@@ -16,8 +16,7 @@ public class BrainCloudSettings : ScriptableObject
 		{
 			if (s_instance) return s_instance;
 
-			s_instance = (BrainCloudSettings)Resources.Load("BrainCloudSettings");
-
+			s_instance = Resources.Load("BrainCloudSettings") as BrainCloudSettings;
 			if (s_instance == null)
 			{
 				// If not found, autocreate the asset object.
