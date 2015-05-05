@@ -228,7 +228,7 @@ public class GameController : MonoBehaviour
 
 		// don't reset this every round... m_totalGamesPlayed = 0;
 
-		// don't reset this every round... m_accuracy = 0;
+		m_accuracy = 0;
 		m_score = 0;
 
 		UpdateScoreText ();
@@ -314,7 +314,7 @@ public class GameController : MonoBehaviour
 		shotsFiredText.text = "Shots Fired: " + m_statShotsFired;
 		shotsFiredText.gameObject.SetActive(true);
 
-		m_accuracy = (m_statShotsFired == 0) ? 0 : (m_statEnemiesKilled + m_statAsteroidsDestroyed) / (double) m_statShotsFired * 100.0d;
+		m_accuracy = (m_shotsFiredThisRound == 0) ? 0 : (m_statEnemiesKilled + m_statAsteroidsDestroyed) / (double) m_statShotsFired * 100.0d;
 		accuracyText.text = String.Format("Accuracy: {0:0.00}%", m_accuracy);
 		accuracyText.gameObject.SetActive(true);
 

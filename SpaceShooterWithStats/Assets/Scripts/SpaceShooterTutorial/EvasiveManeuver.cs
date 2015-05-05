@@ -19,6 +19,7 @@ public class EvasiveManeuver : MonoBehaviour
 	void Start ()
 	{
 		rigidbody = GetComponent<Rigidbody>();
+
 		currentSpeed = rigidbody.velocity.z;
 		StartCoroutine(Evade());
 	}
