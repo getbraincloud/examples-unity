@@ -261,7 +261,7 @@ function sign_app()
 
   echo "Codesign as \"$provisioning_profile\", embedding provisioning profile $mobile_provision"
 
-#  xcrun PackageApplication "$project_derived_data_path/$project_app" -o "$abs_project_derived_data_path/$project_ipa" --sign "$provisioning_profile" --embed "$mobile_provision" || failed codesign
+  xcrun PackageApplication "$project_derived_data_path/$project_app" -o "$abs_project_derived_data_path/$project_ipa" --sign "$provisioning_profile" --embed "$mobile_provision" || failed codesign
 }
 
 function build_app()
@@ -350,7 +350,7 @@ function copy_artifacts_appstore()
   echo "Codesign as \"$provisioning_profile\", embedding provisioning profile $mobile_provision"
 
   #sign build for distribution and package as an .ipa
-#  xcrun PackageApplication "$archive_name/Products/Applications/$project_app" -o "$curdir/artifacts/$project_ipa" --sign "$provisioning_profile" --embed "$curdir/$mobile_provision" || failed copy_artifacts_appstore
+  xcrun PackageApplication "$archive_name/Products/Applications/$project_app" -o "$curdir/artifacts/$project_ipa" --sign "$provisioning_profile" --embed "$curdir/$mobile_provision" || failed copy_artifacts_appstore
 
   if [ -f "$curdir/artifacts/$project_dsym_zip" ]; then
     rm -f "$curdir/artifacts/$project_dsym_zip"
@@ -371,6 +371,10 @@ set -e
 
 # turn on fail if something in pipeline fails
 set -o pipefail
+
+echo
+echo "**** Installing provisioning file"
+install_provisioning
 
 echo
 echo "**** Fixing unity project"
