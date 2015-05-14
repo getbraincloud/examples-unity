@@ -277,7 +277,8 @@ function build_app()
 #  fi
 
   echo "Running xcodebuild > xcodebuild_output ..."
-  xcodebuild -verbose -configuration "$build_config" -project "$project_dir" -scheme "$scheme" PROVISIONING_PROFILE=${uuid} $extra_build_cmds $build_cmds 2>&1 | tee tmp.log
+#  xcodebuild -verbose -configuration "$build_config" -project "$project_dir" -scheme "$scheme" PROVISIONING_PROFILE=${uuid} $extra_build_cmds $build_cmds 2>&1 | tee tmp.log
+  xcodebuild -verbose -configuration "$build_config" -project "$project_dir" -scheme "$scheme" $extra_build_cmds $build_cmds 2>&1 | tee tmp.log
 
   if [ $? -ne 0 ]
   then
@@ -293,16 +294,6 @@ function build_app()
   then
     failed xcodebuild
   fi
-}
-
-function sign_app_old()
-{ 
-  pushd "$project_derived_data_path"
-  local abs_project_derived_data_path=`pwd`
-  popd 
-
-  echo "Codesign as \"$provisioning_profile\", embedding provisioning profile $mobile_provision"
-  xcrun PackageApplication "$project_derived_data_path/$project_app" -o "$abs_project_derived_data_path/$project_ipa" --sign "$provisioning_profile" --embed "$mobile_provision" || failed codesign  
 }
 
 function verify_app()
