@@ -118,6 +118,7 @@ project_archive=$scheme-${build_full_version}.archive.zip
 
 # hardcoded configuration...
 workspace="project.xcworkspace"
+keychain="login"
 
 
 echo "Building for device: $device scheme: $scheme config: $config"
@@ -153,6 +154,20 @@ function failed()
     local error=${1:-Undefined error}
     echo "Failed: $error" >&2
     exit 1
+}
+
+function validate_keychain()
+{
+  # unlock the keychain containing the provisioning profile's private key and set it as the default keychain
+  security unlock-keychain -p "$keychain_password" "$HOME/Library/Keychains/$keychain.keychain"
+  security default-keychain -s "$HOME/Library/Keychains/$keychain.keychain"
+  
+  #describe the available provisioning profiles
+  echo "Available provisioning profiles"
+  security find-identity -p codesigning -v
+
+  #verify that the requested provisioning profile can be found
+  (security find-certificate -a -c "$provisioning_profile" -Z | grep ^SHA-1) || failed provisioning_profile  
 }
 
 function describe_sdks()
@@ -373,6 +388,10 @@ set -e
 set -o pipefail
 
 echo
+echo "**** Validate keychain"
+validate_keychain
+
+echo
 echo "**** Installing provisioning file"
 install_provisioning
 
@@ -393,10 +412,6 @@ echo "**** Stamp version file"
 if [ "$skip_stamp_version" != "true" ]; then
   stamp_version
 fi
-
-#echo
-#echo "**** Install Provisioning"
-#install_provisioning
 
 echo
 echo "**** Build"

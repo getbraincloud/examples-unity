@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source common_params.sh
+source ../../githubPrivate/Common/private.sh
 
 export build_config="Release"
 export bundle_identifier="com.playbrains.bcunityexample"
