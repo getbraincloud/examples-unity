@@ -19,18 +19,20 @@ public class MainScene : MonoBehaviour
         FN_PLAYER_XP_CURRENCY,
         FN_PLAYER_STATS,
         FN_GLOBAL_STATS,
-        FN_CLOUD_CODE
+        FN_CLOUD_CODE,
+		FN_IDENTITY
         //etc
     }
 
     string[] m_bcFuncLabels =
     {
         "Entity",
-        "Entity Custom Class",
-        "Player XP/Currency",
-        "Player Statistics",
-        "Global Statistics",
-        "Cloud Code"
+        "Entity Custom",
+        "XP/Currency",
+        "Player Stats",
+        "Global Stats",
+        "Cloud Code",
+		"Identity"
 
     };
     BrainCloudFunction m_bcFunc = BrainCloudFunction.FN_ENTITY;
@@ -66,6 +68,9 @@ public class MainScene : MonoBehaviour
             case BrainCloudFunction.FN_CLOUD_CODE:
                 m_screen = new ScreenCloudCode();
                 break;
+			case BrainCloudFunction.FN_IDENTITY:
+				m_screen = new ScreenIdentity();
+				break;
         }
         m_bcFunc = in_fn;
         m_screen.SetMainScene(this);

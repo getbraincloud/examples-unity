@@ -69,10 +69,77 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
         string[] scenes = GetScenes();
         BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
     }
+
+	static void PerformBuildAndroid()
+	{
+		BuildTarget target;
+		target = BuildTarget.Android;
+		
+		string[] scenes = GetScenes();
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+	}
+
+	static void PerformBuildWP8()
+	{
+		BuildTarget target;
+		target = BuildTarget.WP8Player;
+		
+		string[] scenes = GetScenes();
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+	}
+
+	static void PerformBuildWin32()
+	{
+		BuildTarget target;
+		target = BuildTarget.StandaloneWindows;
+		
+		string[] scenes = GetScenes();
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+	}
+
+	static void PerformBuildWin64()
+	{
+		BuildTarget target;
+		target = BuildTarget.StandaloneWindows64;
+			
+		string[] scenes = GetScenes();
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+	}
+
+	static void PerformBuildOSX32()
+	{
+		BuildTarget target;
+		target = BuildTarget.StandaloneOSXIntel;
+		
+		string[] scenes = GetScenes();
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+	}
+
+	static void PerformBuildOSX64()
+	{
+		BuildTarget target;
+		target = BuildTarget.StandaloneOSXIntel64;
+		
+		string[] scenes = GetScenes();
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+	}
     
     static void PerformBuildWeb()
     {
         string[] scenes = GetScenes();
         BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), BuildTarget.WebPlayer, BuildOptions.None);
     }
+
+	static void PerformBuildWebGL()
+	{
+		#if UNITY_4_6
+		// no such luck
+		#else
+		BuildTarget target;
+		target = BuildTarget.WebGL;
+		
+		string[] scenes = GetScenes();
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		#endif
+	}
 }

@@ -30,6 +30,7 @@ public class ConnectScene : MonoBehaviour
     void Start()
     {
         BrainCloudWrapper.Initialize();
+		BrainCloudWrapper.GetBC().EnableLogging(true);
     }
     
     void Update()
@@ -157,6 +158,6 @@ public class ConnectScene : MonoBehaviour
     public void OnError_Authenticate(string errorData, object cbObject)
     {
         m_authStatus = "Authenticate failed: " + errorData;
-        Debug.Log("OnError_Authenticate" + errorData);
+        Debug.LogError("OnError_Authenticate" + errorData);
     }
 }
