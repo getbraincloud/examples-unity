@@ -3,7 +3,13 @@ using System.Collections;
 using System.Linq;
 
 public class Build {
-    static string OUTPUT_FOLDER = "../autobuild/artifacts/generated_build";
+	static string ARTIFACTS_FOLDER 		= "../autobuild/artifacts";
+	static string IOS_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/generated_build";
+	static string ANDROID_OUTPUT_APK 	= ARTIFACTS_FOLDER + "/android_build.apk";
+	static string WP8_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/wp8_build";
+	static string DESKTOP_OUTPUT 		= ARTIFACTS_FOLDER + "/desktop_build";
+	static string WEB_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/web_build";
+	static string WEBGL_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/webgl_build";
     
     static string[] GetScenes()
     {
@@ -53,7 +59,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 #endif
 
         string[] scenes = GetScenes();
-        BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(IOS_OUTPUT_FOLDER), target, BuildOptions.None);
     }
 
     static void PerformBuildIOS_il2cpp()
@@ -67,7 +73,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 #endif
 
         string[] scenes = GetScenes();
-        BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(IOS_OUTPUT_FOLDER), target, BuildOptions.None);
     }
 
 	static void PerformBuildAndroid()
@@ -76,7 +82,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		target = BuildTarget.Android;
 		
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(ANDROID_OUTPUT_APK), target, BuildOptions.None);
 	}
 
 	static void PerformBuildWP8()
@@ -85,7 +91,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		target = BuildTarget.WP8Player;
 		
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WP8_OUTPUT_FOLDER), target, BuildOptions.None);
 	}
 
 	static void PerformBuildWin32()
@@ -94,7 +100,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		target = BuildTarget.StandaloneWindows;
 		
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
 
 	static void PerformBuildWin64()
@@ -103,7 +109,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		target = BuildTarget.StandaloneWindows64;
 			
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
 
 	static void PerformBuildOSX32()
@@ -112,7 +118,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		target = BuildTarget.StandaloneOSXIntel;
 		
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
 
 	static void PerformBuildOSX64()
@@ -121,13 +127,13 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		target = BuildTarget.StandaloneOSXIntel64;
 		
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
     
     static void PerformBuildWeb()
     {
         string[] scenes = GetScenes();
-        BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), BuildTarget.WebPlayer, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WEB_OUTPUT_FOLDER), BuildTarget.WebPlayer, BuildOptions.None);
     }
 
 	static void PerformBuildWebGL()
@@ -139,7 +145,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		target = BuildTarget.WebGL;
 		
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(OUTPUT_FOLDER), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WEBGL_OUTPUT_FOLDER), target, BuildOptions.None);
 		#endif
 	}
 }
