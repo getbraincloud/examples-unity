@@ -364,7 +364,7 @@ function copy_artifacts_appstore()
   echo "Codesign as \"$provisioning_profile\", embedding provisioning profile $mobile_provision"
 
   pushd "$archive_name/Products/Applications"
-  app_name=`ls *.app`
+  app_name=`ls | grep \.app | tr -d '\n'`
   popd
 
   #sign build for distribution and package as an .ipa
