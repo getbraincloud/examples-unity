@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export build_internal_version="$GIT_REVISION"
+export build_internal_version="$BUILD_NUMBER"
 if [ "$build_internal_version" == "" ]; then
   export build_internal_version="dev"
 fi
@@ -20,3 +20,4 @@ export build_version_file="$solution_dir/version.txt"
 export scheme="Unity-iPhone"
 export skip_stamp_version="true"
 export keychain_password=""
+
