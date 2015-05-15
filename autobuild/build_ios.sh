@@ -292,8 +292,7 @@ function build_app()
 #  fi
 
   echo "Running xcodebuild > xcodebuild_output ..."
-#  xcodebuild -verbose -configuration "$build_config" -project "$project_dir" -scheme "$scheme" PROVISIONING_PROFILE=${uuid} $extra_build_cmds $build_cmds 2>&1 | tee tmp.log
-  xcodebuild -verbose -configuration "$build_config" -project "$project_dir" -scheme "$scheme" $extra_build_cmds $build_cmds 2>&1 | tee tmp.log
+  xcodebuild -verbose -configuration "$build_config" -project "$project_dir" -scheme "$scheme" PROVISIONING_PROFILE=${uuid} $extra_build_cmds $build_cmds 2>&1 | tee tmp.log
 
   if [ $? -ne 0 ]
   then
