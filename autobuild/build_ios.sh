@@ -373,7 +373,7 @@ function copy_artifacts_appstore()
   if [ -f "$curdir/artifacts/$project_dsym_zip" ]; then
     rm -f "$curdir/artifacts/$project_dsym_zip"
   fi
-  zip -r "$curdir/artifacts/$project_dsym_zip" "$archive_name/dSYMs/$project_app.dSYM"
+  zip -r "$curdir/artifacts/$project_dsym_zip" "$archive_name/dSYMs/$app_name.dSYM"
 
   #clean up the archive so we don't end up with a huge number
   rm -rf "$archive_name"
