@@ -364,11 +364,11 @@ function copy_artifacts_appstore()
   echo "Codesign as \"$provisioning_profile\", embedding provisioning profile $mobile_provision"
 
   pushd "$archive_name/Products/Applications"
-  ipa_name=`ls *.ipa`
+  app_name=`ls *.app`
   popd
 
   #sign build for distribution and package as an .ipa
-  xcrun PackageApplication "$archive_name/Products/Applications/$ipa_name" -o "$curdir/artifacts/$project_ipa" --sign "$provisioning_profile" --embed "$curdir/$mobile_provision" || failed copy_artifacts_appstore
+  xcrun PackageApplication "$archive_name/Products/Applications/$app_name" -o "$curdir/artifacts/$project_ipa" --sign "$provisioning_profile" --embed "$curdir/$mobile_provision" || failed copy_artifacts_appstore
 
   if [ -f "$curdir/artifacts/$project_dsym_zip" ]; then
     rm -f "$curdir/artifacts/$project_dsym_zip"
