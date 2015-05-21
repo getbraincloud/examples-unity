@@ -257,8 +257,11 @@ namespace BrainCloud.Internal
                 }
                 else if (status == eWebRequestStatus.STATUS_DONE)
                 {
-                    HandleResponseBundle(GetWebRequestResponse(m_activeRequest));
                     ResetIdleTimer();
+
+                    // note that active request is set to null if exception is to be thrown
+                    HandleResponseBundle(GetWebRequestResponse(m_activeRequest));
+
                     m_activeRequest = null;
                 }          
             }
@@ -345,6 +348,9 @@ namespace BrainCloud.Internal
         /// <param name="in_jsonData">The received message bundle.</param>
         private void HandleResponseBundle(string in_jsonData)
         {
+            Exception firstThrownException = null;
+            int numExceptionsThrown = 0;
+
             m_brainCloudClientRef.Log("INCOMING: " + in_jsonData);
 
             Dictionary<string, object>[] responseBundle = null;
@@ -440,8 +446,11 @@ namespace BrainCloud.Internal
                             catch(Exception e)
                             {
                                 m_brainCloudClientRef.Log (e.StackTrace);
-
-                                // TODO should we rethrow?
+                                ++numExceptionsThrown;
+                                if (firstThrownException == null)
+                                {
+                                    firstThrownException = e;
+                                }
                             }
                         }
                     }
@@ -473,12 +482,24 @@ namespace BrainCloud.Internal
                         catch(Exception e)
                         {
                             m_brainCloudClientRef.Log (e.StackTrace);
-                                
-                            // TODO should we rethrow?
+                            ++numExceptionsThrown;
+                            if (firstThrownException == null)
+                            {
+                                firstThrownException = e;
+                            }
                         }
                     }
                 }
-            }   
+            }
+
+            if (firstThrownException != null)
+            {
+                m_activeRequest = null; // to make sure we don't reprocess this message
+
+                throw new Exception("User callback handlers threw " + numExceptionsThrown +" exception(s)."
+                                    +" See the Unity log for callstacks or inner exception for first exception thrown.",
+                                    firstThrownException);
+            }
         }
 
 
