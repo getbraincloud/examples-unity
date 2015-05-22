@@ -23,10 +23,10 @@ public abstract class BCScreen
         m_mainScene.AddLog("");
     }
     
-    public virtual void Failure_Callback(string json, object cbObject)
+	public virtual void Failure_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
         m_mainScene.AddLog("FAILURE");
-        m_mainScene.AddLogJson(json);
+        m_mainScene.AddLogJson(statusMessage);
         m_mainScene.AddLog("");
     }
 }

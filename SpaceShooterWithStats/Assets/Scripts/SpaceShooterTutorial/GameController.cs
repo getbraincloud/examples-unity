@@ -56,13 +56,13 @@ public class GameController : MonoBehaviour
 		}
 	}
 	
-	private void StatsFailure_Callback(string responseData, object cbObject)
+	private void StatsFailure_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
 	{
 		if (brainCloudStatusText)
 		{
 			brainCloudStatusText.text = "Failed to increment stats on brainCloud";
 		}
-		Debug.Log (responseData);
+		Debug.Log (statusMessage);
 	}
 	////////////////////////////////////////////
 

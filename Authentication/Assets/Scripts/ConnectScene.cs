@@ -155,9 +155,9 @@ public class ConnectScene : MonoBehaviour
         Application.LoadLevel("Main");
     }
     
-    public void OnError_Authenticate(string errorData, object cbObject)
+	public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        m_authStatus = "Authenticate failed: " + errorData;
-        Debug.LogError("OnError_Authenticate: " + errorData);
+        m_authStatus = "Authenticate failed: " + statusMessage;
+        Debug.LogError("OnError_Authenticate: " + statusMessage);
     }
 }
