@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Net;
-using LitJson;
+using JsonFx.Json;
 using BrainCloud.Internal;
 
 namespace BrainCloud
@@ -114,8 +114,7 @@ namespace BrainCloud
         {
             bool bToReturn = false;
 
-            JsonData data = new JsonData();
-
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.PushNotificationRegisterParamDeviceType.Value] = in_device;
             data[OperationParam.PushNotificationRegisterParamDeviceToken.Value] = in_token;
 
@@ -128,7 +127,7 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Create a new push notification for the current user to send to another user.
+        /// Sends a simple push notification based on the passed in message.
         /// NOTE: It is possible to send a push notification to oneself.
         /// </param>
         /// <param name="in_toPlayerId">
@@ -159,8 +158,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
-
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.PushNotificationSendParamToPlayerId.Value] = in_toPlayerId;
             data[OperationParam.PushNotificationSendParamMessage.Value] = in_message;
 
@@ -170,7 +168,7 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Create a new push notification for the current user to send to another user.
+        /// Sends a notification to a user based on a brainCloud portal configured notification template.
         /// NOTE: It is possible to send a push notification to oneself.
         /// </param>
         /// <param name="in_toPlayerId">
@@ -201,8 +199,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
-
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.PushNotificationSendParamToPlayerId.Value] = in_toPlayerId;
             data[OperationParam.PushNotificationSendParamNotificationTemplateId.Value] = in_notificationTemplateId;
 

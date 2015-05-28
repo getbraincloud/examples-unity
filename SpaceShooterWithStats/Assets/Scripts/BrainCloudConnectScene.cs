@@ -121,8 +121,8 @@ public class BrainCloudConnectScene : MonoBehaviour
 		Application.LoadLevel("Game");
     }
     
-    public void OnError_Authenticate(string errorData, object cbObject)
+    public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        AppendLog("Authenticate failed: " + errorData);
+		AppendLog("Authenticate failed: " + statusMessage);
     }
 }

@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Net;
-using LitJson;
 using BrainCloud.Internal;
 using BrainCloud.Common;
 using BrainCloud.Entity;
@@ -20,8 +19,8 @@ using UnityEngine;
 
 namespace BrainCloud
 {
-    public delegate void SuccessCallback(string responseData, object cbObject);
-    public delegate void FailureCallback(string errorData, object cbObject);
+    public delegate void SuccessCallback(string jsonResponse, object cbObject);
+    public delegate void FailureCallback(int status, int reasonCode, string statusMessage, object cbObject);
     public delegate void LogCallback(string log);
 
 //[Serializable]
@@ -36,7 +35,7 @@ namespace BrainCloud
         {
             // DO NOT USE THIS INTERNALLY WITHIN BRAINCLOUD LIBRARY...
             // THIS IS JUST A CONVENIENCE FOR APP DEVELOPERS TO STORE A SINGLETON!
-            if (s_instance != null)
+            if (s_instance == null)
             {
                 s_instance = new BrainCloudClient();
             }
@@ -101,6 +100,7 @@ namespace BrainCloud
         private BCEntityFactory m_entityFactory;
 
         private BrainCloudComms m_bc;
+        private bool m_initialized;
         private bool m_loggingEnabled = false;
         private object m_loggingMutex = new object();
         private LogCallback m_logDelegate;
@@ -438,6 +438,14 @@ namespace BrainCloud
             }
         }
 
+        public bool Initialized
+        {
+            get
+            {
+                return m_initialized;
+            }
+        }
+
         public string SessionID
         {
             get
@@ -489,11 +497,6 @@ namespace BrainCloud
             {
                 return m_releasePlatform;    //no public "set"
             }
-        }
-
-        public void SetHeartbeatInterval(int intervalInMilliseconds)
-        {
-            m_bc.SetHeartbeatInterval(intervalInMilliseconds);
         }
 
         #endregion
@@ -575,6 +578,8 @@ namespace BrainCloud
             m_gameId = gameId;
             m_gameVersion = gameVersion;
             m_releasePlatform = platform;
+
+            m_initialized = true;
         }
 
         /// <summary>Initialize the identity aspects of brainCloud.</summary>
@@ -586,6 +591,7 @@ namespace BrainCloud
         }
 
         /// <summary>Shuts down all systems needed for BrainCloudClient
+        /// Only call this from the main thread.
         /// Should be used at the end of the app, and opposite of Initiatilize Client
         /// </summary>
         public void ShutDown()
@@ -677,6 +683,15 @@ namespace BrainCloud
         public bool IsAuthenticated()
         {
             return this.Authenticated;
+        }
+
+        /// <summary>
+        /// Returns true if brainCloud has been initialized.
+        /// </summary>
+        /// <returns><c>true</c> if brainCloud is initialized; otherwise, <c>false</c>.</returns>
+        public bool IsInitialized()
+        {
+            return this.Initialized;
         }
 
         #endregion Authentication

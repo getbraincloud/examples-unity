@@ -77,10 +77,10 @@ public class ScreenPlayerStats : BCScreen
                 if (long.TryParse(ps.increment, out valueAsLong)
                     || double.TryParse(ps.increment, out valueAsDouble))
                 {
-                    BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementPlayerStats(
-                        "{ '" + ps.name +"':" + ps.increment +"}",
-                        Success_Callback, Failure_Callback);
-                    m_mainScene.AddLogNoLn("[IncrementStat]... ");
+                	BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementPlayerStats(
+               	    	"{ '" + ps.name +"':" + ps.increment +"}",
+                    	Success_Callback, Failure_Callback);
+               		m_mainScene.AddLogNoLn("[IncrementStat]... ");
                 }
             }
             GUILayout.EndHorizontal();

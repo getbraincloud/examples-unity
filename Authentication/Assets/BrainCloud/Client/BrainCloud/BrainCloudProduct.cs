@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using LitJson;
+using JsonFx.Json;
 using BrainCloud.Internal;
 
 namespace BrainCloud
@@ -66,7 +66,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceGetPlayerVCId.Value] = in_currencyType;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
@@ -128,7 +128,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceAwardVCId.Value] = in_currencyType;
             data[OperationParam.ProductServiceAwardVCAmount.Value] = in_amount;
 
@@ -190,7 +190,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceConsumeVCId.Value] = in_currencyType;
             data[OperationParam.ProductServiceConsumeVCAmount.Value] = in_amount;
 
@@ -289,9 +289,10 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceGetInventoryPlatform.Value] = in_platform;
             data[OperationParam.ProductServiceGetInventoryUserCurrency.Value] = in_userCurrency;
+
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
             ServerCall sc = new ServerCall(ServiceName.Product, ServiceOperation.GetInventory, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
@@ -338,7 +339,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceLanguage.Value] = in_language;
             data[OperationParam.ProductServiceItemId.Value] = in_itemId;
 
@@ -348,7 +349,8 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Finalize Steam Transaction
+        /// Finalize Steam Transaction. On success, the player will be awarded the 
+        /// associated currencies.
         /// </summary>
         /// <remarks>
         /// Service Name - product
@@ -384,7 +386,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceTransId.Value] = in_transId;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
@@ -393,7 +395,8 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Verify Microsoft Receipt
+        /// Verify Microsoft Receipt. On success, the player will be awarded the 
+        /// associated currencies.
         /// </summary>
         /// <remarks>
         /// Service Name - product
@@ -426,7 +429,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceReceipt.Value] = in_receipt;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
@@ -498,7 +501,8 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Verify ITunes Receipt
+        /// Verify ITunes Receipt. On success, the player will be awarded the 
+        /// associated currencies.
         /// </summary>
         /// <remarks>
         /// Service Name - product
@@ -548,7 +552,7 @@ namespace BrainCloud
         /// </returns>
         public void VerifyItunesReceipt(String in_base64EncReceiptData, SuccessCallback in_callback = null, FailureCallback in_failure = null, object in_cbObject = null)
         {
-            JsonData message = new JsonData();
+            Dictionary<string, object> message = new Dictionary<string, object>();
             message[OperationParam.ProductServiceOpCashInReceiptReceipt.Value] = in_base64EncReceiptData;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_callback, in_failure, in_cbObject);
@@ -557,7 +561,8 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Confirm Facebook Purchase
+        /// Confirm Facebook Purchase. On success, the player will be awarded the 
+        /// associated currencies.
         /// </summary>
         /// <remarks>
         /// Service Name - product
@@ -590,7 +595,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceSignedRequest.Value] = in_signedRequest;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
@@ -599,7 +604,8 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Confirm GooglePlay Purchase
+        /// Confirm GooglePlay Purchase. On success, the player will be awarded the 
+        /// associated currencies.
         /// </summary>
         /// <remarks>
         /// Service Name - product
@@ -640,7 +646,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            JsonData data = new JsonData();
+            Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.ProductServiceOrderId.Value] = in_orderId;
             data[OperationParam.ProductServiceProductId.Value] = in_productId;
             data[OperationParam.ProductServiceToken.Value] = in_token;
