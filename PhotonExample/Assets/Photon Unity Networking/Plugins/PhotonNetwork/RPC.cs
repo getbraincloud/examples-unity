@@ -4,7 +4,7 @@
 /// <summary>Implements a RPC Attribute for platforms that don't have it in UnityEngine.</summary>
 #pragma warning restore 1587
 
-#if !UNITY_EDITOR && (UNITY_WINRT || UNITY_WP8 || UNITY_PS3 || UNITY_WIIU)
+#if !UNITY_EDITOR && (UNITY_WINRT || UNITY_WP8 || UNITY_PS3 || UNITY_WIIU || UNITY_WEBGL)
 
 using System;
 

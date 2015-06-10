@@ -328,209 +328,234 @@ public class PhotonView : Photon.MonoBehaviour
 
     private bool failedToFindOnSerialize;
 
-    public void SerializeView( PhotonStream stream, PhotonMessageInfo info )
+    public void SerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        SerializeComponent( observed, stream, info );
+        SerializeComponent(this.observed, stream, info);
 
-        for( int i = 0; i < ObservedComponents.Count; ++i )
+        if (this.ObservedComponents != null && this.ObservedComponents.Count > 0)
         {
-            SerializeComponent( ObservedComponents[ i ], stream, info );
+            for (int i = 0; i < this.ObservedComponents.Count; ++i)
+            {
+                SerializeComponent(this.ObservedComponents[i], stream, info);
+            }
         }
     }
 
-    public void DeserializeView( PhotonStream stream, PhotonMessageInfo info )
+    public void DeserializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        DeserializeComponent( observed, stream, info );
+        DeserializeComponent(this.observed, stream, info);
 
-        for( int i = 0; i < ObservedComponents.Count; ++i )
+        if (this.ObservedComponents != null && this.ObservedComponents.Count > 0)
         {
-            DeserializeComponent( ObservedComponents[ i ], stream, info );
+            for (int i = 0; i < this.ObservedComponents.Count; ++i)
+            {
+                DeserializeComponent(this.ObservedComponents[i], stream, info);
+            }
         }
     }
 
-    internal protected void DeserializeComponent( Component component, PhotonStream stream, PhotonMessageInfo info )
+    protected internal void DeserializeComponent(Component component, PhotonStream stream, PhotonMessageInfo info)
     {
-        if( component == null )
+        if (component == null)
         {
             return;
         }
 
         // Use incoming data according to observed type
-        if( component is MonoBehaviour )
+        if (component is MonoBehaviour)
         {
-            ExecuteComponentOnSerialize( component, stream, info );
+            ExecuteComponentOnSerialize(component, stream, info);
         }
-        else if( component is Transform )
+        else if (component is Transform)
         {
-            Transform trans = (Transform)component;
+            Transform trans = (Transform) component;
 
-            switch( onSerializeTransformOption )
+            switch (this.onSerializeTransformOption)
             {
-            case OnSerializeTransform.All:
-                trans.localPosition = (Vector3)stream.ReceiveNext();
-                trans.localRotation = (Quaternion)stream.ReceiveNext();
-                trans.localScale = (Vector3)stream.ReceiveNext();
-                break;
-            case OnSerializeTransform.OnlyPosition:
-                trans.localPosition = (Vector3)stream.ReceiveNext();
-                break;
-            case OnSerializeTransform.OnlyRotation:
-                trans.localRotation = (Quaternion)stream.ReceiveNext();
-                break;
-            case OnSerializeTransform.OnlyScale:
-                trans.localScale = (Vector3)stream.ReceiveNext();
-                break;
-            case OnSerializeTransform.PositionAndRotation:
-                trans.localPosition = (Vector3)stream.ReceiveNext();
-                trans.localRotation = (Quaternion)stream.ReceiveNext();
-                break;
+                case OnSerializeTransform.All:
+                    trans.localPosition = (Vector3) stream.ReceiveNext();
+                    trans.localRotation = (Quaternion) stream.ReceiveNext();
+                    trans.localScale = (Vector3) stream.ReceiveNext();
+                    break;
+                case OnSerializeTransform.OnlyPosition:
+                    trans.localPosition = (Vector3) stream.ReceiveNext();
+                    break;
+                case OnSerializeTransform.OnlyRotation:
+                    trans.localRotation = (Quaternion) stream.ReceiveNext();
+                    break;
+                case OnSerializeTransform.OnlyScale:
+                    trans.localScale = (Vector3) stream.ReceiveNext();
+                    break;
+                case OnSerializeTransform.PositionAndRotation:
+                    trans.localPosition = (Vector3) stream.ReceiveNext();
+                    trans.localRotation = (Quaternion) stream.ReceiveNext();
+                    break;
             }
         }
-        else if( component is Rigidbody )
+        else if (component is Rigidbody)
         {
-            Rigidbody rigidB = (Rigidbody)component;
+            Rigidbody rigidB = (Rigidbody) component;
 
-            switch( onSerializeRigidBodyOption )
+            switch (this.onSerializeRigidBodyOption)
             {
-            case OnSerializeRigidBody.All:
-                rigidB.velocity = (Vector3)stream.ReceiveNext();
-                rigidB.angularVelocity = (Vector3)stream.ReceiveNext();
-                break;
-            case OnSerializeRigidBody.OnlyAngularVelocity:
-                rigidB.angularVelocity = (Vector3)stream.ReceiveNext();
-                break;
-            case OnSerializeRigidBody.OnlyVelocity:
-                rigidB.velocity = (Vector3)stream.ReceiveNext();
-                break;
+                case OnSerializeRigidBody.All:
+                    rigidB.velocity = (Vector3) stream.ReceiveNext();
+                    rigidB.angularVelocity = (Vector3) stream.ReceiveNext();
+                    break;
+                case OnSerializeRigidBody.OnlyAngularVelocity:
+                    rigidB.angularVelocity = (Vector3) stream.ReceiveNext();
+                    break;
+                case OnSerializeRigidBody.OnlyVelocity:
+                    rigidB.velocity = (Vector3) stream.ReceiveNext();
+                    break;
             }
         }
-        else if( component is Rigidbody2D )
+        else if (component is Rigidbody2D)
         {
-            Rigidbody2D rigidB = (Rigidbody2D)component;
+            Rigidbody2D rigidB = (Rigidbody2D) component;
 
-            switch( onSerializeRigidBodyOption )
+            switch (this.onSerializeRigidBodyOption)
             {
-            case OnSerializeRigidBody.All:
-                rigidB.velocity = (Vector2)stream.ReceiveNext();
-                rigidB.angularVelocity = (float)stream.ReceiveNext();
-                break;
-            case OnSerializeRigidBody.OnlyAngularVelocity:
-                rigidB.angularVelocity = (float)stream.ReceiveNext();
-                break;
-            case OnSerializeRigidBody.OnlyVelocity:
-                rigidB.velocity = (Vector2)stream.ReceiveNext();
-                break;
+                case OnSerializeRigidBody.All:
+                    rigidB.velocity = (Vector2) stream.ReceiveNext();
+                    rigidB.angularVelocity = (float) stream.ReceiveNext();
+                    break;
+                case OnSerializeRigidBody.OnlyAngularVelocity:
+                    rigidB.angularVelocity = (float) stream.ReceiveNext();
+                    break;
+                case OnSerializeRigidBody.OnlyVelocity:
+                    rigidB.velocity = (Vector2) stream.ReceiveNext();
+                    break;
             }
         }
         else
         {
-            Debug.LogError( "Type of observed is unknown when receiving." );
+            Debug.LogError("Type of observed is unknown when receiving.");
         }
     }
 
-    internal protected void SerializeComponent( Component component, PhotonStream stream, PhotonMessageInfo info )
+    protected internal void SerializeComponent(Component component, PhotonStream stream, PhotonMessageInfo info)
     {
-        if( component == null )
+        if (component == null)
         {
             return;
         }
 
-        if( component is MonoBehaviour )
+        if (component is MonoBehaviour)
         {
-            ExecuteComponentOnSerialize( component, stream, info );
+            ExecuteComponentOnSerialize(component, stream, info);
         }
-        else if( component is Transform )
+        else if (component is Transform)
         {
-            Transform trans = (Transform)component;
+            Transform trans = (Transform) component;
 
-            switch( onSerializeTransformOption )
+            switch (this.onSerializeTransformOption)
             {
-            case OnSerializeTransform.All:
-                stream.SendNext( trans.localPosition );
-                stream.SendNext( trans.localRotation );
-                stream.SendNext( trans.localScale );
-                break;
-            case OnSerializeTransform.OnlyPosition:
-                stream.SendNext( trans.localPosition );
-                break;
-            case OnSerializeTransform.OnlyRotation:
-                stream.SendNext( trans.localRotation );
-                break;
-            case OnSerializeTransform.OnlyScale:
-                stream.SendNext( trans.localScale );
-                break;
-            case OnSerializeTransform.PositionAndRotation:
-                stream.SendNext( trans.localPosition );
-                stream.SendNext( trans.localRotation );
-                break;
+                case OnSerializeTransform.All:
+                    stream.SendNext(trans.localPosition);
+                    stream.SendNext(trans.localRotation);
+                    stream.SendNext(trans.localScale);
+                    break;
+                case OnSerializeTransform.OnlyPosition:
+                    stream.SendNext(trans.localPosition);
+                    break;
+                case OnSerializeTransform.OnlyRotation:
+                    stream.SendNext(trans.localRotation);
+                    break;
+                case OnSerializeTransform.OnlyScale:
+                    stream.SendNext(trans.localScale);
+                    break;
+                case OnSerializeTransform.PositionAndRotation:
+                    stream.SendNext(trans.localPosition);
+                    stream.SendNext(trans.localRotation);
+                    break;
             }
         }
-        else if( component is Rigidbody )
+        else if (component is Rigidbody)
         {
-            Rigidbody rigidB = (Rigidbody)component;
+            Rigidbody rigidB = (Rigidbody) component;
 
-            switch( onSerializeRigidBodyOption )
+            switch (this.onSerializeRigidBodyOption)
             {
-            case OnSerializeRigidBody.All:
-                stream.SendNext( rigidB.velocity );
-                stream.SendNext( rigidB.angularVelocity );
-                break;
-            case OnSerializeRigidBody.OnlyAngularVelocity:
-                stream.SendNext( rigidB.angularVelocity );
-                break;
-            case OnSerializeRigidBody.OnlyVelocity:
-                stream.SendNext( rigidB.velocity );
-                break;
+                case OnSerializeRigidBody.All:
+                    stream.SendNext(rigidB.velocity);
+                    stream.SendNext(rigidB.angularVelocity);
+                    break;
+                case OnSerializeRigidBody.OnlyAngularVelocity:
+                    stream.SendNext(rigidB.angularVelocity);
+                    break;
+                case OnSerializeRigidBody.OnlyVelocity:
+                    stream.SendNext(rigidB.velocity);
+                    break;
             }
         }
-        else if( component is Rigidbody2D )
+        else if (component is Rigidbody2D)
         {
-            Rigidbody2D rigidB = (Rigidbody2D)component;
+            Rigidbody2D rigidB = (Rigidbody2D) component;
 
-            switch( onSerializeRigidBodyOption )
+            switch (this.onSerializeRigidBodyOption)
             {
-            case OnSerializeRigidBody.All:
-                stream.SendNext( rigidB.velocity );
-                stream.SendNext( rigidB.angularVelocity );
-                break;
-            case OnSerializeRigidBody.OnlyAngularVelocity:
-                stream.SendNext( rigidB.angularVelocity );
-                break;
-            case OnSerializeRigidBody.OnlyVelocity:
-                stream.SendNext( rigidB.velocity );
-                break;
+                case OnSerializeRigidBody.All:
+                    stream.SendNext(rigidB.velocity);
+                    stream.SendNext(rigidB.angularVelocity);
+                    break;
+                case OnSerializeRigidBody.OnlyAngularVelocity:
+                    stream.SendNext(rigidB.angularVelocity);
+                    break;
+                case OnSerializeRigidBody.OnlyVelocity:
+                    stream.SendNext(rigidB.velocity);
+                    break;
             }
         }
         else
         {
-            Debug.LogError( "Observed type is not serializable: " + component.GetType() );
+            Debug.LogError("Observed type is not serializable: " + component.GetType());
         }
     }
 
-    internal protected void ExecuteComponentOnSerialize( Component component, PhotonStream stream, PhotonMessageInfo info )
+    protected internal void ExecuteComponentOnSerialize(Component component, PhotonStream stream, PhotonMessageInfo info)
     {
-        if( component != null )
+        if (component != null)
         {
-            if( m_OnSerializeMethodInfos.ContainsKey( component ) == false )
+            if (this.m_OnSerializeMethodInfos.ContainsKey(component) == false)
             {
                 MethodInfo newMethod = null;
-                bool foundMethod = NetworkingPeer.GetMethod( component as MonoBehaviour, PhotonNetworkingMessage.OnPhotonSerializeView.ToString(), out newMethod );
+                bool foundMethod = NetworkingPeer.GetMethod(component as MonoBehaviour, PhotonNetworkingMessage.OnPhotonSerializeView.ToString(), out newMethod);
 
-                if( foundMethod == false )
+                if (foundMethod == false)
                 {
-                    Debug.LogError( "The observed monobehaviour (" + component.name + ") of this PhotonView does not implement OnPhotonSerializeView()!" );
+                    Debug.LogError("The observed monobehaviour (" + component.name + ") of this PhotonView does not implement OnPhotonSerializeView()!");
                     newMethod = null;
                 }
 
-                m_OnSerializeMethodInfos.Add( component, newMethod );
+                this.m_OnSerializeMethodInfos.Add(component, newMethod);
             }
 
-            if( m_OnSerializeMethodInfos[ component ] != null )
+            if (this.m_OnSerializeMethodInfos[component] != null)
             {
-                m_OnSerializeMethodInfos[ component ].Invoke( component, new object[] { stream, info } );
+                this.m_OnSerializeMethodInfos[component].Invoke(component, new object[] {stream, info});
             }
         }
     }
+
+
+    internal MonoBehaviour[] RpcMonoBehaviours;
+
+    /// <summary>
+    /// Can be used to refesh the list of MonoBehaviours on this GameObject while PhotonNetwork.UseRpcMonoBehaviourCache is true.
+    /// </summary>
+    /// <remarks>
+    /// Set PhotonNetwork.UseRpcMonoBehaviourCache to true to enable the caching.
+    /// Uses this.GetComponents<MonoBehaviour>() to get a list of MonoBehaviours to call RPCs on (potentially).
+    /// 
+    /// While PhotonNetwork.UseRpcMonoBehaviourCache is false, this method has no effect, 
+    /// because the list is refreshed when a RPC gets called.
+    /// </remarks>
+    public void RefreshRpcMonoBehaviourCache()
+    {
+        this.RpcMonoBehaviours = this.GetComponents<MonoBehaviour>();
+    }
+
 
     /// <summary>
     /// Call a RPC method of this GameObject on remote clients of this room (or on all, inclunding this client).
@@ -580,14 +605,7 @@ public class PhotonView : Photon.MonoBehaviour
     ///<param name="parameters">The parameters that the RPC method has (must fit this call!).</param>
     public void RpcSecure(string methodName, PhotonTargets target, bool encrypt, params object[] parameters)
     {
-        if(PhotonNetwork.networkingPeer.hasSwitchedMC && target == PhotonTargets.MasterClient)
-        {
-            PhotonNetwork.RPC(this, methodName, PhotonNetwork.masterClient, encrypt, parameters);
-        }
-        else
-        {
-            PhotonNetwork.RPC(this, methodName, target, encrypt, parameters);
-        }
+        PhotonNetwork.RPC(this, methodName, target, encrypt, parameters);
     }
 
     /// <summary>

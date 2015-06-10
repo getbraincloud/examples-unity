@@ -219,7 +219,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_roomLevelRangeMax = int.Parse(m_createGameWindow.transform.FindChild("Box 2").GetComponent<InputField>().text.ToString());
             m_roomLevelRangeMin = int.Parse(m_createGameWindow.transform.FindChild("Box 1").GetComponent<InputField>().text.ToString());
 
-            options.maxPlayers = m_roomMaxPlayers;
+            options.maxPlayers = (byte)m_roomMaxPlayers;
             options.isOpen = true;
             options.isVisible = true;
 
@@ -753,7 +753,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             {
                 RoomOptions options = new RoomOptions();
 
-                options.maxPlayers = m_roomMaxPlayers;
+                options.maxPlayers = (byte)m_roomMaxPlayers;
                 options.isOpen = true;
                 options.isVisible = true;
 

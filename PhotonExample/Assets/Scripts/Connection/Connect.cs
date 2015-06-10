@@ -2,7 +2,6 @@
 using UnityEngine;
 using System.Collections;
 using LitJson;
-using ExitGames.Client.Photon.Chat;
 using BrainCloudPhotonExample.Game;
 using UnityEngine.UI;
 

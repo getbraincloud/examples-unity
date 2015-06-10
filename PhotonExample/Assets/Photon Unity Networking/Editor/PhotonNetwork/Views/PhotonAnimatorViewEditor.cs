@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 
 #if UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1 || UNITY_4_2 || UNITY_4_3 || UNITY_4_5 || UNITY_4_6
 using UnityEditorInternal;
-#elif UNITY_5_0
+#elif UNITY_5 || UNITY_5_0
 using UnityEditor.Animations;
 #endif
 
@@ -14,7 +14,7 @@ public class PhotonAnimatorViewEditor : Editor
     private Animator m_Animator;
     private PhotonAnimatorView m_Target;
 
-#if UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1 || UNITY_4_2 || UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_5_0
+#if UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1 || UNITY_4_2 || UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_5 || UNITY_5_0
     private AnimatorController m_Controller;
 #endif
 
@@ -56,7 +56,7 @@ public class PhotonAnimatorViewEditor : Editor
 
     private int GetLayerCount()
     {
-#if UNITY_5_0 || UNITY_5
+#if UNITY_5 || UNITY_5_0
         return (this.m_Controller == null) ? 0 : this.m_Controller.layers.Length;
 #else
         return this.m_Animator.layerCount;
@@ -64,7 +64,7 @@ public class PhotonAnimatorViewEditor : Editor
     }
 
 
-#if UNITY_5_0
+#if UNITY_5 || UNITY_5_0
     private RuntimeAnimatorController GetEffectiveController(Animator animator)
     {
         RuntimeAnimatorController controller = animator.runtimeAnimatorController;
@@ -88,7 +88,7 @@ public class PhotonAnimatorViewEditor : Editor
 
 #if UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1 || UNITY_4_2 || UNITY_4_3 || UNITY_4_5 || UNITY_4_6
         this.m_Controller = AnimatorController.GetEffectiveAnimatorController(this.m_Animator);
-#elif UNITY_5_0
+#elif UNITY_5 || UNITY_5_0
         this.m_Controller = this.GetEffectiveController(this.m_Animator) as AnimatorController;
 #endif
 
@@ -146,7 +146,7 @@ public class PhotonAnimatorViewEditor : Editor
     {
         #if UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1 || UNITY_4_2 || UNITY_4_3 || UNITY_4_5 || UNITY_4_6
         return (this.m_Controller == null) ? 0 : this.m_Controller.parameterCount;
-        #elif UNITY_5_0
+        #elif UNITY_5 || UNITY_5_0
         return (this.m_Controller == null) ? 0 : this.m_Controller.parameters.Length;
         #else
         return (m_Animator == null) ? 0 : m_Animator.parameters.Length;
@@ -157,7 +157,7 @@ public class PhotonAnimatorViewEditor : Editor
     {
         #if UNITY_4_0 || UNITY_4_0_1 || UNITY_4_1 || UNITY_4_2 || UNITY_4_3 || UNITY_4_5 || UNITY_4_6
         return this.m_Controller.GetParameter(i);
-        #elif UNITY_5_0
+        #elif UNITY_5 || UNITY_5_0
         return this.m_Controller.parameters[i];
         #else
         return m_Animator.parameters[i];

@@ -159,6 +159,21 @@ public class Room : RoomInfo
         }
     }
 
+	/// <summary>The ID (actorNumber) of the current Master Client of this room.</summary>
+    /// <remarks>See also: PhotonNetwork.masterClient.</remarks>
+    protected internal int masterClientId
+    {
+        get
+        {
+            return this.masterClientIdField;
+        }
+        set
+        {
+            this.masterClientIdField = value;
+        }
+    }
+
+
     internal Room(string roomName, RoomOptions options) : base(roomName, null)
     {
         if (options == null)
@@ -214,10 +229,32 @@ public class Room : RoomInfo
         NetworkingPeer.SendMonoMessage(PhotonNetworkingMessage.OnPhotonCustomRoomPropertiesChanged, propertiesToSet);
     }
 
+    /// <summary>
+    /// Will update properties on the server, if the expectedValues are matching the current (property)values on the server.
+    /// </summary>
+    /// <remarks>
+    /// This variant of SetCustomProperties uses server side Check-And-Swap (CAS) to update valuzes only if the expected values are correct.
+    /// The expectedValues can't be null or empty, but they can be different key/values than the propertiesToSet.
+    /// 
+    /// If the client's knowledge of properties is wrong or outdated, it can't set values (with CAS).
+    /// This can be useful to keep players from concurrently setting values. For example: If all players
+    /// try to pickup some card or item, only one should get it. With CAS, only the first SetProperties 
+    /// gets executed server-side and any other (sent at the same time) fails.
+    /// 
+    /// The server will broadcast successfully changed values and the local "cache" of customProperties 
+    /// only gets updated after a roundtrip (if anything changed).
+    /// </remarks>
+    /// <param name="propertiesToSet">The new properties to be set. </param>
+    /// <param name="expectedValues">At least one property key/value set to check server-side. Key and value must be correct.</param>
     public void SetCustomProperties(Hashtable propertiesToSet, Hashtable expectedValues)
     {
         if (propertiesToSet == null)
         {
+            return;
+        }
+        if (expectedValues == null || expectedValues.Count == 0)
+        {
+            Debug.LogWarning("SetCustomProperties(props, expected) requires some expectedValues. Use SetCustomProperties(props) to simply set some without check.");
             return;
         }
 
@@ -227,7 +264,6 @@ public class Room : RoomInfo
             Hashtable customPropsToCheck = expectedValues.StripToStringKeys() as Hashtable;
             PhotonNetwork.networkingPeer.OpSetPropertiesOfRoom(customProps, false, 0, customPropsToCheck);  // broadcast is always on for CAS
         }
-        NetworkingPeer.SendMonoMessage(PhotonNetworkingMessage.OnPhotonCustomRoomPropertiesChanged, propertiesToSet);
     }
 
     /// <summary>
