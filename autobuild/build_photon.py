@@ -24,7 +24,7 @@ def main():
 	shutil.rmtree(buildParams.artifactsPath, True)
 	os.mkdir(buildParams.artifactsPath)
 
-	unity.buildFromEditorScript(buildParams.projectPath, buildParams.args.buildEditorScript)
+	unity.buildFromEditorScript(buildParams.projectPath, buildParams.args.buildEditorScript, "/Applications/Unity5.0.1/Unity.app/Contents/MacOS/Unity")
 	return
 
 main()
