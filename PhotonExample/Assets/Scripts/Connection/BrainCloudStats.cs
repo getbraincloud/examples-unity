@@ -46,6 +46,12 @@ namespace BrainCloudPhotonExample.Connection
 
         public JsonData m_leaderboardData;
 
+        public void GetLeaderboard(string aLeaderboardID)
+        {
+            m_leaderboardReady = false;
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.GetGlobalLeaderboard(aLeaderboardID, BrainCloud.BrainCloudSocialLeaderboard.FetchType.HIGHEST_RANKED, 100, LeaderboardSuccess_Callback, LeaderboardFailure_Callback, null);
+        }
+
         public void GetLeaderboardPage(string aLeaderboardID, int aIndex, int aSecondIndex)
         {
             m_leaderboardReady = false;
