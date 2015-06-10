@@ -93,8 +93,8 @@ namespace BrainCloudPhotonExample.Connection
                         case "Battleship":
                             shipType = (int)ShipController.eShipType.SHIP_TYPE_BATTLESHIP;
                             break;
-                        case "Submarine":
-                            shipType = (int)ShipController.eShipType.SHIP_TYPE_SUBMARINE;
+                        case "PatrolBoat":
+                            shipType = (int)ShipController.eShipType.SHIP_TYPE_PATROLBOAT;
                             break;
                         case "Cruiser":
                             shipType = (int)ShipController.eShipType.SHIP_TYPE_CRUISER;

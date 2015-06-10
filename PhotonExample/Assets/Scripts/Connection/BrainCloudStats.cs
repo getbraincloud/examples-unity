@@ -44,6 +44,8 @@ namespace BrainCloudPhotonExample.Connection
 
         public bool m_leaderboardReady = false;
 
+        public string[] m_playerLevelTitles;
+
         public JsonData m_leaderboardData;
 
         public void GetLeaderboard(string aLeaderboardID)
@@ -84,6 +86,8 @@ namespace BrainCloudPhotonExample.Connection
             // Ask brainCloud for statistics
             BrainCloudWrapper.GetBC().PlayerStatisticsService.ReadAllPlayerStats(StatsSuccess_Callback, StatsFailure_Callback, null);
             BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(StateSuccess_Callback, StateFailure_Callback, null);
+            //BrainCloudWrapper.GetBC().GamificationService.ReadX
+            BrainCloudWrapper.GetBC().GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
         }
 
         public void LeaderboardSuccess_Callback(string responseData, object cbObject)
@@ -111,8 +115,8 @@ namespace BrainCloudPhotonExample.Connection
 
             int killScore = (kills) * 10000 - (m_statTimesDestroyed + aDeaths);
             int bombScore = (bombs) * 10000 - (m_statTimesDestroyed + aDeaths);
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("KDR", (ulong)killScore, "");
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("BDR", (ulong)bombScore, "");
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("KDR", (ulong)killScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\"}");
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("BDR", (ulong)bombScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\"}");
             ReadStatistics();
         }
 
@@ -154,6 +158,24 @@ namespace BrainCloudPhotonExample.Connection
         }
 
         private void StateFailure_Callback(int a, int b, string responseData, object cbObject)
+        {
+            Debug.LogError(responseData);
+        }
+
+        private void LevelsSuccess_Callback(string responseData, object cbObject)
+        {
+            JsonData jsonData = JsonMapper.ToObject(responseData);
+            JsonData entries = jsonData["data"]["xp_levels"];
+
+            m_playerLevelTitles = new string[entries.Count];
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                m_playerLevelTitles[i] = entries[i]["statusTitle"].ToString();
+            }
+        }
+
+        private void LevelsFailure_Callback(int a, int b, string responseData, object cbObject)
         {
             Debug.LogError(responseData);
         }

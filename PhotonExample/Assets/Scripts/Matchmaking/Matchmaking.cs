@@ -212,8 +212,15 @@ namespace BrainCloudPhotonExample.Matchmaking
         void OnStatsWindow()
         {
             List<BrainCloudStats.Stat> playerStats = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats();
-
-            string rank = playerStats[0].m_statValue.ToString() + "\n" + playerStats[1].m_statValue.ToString();
+            string rank = "";
+            if (playerStats[0].m_statValue >= GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles.Length)
+            {
+                rank = "0" + "\n" + playerStats[1].m_statValue.ToString();
+            }
+            else
+            {
+                rank = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[playerStats[0].m_statValue-1] + "\n" + playerStats[1].m_statValue.ToString();
+            }
             string stats = playerStats[3].m_statValue.ToString() + "\n" + playerStats[2].m_statValue.ToString() + "\n" + playerStats[4].m_statValue.ToString()
                 + "\n" + playerStats[5].m_statValue.ToString() + "\n" + playerStats[6].m_statValue.ToString()
                 + "\n" + playerStats[7].m_statValue.ToString() + "\n" + playerStats[8].m_statValue.ToString()
@@ -651,7 +658,6 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
         }
 
-
         private bool m_once = true;
 
         void OnLeaderboardWindow()
@@ -692,7 +698,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                 for (int i = 0; i < players; i++)
                 {
                     leaderboardRankText += (i + 1) + "\n";
-                    leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n";
+                    leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + ", " + leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString()  + "\n";
                     leaderboardScoreText += (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
 
                    // playerInfo = leaderboardData["leaderboard"][i]["rank"].ToString() + ": " + leaderboardData["leaderboard"][i]["name"].ToString() + " -- " + scoreType + (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1);

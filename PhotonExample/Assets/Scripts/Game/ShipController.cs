@@ -13,7 +13,7 @@ namespace BrainCloudPhotonExample.Game
             SHIP_TYPE_CARRIER,
             SHIP_TYPE_BATTLESHIP,
             SHIP_TYPE_CRUISER,
-            SHIP_TYPE_SUBMARINE,
+            SHIP_TYPE_PATROLBOAT,
             SHIP_TYPE_DESTROYER,
             SHIP_TYPE_PATROL_BOAT,
         }
@@ -182,8 +182,8 @@ namespace BrainCloudPhotonExample.Game
                     case eShipType.SHIP_TYPE_CRUISER:
                         path = "Cruiser0" + aTeam;
                         break;
-                    case eShipType.SHIP_TYPE_SUBMARINE:
-                        path = "Submarine0" + aTeam;
+                    case eShipType.SHIP_TYPE_PATROLBOAT:
+                        path = "PatrolBoat0" + aTeam;
                         break;
                     case eShipType.SHIP_TYPE_DESTROYER:
                         path = "Destroyer0" + aTeam;
@@ -297,8 +297,8 @@ namespace BrainCloudPhotonExample.Game
                 case eShipType.SHIP_TYPE_CRUISER:
                     path = "Cruiser0" + aTeam;
                     break;
-                case eShipType.SHIP_TYPE_SUBMARINE:
-                    path = "Submarine0" + aTeam;
+                case eShipType.SHIP_TYPE_PATROLBOAT:
+                    path = "PatrolBoat0" + aTeam;
                     break;
                 case eShipType.SHIP_TYPE_DESTROYER:
                     path = "Destroyer0" + aTeam;

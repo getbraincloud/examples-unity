@@ -964,7 +964,7 @@ namespace BrainCloudPhotonExample.Game
                                         ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CRUISER, (shipID % 2) + 1, shipID);
                                         break;
                                     case 3:
-                                        ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_SUBMARINE, (shipID % 2) + 1, shipID);
+                                        ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_PATROLBOAT, (shipID % 2) + 1, shipID);
                                         break;
                                     case 4:
                                         ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
@@ -1402,74 +1402,94 @@ namespace BrainCloudPhotonExample.Game
             string shipName = "";
             ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
             GameObject explosion;
+            string path = "";
             switch (ship.GetShipType())
             {
                 case ShipController.eShipType.SHIP_TYPE_CARRIER:
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load("CarrierExplosion"), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
+                    
+                    
                     if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
                     {
                         shipName += "Red ";
+                        path = "CarrierExplosion02";
                     }
                     else
                     {
                         shipName += "Green ";
+                        path = "CarrierExplosion01";
                     }
+                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
+                    explosion.GetComponent<AudioSource>().Play();
+                    //explosion.transform.FindChild("SinkingShip").GetComponent<Animator>().Play("ShipSinkAnimation");
                     shipName += "Carrier";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_BATTLESHIP:
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load("BattleshipExplosion"), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
+                    
                     if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
                     {
                         shipName += "Red ";
+                        path = "BattleshipExplosion02";
                     }
                     else
                     {
                         shipName += "Green ";
+                        path = "BattleshipExplosion01";
                     }
+                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
+                    explosion.GetComponent<AudioSource>().Play();
+                    //explosion.transform.FindChild("SinkingShip").GetComponent<Animator>().Play("ShipSinkAnimation");
                     shipName += "Battleship";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_CRUISER:
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load("CruiserExplosion"), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
                     if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
                     {
                         shipName += "Red ";
+                        path = "CruiserExplosion02";
                     }
                     else
                     {
                         shipName += "Green ";
+                        path = "CruiserExplosion01";
                     }
+                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
+                    explosion.GetComponent<AudioSource>().Play();
+                    //explosion.transform.FindChild("SinkingShip").GetComponent<Animator>().Play("ShipSinkAnimation");
                     shipName += "Cruiser";
                     break;
-                case ShipController.eShipType.SHIP_TYPE_SUBMARINE:
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load("SubmarineExplosion"), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
+                case ShipController.eShipType.SHIP_TYPE_PATROLBOAT:
                     if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
                     {
                         shipName += "Red ";
+                        path = "PatrolBoatExplosion02";
                     }
                     else
                     {
                         shipName += "Green ";
+                        path = "PatrolBoatExplosion01";
                     }
-                    shipName += "Submarine";
+                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
+                    explosion.GetComponent<AudioSource>().Play();
+                    //explosion.transform.FindChild("SinkingShip").GetComponent<Animator>().Play("ShipSinkAnimation");
+                    shipName += "Patrol Boat";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_DESTROYER:
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load("DestroyerExplosion"), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
                     if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
                     {
                         shipName += "Red ";
+                        path = "DestroyerExplosion02";
                     }
                     else
                     {
                         shipName += "Green ";
+                        path = "DestroyerExplosion01";
                     }
+                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
+                    explosion.GetComponent<AudioSource>().Play();
+                    //explosion.transform.FindChild("SinkingShip").GetComponent<Animator>().Play("ShipSinkAnimation");
                     shipName += "Destroyer";
                     break;
             }
+            
 
             m_killMessages.Add(new KillMessage((string)aBombInfo.m_shooter.customProperties["RoomDisplayName"] + " blew up a " + shipName, ((int)aBombInfo.m_shooter.customProperties["Team"] == 1) ? Color.green : Color.red));
             m_showKillDialog = true;
