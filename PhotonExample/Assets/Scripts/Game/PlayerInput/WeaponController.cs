@@ -82,7 +82,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         {
             bool isAlone = true;
 
-            if (PhotonNetwork.room.playerCount > 1)
+            if (PhotonNetwork.room != null && PhotonNetwork.room.playerCount > 1)
             {
                 PhotonPlayer[] players = PhotonNetwork.playerList;
 
