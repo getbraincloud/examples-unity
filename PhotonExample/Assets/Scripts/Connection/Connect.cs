@@ -201,11 +201,18 @@ namespace BrainCloudPhotonExample.Connection
             ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(ShipController.ShipTarget), (byte)'s', ShipController.ShipTarget.SerializeShipInfo, ShipController.ShipTarget.DeserializeShipInfo);
         }
 
-        private void AppendLog(string log)
+        private void AppendLog(string log, bool error = false)
         {
             string oldStatus = m_authStatus;
             m_authStatus = "\n" + log + "\n" + oldStatus;
-            Debug.Log(log);
+            if (error)
+            {
+                Debug.LogError(log);
+            }
+            else
+            {
+                Debug.Log(log);
+            }
         }
 
         public void OnSuccess_Authenticate(string responseData, object cbObject)
@@ -221,7 +228,8 @@ namespace BrainCloudPhotonExample.Connection
 
         public void OnError_Authenticate(int a, int b, string errorData, object cbObject)
         {
-            AppendLog("Authenticate failed: " + errorData);
+            AppendLog("Authenticate failed: " + errorData, true);
+            m_isLoggingIn = false;
         }
     }
 }

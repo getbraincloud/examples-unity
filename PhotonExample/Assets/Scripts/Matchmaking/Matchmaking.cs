@@ -54,6 +54,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         private int m_sizeListSelection = 1;
 
         private GameObject m_createGameWindow;
+
         //private float m_roomYOffset = 304;
 
         private List<MapPresets.Preset> m_mapPresets;
@@ -65,6 +66,16 @@ namespace BrainCloudPhotonExample.Matchmaking
         private List<GameObject> m_presetButtons;
         private List<GameObject> m_sizeButtons;
 
+        private GameObject m_leaderboardWindow;
+        private GameObject m_scoreText;
+        [SerializeField]
+        private GameObject m_scoreRect;
+
+        [SerializeField]
+        private Sprite m_selectedTabSprite;
+        [SerializeField]
+        private Sprite m_tabSprite;
+
         private Dictionary<string, bool> m_roomFilters = new Dictionary<string, bool>()
     {
         {"HideFull",false},
@@ -75,6 +86,9 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void Start()
         {
+            //m_scoreRect = GameObject.Find("Scores");
+            m_leaderboardWindow = GameObject.Find("Leaderboard");
+            m_scoreText = GameObject.Find("SCORE");
             m_basePresetButton = GameObject.Find("PresetButton");
             m_baseSizeButton = GameObject.Find("SizeButton");
             m_basePresetButton.SetActive(false);
@@ -83,8 +97,10 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_sizeButtons = new List<GameObject>();
             m_mapPresets = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_presets;
             m_mapSizes = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_mapSizes;
+            m_leaderboardWindow.SetActive(false);
+            
 
-            for (int i = 0; i < m_mapPresets.Count;i++)
+            for (int i = 0; i < m_mapPresets.Count; i++)
             {
                 GameObject presetButton = (GameObject)Instantiate(m_basePresetButton, m_basePresetButton.transform.position, m_basePresetButton.transform.rotation);
                 presetButton.transform.SetParent(m_basePresetButton.transform.parent);
@@ -115,9 +131,11 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_roomButtons = new List<RoomButton>();
             m_showRoomsWindow = GameObject.Find("ShowRooms");
             m_createGameWindow = GameObject.Find("CreateGame");
+            m_createGameWindow.SetActive(false);
             m_skin = (GUISkin)Resources.Load("skin");
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboardPage(m_currentLeaderboardID, m_currentLeaderboardPage * m_leaderboardPageSize, m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize);
+            //GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboardPage(m_currentLeaderboardID, m_currentLeaderboardPage * m_leaderboardPageSize, m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize);
+            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
             OnRoomsWindow();
         }
 
@@ -134,6 +152,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
                     m_showRoomsWindow.SetActive(true);
                     m_createGameWindow.SetActive(false);
+                    m_leaderboardWindow.SetActive(false);
                     OnStatsWindow();
                     OrderRoomButtons();
                     //width = 500;
@@ -150,6 +169,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                 case eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS:
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(true);
+                    m_leaderboardWindow.SetActive(false);
 
                     //m_windowRect = new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height);
                     OnNewRoomWindow();
@@ -160,6 +180,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                 case eMatchmakingState.GAME_STATE_JOIN_ROOM:
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
+                    m_leaderboardWindow.SetActive(false);
                     height = 30;
                     GUI.TextArea(new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), "Joining room...");
 
@@ -168,6 +189,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                 case eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM:
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
+                    m_leaderboardWindow.SetActive(false);
                     height = 30;
                     GUI.TextArea(new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), "Creating and joining room...");
 
@@ -175,12 +197,13 @@ namespace BrainCloudPhotonExample.Matchmaking
                 case eMatchmakingState.GAME_STATE_SHOW_LEADERBOARDS:
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
-                    width = 500;
-                    height = 400;
+                    m_leaderboardWindow.SetActive(true);
+                    //width = 500;
+                    //height = 400;
 
-                    m_windowRect = new Rect(Screen.width / 2 - (width / 2 + 100), Screen.height / 2 - (height / 2), width, height);
-
-                    GUILayout.Window(23, m_windowRect, OnLeaderboardWindow, "Leaderboards");
+                    //m_windowRect = new Rect(Screen.width / 2 - (width / 2 + 100), Screen.height / 2 - (height / 2), width, height);
+                    OnLeaderboardWindow();
+                    //GUILayout.Window(23, m_windowRect, OnLeaderboardWindow, "Leaderboards");
                     //GUILayout.Window(22, new Rect(m_windowRect.x + m_windowRect.width, m_windowRect.y, 200, m_windowRect.height), OnStatsWindow, "Statistics");
                     break;
             }
@@ -263,7 +286,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             if (m_showPresetList)
             {
-                for (int i=0;i<m_presetButtons.Count;i++)
+                for (int i = 0; i < m_presetButtons.Count; i++)
                 {
                     m_presetButtons[i].SetActive(true);
                 }
@@ -588,139 +611,120 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         }
 
-        private int m_currentLeaderboardPage = 0;
-        private int m_leaderboardPageSize = 6;
         private string m_currentLeaderboardID = "KDR";
         private bool m_leaderboardReady = false;
 
+        public void ShowLeaderboard()
+        {
+            m_state = eMatchmakingState.GAME_STATE_SHOW_LEADERBOARDS;
+            m_leaderboardReady = false;
+            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
+        }
 
-        void OnLeaderboardWindow(int windowID)
+        public void CloseLeaderboard()
+        {
+            m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+            RefreshRoomsList();
+        }
+
+        public void ShowKDRLeaderboard()
+        {
+            if (m_currentLeaderboardID != "KDR")
+            {
+                GameObject.Find("Aces Tab").GetComponent<Image>().sprite = m_selectedTabSprite;
+                GameObject.Find("Bombers Tab").GetComponent<Image>().sprite = m_tabSprite;
+                m_leaderboardReady = false;
+                m_currentLeaderboardID = "KDR";
+                GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
+            }
+        }
+
+        public void ShowBDRLeaderboard()
+        {
+            if (m_currentLeaderboardID != "BDR")
+            {
+                GameObject.Find("Bombers Tab").GetComponent<Image>().sprite = m_selectedTabSprite;
+                GameObject.Find("Aces Tab").GetComponent<Image>().sprite = m_tabSprite;
+                m_leaderboardReady = false;
+                m_currentLeaderboardID = "BDR";
+                GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
+            }
+        }
+
+
+        private bool m_once = true;
+
+        void OnLeaderboardWindow()
         {
             if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_leaderboardReady)
             {
+                if (!m_leaderboardReady) m_once = false;
                 m_leaderboardReady = true;
             }
             else
             {
                 m_leaderboardReady = false;
-            }
+                m_scoreRect.GetComponent<RectTransform>().localPosition = new Vector3(m_scoreRect.GetComponent<RectTransform>().localPosition.x, -(m_scoreRect.GetComponent<RectTransform>().sizeDelta.y / 2), m_scoreRect.GetComponent<RectTransform>().localPosition.z);
 
-            LitJson.JsonData leaderboardData = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_leaderboardData;
-            GUILayout.FlexibleSpace();
-            GUILayout.BeginVertical();
-            GUILayout.BeginHorizontal();
+            }
 
             if (m_currentLeaderboardID == "KDR")
             {
-                if (GUILayout.Button("Kills") && m_leaderboardReady)
-                {
-                    m_leaderboardReady = false;
-                    m_currentLeaderboardID = "BDR";
-                    m_currentLeaderboardPage = 0;
-                    GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboardPage(m_currentLeaderboardID, m_currentLeaderboardPage * m_leaderboardPageSize, m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize);
-                }
+                m_scoreText.GetComponent<Text>().text = "KILLS";
             }
             else
             {
-                if (GUILayout.Button("Bomb Hits") && m_leaderboardReady)
-                {
-                    m_leaderboardReady = false;
-                    m_currentLeaderboardID = "KDR";
-                    m_currentLeaderboardPage = 0;
-                    GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboardPage(m_currentLeaderboardID, m_currentLeaderboardPage * m_leaderboardPageSize, m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize);
-                }
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Previous Page") && m_leaderboardReady)
-            {
-                if (m_currentLeaderboardPage > 0)
-                {
-                    m_leaderboardReady = false;
-                    m_currentLeaderboardPage--;
-                    GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboardPage(m_currentLeaderboardID, m_currentLeaderboardPage * m_leaderboardPageSize, m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize);
-                }
+                m_scoreText.GetComponent<Text>().text = "TARGETS HIT";
             }
 
+            LitJson.JsonData leaderboardData = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_leaderboardData;
 
-            string totalPages = "";
-            if (leaderboardData == null)
-                totalPages = "1";
-            else
-                totalPages = (Mathf.CeilToInt(float.Parse(leaderboardData["leaderboardSize"].ToString()) / (float)m_leaderboardPageSize)).ToString();
+            string leaderboardRankText = "";
+            string leaderboardNameText = "";
+            string leaderboardScoreText = "";
 
-
-            GUILayout.Label("Page " + (m_currentLeaderboardPage + 1) + "/" + totalPages);
-
-            if (GUILayout.Button("Next Page") && m_leaderboardReady)
-            {
-                if ((int.Parse(leaderboardData["leaderboardSize"].ToString()) > m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize))
-                {
-                    m_leaderboardReady = false;
-                    m_currentLeaderboardPage++;
-                    GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboardPage(m_currentLeaderboardID, m_currentLeaderboardPage * m_leaderboardPageSize, m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize - 1);
-                }
-            }
-
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-
-            GUI.Box(new Rect(m_windowRect.width / 2 - 240, 80, 403, m_windowRect.height - 110), "");
-
-            m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.Width(400), GUILayout.Height(m_windowRect.height - 120));
+            int players = 1;
             if (m_leaderboardReady)
             {
-                int players = m_currentLeaderboardPage * m_leaderboardPageSize;
-                if (players > int.Parse(leaderboardData["leaderboardSize"].ToString()))
+                
+                players = int.Parse(leaderboardData["social_leaderboard"].Count.ToString());
+
+                for (int i = 0; i < players; i++)
                 {
-                    players = int.Parse(leaderboardData["leaderboardSize"].ToString());
+                    leaderboardRankText += (i + 1) + "\n";
+                    leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n";
+                    leaderboardScoreText += (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
+
+                   // playerInfo = leaderboardData["leaderboard"][i]["rank"].ToString() + ": " + leaderboardData["leaderboard"][i]["name"].ToString() + " -- " + scoreType + (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1);
+
                 }
-
-                int maxPlayers = int.Parse(leaderboardData["leaderboardSize"].ToString());
-
-                int loopCount = maxPlayers - players;
-
-                if (loopCount > m_leaderboardPageSize)
+                if (players == 0)
                 {
-                    loopCount = m_leaderboardPageSize;
-                }
-
-                for (int i = 0; i < loopCount; i++)
-                {
-                    string scoreType = "Kills";
-                    if (m_currentLeaderboardID == "KDR")
-                    {
-                        scoreType = "Planes Destroyed: ";
-                    }
-                    else
-                    {
-                        scoreType = "Weakpoints Destroyed: ";
-                    }
-                    string playerInfo = "";
-                    if (leaderboardData["leaderboard"][i] == null)
-                    {
-                        Debug.Log(i + " " + loopCount + " " + maxPlayers);
-                    }
-                    playerInfo = leaderboardData["leaderboard"][i]["rank"].ToString() + ": " + leaderboardData["leaderboard"][i]["name"].ToString() + " -- " + scoreType + (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1);
-                    GUILayout.Button(playerInfo, GUILayout.Width(370), GUILayout.Height(42));
-                }
-                if (maxPlayers == 0)
-                {
-                    GUILayout.Label("No entries found...");
+                    leaderboardNameText = "No entries found...";
+                    leaderboardRankText = "";
+                    leaderboardScoreText = "";
                 }
             }
             else
             {
-                GUILayout.Label("Please wait...");
+                 leaderboardNameText = "Please wait...";
+                 leaderboardRankText = "";
+                 leaderboardScoreText = "";
             }
 
-            GUILayout.EndScrollView();
-
-            GUILayout.EndHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.EndVertical();
-            GUILayout.FlexibleSpace();
+            m_scoreRect.transform.FindChild("List").GetComponent<Text>().text = leaderboardNameText;
+            m_scoreRect.transform.FindChild("List Ranks").GetComponent<Text>().text = leaderboardRankText;
+            m_scoreRect.transform.FindChild("List Count").GetComponent<Text>().text = leaderboardScoreText;
+            m_scoreRect.GetComponent<RectTransform>().sizeDelta = new Vector2(m_scoreRect.GetComponent<RectTransform>().sizeDelta.x, 18.2f * players);
+            if (!m_once)
+            {
+                m_once = true;
+                //m_scoreRect.GetComponent<RectTransform>().localPosition = new Vector3(m_scoreRect.GetComponent<RectTransform>().localPosition.x, -((18.2f * players) / 2), m_scoreRect.GetComponent<RectTransform>().localPosition.z);
+                m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 1;
+                m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 0.99f;
+                m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 1;
+            }
+            
         }
 
         void OnPhotonJoinRoomFailed()
@@ -781,7 +785,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             if (roomExists)
             {
-                
+
                 GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("There's already a room named " + aName + "!", "Error");
                 m_roomName = "";
                 return;
