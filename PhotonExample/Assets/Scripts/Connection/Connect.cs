@@ -17,22 +17,17 @@ namespace BrainCloudPhotonExample.Connection
         private Vector2 m_scrollPosition;
         private string m_authStatus = "Welcome to brainCloud";
 
-        private enum eAuthMode
-        {
-            AUTH_MODE_UNIVERSAL,
-            AUTH_MODE_NONE
-        };
-
-        private eAuthMode m_authMode = eAuthMode.AUTH_MODE_UNIVERSAL;
-
-        private GUISkin m_skin;
-
         private Rect m_windowRect;
         private bool m_isLoggingIn = false;
 
+        private string m_versionNumber = "";
+
         void Start()
         {
-            m_skin = (GUISkin)Resources.Load("skin");
+            m_versionNumber = ((TextAsset)Resources.Load("Version")).text.ToString();
+            GameObject.Find("Version Text").GetComponent<Text>().text = m_versionNumber;
+            DontDestroyOnLoad(GameObject.Find("Version Text"));
+            DontDestroyOnLoad(GameObject.Find("FullScreen"));
             Application.runInBackground = true;
             if (!PhotonNetwork.connectedAndReady) PhotonNetwork.ConnectUsingSettings("1.0");
 
@@ -69,10 +64,6 @@ namespace BrainCloudPhotonExample.Connection
 
         void OnGUI()
         {
-            GUI.skin = m_skin;
-            int width = 500;
-            int height = 400;
-
             OnWindow();
             //m_windowRect = new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height);
             //GUI.Window(30, m_windowRect, OnWindow, "brainCloud Login");
@@ -87,7 +78,11 @@ namespace BrainCloudPhotonExample.Connection
             {
                 if (m_username.Length == 0 || m_password.Length == 0)
                 {
-                    AppendLog("Username/password can't be empty");
+                    AppendLog("Username/password can't be empty", true);
+                }
+                else if(!m_username.Contains("@"))
+                {
+                    AppendLog("Missing @ symbol in email field", true);
                 }
                 else
                 {
@@ -109,7 +104,8 @@ namespace BrainCloudPhotonExample.Connection
                     ///////////////////////////////////////////////////////////////////
                     // brainCloud authentication
                     ///////////////////////////////////////////////////////////////////
-                    BrainCloudWrapper.GetInstance().AuthenticateUniversal(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
+                    BrainCloudWrapper.GetInstance().AuthenticateEmailPassword(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
+                    //BrainCloudWrapper.GetInstance().AuthenticateUniversal(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
 
                     ///////////////////////////////////////////////////////////////////
                 }
@@ -135,6 +131,7 @@ namespace BrainCloudPhotonExample.Connection
             {
                 GameObject.Find("Login Button").transform.GetChild(0).GetComponent<Text>().text = "Logging in...";
                 GameObject.Find("Login Button").GetComponent<Button>().interactable = false;
+                GameObject.Find("Forgot Password").GetComponent<Button>().interactable = false;
             }
             /*
             switch (m_authMode)
@@ -215,11 +212,55 @@ namespace BrainCloudPhotonExample.Connection
             }
         }
 
+        public void ForgotPassword()
+        {
+            m_username = GameObject.Find("UsernameBox").GetComponent<InputField>().text;
+
+            if (m_username == "" || !m_username.Contains("@"))
+            {
+                AppendLog("No email detected in email field!", true);
+                return;
+            }
+            BrainCloudWrapper.GetBC().AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
+            
+        }
+
+        public void OnSuccess_Reset(string responseData, object cbObject)
+        {
+            AppendLog("Password reset instructions sent to registered email.");
+        }
+
+        public void OnError_Reset(int a, int b, string errorData, object cbObject)
+        {
+            AppendLog("Authenticate failed: " + errorData, true);
+        }
+
         public void OnSuccess_Authenticate(string responseData, object cbObject)
         {
             AppendLog("Authenticate successful!");
-            PhotonNetwork.player.name = m_username;
-            BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(m_username);
+            JsonData response = JsonMapper.ToObject(responseData);
+            string username = "";
+            if (response["data"]["playerName"].ToString() == "")
+            {
+                for (int i=0;i<m_username.Length;i++)
+                {
+                    if (m_username[i] != '@')
+                    {
+                        username += m_username[i].ToString();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(username);
+                PhotonNetwork.player.name = username;
+            }
+            else
+            {
+                PhotonNetwork.player.name = response["data"]["playerName"].ToString();
+            }
+            
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadGlobalProperties();
             PhotonNetwork.sendRate = 20;
@@ -230,6 +271,7 @@ namespace BrainCloudPhotonExample.Connection
         {
             AppendLog("Authenticate failed: " + errorData, true);
             m_isLoggingIn = false;
+            
         }
     }
 }

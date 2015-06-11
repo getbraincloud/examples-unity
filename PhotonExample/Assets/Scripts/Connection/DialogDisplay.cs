@@ -9,6 +9,8 @@ namespace BrainCloudPhotonExample.Connection
 
         public static DialogDisplay s_instance;
 
+        private bool m_isFullscreen = false;
+
         List<DialogBox> m_dialogsToDisplay;
         List<FadeLabel> m_labelsToDisplay;
 
@@ -152,6 +154,12 @@ namespace BrainCloudPhotonExample.Connection
                     m_labelsToDisplay.RemoveAt(i);
                 }
             }
+        }
+
+        public void ToggleFullscreen()
+        {
+            m_isFullscreen = !m_isFullscreen;
+            Screen.fullScreen = m_isFullscreen;
         }
     }
 }
