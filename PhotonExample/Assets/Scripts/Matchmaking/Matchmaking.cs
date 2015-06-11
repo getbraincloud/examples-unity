@@ -86,6 +86,8 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void Start()
         {
+            GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+            GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             //m_scoreRect = GameObject.Find("Scores");
             
             m_leaderboardWindow = GameObject.Find("Leaderboard");
@@ -239,7 +241,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
             else
             {
-                rank = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[playerStats[0].m_statValue-1] + "\n" + playerStats[1].m_statValue.ToString();
+                rank = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[playerStats[0].m_statValue-1] + " (" + (playerStats[0].m_statValue) + ")\n" + playerStats[1].m_statValue.ToString();
             }
             string stats = playerStats[3].m_statValue.ToString() + "\n" + playerStats[2].m_statValue.ToString() + "\n" + playerStats[4].m_statValue.ToString()
                 + "\n" + playerStats[5].m_statValue.ToString() + "\n" + playerStats[6].m_statValue.ToString()
@@ -761,6 +763,8 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void OnJoinedRoom()
         {
+            GameObject.Find("Version Text").transform.SetParent(null);
+            GameObject.Find("FullScreen").transform.SetParent(null);
             PhotonNetwork.automaticallySyncScene = true;
             PhotonNetwork.LoadLevel("Game");
         }

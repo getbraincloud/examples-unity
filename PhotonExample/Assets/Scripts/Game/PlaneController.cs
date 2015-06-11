@@ -127,6 +127,8 @@ namespace BrainCloudPhotonExample.Game
         private List<TimePosition> m_photonReleasedPositions = new List<TimePosition>();
         private ParticleSystem m_leftContrail;
         private ParticleSystem m_rightContrail;
+        private GameObject m_rightDamage;
+        private GameObject m_leftDamage;
 
 
         public class TimePosition
@@ -321,13 +323,21 @@ namespace BrainCloudPhotonExample.Game
                     break;
                 case 1:
                     m_rightContrail.startColor = m_blackSmokeColor;
+                    if (m_rightDamage == null) m_rightDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_rightContrail.transform.position, m_rightContrail.transform.rotation);
+                    m_rightDamage.transform.parent = m_rightContrail.transform;
                     break;
                 case 2:
                     m_leftContrail.startColor = m_blackSmokeColor;
+                    if (m_leftDamage == null) m_leftDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_leftContrail.transform.position, m_leftContrail.transform.rotation);
+                    m_leftDamage.transform.parent = m_leftContrail.transform;
                     break;
                 case 3:
                     m_rightContrail.startColor = m_blackSmokeColor;
                     m_leftContrail.startColor = m_blackSmokeColor;
+                    if (m_rightDamage == null) m_rightDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_rightContrail.transform.position, m_rightContrail.transform.rotation);
+                    m_rightDamage.transform.parent = m_rightContrail.transform;
+                    if (m_leftDamage == null) m_leftDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_leftContrail.transform.position, m_leftContrail.transform.rotation);
+                    m_leftDamage.transform.parent = m_leftContrail.transform;
                     break;
             }
 

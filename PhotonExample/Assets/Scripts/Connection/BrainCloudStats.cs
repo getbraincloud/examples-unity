@@ -48,6 +48,15 @@ namespace BrainCloudPhotonExample.Connection
 
         public JsonData m_leaderboardData;
 
+        public static BrainCloudStats s_instance;
+        void Awake()
+        {
+            if (s_instance)
+                DestroyImmediate(gameObject);
+            else
+                s_instance = this;
+        }
+
         public void GetLeaderboard(string aLeaderboardID)
         {
             m_leaderboardReady = false;

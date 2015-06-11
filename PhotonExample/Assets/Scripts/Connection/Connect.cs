@@ -22,12 +22,30 @@ namespace BrainCloudPhotonExample.Connection
 
         private string m_versionNumber = "";
 
+        public static GameObject s_fullScreenButtonInstance;
+        public static GameObject s_versionInstance;
+        void Awake()
+        {
+            if (s_fullScreenButtonInstance)
+                DestroyImmediate(GameObject.Find("FullScreen"));
+            else
+                s_fullScreenButtonInstance = GameObject.Find("FullScreen");
+
+            if (s_versionInstance)
+                DestroyImmediate(GameObject.Find("Version Text"));
+            else
+                s_versionInstance = GameObject.Find("Version Text");
+
+        }
         void Start()
         {
+            
             m_versionNumber = ((TextAsset)Resources.Load("Version")).text.ToString();
             GameObject.Find("Version Text").GetComponent<Text>().text = m_versionNumber;
             DontDestroyOnLoad(GameObject.Find("Version Text"));
             DontDestroyOnLoad(GameObject.Find("FullScreen"));
+            GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+            GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             Application.runInBackground = true;
             if (!PhotonNetwork.connectedAndReady) PhotonNetwork.ConnectUsingSettings("1.0");
 
@@ -263,6 +281,8 @@ namespace BrainCloudPhotonExample.Connection
             
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadGlobalProperties();
+            GameObject.Find("Version Text").transform.SetParent(null);
+            GameObject.Find("FullScreen").transform.SetParent(null);
             PhotonNetwork.sendRate = 20;
             Application.LoadLevel("Matchmaking");
         }

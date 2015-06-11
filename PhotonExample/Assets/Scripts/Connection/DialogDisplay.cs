@@ -7,7 +7,7 @@ namespace BrainCloudPhotonExample.Connection
     public class DialogDisplay : MonoBehaviour
     {
 
-        public static DialogDisplay s_instance;
+        
 
         private bool m_isFullscreen = false;
 
@@ -16,6 +16,7 @@ namespace BrainCloudPhotonExample.Connection
 
         private GUISkin m_skin;
 
+        public static DialogDisplay s_instance;
         void Awake()
         {
             if (s_instance)
