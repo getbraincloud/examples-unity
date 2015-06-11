@@ -132,7 +132,8 @@ namespace BrainCloudPhotonExample.Game
 
         void Start()
         {
-            
+            GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+            GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             m_mapLayout = (int)PhotonNetwork.room.customProperties["MapLayout"];
             m_mapSize = (int)PhotonNetwork.room.customProperties["MapSize"];
             
@@ -266,7 +267,10 @@ namespace BrainCloudPhotonExample.Game
 
         public void OnLeftRoom()
         {
+            GameObject.Find("Version Text").transform.SetParent(null);
+            GameObject.Find("FullScreen").transform.SetParent(null);
             PhotonNetwork.LoadLevel("Matchmaking");
+
         }
 
         public void ForceStartGame()
@@ -1401,6 +1405,12 @@ namespace BrainCloudPhotonExample.Game
 
             string shipName = "";
             ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+            int children = ship.transform.childCount;
+            for (int i = 1; i < children;i++)
+            {
+                Destroy(ship.transform.GetChild(i).gameObject);
+            }
+            Destroy(ship.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).gameObject);
             GameObject explosion;
             string path = "";
             switch (ship.GetShipType())

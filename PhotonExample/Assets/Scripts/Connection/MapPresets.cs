@@ -60,8 +60,18 @@ namespace BrainCloudPhotonExample.Connection
             }
         }
 
+
         public List<Preset> m_presets;
         public List<MapSize> m_mapSizes;
+
+        public static MapPresets s_instance;
+        void Awake()
+        {
+            if (s_instance)
+                DestroyImmediate(gameObject);
+            else
+                s_instance = this;
+        }
 
         void Start()
         {
