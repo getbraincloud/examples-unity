@@ -1126,10 +1126,6 @@ namespace BrainCloudPhotonExample.Game
                 m_team2Score = (int)PhotonNetwork.room.customProperties["Team2Score"];
             }
 
-            if (Input.GetKeyDown("f") && m_gameState == eGameState.GAME_STATE_PLAYING_GAME)
-            {
-                GetComponent<PhotonView>().RPC("EndGame", PhotonTargets.All);
-            }
         }
 
         public void AddSpawnedShip(ShipController aShip)
@@ -1550,6 +1546,19 @@ namespace BrainCloudPhotonExample.Game
             }
             m_showKillDialog = false;
             m_killMessages.Clear();
+        }
+
+        public void SpawnFlare(Vector3 aPosition, Vector3 aVelocity)
+        {
+            GetComponent<PhotonView>().RPC("SpawnFlareRPC", PhotonTargets.All, aPosition, aVelocity, PhotonNetwork.player);
+        }
+
+        [RPC]
+        void SpawnFlareRPC(Vector3 aPosition, Vector3 aVelocity, PhotonPlayer aPlayer)
+        {
+            GameObject flare = (GameObject)Instantiate((GameObject)Resources.Load("Flare"), aPosition, Quaternion.identity);
+            flare.GetComponent<FlareController>().Activate(aPlayer);
+            flare.GetComponent<Rigidbody>().velocity = aVelocity;
         }
 
         [RPC]

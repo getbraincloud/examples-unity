@@ -41,6 +41,7 @@ namespace BrainCloudPhotonExample.Connection
         public float m_multiShotBurstDelay = 0;
         public float m_fastModeFireRateDelay = 0;
         public float m_bombPickupLifetime = 0;
+        public float m_flareLifetime = 0;
 
         public bool m_leaderboardReady = false;
 
@@ -258,6 +259,7 @@ namespace BrainCloudPhotonExample.Connection
             m_multiShotBurstDelay = float.Parse(entries["MultishotBurstDelay"]["value"].ToString());
             m_fastModeFireRateDelay = float.Parse(entries["FastModeFireRateDelay"]["value"].ToString());
             m_bombPickupLifetime = float.Parse(entries["BombPickupLifeTime"]["value"].ToString());
+            m_flareLifetime = 10; // float.Parse(entries["FlareLifeTime"]["value"].ToString());
 
         }
 

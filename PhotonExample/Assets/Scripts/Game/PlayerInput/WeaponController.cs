@@ -276,6 +276,11 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             }
         }
 
+        public void FireFlare(Vector3 aPosition, Vector3 aVelocity)
+        {
+            GameObject.Find("GameManager").GetComponent<GameManager>().SpawnFlare(aPosition, aVelocity);
+        }
+
         public GameObject SpawnBomb(BombController.BombInfo aBombInfo)
         {
             GameObject player = null;

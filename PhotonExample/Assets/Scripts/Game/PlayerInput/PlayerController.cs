@@ -135,6 +135,11 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 GetComponent<WeaponController>().DropBomb();
             }
 
+            if (Input.GetButtonDown("Fire3"))
+            {
+                GetComponent<WeaponController>().FireFlare(m_playerPlane.transform.position, m_playerPlane.GetComponent<Rigidbody>().velocity);
+            }
+
             if (m_isAccelerating)
             {
                 m_speedMultiplier += 3 * Time.deltaTime;
