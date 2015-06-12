@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace BrainCloudPhotonExample.Connection
 {
@@ -134,19 +135,61 @@ namespace BrainCloudPhotonExample.Connection
             m_labelsToDisplay = new List<FadeLabel>();
         }
 
-        public void DisplayDialog(string aMessage, string aTitle)
+        public void DisplayDialog(string aMessage)
         {
-            m_dialogsToDisplay.Add(new DialogBox(aMessage, aTitle));
+            //m_dialogsToDisplay.Add(new DialogBox(aMessage, aTitle));
+            GameObject dialog = (GameObject)Instantiate(transform.GetChild(0).gameObject, transform.GetChild(0).transform.position, transform.GetChild(0).rotation);
+            dialog.transform.SetParent(GameObject.Find("Canvas").transform);
+            dialog.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(dialog); });
+            dialog.transform.GetChild(1).GetComponent<Text>().text = aMessage;
         }
 
-        public void DisplayLabel(Rect aPosition, GUIContent aContent, float aLifeTime, float aFadeTime, Color aColor, int aFontSize)
+        public void DisplayAchievement(int aID, string aTitle, string aDescription)
         {
-            m_labelsToDisplay.Add(new FadeLabel(aPosition, aContent, aLifeTime, aFadeTime, aColor, aFontSize));
+            //m_dialogsToDisplay.Add(new DialogBox(aTitle + " unlocked!\n" + aDescription, "New Achievement!"));
+            GameObject dialog = (GameObject)Instantiate(transform.GetChild(2).gameObject, transform.GetChild(2).transform.position, transform.GetChild(2).transform.rotation);
+            switch (aID)
+            {
+                case 0:
+                    dialog.transform.GetChild(0).gameObject.SetActive(true);
+                    break;
+                case 1:
+                    dialog.transform.GetChild(1).gameObject.SetActive(true);
+                    break;
+                case 2:
+                    dialog.transform.GetChild(2).gameObject.SetActive(true);
+                    break;
+            }
+            dialog.transform.SetParent(GameObject.Find("Canvas").transform);
+            dialog.GetComponent<ParticlesDestroyer>().enabled = true;
+            dialog.GetComponent<ParticlesDestroyer>().m_lifeTime = 5;
+            dialog.transform.GetChild(3).GetComponent<Text>().text = aTitle;
+            dialog.transform.GetChild(4).GetComponent<Text>().text = aDescription;
         }
 
-        public void DisplayAchievement(string aTitle, string aDescription)
+        public void DisplayRankUp(int newRank)
         {
-            m_dialogsToDisplay.Add(new DialogBox(aTitle + " unlocked!\n" + aDescription, "New Achievement!"));
+            GameObject dialog = (GameObject)Instantiate(transform.GetChild(1).gameObject, transform.GetChild(1).transform.position, transform.GetChild(1).transform.rotation);
+            dialog.transform.SetParent(GameObject.Find("Canvas").transform);
+            dialog.GetComponent<ParticlesDestroyer>().enabled = true;
+            dialog.GetComponent<ParticlesDestroyer>().m_lifeTime = 5;
+            dialog.transform.GetChild(0).GetComponent<Text>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[newRank-1] + " (" + newRank + ")";
+        }
+
+        private bool m_showHostLeft = false;
+
+        void OnLevelWasLoaded (int level)
+        {
+            if (m_showHostLeft)
+            {
+                m_showHostLeft = false;
+                DisplayDialog("The host has left the game!");
+            }
+        }
+
+        public void HostLeft()
+        {
+            m_showHostLeft = true;
         }
 
         void Update()

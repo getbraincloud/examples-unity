@@ -97,11 +97,11 @@ namespace BrainCloudPhotonExample.Connection
             {
                 if (m_username.Length == 0 || m_password.Length == 0)
                 {
-                    AppendLog("Username/password can't be empty", true);
+                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Username/password can't be empty!");
                 }
                 else if(!m_username.Contains("@"))
                 {
-                    AppendLog("Missing @ symbol in email field", true);
+                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Not a valid email address!");
                 }
                 else
                 {
@@ -237,7 +237,7 @@ namespace BrainCloudPhotonExample.Connection
 
             if (m_username == "" || !m_username.Contains("@"))
             {
-                AppendLog("No email detected in email field!", true);
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You need to enter an email first!");
                 return;
             }
             BrainCloudWrapper.GetBC().AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
@@ -246,12 +246,16 @@ namespace BrainCloudPhotonExample.Connection
 
         public void OnSuccess_Reset(string responseData, object cbObject)
         {
-            AppendLog("Password reset instructions sent to registered email.");
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Password reset instructions\nsent to registered email.");
         }
 
-        public void OnError_Reset(int a, int b, string errorData, object cbObject)
+        public void OnError_Reset(int a, int b, string responseData, object cbObject)
         {
-            AppendLog("Authenticate failed: " + errorData, true);
+            if (b == 40209)
+            {
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Email not registered!");
+            }
+            
         }
 
         public void OnSuccess_Authenticate(string responseData, object cbObject)
@@ -288,10 +292,14 @@ namespace BrainCloudPhotonExample.Connection
             Application.LoadLevel("Matchmaking");
         }
 
-        public void OnError_Authenticate(int a, int b, string errorData, object cbObject)
+        public void OnError_Authenticate(int a, int b, string responseData, object cbObject)
         {
-            AppendLog("Authenticate failed: " + errorData, true);
+            if (b == 40307)
+            {
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Incorrect username/password combination!");
+            }
             m_isLoggingIn = false;
+            GameObject.Find("Forgot Password").GetComponent<Button>().interactable = true;
             
         }
     }

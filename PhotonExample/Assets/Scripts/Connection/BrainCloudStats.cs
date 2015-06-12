@@ -144,7 +144,7 @@ namespace BrainCloudPhotonExample.Connection
                         {
                             m_achievements[i].m_achieved = true;
                             BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
-                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(m_achievements[i].m_name, m_achievements[i].m_description);
+                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                         }
                         break;
                     }
@@ -161,7 +161,7 @@ namespace BrainCloudPhotonExample.Connection
                         {
                             m_achievements[i].m_achieved = true;
                             BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, AwardSuccess_Callback, AwardFailure_Callback, null);
-                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(m_achievements[i].m_name, m_achievements[i].m_description);
+                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                         }
                         break;
                     }
@@ -189,7 +189,7 @@ namespace BrainCloudPhotonExample.Connection
                     {
                         m_achievements[i].m_achieved = true;
                         BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
-                        GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(m_achievements[i].m_name, m_achievements[i].m_description);
+                        GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id),m_achievements[i].m_name, m_achievements[i].m_description);
                     }
                     break;
                 }
@@ -226,8 +226,8 @@ namespace BrainCloudPhotonExample.Connection
 
             int killScore = (kills) * 10000 - (m_statTimesDestroyed + aDeaths);
             int bombScore = (bombs) * 10000 - (m_statTimesDestroyed + aDeaths);
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("KDR", (ulong)killScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\"}");
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("BDR", (ulong)bombScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\"}");
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("KDR", (ulong)killScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("BDR", (ulong)bombScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
             ReadStatistics();
         }
 
@@ -266,6 +266,15 @@ namespace BrainCloudPhotonExample.Connection
 
             m_playerLevel = int.Parse(entries["experienceLevel"].ToString());
             m_playerExperience = int.Parse(entries["experiencePoints"].ToString());
+            try
+            {
+                //assuming the player only leveled up once
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayRankUp(int.Parse(entries["rewardDetails"]["xp"]["experienceLevels"][0]["level"].ToString()));
+            }
+            catch (KeyNotFoundException e)
+            {
+                //didn't level up
+            }
         }
 
         private void StateFailure_Callback(int a, int b, string responseData, object cbObject)

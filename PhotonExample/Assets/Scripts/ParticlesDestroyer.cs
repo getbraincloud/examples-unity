@@ -7,7 +7,7 @@ namespace BrainCloudPhotonExample
     {
 
         [SerializeField]
-        private float m_lifeTime;
+        public float m_lifeTime;
 
         void FixedUpdate()
         {

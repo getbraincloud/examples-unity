@@ -289,7 +289,7 @@ namespace BrainCloudPhotonExample.Game
         void OnMasterClientSwitched(PhotonPlayer newMasterClient)
         {
             PhotonNetwork.LeaveRoom();
-            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("The host has left the game!", "Disconnected");
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().HostLeft();
             m_playerProperties.Clear();
             PhotonNetwork.player.SetCustomProperties(m_playerProperties);
         }
@@ -376,7 +376,8 @@ namespace BrainCloudPhotonExample.Game
                 m_quitButton.SetActive(true);
                 m_resetButton.SetActive(true);
             }
-
+            m_allyWinText.SetActive(false);
+            m_enemyWinText.SetActive(false);
             if (m_gameState == eGameState.GAME_STATE_GAME_OVER)
             {
                 if (m_team1Score > m_team2Score)
@@ -415,8 +416,6 @@ namespace BrainCloudPhotonExample.Game
             {
                 m_greenLogo.SetActive(false);
                 m_redLogo.SetActive(false);
-                m_allyWinText.SetActive(false);
-                m_enemyWinText.SetActive(false);
             }
 
             PhotonPlayer[] playerList = PhotonNetwork.playerList;

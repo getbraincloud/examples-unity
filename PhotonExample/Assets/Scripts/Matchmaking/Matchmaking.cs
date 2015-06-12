@@ -436,7 +436,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             if (playerLevel < minLevel || playerLevel > maxLevel)
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You're not in that room's\nlevel range!", "Error");
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You're not in that room's\nlevel range!");
             }
             else if (aRoomInfo.playerCount < aRoomInfo.maxPlayers)
             {
@@ -444,12 +444,12 @@ namespace BrainCloudPhotonExample.Matchmaking
                 if (!PhotonNetwork.JoinRoom(aRoomInfo.name))
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!", "Error");
+                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
                 }
             }
             else
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("That room is full!", "Error");
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("That room is full!");
             }
         }
 
@@ -710,6 +710,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             string leaderboardRankText = "";
             string leaderboardNameText = "";
             string leaderboardScoreText = "";
+            string leaderboardLevelText = "";
 
             int players = 1;
             if (m_leaderboardReady)
@@ -720,7 +721,8 @@ namespace BrainCloudPhotonExample.Matchmaking
                 for (int i = 0; i < players; i++)
                 {
                     leaderboardRankText += (i + 1) + "\n";
-                    leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + ", " + leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString()  + "\n";
+                    leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n";
+                    leaderboardLevelText += leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["social_leaderboard"][i]["data"]["level"].ToString() + ")\n";
                     leaderboardScoreText += (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
 
                    // playerInfo = leaderboardData["leaderboard"][i]["rank"].ToString() + ": " + leaderboardData["leaderboard"][i]["name"].ToString() + " -- " + scoreType + (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1);
@@ -730,6 +732,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                 {
                     leaderboardNameText = "No entries found...";
                     leaderboardRankText = "";
+                    leaderboardLevelText = "";
                     leaderboardScoreText = "";
                 }
             }
@@ -737,12 +740,14 @@ namespace BrainCloudPhotonExample.Matchmaking
             {
                  leaderboardNameText = "Please wait...";
                  leaderboardRankText = "";
+                 leaderboardLevelText = "";
                  leaderboardScoreText = "";
             }
 
             m_scoreRect.transform.FindChild("List").GetComponent<Text>().text = leaderboardNameText;
             m_scoreRect.transform.FindChild("List Ranks").GetComponent<Text>().text = leaderboardRankText;
             m_scoreRect.transform.FindChild("List Count").GetComponent<Text>().text = leaderboardScoreText;
+            m_scoreRect.transform.FindChild("List Level").GetComponent<Text>().text = leaderboardLevelText;
             m_scoreRect.GetComponent<RectTransform>().sizeDelta = new Vector2(m_scoreRect.GetComponent<RectTransform>().sizeDelta.x, 18.2f * players);
             if (!m_once)
             {
@@ -758,7 +763,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         void OnPhotonJoinRoomFailed()
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!", "Error");
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
         }
 
         void OnJoinedRoom()
@@ -816,7 +821,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             if (roomExists)
             {
 
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("There's already a room named " + aName + "!", "Error");
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("There's already a room named " + aName + "!");
                 m_roomName = "";
                 return;
             }
