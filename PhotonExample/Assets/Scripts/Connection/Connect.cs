@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using LitJson;
 using BrainCloudPhotonExample.Game;
 using UnityEngine.UI;
@@ -39,7 +40,7 @@ namespace BrainCloudPhotonExample.Connection
         }
         void Start()
         {
-            
+
             m_versionNumber = ((TextAsset)Resources.Load("Version")).text.ToString();
             GameObject.Find("Version Text").GetComponent<Text>().text = m_versionNumber;
             DontDestroyOnLoad(GameObject.Find("Version Text"));

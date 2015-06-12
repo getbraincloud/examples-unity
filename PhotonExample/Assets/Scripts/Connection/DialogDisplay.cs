@@ -144,6 +144,11 @@ namespace BrainCloudPhotonExample.Connection
             m_labelsToDisplay.Add(new FadeLabel(aPosition, aContent, aLifeTime, aFadeTime, aColor, aFontSize));
         }
 
+        public void DisplayAchievement(string aTitle, string aDescription)
+        {
+            m_dialogsToDisplay.Add(new DialogBox(aTitle + " unlocked!\n" + aDescription, "New Achievement!"));
+        }
+
         void Update()
         {
             for (int i = 0; i < m_labelsToDisplay.Count; i++)

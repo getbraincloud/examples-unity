@@ -171,8 +171,8 @@ namespace BrainCloudPhotonExample.Game
                     m_roomProperties["GameTime"] = m_gameTime;
                     m_roomProperties["BombID"] = 0;
                     m_roomProperties["LightPosition"] = Random.Range(1, 5);
-                    m_roomProperties["Team1Score"] = 0;
-                    m_roomProperties["Team2Score"] = 0;
+                    m_roomProperties["Team1Score"] = 0.0f;
+                    m_roomProperties["Team2Score"] = 0.0f;
                     SetLightPosition((int)m_roomProperties["LightPosition"]);
                 }
 
@@ -352,7 +352,8 @@ namespace BrainCloudPhotonExample.Game
 
         void OnScoresWindow()
         {
-
+            m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
+            m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             GameObject team = GameObject.Find("Team Green Score");
             team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
             team = GameObject.Find("Team Red Score");
@@ -462,7 +463,7 @@ namespace BrainCloudPhotonExample.Game
                         m_greenChevron.transform.GetChild(0).GetComponent<Text>().text = PhotonNetwork.player.customProperties["RoomDisplayName"].ToString();
                         m_greenChevron.transform.GetChild(1).GetComponent<Text>().text = PhotonNetwork.player.customProperties["Kills"].ToString() + "/" + PhotonNetwork.player.customProperties["Deaths"].ToString();
                         m_greenChevron.transform.GetChild(2).GetComponent<Text>().text = ((int)PhotonNetwork.player.customProperties["Score"]).ToString("n0");
-                        m_greenChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_greenChevron.GetComponent<RectTransform>().localPosition.x, 21.8f + (greenPlayers * 17.7f), m_greenChevron.GetComponent<RectTransform>().localPosition.z);
+                        m_greenChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_greenChevron.GetComponent<RectTransform>().localPosition.x, 21.8f - (greenPlayers * 17.7f), m_greenChevron.GetComponent<RectTransform>().localPosition.z);
                         greenNamesText += "\n";
                         greenKDText += "\n";
                         greenScoreText += "\n";
@@ -470,8 +471,8 @@ namespace BrainCloudPhotonExample.Game
                     else
                     {
                         greenNamesText += playerList[i].customProperties["RoomDisplayName"].ToString() + "\n";
-                        greenKDText += PhotonNetwork.player.customProperties["Kills"].ToString() + "/" + PhotonNetwork.player.customProperties["Deaths"].ToString() + "\n";
-                        greenScoreText += ((int)PhotonNetwork.player.customProperties["Score"]).ToString("n0") + "\n";
+                        greenKDText += playerList[i].customProperties["Kills"].ToString() + "/" + playerList[i].customProperties["Deaths"].ToString() + "\n";
+                        greenScoreText += ((int)playerList[i].customProperties["Score"]).ToString("n0") + "\n";
                     }
                     greenPlayers++;
                 }
@@ -484,7 +485,7 @@ namespace BrainCloudPhotonExample.Game
                         m_redChevron.transform.GetChild(0).GetComponent<Text>().text = PhotonNetwork.player.customProperties["RoomDisplayName"].ToString();
                         m_redChevron.transform.GetChild(1).GetComponent<Text>().text = PhotonNetwork.player.customProperties["Kills"].ToString() + "/" + PhotonNetwork.player.customProperties["Deaths"].ToString();
                         m_redChevron.transform.GetChild(2).GetComponent<Text>().text = ((int)PhotonNetwork.player.customProperties["Score"]).ToString("n0");
-                        m_redChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_redChevron.GetComponent<RectTransform>().localPosition.x, 21.8f + (redPlayers * 17.7f), m_redChevron.GetComponent<RectTransform>().localPosition.z);
+                        m_redChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_redChevron.GetComponent<RectTransform>().localPosition.x, 21.8f - (redPlayers * 17.7f), m_redChevron.GetComponent<RectTransform>().localPosition.z);
 
                         redNamesText += "\n";
                         redKDText += "\n";
@@ -493,8 +494,8 @@ namespace BrainCloudPhotonExample.Game
                     else
                     {
                         redNamesText += playerList[i].customProperties["RoomDisplayName"].ToString() + "\n";
-                        redKDText += PhotonNetwork.player.customProperties["Kills"].ToString() + "/" + PhotonNetwork.player.customProperties["Deaths"].ToString() + "\n";
-                        redScoreText += ((int)PhotonNetwork.player.customProperties["Score"]).ToString("n0") + "\n";
+                        redKDText += playerList[i].customProperties["Kills"].ToString() + "/" + playerList[i].customProperties["Deaths"].ToString() + "\n";
+                        redScoreText += ((int)playerList[i].customProperties["Score"]).ToString("n0") + "\n";
                     }
                     redPlayers++;
                 }
@@ -1122,8 +1123,8 @@ namespace BrainCloudPhotonExample.Game
             }
             if (!PhotonNetwork.isMasterClient && PhotonNetwork.room != null)
             {
-                m_team1Score = (int)PhotonNetwork.room.customProperties["Team1Score"];
-                m_team2Score = (int)PhotonNetwork.room.customProperties["Team2Score"];
+                m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
+                m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             }
 
         }
@@ -1210,8 +1211,8 @@ namespace BrainCloudPhotonExample.Game
                 m_playerProperties["Kills"] = 0;
                 m_playerProperties["Deaths"] = 0;
                 m_roomProperties["IsPlaying"] = 0;
-                m_roomProperties["Team1Score"] = 0;
-                m_roomProperties["Team2Score"] = 0;
+                m_roomProperties["Team1Score"] = 0.0f;
+                m_roomProperties["Team2Score"] = 0.0f;
                 m_team1Score = 0;
                 m_team2Score = 0;
                 bool done = false;
@@ -1524,6 +1525,10 @@ namespace BrainCloudPhotonExample.Game
             m_timesDestroyed = (int)PhotonNetwork.player.customProperties["Deaths"];
             m_planesDestroyed = (int)PhotonNetwork.player.customProperties["Kills"];
             int gamesWon = ((int)PhotonNetwork.player.customProperties["Team"] == aWinningTeam) ? 1 : 0;
+            if (m_planesDestroyed >= 5)
+            {
+                GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().Get5KillsAchievement();
+            }
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().IncrementStatisticsToBrainCloud(1, gamesWon, m_timesDestroyed, m_shotsFired, m_bombsDropped, m_planesDestroyed, m_carriersDestroyed, m_bombsHit);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().IncrementExperienceToBrainCloud(m_planesDestroyed * GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_expForKill);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().SubmitLeaderboardData(m_planesDestroyed, m_bombsHit, m_timesDestroyed);

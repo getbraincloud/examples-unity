@@ -8,6 +8,23 @@ namespace BrainCloudPhotonExample.Connection
     public class BrainCloudStats : MonoBehaviour
     {
 
+        public class Achievement
+        {
+            public string m_name = "";
+            public string m_id = "";
+            public string m_description = "";
+
+            public bool m_achieved = false;
+
+            public Achievement(string aName, string aID, string aDesc, bool aAchieved)
+            {
+                m_name = aName;
+                m_id = aID;
+                m_description = aDesc;
+                m_achieved = aAchieved;
+            }
+        }
+
         //Player Properties
         private int m_playerLevel = 0;
         private int m_playerExperience = 0;
@@ -43,6 +60,8 @@ namespace BrainCloudPhotonExample.Connection
         public float m_bombPickupLifetime = 0;
         public float m_flareLifetime = 0;
 
+        public List<Achievement> m_achievements;
+
         public bool m_leaderboardReady = false;
 
         public string[] m_playerLevelTitles;
@@ -56,6 +75,8 @@ namespace BrainCloudPhotonExample.Connection
                 DestroyImmediate(gameObject);
             else
                 s_instance = this;
+
+            m_achievements = new List<Achievement>();
         }
 
         public void GetLeaderboard(string aLeaderboardID)
@@ -98,6 +119,85 @@ namespace BrainCloudPhotonExample.Connection
             BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(StateSuccess_Callback, StateFailure_Callback, null);
             //BrainCloudWrapper.GetBC().GamificationService.ReadX
             BrainCloudWrapper.GetBC().GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
+            BrainCloudWrapper.GetBC().GamificationService.ReadAchievements(true, AchievementSuccess_Callback, AchievementFailure_Callback, null);
+        }
+
+        public void AchievementSuccess_Callback(string responseData, object cbObject)
+        {
+            JsonData achievementData = JsonMapper.ToObject(responseData);
+            achievementData = achievementData["data"]["achievements"];
+            m_achievements.Clear();
+            for (int i=0;i<achievementData.Count;i++)
+            {
+                Achievement achievement = new Achievement(achievementData[i]["title"].ToString(), achievementData[i]["id"].ToString(), achievementData[i]["description"].ToString(), achievementData[i]["status"].ToString() == "AWARDED");
+                m_achievements.Add(achievement);
+            }
+
+            if (m_statPlanesDestroyed >= 50)
+            {
+                for (int i=0;i<m_achievements.Count;i++)
+                {
+                    if (m_achievements[i].m_id == "2")
+                    {
+                        if (!m_achievements[i].m_achieved)
+                        {
+                            m_achievements[i].m_achieved = true;
+                            BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
+                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(m_achievements[i].m_name, m_achievements[i].m_description);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (m_statCarriersDestroyed >= 10)
+            {
+                for (int i=0;i<m_achievements.Count;i++)
+                {
+                    if (m_achievements[i].m_id == "1")
+                    {
+                        if (!m_achievements[i].m_achieved)
+                        {
+                            m_achievements[i].m_achieved = true;
+                            BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, AwardSuccess_Callback, AwardFailure_Callback, null);
+                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(m_achievements[i].m_name, m_achievements[i].m_description);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void AwardSuccess_Callback(string responseData, object cbObject)
+        {
+            
+        }
+
+        public void AwardFailure_Callback(int a, int b, string responseData, object cbObject)
+        {
+            Debug.LogError(responseData);
+        }
+
+        public void Get5KillsAchievement()
+        {
+            for (int i = 0; i < m_achievements.Count; i++)
+            {
+                if (m_achievements[i].m_id == "0")
+                {
+                    if (!m_achievements[i].m_achieved)
+                    {
+                        m_achievements[i].m_achieved = true;
+                        BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
+                        GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(m_achievements[i].m_name, m_achievements[i].m_description);
+                    }
+                    break;
+                }
+            }
+        }
+
+        public void AchievementFailure_Callback(int a, int b, string responseData, object cbObject)
+        {
+            Debug.LogError(responseData);
         }
 
         public void LeaderboardSuccess_Callback(string responseData, object cbObject)
