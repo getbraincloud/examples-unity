@@ -1101,13 +1101,6 @@ namespace BrainCloudPhotonExample.Game
                         m_roomProperties = PhotonNetwork.room.customProperties;
                         m_roomProperties["GameTime"] = m_gameTime;
                         PhotonNetwork.room.SetCustomProperties(m_roomProperties);
-
-
-                        if (m_gameTime <= 0)
-                        {
-                            GetComponent<PhotonView>().RPC("ResetGame", PhotonTargets.All);
-
-                        }
                     }
                     else
                     {
@@ -1185,8 +1178,6 @@ namespace BrainCloudPhotonExample.Game
             StopCoroutine("RespawnPlayer");
             m_gameState = eGameState.GAME_STATE_GAME_OVER;
             GameObject.Find("PlayerController").GetComponent<PlayerController>().DestroyPlayerPlane();
-            if (PhotonNetwork.isMasterClient)
-                m_gameTime = 15;
         }
 
         [RPC]

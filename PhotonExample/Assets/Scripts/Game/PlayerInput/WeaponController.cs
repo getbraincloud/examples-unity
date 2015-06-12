@@ -13,6 +13,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public Transform m_bulletSpawnPoint;
 
         private float m_lastShot = 0.0f;
+        private float m_lastFlare = 0.0f;
 
         private GameObject m_bullet1Prefab;
         private GameObject m_bullet2Prefab;
@@ -278,7 +279,12 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public void FireFlare(Vector3 aPosition, Vector3 aVelocity)
         {
-            GameObject.Find("GameManager").GetComponent<GameManager>().SpawnFlare(aPosition, aVelocity);
+            float flareDelay = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_flareCooldown;
+            if ((Time.time - m_lastFlare) > flareDelay)
+            {
+                m_lastFlare = Time.time;
+                GameObject.Find("GameManager").GetComponent<GameManager>().SpawnFlare(aPosition, aVelocity);
+            }
         }
 
         public GameObject SpawnBomb(BombController.BombInfo aBombInfo)
