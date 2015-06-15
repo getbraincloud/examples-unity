@@ -288,8 +288,8 @@ namespace BrainCloudPhotonExample.Game
 
         void OnMasterClientSwitched(PhotonPlayer newMasterClient)
         {
-            PhotonNetwork.LeaveRoom();
             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().HostLeft();
+            PhotonNetwork.LeaveRoom();
             m_playerProperties.Clear();
             PhotonNetwork.player.SetCustomProperties(m_playerProperties);
         }
