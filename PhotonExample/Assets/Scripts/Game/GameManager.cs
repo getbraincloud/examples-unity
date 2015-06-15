@@ -501,13 +501,13 @@ namespace BrainCloudPhotonExample.Game
             }
 
             team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("Players").GetComponent<Text>().text = greenNamesText;
-            team.transform.FindChild("PlayerKD").GetComponent<Text>().text = greenKDText;
-            team.transform.FindChild("PlayerScores").GetComponent<Text>().text = greenScoreText;
+            team.transform.FindChild("GreenPlayers").GetComponent<Text>().text = greenNamesText;
+            team.transform.FindChild("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
+            team.transform.FindChild("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("Players").GetComponent<Text>().text = redNamesText;
-            team.transform.FindChild("PlayerKD").GetComponent<Text>().text = redKDText;
-            team.transform.FindChild("PlayerScores").GetComponent<Text>().text = redScoreText;
+            team.transform.FindChild("RedPlayers").GetComponent<Text>().text = redNamesText;
+            team.transform.FindChild("RedPlayerKD").GetComponent<Text>().text = redKDText;
+            team.transform.FindChild("RedPlayerScores").GetComponent<Text>().text = redScoreText;
 
             /*
 
