@@ -19,11 +19,28 @@ using UnityEngine;
 
 namespace BrainCloud
 {
+    /// <summary>
+    /// Success callback for an API method.
+    /// </summary>
+    /// <param name="jsonResponse">The json response from the server</param>
+    /// <param name="cbObject">The user supplied callback object</param>
     public delegate void SuccessCallback(string jsonResponse, object cbObject);
+
+    /// <summary>
+    /// Failure callback for an API method.
+    /// </summary>
+    /// <param name="status">The http status code</param>
+    /// <param name="reasonCode">The error reason code</param>
+    /// <param name="statusMessage">The status message</param>
+    /// <param name="cbObject">The user supplied callback object</param>
     public delegate void FailureCallback(int status, int reasonCode, string statusMessage, object cbObject);
+
+    /// <summary>
+    /// Log callback to implement if providing a custom logging function.
+    /// </summary>
     public delegate void LogCallback(string log);
 
-//[Serializable]
+
     public class BrainCloudClient
     {
         #region Public Static
@@ -667,7 +684,7 @@ namespace BrainCloud
             m_bc.ResetCommunication();
         }
 
-        /// <summary>Enable Communications with the server</summary>
+        /// <summary>Enable Communications with the server. By default this is true</summary>
         /// <param name="in_value">True to enable comms, false otherwise.</param>
         public void EnableCommunications(bool in_value)
         {
@@ -677,9 +694,12 @@ namespace BrainCloud
 
         #region Authentication
 
-        // This isn't the best confirmation of authenticated,
-        // Once authenticated this is NOT removed, unless the user
-        // is reset completely.
+        /// <summary>
+        /// Returns true if the user is currently authenticated.
+        /// If a session time out or session invalidation is returned from executing a
+        /// sever api call, this flag will reset back to false.
+        /// </summary>
+        /// <returns><c>true</c> if the user is authenticated; otherwise, <c>false</c>.</returns>
         public bool IsAuthenticated()
         {
             return this.Authenticated;
