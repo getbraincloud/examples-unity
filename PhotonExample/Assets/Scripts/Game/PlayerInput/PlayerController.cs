@@ -68,7 +68,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             {
                 while (goingToColor1)
                 {
-                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(1, 0, 0, 1), 3 * Time.fixedDeltaTime);
+                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(1, 0, 0, 1), 4 * Time.fixedDeltaTime);
                     time += Time.fixedDeltaTime;
                     if (time > 0.3f)
                     {
@@ -79,7 +79,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 time = 0;
                 while (!goingToColor1)
                 {
-                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(0.3f, 0, 0, 1), 3 * Time.fixedDeltaTime);
+                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(0.3f, 0, 0, 1), 4 * Time.fixedDeltaTime);
                     time += Time.fixedDeltaTime;
                     if (time > 0.3f)
                     {
