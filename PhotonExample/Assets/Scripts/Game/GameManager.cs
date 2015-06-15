@@ -329,6 +329,8 @@ namespace BrainCloudPhotonExample.Game
                     break;
 
                 case eGameState.GAME_STATE_PLAYING_GAME:
+                    m_lobbyWindow.gameObject.SetActive(false);
+                    m_resultsWindow.gameObject.SetActive(false);
                     m_HUD.SetActive(true);
                     OnHudWindow();
                     break;
