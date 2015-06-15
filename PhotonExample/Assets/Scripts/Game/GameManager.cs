@@ -1647,10 +1647,7 @@ namespace BrainCloudPhotonExample.Game
 
         public void SpawnBombPickup(Vector3 aPosition)
         {
-            int bombID = 0;
-            m_roomProperties = PhotonNetwork.room.customProperties;
-            m_roomProperties["BombID"] = (int)m_roomProperties["BombID"] + 1;
-            bombID = (int)m_roomProperties["BombID"];
+            int bombID = Random.Range(-20000000, 20000000) * 100 + PhotonNetwork.player.ID;
             PhotonNetwork.room.SetCustomProperties(m_roomProperties);
             GetComponent<PhotonView>().RPC("SpawnBombPickupRPC", PhotonTargets.All, aPosition, bombID);
         }
@@ -1896,24 +1893,12 @@ namespace BrainCloudPhotonExample.Game
 
         int GetNextBulletID()
         {
-            m_roomProperties = PhotonNetwork.room.customProperties;
-            int lastId = (int)PhotonNetwork.room.customProperties["lastBulletID"];
-
-            lastId++;
-            m_roomProperties["lastBulletID"] = lastId;
-            PhotonNetwork.room.SetCustomProperties(m_roomProperties);
-            return lastId;
+            return Random.Range(-20000000, 20000000) * 100 + PhotonNetwork.player.ID;
         }
 
         int GetNextBombID()
         {
-            m_roomProperties = PhotonNetwork.room.customProperties;
-            int lastId = (int)PhotonNetwork.room.customProperties["lastBombID"];
-
-            lastId++;
-            m_roomProperties["lastBombID"] = lastId;
-            PhotonNetwork.room.SetCustomProperties(m_roomProperties);
-            return lastId;
+            return Random.Range(-20000000, 20000000) * 100 + PhotonNetwork.player.ID;
         }
 
         IEnumerator WaitForReadyPlayers()
