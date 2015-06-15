@@ -177,13 +177,13 @@ namespace BrainCloudPhotonExample.Connection
         }
 
         private bool m_showHostLeft = false;
+        private bool m_showHost = false;
 
         void OnLevelWasLoaded (int level)
         {
             if (m_showHostLeft)
             {
-                m_showHostLeft = false;
-                DisplayDialog("The host has left the game!");
+                m_showHost = true;
             }
         }
 
@@ -194,16 +194,19 @@ namespace BrainCloudPhotonExample.Connection
 
         void Update()
         {
-            for (int i = 0; i < m_labelsToDisplay.Count; i++)
-            {
-                m_labelsToDisplay[i].Update();
 
-                if (m_labelsToDisplay[i].m_isDone)
-                {
-                    m_labelsToDisplay.RemoveAt(i);
-                }
+        }
+
+        void LateUpdate()
+        {
+            if (m_showHost)
+            {
+                m_showHost = false;
+                m_showHostLeft = false;
+                DisplayDialog("The host has left the game!");
             }
         }
+
 
         public void ToggleFullscreen()
         {
