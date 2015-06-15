@@ -63,7 +63,6 @@ namespace BrainCloudPhotonExample.Game
         private float m_photonRotation = 0;
         private System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         public int m_health = 0;
-        private int m_engineDamaged = 0;
 
         public void OnPhotonSerializeView(PhotonStream aStream, PhotonMessageInfo aInfo)
         {
@@ -80,14 +79,6 @@ namespace BrainCloudPhotonExample.Game
                 m_photonRotation = (float)aStream.ReceiveNext();
                 int lastHealth = m_health;
                 m_health = (int)aStream.ReceiveNext();
-                if (lastHealth < 2 && m_health == 2)
-                {
-                    m_engineDamaged = Random.Range(1, 3);
-                }
-                else if (lastHealth < 1 && m_health == 1)
-                {
-                    m_engineDamaged = 3;
-                }
 
                 stopWatch.Stop();
                 if (stopWatch.ElapsedMilliseconds > (1000 / PhotonNetwork.sendRate))
@@ -127,8 +118,7 @@ namespace BrainCloudPhotonExample.Game
         private List<TimePosition> m_photonReleasedPositions = new List<TimePosition>();
         private ParticleSystem m_leftContrail;
         private ParticleSystem m_rightContrail;
-        private GameObject m_rightDamage;
-        private GameObject m_leftDamage;
+        private List<GameObject> m_planeDamage;
 
 
         public class TimePosition
@@ -261,7 +251,10 @@ namespace BrainCloudPhotonExample.Game
         {
 
             m_bezierTime = 0.0f;
-
+            m_planeDamage = new List<GameObject>() 
+            { 
+                null, null, null, null
+            };
             transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = GetComponent<PhotonView>().owner.customProperties["RoomDisplayName"].ToString();
             if (GetComponent<PhotonView>().isMine)
             {
@@ -306,38 +299,43 @@ namespace BrainCloudPhotonExample.Game
 
         void Update()
         {
-            if (m_health == 2 && m_engineDamaged == 0)
-            {
-                m_engineDamaged = Random.Range(1, 3);
-            }
-            else if (m_health == 1 && m_engineDamaged != 3)
-            {
-                m_engineDamaged = 3;
-            }
 
-            switch (m_engineDamaged)
+            switch (m_health)
             {
-                case 0:
-                    m_leftContrail.startColor = m_whiteSmokeColor;
-                    m_rightContrail.startColor = m_whiteSmokeColor;
-                    break;
                 case 1:
                     m_rightContrail.startColor = m_blackSmokeColor;
-                    if (m_rightDamage == null) m_rightDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_rightContrail.transform.position, m_rightContrail.transform.rotation);
-                    m_rightDamage.transform.parent = m_rightContrail.transform;
+                    m_leftContrail.startColor = m_blackSmokeColor;
+                    if (m_planeDamage[3] == null) m_planeDamage[3] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy4").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy4").rotation);
+                    m_planeDamage[3].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy4");
+                    if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").rotation);
+                    m_planeDamage[2].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3");
+                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").rotation);
+                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2");
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
                     break;
                 case 2:
                     m_leftContrail.startColor = m_blackSmokeColor;
-                    if (m_leftDamage == null) m_leftDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_leftContrail.transform.position, m_leftContrail.transform.rotation);
-                    m_leftDamage.transform.parent = m_leftContrail.transform;
+                    if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").rotation);
+                    m_planeDamage[2].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3");
+                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").rotation);
+                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2");
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
                     break;
                 case 3:
-                    m_rightContrail.startColor = m_blackSmokeColor;
-                    m_leftContrail.startColor = m_blackSmokeColor;
-                    if (m_rightDamage == null) m_rightDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_rightContrail.transform.position, m_rightContrail.transform.rotation);
-                    m_rightDamage.transform.parent = m_rightContrail.transform;
-                    if (m_leftDamage == null) m_leftDamage = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), m_leftContrail.transform.position, m_leftContrail.transform.rotation);
-                    m_leftDamage.transform.parent = m_leftContrail.transform;
+                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").rotation);
+                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2");
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
+                    break;
+                case 4:
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
+                    break;
+                case 5:
+                    m_leftContrail.startColor = m_whiteSmokeColor;
+                    m_rightContrail.startColor = m_whiteSmokeColor;
                     break;
             }
 

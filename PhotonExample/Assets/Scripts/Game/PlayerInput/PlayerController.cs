@@ -160,6 +160,11 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             m_playerPlane.GetComponent<AudioSource>().pitch = 1 + ((m_speedMultiplier - 1) / m_maxSpeedMultiplier) * 0.8f;
 
+            if (Input.GetKeyDown("g"))
+            {
+                TakeBulletDamage(PhotonNetwork.player);
+            }
+
         }
 
         void FixedUpdate()
