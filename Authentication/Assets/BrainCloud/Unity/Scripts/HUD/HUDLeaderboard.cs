@@ -110,7 +110,7 @@ namespace BrainCloudUnity.HUD
 				}
 				else
 				{
-					Debug.LogError ("Can't parse score to ulong value");
+					Debug.LogError ("Can't parse score to long value");
 				}
 			}
 			GUILayout.EndHorizontal ();
