@@ -108,6 +108,8 @@ namespace BrainCloudPhotonExample.Game
         private GameObject m_greenChevron;
         private GameObject m_redChevron;
 
+        private GameObject m_HUD;
+
         void Awake()
         {
             m_greenChevron = GameObject.Find("Team Green Score").transform.FindChild("Chevron").gameObject;
@@ -127,6 +129,10 @@ namespace BrainCloudPhotonExample.Game
             m_mapSizes = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_mapSizes;
             m_resultsWindow = GameObject.Find("Results");
             m_resultsWindow.SetActive(false);
+            m_HUD = GameObject.Find("HUD");
+            GameObject.Find("RespawnText").GetComponent<Text>().text = "";
+            GameObject.Find("PlayerController").GetComponent<PlayerController>().m_missionText = m_HUD.transform.FindChild("MissionText").gameObject;
+            m_HUD.SetActive(false);
             
         }
 
@@ -304,6 +310,7 @@ namespace BrainCloudPhotonExample.Game
                 case eGameState.GAME_STATE_STARTING_GAME:
                     m_lobbyWindow.gameObject.SetActive(true);
                     m_resultsWindow.gameObject.SetActive(false);
+                    m_HUD.SetActive(false);
                     OnWaitingForPlayersWindow();
                     //GUILayout.Window(40, new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), OnWaitingForPlayersWindow, m_room.name + " -- Waiting for Players " + m_room.playerCount + "/" + m_room.maxPlayers + "...");
                     //GUILayout.Window(40, new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), OnWaitingForPlayersWindow, m_room.name + " -- Starting game...");
@@ -311,30 +318,28 @@ namespace BrainCloudPhotonExample.Game
                 case eGameState.GAME_STATE_SPECTATING:
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_resultsWindow.gameObject.SetActive(false);
+                    m_HUD.SetActive(false);
                     GUI.Label(new Rect(Screen.width / 2 - 100, 20, 200, 20), "Spectating");
                     break;
                 case eGameState.GAME_STATE_GAME_OVER:
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_resultsWindow.gameObject.SetActive(true);
+                    m_HUD.SetActive(false);
                     OnScoresWindow();
                     break;
+
+                case eGameState.GAME_STATE_PLAYING_GAME:
+                    m_HUD.SetActive(true);
+                    OnHudWindow();
+                    break;
+
                 default:
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_resultsWindow.gameObject.SetActive(false);
+                    m_HUD.SetActive(false);
                     break;
             }
 
-            if (m_showScores)
-            {
-
-                //GUILayout.Window(41, new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), OnScoresWindow, "Scoreboard - " + Mathf.FloorToInt(m_gameTime / 60) + ":" + Mathf.FloorToInt((m_gameTime % 60) / 10) + "" + Mathf.FloorToInt((m_gameTime % 10)));
-            }
-
-            if (m_isRespawning)
-            {
-                GUI.Box(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 15, 140, 30), "");
-                GUI.Label(new Rect(Screen.width / 2 - 60, Screen.height / 2 - 15, 120, 30), "Respawning in " + Mathf.CeilToInt(m_currentRespawnTime));
-            }
 
             if (m_showKillDialog)
             {
@@ -348,6 +353,20 @@ namespace BrainCloudPhotonExample.Game
                 }
                 GUI.skin.label.normal.textColor = Color.white;
             }
+        }
+
+        void OnHudWindow()
+        {
+            m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
+            m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
+            int score = (int)PhotonNetwork.player.customProperties["Score"];
+            System.TimeSpan span = System.TimeSpan.FromSeconds(m_gameTime);
+            string timeLeft = span.ToString().Substring(3,5);
+
+            m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
+            m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
+            m_HUD.transform.FindChild("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
+            m_HUD.transform.FindChild("TimeLeft").GetChild(0).GetComponent<Text>().text = timeLeft;
         }
 
         void OnScoresWindow()
@@ -781,6 +800,7 @@ namespace BrainCloudPhotonExample.Game
             m_currentRespawnTime = (float)m_respawnTime;
             while (m_currentRespawnTime > 0)
             {
+                GameObject.Find("RespawnText").GetComponent<Text>().text = "Respawning in " + Mathf.CeilToInt(m_currentRespawnTime);
                 yield return new WaitForSeconds(0.1f);
                 m_currentRespawnTime -= 0.1f;
             }
@@ -788,6 +808,7 @@ namespace BrainCloudPhotonExample.Game
             if (m_currentRespawnTime < 0)
             {
                 m_currentRespawnTime = 0;
+                GameObject.Find("RespawnText").GetComponent<Text>().text = "";
             }
 
             if (m_gameState == eGameState.GAME_STATE_PLAYING_GAME)

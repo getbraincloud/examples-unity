@@ -32,7 +32,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             GAME_STATE_NEW_ROOM_OPTIONS,
             GAME_STATE_CREATE_NEW_ROOM,
             GAME_STATE_JOIN_ROOM,
-            GAME_STATE_SHOW_LEADERBOARDS
+            GAME_STATE_SHOW_LEADERBOARDS,
+            GAME_STATE_SHOW_CONTROLS
         }
         private eMatchmakingState m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
 
@@ -76,6 +77,8 @@ namespace BrainCloudPhotonExample.Matchmaking
         [SerializeField]
         private Sprite m_tabSprite;
 
+        private GameObject m_controlWindow;
+
         private Dictionary<string, bool> m_roomFilters = new Dictionary<string, bool>()
     {
         {"HideFull",false},
@@ -101,6 +104,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_mapPresets = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_presets;
             m_mapSizes = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_mapSizes;
             m_leaderboardWindow.SetActive(false);
+            m_controlWindow = GameObject.Find("Controls");
+            m_controlWindow.SetActive(false);
             
 
             for (int i = 0; i < m_mapPresets.Count; i++)
@@ -175,6 +180,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_showRoomsWindow.SetActive(true);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
+                    m_controlWindow.SetActive(false);
                     OnStatsWindow();
                     OrderRoomButtons();
                     //width = 500;
@@ -192,6 +198,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(true);
                     m_leaderboardWindow.SetActive(false);
+                    m_controlWindow.SetActive(false);
 
                     //m_windowRect = new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height);
                     OnNewRoomWindow();
@@ -203,6 +210,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
+                    m_controlWindow.SetActive(false);
                     height = 30;
                     GUI.TextArea(new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), "Joining room...");
 
@@ -212,6 +220,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
+                    m_controlWindow.SetActive(false);
                     height = 30;
                     GUI.TextArea(new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), "Creating and joining room...");
 
@@ -220,6 +229,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(true);
+                    m_controlWindow.SetActive(false);
                     //width = 500;
                     //height = 400;
 
@@ -227,6 +237,13 @@ namespace BrainCloudPhotonExample.Matchmaking
                     OnLeaderboardWindow();
                     //GUILayout.Window(23, m_windowRect, OnLeaderboardWindow, "Leaderboards");
                     //GUILayout.Window(22, new Rect(m_windowRect.x + m_windowRect.width, m_windowRect.y, 200, m_windowRect.height), OnStatsWindow, "Statistics");
+                    break;
+                case eMatchmakingState.GAME_STATE_SHOW_CONTROLS:
+                    m_showRoomsWindow.SetActive(false);
+                    m_controlWindow.SetActive(true);
+                    m_createGameWindow.SetActive(false);
+                    m_leaderboardWindow.SetActive(false);
+
                     break;
             }
         }
@@ -678,6 +695,17 @@ namespace BrainCloudPhotonExample.Matchmaking
                 m_currentLeaderboardID = "BDR";
                 GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
             }
+        }
+
+        public void ShowControls()
+        {
+            m_state = eMatchmakingState.GAME_STATE_SHOW_CONTROLS;
+        }
+
+        public void HideControls()
+        {
+            m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+            RefreshRoomsList();
         }
 
         private bool m_once = true;

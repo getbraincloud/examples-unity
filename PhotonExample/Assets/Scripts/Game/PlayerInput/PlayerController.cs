@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BrainCloudPhotonExample.Connection;
+using UnityEngine.UI;
 
 namespace BrainCloudPhotonExample.Game.PlayerInput
 {
@@ -22,7 +23,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         private int m_baseHealth = 3;
 
         private int m_health = 0;
-
         private float m_speedMultiplier = 1;
 
         private float m_maxSpeedMultiplier = 2.5f;
@@ -38,6 +38,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         private Vector3 m_originalCamPosition = Vector3.zero;
         private float m_shakeDecay = 0;
         private float m_shakeIntensity = 0;
+        public GameObject m_missionText;
 
         void Start()
         {
@@ -50,6 +51,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public void SetPlayerPlane(PlaneController playerPlane)
         {
+            StartCoroutine("PulseMissionText");
             m_leftBounds = false;
             m_currentRotation = playerPlane.gameObject.transform.rotation.eulerAngles.z;
             m_isActive = true;
@@ -58,17 +60,34 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             m_health = m_baseHealth;
         }
 
-        void OnGUI()
+        IEnumerator PulseMissionText()
         {
-            GUI.skin = m_skin;
-            if (m_leftBounds)
+            bool goingToColor1 = true;
+            float time = 0;
+            while (true)
             {
-                GUI.skin.label.normal.textColor = Color.red;
-                int lastSize = GUI.skin.label.fontSize;
-                GUI.skin.label.fontSize = 20;
-                GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height - 50, 200, 100), "Return to Mission Area " + Mathf.CeilToInt(m_leftBoundsTimer));
-                GUI.skin.label.fontSize = lastSize;
-                GUI.skin.label.normal.textColor = Color.white;
+                while (goingToColor1)
+                {
+                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(1, 0, 0, 1), 3 * Time.fixedDeltaTime);
+                    time += Time.fixedDeltaTime;
+                    if (time > 0.3f)
+                    {
+                        goingToColor1 = !goingToColor1;
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+                time = 0;
+                while (!goingToColor1)
+                {
+                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(0.3f, 0, 0, 1), 3 * Time.fixedDeltaTime);
+                    time += Time.fixedDeltaTime;
+                    if (time > 0.3f)
+                    {
+                        goingToColor1 = !goingToColor1;
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+                time = 0;
             }
         }
 
@@ -85,6 +104,16 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                         SuicidePlayer();
                     }
                 }
+            }
+
+
+            if (m_leftBounds)
+            {
+                m_missionText.GetComponent<Text>().text = "Return to Mission Area " + Mathf.CeilToInt(m_leftBoundsTimer);
+            }
+            else
+            {
+                m_missionText.GetComponent<Text>().text = "";
             }
             if (m_playerPlane == null)
             {
