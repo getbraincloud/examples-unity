@@ -170,6 +170,27 @@ namespace BrainCloudPhotonExample.Game
             {
                 m_gameState = eGameState.GAME_STATE_SPECTATING;
                 m_roomProperties["Spectators"] = (int)PhotonNetwork.room.customProperties["Spectators"] + 1;
+                PhotonPlayer[] playerList = PhotonNetwork.playerList;
+                List<PhotonPlayer> playerListList = new List<PhotonPlayer>();
+                for (int i = 0; i < playerList.Length; i++)
+                {
+                    playerListList.Add(playerList[i]);
+                }
+
+                int count = 0;
+                while (count < playerListList.Count)
+                {
+                    if (playerListList[count].customProperties["Team"] == null || (int)playerListList[count].customProperties["Team"] == 0)
+                    {
+                        playerListList.RemoveAt(count);
+                    }
+                    else
+                    {
+                        count++;
+                    }
+                }
+                playerList = playerListList.ToArray().OrderByDescending(x => (int)x.customProperties["Score"]).ToArray();
+                m_spectatingTarget = playerList[0];
             }
             else
             {
@@ -290,7 +311,7 @@ namespace BrainCloudPhotonExample.Game
         {
             if (m_gameState == eGameState.GAME_STATE_GAME_OVER)
             {
-                GetComponent<PhotonView>().RPC("ResetGame",PhotonTargets.All);
+                GetComponent<PhotonView>().RPC("ResetGame", PhotonTargets.All);
             }
         }
 
@@ -364,7 +385,7 @@ namespace BrainCloudPhotonExample.Game
                     team2Ships.Add(m_spawnedShips[i]);
                 }
             }
-            
+
             m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
             m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
             m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team2Ships.Count.ToString();
@@ -1004,11 +1025,11 @@ namespace BrainCloudPhotonExample.Game
 
                         Bounds bounds = GameObject.Find("MapBounds").GetComponent<Collider>().bounds;
 
-                        for (int i = 0; i < (int)m_mapSizes[m_mapSize].m_horizontalSize / 50 + (int)m_mapSizes[m_mapSize].m_verticalSize/50;i++)
+                        for (int i = 0; i < (int)m_mapSizes[m_mapSize].m_horizontalSize / 50 + (int)m_mapSizes[m_mapSize].m_verticalSize / 50; i++)
                         {
-                            Instantiate((GameObject)Resources.Load("Rock0" + Random.Range(1,5)), new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 122),Quaternion.Euler(new Vector3(0,0,Random.Range(0, 360.0f))));
+                            PhotonNetwork.Instantiate("Rock0" + Random.Range(1, 5), new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 122), Quaternion.Euler(new Vector3(0, 0, Random.Range(0, 360.0f))),0);
                         }
-                            StartCoroutine("WaitForReadyPlayers");
+                        StartCoroutine("WaitForReadyPlayers");
                     }
 
                     break;
@@ -1120,8 +1141,69 @@ namespace BrainCloudPhotonExample.Game
                 case eGameState.GAME_STATE_SPECTATING:
                     if (PhotonNetwork.room != null)
                         m_gameTime = (float)PhotonNetwork.room.customProperties["GameTime"];
-                    break;
 
+                    PhotonPlayer[] playerList = PhotonNetwork.playerList;
+                    List<PhotonPlayer> playerListList = new List<PhotonPlayer>();
+                    for (int i = 0; i < playerList.Length; i++)
+                    {
+                        playerListList.Add(playerList[i]);
+                    }
+
+                    int count = 0;
+                    while (count < playerListList.Count)
+                    {
+                        if (playerListList[count].customProperties["Team"] == null || (int)playerListList[count].customProperties["Team"] == 0)
+                        {
+                            playerListList.RemoveAt(count);
+                        }
+                        else
+                        {
+                            count++;
+                        }
+                    }
+                    playerList = playerListList.ToArray().OrderByDescending(x => (int)x.customProperties["Score"]).ToArray();
+
+                    int playerIndex = -1;
+
+                    if (m_spectatingTarget != null)
+                    {
+                        for (int i=0;i<playerList.Length;i++)
+                        {
+                            if (playerList[i] == m_spectatingTarget)
+                            {
+                                playerIndex = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        if (playerIndex == 0 || playerIndex == -1)
+                        {
+                            playerIndex = playerList.Length - 1;
+                        }
+                        else
+                        {
+                            playerIndex--;
+                        }
+                    }
+                    else if (Input.GetMouseButtonDown(1))
+                    {
+                        if (playerIndex == playerList.Length - 1 || playerIndex == -1)
+                        {
+                            playerIndex = 0;
+                        }
+                        else
+                        {
+                            playerIndex++;
+                        }
+                    }
+
+                    if (playerIndex != -1)
+                        m_spectatingTarget = playerList[playerIndex];
+
+                    break;
             }
             if (!PhotonNetwork.isMasterClient && PhotonNetwork.room != null)
             {
@@ -1136,46 +1218,33 @@ namespace BrainCloudPhotonExample.Game
             m_spawnedShips.Add(aShip);
         }
 
+        private PhotonPlayer m_spectatingTarget;
+
         void LateUpdate()
         {
             if (m_gameState == eGameState.GAME_STATE_SPECTATING)
             {
-
                 Vector3 camPos = Camera.main.transform.position;
+
                 GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
-                Vector3 total = Vector3.zero;
+                Vector3 targetPos = Vector3.zero;
                 if (planes.Length > 0)
                 {
                     for (int i = 0; i < planes.Length; i++)
                     {
-                        total += planes[i].transform.position;
+                        if (planes[i].GetComponent<PhotonView>().owner == m_spectatingTarget)
+                        {
+                            targetPos = planes[i].transform.position;
+                        }
                         planes[i].transform.FindChild("NameTag").GetComponent<TextMesh>().characterSize = 0.14f;
                     }
-                    total /= planes.Length;
                 }
                 else
                 {
-                    total = new Vector3(0, 0, -180);
-                }
-                camPos = Vector3.Lerp(new Vector3(0, 0, -180), new Vector3(total.x, total.y, -180), 0.5f);
-
-                if (camPos.x > 160)
-                {
-                    camPos.x = 160;
-                }
-                else if (camPos.x < -160)
-                {
-                    camPos.x = -160;
+                    targetPos = camPos;
                 }
 
-                if (camPos.y > 105)
-                {
-                    camPos.y = 105;
-                }
-                else if (camPos.y < -105)
-                {
-                    camPos.y = -105;
-                }
+                camPos = Vector3.Lerp(Camera.main.transform.position, new Vector3(targetPos.x, targetPos.y, -180), 5 * Time.deltaTime);
 
                 Camera.main.transform.position = camPos;
             }
@@ -1400,7 +1469,7 @@ namespace BrainCloudPhotonExample.Game
                 }
             }
 
-            
+
             if (PhotonNetwork.isMasterClient)
             {
                 if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
@@ -1455,7 +1524,7 @@ namespace BrainCloudPhotonExample.Game
             string shipName = "";
             ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
             int children = ship.transform.childCount;
-            for (int i = 1; i < children;i++)
+            for (int i = 1; i < children; i++)
             {
                 Destroy(ship.transform.GetChild(i).gameObject);
             }
@@ -1465,8 +1534,8 @@ namespace BrainCloudPhotonExample.Game
             switch (ship.GetShipType())
             {
                 case ShipController.eShipType.SHIP_TYPE_CARRIER:
-                    
-                    
+
+
                     if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
                     {
                         shipName += "Red ";
@@ -1483,7 +1552,7 @@ namespace BrainCloudPhotonExample.Game
                     shipName += "Carrier";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_BATTLESHIP:
-                    
+
                     if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
                     {
                         shipName += "Red ";
@@ -1548,7 +1617,7 @@ namespace BrainCloudPhotonExample.Game
                     shipName += "Destroyer";
                     break;
             }
-            
+
             if (PhotonNetwork.isMasterClient)
                 ship.StartRespawn();
 
@@ -1870,6 +1939,12 @@ namespace BrainCloudPhotonExample.Game
                     explosion.GetComponent<AudioSource>().Play();
                     break;
                 }
+            }
+
+            if (m_gameState == eGameState.GAME_STATE_SPECTATING)
+            {
+                if (m_spectatingTarget == aVictim)
+                    m_spectatingTarget = aShooter;
             }
 
             if (aShooter == null)
