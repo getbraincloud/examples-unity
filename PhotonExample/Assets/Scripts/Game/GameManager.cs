@@ -1025,7 +1025,7 @@ namespace BrainCloudPhotonExample.Game
 
                         Bounds bounds = GameObject.Find("MapBounds").GetComponent<Collider>().bounds;
 
-                        for (int i = 0; i < (int)m_mapSizes[m_mapSize].m_horizontalSize / 50 + (int)m_mapSizes[m_mapSize].m_verticalSize / 50; i++)
+                        for (int i = 0; i < (int)m_mapSizes[m_mapSize].m_horizontalSize / 80 + (int)m_mapSizes[m_mapSize].m_verticalSize / 80; i++)
                         {
                             PhotonNetwork.Instantiate("Rock0" + Random.Range(1, 5), new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 122), Quaternion.Euler(new Vector3(0, 0, Random.Range(0, 360.0f))),0);
                         }
