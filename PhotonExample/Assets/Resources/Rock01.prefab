@@ -159,8 +159,8 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 4.82999992
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 11.5
+  m_Center: {x: 0, y: 0, z: -4.76000023}
 --- !u!198 &19800496
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -328,7 +328,7 @@ ParticleSystem:
         rgba: 4294964193
       minMaxState: 0
     startSize:
-      scalar: 5
+      scalar: 12
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -343,7 +343,7 @@ ParticleSystem:
         serializedVersion: 2
         m_Curve:
         - time: 0
-          value: .600000024
+          value: .583333313
           inSlope: 0
           outSlope: 0
           tangentMode: 0
@@ -380,8 +380,8 @@ ParticleSystem:
     serializedVersion: 2
     enabled: 1
     type: 4
-    radius: 4
-    angle: 42.8300018
+    radius: 14.6999998
+    angle: 74.8000031
     length: 5
     boxX: 15.7700005
     boxY: 119.199997
@@ -1321,7 +1321,7 @@ ParticleSystem:
         rgba: 2315255807
       minMaxState: 0
     startSize:
-      scalar: 15
+      scalar: 45
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -1336,7 +1336,7 @@ ParticleSystem:
         serializedVersion: 2
         m_Curve:
         - time: 0
-          value: .866666675
+          value: .888888896
           inSlope: 0
           outSlope: 0
           tangentMode: 0
@@ -1376,8 +1376,8 @@ ParticleSystem:
     radius: 1
     angle: 25
     length: 5
-    boxX: 1
-    boxY: 1
+    boxX: 3
+    boxY: 3
     boxZ: 0
     arc: 360
     placementMode: 0

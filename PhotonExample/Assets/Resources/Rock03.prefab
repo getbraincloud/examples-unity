@@ -43,6 +43,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 455892}
   - 135: {fileID: 13524880}
+  - 135: {fileID: 13581394}
   m_Layer: 20
   m_Name: Rock03
   m_TagString: Effect
@@ -159,8 +160,20 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 4.82999992
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 9.75
+  m_Center: {x: 0, y: 0, z: -3.29999995}
+--- !u!135 &13581394
+SphereCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 132714}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 4.63000011
+  m_Center: {x: -2.1099999, y: 1.79999995, z: -15.8400002}
 --- !u!198 &19862814
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -328,7 +341,7 @@ ParticleSystem:
         rgba: 2315255807
       minMaxState: 0
     startSize:
-      scalar: 13
+      scalar: 32
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -343,7 +356,7 @@ ParticleSystem:
         serializedVersion: 2
         m_Curve:
         - time: 0
-          value: .769230783
+          value: .84375
           inSlope: 0
           outSlope: 0
           tangentMode: 0
@@ -383,8 +396,8 @@ ParticleSystem:
     radius: 1
     angle: 25
     length: 5
-    boxX: 1
-    boxY: 1
+    boxX: 2
+    boxY: 2
     boxZ: 0
     arc: 360
     placementMode: 0
@@ -1351,7 +1364,7 @@ ParticleSystem:
         rgba: 4294964193
       minMaxState: 0
     startSize:
-      scalar: 5
+      scalar: 12
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -1366,7 +1379,7 @@ ParticleSystem:
         serializedVersion: 2
         m_Curve:
         - time: 0
-          value: .600000024
+          value: .583333313
           inSlope: 0
           outSlope: 0
           tangentMode: 0
@@ -1403,8 +1416,8 @@ ParticleSystem:
     serializedVersion: 2
     enabled: 1
     type: 4
-    radius: 3.5999999
-    angle: 42.8300018
+    radius: 10.3000002
+    angle: 74.8000031
     length: 5
     boxX: 15.7700005
     boxY: 119.199997
