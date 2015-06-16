@@ -26,9 +26,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         private float m_speedMultiplier = 1;
 
         private float m_maxSpeedMultiplier = 2.5f;
-
-        private GUISkin m_skin;
-
         private float m_leftBoundsTimer = 0;
         private bool m_leftBounds = false;
 
@@ -42,7 +39,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         void Start()
         {
-            m_skin = (GUISkin)Resources.Load("skin");
             m_turnSpeed = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_planeTurnSpeed;
             m_acceleration = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_planeAcceleration;
             m_baseHealth = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_basePlaneHealth;

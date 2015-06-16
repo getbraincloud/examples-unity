@@ -33,12 +33,12 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         private float m_bulletSpeed = 100f;
         private Vector3 m_bulletVelocity = Vector3.zero;
 
+        private GameObject m_gunCharge;
+
         void Start()
         {
             m_targetingReticule = (GameObject)Instantiate((GameObject)Resources.Load("TargetReticule"), Vector3.zero, Quaternion.identity);
             m_offscreenIndicator = (GameObject)Instantiate((GameObject)Resources.Load("OffscreenIndicator"), Vector3.zero, Quaternion.identity);
-            //m_skin = (GUISkin)Resources.Load("skin");
-            //m_fireDelay = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_fireRateDelay;
             m_bulletSpeed = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_bulletSpeed;
             if (m_bullet1Prefab == null)
             {
@@ -227,6 +227,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public void DestroyPlayerPlane()
         {
             m_bombs = 0;
+            m_gunCharge = null;
             m_playerPlane = null;
             m_bulletSpawnPoint = null;
         }
@@ -252,7 +253,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 GameObject.Find("GameManager").GetComponent<GameManager>().SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.player, m_bulletVelocity));
                 yield return new WaitForSeconds(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotBurstDelay);
             }
-
         }
 
         public void FireWeapon(bool aIsAccelerating)
@@ -334,6 +334,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             if (player != null)
             {
+                player.GetComponent<PlaneController>().ResetGunCharge();
                 GameObject flare = (GameObject)Instantiate(m_muzzleFlarePrefab, player.GetComponent<PlaneController>().m_bulletSpawnPoint.position, player.GetComponent<PlaneController>().m_bulletSpawnPoint.rotation);
                 flare.transform.parent = player.transform;
                 flare.GetComponent<AudioSource>().pitch = 1 + Random.Range(-2.0f, 3.0f) * 0.2f;

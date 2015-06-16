@@ -44,8 +44,6 @@ namespace BrainCloudPhotonExample.Game
 
         private GUISkin m_skin;
 
-        private bool m_showScores = false;
-
         private int m_respawnTime = 3;
 
         private List<BulletController.BulletInfo> m_spawnedBullets;
@@ -78,7 +76,6 @@ namespace BrainCloudPhotonExample.Game
         private int m_timesDestroyed = 0;
 
         private bool m_once = true;
-        private bool m_isRespawning = false;
         private bool m_showKillDialog = false;
         private float m_killDialogTimer = 0;
         private Color m_killDialogColor = Color.clear;
@@ -841,11 +838,9 @@ namespace BrainCloudPhotonExample.Game
                 }
                 GameObject.Find("PlayerController").GetComponent<PlayerController>().SetPlayerPlane(playerPlane.GetComponent<PlaneController>());
                 playerPlane.GetComponent<Rigidbody>().isKinematic = false;
-                m_isRespawning = false;
             }
             else
             {
-                m_isRespawning = false;
             }
         }
 
@@ -860,15 +855,6 @@ namespace BrainCloudPhotonExample.Game
                     m_killDialogTimer = 0;
                     StartCoroutine("FadeKillDialog");
                 }
-            }
-
-            if ((Input.GetKey(KeyCode.Tab) && (m_gameState == eGameState.GAME_STATE_PLAYING_GAME || m_gameState == eGameState.GAME_STATE_SPECTATING)) || m_gameState == eGameState.GAME_STATE_GAME_OVER)
-            {
-                m_showScores = true;
-            }
-            else
-            {
-                m_showScores = false;
             }
 
             switch (m_gameState)
@@ -1254,8 +1240,6 @@ namespace BrainCloudPhotonExample.Game
 
             m_playerIsReady = false;
             m_once = true;
-            m_isRespawning = false;
-            m_showScores = false;
             m_gameState = eGameState.GAME_STATE_WAITING_FOR_PLAYERS;
 
         }
@@ -1860,7 +1844,6 @@ namespace BrainCloudPhotonExample.Game
                 if (aVictim == PhotonNetwork.player)
                 {
                     GameObject.Find("PlayerController").GetComponent<PlayerController>().DestroyPlayerPlane();
-                    m_isRespawning = true;
                     m_playerProperties["Deaths"] = (int)PhotonNetwork.player.customProperties["Deaths"] + 1;
                     PhotonNetwork.player.SetCustomProperties(m_playerProperties);
                     StopCoroutine("RespawnPlayer");
@@ -1877,7 +1860,6 @@ namespace BrainCloudPhotonExample.Game
                 if (aVictim == PhotonNetwork.player)
                 {
                     GameObject.Find("PlayerController").GetComponent<PlayerController>().DestroyPlayerPlane();
-                    m_isRespawning = true;
                     m_playerProperties["Deaths"] = (int)PhotonNetwork.player.customProperties["Deaths"] + 1;
                     PhotonNetwork.player.SetCustomProperties(m_playerProperties);
                     StopCoroutine("RespawnPlayer");

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using BrainCloudPhotonExample.Connection;
 
 namespace BrainCloudPhotonExample.Game
 {
@@ -63,6 +64,7 @@ namespace BrainCloudPhotonExample.Game
         private float m_photonRotation = 0;
         private System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         public int m_health = 0;
+        private GameObject m_gunCharge;
 
         public void OnPhotonSerializeView(PhotonStream aStream, PhotonMessageInfo aInfo)
         {
@@ -77,7 +79,6 @@ namespace BrainCloudPhotonExample.Game
 
                 m_photonPosition = (Vector3)aStream.ReceiveNext();
                 m_photonRotation = (float)aStream.ReceiveNext();
-                int lastHealth = m_health;
                 m_health = (int)aStream.ReceiveNext();
 
                 stopWatch.Stop();
@@ -249,7 +250,7 @@ namespace BrainCloudPhotonExample.Game
 
         void Start()
         {
-
+            
             m_bezierTime = 0.0f;
             m_planeDamage = new List<GameObject>() 
             { 
@@ -295,6 +296,15 @@ namespace BrainCloudPhotonExample.Game
             m_bulletSpawnPoint = graphic.transform.FindChild("BulletSpawn");
             m_leftContrail = graphic.transform.FindChild("LeftSmokeTrail").GetComponent<ParticleSystem>();
             m_rightContrail = graphic.transform.FindChild("RightSmokeTrail").GetComponent<ParticleSystem>();
+
+            m_gunCharge = transform.GetChild(0).GetChild(0).FindChild("GunCharge").gameObject;
+            m_gunCharge.GetComponent<Animator>().speed = 1 / GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotDelay;
+        }
+
+        public void ResetGunCharge()
+        {
+            m_gunCharge.SetActive(false);
+            m_gunCharge.SetActive(true);
         }
 
         void Update()
