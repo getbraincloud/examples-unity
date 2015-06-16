@@ -107,8 +107,22 @@ namespace BrainCloudPhotonExample.Game
 
         private GameObject m_HUD;
 
+        private GameObject m_allyShipSunk;
+        private GameObject m_enemyShipSunk;
+        private GameObject m_greenShipLogo;
+        private GameObject m_redShipLogo;
+
         void Awake()
         {
+            m_allyShipSunk = GameObject.Find("ShipSink").transform.FindChild("AllyShipSunk").gameObject;
+            m_enemyShipSunk = GameObject.Find("ShipSink").transform.FindChild("EnemyShipSunk").gameObject;
+            m_redShipLogo = GameObject.Find("ShipSink").transform.FindChild("RedLogo").gameObject;
+            m_greenShipLogo = GameObject.Find("ShipSink").transform.FindChild("GreenLogo").gameObject;
+            m_allyShipSunk.SetActive(false);
+            m_enemyShipSunk.SetActive(false);
+            m_redShipLogo.SetActive(false);
+            m_greenShipLogo.SetActive(false);
+
             m_greenChevron = GameObject.Find("Team Green Score").transform.FindChild("Chevron").gameObject;
             m_redChevron = GameObject.Find("Team Red Score").transform.FindChild("Chevron").gameObject;
             m_greenLogo = GameObject.Find("Green Logo");
@@ -130,7 +144,7 @@ namespace BrainCloudPhotonExample.Game
             GameObject.Find("RespawnText").GetComponent<Text>().text = "";
             GameObject.Find("PlayerController").GetComponent<PlayerController>().m_missionText = m_HUD.transform.FindChild("MissionText").gameObject;
             m_HUD.SetActive(false);
-            
+
         }
 
         void Start()
@@ -139,11 +153,11 @@ namespace BrainCloudPhotonExample.Game
             GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             m_mapLayout = (int)PhotonNetwork.room.customProperties["MapLayout"];
             m_mapSize = (int)PhotonNetwork.room.customProperties["MapSize"];
-            
+
             if (PhotonNetwork.room.customProperties["LightPosition"] != null) SetLightPosition((int)PhotonNetwork.room.customProperties["LightPosition"]);
             m_spawnedShips = new List<ShipController>();
             m_bombPickupsSpawned = new List<BombPickup>();
-            
+
             StartCoroutine("LoadBackground");
             m_killMessages = new List<KillMessage>();
             m_spawnedBullets = new List<BulletController.BulletInfo>();
@@ -155,7 +169,7 @@ namespace BrainCloudPhotonExample.Game
             StartCoroutine("UpdateRoomDisplayName");
             m_roomProperties = PhotonNetwork.room.customProperties;
             m_playerProperties["Team"] = 0;
-            
+
             m_team1Score = 0;
             m_team2Score = 0;
 
@@ -285,7 +299,7 @@ namespace BrainCloudPhotonExample.Game
         {
             if (m_gameState == eGameState.GAME_STATE_GAME_OVER)
             {
-                ResetGame();
+                GetComponent<PhotonView>().RPC("ResetGame",PhotonTargets.All);
             }
         }
 
@@ -360,7 +374,7 @@ namespace BrainCloudPhotonExample.Game
             m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             int score = (int)PhotonNetwork.player.customProperties["Score"];
             System.TimeSpan span = System.TimeSpan.FromSeconds(m_gameTime);
-            string timeLeft = span.ToString().Substring(3,5);
+            string timeLeft = span.ToString().Substring(3, 5);
 
             m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
             m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
@@ -370,6 +384,7 @@ namespace BrainCloudPhotonExample.Game
 
         void OnScoresWindow()
         {
+            if (PhotonNetwork.room == null) return;
             m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
             m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             GameObject team = GameObject.Find("Team Green Score");
@@ -446,7 +461,7 @@ namespace BrainCloudPhotonExample.Game
             int count = 0;
             while (count < playerListList.Count)
             {
-                if ((int)playerListList[count].customProperties["Team"] == 0)
+                if (playerListList[count].customProperties["Team"] == null || (int)playerListList[count].customProperties["Team"] == 0)
                 {
                     playerListList.RemoveAt(count);
                 }
@@ -465,8 +480,8 @@ namespace BrainCloudPhotonExample.Game
             string redKDText = "";
             string redScoreText = "";
 
-                    //default 21.8
-        //17.7f per line
+            //default 21.8
+            //17.7f per line
             int greenPlayers = 0;
             int redPlayers = 0;
             for (int i = 0; i < playerList.Length; i++)
@@ -1224,7 +1239,7 @@ namespace BrainCloudPhotonExample.Game
                         done = true;
                     }
                 }
-                
+
                 PhotonNetwork.player.SetCustomProperties(m_playerProperties);
                 PhotonNetwork.room.SetCustomProperties(m_roomProperties);
                 GetComponent<PhotonView>().RPC("SetLightPosition", PhotonTargets.All, (int)m_roomProperties["LightPosition"]);
@@ -1353,6 +1368,34 @@ namespace BrainCloudPhotonExample.Game
             return ship;
         }
 
+        IEnumerator FadeOutShipMessage(GameObject aText, GameObject aLogo)
+        {
+            float time = 2;
+            bool done = false;
+            m_allyShipSunk.SetActive(true);
+            m_enemyShipSunk.SetActive(true);
+            m_redShipLogo.SetActive(true);
+            m_greenShipLogo.SetActive(true);
+            m_allyShipSunk.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+            m_enemyShipSunk.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+            m_redShipLogo.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+            m_greenShipLogo.GetComponent<Image>().color = new Color(1, 1, 1, 0);
+
+            aText.GetComponent<Image>().color = new Color(1, 1, 1, 1);
+            aLogo.GetComponent<Image>().color = new Color(1, 1, 1, 1);
+            Color fadeColor = new Color(1, 1, 1, 1);
+            yield return new WaitForSeconds(2);
+
+            while (time > 0)
+            {
+                time -= Time.fixedDeltaTime;
+                fadeColor = new Color(1, 1, 1, fadeColor.a - Time.fixedDeltaTime);
+                aText.GetComponent<Image>().color = fadeColor;
+                aLogo.GetComponent<Image>().color = fadeColor;
+                yield return new WaitForFixedUpdate();
+            }
+        }
+
         public void DestroyedShip(ShipController aShip, BombController.BombInfo aBombInfo)
         {
             GetComponent<PhotonView>().RPC("DestroyedShipRPC", PhotonTargets.AllBuffered, aShip.m_shipID, aBombInfo);
@@ -1371,6 +1414,7 @@ namespace BrainCloudPhotonExample.Game
                 }
             }
 
+            
             if (PhotonNetwork.isMasterClient)
             {
                 if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
@@ -1396,6 +1440,31 @@ namespace BrainCloudPhotonExample.Game
             }
 
             if (ship == null) return;
+
+            StopCoroutine("FadeOutShipMessage");
+            if (ship.m_team == 1)
+            {
+                if ((int)PhotonNetwork.player.customProperties["Team"] == 1)
+                {
+                    StartCoroutine(FadeOutShipMessage(m_allyShipSunk, m_greenShipLogo));
+                }
+                else if ((int)PhotonNetwork.player.customProperties["Team"] == 2)
+                {
+                    StartCoroutine(FadeOutShipMessage(m_enemyShipSunk, m_greenShipLogo));
+                }
+            }
+            else
+            {
+                if ((int)PhotonNetwork.player.customProperties["Team"] == 1)
+                {
+                    StartCoroutine(FadeOutShipMessage(m_enemyShipSunk, m_redShipLogo));
+                }
+                else if ((int)PhotonNetwork.player.customProperties["Team"] == 2)
+                {
+                    StartCoroutine(FadeOutShipMessage(m_allyShipSunk, m_redShipLogo));
+                }
+            }
+
 
             string shipName = "";
             ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
@@ -1494,18 +1563,13 @@ namespace BrainCloudPhotonExample.Game
                     break;
             }
             
-
-            m_killMessages.Add(new KillMessage((string)aBombInfo.m_shooter.customProperties["RoomDisplayName"] + " blew up a " + shipName, ((int)aBombInfo.m_shooter.customProperties["Team"] == 1) ? Color.green : Color.red));
-            m_showKillDialog = true;
-            m_killDialogTimer = 2;
-            StopCoroutine("FadeKillDialog");
             if (PhotonNetwork.isMasterClient)
                 ship.StartRespawn();
+
             if (aBombInfo.m_shooter == PhotonNetwork.player)
             {
                 m_carriersDestroyed++;
                 m_playerProperties["Score"] = (int)m_playerProperties["Score"] + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
-
             }
         }
 
