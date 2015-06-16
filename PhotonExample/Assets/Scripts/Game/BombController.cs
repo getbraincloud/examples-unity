@@ -100,6 +100,10 @@ namespace BrainCloudPhotonExample.Game
                 {
                     GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 0);
                 }
+                else if (aCollision.gameObject.layer == 20) //it hit a rock
+                {
+                    GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 1);
+                }
                 else //it hit a ship
                 {
                     if (((int)m_bombInfo.m_shooter.customProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.customProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
