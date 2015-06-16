@@ -59,10 +59,6 @@ namespace BrainCloudPhotonExample.Game
 
         private List<MapPresets.Preset> m_mapPresets;
         private List<MapPresets.MapSize> m_mapSizes;
-        //private bool m_showPresetList = false;
-        //private bool m_showSizeList = false;
-        //private int m_presetListSelection = 0;
-        //private int m_sizeListSelection = 1;
 
         private float m_currentRespawnTime = 0;
 
@@ -76,9 +72,6 @@ namespace BrainCloudPhotonExample.Game
         private int m_timesDestroyed = 0;
 
         private bool m_once = true;
-        private bool m_showKillDialog = false;
-        private float m_killDialogTimer = 0;
-        private Color m_killDialogColor = Color.clear;
 
         [SerializeField]
         private Collider m_team1SpawnBounds;
@@ -173,7 +166,6 @@ namespace BrainCloudPhotonExample.Game
             m_team1Score = 0;
             m_team2Score = 0;
 
-
             if ((int)m_roomProperties["IsPlaying"] == 1)
             {
                 m_gameState = eGameState.GAME_STATE_SPECTATING;
@@ -192,7 +184,6 @@ namespace BrainCloudPhotonExample.Game
                     m_roomProperties["Team2Score"] = 0.0f;
                     SetLightPosition((int)m_roomProperties["LightPosition"]);
                 }
-
 
                 if (PhotonNetwork.room.customProperties["Team1Players"] == null || PhotonNetwork.room.customProperties["Team2Players"] == null)
                 {
@@ -323,8 +314,6 @@ namespace BrainCloudPhotonExample.Game
                     m_resultsWindow.gameObject.SetActive(false);
                     m_HUD.SetActive(false);
                     OnWaitingForPlayersWindow();
-                    //GUILayout.Window(40, new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), OnWaitingForPlayersWindow, m_room.name + " -- Waiting for Players " + m_room.playerCount + "/" + m_room.maxPlayers + "...");
-                    //GUILayout.Window(40, new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), OnWaitingForPlayersWindow, m_room.name + " -- Starting game...");
                     break;
                 case eGameState.GAME_STATE_SPECTATING:
                     m_lobbyWindow.gameObject.SetActive(false);
@@ -352,20 +341,6 @@ namespace BrainCloudPhotonExample.Game
                     m_HUD.SetActive(false);
                     break;
             }
-
-
-            if (m_showKillDialog)
-            {
-                GUI.skin.label.normal.textColor = m_killDialogColor;
-                for (int i = 0; i < m_killMessages.Count; i++)
-                {
-                    Color oldColor = GUI.skin.label.normal.textColor;
-                    GUI.skin.label.normal.textColor = m_killMessages[i].m_color;
-                    GUI.Label(new Rect(Screen.width - 200, 25 * (i + 1), 200, 20), m_killMessages[i].m_message);
-                    GUI.skin.label.normal.textColor = oldColor;
-                }
-                GUI.skin.label.normal.textColor = Color.white;
-            }
         }
 
         void OnHudWindow()
@@ -376,9 +351,25 @@ namespace BrainCloudPhotonExample.Game
             System.TimeSpan span = System.TimeSpan.FromSeconds(m_gameTime);
             string timeLeft = span.ToString().Substring(3, 5);
 
+            List<ShipController> team1Ships = new List<ShipController>();
+            List<ShipController> team2Ships = new List<ShipController>();
+            for (int i = 0; i < m_spawnedShips.Count; i++)
+            {
+                if (m_spawnedShips[i].m_team == 1 && m_spawnedShips[i].IsAlive())
+                {
+                    team1Ships.Add(m_spawnedShips[i]);
+                }
+                else if (m_spawnedShips[i].m_team == 2 && m_spawnedShips[i].IsAlive())
+                {
+                    team2Ships.Add(m_spawnedShips[i]);
+                }
+            }
+            
             m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
             m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
+            m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team2Ships.Count.ToString();
             m_HUD.transform.FindChild("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
+            m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team1Ships.Count.ToString();
             m_HUD.transform.FindChild("TimeLeft").GetChild(0).GetComponent<Text>().text = timeLeft;
         }
 
@@ -392,8 +383,6 @@ namespace BrainCloudPhotonExample.Game
             team = GameObject.Find("Team Red Score");
             team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
 
-            // m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
-            //m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             if (m_gameState != eGameState.GAME_STATE_GAME_OVER)
             {
                 m_quitButton.SetActive(false);
@@ -861,16 +850,6 @@ namespace BrainCloudPhotonExample.Game
 
         void Update()
         {
-
-            if (m_killDialogTimer > 0)
-            {
-                m_killDialogTimer -= Time.deltaTime;
-                if (m_killDialogTimer <= 0)
-                {
-                    m_killDialogTimer = 0;
-                    StartCoroutine("FadeKillDialog");
-                }
-            }
 
             switch (m_gameState)
             {
@@ -1601,19 +1580,6 @@ namespace BrainCloudPhotonExample.Game
             m_timesDestroyed = 0;
         }
 
-        IEnumerator FadeKillDialog()
-        {
-            float fadeTimer = 1;
-            while (fadeTimer > 0)
-            {
-                yield return null;
-                fadeTimer -= Time.deltaTime;
-                m_killDialogColor = Color.Lerp(m_killDialogColor, new Color(m_killDialogColor.r, m_killDialogColor.g, m_killDialogColor.b, 0), 0.66f * Time.deltaTime);
-            }
-            m_showKillDialog = false;
-            m_killMessages.Clear();
-        }
-
         public void SpawnFlare(Vector3 aPosition, Vector3 aVelocity)
         {
             GetComponent<PhotonView>().RPC("SpawnFlareRPC", PhotonTargets.All, aPosition, aVelocity, PhotonNetwork.player);
@@ -1901,9 +1867,6 @@ namespace BrainCloudPhotonExample.Game
 
             if (aShooter == null)
             {
-                m_killMessages.Add(new KillMessage((string)aVictim.customProperties["RoomDisplayName"] + " went down", ((int)aVictim.customProperties["Team"] == 1) ? Color.green : Color.red));
-                m_killDialogTimer = 2;
-                StopCoroutine("FadeKillDialog");
 
                 if (aVictim == PhotonNetwork.player)
                 {
@@ -1916,10 +1879,6 @@ namespace BrainCloudPhotonExample.Game
             }
             else
             {
-                m_killMessages.Add(new KillMessage((string)aShooter.customProperties["RoomDisplayName"] + " shot down " + (string)aVictim.customProperties["RoomDisplayName"], ((int)aShooter.customProperties["Team"] == 1) ? Color.green : Color.red));
-                m_showKillDialog = true;
-                m_killDialogTimer = 2;
-                StopCoroutine("FadeKillDialog");
 
                 if (aVictim == PhotonNetwork.player)
                 {
