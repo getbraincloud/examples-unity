@@ -42,7 +42,6 @@ namespace BrainCloudPhotonExample.Matchmaking
         private int m_roomLevelRangeMin = 0;
         private int m_roomLevelRangeMax = 50;
 
-        private GUISkin m_skin;
         private Rect m_windowRect;
 
         private GameObject m_showRoomsWindow;
@@ -147,7 +146,6 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_createGameWindow.SetActive(false);
             GameObject.Find("PlayerName").GetComponent<InputField>().text = PhotonNetwork.player.name;
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
-            m_skin = (GUISkin)Resources.Load("skin");
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             //GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboardPage(m_currentLeaderboardID, m_currentLeaderboardPage * m_leaderboardPageSize, m_currentLeaderboardPage * m_leaderboardPageSize + m_leaderboardPageSize);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
@@ -172,10 +170,6 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void OnGUI()
         {
-            // button.onClick.AddListener(() => { CreateGame(); });
-            GUI.skin = m_skin;
-            int width = 200;
-            int height = 200;
 
             switch (m_state)
             {

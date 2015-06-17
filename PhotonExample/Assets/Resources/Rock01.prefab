@@ -60,6 +60,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 428944}
   - 135: {fileID: 13595110}
+  - 114: {fileID: 11493080}
   m_Layer: 20
   m_Name: Rock01
   m_TagString: Effect
@@ -149,6 +150,31 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 149546}
   m_Mesh: {fileID: 4300004, guid: 1b7e1537fd8ab1c42862dc5afe296c95, type: 3}
+--- !u!114 &11493080
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 157542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ownerId: 0
+  group: 0
+  prefixBackup: -1
+  observed: {fileID: 0}
+  synchronization: 0
+  onSerializeTransformOption: 3
+  onSerializeRigidBodyOption: 2
+  ownershipTransfer: 0
+  ObservedComponents:
+  - {fileID: 0}
+  ObservedComponentsFoldoutOpen: 1
+  viewIdField: 0
+  instantiationId: -1
+  isRuntimeInstantiated: 0
 --- !u!135 &13595110
 SphereCollider:
   m_ObjectHideFlags: 1

@@ -33,8 +33,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         private float m_bulletSpeed = 100f;
         private Vector3 m_bulletVelocity = Vector3.zero;
 
-        private GameObject m_gunCharge;
-
         void Start()
         {
             m_targetingReticule = (GameObject)Instantiate((GameObject)Resources.Load("TargetReticule"), Vector3.zero, Quaternion.identity);
@@ -114,7 +112,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 Vector3 velocity = planeVelocity;
                 int count = 1;
                 Vector3 lastPos = m_playerPlane.transform.position;
-                int layerMask = (1 << 16) | (1 << 17) | (1 << 4);
+                int layerMask = (1 << 16) | (1 << 17) | (1 << 4) | (1 << 20);
                 bool hitFound = false;
                 while (!hitFound)
                 {
@@ -227,7 +225,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public void DestroyPlayerPlane()
         {
             m_bombs = 0;
-            m_gunCharge = null;
             m_playerPlane = null;
             m_bulletSpawnPoint = null;
         }

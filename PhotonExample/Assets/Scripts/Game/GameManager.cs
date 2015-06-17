@@ -49,8 +49,6 @@ namespace BrainCloudPhotonExample.Game
         private List<BulletController.BulletInfo> m_spawnedBullets;
         private List<BombController.BombInfo> m_spawnedBombs;
 
-        private List<KillMessage> m_killMessages;
-
         [SerializeField]
         private float m_gameTime = 10 * 60;
 
@@ -105,6 +103,9 @@ namespace BrainCloudPhotonExample.Game
         private GameObject m_greenShipLogo;
         private GameObject m_redShipLogo;
 
+        private GameObject m_quitMenu;
+        private bool m_showQuitMenu;
+
         void Awake()
         {
             m_allyShipSunk = GameObject.Find("ShipSink").transform.FindChild("AllyShipSunk").gameObject;
@@ -115,6 +116,8 @@ namespace BrainCloudPhotonExample.Game
             m_enemyShipSunk.SetActive(false);
             m_redShipLogo.SetActive(false);
             m_greenShipLogo.SetActive(false);
+            m_quitMenu = GameObject.Find("QuitMenu");
+            m_quitMenu.SetActive(false);
 
             m_greenChevron = GameObject.Find("Team Green Score").transform.FindChild("Chevron").gameObject;
             m_redChevron = GameObject.Find("Team Red Score").transform.FindChild("Chevron").gameObject;
@@ -152,7 +155,6 @@ namespace BrainCloudPhotonExample.Game
             m_bombPickupsSpawned = new List<BombPickup>();
 
             StartCoroutine("LoadBackground");
-            m_killMessages = new List<KillMessage>();
             m_spawnedBullets = new List<BulletController.BulletInfo>();
             m_spawnedBombs = new List<BombController.BombInfo>();
             m_skin = (GUISkin)Resources.Load("skin");
@@ -315,6 +317,11 @@ namespace BrainCloudPhotonExample.Game
             }
         }
 
+        public void CloseQuitMenu()
+        {
+            m_showQuitMenu = false;
+        }
+
         void OnMasterClientSwitched(PhotonPlayer newMasterClient)
         {
             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().HostLeft();
@@ -366,6 +373,7 @@ namespace BrainCloudPhotonExample.Game
 
         void OnHudWindow()
         {
+            if (PhotonNetwork.room == null) return;
             m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
             m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             int score = (int)PhotonNetwork.player.customProperties["Score"];
@@ -871,7 +879,7 @@ namespace BrainCloudPhotonExample.Game
 
         void Update()
         {
-
+            
             switch (m_gameState)
             {
                 case eGameState.GAME_STATE_WAITING_FOR_PLAYERS:
@@ -1027,7 +1035,17 @@ namespace BrainCloudPhotonExample.Game
 
                         for (int i = 0; i < (int)m_mapSizes[m_mapSize].m_horizontalSize / 80 + (int)m_mapSizes[m_mapSize].m_verticalSize / 80; i++)
                         {
-                            PhotonNetwork.Instantiate("Rock0" + Random.Range(1, 5), new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 122), Quaternion.Euler(new Vector3(0, 0, Random.Range(0, 360.0f))),0);
+                            Vector3 position = new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 122);
+                            Quaternion rotation = Quaternion.Euler(new Vector3(0, 0, Random.Range(0, 360.0f)));
+
+                            if (!Physics.CheckSphere(position,15, (1 << 16 | 1 << 17 | 1 << 20)))
+                            {
+                                PhotonNetwork.Instantiate("Rock0" + Random.Range(1, 5), position, rotation, 0);
+                            }
+                            else
+                            {
+                                i--;
+                            }
                         }
                         StartCoroutine("WaitForReadyPlayers");
                     }
@@ -1044,6 +1062,21 @@ namespace BrainCloudPhotonExample.Game
 
                 case eGameState.GAME_STATE_PLAYING_GAME:
 
+                    if (Input.GetKeyDown(KeyCode.Escape))
+                    {
+                        m_showQuitMenu = !m_showQuitMenu;
+                    }
+
+                    if (m_showQuitMenu)
+                    {
+                        m_quitMenu.SetActive(true);
+                    }
+                    else
+                    {
+                        m_quitMenu.SetActive(false);
+                    }
+
+                    
                     if (!m_once)
                     {
                         GameObject.Find("BackgroundMusic").GetComponent<AudioSource>().Play();
@@ -1426,7 +1459,6 @@ namespace BrainCloudPhotonExample.Game
         IEnumerator FadeOutShipMessage(GameObject aText, GameObject aLogo)
         {
             float time = 2;
-            bool done = false;
             m_allyShipSunk.SetActive(true);
             m_enemyShipSunk.SetActive(true);
             m_redShipLogo.SetActive(true);
