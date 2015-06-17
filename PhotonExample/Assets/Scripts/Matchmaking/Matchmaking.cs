@@ -437,6 +437,8 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         public void JoinRoom(RoomInfo aRoomInfo)
         {
+            GameObject.Find("Version Text").transform.SetParent(null);
+            GameObject.Find("FullScreen").transform.SetParent(null);
             int minLevel = 0;
             int maxLevel = 50;
             int playerLevel = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats()[0].m_statValue;
@@ -454,6 +456,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             if (playerLevel < minLevel || playerLevel > maxLevel)
             {
                 GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You're not in that room's\nlevel range!");
+                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             }
             else if (aRoomInfo.playerCount < aRoomInfo.maxPlayers)
             {
@@ -461,12 +465,16 @@ namespace BrainCloudPhotonExample.Matchmaking
                 if (!PhotonNetwork.JoinRoom(aRoomInfo.name))
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
                 }
             }
             else
             {
                 GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("That room is full!");
+                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             }
         }
 
@@ -885,7 +893,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
 
 
-
+            GameObject.Find("Version Text").transform.SetParent(null);
+            GameObject.Find("FullScreen").transform.SetParent(null);
             ExitGames.Client.Photon.Hashtable customProperties = new ExitGames.Client.Photon.Hashtable();
             customProperties["roomMinLevel"] = m_roomLevelRangeMin;
             customProperties["roomMaxLevel"] = m_roomLevelRangeMax;

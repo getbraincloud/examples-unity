@@ -363,7 +363,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0f0e61352a54804b942e5766e8051eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_gameTime: 600
   m_team1SpawnBounds: {fileID: 965219777}
   m_team2SpawnBounds: {fileID: 2014871192}
 --- !u!114 &123285992
@@ -6055,6 +6054,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 1377383478}
   - 65: {fileID: 1377383475}
+  - 114: {fileID: 1377383476}
   m_Layer: 12
   m_Name: MapBounds
   m_TagString: Untagged
@@ -6074,6 +6074,17 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 200, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1377383476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1377383474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 569384486bb3ec148aac47562546239a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1377383478
 Transform:
   m_ObjectHideFlags: 0

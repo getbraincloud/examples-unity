@@ -160,23 +160,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &156334
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 421968}
-  - 65: {fileID: 6508344}
-  - 114: {fileID: 11458662}
-  m_Layer: 13
-  m_Name: MapCheck
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!1 &160158
 GameObject:
   m_ObjectHideFlags: 1
@@ -290,18 +273,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 487366}
   m_RootOrder: 1
---- !u!4 &421968
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 156334}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 474776}
-  m_RootOrder: 2
 --- !u!4 &422522
 Transform:
   m_ObjectHideFlags: 1
@@ -349,7 +320,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 474776}
-  m_RootOrder: 3
+  m_RootOrder: 2
 --- !u!4 &461032
 Transform:
   m_ObjectHideFlags: 1
@@ -374,7 +345,6 @@ Transform:
   m_Children:
   - {fileID: 485840}
   - {fileID: 435640}
-  - {fileID: 421968}
   - {fileID: 452100}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -507,18 +477,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!65 &6508344
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 156334}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &6527218
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -654,17 +612,6 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 180352}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 569384486bb3ec148aac47562546239a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &11458662
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 156334}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 569384486bb3ec148aac47562546239a, type: 3}

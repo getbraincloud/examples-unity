@@ -800,12 +800,13 @@ namespace BrainCloudPhotonExample.Game
 
         IEnumerator SpawnGameStart()
         {
+            GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.All);
             yield return new WaitForSeconds(0.5f);
             m_roomProperties = PhotonNetwork.room.customProperties;
             m_roomProperties["IsPlaying"] = 1;
             PhotonNetwork.room.SetCustomProperties(m_roomProperties);
 
-            GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.All);
+            
 
             int shipID = 0;
             bool done = false;
@@ -1650,6 +1651,7 @@ namespace BrainCloudPhotonExample.Game
         [RPC]
         void GetReady()
         {
+            m_gameState = eGameState.GAME_STATE_STARTING_GAME;
             m_playerProperties["Deaths"] = 0;
             m_playerProperties["Kills"] = 0;
             m_playerProperties["IsReady"] = "true";

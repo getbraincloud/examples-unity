@@ -242,6 +242,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         {
             for (int i = 0; i < GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotAmount; i++)
             {
+                if (m_playerPlane == null) break;
                 m_lastShot = Time.time;
                 m_bulletSpawnPoint = m_playerPlane.GetComponent<PlaneController>().m_bulletSpawnPoint;
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;

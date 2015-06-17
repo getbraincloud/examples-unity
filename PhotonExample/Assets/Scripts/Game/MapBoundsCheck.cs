@@ -6,18 +6,21 @@ namespace BrainCloudPhotonExample.Game
 {
     public class MapBoundsCheck : MonoBehaviour
     {
+        public GameObject m_playerPlane;
 
-        void OnTriggerEnter(Collider other)
+        void Update()
         {
-            if (transform.parent.GetComponent<PhotonView>().isMine)
-                GameObject.Find("PlayerController").GetComponent<PlayerController>().EnteredBounds();
+            if (m_playerPlane != null)
+            {
+                if (!GetComponent<Collider>().bounds.Contains(m_playerPlane.transform.position))
+                {
+                    GameObject.Find("PlayerController").GetComponent<PlayerController>().LeftBounds();
+                }
+                else
+                {
+                    GameObject.Find("PlayerController").GetComponent<PlayerController>().EnteredBounds();
+                }
+            }
         }
-
-        void OnTriggerExit(Collider other)
-        {
-            if (transform.parent.GetComponent<PhotonView>().isMine)
-                GameObject.Find("PlayerController").GetComponent<PlayerController>().LeftBounds();
-        }
-
     }
 }

@@ -47,6 +47,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public void SetPlayerPlane(PlaneController playerPlane)
         {
+            GameObject.Find("MapBounds").GetComponent<MapBoundsCheck>().m_playerPlane = playerPlane.gameObject;
             StartCoroutine("PulseMissionText");
             m_leftBounds = false;
             m_currentRotation = playerPlane.gameObject.transform.rotation.eulerAngles.z;
@@ -330,6 +331,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             {
                 return;
             }
+            GameObject.Find("MapBounds").GetComponent<MapBoundsCheck>().m_playerPlane = null;
             m_leftBounds = false;
             m_isActive = false;
             PhotonNetwork.Destroy(m_playerPlane.gameObject);
