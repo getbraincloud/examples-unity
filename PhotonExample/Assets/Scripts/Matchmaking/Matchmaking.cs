@@ -33,7 +33,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             GAME_STATE_CREATE_NEW_ROOM,
             GAME_STATE_JOIN_ROOM,
             GAME_STATE_SHOW_LEADERBOARDS,
-            GAME_STATE_SHOW_CONTROLS
+            GAME_STATE_SHOW_CONTROLS,
+            GAME_STATE_SHOW_ACHIEVEMENTS
         }
         private eMatchmakingState m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
 
@@ -79,6 +80,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         private GameObject m_joiningGameWindow;
 
         private GameObject m_controlWindow;
+        private GameObject m_achievementsWindow;
 
         private Dictionary<string, bool> m_roomFilters = new Dictionary<string, bool>()
     {
@@ -94,6 +96,11 @@ namespace BrainCloudPhotonExample.Matchmaking
             GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             //m_scoreRect = GameObject.Find("Scores");
 
+            m_achievementsWindow = GameObject.Find("Achievements");
+            m_achievementsWindow.transform.GetChild(3).GetChild(0).gameObject.SetActive(false);
+            m_achievementsWindow.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
+            m_achievementsWindow.transform.GetChild(5).GetChild(0).gameObject.SetActive(false);
+            m_achievementsWindow.SetActive(false);
             m_joiningGameWindow = GameObject.Find("JoiningGame");
             m_joiningGameWindow.SetActive(false);
             m_leaderboardWindow = GameObject.Find("Leaderboard");
@@ -174,7 +181,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             switch (m_state)
             {
                 case eMatchmakingState.GAME_STATE_SHOW_ROOMS:
-
+                    m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(true);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
@@ -194,6 +201,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     break;
 
                 case eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS:
+                    m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(true);
                     m_leaderboardWindow.SetActive(false);
@@ -207,6 +215,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     break;
 
                 case eMatchmakingState.GAME_STATE_JOIN_ROOM:
+                    m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
@@ -216,6 +225,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     break;
 
                 case eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM:
+                    m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
@@ -224,20 +234,18 @@ namespace BrainCloudPhotonExample.Matchmaking
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_LEADERBOARDS:
+                    m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(true);
                     m_controlWindow.SetActive(false);
                     m_joiningGameWindow.SetActive(false);
-                    //width = 500;
-                    //height = 400;
 
-                    //m_windowRect = new Rect(Screen.width / 2 - (width / 2 + 100), Screen.height / 2 - (height / 2), width, height);
                     OnLeaderboardWindow();
-                    //GUILayout.Window(23, m_windowRect, OnLeaderboardWindow, "Leaderboards");
-                    //GUILayout.Window(22, new Rect(m_windowRect.x + m_windowRect.width, m_windowRect.y, 200, m_windowRect.height), OnStatsWindow, "Statistics");
+
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_CONTROLS:
+                    m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_controlWindow.SetActive(true);
                     m_createGameWindow.SetActive(false);
@@ -245,7 +253,53 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_joiningGameWindow.SetActive(false);
 
                     break;
+                case eMatchmakingState.GAME_STATE_SHOW_ACHIEVEMENTS:
+                     m_achievementsWindow.SetActive(true);
+                    m_showRoomsWindow.SetActive(false);
+                    m_controlWindow.SetActive(false);
+                    m_createGameWindow.SetActive(false);
+                    m_leaderboardWindow.SetActive(false);
+                    m_joiningGameWindow.SetActive(false);
+                    if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_achievements[2].m_achieved)
+                    {
+                        m_achievementsWindow.transform.GetChild(3).GetComponent<CanvasGroup>().alpha = 1;
+                        m_achievementsWindow.transform.GetChild(3).GetChild(0).gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        m_achievementsWindow.transform.GetChild(3).GetComponent<CanvasGroup>().alpha = 0.3f;
+                        m_achievementsWindow.transform.GetChild(3).GetChild(0).gameObject.SetActive(false);
+                    }
+
+                    if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_achievements[1].m_achieved)
+                    {
+                        m_achievementsWindow.transform.GetChild(4).GetComponent<CanvasGroup>().alpha = 1;
+                        m_achievementsWindow.transform.GetChild(4).GetChild(0).gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        m_achievementsWindow.transform.GetChild(4).GetComponent<CanvasGroup>().alpha = 0.3f;
+                        m_achievementsWindow.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
+                    }
+
+                    if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_achievements[0].m_achieved)
+                    {
+                        m_achievementsWindow.transform.GetChild(5).GetComponent<CanvasGroup>().alpha = 1;
+                        m_achievementsWindow.transform.GetChild(5).GetChild(0).gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        m_achievementsWindow.transform.GetChild(5).GetComponent<CanvasGroup>().alpha = 0.3f;
+                        m_achievementsWindow.transform.GetChild(5).GetChild(0).gameObject.SetActive(false);
+                    }
+
+                    break;
             }
+        }
+
+        public void ShowAchievements()
+        {
+            m_state = eMatchmakingState.GAME_STATE_SHOW_ACHIEVEMENTS;
         }
 
         void OnStatsWindow()
