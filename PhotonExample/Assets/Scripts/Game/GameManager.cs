@@ -800,7 +800,7 @@ namespace BrainCloudPhotonExample.Game
 
         IEnumerator SpawnGameStart()
         {
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(0.5f);
             m_roomProperties = PhotonNetwork.room.customProperties;
             m_roomProperties["IsPlaying"] = 1;
             PhotonNetwork.room.SetCustomProperties(m_roomProperties);
@@ -948,8 +948,6 @@ namespace BrainCloudPhotonExample.Game
                     i--;
                 }
             }
-
-            yield return new WaitForSeconds(2);
         }
 
         void Update()
@@ -1227,6 +1225,13 @@ namespace BrainCloudPhotonExample.Game
         [RPC]
         void ResetGame()
         {
+            m_roomProperties = PhotonNetwork.room.customProperties;
+            m_roomProperties["IsPlaying"] = 0;
+            PhotonNetwork.room.SetCustomProperties(m_roomProperties);
+            GameObject.Find("Version Text").transform.SetParent(null);
+            GameObject.Find("FullScreen").transform.SetParent(null);
+            PhotonNetwork.LoadLevel("Game");
+            /*
             m_gameState = eGameState.GAME_STATE_RESETTING_GAME;
             m_redLogo.SetActive(false);
             m_greenLogo.SetActive(false);
@@ -1276,7 +1281,7 @@ namespace BrainCloudPhotonExample.Game
 
             m_once = false;
             m_gameState = eGameState.GAME_STATE_WAITING_FOR_PLAYERS;
-
+            */
         }
 
         public void HitShipTargetPoint(ShipController.ShipTarget aShipTarget, BombController.BombInfo aBombInfo)
