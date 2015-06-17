@@ -77,6 +77,8 @@ namespace BrainCloudPhotonExample.Matchmaking
         [SerializeField]
         private Sprite m_tabSprite;
 
+        private GameObject m_joiningGameWindow;
+
         private GameObject m_controlWindow;
 
         private Dictionary<string, bool> m_roomFilters = new Dictionary<string, bool>()
@@ -92,7 +94,9 @@ namespace BrainCloudPhotonExample.Matchmaking
             GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
             GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             //m_scoreRect = GameObject.Find("Scores");
-            
+
+            m_joiningGameWindow = GameObject.Find("JoiningGame");
+            m_joiningGameWindow.SetActive(false);
             m_leaderboardWindow = GameObject.Find("Leaderboard");
             m_scoreText = GameObject.Find("SCORE");
             m_basePresetButton = GameObject.Find("PresetButton");
@@ -181,6 +185,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
                     m_controlWindow.SetActive(false);
+                    m_joiningGameWindow.SetActive(false);
                     OnStatsWindow();
                     OrderRoomButtons();
                     //width = 500;
@@ -199,6 +204,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_createGameWindow.SetActive(true);
                     m_leaderboardWindow.SetActive(false);
                     m_controlWindow.SetActive(false);
+                    m_joiningGameWindow.SetActive(false);
 
                     //m_windowRect = new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height);
                     OnNewRoomWindow();
@@ -211,8 +217,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
                     m_controlWindow.SetActive(false);
-                    height = 30;
-                    GUI.TextArea(new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), "Joining room...");
+                    m_joiningGameWindow.SetActive(true);
 
                     break;
 
@@ -221,8 +226,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
                     m_controlWindow.SetActive(false);
-                    height = 30;
-                    GUI.TextArea(new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height), "Creating and joining room...");
+                    m_joiningGameWindow.SetActive(true);
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_LEADERBOARDS:
@@ -230,6 +234,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(true);
                     m_controlWindow.SetActive(false);
+                    m_joiningGameWindow.SetActive(false);
                     //width = 500;
                     //height = 400;
 
@@ -243,6 +248,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_controlWindow.SetActive(true);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
+                    m_joiningGameWindow.SetActive(false);
 
                     break;
             }
