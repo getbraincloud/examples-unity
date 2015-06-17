@@ -93,6 +93,7 @@ namespace BrainCloudPhotonExample.Game
         private float m_respawnTime;
 
         public int m_team;
+        public bool m_isAlive = true;
         //private Vector3[] m_path = null;
         //private float m_pathSpeed = -1;
         private Vector3 m_startPosition = new Vector3(-1, -1, -1);
@@ -354,7 +355,7 @@ namespace BrainCloudPhotonExample.Game
                 }
             }
 
-            return isAlive;
+            return isAlive && m_isAlive;
         }
     }
 }

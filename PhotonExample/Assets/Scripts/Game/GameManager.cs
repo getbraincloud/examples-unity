@@ -161,10 +161,12 @@ namespace BrainCloudPhotonExample.Game
             m_skin = (GUISkin)Resources.Load("skin");
             m_room = PhotonNetwork.room;
             m_playerProperties = new ExitGames.Client.Photon.Hashtable();
+            m_playerProperties = PhotonNetwork.player.customProperties;
             StartCoroutine("UpdatePing");
             StartCoroutine("UpdateRoomDisplayName");
             m_roomProperties = PhotonNetwork.room.customProperties;
-            m_playerProperties["Team"] = 0;
+            if (m_playerProperties["Team"] == null)
+                m_playerProperties["Team"] = 0;
 
             m_team1Score = 0;
             m_team2Score = 0;
@@ -218,13 +220,19 @@ namespace BrainCloudPhotonExample.Game
 
                 if ((int)PhotonNetwork.room.customProperties["Team2Players"] < (int)PhotonNetwork.room.customProperties["Team1Players"])
                 {
-                    m_playerProperties["Team"] = 2;
-                    m_roomProperties["Team2Players"] = (int)PhotonNetwork.room.customProperties["Team2Players"] + 1;
+                    if ((int)m_playerProperties["Team"] == 0)
+                    {
+                        m_playerProperties["Team"] = 2;
+                        m_roomProperties["Team2Players"] = (int)PhotonNetwork.room.customProperties["Team2Players"] + 1;
+                    }
                 }
                 else
                 {
-                    m_playerProperties["Team"] = 1;
-                    m_roomProperties["Team1Players"] = (int)PhotonNetwork.room.customProperties["Team1Players"] + 1;
+                    if ((int)m_playerProperties["Team"] == 0)
+                    {
+                        m_playerProperties["Team"] = 1;
+                        m_roomProperties["Team1Players"] = (int)PhotonNetwork.room.customProperties["Team1Players"] + 1;
+                    }
                 }
             }
             m_playerProperties["Score"] = 0;
@@ -1475,6 +1483,7 @@ namespace BrainCloudPhotonExample.Game
 
             if (ship == null) return;
 
+            ship.m_isAlive = false;
             StopCoroutine("FadeOutShipMessage");
             if (ship.m_team == 1)
             {
