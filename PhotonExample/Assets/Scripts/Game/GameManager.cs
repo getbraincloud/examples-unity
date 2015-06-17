@@ -1458,7 +1458,7 @@ namespace BrainCloudPhotonExample.Game
 
         IEnumerator FadeOutShipMessage(GameObject aText, GameObject aLogo)
         {
-            float time = 2;
+            float time = 0.5f;
             m_allyShipSunk.SetActive(true);
             m_enemyShipSunk.SetActive(true);
             m_redShipLogo.SetActive(true);
@@ -1467,10 +1467,19 @@ namespace BrainCloudPhotonExample.Game
             m_enemyShipSunk.GetComponent<Image>().color = new Color(1, 1, 1, 0);
             m_redShipLogo.GetComponent<Image>().color = new Color(1, 1, 1, 0);
             m_greenShipLogo.GetComponent<Image>().color = new Color(1, 1, 1, 0);
-
+            Color fadeColor = new Color(1, 1, 1, 0);
+            while (time > 0)
+            {
+                time -= Time.fixedDeltaTime;
+                fadeColor = new Color(1, 1, 1, fadeColor.a + Time.fixedDeltaTime * 2.4f);
+                aText.GetComponent<Image>().color = fadeColor;
+                aLogo.GetComponent<Image>().color = fadeColor;
+                yield return new WaitForFixedUpdate();
+            }
+            time = 2;
             aText.GetComponent<Image>().color = new Color(1, 1, 1, 1);
             aLogo.GetComponent<Image>().color = new Color(1, 1, 1, 1);
-            Color fadeColor = new Color(1, 1, 1, 1);
+            fadeColor = new Color(1, 1, 1, 1);
             yield return new WaitForSeconds(2);
 
             while (time > 0)
