@@ -226,6 +226,7 @@ GameObject:
   - 222: {fileID: 34484159}
   - 114: {fileID: 34484158}
   - 114: {fileID: 34484157}
+  - 225: {fileID: 34484160}
   m_Layer: 5
   m_Name: Leaderboard
   m_TagString: Untagged
@@ -302,6 +303,17 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 34484155}
+--- !u!225 &34484160
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 34484155}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &77657443
 GameObject:
   m_ObjectHideFlags: 0
@@ -3240,6 +3252,7 @@ GameObject:
   - 222: {fileID: 608395752}
   - 114: {fileID: 608395751}
   - 114: {fileID: 608395750}
+  - 225: {fileID: 608395753}
   m_Layer: 5
   m_Name: JoiningGame
   m_TagString: Untagged
@@ -3306,6 +3319,17 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 608395748}
+--- !u!225 &608395753
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 608395748}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &666072809
 GameObject:
   m_ObjectHideFlags: 0
@@ -4016,6 +4040,7 @@ GameObject:
   - 222: {fileID: 792417917}
   - 114: {fileID: 792417916}
   - 114: {fileID: 792417915}
+  - 225: {fileID: 792417918}
   m_Layer: 5
   m_Name: ShowRooms
   m_TagString: Untagged
@@ -4088,6 +4113,17 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 792417913}
+--- !u!225 &792417918
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 792417913}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &891908910
 GameObject:
   m_ObjectHideFlags: 0
@@ -5243,6 +5279,7 @@ GameObject:
   - 222: {fileID: 1084982630}
   - 114: {fileID: 1084982629}
   - 114: {fileID: 1084982628}
+  - 225: {fileID: 1084982631}
   m_Layer: 5
   m_Name: CreateGame
   m_TagString: Untagged
@@ -5319,6 +5356,17 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1084982626}
+--- !u!225 &1084982631
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1084982626}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1087730479
 GameObject:
   m_ObjectHideFlags: 0
@@ -8693,6 +8741,7 @@ GameObject:
   - 222: {fileID: 1548117886}
   - 114: {fileID: 1548117885}
   - 114: {fileID: 1548117884}
+  - 225: {fileID: 1548117887}
   m_Layer: 5
   m_Name: Controls
   m_TagString: Untagged
@@ -8768,6 +8817,17 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1548117882}
+--- !u!225 &1548117887
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1548117882}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1575141815
 GameObject:
   m_ObjectHideFlags: 0

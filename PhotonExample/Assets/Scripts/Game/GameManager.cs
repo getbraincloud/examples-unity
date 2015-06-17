@@ -49,7 +49,6 @@ namespace BrainCloudPhotonExample.Game
         private List<BulletController.BulletInfo> m_spawnedBullets;
         private List<BombController.BombInfo> m_spawnedBombs;
 
-        [SerializeField]
         private float m_gameTime = 10 * 60;
 
         private int m_mapLayout = 0;
@@ -69,7 +68,7 @@ namespace BrainCloudPhotonExample.Game
         private int m_carriersDestroyed = 0;
         private int m_timesDestroyed = 0;
 
-        private bool m_once = true;
+        private bool m_once = false;
 
         [SerializeField]
         private Collider m_team1SpawnBounds;
@@ -80,7 +79,6 @@ namespace BrainCloudPhotonExample.Game
         private List<BombPickup> m_bombPickupsSpawned;
         private int m_bombID;
 
-        private bool m_playerIsReady = false;
         private List<ShipController> m_spawnedShips;
 
         private GameObject m_lobbyWindow;
@@ -105,6 +103,7 @@ namespace BrainCloudPhotonExample.Game
 
         private GameObject m_quitMenu;
         private bool m_showQuitMenu;
+        private GameObject m_blackScreen;
 
         void Awake()
         {
@@ -112,6 +111,8 @@ namespace BrainCloudPhotonExample.Game
             m_enemyShipSunk = GameObject.Find("ShipSink").transform.FindChild("EnemyShipSunk").gameObject;
             m_redShipLogo = GameObject.Find("ShipSink").transform.FindChild("RedLogo").gameObject;
             m_greenShipLogo = GameObject.Find("ShipSink").transform.FindChild("GreenLogo").gameObject;
+            m_blackScreen = GameObject.Find("BlackScreen");
+            
             m_allyShipSunk.SetActive(false);
             m_enemyShipSunk.SetActive(false);
             m_redShipLogo.SetActive(false);
@@ -337,7 +338,15 @@ namespace BrainCloudPhotonExample.Game
             switch (m_gameState)
             {
                 case eGameState.GAME_STATE_WAITING_FOR_PLAYERS:
+                    m_resultsWindow.GetComponent<CanvasGroup>().alpha = 0;
+                    
+                    m_lobbyWindow.gameObject.SetActive(true);
+                    m_resultsWindow.gameObject.SetActive(false);
+                    m_HUD.SetActive(false);
+                    OnWaitingForPlayersWindow();
+                    break;
                 case eGameState.GAME_STATE_STARTING_GAME:
+                    m_blackScreen.GetComponent<CanvasGroup>().alpha += Time.fixedDeltaTime * 3;
                     m_lobbyWindow.gameObject.SetActive(true);
                     m_resultsWindow.gameObject.SetActive(false);
                     m_HUD.SetActive(false);
@@ -353,10 +362,12 @@ namespace BrainCloudPhotonExample.Game
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_resultsWindow.gameObject.SetActive(true);
                     m_HUD.SetActive(false);
+
                     OnScoresWindow();
                     break;
 
                 case eGameState.GAME_STATE_PLAYING_GAME:
+                    m_blackScreen.GetComponent<CanvasGroup>().alpha -= Time.fixedDeltaTime * 3;
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_resultsWindow.gameObject.SetActive(false);
                     m_HUD.SetActive(true);
@@ -397,14 +408,23 @@ namespace BrainCloudPhotonExample.Game
             m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
             m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
             m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team2Ships.Count.ToString();
+            if (team2Ships.Count == 1)
+                m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
+            else
+                m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
             m_HUD.transform.FindChild("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
             m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team1Ships.Count.ToString();
+            if (team1Ships.Count == 1)
+                m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
+            else
+                m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
             m_HUD.transform.FindChild("TimeLeft").GetChild(0).GetComponent<Text>().text = timeLeft;
         }
 
         void OnScoresWindow()
         {
             if (PhotonNetwork.room == null) return;
+            m_resultsWindow.GetComponent<CanvasGroup>().alpha += Time.fixedDeltaTime * 2;
             m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
             m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             GameObject team = GameObject.Find("Team Green Score");
@@ -498,8 +518,6 @@ namespace BrainCloudPhotonExample.Game
             string redKDText = "";
             string redScoreText = "";
 
-            //default 21.8
-            //17.7f per line
             int greenPlayers = 0;
             int redPlayers = 0;
             for (int i = 0; i < playerList.Length; i++)
@@ -559,62 +577,6 @@ namespace BrainCloudPhotonExample.Game
             team.transform.FindChild("RedPlayers").GetComponent<Text>().text = redNamesText;
             team.transform.FindChild("RedPlayerKD").GetComponent<Text>().text = redKDText;
             team.transform.FindChild("RedPlayerScores").GetComponent<Text>().text = redScoreText;
-
-            /*
-
-            GUILayout.BeginScrollView(Vector2.zero);
-            GUI.skin.label.normal.textColor = Color.green;
-            GUILayout.Label(m_team1Score.ToString());
-            GUI.skin.label.normal.textColor = Color.white;
-            GUILayout.BeginHorizontal();
-            for (int i = 0; i < m_room.maxPlayers; i++)
-            {
-                if (i < playerList.Length && (int)playerList[i].customProperties["Team"] == 1)
-                {
-
-                    GUI.skin.label.normal.textColor = Color.green;
-                    if (playerList[i].customProperties["RoomDisplayName"] != null) GUILayout.Label(playerList[i].customProperties["RoomDisplayName"].ToString());
-                    GUI.skin.label.normal.textColor = Color.white;
-
-                    GUILayout.Label("K " + playerList[i].customProperties["Kills"].ToString() + "/" + playerList[i].customProperties["Deaths"].ToString() + " D");
-                    if (playerList[i].customProperties["Ping"] != null) GUILayout.Label(playerList[i].customProperties["Ping"].ToString());
-
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal();
-                }
-            }
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndScrollView();
-            GUILayout.BeginScrollView(Vector2.zero);
-            GUI.skin.label.normal.textColor = Color.red;
-            GUILayout.Label(m_team2Score.ToString());
-            GUI.skin.label.normal.textColor = Color.white;
-            GUILayout.BeginHorizontal();
-
-            for (int i = 0; i < m_room.maxPlayers; i++)
-            {
-                if (i < playerList.Length && (int)playerList[i].customProperties["Team"] == 2)
-                {
-
-                    GUI.skin.label.normal.textColor = Color.red;
-                    if (playerList[i].customProperties["RoomDisplayName"] != null) GUILayout.Label(playerList[i].customProperties["RoomDisplayName"].ToString());
-                    GUI.skin.label.normal.textColor = Color.white;
-
-                    GUILayout.Label("K " + playerList[i].customProperties["Kills"].ToString() + "/" + playerList[i].customProperties["Deaths"].ToString() + " D");
-                    if (playerList[i].customProperties["Ping"] != null) GUILayout.Label(playerList[i].customProperties["Ping"].ToString());
-
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal();
-                }
-            }
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndScrollView();
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-            GUILayout.FlexibleSpace();
-             * */
         }
 
         public void ChangeTeam()
@@ -726,47 +688,6 @@ namespace BrainCloudPhotonExample.Game
             {
                 m_gameStartButton.SetActive(true);
             }
-
-            /*
-            GUIContent[] presetList = new GUIContent[m_mapPresets.Count];
-            GUIContent[] sizeList = new GUIContent[m_mapSizes.Count];
-            for (int i = 0; i < m_mapPresets.Count; i++)
-            {
-                presetList[i] = new GUIContent(m_mapPresets[i].m_name);
-            }
-            for (int i = 0; i < m_mapSizes.Count; i++)
-            {
-                sizeList[i] = new GUIContent(m_mapSizes[i].m_name);
-            }
-
-            if (PhotonNetwork.isMasterClient && m_gameState == eGameState.GAME_STATE_WAITING_FOR_PLAYERS)
-            {
-                if (GUILayout.Button("Start game", GUILayout.Width(100), GUILayout.Height(30)))
-                {
-                    ForceStartGame();
-                }
-
-                if (Popup.List(new Rect(Screen.width / 4 - 80, 25, 100, 25), ref m_showPresetList, ref m_presetListSelection, presetList[m_presetListSelection], presetList, GUI.skin.button))
-                {
-                    m_mapLayout = m_presetListSelection;
-                    GetComponent<PhotonView>().RPC("ChangeMapLayout", PhotonTargets.OthersBuffered, m_mapLayout);
-                }
-
-                if (Popup.List(new Rect(Screen.width / 4 + 60, 25, 100, 25), ref m_showSizeList, ref m_sizeListSelection, sizeList[m_sizeListSelection], sizeList, GUI.skin.button))
-                {
-                    m_mapSize = m_sizeListSelection;
-                    GetComponent<PhotonView>().RPC("ChangeMapSize", PhotonTargets.OthersBuffered, m_mapSize);
-                }
-
-            }
-            else if (!PhotonNetwork.isMasterClient)
-            {
-                GUI.Button(new Rect(Screen.width / 4 - 80, 25, 100, 25), presetList[m_mapLayout]);
-
-                GUI.Button(new Rect(Screen.width / 4 + 60, 25, 100, 25), sizeList[m_mapSize]);
-            }
-
-            */
         }
 
         [RPC]
@@ -877,6 +798,160 @@ namespace BrainCloudPhotonExample.Game
             }
         }
 
+        IEnumerator SpawnGameStart()
+        {
+            yield return new WaitForSeconds(1.5f);
+            m_roomProperties = PhotonNetwork.room.customProperties;
+            m_roomProperties["IsPlaying"] = 1;
+            PhotonNetwork.room.SetCustomProperties(m_roomProperties);
+
+            GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.All);
+
+            int shipID = 0;
+            bool done = false;
+            GameObject ship = null;
+            int shipIndex = 0;
+            int tryCount = 0;
+
+            MapPresets.MapSize mapSize = m_mapSizes[m_mapSize];
+            GameObject mapBound = GameObject.Find("MapBounds");
+            mapBound.transform.localScale = new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize);
+            GameObject spawn = GameObject.Find("Team1Spawn");
+            spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.min.x, 0, 22);
+            spawn.transform.localScale = new Vector3(5, 1, mapSize.m_verticalSize * 0.75f);
+            spawn = GameObject.Find("Team2Spawn");
+            spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.max.x, 0, 22);
+            spawn.transform.localScale = new Vector3(5, 1, mapSize.m_verticalSize * 0.75f);
+
+            if (m_mapLayout == 0)
+            {
+                GameObject testShip = (GameObject)Instantiate((GameObject)Resources.Load("Carrier01"), Vector3.zero, Quaternion.identity);
+                while (!done)
+                {
+                    tryCount = 0;
+                    bool positionFound = false;
+                    Vector3 position = new Vector3(0, 0, 122);
+
+                    while (!positionFound)
+                    {
+                        position.x = Random.Range(-340.0f, 340.0f);
+                        position.y = Random.Range(-220.0f, 220.0f);
+
+                        float minDistance = 10000;
+                        for (int i = 0; i < m_spawnedShips.Count; i++)
+                        {
+                            if ((m_spawnedShips[i].transform.position - position).magnitude < minDistance)
+                            {
+                                minDistance = (m_spawnedShips[i].transform.position - position).magnitude;
+                            }
+                        }
+
+                        if (minDistance > 170)
+                        {
+                            positionFound = true;
+                        }
+                        tryCount++;
+                        if (tryCount > 100000)
+                        {
+                            positionFound = true;
+                        }
+                    }
+
+                    float rotation = 0;
+                    tryCount = 0;
+                    bool done2 = false;
+                    testShip.transform.position = position;
+                    while (!done2)
+                    {
+                        rotation = Random.Range(0.0f, 360.0f);
+                        testShip.transform.rotation = Quaternion.Euler(0, 0, rotation);
+
+                        bool collides = false;
+                        for (int i = 0; i < m_spawnedShips.Count; i++)
+                        {
+                            if (testShip.transform.FindChild("Graphic").GetComponent<Collider>().bounds.Intersects(m_spawnedShips[i].transform.FindChild("ShipGraphic").GetChild(0).FindChild("Graphic").GetComponent<Collider>().bounds))
+                            {
+                                collides = true;
+                                break;
+                            }
+                        }
+
+                        if (!collides)
+                        {
+                            done2 = true;
+                        }
+                        tryCount++;
+                        if (tryCount > 1000)
+                        {
+                            done2 = true;
+                        }
+
+                    }
+
+                    ship = PhotonNetwork.Instantiate("Ship", position, Quaternion.Euler(0, 0, Random.Range(0.0f, 360.0f)), 0);
+                    switch (shipIndex)
+                    {
+                        case 0:
+                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CARRIER, (shipID % 2) + 1, shipID);
+                            break;
+                        case 1:
+                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_BATTLESHIP, (shipID % 2) + 1, shipID);
+                            break;
+                        case 2:
+                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CRUISER, (shipID % 2) + 1, shipID);
+                            break;
+                        case 3:
+                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_PATROLBOAT, (shipID % 2) + 1, shipID);
+                            break;
+                        case 4:
+                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
+                            break;
+                    }
+
+                    if (shipID % 2 == 1)
+                    {
+                        shipIndex++;
+                    }
+                    shipID++;
+                    if (m_spawnedShips.Count >= 10) done = true;
+                }
+                Destroy(testShip);
+            }
+            else
+            {
+                MapPresets.Preset preset = m_mapPresets[m_mapLayout];
+                Bounds mapBounds = GameObject.Find("MapBounds").GetComponent<Collider>().bounds;
+                for (int i = 0; i < preset.m_numShips; i++)
+                {
+                    Vector3 position = new Vector3(mapBounds.min.x + (mapBounds.max.x - mapBounds.min.x) * preset.m_ships[i].m_xPositionPercent, mapBounds.min.y + (mapBounds.max.y - mapBounds.min.y) * preset.m_ships[i].m_yPositionPercent, 122);
+                    ship = PhotonNetwork.Instantiate("Ship", position, Quaternion.Euler(0, 0, preset.m_ships[i].m_angle), 0);
+                    ship.GetComponent<ShipController>().SetShipType(preset.m_ships[i].m_shipType, preset.m_ships[i].m_team, shipID, preset.m_ships[i].m_angle, position, preset.m_ships[i].m_respawnTime, preset.m_ships[i].m_path, preset.m_ships[i].m_pathSpeed);
+
+                    shipID++;
+                }
+
+            }
+
+            Bounds bounds = GameObject.Find("MapBounds").GetComponent<Collider>().bounds;
+
+            for (int i = 0; i < (int)m_mapSizes[m_mapSize].m_horizontalSize / 80 + (int)m_mapSizes[m_mapSize].m_verticalSize / 80; i++)
+            {
+                Vector3 position = new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 122);
+                Quaternion rotation = Quaternion.Euler(new Vector3(0, 0, Random.Range(0, 360.0f)));
+
+                if (!Physics.CheckSphere(position, 15, (1 << 16 | 1 << 17 | 1 << 20)))
+                {
+                    PhotonNetwork.Instantiate("Rock0" + Random.Range(1, 5), position, rotation, 0);
+                }
+                else
+                {
+                    i--;
+                }
+            }
+
+            yield return new WaitForSeconds(2);
+        }
+
         void Update()
         {
             
@@ -897,156 +972,10 @@ namespace BrainCloudPhotonExample.Game
 
                 case eGameState.GAME_STATE_STARTING_GAME:
 
-                    if (PhotonNetwork.isMasterClient && !m_playerIsReady)
+                    if (PhotonNetwork.isMasterClient && !m_once)
                     {
-                        m_roomProperties = PhotonNetwork.room.customProperties;
-                        m_roomProperties["IsPlaying"] = 1;
-                        PhotonNetwork.room.SetCustomProperties(m_roomProperties);
-
-                        m_playerIsReady = true;
-                        GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.All);
-
-                        int shipID = 0;
-                        bool done = false;
-                        GameObject ship = null;
-                        int shipIndex = 0;
-                        int tryCount = 0;
-
-                        MapPresets.MapSize mapSize = m_mapSizes[m_mapSize];
-                        GameObject mapBound = GameObject.Find("MapBounds");
-                        mapBound.transform.localScale = new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize);
-                        GameObject spawn = GameObject.Find("Team1Spawn");
-                        spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.min.x, 0, 22);
-                        spawn.transform.localScale = new Vector3(5, 1, mapSize.m_verticalSize * 0.75f);
-                        spawn = GameObject.Find("Team2Spawn");
-                        spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.max.x, 0, 22);
-                        spawn.transform.localScale = new Vector3(5, 1, mapSize.m_verticalSize * 0.75f);
-
-                        if (m_mapLayout == 0)
-                        {
-                            GameObject testShip = (GameObject)Instantiate((GameObject)Resources.Load("Carrier01"), Vector3.zero, Quaternion.identity);
-                            while (!done)
-                            {
-                                tryCount = 0;
-                                bool positionFound = false;
-                                Vector3 position = new Vector3(0, 0, 122);
-
-                                while (!positionFound)
-                                {
-                                    position.x = Random.Range(-340.0f, 340.0f);
-                                    position.y = Random.Range(-220.0f, 220.0f);
-
-                                    float minDistance = 10000;
-                                    for (int i = 0; i < m_spawnedShips.Count; i++)
-                                    {
-                                        if ((m_spawnedShips[i].transform.position - position).magnitude < minDistance)
-                                        {
-                                            minDistance = (m_spawnedShips[i].transform.position - position).magnitude;
-                                        }
-                                    }
-
-                                    if (minDistance > 170)
-                                    {
-                                        positionFound = true;
-                                    }
-                                    tryCount++;
-                                    if (tryCount > 100000)
-                                    {
-                                        positionFound = true;
-                                    }
-                                }
-
-                                float rotation = 0;
-                                tryCount = 0;
-                                bool done2 = false;
-                                testShip.transform.position = position;
-                                while (!done2)
-                                {
-                                    rotation = Random.Range(0.0f, 360.0f);
-                                    testShip.transform.rotation = Quaternion.Euler(0, 0, rotation);
-
-                                    bool collides = false;
-                                    for (int i = 0; i < m_spawnedShips.Count; i++)
-                                    {
-                                        if (testShip.transform.FindChild("Graphic").GetComponent<Collider>().bounds.Intersects(m_spawnedShips[i].transform.FindChild("ShipGraphic").GetChild(0).FindChild("Graphic").GetComponent<Collider>().bounds))
-                                        {
-                                            collides = true;
-                                            break;
-                                        }
-                                    }
-
-                                    if (!collides)
-                                    {
-                                        done2 = true;
-                                    }
-                                    tryCount++;
-                                    if (tryCount > 1000)
-                                    {
-                                        done2 = true;
-                                    }
-
-                                }
-
-                                ship = PhotonNetwork.Instantiate("Ship", position, Quaternion.Euler(0, 0, Random.Range(0.0f, 360.0f)), 0);
-                                switch (shipIndex)
-                                {
-                                    case 0:
-                                        ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CARRIER, (shipID % 2) + 1, shipID);
-                                        break;
-                                    case 1:
-                                        ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_BATTLESHIP, (shipID % 2) + 1, shipID);
-                                        break;
-                                    case 2:
-                                        ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CRUISER, (shipID % 2) + 1, shipID);
-                                        break;
-                                    case 3:
-                                        ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_PATROLBOAT, (shipID % 2) + 1, shipID);
-                                        break;
-                                    case 4:
-                                        ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
-                                        break;
-                                }
-
-                                if (shipID % 2 == 1)
-                                {
-                                    shipIndex++;
-                                }
-                                shipID++;
-                                if (m_spawnedShips.Count >= 10) done = true;
-                            }
-                            Destroy(testShip);
-                        }
-                        else
-                        {
-                            MapPresets.Preset preset = m_mapPresets[m_mapLayout];
-                            Bounds mapBounds = GameObject.Find("MapBounds").GetComponent<Collider>().bounds;
-                            for (int i = 0; i < preset.m_numShips; i++)
-                            {
-                                Vector3 position = new Vector3(mapBounds.min.x + (mapBounds.max.x - mapBounds.min.x) * preset.m_ships[i].m_xPositionPercent, mapBounds.min.y + (mapBounds.max.y - mapBounds.min.y) * preset.m_ships[i].m_yPositionPercent, 122);
-                                ship = PhotonNetwork.Instantiate("Ship", position, Quaternion.Euler(0, 0, preset.m_ships[i].m_angle), 0);
-                                ship.GetComponent<ShipController>().SetShipType(preset.m_ships[i].m_shipType, preset.m_ships[i].m_team, shipID, preset.m_ships[i].m_angle, position, preset.m_ships[i].m_respawnTime, preset.m_ships[i].m_path, preset.m_ships[i].m_pathSpeed);
-
-                                shipID++;
-                            }
-
-                        }
-
-                        Bounds bounds = GameObject.Find("MapBounds").GetComponent<Collider>().bounds;
-
-                        for (int i = 0; i < (int)m_mapSizes[m_mapSize].m_horizontalSize / 80 + (int)m_mapSizes[m_mapSize].m_verticalSize / 80; i++)
-                        {
-                            Vector3 position = new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), 122);
-                            Quaternion rotation = Quaternion.Euler(new Vector3(0, 0, Random.Range(0, 360.0f)));
-
-                            if (!Physics.CheckSphere(position,15, (1 << 16 | 1 << 17 | 1 << 20)))
-                            {
-                                PhotonNetwork.Instantiate("Rock0" + Random.Range(1, 5), position, rotation, 0);
-                            }
-                            else
-                            {
-                                i--;
-                            }
-                        }
+                        m_once = true;
+                        StartCoroutine("SpawnGameStart");
                         StartCoroutine("WaitForReadyPlayers");
                     }
 
@@ -1288,6 +1217,10 @@ namespace BrainCloudPhotonExample.Game
         {
             StopCoroutine("RespawnPlayer");
             m_gameState = eGameState.GAME_STATE_GAME_OVER;
+            m_allyShipSunk.SetActive(false);
+            m_enemyShipSunk.SetActive(false);
+            m_redShipLogo.SetActive(false);
+            m_greenShipLogo.SetActive(false);
             GameObject.Find("PlayerController").GetComponent<PlayerController>().DestroyPlayerPlane();
         }
 
@@ -1341,8 +1274,7 @@ namespace BrainCloudPhotonExample.Game
                 Destroy(explosions[i]);
             }
 
-            m_playerIsReady = false;
-            m_once = true;
+            m_once = false;
             m_gameState = eGameState.GAME_STATE_WAITING_FOR_PLAYERS;
 
         }
