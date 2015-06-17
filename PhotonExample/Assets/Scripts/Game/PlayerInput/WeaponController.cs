@@ -211,6 +211,8 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         {
             if (m_bombs < GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_maxBombCapacity)
             {
+                if (m_playerPlane != null)
+                    GetComponent<AudioSource>().Play();
                 m_bombs++;
             }
         }

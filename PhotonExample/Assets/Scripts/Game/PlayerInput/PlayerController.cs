@@ -47,6 +47,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public void SetPlayerPlane(PlaneController playerPlane)
         {
+            m_leftBoundsTimer = 4;
             GameObject.Find("MapBounds").GetComponent<MapBoundsCheck>().m_playerPlane = playerPlane.gameObject;
             StartCoroutine("PulseMissionText");
             m_leftBounds = false;
@@ -384,7 +385,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public void LeftBounds()
         {
             m_leftBounds = true;
-            m_leftBoundsTimer = 4;
         }
     }
 }
