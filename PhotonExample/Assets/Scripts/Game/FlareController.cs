@@ -41,10 +41,9 @@ namespace BrainCloudPhotonExample.Game
         void Start()
         {
             m_offscreenIndicator = transform.GetChild(1).gameObject;
-            
+
         }
 
-        // Use this for initialization
         void FixedUpdate()
         {
             m_lifeTime -= Time.fixedDeltaTime;
@@ -56,7 +55,6 @@ namespace BrainCloudPhotonExample.Game
             }
         }
 
-        // Update is called once per frame
         void LateUpdate()
         {
             if (m_isActive && (int)m_player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])

@@ -7,9 +7,6 @@ namespace BrainCloudPhotonExample.Connection
 {
     public class DialogDisplay : MonoBehaviour
     {
-
-        
-
         private bool m_isFullscreen = false;
 
         List<DialogBox> m_dialogsToDisplay;
@@ -137,7 +134,6 @@ namespace BrainCloudPhotonExample.Connection
 
         public void DisplayDialog(string aMessage)
         {
-            //m_dialogsToDisplay.Add(new DialogBox(aMessage, aTitle));
             GameObject dialog = (GameObject)Instantiate(transform.GetChild(0).gameObject, transform.GetChild(0).transform.position, transform.GetChild(0).rotation);
             dialog.transform.SetParent(GameObject.Find("Canvas").transform);
             dialog.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(dialog); });
@@ -146,7 +142,6 @@ namespace BrainCloudPhotonExample.Connection
 
         public void DisplayAchievement(int aID, string aTitle, string aDescription)
         {
-            //m_dialogsToDisplay.Add(new DialogBox(aTitle + " unlocked!\n" + aDescription, "New Achievement!"));
             GameObject dialog = (GameObject)Instantiate(transform.GetChild(2).gameObject, transform.GetChild(2).transform.position, transform.GetChild(2).transform.rotation);
             switch (aID)
             {
@@ -173,13 +168,13 @@ namespace BrainCloudPhotonExample.Connection
             dialog.transform.SetParent(GameObject.Find("Canvas").transform);
             dialog.GetComponent<ParticlesDestroyer>().enabled = true;
             dialog.GetComponent<ParticlesDestroyer>().m_lifeTime = 5;
-            dialog.transform.GetChild(0).GetComponent<Text>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[newRank-1] + " (" + newRank + ")";
+            dialog.transform.GetChild(0).GetComponent<Text>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[newRank - 1] + " (" + newRank + ")";
         }
 
         private bool m_showHostLeft = false;
         private bool m_showHost = false;
 
-        void OnLevelWasLoaded (int level)
+        void OnLevelWasLoaded(int level)
         {
             if (m_showHostLeft)
             {
@@ -192,11 +187,6 @@ namespace BrainCloudPhotonExample.Connection
             m_showHostLeft = true;
         }
 
-        void Update()
-        {
-
-        }
-
         void LateUpdate()
         {
             if (m_showHost)
@@ -206,7 +196,6 @@ namespace BrainCloudPhotonExample.Connection
                 DisplayDialog("The host has left the game!");
             }
         }
-
 
         public void ToggleFullscreen()
         {

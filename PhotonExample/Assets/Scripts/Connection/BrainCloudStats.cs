@@ -7,7 +7,6 @@ namespace BrainCloudPhotonExample.Connection
 {
     public class BrainCloudStats : MonoBehaviour
     {
-
         public class Achievement
         {
             public string m_name = "";
@@ -118,7 +117,6 @@ namespace BrainCloudPhotonExample.Connection
             // Ask brainCloud for statistics
             BrainCloudWrapper.GetBC().PlayerStatisticsService.ReadAllPlayerStats(StatsSuccess_Callback, StatsFailure_Callback, null);
             BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(StateSuccess_Callback, StateFailure_Callback, null);
-            //BrainCloudWrapper.GetBC().GamificationService.ReadX
             BrainCloudWrapper.GetBC().GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
             BrainCloudWrapper.GetBC().GamificationService.ReadAchievements(true, AchievementSuccess_Callback, AchievementFailure_Callback, null);
         }
@@ -128,7 +126,7 @@ namespace BrainCloudPhotonExample.Connection
             JsonData achievementData = JsonMapper.ToObject(responseData);
             achievementData = achievementData["data"]["achievements"];
             m_achievements.Clear();
-            for (int i=0;i<achievementData.Count;i++)
+            for (int i = 0; i < achievementData.Count; i++)
             {
                 Achievement achievement = new Achievement(achievementData[i]["title"].ToString(), achievementData[i]["id"].ToString(), achievementData[i]["description"].ToString(), achievementData[i]["status"].ToString() == "AWARDED");
                 m_achievements.Add(achievement);
@@ -136,7 +134,7 @@ namespace BrainCloudPhotonExample.Connection
 
             if (m_statPlanesDestroyed >= 50)
             {
-                for (int i=0;i<m_achievements.Count;i++)
+                for (int i = 0; i < m_achievements.Count; i++)
                 {
                     if (m_achievements[i].m_id == "2")
                     {
@@ -153,7 +151,7 @@ namespace BrainCloudPhotonExample.Connection
 
             if (m_statCarriersDestroyed >= 10)
             {
-                for (int i=0;i<m_achievements.Count;i++)
+                for (int i = 0; i < m_achievements.Count; i++)
                 {
                     if (m_achievements[i].m_id == "1")
                     {
@@ -171,7 +169,7 @@ namespace BrainCloudPhotonExample.Connection
 
         public void AwardSuccess_Callback(string responseData, object cbObject)
         {
-            
+
         }
 
         public void AwardFailure_Callback(int a, int b, string responseData, object cbObject)
@@ -189,7 +187,7 @@ namespace BrainCloudPhotonExample.Connection
                     {
                         m_achievements[i].m_achieved = true;
                         BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
-                        GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id),m_achievements[i].m_name, m_achievements[i].m_description);
+                        GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                     }
                     break;
                 }

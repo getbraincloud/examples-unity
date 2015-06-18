@@ -6,8 +6,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 {
     public class WeaponController : MonoBehaviour
     {
-        //private float m_fireDelay = 0.3f;
-
         private GameObject m_playerPlane;
 
         public Transform m_bulletSpawnPoint;
@@ -26,7 +24,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         private int m_bombs = 0;
 
-        //private GUISkin m_skin;
         private GameObject m_targetingReticule;
         private GameObject m_offscreenIndicator;
 
@@ -140,7 +137,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                         hitFound = true;
                         position.z = 121.5f;
                     }
-
                 }
 
                 m_targetingReticule.transform.position = position;
@@ -162,35 +158,45 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 }
 
                 m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
-                //m_offscreenIndicator.transform.position = Camera.main.transform.position;
-                //Vector3 indicatorPosition = new Vector3(m_offscreenIndicator.transform.position.x, m_offscreenIndicator.transform.position.y, m_offscreenIndicator.transform.position.z + 10);
-                //float height = 2 * 10 * Mathf.Tan(Camera.main.fieldOfView * 0.5f * Mathf.Deg2Rad);
-                //float width = height * Camera.main.aspect;
-                //Bounds bounds = new Bounds(new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y, 22), new Vector3(width, height, 0));
+
                 GameObject ship = GameObject.Find("GameManager").GetComponent<GameManager>().GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.customProperties["Team"]);
 
                 if (ship != null)
                 {
                     Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
-                    if (!GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
+                    m_offscreenIndicator.transform.position = ship.transform.position;
+                    position = m_offscreenIndicator.transform.position;
+                    Vector3 point = Camera.main.WorldToScreenPoint(position);
+                    bool wasOffscreen = false;
+                    if (point.x > Screen.width - 30)
                     {
-                        m_offscreenIndicator.transform.position = ship.transform.position;
-                        position = m_offscreenIndicator.transform.position;
-                        Vector3 point = Camera.main.WorldToScreenPoint(position);
-                        if (point.x > Screen.width - 10) point.x = Screen.width - 10;
-                        if (point.x < 0 + 10) point.x = 0 + 10;
-                        if (point.y > Screen.height - 10) point.y = Screen.height - 10;
-                        if (point.y < 0 + 10) point.y = 0 + 10;
-                        point.z = 10;
-                        point = Camera.main.ScreenToWorldPoint(point);
-                        m_offscreenIndicator.transform.position = point;
-                        point -= Camera.main.transform.position;
-                        m_offscreenIndicator.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(point.y, point.x) * Mathf.Rad2Deg - 90);
+                        wasOffscreen = true;
+                        point.x = Screen.width - 30;
                     }
-                    else
+                    if (point.x < 0 + 30)
                     {
+                        wasOffscreen = true;
+                        point.x = 0 + 30;
+                    }
+                    if (point.y > Screen.height - 30)
+                    {
+                        wasOffscreen = true;
+                        point.y = Screen.height - 30;
+                    }
+                    if (point.y < 0 + 30)
+                    {
+                        wasOffscreen = true;
+                        point.y = 0 + 30;
+                    }
+                    point.z = 10;
+                    point = Camera.main.ScreenToWorldPoint(point);
+                    m_offscreenIndicator.transform.position = point;
+                    point -= Camera.main.transform.position;
+                    m_offscreenIndicator.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(point.y, point.x) * Mathf.Rad2Deg - 90);
+
+                    if (!wasOffscreen)
                         m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-                    }
+
                 }
                 else
                 {

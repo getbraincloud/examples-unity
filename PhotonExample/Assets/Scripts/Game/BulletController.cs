@@ -72,7 +72,6 @@ namespace BrainCloudPhotonExample.Game
                 ExitGames.Client.Photon.Protocol.Deserialize(out speed.y, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Deserialize(out speed.z, bytes, ref index);
 
-
                 ExitGames.Client.Photon.Protocol.Deserialize(out id, bytes, ref index);
 
                 shooter = shooter.Get(shooterID);

@@ -6,7 +6,6 @@ namespace BrainCloudPhotonExample.Game
 {
     public class ShipController : MonoBehaviour
     {
-
         public enum eShipType
         {
             SHIP_TYPE_NONE,
@@ -94,8 +93,6 @@ namespace BrainCloudPhotonExample.Game
 
         public int m_team;
         public bool m_isAlive = true;
-        //private Vector3[] m_path = null;
-        //private float m_pathSpeed = -1;
         private Vector3 m_startPosition = new Vector3(-1, -1, -1);
         private float m_startAngle = -1;
         public int m_shipID;
@@ -161,7 +158,6 @@ namespace BrainCloudPhotonExample.Game
             {
                 m_startPosition = transform.position;
                 m_startAngle = transform.eulerAngles.z;
-                //m_pathSpeed = -1;
                 m_respawnTime = -1;
 
                 m_team = aTeam;
@@ -273,8 +269,6 @@ namespace BrainCloudPhotonExample.Game
             m_team = aTeam;
             m_startPosition = aPosition;
             m_startAngle = aAngle;
-            //m_path = aPath;
-            //m_pathSpeed = aPathSpeed;
             m_respawnTime = aRespawnTime;
 
             transform.position = m_startPosition;
@@ -340,7 +334,6 @@ namespace BrainCloudPhotonExample.Game
 
                 index++;
             }
-            //m_targetPositions = index - 1;
         }
 
         public bool IsAlive()

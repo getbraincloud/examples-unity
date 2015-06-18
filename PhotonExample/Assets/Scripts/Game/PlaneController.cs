@@ -23,7 +23,6 @@ namespace BrainCloudPhotonExample.Game
                 float direction = 1;
                 float angle = 0.0f;
 
-                //See if aVector is left or right of this vector
                 if ((m_direction.x * aVector.m_direction.y) - (m_direction.y * aVector.m_direction.x) < 0)
                 {
                     direction = -1;
@@ -250,7 +249,7 @@ namespace BrainCloudPhotonExample.Game
 
         void Start()
         {
-            
+
             m_bezierTime = 0.0f;
             m_planeDamage = new List<GameObject>() 
             { 
@@ -309,7 +308,6 @@ namespace BrainCloudPhotonExample.Game
 
         void Update()
         {
-
             switch (m_health)
             {
                 case 1:
@@ -455,7 +453,6 @@ namespace BrainCloudPhotonExample.Game
             {
                 targetAngle = 90 * m_bankCurve.Evaluate(m_bankTime / m_timeToFullBank);
             }
-
 
             m_bankAngle = targetAngle;
 

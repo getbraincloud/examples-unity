@@ -6,7 +6,6 @@ namespace BrainCloudPhotonExample.Game
 {
     public class TargetPointDisplay : MonoBehaviour
     {
-
         private Color m_color;
         private int m_team;
 

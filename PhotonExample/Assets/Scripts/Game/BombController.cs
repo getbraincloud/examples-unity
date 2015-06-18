@@ -6,7 +6,6 @@ namespace BrainCloudPhotonExample.Game
 {
     public class BombController : MonoBehaviour
     {
-
         public class BombInfo
         {
             public Vector3 m_startPosition;
@@ -67,7 +66,6 @@ namespace BrainCloudPhotonExample.Game
                 ExitGames.Client.Photon.Protocol.Deserialize(out speed.x, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Deserialize(out speed.y, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Deserialize(out speed.z, bytes, ref index);
-
 
                 ExitGames.Client.Photon.Protocol.Deserialize(out id, bytes, ref index);
 
