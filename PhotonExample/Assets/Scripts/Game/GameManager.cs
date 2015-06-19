@@ -584,6 +584,7 @@ namespace BrainCloudPhotonExample.Game
         {
             if (PhotonNetwork.room == null) return;
             m_resultsWindow.GetComponent<CanvasGroup>().alpha += Time.fixedDeltaTime * 2;
+            if (m_resultsWindow.GetComponent<CanvasGroup>().alpha > 1) m_resultsWindow.GetComponent<CanvasGroup>().alpha = 1;
             m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
             m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
             GameObject team = GameObject.Find("Team Green Score");
