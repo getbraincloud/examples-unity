@@ -302,7 +302,27 @@ namespace BrainCloudPhotonExample.Game
 
         public void LeaveRoom()
         {
+            if (PhotonNetwork.player.customProperties["Team"] != null && (int)PhotonNetwork.player.customProperties["Team"] == 1)
+            {
+                m_roomProperties = PhotonNetwork.room.customProperties;
+                m_roomProperties["Team1Players"] = (int)m_roomProperties["Team1Players"] - 1;
+                PhotonNetwork.room.SetCustomProperties(m_roomProperties);
+            }
+            else if (PhotonNetwork.player.customProperties["Team"] != null && (int)PhotonNetwork.player.customProperties["Team"] == 2)
+            {
+                m_roomProperties = PhotonNetwork.room.customProperties;
+                m_roomProperties["Team2Players"] = (int)m_roomProperties["Team2Players"] - 1;
+                PhotonNetwork.room.SetCustomProperties(m_roomProperties);
+            }
+            else if (PhotonNetwork.player.customProperties["Team"] == null || (int)PhotonNetwork.player.customProperties["Team"] == 0)
+            {
+                m_roomProperties = PhotonNetwork.room.customProperties;
+                m_roomProperties["Spectators"] = (int)m_roomProperties["Spectators"] - 1;
+                PhotonNetwork.room.SetCustomProperties(m_roomProperties);
+            }
+
             m_playerProperties.Clear();
+
             PhotonNetwork.player.SetCustomProperties(m_playerProperties);
             PhotonNetwork.LeaveRoom();
         }
@@ -594,12 +614,12 @@ namespace BrainCloudPhotonExample.Game
                 {
                     m_greenLogo.SetActive(true);
                     m_redLogo.SetActive(false);
-                    if ((int)PhotonNetwork.player.customProperties["Team"] == 1)
+                    if (PhotonNetwork.player.customProperties["Team"] != null && (int)PhotonNetwork.player.customProperties["Team"] == 1)
                     {
                         m_allyWinText.SetActive(true);
                         m_enemyWinText.SetActive(false);
                     }
-                    else if ((int)PhotonNetwork.player.customProperties["Team"] == 2)
+                    else if (PhotonNetwork.player.customProperties["Team"] != null && (int)PhotonNetwork.player.customProperties["Team"] == 2)
                     {
                         m_allyWinText.SetActive(false);
                         m_enemyWinText.SetActive(true);
@@ -1469,7 +1489,6 @@ namespace BrainCloudPhotonExample.Game
             }
 
             if (shipTarget == null) return;
-            Debug.Log("hit");
             GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("WeakpointExplosion"), shipTarget.m_position.position, shipTarget.m_position.rotation);
             explosion.transform.parent = ship.transform;
             explosion.GetComponent<AudioSource>().Play();

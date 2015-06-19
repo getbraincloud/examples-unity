@@ -19,7 +19,8 @@ namespace BrainCloudPhotonExample.Game
         {
             if (GameObject.Find("PlayerController").GetComponent<WeaponController>().HasBombs())
             {
-                if (m_team == (int)PhotonNetwork.player.customProperties["Team"])
+                
+                if (PhotonNetwork.player.customProperties["Team"] != null && m_team == (int)PhotonNetwork.player.customProperties["Team"])
                 {
                     GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0);
                 }
