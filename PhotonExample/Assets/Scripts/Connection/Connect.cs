@@ -164,7 +164,7 @@ namespace BrainCloudPhotonExample.Connection
 
         void OnPhotonMaxCcuReached()
         {
-            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("This game uses a trial version of Photon, and the max user limit has been reached! Try again later.");
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("This game uses a trial version of Photon, and the max user limit has been reached! Please try again later.");
         }
 
         private void AppendLog(string log, bool error = false)
