@@ -59,9 +59,9 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_bombDropPrefab = (GameObject)Resources.Load("BombDrop");
             }
 
-
             m_targetingReticule.transform.FindChild("WeakPointSprite").GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
             m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
+            m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
         }
 
         public bool HasBombs()
@@ -158,6 +158,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 }
 
                 m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
+                m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
 
                 GameObject ship = GameObject.Find("GameManager").GetComponent<GameManager>().GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.customProperties["Team"]);
 
@@ -168,25 +169,25 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                     position = m_offscreenIndicator.transform.position;
                     Vector3 point = Camera.main.WorldToScreenPoint(position);
                     bool wasOffscreen = false;
-                    if (point.x > Screen.width - 30)
+                    if (point.x > Screen.width - 35)
                     {
                         wasOffscreen = true;
-                        point.x = Screen.width - 30;
+                        point.x = Screen.width - 35;
                     }
-                    if (point.x < 0 + 30)
+                    if (point.x < 0 + 35)
                     {
                         wasOffscreen = true;
-                        point.x = 0 + 30;
+                        point.x = 0 + 35;
                     }
-                    if (point.y > Screen.height - 30)
+                    if (point.y > Screen.height - 35)
                     {
                         wasOffscreen = true;
-                        point.y = Screen.height - 30;
+                        point.y = Screen.height - 35;
                     }
-                    if (point.y < 0 + 30)
+                    if (point.y < 0 + 35)
                     {
                         wasOffscreen = true;
-                        point.y = 0 + 30;
+                        point.y = 0 + 35;
                     }
                     point.z = 10;
                     point = Camera.main.ScreenToWorldPoint(point);
@@ -195,12 +196,17 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                     m_offscreenIndicator.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(point.y, point.x) * Mathf.Rad2Deg - 90);
 
                     if (!wasOffscreen)
+                    {
                         m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
+                        m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
 
+                    }
                 }
                 else
                 {
                     m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
+                    m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
+
                 }
 
             }
@@ -210,6 +216,8 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_targetingReticule.transform.FindChild("WeakPointSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.FindChild("WeakPointSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0), 4 * Time.deltaTime);
                 m_targetingReticule.transform.FindChild("BombCounter").GetComponent<TextMesh>().text = "";
                 m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
+                m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
+
             }
         }
 

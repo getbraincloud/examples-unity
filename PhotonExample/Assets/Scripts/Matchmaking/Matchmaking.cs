@@ -74,6 +74,11 @@ namespace BrainCloudPhotonExample.Matchmaking
         private Sprite m_selectedTabSprite;
         [SerializeField]
         private Sprite m_tabSprite;
+        private Color m_selectedTabColor;
+        private Color m_tabColor;
+
+        [SerializeField]
+        private GameObject m_playerChevron;
 
         private GameObject m_joiningGameWindow;
 
@@ -90,6 +95,8 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void Start()
         {
+            m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
+            m_tabColor = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color;
             GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
             GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
 
@@ -554,6 +561,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             {
                 GameObject.Find("Aces Tab").GetComponent<Image>().sprite = m_selectedTabSprite;
                 GameObject.Find("Bombers Tab").GetComponent<Image>().sprite = m_tabSprite;
+                GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color = m_selectedTabColor;
+                GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color = m_tabColor;
                 m_leaderboardReady = false;
                 m_currentLeaderboardID = "KDR";
                 GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
@@ -566,6 +575,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             {
                 GameObject.Find("Bombers Tab").GetComponent<Image>().sprite = m_selectedTabSprite;
                 GameObject.Find("Aces Tab").GetComponent<Image>().sprite = m_tabSprite;
+                GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color = m_tabColor;
+                GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color = m_selectedTabColor;
                 m_leaderboardReady = false;
                 m_currentLeaderboardID = "BDR";
                 GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
@@ -616,17 +627,33 @@ namespace BrainCloudPhotonExample.Matchmaking
             string leaderboardLevelText = "";
 
             int players = 1;
+            bool playerListed = false;
+            int playerChevronPosition = 0;
             if (m_leaderboardReady)
             {
-
+                
                 players = int.Parse(leaderboardData["social_leaderboard"].Count.ToString());
 
                 for (int i = 0; i < players; i++)
                 {
-                    leaderboardRankText += (i + 1) + "\n";
-                    leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n";
-                    leaderboardLevelText += leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["social_leaderboard"][i]["data"]["level"].ToString() + ")\n";
-                    leaderboardScoreText += (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
+                    if (leaderboardData["social_leaderboard"][i]["name"].ToString() == PhotonNetwork.playerName)
+                    {
+                        playerListed = true;
+                        playerChevronPosition = i;
+                       // leaderboardRankText += "\n";
+                       // leaderboardNameText += "\n";
+                       // leaderboardLevelText += "\n";
+                       // leaderboardScoreText += "\n";
+                        //96.6
+                        //17.95
+                    }
+                    //else
+                    {
+                        leaderboardRankText += (i + 1) + "\n";
+                        leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n";
+                        leaderboardLevelText += leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["social_leaderboard"][i]["data"]["level"].ToString() + ")\n";
+                        leaderboardScoreText += (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
+                    }
                 }
                 if (players == 0)
                 {
@@ -643,6 +670,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                 leaderboardLevelText = "";
                 leaderboardScoreText = "";
             }
+            
 
             m_scoreRect.transform.FindChild("List").GetComponent<Text>().text = leaderboardNameText;
             m_scoreRect.transform.FindChild("List Ranks").GetComponent<Text>().text = leaderboardRankText;
@@ -656,7 +684,16 @@ namespace BrainCloudPhotonExample.Matchmaking
                 m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 0.99f;
                 m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 1;
             }
+            if (!playerListed)
+            {
+                m_playerChevron.SetActive(false);
+            }
+            else
+            {
+                m_playerChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_playerChevron.GetComponent<RectTransform>().localPosition.x, 96.6f - (17.95f * playerChevronPosition), m_playerChevron.GetComponent<RectTransform>().localPosition.z);
 
+                m_playerChevron.SetActive(true);
+            }
         }
 
         void OnPhotonJoinRoomFailed()
@@ -672,7 +709,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             PhotonNetwork.automaticallySyncScene = true;
             PhotonNetwork.LoadLevel("Game");
         }
-        
+
         public void QuitToLogin()
         {
             BrainCloudWrapper.GetBC().PlayerStateService.Logout();
