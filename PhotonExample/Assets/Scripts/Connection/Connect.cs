@@ -162,6 +162,11 @@ namespace BrainCloudPhotonExample.Connection
             ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(ShipController.ShipTarget), (byte)'s', ShipController.ShipTarget.SerializeShipInfo, ShipController.ShipTarget.DeserializeShipInfo);
         }
 
+        void OnPhotonMaxCcuReached()
+        {
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("This game uses a trial version of Photon, and the max user limit has been reached! Try again later.");
+        }
+
         private void AppendLog(string log, bool error = false)
         {
             string oldStatus = m_authStatus;
