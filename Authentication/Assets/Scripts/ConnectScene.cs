@@ -30,7 +30,6 @@ public class ConnectScene : MonoBehaviour
     void Start()
     {
         BrainCloudWrapper.Initialize();
-		BrainCloudWrapper.GetBC().EnableLogging(true);
     }
     
     void Update()
