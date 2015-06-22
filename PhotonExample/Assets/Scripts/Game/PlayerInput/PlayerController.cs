@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BrainCloudPhotonExample.Connection;
+using UnityEngine.UI;
 
 namespace BrainCloudPhotonExample.Game.PlayerInput
 {
@@ -22,26 +23,19 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         private int m_baseHealth = 3;
 
         private int m_health = 0;
-
         private float m_speedMultiplier = 1;
 
         private float m_maxSpeedMultiplier = 2.5f;
-
-        private GUISkin m_skin;
-
         private float m_leftBoundsTimer = 0;
         private bool m_leftBounds = false;
-
-        //private float m_horizontalCamLimit = 0;
-        //private float m_verticalCamLimit = 0;
 
         private Vector3 m_originalCamPosition = Vector3.zero;
         private float m_shakeDecay = 0;
         private float m_shakeIntensity = 0;
+        public GameObject m_missionText;
 
         void Start()
         {
-            m_skin = (GUISkin)Resources.Load("skin");
             m_turnSpeed = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_planeTurnSpeed;
             m_acceleration = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_planeAcceleration;
             m_baseHealth = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_basePlaneHealth;
@@ -50,6 +44,9 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public void SetPlayerPlane(PlaneController playerPlane)
         {
+            m_leftBoundsTimer = 4;
+            GameObject.Find("MapBounds").GetComponent<MapBoundsCheck>().m_playerPlane = playerPlane.gameObject;
+            StartCoroutine("PulseMissionText");
             m_leftBounds = false;
             m_currentRotation = playerPlane.gameObject.transform.rotation.eulerAngles.z;
             m_isActive = true;
@@ -58,23 +55,39 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             m_health = m_baseHealth;
         }
 
-        void OnGUI()
+        IEnumerator PulseMissionText()
         {
-            GUI.skin = m_skin;
-            if (m_leftBounds)
+            bool goingToColor1 = true;
+            float time = 0;
+            while (true)
             {
-                GUI.skin.label.normal.textColor = Color.red;
-                int lastSize = GUI.skin.label.fontSize;
-                GUI.skin.label.fontSize = 20;
-                GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height - 50, 200, 100), "Return to Mission Area " + Mathf.CeilToInt(m_leftBoundsTimer));
-                GUI.skin.label.fontSize = lastSize;
-                GUI.skin.label.normal.textColor = Color.white;
+                while (goingToColor1)
+                {
+                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(1, 0, 0, 1), 4 * Time.fixedDeltaTime);
+                    time += Time.fixedDeltaTime;
+                    if (time > 0.3f)
+                    {
+                        goingToColor1 = !goingToColor1;
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+                time = 0;
+                while (!goingToColor1)
+                {
+                    m_missionText.GetComponent<Text>().color = Color.Lerp(m_missionText.GetComponent<Text>().color, new Color(0.3f, 0, 0, 1), 4 * Time.fixedDeltaTime);
+                    time += Time.fixedDeltaTime;
+                    if (time > 0.3f)
+                    {
+                        goingToColor1 = !goingToColor1;
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+                time = 0;
             }
         }
 
         void Update()
         {
-
             if (m_leftBounds)
             {
                 if (m_leftBoundsTimer > 0)
@@ -86,6 +99,15 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                     }
                 }
             }
+
+            if (m_leftBounds)
+            {
+                m_missionText.GetComponent<Text>().text = "Return to Mission Area " + Mathf.CeilToInt(m_leftBoundsTimer);
+            }
+            else
+            {
+                m_missionText.GetComponent<Text>().text = "";
+            }
             if (m_playerPlane == null)
             {
                 m_isAccelerating = false;
@@ -93,7 +115,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_isTurningRight = false;
                 return;
             }
-
 
             if (!m_isActive) return;
             m_playerPlane.GetComponent<AudioSource>().pitch = 1 + ((m_speedMultiplier - 1) / m_maxSpeedMultiplier) * 0.5f;
@@ -159,12 +180,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             }
 
             m_playerPlane.GetComponent<AudioSource>().pitch = 1 + ((m_speedMultiplier - 1) / m_maxSpeedMultiplier) * 0.8f;
-
-            if (Input.GetKeyDown("g"))
-            {
-                TakeBulletDamage(PhotonNetwork.player);
-            }
-
         }
 
         void FixedUpdate()
@@ -195,16 +210,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             m_playerPlane.Accelerate(m_acceleration, m_speedMultiplier);
             m_playerPlane.SetRotation(m_currentRotation);
-
-
-
-
-        }
-
-        public void SetCamLimits(float aHLimit, float aVLimit)
-        {
-            //m_horizontalCamLimit = aHLimit;
-            //m_verticalCamLimit = aVLimit;
         }
 
         void LateUpdate()
@@ -215,12 +220,8 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, new Vector3(m_playerPlane.transform.FindChild("CameraPosition").position.x, m_playerPlane.transform.FindChild("CameraPosition").position.y, -110), 0.5f);
                 Camera.main.transform.GetChild(0).position = m_playerPlane.transform.position;
                 m_playerPlane.GetComponent<AudioSource>().spatialBlend = 0;
-
             }
 
-            //GeometryUtility.CalculateFrustumPlanes(Camera.main);
-            //GeometryUtility.TestPlanesAABB()
-            //Camera.main.re
             Vector3 cameraPosition = Camera.main.transform.position;
             float height = 2 * 132 * Mathf.Tan(Camera.main.fieldOfView * 0.5f * Mathf.Deg2Rad);
             float width = height * Camera.main.aspect;
@@ -245,24 +246,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 cameraPosition.y = mapBounds.max.y - (bounds.max.y - bounds.center.y);
             }
 
-            /*if (cameraPosition.y < -m_verticalCamLimit)
-            {
-                cameraPosition.y = -m_verticalCamLimit;
-            }
-            else if (cameraPosition.y > m_verticalCamLimit)
-            {
-                cameraPosition.y = m_verticalCamLimit;
-            }
-
-            if (cameraPosition.x < -m_horizontalCamLimit)
-            {
-                cameraPosition.x = -m_horizontalCamLimit;
-            }
-            else if (cameraPosition.x > m_horizontalCamLimit)
-            {
-                cameraPosition.x = m_horizontalCamLimit;
-            }
-            */
             m_originalCamPosition = cameraPosition;
             if (m_shakeIntensity > 0)
             {
@@ -305,6 +288,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             {
                 return;
             }
+            GameObject.Find("MapBounds").GetComponent<MapBoundsCheck>().m_playerPlane = null;
             m_leftBounds = false;
             m_isActive = false;
             PhotonNetwork.Destroy(m_playerPlane.gameObject);
@@ -343,8 +327,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             }
         }
 
-
-
         public void EnteredBounds()
         {
             if (m_leftBounds)
@@ -357,7 +339,6 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public void LeftBounds()
         {
             m_leftBounds = true;
-            m_leftBoundsTimer = 4;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace BrainCloudPhotonExample.Game
     {
         public int m_pickupID;
         private bool m_isActive = false;
-        private float m_lifeTime = 100;
+        private float m_lifeTime = 5;
 
         void OnTriggerEnter(Collider aOther)
         {
@@ -43,7 +43,6 @@ namespace BrainCloudPhotonExample.Game
         Vector3 GetRandomDirection()
         {
             Vector3 randomDirection = Vector3.up;
-
             randomDirection = Quaternion.Euler(new Vector3(0, 0, 360 / ((((4 * m_pickupID) + 1) % 9) + 1))) * randomDirection;
 
             return randomDirection.normalized;
@@ -58,7 +57,10 @@ namespace BrainCloudPhotonExample.Game
                 m_isActive = false;
                 return;
             }
-
+            else if (m_lifeTime <= 0 && !m_isActive)
+            {
+                Destroy(gameObject);
+            }
             Bounds mapBounds = GameObject.Find("MapBounds").GetComponent<Collider>().bounds;
             Vector3 position = transform.position;
             if (position.x < mapBounds.min.x + 25)

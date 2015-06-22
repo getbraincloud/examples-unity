@@ -25,6 +25,7 @@ namespace BrainCloudPhotonExample.Connection
 
         public static GameObject s_fullScreenButtonInstance;
         public static GameObject s_versionInstance;
+
         void Awake()
         {
             if (s_fullScreenButtonInstance)
@@ -81,11 +82,9 @@ namespace BrainCloudPhotonExample.Connection
             GameObject.Find("PasswordBox").GetComponent<InputField>().text = m_password;
         }
 
-        void OnGUI()
+        void Update()
         {
             OnWindow();
-            //m_windowRect = new Rect(Screen.width / 2 - (width / 2), Screen.height / 2 - (height / 2), width, height);
-            //GUI.Window(30, m_windowRect, OnWindow, "brainCloud Login");
         }
 
         public void Login()
@@ -99,7 +98,7 @@ namespace BrainCloudPhotonExample.Connection
                 {
                     GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Username/password can't be empty!");
                 }
-                else if(!m_username.Contains("@"))
+                else if (!m_username.Contains("@"))
                 {
                     GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Not a valid email address!");
                 }
@@ -119,7 +118,7 @@ namespace BrainCloudPhotonExample.Connection
                     }
 
                     m_isLoggingIn = true;
-                    
+
                     ///////////////////////////////////////////////////////////////////
                     // brainCloud authentication
                     ///////////////////////////////////////////////////////////////////
@@ -152,60 +151,6 @@ namespace BrainCloudPhotonExample.Connection
                 GameObject.Find("Login Button").GetComponent<Button>().interactable = false;
                 GameObject.Find("Forgot Password").GetComponent<Button>().interactable = false;
             }
-            /*
-            switch (m_authMode)
-            {
-                case eAuthMode.AUTH_MODE_UNIVERSAL:
-
-                    GUI.Label(new Rect(m_windowRect.width / 2 - 100, 45, 100, 20), "Username \n(If it doesn't exist, it will be created)");
-                    m_username = GUI.TextField(new Rect(m_windowRect.width / 2 - 100, 80, 200, 20), m_username);
-
-                    GUI.Label(new Rect(m_windowRect.width / 2 - 100, 110, 100, 20), "Password");
-                    m_password = GUI.PasswordField(new Rect(m_windowRect.width / 2 - 100, 140, 200, 20), m_password, '*');
-
-                    string buttonText = "";
-                    if (!m_connectedToPhoton)
-                    {
-                        buttonText = "Please Wait...";
-                    }
-                    else
-                    {
-                        buttonText = "Login";
-                    }
-
-                    if (GUI.Button(new Rect(m_windowRect.width / 2 - 50, 180, 100, 30), buttonText))
-                    {
-                        if (m_connectedToPhoton)
-                        {
-                            if (m_username.Length == 0 || m_password.Length == 0)
-                            {
-                                AppendLog("Username/password can't be empty");
-                            }
-                            else
-                            {
-                                AppendLog("Attempting to authenticate...");
-                                PlayerPrefs.SetString("username", m_username);
-                                PlayerPrefs.SetString("password", m_password);
-
-                                ///////////////////////////////////////////////////////////////////
-                                // brainCloud authentication
-                                ///////////////////////////////////////////////////////////////////
-                                BrainCloudWrapper.GetInstance().AuthenticateUniversal(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
-
-                                ///////////////////////////////////////////////////////////////////
-                            }
-                        }
-                    }
-                    break;
-            }
-
-            GUI.TextArea(new Rect(m_windowRect.width / 2 - 140, 240, 280, 90), m_authStatus);
-
-            if (GUI.Button(new Rect(m_windowRect.width / 2 + 100, 360, 100, 30), "Clear Log"))
-            {
-                m_authStatus = "";
-            }
-            */
         }
 
         void OnConnectedToPhoton()
@@ -215,6 +160,11 @@ namespace BrainCloudPhotonExample.Connection
             ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(BulletController.BulletInfo), (byte)'B', BulletController.BulletInfo.SerializeBulletInfo, BulletController.BulletInfo.DeserializeBulletInfo);
             ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(BombController.BombInfo), (byte)'b', BombController.BombInfo.SerializeBombInfo, BombController.BombInfo.DeserializeBombInfo);
             ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(ShipController.ShipTarget), (byte)'s', ShipController.ShipTarget.SerializeShipInfo, ShipController.ShipTarget.DeserializeShipInfo);
+        }
+
+        void OnPhotonMaxCcuReached()
+        {
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("This game uses a trial version of Photon, and the max user limit has been reached! Please try again later.");
         }
 
         private void AppendLog(string log, bool error = false)
@@ -241,7 +191,7 @@ namespace BrainCloudPhotonExample.Connection
                 return;
             }
             BrainCloudWrapper.GetBC().AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
-            
+
         }
 
         public void OnSuccess_Reset(string responseData, object cbObject)
@@ -255,7 +205,7 @@ namespace BrainCloudPhotonExample.Connection
             {
                 GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Email not registered!");
             }
-            
+
         }
 
         public void OnSuccess_Authenticate(string responseData, object cbObject)
@@ -265,7 +215,7 @@ namespace BrainCloudPhotonExample.Connection
             string username = "";
             if (response["data"]["playerName"].ToString() == "")
             {
-                for (int i=0;i<m_username.Length;i++)
+                for (int i = 0; i < m_username.Length; i++)
                 {
                     if (m_username[i] != '@')
                     {
@@ -283,7 +233,7 @@ namespace BrainCloudPhotonExample.Connection
             {
                 PhotonNetwork.player.name = response["data"]["playerName"].ToString();
             }
-            
+
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadGlobalProperties();
             GameObject.Find("Version Text").transform.SetParent(null);
@@ -300,7 +250,6 @@ namespace BrainCloudPhotonExample.Connection
             }
             m_isLoggingIn = false;
             GameObject.Find("Forgot Password").GetComponent<Button>().interactable = true;
-            
         }
     }
 }

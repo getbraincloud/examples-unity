@@ -60,7 +60,6 @@ namespace BrainCloudPhotonExample.Connection
             }
         }
 
-
         public List<Preset> m_presets;
         public List<MapSize> m_mapSizes;
 

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using BrainCloudPhotonExample.Connection;
 
 namespace BrainCloudPhotonExample.Game
 {
@@ -22,7 +23,6 @@ namespace BrainCloudPhotonExample.Game
                 float direction = 1;
                 float angle = 0.0f;
 
-                //See if aVector is left or right of this vector
                 if ((m_direction.x * aVector.m_direction.y) - (m_direction.y * aVector.m_direction.x) < 0)
                 {
                     direction = -1;
@@ -63,6 +63,7 @@ namespace BrainCloudPhotonExample.Game
         private float m_photonRotation = 0;
         private System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         public int m_health = 0;
+        private GameObject m_gunCharge;
 
         public void OnPhotonSerializeView(PhotonStream aStream, PhotonMessageInfo aInfo)
         {
@@ -77,7 +78,6 @@ namespace BrainCloudPhotonExample.Game
 
                 m_photonPosition = (Vector3)aStream.ReceiveNext();
                 m_photonRotation = (float)aStream.ReceiveNext();
-                int lastHealth = m_health;
                 m_health = (int)aStream.ReceiveNext();
 
                 stopWatch.Stop();
@@ -295,11 +295,19 @@ namespace BrainCloudPhotonExample.Game
             m_bulletSpawnPoint = graphic.transform.FindChild("BulletSpawn");
             m_leftContrail = graphic.transform.FindChild("LeftSmokeTrail").GetComponent<ParticleSystem>();
             m_rightContrail = graphic.transform.FindChild("RightSmokeTrail").GetComponent<ParticleSystem>();
+
+            m_gunCharge = transform.GetChild(0).GetChild(0).FindChild("GunCharge").gameObject;
+            m_gunCharge.GetComponent<Animator>().speed = 1 / GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotDelay;
+        }
+
+        public void ResetGunCharge()
+        {
+            m_gunCharge.SetActive(false);
+            m_gunCharge.SetActive(true);
         }
 
         void Update()
         {
-
             switch (m_health)
             {
                 case 1:
@@ -445,7 +453,6 @@ namespace BrainCloudPhotonExample.Game
             {
                 targetAngle = 90 * m_bankCurve.Evaluate(m_bankTime / m_timeToFullBank);
             }
-
 
             m_bankAngle = targetAngle;
 

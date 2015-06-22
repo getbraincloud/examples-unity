@@ -6,7 +6,6 @@ namespace BrainCloudPhotonExample.Game
 {
     public class BombController : MonoBehaviour
     {
-
         public class BombInfo
         {
             public Vector3 m_startPosition;
@@ -68,7 +67,6 @@ namespace BrainCloudPhotonExample.Game
                 ExitGames.Client.Photon.Protocol.Deserialize(out speed.y, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Deserialize(out speed.z, bytes, ref index);
 
-
                 ExitGames.Client.Photon.Protocol.Deserialize(out id, bytes, ref index);
 
                 shooter = shooter.Get(shooterID);
@@ -99,6 +97,10 @@ namespace BrainCloudPhotonExample.Game
                 if (aCollision.gameObject.layer == 4)
                 {
                     GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 0);
+                }
+                else if (aCollision.gameObject.layer == 20) //it hit a rock
+                {
+                    GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 1);
                 }
                 else //it hit a ship
                 {

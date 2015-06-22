@@ -29,6 +29,7 @@ namespace BrainCloudPhotonExample.Game
             if (m_player == PhotonNetwork.player)
             {
                 transform.GetChild(1).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+                transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
                 transform.GetChild(2).GetComponent<TextMesh>().color = new Color(1, 1, 1, 0);
             }
 
@@ -41,10 +42,9 @@ namespace BrainCloudPhotonExample.Game
         void Start()
         {
             m_offscreenIndicator = transform.GetChild(1).gameObject;
-            
+
         }
 
-        // Use this for initialization
         void FixedUpdate()
         {
             m_lifeTime -= Time.fixedDeltaTime;
@@ -56,7 +56,6 @@ namespace BrainCloudPhotonExample.Game
             }
         }
 
-        // Update is called once per frame
         void LateUpdate()
         {
             if (m_isActive && (int)m_player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
@@ -67,25 +66,25 @@ namespace BrainCloudPhotonExample.Game
 
                 bool isOffscreen = false;
 
-                if (point.x > Screen.width - 10)
+                if (point.x > Screen.width - 35)
                 {
                     isOffscreen = true;
-                    point.x = Screen.width - 10;
+                    point.x = Screen.width - 35;
                 }
-                if (point.x < 0 + 10)
+                if (point.x < 0 + 35)
                 {
                     isOffscreen = true;
-                    point.x = 0 + 10;
+                    point.x = 0 + 35;
                 }
-                if (point.y > Screen.height - 10)
+                if (point.y > Screen.height - 35)
                 {
                     isOffscreen = true;
-                    point.y = Screen.height - 10;
+                    point.y = Screen.height - 35;
                 }
-                if (point.y < 0 + 10)
+                if (point.y < 0 + 35)
                 {
                     isOffscreen = true;
-                    point.y = 0 + 10;
+                    point.y = 0 + 35;
                 }
                 point.z = 10;
                 point = Camera.main.ScreenToWorldPoint(point);
@@ -100,11 +99,13 @@ namespace BrainCloudPhotonExample.Game
                 if (isOffscreen && m_player != PhotonNetwork.player)
                 {
                     m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+                    m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
                     transform.GetChild(2).GetComponent<TextMesh>().color = new Color(1, 1, 1, 1);
                 }
                 else
                 {
                     m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+                    m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
                     transform.GetChild(2).GetComponent<TextMesh>().color = new Color(1, 1, 1, 0);
                 }
             }
