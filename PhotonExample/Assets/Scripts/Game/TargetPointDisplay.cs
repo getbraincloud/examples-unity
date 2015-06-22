@@ -22,16 +22,16 @@ namespace BrainCloudPhotonExample.Game
                 
                 if (PhotonNetwork.player.customProperties["Team"] != null && m_team == (int)PhotonNetwork.player.customProperties["Team"])
                 {
-                    GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0);
+                    GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0.0f);
                 }
                 else
                 {
-                    GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 1);
+                    GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0.4f);
                 }
             }
             else
             {
-                GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0);
+                GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0.0f);
             }
         }
     }
