@@ -156,7 +156,6 @@ namespace BrainCloudPhotonExample.Game
             m_spawnedShips = new List<ShipController>();
             m_bombPickupsSpawned = new List<BombPickup>();
 
-            StartCoroutine("LoadBackground");
             m_spawnedBullets = new List<BulletController.BulletInfo>();
             m_spawnedBombs = new List<BombController.BombInfo>();
             m_skin = (GUISkin)Resources.Load("skin");
@@ -279,12 +278,6 @@ namespace BrainCloudPhotonExample.Game
                 }
                 yield return new WaitForSeconds(0.02f);
             }
-        }
-
-        IEnumerator LoadBackground()
-        {
-            AsyncOperation async = Application.LoadLevelAdditiveAsync("Background");
-            yield return async;
         }
 
         public void OnPhotonSerializeView(PhotonStream aStream, PhotonMessageInfo aInfo)
