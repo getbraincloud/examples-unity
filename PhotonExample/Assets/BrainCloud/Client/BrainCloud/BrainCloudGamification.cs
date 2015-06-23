@@ -664,7 +664,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            string[] ids = in_achievementIds.Split(new char[] { ',' });
+            string[] ids = in_achievementIds.Split(new char[] {','});
             string achievementsStr = "[";
             for (int i = 0, isize = ids.Length; i < isize; ++i)
             {
@@ -674,12 +674,12 @@ namespace BrainCloud
             }
             achievementsStr += "]";
 
-            string[] achievementData = JsonReader.Deserialize<string[]>(achievementsStr);
+            List<object> achievementData = JsonReader.Deserialize<List<object>>(achievementsStr);
 
             Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.GamificationServiceAchievementsName.Value] = achievementData;
 
-            SuccessCallback successCallbacks = (SuccessCallback)AchievementAwardedSuccessCallback;
+            SuccessCallback successCallbacks = (SuccessCallback) AchievementAwardedSuccessCallback;
             if (in_success != null)
             {
                 successCallbacks += in_success;
@@ -691,21 +691,15 @@ namespace BrainCloud
 
         private void AchievementAwardedSuccessCallback(string in_data, object in_obj)
         {
-            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_data);
-            UnityEngine.Debug.Log(in_data);
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>> (in_data);
             try
             {
-                Dictionary<string, object> data = (Dictionary<string, object>)response[OperationParam.GamificationServiceAchievementsData.Value];
-                //achievements; //= (object[])data[OperationParam.GamificationServiceAchievementsName.Value];
-                if (((object[])data[OperationParam.GamificationServiceAchievementsName.Value]).Length > 0)
+                Dictionary<string, object> data = (Dictionary<string, object>) response[OperationParam.GamificationServiceAchievementsData.Value];
+                List<string> achievements = (List<string>) data[OperationParam.GamificationServiceAchievementsName.Value];
+
+                for (int i = 0; i < achievements.Count; i++)
                 {
-                    Dictionary<string, object>[] achievements = (Dictionary<string, object>[])data[OperationParam.GamificationServiceAchievementsName.Value];
-                    for (int i = 0; i < achievements.Length; i++)
-                    {
-                        //UnityEngine.Debug.Log(achievements[i]["id"].ToString());
-                        UnityEngine.Debug.Log(((string)achievements[i]["id"]));
-                        AwardThirdPartyAchievements(achievements[i]["id"].ToString());
-                    }
+                    AwardThirdPartyAchievements(achievements[i]);
                 }
 
                 if (m_achievementsDelegate != null)
@@ -713,22 +707,22 @@ namespace BrainCloud
                     m_achievementsDelegate(in_data, in_obj);
                 }
             }
-            catch (System.Collections.Generic.KeyNotFoundException)
+            catch(System.Collections.Generic.KeyNotFoundException)
             {
                 //do nothing.
             }
         }
 
-
+      
         // goes through JSON response to award achievements via third party (ie game centre, facebook etc).
         // notifies achievement delegate
         internal void CheckForAchievementsToAward(string in_data, object in_obj)
         {
-            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_data);
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>> (in_data);
             try
             {
-                Dictionary<string, object> data = (Dictionary<string, object>)response[OperationParam.GamificationServiceAchievementsData.Value];
-                List<string> achievements = (List<string>)data[OperationParam.GamificationServiceAchievementsGranted.Value];
+                Dictionary<string, object> data = (Dictionary<string, object>) response[OperationParam.GamificationServiceAchievementsData.Value];
+                List<string> achievements = (List<string>) data[OperationParam.GamificationServiceAchievementsGranted.Value];
                 if (achievements != null)
                 {
                     foreach (string achievement in achievements)
@@ -754,7 +748,7 @@ namespace BrainCloud
 
 #if !(DOT_NET)
             // only do it for logged in players
-            UnityEngine.Social.localUser.Authenticate(success =>
+            UnityEngine.Social.localUser.Authenticate (success =>
             {
                 if (success)
                 {
@@ -769,7 +763,6 @@ namespace BrainCloud
                             Console.Write("AwardThirdPartyAchievements Failed");
 
                     });
-
                 }
             });
 #endif
