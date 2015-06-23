@@ -64,6 +64,8 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         private List<GameObject> m_presetButtons;
         private List<GameObject> m_sizeButtons;
+        [SerializeField]
+        private GameObject m_roomsScrollBar;
 
         private GameObject m_leaderboardWindow;
         private GameObject m_scoreText;
@@ -537,6 +539,15 @@ namespace BrainCloudPhotonExample.Matchmaking
             {
                 m_refreshLabel.GetComponent<Text>().text = "No rooms found...";
             }
+
+            if (rooms.Length < 9)
+            {
+                m_roomsScrollBar.SetActive(false);
+            }
+            else
+            {
+                m_roomsScrollBar.SetActive(true);
+            }
         }
 
         private string m_currentLeaderboardID = "KDR";
@@ -640,14 +651,18 @@ namespace BrainCloudPhotonExample.Matchmaking
                     {
                         playerListed = true;
                         playerChevronPosition = i;
-                       // leaderboardRankText += "\n";
-                       // leaderboardNameText += "\n";
-                       // leaderboardLevelText += "\n";
-                       // leaderboardScoreText += "\n";
+                        leaderboardRankText += "\n";
+                        leaderboardNameText += "\n";
+                        leaderboardLevelText += "\n";
+                        leaderboardScoreText += "\n";
+                        m_playerChevron.transform.FindChild("PlayerPlace").GetComponent<Text>().text = (i + 1) + "";
+                        m_playerChevron.transform.FindChild("PlayerName").GetComponent<Text>().text = leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n"; ;
+                        m_playerChevron.transform.FindChild("PlayerLevel").GetComponent<Text>().text = leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["social_leaderboard"][i]["data"]["level"].ToString() + ")\n"; ;
+                        m_playerChevron.transform.FindChild("PlayerScore").GetComponent<Text>().text = (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
                         //96.6
                         //17.95
                     }
-                    //else
+                    else
                     {
                         leaderboardRankText += (i + 1) + "\n";
                         leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n";

@@ -102,11 +102,13 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             if (m_leftBounds)
             {
-                m_missionText.GetComponent<Text>().text = "Return to Mission Area " + Mathf.CeilToInt(m_leftBoundsTimer);
+                m_missionText.SetActive(true);
+                m_missionText.GetComponent<Text>().text = "0:0" + Mathf.CeilToInt(m_leftBoundsTimer);
             }
             else
             {
                 m_missionText.GetComponent<Text>().text = "";
+                m_missionText.SetActive(false);
             }
             if (m_playerPlane == null)
             {
