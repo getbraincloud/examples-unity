@@ -164,7 +164,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 if (ship != null)
                 {
-                    Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
+                    //Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
                     m_offscreenIndicator.transform.position = ship.transform.position;
                     position = m_offscreenIndicator.transform.position;
                     Vector3 point = Camera.main.WorldToScreenPoint(position);

@@ -224,8 +224,8 @@ namespace BrainCloudPhotonExample.Connection
 
             int killScore = (kills) * 10000 - (m_statTimesDestroyed + aDeaths);
             int bombScore = (bombs) * 10000 - (m_statTimesDestroyed + aDeaths);
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("KDR", (ulong)killScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("BDR", (ulong)bombScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("KDR", killScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard("BDR", bombScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
             ReadStatistics();
         }
 
@@ -269,7 +269,7 @@ namespace BrainCloudPhotonExample.Connection
                 //assuming the player only leveled up once
                 GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayRankUp(int.Parse(entries["rewardDetails"]["xp"]["experienceLevels"][0]["level"].ToString()));
             }
-            catch (KeyNotFoundException e)
+            catch (KeyNotFoundException)
             {
                 //didn't level up
             }

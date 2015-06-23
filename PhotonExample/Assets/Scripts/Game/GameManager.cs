@@ -294,8 +294,10 @@ namespace BrainCloudPhotonExample.Game
 
         void OnApplicationQuit()
         {
-            if (m_playerProperties != null) ;
-            m_playerProperties.Clear();
+            if (m_playerProperties != null)
+			{
+            	m_playerProperties.Clear();
+			}
             PhotonNetwork.player.SetCustomProperties(m_playerProperties);
             PhotonNetwork.Disconnect();
         }
