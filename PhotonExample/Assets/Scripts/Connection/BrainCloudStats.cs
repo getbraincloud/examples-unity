@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using LitJson;
+using System;
 using System.Collections.Generic;
 
 namespace BrainCloudPhotonExample.Connection
@@ -131,7 +132,7 @@ namespace BrainCloudPhotonExample.Connection
                 Achievement achievement = new Achievement(achievementData[i]["title"].ToString(), achievementData[i]["id"].ToString(), achievementData[i]["description"].ToString(), achievementData[i]["status"].ToString() == "AWARDED");
                 m_achievements.Add(achievement);
             }
-
+            /*
             if (m_statPlanesDestroyed >= 50)
             {
                 for (int i = 0; i < m_achievements.Count; i++)
@@ -164,7 +165,7 @@ namespace BrainCloudPhotonExample.Connection
                         break;
                     }
                 }
-            }
+            }*/
         }
 
         public void AwardSuccess_Callback(string responseData, object cbObject)
@@ -273,6 +274,8 @@ namespace BrainCloudPhotonExample.Connection
             {
                 //didn't level up
             }
+
+            
         }
 
         private void StateFailure_Callback(int a, int b, string responseData, object cbObject)
@@ -312,6 +315,27 @@ namespace BrainCloudPhotonExample.Connection
             m_statTimesDestroyed = int.Parse(entries["timesDestroyed"].ToString());
             m_statGamesWon = int.Parse(entries["gamesWon"].ToString());
             m_statBombsHit = int.Parse(entries["bombsHit"].ToString());
+
+            try
+            {
+                //assuming the player received an achievement
+                int achievementID = int.Parse(jsonData["data"]["rewardDetails"]["milestones"][0]["rewards"]["achievement"].ToString());
+                for (int i=0;i<m_achievements.Count;i++)
+                {
+                    if (m_achievements[i].m_id == achievementID.ToString())
+                    {
+                        GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(achievementID, m_achievements[i].m_name, m_achievements[i].m_description);
+                    }
+                }
+            }
+            catch (KeyNotFoundException)
+            {
+                //no achievements awarded
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                //no achievements awarded
+            }
         }
 
         private void StatsFailure_Callback(int a, int b, string responseData, object cbObject)
