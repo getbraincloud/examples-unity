@@ -950,8 +950,27 @@ namespace BrainCloudPhotonExample.Game
             }
         }
 
+        [RPC]
+        void SetMapSizeRPC(Vector3 newScale)
+        {
+            GameObject mapBound = GameObject.Find("MapBounds");
+            mapBound.transform.localScale = newScale;
+
+            GameObject spawn = GameObject.Find("Team1Spawn");
+            spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.min.x, 0, 22);
+            spawn.transform.localScale = new Vector3(5, 1, newScale.z * 0.75f);
+            spawn = GameObject.Find("Team2Spawn");
+            spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.max.x, 0, 22);
+            spawn.transform.localScale = new Vector3(5, 1, newScale.z * 0.75f);
+            GameObject.Find("BorderClouds").GetComponent<MapCloudBorder>().SetCloudBorder();
+        }
+
         IEnumerator SpawnGameStart()
         {
+            MapPresets.MapSize mapSize = m_mapSizes[m_mapSize];
+            GameObject mapBound = GameObject.Find("MapBounds");
+            mapBound.transform.localScale = new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize);
+            GetComponent<PhotonView>().RPC("SetMapSizeRPC", PhotonTargets.OthersBuffered, new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize));
             GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.All);
             yield return new WaitForSeconds(0.5f);
             m_roomProperties = PhotonNetwork.room.customProperties;
@@ -964,16 +983,14 @@ namespace BrainCloudPhotonExample.Game
             int shipIndex = 0;
             int tryCount = 0;
 
-            MapPresets.MapSize mapSize = m_mapSizes[m_mapSize];
-            GameObject mapBound = GameObject.Find("MapBounds");
-            mapBound.transform.localScale = new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize);
+
             GameObject spawn = GameObject.Find("Team1Spawn");
             spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.min.x, 0, 22);
             spawn.transform.localScale = new Vector3(5, 1, mapSize.m_verticalSize * 0.75f);
             spawn = GameObject.Find("Team2Spawn");
             spawn.transform.position = new Vector3(mapBound.GetComponent<Collider>().bounds.max.x, 0, 22);
             spawn.transform.localScale = new Vector3(5, 1, mapSize.m_verticalSize * 0.75f);
-
+            GameObject.Find("BorderClouds").GetComponent<MapCloudBorder>().SetCloudBorder();
             if (m_mapLayout == 0)
             {
                 GameObject testShip = (GameObject)Instantiate((GameObject)Resources.Load("Carrier01"), Vector3.zero, Quaternion.identity);
