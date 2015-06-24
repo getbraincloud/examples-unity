@@ -3,14 +3,17 @@
 --- !u!129 &1
 PlayerSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 7
+  serializedVersion: 6
   AndroidProfiler: 0
   defaultScreenOrientation: 4
   targetDevice: 2
+  targetGlesGraphics: -1
+  targetIOSGraphics: -1
   targetResolution: 0
   accelerometerFrequency: 60
   companyName: bitHeads
   productName: PhotonDemo
+  cloudProjectId: 
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_ShowUnitySplashScreen: 0
@@ -23,6 +26,7 @@ PlayerSettings:
   m_ActiveColorSpace: 0
   m_MTRendering: 1
   m_MobileMTRendering: 0
+  m_UseDX11: 1
   m_Stereoscopic3D: 0
   iosShowActivityIndicatorOnLoading: -1
   androidShowActivityIndicatorOnLoading: -1
@@ -77,7 +81,6 @@ PlayerSettings:
   metroEnableIndependentInputSource: 0
   metroEnableLowLatencyPresentationAPI: 0
   xboxOneDisableKinectGpuReservation: 0
-  virtualRealitySupported: 0
   productGUID: 02aa610b97e4ef944abe7441ff8d5c9d
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 9
@@ -120,7 +123,6 @@ PlayerSettings:
   iOSLaunchScreenCustomXibPath: 
   AndroidTargetDevice: 0
   AndroidSplashScreenScale: 0
-  androidSplashScreen: {fileID: 0}
   AndroidKeystoreName: 
   AndroidKeyaliasName: 
   AndroidTVCompatibility: 1
@@ -145,7 +147,6 @@ PlayerSettings:
   - m_BuildTarget: WebGL
     m_StaticBatching: 1
     m_DynamicBatching: 1
-  m_BuildTargetGraphicsAPIs: []
   webPlayerTemplate: APPLICATION:No Context Menu
   m_TemplateCustomTags: {}
   actionOnDotNetUnhandledException: 1
@@ -207,7 +208,6 @@ PlayerSettings:
   ps4ApplicationParam2: 0
   ps4ApplicationParam3: 0
   ps4ApplicationParam4: 0
-  ps4GarlicHeapSize: 2048
   ps4Passcode: frAQBc8Wsa1xVPfvJcrgRYwTiizs2trQ
   ps4pnSessions: 1
   ps4pnPresence: 1
@@ -359,7 +359,8 @@ PlayerSettings:
   blackberrySquareSplashScreen: {fileID: 0}
   tizenProductDescription: 
   tizenProductURL: 
-  tizenSigningProfileName: 
+  tizenCertificatePath: 
+  tizenCertificatePassword: 
   tizenGPSPermissions: 0
   tizenMicrophonePermissions: 0
   stvDeviceAddress: 
@@ -417,9 +418,4 @@ PlayerSettings:
   - WebGL::template
   WebGL::emscriptenArgs: 
   WebGL::template: APPLICATION:Default
-  firstStreamedSceneWithResources: 0
-  cloudProjectId: 
-  projectId: 
-  projectName: 
-  organizationId: 
-  cloudEnabled: 0
+  firstStreamedLevelWithResources: 0

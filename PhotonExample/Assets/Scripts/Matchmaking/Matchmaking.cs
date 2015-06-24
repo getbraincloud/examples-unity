@@ -157,7 +157,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_roomButtons = new List<RoomButton>();
             m_showRoomsWindow = GameObject.Find("ShowRooms");
             m_createGameWindow = GameObject.Find("CreateGame");
-            m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text = PlayerPrefs.GetString("LastRoomName");
+            
             m_createGameWindow.SetActive(false);
             GameObject.Find("PlayerName").GetComponent<InputField>().text = PhotonNetwork.player.name;
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
@@ -735,6 +735,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void CreateGame()
         {
             m_state = eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS;
+            m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_previousGameName;
         }
 
         void Update()
@@ -820,7 +821,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             customProperties["MapSize"] = m_sizeListSelection;
             aOptions.customRoomProperties = customProperties;
             aOptions.customRoomPropertiesForLobby = new string[] { "roomMinLevel", "roomMaxLevel", "IsPlaying" };
-            PlayerPrefs.SetString("LastRoomName", aName);
+            BrainCloudWrapper.GetBC().EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + aName + "\"}", null, -1, null, null,null);
+            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
             PhotonNetwork.CreateRoom(aName, aOptions, TypedLobby.Default);
         }
