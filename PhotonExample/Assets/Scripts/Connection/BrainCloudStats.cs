@@ -60,6 +60,7 @@ namespace BrainCloudPhotonExample.Connection
         public float m_bombPickupLifetime = 0;
         public float m_flareLifetime = 0;
         public float m_flareCooldown = 0;
+        public string m_previousGameName = "";
 
         public List<Achievement> m_achievements;
 
@@ -275,6 +276,20 @@ namespace BrainCloudPhotonExample.Connection
                 //didn't level up
             }
 
+
+            try
+            {
+                m_previousGameName = entries["entities"][0]["data"]["gameName"].ToString();
+                //assuming the player has a saved game name
+            }
+            catch (KeyNotFoundException)
+            {
+                //doesn't have a previous game
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+
+            }
             
         }
 
