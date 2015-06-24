@@ -10,8 +10,8 @@ def main():
 	
 	buildParams = unitybuild.BuildParams()
 
-	buildParams.projectPath = os.path.abspath("../PhotonExample")
-	buildParams.projectName = "PhotonExample"
+	buildParams.projectPath = os.path.abspath("../Bombers")
+	buildParams.projectName = "Bombers"
 	buildParams.baseVersion = "1.0.0"
 	
 	# a few handy debugging features
@@ -25,7 +25,7 @@ def main():
 	shutil.rmtree(buildParams.artifactsPath, True)
 	os.mkdir(buildParams.artifactsPath)
 
-	unitybuild.stampVersionFile("../PhotonExample/Assets/Resources/Version.txt", buildParams._version)
+	unitybuild.stampVersionFile("../Bombers/Assets/Resources/Version.txt", buildParams._version)
 
 	unity.buildFromEditorScript(buildParams.projectPath, buildParams.args.buildEditorScript, "/Applications/Unity5.0.1/Unity.app/Contents/MacOS/Unity")
 
