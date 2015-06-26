@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Text;
 using JsonFx.Json;
 using BrainCloud.Internal;
-using UnityEngine;
 
 namespace BrainCloud
 {
@@ -191,15 +190,8 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null )
         {
-            Debug.Log(in_jsonOpponentIds);
             Dictionary<string, object> data = new Dictionary<string, object>();
-            object[] array = JsonReader.Deserialize<object[]>(in_jsonOpponentIds);
-            List<object> result = new List<object>();
-            for (int i = 0; i < array.Length;i++ )
-            {
-                result.Add(array[i]);
-            }
-            data["players"] = result;
+            data["players"] = JsonReader.Deserialize<List<object>> (in_jsonOpponentIds);
 
             if (Util.IsOptionalParameterValid(in_jsonMatchState))
             {
@@ -227,14 +219,9 @@ namespace BrainCloud
             {
                 data["pushContent"] = in_pushNotificationMessage;
             }
-            
+
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
             ServerCall sc = new ServerCall(ServiceName.AsyncMatch, ServiceOperation.Create, data, callback);
-            
-            Debug.Log(sc.GetJsonData());
-
-
-
             m_brainCloudClientRef.SendRequest(sc);
         }
 

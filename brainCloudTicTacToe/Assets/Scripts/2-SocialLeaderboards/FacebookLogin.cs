@@ -18,17 +18,7 @@ public class FacebookLogin : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		// For BrainCloud customers:
-		string url = "https://sharedprod.braincloudservers.com/dispatcherv2";
-		
-		// For internal development:
-		//string url = "https://internal.braincloudservers.com/dispatcherv2";
-
-        string secretKey = "8ce0fae6-b0c5-4062-8386-84e5b8084600";
-		string gameId = "10228";
-		string gameVersion = "1.0";
-		
-		BrainCloudWrapper.Initialize(url, secretKey, gameId, gameVersion);
+        BrainCloudWrapper.Initialize();
 	}
 	
 	// Update is called once per frame
@@ -82,7 +72,7 @@ public class FacebookLogin : MonoBehaviour {
 		{
 			// It worked
 			Debug.Log("Facebook auth success");
-			
+
 			// Now we login using Braincloud
 			BrainCloudWrapper.GetBC().AuthenticationService.AuthenticateFacebook(
 				FB.UserId, 
