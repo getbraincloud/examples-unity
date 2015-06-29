@@ -198,6 +198,9 @@ namespace BrainCloudPhotonExample.Game
                 m_spectatingTarget = playerList[0];
             }
             else*/
+
+            
+
             {
                 if (PhotonNetwork.isMasterClient)
                 {
@@ -238,6 +241,19 @@ namespace BrainCloudPhotonExample.Game
             m_playerProperties["Score"] = 0;
             PhotonNetwork.player.SetCustomProperties(m_playerProperties);
             PhotonNetwork.room.SetCustomProperties(m_roomProperties);
+
+            if ((int)m_roomProperties["IsPlaying"] == 1)
+            {
+                GetComponent<PhotonView>().RPC("AnnounceJoin", PhotonTargets.All, m_playerProperties["DisplayName"].ToString(), (int)m_playerProperties["Team"]);
+            }
+        }
+
+        [RPC]
+        void AnnounceJoin(string aPlayerName, int aTeam)
+        {
+            string message = aPlayerName + " has joined the fight\n on the ";
+            message += (aTeam == 1) ? "green team!" : "red team!";
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog(message, true);
         }
 
         [RPC]

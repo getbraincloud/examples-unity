@@ -30,6 +30,8 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         private float m_bulletSpeed = 100f;
         private Vector3 m_bulletVelocity = Vector3.zero;
 
+        private float m_aloneBombTimer = 0;
+
         void Start()
         {
             m_targetingReticule = (GameObject)Instantiate((GameObject)Resources.Load("TargetReticule"), Vector3.zero, Quaternion.identity);
@@ -74,6 +76,12 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             return m_bombs;
         }
 
+        void Update()
+        {
+            if (m_playerPlane != null)
+                m_aloneBombTimer += Time.deltaTime;
+        }
+
         void LateUpdate()
         {
             bool isAlone = true;
@@ -94,8 +102,9 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                     }
                 }
             }
-            if (isAlone && m_bombs < GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_maxBombCapacity)
+            if (isAlone && m_bombs == 0 && m_aloneBombTimer >= 3)
             {
+                m_aloneBombTimer = 0;
                 AddBomb();
             }
 
