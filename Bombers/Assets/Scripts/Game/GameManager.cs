@@ -171,7 +171,7 @@ namespace BrainCloudPhotonExample.Game
             m_team1Score = 0;
             m_team2Score = 0;
 
-            if ((int)m_roomProperties["IsPlaying"] == 1)
+            /*if ((int)m_roomProperties["IsPlaying"] == 1)
             {
                 m_gameState = eGameState.GAME_STATE_SPECTATING;
                 m_roomProperties["Spectators"] = (int)PhotonNetwork.room.customProperties["Spectators"] + 1;
@@ -197,7 +197,7 @@ namespace BrainCloudPhotonExample.Game
                 playerList = playerListList.ToArray().OrderByDescending(x => (int)x.customProperties["Score"]).ToArray();
                 m_spectatingTarget = playerList[0];
             }
-            else
+            else*/
             {
                 if (PhotonNetwork.isMasterClient)
                 {
@@ -971,7 +971,7 @@ namespace BrainCloudPhotonExample.Game
             GameObject mapBound = GameObject.Find("MapBounds");
             mapBound.transform.localScale = new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize);
             GetComponent<PhotonView>().RPC("SetMapSizeRPC", PhotonTargets.OthersBuffered, new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize));
-            GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.All);
+            GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.AllBuffered);
             yield return new WaitForSeconds(0.5f);
             m_roomProperties = PhotonNetwork.room.customProperties;
             m_roomProperties["IsPlaying"] = 1;
@@ -1151,7 +1151,7 @@ namespace BrainCloudPhotonExample.Game
                     if (PhotonNetwork.isMasterClient && m_once)
                     {
                         m_once = false;
-                        GetComponent<PhotonView>().RPC("SpawnPlayer", PhotonTargets.All);
+                        GetComponent<PhotonView>().RPC("SpawnPlayer", PhotonTargets.AllBuffered);
                     }
 
                     break;
@@ -1228,7 +1228,7 @@ namespace BrainCloudPhotonExample.Game
 
                         if (m_gameTime <= 0 || team1IsDestroyed || team2IsDestroyed)
                         {
-                            GetComponent<PhotonView>().RPC("EndGame", PhotonTargets.All);
+                            GetComponent<PhotonView>().RPC("EndGame", PhotonTargets.AllBuffered);
                         }
                     }
                     else
