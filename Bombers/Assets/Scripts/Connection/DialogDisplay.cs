@@ -146,6 +146,7 @@ namespace BrainCloudPhotonExample.Connection
                 GameObject dialog = (GameObject)Instantiate(transform.GetChild(3).gameObject, transform.GetChild(3).transform.position, transform.GetChild(3).rotation);
                 dialog.transform.SetParent(GameObject.Find("Canvas").transform);
                 dialog.transform.GetChild(0).GetComponent<Text>().text = aMessage;
+                dialog.GetComponent<ParticlesDestroyer>().enabled = true;
             }
         }
 
