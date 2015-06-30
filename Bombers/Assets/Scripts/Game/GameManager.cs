@@ -451,7 +451,9 @@ namespace BrainCloudPhotonExample.Game
             if (PhotonNetwork.room == null) return;
             m_team1Score = (float)PhotonNetwork.room.customProperties["Team1Score"];
             m_team2Score = (float)PhotonNetwork.room.customProperties["Team2Score"];
-            int score = (int)PhotonNetwork.player.customProperties["Score"];
+            int score = 0;
+            if (PhotonNetwork.player.customProperties["Score"] != null)
+                score = (int)PhotonNetwork.player.customProperties["Score"];
             System.TimeSpan span = System.TimeSpan.FromSeconds(m_gameTime);
             string timeLeft = span.ToString().Substring(3, 5);
 

@@ -168,8 +168,10 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
                 m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
-
-                GameObject ship = GameObject.Find("GameManager").GetComponent<GameManager>().GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.customProperties["Team"]);
+                
+                GameObject ship = null;
+                if (PhotonNetwork.room != null)
+                    ship = GameObject.Find("GameManager").GetComponent<GameManager>().GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.customProperties["Team"]);
 
                 if (ship != null)
                 {
