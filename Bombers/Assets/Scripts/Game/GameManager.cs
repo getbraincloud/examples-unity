@@ -242,9 +242,9 @@ namespace BrainCloudPhotonExample.Game
             PhotonNetwork.player.SetCustomProperties(m_playerProperties);
             PhotonNetwork.room.SetCustomProperties(m_roomProperties);
 
-            if ((int)m_roomProperties["IsPlaying"] == 1)
+            if ((int)PhotonNetwork.room.customProperties["IsPlaying"] == 1)
             {
-                GetComponent<PhotonView>().RPC("AnnounceJoin", PhotonTargets.All, m_playerProperties["DisplayName"].ToString(), (int)m_playerProperties["Team"]);
+                GetComponent<PhotonView>().RPC("AnnounceJoin", PhotonTargets.All, m_playerProperties["RoomDisplayName"].ToString(), (int)m_playerProperties["Team"]);
             }
         }
 
@@ -374,7 +374,7 @@ namespace BrainCloudPhotonExample.Game
         void OnGUI()
         {
             GUI.skin = m_skin;
-
+            if (PhotonNetwork.room == null) return;
             switch (m_gameState)
             {
                 case eGameState.GAME_STATE_WAITING_FOR_PLAYERS:
