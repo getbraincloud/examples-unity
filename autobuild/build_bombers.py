@@ -27,7 +27,7 @@ def main():
 
 	unitybuild.stampVersionFile("../Bombers/Assets/Resources/Version.txt", buildParams._version)
 
-	unity.buildFromEditorScript(buildParams.projectPath, buildParams.args.buildEditorScript, "/Applications/Unity5.0.1/Unity.app/Contents/MacOS/Unity")
+	unity.buildFromEditorScript(buildParams.projectPath, buildParams.args.buildEditorScript, "/Applications/Unity5.1.1/Unity.app/Contents/MacOS/Unity")
 
 	return
 
