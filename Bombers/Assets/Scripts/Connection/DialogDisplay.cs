@@ -132,12 +132,21 @@ namespace BrainCloudPhotonExample.Connection
             m_labelsToDisplay = new List<FadeLabel>();
         }
 
-        public void DisplayDialog(string aMessage)
+        public void DisplayDialog(string aMessage, bool aGoesAway = false)
         {
-            GameObject dialog = (GameObject)Instantiate(transform.GetChild(0).gameObject, transform.GetChild(0).transform.position, transform.GetChild(0).rotation);
-            dialog.transform.SetParent(GameObject.Find("Canvas").transform);
-            dialog.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(dialog); });
-            dialog.transform.GetChild(1).GetComponent<Text>().text = aMessage;
+            if (!aGoesAway)
+            {
+                GameObject dialog = (GameObject)Instantiate(transform.GetChild(0).gameObject, transform.GetChild(0).transform.position, transform.GetChild(0).rotation);
+                dialog.transform.SetParent(GameObject.Find("Canvas").transform);
+                dialog.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => { Destroy(dialog); });
+                dialog.transform.GetChild(1).GetComponent<Text>().text = aMessage;
+            }
+            else
+            {
+                GameObject dialog = (GameObject)Instantiate(transform.GetChild(3).gameObject, transform.GetChild(3).transform.position, transform.GetChild(3).rotation);
+                dialog.transform.SetParent(GameObject.Find("Canvas").transform);
+                dialog.transform.GetChild(0).GetComponent<Text>().text = aMessage;
+            }
         }
 
         public void DisplayAchievement(int aID, string aTitle, string aDescription)

@@ -1,6 +1,8 @@
 ﻿using UnityEditor;
 using System.Collections;
 using System.Linq;
+using System;
+using BrainCloud;
 
 public class Build {
 	static string ARTIFACTS_FOLDER 		= "../autobuild/artifacts";
@@ -15,6 +17,26 @@ public class Build {
 	{
 		string[] scenes = (from scene in EditorBuildSettings.scenes where scene.enabled select scene.path).ToArray();
 		return scenes;
+	}
+
+	static void UpdateBrainCloudSettings()
+	{
+		string[] args = Environment.GetCommandLineArgs();
+		foreach (string arg in args)
+		{
+			if (arg.StartsWith("-bcappid="))
+			{
+				BrainCloudSettings.Instance.GameId = arg.Substring(("-bcappid=").Length);
+			}
+			else if (arg.StartsWith ("-bcsecret="))
+			{
+				BrainCloudSettings.Instance.SecretKey = arg.Substring(("-bcsecret=").Length);
+			}
+			else if (arg.StartsWith ("-bcurl="))
+			{
+				BrainCloudSettings.Instance.ServerURL = arg.Substring (("-bcurl=").Length);
+			}
+		}
 	}
 	
 	/* From the forums: http://forum.unity3d.com/threads/4-6-ios-64-bit-beta.290551/page-9#post-1948394
@@ -57,7 +79,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		#else
 		target = BuildTarget.iOS;
 		#endif
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(IOS_OUTPUT_FOLDER), target, BuildOptions.None);
 	}
@@ -71,7 +94,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		#else
 		target = BuildTarget.iOS;
 		#endif
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(IOS_OUTPUT_FOLDER), target, BuildOptions.None);
 	}
@@ -80,7 +104,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	{
 		BuildTarget target;
 		target = BuildTarget.Android;
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(ANDROID_OUTPUT_APK), target, BuildOptions.None);
 	}
@@ -89,7 +114,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	{
 		BuildTarget target;
 		target = BuildTarget.WP8Player;
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WP8_OUTPUT_FOLDER), target, BuildOptions.None);
 	}
@@ -98,7 +124,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	{
 		BuildTarget target;
 		target = BuildTarget.StandaloneWindows;
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
@@ -107,7 +134,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	{
 		BuildTarget target;
 		target = BuildTarget.StandaloneWindows64;
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
@@ -116,7 +144,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	{
 		BuildTarget target;
 		target = BuildTarget.StandaloneOSXIntel;
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
@@ -125,13 +154,15 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	{
 		BuildTarget target;
 		target = BuildTarget.StandaloneOSXIntel64;
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
 	
 	static void PerformBuildWeb()
 	{
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WEB_OUTPUT_FOLDER), BuildTarget.WebPlayer, BuildOptions.None);
 	}
@@ -143,7 +174,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		#else
 		BuildTarget target;
 		target = BuildTarget.WebGL;
-		
+
+		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WEBGL_OUTPUT_FOLDER), target, BuildOptions.None);
 		#endif
