@@ -1,0 +1,219 @@
+{
+	"payouts" : {
+		"symbols" : 7,
+		"symbol1" : {"value": 9, "3":3, "4":20, "5":80},
+		"symbol2" : {"value": 10, "3":4, "4":25, "5":100},
+		"symbol3" : {"value": 11, "3":6, "4":40, "5":150},
+		"symbol4" : {"value": 12, "3":8, "4":50, "5":175},
+		"symbol5" : {"value": 13, "3":20, "4":75, "5":300},
+		"symbol6" : {"value": 14, "3":40, "4":100, "5":500},
+		"symbol7" : {"value": 15, "3":50, "4":125, "5":600}
+	},
+	"reels" : 5,
+	"reelMaps" : {
+		"reel1" : {
+			"symbols":[
+				{"type" : "NORMAL",
+				 "value" : 9
+				},
+				{"type" : "NORMAL",
+				 "value" : 10
+				},
+				{"type" : "NORMAL",
+				 "value" : 11
+				},
+				{"type" : "NORMAL",
+				 "value" : 12
+				},
+				{"type" : "NORMAL",
+				 "value" : 13
+				},
+				{"type" : "NORMAL",
+				 "value" : 14
+				},
+				{"type" : "NORMAL",
+				 "value" : 15
+				},
+				{"type" : "WILD",
+				 "value" : -1
+				},
+				{"type" : "JACKPOT",
+				 "value" : -2
+				}
+			],
+			"virtualMap" : {
+				"min" : 1,
+				"max" : 18,
+				"symbol1" : [1, 2],
+				"symbol2" : [3, 4],
+				"symbol3" : [5, 6],
+				"symbol4" : [7, 8],
+				"symbol5" : [9, 10],
+				"symbol6" : [11, 12],
+				"symbol7" : [13, 14],
+				"symbol8" : [15, 16],
+				"symbol9" : [17, 18]
+			}
+		},
+		"reel2" : {
+			"symbols":[
+				{"type" : "NORMAL",
+				 "value" : 9
+				},
+				{"type" : "NORMAL",
+				 "value" : 10
+				},
+				{"type" : "NORMAL",
+				 "value" : 11
+				},
+				{"type" : "NORMAL",
+				 "value" : 12
+				},
+				{"type" : "NORMAL",
+				 "value" : 13
+				},
+				{"type" : "NORMAL",
+				 "value" : 14
+				},
+				{"type" : "NORMAL",
+				 "value" : 15
+				},
+				{"type" : "WILD"},
+				{"type" : "JACKPOT"}
+			],
+			"virtualMap" : {
+				"min" : 1,
+				"max" : 18,
+				"symbol1" : [1, 2],
+				"symbol2" : [3, 4],
+				"symbol3" : [5, 6],
+				"symbol4" : [7, 8],
+				"symbol5" : [9, 10],
+				"symbol6" : [11, 12],
+				"symbol7" : [13, 14],
+				"symbol8" : [15, 16],
+				"symbol9" : [17, 18]
+			}
+		},
+		"reel3" : {
+			"symbols":[
+				{"type" : "NORMAL",
+				 "value" : 9
+				},
+				{"type" : "NORMAL",
+				 "value" : 10
+				},
+				{"type" : "NORMAL",
+				 "value" : 11
+				},
+				{"type" : "NORMAL",
+				 "value" : 12
+				},
+				{"type" : "NORMAL",
+				 "value" : 13
+				},
+				{"type" : "NORMAL",
+				 "value" : 14
+				},
+				{"type" : "NORMAL",
+				 "value" : 15
+				},
+				{"type" : "WILD"},
+				{"type" : "JACKPOT"}
+			],
+			"virtualMap" : {
+				"min" : 1,
+				"max" : 18,
+				"symbol1" : [1, 2],
+				"symbol2" : [3, 4],
+				"symbol3" : [5, 6],
+				"symbol4" : [7, 8],
+				"symbol5" : [9, 10],
+				"symbol6" : [11, 12],
+				"symbol7" : [13, 14],
+				"symbol8" : [15, 16],
+				"symbol9" : [17, 18]
+			}
+		},
+		"reel4" : {
+			"symbols":[
+				{"type" : "NORMAL",
+				 "value" : 9
+				},
+				{"type" : "NORMAL",
+				 "value" : 10
+				},
+				{"type" : "NORMAL",
+				 "value" : 11
+				},
+				{"type" : "NORMAL",
+				 "value" : 12
+				},
+				{"type" : "NORMAL",
+				 "value" : 13
+				},
+				{"type" : "NORMAL",
+				 "value" : 14
+				},
+				{"type" : "NORMAL",
+				 "value" : 15
+				},
+				{"type" : "WILD"},
+				{"type" : "JACKPOT"}
+			],
+			"virtualMap" : {
+				"min" : 1,
+				"max" : 18,
+				"symbol1" : [1, 2],
+				"symbol2" : [3, 4],
+				"symbol3" : [5, 6],
+				"symbol4" : [7, 8],
+				"symbol5" : [9, 10],
+				"symbol6" : [11, 12],
+				"symbol7" : [13, 14],
+				"symbol8" : [15, 16],
+				"symbol9" : [17, 18]
+			}
+		},
+		"reel5" : {
+			"symbols":[
+				{"type" : "NORMAL",
+				 "value" : 9
+				},
+				{"type" : "NORMAL",
+				 "value" : 10
+				},
+				{"type" : "NORMAL",
+				 "value" : 11
+				},
+				{"type" : "NORMAL",
+				 "value" : 12
+				},
+				{"type" : "NORMAL",
+				 "value" : 13
+				},
+				{"type" : "NORMAL",
+				 "value" : 14
+				},
+				{"type" : "NORMAL",
+				 "value" : 15
+				},
+				{"type" : "WILD"},
+				{"type" : "JACKPOT"}
+			],
+			"virtualMap" : {
+				"min" : 1,
+				"max" : 18,
+				"symbol1" : [1, 2],
+				"symbol2" : [3, 4],
+				"symbol3" : [5, 6],
+				"symbol4" : [7, 8],
+				"symbol5" : [9, 10],
+				"symbol6" : [11, 12],
+				"symbol7" : [13, 14],
+				"symbol8" : [15, 16],
+				"symbol9" : [17, 18]
+			}
+		}
+	}
+}
