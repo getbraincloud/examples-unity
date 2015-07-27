@@ -6,27 +6,46 @@ using BrainCloudUNETExample.Game.PlayerInput;
 
 public class BombersNetworkManager : NetworkManager
 {
+    public GameObject m_gameManager;
+    public GameObject m_gameInfo;
 
-    public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
+    /*public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
     {
-        m_localConnection = conn;
         GameObject player = (GameObject)Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
         //player.GetComponent<BombersPlayerController>();
         m_localPlayer = player.GetComponent<BombersPlayerController>();
+        //m_localConnection = conn;
         NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
-    }
+        
+        //GameObject.Find("GameInfo").GetComponent<GameInfo>().Initialize(m_matchOptions);
+       // m_matchOptions.Clear();
+    }*/
 
     public static Dictionary<string, string> m_matchOptions;
     public static NetworkConnection m_localConnection;
     public static BombersPlayerController m_localPlayer;
-    
+
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
-        if (Application.loadedLevelName == "Game")
+        m_localConnection = conn;
+        if (Application.loadedLevelName == "Game" && m_matchOptions != null)
         {
-            GameObject.Find("GameInfo").GetComponent<GameInfo>().Initialize(m_matchOptions);
+            
+            StartCoroutine(InitializeGameInfo(m_matchOptions));
             m_matchOptions.Clear();
-            UnityEngine.Networking.ClientScene.AddPlayer(conn, 0);
         }
+        base.OnClientSceneChanged(conn);
+    }
+
+    IEnumerator InitializeGameInfo(Dictionary<string, string> aMatchOptions)
+    {
+        Dictionary<string, string> matchOptions = aMatchOptions;
+
+        while (GameObject.Find("GameInfo") == null)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        GameObject.Find("GameInfo").GetComponent<GameInfo>().Initialize(matchOptions);
     }
 }

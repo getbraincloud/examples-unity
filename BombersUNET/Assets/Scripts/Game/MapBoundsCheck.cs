@@ -14,11 +14,11 @@ namespace BrainCloudUNETExample.Game
             {
                 if (!GetComponent<Collider>().bounds.Contains(m_playerPlane.transform.position))
                 {
-                    GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().LeftBounds();
+                    BombersNetworkManager.m_localPlayer.LeftBounds();
                 }
                 else
                 {
-                    GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().EnteredBounds();
+                    BombersNetworkManager.m_localPlayer.EnteredBounds();
                 }
             }
         }

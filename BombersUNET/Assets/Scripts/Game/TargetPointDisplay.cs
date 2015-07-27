@@ -17,7 +17,7 @@ namespace BrainCloudUNETExample.Game
 
         void LateUpdate()
         {
-            if (GameObject.Find("PlayerController").GetComponent<WeaponController>().HasBombs())
+            if (BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().HasBombs())
             {
                 
                 if (m_team == BombersNetworkManager.m_localPlayer.m_team)

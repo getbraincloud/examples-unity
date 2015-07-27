@@ -96,13 +96,13 @@ namespace BrainCloudUNETExample.Game
                 transform.GetChild(2).position = m_offscreenIndicator.transform.position + new Vector3(0, -0.8f, 0);
                 transform.GetChild(2).eulerAngles = new Vector3(0, 0, 0);
 
-                //if (isOffscreen && m_player != PhotonNetwork.player)
+                if (isOffscreen && m_player != BombersNetworkManager.m_localPlayer.m_playerID)
                 {
                     m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
                     m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
                     transform.GetChild(2).GetComponent<TextMesh>().color = new Color(1, 1, 1, 1);
                 }
-                //else
+                else
                 {
                     m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
                     m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);

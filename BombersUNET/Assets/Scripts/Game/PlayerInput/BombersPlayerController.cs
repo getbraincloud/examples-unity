@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using BrainCloudUNETExample.Connection;
 using UnityEngine.UI;
 using UnityEngine.Networking;
@@ -8,6 +9,20 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 {
     public class BombersPlayerController : NetworkBehaviour
     {
+
+        public static BombersPlayerController GetPlayer(int aID)
+        {
+            GameObject[] playerList = GameObject.FindGameObjectsWithTag("PlayerController");
+
+            for (int i = 0; i < playerList.Length; i++)
+            {
+                if (playerList[i].GetComponent<BombersPlayerController>().m_playerID == aID)
+                {
+                    return playerList[i].GetComponent<BombersPlayerController>();
+                }
+            }
+            return null;
+        }
 
         [SyncVar]
         public int m_score;
@@ -59,14 +74,31 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         void Awake()
         {
-            if (isLocalPlayer)
+            if (!isLocalPlayer || !hasAuthority)
             {
-                m_displayName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName;
+                return;
             }
         }
 
         void Start()
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+
+            
+
+            //if (BombersNetworkManager.m_localPlayer != null)
+            //{
+                StartCoroutine("UpdateVarsClient");
+                CmdUpdateSyncVars();
+                Debug.Log("hit");
+                BombersNetworkManager.m_localPlayer = this;
+                m_displayName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName;
+                m_playerID = (int)netId.Value;
+            //}
+
             m_missionText = GameObject.Find("GameManager").GetComponent<GameManager>().m_missionText;
             m_turnSpeed = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_planeTurnSpeed;
             m_acceleration = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_planeAcceleration;
@@ -74,8 +106,50 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             m_maxSpeedMultiplier = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_maxPlaneSpeedMultiplier;
         }
 
+        [Command]
+        void CmdUpdateSyncVars()
+        {
+            StartCoroutine("UpdateVars");
+        }
+
+        [Command]
+        void CmdUpdateSyncVarsFromClient(int aScore, int aPlayerID, int aTeam, int aKills, int aDeaths, int aPing, string aDisplayName)
+        {
+            m_score = aScore;
+            m_playerID = aPlayerID;
+            m_team = aTeam;
+            m_kills = aKills;
+            m_deaths = aDeaths;
+            m_ping = aPing;
+            m_displayName = aDisplayName;
+        }
+
+        IEnumerator UpdateVars()
+        {
+            while (true)
+            {
+                SetDirtyBit(syncVarDirtyBits);
+                yield return new WaitForSeconds(GetNetworkSendInterval());
+            }
+        }
+
+        IEnumerator UpdateVarsClient()
+        {
+            if (isServer) yield break;
+
+            while (true)
+            {
+                CmdUpdateSyncVarsFromClient(m_score, m_playerID, m_team, m_kills, m_deaths, m_ping, m_displayName);
+                yield return new WaitForSeconds(GetNetworkSendInterval());
+            }
+        }
+
         public void SetPlayerPlane(PlaneController playerPlane)
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
             m_leftBoundsTimer = 4;
             GameObject.Find("MapBounds").GetComponent<MapBoundsCheck>().m_playerPlane = playerPlane.gameObject;
             StartCoroutine("PulseMissionText");
@@ -85,10 +159,15 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             m_playerPlane = playerPlane;
             GetComponent<WeaponController>().SetPlayerPlane(playerPlane);
             m_health = m_baseHealth;
+            m_playerPlane.m_playerID = m_playerID;
         }
 
         IEnumerator PulseMissionText()
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                yield break;
+            }
             bool goingToColor1 = true;
             float time = 0;
             while (true)
@@ -120,6 +199,11 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         void Update()
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+
             if (m_leftBounds)
             {
                 if (m_leftBoundsTimer > 0)
@@ -218,6 +302,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         void FixedUpdate()
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
             if (m_playerPlane == null)
             {
                 return;
@@ -248,7 +336,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         void LateUpdate()
         {
-
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
             if (m_playerPlane != null)
             {
                 Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, new Vector3(m_playerPlane.transform.FindChild("CameraPosition").position.x, m_playerPlane.transform.FindChild("CameraPosition").position.y, -110), 0.5f);
@@ -296,29 +387,41 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         public void ShakeCamera(float aIntensity, float aDecay)
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
             m_shakeIntensity = aIntensity;
             m_shakeDecay = aDecay;
         }
 
         public void SuicidePlayer()
         {
+            if (!isLocalPlayer || !hasAuthority) 
+            {
+                return;
+            }
             m_leftBounds = false;
             m_health = 0;
             Vector3 position = m_playerPlane.transform.position;
             int bombs = GetComponent<WeaponController>().GetBombs();
-            //GameObject.Find("GameManager").GetComponent<GameManager>().CmdDestroyPlayerPlane(PhotonNetwork.player);
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdDestroyPlayerPlane(m_playerID, -1);
             GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBombPickup(position, NetworkManager.singleton.client.connection.connectionId);
             for (int i = 0; i < bombs; i++)
             {
 
                 GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBombPickup(position, NetworkManager.singleton.client.connection.connectionId);
             }
-            DestroyPlayerPlane();
+            //DestroyPlayerPlane();
         }
 
 
         public void DestroyPlayerPlane()
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
             if (m_playerPlane == null)
             {
                 return;
@@ -327,6 +430,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             m_leftBounds = false;
             m_isActive = false;
             //PhotonNetwork.Destroy(m_playerPlane.gameObject);
+            NetworkManager.Destroy(m_playerPlane.gameObject);
             m_playerPlane = null;
             GetComponent<WeaponController>().DestroyPlayerPlane();
             m_health = 0;
@@ -342,8 +446,104 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             m_isActive = false;
         }
 
+        public void DespawnBombPickupCommand(int aPickupID)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdDespawnBombPickup(aPickupID);
+        }
+
+        public void BombPickedUpCommand(int aPlayerID, int aPickupID)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdBombPickedUp(aPlayerID, aPickupID);
+        }
+
+        public void DestroyShipCommand(int shipID, string aJson)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdDestroyedShip(shipID, aJson);
+        }
+
+        public void HitShipTargetPointCommand(int aID, int aIndex, string aJson)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdHitShipTargetPoint(aID, aIndex, aJson);
+        }
+
+        public void DeleteBombCommand(string aJson, int aID)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdDeleteBomb(aJson, aID);
+        }
+
+        public void DeleteBulletCommand(string aJson)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdDeleteBullet(aJson);
+        }
+
+        
+        public void BulletHitPlayerCommand(string aJson, Vector3 aHitPoint, int aID)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdBulletHitPlayer(aJson, aHitPoint, aID);
+        }
+
+        
+        public void FireBulletCommand(string aJson)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBullet(aJson);
+        }
+
+        public void FireFlareCommand(Vector3 aPosition, Vector3 aVelocity)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnFlare(aPosition, aVelocity, BombersNetworkManager.m_localPlayer.m_playerID);
+        }
+
+        public void SpawnBombCommand(string aJson)
+        {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
+            GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBomb(aJson);
+        }
+
         public void TakeBulletDamage(int aShooter)
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
             if (m_health == 0) return;
             m_health--;
             m_playerPlane.m_health = m_health;
@@ -352,7 +552,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 m_health = 0;
                 Vector3 position = m_playerPlane.transform.position;
                 int bombs = GetComponent<WeaponController>().GetBombs();
-                //GameObject.Find("GameManager").GetComponent<GameManager>().CmdDestroyPlayerPlane(PhotonNetwork.player, aShooter);
+                GameObject.Find("GameManager").GetComponent<GameManager>().CmdDestroyPlayerPlane(m_playerID, aShooter);
                 GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBombPickup(position, NetworkManager.singleton.client.connection.connectionId);
                 for (int i = 0; i < bombs; i++)
                 {
@@ -364,6 +564,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         public void EnteredBounds()
         {
+            if (!isLocalPlayer || !hasAuthority)
+            {
+                return;
+            }
             if (m_leftBounds)
             {
                 m_leftBounds = false;

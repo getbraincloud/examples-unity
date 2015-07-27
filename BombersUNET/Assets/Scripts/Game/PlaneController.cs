@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloudUNETExample.Connection;
+using BrainCloudUNETExample.Game.PlayerInput;
 
 namespace BrainCloudUNETExample.Game
 {
@@ -65,7 +66,7 @@ namespace BrainCloudUNETExample.Game
 
         private Vector3 m_photonPosition = Vector3.zero;
         private float m_photonRotation = 0;
-        private System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+        //private System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         public int m_health = 0;
         private GameObject m_gunCharge;
 
@@ -99,7 +100,7 @@ namespace BrainCloudUNETExample.Game
         //    }
         //}
 
-        private bool m_once = true;
+        //private bool m_once = true;
 
         private bool m_isBankingRight = false;
         private bool m_isBankingLeft = false;
@@ -253,14 +254,13 @@ namespace BrainCloudUNETExample.Game
 
         void Start()
         {
-
             m_bezierTime = 0.0f;
             m_planeDamage = new List<GameObject>() 
             { 
                 null, null, null, null
             };
-           // transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = GetComponent<PhotonView>().owner.customProperties["RoomDisplayName"].ToString();
-            if (true) //isLocal
+            transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = BombersPlayerController.GetPlayer(m_playerID).m_displayName;
+            if (BombersPlayerController.GetPlayer(m_playerID).isLocalPlayer) //isLocal
             {
                 transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = "";
             }
@@ -278,13 +278,13 @@ namespace BrainCloudUNETExample.Game
             }
 
             string teamBomberPath = "";
-            //if ((int)GetComponent<PhotonView>().owner.customProperties["Team"] == 1)
+            if (BombersPlayerController.GetPlayer(m_playerID).m_team == 1)
             {
                 teamBomberPath = "Bomber01";
                 gameObject.layer = 8;
                 transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().color = Color.green;
             }
-            //else
+            else
             {
                 teamBomberPath = "Bomber02";
                 gameObject.layer = 9;
@@ -397,15 +397,15 @@ namespace BrainCloudUNETExample.Game
 
         void FixedUpdate()
         {
-            if (true)//!isLocalClient
-            {
-                m_bezierTime += Time.deltaTime * m_bezierSpeed;
-                if (m_bezierTime > 1) m_bezierTime = 1;
+            //if (false)//!isLocalClient
+            //{
+            //    m_bezierTime += Time.deltaTime * m_bezierSpeed;
+            //    if (m_bezierTime > 1) m_bezierTime = 1;
 
-                m_lastBezierPoint = CalculateBezierPoint(m_bezierTime, m_lastBezierPoint, m_photonPositions[1], m_photonPositions[2], m_photonPositions[3]);
-                GetComponent<Rigidbody>().MovePosition(Vector3.Lerp(transform.position, m_lastBezierPoint, 11 * Time.smoothDeltaTime));
-                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(0, 0, m_photonRotations[0])), Time.smoothDeltaTime * 20);
-            }
+            //    m_lastBezierPoint = CalculateBezierPoint(m_bezierTime, m_lastBezierPoint, m_photonPositions[1], m_photonPositions[2], m_photonPositions[3]);
+            //    GetComponent<Rigidbody>().MovePosition(Vector3.Lerp(transform.position, m_lastBezierPoint, 11 * Time.smoothDeltaTime));
+            //    transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(0, 0, m_photonRotations[0])), Time.smoothDeltaTime * 20);
+            //}
 
             Vector3 direction = GetComponent<Rigidbody>().velocity;
 

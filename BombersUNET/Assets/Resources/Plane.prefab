@@ -119,9 +119,9 @@ GameObject:
   - 54: {fileID: 5458068}
   - 65: {fileID: 6527218}
   - 114: {fileID: 11494824}
-  - 114: {fileID: 11493456}
   - 82: {fileID: 8279350}
   - 114: {fileID: 11446494}
+  - 114: {fileID: 11482892}
   m_Layer: 8
   m_Name: Plane
   m_TagString: Plane
@@ -573,25 +573,25 @@ MonoBehaviour:
   m_SceneId:
     m_Value: 0
   m_AssetId:
-    i0: 0
-    i1: 0
-    i2: 0
-    i3: 0
-    i4: 0
-    i5: 0
-    i6: 0
-    i7: 0
-    i8: 0
-    i9: 0
-    i10: 0
-    i11: 0
-    i12: 0
-    i13: 0
-    i14: 0
-    i15: 0
+    i0: 142
+    i1: 81
+    i2: 111
+    i3: 81
+    i4: 48
+    i5: 210
+    i6: 215
+    i7: 52
+    i8: 56
+    i9: 128
+    i10: 205
+    i11: 38
+    i12: 64
+    i13: 99
+    i14: 238
+    i15: 193
   m_ServerOnly: 0
   m_LocalPlayerAuthority: 0
---- !u!114 &11493456
+--- !u!114 &11482892
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -599,23 +599,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 146880}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Script: {fileID: -1768714887, guid: 870353891bb340e2b2a9c8707e7419ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ownerId: 0
-  group: 0
-  prefixBackup: -1
-  observed: {fileID: 0}
-  synchronization: 2
-  onSerializeTransformOption: 3
-  onSerializeRigidBodyOption: 2
-  ownershipTransfer: 1
-  ObservedComponents:
-  - {fileID: 11494824}
-  ObservedComponentsFoldoutOpen: 1
-  viewIdField: 0
-  instantiationId: -1
-  isRuntimeInstantiated: 0
+  m_TransformSyncMode: 3
+  m_SendInterval: .100000001
+  m_SyncRotationAxis: 3
+  m_RotationSyncCompression: 0
+  m_SyncSpin: 0
+  m_MovementTheshold: 9.99999975e-06
+  m_SnapThreshold: 5
+  m_InterpolateRotation: 1
+  m_InterpolateMovement: 1
 --- !u!114 &11494824
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -627,6 +622,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5d4071bf7e513545beac816ec3b20f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_playerID: 0
   m_bulletSpawnPoint: {fileID: 0}
   m_health: 0
   m_timeToFullBank: .699999988
@@ -3819,7 +3815,19 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: m_InterpolateMovement
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_LocalPlayerAuthority
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_MovementTheshold
+      value: 9.99999975e-06
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 146880}

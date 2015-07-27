@@ -60,7 +60,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 428944}
   - 135: {fileID: 13595110}
-  - 114: {fileID: 11493080}
   - 114: {fileID: 11426920}
   m_Layer: 20
   m_Name: Rock01
@@ -165,49 +164,24 @@ MonoBehaviour:
   m_SceneId:
     m_Value: 0
   m_AssetId:
-    i0: 0
-    i1: 0
-    i2: 0
-    i3: 0
-    i4: 0
-    i5: 0
-    i6: 0
-    i7: 0
-    i8: 0
-    i9: 0
-    i10: 0
-    i11: 0
-    i12: 0
-    i13: 0
-    i14: 0
-    i15: 0
+    i0: 160
+    i1: 141
+    i2: 181
+    i3: 13
+    i4: 93
+    i5: 50
+    i6: 131
+    i7: 52
+    i8: 42
+    i9: 41
+    i10: 197
+    i11: 204
+    i12: 128
+    i13: 199
+    i14: 141
+    i15: 166
   m_ServerOnly: 0
   m_LocalPlayerAuthority: 0
---- !u!114 &11493080
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 157542}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ownerId: 0
-  group: 0
-  prefixBackup: -1
-  observed: {fileID: 0}
-  synchronization: 0
-  onSerializeTransformOption: 3
-  onSerializeRigidBodyOption: 2
-  ownershipTransfer: 0
-  ObservedComponents:
-  - {fileID: 0}
-  ObservedComponentsFoldoutOpen: 1
-  viewIdField: 0
-  instantiationId: -1
-  isRuntimeInstantiated: 0
 --- !u!135 &13595110
 SphereCollider:
   m_ObjectHideFlags: 1

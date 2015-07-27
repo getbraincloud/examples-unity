@@ -42,7 +42,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 433752}
   - 54: {fileID: 5477522}
-  - 114: {fileID: 11428962}
   - 114: {fileID: 11493084}
   - 135: {fileID: 13569504}
   - 114: {fileID: 11499488}
@@ -210,31 +209,6 @@ TrailRenderer:
       rgba: 1005040
   m_MinVertexDistance: 1
   m_Autodestruct: 0
---- !u!114 &11428962
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 174630}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ownerId: 0
-  group: 0
-  prefixBackup: -1
-  observed: {fileID: 0}
-  synchronization: 0
-  onSerializeTransformOption: 3
-  onSerializeRigidBodyOption: 2
-  ownershipTransfer: 0
-  ObservedComponents:
-  - {fileID: 0}
-  ObservedComponentsFoldoutOpen: 1
-  viewIdField: 0
-  instantiationId: -1
-  isRuntimeInstantiated: 0
 --- !u!114 &11493084
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -261,22 +235,22 @@ MonoBehaviour:
   m_SceneId:
     m_Value: 0
   m_AssetId:
-    i0: 0
-    i1: 0
-    i2: 0
-    i3: 0
-    i4: 0
-    i5: 0
-    i6: 0
-    i7: 0
-    i8: 0
-    i9: 0
-    i10: 0
-    i11: 0
-    i12: 0
-    i13: 0
-    i14: 0
-    i15: 0
+    i0: 69
+    i1: 131
+    i2: 45
+    i3: 118
+    i4: 105
+    i5: 175
+    i6: 18
+    i7: 36
+    i8: 107
+    i9: 90
+    i10: 129
+    i11: 25
+    i12: 132
+    i13: 98
+    i14: 179
+    i15: 44
   m_ServerOnly: 0
   m_LocalPlayerAuthority: 0
 --- !u!135 &13569504

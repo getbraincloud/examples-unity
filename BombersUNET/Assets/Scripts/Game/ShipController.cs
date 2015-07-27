@@ -26,16 +26,19 @@ namespace BrainCloudUNETExample.Game
             public float m_radius = 6;
             public bool m_isAlive = false;
             public GameObject m_targetGraphic;
+            public GameObject gameObject;
 
-            public ShipTarget(Transform aPosition, int aShipID, int aIndex)
+            public ShipTarget(GameObject aGraphic, Transform aPosition, int aShipID, int aIndex)
             {
                 m_position = aPosition;
                 m_shipID = aShipID;
                 m_index = aIndex;
                 m_isAlive = true;
-                m_targetGraphic = (GameObject)Instantiate((GameObject)Resources.Load("TargetPosition"), m_position.position, m_position.rotation);
+                m_targetGraphic = aGraphic;
+                gameObject = aPosition.gameObject;
                 m_targetGraphic.transform.parent = m_position;
                 m_targetGraphic.transform.localScale = new Vector3(m_radius / 2, m_radius / 2, m_radius / 2);
+                
             }
 
             public ShipTarget(int aShipID, int aIndex)
@@ -105,6 +108,7 @@ namespace BrainCloudUNETExample.Game
 
         public ShipTarget GetShipTarget(ShipTarget aShipTarget)
         {
+            
             return m_shipTargets[aShipTarget.m_index];
         }
 
@@ -139,14 +143,204 @@ namespace BrainCloudUNETExample.Game
 
         public void SetShipType(eShipType aShipType, int aTeam, int aShipID)
         {
-            RpcSetShipType1((int)aShipType, aTeam, aShipID);
+            //RpcSetShipType1((int)aShipType, aTeam, aShipID);
+            CmdSetShipType1((int)aShipType, aTeam, aShipID);
             //GetComponent<PhotonView>().RPC("SetShipTypeRPC", PhotonTargets.AllBuffered, (int)aShipType, aTeam, aShipID);
         }
 
         public void SetShipType(eShipType aShipType, int aTeam, int aShipID, float aAngle, Vector3 aPosition, float aRespawnTime, Vector3[] aPath, float aPathSpeed)
         {
-            RpcSetShipType2((int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
+            //RpcSetShipType2((int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
+            CmdSetShipType2((int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
             //GetComponent<PhotonView>().RPC("SetShipTypeRPC", PhotonTargets.AllBuffered, (int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
+        }
+
+        [Command]
+        void CmdSetShipType1(int aShipType, int aTeam, int aShipID)
+        {
+            if (m_startPosition == new Vector3(-1, -1, -1))
+            {
+                m_startPosition = transform.position;
+                m_startAngle = transform.eulerAngles.z;
+                m_respawnTime = -1;
+
+                m_team = aTeam;
+                GameObject.Find("GameManager").GetComponent<GameManager>().AddSpawnedShip(this);
+                m_shipType = (eShipType)aShipType;
+                m_shipTargets = new List<ShipTarget>();
+                m_shipID = aShipID;
+                int index = 1;
+                GameObject graphic = null;
+                string path = "";
+                switch (m_shipType)
+                {
+                    case eShipType.SHIP_TYPE_CARRIER:
+                        path = "Carrier0" + aTeam;
+                        break;
+                    case eShipType.SHIP_TYPE_BATTLESHIP:
+                        path = "Battleship0" + aTeam;
+                        break;
+                    case eShipType.SHIP_TYPE_CRUISER:
+                        path = "Cruiser0" + aTeam;
+                        break;
+                    case eShipType.SHIP_TYPE_PATROLBOAT:
+                        path = "PatrolBoat0" + aTeam;
+                        break;
+                    case eShipType.SHIP_TYPE_DESTROYER:
+                        path = "Destroyer0" + aTeam;
+                        break;
+                }
+
+
+                m_shipPrefab = (GameObject)Resources.Load(path);
+                graphic = (GameObject)Instantiate(m_shipPrefab, transform.FindChild("ShipGraphic").position, transform.FindChild("ShipGraphic").rotation);
+                graphic.transform.parent = transform.FindChild("ShipGraphic");
+
+                if (aTeam == 1)
+                {
+                    graphic.transform.FindChild("Graphic").gameObject.layer = 16;
+                }
+                else
+                {
+                    graphic.transform.FindChild("Graphic").gameObject.layer = 17;
+                }
+
+                bool done = false;
+                path = "";
+                while (!done)
+                {
+
+                    path = "TargetPosition" + index;
+                    Transform target = graphic.transform.FindChild(path);
+
+                    if (target != null)
+                    {
+                        GameObject targetGraphic = (GameObject)Instantiate((GameObject)Resources.Load("TargetPosition"), target.position, target.rotation);
+                        m_shipTargets.Add(new ShipTarget(targetGraphic, target, m_shipID, index - 1));
+                    }
+                    else
+                    {
+                        done = true;
+                        break;
+                    }
+
+                    index++;
+                }
+            }
+            else
+            {
+                m_team = aTeam;
+                transform.position = m_startPosition;
+                transform.rotation = Quaternion.Euler(0, 0, m_startAngle);
+
+                GameObject.Find("GameManager").GetComponent<GameManager>().AddSpawnedShip(this);
+                m_shipType = (eShipType)aShipType;
+                m_shipTargets = new List<ShipTarget>();
+                m_shipID = aShipID;
+                int index = 1;
+                GameObject graphic = transform.GetChild(0).GetChild(0).gameObject;
+                m_shipTargets.Clear();
+                bool done = false;
+                string path = "";
+                while (!done)
+                {
+                    path = "TargetPosition" + index;
+                    Transform target = graphic.transform.FindChild(path);
+
+                    if (target != null)
+                    {
+                        GameObject targetGraphic = (GameObject)Instantiate((GameObject)Resources.Load("TargetPosition"), target.position, target.rotation);
+                        m_shipTargets.Add(new ShipTarget(targetGraphic, target, m_shipID, index - 1));
+                    }
+                    else
+                    {
+                        done = true;
+                        break;
+                    }
+
+                    index++;
+                }
+                ParticleSystem[] effects = transform.GetComponentsInChildren<ParticleSystem>();
+                for (int i = 0; i < effects.Length; i++)
+                {
+                    Destroy(effects[i].gameObject);
+                }
+            }
+
+        }
+
+        [Command]
+        void CmdSetShipType2(int aShipType, int aTeam, int aShipID, float aAngle, Vector3 aPosition, float aRespawnTime, Vector3[] aPath, float aPathSpeed)
+        {
+            m_team = aTeam;
+            m_startPosition = aPosition;
+            m_startAngle = aAngle;
+            m_respawnTime = aRespawnTime;
+
+            transform.position = m_startPosition;
+            transform.rotation = Quaternion.Euler(0, 0, m_startAngle);
+
+            GameObject.Find("GameManager").GetComponent<GameManager>().AddSpawnedShip(this);
+            m_shipType = (eShipType)aShipType;
+            m_shipTargets = new List<ShipTarget>();
+            m_shipID = aShipID;
+            int index = 1;
+            GameObject graphic = null;
+            string path = "";
+            switch (m_shipType)
+            {
+                case eShipType.SHIP_TYPE_CARRIER:
+                    path = "Carrier0" + aTeam;
+                    break;
+                case eShipType.SHIP_TYPE_BATTLESHIP:
+                    path = "Battleship0" + aTeam;
+                    break;
+                case eShipType.SHIP_TYPE_CRUISER:
+                    path = "Cruiser0" + aTeam;
+                    break;
+                case eShipType.SHIP_TYPE_PATROLBOAT:
+                    path = "PatrolBoat0" + aTeam;
+                    break;
+                case eShipType.SHIP_TYPE_DESTROYER:
+                    path = "Destroyer0" + aTeam;
+                    break;
+            }
+
+
+            m_shipPrefab = (GameObject)Resources.Load(path);
+            graphic = (GameObject)Instantiate(m_shipPrefab, transform.FindChild("ShipGraphic").position, transform.FindChild("ShipGraphic").rotation);
+            graphic.transform.parent = transform.FindChild("ShipGraphic");
+
+            if (aTeam == 1)
+            {
+                graphic.transform.FindChild("Graphic").gameObject.layer = 16;
+            }
+            else
+            {
+                graphic.transform.FindChild("Graphic").gameObject.layer = 17;
+            }
+
+            bool done = false;
+            path = "";
+            while (!done)
+            {
+
+                path = "TargetPosition" + index;
+                Transform target = graphic.transform.FindChild(path);
+
+                if (target != null)
+                {
+                    GameObject targetGraphic = (GameObject)Instantiate((GameObject)Resources.Load("TargetPosition"), target.position, target.rotation);
+                    m_shipTargets.Add(new ShipTarget(targetGraphic, target, m_shipID, index - 1));
+                }
+                else
+                {
+                    done = true;
+                    break;
+                }
+
+                index++;
+            }
         }
 
         [ClientRpc]
@@ -209,7 +403,8 @@ namespace BrainCloudUNETExample.Game
 
                     if (target != null)
                     {
-                        m_shipTargets.Add(new ShipTarget(target, m_shipID, index - 1));
+                        GameObject targetGraphic = (GameObject)Instantiate((GameObject)Resources.Load("TargetPosition"), target.position, target.rotation);
+                        m_shipTargets.Add(new ShipTarget(targetGraphic, target, m_shipID, index - 1));
                     }
                     else
                     {
@@ -242,7 +437,8 @@ namespace BrainCloudUNETExample.Game
 
                     if (target != null)
                     {
-                        m_shipTargets.Add(new ShipTarget(target, m_shipID, index - 1));
+                        GameObject targetGraphic = (GameObject)Instantiate((GameObject)Resources.Load("TargetPosition"), target.position, target.rotation);
+                        m_shipTargets.Add(new ShipTarget(targetGraphic, target, m_shipID, index - 1));
                     }
                     else
                     {
@@ -322,7 +518,8 @@ namespace BrainCloudUNETExample.Game
 
                 if (target != null)
                 {
-                    m_shipTargets.Add(new ShipTarget(target, m_shipID, index - 1));
+                    GameObject targetGraphic = (GameObject)Instantiate((GameObject)Resources.Load("TargetPosition"), target.position, target.rotation);
+                    m_shipTargets.Add(new ShipTarget(targetGraphic, target, m_shipID, index - 1));
                 }
                 else
                 {

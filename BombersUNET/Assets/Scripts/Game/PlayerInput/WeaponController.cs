@@ -270,7 +270,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             if (m_bombs > 0)
             {
                 m_bombs--;
-                GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBomb(new BombController.BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, BombersNetworkManager.m_localPlayer.m_playerID, m_playerPlane.GetComponent<Rigidbody>().velocity));
+                BombersNetworkManager.m_localPlayer.SpawnBombCommand(new BombController.BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, BombersNetworkManager.m_localPlayer.m_playerID, m_playerPlane.GetComponent<Rigidbody>().velocity).GetJson());
             }
         }
 
@@ -284,7 +284,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, BombersNetworkManager.m_localPlayer.m_playerID, m_bulletVelocity));
+                BombersNetworkManager.m_localPlayer.FireBulletCommand(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, BombersNetworkManager.m_localPlayer.m_playerID, m_bulletVelocity).GetJson());
                 yield return new WaitForSeconds(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotBurstDelay);
             }
         }
@@ -307,7 +307,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, BombersNetworkManager.m_localPlayer.m_playerID, m_bulletVelocity));
+                BombersNetworkManager.m_localPlayer.FireBulletCommand(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, BombersNetworkManager.m_localPlayer.m_playerID, m_bulletVelocity).GetJson());
             }
         }
 
@@ -317,7 +317,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             if ((Time.time - m_lastFlare) > flareDelay)
             {
                 m_lastFlare = Time.time;
-                GameObject.Find("GameManager").GetComponent<GameManager>().CmdSpawnFlare(aPosition, aVelocity, BombersNetworkManager.m_localPlayer.m_playerID);
+                BombersNetworkManager.m_localPlayer.FireFlareCommand(aPosition, aVelocity);
             }
         }
 

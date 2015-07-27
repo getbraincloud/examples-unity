@@ -2,12 +2,14 @@
 using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
+using LitJson;
+using BrainCloudUNETExample.Game.PlayerInput;
 
 namespace BrainCloudUNETExample.Game
 {
     public class BombController : MonoBehaviour
     {
-        public class BombInfo : NetworkBehaviour
+        public class BombInfo
         {
             public Vector3 m_startPosition;
             public Vector3 m_startDirection;
@@ -16,6 +18,7 @@ namespace BrainCloudUNETExample.Game
             public int m_bombID;
             public bool m_isMaster = false;
             public GameObject gameObject;
+            public string m_bombInfoJson;
 
             public BombInfo(Vector3 aStartPos, Vector3 aStartDir, int aPlayer, Vector3 aSpeed, int aID = 0)
             {
@@ -26,16 +29,37 @@ namespace BrainCloudUNETExample.Game
                 m_bombID = aID;
             }
 
-            public override bool OnSerialize(NetworkWriter writer, bool initialState)
+            public static BombInfo GetBombInfo(string aJson)
             {
-                return base.OnSerialize(writer, initialState);
+                JsonData bombInfo = JsonMapper.ToObject(aJson);
+
+                Vector3 startPos = Vector3.zero;
+                Vector3 direction = Vector3.zero;
+                int shooterID = 0;
+                Vector3 speed = Vector3.zero;
+                int id = 0;
+
+                startPos.x = float.Parse(bombInfo["startPos"]["x"].ToString());
+                startPos.y = float.Parse(bombInfo["startPos"]["y"].ToString());
+                startPos.z = float.Parse(bombInfo["startPos"]["z"].ToString());
+                direction.x = float.Parse(bombInfo["direction"]["x"].ToString());
+                direction.y = float.Parse(bombInfo["direction"]["y"].ToString());
+                direction.z = float.Parse(bombInfo["direction"]["z"].ToString());
+                speed.x = float.Parse(bombInfo["speed"]["x"].ToString());
+                speed.y = float.Parse(bombInfo["speed"]["y"].ToString());
+                speed.z = float.Parse(bombInfo["speed"]["z"].ToString());
+                shooterID = int.Parse(bombInfo["shooterID"].ToString());
+                id = int.Parse(bombInfo["id"].ToString());
+
+                return new BombInfo(startPos, direction, shooterID, speed, id);
             }
 
-            public override void OnDeserialize(NetworkReader reader, bool initialState)
+            public string GetJson()
             {
-                base.OnDeserialize(reader, initialState);
+                string info = "{\"startPos\" : {\"x\" : \""+m_startPosition.x+"\", \"y\" : \""+m_startPosition.y+"\", \"z\" : \""+m_startPosition.z+"\"}, \"direction\" : {\"x\" : \""+m_startDirection.x+"\", \"y\" : \""+m_startDirection.y+"\", \"z\" : \""+m_startDirection.z+"\"}, \"speed\" : {\"x\" : \""+m_startVelocity.x+"\", \"y\" : \""+m_startVelocity.y+"\", \"z\" : \""+m_startVelocity.z+"\"}, \"shooterID\" : \""+m_shooter+"\", \"id\" : \""+m_bombID+"\"}";
+                return info;
             }
-
+            
             //public static byte[] SerializeBombInfo(object aBombInfo)
             //{
             //    BombInfo bombInfo = (BombInfo)aBombInfo;
@@ -53,7 +77,6 @@ namespace BrainCloudUNETExample.Game
             //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startVelocity.z, bytes, ref index);
 
             //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_bombID, bytes, ref index);
-
             //    return bytes;
             //}
 
@@ -107,19 +130,19 @@ namespace BrainCloudUNETExample.Game
             {
                 if (aCollision.gameObject.layer == 4)
                 {
-                    GameObject.Find("GameManager").GetComponent<GameManager>().CmdDeleteBomb(m_bombInfo, 0);
+                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 0);
                 }
                 else if (aCollision.gameObject.layer == 20) //it hit a rock
                 {
-                    GameObject.Find("GameManager").GetComponent<GameManager>().CmdDeleteBomb(m_bombInfo, 1);
+                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 1);
                 }
                 else //it hit a ship
                 {
-                   // if (((int)m_bombInfo.m_shooter.customProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.customProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
+                    if ((BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1 && aCollision.gameObject.layer == 16) || (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 2 && aCollision.gameObject.layer == 17))
                     {
-                        GameObject.Find("GameManager").GetComponent<GameManager>().CmdDeleteBomb(m_bombInfo, 2);
+                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 2);
                     }
-                    //else
+                    else
                     {
                         List<ShipController.ShipTarget> shipTargets = aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().GetTargets();
                         for (int i = 0; i < shipTargets.Count; i++)
@@ -133,17 +156,17 @@ namespace BrainCloudUNETExample.Game
                                 else
                                 {
                                     shipTargets[i].m_isAlive = false;
-                                    GameObject.Find("GameManager").GetComponent<GameManager>().CmdHitShipTargetPoint(shipTargets[i], m_bombInfo);
+                                    BombersNetworkManager.m_localPlayer.HitShipTargetPointCommand(shipTargets[i].m_shipID, shipTargets[i].m_index, m_bombInfo.GetJson());
                                 }
 
                                 if (!aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().IsAlive())
                                 {
-                                    GameObject.Find("GameManager").GetComponent<GameManager>().CmdDestroyedShip(aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().m_shipID, m_bombInfo);
+                                    BombersNetworkManager.m_localPlayer.DestroyShipCommand(aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().m_shipID, m_bombInfo.GetJson());
                                     break;
                                 }
                             }
                         }
-                        GameObject.Find("GameManager").GetComponent<GameManager>().CmdDeleteBomb(m_bombInfo, 1);
+                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 1);
                     }
                 }
             }
@@ -154,12 +177,12 @@ namespace BrainCloudUNETExample.Game
                     GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombWaterExplosion"), transform.position, Quaternion.identity);
                     explosion.GetComponent<AudioSource>().Play();
                 }
-                //else if (((int)m_bombInfo.m_shooter.customProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.customProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
+                else if ((BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1 && aCollision.gameObject.layer == 16) || (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 2 && aCollision.gameObject.layer == 17))
                 {
                     GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombDud"), transform.position, Quaternion.identity);
                     explosion.GetComponent<AudioSource>().Play();
                 }
-                //else
+                else
                 {
                     GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombExplosion"), transform.position, Quaternion.identity);
                     explosion.GetComponent<AudioSource>().Play();
@@ -179,11 +202,11 @@ namespace BrainCloudUNETExample.Game
 
             string teamBombPath = "";
 
-            //if ((int)m_bombInfo.m_shooter.customProperties["Team"] == 1)
+            if (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1)
             {
                 teamBombPath = "Bomb01";
             }
-            //else
+            else
             {
                 teamBombPath = "Bomb02";
             }

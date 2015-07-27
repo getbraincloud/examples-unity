@@ -52,6 +52,11 @@ public class GameInfo : NetworkBehaviour {
     [SyncVar]
     private int m_maxPlayers = 0;
 
+    //private Dictionary<string, string> m_matchOptions;
+
+    [SyncVar]
+    private float m_originalGameTime = 0;
+
     void Awake()
     {
         s_instance = this;
@@ -63,6 +68,7 @@ public class GameInfo : NetworkBehaviour {
         m_team1Score = 0;
         m_team2Score = 0;
         m_gameTime = int.Parse(aOptions["gameTime"]);
+        m_originalGameTime = m_gameTime;
         m_mapLayout = int.Parse(aOptions["mapLayout"]);
         m_mapSize = int.Parse(aOptions["mapSize"]);
         m_lightPosition = int.Parse(aOptions["lightPosition"]);
@@ -72,6 +78,16 @@ public class GameInfo : NetworkBehaviour {
         m_team1Players = 0;
         m_team2Players = 0;
     }
+
+    [Server]
+    public void Reinitialize()
+    {
+        m_team1Score = 0;
+        m_team2Score = 0;
+        m_gameTime = m_originalGameTime;
+        m_isPlaying = 0;
+    }
+
 
     public int GetMaxPlayers()
     {

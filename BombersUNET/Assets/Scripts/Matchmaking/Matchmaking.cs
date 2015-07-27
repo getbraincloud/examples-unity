@@ -445,20 +445,20 @@ namespace BrainCloudUNETExample.Matchmaking
             else if (0 < 8)
             {
                 m_state = eMatchmakingState.GAME_STATE_JOIN_ROOM;
-                if (false) //couldn't join
-                {
-                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
-                }
+                //if (false) //couldn't join
+                //{
+                //    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                //    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                //    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+                //    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
+                //}
             }
-            else
-            {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("That room is full!");
-                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-            }
+            //else
+            //{
+            //    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("That room is full!");
+            //    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+            //    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+            //}
         }
 
         public void RefreshRoomsList()
@@ -746,6 +746,8 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             if (aMatchResponse.success)
             {
+                //GameObject.Find("Version Text").transform.SetParent(null);
+                //GameObject.Find("FullScreen").transform.SetParent(null);
                 NetworkManager.singleton.OnMatchCreate(aMatchResponse);
                 //BombersNetworkManager.singleton.matchMaker.JoinMatch(aMatchResponse.networkId, "", OnMatchJoined);
             }
@@ -763,6 +765,10 @@ namespace BrainCloudUNETExample.Matchmaking
                 //Application.LoadLevel("Game");
                 //BombersNetworkManager.singleton.ServerChangeScene("Game");
                 NetworkManager.singleton.OnMatchJoined(aMatchResponse);
+                //NetworkManager.singleton.ServerChangeScene("Game");
+                //NetworkServer.SpawnObjects();
+                GameObject.Find("Version Text").transform.SetParent(null);
+                GameObject.Find("FullScreen").transform.SetParent(null);
             }
             else
             {
@@ -772,8 +778,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
         void OnJoinedRoom()
         {
-            GameObject.Find("Version Text").transform.SetParent(null);
-            GameObject.Find("FullScreen").transform.SetParent(null);
+            
             //TODO: See if action required for UNET
             //PhotonNetwork.LoadLevel("Game");
         }

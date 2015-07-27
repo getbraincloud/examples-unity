@@ -37,11 +37,8 @@ namespace BrainCloudUNETExample.Game
             }
         }
 
+        [SerializeField]
         private eGameState m_gameState = eGameState.GAME_STATE_WAITING_FOR_PLAYERS;
-
-        //private ExitGames.Client.Photon.Hashtable m_playerProperties = null;
-        //private ExitGames.Client.Photon.Hashtable m_roomProperties = null;
-        //private Room m_room = null;
 
         private GUISkin m_skin;
 
@@ -152,7 +149,7 @@ namespace BrainCloudUNETExample.Game
         public GameObject m_missionText;
         public GameInfo m_gameInfo;
 
-        void Start()
+        void Initialize()
         {
             GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
             GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
@@ -160,21 +157,17 @@ namespace BrainCloudUNETExample.Game
             m_mapLayout = m_gameInfo.GetMapLayout();
             m_mapSize = m_gameInfo.GetMapSize();
 
-            SetLightPosition(m_gameInfo.GetLightPosition());
+            if (isServer)
+                RpcSetLightPosition(m_gameInfo.GetLightPosition());
+
             m_spawnedShips = new List<ShipController>();
             m_bombPickupsSpawned = new List<BombPickup>();
 
             m_spawnedBullets = new List<BulletController.BulletInfo>();
             m_spawnedBombs = new List<BombController.BombInfo>();
             m_skin = (GUISkin)Resources.Load("skin");
-            //m_room = PhotonNetwork.room;
-            //m_playerProperties = new ExitGames.Client.Photon.Hashtable();
-            //m_playerProperties = PhotonNetwork.player.customProperties;
             StartCoroutine("UpdatePing");
             StartCoroutine("UpdateRoomDisplayName");
-            //m_roomProperties = PhotonNetwork.room.customProperties;
-            //if (m_playerProperties["Team"] == null)
-            //    m_playerProperties["Team"] = 0;
 
             m_team1Score = 0;
             m_team2Score = 0;
@@ -212,7 +205,7 @@ namespace BrainCloudUNETExample.Game
                 if (isServer)
                 {
                     m_gameInfo.SetLightPosition(Random.Range(1, 5));
-                    SetLightPosition(m_gameInfo.GetLightPosition());
+                    RpcSetLightPosition(m_gameInfo.GetLightPosition());
                 }
 
                 if (m_gameInfo.GetTeamPlayers(2) < m_gameInfo.GetTeamPlayers(1))
@@ -236,16 +229,31 @@ namespace BrainCloudUNETExample.Game
             }
         }
 
-        [RPC]
-        void AnnounceJoin(string aPlayerName, int aTeam)
+        void Start()
+        {
+            StartCoroutine("WaitForGameInfo");
+        }
+
+        IEnumerator WaitForGameInfo()
+        {
+            while (GameObject.Find("GameInfo").GetComponent<GameInfo>() == null || BombersNetworkManager.m_localPlayer == null)
+            {
+                yield return new WaitForSeconds(0);
+            }
+            m_gameInfo = GameObject.Find("GameInfo").GetComponent<GameInfo>();
+            Initialize();
+        }
+
+        [ClientRpc]
+        void RpcAnnounceJoin(string aPlayerName, int aTeam)
         {
             string message = aPlayerName + " has joined the fight\n on the ";
             message += (aTeam == 1) ? "green team!" : "red team!";
             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog(message, true);
         }
 
-        [RPC]
-        void SetLightPosition(int aPosition)
+        [ClientRpc]
+        void RpcSetLightPosition(int aPosition)
         {
             Vector3 position = Vector3.zero;
             switch (aPosition)
@@ -297,12 +305,6 @@ namespace BrainCloudUNETExample.Game
                 NetworkManager.singleton.client.Disconnect();
             }
              * */
-            //if (m_playerProperties != null)
-            //{
-            //	m_playerProperties.Clear();
-            //}
-            //PhotonNetwork.player.SetCustomProperties(m_playerProperties);
-            //PhotonNetwork.Disconnect();
         }
 
         public void LeaveRoom()
@@ -318,52 +320,53 @@ namespace BrainCloudUNETExample.Game
 
             GameObject.Find("Version Text").transform.SetParent(null);
             GameObject.Find("FullScreen").transform.SetParent(null);
+            NetworkManager.singleton.matchMaker.DestroyMatch(NetworkManager.singleton.matchInfo.networkId, DestroyMatchCallback);
+            
+        }
 
+        public void DestroyMatchCallback(UnityEngine.Networking.Match.BasicResponse aRespose)
+        {
             if (isServer)
             {
                 NetworkManager.singleton.StopHost();
+
             }
             else
             {
                 NetworkManager.singleton.client.Disconnect();
             }
+            NetworkManager.singleton.StartMatchMaker();
+            
         }
 
-        public void OnLeftRoom()
+        [Command]
+        public void CmdForceStartGame()
         {
-            //GameObject.Find("Version Text").transform.SetParent(null);
-            //GameObject.Find("FullScreen").transform.SetParent(null);
-            //PhotonNetwork.LoadLevel("Matchmaking");
+            m_gameState = eGameState.GAME_STATE_STARTING_GAME;
+            RpcForceStartGame();
         }
 
-        public void ForceStartGame()
+        [ClientRpc]
+        public void RpcForceStartGame()
         {
             m_gameState = eGameState.GAME_STATE_STARTING_GAME;
         }
 
-        public void ReturnToWaitingRoom()
-        {
-            if (m_gameState == eGameState.GAME_STATE_GAME_OVER)
-            {
-                RpcResetGame();
-                //GetComponent<PhotonView>().RPC("ResetGame", PhotonTargets.All);
-            }
-        }
+        
 
         public void CloseQuitMenu()
         {
             m_showQuitMenu = false;
         }
 
-        //void OnMasterClientSwitched(PhotonPlayer newMasterClient)
-        //{
-        //    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().HostLeft();
-        //}
+        /*void OnMasterClientSwitched(PhotonPlayer newMasterClient)
+        {
+            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().HostLeft();
+        }*/
 
         void OnGUI()
         {
             GUI.skin = m_skin;
-            //if (PhotonNetwork.room == null) return;
             switch (m_gameState)
             {
                 case eGameState.GAME_STATE_WAITING_FOR_PLAYERS:
@@ -437,7 +440,6 @@ namespace BrainCloudUNETExample.Game
 
         void OnHudWindow()
         {
-            //if (PhotonNetwork.room == null) return;
             m_team1Score = m_gameInfo.GetTeamScore(1);
             m_team2Score = m_gameInfo.GetTeamScore(2);
             int score = BombersNetworkManager.m_localPlayer.m_score;
@@ -583,7 +585,6 @@ namespace BrainCloudUNETExample.Game
 
         void OnScoresWindow()
         {
-            //if (PhotonNetwork.room == null) return;
             m_resultsWindow.GetComponent<CanvasGroup>().alpha += Time.fixedDeltaTime * 2;
             if (m_resultsWindow.GetComponent<CanvasGroup>().alpha > 1) m_resultsWindow.GetComponent<CanvasGroup>().alpha = 1;
             m_team1Score = m_gameInfo.GetTeamPlayers(1);
@@ -773,6 +774,7 @@ namespace BrainCloudUNETExample.Game
 
         void OnWaitingForPlayersWindow()
         {
+            
             GameObject[] playerList = GameObject.FindGameObjectsWithTag("PlayerController");
             List<GameObject> playerListList = new List<GameObject>();
 
@@ -800,17 +802,15 @@ namespace BrainCloudUNETExample.Game
 
             for (int i = 0; i < playerList.Length; i++)
             {
-                if (playerList[i].GetComponent<BombersPlayerController>().m_team != null)
+                if (playerList[i].GetComponent<BombersPlayerController>().m_team == 1)
                 {
-                    if (playerList[i].GetComponent<BombersPlayerController>().m_team == 1)
-                    {
-                        greenPlayers.Add(playerList[i]);
-                    }
-                    else if (playerList[i].GetComponent<BombersPlayerController>().m_team == 2)
-                    {
-                        redPlayers.Add(playerList[i]);
-                    }
+                    greenPlayers.Add(playerList[i]);
                 }
+                else if (playerList[i].GetComponent<BombersPlayerController>().m_team == 2)
+                {
+                    redPlayers.Add(playerList[i]);
+                }
+
             }
 
             Text teamText = GameObject.Find("GreenPlayerNames").GetComponent<Text>();
@@ -857,24 +857,13 @@ namespace BrainCloudUNETExample.Game
             }
         }
 
-        //[RPC]
-        //void ChangeMapLayout(int aLayout)
-        //{
-        //    m_mapLayout = aLayout;
-        //}
-
-        //[RPC]
-        //void ChangeMapSize(int aSize)
-        //{
-        //    m_mapSize = aSize;
-        //}
-
         IEnumerator UpdatePing()
         {
             while (m_gameState != eGameState.GAME_STATE_CLOSING_ROOM)
             {
                 byte errorByte;
-                BombersNetworkManager.m_localPlayer.m_ping = NetworkTransport.GetCurrentRtt(BombersNetworkManager.m_localConnection.hostId, BombersNetworkManager.m_localConnection.connectionId, out errorByte);
+                if (BombersNetworkManager.m_localConnection.hostId != -1)
+                    BombersNetworkManager.m_localPlayer.m_ping = NetworkTransport.GetCurrentRtt(BombersNetworkManager.m_localConnection.hostId, BombersNetworkManager.m_localConnection.connectionId, out errorByte);
                 yield return new WaitForSeconds(1);
             }
         }
@@ -884,6 +873,11 @@ namespace BrainCloudUNETExample.Game
             List<string> otherNames = new List<string>();
             while (true)
             {
+
+                while (BombersNetworkManager.m_localPlayer == null)
+                {
+                    yield return new WaitForSeconds(0);
+                }
                 otherNames.Clear();
                 GameObject[] playerList = GameObject.FindGameObjectsWithTag("PlayerController");
                 foreach (GameObject player in playerList)
@@ -954,7 +948,7 @@ namespace BrainCloudUNETExample.Game
                 {
                     playerPlane.layer = 9;
                 }
-                GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().SetPlayerPlane(playerPlane.GetComponent<PlaneController>());
+                BombersNetworkManager.m_localPlayer.SetPlayerPlane(playerPlane.GetComponent<PlaneController>());
                 playerPlane.GetComponent<Rigidbody>().isKinematic = false;
             }
         }
@@ -974,19 +968,19 @@ namespace BrainCloudUNETExample.Game
             GameObject.Find("BorderClouds").GetComponent<MapCloudBorder>().SetCloudBorder();
         }
 
-        [Command]
-        void CmdSpawnGameStart()
+
+        IEnumerator SpawnGameStart()
         {
             MapPresets.MapSize mapSize = m_mapSizes[m_mapSize];
             GameObject mapBound = GameObject.Find("MapBounds");
             mapBound.transform.localScale = new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize);
 
             RpcSetMapSize(new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize));
-            //GetComponent<PhotonView>().RPC("SetMapSizeRPC", PhotonTargets.OthersBuffered, new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize));
+            /*GetComponent<PhotonView>().RPC("SetMapSizeRPC", PhotonTargets.OthersBuffered, new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize));*/
             RpcGetReady();
-            //GetComponent<PhotonView>().RPC("GetReady", PhotonTargets.AllBuffered);
-            
+
             m_gameInfo.SetPlaying(1);
+            yield return new WaitForSeconds(0.5f);
 
             int shipID = 0;
             bool done = false;
@@ -1029,7 +1023,7 @@ namespace BrainCloudUNETExample.Game
                             positionFound = true;
                         }
                         tryCount++;
-                        if (tryCount > 100000)
+                        if (tryCount > 10000)
                         {
                             positionFound = true;
                         }
@@ -1068,6 +1062,7 @@ namespace BrainCloudUNETExample.Game
 
                     ship = (GameObject)Instantiate((GameObject)Resources.Load("Ship"), position, Quaternion.Euler(0, 0, Random.Range(0.0f, 360.0f)));
                     NetworkServer.Spawn(ship);
+                    
                     switch (shipIndex)
                     {
                         case 0:
@@ -1086,7 +1081,7 @@ namespace BrainCloudUNETExample.Game
                             ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
                             break;
                     }
-
+                    
                     if (shipID % 2 == 1)
                     {
                         shipIndex++;
@@ -1129,6 +1124,9 @@ namespace BrainCloudUNETExample.Game
                     i--;
                 }
             }
+
+            m_gameState = eGameState.GAME_STATE_SPAWN_PLAYERS;
+
         }
 
         void Update()
@@ -1137,10 +1135,6 @@ namespace BrainCloudUNETExample.Game
             {
                 case eGameState.GAME_STATE_WAITING_FOR_PLAYERS:
                     m_showScores = false;
-                    //if (NetworkManager.singleton.matchSize == m_gameInfo)
-                    //{
-                    //    m_gameState = eGameState.GAME_STATE_STARTING_GAME;
-                    //}
 
                     if (GameObject.Find("BackgroundMusic").GetComponent<AudioSource>().isPlaying)
                     {
@@ -1155,7 +1149,6 @@ namespace BrainCloudUNETExample.Game
                     {
                         m_once = true;
                         StartCoroutine("SpawnGameStart");
-                        StartCoroutine("WaitForReadyPlayers");
                     }
 
                     break;
@@ -1164,9 +1157,8 @@ namespace BrainCloudUNETExample.Game
                     if (isServer && m_once)
                     {
                         m_once = false;
-                        //TODO: Change for UNET
                         RpcSpawnPlayer();
-                        //GetComponent<PhotonView>().RPC("SpawnPlayer", PhotonTargets.AllBuffered);
+                        m_gameState = eGameState.GAME_STATE_PLAYING_GAME;
                     }
 
                     break;
@@ -1261,7 +1253,7 @@ namespace BrainCloudUNETExample.Game
                         m_once = false;
                         m_team1Score = m_gameInfo.GetTeamScore(1);
                         m_team2Score = m_gameInfo.GetTeamScore(2);
-                        GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().EndGame();
+                        BombersNetworkManager.m_localPlayer.EndGame();
                         if (isServer)
                         {
                             if (m_team1Score > m_team2Score)
@@ -1281,10 +1273,7 @@ namespace BrainCloudUNETExample.Game
 
                     if (isServer)
                     {
-                        //m_gameTime -= Time.deltaTime;
-                        //m_roomProperties = PhotonNetwork.room.customProperties;
-                        //m_roomProperties["GameTime"] = m_gameTime;
-                        //PhotonNetwork.room.SetCustomProperties(m_roomProperties);
+
                     }
                     else
                     {
@@ -1292,77 +1281,77 @@ namespace BrainCloudUNETExample.Game
                     }
                     break;
                 case eGameState.GAME_STATE_SPECTATING:
-                    //if (Input.GetKey(KeyCode.Tab))
-                    //{
-                    //    m_showScores = true;
-                    //}
-                    //else
-                    //{
-                    //    m_showScores = false;
-                    //}
-                    //m_gameTime = m_gameInfo.GetGameTime();
+                    /*if (Input.GetKey(KeyCode.Tab))
+                    {
+                        m_showScores = true;
+                    }
+                    else
+                    {
+                        m_showScores = false;
+                    }
+                    m_gameTime = m_gameInfo.GetGameTime();
 
-                    //PhotonPlayer[] playerList = PhotonNetwork.playerList;
-                    //List<PhotonPlayer> playerListList = new List<PhotonPlayer>();
-                    //for (int i = 0; i < playerList.Length; i++)
-                    //{
-                    //    playerListList.Add(playerList[i]);
-                    //}
+                    PhotonPlayer[] playerList = PhotonNetwork.playerList;
+                    List<PhotonPlayer> playerListList = new List<PhotonPlayer>();
+                    for (int i = 0; i < playerList.Length; i++)
+                    {
+                        playerListList.Add(playerList[i]);
+                    }
 
-                    //int count = 0;
-                    //while (count < playerListList.Count)
-                    //{
-                    //    if (playerListList[count].customProperties["Team"] == null || (int)playerListList[count].customProperties["Team"] == 0)
-                    //    {
-                    //        playerListList.RemoveAt(count);
-                    //    }
-                    //    else
-                    //    {
-                    //        count++;
-                    //    }
-                    //}
-                    //playerList = playerListList.ToArray().OrderByDescending(x => (int)x.customProperties["Score"]).ToArray();
+                    int count = 0;
+                    while (count < playerListList.Count)
+                    {
+                        if (playerListList[count].customProperties["Team"] == null || (int)playerListList[count].customProperties["Team"] == 0)
+                        {
+                            playerListList.RemoveAt(count);
+                        }
+                        else
+                        {
+                            count++;
+                        }
+                    }
+                    playerList = playerListList.ToArray().OrderByDescending(x => (int)x.customProperties["Score"]).ToArray();
 
-                    //int playerIndex = -1;
+                    int playerIndex = -1;
 
-                    //if (m_spectatingTarget != null)
-                    //{
-                    //    for (int i = 0; i < playerList.Length; i++)
-                    //    {
-                    //        if (playerList[i] == m_spectatingTarget)
-                    //        {
-                    //            playerIndex = i;
-                    //            break;
-                    //        }
-                    //    }
-                    //}
+                    if (m_spectatingTarget != null)
+                    {
+                        for (int i = 0; i < playerList.Length; i++)
+                        {
+                            if (playerList[i] == m_spectatingTarget)
+                            {
+                                playerIndex = i;
+                                break;
+                            }
+                        }
+                    }
 
-                    //if (Input.GetMouseButtonDown(0))
-                    //{
-                    //    if (playerIndex == 0 || playerIndex == -1)
-                    //    {
-                    //        playerIndex = playerList.Length - 1;
-                    //    }
-                    //    else
-                    //    {
-                    //        playerIndex--;
-                    //    }
-                    //}
-                    //else if (Input.GetMouseButtonDown(1))
-                    //{
-                    //    if (playerIndex == playerList.Length - 1 || playerIndex == -1)
-                    //    {
-                    //        playerIndex = 0;
-                    //    }
-                    //    else
-                    //    {
-                    //        playerIndex++;
-                    //    }
-                    //}
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        if (playerIndex == 0 || playerIndex == -1)
+                        {
+                            playerIndex = playerList.Length - 1;
+                        }
+                        else
+                        {
+                            playerIndex--;
+                        }
+                    }
+                    else if (Input.GetMouseButtonDown(1))
+                    {
+                        if (playerIndex == playerList.Length - 1 || playerIndex == -1)
+                        {
+                            playerIndex = 0;
+                        }
+                        else
+                        {
+                            playerIndex++;
+                        }
+                    }
 
-                    //if (playerIndex != -1)
-                    //    m_spectatingTarget = playerList[playerIndex];
-
+                    if (playerIndex != -1)
+                        m_spectatingTarget = playerList[playerIndex];
+                    */
                     break;
             }
             if (isClient)
@@ -1381,32 +1370,32 @@ namespace BrainCloudUNETExample.Game
 
         void LateUpdate()
         {
-            //if (m_gameState == eGameState.GAME_STATE_SPECTATING)
-            //{
-            //    Vector3 camPos = Camera.main.transform.position;
+            /*if (m_gameState == eGameState.GAME_STATE_SPECTATING)
+            {
+                Vector3 camPos = Camera.main.transform.position;
 
-            //    GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
-            //    Vector3 targetPos = Vector3.zero;
-            //    if (planes.Length > 0)
-            //    {
-            //        for (int i = 0; i < planes.Length; i++)
-            //        {
-            //            if (planes[i].GetComponent<PhotonView>().owner == m_spectatingTarget)
-            //            {
-            //                targetPos = planes[i].transform.position;
-            //            }
-            //            planes[i].transform.FindChild("NameTag").GetComponent<TextMesh>().characterSize = 0.14f;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        targetPos = camPos;
-            //    }
+                GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
+                Vector3 targetPos = Vector3.zero;
+                if (planes.Length > 0)
+                {
+                    for (int i = 0; i < planes.Length; i++)
+                    {
+                        if (planes[i].GetComponent<PhotonView>().owner == m_spectatingTarget)
+                        {
+                            targetPos = planes[i].transform.position;
+                        }
+                        planes[i].transform.FindChild("NameTag").GetComponent<TextMesh>().characterSize = 0.14f;
+                    }
+                }
+                else
+                {
+                    targetPos = camPos;
+                }
 
-            //    camPos = Vector3.Lerp(Camera.main.transform.position, new Vector3(targetPos.x, targetPos.y, -180), 5 * Time.deltaTime);
+                camPos = Vector3.Lerp(Camera.main.transform.position, new Vector3(targetPos.x, targetPos.y, -180), 5 * Time.deltaTime);
 
-            //    Camera.main.transform.position = camPos;
-            //}
+                Camera.main.transform.position = camPos;
+            }*/
         }
 
         [ClientRpc]
@@ -1418,23 +1407,88 @@ namespace BrainCloudUNETExample.Game
             m_enemyShipSunk.SetActive(false);
             m_redShipLogo.SetActive(false);
             m_greenShipLogo.SetActive(false);
-            GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().DestroyPlayerPlane();
+            BombersNetworkManager.m_localPlayer.DestroyPlayerPlane();
+        }
+
+        [Command]
+        public void CmdReturnToWaitingRoom()
+        {
+            if (m_gameState == eGameState.GAME_STATE_GAME_OVER)
+            {
+                RpcResetGame();
+                m_gameState = eGameState.GAME_STATE_WAITING_FOR_PLAYERS;
+
+                GameObject.Find("GameInfo").GetComponent<GameInfo>().Reinitialize();
+                m_spawnedBombs.Clear();
+                m_spawnedBullets.Clear();
+                m_spawnedShips.Clear();
+            }
         }
 
         [ClientRpc]
         void RpcResetGame()
         {
-            m_gameInfo.SetPlaying(0);
-            GameObject.Find("Version Text").transform.SetParent(null);
-            GameObject.Find("FullScreen").transform.SetParent(null);
+            m_gameState = eGameState.GAME_STATE_WAITING_FOR_PLAYERS;
+            BombersNetworkManager.m_localPlayer.m_score = 0;
+            BombersNetworkManager.m_localPlayer.m_kills = 0;
+            BombersNetworkManager.m_localPlayer.m_deaths = 0;
+
+            GameObject[] effects = GameObject.FindGameObjectsWithTag("Effect");
+            foreach(GameObject effect in effects)
+            {
+                Destroy(effect);
+            }
+
+            effects = GameObject.FindGameObjectsWithTag("Ship");
+            foreach (GameObject effect in effects)
+            {
+                Destroy(effect);
+            }
+
+            m_spawnedBombs.Clear();
+            m_spawnedBullets.Clear();
+            m_spawnedShips.Clear();
+            //m_gameInfo.SetPlaying(0);
+            //GameObject.Find("Version Text").transform.SetParent(null);
+            //GameObject.Find("FullScreen").transform.SetParent(null);
             //TODO: Change for UNET
+            //Application.LoadLevel("Game");
+            //NetworkManager.singleton.ServerChangeScene("Game");
             //PhotonNetwork.LoadLevel("Game");
         }
 
         [Command]
-        public void CmdHitShipTargetPoint(ShipController.ShipTarget aShipTarget, BombController.BombInfo aBombInfo)
+        public void CmdHitShipTargetPoint(int aShipID, int aTargetIndex, string aBombInfoString)
         {
-            RpcHitShipTargetPoint(aShipTarget, aBombInfo);
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
+            if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+            {
+                m_gameInfo.SetTeamScore(1, m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction);
+            }
+            else if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 2)
+            {
+                m_gameInfo.SetTeamScore(2, m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction);
+            }
+
+            ShipController.ShipTarget shipTarget = null;
+            //GameObject ship = null;
+            ShipController.ShipTarget aShipTarget = new ShipController.ShipTarget(aShipID, aTargetIndex);
+            for (int i = 0; i < m_spawnedShips.Count; i++)
+            {
+                if (m_spawnedShips[i].ContainsShipTarget(aShipTarget))
+                {
+                    shipTarget = m_spawnedShips[i].GetShipTarget(aShipTarget);
+                    //ship = m_spawnedShips[i].gameObject;
+                    break;
+                }
+            }
+
+            if (shipTarget != null)
+            {
+                //Debug.Log(shipTarget.m_targetGraphic);
+                //NetworkServer.Destroy(shipTarget.m_targetGraphic);
+            }
+            RpcHitShipTargetPoint(aShipID, aTargetIndex, aBombInfoString);
             //GetComponent<PhotonView>().RPC("HitShipTargetPointRPC", PhotonTargets.AllBuffered, aShipTarget, aBombInfo);
         }
 
@@ -1462,7 +1516,6 @@ namespace BrainCloudUNETExample.Game
                 ship.SetShipType(ship.GetShipType(), ship.m_team, aShipID);
             }
             RpcRespawnShip(aShipID);
-            //GetComponent<PhotonView>().RPC("RespawnShipRPC", PhotonTargets.AllBuffered, aShip.m_shipID); 
         }
 
         [ClientRpc]
@@ -1487,11 +1540,12 @@ namespace BrainCloudUNETExample.Game
         }
 
         [ClientRpc]
-        void RpcHitShipTargetPoint(ShipController.ShipTarget aShipTarget, BombController.BombInfo aBombInfo)
+        void RpcHitShipTargetPoint(int aShipID, int aTargetIndex, string aBombInfoString)
         {
             ShipController.ShipTarget shipTarget = null;
             GameObject ship = null;
-
+            ShipController.ShipTarget aShipTarget = new ShipController.ShipTarget(aShipID, aTargetIndex);
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             for (int i = 0; i < m_spawnedShips.Count; i++)
             {
                 if (m_spawnedShips[i].ContainsShipTarget(aShipTarget))
@@ -1501,37 +1555,27 @@ namespace BrainCloudUNETExample.Game
                     break;
                 }
             }
-            //if (aBombInfo.m_shooter == BombersNetworkManager)
+
+            if (aBombInfo.m_shooter == BombersNetworkManager.m_localPlayer.m_playerID)
             {
                 m_bombsHit++;
-                //m_playerProperties["Score"] = (int)m_playerProperties["Score"] + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
+                BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
             }
-
-            //if (PhotonNetwork.isMasterClient)
-            //{
-            //    if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
-            //    {
-            //        m_team1Score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
-            //        m_roomProperties["Team1Score"] = m_team1Score;
-            //    }
-            //    else if ((int)aBombInfo.m_shooter.customProperties["Team"] == 2)
-            //    {
-            //        m_team2Score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
-            //        m_roomProperties["Team2Score"] = m_team2Score;
-            //    }
-            //}
 
             Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
             if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
             {
-                GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
             }
 
             if (shipTarget == null) return;
             GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("WeakpointExplosion"), shipTarget.m_position.position, shipTarget.m_position.rotation);
             explosion.transform.parent = ship.transform;
             explosion.GetComponent<AudioSource>().Play();
-            Destroy(shipTarget.m_targetGraphic);
+            foreach (Transform child in shipTarget.gameObject.transform)
+            {
+                Destroy(child.gameObject);
+            }
 
         }
 
@@ -1587,15 +1631,32 @@ namespace BrainCloudUNETExample.Game
         }
 
         [Command]
-        public void CmdDestroyedShip(int aShipID, BombController.BombInfo aBombInfo)
+        public void CmdDestroyedShip(int aShipID, string aBombInfoString)
         {
-            RpcDestroyedShip(aShipID, aBombInfo);
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
+
+            if (isServer)
+            {
+                if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+                {
+                     m_gameInfo.SetTeamScore(1, m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
+                    
+                }
+                else
+                {
+                     m_gameInfo.SetTeamScore(2, m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
+                    
+                }
+            }
+
+            RpcDestroyedShip(aShipID, aBombInfoString);
             //GetComponent<PhotonView>().RPC("DestroyedShipRPC", PhotonTargets.AllBuffered, aShip.m_shipID, aBombInfo);
         }
 
         [ClientRpc]
-        void RpcDestroyedShip(int aShipID, BombController.BombInfo aBombInfo)
+        void RpcDestroyedShip(int aShipID, string aBombInfoString)
         {
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             ShipController ship = null;
             for (int i = 0; i < m_spawnedShips.Count; i++)
             {
@@ -1605,24 +1666,11 @@ namespace BrainCloudUNETExample.Game
                     break;
                 }
             }
-            //if (isServer)
-            //{
-            //    if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
-            //    {
-            //        m_team1Score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
-            //        m_roomProperties["Team1Score"] = m_team1Score;
-            //    }
-            //    else
-            //    {
-            //        m_team2Score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
-            //        m_roomProperties["Team2Score"] = m_team2Score;
-            //    }
-            //}
-
+            
             Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
             if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
             {
-                GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shipIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shipIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
             }
 
             if (ship == null) return;
@@ -1660,7 +1708,7 @@ namespace BrainCloudUNETExample.Game
             {
                 ship.transform.GetChild(i).GetChild(0).GetChild(4).GetComponent<ParticleSystem>().enableEmission = false;
             }
-            Destroy(ship.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).gameObject);
+            //Destroy(ship.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).gameObject);
             GameObject explosion;
             string path = "";
             switch (ship.GetShipType())
@@ -1668,7 +1716,7 @@ namespace BrainCloudUNETExample.Game
                 case ShipController.eShipType.SHIP_TYPE_CARRIER:
 
 
-                    if ((int)aBombInfo.m_shooter == 1)
+                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "CarrierExplosion02";
@@ -1684,7 +1732,7 @@ namespace BrainCloudUNETExample.Game
                     break;
                 case ShipController.eShipType.SHIP_TYPE_BATTLESHIP:
 
-                    if ((int)aBombInfo.m_shooter == 1)
+                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "BattleshipExplosion02";
@@ -1699,7 +1747,7 @@ namespace BrainCloudUNETExample.Game
                     shipName += "Battleship";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_CRUISER:
-                    if ((int)aBombInfo.m_shooter == 1)
+                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "CruiserExplosion02";
@@ -1714,7 +1762,7 @@ namespace BrainCloudUNETExample.Game
                     shipName += "Cruiser";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_PATROLBOAT:
-                    if ((int)aBombInfo.m_shooter == 1)
+                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "PatrolBoatExplosion02";
@@ -1729,7 +1777,7 @@ namespace BrainCloudUNETExample.Game
                     shipName += "Patrol Boat";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_DESTROYER:
-                    if ((int)aBombInfo.m_shooter == 1)
+                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "DestroyerExplosion02";
@@ -1748,11 +1796,10 @@ namespace BrainCloudUNETExample.Game
             if (isServer)
                 ship.StartRespawn();
 
-            //if (aBombInfo.m_shooter == PhotonNetwork.player)
+            if (aBombInfo.m_shooter == BombersNetworkManager.m_localPlayer.m_playerID)
             {
                 m_carriersDestroyed++;
-                //BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
-                //m_playerProperties["Score"] = (int)m_playerProperties["Score"] + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
+                BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
             }
         }
 
@@ -1809,14 +1856,44 @@ namespace BrainCloudUNETExample.Game
             BombersNetworkManager.m_localPlayer.m_kills = 0;
         }
 
+        void SpawnPlayer()
+        {
+
+            //{
+            //    Vector3 spawnPoint = Vector3.zero;
+            //    spawnPoint.z = 22;
+
+            //    if (BombersNetworkManager.m_localPlayer.m_team == 1)
+            //    {
+            //        spawnPoint.x = Random.Range(m_team1SpawnBounds.bounds.center.x - m_team1SpawnBounds.bounds.size.x / 2, m_team1SpawnBounds.bounds.center.x + m_team1SpawnBounds.bounds.size.x / 2) - 10;
+            //        spawnPoint.y = Random.Range(m_team1SpawnBounds.bounds.center.y - m_team1SpawnBounds.bounds.size.y / 2, m_team1SpawnBounds.bounds.center.y + m_team1SpawnBounds.bounds.size.y / 2);
+            //    }
+            //    else if (BombersNetworkManager.m_localPlayer.m_team == 2)
+            //    {
+            //        spawnPoint.x = Random.Range(m_team2SpawnBounds.bounds.center.x - m_team2SpawnBounds.bounds.size.x / 2, m_team2SpawnBounds.bounds.center.x + m_team2SpawnBounds.bounds.size.x / 2) + 10;
+            //        spawnPoint.y = Random.Range(m_team2SpawnBounds.bounds.center.y - m_team2SpawnBounds.bounds.size.y / 2, m_team2SpawnBounds.bounds.center.y + m_team2SpawnBounds.bounds.size.y / 2);
+            //    }
+
+            //    GameObject playerPlane = (GameObject)Instantiate((GameObject)Resources.Load("Plane"), spawnPoint, Quaternion.LookRotation(Vector3.forward, (new Vector3(0, 0, 22) - spawnPoint)));
+            //    NetworkServer.Spawn(playerPlane);
+            //    if (BombersNetworkManager.m_localPlayer.m_team == 1)
+            //    {
+            //        playerPlane.layer = 8;
+            //    }
+            //    else if (BombersNetworkManager.m_localPlayer.m_team == 2)
+            //    {
+            //        playerPlane.layer = 9;
+            //    }
+            //    BombersNetworkManager.m_localPlayer.SetPlayerPlane(playerPlane.GetComponent<PlaneController>());
+            //    playerPlane.GetComponent<Rigidbody>().isKinematic = false;
+
+            //}
+        }
+
+
         [ClientRpc]
         void RpcSpawnPlayer()
         {
-            if (BombersNetworkManager.m_localPlayer.m_team == 0)
-            {
-                m_gameState = eGameState.GAME_STATE_SPECTATING;
-            }
-            else
             {
                 Vector3 spawnPoint = Vector3.zero;
                 spawnPoint.z = 22;
@@ -1849,7 +1926,7 @@ namespace BrainCloudUNETExample.Game
         }
 
         [Command]
-        public void CmdespawnBombPickup(int aPickupID)
+        public void CmdDespawnBombPickup(int aPickupID)
         {
             RpcDespawnBombPickup(aPickupID);
             //GetComponent<PhotonView>().RPC("DespawnBombPickupRPC", PhotonTargets.All, aPickupID);
@@ -1862,7 +1939,7 @@ namespace BrainCloudUNETExample.Game
             {
                 if (m_bombPickupsSpawned[i].m_pickupID == aPickupID)
                 {
-                    Destroy(m_bombPickupsSpawned[i].gameObject);
+                    if (m_bombPickupsSpawned[i] != null && m_bombPickupsSpawned[i].gameObject != null) Destroy(m_bombPickupsSpawned[i].gameObject);
                     m_bombPickupsSpawned.RemoveAt(i);
                     break;
                 }
@@ -1899,39 +1976,41 @@ namespace BrainCloudUNETExample.Game
             {
                 if (m_bombPickupsSpawned[i].m_pickupID == aPickupID)
                 {
-                    Destroy(m_bombPickupsSpawned[i].gameObject);
+                    if (m_bombPickupsSpawned[i] != null && m_bombPickupsSpawned[i].gameObject != null) Destroy(m_bombPickupsSpawned[i].gameObject);
                     m_bombPickupsSpawned.RemoveAt(i);
                     break;
                 }
             }
 
-            //if (aPlayer == PhotonNetwork.player)
+            if (aPlayer == BombersNetworkManager.m_localPlayer.m_playerID)
             {
-                GameObject.Find("PlayerController").GetComponent<WeaponController>().AddBomb();
+                BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().AddBomb();
             }
         }
 
         [Command]
-        public void CmdSpawnBomb(BombController.BombInfo aBombInfo)
+        public void CmdSpawnBomb(string aBombInfo)
         {
             m_bombsDropped++;
             int id = GetNextBombID();
-            aBombInfo.m_bombID = id;
-            RpcSpawnBomb(aBombInfo);
+            BombController.BombInfo bombInfo = BombController.BombInfo.GetBombInfo(aBombInfo);
+            bombInfo.m_bombID = id;
+            RpcSpawnBomb(bombInfo.GetJson());
             //GetComponent<PhotonView>().RPC("SpawnBombRPC", PhotonTargets.All, aBombInfo);
         }
 
         [ClientRpc]
-        void RpcSpawnBomb(BombController.BombInfo aBombInfo)
+        void RpcSpawnBomb(string aBombInfoString)
         {
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             if (isServer)
             {
                 aBombInfo.m_isMaster = true;
             }
 
-            GameObject bomb = GameObject.Find("PlayerController").GetComponent<WeaponController>().SpawnBomb(aBombInfo);
+            GameObject bomb = BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().SpawnBomb(aBombInfo);
             m_spawnedBombs.Add(bomb.GetComponent<BombController>().GetBombInfo());
-            int playerTeam = (int)aBombInfo.m_shooter;//.customProperties["Team"];
+            int playerTeam = BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team;
 
             switch (playerTeam)
             {
@@ -1945,15 +2024,16 @@ namespace BrainCloudUNETExample.Game
         }
 
         [Command]
-        public void CmdDeleteBomb(BombController.BombInfo aBombInfo, int aHitSurface)
+        public void CmdDeleteBomb(string aBombInfo, int aHitSurface)
         {
             RpcDeleteBomb(aBombInfo, aHitSurface);
-            //GetComponent<PhotonView>().RPC("DeleteBombRPC", PhotonTargets.All, aBombInfo, aHitSurface);
+            //GetComponent<PhotonView>().RPC("DeleteBombRPC", PhotonTargets.All, aBombInfo, aHitSurface)
         }
 
         [ClientRpc]
-        void RpcDeleteBomb(BombController.BombInfo aBombInfo, int aHitSurface)
+        void RpcDeleteBomb(string aBombInfoString, int aHitSurface)
         {
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             if (m_spawnedBombs.Contains(aBombInfo))
             {
                 int index = m_spawnedBombs.IndexOf(aBombInfo);
@@ -1982,28 +2062,30 @@ namespace BrainCloudUNETExample.Game
         }
 
         [Command]
-        public void CmdSpawnBullet(BulletController.BulletInfo aBulletInfo)
+        public void CmdSpawnBullet(string aBulletInfo)
         {
             m_shotsFired++;
             int id = GetNextBulletID();
-            aBulletInfo.m_bulletID = id;
-            RpcSpawnBullet(aBulletInfo);
+            BulletController.BulletInfo bulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfo);
+            bulletInfo.m_bulletID = id;
+            RpcSpawnBullet(bulletInfo.GetJson());
             //GetComponent<PhotonView>().RPC("SpawnBulletRPC", PhotonTargets.All, aBulletInfo);
         }
 
         [ClientRpc]
-        void RpcSpawnBullet(BulletController.BulletInfo aBulletInfo)
+        void RpcSpawnBullet(string aBulletInfoString)
         {
-            //if (PhotonNetwork.player == aBulletInfo.m_shooter)
+            BulletController.BulletInfo aBulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfoString);
+            if (BombersNetworkManager.m_localPlayer.m_playerID == aBulletInfo.m_shooter)
             {
                 aBulletInfo.m_isMaster = true;
             }
 
-            GameObject bullet = GameObject.Find("PlayerController").GetComponent<WeaponController>().SpawnBullet(aBulletInfo);
+            GameObject bullet = BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().SpawnBullet(aBulletInfo);
             m_spawnedBullets.Add(bullet.GetComponent<BulletController>().GetBulletInfo());
-            int playerTeam = (int)aBulletInfo.m_shooter;//.customProperties["Team"];
+            int playerTeam = BombersPlayerController.GetPlayer(aBulletInfo.m_shooter).m_team;
 
-            //if (PhotonNetwork.player != aBulletInfo.m_shooter)
+            if (BombersNetworkManager.m_localPlayer.m_playerID != aBulletInfo.m_shooter)
             {
                 bullet.GetComponent<Collider>().isTrigger = true;
             }
@@ -2020,15 +2102,16 @@ namespace BrainCloudUNETExample.Game
         }
 
         [Command]
-        public void CmdDeleteBullet(BulletController.BulletInfo aBulletInfo)
+        public void CmdDeleteBullet(string aBulletInfo)
         {
             RpcDeleteBullet(aBulletInfo);
             //GetComponent<PhotonView>().RPC("DeleteBulletRPC", PhotonTargets.All, aBulletInfo);
         }
 
         [ClientRpc]
-        void RpcDeleteBullet(BulletController.BulletInfo aBulletInfo)
+        void RpcDeleteBullet(string aBulletInfoString)
         {
+            BulletController.BulletInfo aBulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfoString);
             if (m_spawnedBullets.Contains(aBulletInfo))
             {
                 int index = m_spawnedBullets.IndexOf(aBulletInfo);
@@ -2039,33 +2122,32 @@ namespace BrainCloudUNETExample.Game
         }
 
         [Command]
-        public void CmdBulletHitPlayer(BulletController.BulletInfo aBulletInfo, Collision aCollision)
+        public void CmdBulletHitPlayer(string aBulletInfo, Vector3 aRelativeHitPoint, int aHitPlayerID)
         {
-            aBulletInfo.gameObject.transform.parent = aCollision.gameObject.transform;
-            Vector3 relativeHitPoint = aBulletInfo.gameObject.transform.localPosition;
-            int hitPlayer = 0;//aCollision.gameObject.GetComponent<PhotonView>().owner;
-            int shooter = aBulletInfo.m_shooter;
-            aBulletInfo.gameObject.transform.parent = null;
+            BulletController.BulletInfo bulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfo);
+            int hitPlayer = aHitPlayerID;
+            int shooter = bulletInfo.m_shooter;
             CmdDeleteBullet(aBulletInfo);
-            RpcBulletHitPlayer(relativeHitPoint, aBulletInfo, shooter, hitPlayer);
+            RpcBulletHitPlayer(aRelativeHitPoint, aBulletInfo, shooter, hitPlayer);
             //GetComponent<PhotonView>().RPC("BulletHitPlayerRPC", PhotonTargets.All, relativeHitPoint, aBulletInfo, shooter, hitPlayer);
         }
 
         [ClientRpc]
-        void RpcBulletHitPlayer(Vector3 aHitPoint, BulletController.BulletInfo aBulletInfo, int aShooter, int aHitPlayer)
+        void RpcBulletHitPlayer(Vector3 aHitPoint, string aBulletInfoString, int aShooter, int aHitPlayer)
         {
+            BulletController.BulletInfo aBulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfoString);
             foreach (GameObject plane in GameObject.FindGameObjectsWithTag("Plane"))
             {
-                //if (plane.GetComponent<PhotonView>().owner == aHitPlayer)
+                if (plane.GetComponent<PlaneController>().m_playerID == aHitPlayer)
                 {
                     Instantiate((GameObject)Resources.Load("BulletHit"), plane.transform.position + aHitPoint, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
                     break;
                 }
             }
 
-            //if (aHitPlayer == PhotonNetwork.player)
+            if (aHitPlayer == BombersNetworkManager.m_localPlayer.m_playerID)
             {
-               // GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().TakeBulletDamage(aShooter);
+                BombersNetworkManager.m_localPlayer.TakeBulletDamage(aShooter);
             }
         }
 
@@ -2081,7 +2163,7 @@ namespace BrainCloudUNETExample.Game
         {
             foreach (GameObject plane in GameObject.FindGameObjectsWithTag("Plane"))
             {
-                //if (plane.GetComponent<PhotonView>().owner == aVictim)
+                if (plane.GetComponent<PlaneController>().m_playerID == aVictim)
                 {
                     GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("PlayerExplosion"), plane.transform.position, plane.transform.rotation);
                     explosion.GetComponent<AudioSource>().Play();
@@ -2097,9 +2179,9 @@ namespace BrainCloudUNETExample.Game
 
             if (aShooter == -1)
             {
-                //if (aVictim == PhotonNetwork.player)
+                if (aVictim == BombersNetworkManager.m_localPlayer.m_playerID)
                 {
-                    GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().DestroyPlayerPlane();
+                    BombersNetworkManager.m_localPlayer.DestroyPlayerPlane();
                     BombersNetworkManager.m_localPlayer.m_deaths += 1;
                     StopCoroutine("RespawnPlayer");
                     StartCoroutine("RespawnPlayer");
@@ -2108,14 +2190,14 @@ namespace BrainCloudUNETExample.Game
             else
             {
 
-                //if (aVictim == PhotonNetwork.player)
+                if (aVictim == BombersNetworkManager.m_localPlayer.m_playerID)
                 {
-                    GameObject.Find("PlayerController").GetComponent<BombersPlayerController>().DestroyPlayerPlane();
+                    BombersNetworkManager.m_localPlayer.DestroyPlayerPlane();
                     BombersNetworkManager.m_localPlayer.m_deaths += 1;
                     StopCoroutine("RespawnPlayer");
                     StartCoroutine("RespawnPlayer");
                 }
-                //else if (aShooter == PhotonNetwork.player)
+                else if (aShooter == BombersNetworkManager.m_localPlayer.m_playerID)
                 {
                     BombersNetworkManager.m_localPlayer.m_kills += 1;
                 }
@@ -2134,26 +2216,27 @@ namespace BrainCloudUNETExample.Game
 
         IEnumerator WaitForReadyPlayers()
         {
-            bool playersReady = false;
+            //bool playersReady = false;
 
-            while (!playersReady)
-            {
-                //GameObject[] playerList = PhotonNetwork.playerList.OrderBy(x => x.ID).ToArray();
+            //while (!playersReady)
+            //{
+            //    //GameObject[] playerList = PhotonNetwork.playerList.OrderBy(x => x.ID).ToArray();
 
-                playersReady = true;
-                for (int i = 0; i < m_gameInfo.GetMaxPlayers(); i++)
-                {
-                    //if (i < playerList.Length)
-                    {
-                        //if (playerList[i].customProperties["IsReady"] == null) playersReady = false;
-                        break;
-                    }
-                }
+            //    playersReady = true;
+            //    //for (int i = 0; i < m_gameInfo.GetMaxPlayers(); i++)
+            //    //{
+            //    //    //if (i < playerList.Length)
+            //    //    {
+            //    //        //if (playerList[i].customProperties["IsReady"] == null) playersReady = false;
+            //    //        break;
+            //    //    }
+            //    //}
 
-                yield return new WaitForSeconds(0.5f);
-            }
+            //    yield return new WaitForSeconds(0.5f);
+            //}
 
-            m_gameState = eGameState.GAME_STATE_SPAWN_PLAYERS;
+
+            yield return null;
         }
 
     }
