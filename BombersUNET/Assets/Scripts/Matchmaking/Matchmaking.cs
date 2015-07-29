@@ -1,7 +1,7 @@
 ﻿/*
  * UNET does not yet allow for matchmaking information to be sent through the matchmaker, so all of the match filtering is non-functional, besides name-based filtering.
  * 
- */ 
+ */
 
 using UnityEngine;
 using System.Collections;
@@ -123,7 +123,7 @@ namespace BrainCloudUNETExample.Matchmaking
                 versionText.transform.SetParent(GameObject.Find("Canvas").transform);
                 fullscreenButton.transform.SetParent(GameObject.Find("Canvas").transform);
             }
-            
+
 
             m_achievementsWindow = GameObject.Find("Achievements");
             m_refreshLabel = GameObject.Find("RefreshLabel");
@@ -180,7 +180,7 @@ namespace BrainCloudUNETExample.Matchmaking
             m_roomButtons = new List<RoomButton>();
             m_showRoomsWindow = GameObject.Find("ShowRooms");
             m_createGameWindow = GameObject.Find("CreateGame");
-            
+
             m_createGameWindow.SetActive(false);
             GameObject.Find("PlayerName").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName;
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
@@ -363,7 +363,7 @@ namespace BrainCloudUNETExample.Matchmaking
             options.size = (uint)m_roomMaxPlayers;
             options.advertise = true;
             options.password = "";
-            options.matchAttributes = new Dictionary<string, long>() {{"minLevel", m_roomLevelRangeMin}, {"maxLevel", m_roomLevelRangeMax}};
+            options.matchAttributes = new Dictionary<string, long>() { { "minLevel", m_roomLevelRangeMin }, { "maxLevel", m_roomLevelRangeMax } };
 
             CreateNewRoom(m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text, options);
         }
@@ -507,10 +507,10 @@ namespace BrainCloudUNETExample.Matchmaking
             {
                 m_roomList.Add(match);
             }
-            
+
             if (m_roomList != null)
             {
-                
+
                 for (int i = 0; i < m_roomList.Count; i++)
                 {
                     GameObject roomButton = (GameObject)Instantiate(m_baseButton, m_baseButton.transform.position, m_baseButton.transform.rotation);
@@ -655,7 +655,7 @@ namespace BrainCloudUNETExample.Matchmaking
             int playerChevronPosition = 0;
             if (m_leaderboardReady)
             {
-                
+
                 players = int.Parse(leaderboardData["social_leaderboard"].Count.ToString());
 
                 for (int i = 0; i < players; i++)
@@ -698,7 +698,7 @@ namespace BrainCloudUNETExample.Matchmaking
                 leaderboardLevelText = "";
                 leaderboardScoreText = "";
             }
-            
+
 
             m_scoreRect.transform.FindChild("List").GetComponent<Text>().text = leaderboardNameText;
             m_scoreRect.transform.FindChild("List Ranks").GetComponent<Text>().text = leaderboardRankText;

@@ -73,8 +73,46 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_gameState: 1
+  m_skin: {fileID: 0}
+  m_respawnTime: 3
+  m_gameTime: 600
+  m_mapLayout: 0
+  m_mapSize: 1
+  m_currentRespawnTime: 0
+  m_team1Score: 0
+  m_team2Score: 0
+  m_shotsFired: 0
+  m_bombsDropped: 0
+  m_bombsHit: 0
+  m_planesDestroyed: 0
+  m_carriersDestroyed: 0
+  m_timesDestroyed: 0
+  m_once: 0
   m_team1SpawnBounds: {fileID: 0}
   m_team2SpawnBounds: {fileID: 0}
+  m_bombPickupsSpawned: []
+  m_bombID: 0
+  m_spawnedShips: []
+  m_lobbyWindow: {fileID: 0}
+  m_gameStartButton: {fileID: 0}
+  m_resultsWindow: {fileID: 0}
+  m_greenLogo: {fileID: 0}
+  m_redLogo: {fileID: 0}
+  m_enemyWinText: {fileID: 0}
+  m_allyWinText: {fileID: 0}
+  m_resetButton: {fileID: 0}
+  m_quitButton: {fileID: 0}
+  m_greenChevron: {fileID: 0}
+  m_redChevron: {fileID: 0}
+  m_HUD: {fileID: 0}
+  m_allyShipSunk: {fileID: 0}
+  m_enemyShipSunk: {fileID: 0}
+  m_greenShipLogo: {fileID: 0}
+  m_redShipLogo: {fileID: 0}
+  m_quitMenu: {fileID: 0}
+  m_showQuitMenu: 0
+  m_blackScreen: {fileID: 0}
+  m_showScores: 0
   m_missionText: {fileID: 0}
   m_gameInfo: {fileID: 0}
 --- !u!1001 &100100000

@@ -862,7 +862,7 @@ namespace BrainCloudUNETExample.Game
                 byte errorByte;
                 if (BombersNetworkManager.m_localConnection.hostId != -1)
                     BombersNetworkManager.m_localPlayer.m_ping = NetworkTransport.GetCurrentRtt(BombersNetworkManager.m_localConnection.hostId, BombersNetworkManager.m_localConnection.connectionId, out errorByte);
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSeconds(5);
             }
         }
 
@@ -1115,7 +1115,7 @@ namespace BrainCloudUNETExample.Game
                     }
                     else
                     {
-                        yield return new WaitForSeconds(0.1f);
+                        yield return new WaitForSeconds(0.2f);
                     }
                 }
                 done = false;

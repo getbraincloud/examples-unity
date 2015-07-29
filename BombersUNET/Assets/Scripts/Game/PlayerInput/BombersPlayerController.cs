@@ -146,7 +146,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             while (true)
             {
                 SetDirtyBit(syncVarDirtyBits);
-                yield return new WaitForSeconds(GetNetworkSendInterval());
+                yield return new WaitForSeconds(1);
             }
         }
 
