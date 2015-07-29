@@ -59,55 +59,6 @@ namespace BrainCloudUNETExample.Game
                 string info = "{\"startPos\" : {\"x\" : \""+m_startPosition.x+"\", \"y\" : \""+m_startPosition.y+"\", \"z\" : \""+m_startPosition.z+"\"}, \"direction\" : {\"x\" : \""+m_startDirection.x+"\", \"y\" : \""+m_startDirection.y+"\", \"z\" : \""+m_startDirection.z+"\"}, \"speed\" : {\"x\" : \""+m_startVelocity.x+"\", \"y\" : \""+m_startVelocity.y+"\", \"z\" : \""+m_startVelocity.z+"\"}, \"shooterID\" : \""+m_shooter+"\", \"id\" : \""+m_bombID+"\"}";
                 return info;
             }
-            
-            //public static byte[] SerializeBombInfo(object aBombInfo)
-            //{
-            //    BombInfo bombInfo = (BombInfo)aBombInfo;
-            //    byte[] bytes = new byte[sizeof(float) * 9 + sizeof(int) * 2];
-            //    int index = 0;
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startPosition.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startPosition.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startPosition.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startDirection.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startDirection.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startDirection.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_shooter.ID, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startVelocity.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startVelocity.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startVelocity.z, bytes, ref index);
-
-            //    ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_bombID, bytes, ref index);
-            //    return bytes;
-            //}
-
-            //public static object DeserializeBombInfo(byte[] bytes)
-            //{
-            //    Vector3 startPos = Vector3.zero;
-            //    Vector3 direction = Vector3.zero;
-            //    PhotonPlayer shooter = PhotonNetwork.player;
-            //    int shooterID = 0;
-            //    Vector3 speed = Vector3.zero;
-            //    int id = 0;
-
-            //    int index = 0;
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out startPos.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out startPos.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out startPos.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out direction.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out direction.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out direction.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out shooterID, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out speed.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out speed.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out speed.z, bytes, ref index);
-
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out id, bytes, ref index);
-
-            //    shooter = shooter.Get(shooterID);
-
-            //    BombInfo bombInfo = new BombInfo(startPos, direction, shooter, speed, id);
-            //    return bombInfo;
-            //}
 
             public override bool Equals(object obj)
             {

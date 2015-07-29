@@ -136,15 +136,6 @@ namespace BrainCloudUNETExample.Connection
             }
         }
 
-        /*void OnConnectedToPhoton()
-        {
-            m_connectedToPhoton = PhotonNetwork.connectedAndReady;
-            AppendLog("Connected to Photon");
-            ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(BulletController.BulletInfo), (byte)'B', BulletController.BulletInfo.SerializeBulletInfo, BulletController.BulletInfo.DeserializeBulletInfo);
-            ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(BombController.BombInfo), (byte)'b', BombController.BombInfo.SerializeBombInfo, BombController.BombInfo.DeserializeBombInfo);
-            ExitGames.Client.Photon.PhotonPeer.RegisterType(typeof(ShipController.ShipTarget), (byte)'s', ShipController.ShipTarget.SerializeShipInfo, ShipController.ShipTarget.DeserializeShipInfo);
-        }*/
-
         private void AppendLog(string log, bool error = false)
         {
             string oldStatus = m_authStatus;

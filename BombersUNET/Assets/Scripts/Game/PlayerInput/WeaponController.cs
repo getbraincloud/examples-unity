@@ -107,7 +107,6 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 }
             }
             playerList = playerListList.ToArray();
-            //if (PhotonNetwork.room != null && PhotonNetwork.room.playerCount > 1)
             {
                 if (playerList.Length > 1)
                     isAlone = false;
@@ -184,7 +183,6 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
                 if (ship != null)
                 {
-                    //Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
                     m_offscreenIndicator.transform.position = ship.transform.position;
                     position = m_offscreenIndicator.transform.position;
                     Vector3 point = Camera.main.WorldToScreenPoint(position);
@@ -325,7 +323,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         {
             GameObject player = null;
 
-            GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
+            GameObject[] planes = GameObject.FindGameObjectsWithTag("PlayerController");
             for (int i = 0; i < planes.Length; i++)
             {
                 if (planes[i].GetComponent<PlaneController>().m_playerID == aBombInfo.m_shooter)
@@ -355,7 +353,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         public GameObject SpawnBullet(BulletController.BulletInfo aBulletInfo)
         {
             GameObject player = null;
-            GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
+            GameObject[] planes = GameObject.FindGameObjectsWithTag("PlayerController");
             for (int i = 0; i < planes.Length; i++)
             {
                 if (planes[i].GetComponent<PlaneController>().m_playerID == aBulletInfo.m_shooter)

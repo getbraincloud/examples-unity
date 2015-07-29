@@ -38,7 +38,7 @@ namespace BrainCloudUNETExample.Game
                 gameObject = aPosition.gameObject;
                 m_targetGraphic.transform.parent = m_position;
                 m_targetGraphic.transform.localScale = new Vector3(m_radius / 2, m_radius / 2, m_radius / 2);
-                
+
             }
 
             public ShipTarget(int aShipID, int aIndex)
@@ -52,29 +52,6 @@ namespace BrainCloudUNETExample.Game
                 m_shipID = aShipTarget[0];
                 m_index = aShipTarget[1];
             }
-
-            //public static byte[] SerializeShipInfo(object aShipInfo)
-            //{
-            //    ShipTarget shipInfo = (ShipTarget)aShipInfo;
-            //    byte[] bytes = new byte[sizeof(int) * 2];
-            //    int index = 0;
-            //    ExitGames.Client.Photon.Protocol.Serialize(shipInfo.m_shipID, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(shipInfo.m_index, bytes, ref index);
-
-            //    return bytes;
-            //}
-
-            //public static object DeserializeShipInfo(byte[] bytes)
-            //{
-            //    int id = 0;
-            //    int ind = 0;
-
-            //    int index = 0;
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out id, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out ind, bytes, ref index);
-
-            //    return new ShipTarget(id, ind);
-            //}
 
             public override bool Equals(object obj)
             {
@@ -98,6 +75,8 @@ namespace BrainCloudUNETExample.Game
         public int m_team;
         public bool m_isAlive = true;
         private Vector3 m_startPosition = new Vector3(-1, -1, -1);
+
+        [SyncVar]
         private float m_startAngle = -1;
         public int m_shipID;
 
@@ -108,7 +87,7 @@ namespace BrainCloudUNETExample.Game
 
         public ShipTarget GetShipTarget(ShipTarget aShipTarget)
         {
-            
+
             return m_shipTargets[aShipTarget.m_index];
         }
 
@@ -136,6 +115,11 @@ namespace BrainCloudUNETExample.Game
             GameObject.Find("GameManager").GetComponent<GameManager>().CmdRespawnShip(this.m_shipID);
         }
 
+        void Update()
+        {
+            transform.rotation = Quaternion.Euler(0, 0, m_startAngle);
+        }
+
         public List<ShipTarget> GetTargets()
         {
             return m_shipTargets;
@@ -143,16 +127,16 @@ namespace BrainCloudUNETExample.Game
 
         public void SetShipType(eShipType aShipType, int aTeam, int aShipID)
         {
-            //RpcSetShipType1((int)aShipType, aTeam, aShipID);
+            RpcSetShipType1((int)aShipType, aTeam, aShipID);
+
             CmdSetShipType1((int)aShipType, aTeam, aShipID);
-            //GetComponent<PhotonView>().RPC("SetShipTypeRPC", PhotonTargets.AllBuffered, (int)aShipType, aTeam, aShipID);
         }
 
         public void SetShipType(eShipType aShipType, int aTeam, int aShipID, float aAngle, Vector3 aPosition, float aRespawnTime, Vector3[] aPath, float aPathSpeed)
         {
-            //RpcSetShipType2((int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
+            RpcSetShipType2((int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
+
             CmdSetShipType2((int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
-            //GetComponent<PhotonView>().RPC("SetShipTypeRPC", PhotonTargets.AllBuffered, (int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
         }
 
         [Command]
@@ -545,5 +529,9 @@ namespace BrainCloudUNETExample.Game
 
             return isAlive && m_isAlive;
         }
+
+        
     }
+
+
 }

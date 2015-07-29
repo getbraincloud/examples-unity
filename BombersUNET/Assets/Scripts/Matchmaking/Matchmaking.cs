@@ -1,4 +1,9 @@
-﻿using UnityEngine;
+﻿/*
+ * UNET does not yet allow for matchmaking information to be sent through the matchmaker, so all of the match filtering is non-functional, besides name-based filtering.
+ * 
+ */ 
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -38,7 +43,6 @@ namespace BrainCloudUNETExample.Matchmaking
         }
         private eMatchmakingState m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
 
-        //private string m_roomName = "";
         private int m_roomMaxPlayers = 8;
         private int m_roomLevelRangeMin = 0;
         private int m_roomLevelRangeMax = 50;
@@ -99,10 +103,27 @@ namespace BrainCloudUNETExample.Matchmaking
 
         void Start()
         {
+            BombersNetworkManager.singleton.StartMatchMaker();
             m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
             m_tabColor = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color;
-            GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-            GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+            if (GameObject.Find("Version Text") != null)
+            {
+                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+            }
+            else
+            {
+                GameObject.Find("DialogDisplay").GetComponent<BrainCloudUNETExample.Connection.DialogDisplay>().DisplayDialog("The host has disconnected!");
+                GameObject versionText = (GameObject)Instantiate((GameObject)Resources.Load("VTPrefab"));
+                GameObject fullscreenButton = (GameObject)Instantiate((GameObject)Resources.Load("FSPrefab"));
+                versionText.name = "Version Text";
+                fullscreenButton.name = "FullScreen";
+                string versionNumber = ((TextAsset)Resources.Load("Version")).text.ToString();
+                versionText.GetComponent<Text>().text = versionNumber;
+                versionText.transform.SetParent(GameObject.Find("Canvas").transform);
+                fullscreenButton.transform.SetParent(GameObject.Find("Canvas").transform);
+            }
+            
 
             m_achievementsWindow = GameObject.Find("Achievements");
             m_refreshLabel = GameObject.Find("RefreshLabel");
@@ -178,8 +199,6 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void FinishEditName()
         {
-            //TODO: Change for UNET
-            //PhotonNetwork.player.name = GameObject.Find("PlayerName").GetComponent<InputField>().text;
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName = GameObject.Find("PlayerName").GetComponent<InputField>().text;
             BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(GameObject.Find("PlayerName").GetComponent<InputField>().text);
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
@@ -312,7 +331,6 @@ namespace BrainCloudUNETExample.Matchmaking
             }
             else
             {
-                //Debug.Log(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles.Length + " " + (playerStats[0].m_statValue - 1) + " " + playerStats[1].m_statValue.ToString());
                 rank = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[playerStats[0].m_statValue - 1] + " (" + (playerStats[0].m_statValue) + ")\n" + playerStats[1].m_statValue.ToString();
             }
             string stats = playerStats[3].m_statValue.ToString() + "\n" + playerStats[2].m_statValue.ToString() + "\n" + playerStats[4].m_statValue.ToString()
@@ -336,7 +354,6 @@ namespace BrainCloudUNETExample.Matchmaking
         public void ConfirmCreateGame()
         {
             CloseDropDowns();
-            //RoomOptions options = new RoomOptions();
 
             m_roomMaxPlayers = int.Parse(m_createGameWindow.transform.FindChild("Max Players").GetComponent<InputField>().text.ToString());
             m_roomLevelRangeMax = int.Parse(m_createGameWindow.transform.FindChild("Box 2").GetComponent<InputField>().text.ToString());
@@ -418,7 +435,7 @@ namespace BrainCloudUNETExample.Matchmaking
             }
         }
 
-        public void JoinRoom(Dictionary<string,object> aRoomInfo)
+        public void JoinRoom(MatchDesc aRoomInfo)
         {
             GameObject.Find("Version Text").transform.SetParent(null);
             GameObject.Find("FullScreen").transform.SetParent(null);
@@ -426,40 +443,36 @@ namespace BrainCloudUNETExample.Matchmaking
             int maxLevel = 50;
             int playerLevel = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats()[0].m_statValue;
 
-            if (aRoomInfo["roomMinLevel"] != null)
-            {
-                minLevel = (int)aRoomInfo["roomMinLevel"];
-            }
-
-            if (aRoomInfo["roomMaxLevel"] != null)
-            {
-                maxLevel = (int)aRoomInfo["roomMaxLevel"];
-            }
-
             if (playerLevel < minLevel || playerLevel > maxLevel)
             {
                 GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You're not in that room's\nlevel range!");
                 GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
                 GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             }
-            else if (0 < 8)
+            else
             {
                 m_state = eMatchmakingState.GAME_STATE_JOIN_ROOM;
-                //if (false) //couldn't join
-                //{
-                //    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                //    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                //    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-                //    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
-                //}
+                try
+                {
+                    BombersNetworkManager.singleton.matchMaker.JoinMatch(aRoomInfo.networkId, "", OnMatchJoined);
+                }
+                catch (ArgumentException e)
+                {
+                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You just left that room!");
+                }
+                catch (Exception e)
+                {
+                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Error joining room! Try restarting.");
+                }
             }
-            //else
-            //{
-            //    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("That room is full!");
-            //    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-            //    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-            //}
         }
+
 
         public void RefreshRoomsList()
         {
@@ -473,32 +486,8 @@ namespace BrainCloudUNETExample.Matchmaking
             m_roomFilters["HideLevelRange"] = GameObject.Find("Toggle-MyRank").GetComponent<Toggle>().isOn;
             m_filterName = GameObject.Find("InputField").GetComponent<InputField>().text;
 
-            //int minLevel = 0;
-            //int maxLevel = 50;
-            //int playerLevel = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats()[0].m_statValue;
-
             for (int i = 0; i < m_roomButtons.Count; i++)
             {
-                //long val = 0;
-                /*
-                if (m_roomButtons[i].m_room.matchAttributes.TryGetValue("roomMinLevel", out val))
-                {
-                    minLevel = (int)m_roomButtons[i].m_room.matchAttributes["roomMinLevel"];
-                    if (playerLevel < minLevel && m_roomFilters["HideLevelRange"])
-                    {
-                        continue;
-                    }
-                }
-                
-                if (m_roomButtons[i].m_room.matchAttributes.TryGetValue("roomMaxLevel", out val))
-                {
-                    maxLevel = (int)m_roomButtons[i].m_room.matchAttributes["roomMaxLevel"];
-                    if (playerLevel > maxLevel && m_roomFilters["HideLevelRange"])
-                    {
-                        continue;
-                    }
-                }
-                */
 
                 if (m_filterName != "" && !m_roomButtons[i].m_room.name.ToLower().Contains(m_filterName.ToLower()))
                 {
@@ -519,7 +508,6 @@ namespace BrainCloudUNETExample.Matchmaking
                 m_roomList.Add(match);
             }
             
-            //RoomInfo[] rooms = PhotonNetwork.GetRoomList();
             if (m_roomList != null)
             {
                 
@@ -532,7 +520,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     position.y -= i * 30;
                     roomButton.GetComponent<RectTransform>().position = position;
                     MatchDesc roomInfo = m_roomList[i];
-                    roomButton.GetComponent<Button>().onClick.AddListener(() => { BombersNetworkManager.singleton.matchMaker.JoinMatch(roomInfo.networkId, "", OnMatchJoined); });
+                    roomButton.GetComponent<Button>().onClick.AddListener(() => { JoinRoom(roomInfo); });
                     roomButton.transform.GetChild(0).GetComponent<Text>().text = m_roomList[i].name;
 
                     roomButton.transform.GetChild(1).GetComponent<Text>().text = m_roomList[i].currentSize + "/" + m_roomList[i].maxSize;
@@ -736,7 +724,7 @@ namespace BrainCloudUNETExample.Matchmaking
             }
         }
 
-        void OnPhotonJoinRoomFailed()
+        void OnJoinRoomFailed()
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
@@ -746,10 +734,7 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             if (aMatchResponse.success)
             {
-                //GameObject.Find("Version Text").transform.SetParent(null);
-                //GameObject.Find("FullScreen").transform.SetParent(null);
                 NetworkManager.singleton.OnMatchCreate(aMatchResponse);
-                //BombersNetworkManager.singleton.matchMaker.JoinMatch(aMatchResponse.networkId, "", OnMatchJoined);
             }
             else
             {
@@ -761,26 +746,35 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             if (aMatchResponse.success)
             {
-                //TODO: See if this is the correct thing to do
-                //Application.LoadLevel("Game");
-                //BombersNetworkManager.singleton.ServerChangeScene("Game");
-                NetworkManager.singleton.OnMatchJoined(aMatchResponse);
-                //NetworkManager.singleton.ServerChangeScene("Game");
-                //NetworkServer.SpawnObjects();
-                GameObject.Find("Version Text").transform.SetParent(null);
-                GameObject.Find("FullScreen").transform.SetParent(null);
+
+                try
+                {
+                    NetworkManager.singleton.OnMatchJoined(aMatchResponse);
+                }
+                catch (ArgumentException e)
+                {
+                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You just left that room!");
+                }
+                catch (Exception e)
+                {
+                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Error joining room! Try restarting.");
+                }
+
             }
             else
             {
+                m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
+                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
                 Debug.LogError("Join match failed");
             }
-        }
-
-        void OnJoinedRoom()
-        {
-            
-            //TODO: See if action required for UNET
-            //PhotonNetwork.LoadLevel("Game");
         }
 
         public void QuitToLogin()
@@ -788,8 +782,6 @@ namespace BrainCloudUNETExample.Matchmaking
             BrainCloudWrapper.GetBC().PlayerStateService.Logout();
             BrainCloudWrapper.GetBC().AuthenticationService.ClearSavedProfileID();
             Application.LoadLevel("Connect");
-            //TODO: See if action required for UNET
-            //PhotonNetwork.LoadLevel("Connect");
         }
 
         public void CreateGame()
@@ -808,15 +800,12 @@ namespace BrainCloudUNETExample.Matchmaking
 
         void CreateNewRoom(string aName, CreateMatchRequest aOptions)
         {
-            //RoomInfo[] rooms = PhotonNetwork.GetRoomList();
             List<MatchDesc> rooms = BombersNetworkManager.singleton.matches;
             bool roomExists = false;
             string roomName = aName;
 
             if (aName == "")
             {
-                //TODO: Change for UNET
-                //aName = PhotonNetwork.player.name + "'s Room";
                 roomName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName + "'s Room";
             }
 
@@ -835,7 +824,6 @@ namespace BrainCloudUNETExample.Matchmaking
             if (roomExists)
             {
                 GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("There's already a room named " + aName + "!");
-                //m_roomName = "";
                 return;
             }
 
@@ -884,13 +872,9 @@ namespace BrainCloudUNETExample.Matchmaking
             options.matchAttributes.Add("IsPlaying", 0);
             options.matchAttributes.Add("MapLayout", m_presetListSelection);
             options.matchAttributes.Add("MapSize", m_sizeListSelection);
-            //aOptions.matchAttributes.Add("Team1Score", 0);
-            //aOptions.matchAttributes.Add("Team2Score", 0);
             BrainCloudWrapper.GetBC().EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + roomName + "\"}", null, -1, null, null, null);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
-            //m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
-            m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            //BombersNetworkManager.singleton.matchMaker.CreateMatch(aName, aOptions.size, true, "", OnMatchCreate);
+            m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
             Dictionary<string, string> matchOptions = new Dictionary<string, string>();
             matchOptions.Add("gameTime", 600.ToString());
             matchOptions.Add("isPlaying", 0.ToString());
@@ -902,8 +886,6 @@ namespace BrainCloudUNETExample.Matchmaking
 
             BombersNetworkManager.m_matchOptions = matchOptions;
             BombersNetworkManager.singleton.matchMaker.CreateMatch(options, OnMatchCreate);
-
-            //PhotonNetwork.CreateRoom(aName, aOptions, TypedLobby.Default);
         }
     }
 }

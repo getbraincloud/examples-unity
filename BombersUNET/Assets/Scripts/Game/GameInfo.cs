@@ -52,8 +52,6 @@ public class GameInfo : NetworkBehaviour {
     [SyncVar]
     private int m_maxPlayers = 0;
 
-    //private Dictionary<string, string> m_matchOptions;
-
     [SyncVar]
     private float m_originalGameTime = 0;
 

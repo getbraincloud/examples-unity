@@ -135,40 +135,6 @@ namespace BrainCloudUNETExample.Connection
                 Achievement achievement = new Achievement(achievementData[i]["title"].ToString(), achievementData[i]["id"].ToString(), achievementData[i]["description"].ToString(), achievementData[i]["status"].ToString() == "AWARDED");
                 m_achievements.Add(achievement);
             }
-            /*
-            if (m_statPlanesDestroyed >= 50)
-            {
-                for (int i = 0; i < m_achievements.Count; i++)
-                {
-                    if (m_achievements[i].m_id == "2")
-                    {
-                        if (!m_achievements[i].m_achieved)
-                        {
-                            m_achievements[i].m_achieved = true;
-                            BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
-                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (m_statCarriersDestroyed >= 10)
-            {
-                for (int i = 0; i < m_achievements.Count; i++)
-                {
-                    if (m_achievements[i].m_id == "1")
-                    {
-                        if (!m_achievements[i].m_achieved)
-                        {
-                            m_achievements[i].m_achieved = true;
-                            BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, AwardSuccess_Callback, AwardFailure_Callback, null);
-                            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
-                        }
-                        break;
-                    }
-                }
-            }*/
         }
 
         public void AwardSuccess_Callback(string responseData, object cbObject)

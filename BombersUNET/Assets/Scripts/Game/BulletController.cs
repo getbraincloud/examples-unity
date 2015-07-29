@@ -63,56 +63,6 @@ namespace BrainCloudUNETExample.Game
                 return info;
             }
 
-            //public static byte[] SerializeBulletInfo(object aBulletInfo)
-            //{
-            //    BulletInfo bulletInfo = (BulletInfo)aBulletInfo;
-            //    byte[] bytes = new byte[sizeof(float) * 9 + sizeof(int) * 2];
-            //    int index = 0;
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startPosition.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startPosition.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startPosition.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startDirection.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startDirection.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startDirection.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_shooter.ID, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startVelocity.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startVelocity.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startVelocity.z, bytes, ref index);
-
-            //    ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_bulletID, bytes, ref index);
-
-            //    return bytes;
-            //}
-
-            //public static object DeserializeBulletInfo(byte[] bytes)
-            //{
-            //    Vector3 startPos = Vector3.zero;
-            //    Vector3 direction = Vector3.zero;
-            //    PhotonPlayer shooter = PhotonNetwork.player;
-            //    int shooterID = 0;
-            //    Vector3 speed = Vector3.zero;
-            //    int id = 0;
-
-            //    int index = 0;
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out startPos.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out startPos.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out startPos.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out direction.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out direction.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out direction.z, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out shooterID, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out speed.x, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out speed.y, bytes, ref index);
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out speed.z, bytes, ref index);
-
-            //    ExitGames.Client.Photon.Protocol.Deserialize(out id, bytes, ref index);
-
-            //    shooter = shooter.Get(shooterID);
-
-            //    BulletInfo bulletInfo = new BulletInfo(startPos, direction, shooter, speed, id);
-            //    return bulletInfo;
-            //}
-
             public override bool Equals(object obj)
             {
                 return ((BulletInfo)obj).m_bulletID == m_bulletID;

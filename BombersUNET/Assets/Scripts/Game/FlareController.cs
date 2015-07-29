@@ -17,16 +17,14 @@ namespace BrainCloudUNETExample.Game
             m_lifeTime = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_flareLifetime;
             m_isActive = true;
             m_player = aPlayer;
-            foreach (GameObject plane in GameObject.FindGameObjectsWithTag("Plane"))
+            foreach (GameObject plane in GameObject.FindGameObjectsWithTag("PlayerController"))
             {
-                //if (plane.GetComponent<PhotonView>().owner == aPlayer)
                 {
                     m_playerPlane = plane;
                     break;
                 }
             }
 
-            //if (m_player == PhotonNetwork.player)
             {
                 transform.GetChild(1).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
                 transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
@@ -58,7 +56,6 @@ namespace BrainCloudUNETExample.Game
 
         void LateUpdate()
         {
-            //if (m_isActive && (int)m_player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
             {
                 m_offscreenIndicator.transform.position = m_playerPlane.transform.position;
                 Vector3 position = m_offscreenIndicator.transform.position;
@@ -92,7 +89,7 @@ namespace BrainCloudUNETExample.Game
                 point -= Camera.main.transform.position;
                 m_offscreenIndicator.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(point.y, point.x) * Mathf.Rad2Deg - 90);
 
-                //transform.GetChild(2).GetComponent<TextMesh>().text = m_player.customProperties["RoomDisplayName"].ToString();
+
                 transform.GetChild(2).position = m_offscreenIndicator.transform.position + new Vector3(0, -0.8f, 0);
                 transform.GetChild(2).eulerAngles = new Vector3(0, 0, 0);
 
@@ -109,7 +106,7 @@ namespace BrainCloudUNETExample.Game
                     transform.GetChild(2).GetComponent<TextMesh>().color = new Color(1, 1, 1, 0);
                 }
             }
-            //else
+
             {
                 transform.GetChild(1).gameObject.SetActive(false);
                 transform.GetChild(2).gameObject.SetActive(false);
