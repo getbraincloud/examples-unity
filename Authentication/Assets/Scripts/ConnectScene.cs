@@ -11,25 +11,31 @@ public class ConnectScene : MonoBehaviour
     enum eAuthTypes {
         EMAIL,
         UNIVERSAL,
-        //FACEBOOK,
+        TWITTER,
         ANONYMOUS
     };
     string[] m_authTypes = {
         "Email",
         "Universal",
-        //"Facebook",
+        "Twitter",
         "Anonymous"
     };
     string m_universalUserId = "";
     string m_universalPwd = "";
     string m_emailId = "";
     string m_emailPwd = "";
+
+    public string CONSUMER_KEY;
+    public string CONSUMER_SECRET;
+    Twitter.RequestTokenResponse m_RequestTokenResponse;
+    Twitter.AccessTokenResponse m_AccessTokenResponse;
     //string m_facebookUserId = "";
     //string m_facebookAuthToken = "";
 
     void Start()
     {
         BrainCloudWrapper.Initialize();
+        m_AccessTokenResponse = new Twitter.AccessTokenResponse();
     }
     
     void Update()
@@ -105,9 +111,39 @@ public class ConnectScene : MonoBehaviour
                     m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
-        //else if (m_selectedAuth == (int) eAuthTypes.FACEBOOK)
-        //{
-        //}
+        else if (m_selectedAuth == (int) eAuthTypes.TWITTER)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.BeginVertical();
+            if (GUILayout.Button("Get PIN"))
+            {
+                StartCoroutine(Twitter.API.GetRequestToken(CONSUMER_KEY, CONSUMER_SECRET,
+                                                               new Twitter.RequestTokenCallback(this.OnSuccess_GetPIN)));
+            }
+            GUILayout.EndVertical();
+            GUILayout.BeginVertical();
+            GUILayout.Label("PIN:");
+            m_emailId = GUILayout.TextField(m_emailId, GUILayout.MinWidth(200));
+            //m_emailPwd = GUILayout.PasswordField(m_emailPwd, '*', GUILayout.MinWidth(200));
+            GUILayout.EndVertical();
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("Enter PIN", GUILayout.ExpandWidth(false)))
+            {
+                m_authStatus = "Attempting to authenticate";
+
+                // clear out any previous profile or anonymous ids
+                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+                BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
+                StartCoroutine(Twitter.API.GetAccessToken(CONSUMER_KEY, CONSUMER_SECRET, m_RequestTokenResponse.Token, m_emailId,
+                               new Twitter.AccessTokenCallback(this.OnSuccess_AuthenticateTwitter)));
+                //BrainCloudWrapper.GetBC().AuthenticationService.AuthenticateTwitter()
+
+                //BrainCloudWrapper.GetInstance().AuthenticateEmailPassword(
+                   // m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
+            }
+        }
         else if (m_selectedAuth == (int) eAuthTypes.ANONYMOUS)
         {
             GUILayout.Label("Profile Id: " + BrainCloudWrapper.GetInstance().GetStoredProfileId());
@@ -148,6 +184,46 @@ public class ConnectScene : MonoBehaviour
         GUILayout.EndArea();
     }
     
+    public void OnSuccess_GetPIN(bool success, Twitter.RequestTokenResponse response)
+    {
+        if (success)
+        {
+            string log = "OnRequestTokenCallback - succeeded";
+            log += "\n    Token : " + response.Token;
+            log += "\n    TokenSecret : " + response.TokenSecret;
+            print(log);
+
+            m_RequestTokenResponse = response;
+
+            Twitter.API.OpenAuthorizationPage(response.Token);
+        }
+        else
+        {
+            print("OnRequestTokenCallback - failed.");
+        }
+    }
+
+
+    void OnSuccess_AuthenticateTwitter(bool success, Twitter.AccessTokenResponse response)
+    {
+        if (success)
+        {
+            string log = "OnAccessTokenCallback - succeeded";
+            log += "\n    UserId : " + response.UserId;
+            log += "\n    ScreenName : " + response.ScreenName;
+            log += "\n    Token : " + response.Token;
+            log += "\n    TokenSecret : " + response.TokenSecret;
+            print(log);
+
+            m_AccessTokenResponse = response;
+
+            BrainCloudWrapper.GetBC().AuthenticationService.AuthenticateTwitter(response.UserId, response.Token, response.TokenSecret, true, OnSuccess_Authenticate, OnError_Authenticate);
+        }
+        else
+        {
+            print("OnAccessTokenCallback - failed.");
+        }
+    }
     public void OnSuccess_Authenticate(string responseData, object cbObject)
     {
         m_authStatus = "Authenticate successful!";
