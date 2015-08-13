@@ -3,10 +3,11 @@ using UnityEngine.Networking;
 using System.Collections;
 using LitJson;
 using BrainCloudUNETExample.Connection;
+using BrainCloudUNETExample.Game.PlayerInput;
 
 namespace BrainCloudUNETExample.Game
 {
-    public class BulletController : MonoBehaviour
+    public class BulletController : NetworkBehaviour
     {
         [SerializeField]
         private float m_lifeTime = 2.5f;
@@ -76,26 +77,34 @@ namespace BrainCloudUNETExample.Game
 
         void OnCollisionEnter(Collision aCollision)
         {
-            if (m_bulletInfo.m_isMaster)
+            if (isServer)
             {
                 if (aCollision.gameObject.GetComponent<PlaneController>() != null)
                 {
                     m_bulletInfo.gameObject.transform.parent = aCollision.gameObject.transform;
                     Vector3 relativeHitPoint = m_bulletInfo.gameObject.transform.localPosition;
                     m_bulletInfo.gameObject.transform.parent = null;
-                    BombersNetworkManager.m_localPlayer.BulletHitPlayerCommand(m_bulletInfo.GetJson(), relativeHitPoint, aCollision.gameObject.GetComponent<PlaneController>().m_playerID);
+                    aCollision.gameObject.GetComponent<BombersPlayerController>().BulletHitPlayerCommand(m_bulletInfo.GetJson(), relativeHitPoint, aCollision.gameObject.GetComponent<PlaneController>().m_playerID);
                 }
                 else
                 {
                    
                 }
-                BombersNetworkManager.m_localPlayer.DeleteBulletCommand(m_bulletInfo.GetJson());
+                NetworkServer.Destroy(gameObject);
+                //BombersNetworkManager.m_localPlayer.DeleteBulletCommand(m_bulletInfo.GetJson());
             }
         }
 
         void Start()
         {
-            m_lifeTime = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_bulletLifeTime;
+            if (!isServer)
+            {
+
+            }
+            else
+            {
+                m_lifeTime = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_bulletLifeTime;
+            }
         }
 
         public void SetBulletInfo(BulletInfo aBulletInfo)
@@ -111,12 +120,15 @@ namespace BrainCloudUNETExample.Game
 
         void Update()
         {
+            if (!isServer) return;
+
             m_lifeTime -= Time.deltaTime;
             if (m_lifeTime <= 0)
             {
                 if (m_bulletInfo.m_isMaster)
                 {
-                    BombersNetworkManager.m_localPlayer.DeleteBulletCommand(m_bulletInfo.GetJson());
+                    NetworkServer.Destroy(gameObject);
+                    //BombersNetworkManager.m_localPlayer.DeleteBulletCommand(m_bulletInfo.GetJson());
                 }
                 
             }

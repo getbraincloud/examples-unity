@@ -23,9 +23,8 @@ public class BombersNetworkManager : NetworkManager
         m_localConnection = conn;
         if (Application.loadedLevelName == "Game" && m_matchOptions != null)
         {
-            
             StartCoroutine(InitializeGameInfo(m_matchOptions));
-            m_matchOptions.Clear();
+            m_matchOptions = null;
         }
         base.OnClientSceneChanged(conn);
     }

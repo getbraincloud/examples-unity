@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloudUNETExample.Connection;
@@ -17,9 +18,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         private GameObject m_bullet1Prefab;
         private GameObject m_bullet2Prefab;
 
-        private GameObject m_bombPrefab;
+        private GameObject m_bombPrefab1;
+        private GameObject m_bombPrefab2;
 
-        private GameObject m_muzzleFlarePrefab;
+        public GameObject m_muzzleFlarePrefab;
 
         private GameObject m_bombDropPrefab;
 
@@ -28,7 +30,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         private GameObject m_targetingReticule;
         private GameObject m_offscreenIndicator;
 
-        private float m_bulletSpeed = 100f;
+        public float m_bulletSpeed = 100f;
         private Vector3 m_bulletVelocity = Vector3.zero;
 
         private float m_aloneBombTimer = 0;
@@ -47,9 +49,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 m_bullet2Prefab = (GameObject)Resources.Load("Bullet02");
             }
 
-            if (m_bombPrefab == null)
+            if (m_bombPrefab1 == null)
             {
-                m_bombPrefab = (GameObject)Resources.Load("Bomb");
+                m_bombPrefab1 = (GameObject)Resources.Load("Bomb01");
+                m_bombPrefab2 = (GameObject)Resources.Load("Bomb02");
             }
 
             if (m_muzzleFlarePrefab == null)
@@ -344,7 +347,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 flare.GetComponent<AudioSource>().Play();
             }
 
-            GameObject bomb = (GameObject)Instantiate(m_bombPrefab, aBombInfo.m_startPosition, Quaternion.LookRotation(aBombInfo.m_startDirection, -Vector3.forward));
+            GameObject bomb = (GameObject)Instantiate((BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1) ? m_bombPrefab1 : m_bombPrefab2, aBombInfo.m_startPosition, Quaternion.LookRotation(aBombInfo.m_startDirection, -Vector3.forward));
             bomb.GetComponent<Rigidbody>().velocity = aBombInfo.m_startVelocity;
             bomb.GetComponent<BombController>().SetBombInfo(aBombInfo);
             return bomb;
@@ -367,17 +370,17 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             if (player != null)
             {
                 player.GetComponent<PlaneController>().ResetGunCharge();
-                GameObject flare = (GameObject)Instantiate(m_muzzleFlarePrefab, player.GetComponent<PlaneController>().m_bulletSpawnPoint.position, player.GetComponent<PlaneController>().m_bulletSpawnPoint.rotation);
+                GameObject flare = (GameObject)Instantiate(m_muzzleFlarePrefab, aBulletInfo.m_startPosition, player.GetComponent<PlaneController>().m_bulletSpawnPoint.rotation);
                 flare.transform.parent = player.transform;
                 flare.GetComponent<AudioSource>().pitch = 1 + Random.Range(-2.0f, 3.0f) * 0.2f;
                 if (aBulletInfo.m_shooter == BombersNetworkManager.m_localPlayer.m_playerID)
                 {
                     flare.GetComponent<AudioSource>().spatialBlend = 0;
                 }
-                flare.GetComponent<AudioSource>().Play();
+                NetworkServer.Spawn(flare);
             }
-
-            GameObject bullet = (GameObject)Instantiate((GameObject.Find("GameManager").GetComponent<GameManager>().FindPlayerWithID(aBulletInfo.m_shooter).m_team == 1) ? m_bullet1Prefab : m_bullet2Prefab, aBulletInfo.m_startPosition, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
+            int team = GetComponent<BombersPlayerController>().m_team;
+            GameObject bullet = (GameObject)Instantiate((team == 1) ? m_bullet1Prefab : m_bullet2Prefab, aBulletInfo.m_startPosition, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
             bullet.GetComponent<Rigidbody>().velocity = aBulletInfo.m_startVelocity;
             bullet.GetComponent<BulletController>().SetBulletInfo(aBulletInfo);
 

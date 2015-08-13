@@ -183,6 +183,8 @@ namespace BrainCloudUNETExample.Connection
 
         private bool m_showHostLeft = false;
         private bool m_showHost = false;
+        private bool m_showPlaying = false;
+        private bool m_showPlay = false;
 
         void OnLevelWasLoaded(int level)
         {
@@ -190,11 +192,21 @@ namespace BrainCloudUNETExample.Connection
             {
                 m_showHost = true;
             }
+
+            if (m_showPlaying)
+            {
+                m_showPlay = true;
+            }
         }
 
         public void HostLeft()
         {
             m_showHostLeft = true;
+        }
+
+        public void IsPlaying()
+        {
+            m_showPlaying = true;
         }
 
         void LateUpdate()
@@ -204,6 +216,13 @@ namespace BrainCloudUNETExample.Connection
                 m_showHost = false;
                 m_showHostLeft = false;
                 DisplayDialog("The host has left the game!");
+            }
+
+            if (m_showPlay)
+            {
+                m_showPlay = false;
+                m_showPlaying = false;
+                DisplayDialog("You can't join games in progress!");
             }
         }
 

@@ -561,14 +561,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_TransformSyncMode: 1
-  m_SendInterval: .100000001
-  m_SyncRotationAxis: 3
+  m_SendInterval: .0500000007
+  m_SyncRotationAxis: 7
   m_RotationSyncCompression: 0
   m_SyncSpin: 0
-  m_MovementTheshold: .00100000005
+  m_MovementTheshold: 9.99999975e-06
   m_SnapThreshold: 5
   m_InterpolateRotation: 1
-  m_InterpolateMovement: 1
+  m_InterpolateMovement: 2
 --- !u!114 &11450900
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -613,6 +613,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_bulletSpawnPoint: {fileID: 0}
+  m_bulletSpeed: 100
 --- !u!114 &11483664
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -660,7 +661,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_playerID: 0
   m_bulletSpawnPoint: {fileID: 0}
-  m_health: 0
+  m_health: 5
   m_timeToFullBank: .699999988
   m_bankCurve:
     serializedVersion: 2
@@ -3877,11 +3878,19 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_SendInterval
-      value: .100000001
+      value: .0500000007
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_MovementTheshold
-      value: .00100000005
+      value: 9.99999975e-06
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_InterpolateMovement
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_health
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

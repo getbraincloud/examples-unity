@@ -7,7 +7,7 @@ using BrainCloudUNETExample.Game.PlayerInput;
 
 namespace BrainCloudUNETExample.Game
 {
-    public class BombController : MonoBehaviour
+    public class BombController : NetworkBehaviour
     {
         public class BombInfo
         {
@@ -73,25 +73,23 @@ namespace BrainCloudUNETExample.Game
 
         void OnCollisionEnter(Collision aCollision)
         {
-            if (!m_isActive) return;
-
             m_isActive = false;
 
-            if (m_bombInfo.m_isMaster)
+            if (isServer)
             {
                 if (aCollision.gameObject.layer == 4)
                 {
-                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 0);
+                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 0);
                 }
                 else if (aCollision.gameObject.layer == 20) //it hit a rock
                 {
-                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 1);
+                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 1);
                 }
                 else //it hit a ship
                 {
                     if ((BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1 && aCollision.gameObject.layer == 16) || (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 2 && aCollision.gameObject.layer == 17))
                     {
-                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 2);
+                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 2);
                     }
                     else
                     {
@@ -117,32 +115,43 @@ namespace BrainCloudUNETExample.Game
                                 }
                             }
                         }
-                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(m_bombInfo.GetJson(), 1);
+                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 1);
                     }
                 }
+                NetworkServer.Destroy(gameObject);
             }
             else
             {
-                if (aCollision.gameObject.layer == 4)
+                if (transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled == true)
                 {
-                    GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombWaterExplosion"), transform.position, Quaternion.identity);
-                    explosion.GetComponent<AudioSource>().Play();
-                }
-                else if ((BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1 && aCollision.gameObject.layer == 16) || (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 2 && aCollision.gameObject.layer == 17))
-                {
-                    GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombDud"), transform.position, Quaternion.identity);
-                    explosion.GetComponent<AudioSource>().Play();
-                }
-                else
-                {
-                    GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombExplosion"), transform.position, Quaternion.identity);
-                    explosion.GetComponent<AudioSource>().Play();
+                    try
+                    {
+                        if (aCollision.gameObject.layer == 4)
+                        {
+                            Instantiate((GameObject)Resources.Load("BombWaterExplosion"), transform.position, Quaternion.identity);
+                        }
+                        else if ((BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1 && aCollision.gameObject.layer == 16) || (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 2 && aCollision.gameObject.layer == 17))
+                        {
+                            Instantiate((GameObject)Resources.Load("BombDud"), transform.position, Quaternion.identity);
+                        }
+                        else
+                        {
+                            Instantiate((GameObject)Resources.Load("BombExplosion"), transform.position, Quaternion.identity);
+                        }
+                        transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                        Destroy(gameObject);
+                    }
+                    catch
+                    {
+                        Instantiate((GameObject)Resources.Load("BombExplosion"), transform.position, Quaternion.identity);
+                        transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                        Destroy(gameObject);
+                    }
                 }
             }
-            transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
         }
 
-        private BombInfo m_bombInfo;
+        public BombInfo m_bombInfo;
         private float m_bombRadius = 15f;
         public bool m_isActive = true;
 
@@ -162,8 +171,8 @@ namespace BrainCloudUNETExample.Game
                 teamBombPath = "Bomb02";
             }
 
-            GameObject graphic = (GameObject)Instantiate((GameObject)Resources.Load(teamBombPath), transform.position, transform.rotation);
-            graphic.transform.parent = transform;
+            //GameObject graphic = (GameObject)Instantiate((GameObject)Resources.Load(teamBombPath), transform.position, transform.rotation);
+            //graphic.transform.parent = transform;
         }
 
         public BombInfo GetBombInfo()

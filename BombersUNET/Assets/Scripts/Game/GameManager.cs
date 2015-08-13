@@ -157,6 +157,12 @@ namespace BrainCloudUNETExample.Game
 
         void Initialize()
         {
+            if (m_gameInfo.GetPlaying() == 1)
+            {
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().IsPlaying();
+                LeaveRoom();
+                //BombersNetworkManager.m_localPlayer.AnnounceJoinCommand();
+            }
             GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
             GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
 
@@ -202,7 +208,9 @@ namespace BrainCloudUNETExample.Game
 
             if (m_gameInfo.GetPlaying() == 1)
             {
-                BombersNetworkManager.m_localPlayer.AnnounceJoinCommand();
+                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().IsPlaying();
+                LeaveRoom();
+                //BombersNetworkManager.m_localPlayer.AnnounceJoinCommand();
             }
         }
 
@@ -1106,16 +1114,17 @@ namespace BrainCloudUNETExample.Game
             GameObject[] players = GameObject.FindGameObjectsWithTag("PlayerController");
             for (int i = 0; i < players.Length; i++)
             {
+                players[i].GetComponent<BombersPlayerController>().SpawnPlayers();
                 while (!done)
                 {
-                    players[i].GetComponent<BombersPlayerController>().SpawnPlayers();
                     if (players[i].GetComponent<BombersPlayerController>().m_planeActive)
                     {
                         done = true;
                     }
                     else
                     {
-                        yield return new WaitForSeconds(0.2f);
+                        players[i].GetComponent<BombersPlayerController>().SpawnPlayers();
+                        yield return new WaitForSeconds(0.5f);
                     }
                 }
                 done = false;
@@ -1126,6 +1135,7 @@ namespace BrainCloudUNETExample.Game
 
         void Update()
         {
+            
             switch (m_gameState)
             {
                 case eGameState.GAME_STATE_WAITING_FOR_PLAYERS:
@@ -1501,7 +1511,6 @@ namespace BrainCloudUNETExample.Game
             {
                 if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
                 {
-                    Debug.Log(m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
                      m_gameInfo.SetTeamScore(1, m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
                     
                 }

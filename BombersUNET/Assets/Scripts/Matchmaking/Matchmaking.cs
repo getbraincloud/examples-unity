@@ -500,12 +500,13 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void OnListRoomsCallback(ListMatchResponse aResponse)
         {
-            Debug.Log(aResponse.ToString());
+            //Debug.Log(aResponse.ToString());
             m_roomList = new List<MatchDesc>();
             m_roomList.Clear();
             foreach (MatchDesc match in aResponse.matches)
             {
                 m_roomList.Add(match);
+                match.
             }
 
             if (m_roomList != null)

@@ -70,7 +70,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         private bool m_isActive = false;
 
-        private int m_baseHealth = 3;
+        private int m_baseHealth = 5;
 
         private bool m_respawning = true;
 
@@ -128,17 +128,17 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         }
 
         [Command(channel=1)]
-        void CmdUpdateSyncVarsFromClient(int aScore, int aPlayerID, int aTeam, int aKills, int aDeaths, int aPing, string aDisplayName, bool isActive, int aHealth)
+        void CmdUpdateSyncVarsFromClient(int aScore, byte aPlayerID, byte aTeam, byte aKills, byte aDeaths, int aPing, string aDisplayName, bool isActive, byte aHealth)
         {
             m_score = aScore;
-            m_playerID = aPlayerID;
-            m_team = aTeam;
-            m_kills = aKills;
-            m_deaths = aDeaths;
+            m_playerID = (int)aPlayerID;
+            m_team = (int)aTeam;
+            m_kills = (int)aKills;
+            m_deaths = (int)aDeaths;
             m_ping = aPing;
             m_displayName = aDisplayName;
             m_planeActive = isActive;
-            m_health = aHealth;
+            m_health = (int)aHealth;
         }
 
         IEnumerator UpdateVars()
@@ -156,8 +156,8 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
             while (true)
             {
-                CmdUpdateSyncVarsFromClient(m_score, m_playerID, m_team, m_kills, m_deaths, m_ping, m_displayName, m_planeActive, m_health);
-                yield return new WaitForSeconds(GetNetworkSendInterval());
+                CmdUpdateSyncVarsFromClient(m_score, (byte)m_playerID, (byte)m_team, (byte)m_kills, (byte)m_deaths, m_ping, m_displayName, m_planeActive, (byte)m_health);
+                yield return new WaitForSeconds(0.5f);
             }
         }
 
@@ -529,7 +529,6 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         public void BombPickedUpCommand(int aPlayerID, int aPickupID)
         {
-
             if (!isLocalPlayer || !hasAuthority)
             {
                 return;
@@ -564,14 +563,24 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         public void DestroyShipCommand(int shipID, string aJson)
         {
-            if (!isLocalPlayer || !hasAuthority)
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aJson);
+            if (isServer)
             {
-                return;
+                if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+                {
+                    m_gMan.m_gameInfo.SetTeamScore(1, m_gMan.m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
+
+                }
+                else
+                {
+                    m_gMan.m_gameInfo.SetTeamScore(2, m_gMan.m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
+
+                }
             }
-            CmdDestroyedShip(shipID, aJson);
+            RpcDestroyedShip((byte)shipID, (byte)aBombInfo.m_shooter);
         }
 
-        [Command]
+        /*[Command]
         public void CmdDestroyedShip(int aShipID, string aBombInfoString)
         {
             BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
@@ -590,13 +599,12 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 }
             }
 
-            RpcDestroyedShip(aShipID, aBombInfoString);
-        }
+            
+        }*/
 
         [ClientRpc]
-        void RpcDestroyedShip(int aShipID, string aBombInfoString)
+        void RpcDestroyedShip(byte aShipID, byte aShooter)
         {
-            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             ShipController ship = null;
             for (int i = 0; i < m_gMan.m_spawnedShips.Count; i++)
             {
@@ -655,7 +663,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 case ShipController.eShipType.SHIP_TYPE_CARRIER:
 
 
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+                    if (BombersPlayerController.GetPlayer(aShooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "CarrierExplosion02";
@@ -671,7 +679,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                     break;
                 case ShipController.eShipType.SHIP_TYPE_BATTLESHIP:
 
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+                    if (BombersPlayerController.GetPlayer(aShooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "BattleshipExplosion02";
@@ -686,7 +694,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                     shipName += "Battleship";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_CRUISER:
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+                    if (BombersPlayerController.GetPlayer(aShooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "CruiserExplosion02";
@@ -701,7 +709,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                     shipName += "Cruiser";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_PATROLBOAT:
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+                    if (BombersPlayerController.GetPlayer(aShooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "PatrolBoatExplosion02";
@@ -716,7 +724,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                     shipName += "Patrol Boat";
                     break;
                 case ShipController.eShipType.SHIP_TYPE_DESTROYER:
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+                    if (BombersPlayerController.GetPlayer(aShooter).m_team == 1)
                     {
                         shipName += "Red ";
                         path = "DestroyerExplosion02";
@@ -735,7 +743,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             if (isServer)
                 ship.StartRespawn();
 
-            if (aBombInfo.m_shooter == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aShooter == BombersNetworkManager.m_localPlayer.m_playerID)
             {
                 m_gMan.m_carriersDestroyed++;
                 BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
@@ -744,15 +752,58 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         public void HitShipTargetPointCommand(int aID, int aIndex, string aJson)
         {
-            if (!isLocalPlayer || !hasAuthority)
+            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aJson);
+            if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
+            {
+                m_gMan.m_gameInfo.SetTeamScore(1, m_gMan.m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction);
+            }
+            else if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 2)
+            {
+                m_gMan.m_gameInfo.SetTeamScore(2, m_gMan.m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction);
+            }
+
+            ShipController.ShipTarget shipTarget = null;
+            GameObject ship = null;
+            ShipController.ShipTarget aShipTarget = new ShipController.ShipTarget(aID, aIndex);
+            for (int i = 0; i < m_gMan.m_spawnedShips.Count; i++)
+            {
+                if (m_gMan.m_spawnedShips[i].ContainsShipTarget(aShipTarget))
+                {
+                    shipTarget = m_gMan.m_spawnedShips[i].GetShipTarget(aShipTarget);
+                    ship = m_gMan.m_spawnedShips[i].gameObject;
+                    break;
+                }
+            }
+
+            Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
+            if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
+            {
+                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+            }
+
+            if (shipTarget != null)
+            {
+                GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("WeakpointExplosion"), shipTarget.m_position.position, shipTarget.m_position.rotation);
+                explosion.transform.parent = ship.transform;
+                explosion.GetComponent<AudioSource>().Play();
+                foreach (Transform child in shipTarget.gameObject.transform)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+            
+
+            RpcHitShipTargetPoint(aID, aIndex, aBombInfo.m_shooter);
+            
+            /*if (!isLocalPlayer || !hasAuthority)
             {
                 return;
             }
-            CmdHitShipTargetPoint(aID, aIndex, aJson);
+            CmdHitShipTargetPoint(aID, aIndex, aJson);*/
         }
 
-        [Command]
-        public void CmdHitShipTargetPoint(int aShipID, int aTargetIndex, string aBombInfoString)
+        /*[Command]
+        public void CmdHitShipTargetPoint(int aShipID, int aTargetIndex, int aShooter)
         {
             BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
@@ -765,15 +816,14 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             }
 
             RpcHitShipTargetPoint(aShipID, aTargetIndex, aBombInfoString);
-        }
+        }*/
 
         [ClientRpc]
-        void RpcHitShipTargetPoint(int aShipID, int aTargetIndex, string aBombInfoString)
+        void RpcHitShipTargetPoint(int aShipID, int aTargetIndex, int aShooter)
         {
             ShipController.ShipTarget shipTarget = null;
             GameObject ship = null;
             ShipController.ShipTarget aShipTarget = new ShipController.ShipTarget(aShipID, aTargetIndex);
-            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             for (int i = 0; i < m_gMan.m_spawnedShips.Count; i++)
             {
                 if (m_gMan.m_spawnedShips[i].ContainsShipTarget(aShipTarget))
@@ -784,7 +834,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 }
             }
 
-            if (aBombInfo.m_shooter == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aShooter == BombersNetworkManager.m_localPlayer.m_playerID)
             {
                 m_gMan.m_bombsHit++;
                 BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
@@ -807,22 +857,34 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         }
 
-        public void DeleteBombCommand(string aJson, int aID)
+        public void DeleteBombCommand(BombController aBombController, int aID)
         {
-            if (!isLocalPlayer || !hasAuthority)
+            //BombController.BombInfo aBombInfo = aBombController.m_bombInfo;
+            GameObject explosion;
+            if (aID == 0)
             {
-                return;
+                explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombWaterExplosion"), aBombController.transform.position, Quaternion.identity);
+                explosion.GetComponent<AudioSource>().Play();
             }
-            CmdDeleteBomb(aJson, aID);
+            else if (aID == 1)
+            {
+                explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombExplosion"), aBombController.transform.position, Quaternion.identity);
+                explosion.GetComponent<AudioSource>().Play();
+            }
+            else
+            {
+                explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombDud"), aBombController.transform.position, Quaternion.identity);
+            }
+            //CmdDeleteBomb(aJson, aID);
         }
 
-        [Command]
+        /*[Command]
         public void CmdDeleteBomb(string aBombInfo, int aHitSurface)
         {
             RpcDeleteBomb(aBombInfo, aHitSurface);
-        }
+        }*/
 
-        [ClientRpc]
+        /*[ClientRpc]
         void RpcDeleteBomb(string aBombInfoString, int aHitSurface)
         {
             BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
@@ -851,7 +913,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 Destroy(bomb);
                 m_gMan.m_spawnedBombs.Remove(aBombInfo);
             }
-        }
+        }*/
 
         public void DeleteBulletCommand(string aJson)
         {
@@ -859,10 +921,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             {
                 return;
             }
-            CmdDeleteBullet(aJson);
+            //CmdDeleteBullet(aJson);
         }
 
-        [Command(channel = 1)]
+        /*[Command(channel = 1)]
         public void CmdDeleteBullet(string aBulletInfo)
         {
             RpcDeleteBullet(aBulletInfo);
@@ -880,17 +942,31 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 m_gMan.m_spawnedBullets.Remove(aBulletInfo);
             }
         }
+        */
 
         public void BulletHitPlayerCommand(string aJson, Vector3 aHitPoint, int aID)
         {
-            if (!isLocalPlayer || !hasAuthority)
+            BulletController.BulletInfo bulletInfo = BulletController.BulletInfo.GetBulletInfo(aJson);
+            int hitPlayer = aID;
+            int shooter = bulletInfo.m_shooter;
+            //CmdDeleteBullet(aBulletInfo);
+            foreach (GameObject plane in GameObject.FindGameObjectsWithTag("PlayerController"))
             {
-                return;
+                if (plane.GetComponent<PlaneController>().m_playerID == hitPlayer)
+                {
+                    GameObject bulletHit = (GameObject)Instantiate((GameObject)Resources.Load("BulletHit"), plane.transform.position + aHitPoint, Quaternion.LookRotation(bulletInfo.m_startDirection, -Vector3.forward));
+                    NetworkServer.Spawn(bulletHit);
+                    break;
+                }
             }
-            CmdBulletHitPlayer(aJson, aHitPoint, aID);
+
+            TakeBulletDamage(shooter);
+            
+            //RpcBulletHitPlayer(aRelativeHitPoint, aBulletInfo, shooter, hitPlayer);
+            //CmdBulletHitPlayer(aJson, aHitPoint, aID);
         }
 
-        [Command]
+        /*[Command]
         public void CmdBulletHitPlayer(string aBulletInfo, Vector3 aRelativeHitPoint, int aHitPlayerID)
         {
             BulletController.BulletInfo bulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfo);
@@ -898,7 +974,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             int shooter = bulletInfo.m_shooter;
             CmdDeleteBullet(aBulletInfo);
             RpcBulletHitPlayer(aRelativeHitPoint, aBulletInfo, shooter, hitPlayer);
-        }
+        }*/
 
         [ClientRpc]
         void RpcBulletHitPlayer(Vector3 aHitPoint, string aBulletInfoString, int aShooter, int aHitPlayer)
@@ -926,24 +1002,56 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 return;
             }
 
-            CmdSpawnBullet(aJson);
+            //BulletController.BulletInfo bulletInfo = BulletController.BulletInfo.GetBulletInfo(aJson);
+            m_gMan.m_shotsFired++;
+
+            CmdSpawnBullet();
+            //CmdSpawnBullet(bulletInfo.m_startPosition, bulletInfo.m_startDirection, bulletInfo.m_startVelocity,(byte)bulletInfo.m_shooter);
+            
 
         }
 
-        [Command(channel = 1)]
-        void CmdSpawnBullet(string aBulletInfo)
+        [Command]
+        void CmdSpawnBullet()
+        {
+            int id = Random.Range(-20000000, 20000000) * 100 + m_playerID;
+            //Transform m_bulletSpawnPoint = aSpawnPoint;
+            Transform m_bulletSpawnPoint = m_playerPlane.GetComponent<PlaneController>().m_bulletSpawnPoint;
+            Vector3 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
+            m_bulletVelocity *= GetComponent<WeaponController>().m_bulletSpeed;
+            m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
+            BulletController.BulletInfo aBulletInfo = new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, m_playerID, m_bulletVelocity, id);
+            aBulletInfo.m_isMaster = true;
+            GameObject bullet = GetComponent<WeaponController>().SpawnBullet(aBulletInfo);
+            m_gMan.m_spawnedBullets.Add(bullet.GetComponent<BulletController>().GetBulletInfo());
+            bullet.GetComponent<Collider>().isTrigger = false;
+            switch (m_team)
+            {
+                case 1:
+                    bullet.layer = 10;
+                    break;
+                case 2:
+                    bullet.layer = 11;
+                    break;
+            }
+
+            NetworkServer.Spawn(bullet);
+        }
+
+        /*[Command(channel = 1)]
+        void CmdSpawnBullet(Vector3 aStartPos, Vector3 aDirection, Vector3 aSpeed, byte aShooter)
         {
             m_gMan.m_shotsFired++;
             int id = Random.Range(-20000000, 20000000) * 100 + m_playerID;
-            BulletController.BulletInfo bulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfo);
-            bulletInfo.m_bulletID = id;
-            RpcSpawnBullet(bulletInfo.GetJson());
-        }
+            //BulletController.BulletInfo bulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfo);
+            //bulletInfo.m_bulletID = id;
+            RpcSpawnBullet(aStartPos, aDirection, aSpeed, aShooter, (byte)id);
+        }*/
 
-        [ClientRpc(channel = 1)]
-        void RpcSpawnBullet(string aBulletInfoString)
+        /*[ClientRpc(channel = 1)]
+        void RpcSpawnBullet(Vector3 aStartPos, Vector3 aDirection, Vector3 aSpeed, byte aShooter, byte aID)
         {
-            BulletController.BulletInfo aBulletInfo = BulletController.BulletInfo.GetBulletInfo(aBulletInfoString);
+            BulletController.BulletInfo aBulletInfo = new BulletController.BulletInfo(aStartPos, aDirection, (int)aShooter, aSpeed, (int)aID);//BulletController.BulletInfo.GetBulletInfo(aBulletInfoString);
             if (BombersNetworkManager.m_localPlayer.m_playerID == aBulletInfo.m_shooter)
             {
                 aBulletInfo.m_isMaster = true;
@@ -967,7 +1075,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                     bullet.layer = 11;
                     break;
             }
-        }
+        }*/
 
         public void FireFlareCommand(Vector3 aPosition, Vector3 aVelocity)
         {
@@ -998,23 +1106,52 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             {
                 return;
             }
-            CmdSpawnBomb(aJson);
+            BombController.BombInfo bombInfo = BombController.BombInfo.GetBombInfo(aJson);
+            m_gMan.m_bombsDropped++;
+            CmdSpawnBomb(bombInfo.m_startPosition, bombInfo.m_startDirection, bombInfo.m_startVelocity, (byte)bombInfo.m_shooter);
+
+            //CmdSpawnBomb(aJson);
         }
 
         [Command]
-        public void CmdSpawnBomb(string aBombInfo)
+        public void CmdSpawnBomb(Vector3 aStartPos, Vector3 aDirection, Vector3 aSpeed, byte aShooter)
         {
-            m_gMan.m_bombsDropped++;
+            
             int id = m_gMan.GetNextBombID();
-            BombController.BombInfo bombInfo = BombController.BombInfo.GetBombInfo(aBombInfo);
-            bombInfo.m_bombID = id;
-            RpcSpawnBomb(bombInfo.GetJson());
+            //BombController.BombInfo bombInfo = BombController.BombInfo.GetBombInfo(aBombInfo);
+            //bombInfo.m_bombID = id;
+            //RpcSpawnBomb(aStartPos, aDirection, aSpeed, aShooter, (byte)id);
+            //RpcSpawnBomb(bombInfo.GetJson());
+            BombController.BombInfo aBombInfo = new BombController.BombInfo(aStartPos, aDirection, (int)aShooter, aSpeed, id);//BulletController.BulletInfo.GetBulletInfo(aBulletInfoString);
+
+            //BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
+            if (isServer)
+            {
+                aBombInfo.m_isMaster = true;
+            }
+
+            GameObject bomb = BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().SpawnBomb(aBombInfo);
+            m_gMan.m_spawnedBombs.Add(bomb.GetComponent<BombController>().GetBombInfo());
+            int playerTeam = BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team;
+
+            switch (playerTeam)
+            {
+                case 1:
+                    bomb.layer = 14;
+                    break;
+                case 2:
+                    bomb.layer = 15;
+                    break;
+            }
+            NetworkServer.Spawn(bomb);
         }
 
         [ClientRpc]
-        void RpcSpawnBomb(string aBombInfoString)
+        void RpcSpawnBomb(Vector3 aStartPos, Vector3 aDirection, Vector3 aSpeed, byte aShooter, byte aID)
         {
-            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
+            BombController.BombInfo aBombInfo = new BombController.BombInfo(aStartPos, aDirection, (int)aShooter, aSpeed, (int)aID);//BulletController.BulletInfo.GetBulletInfo(aBulletInfoString);
+
+            //BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             if (isServer)
             {
                 aBombInfo.m_isMaster = true;
@@ -1037,10 +1174,6 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
         public void TakeBulletDamage(int aShooter)
         {
-            if (!isLocalPlayer || !hasAuthority)
-            {
-                return;
-            }
             if (m_health == 0) return;
             m_health--;
             m_playerPlane.m_health = m_health;
