@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
@@ -76,6 +77,12 @@ public class MainScene : MonoBehaviour
         m_bcFunc = in_fn;
         m_screen.SetMainScene(this);
         m_screen.Activate();
+    }
+
+    
+    public void TwitterCoroutine(IEnumerator coroutine)
+    {
+        StartCoroutine(coroutine);
     }
 
     // lays out the top toolbar + player info

@@ -25,8 +25,8 @@ public class ConnectScene : MonoBehaviour
     string m_emailId = "";
     string m_emailPwd = "";
 
-    public string CONSUMER_KEY;
-    public string CONSUMER_SECRET;
+    public static string CONSUMER_KEY = "";
+    public static string CONSUMER_SECRET = "";
     Twitter.RequestTokenResponse m_RequestTokenResponse;
     Twitter.AccessTokenResponse m_AccessTokenResponse;
     //string m_facebookUserId = "";
