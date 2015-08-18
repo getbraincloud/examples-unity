@@ -17,6 +17,17 @@ You can find more information about how to run the example here:
 
 http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-authentication-example/
 
+## Bombers
+
+Bombers is a realtime multiplayer game implemented using Photon and brainCloud. brainCloud provides the backend services for storing data, Photon supplies the Matchmaking and Multiplayer server.
+
+You can find more information on Bombers here:
+
+http://getbraincloud.com/apidocs/tutorials/unity-tutorials/braincloud-bombers-example-game/
+
+## BombersUNET
+
+This is Bombers but using the Unity networking introduced in 5.x. Note that some aspects of Unity networking are still under development and as such, the game has some missing features (e.g. join in progress).
 
 ## SpaceShooterWithStats
 
