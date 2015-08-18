@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &164692
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 485854}
+  - 114: {fileID: 11452598}
+  - 114: {fileID: 11408408}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &485854
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 164692}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.80120897, y: 1.14208746, z: -9.40871239}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+--- !u!114 &11408408
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 164692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: 870353891bb340e2b2a9c8707e7419ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 170
+    i1: 219
+    i2: 133
+    i3: 61
+    i4: 168
+    i5: 231
+    i6: 119
+    i7: 84
+    i8: 170
+    i9: 222
+    i10: 49
+    i11: 182
+    i12: 197
+    i13: 154
+    i14: 106
+    i15: 153
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 0
+--- !u!114 &11452598
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 164692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0f0e61352a54804b942e5766e8051eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_gameState: 1
+  m_skin: {fileID: 0}
+  m_respawnTime: 3
+  m_gameTime: 600
+  m_mapLayout: 0
+  m_mapSize: 1
+  m_currentRespawnTime: 0
+  m_team1Score: 0
+  m_team2Score: 0
+  m_shotsFired: 0
+  m_bombsDropped: 0
+  m_bombsHit: 0
+  m_planesDestroyed: 0
+  m_carriersDestroyed: 0
+  m_timesDestroyed: 0
+  m_once: 0
+  m_team1SpawnBounds: {fileID: 0}
+  m_team2SpawnBounds: {fileID: 0}
+  m_bombPickupsSpawned: []
+  m_bombID: 0
+  m_spawnedShips: []
+  m_lobbyWindow: {fileID: 0}
+  m_gameStartButton: {fileID: 0}
+  m_resultsWindow: {fileID: 0}
+  m_greenLogo: {fileID: 0}
+  m_redLogo: {fileID: 0}
+  m_enemyWinText: {fileID: 0}
+  m_allyWinText: {fileID: 0}
+  m_resetButton: {fileID: 0}
+  m_quitButton: {fileID: 0}
+  m_greenChevron: {fileID: 0}
+  m_redChevron: {fileID: 0}
+  m_HUD: {fileID: 0}
+  m_allyShipSunk: {fileID: 0}
+  m_enemyShipSunk: {fileID: 0}
+  m_greenShipLogo: {fileID: 0}
+  m_redShipLogo: {fileID: 0}
+  m_quitMenu: {fileID: 0}
+  m_showQuitMenu: 0
+  m_blackScreen: {fileID: 0}
+  m_showScores: 0
+  m_missionText: {fileID: 0}
+  m_gameInfo: {fileID: 0}
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: m_LocalPlayerAuthority
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 164692}
+  m_IsPrefabParent: 1

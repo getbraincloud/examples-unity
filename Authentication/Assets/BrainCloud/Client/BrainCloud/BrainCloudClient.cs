@@ -106,6 +106,8 @@ namespace BrainCloud
             m_twitterService = new BrainCloudTwitter(this);
             m_pushNotificationService = new BrainCloudPushNotification(this);
             m_playerStatisticsEventService = new BrainCloudPlayerStatisticsEvent(this);
+
+            m_s3HandlingService = new BrainCloudS3Handling(this);
         }
 
         //---------------------------------------------------------------
@@ -144,6 +146,7 @@ namespace BrainCloud
         private BrainCloudTwitter m_twitterService;
         private BrainCloudPushNotification m_pushNotificationService;
         private BrainCloudPlayerStatisticsEvent m_playerStatisticsEventService;
+        private BrainCloudS3Handling m_s3HandlingService;
 
         #endregion Private Data
 
@@ -447,6 +450,16 @@ namespace BrainCloud
             return this.m_playerStatisticsEventService;
         }
 
+        public BrainCloudS3Handling S3HandlingService
+        {
+            get { return m_s3HandlingService; }
+        }
+
+        public BrainCloudS3Handling GetS3HandlingService()
+        {
+            return this.m_s3HandlingService;
+        }
+
         public bool Authenticated
         {
             get
@@ -516,12 +529,24 @@ namespace BrainCloud
             }
         }
 
+        private string s_defaultServerURL = "https://sharedprod.braincloudservers.com/dispatcherv2";
         #endregion
 
         // InitializeClient
         // OnHeartBeat
         // ResetCommunication
         #region Miscellaneous
+
+        /// <summary>Method initializes the BrainCloudClient.</summary>
+        /// <param name="secretKey">The secret key for your game
+        /// <param name="gameId ">The game id</param>
+        /// <param name="gameVersion The game version</param>
+        /// <param name="cachedProfileId The profile Id</param>
+        /// <param name="anonymousId The anonymous Id</param>
+        public void Initialize(string secretKey, string gameId, string gameVersion)
+        {
+            Initialize(s_defaultServerURL, secretKey, gameId, gameVersion);
+        }
 
         /// <summary>Method initializes the BrainCloudClient.</summary>
         /// <param name="serverURL">The url to the brainCloud server</param>
@@ -644,7 +669,7 @@ namespace BrainCloud
         {
             if (m_loggingEnabled)
             {
-                string formattedLog = "#BCC " + log;
+                string formattedLog = "#BCC " + (log.Length < 14000 ? log : log.Substring(0, 14000) + " << (LOG TRUNCATED)");
                 lock(m_loggingMutex)
                 {
                     if (m_logDelegate != null)
@@ -653,6 +678,7 @@ namespace BrainCloud
                     }
                     else
                     {
+
 #if !(DOT_NET)
                         Debug.Log(formattedLog);
 #else
@@ -682,6 +708,7 @@ namespace BrainCloud
         public void ResetCommunication()
         {
             m_bc.ResetCommunication();
+            AuthenticationService.ClearSavedProfileID();
         }
 
         /// <summary>Enable Communications with the server. By default this is true</summary>

@@ -43,7 +43,12 @@ namespace BrainCloudPhotonExample.Game
         Vector3 GetRandomDirection()
         {
             Vector3 randomDirection = Vector3.up;
-            randomDirection = Quaternion.Euler(new Vector3(0, 0, 360 / ((((4 * m_pickupID) + 1) % 9) + 1))) * randomDirection;
+             float num = 0;
+            if (((((4 * m_pickupID) + 1) % 9) + 1) == 0)
+                num = 0.01f;
+            else
+            num = ((((4 * m_pickupID) + 1) % 9) + 1);
+            randomDirection = Quaternion.Euler(new Vector3(0, 0, 360 / num)) * randomDirection;
 
             return randomDirection.normalized;
         }
