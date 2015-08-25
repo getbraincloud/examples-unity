@@ -127,7 +127,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT + ".exe"), target, BuildOptions.None);
 	}
 	
 	static void PerformBuildWin64()
@@ -137,7 +137,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
+		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT + ".exe"), target, BuildOptions.None);
 	}
 	
 	static void PerformBuildOSX32()
