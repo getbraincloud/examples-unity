@@ -9,8 +9,8 @@ public class Build {
 	static string IOS_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/generated_build";
 	static string ANDROID_OUTPUT_APK 	= ARTIFACTS_FOLDER + "/android_build.apk";
 	static string WP8_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/wp8_build";
-	static string DESKTOP_OUTPUT 		= ARTIFACTS_FOLDER + "/desktop_build";
-	static string WEB_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/brainCloudBombers"; //"/web_build";
+    static string DESKTOP_OUTPUT 		= ARTIFACTS_FOLDER + "/brainCloudBombersUNET";
+	static string WEB_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/brainCloudBombersUNET"; //"/web_build";
 	static string WEBGL_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/webgl_build";
 	
 	static string[] GetScenes()
