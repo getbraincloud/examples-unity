@@ -506,7 +506,7 @@ namespace BrainCloudUNETExample.Matchmaking
             foreach (MatchDesc match in aResponse.matches)
             {
                 m_roomList.Add(match);
-                match.
+                
             }
 
             if (m_roomList != null)
