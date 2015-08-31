@@ -302,7 +302,7 @@ public class GamePicker : MonoBehaviour {
 		matchState["board"] = "#########"; // Empty the board. # = nothing, O,X = tokens
 
 		// Setup our opponent list. In this case, we have just one opponent.
-		JsonData opponentIds = new JsonData();
+		//JsonData opponentIds = new JsonData();
 
 		// Create the match
 		BrainCloudWrapper.GetBC().AsyncMatchService.CreateMatchWithInitialTurn(
