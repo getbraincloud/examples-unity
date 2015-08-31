@@ -49,12 +49,13 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation UpdateSummary = new ServiceOperation("UPDATE_SUMMARY");
         public static readonly ServiceOperation UpdateSetMinimum = new ServiceOperation("UPDATE_SET_MINIMUM");
         public static readonly ServiceOperation UpdateIncrementToMaximum = new ServiceOperation("UPDATE_INCREMENT_TO_MAXIMUM");
-        public static readonly ServiceOperation GetFriendProfileInfo = new ServiceOperation("GET_FRIEND_PROFILE_INFO");
+        public static readonly ServiceOperation GetFriendProfileInfoForExternalId = new ServiceOperation("GET_FRIEND_PROFILE_INFO_FOR_EXTERNAL_ID");
         public static readonly ServiceOperation ReadFriends = new ServiceOperation("READ_FRIENDS");
         public static readonly ServiceOperation ReadFriendEntity = new ServiceOperation("READ_FRIEND_ENTITY");
         public static readonly ServiceOperation ReadFriendsEntities = new ServiceOperation("READ_FRIENDS_ENTITIES");
         public static readonly ServiceOperation ReadFriendsWithApplication = new ServiceOperation("READ_FRIENDS_WITH_APPLICATION");
         public static readonly ServiceOperation ReadFriendPlayerState = new ServiceOperation("READ_FRIEND_PLAYER_STATE");
+        public static readonly ServiceOperation FindPlayerByName = new ServiceOperation("FIND_PLAYER_BY_NAME");
         public static readonly ServiceOperation GetLeaderboard = new ServiceOperation("GET_LEADERBOARD");
         public static readonly ServiceOperation GetGlobalLeaderboard = new ServiceOperation("GET_GLOBAL_LEADERBOARD");
         public static readonly ServiceOperation GetGlobalLeaderboardPage = new ServiceOperation("GET_GLOBAL_LEADERBOARD_PAGE");
@@ -87,6 +88,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation UpdateEventData = new ServiceOperation("UPDATE_EVENT_DATA");
         public static readonly ServiceOperation DeleteSent = new ServiceOperation("DELETE_SENT");
         public static readonly ServiceOperation DeleteIncoming = new ServiceOperation("DELETE_INCOMING");
+        public static readonly ServiceOperation GetEvents = new ServiceOperation("GET_EVENTS");
 
         public static readonly ServiceOperation UpdateIncrement = new ServiceOperation("UPDATE_INCREMENT");
         public static readonly ServiceOperation ReadNextXpLevel = new ServiceOperation("READ_NEXT_XPLEVEL");
@@ -174,6 +176,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetList = new ServiceOperation("GET_LIST");
         public static readonly ServiceOperation GetListByIndexedId = new ServiceOperation("GET_LIST_BY_INDEXED_ID");
         public static readonly ServiceOperation GetListCount = new ServiceOperation("GET_LIST_COUNT");
+        public static readonly ServiceOperation GetPage = new ServiceOperation("GET_PAGE");
+        public static readonly ServiceOperation GetPageOffset = new ServiceOperation("GET_PAGE_BY_OFFSET");
 
         public static readonly ServiceOperation GetAttributes = new ServiceOperation("GET_ATTRIBUTES");
         public static readonly ServiceOperation UpdateAttributes = new ServiceOperation("UPDATE_ATTRIBUTES");
@@ -183,6 +187,11 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GooglePlayConfirmPurchase = new ServiceOperation("CONFIRM_GOOGLEPLAY_PURCHASE");
 
         public static readonly ServiceOperation ReadProperties = new ServiceOperation("READ_PROPERTIES");
+
+        public static readonly ServiceOperation GetUpdatedFiles = new ServiceOperation("GET_UPDATED_FILES");
+        public static readonly ServiceOperation GetFileList = new ServiceOperation("GET_FILE_LIST");
+
+        public static readonly ServiceOperation ScheduleCloudScript = new ServiceOperation("SCHEDULE_CLOUD_SCRIPT");
 
         private ServiceOperation(string value)
         {
