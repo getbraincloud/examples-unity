@@ -14,11 +14,11 @@ public class EvasiveManeuver : MonoBehaviour
 	private float currentSpeed;
 	private float targetManeuver;
 
-	private Rigidbody rigidbody;
+	private Rigidbody m_rigidbody;
 
 	void Start ()
 	{
-		rigidbody = GetComponent<Rigidbody>();
+		m_rigidbody = GetComponent<Rigidbody>();
 
 		currentSpeed = rigidbody.velocity.z;
 		StartCoroutine(Evade());
@@ -38,15 +38,15 @@ public class EvasiveManeuver : MonoBehaviour
 	
 	void FixedUpdate ()
 	{
-		float newManeuver = Mathf.MoveTowards (rigidbody.velocity.x, targetManeuver, smoothing * Time.deltaTime);
-		rigidbody.velocity = new Vector3 (newManeuver, 0.0f, currentSpeed);
-		rigidbody.position = new Vector3
+		float newManeuver = Mathf.MoveTowards (m_rigidbody.velocity.x, targetManeuver, smoothing * Time.deltaTime);
+		m_rigidbody.velocity = new Vector3 (newManeuver, 0.0f, currentSpeed);
+		m_rigidbody.position = new Vector3
 		(
-			Mathf.Clamp(rigidbody.position.x, boundary.xMin, boundary.xMax), 
+			Mathf.Clamp(m_rigidbody.position.x, boundary.xMin, boundary.xMax), 
 			0.0f, 
-			Mathf.Clamp(rigidbody.position.z, boundary.zMin, boundary.zMax)
+			Mathf.Clamp(m_rigidbody.position.z, boundary.zMin, boundary.zMax)
 		);
-		if(rigidbody.tag != "Powerup1" || rigidbody.tag != "Powerup2")
-			rigidbody.rotation = Quaternion.Euler (0, 0, rigidbody.velocity.x * -tilt);
+		if(m_rigidbody.tag != "Powerup1" || m_rigidbody.tag != "Powerup2")
+			m_rigidbody.rotation = Quaternion.Euler (0, 0, m_rigidbody.velocity.x * -tilt);
 	}
 }
