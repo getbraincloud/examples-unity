@@ -462,6 +462,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You just left that room!");
+					Debug.Log("caught ArgumentException " + e);
                 }
                 catch (Exception e)
                 {
@@ -469,6 +470,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Error joining room! Try restarting.");
+					Debug.Log("caught Exception " + e);
                 }
             }
         }
@@ -747,8 +749,7 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             if (aMatchResponse.success)
             {
-
-                try
+				try
                 {
                     NetworkManager.singleton.OnMatchJoined(aMatchResponse);
                 }
@@ -758,6 +759,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You just left that room!");
+					Debug.Log("caught ArgumentException " + e);
                 }
                 catch (Exception e)
                 {
@@ -765,8 +767,8 @@ namespace BrainCloudUNETExample.Matchmaking
                     GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
                     GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Error joining room! Try restarting.");
+					Debug.Log("caught Exception " + e);
                 }
-
             }
             else
             {

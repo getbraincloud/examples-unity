@@ -121,7 +121,7 @@ RectTransform:
   m_RootOrder: 1
   m_AnchorMin: {x: .5, y: .5}
   m_AnchorMax: {x: .5, y: .5}
-  m_AnchoredPosition: {x: -2.43190007e-05, y: 76.9000015}
+  m_AnchoredPosition: {x: -2.43190007e-05, y: 70}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: .5, y: .5}
 --- !u!225 &30692865
@@ -227,7 +227,7 @@ RectTransform:
   m_RootOrder: 3
   m_AnchorMin: {x: .5, y: .5}
   m_AnchorMax: {x: .5, y: .5}
-  m_AnchoredPosition: {x: 0, y: 187}
+  m_AnchoredPosition: {x: 0, y: 160}
   m_SizeDelta: {x: 152, y: 78}
   m_Pivot: {x: .5, y: .5}
 --- !u!114 &76300920
@@ -3441,7 +3441,7 @@ RectTransform:
   m_RootOrder: 2
   m_AnchorMin: {x: .5, y: .5}
   m_AnchorMax: {x: .5, y: .5}
-  m_AnchoredPosition: {x: 0, y: 187}
+  m_AnchoredPosition: {x: 0, y: 160}
   m_SizeDelta: {x: 152, y: 78}
   m_Pivot: {x: .5, y: .5}
 --- !u!114 &818330966
@@ -6024,6 +6024,7 @@ Camera:
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
+  m_TargetEye: 3
   m_HDR: 1
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -6442,6 +6443,7 @@ Camera:
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
+  m_TargetEye: 3
   m_HDR: 1
   m_OcclusionCulling: 1
   m_StereoConvergence: 10

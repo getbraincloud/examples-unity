@@ -86,7 +86,7 @@ namespace BrainCloudUNETExample.Connection
         public void GetLeaderboard(string aLeaderboardID)
         {
             m_leaderboardReady = false;
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.GetGlobalLeaderboard(aLeaderboardID, BrainCloud.BrainCloudSocialLeaderboard.FetchType.HIGHEST_RANKED, 100, LeaderboardSuccess_Callback, LeaderboardFailure_Callback, null);
+			GetLeaderboardPage(aLeaderboardID, 0, 100);
         }
 
         public void GetLeaderboardPage(string aLeaderboardID, int aIndex, int aSecondIndex)

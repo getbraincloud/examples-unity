@@ -58,6 +58,7 @@ namespace BrainCloud
 
                 // send token to a provider
                 // default to iOS
+                // TODO: implement other device types
                 string deviceType = OperationParam.DeviceRegistrationTypeIos.Value;
                 if (UnityEngine.Application.platform == UnityEngine.RuntimePlatform.Android)
                 {

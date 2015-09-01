@@ -286,6 +286,7 @@ namespace BrainCloud
         /*Unavailable for now...
          * public void UpdateEntityPartial(string entityId, string entityType, string jsonEntityData, SuccessCallback in_success, FailureCallback in_failure, object in_cbObject)
         {
+            // TODO: actually call the right method...
             UpdateEntity(entityId, entityType, jsonEntityData, in_success, in_failure, in_cbObject);
         }
          */

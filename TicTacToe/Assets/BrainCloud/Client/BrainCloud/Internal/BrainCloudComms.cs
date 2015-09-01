@@ -117,24 +117,11 @@ namespace BrainCloud.Internal
         /// </summary>
         private double m_debugPacketLossRate = 0;
 
+        /// <summary>
+        /// The event handler callback method
+        /// </summary>
+        private EventCallback m_eventCallback;
 
-        private enum eWebRequestStatus
-        {
-            /// <summary>
-            /// Pending status indicating web request is still active
-            /// </summary>
-            STATUS_PENDING = 0,
-
-            /// <summary>
-            /// Done status indicating web request has completed successfully
-            /// </summary>
-            STATUS_DONE = 1,
-
-            /// <summary>
-            /// Error status indicating there was a network error or error http code returned
-            /// </summary>
-            STATUS_ERROR = 2
-        }
 
 
         private bool m_isAuthenticated = false;
@@ -199,6 +186,16 @@ namespace BrainCloud.Internal
             m_initialized = true;
         }
 
+        public void RegisterEventCallback(EventCallback in_cb)
+        {
+            m_eventCallback = in_cb;
+        }
+
+        public void DeregisterEventCallback()
+        {
+            m_eventCallback = null;
+        }
+
 
         /// <summary>
         /// The update method needs to be called periodically to send/receive responses
@@ -223,12 +220,12 @@ namespace BrainCloud.Internal
             // process current request
             if (m_activeRequest != null)
             {
-                eWebRequestStatus status = GetWebRequestStatus(m_activeRequest);
-                if (status == eWebRequestStatus.STATUS_ERROR)
+                RequestState.eWebRequestStatus status = GetWebRequestStatus(m_activeRequest);
+                if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
                 {
                     // do nothing with the error right now - let the timeout code handle it
                 }
-                else if (status == eWebRequestStatus.STATUS_DONE)
+                else if (status == RequestState.eWebRequestStatus.STATUS_DONE)
                 {
                     ResetIdleTimer();
 
@@ -248,14 +245,16 @@ namespace BrainCloud.Internal
             // is it time for a retry?
             if (m_activeRequest != null)
             {
-                if (DateTime.Now.Subtract(m_activeRequest.TimeSent) >= GetPacketTimeout(m_activeRequest.Retries))
+                if (DateTime.Now.Subtract(m_activeRequest.TimeSent) >= GetPacketTimeout(m_activeRequest))
                 {
+                    m_activeRequest.CancelRequest();
+
                     if (!ResendMessage(m_activeRequest))
                     {
                         // we've reached the retry limit - send timeout error to all client callbacks
 
-                        eWebRequestStatus status = GetWebRequestStatus(m_activeRequest);
-                        if (status == eWebRequestStatus.STATUS_ERROR)
+                        RequestState.eWebRequestStatus status = GetWebRequestStatus(m_activeRequest);
+                        if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
                         {
                             m_brainCloudClientRef.Log("Timeout with network error: " + GetWebRequestResponse(m_activeRequest));
                         }
@@ -376,8 +375,9 @@ namespace BrainCloud.Internal
 
             Dictionary<string, object>[] responseBundle = bundleObj.responses;
             Dictionary<string, object> response = null;
-            Exception firstThrownException = null;
-            int numExceptionsThrown = 0;
+            //Exception firstThrownException = null;
+            //int numExceptionsThrown = 0;
+            IList<Exception> exceptions = new List<Exception>(); 
 
             for (int j = 0; j < responseBundle.Length; ++j)
             {
@@ -444,14 +444,12 @@ namespace BrainCloud.Internal
                     {
                         if (sc.GetService().Equals(ServiceName.PlayerState.Value)
                             && (sc.GetOperation().Equals(ServiceOperation.FullReset.Value)
-                            || sc.GetOperation().Equals(ServiceOperation.Reset.Value)
-                            || sc.GetOperation().Equals(ServiceOperation.Logout.Value)))
-                            
+                                || sc.GetOperation().Equals(ServiceOperation.Logout.Value)))
                         {
                             // we reset the current player or logged out
                             // we are no longer authenticated
                             m_isAuthenticated = false;
-                            m_brainCloudClientRef.AuthenticationService.ProfileId = null;
+                            m_brainCloudClientRef.AuthenticationService.ClearSavedProfileID();
                         }
                         else if (sc.GetService().Equals(ServiceName.Authenticate.Value)
                             && sc.GetOperation().Equals(ServiceOperation.Authenticate.Value))
@@ -469,11 +467,7 @@ namespace BrainCloud.Internal
                             catch(Exception e)
                             {
                                 m_brainCloudClientRef.Log (e.StackTrace);
-                                ++numExceptionsThrown;
-                                if (firstThrownException == null)
-                                {
-                                    firstThrownException = e;
-                                }
+                                exceptions.Add (e);
                             }
                         }
                     }
@@ -499,6 +493,15 @@ namespace BrainCloud.Internal
                         m_isAuthenticated = false;
                         m_brainCloudClientRef.Log ("Received session expired or not found, need to re-authenticate");
                     }
+
+                    if (sc != null && sc.GetOperation().Equals(ServiceOperation.Logout.Value))
+                    {
+                        if (reasonCode == ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT)
+                        {
+                            m_isAuthenticated = false;
+                            m_brainCloudClientRef.Log("Could not communicate with the server on logout due to network timeout");
+                        }
+                    }
                     
                     // now try to execute the callback
                     if (sc != null && sc.GetCallback() != null)
@@ -510,23 +513,35 @@ namespace BrainCloud.Internal
                         catch(Exception e)
                         {
                             m_brainCloudClientRef.Log (e.StackTrace);
-                            ++numExceptionsThrown;
-                            if (firstThrownException == null)
-                            {
-                                firstThrownException = e;
-                            }
+                            exceptions.Add (e);
                         }
                     }
                 }
             }
 
-            if (firstThrownException != null)
+            if (bundleObj.events != null && m_eventCallback != null)
+            {
+                Dictionary<string, Dictionary<string, object>[]> eventsJsonObj = new Dictionary<string, Dictionary<string, object>[]>();
+                eventsJsonObj["events"] = bundleObj.events;
+                string eventsAsJson = JsonWriter.Serialize(eventsJsonObj);
+                try
+                {
+                    m_eventCallback(eventsAsJson);
+                }
+                catch(Exception e)
+                {
+                    m_brainCloudClientRef.Log (e.StackTrace);
+                    exceptions.Add (e);
+                }
+            }
+
+            if (exceptions.Count > 0)
             {
                 m_activeRequest = null; // to make sure we don't reprocess this message
 
-                throw new Exception("User callback handlers threw " + numExceptionsThrown +" exception(s)."
+                throw new Exception("User callback handlers threw " + exceptions.Count +" exception(s)."
                                     +" See the Unity log for callstacks or inner exception for first exception thrown.",
-                                    firstThrownException);
+                                    exceptions[0]);
             }
         }
 
@@ -577,6 +592,12 @@ namespace BrainCloud.Internal
                         message[OperationParam.ServiceMessageData.Value] = scIndex.GetJsonData();
                         
                         messageList.Add(message);
+
+                        if (scIndex.GetOperation ().Equals (ServiceOperation.FullReset.Value)
+                            || scIndex.GetOperation ().Equals(ServiceOperation.Logout.Value))
+                        {
+                            requestState.IsSessionTerminatingPacket = true;
+                        }
                     }
                     
                     SendMessage(requestState, messageList);
@@ -658,12 +679,15 @@ namespace BrainCloud.Internal
                 request.Method = "POST";
                 request.Headers.Add("X-SIG", sig);
                 request.ContentLength = byteArray.Length;
-                request.BeginGetRequestStream(new AsyncCallback(GetRequestCallback), requestState);
+                // TODO: Convert to using a task as BeginGetRequestStream can block for minutes
+                requestState.AsyncResult = request.BeginGetRequestStream(new AsyncCallback(GetRequestCallback), requestState);
+
+
                 #endif
 
                 requestState.WebRequest = request;
             }
-            requestState.Jsonstring = jsonRequestString;
+            requestState.RequestString = jsonRequestString;
             requestState.TimeSent = DateTime.Now;
 
             ResetIdleTimer();
@@ -680,9 +704,9 @@ namespace BrainCloud.Internal
         /// </summary>
         /// <returns>The web request status.</returns>
         /// <param name="in_requestState">In_request state.</param>
-        private eWebRequestStatus GetWebRequestStatus(RequestState in_requestState)
+        private RequestState.eWebRequestStatus GetWebRequestStatus(RequestState in_requestState)
         {
-            eWebRequestStatus status = eWebRequestStatus.STATUS_PENDING;
+            RequestState.eWebRequestStatus status = RequestState.eWebRequestStatus.STATUS_PENDING;
 
             // for testing packet loss, some packets are flagged to be lost
             // and should always return status pending no matter what the real
@@ -695,12 +719,14 @@ namespace BrainCloud.Internal
 #if !(DOT_NET)
             if (m_activeRequest.WebRequest.error != null)
             {
-                status = eWebRequestStatus.STATUS_ERROR;
+                status = RequestState.eWebRequestStatus.STATUS_ERROR;
             }
             else if (m_activeRequest.WebRequest.isDone)
             {
-                status = eWebRequestStatus.STATUS_DONE;
+                status = RequestState.eWebRequestStatus.STATUS_DONE;
             }
+#else
+            status = m_activeRequest.DotNetRequestStatus;
 #endif
             return status;
         }
@@ -723,6 +749,8 @@ namespace BrainCloud.Internal
             {
                 response = m_activeRequest.WebRequest.text;
             }
+#else
+            response = m_activeRequest.DotNetResponseString;
 #endif
             return response;
         }
@@ -733,27 +761,56 @@ namespace BrainCloud.Internal
         /// </summary>
         /// <returns>The packet timeout.</returns>
         /// <param name="currentRetryNumber">Current retry number.</param>
-        private TimeSpan GetPacketTimeout(int currentRetry)
+        private TimeSpan GetPacketTimeout(RequestState in_requestState)
         {
+            int currentRetry = in_requestState.Retries;
             TimeSpan ret;
-            switch (currentRetry)
+
+            // if this is a delete player or logout we change the
+            // timeout behaviour
+            if (in_requestState.IsSessionTerminatingPacket)
             {
-            case 0:
-                ret = TimeSpan.FromSeconds(3);
-                break;
-            case 1:
-                ret = TimeSpan.FromSeconds(5);
-                break;
-            case 2:
-                ret = TimeSpan.FromSeconds(5);
-                break;
-            case 3:
-                ret = TimeSpan.FromSeconds(10);
-                break;
-            case 4:
-            default:
-                ret = TimeSpan.FromSeconds(10);
-                break;
+                switch (currentRetry)
+                {
+                case 0:
+                    ret = TimeSpan.FromSeconds(15);
+                    break;
+                case 1:
+                    ret = TimeSpan.FromSeconds(15);
+                    break;
+                case 2:
+                    ret = TimeSpan.FromSeconds(2);
+                    break;
+                case 3:
+                    ret = TimeSpan.FromSeconds(2);
+                    break;
+                case 4:
+                default:
+                    ret = TimeSpan.FromSeconds(1);
+                    break;
+                }
+            }
+            else
+            {
+                switch (currentRetry)
+                {
+                case 0:
+                    ret = TimeSpan.FromSeconds(3);
+                    break;
+                case 1:
+                    ret = TimeSpan.FromSeconds(5);
+                    break;
+                case 2:
+                    ret = TimeSpan.FromSeconds(5);
+                    break;
+                case 3:
+                    ret = TimeSpan.FromSeconds(10);
+                    break;
+                case 4:
+                default:
+                    ret = TimeSpan.FromSeconds(10);
+                    break;
+                }
             }
 
             return ret;
@@ -818,25 +875,27 @@ namespace BrainCloud.Internal
 
 
 #if (DOT_NET)
-        // TODO: This implementation needs to be completed!!!
-
         private void GetRequestCallback(IAsyncResult asynchronousResult)
-        {/*
+        {
+            RequestState requestState = (RequestState)asynchronousResult.AsyncState;
+            if (requestState.IsCancelled)
+            { 
+                return;
+            }
+            WebRequest webRequest = (WebRequest)requestState.WebRequest;
+
             try
             {
-                RequestState requestState = (RequestState)asynchronousResult.AsyncState;
-                WebRequest webRequest = (WebRequest)requestState.WebRequest;
-
                 // End the operation
 
                 Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
-                m_brainCloudClientRef.Log("GetRequestStreamCallback - JsonRequeststring GOING OUT: " + requestState.Jsonstring);
+                //m_brainCloudClientRef.Log("GetRequestStreamCallback - JsonRequeststring GOING OUT: " + requestState.JsonRequestString);
 
                 // Convert the string into a byte array.
-                byte[] byteArray = Encoding.UTF8.GetBytes(requestState.Jsonstring);
+                byte[] byteArray = Encoding.UTF8.GetBytes(requestState.RequestString);
 
                 // Write to the request stream.
-                postStream.Write(byteArray, 0, requestState.Jsonstring.Length);
+                postStream.Write(byteArray, 0, requestState.RequestString.Length);
                 postStream.Close();
 
                 // Start the asynchronous operation to get the response
@@ -844,18 +903,22 @@ namespace BrainCloud.Internal
             }
             catch (Exception ex)
             {
-                //Debug.WriteLine("BrainCloud - GetResponseCallback - Exception: " + ex.ToString());
-                HandleErrorCallInProgressCalls(ex.ToString());
-            }*/
+                m_brainCloudClientRef.Log("GetResponseCallback - Exception: " + ex.ToString());
+                requestState.DotNetRequestStatus = RequestState.eWebRequestStatus.STATUS_ERROR;
+            }
         }
 
         private void GetResponseCallback(IAsyncResult asynchronousResult)
-        {/*
+        {
+            RequestState requestState = (RequestState)asynchronousResult.AsyncState;
+            if (requestState.IsCancelled)
+            { 
+                return;
+            }
+
             //a callback method to end receiving the data
-            string jsonResponseString = "";
             try
             {
-                RequestState requestState = (RequestState)asynchronousResult.AsyncState;
                 WebRequest webRequest = requestState.WebRequest;
 
                 // End the operation
@@ -863,7 +926,8 @@ namespace BrainCloud.Internal
                 Stream streamResponse = response.GetResponseStream();
                 StreamReader streamRead = new StreamReader(streamResponse);
 
-                jsonResponseString = streamRead.ReadToEnd();
+                requestState.DotNetResponseString = streamRead.ReadToEnd();
+                requestState.DotNetRequestStatus = RequestState.eWebRequestStatus.STATUS_DONE;
 
                 // Close the stream object
                 streamResponse.Close();
@@ -872,30 +936,17 @@ namespace BrainCloud.Internal
                 // Release the HttpWebResponse
                 response.Close();
             }
+            catch (WebException wex)
+            {
+                m_brainCloudClientRef.Log("GetResponseCallback - WebException: " + wex.ToString());
+                requestState.DotNetRequestStatus = RequestState.eWebRequestStatus.STATUS_ERROR;
+            }
             catch (Exception ex)
             {
-                Debug.WriteLine("BrainCloud - GetResponseCallback - Exception: " + ex.ToString());
-                HandleErrorCallInProgressCalls(ex.ToString());
-                return;
+                m_brainCloudClientRef.Log("GetResponseCallback - Exception: " + ex.ToString());
+                requestState.DotNetRequestStatus = RequestState.eWebRequestStatus.STATUS_ERROR;
             }
-
-            // and now handle the incoming data
-            HandleSuccessCallInProgressCalls(jsonResponseString);
-
-            EnableHeartBeatTimer(true);
-            EnableTimeOutTimer(false);*/
         }
-
-        private void CreateLoaderThread()
-        { /*
-            // processing thread handled via m_processingEvent
-            Thread thread = new System.Threading.Thread( (ThreadStart)ProcessQueue );
-            thread.Priority = System.Threading.ThreadPriority.BelowNormal;
-            thread.IsBackground = true;
-            thread.Name = "BrainCloud.m_loaderThread";
-            thread.Start();*/
-        }
-
 #endif
 
 
@@ -973,6 +1024,8 @@ namespace BrainCloud.Internal
         {
             public long packetId = 0;
             public Dictionary<string, object>[] responses = null;
+            public Dictionary<string, object>[] events = null;
+
             
             public JsonResponseBundleV2()
             {}
@@ -1002,145 +1055,6 @@ namespace BrainCloud.Internal
                 status = in_status;
                 reason_code = in_reasonCode;
                 status_message = in_statusMessage;
-            }
-        }
-        #endregion
-
-
-        #region RequestState Class Helper
-        private class RequestState
-        {
-            // This class stores the request state of the request.
-            private long m_packetId;
-            public long PacketId
-            {
-                get
-                {
-                    return m_packetId;
-                }
-                set
-                {
-                    m_packetId = value;
-                }
-            }
-
-            private DateTime m_timeSent;
-            public DateTime TimeSent
-            {
-                get
-                {
-                    return m_timeSent;
-                }
-                set
-                {
-                    m_timeSent = value;
-                }
-            }
-
-            private int m_retries;
-            public int Retries
-            {
-                get
-                {
-                    return m_retries;
-                }
-                set
-                {
-                    m_retries = value;
-                }
-            }
-
-            // we process the signature on the background thread
-            private string m_sig = "";
-            public string Signature
-            {
-                get
-                {
-                    return m_sig;
-                }
-                set
-                {
-                    m_sig = value;
-                }
-            }
-            
-            // we also process the byte array on the background thread
-            private byte[] m_byteArray = null;
-            public byte[] ByteArray
-            {
-                get
-                {
-                    return m_byteArray;
-                }
-                set
-                {
-                    m_byteArray = value;
-                }
-            }
-
-        #if !(DOT_NET)       
-            // unity uses WWW objects to make http calls cross platform
-            private WWW request;
-            public WWW WebRequest
-        #else
-            // while .net projects can use the WebRequest Object
-            private WebRequest request;
-            public WebRequest WebRequest
-        #endif
-            {
-                get
-                {
-                    return request;
-                }
-                set
-                {
-                    request = value;
-                }
-            }
-
-            private string m_jsonstring;
-            public string Jsonstring
-            {
-                get
-                {
-                    return m_jsonstring;
-                }
-                set
-                {
-                    m_jsonstring = value;
-                }
-            }
-
-            private List<object> m_messageList;
-            public List<object> MessageList
-            {
-                get
-                {
-                    return m_messageList;
-                }
-                set
-                {
-                    m_messageList = value;
-                }
-            }
-
-            private bool m_loseThisPacket;
-            public bool LoseThisPacket
-            {
-                get
-                {
-                    return m_loseThisPacket;
-                }
-                set
-                {
-                    m_loseThisPacket = value;
-                }
-            }
-
-            public RequestState()
-            {
-                request = null;
-                m_jsonstring = "";
             }
         }
         #endregion

@@ -905,6 +905,7 @@ namespace JsonFx.Json
 
 		public virtual void Write(XmlNode value)
 		{
+			// TODO: auto-translate XML to JsonML
 			this.Write(value.OuterXml);
 		}
 

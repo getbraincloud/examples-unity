@@ -178,6 +178,7 @@ namespace JsonFx.Json
 
 		private static bool IsReservedWord(string varExpr)
 		{
+			// TODO: investigate doing this like Rhino does (switch on length check first letter or two)
 			switch (varExpr)
 			{
 				// literals
@@ -316,6 +317,7 @@ namespace JsonFx.Json
 			}
 			else
 			{
+				// TODO: determine if this should output parens around identifier
 				writer.TextWriter.Write(this.identifier);
 			}
 		}

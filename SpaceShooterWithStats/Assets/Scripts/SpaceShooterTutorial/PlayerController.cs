@@ -19,11 +19,11 @@ public class PlayerController : MonoBehaviour
 	 
 	private float nextFire;
 	private GameController gameController;
-	private Rigidbody rigidbody;
+	private Rigidbody m_rigidbody;
 	
 	void Start ()
 	{
-		rigidbody = GetComponent<Rigidbody>();
+		m_rigidbody = GetComponent<Rigidbody>();
 		gameController = GameObject.FindGameObjectWithTag ("GameController").GetComponent<GameController>();
 	}
 	
@@ -45,15 +45,15 @@ public class PlayerController : MonoBehaviour
 		float moveVertical = Input.GetAxis ("Vertical");
 
 		Vector3 movement = new Vector3 (moveHorizontal, 0.0f, moveVertical);
-		rigidbody.velocity = movement * speed;
+		m_rigidbody.velocity = movement * speed;
 		
-		rigidbody.position = new Vector3
+		m_rigidbody.position = new Vector3
 		(
-			Mathf.Clamp (rigidbody.position.x, boundary.xMin, boundary.xMax), 
+			Mathf.Clamp (m_rigidbody.position.x, boundary.xMin, boundary.xMax), 
 			0.0f, 
-			Mathf.Clamp (rigidbody.position.z, boundary.zMin, boundary.zMax)
+			Mathf.Clamp (m_rigidbody.position.z, boundary.zMin, boundary.zMax)
 		);
 		
-		rigidbody.rotation = Quaternion.Euler (0.0f, 0.0f, rigidbody.velocity.x * -tilt);
+		m_rigidbody.rotation = Quaternion.Euler (0.0f, 0.0f, m_rigidbody.velocity.x * -tilt);
 	}
 }
