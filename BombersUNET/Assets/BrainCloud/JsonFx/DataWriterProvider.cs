@@ -70,6 +70,7 @@ namespace JsonFx.Json
 				{
 					if (this.DefaultWriter == null)
 					{
+						// TODO: decide less arbitrary way to choose default
 						// without hardcoding value into IDataWriter
 						this.DefaultWriter = writer;
 					}

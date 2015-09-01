@@ -75,7 +75,7 @@ namespace JsonFx.Xml
 				namespaces = new XmlSerializerNamespaces();
 				namespaces.Add(String.Empty, String.Empty);// tricks the serializer into not emitting default xmlns attributes
 			}
-			//this.Namespaces = namespaces;
+			this.Namespaces = namespaces;
 		}
 
 		#endregion Init
