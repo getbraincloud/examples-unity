@@ -87,46 +87,6 @@ NavMeshSettings:
     cellSize: .166666657
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &127037358
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 100000, guid: fcd85d91b3a554e2bb559a176ddb5398, type: 2}
-  m_PrefabInternal: {fileID: 267667398}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 127037360}
-  - 114: {fileID: 127037359}
-  m_Layer: 0
-  m_Name: BrainCloudHUD
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
---- !u!114 &127037359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 11400000, guid: fcd85d91b3a554e2bb559a176ddb5398,
-    type: 2}
-  m_PrefabInternal: {fileID: 267667398}
-  m_GameObject: {fileID: 127037358}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 552e6ded2c8dc47f083c558011e692c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &127037360
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 400000, guid: fcd85d91b3a554e2bb559a176ddb5398, type: 2}
-  m_PrefabInternal: {fileID: 267667398}
-  m_GameObject: {fileID: 127037358}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
 --- !u!1001 &267667398
 Prefab:
   m_ObjectHideFlags: 0
@@ -168,8 +128,48 @@ Prefab:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: fcd85d91b3a554e2bb559a176ddb5398, type: 2}
-  m_RootGameObject: {fileID: 127037358}
+  m_RootGameObject: {fileID: 596333367}
   m_IsPrefabParent: 0
+--- !u!1 &596333367
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: fcd85d91b3a554e2bb559a176ddb5398, type: 2}
+  m_PrefabInternal: {fileID: 267667398}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 596333369}
+  - 114: {fileID: 596333368}
+  m_Layer: 0
+  m_Name: BrainCloudHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!114 &596333368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: fcd85d91b3a554e2bb559a176ddb5398,
+    type: 2}
+  m_PrefabInternal: {fileID: 267667398}
+  m_GameObject: {fileID: 596333367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 552e6ded2c8dc47f083c558011e692c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &596333369
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: fcd85d91b3a554e2bb559a176ddb5398, type: 2}
+  m_PrefabInternal: {fileID: 267667398}
+  m_GameObject: {fileID: 596333367}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
 --- !u!1 &735255927
 GameObject:
   m_ObjectHideFlags: 0
@@ -256,47 +256,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!1 &1166186366
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 100000, guid: 1cfabde382fcf408a943b02e4d1f3e35, type: 2}
-  m_PrefabInternal: {fileID: 1310516214}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 1166186368}
-  - 114: {fileID: 1166186367}
-  m_Layer: 0
-  m_Name: BrainCloudLogin
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
---- !u!114 &1166186367
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 11400000, guid: 1cfabde382fcf408a943b02e4d1f3e35,
-    type: 2}
-  m_PrefabInternal: {fileID: 1310516214}
-  m_GameObject: {fileID: 1166186366}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36cc3e6c560fb4016b69f27f134ae9ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_authSuccessLevel: 
---- !u!4 &1166186368
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 400000, guid: 1cfabde382fcf408a943b02e4d1f3e35, type: 2}
-  m_PrefabInternal: {fileID: 1310516214}
-  m_GameObject: {fileID: 1166186366}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
 --- !u!1001 &1310516214
 Prefab:
   m_ObjectHideFlags: 0
@@ -338,5 +297,46 @@ Prefab:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1cfabde382fcf408a943b02e4d1f3e35, type: 2}
-  m_RootGameObject: {fileID: 1166186366}
+  m_RootGameObject: {fileID: 1753399000}
   m_IsPrefabParent: 0
+--- !u!1 &1753399000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 100000, guid: 1cfabde382fcf408a943b02e4d1f3e35, type: 2}
+  m_PrefabInternal: {fileID: 1310516214}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1753399002}
+  - 114: {fileID: 1753399001}
+  m_Layer: 0
+  m_Name: BrainCloudLogin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!114 &1753399001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 11400000, guid: 1cfabde382fcf408a943b02e4d1f3e35,
+    type: 2}
+  m_PrefabInternal: {fileID: 1310516214}
+  m_GameObject: {fileID: 1753399000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36cc3e6c560fb4016b69f27f134ae9ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_authSuccessLevel: 
+--- !u!4 &1753399002
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 400000, guid: 1cfabde382fcf408a943b02e4d1f3e35, type: 2}
+  m_PrefabInternal: {fileID: 1310516214}
+  m_GameObject: {fileID: 1753399000}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
