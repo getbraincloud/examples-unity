@@ -21,6 +21,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation Merge = new ServiceOperation("MERGE");
         public static readonly ServiceOperation Detach = new ServiceOperation("DETACH");
         public static readonly ServiceOperation ResetEmailPassword = new ServiceOperation("RESET_EMAIL_PASSWORD");
+        public static readonly ServiceOperation SwitchToChildProfile = new ServiceOperation("SWITCH_TO_CHILD_PROFILE");
+        public static readonly ServiceOperation SwitchToParentProfile = new ServiceOperation("SWITCH_TO_PARENT_PROFILE");
 
         public static readonly ServiceOperation Create = new ServiceOperation("CREATE");
         public static readonly ServiceOperation CreateWithIndexedId = new ServiceOperation("CREATE_WITH_INDEXED_ID");
@@ -88,6 +90,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation UpdateEventData = new ServiceOperation("UPDATE_EVENT_DATA");
         public static readonly ServiceOperation DeleteSent = new ServiceOperation("DELETE_SENT");
         public static readonly ServiceOperation DeleteIncoming = new ServiceOperation("DELETE_INCOMING");
+        public static readonly ServiceOperation GetEvents = new ServiceOperation("GET_EVENTS");
 
         public static readonly ServiceOperation UpdateIncrement = new ServiceOperation("UPDATE_INCREMENT");
         public static readonly ServiceOperation ReadNextXpLevel = new ServiceOperation("READ_NEXT_XPLEVEL");
@@ -181,6 +184,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetAttributes = new ServiceOperation("GET_ATTRIBUTES");
         public static readonly ServiceOperation UpdateAttributes = new ServiceOperation("UPDATE_ATTRIBUTES");
         public static readonly ServiceOperation RemoveAttributes = new ServiceOperation("REMOVE_ATTRIBUTES");
+        public static readonly ServiceOperation GetChildProfiles = new ServiceOperation("GET_CHILD_PROFILES");
 
         public static readonly ServiceOperation FbConfirmPurchase = new ServiceOperation("FB_CONFIRM_PURCHASE");
         public static readonly ServiceOperation GooglePlayConfirmPurchase = new ServiceOperation("CONFIRM_GOOGLEPLAY_PURCHASE");
@@ -191,6 +195,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetFileList = new ServiceOperation("GET_FILE_LIST");
 
         public static readonly ServiceOperation ScheduleCloudScript = new ServiceOperation("SCHEDULE_CLOUD_SCRIPT");
+        public static readonly ServiceOperation RunAsParent = new ServiceOperation("RUN_AS_PARENT");
 
         private ServiceOperation(string value)
         {

@@ -11,6 +11,7 @@ using BrainCloud.Internal;
 
 #if !(DOT_NET)
 using UnityEngine.SocialPlatforms;
+using UnityEngine;
 #endif
 
 namespace BrainCloud
@@ -53,117 +54,97 @@ namespace BrainCloud
         /// </param>
         /// <returns> The JSON returned in the callback is as follows:
         /// {
-        ///   "status": 200,
-        ///   "data": {
-        ///     "milestones": [
-        ///       {
-        ///         "gameId": "com.bitheads.unityexample",
-        ///         "milestoneId": "milestone01",
-        ///         "playerStatistics": {
-        ///           "experiencePoints": null,
-        ///           "experienceLevel": null,
-        ///           "empty": true,
-        ///           "statistics": {}
-        ///         },
-        ///         "globalStatistics": {
-        ///           "statistics": {},
-        ///           "empty": true
-        ///         },
-        ///         "playerStatisticsUnlockThresholds": {
-        ///           "experiencePoints": null,
-        ///           "experienceLevel": null,
-        ///           "empty": true,
-        ///           "statistics": {}
-        ///         },
-        ///         "globalStatisticsUnlockThresholds": {
-        ///           "statistics": {},
-        ///           "empty": true
-        ///         },
-        ///         "reward": {
-        ///           "experiencePoints": null,
-        ///           "playerStatistics": null,
-        ///           "currencies": {
-        ///             "gems": 10
-        ///           },
-        ///           "globalGameStatistics": null,
-        ///           "achievement": null
-        ///         },
-        ///         "title": "Level 1 milestone",
-        ///         "extraData": null,
-        ///         "description": "Awarded when you get to player level 1",
-        ///         "category": "general",
-        ///         "key": {
-        ///           "gameId": "com.bitheads.unityexample",
-        ///           "milestoneId": "milestone01",
-        ///           "primaryKey": true
-        ///         }
-        ///       }
-        ///     ],
-        ///     "achievements": [
-        ///       {
-        ///         "gameId": "com.bitheads.unityexample",
-        ///         "achievementId": "ach01",
-        ///         "facebookUrl": "http://someurl.com",
-        ///         "title": "Finish Tutorial",
-        ///         "imageUrl": "http://someurl.com",
-        ///         "facebookGamePoints": 10,
-        ///         "extraData": null,
-        ///         "invisibleUntilEarned": null,
-        ///         "description": "Achievement awarded when you finish the tutorial",
-        ///         "key": {
-        ///           "gameId": "com.bitheads.unityexample",
-        ///           "achievementId": "ach01",
-        ///           "primaryKey": true
-        ///         }
-        ///       }
-        ///     ],
-        ///     "xp_levels": [
-        ///       {
-        ///         "gameId": "com.bitheads.unityexample",
-        ///         "numericLevel": 1,
-        ///         "experience": 10,
-        ///         "reward": {
-        ///           "experiencePoints": null,
-        ///           "playerStatistics": null,
-        ///           "currencies": {
-        ///             "gold": 1000
-        ///           },
-        ///           "globalGameStatistics": null,
-        ///           "achievement": null
-        ///         },
-        ///         "facebookAction": "",
-        ///         "statusTitle": "Peon",
-        ///         "key": {
-        ///           "gameId": "com.bitheads.unityexample",
-        ///           "numericLevel": 1,
-        ///           "primaryKey": true
-        ///         }
-        ///       },
-        ///       {
-        ///         "gameId": "com.bitheads.unityexample",
-        ///         "numericLevel": 2,
-        ///         "experience": 20,
-        ///         "reward": {
-        ///           "experiencePoints": null,
-        ///           "playerStatistics": null,
-        ///           "currencies": {
-        ///             "gems": 10,
-        ///             "gold": 2000
-        ///           },
-        ///           "globalGameStatistics": null,
-        ///           "achievement": null
-        ///         },
-        ///         "facebookAction": "",
-        ///         "statusTitle": "Jester",
-        ///         "key": {
-        ///           "gameId": "com.bitheads.unityexample",
-        ///           "numericLevel": 2,
-        ///           "primaryKey": true
-        ///         }
-        ///       }
-        ///     ],
-        ///     "quests": []
+        ///  "status": 200,
+        ///  "data": {
+        ///   "milestones": [
+        ///    {
+        ///     "id": "milestone02",
+        ///     "category": "general",
+        ///     "title": "Level 2 milestone",
+        ///     "status": "SATISFIED",
+        ///     "description": "Awarded when you get to level 2",
+        ///     "gameId": "10068",
+        ///     "rewards": {
+        ///      "currency": {
+        ///       "gold": 1000
+        ///      }
+        ///     },
+        ///     "extraData": null,
+        ///     "questId": null,
+        ///     "milestoneId": "milestone02"
+        ///    },
+        ///    {
+        ///     "id": "milestone01",
+        ///     "thresholds": {
+        ///      "playerStatistics": {
+        ///       "experiencePoints": 0
+        ///      }
+        ///     },
+        ///     "category": "general",
+        ///     "title": "Level 1 milestone",
+        ///     "status": "SATISFIED",
+        ///     "description": "Awarded when you get to player level 1",
+        ///     "gameId": "10068",
+        ///     "rewards": {
+        ///      "currency": {
+        ///       "gems": 10
+        ///      }
+        ///     },
+        ///     "extraData": null,
+        ///     "questId": null,
+        ///     "milestoneId": "milestone01"
+        ///    }
+        ///   ],
+        ///   "achievements": [
+        ///    {
+        ///     "fbEnabled": true,
+        ///     "imageUrl": null,
+        ///     "status": "NOT_AWARDED",
+        ///     "gameId": "10068",
+        ///     "steamEnabled": false,
+        ///     "extraData": null,
+        ///     "achievementId": "ach01",
+        ///     "invisibleUntilEarned": false,
+        ///     "steamAchievementId": "",
+        ///     "id": "ach01",
+        ///     "appleEnabled": false,
+        ///     "title": "Finish Tutorial",
+        ///     "fbGamePoints": 10,
+        ///     "description": "Achievement awarded when you finish the tutorial",
+        ///     "appleAchievementId": ""
+        ///    },
+        ///    {
+        ///     "fbEnabled": true,
+        ///     "imageUrl": null,
+        ///     "status": "NOT_AWARDED",
+        ///     "gameId": "10068",
+        ///     "steamEnabled": false,
+        ///     "extraData": null,
+        ///     "achievementId": "ach02",
+        ///     "invisibleUntilEarned": false,
+        ///     "steamAchievementId": "",
+        ///     "id": "ach02",
+        ///     "appleEnabled": false,
+        ///     "title": "Level up",
+        ///     "fbGamePoints": 10,
+        ///     "description": "Awarded when you level up for the first time!",
+        ///     "appleAchievementId": ""
+        ///    }
+        ///   ],
+        ///   "quests": [],
+        ///   "xp": {
+        ///    "xpCapped": false,
+        ///    "experiencePoints": 0,
+        ///    "xpLevel": {
+        ///     "gameId": "10068",
+        ///     "level": 0,
+        ///     "statusTitle": "Lesser",
+        ///     "experience": 0,
+        ///     "fbAction": ""
+        ///    },
+        ///    "experienceLevel": 0
         ///   }
+        ///  }
         /// }
         /// </returns>
         public void ReadAllGamification(
@@ -351,32 +332,28 @@ namespace BrainCloud
         /// </param>
         /// <returns> The JSON returned in the callback is as follows:
         /// {
-        ///   "status": 200,
-        ///   "data": {
-        ///     "xp_levels": [
-        ///       {
-        ///         "gameId": "com.bitheads.unityexample",
-        ///         "numericLevel": 1,
-        ///         "experience": 10,
-        ///         "reward": {
-        ///           "experiencePoints": null,
-        ///           "playerStatistics": null,
-        ///           "currencies": {
-        ///             "gold": 1000
-        ///           },
-        ///           "globalGameStatistics": null,
-        ///           "achievement": null
-        ///         },
-        ///         "facebookAction": "",
-        ///         "statusTitle": "Peon",
-        ///         "key": {
-        ///           "gameId": "com.bitheads.unityexample",
-        ///           "numericLevel": 1,
-        ///           "primaryKey": true
-        ///         }
-        ///       }
-        ///     ]
-        ///   }
+        ///  "status": 200,
+        ///  "data": {
+        ///   "xp_levels": [
+        ///    {
+        ///     "level": 1,
+        ///     "statusTitle": "Peon",
+        ///     "experience": 0,
+        ///     "fbAction": ""
+        ///    },
+        ///    {
+        ///     "level": 2,
+        ///     "statusTitle": "Small Fry",
+        ///     "experience": 1000,
+        ///     "fbAction": "",
+        ///     "reward": {
+        ///      "currency": {
+        ///       "gold": 500
+        ///      }
+        ///     }
+        ///    }
+        ///   ]
+        ///  }
         /// }
         /// </returns>
         public void ReadXpLevelsMetaData(
@@ -664,7 +641,7 @@ namespace BrainCloud
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            string[] ids = in_achievementIds.Split(new char[] {','});
+            string[] ids = in_achievementIds.Split(new char[] { ',' });
             string achievementsStr = "[";
             for (int i = 0, isize = ids.Length; i < isize; ++i)
             {
@@ -674,12 +651,12 @@ namespace BrainCloud
             }
             achievementsStr += "]";
 
-            List<object> achievementData = JsonReader.Deserialize<List<object>>(achievementsStr);
+            string[] achievementData = JsonReader.Deserialize<string[]>(achievementsStr);
 
             Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.GamificationServiceAchievementsName.Value] = achievementData;
 
-            SuccessCallback successCallbacks = (SuccessCallback) AchievementAwardedSuccessCallback;
+            SuccessCallback successCallbacks = (SuccessCallback)AchievementAwardedSuccessCallback;
             if (in_success != null)
             {
                 successCallbacks += in_success;
@@ -691,15 +668,18 @@ namespace BrainCloud
 
         private void AchievementAwardedSuccessCallback(string in_data, object in_obj)
         {
-            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>> (in_data);
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_data);
             try
             {
-                Dictionary<string, object> data = (Dictionary<string, object>) response[OperationParam.GamificationServiceAchievementsData.Value];
-                List<string> achievements = (List<string>) data[OperationParam.GamificationServiceAchievementsName.Value];
-
-                for (int i = 0; i < achievements.Count; i++)
+                Dictionary<string, object> data = (Dictionary<string, object>)response[OperationParam.GamificationServiceAchievementsData.Value];
+                //List<string> achievements = (List<string>) data[OperationParam.GamificationServiceAchievementsName.Value];
+                if (((object[])data[OperationParam.GamificationServiceAchievementsName.Value]).Length > 0)
                 {
-                    AwardThirdPartyAchievements(achievements[i]);
+                    Dictionary<string, object>[] achievements = (Dictionary<string, object>[])data[OperationParam.GamificationServiceAchievementsName.Value];
+                    for (int i = 0; i < achievements.Length; i++)
+                    {
+                        AwardThirdPartyAchievements(achievements[i]["id"].ToString());
+                    }
                 }
 
                 if (m_achievementsDelegate != null)
@@ -707,22 +687,22 @@ namespace BrainCloud
                     m_achievementsDelegate(in_data, in_obj);
                 }
             }
-            catch(System.Collections.Generic.KeyNotFoundException)
+            catch (System.Collections.Generic.KeyNotFoundException)
             {
                 //do nothing.
             }
         }
 
-      
+
         // goes through JSON response to award achievements via third party (ie game centre, facebook etc).
         // notifies achievement delegate
         internal void CheckForAchievementsToAward(string in_data, object in_obj)
         {
-            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>> (in_data);
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_data);
             try
             {
-                Dictionary<string, object> data = (Dictionary<string, object>) response[OperationParam.GamificationServiceAchievementsData.Value];
-                List<string> achievements = (List<string>) data[OperationParam.GamificationServiceAchievementsGranted.Value];
+                Dictionary<string, object> data = (Dictionary<string, object>)response[OperationParam.GamificationServiceAchievementsData.Value];
+                List<string> achievements = (List<string>)data[OperationParam.GamificationServiceAchievementsGranted.Value];
                 if (achievements != null)
                 {
                     foreach (string achievement in achievements)
@@ -745,25 +725,23 @@ namespace BrainCloud
 
         private void AwardThirdPartyAchievements(string in_achievements)
         {
-
 #if !(DOT_NET)
             // only do it for logged in players
-            UnityEngine.Social.localUser.Authenticate (success =>
+            if (!UnityEngine.Social.localUser.authenticated)
             {
-                if (success)
-                {
-                    IAchievement achievement = UnityEngine.Social.CreateAchievement();
-                    achievement.id = in_achievements;
-                    achievement.percentCompleted = 100.0; //progress as double
-                    achievement.ReportProgress(result =>
-                    {
-                        if (result)
-                            Console.Write("AwardThirdPartyAchievements Success");
-                        else
-                            Console.Write("AwardThirdPartyAchievements Failed");
+                Debug.Log("Couldnt award Unity Social achievement because localUser was not authenticated");
+                return;
+            }
 
-                    });
-                }
+            IAchievement achievement = UnityEngine.Social.CreateAchievement();
+            achievement.id = in_achievements;
+            achievement.percentCompleted = 100.0; //progress as double
+            achievement.ReportProgress(result =>
+            {
+                if (result)
+                    Debug.Log("AwardThirdPartyAchievements Success");
+                else
+                    Debug.Log("AwardThirdPartyAchievements Failed");
             });
 #endif
         }

@@ -593,6 +593,7 @@ namespace JsonFx.Json
 			// consume closing bracket
 			this.index++;
 
+			// TODO: optimize to reduce number of conversions on lists
 
 			if (arrayItemType != null && arrayItemType != typeof(object))
 			{

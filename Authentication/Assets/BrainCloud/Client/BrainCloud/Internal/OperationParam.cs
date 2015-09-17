@@ -41,7 +41,9 @@ namespace BrainCloud
         public static readonly OperationParam AuthenticateServiceAuthenticateReleasePlatform     = new OperationParam("releasePlatform");
         public static readonly OperationParam AuthenticateServiceAuthenticateGameVersion         = new OperationParam("gameVersion");
         public static readonly OperationParam AuthenticateServiceAuthenticateBrainCloudVersion   = new OperationParam("clientLibVersion");
-        public static readonly OperationParam AuthenticateServiceAuthenticateExternalAuthName    = new OperationParam("clientLibVersion");
+        public static readonly OperationParam AuthenticateServiceAuthenticateExternalAuthName    = new OperationParam("externalAuthName");
+
+        public static readonly OperationParam AuthenticateServiceAuthenticateLevelName           = new OperationParam("levelName");
 
         public static readonly OperationParam AuthenticateServiceAuthenticateAuthFacebook        = new OperationParam("Facebook");
         public static readonly OperationParam AuthenticateServiceAuthenticateAuthEmail           = new OperationParam("Email");
@@ -135,6 +137,8 @@ namespace BrainCloud
         // Event Service - Delete Sent Params
         public static readonly OperationParam EventServiceDeleteSentEventId                      = new OperationParam("eventId");
         public static readonly OperationParam EventServiceDeleteSentToId                         = new OperationParam("toId");
+        public static readonly OperationParam EventServiceIncludeIncomingEvents                  = new OperationParam("includeIncomingEvents");
+        public static readonly OperationParam EventServiceIncludeSentEvents                      = new OperationParam("includeSentEvents");
 
         // Friend Service - Params
         public static readonly OperationParam FriendServiceEntityId                             = new OperationParam("entityId");
@@ -182,6 +186,8 @@ namespace BrainCloud
         // Player State Service - Atributes
         public static readonly OperationParam PlayerStateServiceAttributes = new OperationParam("attributes");
         public static readonly OperationParam PlayerStateServiceWipeExisting = new OperationParam("wipeExisting");
+
+        public static readonly OperationParam PlayerStateServiceIncludeSummaryData = new OperationParam("includePlayerSummaryData");
 
         // Player State Service - Reset Params
         //public static readonly Operation PlayerStateServiceReset = new Operation("");
@@ -278,6 +284,7 @@ namespace BrainCloud
         public static readonly OperationParam ScriptServiceRunScriptData                         = new OperationParam("scriptData");
         public static readonly OperationParam ScriptServiceStartDateUTC                          = new OperationParam("startDateUTC");
         public static readonly OperationParam ScriptServiceStartMinutesFromNow                   = new OperationParam("minutesFromNow");
+        public static readonly OperationParam ScriptServiceParentLevel                           = new OperationParam("parentLevel");
 
         public static readonly OperationParam MatchMakingServicePlayerRating                     = new OperationParam("playerRating");
         public static readonly OperationParam MatchMakingServiceMinutes                          = new OperationParam("minutes");
