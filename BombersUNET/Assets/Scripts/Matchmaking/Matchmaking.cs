@@ -721,7 +721,7 @@ namespace BrainCloudUNETExample.Matchmaking
             }
             else
             {
-                m_playerChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_playerChevron.GetComponent<RectTransform>().localPosition.x, 96.6f - (17.95f * playerChevronPosition), m_playerChevron.GetComponent<RectTransform>().localPosition.z);
+                m_playerChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_playerChevron.GetComponent<RectTransform>().localPosition.x, -(19f * playerChevronPosition), m_playerChevron.GetComponent<RectTransform>().localPosition.z);
 
                 m_playerChevron.SetActive(true);
             }
