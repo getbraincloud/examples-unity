@@ -642,7 +642,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             int playerChevronPosition = 0;
             if (m_leaderboardReady)
             {
-                
+
                 players = leaderboardData["leaderboard"].Count;
 
                 for (int i = 0; i < players; i++)
@@ -705,7 +705,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
             else
             {
-                m_playerChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_playerChevron.GetComponent<RectTransform>().localPosition.x, 96.6f - (17.95f * playerChevronPosition), m_playerChevron.GetComponent<RectTransform>().localPosition.z);
+                m_playerChevron.GetComponent<RectTransform>().localPosition = new Vector3(m_playerChevron.GetComponent<RectTransform>().localPosition.x, - (19f * playerChevronPosition), m_playerChevron.GetComponent<RectTransform>().localPosition.z);
 
                 m_playerChevron.SetActive(true);
             }
