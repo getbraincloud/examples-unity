@@ -643,11 +643,11 @@ namespace BrainCloudPhotonExample.Matchmaking
             if (m_leaderboardReady)
             {
                 
-                players = int.Parse(leaderboardData["social_leaderboard"].Count.ToString());
+                players = leaderboardData["leaderboard"].Count;
 
                 for (int i = 0; i < players; i++)
                 {
-                    if (leaderboardData["social_leaderboard"][i]["name"].ToString() == PhotonNetwork.playerName)
+                    if (leaderboardData["leaderboard"][i]["name"].ToString() == PhotonNetwork.playerName)
                     {
                         playerListed = true;
                         playerChevronPosition = i;
@@ -656,18 +656,18 @@ namespace BrainCloudPhotonExample.Matchmaking
                         leaderboardLevelText += "\n";
                         leaderboardScoreText += "\n";
                         m_playerChevron.transform.FindChild("PlayerPlace").GetComponent<Text>().text = (i + 1) + "";
-                        m_playerChevron.transform.FindChild("PlayerName").GetComponent<Text>().text = leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n"; ;
-                        m_playerChevron.transform.FindChild("PlayerLevel").GetComponent<Text>().text = leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["social_leaderboard"][i]["data"]["level"].ToString() + ")\n"; ;
-                        m_playerChevron.transform.FindChild("PlayerScore").GetComponent<Text>().text = (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
+                        m_playerChevron.transform.FindChild("PlayerName").GetComponent<Text>().text = leaderboardData["leaderboard"][i]["name"].ToString() + "\n"; ;
+                        m_playerChevron.transform.FindChild("PlayerLevel").GetComponent<Text>().text = leaderboardData["leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["leaderboard"][i]["data"]["level"].ToString() + ")\n"; ;
+                        m_playerChevron.transform.FindChild("PlayerScore").GetComponent<Text>().text = (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
                         //96.6
                         //17.95
                     }
                     else
                     {
                         leaderboardRankText += (i + 1) + "\n";
-                        leaderboardNameText += leaderboardData["social_leaderboard"][i]["name"].ToString() + "\n";
-                        leaderboardLevelText += leaderboardData["social_leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["social_leaderboard"][i]["data"]["level"].ToString() + ")\n";
-                        leaderboardScoreText += (Mathf.Floor(float.Parse(leaderboardData["social_leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
+                        leaderboardNameText += leaderboardData["leaderboard"][i]["name"].ToString() + "\n";
+                        leaderboardLevelText += leaderboardData["leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["leaderboard"][i]["data"]["level"].ToString() + ")\n";
+                        leaderboardScoreText += (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
                     }
                 }
                 if (players == 0)
