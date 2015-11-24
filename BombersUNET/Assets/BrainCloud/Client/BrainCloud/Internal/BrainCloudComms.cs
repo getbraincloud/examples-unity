@@ -45,11 +45,6 @@ namespace BrainCloud.Internal
     internal sealed class BrainCloudComms
     {
         /// <summary>
-        /// The maximum number of retries for a packet.
-        /// </summary>
-        private static int MAX_RETRIES = 5;
-
-        /// <summary>
         /// The maximum number of messages in a bundle.
         /// Note that this is somewhat arbitrary - using the size
         /// of the packet would be a more appropriate measuring stick.
@@ -110,7 +105,7 @@ namespace BrainCloud.Internal
         /// How long we wait to send a heartbeat if no packets have been sent or received.
         /// This value is set to a percentage of the heartbeat timeout sent by the authenticate response.
         /// </summary>
-        private TimeSpan m_idleTimeout = TimeSpan.FromSeconds(60);
+        private TimeSpan m_idleTimeout = TimeSpan.FromSeconds(5*60);
 
         /// <summary>
         /// Debug value to introduce packet loss for testing retries etc.
@@ -122,7 +117,10 @@ namespace BrainCloud.Internal
         /// </summary>
         private EventCallback m_eventCallback;
 
-
+        /// <summary>
+        /// The reward handler callback method
+        /// </summary>
+        private RewardCallback m_rewardCallback;
 
         private bool m_isAuthenticated = false;
         public bool Authenticated
@@ -160,6 +158,52 @@ namespace BrainCloud.Internal
             }
         }
 
+        /// <summary>
+        /// A list of packet timeouts. Index represents the packet attempt number.
+        /// </summary>
+        private List<int> m_packetTimeouts = new List<int> {10, 10, 10};
+        public List<int> PacketTimeouts
+        {
+            get
+            {
+                return m_packetTimeouts;
+            }
+            set
+            {
+                m_packetTimeouts = value;
+            }
+        }
+        public void SetPacketTimeoutsToDefault()
+        {
+            m_packetTimeouts = new List<int> {10, 10, 10};
+        }
+
+        private int m_authPacketTimeoutSecs = 15;
+        public int AuthenticationPacketTimeoutSecs
+        {
+            get
+            {
+                return m_authPacketTimeoutSecs;
+            }
+            set
+            {
+                m_authPacketTimeoutSecs = value;
+            }
+        }
+
+        private bool m_oldStyleStatusResponseInErrorCallback = false;
+        public bool OldStyleStatusResponseInErrorCallback
+        {
+            get
+            {
+                return m_oldStyleStatusResponseInErrorCallback;
+            }
+            set
+            {
+                m_oldStyleStatusResponseInErrorCallback = value;
+            }
+        }
+
 
         public BrainCloudComms(BrainCloudClient in_client)
         {
@@ -194,6 +238,16 @@ namespace BrainCloud.Internal
         public void DeregisterEventCallback()
         {
             m_eventCallback = null;
+        }
+
+        public void RegisterRewardCallback(RewardCallback in_cb)
+        {
+            m_rewardCallback = in_cb;
+        }
+
+        public void DeregisterRewardCallback()
+        {
+            m_rewardCallback = null;
         }
 
 
@@ -247,16 +301,22 @@ namespace BrainCloud.Internal
             {
                 if (DateTime.Now.Subtract(m_activeRequest.TimeSent) >= GetPacketTimeout(m_activeRequest))
                 {
+                    // grab status/response before cancelling the request as in Unity, the www object
+                    // will set internal status fields to null when www object is disposed
+                    RequestState.eWebRequestStatus status = GetWebRequestStatus(m_activeRequest);
+                    string errorResponse = "";
+                    if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
+                    {
+                        errorResponse = GetWebRequestResponse(m_activeRequest);
+                    }
                     m_activeRequest.CancelRequest();
 
                     if (!ResendMessage(m_activeRequest))
                     {
                         // we've reached the retry limit - send timeout error to all client callbacks
-
-                        RequestState.eWebRequestStatus status = GetWebRequestStatus(m_activeRequest);
                         if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
                         {
-                            m_brainCloudClientRef.Log("Timeout with network error: " + GetWebRequestResponse(m_activeRequest));
+							m_brainCloudClientRef.Log("Timeout with network error: " + errorResponse);
                         }
                         else
                         {
@@ -409,9 +469,10 @@ namespace BrainCloud.Internal
                 // its a success response
                 if (statusCode == 200)
                 {
+                    Dictionary<string, object> responseData = null;
                     if (response[OperationParam.ServiceMessageData.Value] != null)
                     {
-                        Dictionary<string, object> responseData = (Dictionary<string, object>) response[OperationParam.ServiceMessageData.Value];
+                        responseData = (Dictionary<string, object>) response[OperationParam.ServiceMessageData.Value];
                         
                         // send the data back as not formatted
                         data = JsonWriter.Serialize(response);
@@ -468,25 +529,98 @@ namespace BrainCloud.Internal
                                 exceptions.Add (e);
                             }
                         }
+
+                        // now deal with rewards
+                        if (m_rewardCallback != null && responseData != null) 
+                        {
+                            try
+                            {
+                                Dictionary<string, object> rewards = null;
+
+                                // it's an operation that return a reward
+                                if (sc.GetService().Equals(ServiceName.Authenticate.Value)
+                                        && sc.GetOperation().Equals(ServiceOperation.Authenticate.Value))
+                                {
+                                    object objRewards = null;
+                                    if (responseData.TryGetValue("rewards", out objRewards))
+                                    {
+                                        Dictionary<string, object> outerRewards = (Dictionary<string, object>) objRewards;
+                                        if (outerRewards.TryGetValue("rewards", out objRewards))
+                                        {
+                                            Dictionary<string, object> innerRewards = (Dictionary<string, object>) objRewards;
+                                            if (innerRewards.Count > 0)
+                                            {
+                                                // we found rewards
+                                                rewards = outerRewards;
+                                            }
+                                        }
+                                    }
+                                }
+                                else if ((sc.GetService().Equals(ServiceName.PlayerStatistics.Value)
+                                        && sc.GetOperation().Equals (ServiceOperation.Update.Value))
+                                    || (sc.GetService().Equals(ServiceName.PlayerStatisticsEvent.Value)
+                                       && (sc.GetOperation().Equals (ServiceOperation.Trigger.Value)
+                                            || sc.GetOperation().Equals (ServiceOperation.TriggerMultiple.Value))))
+                                {
+                                    object objRewards = null;
+                                    if (responseData.TryGetValue("rewards", out objRewards))
+                                    {
+                                        Dictionary<string, object> innerRewards = (Dictionary<string, object>) objRewards;
+                                        if (innerRewards.Count > 0)
+                                        {
+                                            // we found rewards
+                                            rewards = responseData;
+                                        }
+                                    }
+                                }
+
+                                if (rewards != null)
+                                {
+                                    Dictionary<string, object> theReward = new Dictionary<string, object>();
+                                    theReward["rewards"] = rewards;
+                                    theReward["service"] = sc.GetService ();
+                                    theReward["operation"] = sc.GetOperation();
+                                    Dictionary<string, object> apiRewards = new Dictionary<string, object>();
+                                    List<object> rewardList = new List<object>();
+                                    rewardList.Add (theReward);
+                                    apiRewards["apiRewards"] = rewardList;
+
+                                    string rewardsAsJson = JsonWriter.Serialize(apiRewards);
+                                    m_rewardCallback(rewardsAsJson);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                m_brainCloudClientRef.Log (e.StackTrace);
+                                exceptions.Add (e);
+                            }
+                        }
                     }
                 }
                 else if (statusCode >= 400 || statusCode == 202)
                 {
                     object reasonCodeObj = null, statusMessageObj = null;
                     int reasonCode = 0;
-                    string statusMessage = "";
+                    string errorJson = "";
                     
                     if (response.TryGetValue("reason_code", out reasonCodeObj))
                     {
                         reasonCode = (int) reasonCodeObj;
                     }
-                    if (response.TryGetValue ("status_message", out statusMessageObj))
+                    if (m_oldStyleStatusResponseInErrorCallback)
                     {
-                        statusMessage = (string) statusMessageObj;
+                        if (response.TryGetValue ("status_message", out statusMessageObj))
+                        {
+                            errorJson = (string) statusMessageObj;
+                        }
+                    }
+                    else
+                    {
+                        errorJson = JsonWriter.Serialize (response);
                     }
                     
-                    if (reasonCode == ReasonCodes.SESSION_EXPIRED
-                        || reasonCode == ReasonCodes.SESSION_NOT_FOUND_ERROR)
+                    if (reasonCode == ReasonCodes.PLAYER_SESSION_EXPIRED
+                        || reasonCode == ReasonCodes.NO_SESSION)
                     {
                         m_isAuthenticated = false;
                         m_brainCloudClientRef.Log ("Received session expired or not found, need to re-authenticate");
@@ -506,7 +640,7 @@ namespace BrainCloud.Internal
                     {
                         try
                         {
-                            sc.GetCallback().OnErrorCallback(statusCode, reasonCode, statusMessage);
+                            sc.GetCallback().OnErrorCallback(statusCode, reasonCode, errorJson);
                         }
                         catch(Exception e)
                         {
@@ -591,10 +725,15 @@ namespace BrainCloud.Internal
                         
                         messageList.Add(message);
 
+                        if (scIndex.GetOperation ().Equals (ServiceOperation.Authenticate.Value))
+                        {
+                            requestState.PacketNoRetry = true;
+                        }
+
                         if (scIndex.GetOperation ().Equals (ServiceOperation.FullReset.Value)
                             || scIndex.GetOperation ().Equals(ServiceOperation.Logout.Value))
                         {
-                            requestState.IsSessionTerminatingPacket = true;
+                            requestState.PacketRequiresLongTimeout = true;
                         }
                     }
                     
@@ -629,7 +768,7 @@ namespace BrainCloud.Internal
         private bool ResendMessage(RequestState requestState)
         {
             ++m_activeRequest.Retries;
-            if (m_activeRequest.Retries >= MAX_RETRIES)
+            if (m_activeRequest.Retries >= GetMaxRetriesForPacket(requestState))
             {
                 return false;
             }
@@ -677,10 +816,10 @@ namespace BrainCloud.Internal
                 request.Method = "POST";
                 request.Headers.Add("X-SIG", sig);
                 request.ContentLength = byteArray.Length;
+                request.Timeout = (int) GetPacketTimeout(requestState).TotalMilliseconds;
+
                 // TODO: Convert to using a task as BeginGetRequestStream can block for minutes
                 requestState.AsyncResult = request.BeginGetRequestStream(new AsyncCallback(GetRequestCallback), requestState);
-
-
                 #endif
 
                 requestState.WebRequest = request;
@@ -689,7 +828,7 @@ namespace BrainCloud.Internal
             requestState.TimeSent = DateTime.Now;
 
             ResetIdleTimer();
-            
+           
             m_brainCloudClientRef.Log("OUTGOING " 
                                       + (requestState.Retries > 0 ? " Retry(" + requestState.Retries +"): " : ": ")
                                       + jsonRequestString);
@@ -753,62 +892,54 @@ namespace BrainCloud.Internal
             return response;
         }
 
+        /// <summary>
+        /// Method returns the maximum retries for the given packet
+        /// </summary>
+        /// <returns>The maximum retries for the given packet.</returns>
+        /// <param name="in_requestState">The active request.</param>
+        private int GetMaxRetriesForPacket(RequestState in_requestState)
+        {
+            if (in_requestState.PacketNoRetry)
+            {
+                return 0;
+            }
+            return m_packetTimeouts.Count;
+        }
 
         /// <summary>
         /// Method staggers the packet timeout value based on the currentRetry
         /// </summary>
         /// <returns>The packet timeout.</returns>
-        /// <param name="currentRetryNumber">Current retry number.</param>
+        /// <param name="in_requestState">The active request.</param>
         private TimeSpan GetPacketTimeout(RequestState in_requestState)
         {
+            if (in_requestState.PacketNoRetry)
+            {
+                return TimeSpan.FromSeconds(m_authPacketTimeoutSecs);
+            }
+
             int currentRetry = in_requestState.Retries;
             TimeSpan ret;
 
-            // if this is a delete player or logout we change the
+            // if this is a delete player, or logout we change the
             // timeout behaviour
-            if (in_requestState.IsSessionTerminatingPacket)
+            if (in_requestState.PacketRequiresLongTimeout)
             {
-                switch (currentRetry)
+                // unused as default timeouts are now quite long
+            }
+
+            if (currentRetry >= m_packetTimeouts.Count)
+            {
+                int secs = 10;
+                if (m_packetTimeouts.Count > 0)
                 {
-                case 0:
-                    ret = TimeSpan.FromSeconds(15);
-                    break;
-                case 1:
-                    ret = TimeSpan.FromSeconds(15);
-                    break;
-                case 2:
-                    ret = TimeSpan.FromSeconds(2);
-                    break;
-                case 3:
-                    ret = TimeSpan.FromSeconds(2);
-                    break;
-                case 4:
-                default:
-                    ret = TimeSpan.FromSeconds(1);
-                    break;
+                    secs = m_packetTimeouts[m_packetTimeouts.Count - 1];
                 }
+                ret = TimeSpan.FromSeconds(secs);
             }
             else
             {
-                switch (currentRetry)
-                {
-                case 0:
-                    ret = TimeSpan.FromSeconds(3);
-                    break;
-                case 1:
-                    ret = TimeSpan.FromSeconds(5);
-                    break;
-                case 2:
-                    ret = TimeSpan.FromSeconds(5);
-                    break;
-                case 3:
-                    ret = TimeSpan.FromSeconds(10);
-                    break;
-                case 4:
-                default:
-                    ret = TimeSpan.FromSeconds(10);
-                    break;
-                }
+                ret = TimeSpan.FromSeconds(m_packetTimeouts[currentRetry]);
             }
 
             return ret;
@@ -868,6 +999,8 @@ namespace BrainCloud.Internal
                 m_serviceCallsWaiting.Clear();
                 m_serviceCallsInProgress.Clear();
                 m_activeRequest = null;
+                m_brainCloudClientRef.AuthenticationService.ProfileId = "";
+                m_sessionID = "";
             }
         }
 
@@ -910,7 +1043,7 @@ namespace BrainCloud.Internal
         {
             RequestState requestState = (RequestState)asynchronousResult.AsyncState;
             if (requestState.IsCancelled)
-            { 
+            {
                 return;
             }
 
