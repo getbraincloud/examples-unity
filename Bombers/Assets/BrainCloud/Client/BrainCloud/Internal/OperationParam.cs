@@ -19,6 +19,7 @@ namespace BrainCloud
         public static readonly OperationParam PushNotificationSendParamToPlayerId             = new OperationParam("toPlayerId");
         public static readonly OperationParam PushNotificationSendParamMessage                = new OperationParam("message");
         public static readonly OperationParam PushNotificationSendParamNotificationTemplateId = new OperationParam("notificationTemplateId");
+        public static readonly OperationParam PushNotificationSendParamSubstitutions          = new OperationParam("substitutions");
 
         // Twitter Service - Verify Params
         public static readonly OperationParam TwitterServiceVerifyToken   				      = new OperationParam("token");
@@ -208,6 +209,7 @@ namespace BrainCloud
 
         // Social Leaderboard Service - general parameters
         public static readonly OperationParam SocialLeaderboardServiceLeaderboardId              = new OperationParam("leaderboardId");
+        public static readonly OperationParam SocialLeaderboardServiceLeaderboardIds             = new OperationParam("leaderboardIds");
         public static readonly OperationParam SocialLeaderboardServiceReplaceName                = new OperationParam("replaceName");
         public static readonly OperationParam SocialLeaderboardServiceScore                      = new OperationParam("score");
         public static readonly OperationParam SocialLeaderboardServiceData                       = new OperationParam("data");
@@ -226,9 +228,15 @@ namespace BrainCloud
         public static readonly OperationParam SocialLeaderboardServiceAfterCount                 = new OperationParam("afterCount");
         public static readonly OperationParam SocialLeaderboardServiceIncludeLeaderboardSize     = new OperationParam("includeLeaderboardSize");
         public static readonly OperationParam SocialLeaderboardServiceVersionId                  = new OperationParam("versionId");
+        public static readonly OperationParam SocialLeaderboardServiceLeaderboardResultCount     = new OperationParam("leaderboardResultCount");
+
 
         // Social Leaderboard Service - Reset Score Params
         //public static readonly Operation SocialLeaderboardServiceResetScore = new Operation("");
+
+        // Product Service
+        public static readonly OperationParam ProductServiceCurrencyId                           = new OperationParam("vc_id");
+        public static readonly OperationParam ProductServiceCurrencyAmount                       = new OperationParam("vc_amount");
 
         // Product Service - Get Inventory Params
         public static readonly OperationParam ProductServiceGetInventoryPlatform                 = new OperationParam("platform");
@@ -238,17 +246,6 @@ namespace BrainCloud
         // Product Service - Op Cash In Receipt Params
         public static readonly OperationParam ProductServiceOpCashInReceiptReceipt               = new OperationParam("receipt"); //C++ only
         public static readonly OperationParam ProductServiceOpCashInReceiptUrl                   = new OperationParam("url"); //C++ only
-
-        // Product Service - Award VC Params
-        public static readonly OperationParam ProductServiceAwardVCId                            = new OperationParam("vc_id");
-        public static readonly OperationParam ProductServiceAwardVCAmount                        = new OperationParam("vc_amount");
-
-        // Product Service - Get Player VC Params
-        public static readonly OperationParam ProductServiceGetPlayerVCId                        = new OperationParam("vc_id");
-
-        // Product Service - Consume VC Params
-        public static readonly OperationParam ProductServiceConsumeVCId                          = new OperationParam("vc_id");
-        public static readonly OperationParam ProductServiceConsumeVCAmount                      = new OperationParam("vc_amount");
 
         // Product Service - Reset Player VC Params
         //public static readonly OperationParam ProductServiceResetPlayerVC = new OperationParam("");
@@ -318,6 +315,13 @@ namespace BrainCloud
         public static readonly OperationParam S3HandlingServiceFileCategory                      = new OperationParam("category");
         public static readonly OperationParam S3HandlingServiceFileDetails                       = new OperationParam("fileDetails");
 
+        //Shared Identity
+        public static readonly OperationParam IdentityServiceForceSingleton = new OperationParam("forceSingleton");
+
+        //RedemptionCode
+        public static readonly OperationParam RedemptionCodeServiceScanCode = new OperationParam("scanCode");
+        public static readonly OperationParam RedemptionCodeServiceCodeType = new OperationParam("codeType");
+        public static readonly OperationParam RedemptionCodeServiceCustomRedemptionInfo = new OperationParam("customRedemptionInfo");
 
         private OperationParam(string value)
         {
