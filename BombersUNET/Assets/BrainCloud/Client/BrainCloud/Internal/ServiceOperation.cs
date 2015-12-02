@@ -58,7 +58,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ReadFriendsWithApplication = new ServiceOperation("READ_FRIENDS_WITH_APPLICATION");
         public static readonly ServiceOperation ReadFriendPlayerState = new ServiceOperation("READ_FRIEND_PLAYER_STATE");
         public static readonly ServiceOperation FindPlayerByName = new ServiceOperation("FIND_PLAYER_BY_NAME");
-        public static readonly ServiceOperation GetLeaderboard = new ServiceOperation("GET_LEADERBOARD");
+        public static readonly ServiceOperation GetSocialLeaderboard = new ServiceOperation("GET_SOCIAL_LEADERBOARD");
+        public static readonly ServiceOperation GetMultiSocialLeaderboard = new ServiceOperation("GET_MULTI_SOCIAL_LEADERBOARD");
         public static readonly ServiceOperation GetGlobalLeaderboard = new ServiceOperation("GET_GLOBAL_LEADERBOARD");
         public static readonly ServiceOperation GetGlobalLeaderboardPage = new ServiceOperation("GET_GLOBAL_LEADERBOARD_PAGE");
         public static readonly ServiceOperation GetGlobalLeaderboardView = new ServiceOperation("GET_GLOBAL_LEADERBOARD_VIEW");
@@ -85,6 +86,11 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ConsumePlayerVC = new ServiceOperation("CONSUME_VC");
         public static readonly ServiceOperation GetPlayerVC = new ServiceOperation("GET_PLAYER_VC");
         public static readonly ServiceOperation ResetPlayerVC = new ServiceOperation("RESET_PLAYER_VC");
+
+        public static readonly ServiceOperation AwardParentCurrency = new ServiceOperation("AWARD_PARENT_VC");
+        public static readonly ServiceOperation ConsumeParentCurrency = new ServiceOperation("CONSUME_PARENT_VC");
+        public static readonly ServiceOperation GetParentCurrency = new ServiceOperation("GET_PARENT_VC");
+        public static readonly ServiceOperation ResetParentCurrency = new ServiceOperation("RESET_PARENT_VC");
 
         public static readonly ServiceOperation Send = new ServiceOperation("SEND");
         public static readonly ServiceOperation UpdateEventData = new ServiceOperation("UPDATE_EVENT_DATA");
@@ -113,8 +119,13 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ShieldOnFor = new ServiceOperation("SHIELD_ON_FOR");
         public static readonly ServiceOperation ShieldOff = new ServiceOperation("SHIELD_OFF");
         public static readonly ServiceOperation GetShieldExpiry = new ServiceOperation("GET_SHIELD_EXPIRY");
-        public static readonly ServiceOperation GetOnewayPlayers = new ServiceOperation("GET_ONEWAY_PLAYERS");
-        public static readonly ServiceOperation GetOnewayPlayersFilter = new ServiceOperation("GET_ONEWAY_PLAYERS_FILTER");
+        public static readonly ServiceOperation FindPlayers = new ServiceOperation("FIND_PLAYERS");
+        public static readonly ServiceOperation FindPlayersUsingFilter = new ServiceOperation("FIND_PLAYERS_USING_FILTER");
+
+        [Obsolete]
+        public static readonly ServiceOperation GetOneWayPlayers = new ServiceOperation("GET_ONEWAY_PLAYERS");
+        [Obsolete]
+        public static readonly ServiceOperation GetOneWayPlayersFilter = new ServiceOperation("GET_ONEWAY_PLAYERS_FILTER");
 
         public static readonly ServiceOperation SubmitTurn = new ServiceOperation("SUBMIT_TURN");
         public static readonly ServiceOperation UpdateMatchSummary = new ServiceOperation("UPDATE_SUMMARY");
@@ -138,8 +149,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ReadQuestsByCategory = new ServiceOperation("READ_QUESTS_BY_CATEGORY");
         public static readonly ServiceOperation ResetMilestones = new ServiceOperation("RESET_MILESTONES");
 
-        public static readonly ServiceOperation ReadGameStatisticsByCategory = new ServiceOperation("READ_GAME_STATISTICS_BY_CATEGORY");
-        public static readonly ServiceOperation ReadPlayerStatisticsByCategory = new ServiceOperation("READ_PLAYER_STATISTICS_BY_CATEGORY");
+		public static readonly ServiceOperation ReadForCategory = new ServiceOperation("READ_FOR_CATEGORY");
 
         public static readonly ServiceOperation ReadMilestones = new ServiceOperation("READ_MILESTONES");
         public static readonly ServiceOperation ReadMilestonesByCategory = new ServiceOperation("READ_MILESTONES_BY_CATEGORY");
@@ -195,7 +205,11 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetFileList = new ServiceOperation("GET_FILE_LIST");
 
         public static readonly ServiceOperation ScheduleCloudScript = new ServiceOperation("SCHEDULE_CLOUD_SCRIPT");
-        public static readonly ServiceOperation RunAsParent = new ServiceOperation("RUN_AS_PARENT");
+        public static readonly ServiceOperation RunParentScript = new ServiceOperation("RUN_PARENT_SCRIPT");
+
+        //RedemptionCode
+        public static readonly ServiceOperation GetRedeemedCodes = new ServiceOperation("GET_REDEEMED_CODES");
+        public static readonly ServiceOperation RedeemCode = new ServiceOperation("REDEEM_CODE");
 
         private ServiceOperation(string value)
         {

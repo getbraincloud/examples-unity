@@ -8,6 +8,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
+<<<<<<< HEAD
   m_Script: {fileID: 11500000, guid: 56a97abc078c945fc95d75a6dd902d96, type: 3}
   m_Name: BrainCloudSettings
   m_EditorClassIdentifier: 
@@ -15,4 +16,13 @@ MonoBehaviour:
   m_secretKey: 
   m_gameId: 
   m_gameVersion: 1.0
+=======
+  m_Script: {fileID: 11500000, guid: 1f0bc6860cc3c45bba278afe9257d05d, type: 3}
+  m_Name: BrainCloudSettings
+  m_EditorClassIdentifier: 
+  m_serverURL: https://sharedprod.braincloudservers.com
+  m_secretKey: 83f99d82-8725-4228-8240-21afe41507ae
+  m_gameId: 10223
+  m_gameVersion: 1.0.0
+>>>>>>> development
   m_enableLogging: 0

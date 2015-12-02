@@ -31,9 +31,9 @@ namespace BrainCloud
     /// </summary>
     /// <param name="status">The http status code</param>
     /// <param name="reasonCode">The error reason code</param>
-    /// <param name="statusMessage">The status message</param>
+    /// <param name="jsonError">The error json string</param>
     /// <param name="cbObject">The user supplied callback object</param>
-    public delegate void FailureCallback(int status, int reasonCode, string statusMessage, object cbObject);
+    public delegate void FailureCallback(int status, int reasonCode, string jsonError, object cbObject);
 
     /// <summary>
     /// Log callback to implement if providing a custom logging function.
@@ -44,6 +44,11 @@ namespace BrainCloud
     /// Callback method invoked when brainCloud events are received.
     /// </summary>
     public delegate void EventCallback(string jsonResponse);
+
+    /// <summary>
+    /// Callback method invoked when brainCloud rewards are received.
+    /// </summary>
+    public delegate void RewardCallback(string jsonResponse);
 
 
     public class BrainCloudClient
@@ -113,6 +118,7 @@ namespace BrainCloud
             m_playerStatisticsEventService = new BrainCloudPlayerStatisticsEvent(this);
 
             m_s3HandlingService = new BrainCloudS3Handling(this);
+            m_redemptionCodeService = new BrainCloudRedemptionCode(this);
         }
 
         //---------------------------------------------------------------
@@ -152,6 +158,7 @@ namespace BrainCloud
         private BrainCloudPushNotification m_pushNotificationService;
         private BrainCloudPlayerStatisticsEvent m_playerStatisticsEventService;
         private BrainCloudS3Handling m_s3HandlingService;
+        private BrainCloudRedemptionCode m_redemptionCodeService;
 
         #endregion Private Data
 
@@ -465,6 +472,16 @@ namespace BrainCloud
             return this.m_s3HandlingService;
         }
 
+        public BrainCloudRedemptionCode RedemptionCodeService
+        {
+            get { return m_redemptionCodeService; }
+        }
+
+        public BrainCloudRedemptionCode GetRedemptionCodeService
+        {
+            get { return m_redemptionCodeService; }
+        }
+
         public bool Authenticated
         {
             get
@@ -525,12 +542,12 @@ namespace BrainCloud
             }
         }
 
-        private string m_releasePlatform = "";
-        public string ReleasePlatform
+        private BrainCloud.Common.Platform m_platform;
+        public BrainCloud.Common.Platform ReleasePlatform
         {
             get
             {
-                return m_releasePlatform;    //no public "set"
+                return m_platform;
             }
         }
 
@@ -562,68 +579,10 @@ namespace BrainCloud
         /// <param name="anonymousId The anonymous Id</param>
         public void Initialize(string serverURL, string secretKey, string gameId, string gameVersion)
         {
-            string platform = "";
-#if !(DOT_NET)
-            switch ( UnityEngine.Application.platform )
-            {
-            // web browser
-            case UnityEngine.RuntimePlatform.WindowsWebPlayer:
-            case UnityEngine.RuntimePlatform.OSXWebPlayer:
-            {
-                // this is going to change to "WEB" at some point (when we remove "FB")
-                platform = Constants.PlatformFacebook;
-                break;
-            }
-
-            // android
-            case UnityEngine.RuntimePlatform.Android:
-            {
-                platform = Constants.PlatformGooglePlayAndroid;
-                break;
-            }
-
-            // windows phone 8
-            case UnityEngine.RuntimePlatform.WP8Player:
-            {
-                platform = Constants.PlatformWindowsPhone;
-                break;
-            }
-
-            // mac osx
-            case UnityEngine.RuntimePlatform.OSXEditor:
-            case UnityEngine.RuntimePlatform.OSXPlayer:
-            case UnityEngine.RuntimePlatform.OSXDashboardPlayer:
-            {
-                platform = Constants.PlatformOSX;
-                break;
-            }
-
-            // windows desktop
-            case UnityEngine.RuntimePlatform.WindowsEditor:
-            case UnityEngine.RuntimePlatform.WindowsPlayer:
-            {
-                platform = Constants.PlatformWindows;
-                break;
-            }
-            
-            // linux
-            case UnityEngine.RuntimePlatform.LinuxPlayer:
-            {
-                platform = Constants.PlatformLinux;
-                break;
-            }
-
-            // ios and default
-            case UnityEngine.RuntimePlatform.IPhonePlayer:
-            default:
-            {
-                platform = Constants.PlatformIOS;
-                break;
-            }
-            }
-#else
             // TODO: what is our default c# platform?
-            platform = Constants.PlatformIOS;
+            Platform platform = Platform.Windows;
+#if !(DOT_NET)
+            platform = Platform.FromUnityRuntime();
 #endif
 
             // set up braincloud which does the message handling
@@ -631,7 +590,7 @@ namespace BrainCloud
 
             m_gameId = gameId;
             m_gameVersion = gameVersion;
-            m_releasePlatform = platform;
+            m_platform = platform;
 
             m_initialized = true;
         }
@@ -662,17 +621,52 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Registers a delegate to receive event notifications.
+        /// Sets a callback handler for any out of band event messages that come from
+        /// brainCloud.
         /// </summary>
-        /// <param name="in_delegate">The event handler delegate</param>
+        /// <param name="in_cb">in_eventCallback A function which takes a json string as it's only parameter.
+        ///  The json format looks like the following:
+        /// {
+        ///   "events": [{
+        ///      "fromPlayerId": "178ed06a-d575-4591-8970-e23a5d35f9df",
+        ///      "eventId": 3967,
+        ///      "createdAt": 1441742105908,
+        ///      "gameId": "123",
+        ///      "toPlayerId": "178ed06a-d575-4591-8970-e23a5d35f9df",
+        ///      "eventType": "test",
+        ///      "eventData": {"testData": 117}
+        ///    }],
+        ///    ]
+        ///  }
         public void RegisterEventCallback(EventCallback in_cb)
         {
             m_bc.RegisterEventCallback(in_cb);
         }
 
+        /// <summary>
+        /// Deregisters the event callback.
+        /// </summary>
         public void DeregisterEventCallback()
         {
             m_bc.DeregisterEventCallback();
+        }
+
+        /// <summary>
+        /// Sets a reward handler for any api call results that return rewards.
+        /// </summary>
+        /// <param name="in_cb">The reward callback handler.</param>
+        /// <see cref="http://getbraincloud.com/apidocs">The brainCloud apidocs site for more information on the return JSON</see>
+        public void RegisterRewardCallback(RewardCallback in_cb)
+        {
+            m_bc.RegisterRewardCallback(in_cb);
+        }
+        
+        /// <summary>
+        /// Deregisters the reward callback.
+        /// </summary>
+        public void DeregisterRewardCallback()
+        {
+            m_bc.DeregisterRewardCallback();
         }
 
 
@@ -743,6 +737,82 @@ namespace BrainCloud
         {
             m_bc.EnableComms(in_value);
         }
+
+        /// <summary>
+        /// Sets the packet timeouts using a list of integers that
+        /// represent timeout values for each packet retry. The 
+        /// first item in the list represents the timeout for the first packet
+        /// attempt, the second for the second packet attempt, and so on.
+        /// 
+        /// The number of entries in this array determines how many packet
+        /// retries will occur.
+        /// 
+        /// By default, the packet timeout array is {10, 10, 10}
+        /// 
+        /// Note that this method does not change the timeout for authentication
+        /// packets (use SetAuthenticationPacketTimeout method).
+        ///
+        /// </summary>
+        /// <param name="in_timeouts">An array of packet timeouts.</param>
+        public void SetPacketTimeouts(List<int> in_timeouts)
+        {
+            m_bc.PacketTimeouts = in_timeouts;
+        }
+
+        /// <summary>
+        /// Sets the packet timeouts back to default.
+        /// </summary>
+        public void SetPacketTimeoutsToDefault()
+        {
+            m_bc.SetPacketTimeoutsToDefault();
+        }
+
+        /// <summary>
+        /// Returns the list of packet timeouts.
+        /// </summary>
+        /// <returns>The packet timeouts.</returns>
+        public List<int> GetPacketTimeouts()
+        {
+            return m_bc.PacketTimeouts;
+        }
+
+        /// <summary>
+        /// Sets the authentication packet timeout which is tracked separately
+        /// from all other packets. Note that authentication packets are never
+        /// retried and so this value represents the total time a client would
+        /// wait to receive a reply to an authentication api call. By default
+        /// this timeout is set to 15 seconds.
+        /// </summary>
+        /// <param name="valueSecs">The timeout in seconds.</param>
+        public void SetAuthenticationPacketTimeout(int timeoutSecs)
+        {
+            m_bc.AuthenticationPacketTimeoutSecs = timeoutSecs;
+        }
+
+        /// <summary>
+        /// Gets the authentication packet timeout which is tracked separately
+        /// from all other packets. Note that authentication packets are never
+        /// retried and so this value represents the total time a client would
+        /// wait to receive a reply to an authentication api call. By default
+        /// this timeout is set to 15 seconds.
+        /// </summary>
+        /// <returns>The authentication packet timeoutin seconds.</returns>
+        public int GetAuthenticationPacketTimeout()
+        {
+            return m_bc.AuthenticationPacketTimeoutSecs;
+        }
+
+        /// <summary>
+        /// Sets the error callback to return the status message instead of the
+        /// error json string. This flag is used to conform to pre-2.17 client
+        /// behaviour.
+        /// </summary>
+        /// <param name="enabled">If set to <c>true</c>, enable.</param>
+        public void SetOldStyleStatusMessageErrorCallback(bool enabled)
+        {
+            m_bc.OldStyleStatusResponseInErrorCallback = enabled;
+        }
+
         #endregion
 
         #region Authentication
