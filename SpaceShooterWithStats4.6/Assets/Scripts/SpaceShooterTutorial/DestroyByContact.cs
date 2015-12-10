@@ -23,6 +23,8 @@ public class DestroyByContact : MonoBehaviour
 
 	void OnTriggerEnter (Collider other)
 	{
+		Debug.Log ("DestroyByContact.OnTriggerEnter() this.tag:" + this.tag + " other.tag:" + other.tag);
+
 		if (other.tag == "Boundary" || other.tag == "Enemy" || other.tag == "Powerup1" || other.tag == "Powerup2")
 		{
 			return;

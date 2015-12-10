@@ -23,7 +23,7 @@ public class GameController : MonoBehaviour
 	{
 		// Build the statistics name/inc value dictionary
 		Dictionary<string, object> stats = new Dictionary<string, object> {
-			{"enemiesKilled", m_enemiesKilledThisRound},
+			{"enemyShipsKilled", m_enemiesKilledThisRound},
 			{"asteroidsDestroyed", m_asteroidsDestroyedThisRound},
 			{"shotsFired", m_shotsFiredThisRound},
 			{"gamesPlayed", 1}
@@ -43,7 +43,7 @@ public class GameController : MonoBehaviour
 		JsonData jsonData = JsonMapper.ToObject (responseData);
 		JsonData entries = jsonData["data"]["statistics"];
 
-		m_statEnemiesKilled = int.Parse(entries["enemiesKilled"].ToString());
+		m_statEnemiesKilled = int.Parse(entries["enemyShipsKilled"].ToString());
 		m_statAsteroidsDestroyed = int.Parse(entries["asteroidsDestroyed"].ToString());
 		m_statShotsFired = int.Parse(entries["shotsFired"].ToString());
 		m_statGamesPlayed = int.Parse(entries["gamesPlayed"].ToString());
