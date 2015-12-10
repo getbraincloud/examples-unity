@@ -11,8 +11,10 @@ public class Build {
 	static string WP8_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/wp8_build";
 	static string DESKTOP_OUTPUT 		= ARTIFACTS_FOLDER + "/desktop_build";
 	static string WEB_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/brainCloudBombers"; //"/web_build";
+#if !UNITY_4_6
 	static string WEBGL_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/webgl_build";
-	
+#endif
+
 	static string[] GetScenes()
 	{
 		string[] scenes = (from scene in EditorBuildSettings.scenes where scene.enabled select scene.path).ToArray();
