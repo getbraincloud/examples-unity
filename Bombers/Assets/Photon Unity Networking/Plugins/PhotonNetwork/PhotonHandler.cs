@@ -6,16 +6,17 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics;
 using ExitGames.Client.Photon;
 using UnityEngine;
-
+using Debug = UnityEngine.Debug;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 
 /// <summary>
 /// Internal Monobehaviour that allows Photon to run an Update loop.
 /// </summary>
-internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
+internal class PhotonHandler : Photon.MonoBehaviour
 {
     public static PhotonHandler SP;
 
@@ -28,9 +29,12 @@ internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
     private int nextSendTickCountOnSerialize = 0;
 
     private static bool sendThreadShouldRun;
-    public static bool AppQuits;
 
-    public static Type PingImplementation = null;
+    private static Stopwatch timerToStopConnectionInBackground;
+
+    protected internal static bool AppQuits;
+
+    protected internal static Type PingImplementation = null;
 
     protected void Awake()
     {
@@ -48,12 +52,50 @@ internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
         PhotonHandler.StartFallbackSendAckThread();
     }
 
-    /// <summary>Called by Unity when the application is closed. Tries to disconnect.</summary>
+    /// <summary>Called by Unity when the application is closed. Disconnects.</summary>
     protected void OnApplicationQuit()
     {
         PhotonHandler.AppQuits = true;
         PhotonHandler.StopFallbackSendAckThread();
         PhotonNetwork.Disconnect();
+    }
+
+    /// <summary>
+    /// Called by Unity when the application gets paused (e.g. on Android when in background).
+    /// </summary>
+    /// <remarks>
+    /// Some versions of Unity will give false values for pause on Android (and possibly on other platforms).
+    /// Sets a disconnect timer when PhotonNetwork.BackgroundTimeout > 0.001f.
+    /// </remarks>
+    /// <param name="pause"></param>
+    protected void OnApplicationPause(bool pause)
+    {
+        if (PhotonNetwork.BackgroundTimeout > 0.001f)
+        {
+            if (timerToStopConnectionInBackground == null)
+            {
+                timerToStopConnectionInBackground = new Stopwatch();
+            }
+
+            if (pause)
+            {
+                timerToStopConnectionInBackground.Reset();
+                timerToStopConnectionInBackground.Start();
+
+            }
+            else
+            {
+                timerToStopConnectionInBackground.Stop();
+            }
+        }
+    }
+
+    /// <summary>Called by Unity when the play mode ends. Used to cleanup.</summary>
+    protected void OnDestroy()
+    {
+        //Debug.Log("OnDestroy on PhotonHandler.");
+        PhotonHandler.StopFallbackSendAckThread();
+        //PhotonNetwork.Disconnect();
     }
 
     protected void Update()
@@ -112,7 +154,7 @@ internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
     protected void OnLevelWasLoaded(int level)
     {
         PhotonNetwork.networkingPeer.NewSceneLoaded();
-        PhotonNetwork.networkingPeer.SetLevelInPropsIfSynced(Application.loadedLevelName);
+        PhotonNetwork.networkingPeer.SetLevelInPropsIfSynced(SceneManagerHelper.ActiveSceneName);
     }
 
     protected void OnJoinedRoom()
@@ -122,7 +164,7 @@ internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
 
     protected void OnCreatedRoom()
     {
-        PhotonNetwork.networkingPeer.SetLevelInPropsIfSynced(Application.loadedLevelName);
+        PhotonNetwork.networkingPeer.SetLevelInPropsIfSynced(SceneManagerHelper.ActiveSceneName);
     }
 
     public static void StartFallbackSendAckThread()
@@ -150,47 +192,23 @@ internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
         if (sendThreadShouldRun && PhotonNetwork.networkingPeer != null)
         {
             PhotonNetwork.networkingPeer.SendAcksOnly();
+
+            // check if the client should disconnect after some seconds in background
+            if (timerToStopConnectionInBackground != null && PhotonNetwork.BackgroundTimeout > 0.001f)
+            {
+                if (timerToStopConnectionInBackground.ElapsedMilliseconds > PhotonNetwork.BackgroundTimeout*1000)
+                {
+                    timerToStopConnectionInBackground.Stop();
+                    timerToStopConnectionInBackground.Reset();
+
+                    PhotonNetwork.Disconnect();
+                    return sendThreadShouldRun;
+                }
+            }
         }
 
         return sendThreadShouldRun;
     }
-
-    #region Implementation of IPhotonPeerListener
-
-    public void DebugReturn(DebugLevel level, string message)
-    {
-        if (level == DebugLevel.ERROR)
-        {
-            Debug.LogError(message);
-        }
-        else if (level == DebugLevel.WARNING)
-        {
-            Debug.LogWarning(message);
-        }
-        else if (level == DebugLevel.INFO && PhotonNetwork.logLevel >= PhotonLogLevel.Informational)
-        {
-            Debug.Log(message);
-        }
-        else if (level == DebugLevel.ALL && PhotonNetwork.logLevel == PhotonLogLevel.Full)
-        {
-            Debug.Log(message);
-        }
-    }
-
-    public void OnOperationResponse(OperationResponse operationResponse)
-    {
-    }
-
-    public void OnStatusChanged(StatusCode statusCode)
-    {
-    }
-
-    public void OnEvent(EventData photonEvent)
-    {
-    }
-
-    #endregion
-
 
 
     #region Photon Cloud Ping Evaluation
@@ -226,7 +244,6 @@ internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
     }
 
 
-
     internal protected static void PingAvailableRegionsAndConnectToBest()
     {
         SP.StartCoroutine(SP.PingAvailableRegionsCoroutine(true));
@@ -253,19 +270,6 @@ internal class PhotonHandler : Photon.MonoBehaviour, IPhotonPeerListener
             Debug.LogError("No regions available. Are you sure your appid is valid and setup?");
             yield break; // break if we don't get regions at all
         }
-
-        //#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IPHONE)
-        //#pragma warning disable 0162    // the library variant defines if we should use PUN's SocketUdp variant (at all)
-        //if (PhotonPeer.NoSocket)
-        //{
-        //    if (PhotonNetwork.logLevel >= PhotonLogLevel.Informational)
-        //    {
-        //        Debug.Log("PUN disconnects to re-use native sockets for pining servers and to find the best.");
-        //    }
-        //    PhotonNetwork.Disconnect();
-        //}
-        //#pragma warning restore 0162
-        //#endif
 
         PhotonPingManager pingManager = new PhotonPingManager();
         foreach (Region region in PhotonNetwork.networkingPeer.AvailableRegions)

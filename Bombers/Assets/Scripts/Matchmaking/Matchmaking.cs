@@ -458,6 +458,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void RefreshRoomsList()
         {
             m_refreshLabel.GetComponent<Text>().text = "Refreshing List...";
+			Debug.Log ("Refreshing rooms...");
             OnRoomsWindow();
         }
 
@@ -510,6 +511,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             m_roomButtons.Clear();
             RoomInfo[] rooms = PhotonNetwork.GetRoomList();
+			Debug.Log ("Retrieved " + rooms.Length +" rooms from Photon");
 
             for (int i = 0; i < rooms.Length; i++)
             {

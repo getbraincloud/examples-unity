@@ -188,7 +188,8 @@ namespace BrainCloudPhotonExample.Connection
                     if (!m_achievements[i].m_achieved)
                     {
                         m_achievements[i].m_achieved = true;
-                        BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
+						string[] achArray = new string[] {m_achievements[i].m_id};
+						BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(achArray, null, null, null);
                         GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                     }
                     break;

@@ -142,7 +142,7 @@ namespace ExitGames.Client.Photon
             }
             catch (Exception e)
             {
-                this.Listener.DebugReturn(DebugLevel.ERROR, "Cannot send. " + e.Message);
+                this.Listener.DebugReturn(DebugLevel.ERROR, "Cannot send to: " + this.ServerAddress + ". " + e.Message);
 
                 HandleException(StatusCode.Exception);
                 return PhotonSocketError.Exception;
@@ -171,7 +171,7 @@ namespace ExitGames.Client.Photon
             }
             if (this.sock.Error != null)
             {
-                this.Listener.DebugReturn(DebugLevel.ERROR, "Exiting receive thread due to error: " + this.sock.Error);
+                this.Listener.DebugReturn(DebugLevel.ERROR, "Exiting receive thread due to error: " + this.sock.Error + " Server: " + this.ServerAddress);
 				this.HandleException(StatusCode.ExceptionOnConnect);
             }
             else
@@ -185,7 +185,7 @@ namespace ExitGames.Client.Photon
 				{
 					if (this.sock.Error != null)
 					{
-						this.Listener.DebugReturn(DebugLevel.ERROR, "Exiting receive thread (inside loop) due to error: " + this.sock.Error);
+						this.Listener.DebugReturn(DebugLevel.ERROR, "Exiting receive thread (inside loop) due to error: " + this.sock.Error + " Server: " + this.ServerAddress);
 						this.HandleException(StatusCode.ExceptionOnReceive);
 						break;
 					}
@@ -216,7 +216,7 @@ namespace ExitGames.Client.Photon
 							{
 								if (this.ReportDebugOfLevel(DebugLevel.ERROR))
 								{
-									this.EnqueueDebugReturn(DebugLevel.ERROR, "Receive issue. State: " + this.State + " Exception: " + e);
+									this.EnqueueDebugReturn(DebugLevel.ERROR, "Receive issue. State: " + this.State + ". Server: '" + this.ServerAddress + "' Exception: " + e);
 								}
 								this.HandleException(StatusCode.ExceptionOnReceive);
 							}
@@ -234,7 +234,7 @@ namespace ExitGames.Client.Photon
 							{
 								if (this.ReportDebugOfLevel(DebugLevel.ERROR))
 								{
-									this.EnqueueDebugReturn(DebugLevel.ERROR, "Receive issue. State: " + this.State + " Exception: " + e);
+									this.EnqueueDebugReturn(DebugLevel.ERROR, "Receive issue. State: " + this.State + ". Server: '" + this.ServerAddress + "' Exception: " + e);
 								}
 								this.HandleException(StatusCode.ExceptionOnReceive);
 							}

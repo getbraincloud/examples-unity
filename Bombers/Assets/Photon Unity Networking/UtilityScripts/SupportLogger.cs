@@ -31,6 +31,12 @@ public class SupportLogging : MonoBehaviour
         }
     }
 
+
+    protected void OnApplicationPause(bool pause)
+    {
+        Debug.Log("SupportLogger OnApplicationPause: " + pause + " connected: " + PhotonNetwork.connected);
+    }
+
     public void OnApplicationQuit()
     {
         this.CancelInvoke();
@@ -93,5 +99,10 @@ public class SupportLogging : MonoBehaviour
     public void OnLeftRoom()
     {
         Debug.Log("SupportLogger OnLeftRoom().");
+    }
+
+    public void OnDisconnectedFromPhoton()
+    {
+        Debug.Log("SupportLogger OnDisconnectedFromPhoton().");
     }
 }
