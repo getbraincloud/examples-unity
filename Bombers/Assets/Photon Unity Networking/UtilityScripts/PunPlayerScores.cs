@@ -10,7 +10,7 @@ public class PunPlayerScores : MonoBehaviour
 }
 
 
-static class ScoreExtensions
+public static class ScoreExtensions
 {
     public static void SetScore(this PhotonPlayer player, int newScore)
     {

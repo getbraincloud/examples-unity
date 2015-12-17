@@ -84,6 +84,7 @@ namespace BrainCloudPhotonExample.Connection
 
         void Update()
         {
+            m_connectedToPhoton = PhotonNetwork.connectedAndReady;
             OnWindow();
         }
 

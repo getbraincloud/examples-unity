@@ -183,6 +183,7 @@ public class PhotonTransformViewPositionControl
     void SerializeData( Vector3 currentPosition, PhotonStream stream, PhotonMessageInfo info )
     {
         stream.SendNext( currentPosition );
+        m_NetworkPosition = currentPosition;
 
         if( m_Model.ExtrapolateOption == PhotonTransformViewPositionModel.ExtrapolateOptions.SynchronizeValues ||
             m_Model.InterpolateOption == PhotonTransformViewPositionModel.InterpolateOptions.SynchronizeValues )

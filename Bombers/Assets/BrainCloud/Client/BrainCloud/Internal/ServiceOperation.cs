@@ -33,6 +33,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ReadShared = new ServiceOperation("READ_SHARED");
 
         // push notification
+        public static readonly ServiceOperation DeregisterAll = new ServiceOperation("DEREGISTER_ALL");
+        public static readonly ServiceOperation Deregister = new ServiceOperation("DEREGISTER");
         public static readonly ServiceOperation Register = new ServiceOperation("REGISTER");
         public static readonly ServiceOperation SendSimple = new ServiceOperation("SEND_SIMPLE");
         public static readonly ServiceOperation SendRich = new ServiceOperation("SEND_RICH");
@@ -210,6 +212,18 @@ namespace BrainCloud.Internal
         //RedemptionCode
         public static readonly ServiceOperation GetRedeemedCodes = new ServiceOperation("GET_REDEEMED_CODES");
         public static readonly ServiceOperation RedeemCode = new ServiceOperation("REDEEM_CODE");
+
+        //DataStream
+        public static readonly ServiceOperation CustomPageEvent = new ServiceOperation("CUSTOM_PAGE_EVENT");
+        public static readonly ServiceOperation CustomScreenEvent = new ServiceOperation("CUSTOM_SCREEN_EVENT");
+        public static readonly ServiceOperation CustomTrackEvent = new ServiceOperation("CUSTOM_TRACK_EVENT");
+
+        //Profanity
+        public static readonly ServiceOperation ProfanityCheck = new ServiceOperation("PROFANITY_CHECK");
+        public static readonly ServiceOperation ProfanityReplaceText = new ServiceOperation("PROFANITY_REPLACE_TEXT");
+        public static readonly ServiceOperation ProfanityIdentifyBadWords = new ServiceOperation("PROFANITY_IDENTIFY_BAD_WORDS");
+
+
 
         private ServiceOperation(string value)
         {

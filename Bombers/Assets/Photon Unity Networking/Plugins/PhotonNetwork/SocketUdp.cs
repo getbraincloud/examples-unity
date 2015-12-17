@@ -81,7 +81,7 @@ namespace ExitGames.Client.Photon
         {
             if (this.ReportDebugOfLevel(DebugLevel.INFO))
             {
-                this.EnqueueDebugReturn(DebugLevel.INFO, "CSharpSocket.Disconnect()");
+                this.EnqueueDebugReturn(DebugLevel.INFO, "Disconnect()");
             }
 
             this.State = PhotonSocketState.Disconnecting;
@@ -121,8 +121,12 @@ namespace ExitGames.Client.Photon
                 {
                     sock.Send(data, 0, length, SocketFlags.None);
                 }
-                catch
+                catch (Exception e)
                 {
+                    if (this.ReportDebugOfLevel(DebugLevel.ERROR))
+                    {
+                        this.EnqueueDebugReturn(DebugLevel.ERROR, "Cannot send to: " + this.ServerAddress + ". " + e.Message);
+                    }
                     return PhotonSocketError.Exception;
                 }
             }
@@ -154,7 +158,7 @@ namespace ExitGames.Client.Photon
             {
                 if (this.ReportDebugOfLevel(DebugLevel.ERROR))
                 {
-                    this.Listener.DebugReturn(DebugLevel.ERROR, "Connect() failed: " + se.ToString());
+                    this.Listener.DebugReturn(DebugLevel.ERROR, "Connect() to '" + this.ServerAddress + "' failed: " + se.ToString());
                 }
 
                 this.HandleException(StatusCode.SecurityExceptionOnConnect);
@@ -164,7 +168,7 @@ namespace ExitGames.Client.Photon
             {
                 if (this.ReportDebugOfLevel(DebugLevel.ERROR))
                 {
-                    this.Listener.DebugReturn(DebugLevel.ERROR, "Connect() failed: " + se.ToString());
+                    this.Listener.DebugReturn(DebugLevel.ERROR, "Connect() to '" + this.ServerAddress + "' failed: " + se.ToString());
                 }
 
                 this.HandleException(StatusCode.ExceptionOnConnect);
@@ -194,7 +198,7 @@ namespace ExitGames.Client.Photon
                     {
                         if (this.ReportDebugOfLevel(DebugLevel.ERROR))
                         {
-                            this.EnqueueDebugReturn(DebugLevel.ERROR, "Receive issue. State: " + this.State + " Exception: " + e);
+                            this.EnqueueDebugReturn(DebugLevel.ERROR, "Receive issue. State: " + this.State + ". Server: '" + this.ServerAddress + "' Exception: " + e);
                         }
 
                         this.HandleException(StatusCode.ExceptionOnReceive);

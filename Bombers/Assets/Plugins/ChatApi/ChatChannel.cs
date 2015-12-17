@@ -7,6 +7,7 @@
 namespace ExitGames.Client.Photon.Chat
 {
     using System.Collections.Generic;
+    using System.Text;
 
     /// <summary>
     /// A channel of communication in Photon Chat, updated by ChatClient and provided as READ ONLY.
@@ -29,6 +30,9 @@ namespace ExitGames.Client.Photon.Chat
         /// <summary>Messages in chronoligical order. Senders and Messages refer to each other by index. Senders[x] is the sender of Messages[x].</summary>
         public readonly List<object> Messages = new List<object>();
 
+        /// <summary>If greater than 0, this channel will limit the number of messages, that it caches locally.</summary>
+        public int MessageLimit;
+
         /// <summary>Is this a private 1:1 channel?</summary>
         public bool IsPrivate { get; internal protected set; }
 
@@ -47,6 +51,7 @@ namespace ExitGames.Client.Photon.Chat
         {
             this.Senders.Add(sender);
             this.Messages.Add(message);
+            this.TruncateMessages();
         }
 
         /// <summary>Used internally to add messages to this channel.</summary>
@@ -54,6 +59,20 @@ namespace ExitGames.Client.Photon.Chat
         {
             this.Senders.AddRange(senders);
             this.Messages.AddRange(messages);
+            this.TruncateMessages();
+        }
+
+        /// <summary>Reduces the number of locally cached messages in this channel to the MessageLimit (if set).</summary>
+        public void TruncateMessages()
+        {
+            if (this.MessageLimit <= 0 || this.Messages.Count <= this.MessageLimit)
+            {
+                return;
+            }
+
+            int excessCount = this.Messages.Count - this.MessageLimit;
+            this.Senders.RemoveRange(0, excessCount);
+            this.Messages.RemoveRange(0, excessCount);
         }
 
         /// <summary>Clear the local cache of messages currently stored. This frees memory but doesn't affect the server.</summary>
@@ -61,6 +80,18 @@ namespace ExitGames.Client.Photon.Chat
         {
             this.Senders.Clear();
             this.Messages.Clear();
+        }
+
+        /// <summary>Provides a string-representation of all messages in this channel.</summary>
+        /// <returns>All known messages in format "Sender: Message", line by line.</returns>
+        public string ToStringMessages()
+        {
+            StringBuilder txt = new StringBuilder();
+            for (int i = 0; i < this.Messages.Count; i++)
+            {
+                txt.AppendLine(string.Format("{0}: {1}", this.Senders[i], this.Messages[i]));
+            }
+            return txt.ToString();
         }
     }
 }

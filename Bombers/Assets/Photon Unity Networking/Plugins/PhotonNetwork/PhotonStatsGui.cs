@@ -46,7 +46,10 @@ public class PhotonStatsGui : MonoBehaviour
 
     public void Start()
     {
-        this.statsRect.x = Screen.width - this.statsRect.width;
+        if (this.statsRect.x <= 0)
+        {
+            this.statsRect.x = Screen.width - this.statsRect.width;
+        }
     }
 
     /// <summary>Checks for shift+tab input combination (to toggle statsOn).</summary>
@@ -124,7 +127,7 @@ public class PhotonStatsGui : MonoBehaviour
         if (this.healthStatsVisible)
         {
             healthStats = string.Format(
-                "ping: {6}[+/-{7}]ms\nlongest delta between\nsend: {0,4}ms disp: {1,4}ms\nlongest time for:\nev({3}):{2,3}ms op({5}):{4,3}ms",
+                "ping: {6}[+/-{7}]ms resent:{8}\nmax ms between\nsend: {0,4} dispatch: {1,4}\nlongest dispatch for:\nev({3}):{2,3}ms op({5}):{4,3}ms",
                 gls.LongestDeltaBetweenSending,
                 gls.LongestDeltaBetweenDispatching,
                 gls.LongestEventCallback,
@@ -132,7 +135,8 @@ public class PhotonStatsGui : MonoBehaviour
                 gls.LongestOpResponseCallback,
                 gls.LongestOpResponseCallbackOpCode,
                 PhotonNetwork.networkingPeer.RoundTripTime,
-                PhotonNetwork.networkingPeer.RoundTripTimeVariance);
+                PhotonNetwork.networkingPeer.RoundTripTimeVariance,
+                PhotonNetwork.networkingPeer.ResentReliableCommands);
             GUILayout.Label(healthStats);
         }
 

@@ -35,6 +35,7 @@ public class PhotonTransformViewScaleControl
         if( stream.isWriting == true )
         {
             stream.SendNext( currentScale );
+            m_NetworkScale = currentScale;
         }
         else
         {

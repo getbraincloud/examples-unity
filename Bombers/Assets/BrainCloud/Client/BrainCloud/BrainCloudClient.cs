@@ -11,6 +11,7 @@ using System.Net;
 using BrainCloud.Internal;
 using BrainCloud.Common;
 using BrainCloud.Entity;
+using System.Globalization;
 
 
 #if !(DOT_NET)
@@ -119,6 +120,8 @@ namespace BrainCloud
 
             m_s3HandlingService = new BrainCloudS3Handling(this);
             m_redemptionCodeService = new BrainCloudRedemptionCode(this);
+            m_dataStreamService = new BrainCloudDataStream(this);
+            m_profanityService = new BrainCloudProfanity(this);
         }
 
         //---------------------------------------------------------------
@@ -159,6 +162,8 @@ namespace BrainCloud
         private BrainCloudPlayerStatisticsEvent m_playerStatisticsEventService;
         private BrainCloudS3Handling m_s3HandlingService;
         private BrainCloudRedemptionCode m_redemptionCodeService;
+        private BrainCloudDataStream m_dataStreamService;
+        private BrainCloudProfanity m_profanityService;
 
         #endregion Private Data
 
@@ -482,6 +487,27 @@ namespace BrainCloud
             get { return m_redemptionCodeService; }
         }
 
+        public BrainCloudDataStream DataStreamService
+        {
+            get { return m_dataStreamService; }
+        }
+
+        public BrainCloudDataStream GetDataStreamService
+        {
+            get { return m_dataStreamService; }
+        }
+
+        public BrainCloudProfanity ProfanityService
+        {
+            get { return m_profanityService; }
+        }
+
+        public BrainCloudProfanity GetProfanityService
+        {
+            get { return m_profanityService; }
+        }
+
+
         public bool Authenticated
         {
             get
@@ -517,12 +543,18 @@ namespace BrainCloud
             return this.SessionID;
         }
 
-        private string m_gameId = "";
         public string GameId
         {
             get
             {
-                return m_gameId;    //no public "set"
+                if (m_bc != null)
+                {
+                    return m_bc.GameId;
+                }
+                else
+                {
+                    return "";
+                }
             }
         }
 
@@ -586,11 +618,20 @@ namespace BrainCloud
 #endif
 
             // set up braincloud which does the message handling
-            m_bc.Initialize(serverURL, secretKey);
+            m_bc.Initialize(serverURL, gameId, secretKey);
 
-            m_gameId = gameId;
             m_gameVersion = gameVersion;
             m_platform = platform;
+
+            //setup region/country code
+            if(Util.GetCurrentCountryCode() == string.Empty)
+            {
+#if(DOT_NET)
+                Util.SetCurrentCountryCode(RegionInfo.CurrentRegion.TwoLetterISORegionName);
+#else
+                Util.SetCurrentCountryCode(RegionLocale.UsersCountryLocale);
+#endif
+            }
 
             m_initialized = true;
         }

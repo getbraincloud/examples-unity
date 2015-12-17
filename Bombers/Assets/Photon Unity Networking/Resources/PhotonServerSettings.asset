@@ -16,13 +16,30 @@ MonoBehaviour:
   ServerAddress: 
   ServerPort: 5055
   AppID: 5c254fca-c7ec-43c5-91ce-811969bd57fb
-  PreferredRegion: 4
+  PreferredRegion: 1
   EnabledRegions: -1
+  JoinLobby: 1
+  EnableLobbyStatistics: 0
   RpcList:
+  - AnnounceJoin
+  - AwardExperienceRPC
+  - BombPickedUpRPC
+  - BulletHitPlayerRPC
+  - ChangeMapLayout
+  - ChangeMapSize
   - Chat
   - ColorRpc
+  - DeleteBombRPC
+  - DeleteBulletRPC
+  - DespawnBombPickupRPC
+  - DestroyedShipRPC
+  - DestroyPlayerPlaneRPC
   - DestroyRpc
   - DoJump
+  - EndGame
+  - Flash
+  - GetReady
+  - HitShipTargetPointRPC
   - InstantiateRpc
   - Marco
   - OnAwakeRPC
@@ -32,30 +49,15 @@ MonoBehaviour:
   - PunPickupSimple
   - PunRespawn
   - RequestForPickupTimes
-  - TaggedPlayer
-  - AddChatText
-  - SpawnPlayer
-  - GetReady
-  - AwardExperienceRPC
-  - BulletHitPlayerRPC
-  - DeleteBombRPC
-  - DeleteBulletRPC
-  - DestroyPlayerPlaneRPC
-  - EndGame
   - ResetGame
+  - RespawnShipRPC
+  - SetLightPosition
+  - SetMapSizeRPC
+  - SetShipTypeRPC
+  - SpawnBombPickupRPC
   - SpawnBombRPC
   - SpawnBulletRPC
-  - SetShipTypeRPC
-  - DestroyedShipRPC
-  - HitShipTargetPointRPC
-  - BombPickedUpRPC
-  - SpawnBombPickupRPC
-  - SetLightPosition
-  - ChangeMapLayout
-  - RespawnShipRPC
-  - ChangeMapSize
-  - DespawnBombPickupRPC
   - SpawnFlareRPC
-  - SetMapSizeRPC
-  - AnnounceJoin
-  DisableAutoOpenWizard: 0
+  - SpawnPlayer
+  - TaggedPlayer
+  DisableAutoOpenWizard: 1

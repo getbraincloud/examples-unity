@@ -97,6 +97,11 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void Start()
         {
+			if (!BrainCloudWrapper.GetBC().Initialized)
+			{
+				Application.LoadLevel("Connect");
+				return;
+			}
             m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
             m_tabColor = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color;
             GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
@@ -458,6 +463,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void RefreshRoomsList()
         {
             m_refreshLabel.GetComponent<Text>().text = "Refreshing List...";
+			Debug.Log ("Refreshing rooms...");
             OnRoomsWindow();
         }
 
@@ -510,6 +516,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             m_roomButtons.Clear();
             RoomInfo[] rooms = PhotonNetwork.GetRoomList();
+			Debug.Log ("Retrieved " + rooms.Length +" rooms from Photon");
 
             for (int i = 0; i < rooms.Length; i++)
             {

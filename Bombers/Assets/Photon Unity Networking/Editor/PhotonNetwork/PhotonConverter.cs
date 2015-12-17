@@ -7,6 +7,8 @@
 // </summary>
 // <author>developer@exitgames.com</author>
 // ----------------------------------------------------------------------------
+
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -41,7 +43,7 @@ public class PhotonConverter : Photon.MonoBehaviour
         Output(EditorApplication.timeSinceStartup + " Started conversion of Unity networking -> Photon");
 
         //Ask to save current scene (optional)
-        EditorApplication.SaveCurrentSceneIfUserWantsTo();
+        EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
 
         EditorUtility.DisplayProgressBar("Converting..", "Starting.", 0);
 
@@ -90,7 +92,7 @@ public class PhotonConverter : Photon.MonoBehaviour
         string[] sceneFiles = Directory.GetFiles("Assets/", "*.unity", SearchOption.AllDirectories);
         foreach (string sceneName in sceneFiles)
         {
-            EditorApplication.OpenScene(sceneName);
+            EditorSceneManager.OpenScene(sceneName);
             EditorUtility.DisplayProgressBar("Converting..", "Scene:" + sceneName, 0.2f);
 
             int converted2 = ConvertNetworkView((NetworkView[])GameObject.FindObjectsOfType(typeof(NetworkView)), true);
@@ -100,9 +102,8 @@ public class PhotonConverter : Photon.MonoBehaviour
                 PhotonViewHandler.HierarchyChange();    //TODO: most likely this is triggered on change or on save
 
                 Output("Replaced " + converted2 + " NetworkViews with PhotonViews in scene: " + sceneName);
-                EditorApplication.SaveScene(EditorApplication.currentScene);
+                EditorSceneManager.SaveOpenScenes();
             }
-
         }
 
         //Convert C#/JS scripts (API stuff)
@@ -318,6 +319,36 @@ public class PhotonConverter : Photon.MonoBehaviour
         }
 
         File.WriteAllText(file, text);
+    }
+
+
+    ///  default path: "Assets"
+    public static void ConvertRpcAttribute(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            path = "Assets";
+        }
+
+        List<string> scripts = GetScriptsInFolder(path);
+        foreach (string file in scripts)
+        {
+            string text = File.ReadAllText(file);
+            string textCopy = text;
+            if (file.EndsWith("PhotonConverter.cs"))
+            {
+                continue;
+            }
+
+            text = text.Replace("[RPC]", "[PunRPC]");
+            text = text.Replace("@RPC", "@PunRPC");
+
+            if (!text.Equals(textCopy))
+            {
+                File.WriteAllText(file, text);
+                Debug.Log("Converted RPC to PunRPC in: " + file);
+            }
+        }
     }
 
     static string PregReplace(string input, string[] pattern, string[] replacements)

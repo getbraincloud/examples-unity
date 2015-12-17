@@ -113,6 +113,12 @@ namespace BrainCloudUNETExample.Game
 
         void Awake()
         {
+			if (!BrainCloudWrapper.GetBC ().Initialized)
+			{
+				Application.LoadLevel ("Connect");
+				return;
+			}
+
             m_allyShipSunk = GameObject.Find("ShipSink").transform.FindChild("AllyShipSunk").gameObject;
             m_enemyShipSunk = GameObject.Find("ShipSink").transform.FindChild("EnemyShipSunk").gameObject;
             m_redShipLogo = GameObject.Find("ShipSink").transform.FindChild("RedLogo").gameObject;
