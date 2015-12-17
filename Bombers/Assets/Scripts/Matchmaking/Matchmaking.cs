@@ -97,6 +97,11 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void Start()
         {
+			if (!BrainCloudWrapper.GetBC().Initialized)
+			{
+				Application.LoadLevel("Connect");
+				return;
+			}
             m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
             m_tabColor = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color;
             GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
