@@ -1666,7 +1666,7 @@ namespace BrainCloudPhotonExample.Game
 			{
             	Destroy(ship.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).gameObject);
 			}
-			catch(System.Exception e)
+			catch(System.Exception)
 			{
 
 			}
