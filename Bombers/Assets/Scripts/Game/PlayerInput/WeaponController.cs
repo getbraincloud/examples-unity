@@ -92,7 +92,21 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 for (int i = 0; i < players.Length; i++)
                 {
-                    if (players[i].customProperties["Team"] == null || (int)players[i].customProperties["Team"] == 3 || (int)players[i].customProperties["Team"] == 0 || players[i] == PhotonNetwork.player || (int)players[i].customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
+					PhotonPlayer player = players[i];
+					if (player == null 
+					    || player.customProperties == null 
+					    || PhotonNetwork.player == null
+					    || PhotonNetwork.player.customProperties == null)
+					{
+						continue;
+					}
+
+					if (player.customProperties["Team"] == null 
+					    || (int)player.customProperties["Team"] == 3 
+					    || (int)player.customProperties["Team"] == 0 
+					    || player == PhotonNetwork.player
+					    || PhotonNetwork.player.customProperties["Team"] == null
+					    || (int)player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
                     {
                         continue;
                     }
