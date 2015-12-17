@@ -103,6 +103,11 @@ namespace BrainCloudUNETExample.Matchmaking
 
         void Start()
         {
+			if (!BrainCloudWrapper.GetBC ().Initialized)
+			{
+				Application.LoadLevel ("Connect");
+				return;
+			}
             BombersNetworkManager.singleton.StartMatchMaker();
             m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
             m_tabColor = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color;
