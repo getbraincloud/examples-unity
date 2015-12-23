@@ -2001,6 +2001,9 @@ namespace BrainCloudPhotonExample.Game
             }
 
             GameObject bullet = GameObject.Find("PlayerController").GetComponent<WeaponController>().SpawnBullet(aBulletInfo);
+
+            if (bullet == null) return;
+
             m_spawnedBullets.Add(bullet.GetComponent<BulletController>().GetBulletInfo());
             int playerTeam = (int)aBulletInfo.m_shooter.customProperties["Team"];
 
