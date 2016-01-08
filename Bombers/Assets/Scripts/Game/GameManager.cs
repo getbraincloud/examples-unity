@@ -10,7 +10,6 @@ namespace BrainCloudPhotonExample.Game
 {
     public class GameManager : Photon.MonoBehaviour
     {
-
         private enum eGameState
         {
             GAME_STATE_INITIALIZE_GAME,
@@ -153,8 +152,6 @@ namespace BrainCloudPhotonExample.Game
 
         void Start()
         {
-            GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-            GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
             m_mapLayout = (int)PhotonNetwork.room.customProperties["MapLayout"];
             m_mapSize = (int)PhotonNetwork.room.customProperties["MapSize"];
 
@@ -346,8 +343,6 @@ namespace BrainCloudPhotonExample.Game
 
         public void OnLeftRoom()
         {
-            GameObject.Find("Version Text").transform.SetParent(null);
-            GameObject.Find("FullScreen").transform.SetParent(null);
             PhotonNetwork.LoadLevel("Matchmaking");
         }
 
@@ -1436,8 +1431,6 @@ namespace BrainCloudPhotonExample.Game
             m_roomProperties = PhotonNetwork.room.customProperties;
             m_roomProperties["IsPlaying"] = 0;
             PhotonNetwork.room.SetCustomProperties(m_roomProperties);
-            GameObject.Find("Version Text").transform.SetParent(null);
-            GameObject.Find("FullScreen").transform.SetParent(null);
             PhotonNetwork.LoadLevel("Game");
         }
 
