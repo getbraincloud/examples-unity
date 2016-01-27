@@ -32,11 +32,20 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         private float m_aloneBombTimer = 0;
 
+        private GameManager _gameManager;
+        private BrainCloudStats _brainCloudStats;
+
+        void Awake()
+        {
+            _gameManager = FindObjectOfType<GameManager>();
+            _brainCloudStats = FindObjectOfType<BrainCloudStats>();
+        }
+
         void Start()
         {
             m_targetingReticule = (GameObject)Instantiate((GameObject)Resources.Load("TargetReticule"), Vector3.zero, Quaternion.identity);
             m_offscreenIndicator = (GameObject)Instantiate((GameObject)Resources.Load("OffscreenIndicator"), Vector3.zero, Quaternion.identity);
-            m_bulletSpeed = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_bulletSpeed;
+            m_bulletSpeed = _brainCloudStats.m_bulletSpeed;
             if (m_bullet1Prefab == null)
             {
                 m_bullet1Prefab = (GameObject)Resources.Load("Bullet01");
@@ -61,7 +70,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_bombDropPrefab = (GameObject)Resources.Load("BombDrop");
             }
 
-			m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+            m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
             m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
             m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
         }
@@ -92,21 +101,21 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 for (int i = 0; i < players.Length; i++)
                 {
-					PhotonPlayer player = players[i];
-					if (player == null 
-					    || player.customProperties == null 
-					    || PhotonNetwork.player == null
-					    || PhotonNetwork.player.customProperties == null)
-					{
-						continue;
-					}
+                    PhotonPlayer player = players[i];
+                    if (player == null
+                        || player.customProperties == null
+                        || PhotonNetwork.player == null
+                        || PhotonNetwork.player.customProperties == null)
+                    {
+                        continue;
+                    }
 
-					if (player.customProperties["Team"] == null 
-					    || (int)player.customProperties["Team"] == 3 
-					    || (int)player.customProperties["Team"] == 0 
-					    || player == PhotonNetwork.player
-					    || PhotonNetwork.player.customProperties["Team"] == null
-					    || (int)player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
+                    if (player.customProperties["Team"] == null
+                        || (int)player.customProperties["Team"] == 3
+                        || (int)player.customProperties["Team"] == 0
+                        || player == PhotonNetwork.player
+                        || PhotonNetwork.player.customProperties["Team"] == null
+                        || (int)player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
                     {
                         continue;
                     }
@@ -124,7 +133,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             if (m_bombs > 0 && m_playerPlane != null)
             {
-				m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0.3f), 4 * Time.deltaTime);
+                m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0.3f), 4 * Time.deltaTime);
 
                 m_targetingReticule.GetComponent<MeshRenderer>().enabled = true;
                 Vector3 position = m_playerPlane.transform.position;
@@ -164,7 +173,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 m_targetingReticule.transform.position = position;
                 TextMesh bombCounter = m_targetingReticule.transform.FindChild("BombCounter").GetComponent<TextMesh>();
-                int maxBombs = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_maxBombCapacity;
+                int maxBombs = _brainCloudStats.m_maxBombCapacity;
                 if (m_bombs == 0 || m_bombs == 1)
                 {
                     bombCounter.text = "";
@@ -182,10 +191,14 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
                 m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
-                
+
                 GameObject ship = null;
-				if (PhotonNetwork.room != null && GameObject.Find("GameManager") != null && GameObject.Find("GameManager").GetComponent<GameManager>() != null)
-                    ship = GameObject.Find("GameManager").GetComponent<GameManager>().GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.customProperties["Team"]);
+
+                if (PhotonNetwork.room != null && _gameManager != null && PhotonNetwork.player != null && m_playerPlane != null && PhotonNetwork.player.customProperties != null)
+                {
+                    if(PhotonNetwork.player.customProperties.ContainsKey("Team"))
+                        ship = _gameManager.GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.customProperties["Team"]);
+                }
 
                 if (ship != null)
                 {
@@ -238,7 +251,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             else
             {
                 m_targetingReticule.GetComponent<MeshRenderer>().enabled = false;
-				m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0), 4 * Time.deltaTime);
+                m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0), 4 * Time.deltaTime);
                 m_targetingReticule.transform.FindChild("BombCounter").GetComponent<TextMesh>().text = "";
                 m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
                 m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
@@ -248,7 +261,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public void AddBomb()
         {
-            if (m_bombs < GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_maxBombCapacity)
+            if (m_bombs < _brainCloudStats.m_maxBombCapacity)
             {
                 if (m_playerPlane != null)
                     GetComponent<AudioSource>().Play();
@@ -275,13 +288,13 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             if (m_bombs > 0)
             {
                 m_bombs--;
-                GameObject.Find("GameManager").GetComponent<GameManager>().SpawnBomb(new BombController.BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, PhotonNetwork.player, m_playerPlane.GetComponent<Rigidbody>().velocity));
+                _gameManager.SpawnBomb(new BombController.BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, PhotonNetwork.player, m_playerPlane.GetComponent<Rigidbody>().velocity));
             }
         }
 
         IEnumerator FireMultiShot()
         {
-            for (int i = 0; i < GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotAmount; i++)
+            for (int i = 0; i < _brainCloudStats.m_multiShotAmount; i++)
             {
                 if (m_playerPlane == null) break;
                 m_lastShot = Time.time;
@@ -289,19 +302,19 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                GameObject.Find("GameManager").GetComponent<GameManager>().SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.player, m_bulletVelocity));
-                yield return new WaitForSeconds(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotBurstDelay);
+                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.player, m_bulletVelocity));
+                yield return new WaitForSeconds(_brainCloudStats.m_multiShotBurstDelay);
             }
         }
 
         public void FireWeapon(bool aIsAccelerating)
         {
-            float fireDelay = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_fireRateDelay;
+            float fireDelay = _brainCloudStats.m_fireRateDelay;
 
             if (aIsAccelerating)
-                fireDelay = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_fastModeFireRateDelay;
+                fireDelay = _brainCloudStats.m_fastModeFireRateDelay;
 
-            if ((Time.time - m_lastShot) > GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotDelay)
+            if ((Time.time - m_lastShot) > _brainCloudStats.m_multiShotDelay)
             {
                 StartCoroutine("FireMultiShot");
             }
@@ -312,17 +325,17 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                GameObject.Find("GameManager").GetComponent<GameManager>().SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.player, m_bulletVelocity));
+                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.player, m_bulletVelocity));
             }
         }
 
         public void FireFlare(Vector3 aPosition, Vector3 aVelocity)
         {
-            float flareDelay = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_flareCooldown;
+            float flareDelay = _brainCloudStats.m_flareCooldown;
             if ((Time.time - m_lastFlare) > flareDelay)
             {
                 m_lastFlare = Time.time;
-                GameObject.Find("GameManager").GetComponent<GameManager>().SpawnFlare(aPosition, aVelocity);
+                _gameManager.SpawnFlare(aPosition, aVelocity);
             }
         }
 
@@ -359,6 +372,8 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public GameObject SpawnBullet(BulletController.BulletInfo aBulletInfo)
         {
+            if (!aBulletInfo.m_shooter.customProperties.ContainsKey("Team")) return null;
+
             GameObject player = null;
             GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
             for (int i = 0; i < planes.Length; i++)

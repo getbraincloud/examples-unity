@@ -169,8 +169,6 @@ namespace BrainCloudUNETExample.Game
                 LeaveRoom();
                 //BombersNetworkManager.m_localPlayer.AnnounceJoinCommand();
             }
-            GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-            GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
 
             m_mapLayout = m_gameInfo.GetMapLayout();
             m_mapSize = m_gameInfo.GetMapSize();
@@ -321,9 +319,7 @@ namespace BrainCloudUNETExample.Game
             {
                 m_gameInfo.SetTeamPlayers(2, m_gameInfo.GetTeamPlayers(2) - 1);
             }
-
-            GameObject.Find("Version Text").transform.SetParent(null);
-            GameObject.Find("FullScreen").transform.SetParent(null);
+            
             if (isServer)
             {
                 RpcLeaveRoom();

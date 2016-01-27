@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -7,8 +6,6 @@ namespace BrainCloudPhotonExample.Connection
 {
     public class DialogDisplay : MonoBehaviour
     {
-        private bool m_isFullscreen = false;
-
         List<DialogBox> m_dialogsToDisplay;
         List<FadeLabel> m_labelsToDisplay;
 
@@ -205,12 +202,6 @@ namespace BrainCloudPhotonExample.Connection
                 m_showHostLeft = false;
                 DisplayDialog("The host has left the game!");
             }
-        }
-
-        public void ToggleFullscreen()
-        {
-            m_isFullscreen = !m_isFullscreen;
-            Screen.fullScreen = m_isFullscreen;
         }
     }
 }

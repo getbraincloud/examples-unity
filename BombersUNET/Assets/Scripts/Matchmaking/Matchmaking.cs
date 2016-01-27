@@ -4,11 +4,9 @@
  */
 
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
-using System.Linq;
 using BrainCloudUNETExample.Connection;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
@@ -100,35 +98,20 @@ namespace BrainCloudUNETExample.Matchmaking
     };
 
         private string m_filterName = "";
+        private DialogDisplay m_dialogueDisplay;
 
         void Start()
         {
-			if (!BrainCloudWrapper.GetBC ().Initialized)
-			{
-				Application.LoadLevel ("Connect");
-				return;
-			}
+            if (!BrainCloudWrapper.GetBC().Initialized)
+            {
+                Application.LoadLevel("Connect");
+                return;
+            }
             BombersNetworkManager.singleton.StartMatchMaker();
             m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
             m_tabColor = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color;
-            if (GameObject.Find("Version Text") != null)
-            {
-                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-            }
-            else
-            {
-                GameObject.Find("DialogDisplay").GetComponent<BrainCloudUNETExample.Connection.DialogDisplay>().DisplayDialog("The host has disconnected!");
-                GameObject versionText = (GameObject)Instantiate((GameObject)Resources.Load("VTPrefab"));
-                GameObject fullscreenButton = (GameObject)Instantiate((GameObject)Resources.Load("FSPrefab"));
-                versionText.name = "Version Text";
-                fullscreenButton.name = "FullScreen";
-                string versionNumber = ((TextAsset)Resources.Load("Version")).text.ToString();
-                versionText.GetComponent<Text>().text = versionNumber;
-                versionText.transform.SetParent(GameObject.Find("Canvas").transform);
-                fullscreenButton.transform.SetParent(GameObject.Find("Canvas").transform);
-            }
 
+            m_dialogueDisplay = FindObjectOfType<DialogDisplay>();
 
             m_achievementsWindow = GameObject.Find("Achievements");
             m_refreshLabel = GameObject.Find("RefreshLabel");
@@ -442,17 +425,13 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void JoinRoom(MatchDesc aRoomInfo)
         {
-            GameObject.Find("Version Text").transform.SetParent(null);
-            GameObject.Find("FullScreen").transform.SetParent(null);
             int minLevel = 0;
             int maxLevel = 50;
             int playerLevel = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats()[0].m_statValue;
 
             if (playerLevel < minLevel || playerLevel > maxLevel)
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You're not in that room's\nlevel range!");
-                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
+                m_dialogueDisplay.DisplayDialog("You're not in that room's\nlevel range!");
             }
             else
             {
@@ -464,18 +443,14 @@ namespace BrainCloudUNETExample.Matchmaking
                 catch (ArgumentException e)
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You just left that room!");
-					Debug.Log("caught ArgumentException " + e);
+                    m_dialogueDisplay.DisplayDialog("You just left that room!");
+                    Debug.Log("caught ArgumentException " + e);
                 }
                 catch (Exception e)
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Error joining room! Try restarting.");
-					Debug.Log("caught Exception " + e);
+                    m_dialogueDisplay.DisplayDialog("Error joining room! Try restarting.");
+                    Debug.Log("caught Exception " + e);
                 }
             }
         }
@@ -513,7 +488,7 @@ namespace BrainCloudUNETExample.Matchmaking
             foreach (MatchDesc match in aResponse.matches)
             {
                 m_roomList.Add(match);
-                
+
             }
 
             if (m_roomList != null)
@@ -735,7 +710,7 @@ namespace BrainCloudUNETExample.Matchmaking
         void OnJoinRoomFailed()
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
+            m_dialogueDisplay.DisplayDialog("Could not join room!");
         }
 
         public void OnMatchCreate(CreateMatchResponse aMatchResponse)
@@ -754,33 +729,27 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             if (aMatchResponse.success)
             {
-				try
+                try
                 {
                     NetworkManager.singleton.OnMatchJoined(aMatchResponse);
                 }
                 catch (ArgumentException e)
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You just left that room!");
-					Debug.Log("caught ArgumentException " + e);
+                    m_dialogueDisplay.DisplayDialog("You just left that room!");
+                    Debug.Log("caught ArgumentException " + e);
                 }
                 catch (Exception e)
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Error joining room! Try restarting.");
-					Debug.Log("caught Exception " + e);
+                    m_dialogueDisplay.DisplayDialog("Error joining room! Try restarting.");
+                    Debug.Log("caught Exception " + e);
                 }
             }
             else
             {
                 m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                GameObject.Find("Version Text").transform.SetParent(GameObject.Find("Canvas").transform);
-                GameObject.Find("FullScreen").transform.SetParent(GameObject.Find("Canvas").transform);
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
+                m_dialogueDisplay.DisplayDialog("Could not join room!");
                 Debug.LogError("Join match failed");
             }
         }
@@ -831,7 +800,7 @@ namespace BrainCloudUNETExample.Matchmaking
             }
             if (roomExists)
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("There's already a room named " + aName + "!");
+                m_dialogueDisplay.DisplayDialog("There's already a room named " + aName + "!");
                 return;
             }
 
@@ -864,9 +833,6 @@ namespace BrainCloudUNETExample.Matchmaking
             {
                 aOptions.size = 2;
             }
-
-            GameObject.Find("Version Text").transform.SetParent(null);
-            GameObject.Find("FullScreen").transform.SetParent(null);
 
             CreateMatchRequest options = new CreateMatchRequest();
             options.name = aName;
