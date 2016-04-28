@@ -19,20 +19,10 @@ namespace BrainCloud
     public class BrainCloudGamification
     {
         private BrainCloudClient m_brainCloudClientRef;
-        SuccessCallback m_achievementsDelegate;
 
         public BrainCloudGamification(BrainCloudClient in_brainCloud)
         {
             m_brainCloudClientRef = in_brainCloud;
-        }
-
-        /// <summary>
-        /// Sets the achievement awarded delegate which is called anytime
-        /// an achievement is awarded
-        /// </summary>
-        public void SetAchievementAwardedDelegate(SuccessCallback in_delegate)
-        {
-            m_achievementsDelegate = in_delegate;
         }
 
 
@@ -481,90 +471,6 @@ namespace BrainCloud
             m_brainCloudClientRef.SendRequest(sc);
         }
 
-
-
-        /// <summary>
-        /// Method retrieves the game (aka global) statistics for the given category.
-        /// </summary>
-        /// <remarks>
-        /// Service Name - Gamification
-        /// Service Operation - ReadGameStatisticsByCategory
-        /// </remarks>
-        /// <param name="in_category">
-        /// The game statistics category
-        /// </param>
-        /// <param name="in_success">
-        /// The success callback.
-        /// </param>
-        /// <param name="in_failure">
-        /// The failure callback.
-        /// </param>
-        /// <param name="in_cbObject">
-        /// The user object sent to the callback.
-        /// </param>
-        /// <returns> The JSON returned in the callback is as follows:
-        /// {
-        ///   "status":200,
-        ///   "data":{
-        ///     "gameStatistics": []
-        ///   }
-        /// }
-        /// </returns>
-        public void ReadGameStatisticsByCategory(
-            string in_category,
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
-        {
-            Dictionary<string, object> data = new Dictionary<string, object>();
-            data[OperationParam.GamificationServiceCategory.Value] = in_category;
-
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
-            ServerCall sc = new ServerCall(ServiceName.Gamification, ServiceOperation.ReadGameStatisticsByCategory, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
-        }
-
-        /// <summary>
-        /// Method retrieves the player statistics for the given category.
-        /// </summary>
-        /// <remarks>
-        /// Service Name - Gamification
-        /// Service Operation - ReadPlayerStatisticsByCategory
-        /// </remarks>
-        /// <param name="in_category">
-        /// The player statistics category
-        /// </param>
-        /// <param name="in_success">
-        /// The success callback.
-        /// </param>
-        /// <param name="in_failure">
-        /// The failure callback.
-        /// </param>
-        /// <param name="in_cbObject">
-        /// The user object sent to the callback.
-        /// </param>
-        /// <returns> The JSON returned in the callback is as follows:
-        /// {
-        ///   "status":200,
-        ///   "data":{
-        ///     "playerStatistics": []
-        ///   }
-        /// }
-        /// </returns>
-        public void ReadPlayerStatisticsByCategory(
-            string in_category,
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
-        {
-            Dictionary<string, object> data = new Dictionary<string, object>();
-            data[OperationParam.GamificationServiceCategory.Value] = in_category;
-
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
-            ServerCall sc = new ServerCall(ServiceName.Gamification, ServiceOperation.ReadPlayerStatisticsByCategory, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
-        }
-
         /// <summary>
         /// Method retrieves milestones of the given category.
         /// </summary>
@@ -618,7 +524,7 @@ namespace BrainCloud
         /// Service Operation - AwardAchievements
         /// </remarks>
         /// <param name="in_achievementIds">
-        /// A comma separated list of achievement ids to award
+        /// A collection of achievement ids to award
         /// </param>
         /// <param name="in_success">
         /// The success callback.
@@ -636,116 +542,18 @@ namespace BrainCloud
         /// }
         /// </returns>
         public void AwardAchievements(
-            string in_achievementIds,
+            IList<string> in_achievementIds,
             SuccessCallback in_success = null,
             FailureCallback in_failure = null,
             object in_cbObject = null)
         {
-            string[] ids = in_achievementIds.Split(new char[] { ',' });
-            string achievementsStr = "[";
-            for (int i = 0, isize = ids.Length; i < isize; ++i)
-            {
-                achievementsStr += (i == 0 ? "\"" : ",\"");
-                achievementsStr += ids[i];
-                achievementsStr += "\"";
-            }
-            achievementsStr += "]";
-
-            string[] achievementData = JsonReader.Deserialize<string[]>(achievementsStr);
-
             Dictionary<string, object> data = new Dictionary<string, object>();
-            data[OperationParam.GamificationServiceAchievementsName.Value] = achievementData;
+            data[OperationParam.GamificationServiceAchievementsName.Value] = in_achievementIds;
 
-            SuccessCallback successCallbacks = (SuccessCallback)AchievementAwardedSuccessCallback;
-            if (in_success != null)
-            {
-                successCallbacks += in_success;
-            }
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(successCallbacks, in_failure);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure);
             ServerCall sc = new ServerCall(ServiceName.Gamification, ServiceOperation.AwardAchievements, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
-
-        private void AchievementAwardedSuccessCallback(string in_data, object in_obj)
-        {
-            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_data);
-            try
-            {
-                Dictionary<string, object> data = (Dictionary<string, object>)response[OperationParam.GamificationServiceAchievementsData.Value];
-                //List<string> achievements = (List<string>) data[OperationParam.GamificationServiceAchievementsName.Value];
-                if (((object[])data[OperationParam.GamificationServiceAchievementsName.Value]).Length > 0)
-                {
-                    Dictionary<string, object>[] achievements = (Dictionary<string, object>[])data[OperationParam.GamificationServiceAchievementsName.Value];
-                    for (int i = 0; i < achievements.Length; i++)
-                    {
-                        AwardThirdPartyAchievements(achievements[i]["id"].ToString());
-                    }
-                }
-
-                if (m_achievementsDelegate != null)
-                {
-                    m_achievementsDelegate(in_data, in_obj);
-                }
-            }
-            catch (System.Collections.Generic.KeyNotFoundException)
-            {
-                //do nothing.
-            }
-        }
-
-
-        // goes through JSON response to award achievements via third party (ie game centre, facebook etc).
-        // notifies achievement delegate
-        internal void CheckForAchievementsToAward(string in_data, object in_obj)
-        {
-            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_data);
-            try
-            {
-                Dictionary<string, object> data = (Dictionary<string, object>)response[OperationParam.GamificationServiceAchievementsData.Value];
-                List<string> achievements = (List<string>)data[OperationParam.GamificationServiceAchievementsGranted.Value];
-                if (achievements != null)
-                {
-                    foreach (string achievement in achievements)
-                    {
-                        AwardThirdPartyAchievements(achievement);
-                    }
-                }
-
-                //Let the Game Side knows about those Achievements.
-                if (m_achievementsDelegate != null)
-                {
-                    m_achievementsDelegate(JsonWriter.Serialize(achievements), null);
-                }
-            }
-            catch (System.Collections.Generic.KeyNotFoundException)
-            {
-                //do nothing.
-            }
-        }
-
-        private void AwardThirdPartyAchievements(string in_achievements)
-        {
-#if !(DOT_NET)
-            // only do it for logged in players
-            if (!UnityEngine.Social.localUser.authenticated)
-            {
-                Debug.Log("Couldnt award Unity Social achievement because localUser was not authenticated");
-                return;
-            }
-
-            IAchievement achievement = UnityEngine.Social.CreateAchievement();
-            achievement.id = in_achievements;
-            achievement.percentCompleted = 100.0; //progress as double
-            achievement.ReportProgress(result =>
-            {
-                if (result)
-                    Debug.Log("AwardThirdPartyAchievements Success");
-                else
-                    Debug.Log("AwardThirdPartyAchievements Failed");
-            });
-#endif
-        }
-
 
         /// <summary>
         /// Method retrieves all of the quests defined for the game.
@@ -1081,7 +889,7 @@ namespace BrainCloud
         /// }
         /// </returns>
         public void ResetMilestones(
-            string[] in_milestoneIds,
+            IList<string> in_milestoneIds,
             SuccessCallback in_success = null,
             FailureCallback in_failure = null,
             object in_cbObject = null)
@@ -1094,6 +902,5 @@ namespace BrainCloud
             m_brainCloudClientRef.SendRequest(sc);
 
         }
-
     }
 }

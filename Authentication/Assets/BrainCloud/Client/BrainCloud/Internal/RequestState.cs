@@ -4,23 +4,14 @@
 //----------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 
 #if (DOT_NET)
 using System.Net;
-using System.Web;
-using System.Threading;
-using System.Diagnostics;
 #else
 using UnityEngine;
 #endif
 
-using System.IO;
-using BrainCloud;
-using JsonFx.Json;
 
 namespace BrainCloud.Internal
 {
@@ -33,12 +24,12 @@ namespace BrainCloud.Internal
             /// Pending status indicating web request is still active
             /// </summary>
             STATUS_PENDING = 0,
-            
+
             /// <summary>
             /// Done status indicating web request has completed successfully
             /// </summary>
             STATUS_DONE = 1,
-            
+
             /// <summary>
             /// Error status indicating there was a network error or error http code returned
             /// </summary>
@@ -98,7 +89,7 @@ namespace BrainCloud.Internal
                 m_sig = value;
             }
         }
-        
+
         // we also process the byte array on the background thread
         private byte[] m_byteArray = null;
         public byte[] ByteArray
@@ -113,11 +104,11 @@ namespace BrainCloud.Internal
             }
         }
 
-    #if !(DOT_NET)       
+#if !(DOT_NET)
         // unity uses WWW objects to make http calls cross platform
         private WWW request;
         public WWW WebRequest
-    #else
+#else
         // while .net projects can use the WebRequest Object
         private IAsyncResult m_asyncResult;
         public IAsyncResult AsyncResult
@@ -143,7 +134,7 @@ namespace BrainCloud.Internal
             }
         }
         public WebRequest WebRequest
-    #endif
+#endif
         {
             get
             {
@@ -189,7 +180,7 @@ namespace BrainCloud.Internal
             {
                 return m_dotNetRequestStatus;
             }
-            set 
+            set
             {
                 m_dotNetRequestStatus = value;
             }
@@ -222,16 +213,29 @@ namespace BrainCloud.Internal
             }
         }
 
-        private bool m_isSessionTerminatingPacket;
-        public bool IsSessionTerminatingPacket
+        private bool m_packetRequiresLongTimeout = false;
+        public bool PacketRequiresLongTimeout
         {
             get
             {
-                return m_isSessionTerminatingPacket;
+                return m_packetRequiresLongTimeout;
             }
             set
             {
-                m_isSessionTerminatingPacket = value;
+                m_packetRequiresLongTimeout = value;
+            }
+        }
+
+        private bool m_packetNoRetry = false;
+        public bool PacketNoRetry
+        {
+            get
+            {
+                return m_packetNoRetry;
+            }
+            set
+            {
+                m_packetNoRetry = value;
             }
         }
 
@@ -242,10 +246,27 @@ namespace BrainCloud.Internal
 
         public void CancelRequest()
         {
+            try
+            {
 #if DOT_NET
-            // kill the task - we've timed out
-            m_isCancelled = true;
+                // kill the task - we've timed out
+                m_isCancelled = true;
+                if (WebRequest != null)
+                {
+
+                    WebRequest.Abort();
+                }
+#else
+                /* disposing of the www class causes unity editor to lock up
+                if (WebRequest != null)
+                {
+                    WebRequest.Dispose();
+                }*/
 #endif
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 }

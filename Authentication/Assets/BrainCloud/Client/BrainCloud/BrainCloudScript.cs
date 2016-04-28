@@ -184,11 +184,11 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Run a script from the Parent Profile
+        /// Run a cloud script in a parent app
         /// </summary>
         /// <remarks>
         /// Service Name - Script
-        /// Service Operation - RunAsParent
+        /// Service Operation - RUN_PARENT_SCRIPT
         /// </remarks>
         /// <param name="in_scriptName"> Name of script </param>
         /// <param name="in_jsonScriptData"> JSON bundle to pass to script </param>
@@ -197,11 +197,18 @@ namespace BrainCloud
         /// <param name="in_failure"> The failure callback. </param>
         /// <param name="in_cbObject"> The user object sent to the callback. </param>
         /// <returns> The JSON returned in the callback is as follows:
+        /// {
+        ///     "status": 200,
+        ///     "data": {
+        ///         "response": {
+        ///             "success": true
+        ///         },
+        ///         "success": true
+        ///     }
+        /// }
         /// @see The API documentation site for more details on cloud code
         /// </returns>
-        /// /*
-        /// 
-        public void RunAsParent(
+        public void RunParentScript(
             string in_scriptName,
             string in_jsonScriptData,
             string in_parentLevel,
@@ -221,7 +228,7 @@ namespace BrainCloud
             data[OperationParam.ScriptServiceParentLevel.Value] = in_parentLevel;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
-            ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.RunAsParent, data, callback);
+            ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.RunParentScript, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
     }

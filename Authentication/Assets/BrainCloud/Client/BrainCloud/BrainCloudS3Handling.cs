@@ -48,8 +48,8 @@ namespace BrainCloud
         /// <returns>  The JSON returned in the callback is as follows. 
         /// {
         ///     "status": 200,
-        ///     "fileDetails": [
-        ///         {
+        ///     "data": {
+        ///         "fileDetails": [{
         ///             "gameId": "12311331",
         ///             "fileId": "3780516b-14f8-4055-8899-8eaab6ac7e82",
         ///             "shortName": "Test Doc",
@@ -62,8 +62,8 @@ namespace BrainCloud
         ///             "relativeUrl": "/cust/testDoc.txt",
         ///             "absoluteUrl": "http://internal.braincloudservers.com/s3/portal/g/12311331/cust/testDoc.txt",
         ///             "md5Hash": "d41d8cd98f00b204e9800998ecf8427e"
-        ///         }
-        ///     ]
+        ///         }]
+        ///     }
         /// }
         /// </returns>
         public void GetUpdatedFiles(
@@ -88,7 +88,7 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Retreives the detailds of custom files stored on the server
+        /// Retrieves the details of custom files stored on the server
         /// </summary>
         /// <remarks>
         /// Service Name - S3Handling
@@ -109,8 +109,8 @@ namespace BrainCloud
         /// <returns>  The JSON returned in the callback is as follows. 
         /// {
         ///     "status": 200,
-        ///     "fileDetails": [
-        ///         {
+        ///     "data": {
+        ///         "fileDetails": [{
         ///             "gameId": "12311331",
         ///             "fileId": "3780516b-14f8-4055-8899-8eaab6ac7e82",
         ///             "shortName": "Test Doc",
@@ -123,8 +123,8 @@ namespace BrainCloud
         ///             "relativeUrl": "/cust/testDoc.txt",
         ///             "absoluteUrl": "http://internal.braincloudservers.com/s3/portal/g/12311331/cust/testDoc.txt",
         ///             "md5Hash": "d41d8cd98f00b204e9800998ecf8427e"
-        ///         }
-        ///     ]
+        ///         }]
+        ///     }
         /// }
         /// </returns>
         public void GetFileList(

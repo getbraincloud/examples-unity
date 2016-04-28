@@ -3,10 +3,6 @@
 // Copyright 2015 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace BrainCloud
 {
     internal sealed class OperationParam
@@ -19,6 +15,7 @@ namespace BrainCloud
         public static readonly OperationParam PushNotificationSendParamToPlayerId             = new OperationParam("toPlayerId");
         public static readonly OperationParam PushNotificationSendParamMessage                = new OperationParam("message");
         public static readonly OperationParam PushNotificationSendParamNotificationTemplateId = new OperationParam("notificationTemplateId");
+        public static readonly OperationParam PushNotificationSendParamSubstitutions          = new OperationParam("substitutions");
 
         // Twitter Service - Verify Params
         public static readonly OperationParam TwitterServiceVerifyToken   				      = new OperationParam("token");
@@ -45,21 +42,11 @@ namespace BrainCloud
 
         public static readonly OperationParam AuthenticateServiceAuthenticateLevelName           = new OperationParam("levelName");
 
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthFacebook        = new OperationParam("Facebook");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthEmail           = new OperationParam("Email");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthGameCenter      = new OperationParam("GameCenter");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthUniversal       = new OperationParam("Universal");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthSteam           = new OperationParam("Steam");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthGoogle          = new OperationParam("Google");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthTwitter         = new OperationParam("Twitter");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthExternal        = new OperationParam("External");
-
         public static readonly OperationParam AuthenticateServiceAuthenticateCountryCode         = new OperationParam("countryCode");
         public static readonly OperationParam AuthenticateServiceAuthenticateLanguageCode        = new OperationParam("languageCode");
         public static readonly OperationParam AuthenticateServiceAuthenticateTimeZoneOffset      = new OperationParam("timeZoneOffset");
 
         public static readonly OperationParam AuthenticateServiceAuthenticateAuthUpgradeID       = new OperationParam("upgradeAppId");
-        public static readonly OperationParam AuthenticateServiceAuthenticateAuthAnonymous       = new OperationParam("Anonymous");
         public static readonly OperationParam AuthenticateServiceAuthenticateAnonymousId         = new OperationParam("anonymousId");
         public static readonly OperationParam AuthenticateServiceAuthenticateProfileId           = new OperationParam("profileId");
         public static readonly OperationParam AuthenticateServiceAuthenticateForceCreate         = new OperationParam("forceCreate");
@@ -70,39 +57,16 @@ namespace BrainCloud
         public static readonly OperationParam IdentityServiceAuthenticationType                  = new OperationParam("authenticationType");
         public static readonly OperationParam IdentityServiceConfirmAnonymous                    = new OperationParam("confirmAnonymous");
 
-        // Entity Service - Create Params
-        public static readonly OperationParam EntityServiceCreateEntityId                        = new OperationParam("entityId");
-        public static readonly OperationParam EntityServiceCreateEntityTargetPlayerId            = new OperationParam("targetPlayerId");
-
-        public static readonly OperationParam EntityServiceCreateEntityType                      = new OperationParam("entityType");
-        public static readonly OperationParam EntityServiceCreateEntitySubtype                   = new OperationParam("entitySubtype");
-        public static readonly OperationParam EntityServiceCreateData                            = new OperationParam("data");
-        public static readonly OperationParam EntityServiceCreateAcl = new OperationParam("acl");
-        public static readonly OperationParam EntityServiceCreateFriendData                      = new OperationParam("friendData");
-
-        // Entity Service - GetEntitiesByType
-        public static readonly OperationParam EntityServiceGetSEntitiesByTypeEntityType          = new OperationParam("entityType");
-
-        // Entity Service - Update Params
-        public static readonly OperationParam EntityServiceUpdateEntityType                      = new OperationParam("entityType");
-        public static readonly OperationParam EntityServiceUpdateEntityId                        = new OperationParam("entityId");
-        public static readonly OperationParam EntityServiceUpdateData                            = new OperationParam("data");
-        public static readonly OperationParam EntityServiceUpdateVersion                         = new OperationParam("version");
-        public static readonly OperationParam EntityServiceUpdateAcl                             = new OperationParam("acl");
-
-        // Entity Service - Update Partial Params
-        public static readonly OperationParam EntityServiceUpdatePartialEntityType               = new OperationParam("entityType");
-        public static readonly OperationParam EntityServiceUpdatePartialEntityId                 = new OperationParam("entityId");
-        public static readonly OperationParam EntityServiceUpdatePartialUpdateOps                = new OperationParam("updateOps");
-
-        // Entity Service - Delete Params
-        public static readonly OperationParam EntityServiceDeleteEntityType                      = new OperationParam("entityType");
-        public static readonly OperationParam EntityServiceDeleteEntityId                        = new OperationParam("entityId");
-
-        // Entity Service - GetSharedEntitiesForPlayerId
-        public static readonly OperationParam EntityServiceGetSharedEntitiesTargetPlayerId       = new OperationParam("targetPlayerId");
-        public static readonly OperationParam EntityServiceGetSharedStatsTargetPlayerId          = new OperationParam("targetPlayerId");
-        public static readonly OperationParam EntityServiceGetSharedPlayerStateTargetPlayerId    = new OperationParam("targetPlayerId");
+        // Entity Service 
+        public static readonly OperationParam EntityServiceEntityId                             = new OperationParam("entityId");
+        public static readonly OperationParam EntityServiceEntityType                           = new OperationParam("entityType");
+        public static readonly OperationParam EntityServiceEntitySubtype                        = new OperationParam("entitySubtype");
+        public static readonly OperationParam EntityServiceData                                 = new OperationParam("data");
+        public static readonly OperationParam EntityServiceAcl                                  = new OperationParam("acl");
+        public static readonly OperationParam EntityServiceFriendData                           = new OperationParam("friendData");
+        public static readonly OperationParam EntityServiceVersion                              = new OperationParam("version");
+        public static readonly OperationParam EntityServiceUpdateOps                            = new OperationParam("updateOps");
+        public static readonly OperationParam EntityServiceTargetPlayerId                       = new OperationParam("targetPlayerId");
 
         // Global Entity Service - Params
         public static readonly OperationParam GlobalEntityServiceEntityId                       = new OperationParam("entityId");
@@ -143,11 +107,14 @@ namespace BrainCloud
         // Friend Service - Params
         public static readonly OperationParam FriendServiceEntityId                             = new OperationParam("entityId");
         public static readonly OperationParam FriendServiceExternalId                           = new OperationParam("externalId");
+        public static readonly OperationParam FriendServiceProfileId                            = new OperationParam("profileId");
         public static readonly OperationParam FriendServiceFriendId                             = new OperationParam("friendId");
         public static readonly OperationParam FriendServiceAuthenticationType                   = new OperationParam("authenticationType");
         public static readonly OperationParam FriendServiceEntityType                           = new OperationParam("entityType");
         public static readonly OperationParam FriendServiceEntitySubtype                        = new OperationParam("entitySubtype");
         public static readonly OperationParam FriendServiceIncludeSummaryData                   = new OperationParam("includeSummaryData");
+        public static readonly OperationParam FriendServiceFriendPlatform                       = new OperationParam("friendPlatform");
+        public static readonly OperationParam FriendServiceProfileIds                           = new OperationParam("profileIds");
 
         // Friend Service operations
         //public static readonly Operation FriendServiceReadFriends = new Operation("READ_FRIENDS");
@@ -189,6 +156,10 @@ namespace BrainCloud
 
         public static readonly OperationParam PlayerStateServiceIncludeSummaryData = new OperationParam("includePlayerSummaryData");
 
+        // Player State Service - UPDATE_PICTURE_URL
+        public static readonly OperationParam PlayerStateServicePlayerPictureUrl = new OperationParam("playerPictureUrl");
+        public static readonly OperationParam PlayerStateServiceContactEmail = new OperationParam("contactEmail");
+
         // Player State Service - Reset Params
         //public static readonly Operation PlayerStateServiceReset = new Operation("");
 
@@ -208,6 +179,7 @@ namespace BrainCloud
 
         // Social Leaderboard Service - general parameters
         public static readonly OperationParam SocialLeaderboardServiceLeaderboardId              = new OperationParam("leaderboardId");
+        public static readonly OperationParam SocialLeaderboardServiceLeaderboardIds             = new OperationParam("leaderboardIds");
         public static readonly OperationParam SocialLeaderboardServiceReplaceName                = new OperationParam("replaceName");
         public static readonly OperationParam SocialLeaderboardServiceScore                      = new OperationParam("score");
         public static readonly OperationParam SocialLeaderboardServiceData                       = new OperationParam("data");
@@ -226,9 +198,15 @@ namespace BrainCloud
         public static readonly OperationParam SocialLeaderboardServiceAfterCount                 = new OperationParam("afterCount");
         public static readonly OperationParam SocialLeaderboardServiceIncludeLeaderboardSize     = new OperationParam("includeLeaderboardSize");
         public static readonly OperationParam SocialLeaderboardServiceVersionId                  = new OperationParam("versionId");
+        public static readonly OperationParam SocialLeaderboardServiceLeaderboardResultCount     = new OperationParam("leaderboardResultCount");
+
 
         // Social Leaderboard Service - Reset Score Params
         //public static readonly Operation SocialLeaderboardServiceResetScore = new Operation("");
+
+        // Product Service
+        public static readonly OperationParam ProductServiceCurrencyId                           = new OperationParam("vc_id");
+        public static readonly OperationParam ProductServiceCurrencyAmount                       = new OperationParam("vc_amount");
 
         // Product Service - Get Inventory Params
         public static readonly OperationParam ProductServiceGetInventoryPlatform                 = new OperationParam("platform");
@@ -238,17 +216,6 @@ namespace BrainCloud
         // Product Service - Op Cash In Receipt Params
         public static readonly OperationParam ProductServiceOpCashInReceiptReceipt               = new OperationParam("receipt"); //C++ only
         public static readonly OperationParam ProductServiceOpCashInReceiptUrl                   = new OperationParam("url"); //C++ only
-
-        // Product Service - Award VC Params
-        public static readonly OperationParam ProductServiceAwardVCId                            = new OperationParam("vc_id");
-        public static readonly OperationParam ProductServiceAwardVCAmount                        = new OperationParam("vc_amount");
-
-        // Product Service - Get Player VC Params
-        public static readonly OperationParam ProductServiceGetPlayerVCId                        = new OperationParam("vc_id");
-
-        // Product Service - Consume VC Params
-        public static readonly OperationParam ProductServiceConsumeVCId                          = new OperationParam("vc_id");
-        public static readonly OperationParam ProductServiceConsumeVCAmount                      = new OperationParam("vc_amount");
 
         // Product Service - Reset Player VC Params
         //public static readonly OperationParam ProductServiceResetPlayerVC = new OperationParam("");
@@ -271,6 +238,7 @@ namespace BrainCloud
         public static readonly OperationParam ServiceMessagePacketId                             = new OperationParam("packetId");
         public static readonly OperationParam ServiceMessageProfileId                            = new OperationParam("profileId");
         public static readonly OperationParam ServiceMessageSessionId                            = new OperationParam("sessionId");
+        public static readonly OperationParam ServiceMessageGameId                               = new OperationParam("gameId");
         public static readonly OperationParam ServiceMessageMessages                             = new OperationParam("messages");
 
         // Error Params
@@ -290,6 +258,7 @@ namespace BrainCloud
         public static readonly OperationParam MatchMakingServiceMinutes                          = new OperationParam("minutes");
         public static readonly OperationParam MatchMakingServiceRangeDelta                       = new OperationParam("rangeDelta");
         public static readonly OperationParam MatchMakingServiceNumMatches                       = new OperationParam("numMatches");
+        public static readonly OperationParam MatchMakingServiceAttributes                       = new OperationParam("attributes");
         public static readonly OperationParam MatchMakingServiceExtraParams                      = new OperationParam("extraParams");
         public static readonly OperationParam MatchMakingServicePlayerId                         = new OperationParam("playerId");
         public static readonly OperationParam MatchMakingServicePlaybackStreamId                 = new OperationParam("playbackStreamId");
@@ -318,6 +287,35 @@ namespace BrainCloud
         public static readonly OperationParam S3HandlingServiceFileCategory                      = new OperationParam("category");
         public static readonly OperationParam S3HandlingServiceFileDetails                       = new OperationParam("fileDetails");
 
+        //Shared Identity
+        public static readonly OperationParam IdentityServiceForceSingleton                     = new OperationParam("forceSingleton");
+
+        //RedemptionCode
+        public static readonly OperationParam RedemptionCodeServiceScanCode                     = new OperationParam("scanCode");
+        public static readonly OperationParam RedemptionCodeServiceCodeType                     = new OperationParam("codeType");
+        public static readonly OperationParam RedemptionCodeServiceCustomRedemptionInfo         = new OperationParam("customRedemptionInfo");
+
+        //DataStream
+        public static readonly OperationParam DataStreamEventName                               = new OperationParam("eventName");
+        public static readonly OperationParam DataStreamEventProperties                         = new OperationParam("eventProperties");
+
+        // Profanity
+        public static readonly  OperationParam ProfanityText                                      = new OperationParam("text");
+        public static readonly  OperationParam ProfanityReplaceSymbol                             = new OperationParam("replaceSymbol");
+        public static readonly  OperationParam ProfanityFlagEmail                                 = new OperationParam("flagEmail");
+        public static readonly  OperationParam ProfanityFlagPhone                                 = new OperationParam("flagPhone");
+        public static readonly  OperationParam ProfanityFlagUrls                                  = new OperationParam("flagUrls");
+        public static readonly  OperationParam ProfanityLanguages                                 = new OperationParam("languages");
+
+        //File upload
+        public static readonly OperationParam UploadLocalPath                                    = new OperationParam("localPath");
+        public static readonly OperationParam UploadCloudPath                                    = new OperationParam("cloudPath");
+        public static readonly OperationParam UploadCloudFilename                                = new OperationParam("cloudFilename");
+        public static readonly OperationParam UploadShareable                                    = new OperationParam("shareable");
+        public static readonly OperationParam UploadReplaceIfExists                              = new OperationParam("replaceIfExists");
+        public static readonly OperationParam UploadFileSize                                     = new OperationParam("fileSize");
+        public static readonly OperationParam UploadRecurse                                      = new OperationParam("recurse");
+        public static readonly OperationParam UploadPath                                         = new OperationParam("path");
 
         private OperationParam(string value)
         {

@@ -3,10 +3,6 @@
 // Copyright 2015 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace BrainCloud.Internal
 {
     internal class ServiceName
@@ -47,6 +43,11 @@ namespace BrainCloud.Internal
         public static readonly ServiceName GlobalApp = new ServiceName("globalApp");
 
         public static readonly ServiceName S3Handling = new ServiceName("s3Handling");
+        public static readonly ServiceName RedemptionCode = new ServiceName("redemptionCode");
+        public static readonly ServiceName DataStream = new ServiceName("dataStream");
+        public static readonly ServiceName Profanity = new ServiceName("profanity");
+
+        public static readonly ServiceName File = new ServiceName("file");
 
         private ServiceName(string value)
         {
