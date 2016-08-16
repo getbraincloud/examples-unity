@@ -1,14 +1,8 @@
 //----------------------------------------------------
 // brainCloud client source code
-// Copyright 2015 bitHeads, inc.
+// Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Net;
-using JsonFx.Json;
 using BrainCloud.Internal;
 
 namespace BrainCloud
@@ -39,14 +33,6 @@ namespace BrainCloud
         /// <param name="in_cbObject">
         /// The user object sent to the callback.
         /// </param>
-        /// <returns> A JSON string such as:
-        /// {
-        ///   "status":200,
-        ///   "data":{
-        ///     "server_time":1396378241893
-        ///   }
-        /// }
-        /// </returns>
         public void ReadServerTime(
             SuccessCallback in_success = null,
             FailureCallback in_failure = null,

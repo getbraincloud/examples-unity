@@ -156,7 +156,7 @@ namespace BrainCloudUNETExample.Connection
                     if (!m_achievements[i].m_achieved)
                     {
                         m_achievements[i].m_achieved = true;
-                        BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
+                        BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(new[] { m_achievements[i].m_id }, null, null, null);
                         GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                     }
                     break;

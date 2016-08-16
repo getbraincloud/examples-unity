@@ -36,7 +36,7 @@ public class SocialLeaderboards : BestScores {
 	void OnPostScoreSuccess(string postResponseData, object cbPostObject)
 	{
 		// Now we fetch the leaderboards to see were we stand
-		BrainCloudWrapper.GetBC().SocialLeaderboardService.GetLeaderboard(
+		BrainCloudWrapper.GetBC().SocialLeaderboardService.GetSocialLeaderboard(
 			"spacegame_highscores",		// Leaderboard Id
 			true, 						// If true, your name will be replaced with "You"
 			OnGetLeaderboardsSuccess,	// Success callback

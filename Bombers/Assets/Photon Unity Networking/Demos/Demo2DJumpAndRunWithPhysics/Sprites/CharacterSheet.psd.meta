@@ -1,6 +1,125 @@
 fileFormatVersion: 2
 guid: 6eedfc74195a44648b72bcf755811a88
 TextureImporter:
+  fileIDToRecycleName:
+    21300000: idle_0
+    21300002: idle_1
+    21300004: idle_2
+    21300006: idle_3
+    21300008: idle_4
+    21300010: idle_5
+    21300012: idle_6
+    21300014: idle_7
+    21300016: idle_8
+    21300018: idle_9
+    21300020: idle_10
+    21300022: idle_11
+    21300024: idle_12
+    21300026: idle_13
+    21300028: idle_14
+    21300030: run_15
+    21300032: run_16
+    21300034: run_0
+    21300036: run_1
+    21300038: run_2
+    21300040: run_3
+    21300042: run_4
+    21300044: run_5
+    21300046: run_6
+    21300048: run_7
+    21300050: run_8
+    21300052: run_9
+    21300054: run_10
+    21300056: run_11
+    21300058: run_12
+    21300060: run_14
+    21300062: run_17
+    21300064: run_18
+    21300066: run_19
+    21300068: run_20
+    21300070: run_21
+    21300072: run_22
+    21300074: run_23
+    21300076: run_24
+    21300078: run_25
+    21300080: run_26
+    21300082: run_27
+    21300084: run_28
+    21300086: run_29
+    21300088: run_30
+    21300090: run_31
+    21300092: jump_0
+    21300094: jump_1
+    21300096: jump_2
+    21300098: jump_3
+    21300100: jump_4
+    21300102: jump_5
+    21300104: jump_6
+    21300106: jump_7
+    21300108: jump_8
+    21300110: jump_9
+    21300112: jump_10
+    21300114: jump_11
+    21300116: jump_12
+    21300118: jump_13
+    21300120: jump_14
+    21300122: jump_15
+    21300124: jump_16
+    21300126: jump_17
+    21300128: jump_18
+    21300130: jump_19
+    21300132: jump_20
+    21300134: jump_21
+    21300136: jump_22
+    21300138: jump_23
+    21300140: jump_24
+    21300142: jump_25
+    21300144: jump_26
+    21300146: jump_27
+    21300148: jump_28
+    21300150: jump_29
+    21300152: jump_30
+    21300154: jump_31
+    21300156: jump_32
+    21300158: jump_33
+    21300160: jump_34
+    21300162: jump_35
+    21300164: jump_36
+    21300166: jump_37
+    21300168: jump_38
+    21300170: land_0
+    21300172: land_1
+    21300174: land_2
+    21300176: land_3
+    21300178: land_4
+    21300180: land_5
+    21300182: land_6
+    21300184: land_7
+    21300186: land_8
+    21300188: land_9
+    21300190: land_10
+    21300192: land_11
+    21300194: land_12
+    21300196: land_13
+    21300198: land_14
+    21300200: land_15
+    21300202: land_16
+    21300204: land_17
+    21300206: land_18
+    21300208: land_19
+    21300210: land_20
+    21300212: land_21
+    21300214: land_22
+    21300216: land_23
+    21300218: land_24
+    21300220: land_25
+    21300222: land_26
+    21300224: land_27
+    21300226: land_28
+    21300228: land_29
+    21300230: land_30
+    21300232: land_31
+    21300234: land_32
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -19,6 +138,9 @@ TextureImporter:
   isReadable: 0
   grayScaleToAlpha: 0
   generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 8
+  cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
   textureFormat: -3
   maxTextureSize: 1024
@@ -29,12 +151,15 @@ TextureImporter:
     wrapMode: 1
   nPOTScale: 0
   lightmap: 0
+  rGBM: 0
   compressionQuality: 50
+  allowsAlphaSplitting: 0
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: .5, y: .5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 65
   alphaIsTransparency: 1
   textureType: 8
@@ -50,6 +175,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_1
       rect:
         serializedVersion: 2
@@ -59,6 +185,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_2
       rect:
         serializedVersion: 2
@@ -68,6 +195,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_3
       rect:
         serializedVersion: 2
@@ -77,6 +205,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_4
       rect:
         serializedVersion: 2
@@ -86,6 +215,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_5
       rect:
         serializedVersion: 2
@@ -95,6 +225,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_6
       rect:
         serializedVersion: 2
@@ -104,6 +235,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_7
       rect:
         serializedVersion: 2
@@ -113,6 +245,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_8
       rect:
         serializedVersion: 2
@@ -122,6 +255,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_9
       rect:
         serializedVersion: 2
@@ -131,6 +265,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_10
       rect:
         serializedVersion: 2
@@ -140,6 +275,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_11
       rect:
         serializedVersion: 2
@@ -149,6 +285,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_12
       rect:
         serializedVersion: 2
@@ -158,6 +295,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_13
       rect:
         serializedVersion: 2
@@ -167,6 +305,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: idle_14
       rect:
         serializedVersion: 2
@@ -176,6 +315,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_15
       rect:
         serializedVersion: 2
@@ -185,6 +325,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_16
       rect:
         serializedVersion: 2
@@ -194,6 +335,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_0
       rect:
         serializedVersion: 2
@@ -203,6 +345,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_1
       rect:
         serializedVersion: 2
@@ -212,6 +355,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_2
       rect:
         serializedVersion: 2
@@ -221,6 +365,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_3
       rect:
         serializedVersion: 2
@@ -230,6 +375,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_4
       rect:
         serializedVersion: 2
@@ -239,6 +385,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_5
       rect:
         serializedVersion: 2
@@ -248,6 +395,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_6
       rect:
         serializedVersion: 2
@@ -257,6 +405,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_7
       rect:
         serializedVersion: 2
@@ -266,6 +415,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_8
       rect:
         serializedVersion: 2
@@ -275,6 +425,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_9
       rect:
         serializedVersion: 2
@@ -284,6 +435,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_10
       rect:
         serializedVersion: 2
@@ -293,6 +445,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_11
       rect:
         serializedVersion: 2
@@ -302,6 +455,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_12
       rect:
         serializedVersion: 2
@@ -311,6 +465,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_14
       rect:
         serializedVersion: 2
@@ -320,6 +475,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_17
       rect:
         serializedVersion: 2
@@ -329,6 +485,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_18
       rect:
         serializedVersion: 2
@@ -338,6 +495,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_19
       rect:
         serializedVersion: 2
@@ -347,6 +505,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_20
       rect:
         serializedVersion: 2
@@ -356,6 +515,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_21
       rect:
         serializedVersion: 2
@@ -365,6 +525,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_22
       rect:
         serializedVersion: 2
@@ -374,6 +535,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_23
       rect:
         serializedVersion: 2
@@ -383,6 +545,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_24
       rect:
         serializedVersion: 2
@@ -392,6 +555,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_25
       rect:
         serializedVersion: 2
@@ -401,6 +565,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_26
       rect:
         serializedVersion: 2
@@ -410,6 +575,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_27
       rect:
         serializedVersion: 2
@@ -419,6 +585,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_28
       rect:
         serializedVersion: 2
@@ -428,6 +595,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_29
       rect:
         serializedVersion: 2
@@ -437,6 +605,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_30
       rect:
         serializedVersion: 2
@@ -446,6 +615,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: run_31
       rect:
         serializedVersion: 2
@@ -455,6 +625,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_0
       rect:
         serializedVersion: 2
@@ -464,6 +635,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_1
       rect:
         serializedVersion: 2
@@ -473,6 +645,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_2
       rect:
         serializedVersion: 2
@@ -482,6 +655,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_3
       rect:
         serializedVersion: 2
@@ -491,6 +665,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_4
       rect:
         serializedVersion: 2
@@ -500,6 +675,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_5
       rect:
         serializedVersion: 2
@@ -509,6 +685,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_6
       rect:
         serializedVersion: 2
@@ -518,6 +695,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_7
       rect:
         serializedVersion: 2
@@ -527,6 +705,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_8
       rect:
         serializedVersion: 2
@@ -536,6 +715,7 @@ TextureImporter:
         height: 92
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_9
       rect:
         serializedVersion: 2
@@ -545,6 +725,7 @@ TextureImporter:
         height: 94
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_10
       rect:
         serializedVersion: 2
@@ -554,6 +735,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_11
       rect:
         serializedVersion: 2
@@ -563,6 +745,7 @@ TextureImporter:
         height: 104
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_12
       rect:
         serializedVersion: 2
@@ -572,6 +755,7 @@ TextureImporter:
         height: 108
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_13
       rect:
         serializedVersion: 2
@@ -581,6 +765,7 @@ TextureImporter:
         height: 109
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_14
       rect:
         serializedVersion: 2
@@ -590,6 +775,7 @@ TextureImporter:
         height: 109
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_15
       rect:
         serializedVersion: 2
@@ -599,6 +785,7 @@ TextureImporter:
         height: 111
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_16
       rect:
         serializedVersion: 2
@@ -608,6 +795,7 @@ TextureImporter:
         height: 109
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_17
       rect:
         serializedVersion: 2
@@ -617,6 +805,7 @@ TextureImporter:
         height: 105
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_18
       rect:
         serializedVersion: 2
@@ -626,6 +815,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_19
       rect:
         serializedVersion: 2
@@ -635,6 +825,7 @@ TextureImporter:
         height: 94
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_20
       rect:
         serializedVersion: 2
@@ -644,6 +835,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_21
       rect:
         serializedVersion: 2
@@ -653,6 +845,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_22
       rect:
         serializedVersion: 2
@@ -662,6 +855,7 @@ TextureImporter:
         height: 82
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_23
       rect:
         serializedVersion: 2
@@ -671,6 +865,7 @@ TextureImporter:
         height: 79
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_24
       rect:
         serializedVersion: 2
@@ -680,6 +875,7 @@ TextureImporter:
         height: 78
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_25
       rect:
         serializedVersion: 2
@@ -689,6 +885,7 @@ TextureImporter:
         height: 79
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_26
       rect:
         serializedVersion: 2
@@ -698,6 +895,7 @@ TextureImporter:
         height: 79
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_27
       rect:
         serializedVersion: 2
@@ -707,6 +905,7 @@ TextureImporter:
         height: 80
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_28
       rect:
         serializedVersion: 2
@@ -716,6 +915,7 @@ TextureImporter:
         height: 82
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_29
       rect:
         serializedVersion: 2
@@ -725,6 +925,7 @@ TextureImporter:
         height: 84
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_30
       rect:
         serializedVersion: 2
@@ -734,6 +935,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_31
       rect:
         serializedVersion: 2
@@ -743,6 +945,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_32
       rect:
         serializedVersion: 2
@@ -752,6 +955,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_33
       rect:
         serializedVersion: 2
@@ -761,6 +965,7 @@ TextureImporter:
         height: 92
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_34
       rect:
         serializedVersion: 2
@@ -770,6 +975,7 @@ TextureImporter:
         height: 95
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_35
       rect:
         serializedVersion: 2
@@ -779,6 +985,7 @@ TextureImporter:
         height: 97
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_36
       rect:
         serializedVersion: 2
@@ -788,6 +995,7 @@ TextureImporter:
         height: 98
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_37
       rect:
         serializedVersion: 2
@@ -797,6 +1005,7 @@ TextureImporter:
         height: 99
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: jump_38
       rect:
         serializedVersion: 2
@@ -806,6 +1015,7 @@ TextureImporter:
         height: 98
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_0
       rect:
         serializedVersion: 2
@@ -815,6 +1025,7 @@ TextureImporter:
         height: 100
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_1
       rect:
         serializedVersion: 2
@@ -824,6 +1035,7 @@ TextureImporter:
         height: 100
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_2
       rect:
         serializedVersion: 2
@@ -833,6 +1045,7 @@ TextureImporter:
         height: 96
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_3
       rect:
         serializedVersion: 2
@@ -842,6 +1055,7 @@ TextureImporter:
         height: 94
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_4
       rect:
         serializedVersion: 2
@@ -851,6 +1065,7 @@ TextureImporter:
         height: 91
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_5
       rect:
         serializedVersion: 2
@@ -860,6 +1075,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_6
       rect:
         serializedVersion: 2
@@ -869,6 +1085,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_7
       rect:
         serializedVersion: 2
@@ -878,6 +1095,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_8
       rect:
         serializedVersion: 2
@@ -887,6 +1105,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_9
       rect:
         serializedVersion: 2
@@ -896,6 +1115,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_10
       rect:
         serializedVersion: 2
@@ -905,6 +1125,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_11
       rect:
         serializedVersion: 2
@@ -914,6 +1135,7 @@ TextureImporter:
         height: 85
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_12
       rect:
         serializedVersion: 2
@@ -923,6 +1145,7 @@ TextureImporter:
         height: 84
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_13
       rect:
         serializedVersion: 2
@@ -932,6 +1155,7 @@ TextureImporter:
         height: 84
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_14
       rect:
         serializedVersion: 2
@@ -941,6 +1165,7 @@ TextureImporter:
         height: 84
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_15
       rect:
         serializedVersion: 2
@@ -950,6 +1175,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_16
       rect:
         serializedVersion: 2
@@ -959,6 +1185,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_17
       rect:
         serializedVersion: 2
@@ -968,6 +1195,7 @@ TextureImporter:
         height: 86
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_18
       rect:
         serializedVersion: 2
@@ -977,6 +1205,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_19
       rect:
         serializedVersion: 2
@@ -986,6 +1215,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_20
       rect:
         serializedVersion: 2
@@ -995,6 +1225,7 @@ TextureImporter:
         height: 87
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_21
       rect:
         serializedVersion: 2
@@ -1004,6 +1235,7 @@ TextureImporter:
         height: 88
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_22
       rect:
         serializedVersion: 2
@@ -1013,6 +1245,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_23
       rect:
         serializedVersion: 2
@@ -1022,6 +1255,7 @@ TextureImporter:
         height: 92
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_24
       rect:
         serializedVersion: 2
@@ -1031,6 +1265,7 @@ TextureImporter:
         height: 92
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_25
       rect:
         serializedVersion: 2
@@ -1040,6 +1275,7 @@ TextureImporter:
         height: 92
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_26
       rect:
         serializedVersion: 2
@@ -1049,6 +1285,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_27
       rect:
         serializedVersion: 2
@@ -1058,6 +1295,7 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_28
       rect:
         serializedVersion: 2
@@ -1067,6 +1305,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_29
       rect:
         serializedVersion: 2
@@ -1076,6 +1315,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_30
       rect:
         serializedVersion: 2
@@ -1085,6 +1325,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_31
       rect:
         serializedVersion: 2
@@ -1094,6 +1335,7 @@ TextureImporter:
         height: 90
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
     - name: land_32
       rect:
         serializedVersion: 2
@@ -1103,5 +1345,8 @@ TextureImporter:
         height: 89
       alignment: 7
       pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
   spritePackingTag: 
   userData: 
+  assetBundleName: 
+  assetBundleVariant: 

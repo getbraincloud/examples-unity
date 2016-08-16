@@ -1,12 +1,9 @@
 ﻿//----------------------------------------------------
 // brainCloud client source code
-// Copyright 2015 bitHeads, inc.
+// Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BrainCloud.Internal
 {
@@ -20,9 +17,6 @@ namespace BrainCloud.Internal
             m_operation = operation.Value;
             m_jsonData = jsonData;
             m_callback = callback;
-
-            //string jsonData2 = JsonMapper.ToJson(m_jsonData);
-            //Console.WriteLine("\n ServerCall::ServerCall -- json data -- " + jsonData2);
         }
 
         #endregion

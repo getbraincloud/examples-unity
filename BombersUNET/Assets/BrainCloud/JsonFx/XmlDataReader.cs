@@ -52,7 +52,7 @@ namespace JsonFx.Xml
 
 		private readonly XmlReaderSettings Settings;
 
-		// preston - to prevent warning when compiling in Unity
+		// to prevent warning when compiling
 		#pragma warning disable 0414
 		private readonly XmlSerializerNamespaces Namespaces;
 		#pragma warning restore 0414

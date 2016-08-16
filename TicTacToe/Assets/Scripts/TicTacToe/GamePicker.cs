@@ -2,6 +2,7 @@
 using System.Collections;
 using LitJson;
 using System.Collections.Generic;
+using BrainCloud;
 
 public class GamePicker : MonoBehaviour {
 
@@ -86,7 +87,7 @@ public class GamePicker : MonoBehaviour {
 	{
 		// Get our facebook friends that have played this game also.
         //BrainCloudWrapper.GetBC().FriendService.
-        BrainCloudWrapper.GetBC().FriendService.ReadFriendsWithApplication(false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
+        BrainCloudWrapper.GetBC().FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
 	}
 
 	void OnReadFriendData(string responseData, object cbPostObject) 
@@ -309,7 +310,6 @@ public class GamePicker : MonoBehaviour {
 			"[{\"platform\":\"BC\",\"id\":\"" + fbFriend.playerId + "\"}]", 	// Opponents
 			matchState.ToJson(),	// Current match state
 			"A friend has challenged you to a match of Tic Tac Toe.",	// Push notification Message
-			null,	// Match id. Keep empty, we let brainCloud generate one
 			(yourTurnFirst) ? FacebookLogin.PlayerId : fbFriend.playerId, // Which turn it is. We picked randomly
 			summaryData.ToJson(),	// Summary data
 			OnCreateMatchSuccess,
