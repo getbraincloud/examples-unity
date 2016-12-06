@@ -1,3 +1,9 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="InRoomRoundTimer.cs" company="Exit Games GmbH">
+//   Part of: Photon Unity Networking
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
 using ExitGames.Client.Photon;
 using UnityEngine;
 

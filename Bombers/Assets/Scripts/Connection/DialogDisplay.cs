@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Connection
 {
@@ -17,7 +18,10 @@ namespace BrainCloudPhotonExample.Connection
             if (s_instance)
                 DestroyImmediate(gameObject);
             else
+            {
                 s_instance = this;
+                SceneManager.sceneLoaded += OnSceneLoaded;
+            }
         }
 
         class DialogBox
@@ -181,14 +185,6 @@ namespace BrainCloudPhotonExample.Connection
         private bool m_showHostLeft = false;
         private bool m_showHost = false;
 
-        void OnLevelWasLoaded(int level)
-        {
-            if (m_showHostLeft)
-            {
-                m_showHost = true;
-            }
-        }
-
         public void HostLeft()
         {
             m_showHostLeft = true;
@@ -201,6 +197,19 @@ namespace BrainCloudPhotonExample.Connection
                 m_showHost = false;
                 m_showHostLeft = false;
                 DisplayDialog("The host has left the game!");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (m_showHostLeft)
+            {
+                m_showHost = true;
             }
         }
     }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using BrainCloudPhotonExample.Connection;
-
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Matchmaking
 {
@@ -96,7 +96,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         {
             if (!BrainCloudWrapper.GetBC().Initialized)
             {
-                Application.LoadLevel("Connect");
+                SceneManager.LoadScene("Connect");
                 return;
             }
             m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
@@ -125,6 +125,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_controlWindow = GameObject.Find("Controls");
             m_controlWindow.SetActive(false);
 
+            PhotonNetwork.JoinLobby();
 
             for (int i = 0; i < m_mapPresets.Count; i++)
             {
@@ -338,9 +339,9 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_roomLevelRangeMax = int.Parse(m_createGameWindow.transform.FindChild("Box 2").GetComponent<InputField>().text.ToString());
             m_roomLevelRangeMin = int.Parse(m_createGameWindow.transform.FindChild("Box 1").GetComponent<InputField>().text.ToString());
 
-            options.maxPlayers = (byte)m_roomMaxPlayers;
-            options.isOpen = true;
-            options.isVisible = true;
+            options.MaxPlayers = (byte)m_roomMaxPlayers;
+            options.IsOpen = true;
+            options.IsVisible = true;
 
             CreateNewRoom(m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text, options);
         }
@@ -736,9 +737,9 @@ namespace BrainCloudPhotonExample.Matchmaking
             {
                 RoomOptions options = new RoomOptions();
 
-                options.maxPlayers = (byte)m_roomMaxPlayers;
-                options.isOpen = true;
-                options.isVisible = true;
+                options.MaxPlayers = (byte)m_roomMaxPlayers;
+                options.IsOpen = true;
+                options.IsVisible = true;
 
                 CreateNewRoom(m_roomName, options);
             }
@@ -791,13 +792,13 @@ namespace BrainCloudPhotonExample.Matchmaking
                 m_roomLevelRangeMax = m_roomLevelRangeMin;
             }
 
-            if (aOptions.maxPlayers > 8)
+            if (aOptions.MaxPlayers > 8)
             {
-                aOptions.maxPlayers = 8;
+                aOptions.MaxPlayers = 8;
             }
-            else if (aOptions.maxPlayers < 1)
+            else if (aOptions.MaxPlayers < 1)
             {
-                aOptions.maxPlayers = 1;
+                aOptions.MaxPlayers = 1;
             }
 
             ExitGames.Client.Photon.Hashtable customProperties = new ExitGames.Client.Photon.Hashtable();
@@ -809,8 +810,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             customProperties["IsPlaying"] = 0;
             customProperties["MapLayout"] = m_presetListSelection;
             customProperties["MapSize"] = m_sizeListSelection;
-            aOptions.customRoomProperties = customProperties;
-            aOptions.customRoomPropertiesForLobby = new string[] { "roomMinLevel", "roomMaxLevel", "IsPlaying" };
+            aOptions.CustomRoomProperties = customProperties;
+            aOptions.CustomRoomPropertiesForLobby = new string[] { "roomMinLevel", "roomMaxLevel", "IsPlaying" };
             BrainCloudWrapper.GetBC().EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + aName + "\"}", null, -1, null, null, null);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;

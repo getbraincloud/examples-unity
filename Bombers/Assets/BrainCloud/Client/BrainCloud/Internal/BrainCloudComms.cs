@@ -751,9 +751,9 @@ namespace BrainCloud.Internal
                             }
 
                             // save the profile ID
-                            if (GetJsonString(responseData, OperationParam.ServiceMessageProfileId.Value, null) != null)
+                            if (GetJsonString(responseData, OperationParam.ProfileId.Value, null) != null)
                             {
-                                _brainCloudClientRef.AuthenticationService.ProfileId = (string)responseData[OperationParam.ServiceMessageProfileId.Value];
+                                _brainCloudClientRef.AuthenticationService.ProfileId = (string)responseData[OperationParam.ProfileId.Value];
                             }
                         }
                         catch (Exception e)
@@ -944,7 +944,19 @@ namespace BrainCloud.Internal
 
                     if (_globalErrorCallback != null)
                     {
-                        _globalErrorCallback(statusCode, reasonCode, errorJson, sc != null && sc.GetCallback() != null ? sc.GetCallback().m_cbObject : null);
+                        object cbObject = null;
+                        if (sc != null && sc.GetCallback() != null)
+                        {
+                            cbObject = sc.GetCallback().m_cbObject;
+                            // if this is the internal BrainCloudWrapper callback object return the user-supplied
+                            // callback object instead
+                            if (cbObject != null && cbObject is WrapperAuthCallbackObject)
+                            {
+                                cbObject = ((WrapperAuthCallbackObject) cbObject)._cbObject;
+                            }
+                        }
+
+                        _globalErrorCallback(statusCode, reasonCode, errorJson, cbObject);
                     }
                 }
             }
