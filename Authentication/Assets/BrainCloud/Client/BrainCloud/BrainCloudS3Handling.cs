@@ -1,6 +1,6 @@
 //----------------------------------------------------
 // brainCloud client source code
-// Copyright 2015 bitHeads, inc.
+// Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
 using System;
@@ -45,27 +45,6 @@ namespace BrainCloud
         /// <param name="in_cbObject">
         /// The user object sent to the callback.
         /// </param>
-        /// <returns>  The JSON returned in the callback is as follows. 
-        /// {
-        ///     "status": 200,
-        ///     "fileDetails": [
-        ///         {
-        ///             "gameId": "12311331",
-        ///             "fileId": "3780516b-14f8-4055-8899-8eaab6ac7e82",
-        ///             "shortName": "Test Doc",
-        ///             "fileName": "testDoc.txt",
-        ///             "type": "g",
-        ///             "subType": "cust",
-        ///             "category": null,
-        ///             "fileSize": 4,
-        ///             "dateUploaded": 1437154770000,
-        ///             "relativeUrl": "/cust/testDoc.txt",
-        ///             "absoluteUrl": "http://internal.braincloudservers.com/s3/portal/g/12311331/cust/testDoc.txt",
-        ///             "md5Hash": "d41d8cd98f00b204e9800998ecf8427e"
-        ///         }
-        ///     ]
-        /// }
-        /// </returns>
         public void GetUpdatedFiles(
             string in_category,
             string in_fileDetailsJson,
@@ -88,7 +67,7 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Retreives the detailds of custom files stored on the server
+        /// Retrieves the details of custom files stored on the server
         /// </summary>
         /// <remarks>
         /// Service Name - S3Handling
@@ -106,27 +85,6 @@ namespace BrainCloud
         /// <param name="in_cbObject">
         /// The user object sent to the callback.
         /// </param>
-        /// <returns>  The JSON returned in the callback is as follows. 
-        /// {
-        ///     "status": 200,
-        ///     "fileDetails": [
-        ///         {
-        ///             "gameId": "12311331",
-        ///             "fileId": "3780516b-14f8-4055-8899-8eaab6ac7e82",
-        ///             "shortName": "Test Doc",
-        ///             "fileName": "testDoc.txt",
-        ///             "type": "g",
-        ///             "subType": "cust",
-        ///             "category": null,
-        ///             "fileSize": 4,
-        ///             "dateUploaded": 1437154770000,
-        ///             "relativeUrl": "/cust/testDoc.txt",
-        ///             "absoluteUrl": "http://internal.braincloudservers.com/s3/portal/g/12311331/cust/testDoc.txt",
-        ///             "md5Hash": "d41d8cd98f00b204e9800998ecf8427e"
-        ///         }
-        ///     ]
-        /// }
-        /// </returns>
         public void GetFileList(
             string in_category,
             SuccessCallback in_success = null,
@@ -142,6 +100,27 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
             ServerCall sc = new ServerCall(ServiceName.S3Handling, ServiceOperation.GetFileList, data, callback);
+            m_brainCloudClientRef.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Returns the CDN URL for a file
+        /// </summary>
+        /// <param name="fileId">ID of file</param>
+        /// <param name="success">The success callback</param>
+        /// <param name="failure">The failure callback</param>
+        /// <param name="cbObject">The callback object</param>
+        public void GetCDNUrl(
+            string fileId,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.S3HandlingServiceFileId.Value] = fileId;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.S3Handling, ServiceOperation.GetCdnUrl, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
     }

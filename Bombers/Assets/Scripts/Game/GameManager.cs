@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine.UI;
 using BrainCloudPhotonExample.Connection;
 using BrainCloudPhotonExample.Game.PlayerInput;
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Game
 {
@@ -110,7 +111,7 @@ namespace BrainCloudPhotonExample.Game
         {
 			if (!BrainCloudWrapper.GetBC().Initialized)
 			{
-				Application.LoadLevel("Connect");
+				SceneManager.LoadScene("Connect");
 				return;
 			}
 
@@ -1653,7 +1654,12 @@ namespace BrainCloudPhotonExample.Game
             int children = ship.transform.childCount;
             for (int i = 1; i < children; i++)
             {
-                ship.transform.GetChild(i).GetChild(0).GetChild(4).GetComponent<ParticleSystem>().enableEmission = false;
+                var particleSys = ship.transform.GetChild(i).GetChild(0).GetChild(4).GetComponent<ParticleSystem>();
+                if(particleSys)
+                {
+                    var emission = particleSys.emission;
+                    emission.enabled = false;
+                }
             }
 			try 
 			{

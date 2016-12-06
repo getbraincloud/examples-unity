@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System;
 using BrainCloud;
+using BrainCloudUnity;
 
 public class Build {
 	static string ARTIFACTS_FOLDER 		= "../autobuild/artifacts";

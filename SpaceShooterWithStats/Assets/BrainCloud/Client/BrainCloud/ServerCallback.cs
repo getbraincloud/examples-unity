@@ -1,6 +1,6 @@
 ﻿//----------------------------------------------------
 // brainCloud client source code
-// Copyright 2015 bitHeads, inc.
+// Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
 using System;
@@ -41,6 +41,11 @@ namespace BrainCloud
             {
                 m_fnFailureCallback(statusCode, reasonCode, statusMessage, m_cbObject);
             }
+        }
+
+        public bool AreCallbacksNull()
+        {
+            return m_fnSuccessCallback == null && m_fnFailureCallback == null;
         }
         #endregion
     }

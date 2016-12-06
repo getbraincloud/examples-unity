@@ -11,14 +11,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f3758f8f58fdef43803eb9be1df0608, type: 3}
   m_Name: PhotonServerSettings
   m_EditorClassIdentifier: 
-  HostType: 4
+  HostType: 1
   Protocol: 0
   ServerAddress: 
   ServerPort: 5055
   AppID: 5c254fca-c7ec-43c5-91ce-811969bd57fb
-  PreferredRegion: 1
+  VoiceAppID: 
+  PreferredRegion: 0
   EnabledRegions: -1
-  JoinLobby: 1
+  JoinLobby: 0
   EnableLobbyStatistics: 0
   RpcList:
   - AnnounceJoin
@@ -48,6 +49,7 @@ MonoBehaviour:
   - PunPickup
   - PunPickupSimple
   - PunRespawn
+  - RequestForPickupItems
   - RequestForPickupTimes
   - ResetGame
   - RespawnShipRPC

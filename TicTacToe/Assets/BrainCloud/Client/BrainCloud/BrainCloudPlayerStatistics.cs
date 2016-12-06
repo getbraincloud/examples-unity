@@ -1,6 +1,6 @@
 ﻿//----------------------------------------------------
 // brainCloud client source code
-// Copyright 2015 bitHeads, inc.
+// Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
 using System;
@@ -14,9 +14,9 @@ namespace BrainCloud
     public class BrainCloudPlayerStatistics
     {
         private BrainCloudClient m_brainCloudClientRef;
-        public BrainCloudPlayerStatistics(BrainCloudClient in_brainCloudClientRef)
+        public BrainCloudPlayerStatistics(BrainCloudClient brainCloudClientRef)
         {
-            m_brainCloudClientRef = in_brainCloudClientRef;
+            m_brainCloudClientRef = brainCloudClientRef;
         }
 
         /// <summary>
@@ -26,34 +26,21 @@ namespace BrainCloud
         /// Service Name - PlayerStatistics
         /// Service Operation - Read
         /// </remarks>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         /// </param>
-        /// <returns> The JSON returned in the callback is as follows:
-        /// {
-        ///   "status":200,
-        ///   "data":{
-        ///     "statistics":{
-        ///       "minions":0,
-        ///       "wood":50,
-        ///       "pantelons":3,
-        ///       "iron":0
-        ///     }
-        ///   }
-        /// }
-        /// </returns>
         public void ReadAllPlayerStats(
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.Read, null, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
@@ -65,44 +52,62 @@ namespace BrainCloud
         /// Service Name - PlayerStatistics
         /// Service Operation - ReadSubset
         /// </remarks>
-        /// <param name="in_jsonData">
-        /// The json data containing the subset of statistics to read:
-        /// ex. [ "pantaloons", "minions" ]
+        /// <param name="playerStats">
+        /// A list containing the subset of statistics to read.
         /// </param>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         /// </param>
-        /// <returns> JSON with the subset of global statistics:
-        /// {
-        ///   "status":200,
-        ///   "data":{
-        ///     "statisticsExceptions":{
-        ///     },
-        ///     "statistics":{
-        ///       "wood":11,
-        ///       "minions":1
-        ///     }
-        ///   }
-        /// }
-        /// </returns>
         public void ReadPlayerStatsSubset(
-            string in_jsonData,
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            IList<string> playerStats,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
-            object[] statsSubset = JsonReader.Deserialize<object[]>(in_jsonData);
-            data[OperationParam.PlayerStatisticsServiceStats.Value] = statsSubset;
+            data[OperationParam.PlayerStatisticsServiceStats.Value] = playerStats;
 
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.ReadSubset, data, callback);
+            m_brainCloudClientRef.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Method retrieves the player statistics for the given category.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - PlayerStatistics
+        /// Service Operation - READ_FOR_CATEGORY
+        /// </remarks>
+        /// <param name="category">
+        /// The player statistics category
+        /// </param>
+        /// <param name="success">
+        /// The success callback.
+        /// </param>
+        /// <param name="failure">
+        /// The failure callback.
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void ReadPlayerStatsForCategory(
+            string category,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.GamificationServiceCategory.Value] = category;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.ReadForCategory, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
 
@@ -114,28 +119,22 @@ namespace BrainCloud
         /// Service Operation - Reset
         ///
         /// </remarks>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         ///
         /// </param>
-        /// <returns> The JSON returned in the callback is as follows:
-        /// {
-        ///   "status":200,
-        ///   "data":null
-        /// }
-        /// </returns>
         public void ResetAllPlayerStats(
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.Reset, null, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
@@ -151,7 +150,7 @@ namespace BrainCloud
         /// Service Name - PlayerStatistics
         /// Service Operation - Update
         /// </remarks>
-        /// <param name="in_jsonData">
+        /// <param name="jsonData">
         /// The JSON encoded data to be sent to the server as follows:
         /// {
         ///   stat1: 10,
@@ -165,80 +164,26 @@ namespace BrainCloud
         /// }
         /// which increments stat1 by 9 up to a limit of 30.
         /// </param>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         /// </param>
-        /// <returns> JSON describing the new value of the statistics and any rewards that were triggered:
-        ///  {
-        ///    "status":200,
-        ///    "data":{
-        ///      "experiencePoints":10,
-        ///      "xpCapped":false,
-        ///      "rewardDetails":{
-        ///        "xp":{
-        ///          "experienceLevels":[
-        ///            {
-        ///              "level":1,
-        ///              "reward":{
-        ///                "currency":{
-        ///                  "gold":1000
-        ///                }
-        ///              }
-        ///            }
-        ///          ]
-        ///        }
-        ///      },
-        ///      "rewards":{
-        ///        "experienceLevels":[
-        ///          1
-        ///        ],
-        ///        "currency":{
-        ///          "gold":1000
-        ///        }
-        ///      },
-        ///      "experienceLevel":1,
-        ///      "statistics":{
-        ///        "LIVES":1
-        ///      },
-        ///      "currency":{
-        ///        "gems":{
-        ///          "purchased":0,
-        ///          "balance":10,
-        ///          "consumed":0,
-        ///          "awarded":10
-        ///        },
-        ///        "gold":{
-        ///          "purchased":0,
-        ///          "balance":2000,
-        ///          "consumed":0,
-        ///          "awarded":2000
-        ///        }
-        ///      }
-        ///    }
-        ///  }
-        /// </returns>
         public void IncrementPlayerStats(
-            string in_jsonData,
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            string jsonData,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
-            Dictionary<string, object> statsData = JsonReader.Deserialize<Dictionary<string, object>> (in_jsonData);
+            Dictionary<string, object> statsData = JsonReader.Deserialize<Dictionary<string, object>>(jsonData);
             data[OperationParam.PlayerStatisticsServiceStats.Value] = statsData;
 
-            SuccessCallback successCallbacks = m_brainCloudClientRef.GetGamificationService().CheckForAchievementsToAward;
-            if (in_success != null)
-            {
-                successCallbacks += in_success;
-            }
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(successCallbacks, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.Update, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
@@ -255,7 +200,7 @@ namespace BrainCloud
         /// Service Name - PlayerStatistics
         /// Service Operation - Update
         /// </remarks>
-        /// <param name="in_dictData">
+        /// <param name="dictData">
         /// Stats name and their increments:
         /// {
         ///  {"stat1", 10},
@@ -270,80 +215,66 @@ namespace BrainCloud
         /// }
         /// which increments stat1 by 9 up to a limit of 30.
         /// </param>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         /// </param>
-        /// <returns> JSON describing the new value of the statistics and any rewards that were triggered:
-        ///  {
-        ///    "status":200,
-        ///    "data":{
-        ///      "experiencePoints":10,
-        ///      "xpCapped":false,
-        ///      "rewardDetails":{
-        ///        "xp":{
-        ///          "experienceLevels":[
-        ///            {
-        ///              "level":1,
-        ///              "reward":{
-        ///                "currency":{
-        ///                  "gold":1000
-        ///                }
-        ///              }
-        ///            }
-        ///          ]
-        ///        }
-        ///      },
-        ///      "rewards":{
-        ///        "experienceLevels":[
-        ///          1
-        ///        ],
-        ///        "currency":{
-        ///          "gold":1000
-        ///        }
-        ///      },
-        ///      "experienceLevel":1,
-        ///      "statistics":{
-        ///        "LIVES":1
-        ///      },
-        ///      "currency":{
-        ///        "gems":{
-        ///          "purchased":0,
-        ///          "balance":10,
-        ///          "consumed":0,
-        ///          "awarded":10
-        ///        },
-        ///        "gold":{
-        ///          "purchased":0,
-        ///          "balance":2000,
-        ///          "consumed":0,
-        ///          "awarded":2000
-        ///        }
-        ///      }
-        ///    }
-        ///  }
-        /// </returns>
         public void IncrementPlayerStats(
-            Dictionary<string, object> in_dictData,
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            Dictionary<string, object> dictData,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
-            data[OperationParam.PlayerStatisticsServiceStats.Value] = in_dictData;
+            data[OperationParam.PlayerStatisticsServiceStats.Value] = dictData;
 
-            SuccessCallback successCallbacks = m_brainCloudClientRef.GetGamificationService().CheckForAchievementsToAward;
-            if (in_success != null)
-            {
-                successCallbacks += in_success;
-            }
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(successCallbacks, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.Update, data, callback);
+            m_brainCloudClientRef.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Apply statistics grammar to a partial set of statistics.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - playerStatistics
+        /// Service Operation - PROCESS_STATISTICS
+        /// </remarks>
+        /// <param name="statisticsData">
+        /// Example data to be passed to method:
+        /// {
+        ///     "DEAD_CATS": "RESET",
+        ///     "LIVES_LEFT": "SET#9",
+        ///     "MICE_KILLED": "INC#2",
+        ///     "DOG_SCARE_BONUS_POINTS": "INC#10",
+        ///     "TREES_CLIMBED": 1
+        /// }
+        /// </param>
+        /// <param name="success">
+        /// The success callback
+        /// </param>
+        /// <param name="failure">
+        /// The failure callback
+        /// </param>
+        /// <param name="cbObject">
+        /// The callback object
+        /// </param>
+        public void ProcessStatistics(
+            Dictionary<string, object> statisticsData,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.PlayerStatisticsServiceStats.Value] = statisticsData;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.ProcessStatistics, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
 
@@ -354,50 +285,21 @@ namespace BrainCloud
         /// Service Name - PlayerStatistics
         /// Service Operation - ReadNextXpLevel
         /// </remarks>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         /// </param>
-        /// <returns> JSON describing the next experience level for the player.
-        /// {
-        ///   "status":200,
-        ///   "data":{
-        ///     "xp_level":{
-        ///       "gameId":"com.bitheads.unityexample",
-        ///       "numericLevel":2,
-        ///       "experience":20,
-        ///       "reward":{
-        ///         "globalGameStatistics":null,
-        ///         "experiencePoints":null,
-        ///         "playerStatistics":null,
-        ///         "achievement":null,
-        ///         "currencies":{
-        ///           "gems":10,
-        ///           "gold":2000
-        ///         }
-        ///       },
-        ///       "facebookAction":"",
-        ///       "statusTitle":"Jester",
-        ///       "key":{
-        ///         "gameId":"com.bitheads.unityexample",
-        ///         "numericLevel":2,
-        ///         "primaryKey":true
-        ///       }
-        ///     }
-        ///   }
-        /// }
-        /// </returns>
         public void GetNextExperienceLevel(
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(in_success, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.ReadNextXpLevel, null, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
@@ -410,54 +312,28 @@ namespace BrainCloud
         /// Service Name - PlayerStatistics
         /// Service Operation - Update
         /// </remarks>
-        /// <param name="in_xpValue">
+        /// <param name="xpValue">
         /// The amount to increase the player's experience by
         /// </param>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         /// </param>
-        /// <returns> JSON describing the player's .
-        /// {
-        ///   "status":200,
-        ///   "data":{
-        ///     "statisticsExceptions":{
-        ///     },
-        ///     "milestones":{
-        ///     },
-        ///     "experiencePoints":110,
-        ///     "quests":{
-        ///     },
-        ///     "experienceLevel":1,
-        ///     "statistics":{
-        ///       "minions":0,
-        ///       "wood":50,
-        ///       "pantelons":3,
-        ///       "iron":0
-        ///     }
-        ///   }
-        /// }
-        /// </returns>
         public void IncrementExperiencePoints(
-            int in_xpValue,
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            int xpValue,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
-            data[OperationParam.PlayerStatisticsExperiencePoints.Value] = in_xpValue;
+            data[OperationParam.PlayerStatisticsExperiencePoints.Value] = xpValue;
 
-            SuccessCallback successCallbacks = m_brainCloudClientRef.GetGamificationService().CheckForAchievementsToAward;
-            if (in_success != null)
-            {
-                successCallbacks += in_success;
-            }
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(successCallbacks, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.Update, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }
@@ -471,39 +347,28 @@ namespace BrainCloud
         /// Service Name - PlayerStatistics
         /// Service Operation - SetXpPoints
         /// </remarks>
-        /// <param name="in_xpValue">
+        /// <param name="xpValue">
         /// The amount to set the the player's experience to
         /// </param>
-        /// <param name="in_success">
+        /// <param name="success">
         /// The success callback
         /// </param>
-        /// <param name="in_failure">
+        /// <param name="failure">
         /// The failure callback
         /// </param>
-        /// <param name="in_cbObject">
+        /// <param name="cbObject">
         /// The callback object
         /// </param>
-        /// <returns> The JSON returned in the callback is as follows.
-        /// {
-        ///   "status":200,
-        ///   "data":null
-        /// }
-        /// </returns>
         public void SetExperiencePoints(
-            int in_xpValue,
-            SuccessCallback in_success = null,
-            FailureCallback in_failure = null,
-            object in_cbObject = null)
+            int xpValue,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
-            data[OperationParam.PlayerStatisticsExperiencePoints.Value] = in_xpValue;
+            data[OperationParam.PlayerStatisticsExperiencePoints.Value] = xpValue;
 
-            SuccessCallback successCallbacks = m_brainCloudClientRef.GetGamificationService().CheckForAchievementsToAward;
-            if (in_success != null)
-            {
-                successCallbacks += in_success;
-            }
-            ServerCallback callback = BrainCloudClient.CreateServerCallback(successCallbacks, in_failure, in_cbObject);
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.PlayerStatistics, ServiceOperation.SetXpPoints, data, callback);
             m_brainCloudClientRef.SendRequest(sc);
         }

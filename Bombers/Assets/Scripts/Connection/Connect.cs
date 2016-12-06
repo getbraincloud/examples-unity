@@ -2,6 +2,7 @@
 using LitJson;
 using BrainCloudPhotonExample.Game;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Connection
 {
@@ -210,7 +211,7 @@ namespace BrainCloudPhotonExample.Connection
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadGlobalProperties();
             PhotonNetwork.sendRate = 20;
-            Application.LoadLevel("Matchmaking");
+            SceneManager.LoadScene("Matchmaking");
         }
 
         public void OnError_Authenticate(int a, int b, string responseData, object cbObject)
