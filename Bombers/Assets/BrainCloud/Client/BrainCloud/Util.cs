@@ -132,19 +132,12 @@ namespace BrainCloud
         public static double GetUTCOffsetForCurrentTimeZone()
         {
             double utcOffset = 0;
-            try
-            {
-                TimeZone localZone = TimeZone.CurrentTimeZone;
-                DateTime baseUTC = new DateTime();
-                // Calculate the local time and UTC offset.
-                DateTime localTime = localZone.ToLocalTime(baseUTC);
-                TimeSpan localOffset = localZone.GetUtcOffset(localTime);
-                utcOffset = localOffset.TotalHours;
-            }
-            catch (Exception)
-            {
-                // what to do now?
-            }
+            TimeZone localZone = TimeZone.CurrentTimeZone;
+            DateTime baseUTC = new DateTime();
+            // Calculate the local time and UTC offset.
+            DateTime localTime = localZone.ToLocalTime(baseUTC);
+            TimeSpan localOffset = localZone.GetUtcOffset(localTime);
+            utcOffset = localOffset.TotalHours;
             return utcOffset;
         }
 

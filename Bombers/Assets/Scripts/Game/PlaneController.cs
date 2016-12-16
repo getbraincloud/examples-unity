@@ -120,6 +120,8 @@ namespace BrainCloudPhotonExample.Game
         private ParticleSystem m_rightContrail;
         private List<GameObject> m_planeDamage;
 
+        private Rigidbody m_rigidobdy;
+
 
         public class TimePosition
         {
@@ -243,16 +245,17 @@ namespace BrainCloudPhotonExample.Game
 
                     m_bezierTime = properBezierTime;
                 }
-                yield return new WaitForSeconds(((float)(1000 / PhotonNetwork.sendRate)) / 1000);
+                yield return YieldFactory.GetWaitForSeconds(((float)(1000 / PhotonNetwork.sendRate)) / 1000);
             }
         }
 
         void Start()
         {
+            m_rigidobdy = GetComponent<Rigidbody>();
 
             m_bezierTime = 0.0f;
-            m_planeDamage = new List<GameObject>() 
-            { 
+            m_planeDamage = new List<GameObject>()
+            {
                 null, null, null, null
             };
             transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = GetComponent<PhotonView>().owner.customProperties["RoomDisplayName"].ToString();
@@ -399,11 +402,11 @@ namespace BrainCloudPhotonExample.Game
                 if (m_bezierTime > 1) m_bezierTime = 1;
 
                 m_lastBezierPoint = CalculateBezierPoint(m_bezierTime, m_lastBezierPoint, m_photonPositions[1], m_photonPositions[2], m_photonPositions[3]);
-                GetComponent<Rigidbody>().MovePosition(Vector3.Lerp(transform.position, m_lastBezierPoint, 11 * Time.smoothDeltaTime));
+                m_rigidobdy.MovePosition(Vector3.Lerp(transform.position, m_lastBezierPoint, 11 * Time.smoothDeltaTime));
                 transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(new Vector3(0, 0, m_photonRotations[0])), Time.smoothDeltaTime * 20);
             }
 
-            Vector3 direction = GetComponent<Rigidbody>().velocity;
+            Vector3 direction = m_rigidobdy.velocity;
 
             if (direction == Vector3.zero)
             {
@@ -464,10 +467,10 @@ namespace BrainCloudPhotonExample.Game
 
         public void Accelerate(float aAcceleration, float aSpeedMultiplier)
         {
-            GetComponent<Rigidbody>().AddForce(transform.up * aAcceleration * aSpeedMultiplier);
-            if (GetComponent<Rigidbody>().velocity.magnitude > 30 * aSpeedMultiplier)
+            m_rigidobdy.AddForce(transform.up * aAcceleration * aSpeedMultiplier);
+            if (m_rigidobdy.velocity.magnitude > 30 * aSpeedMultiplier)
             {
-                GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity.normalized * 30 * aSpeedMultiplier;
+                m_rigidobdy.velocity = m_rigidobdy.velocity.normalized * 30 * aSpeedMultiplier;
             }
         }
 
@@ -478,7 +481,7 @@ namespace BrainCloudPhotonExample.Game
                 m_lastPositions[i] = m_lastPositions[i + 1];
             }
 
-            Vector3 direction = GetComponent<Rigidbody>().velocity;
+            Vector3 direction = m_rigidobdy.velocity;
 
             if (direction == Vector3.zero)
             {

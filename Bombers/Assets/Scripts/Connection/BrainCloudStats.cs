@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using LitJson;
-using System;
 using System.Collections.Generic;
 
 namespace BrainCloudPhotonExample.Connection
@@ -23,6 +21,11 @@ namespace BrainCloudPhotonExample.Connection
                 m_description = aDesc;
                 m_achieved = aAchieved;
             }
+        }
+
+        public static BrainCloudStats Instance
+        {
+            get { return s_instance; }
         }
 
         //Player Properties
@@ -71,6 +74,7 @@ namespace BrainCloudPhotonExample.Connection
         public JsonData m_leaderboardData;
 
         public static BrainCloudStats s_instance;
+
         void Awake()
         {
             if (s_instance)
@@ -84,7 +88,7 @@ namespace BrainCloudPhotonExample.Connection
         public void GetLeaderboard(string aLeaderboardID)
         {
             m_leaderboardReady = false;
-			GetLeaderboardPage(aLeaderboardID, 0, 100);
+            GetLeaderboardPage(aLeaderboardID, 0, 100);
         }
 
         public void GetLeaderboardPage(string aLeaderboardID, int aIndex, int aSecondIndex)
@@ -188,8 +192,8 @@ namespace BrainCloudPhotonExample.Connection
                     if (!m_achievements[i].m_achieved)
                     {
                         m_achievements[i].m_achieved = true;
-						string[] achArray = new string[] {m_achievements[i].m_id};
-						BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(achArray, null, null, null);
+                        string[] achArray = new string[] { m_achievements[i].m_id };
+                        BrainCloudWrapper.GetBC().GamificationService.AwardAchievements(achArray, null, null, null);
                         GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                     }
                     break;
@@ -238,20 +242,19 @@ namespace BrainCloudPhotonExample.Connection
         {
             // Build the statistics name/inc value dictionary
             Dictionary<string, object> stats = new Dictionary<string, object> {
-			{"gamesPlayed", gamesPlayed},
-			{"gamesWon", gamesWon},
-			{"timesDestroyed", timesDestroyed},
+            {"gamesPlayed", gamesPlayed},
+            {"gamesWon", gamesWon},
+            {"timesDestroyed", timesDestroyed},
             {"shotsFired", shotsFired},
             {"bombsDropped", bombsDropped},
             {"planesDestroyed", planesDestroyed},
             {"carriersDestroyed", carriersDestroyed},
             {"bombsHit", bombsHit}
-		};
+        };
 
             // Send to the cloud
             BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementPlayerStats(
                 stats, StatsSuccess_Callback, StatsFailure_Callback, null);
-
         }
 
         public void IncrementExperienceToBrainCloud(int aExperience)
@@ -267,31 +270,32 @@ namespace BrainCloudPhotonExample.Connection
 
             m_playerLevel = int.Parse(entries["experienceLevel"].ToString());
             m_playerExperience = int.Parse(entries["experiencePoints"].ToString());
-            try
+
+            if (entries.Keys.Contains("rewardDetails"))
             {
-                //assuming the player only leveled up once
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayRankUp(int.Parse(entries["rewardDetails"]["xp"]["experienceLevels"][0]["level"].ToString()));
-            }
-            catch (KeyNotFoundException)
-            {
-                //didn't level up
+                JsonData rewardDetails = entries["rewardDetails"];
+                if (rewardDetails.Keys.Contains("xp"))
+                {
+                    var xp = rewardDetails["xp"];
+
+                    if (xp.Keys.Contains("experienceLevels"))
+                    {
+                        var levels = xp["experienceLevels"];
+                        if (levels.Count > 0)
+                        {
+                            var dialogDisplay = GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>();
+                            dialogDisplay.DisplayRankUp(int.Parse(rewardDetails["xp"]["experienceLevels"][0]["level"].ToString()));
+                        }
+                    }
+                }
             }
 
-
-            try
+            if (entries.Keys.Contains("entities"))
             {
-                m_previousGameName = entries["entities"][0]["data"]["gameName"].ToString();
-                //assuming the player has a saved game name
+                var entities = entries["entities"];
+                if (entities.Count > 0)
+                    m_previousGameName = entries["entities"][0]["data"]["gameName"].ToString();
             }
-            catch (KeyNotFoundException)
-            {
-                //doesn't have a previous game
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-
-            }
-            
         }
 
         private void StateFailure_Callback(int a, int b, string responseData, object cbObject)
@@ -332,25 +336,33 @@ namespace BrainCloudPhotonExample.Connection
             m_statGamesWon = int.Parse(entries["gamesWon"].ToString());
             m_statBombsHit = int.Parse(entries["bombsHit"].ToString());
 
-            try
+            if (entries.Keys.Contains("rewardDetails"))
             {
-                //assuming the player received an achievement
-                int achievementID = int.Parse(jsonData["data"]["rewardDetails"]["milestones"][0]["rewards"]["achievement"].ToString());
-                for (int i=0;i<m_achievements.Count;i++)
+                JsonData rewardDetails = entries["rewardDetails"];
+                if (rewardDetails.Keys.Contains("milestones"))
                 {
-                    if (m_achievements[i].m_id == achievementID.ToString())
+                    var milestones = rewardDetails["milestones"];
+                    if (milestones.Count > 0)
                     {
-                        GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(achievementID, m_achievements[i].m_name, m_achievements[i].m_description);
+
+                        var rewards = rewardDetails["milestones"][0]["rewards"];
+
+                        if (rewards.Count > 0 && rewards.Keys.Contains("achievement"))
+                        {
+                            //assuming the player received an achievement
+                            int achievementID = int.Parse(rewards["achievement"].ToString());
+
+                            for (int i = 0; i < m_achievements.Count; i++)
+                            {
+                                if (m_achievements[i].m_id == achievementID.ToString())
+                                {
+                                    var dialogDisplay = GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>();
+                                    dialogDisplay.DisplayAchievement(achievementID, m_achievements[i].m_name, m_achievements[i].m_description);
+                                }
+                            }
+                        }
                     }
                 }
-            }
-            catch (KeyNotFoundException)
-            {
-                //no achievements awarded
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                //no achievements awarded
             }
         }
 
