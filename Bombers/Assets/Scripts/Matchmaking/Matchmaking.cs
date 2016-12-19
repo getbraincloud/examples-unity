@@ -65,7 +65,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         private GameObject m_roomsScrollBar;
 
         private GameObject m_leaderboardWindow;
-        private GameObject m_scoreText;
+        private Text m_scoreText;
         [SerializeField]
         private GameObject m_scoreRect;
 
@@ -85,20 +85,39 @@ namespace BrainCloudPhotonExample.Matchmaking
         private GameObject m_achievementsWindow;
 
         private Dictionary<string, bool> m_roomFilters = new Dictionary<string, bool>()
-    {
-        {"HideFull",false},
-        {"HideLevelRange", false}
-    };
+        {
+            {"HideFull",false},
+            {"HideLevelRange", false}
+        };
 
         private string m_filterName = "";
 
-        void Start()
+        private InputField m_playerName;
+        private Image m_playerNameImage;
+        private DialogDisplay m_dialogDisplay;
+
+        private Image m_acesTabImg;
+        private Text m_acesTabText;
+        private Image m_bombersTabImg;
+        private Text m_bombersTabText;
+
+        private void Start()
         {
             if (!BrainCloudWrapper.GetBC().Initialized)
             {
                 SceneManager.LoadScene("Connect");
                 return;
             }
+
+            m_playerName = GameObject.Find("PlayerName").GetComponent<InputField>();
+            m_playerNameImage = GameObject.Find("PlayerName").GetComponent<Image>();
+            m_dialogDisplay = GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>();
+
+            m_acesTabImg = GameObject.Find("Aces Tab").GetComponent<Image>();
+            m_acesTabText = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>();
+            m_bombersTabImg = GameObject.Find("Bombers Tab").GetComponent<Image>();
+            m_bombersTabText = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>();
+
             m_selectedTabColor = GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color;
             m_tabColor = GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color;
 
@@ -112,7 +131,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_joiningGameWindow = GameObject.Find("JoiningGame");
             m_joiningGameWindow.SetActive(false);
             m_leaderboardWindow = GameObject.Find("Leaderboard");
-            m_scoreText = GameObject.Find("SCORE");
+            m_scoreText = GameObject.Find("SCORE").GetComponent<Text>();
             m_basePresetButton = GameObject.Find("PresetButton");
             m_baseSizeButton = GameObject.Find("SizeButton");
             m_basePresetButton.SetActive(false);
@@ -124,9 +143,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_leaderboardWindow.SetActive(false);
             m_controlWindow = GameObject.Find("Controls");
             m_controlWindow.SetActive(false);
-
-            PhotonNetwork.JoinLobby();
-
+            
             for (int i = 0; i < m_mapPresets.Count; i++)
             {
                 GameObject presetButton = (GameObject)Instantiate(m_basePresetButton, m_basePresetButton.transform.position, m_basePresetButton.transform.rotation);
@@ -160,27 +177,30 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_createGameWindow = GameObject.Find("CreateGame");
 
             m_createGameWindow.SetActive(false);
-            GameObject.Find("PlayerName").GetComponent<InputField>().text = PhotonNetwork.player.name;
-            GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
-            OnRoomsWindow();
+            m_playerName.text = PhotonNetwork.player.name;
+            m_playerName.interactable = false;
+
+            PhotonNetwork.JoinLobby();
+
+            BrainCloudStats.Instance.ReadStatistics();
+            BrainCloudStats.Instance.GetLeaderboard(m_currentLeaderboardID);
+           // OnRoomsWindow();
         }
 
         public void EditName()
         {
-            GameObject.Find("PlayerName").GetComponent<InputField>().interactable = true;
-            GameObject.Find("PlayerName").GetComponent<InputField>().ActivateInputField();
-            GameObject.Find("PlayerName").GetComponent<InputField>().Select();
-            GameObject.Find("PlayerName").GetComponent<Image>().enabled = true;
+            m_playerName.interactable = true;
+            m_playerName.ActivateInputField();
+            m_playerName.Select();
+            m_playerNameImage.enabled = true;
         }
 
         public void FinishEditName()
         {
-            PhotonNetwork.player.name = GameObject.Find("PlayerName").GetComponent<InputField>().text;
-            BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(GameObject.Find("PlayerName").GetComponent<InputField>().text);
-            GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
-            GameObject.Find("PlayerName").GetComponent<Image>().enabled = false;
+            PhotonNetwork.player.name = m_playerName.text;
+            BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(m_playerName.text);
+            m_playerName.interactable = false;
+            m_playerNameImage.enabled = false;
         }
 
         void OnGUI()
@@ -257,7 +277,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
                     m_joiningGameWindow.SetActive(false);
-                    if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_achievements[2].m_achieved)
+                    if (BrainCloudStats.Instance.m_achievements[2].m_achieved)
                     {
                         m_achievementsWindow.transform.GetChild(3).GetComponent<CanvasGroup>().alpha = 1;
                         m_achievementsWindow.transform.GetChild(3).GetChild(0).gameObject.SetActive(true);
@@ -268,7 +288,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                         m_achievementsWindow.transform.GetChild(3).GetChild(0).gameObject.SetActive(false);
                     }
 
-                    if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_achievements[1].m_achieved)
+                    if (BrainCloudStats.Instance.m_achievements[1].m_achieved)
                     {
                         m_achievementsWindow.transform.GetChild(4).GetComponent<CanvasGroup>().alpha = 1;
                         m_achievementsWindow.transform.GetChild(4).GetChild(0).gameObject.SetActive(true);
@@ -279,7 +299,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                         m_achievementsWindow.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
                     }
 
-                    if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_achievements[0].m_achieved)
+                    if (BrainCloudStats.Instance.m_achievements[0].m_achieved)
                     {
                         m_achievementsWindow.transform.GetChild(5).GetComponent<CanvasGroup>().alpha = 1;
                         m_achievementsWindow.transform.GetChild(5).GetChild(0).gameObject.SetActive(true);
@@ -301,15 +321,15 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void OnStatsWindow()
         {
-            List<BrainCloudStats.Stat> playerStats = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats();
+            List<BrainCloudStats.Stat> playerStats = BrainCloudStats.Instance.GetStats();
             string rank = "";
-            if (playerStats[0].m_statValue >= GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles.Length)
+            if (playerStats[0].m_statValue >= BrainCloudStats.Instance.m_playerLevelTitles.Length)
             {
                 rank = "0" + "\n" + playerStats[1].m_statValue.ToString();
             }
             else
             {
-                rank = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerLevelTitles[playerStats[0].m_statValue - 1] + " (" + (playerStats[0].m_statValue) + ")\n" + playerStats[1].m_statValue.ToString();
+                rank = BrainCloudStats.Instance.m_playerLevelTitles[playerStats[0].m_statValue - 1] + " (" + (playerStats[0].m_statValue) + ")\n" + playerStats[1].m_statValue.ToString();
             }
             string stats = playerStats[3].m_statValue.ToString() + "\n" + playerStats[2].m_statValue.ToString() + "\n" + playerStats[4].m_statValue.ToString()
                 + "\n" + playerStats[5].m_statValue.ToString() + "\n" + playerStats[6].m_statValue.ToString()
@@ -326,7 +346,6 @@ namespace BrainCloudPhotonExample.Matchmaking
         {
             CloseDropDowns();
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            RefreshRoomsList();
         }
 
         public void ConfirmCreateGame()
@@ -417,7 +436,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         {
             int minLevel = 0;
             int maxLevel = 50;
-            int playerLevel = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats()[0].m_statValue;
+            int playerLevel = BrainCloudStats.Instance.GetStats()[0].m_statValue;
 
             if (aRoomInfo.customProperties["roomMinLevel"] != null)
             {
@@ -431,7 +450,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             if (playerLevel < minLevel || playerLevel > maxLevel)
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You're not in that room's\nlevel range!");
+                m_dialogDisplay.DisplayDialog("You're not in that room's\nlevel range!");
             }
             else if (aRoomInfo.playerCount < aRoomInfo.maxPlayers)
             {
@@ -439,20 +458,13 @@ namespace BrainCloudPhotonExample.Matchmaking
                 if (!PhotonNetwork.JoinRoom(aRoomInfo.name))
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
+                    m_dialogDisplay.DisplayDialog("Could not join room!");
                 }
             }
             else
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("That room is full!");
+                m_dialogDisplay.DisplayDialog("That room is full!");
             }
-        }
-
-        public void RefreshRoomsList()
-        {
-            m_refreshLabel.GetComponent<Text>().text = "Refreshing List...";
-            Debug.Log("Refreshing rooms...");
-            OnRoomsWindow();
         }
 
         void OrderRoomButtons()
@@ -463,7 +475,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             int minLevel = 0;
             int maxLevel = 50;
-            int playerLevel = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats()[0].m_statValue;
+            int playerLevel = BrainCloudStats.Instance.GetStats()[0].m_statValue;
 
             for (int i = 0; i < m_roomButtons.Count; i++)
             {
@@ -504,7 +516,6 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             m_roomButtons.Clear();
             RoomInfo[] rooms = PhotonNetwork.GetRoomList();
-            Debug.Log("Retrieved " + rooms.Length + " rooms from Photon");
 
             for (int i = 0; i < rooms.Length; i++)
             {
@@ -552,26 +563,25 @@ namespace BrainCloudPhotonExample.Matchmaking
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_LEADERBOARDS;
             m_leaderboardReady = false;
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
+            BrainCloudStats.Instance.GetLeaderboard(m_currentLeaderboardID);
         }
 
         public void CloseLeaderboard()
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            RefreshRoomsList();
         }
 
         public void ShowKDRLeaderboard()
         {
             if (m_currentLeaderboardID != "KDR")
             {
-                GameObject.Find("Aces Tab").GetComponent<Image>().sprite = m_selectedTabSprite;
-                GameObject.Find("Bombers Tab").GetComponent<Image>().sprite = m_tabSprite;
-                GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color = m_selectedTabColor;
-                GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color = m_tabColor;
+                m_acesTabImg.sprite = m_selectedTabSprite;
+                m_bombersTabImg.sprite = m_tabSprite;
+                m_acesTabText.color = m_selectedTabColor;
+                m_bombersTabText.color = m_tabColor;
                 m_leaderboardReady = false;
                 m_currentLeaderboardID = "KDR";
-                GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
+                BrainCloudStats.Instance.GetLeaderboard(m_currentLeaderboardID);
             }
         }
 
@@ -579,13 +589,13 @@ namespace BrainCloudPhotonExample.Matchmaking
         {
             if (m_currentLeaderboardID != "BDR")
             {
-                GameObject.Find("Bombers Tab").GetComponent<Image>().sprite = m_selectedTabSprite;
-                GameObject.Find("Aces Tab").GetComponent<Image>().sprite = m_tabSprite;
-                GameObject.Find("Aces Tab").transform.GetChild(0).GetComponent<Text>().color = m_tabColor;
-                GameObject.Find("Bombers Tab").transform.GetChild(0).GetComponent<Text>().color = m_selectedTabColor;
+                m_bombersTabImg.sprite = m_selectedTabSprite;
+                m_acesTabImg.sprite = m_tabSprite;
+                m_acesTabText.color = m_tabColor;
+                m_bombersTabText.color = m_selectedTabColor;
                 m_leaderboardReady = false;
                 m_currentLeaderboardID = "BDR";
-                GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
+                BrainCloudStats.Instance.GetLeaderboard(m_currentLeaderboardID);
             }
         }
 
@@ -597,14 +607,13 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void HideControls()
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            RefreshRoomsList();
         }
 
         private bool m_once = true;
 
         void OnLeaderboardWindow()
         {
-            if (GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_leaderboardReady)
+            if (BrainCloudStats.Instance.m_leaderboardReady)
             {
                 if (!m_leaderboardReady) m_once = false;
                 m_leaderboardReady = true;
@@ -618,14 +627,14 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             if (m_currentLeaderboardID == "KDR")
             {
-                m_scoreText.GetComponent<Text>().text = "KILLS";
+                m_scoreText.text = "KILLS";
             }
             else
             {
-                m_scoreText.GetComponent<Text>().text = "TARGETS HIT";
+                m_scoreText.text = "TARGETS HIT";
             }
 
-            LitJson.JsonData leaderboardData = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_leaderboardData;
+            LitJson.JsonData leaderboardData = BrainCloudStats.Instance.m_leaderboardData;
 
             string leaderboardRankText = "";
             string leaderboardNameText = "";
@@ -709,13 +718,23 @@ namespace BrainCloudPhotonExample.Matchmaking
         void OnPhotonJoinRoomFailed()
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Could not join room!");
+            m_dialogDisplay.DisplayDialog("Could not join room!");
         }
 
         void OnJoinedRoom()
         {
             PhotonNetwork.automaticallySyncScene = true;
             PhotonNetwork.LoadLevel("Game");
+        }
+
+        void OnReceivedRoomListUpdate()
+        {
+            OnRoomsWindow();
+        }
+
+        void OnConnectedToMaster()
+        {
+            PhotonNetwork.JoinLobby();
         }
 
         public void QuitToLogin()
@@ -728,7 +747,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void CreateGame()
         {
             m_state = eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS;
-            m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_previousGameName;
+            m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text = BrainCloudStats.Instance.m_previousGameName;
         }
 
         void Update()
@@ -766,12 +785,12 @@ namespace BrainCloudPhotonExample.Matchmaking
             if (roomExists)
             {
 
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("There's already a room named " + aName + "!");
+                m_dialogDisplay.DisplayDialog("There's already a room named " + aName + "!");
                 m_roomName = "";
                 return;
             }
 
-            int playerLevel = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats()[0].m_statValue;
+            int playerLevel = BrainCloudStats.Instance.GetStats()[0].m_statValue;
 
             if (m_roomLevelRangeMin < 0)
             {
@@ -813,7 +832,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             aOptions.CustomRoomProperties = customProperties;
             aOptions.CustomRoomPropertiesForLobby = new string[] { "roomMinLevel", "roomMaxLevel", "IsPlaying" };
             BrainCloudWrapper.GetBC().EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + aName + "\"}", null, -1, null, null, null);
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
+            BrainCloudStats.Instance.ReadStatistics();
             m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
             PhotonNetwork.CreateRoom(aName, aOptions, TypedLobby.Default);
         }
