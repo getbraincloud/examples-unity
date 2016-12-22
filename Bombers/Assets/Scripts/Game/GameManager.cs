@@ -1130,22 +1130,24 @@ namespace BrainCloudPhotonExample.Game
                     }
 
                     ship = PhotonNetwork.Instantiate("Ship", position, Quaternion.Euler(0, 0, Random.Range(0.0f, 360.0f)), 0);
+                    
+                    var shipController = ship.GetComponent<ShipController>();
                     switch (shipIndex)
                     {
                         case 0:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CARRIER, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_CARRIER, (shipID % 2) + 1, shipID);
                             break;
                         case 1:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_BATTLESHIP, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_BATTLESHIP, (shipID % 2) + 1, shipID);
                             break;
                         case 2:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CRUISER, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_CRUISER, (shipID % 2) + 1, shipID);
                             break;
                         case 3:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_PATROLBOAT, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_PATROLBOAT, (shipID % 2) + 1, shipID);
                             break;
                         case 4:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
                             break;
                     }
 
@@ -1702,95 +1704,33 @@ namespace BrainCloudPhotonExample.Game
             {
 
             }
-            GameObject explosion;
-            GameObject prefab;
 
-            if (aBombInfo != null
-                && aBombInfo.m_shooter != null
-                && aBombInfo.m_shooter.customProperties != null)
+            int bomberTeam = (int)aBombInfo.m_shooter.customProperties["Team"];
+            GameObject prefab = null;
+            
+            switch (ship.GetShipType())
             {
-                switch (ship.GetShipType())
-                {
-                    case ShipController.eShipType.SHIP_TYPE_CARRIER:
-                        if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
-                        {
-                            shipName += "Red ";
-                            prefab = m_carrierExplosion02;
-                        }
-                        else
-                        {
-                            shipName += "Green ";
-                            prefab = m_carrierExplosion01;
-                        }
-                        explosion = (GameObject)Instantiate(prefab, ship.transform.position, ship.transform.rotation);
-                        explosion.GetComponent<AudioSource>().Play();
-                        shipName += "Carrier";
-                        break;
+                case ShipController.eShipType.SHIP_TYPE_CARRIER:
+                    prefab = bomberTeam == 1 ? m_carrierExplosion02 : m_carrierExplosion01;
+                    break;
+                case ShipController.eShipType.SHIP_TYPE_BATTLESHIP:
+                    prefab = bomberTeam == 1 ? m_battleshipExplosion02 : m_battleshipExplosion01;
+                    break;
+                case ShipController.eShipType.SHIP_TYPE_CRUISER:
+                    prefab = bomberTeam == 1 ? m_cruiserExplosion02 : m_cruiserExplosion01;
+                    break;
+                case ShipController.eShipType.SHIP_TYPE_PATROLBOAT:
+                    prefab = bomberTeam == 1 ? m_patrolBoatExplosion02 : m_patrolBoatExplosion01;
+                    break;
+                case ShipController.eShipType.SHIP_TYPE_DESTROYER:
+                    prefab = bomberTeam == 1 ? m_destroyerExplosion02 : m_destroyerExplosion01;
+                    break;
+            }
 
-                    case ShipController.eShipType.SHIP_TYPE_BATTLESHIP:
-                        if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
-                        {
-                            shipName += "Red ";
-                            prefab = m_battleshipExplosion02;
-                        }
-                        else
-                        {
-                            shipName += "Green ";
-                            prefab = m_battleshipExplosion01;
-                        }
-                        explosion = (GameObject)Instantiate(prefab, ship.transform.position, ship.transform.rotation);
-                        explosion.GetComponent<AudioSource>().Play();
-                        shipName += "Battleship";
-                        break;
-
-                    case ShipController.eShipType.SHIP_TYPE_CRUISER:
-                        if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
-                        {
-                            shipName += "Red ";
-                            prefab = m_cruiserExplosion02;
-                        }
-                        else
-                        {
-                            shipName += "Green ";
-                            prefab = m_cruiserExplosion01;
-                        }
-                        explosion = (GameObject)Instantiate(prefab, ship.transform.position, ship.transform.rotation);
-                        explosion.GetComponent<AudioSource>().Play();
-                        shipName += "Cruiser";
-                        break;
-
-                    case ShipController.eShipType.SHIP_TYPE_PATROLBOAT:
-                        if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
-                        {
-                            shipName += "Red ";
-                            prefab = m_patrolBoatExplosion02;
-                        }
-                        else
-                        {
-                            shipName += "Green ";
-                            prefab = m_patrolBoatExplosion01;
-                        }
-                        explosion = (GameObject)Instantiate(prefab, ship.transform.position, ship.transform.rotation);
-                        explosion.GetComponent<AudioSource>().Play();
-                        shipName += "Patrol Boat";
-                        break;
-
-                    case ShipController.eShipType.SHIP_TYPE_DESTROYER:
-                        if ((int)aBombInfo.m_shooter.customProperties["Team"] == 1)
-                        {
-                            shipName += "Red ";
-                            prefab = m_destroyerExplosion02;
-                        }
-                        else
-                        {
-                            shipName += "Green ";
-                            prefab = m_destroyerExplosion01;
-                        }
-                        explosion = (GameObject)Instantiate(prefab, ship.transform.position, ship.transform.rotation);
-                        explosion.GetComponent<AudioSource>().Play();
-                        shipName += "Destroyer";
-                        break;
-                }
+            if (prefab != null)
+            {
+                GameObject explosion = (GameObject)Instantiate(prefab, ship.transform.position, ship.transform.rotation);
+                explosion.GetComponent<AudioSource>().Play();
             }
 
             if (PhotonNetwork.isMasterClient)
