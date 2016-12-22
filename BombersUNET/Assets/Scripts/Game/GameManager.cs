@@ -2,7 +2,7 @@
  * The GameManager class is mainly used by the server, as none of its functions can be called on the client side. It 
  * controls the basic progress of the game, populating the scoreboards and dealing with players connecting.
  * 
- */ 
+ */
 
 using UnityEngine;
 using UnityEngine.Networking;
@@ -12,6 +12,7 @@ using System.Linq;
 using UnityEngine.UI;
 using BrainCloudUNETExample.Connection;
 using BrainCloudUNETExample.Game.PlayerInput;
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudUNETExample.Game
 {
@@ -111,13 +112,34 @@ namespace BrainCloudUNETExample.Game
 
         public bool m_showScores = false;
 
+        //resources
+        private GameObject m_carrierExplosion01;
+        private GameObject m_carrierExplosion02;
+        private GameObject m_battleshipExplosion01;
+        private GameObject m_battleshipExplosion02;
+        private GameObject m_cruiserExplosion02;
+        private GameObject m_cruiserExplosion01;
+        private GameObject m_patrolBoatExplosion02;
+        private GameObject m_patrolBoatExplosion01;
+        private GameObject m_destroyerExplosion02;
+        private GameObject m_destroyerExplosion01;
+        private GameObject m_flare;
+        private GameObject m_bombPickup;
+        private GameObject m_bulletHit;
+        private GameObject m_playerExplosion;
+        private GameObject m_weakpointExplosion;
+        private GameObject m_carrier01;
+        private GameObject m_bombExplosion;
+        private GameObject m_bombWaterExplosion;
+        private GameObject m_bombDud;
+
         void Awake()
         {
-			if (!BrainCloudWrapper.GetBC ().Initialized)
-			{
-				Application.LoadLevel ("Connect");
-				return;
-			}
+            if (!BrainCloudWrapper.GetBC().Initialized)
+            {
+                SceneManager.LoadScene("Connect");
+                return;
+            }
 
             m_allyShipSunk = GameObject.Find("ShipSink").transform.FindChild("AllyShipSunk").gameObject;
             m_enemyShipSunk = GameObject.Find("ShipSink").transform.FindChild("EnemyShipSunk").gameObject;
@@ -144,7 +166,7 @@ namespace BrainCloudUNETExample.Game
             m_quitButton = GameObject.Find("ResultsQuit");
             m_lobbyWindow = GameObject.Find("Lobby");
             m_gameStartButton = GameObject.Find("StartGame");
-            m_gameTime = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_defaultGameTime;
+            m_gameTime = BrainCloudStats.Instance.m_defaultGameTime;
             m_mapPresets = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_presets;
             m_mapSizes = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_mapSizes;
             m_resultsWindow = GameObject.Find("Results");
@@ -156,6 +178,26 @@ namespace BrainCloudUNETExample.Game
 
             m_HUD.SetActive(false);
 
+            //resources
+            m_carrierExplosion01 = Resources.Load("CarrierExplosion01") as GameObject;
+            m_carrierExplosion02 = Resources.Load("CarrierExplosion02") as GameObject;
+            m_battleshipExplosion01 = Resources.Load("BattleshipExplosion01") as GameObject;
+            m_battleshipExplosion02 = Resources.Load("BattleshipExplosion02") as GameObject;
+            m_cruiserExplosion02 = Resources.Load("CruiserExplosion02") as GameObject;
+            m_cruiserExplosion01 = Resources.Load("CruiserExplosion01") as GameObject;
+            m_patrolBoatExplosion02 = Resources.Load("PatrolBoatExplosion02") as GameObject;
+            m_patrolBoatExplosion01 = Resources.Load("PatrolBoatExplosion01") as GameObject;
+            m_destroyerExplosion02 = Resources.Load("DestroyerExplosion02") as GameObject;
+            m_destroyerExplosion01 = Resources.Load("DestroyerExplosion01") as GameObject;
+            m_flare = Resources.Load("Flare") as GameObject;
+            m_bombPickup = Resources.Load("BombPickup") as GameObject;
+            m_bulletHit = Resources.Load("BulletHit") as GameObject;
+            m_playerExplosion = Resources.Load("PlayerExplosion") as GameObject;
+            m_weakpointExplosion = Resources.Load("WeakpointExplosion") as GameObject;
+            m_carrier01 = Resources.Load("Carrier01") as GameObject;
+            m_bombExplosion = Resources.Load("BombExplosion") as GameObject;
+            m_bombWaterExplosion = Resources.Load("BombWaterExplosion") as GameObject;
+            m_bombDud = Resources.Load("BombDud") as GameObject;
         }
 
         public GameObject m_missionText;
@@ -239,7 +281,7 @@ namespace BrainCloudUNETExample.Game
             StartCoroutine(RespawnPlayer(aPlayerID));
             RpcAnnounceJoin(aPlayerName, aTeam);
         }
-        
+
         [ClientRpc]
         void RpcAnnounceJoin(string aPlayerName, int aTeam)
         {
@@ -290,24 +332,8 @@ namespace BrainCloudUNETExample.Game
 
         void OnApplicationQuit()
         {
-            if(isServer)
-            {
-                NetworkManager.singleton.matchMaker.DestroyMatch(NetworkManager.singleton.matchInfo.networkId, DestroyMatchCallback);
-                BombersNetworkManager.singleton.StopMatchMaker();
-                BombersNetworkManager.singleton.StopClient();
-                BombersNetworkManager.singleton.StartMatchMaker();
-            }
-            else
-            {
-                BombersNetworkManager.singleton.StopMatchMaker();
-                BombersNetworkManager.singleton.StopClient();
-                BombersNetworkManager.singleton.StartMatchMaker();
-            }
-
             LeaveRoom();
         }
-
-        
 
         public void LeaveRoom()
         {
@@ -319,11 +345,10 @@ namespace BrainCloudUNETExample.Game
             {
                 m_gameInfo.SetTeamPlayers(2, m_gameInfo.GetTeamPlayers(2) - 1);
             }
-            
+
             if (isServer)
             {
-                RpcLeaveRoom();
-                NetworkManager.singleton.matchMaker.DestroyMatch(NetworkManager.singleton.matchInfo.networkId, DestroyMatchCallback);
+                NetworkManager.singleton.matchMaker.DestroyMatch(NetworkManager.singleton.matchInfo.networkId, 0, DestroyMatchCallback);
             }
             else
             {
@@ -339,19 +364,17 @@ namespace BrainCloudUNETExample.Game
             LeaveRoom();
         }
 
-        public void DestroyMatchCallback(UnityEngine.Networking.Match.BasicResponse aRespose)
+        public void DestroyMatchCallback(bool success, string extendedInfo)
         {
             if (isServer)
             {
                 NetworkManager.singleton.StopHost();
-
             }
             else
             {
                 NetworkManager.singleton.client.Disconnect();
             }
             NetworkManager.singleton.StartMatchMaker();
-            
         }
 
         [Command]
@@ -470,13 +493,13 @@ namespace BrainCloudUNETExample.Game
 
             m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
             m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
-            m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team2Ships.Count/2).ToString();
+            m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team2Ships.Count / 2).ToString();
             if (team2Ships.Count == 2)
                 m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
             else
                 m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
             m_HUD.transform.FindChild("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
-            m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team1Ships.Count/2).ToString();
+            m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team1Ships.Count / 2).ToString();
             if (team1Ships.Count == 2)
                 m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
             else
@@ -782,7 +805,7 @@ namespace BrainCloudUNETExample.Game
 
         void OnWaitingForPlayersWindow()
         {
-            
+
             GameObject[] playerList = GameObject.FindGameObjectsWithTag("PlayerController");
             List<GameObject> playerListList = new List<GameObject>();
 
@@ -906,7 +929,7 @@ namespace BrainCloudUNETExample.Game
 
                 if (BombersNetworkManager.m_localPlayer.m_displayName == "")
                 {
-                    BombersNetworkManager.m_localPlayer.m_displayName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName;
+                    BombersNetworkManager.m_localPlayer.m_displayName = BrainCloudStats.Instance.PlayerName;
                 }
 
                 yield return new WaitForSeconds(0.1f);
@@ -978,7 +1001,7 @@ namespace BrainCloudUNETExample.Game
             GameObject.Find("BorderClouds").GetComponent<MapCloudBorder>().SetCloudBorder();
             if (m_mapLayout == 0)
             {
-                GameObject testShip = (GameObject)Instantiate((GameObject)Resources.Load("Carrier01"), Vector3.zero, Quaternion.identity);
+                GameObject testShip = (GameObject)Instantiate(m_carrier01, Vector3.zero, Quaternion.identity);
                 while (!done)
                 {
                     tryCount = 0;
@@ -1044,25 +1067,26 @@ namespace BrainCloudUNETExample.Game
                     ship = (GameObject)Instantiate((GameObject)Resources.Load("Ship"), position, Quaternion.Euler(0, 0, Random.Range(0.0f, 360.0f)));
                     NetworkServer.Spawn(ship);
                     
+                    var shipController = ship.GetComponent<ShipController>();
                     switch (shipIndex)
                     {
                         case 0:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CARRIER, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_CARRIER, (shipID % 2) + 1, shipID);
                             break;
                         case 1:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_BATTLESHIP, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_BATTLESHIP, (shipID % 2) + 1, shipID);
                             break;
                         case 2:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_CRUISER, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_CRUISER, (shipID % 2) + 1, shipID);
                             break;
                         case 3:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_PATROLBOAT, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_PATROLBOAT, (shipID % 2) + 1, shipID);
                             break;
                         case 4:
-                            ship.GetComponent<ShipController>().SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
+                            shipController.SetShipType(ShipController.eShipType.SHIP_TYPE_DESTROYER, (shipID % 2) + 1, shipID);
                             break;
                     }
-                    
+
                     if (shipID % 2 == 1)
                     {
                         shipIndex++;
@@ -1137,7 +1161,7 @@ namespace BrainCloudUNETExample.Game
 
         void Update()
         {
-            
+
             switch (m_gameState)
             {
                 case eGameState.GAME_STATE_WAITING_FOR_PLAYERS:
@@ -1334,7 +1358,7 @@ namespace BrainCloudUNETExample.Game
             BombersNetworkManager.m_localPlayer.m_deaths = 0;
 
             GameObject[] effects = GameObject.FindGameObjectsWithTag("Effect");
-            foreach(GameObject effect in effects)
+            foreach (GameObject effect in effects)
             {
                 Destroy(effect);
             }
@@ -1356,11 +1380,11 @@ namespace BrainCloudUNETExample.Game
             BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
             if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
             {
-                m_gameInfo.SetTeamScore(1, m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction);
+                m_gameInfo.SetTeamScore(1, m_gameInfo.GetTeamScore(1) + BrainCloudStats.Instance.m_pointsForWeakpointDestruction);
             }
             else if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 2)
             {
-                m_gameInfo.SetTeamScore(2, m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction);
+                m_gameInfo.SetTeamScore(2, m_gameInfo.GetTeamScore(2) + BrainCloudStats.Instance.m_pointsForWeakpointDestruction);
             }
 
             RpcHitShipTargetPoint(aShipID, aTargetIndex, aBombInfoString);
@@ -1433,17 +1457,17 @@ namespace BrainCloudUNETExample.Game
             if (aBombInfo.m_shooter == BombersNetworkManager.m_localPlayer.m_playerID)
             {
                 m_bombsHit++;
-                BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
+                BombersNetworkManager.m_localPlayer.m_score += BrainCloudStats.Instance.m_pointsForWeakpointDestruction;
             }
 
             Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
             if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
             {
-                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+                BombersNetworkManager.m_localPlayer.ShakeCamera(BrainCloudStats.Instance.m_weakpointIntensity, BrainCloudStats.Instance.m_shakeTime);
             }
 
             if (shipTarget == null) return;
-            GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("WeakpointExplosion"), shipTarget.m_position.position, shipTarget.m_position.rotation);
+            GameObject explosion = (GameObject)Instantiate(m_weakpointExplosion, shipTarget.m_position.position, shipTarget.m_position.rotation);
             explosion.transform.parent = ship.transform;
             explosion.GetComponent<AudioSource>().Play();
             foreach (Transform child in shipTarget.gameObject.transform)
@@ -1513,13 +1537,13 @@ namespace BrainCloudUNETExample.Game
             {
                 if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
                 {
-                     m_gameInfo.SetTeamScore(1, m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
-                    
+                    m_gameInfo.SetTeamScore(1, m_gameInfo.GetTeamScore(1) + BrainCloudStats.Instance.m_pointsForShipDestruction);
+
                 }
                 else
                 {
-                     m_gameInfo.SetTeamScore(2, m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
-                    
+                    m_gameInfo.SetTeamScore(2, m_gameInfo.GetTeamScore(2) + BrainCloudStats.Instance.m_pointsForShipDestruction);
+
                 }
             }
 
@@ -1539,11 +1563,11 @@ namespace BrainCloudUNETExample.Game
                     break;
                 }
             }
-            
+
             Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
             if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
             {
-                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shipIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+                BombersNetworkManager.m_localPlayer.ShakeCamera(BrainCloudStats.Instance.m_shipIntensity, BrainCloudStats.Instance.m_shakeTime);
             }
 
             if (ship == null) return;
@@ -1573,96 +1597,41 @@ namespace BrainCloudUNETExample.Game
                 }
             }
 
-
-            string shipName = "";
             ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
             int children = ship.transform.childCount;
             for (int i = 1; i < children; i++)
             {
-                ship.transform.GetChild(i).GetChild(0).GetChild(4).GetComponent<ParticleSystem>().enableEmission = false;
+                var ps = ship.transform.GetChild(i).GetChild(0).GetChild(4).GetComponent<ParticleSystem>();
+                var em = ps.emission;
+                em.enabled = false;
             }
-            GameObject explosion;
-            string path = "";
+
+            int bomberTeam = BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team;
+            GameObject prefab = null;
+
             switch (ship.GetShipType())
             {
                 case ShipController.eShipType.SHIP_TYPE_CARRIER:
-
-
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
-                    {
-                        shipName += "Red ";
-                        path = "CarrierExplosion02";
-                    }
-                    else
-                    {
-                        shipName += "Green ";
-                        path = "CarrierExplosion01";
-                    }
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
-                    shipName += "Carrier";
+                    prefab = bomberTeam == 1 ? m_carrierExplosion02 : m_carrierExplosion01;
                     break;
                 case ShipController.eShipType.SHIP_TYPE_BATTLESHIP:
-
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
-                    {
-                        shipName += "Red ";
-                        path = "BattleshipExplosion02";
-                    }
-                    else
-                    {
-                        shipName += "Green ";
-                        path = "BattleshipExplosion01";
-                    }
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
-                    shipName += "Battleship";
+                    prefab = bomberTeam == 1 ? m_battleshipExplosion02 : m_battleshipExplosion01;
                     break;
                 case ShipController.eShipType.SHIP_TYPE_CRUISER:
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
-                    {
-                        shipName += "Red ";
-                        path = "CruiserExplosion02";
-                    }
-                    else
-                    {
-                        shipName += "Green ";
-                        path = "CruiserExplosion01";
-                    }
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
-                    shipName += "Cruiser";
+                    prefab = bomberTeam == 1 ? m_cruiserExplosion02 : m_cruiserExplosion01;
                     break;
                 case ShipController.eShipType.SHIP_TYPE_PATROLBOAT:
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
-                    {
-                        shipName += "Red ";
-                        path = "PatrolBoatExplosion02";
-                    }
-                    else
-                    {
-                        shipName += "Green ";
-                        path = "PatrolBoatExplosion01";
-                    }
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
-                    shipName += "Patrol Boat";
+                    prefab = bomberTeam == 1 ? m_patrolBoatExplosion02 : m_patrolBoatExplosion01;
                     break;
                 case ShipController.eShipType.SHIP_TYPE_DESTROYER:
-                    if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
-                    {
-                        shipName += "Red ";
-                        path = "DestroyerExplosion02";
-                    }
-                    else
-                    {
-                        shipName += "Green ";
-                        path = "DestroyerExplosion01";
-                    }
-                    explosion = (GameObject)Instantiate((GameObject)Resources.Load(path), ship.transform.position, ship.transform.rotation);
-                    explosion.GetComponent<AudioSource>().Play();
-                    shipName += "Destroyer";
+                    prefab = bomberTeam == 1 ? m_destroyerExplosion02 : m_destroyerExplosion01;
                     break;
+            }
+
+            if (prefab != null)
+            {
+                GameObject explosion = (GameObject)Instantiate(prefab, ship.transform.position, ship.transform.rotation);
+                explosion.GetComponent<AudioSource>().Play();
             }
 
             if (isServer)
@@ -1671,7 +1640,7 @@ namespace BrainCloudUNETExample.Game
             if (aBombInfo.m_shooter == BombersNetworkManager.m_localPlayer.m_playerID)
             {
                 m_carriersDestroyed++;
-                BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
+                BombersNetworkManager.m_localPlayer.m_score += BrainCloudStats.Instance.m_pointsForShipDestruction;
             }
         }
 
@@ -1691,11 +1660,11 @@ namespace BrainCloudUNETExample.Game
             int gamesWon = (BombersNetworkManager.m_localPlayer.m_team == aWinningTeam) ? 1 : 0;
             if (m_planesDestroyed >= 5)
             {
-                GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().Get5KillsAchievement();
+                BrainCloudStats.Instance.Get5KillsAchievement();
             }
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().IncrementStatisticsToBrainCloud(1, gamesWon, m_timesDestroyed, m_shotsFired, m_bombsDropped, m_planesDestroyed, m_carriersDestroyed, m_bombsHit);
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().IncrementExperienceToBrainCloud(m_planesDestroyed * GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_expForKill);
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().SubmitLeaderboardData(m_planesDestroyed, m_bombsHit, m_timesDestroyed);
+            BrainCloudStats.Instance.IncrementStatisticsToBrainCloud(1, gamesWon, m_timesDestroyed, m_shotsFired, m_bombsDropped, m_planesDestroyed, m_carriersDestroyed, m_bombsHit);
+            BrainCloudStats.Instance.IncrementExperienceToBrainCloud(m_planesDestroyed * BrainCloudStats.Instance.m_expForKill);
+            BrainCloudStats.Instance.SubmitLeaderboardData(m_planesDestroyed, m_bombsHit, m_timesDestroyed);
             m_shotsFired = 0;
             m_bombsDropped = 0;
             m_bombsHit = 0;
@@ -1713,7 +1682,7 @@ namespace BrainCloudUNETExample.Game
         [ClientRpc]
         void RpcSpawnFlare(Vector3 aPosition, Vector3 aVelocity, int aPlayer)
         {
-            GameObject flare = (GameObject)Instantiate((GameObject)Resources.Load("Flare"), aPosition, Quaternion.identity);
+            GameObject flare = (GameObject)Instantiate(m_flare, aPosition, Quaternion.identity);
             flare.GetComponent<FlareController>().Activate(aPlayer);
             flare.GetComponent<Rigidbody>().velocity = aVelocity;
         }
@@ -1790,7 +1759,7 @@ namespace BrainCloudUNETExample.Game
         [ClientRpc]
         void RpcSpawnBombPickup(Vector3 aPosition, int bombID)
         {
-            GameObject bombPickup = (GameObject)Instantiate((GameObject)Resources.Load("BombPickup"), aPosition, Quaternion.identity);
+            GameObject bombPickup = (GameObject)Instantiate(m_bombPickup, aPosition, Quaternion.identity);
             bombPickup.GetComponent<BombPickup>().Activate(bombID);
             m_bombPickupsSpawned.Add(bombPickup.GetComponent<BombPickup>());
         }
@@ -1873,17 +1842,17 @@ namespace BrainCloudUNETExample.Game
                 {
                     if (aHitSurface == 0)
                     {
-                        explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombWaterExplosion"), bomb.transform.position, Quaternion.identity);
+                        explosion = (GameObject)Instantiate(m_bombWaterExplosion, bomb.transform.position, Quaternion.identity);
                         explosion.GetComponent<AudioSource>().Play();
                     }
                     else if (aHitSurface == 1)
                     {
-                        explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombExplosion"), bomb.transform.position, Quaternion.identity);
+                        explosion = (GameObject)Instantiate(m_bombExplosion, bomb.transform.position, Quaternion.identity);
                         explosion.GetComponent<AudioSource>().Play();
                     }
                     else
                     {
-                        explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombDud"), bomb.transform.position, Quaternion.identity);
+                        explosion = (GameObject)Instantiate(m_bombDud, bomb.transform.position, Quaternion.identity);
                     }
                 }
                 Destroy(bomb);
@@ -1967,7 +1936,7 @@ namespace BrainCloudUNETExample.Game
             {
                 if (plane.GetComponent<PlaneController>().m_playerID == aHitPlayer)
                 {
-                    Instantiate((GameObject)Resources.Load("BulletHit"), plane.transform.position + aHitPoint, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
+                    Instantiate(m_bulletHit, plane.transform.position + aHitPoint, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
                     break;
                 }
             }
@@ -1991,7 +1960,7 @@ namespace BrainCloudUNETExample.Game
             {
                 if (plane.GetComponent<PlaneController>().m_playerID == aVictim)
                 {
-                    GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("PlayerExplosion"), plane.transform.position, plane.transform.rotation);
+                    GameObject explosion = (GameObject)Instantiate(m_playerExplosion, plane.transform.position, plane.transform.rotation);
                     explosion.GetComponent<AudioSource>().Play();
                     break;
                 }

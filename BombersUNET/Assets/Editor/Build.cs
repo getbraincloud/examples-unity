@@ -9,9 +9,7 @@ public class Build {
 	static string ARTIFACTS_FOLDER 		= "../autobuild/artifacts";
 	static string IOS_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/generated_build";
 	static string ANDROID_OUTPUT_APK 	= ARTIFACTS_FOLDER + "/android_build.apk";
-	static string WP8_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/wp8_build";
     static string DESKTOP_OUTPUT 		= ARTIFACTS_FOLDER + "/brainCloudBombersUNET";
-	static string WEB_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/brainCloudBombersUNET"; //"/web_build";
 	static string WEBGL_OUTPUT_FOLDER 	= ARTIFACTS_FOLDER + "/webgl_build";
 	
 	static string[] GetScenes()
@@ -111,16 +109,6 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(ANDROID_OUTPUT_APK), target, BuildOptions.None);
 	}
 	
-	static void PerformBuildWP8()
-	{
-		BuildTarget target;
-		target = BuildTarget.WP8Player;
-
-		UpdateBrainCloudSettings();
-		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WP8_OUTPUT_FOLDER), target, BuildOptions.None);
-	}
-	
 	static void PerformBuildWin32()
 	{
 		BuildTarget target;
@@ -159,13 +147,6 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
-	}
-	
-	static void PerformBuildWeb()
-	{
-		UpdateBrainCloudSettings();
-		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WEB_OUTPUT_FOLDER), BuildTarget.WebPlayer, BuildOptions.None);
 	}
 	
 	static void PerformBuildWebGL()

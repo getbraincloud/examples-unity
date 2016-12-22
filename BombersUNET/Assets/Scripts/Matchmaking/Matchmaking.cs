@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using BrainCloudUNETExample.Connection;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudUNETExample.Matchmaking
 {
@@ -17,17 +18,15 @@ namespace BrainCloudUNETExample.Matchmaking
     {
         public class RoomButton
         {
-            public MatchDesc m_room;
+            public MatchInfoSnapshot m_room;
             public Button m_button;
 
-            public RoomButton(MatchDesc aRoom, Button abutton)
+            public RoomButton(MatchInfoSnapshot aRoom, Button abutton)
             {
                 m_room = aRoom;
                 m_button = abutton;
             }
         }
-
-        private Vector2 m_scrollPosition;
 
         private enum eMatchmakingState
         {
@@ -44,8 +43,6 @@ namespace BrainCloudUNETExample.Matchmaking
         private int m_roomMaxPlayers = 8;
         private int m_roomLevelRangeMin = 0;
         private int m_roomLevelRangeMax = 50;
-
-        private Rect m_windowRect;
 
         private GameObject m_showRoomsWindow;
         private GameObject m_refreshLabel;
@@ -89,13 +86,13 @@ namespace BrainCloudUNETExample.Matchmaking
 
         private GameObject m_controlWindow;
         private GameObject m_achievementsWindow;
-        List<MatchDesc> m_roomList = null;
+        List<MatchInfoSnapshot> m_roomList = null;
 
         private Dictionary<string, bool> m_roomFilters = new Dictionary<string, bool>()
-    {
-        {"HideFull",false},
-        {"HideLevelRange", false}
-    };
+        {
+            {"HideFull",false},
+            {"HideLevelRange", false}
+        };
 
         private string m_filterName = "";
         private DialogDisplay m_dialogueDisplay;
@@ -104,7 +101,7 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             if (!BrainCloudWrapper.GetBC().Initialized)
             {
-                Application.LoadLevel("Connect");
+                SceneManager.LoadScene("Connect");
                 return;
             }
             BombersNetworkManager.singleton.StartMatchMaker();
@@ -170,7 +167,7 @@ namespace BrainCloudUNETExample.Matchmaking
             m_createGameWindow = GameObject.Find("CreateGame");
 
             m_createGameWindow.SetActive(false);
-            GameObject.Find("PlayerName").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName;
+            GameObject.Find("PlayerName").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetLeaderboard(m_currentLeaderboardID);
@@ -187,13 +184,13 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void FinishEditName()
         {
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName = GameObject.Find("PlayerName").GetComponent<InputField>().text;
+            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName = GameObject.Find("PlayerName").GetComponent<InputField>().text;
             BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(GameObject.Find("PlayerName").GetComponent<InputField>().text);
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
             GameObject.Find("PlayerName").GetComponent<Image>().enabled = false;
         }
 
-        void OnGUI()
+        private void OnGUI()
         {
 
             switch (m_state)
@@ -309,7 +306,7 @@ namespace BrainCloudUNETExample.Matchmaking
             m_state = eMatchmakingState.GAME_STATE_SHOW_ACHIEVEMENTS;
         }
 
-        void OnStatsWindow()
+        private void OnStatsWindow()
         {
             List<BrainCloudStats.Stat> playerStats = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().GetStats();
             string rank = "";
@@ -347,13 +344,9 @@ namespace BrainCloudUNETExample.Matchmaking
             m_roomLevelRangeMax = int.Parse(m_createGameWindow.transform.FindChild("Box 2").GetComponent<InputField>().text.ToString());
             m_roomLevelRangeMin = int.Parse(m_createGameWindow.transform.FindChild("Box 1").GetComponent<InputField>().text.ToString());
 
-            CreateMatchRequest options = new CreateMatchRequest();
-            options.size = (uint)m_roomMaxPlayers;
-            options.advertise = true;
-            options.password = "";
-            options.matchAttributes = new Dictionary<string, long>() { { "minLevel", m_roomLevelRangeMin }, { "maxLevel", m_roomLevelRangeMax } };
+            var matchAttributes = new Dictionary<string, long>() { { "minLevel", m_roomLevelRangeMin }, { "maxLevel", m_roomLevelRangeMax } };
 
-            CreateNewRoom(m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text, options);
+            CreateNewRoom(m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text, (uint)m_roomMaxPlayers, matchAttributes);
         }
 
         public void CloseDropDowns()
@@ -386,7 +379,7 @@ namespace BrainCloudUNETExample.Matchmaking
             CloseDropDowns();
         }
 
-        void OnNewRoomWindow()
+        private void OnNewRoomWindow()
         {
             m_createGameWindow.transform.FindChild("Layout").FindChild("Selection").GetComponent<Text>().text = m_mapPresets[m_presetListSelection].m_name;
             m_createGameWindow.transform.FindChild("Size").FindChild("Selection").GetComponent<Text>().text = m_mapSizes[m_sizeListSelection].m_name;
@@ -423,7 +416,7 @@ namespace BrainCloudUNETExample.Matchmaking
             }
         }
 
-        public void JoinRoom(MatchDesc aRoomInfo)
+        public void JoinRoom(MatchInfoSnapshot aRoomInfo)
         {
             int minLevel = 0;
             int maxLevel = 50;
@@ -438,7 +431,7 @@ namespace BrainCloudUNETExample.Matchmaking
                 m_state = eMatchmakingState.GAME_STATE_JOIN_ROOM;
                 try
                 {
-                    BombersNetworkManager.singleton.matchMaker.JoinMatch(aRoomInfo.networkId, "", OnMatchJoined);
+                    BombersNetworkManager.singleton.matchMaker.JoinMatch(aRoomInfo.networkId, "", "", "", 0, 0, OnMatchJoined);
                 }
                 catch (ArgumentException e)
                 {
@@ -462,7 +455,7 @@ namespace BrainCloudUNETExample.Matchmaking
             OnRoomsWindow();
         }
 
-        void OrderRoomButtons()
+        private void OrderRoomButtons()
         {
             m_roomFilters["HideFull"] = GameObject.Find("Toggle-Hide").GetComponent<Toggle>().isOn;
             m_roomFilters["HideLevelRange"] = GameObject.Find("Toggle-MyRank").GetComponent<Toggle>().isOn;
@@ -476,19 +469,16 @@ namespace BrainCloudUNETExample.Matchmaking
                     continue;
                 }
             }
-
-
         }
 
-        public void OnListRoomsCallback(ListMatchResponse aResponse)
+        public void OnListRoomsCallback(bool success, string extendedInfo, List<MatchInfoSnapshot> matches)
         {
             //Debug.Log(aResponse.ToString());
-            m_roomList = new List<MatchDesc>();
+            m_roomList = new List<MatchInfoSnapshot>();
             m_roomList.Clear();
-            foreach (MatchDesc match in aResponse.matches)
+            foreach (MatchInfoSnapshot match in matches)
             {
                 m_roomList.Add(match);
-
             }
 
             if (m_roomList != null)
@@ -502,7 +492,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     Vector3 position = roomButton.GetComponent<RectTransform>().position;
                     position.y -= i * 30;
                     roomButton.GetComponent<RectTransform>().position = position;
-                    MatchDesc roomInfo = m_roomList[i];
+                    MatchInfoSnapshot roomInfo = m_roomList[i];
                     roomButton.GetComponent<Button>().onClick.AddListener(() => { JoinRoom(roomInfo); });
                     roomButton.transform.GetChild(0).GetComponent<Text>().text = m_roomList[i].name;
 
@@ -543,7 +533,7 @@ namespace BrainCloudUNETExample.Matchmaking
             }
             m_refreshLabel.GetComponent<Text>().text = "Refreshing...";
             m_roomButtons.Clear();
-            BombersNetworkManager.singleton.matchMaker.ListMatches(0, 100, "", OnListRoomsCallback);
+            BombersNetworkManager.singleton.matchMaker.ListMatches(0, 100, "", true, 0, 0, OnListRoomsCallback);
         }
 
         private string m_currentLeaderboardID = "KDR";
@@ -643,7 +633,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                 for (int i = 0; i < players; i++)
                 {
-                    if (leaderboardData["leaderboard"][i]["name"].ToString() == GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName)
+                    if (leaderboardData["leaderboard"][i]["name"].ToString() == GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName)
                     {
                         playerListed = true;
                         playerChevronPosition = i;
@@ -713,11 +703,11 @@ namespace BrainCloudUNETExample.Matchmaking
             m_dialogueDisplay.DisplayDialog("Could not join room!");
         }
 
-        public void OnMatchCreate(CreateMatchResponse aMatchResponse)
+        public void OnMatchCreate(bool success, string extendedInfo, MatchInfo matchInfo)
         {
-            if (aMatchResponse.success)
+            if (success)
             {
-                NetworkManager.singleton.OnMatchCreate(aMatchResponse);
+                NetworkManager.singleton.OnMatchCreate(success, extendedInfo, matchInfo);
             }
             else
             {
@@ -725,13 +715,13 @@ namespace BrainCloudUNETExample.Matchmaking
             }
         }
 
-        public void OnMatchJoined(JoinMatchResponse aMatchResponse)
+        public void OnMatchJoined(bool success, string extendedInfo, MatchInfo matchInfo)
         {
-            if (aMatchResponse.success)
+            if (success)
             {
                 try
                 {
-                    NetworkManager.singleton.OnMatchJoined(aMatchResponse);
+                    NetworkManager.singleton.OnMatchJoined(success, extendedInfo, matchInfo);
                 }
                 catch (ArgumentException e)
                 {
@@ -758,7 +748,7 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             BrainCloudWrapper.GetBC().PlayerStateService.Logout();
             BrainCloudWrapper.GetBC().AuthenticationService.ClearSavedProfileID();
-            Application.LoadLevel("Connect");
+            SceneManager.LoadScene("Connect");
         }
 
         public void CreateGame()
@@ -775,21 +765,19 @@ namespace BrainCloudUNETExample.Matchmaking
             }
         }
 
-        void CreateNewRoom(string aName, CreateMatchRequest aOptions)
+        void CreateNewRoom(string aName, uint size, Dictionary<string, long> matchAttributes)
         {
-            List<MatchDesc> rooms = BombersNetworkManager.singleton.matches;
+            List<MatchInfoSnapshot> rooms = BombersNetworkManager.singleton.matches;
             bool roomExists = false;
             string roomName = aName;
 
             if (aName == "")
             {
-                roomName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName + "'s Room";
+                roomName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName + "'s Room";
             }
 
             if (rooms != null)
             {
-
-
                 for (int i = 0; i < rooms.Count; i++)
                 {
                     if (rooms[i].name == aName)
@@ -825,41 +813,38 @@ namespace BrainCloudUNETExample.Matchmaking
                 m_roomLevelRangeMax = m_roomLevelRangeMin;
             }
 
-            if (aOptions.size > 8)
+            if (size > 8)
             {
-                aOptions.size = 8;
+                size = 8;
             }
-            else if (aOptions.size < 2)
+            else if (size < 2)
             {
-                aOptions.size = 2;
+                size = 2;
             }
 
-            CreateMatchRequest options = new CreateMatchRequest();
-            options.name = aName;
-            options.size = aOptions.size;
-            options.advertise = true;
-            options.password = "";
-            options.matchAttributes = new Dictionary<string, long>();
-            options.matchAttributes.Add("minLevel", m_roomLevelRangeMin);
-            options.matchAttributes.Add("maxLevel", m_roomLevelRangeMax);
-            options.matchAttributes.Add("StartGameTime", 600);
-            options.matchAttributes.Add("IsPlaying", 0);
-            options.matchAttributes.Add("MapLayout", m_presetListSelection);
-            options.matchAttributes.Add("MapSize", m_sizeListSelection);
+            matchAttributes["minLevel"] = m_roomLevelRangeMin;
+            matchAttributes["maxLevel"] = m_roomLevelRangeMax;
+            matchAttributes["StartGameTime"] = 600;
+            matchAttributes["IsPlaying"] = 0;
+            matchAttributes["MapLayout"] = m_presetListSelection;
+            matchAttributes["MapSize"] = m_sizeListSelection;
+
             BrainCloudWrapper.GetBC().EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + roomName + "\"}", null, -1, null, null, null);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
+
+
             Dictionary<string, string> matchOptions = new Dictionary<string, string>();
             matchOptions.Add("gameTime", 600.ToString());
             matchOptions.Add("isPlaying", 0.ToString());
             matchOptions.Add("mapLayout", m_presetListSelection.ToString());
             matchOptions.Add("mapSize", m_sizeListSelection.ToString());
             matchOptions.Add("gameName", roomName);
-            matchOptions.Add("maxPlayers", aOptions.size.ToString());
+            matchOptions.Add("maxPlayers", size.ToString());
             matchOptions.Add("lightPosition", 0.ToString());
 
             BombersNetworkManager.m_matchOptions = matchOptions;
-            BombersNetworkManager.singleton.matchMaker.CreateMatch(options, OnMatchCreate);
+            BombersNetworkManager.singleton.matchMaker.CreateMatch(aName, size, true, "", "", "", 0, 0, OnMatchCreate);
         }
     }
 }
