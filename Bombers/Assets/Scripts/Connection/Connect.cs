@@ -13,12 +13,8 @@ namespace BrainCloudPhotonExample.Connection
         private bool m_connectedToPhoton = false;
 
         private string m_username = "";
-        private string m_password = "";
-
-        private Vector2 m_scrollPosition;
-        private string m_authStatus = "Welcome to brainCloud";
-
-        private Rect m_windowRect;
+        private string m_password = "";        
+        private string m_authStatus = "Welcome to brainCloud";        
         private bool m_isLoggingIn = false;
 
         private DialogDisplay m_dialogueDisplay;
@@ -215,11 +211,11 @@ namespace BrainCloudPhotonExample.Connection
                     }
                 }
                 BrainCloudWrapper.Client.PlayerStateService.UpdatePlayerName(username);
-                PhotonNetwork.player.name = username;
+                PhotonNetwork.player.NickName = username;
             }
             else
             {
-                PhotonNetwork.player.name = response["data"]["playerName"].ToString();
+                PhotonNetwork.player.NickName = response["data"]["playerName"].ToString();
             }
 
             BrainCloudStats.Instance.ReadStatistics();

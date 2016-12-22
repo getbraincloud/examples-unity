@@ -304,7 +304,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
 
             if (this.LocalPlayer != null)
             {
-                this.LocalPlayer.name = value;
+                this.LocalPlayer.NickName = value;
             }
 
             this.playername = value;
@@ -325,7 +325,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
     {
         get
         {
-            if (this.currentRoom != null && this.currentRoom.isLocalClientInside)
+            if (this.currentRoom != null && this.currentRoom.IsLocalClientInside)
             {
                 return this.currentRoom;
             }
@@ -402,13 +402,13 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
         get
         {
             if (PhotonNetwork.offlineMode) return this.LocalPlayer.ID;
-            return (this.CurrentRoom == null) ? 0 : this.CurrentRoom.masterClientId;
+            return (this.CurrentRoom == null) ? 0 : this.CurrentRoom.MasterClientId;
         }
         private set
         {
             if (this.CurrentRoom != null)
             {
-                this.CurrentRoom.masterClientId = value;
+                this.CurrentRoom.MasterClientId = value;
             }
         }
     }
@@ -694,6 +694,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
 			Debug.Log("WebGL only supports WebSocket protocol. Overriding PhotonServerSettings.");
 	        protocolOverride = ConnectionProtocol.WebSocketSecure;
 		}
+        PhotonHandler.PingImplementation = typeof(PingHttp);
         #endif
 
 
@@ -904,6 +905,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
     {
         enterRoomParamsCache = new EnterRoomParams();   // this is used when the client arrives on the GS and joins the room
         enterRoomParamsCache.Lobby = opJoinRandomRoomParams.TypedLobby;
+        this.enterRoomParamsCache.ExpectedUsers = opJoinRandomRoomParams.ExpectedUsers;
 
         this.lastJoinType = JoinType.JoinRandomRoom;
         return base.OpJoinRandomRoom(opJoinRandomRoomParams);
@@ -1057,7 +1059,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
     {
         bool wasInRoom = this.CurrentRoom != null;
         // when leaving a room, we clean up depending on that room's settings.
-        bool autoCleanupSettingOfRoom = (this.CurrentRoom != null) ? this.CurrentRoom.autoCleanUp : PhotonNetwork.autoCleanUpPlayerObjects;
+        bool autoCleanupSettingOfRoom = (this.CurrentRoom != null) ? this.CurrentRoom.AutoCleanUp : PhotonNetwork.autoCleanUpPlayerObjects;
 
         this.hasSwitchedMC = false;
         this.CurrentRoom = null;
@@ -1164,7 +1166,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
         }
 
         Room current = new Room(this.enterRoomParamsCache.RoomName, null);
-        current.isLocalClientInside = true;
+        current.IsLocalClientInside = true;
         this.CurrentRoom = current;
 
         this.State = ClientState.Joined;
@@ -1219,7 +1221,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
     void RemovePlayer(int ID, PhotonPlayer player)
     {
         this.mActors.Remove(ID);
-        if (!player.isLocal)
+        if (!player.IsLocal)
         {
             RebuildPlayerListCopies();
         }
@@ -1234,7 +1236,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
         for (int i = 0; i < this.mPlayerListCopy.Length; i++)
         {
             PhotonPlayer player = this.mPlayerListCopy[i];
-            if (!player.isLocal)
+            if (!player.IsLocal)
             {
                 otherP.Add(player);
             }
@@ -1274,15 +1276,15 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
             return;
         }
 
-		bool _isAlreadyInactive =  player.isInactive;
+		bool _isAlreadyInactive =  player.IsInactive;
 
         if (evLeave.Parameters.ContainsKey(ParameterCode.IsInactive))
         {
             // player becomes inactive (but might return / is not gone for good)
-            player.isInactive = (bool)evLeave.Parameters[ParameterCode.IsInactive];
-			if (player.isInactive && _isAlreadyInactive)
+            player.IsInactive = (bool)evLeave.Parameters[ParameterCode.IsInactive];
+			if (player.IsInactive && _isAlreadyInactive)
             {
-                Debug.LogWarning("HandleEventLeave for player ID: " + actorID + " isInactive: " + player.isInactive + ". Stopping handling if inactive.");
+                Debug.LogWarning("HandleEventLeave for player ID: " + actorID + " isInactive: " + player.IsInactive + ". Stopping handling if inactive.");
                 return;
             }
         }
@@ -1306,13 +1308,13 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
 
 
 		// we let the player up if inactive but if we were already inactive, then we have to actually remove the player properly.
-		if (player.isInactive && !_isAlreadyInactive)
+		if (player.IsInactive && !_isAlreadyInactive)
 		{
 			return;
 		}
 
         // destroy objects & buffered messages
-        if (this.CurrentRoom != null && this.CurrentRoom.autoCleanUp)
+        if (this.CurrentRoom != null && this.CurrentRoom.AutoCleanUp)
         {
             this.DestroyPlayerObjects(actorID, true);
         }
@@ -1416,7 +1418,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
         }
 
         this.hasSwitchedMC = true;
-        this.CurrentRoom.masterClientId = playerId;
+        this.CurrentRoom.MasterClientId = playerId;
         SendMonoMessage(PhotonNetworkingMessage.OnMasterClientSwitched, this.GetPlayerWithId(playerId));    // we only callback when an actual change is done
         return true;
     }
@@ -1449,7 +1451,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
 
         if (this.LocalPlayer != null)
         {
-            this.LocalPlayer.name = this.PlayerName;
+            this.LocalPlayer.NickName = this.PlayerName;
             Hashtable properties = new Hashtable();
             properties[ActorProperties.PlayerName] = this.PlayerName;
             if (this.LocalPlayer.ID > 0)
@@ -1464,7 +1466,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
     {
         if (PhotonNetwork.player != null)
         {
-            return PhotonNetwork.player.allProperties;
+            return PhotonNetwork.player.AllProperties;
         }
 
         Hashtable actorProperties = new Hashtable();
@@ -1614,7 +1616,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
                                     this.AuthValues = new AuthenticationValues();
                                 }
                                 this.AuthValues.UserId = incomingId;
-                                PhotonNetwork.player.userId = incomingId;
+                                PhotonNetwork.player.UserId = incomingId;
 
                                 if (PhotonNetwork.logLevel >= PhotonLogLevel.Informational)
                                 {
@@ -2241,9 +2243,9 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
                         }
                         break;
                     case OwnershipOption.Request:
-                        if (currentOwner == PhotonNetwork.player.ID || PhotonNetwork.player.isMasterClient)
+                        if (currentOwner == PhotonNetwork.player.ID || PhotonNetwork.player.IsMasterClient)
                         {
-                            if ((requestedView.ownerId == PhotonNetwork.player.ID) || (PhotonNetwork.player.isMasterClient && !requestedView.isOwnerActive))
+                            if ((requestedView.ownerId == PhotonNetwork.player.ID) || (PhotonNetwork.player.IsMasterClient && !requestedView.isOwnerActive))
                             {
                                 SendMonoMessage(PhotonNetworkingMessage.OnOwnershipRequest, new object[] {requestedView, originatingPlayer});
                             }
@@ -2333,7 +2335,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
                 else
                 {
                     originatingPlayer.InternalCacheProperties(actorProperties);
-                    originatingPlayer.isInactive = false;
+                    originatingPlayer.IsInactive = false;
                 }
 
                 if (actorNr == this.LocalPlayer.ID)
@@ -2409,7 +2411,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
 
             case PunEvent.CloseConnection:
                 // MasterClient "requests" a disconnection from us
-                if (originatingPlayer == null || !originatingPlayer.isMasterClient)
+                if (originatingPlayer == null || !originatingPlayer.IsMasterClient)
                 {
                     Debug.LogError("Error: Someone else(" + originatingPlayer + ") then the masterserver requests a disconnect!");
                 }
@@ -2491,6 +2493,16 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
                 {
                     Debug.LogWarning("Warning: Unhandled Event ErrorInfo (251). Set PhotonNetwork.OnEventCall to the method PUN should call for this event.");
                 }
+                break;
+
+            case EventCode.AuthEvent:
+                if (this.AuthValues == null)
+                {
+                    this.AuthValues = new AuthenticationValues();
+                }
+
+                this.AuthValues.Token = photonEvent[ParameterCode.Secret] as string;
+                this.tokenCache = this.AuthValues.Token;
                 break;
 
             default:
@@ -3485,7 +3497,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
     // Remove RPCs of view (if they are local player's RPCs)
     public void CleanRpcBufferIfMine(PhotonView view)
     {
-        if (view.ownerId != this.LocalPlayer.ID && !LocalPlayer.isMasterClient)
+        if (view.ownerId != this.LocalPlayer.ID && !LocalPlayer.IsMasterClient)
         {
             Debug.LogError("Cannot remove cached RPCs on a PhotonView thats not ours! " + view.owner + " scene: " + view.isSceneView);
             return;
@@ -4105,7 +4117,7 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
         // this has nothing to do with reading the actual synchronization update.
         // We don't do anything is OwnerShip Was Touched, which means we got the infos already. We only possibly act if ownership was never transfered.
 		// We do override OwnerShipWasTransfered if owner is the masterClient.
-		if (sender.ID != view.ownerId && (!view.OwnerShipWasTransfered || view.ownerId == 0) )
+		if (sender.ID != view.ownerId && (!view.OwnerShipWasTransfered || view.ownerId == 0) && view.currentMasterID == -1 )
         {
             // obviously the owner changed and we didn't yet notice.
             //Debug.Log("Adjusting owner to sender of updates. From: " + view.ownerId + " to: " + sender.ID);
@@ -4348,13 +4360,13 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
         }
 
         // check if "current level" is set in props
-        if (!PhotonNetwork.room.customProperties.ContainsKey(NetworkingPeer.CurrentSceneProperty))
+        if (!PhotonNetwork.room.CustomProperties.ContainsKey(NetworkingPeer.CurrentSceneProperty))
         {
             return;
         }
 
         // if loaded level is not the one defined my master in props, load that level
-        object sceneId = PhotonNetwork.room.customProperties[NetworkingPeer.CurrentSceneProperty];
+        object sceneId = PhotonNetwork.room.CustomProperties[NetworkingPeer.CurrentSceneProperty];
         if (sceneId is int)
         {
             if (SceneManagerHelper.ActiveSceneBuildIndex != (int)sceneId)
@@ -4380,9 +4392,9 @@ internal class NetworkingPeer : LoadBalancingPeer, IPhotonPeerListener
         }
 
         // check if "current level" is already set in props
-        if (PhotonNetwork.room.customProperties.ContainsKey(NetworkingPeer.CurrentSceneProperty))
+        if (PhotonNetwork.room.CustomProperties.ContainsKey(NetworkingPeer.CurrentSceneProperty))
         {
-            object levelIdInProps = PhotonNetwork.room.customProperties[NetworkingPeer.CurrentSceneProperty];
+            object levelIdInProps = PhotonNetwork.room.CustomProperties[NetworkingPeer.CurrentSceneProperty];
             if (levelIdInProps is int && SceneManagerHelper.ActiveSceneBuildIndex == (int)levelIdInProps)
             {
                 return;

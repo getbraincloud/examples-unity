@@ -258,7 +258,7 @@ namespace BrainCloudPhotonExample.Game
             {
                 null, null, null, null
             };
-            transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = GetComponent<PhotonView>().owner.customProperties["RoomDisplayName"].ToString();
+            transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = GetComponent<PhotonView>().owner.CustomProperties["RoomDisplayName"].ToString();
             if (GetComponent<PhotonView>().isMine)
             {
                 transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = "";
@@ -277,7 +277,7 @@ namespace BrainCloudPhotonExample.Game
             }
 
             string teamBomberPath = "";
-            if ((int)GetComponent<PhotonView>().owner.customProperties["Team"] == 1)
+            if ((int)GetComponent<PhotonView>().owner.CustomProperties["Team"] == 1)
             {
                 teamBomberPath = "Bomber01";
                 gameObject.layer = 8;

@@ -20,8 +20,6 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
         }
 
-        private Vector2 m_scrollPosition;
-
         private enum eMatchmakingState
         {
             GAME_STATE_SHOW_ROOMS,
@@ -32,15 +30,14 @@ namespace BrainCloudPhotonExample.Matchmaking
             GAME_STATE_SHOW_CONTROLS,
             GAME_STATE_SHOW_ACHIEVEMENTS
         }
+
         private eMatchmakingState m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
 
         private string m_roomName = "";
         private int m_roomMaxPlayers = 8;
         private int m_roomLevelRangeMin = 0;
         private int m_roomLevelRangeMax = 50;
-
-        private Rect m_windowRect;
-
+        
         private GameObject m_showRoomsWindow;
         private GameObject m_refreshLabel;
         private List<RoomButton> m_roomButtons;
@@ -177,7 +174,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_createGameWindow = GameObject.Find("CreateGame");
 
             m_createGameWindow.SetActive(false);
-            m_playerName.text = PhotonNetwork.player.name;
+            m_playerName.text = PhotonNetwork.player.NickName;
             m_playerName.interactable = false;
 
             PhotonNetwork.JoinLobby();
@@ -197,7 +194,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         public void FinishEditName()
         {
-            PhotonNetwork.player.name = m_playerName.text;
+            PhotonNetwork.player.NickName = m_playerName.text;
             BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(m_playerName.text);
             m_playerName.interactable = false;
             m_playerNameImage.enabled = false;
@@ -438,24 +435,24 @@ namespace BrainCloudPhotonExample.Matchmaking
             int maxLevel = 50;
             int playerLevel = BrainCloudStats.Instance.GetStats()[0].m_statValue;
 
-            if (aRoomInfo.customProperties["roomMinLevel"] != null)
+            if (aRoomInfo.CustomProperties["roomMinLevel"] != null)
             {
-                minLevel = (int)aRoomInfo.customProperties["roomMinLevel"];
+                minLevel = (int)aRoomInfo.CustomProperties["roomMinLevel"];
             }
 
-            if (aRoomInfo.customProperties["roomMaxLevel"] != null)
+            if (aRoomInfo.CustomProperties["roomMaxLevel"] != null)
             {
-                maxLevel = (int)aRoomInfo.customProperties["roomMaxLevel"];
+                maxLevel = (int)aRoomInfo.CustomProperties["roomMaxLevel"];
             }
 
             if (playerLevel < minLevel || playerLevel > maxLevel)
             {
                 m_dialogDisplay.DisplayDialog("You're not in that room's\nlevel range!");
             }
-            else if (aRoomInfo.playerCount < aRoomInfo.maxPlayers)
+            else if (aRoomInfo.PlayerCount < aRoomInfo.MaxPlayers)
             {
                 m_state = eMatchmakingState.GAME_STATE_JOIN_ROOM;
-                if (!PhotonNetwork.JoinRoom(aRoomInfo.name))
+                if (!PhotonNetwork.JoinRoom(aRoomInfo.Name))
                 {
                     m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
                     m_dialogDisplay.DisplayDialog("Could not join room!");
@@ -479,18 +476,18 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             for (int i = 0; i < m_roomButtons.Count; i++)
             {
-                if (m_roomButtons[i].m_room.customProperties["roomMinLevel"] != null)
+                if (m_roomButtons[i].m_room.CustomProperties["roomMinLevel"] != null)
                 {
-                    minLevel = (int)m_roomButtons[i].m_room.customProperties["roomMinLevel"];
+                    minLevel = (int)m_roomButtons[i].m_room.CustomProperties["roomMinLevel"];
                     if (playerLevel < minLevel && m_roomFilters["HideLevelRange"])
                     {
                         continue;
                     }
                 }
 
-                if (m_roomButtons[i].m_room.customProperties["roomMaxLevel"] != null)
+                if (m_roomButtons[i].m_room.CustomProperties["roomMaxLevel"] != null)
                 {
-                    maxLevel = (int)m_roomButtons[i].m_room.customProperties["roomMaxLevel"];
+                    maxLevel = (int)m_roomButtons[i].m_room.CustomProperties["roomMaxLevel"];
                     if (playerLevel > maxLevel && m_roomFilters["HideLevelRange"])
                     {
                         continue;
@@ -498,7 +495,7 @@ namespace BrainCloudPhotonExample.Matchmaking
                 }
 
 
-                if (m_filterName != "" && !m_roomButtons[i].m_room.name.ToLower().Contains(m_filterName.ToLower()))
+                if (m_filterName != "" && !m_roomButtons[i].m_room.Name.ToLower().Contains(m_filterName.ToLower()))
                 {
                     continue;
                 }
@@ -527,13 +524,13 @@ namespace BrainCloudPhotonExample.Matchmaking
                 roomButton.GetComponent<RectTransform>().position = position;
                 RoomInfo roomInfo = rooms[i];
                 roomButton.GetComponent<Button>().onClick.AddListener(() => { JoinRoom(roomInfo); });
-                roomButton.transform.GetChild(0).GetComponent<Text>().text = rooms[i].name;
-                if ((int)rooms[i].customProperties["IsPlaying"] == 1)
+                roomButton.transform.GetChild(0).GetComponent<Text>().text = rooms[i].Name;
+                if ((int)rooms[i].CustomProperties["IsPlaying"] == 1)
                 {
-                    roomButton.transform.GetChild(0).GetComponent<Text>().text = rooms[i].name + " -- In Progress";
+                    roomButton.transform.GetChild(0).GetComponent<Text>().text = rooms[i].Name + " -- In Progress";
                 }
 
-                roomButton.transform.GetChild(1).GetComponent<Text>().text = rooms[i].playerCount + "/" + rooms[i].maxPlayers;
+                roomButton.transform.GetChild(1).GetComponent<Text>().text = rooms[i].PlayerCount + "/" + rooms[i].MaxPlayers;
                 m_roomButtons.Add(new RoomButton(roomInfo, roomButton.GetComponent<Button>()));
             }
 
@@ -771,12 +768,12 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             if (aName == "")
             {
-                aName = PhotonNetwork.player.name + "'s Room";
+                aName = PhotonNetwork.player.NickName + "'s Room";
             }
 
             for (int i = 0; i < rooms.Length; i++)
             {
-                if (rooms[i].name == aName)
+                if (rooms[i].Name == aName)
                 {
                     roomExists = true;
                 }

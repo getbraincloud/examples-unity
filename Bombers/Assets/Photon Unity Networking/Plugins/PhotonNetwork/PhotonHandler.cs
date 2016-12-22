@@ -97,7 +97,7 @@ internal class PhotonHandler : MonoBehaviour
     /// </summary>
     /// <remarks>
     /// Sets a disconnect timer when PhotonNetwork.BackgroundTimeout > 0.1f. See PhotonNetwork.BackgroundTimeout.
-    /// 
+    ///
     /// Some versions of Unity will give false values for pause on Android (and possibly on other platforms).
     /// </remarks>
     /// <param name="pause">If the app pauses.</param>

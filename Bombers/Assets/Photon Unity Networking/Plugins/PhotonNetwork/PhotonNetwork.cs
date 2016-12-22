@@ -28,7 +28,7 @@ using System.IO;
 public static class PhotonNetwork
 {
     /// <summary>Version number of PUN. Also used in GameVersion to separate client version from each other.</summary>
-    public const string versionPUN = "1.79";
+    public const string versionPUN = "1.80";
 
     /// <summary>Version string for your this build. Can be used to separate incompatible clients. Sent during connect.</summary>
     /// <remarks>This is only sent when you connect so that is also the place you set it usually (e.g. in ConnectUsingSettings).</remarks>
@@ -197,7 +197,7 @@ public static class PhotonNetwork
     /// <remarks>
     /// Set these before calling Connect if you want custom authentication.
     /// These values set the userId, if and how that userId gets verified (server-side), etc..
-    /// 
+    ///
     /// If authentication fails for any values, PUN will call your implementation of OnCustomAuthenticationFailed(string debugMsg).
     /// See: PhotonNetworkingMessage.OnCustomAuthenticationFailed
     /// </remarks>
@@ -286,12 +286,12 @@ public static class PhotonNetwork
     }
 
     /// <summary>
-    /// Set to synchronize the player's nickname with everyone in the room(s) you enter. This sets PhotonPlayer.name.
+    /// Set to synchronize the player's nickname with everyone in the room(s) you enter. This sets PhotonNetwork.player.NickName.
     /// </summary>
     /// <remarks>
     /// The playerName is just a nickname and does not have to be unique or backed up with some account.<br/>
     /// Set the value any time (e.g. before you connect) and it will be available to everyone you play with.<br/>
-    /// Access the names of players by: PhotonPlayer.name. <br/>
+    /// Access the names of players by: PhotonPlayer.NickName. <br/>
     /// PhotonNetwork.otherPlayers is a list of other players - each contains the playerName the remote player set.
     /// </remarks>
     public static string playerName
@@ -852,11 +852,11 @@ public static class PhotonNetwork
     /// <remarks>
     /// It's best practice to disconnect inactive apps/connections after a while but to also allow users to take calls, etc..
     /// We think a reasonable backgroung timeout is 60 seconds.
-    /// 
-    /// To handle the timeout, implement: OnDisconnectedFromPhoton(), as usual. 
+    ///
+    /// To handle the timeout, implement: OnDisconnectedFromPhoton(), as usual.
     /// Your application will "notice" the background disconnect when it becomes active again (running the Update() loop).
-    /// 
-    /// If you need to separate this case from others, you need to track if the app was in the background 
+    ///
+    /// If you need to separate this case from others, you need to track if the app was in the background
     /// (there is no special callback by PUN).
     ///
     /// A value below 0.1 seconds will disable this timeout (careful: connections can be kept indefinitely).
@@ -1106,7 +1106,10 @@ public static class PhotonNetwork
         }
         #endif
 
-        Application.runInBackground = true;
+		if (PhotonServerSettings != null)
+		{
+			Application.runInBackground = PhotonServerSettings.RunInBackground;
+		}
 
         // Set up a MonoBehaviour to run Photon, and hide it
         GameObject photonGO = new GameObject();
@@ -1167,7 +1170,7 @@ public static class PhotonNetwork
     /// <param name="cp">Network protocol to use as low level connection. UDP is default. TCP is not available on all platforms (see remarks).</param>
     public static void SwitchToProtocol(ConnectionProtocol cp)
     {
-        Debug.Log("SwitchToProtocol: " + cp + " PhotonNetwork.connected: " + PhotonNetwork.connected);
+        // Debug.Log("SwitchToProtocol: " + cp + " PhotonNetwork.connected: " + PhotonNetwork.connected);
         networkingPeer.TransportProtocol = cp;
     }
 
@@ -1213,6 +1216,9 @@ public static class PhotonNetwork
             Debug.LogError("You did not select a Hosting Type in your PhotonServerSettings. Please set it up or don't use ConnectUsingSettings().");
             return false;
         }
+
+        PhotonNetwork.logLevel = PhotonServerSettings.PunLogging;
+        PhotonNetwork.networkingPeer.DebugOut = PhotonServerSettings.NetworkLogging;
 
         SwitchToProtocol(PhotonServerSettings.Protocol);
         networkingPeer.SetApp(PhotonServerSettings.AppID, gameVersion);
@@ -1575,9 +1581,9 @@ public static class PhotonNetwork
     /// That list is initialized on first use of OpFindFriends (before that, it is null).
     /// To refresh the list, call FindFriends again (in 5 seconds or 10 or 20).
     ///
-    /// Users identify themselves by setting a unique userId in the PhotonNetwork.AuthValues. 
+    /// Users identify themselves by setting a unique userId in the PhotonNetwork.AuthValues.
     /// See remarks of AuthenticationValues for info about how this is set and used.
-    /// 
+    ///
     /// The list of friends must be fetched from some other source (not provided by Photon).
     ///
     ///
@@ -1718,7 +1724,7 @@ public static class PhotonNetwork
     /// JoinRoom fails if the room is either full or no longer available (it might become empty while you attempt to join).
     /// Implement OnPhotonJoinRoomFailed() to get a callback in error case.
     ///
-    /// To join a room from the lobby's listing, use RoomInfo.name as roomName here.
+    /// To join a room from the lobby's listing, use RoomInfo.Name as roomName here.
     /// Despite using multiple lobbies, a roomName is always "global" for your application and so you don't
     /// have to specify which lobby it's in. The Master Server will find the room.
     /// In the Photon Cloud, an application is defined by AppId, Game- and PUN-version.
@@ -1739,7 +1745,7 @@ public static class PhotonNetwork
     /// JoinRoom fails if the room is either full or no longer available (it might become empty while you attempt to join).
     /// Implement OnPhotonJoinRoomFailed() to get a callback in error case.
     ///
-    /// To join a room from the lobby's listing, use RoomInfo.name as roomName here.
+    /// To join a room from the lobby's listing, use RoomInfo.Name as roomName here.
     /// Despite using multiple lobbies, a roomName is always "global" for your application and so you don't
     /// have to specify which lobby it's in. The Master Server will find the room.
     /// In the Photon Cloud, an application is defined by AppId, Game- and PUN-version.
@@ -1849,7 +1855,7 @@ public static class PhotonNetwork
         opParams.RoomOptions = roomOptions;
         opParams.Lobby = typedLobby;
         opParams.CreateIfNotExists = true;
-        opParams.PlayerProperties = player.customProperties;
+        opParams.PlayerProperties = player.CustomProperties;
         opParams.ExpectedUsers = expectedUsers;
 
         return networkingPeer.OpJoinRoom(opParams);
@@ -1996,7 +2002,7 @@ public static class PhotonNetwork
         EnterRoomParams opParams = new EnterRoomParams();
         opParams.RoomName = roomName;
         opParams.RejoinOnly = true;
-        opParams.PlayerProperties = player.customProperties;
+        opParams.PlayerProperties = player.CustomProperties;
 
         return networkingPeer.OpJoinRoom(opParams);
     }
@@ -2009,7 +2015,7 @@ public static class PhotonNetwork
     {
         offlineModeRoom = new Room(roomName, roomOptions);
         networkingPeer.ChangeLocalID(1);
-        offlineModeRoom.masterClientId = 1;
+        offlineModeRoom.MasterClientId = 1;
 
         if (createdRoom)
         {
@@ -2191,13 +2197,13 @@ public static class PhotonNetwork
         if (customProperties == null)
         {
             customProperties = new Hashtable();
-            foreach (object k in player.customProperties.Keys)
+            foreach (object k in player.CustomProperties.Keys)
             {
                 customProperties[(string)k] = null;
             }
         }
 
-        if (room != null && room.isLocalClientInside)
+        if (room != null && room.IsLocalClientInside)
         {
             player.SetCustomProperties(customProperties);
         }
@@ -2224,9 +2230,9 @@ public static class PhotonNetwork
     /// <param name="customPropertiesToDelete">List of Custom Property keys to remove. See remarks.</param>
     public static void RemovePlayerCustomProperties(string[] customPropertiesToDelete)
     {
-        if (customPropertiesToDelete == null || customPropertiesToDelete.Length == 0 || player.customProperties == null)
+        if (customPropertiesToDelete == null || customPropertiesToDelete.Length == 0 || player.CustomProperties == null)
         {
-            player.customProperties = new Hashtable();
+            player.CustomProperties = new Hashtable();
             return;
         }
 
@@ -2234,9 +2240,9 @@ public static class PhotonNetwork
         for (int i = 0; i < customPropertiesToDelete.Length; i++)
         {
             string key = customPropertiesToDelete[i];
-            if (player.customProperties.ContainsKey(key))
+            if (player.CustomProperties.ContainsKey(key))
             {
-                player.customProperties.Remove(key);
+                player.CustomProperties.Remove(key);
             }
         }
     }
@@ -2581,7 +2587,7 @@ public static class PhotonNetwork
             return false;
         }
 
-        if (!player.isMasterClient)
+        if (!player.IsMasterClient)
         {
             Debug.LogError("CloseConnection: Only the masterclient can kick another player.");
             return false;
@@ -2759,7 +2765,7 @@ public static class PhotonNetwork
         {
             return;
         }
-        if (player.isMasterClient || targetPlayerId == player.ID)
+        if (player.IsMasterClient || targetPlayerId == player.ID)
         {
             networkingPeer.DestroyPlayerObjects(targetPlayerId, false);
         }
@@ -2816,7 +2822,7 @@ public static class PhotonNetwork
             return;
         }
 
-        if (!targetPlayer.isLocal && !isMasterClient)
+        if (!targetPlayer.IsLocal && !isMasterClient)
         {
             Debug.LogError("Error; Only the MasterClient can call RemoveRPCs for other players.");
             return;
@@ -2954,7 +2960,10 @@ public static class PhotonNetwork
         Component[] targetComponents = (Component[]) GameObject.FindObjectsOfType(type);
         for (int index = 0; index < targetComponents.Length; index++)
         {
-            objectsWithComponent.Add(targetComponents[index].gameObject);
+            if (targetComponents[index] != null)
+            {
+                objectsWithComponent.Add(targetComponents[index].gameObject);
+            }
         }
 
         return objectsWithComponent;

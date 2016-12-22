@@ -17,7 +17,7 @@ using SupportClassPun = ExitGames.Client.Photon.SupportClass;
 
 namespace ExitGames.Client.Photon
 {
-
+    #if UNITY_5_3 || UNITY_5_3_OR_NEWER
 	/// <summary>
 	/// Yield Instruction to Wait for real seconds. Very important to keep connection working if Time.TimeScale is altered, we still want accurate network events
 	/// </summary>
@@ -35,6 +35,7 @@ namespace ExitGames.Client.Photon
 			_endTime = Time.realtimeSinceStartup + seconds;
 		}
 	}
+    #endif
 
     /// <summary>
     /// Internal class to encapsulate the network i/o functionality for the realtime libary.
@@ -186,7 +187,12 @@ namespace ExitGames.Client.Photon
             this.Listener.DebugReturn(DebugLevel.INFO, "ReceiveLoop()");
             while (!this.sock.Connected && this.sock.Error == null)
             {
-				yield return new WaitForRealSeconds(0.1f); // while connecting
+                #if UNITY_5_3 || UNITY_5_3_OR_NEWER
+                yield return new WaitForRealSeconds(0.1f);
+                #else
+                float waittime = Time.realtimeSinceStartup + 0.1f;
+                while (Time.realtimeSinceStartup < waittime) yield return 0;
+                #endif
             }
 
             if (this.sock.Error != null)
@@ -215,7 +221,13 @@ namespace ExitGames.Client.Photon
 						byte[] inBuff = this.sock.Recv();
 						if (inBuff == null || inBuff.Length == 0)
 						{
-							yield return new WaitForRealSeconds(0.02f); // nothing received. wait a bit, try again
+						    // nothing received. wait a bit, try again
+                            #if UNITY_5_3 || UNITY_5_3_OR_NEWER
+                            yield return new WaitForRealSeconds(0.02f);
+                            #else
+                            float waittime = Time.realtimeSinceStartup + 0.02f;
+                            while (Time.realtimeSinceStartup < waittime) yield return 0;
+                            #endif
 							continue;
 						}
 
