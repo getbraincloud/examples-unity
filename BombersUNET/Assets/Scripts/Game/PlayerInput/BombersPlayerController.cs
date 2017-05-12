@@ -111,7 +111,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             StartCoroutine("UpdateVarsClient");
             CmdUpdateSyncVars();
             BombersNetworkManager.m_localPlayer = this;
-            m_displayName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName;
+            m_displayName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
             m_playerID = (int)netId.Value;
 
             m_missionText = m_gMan.m_missionText;
@@ -654,7 +654,9 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             int children = ship.transform.childCount;
             for (int i = 1; i < children; i++)
             {
-                ship.transform.GetChild(i).GetChild(0).GetChild(4).GetComponent<ParticleSystem>().enableEmission = false;
+                var ps = ship.transform.GetChild(i).GetChild(0).GetChild(4).GetComponent<ParticleSystem>();
+                var em = ps.emission;
+                em.enabled = false;
             }
             GameObject explosion;
             string path = "";

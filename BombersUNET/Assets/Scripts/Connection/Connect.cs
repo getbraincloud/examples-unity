@@ -1,11 +1,9 @@
-﻿using System;
-using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using UnityEngine;
 using LitJson;
-using BrainCloudUNETExample.Game;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using BrainCloud;
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudUNETExample.Connection
 {
@@ -14,11 +12,26 @@ namespace BrainCloudUNETExample.Connection
         private string m_username = "";
         private string m_password = "";
 
-        private Vector2 m_scrollPosition;
         private string m_authStatus = "Welcome to brainCloud";
 
-        private Rect m_windowRect;
         private bool m_isLoggingIn = false;
+
+        private DialogDisplay m_dialogueDisplay;
+        private InputField m_usernameField;
+        private InputField m_passwordField;
+        private Button m_loginBtn;
+        private Button m_forgotPasswordBtn;
+        private Toggle m_savePassToggle;
+
+        void Awake()
+        {
+            m_dialogueDisplay = GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>();
+            m_usernameField = GameObject.Find("UsernameBox").GetComponent<InputField>();
+            m_passwordField = GameObject.Find("PasswordBox").GetComponent<InputField>();
+            m_loginBtn = GameObject.Find("Login Button").GetComponent<Button>();
+            m_forgotPasswordBtn = GameObject.Find("Forgot Password").GetComponent<Button>();
+            m_savePassToggle = GameObject.Find("Toggle").GetComponent<Toggle>();
+        }
 
         void Start()
         {
@@ -29,6 +42,7 @@ namespace BrainCloudUNETExample.Connection
             ///////////////////////////////////////////////////////////////////
 
             BrainCloudWrapper.Initialize();
+            BrainCloudWrapper.Instance.AlwaysAllowProfileSwitch = true;
 
             ///////////////////////////////////////////////////////////////////
 
@@ -59,55 +73,51 @@ namespace BrainCloudUNETExample.Connection
 
         public void Login()
         {
-            m_username = GameObject.Find("UsernameBox").GetComponent<InputField>().text;
-            m_password = GameObject.Find("PasswordBox").GetComponent<InputField>().text;
+            m_username = m_usernameField.text;
+            m_password = m_passwordField.text;
 
-                if (m_username.Length == 0 || m_password.Length == 0)
+            if (m_username.Length == 0 || m_password.Length == 0)
+            {
+                m_dialogueDisplay.DisplayDialog("Username/password can't be empty!");
+            }
+            else if (!m_username.Contains("@"))
+            {
+                m_dialogueDisplay.DisplayDialog("Not a valid email address!");
+            }
+            else
+            {
+                AppendLog("Attempting to authenticate...");
+                PlayerPrefs.SetString("username", m_username);
+                if (m_savePassToggle.isOn)
                 {
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Username/password can't be empty!");
-                }
-                else if (!m_username.Contains("@"))
-                {
-                    GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Not a valid email address!");
+                    PlayerPrefs.SetString("password", m_password);
+                    PlayerPrefs.SetInt("remember", 1);
                 }
                 else
                 {
-                    AppendLog("Attempting to authenticate...");
-                    PlayerPrefs.SetString("username", m_username);
-                    if (GameObject.Find("Toggle").GetComponent<Toggle>().isOn)
-                    {
-                        PlayerPrefs.SetString("password", m_password);
-                        PlayerPrefs.SetInt("remember", 1);
-                    }
-                    else
-                    {
-                        PlayerPrefs.SetString("password", "");
-                        PlayerPrefs.SetInt("remember", 0);
-                    }
-
-                    m_isLoggingIn = true;
-
-                    ///////////////////////////////////////////////////////////////////
-                    // brainCloud authentication
-                    ///////////////////////////////////////////////////////////////////
-                    BrainCloudWrapper.GetInstance().AuthenticateEmailPassword(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
-                    ///////////////////////////////////////////////////////////////////
+                    PlayerPrefs.SetString("password", "");
+                    PlayerPrefs.SetInt("remember", 0);
                 }
-            
+
+                m_isLoggingIn = true;
+
+                // brainCloud authentication
+                BrainCloudWrapper.Instance.AuthenticateEmailPassword(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
+            }
         }
 
         void OnWindow()
         {
             if (!m_isLoggingIn)
             {
-               GameObject.Find("Login Button").GetComponent<Button>().interactable = true;
-               GameObject.Find("Login Button").transform.GetChild(0).GetComponent<Text>().text = "Log In";
+                m_loginBtn.interactable = true;
+                m_loginBtn.transform.GetChild(0).GetComponent<Text>().text = "Log In";
             }
             else
             {
-                GameObject.Find("Login Button").transform.GetChild(0).GetComponent<Text>().text = "Logging in...";
-                GameObject.Find("Login Button").GetComponent<Button>().interactable = false;
-                GameObject.Find("Forgot Password").GetComponent<Button>().interactable = false;
+                m_loginBtn.transform.GetChild(0).GetComponent<Text>().text = "Logging in...";
+                m_loginBtn.interactable = false;
+                m_forgotPasswordBtn.interactable = false;
             }
         }
 
@@ -127,29 +137,28 @@ namespace BrainCloudUNETExample.Connection
 
         public void ForgotPassword()
         {
-            m_username = GameObject.Find("UsernameBox").GetComponent<InputField>().text;
+            m_username = m_usernameField.text;
 
             if (m_username == "" || !m_username.Contains("@"))
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("You need to enter an email first!");
+                m_dialogueDisplay.DisplayDialog("You need to enter an email first!");
                 return;
             }
-            BrainCloudWrapper.GetBC().AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
+            BrainCloudWrapper.Client.AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
 
         }
 
         public void OnSuccess_Reset(string responseData, object cbObject)
         {
-            GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Password reset instructions\nsent to registered email.");
+            m_dialogueDisplay.DisplayDialog("Password reset instructions\nsent to registered email.");
         }
 
-        public void OnError_Reset(int a, int b, string responseData, object cbObject)
+        public void OnError_Reset(int statusCode, int reasonCode, string responseData, object cbObject)
         {
-            if (b == 40209)
+            if (reasonCode == ReasonCodes.SECURITY_ERROR)
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Email not registered!");
+                m_dialogueDisplay.DisplayDialog("Email not registered!");
             }
-
         }
 
         public void OnSuccess_Authenticate(string responseData, object cbObject)
@@ -170,28 +179,29 @@ namespace BrainCloudUNETExample.Connection
                         break;
                     }
                 }
-                BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(username);
+                BrainCloudWrapper.Client.PlayerStateService.UpdatePlayerName(username);
             }
             else
             {
                 username = response["data"]["playerName"].ToString();
             }
 
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadGlobalProperties();
-            GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_playerName = username;
+
+            BrainCloudStats.Instance.ReadStatistics();
+            BrainCloudStats.Instance.ReadGlobalProperties();
+            BrainCloudStats.Instance.PlayerName = username;
             NetworkManager.singleton.StartMatchMaker();
-            Application.LoadLevel("Matchmaking");
+            SceneManager.LoadScene("Matchmaking");
         }
 
-        public void OnError_Authenticate(int a, int b, string responseData, object cbObject)
+        public void OnError_Authenticate(int statusCode, int reasonCode, string responseData, object cbObject)
         {
-            if (b == 40307)
+            if (reasonCode == ReasonCodes.TOKEN_DOES_NOT_MATCH_USER)
             {
-                GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog("Incorrect username/password combination!");
+                m_dialogueDisplay.DisplayDialog("Incorrect username/password combination!");
             }
             m_isLoggingIn = false;
-            GameObject.Find("Forgot Password").GetComponent<Button>().interactable = true;
+            m_forgotPasswordBtn.interactable = true;
         }
     }
 }

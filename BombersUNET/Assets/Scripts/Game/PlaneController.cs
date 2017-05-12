@@ -89,7 +89,7 @@ namespace BrainCloudUNETExample.Game
             { 
                 null, null, null, null
             };
-            Debug.Log(m_playerID);
+
             transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = BombersPlayerController.GetPlayer(m_playerID).m_displayName;
             if (BombersPlayerController.GetPlayer(m_playerID).isLocalPlayer) //isLocal
             {

@@ -95,7 +95,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         {
             bool isAlone = true;
 
-            if (PhotonNetwork.room != null && PhotonNetwork.room.playerCount > 1)
+            if (PhotonNetwork.room != null && PhotonNetwork.room.PlayerCount > 1)
             {
                 PhotonPlayer[] players = PhotonNetwork.playerList;
 
@@ -103,19 +103,19 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 {
                     PhotonPlayer player = players[i];
                     if (player == null
-                        || player.customProperties == null
+                        || player.CustomProperties == null
                         || PhotonNetwork.player == null
-                        || PhotonNetwork.player.customProperties == null)
+                        || PhotonNetwork.player.CustomProperties == null)
                     {
                         continue;
                     }
 
-                    if (player.customProperties["Team"] == null
-                        || (int)player.customProperties["Team"] == 3
-                        || (int)player.customProperties["Team"] == 0
+                    if (player.CustomProperties["Team"] == null
+                        || (int)player.CustomProperties["Team"] == 3
+                        || (int)player.CustomProperties["Team"] == 0
                         || player == PhotonNetwork.player
-                        || PhotonNetwork.player.customProperties["Team"] == null
-                        || (int)player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
+                        || PhotonNetwork.player.CustomProperties["Team"] == null
+                        || (int)player.CustomProperties["Team"] == (int)PhotonNetwork.player.CustomProperties["Team"])
                     {
                         continue;
                     }
@@ -194,10 +194,10 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 GameObject ship = null;
 
-                if (PhotonNetwork.room != null && _gameManager != null && PhotonNetwork.player != null && m_playerPlane != null && PhotonNetwork.player.customProperties != null)
+                if (PhotonNetwork.room != null && _gameManager != null && PhotonNetwork.player != null && m_playerPlane != null && PhotonNetwork.player.CustomProperties != null)
                 {
-                    if(PhotonNetwork.player.customProperties.ContainsKey("Team"))
-                        ship = _gameManager.GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.customProperties["Team"]);
+                    if (PhotonNetwork.player.CustomProperties.ContainsKey("Team"))
+                        ship = _gameManager.GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.CustomProperties["Team"]);
                 }
 
                 if (ship != null)
@@ -372,7 +372,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
         public GameObject SpawnBullet(BulletController.BulletInfo aBulletInfo)
         {
-            if (!aBulletInfo.m_shooter.customProperties.ContainsKey("Team")) return null;
+            if (!aBulletInfo.m_shooter.CustomProperties.ContainsKey("Team")) return null;
 
             GameObject player = null;
             GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
@@ -399,7 +399,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 flare.GetComponent<AudioSource>().Play();
             }
 
-            GameObject bullet = (GameObject)Instantiate(((int)aBulletInfo.m_shooter.customProperties["Team"] == 1) ? m_bullet1Prefab : m_bullet2Prefab, aBulletInfo.m_startPosition, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
+            GameObject bullet = (GameObject)Instantiate(((int)aBulletInfo.m_shooter.CustomProperties["Team"] == 1) ? m_bullet1Prefab : m_bullet2Prefab, aBulletInfo.m_startPosition, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
             bullet.GetComponent<Rigidbody>().velocity = aBulletInfo.m_startVelocity;
             bullet.GetComponent<BulletController>().SetBulletInfo(aBulletInfo);
 

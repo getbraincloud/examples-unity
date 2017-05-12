@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace BrainCloudUNETExample.Connection
 {
     public class DialogDisplay : MonoBehaviour
     {
+        public static DialogDisplay Instance { get { return s_instance; } }
+
         private bool m_isFullscreen = false;
 
         List<DialogBox> m_dialogsToDisplay;
@@ -15,15 +17,20 @@ namespace BrainCloudUNETExample.Connection
         private GUISkin m_skin;
 
         public static DialogDisplay s_instance;
-        void Awake()
+
+        private void Awake()
         {
             if (s_instance)
+            {
                 DestroyImmediate(gameObject);
-            else
-                s_instance = this;
+                return;
+            }
+
+            s_instance = this;
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
-        class DialogBox
+        private class DialogBox
         {
             public string m_message;
             public string m_title;
@@ -35,7 +42,7 @@ namespace BrainCloudUNETExample.Connection
             }
         }
 
-        class FadeLabel
+        private class FadeLabel
         {
             public Rect m_position;
             public GUIContent m_content;
@@ -81,7 +88,7 @@ namespace BrainCloudUNETExample.Connection
             }
         }
 
-        void OnGUI()
+        private void OnGUI()
         {
             GUI.skin = m_skin;
             int width = 250;
@@ -105,7 +112,7 @@ namespace BrainCloudUNETExample.Connection
             }
         }
 
-        void OnWindow(int windowID)
+        private void OnWindow(int windowID)
         {
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal();
@@ -124,7 +131,7 @@ namespace BrainCloudUNETExample.Connection
             GUILayout.FlexibleSpace();
         }
 
-        void Start()
+        private void Start()
         {
             m_skin = (GUISkin)Resources.Load("skin");
             DontDestroyOnLoad(gameObject);
@@ -186,7 +193,7 @@ namespace BrainCloudUNETExample.Connection
         private bool m_showPlaying = false;
         private bool m_showPlay = false;
 
-        void OnLevelWasLoaded(int level)
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (m_showHostLeft)
             {
@@ -209,7 +216,7 @@ namespace BrainCloudUNETExample.Connection
             m_showPlaying = true;
         }
 
-        void LateUpdate()
+        private void LateUpdate()
         {
             if (m_showHost)
             {

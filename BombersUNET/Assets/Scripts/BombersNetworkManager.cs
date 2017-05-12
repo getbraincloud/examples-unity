@@ -1,13 +1,14 @@
 ﻿/*
  * UNET doesn't have a clean built-in way to detect that a host has left a match, so a general all-encompasing error and disconnection statement has been made
  * in this network manager to boot player back to the menu should the host leave the game.
- */ 
+ */
 
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using BrainCloudUNETExample.Game.PlayerInput;
+using UnityEngine.SceneManagement;
 
 public class BombersNetworkManager : NetworkManager
 {
@@ -21,7 +22,7 @@ public class BombersNetworkManager : NetworkManager
     public override void OnClientSceneChanged(NetworkConnection conn)
     {
         m_localConnection = conn;
-        if (Application.loadedLevelName == "Game" && m_matchOptions != null)
+        if (SceneManager.GetActiveScene().name == "Game" && m_matchOptions != null)
         {
             StartCoroutine(InitializeGameInfo(m_matchOptions));
             m_matchOptions = null;
@@ -35,7 +36,7 @@ public class BombersNetworkManager : NetworkManager
 
         while (GameObject.Find("GameInfo") == null)
         {
-            yield return new WaitForSeconds(0);
+            yield return null;
         }
 
         GameObject.Find("GameInfo").GetComponent<GameInfo>().Initialize(matchOptions);

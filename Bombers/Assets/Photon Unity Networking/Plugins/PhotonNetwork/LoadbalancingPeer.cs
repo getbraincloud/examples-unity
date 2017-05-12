@@ -1031,6 +1031,9 @@ using ExitGames.Client.Photon;
 
         /// <summary>(250) Sent by Photon whent he event cache slice was changed. Done by OpRaiseEvent.</summary>
         public const byte CacheSliceChanged = 250;
+
+        /// <summary>(223) Sent by Photon to update a token before it times out.</summary>
+        public const byte AuthEvent = 223;
     }
 
 
@@ -1541,7 +1544,7 @@ using ExitGames.Client.Photon;
         /// </summary>
         /// <remarks>
         /// When you set this to true, Photon will publish the UserIds of the players in that room.
-        /// In that case, you can use PhotonPlayer.userId, to access any player's userID.
+        /// In that case, you can use PhotonPlayer.UserId, to access any player's userID.
         /// This is useful for FindFriends and to set "expected users" to reserve slots in a room (see PhotonNetwork.JoinRoom e.g.).
         /// </remarks>
         public bool PublishUserId { get { return this.publishUserIdField; } set { this.publishUserIdField = value; } }
@@ -1715,7 +1718,7 @@ public class RaiseEventOptions
     /// The AuthValues are sent in OpAuthenticate when you connect, so they must be set before you connect.
     /// Should you not set any AuthValues, PUN will create them and set the playerName as userId in them.
     /// If the AuthValues.userId is null or empty when it's sent to the server, then the Photon Server assigns a userId!
-    /// 
+    ///
     /// The Photon Cloud Dashboard will let you enable this feature and set important server values for it.
     /// https://www.photonengine.com/dashboard
     /// </remarks>

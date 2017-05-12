@@ -104,7 +104,7 @@ namespace BrainCloudPhotonExample.Game
                 }
                 else //it hit a ship
                 {
-                    if (((int)m_bombInfo.m_shooter.customProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.customProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
+                    if (((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
                     {
                         GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 2);
                     }
@@ -143,7 +143,7 @@ namespace BrainCloudPhotonExample.Game
                     GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombWaterExplosion"), transform.position, Quaternion.identity);
                     explosion.GetComponent<AudioSource>().Play();
                 }
-                else if (((int)m_bombInfo.m_shooter.customProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.customProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
+                else if (((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
                 {
                     GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombDud"), transform.position, Quaternion.identity);
                     explosion.GetComponent<AudioSource>().Play();
@@ -168,7 +168,7 @@ namespace BrainCloudPhotonExample.Game
 
             string teamBombPath = "";
 
-            if ((int)m_bombInfo.m_shooter.customProperties["Team"] == 1)
+            if ((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 1)
             {
                 teamBombPath = "Bomb01";
             }

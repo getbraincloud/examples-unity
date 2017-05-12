@@ -11,7 +11,6 @@
 namespace ExitGames.Client.Photon.Chat
 {
     using System;
-    using System.Diagnostics;
     using System.Collections.Generic;
     using ExitGames.Client.Photon;
 
@@ -38,26 +37,42 @@ namespace ExitGames.Client.Photon.Chat
     public class ChatClient : IPhotonPeerListener
     {
         const int FriendRequestListMax = 1024;
+
         /// <summary>The address of last connected Name Server.</summary>
         public string NameServerAddress { get; private set; }
+
         /// <summary>The address of the actual chat server assigned from NameServer. Public for read only.</summary>
         public string FrontendAddress { get; private set; }
+
         /// <summary>Region used to connect to. Currently all chat is done in EU. It can make sense to use only one region for the whole game.</summary>
         private string chatRegion = "EU";
 
         /// <summary>Settable only before you connect! Defaults to "EU".</summary>
         public string ChatRegion
         {
-            get { return chatRegion; }
-            set { chatRegion = value; }
+            get { return this.chatRegion; }
+            set { this.chatRegion = value; }
         }
 
         /// <summary>Current state of the ChatClient. Also use CanChat.</summary>
         public ChatState State { get; private set; }
+
         public ChatDisconnectCause DisconnectedCause { get; private set; }
-        public bool CanChat { get { return this.State == ChatState.ConnectedToFrontEnd && this.HasPeer; } }
-        public bool CanChatInChannel(string channelName) { return this.CanChat && this.PublicChannels.ContainsKey(channelName) && !this.PublicChannelsUnsubscribing.Contains(channelName);  }
-        private bool HasPeer { get { return this.chatPeer != null; }  }
+
+        public bool CanChat
+        {
+            get { return this.State == ChatState.ConnectedToFrontEnd && this.HasPeer; }
+        }
+
+        public bool CanChatInChannel(string channelName)
+        {
+            return this.CanChat && this.PublicChannels.ContainsKey(channelName) && !this.PublicChannelsUnsubscribing.Contains(channelName);
+        }
+
+        private bool HasPeer
+        {
+            get { return this.chatPeer != null; }
+        }
 
         /// <summary>The version of your client. A new version also creates a new "virtual app" to separate players from older client versions.</summary>
         public string AppVersion { get; private set; }
@@ -75,10 +90,7 @@ namespace ExitGames.Client.Photon.Chat
         /// It's not a nickname and we assume users with the same userID are the same person.</remarks>
         public string UserId
         {
-            get
-            {
-                return (this.AuthValues != null) ? this.AuthValues.UserId : null;
-            }
+            get { return (this.AuthValues != null) ? this.AuthValues.UserId : null; }
             private set
             {
                 if (this.AuthValues == null)
@@ -191,10 +203,10 @@ namespace ExitGames.Client.Photon.Chat
         /// </remarks>
         public void Service()
         {
-            if (this.HasPeer && (Environment.TickCount - msTimestampOfLastServiceCall > msDeltaForServiceCalls || msTimestampOfLastServiceCall == 0))
+            if (this.HasPeer && (Environment.TickCount - this.msTimestampOfLastServiceCall > this.msDeltaForServiceCalls || this.msTimestampOfLastServiceCall == 0))
             {
-                msTimestampOfLastServiceCall = Environment.TickCount;
-                this.chatPeer.Service();  //TODO: make sure to call service regularly. in best case it could be integrated into PhotonHandler.FallbackSendAckThread()!
+                this.msTimestampOfLastServiceCall = Environment.TickCount;
+                this.chatPeer.Service(); //TODO: make sure to call service regularly. in best case it could be integrated into PhotonHandler.FallbackSendAckThread()!
             }
         }
 
@@ -286,11 +298,11 @@ namespace ExitGames.Client.Photon.Chat
                 return false;
             }
 
-            foreach (var ch in channels)
+            foreach (string ch in channels)
             {
                 this.PublicChannelsUnsubscribing.Add(ch);
             }
-            return SendChannelOperation(channels, ChatOperationCode.Unsubscribe, 0);
+            return this.SendChannelOperation(channels, ChatOperationCode.Unsubscribe, 0);
         }
 
         /// <summary>Sends a message to a public channel which this client subscribed to.</summary>
@@ -348,7 +360,7 @@ namespace ExitGames.Client.Photon.Chat
         /// <returns>True if this clients can send the message to the server.</returns>
         public bool SendPrivateMessage(string target, object message)
         {
-            return SendPrivateMessage(target, message, false);
+            return this.SendPrivateMessage(target, message, false);
         }
 
         /// <summary>
@@ -454,8 +466,9 @@ namespace ExitGames.Client.Photon.Chat
         /// <returns>True if the operation gets called on the server.</returns>
         public bool SetOnlineStatus(int status)
         {
-            return SetOnlineStatus(status, null, true);
+            return this.SetOnlineStatus(status, null, true);
         }
+
         /// <summary>Sets the user's status without changing your status-message.</summary>
         /// <remarks>
         /// The predefined status values can be found in class ChatUserStatus.
@@ -472,7 +485,7 @@ namespace ExitGames.Client.Photon.Chat
         /// <returns>True if the operation gets called on the server.</returns>
         public bool SetOnlineStatus(int status, object message)
         {
-            return SetOnlineStatus(status, message, false);
+            return this.SetOnlineStatus(status, message, false);
         }
 
         /// <summary>
@@ -632,7 +645,7 @@ namespace ExitGames.Client.Photon.Chat
         {
             if (!isPrivate)
             {
-               return this.PublicChannels.TryGetValue(channelName, out channel);
+                return this.PublicChannels.TryGetValue(channelName, out channel);
             }
             else
             {
@@ -739,16 +752,12 @@ namespace ExitGames.Client.Photon.Chat
             switch (statusCode)
             {
                 case StatusCode.Connect:
-                    if (!this.chatPeer.IsProtocolSecure) {
-#if UNITY
-                        UnityEngine.Debug.Log("Establishing Encryption");
-#endif
+                    if (!this.chatPeer.IsProtocolSecure)
+                    {
                         this.chatPeer.EstablishEncryption();
                     }
-                    else {
-#if UNITY
-                        UnityEngine.Debug.Log("Skipping Encryption");
-#endif
+                    else
+                    {
                         if (!this.didAuthenticate)
                         {
                             this.didAuthenticate = this.chatPeer.AuthenticateOnNameServer(this.AppId, this.AppVersion, this.chatRegion, this.AuthValues);
@@ -805,13 +814,13 @@ namespace ExitGames.Client.Photon.Chat
             }
         }
 
-#if SDK_V4
+        #if SDK_V4
         void IPhotonPeerListener.OnMessage(object msg)
         {
             // in v4 interface IPhotonPeerListener
             return;
         }
-#endif
+        #endif
 
         #endregion
 
@@ -831,13 +840,13 @@ namespace ExitGames.Client.Photon.Chat
         {
             //Console.WriteLine(SupportClass.DictionaryToString(eventData.Parameters));
 
-            var message = (object)eventData.Parameters[(byte)ChatParameterCode.Message];
-            var sender = (string)eventData.Parameters[(byte)ChatParameterCode.Sender];
+            object message = (object)eventData.Parameters[(byte)ChatParameterCode.Message];
+            string sender = (string)eventData.Parameters[(byte)ChatParameterCode.Sender];
 
             string channelName;
             if (this.UserId != null && this.UserId.Equals(sender))
             {
-                var target = (string)eventData.Parameters[(byte)ChatParameterCode.UserId];
+                string target = (string)eventData.Parameters[(byte)ChatParameterCode.UserId];
                 channelName = this.GetPrivateChannelNameByUser(target);
             }
             else
@@ -860,9 +869,9 @@ namespace ExitGames.Client.Photon.Chat
 
         private void HandleChatMessagesEvent(EventData eventData)
         {
-            var messages = (object[])eventData.Parameters[(byte)ChatParameterCode.Messages];
-            var senders = (string[])eventData.Parameters[(byte)ChatParameterCode.Senders];
-            var channelName = (string)eventData.Parameters[(byte)ChatParameterCode.Channel];
+            object[] messages = (object[])eventData.Parameters[(byte)ChatParameterCode.Messages];
+            string[] senders = (string[])eventData.Parameters[(byte)ChatParameterCode.Senders];
+            string channelName = (string)eventData.Parameters[(byte)ChatParameterCode.Channel];
 
             ChatChannel channel;
             if (!this.PublicChannels.TryGetValue(channelName, out channel))
@@ -880,8 +889,8 @@ namespace ExitGames.Client.Photon.Chat
 
         private void HandleSubscribeEvent(EventData eventData)
         {
-            var channelsInResponse = (string[])eventData.Parameters[ChatParameterCode.Channels];
-            var results = (bool[])eventData.Parameters[ChatParameterCode.SubscribeResults];
+            string[] channelsInResponse = (string[])eventData.Parameters[ChatParameterCode.Channels];
+            bool[] results = (bool[])eventData.Parameters[ChatParameterCode.SubscribeResults];
 
             for (int i = 0; i < channelsInResponse.Length; i++)
             {
@@ -902,8 +911,8 @@ namespace ExitGames.Client.Photon.Chat
 
         private void HandleUnsubscribeEvent(EventData eventData)
         {
-            var channelsInRequest = (string[])eventData[ChatParameterCode.Channels];
-            for (var i = 0; i < channelsInRequest.Length; i++)
+            string[] channelsInRequest = (string[])eventData[ChatParameterCode.Channels];
+            for (int i = 0; i < channelsInRequest.Length; i++)
             {
                 string channelName = channelsInRequest[i];
                 this.PublicChannels.Remove(channelName);
@@ -934,7 +943,7 @@ namespace ExitGames.Client.Photon.Chat
                             this.AuthValues = new AuthenticationValues();
                         }
                         this.AuthValues.Token = operationResponse[ParameterCode.Secret] as string;
-                        this.FrontendAddress = (string) operationResponse[ParameterCode.Address];
+                        this.FrontendAddress = (string)operationResponse[ParameterCode.Address];
 
                         // we disconnect and status handler starts to connect to front end
                         this.chatPeer.Disconnect();
@@ -949,7 +958,7 @@ namespace ExitGames.Client.Photon.Chat
                 }
                 else if (this.State == ChatState.ConnectingToFrontEnd)
                 {
-                    this.msDeltaForServiceCalls = this.msDeltaForServiceCalls * 4;  // when we arrived on chat server: limit Service calls some more
+                    this.msDeltaForServiceCalls = this.msDeltaForServiceCalls * 4; // when we arrived on chat server: limit Service calls some more
 
                     this.State = ChatState.ConnectedToFrontEnd;
                     this.listener.OnChatStateChange(this.State);
@@ -992,8 +1001,8 @@ namespace ExitGames.Client.Photon.Chat
 
         private void HandleStatusUpdate(EventData eventData)
         {
-            var user = (string)eventData.Parameters[ChatParameterCode.Sender];
-            var status = (int)eventData.Parameters[ChatParameterCode.Status];
+            string user = (string)eventData.Parameters[ChatParameterCode.Sender];
+            int status = (int)eventData.Parameters[ChatParameterCode.Status];
 
             object message = null;
             bool gotMessage = eventData.Parameters.ContainsKey(ChatParameterCode.Message);
@@ -1031,7 +1040,7 @@ namespace ExitGames.Client.Photon.Chat
                 }
                 else
                 {
-                    var opParameters = new Dictionary<byte, object> { { (byte)ChatParameterCode.Secret, this.AuthValues.Token } };
+                    Dictionary<byte, object> opParameters = new Dictionary<byte, object> { { (byte)ChatParameterCode.Secret, this.AuthValues.Token } };
                     return this.chatPeer.OpCustom((byte)ChatOperationCode.Authenticate, opParameters, true);
                 }
             }

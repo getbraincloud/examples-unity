@@ -58,7 +58,7 @@ namespace BrainCloudPhotonExample.Game
 
         void LateUpdate()
         {
-            if (m_isActive && (int)m_player.customProperties["Team"] == (int)PhotonNetwork.player.customProperties["Team"])
+            if (m_isActive && (int)m_player.CustomProperties["Team"] == (int)PhotonNetwork.player.CustomProperties["Team"])
             {
                 m_offscreenIndicator.transform.position = m_playerPlane.transform.position;
                 Vector3 position = m_offscreenIndicator.transform.position;
@@ -92,7 +92,7 @@ namespace BrainCloudPhotonExample.Game
                 point -= Camera.main.transform.position;
                 m_offscreenIndicator.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(point.y, point.x) * Mathf.Rad2Deg - 90);
 
-                transform.GetChild(2).GetComponent<TextMesh>().text = m_player.customProperties["RoomDisplayName"].ToString();
+                transform.GetChild(2).GetComponent<TextMesh>().text = m_player.CustomProperties["RoomDisplayName"].ToString();
                 transform.GetChild(2).position = m_offscreenIndicator.transform.position + new Vector3(0, -0.8f, 0);
                 transform.GetChild(2).eulerAngles = new Vector3(0, 0, 0);
 

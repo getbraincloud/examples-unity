@@ -124,6 +124,7 @@ namespace BrainCloud
         private BrainCloudProfanity _profanityService;
         private BrainCloudFile _fileService;
         private BrainCloudGroup _groupService;
+        private BrainCloudMail _mailService;
 
         #endregion Private Data
 
@@ -194,6 +195,7 @@ namespace BrainCloud
             _profanityService = new BrainCloudProfanity(this);
             _fileService = new BrainCloudFile(this);
             _groupService = new BrainCloudGroup(this);
+            _mailService = new BrainCloudMail(this);
         }
 
         //---------------------------------------------------------------
@@ -359,6 +361,11 @@ namespace BrainCloud
             get { return _leaderboardService; }
         }
 
+        public BrainCloudSocialLeaderboard LeaderboardService
+        {
+            get { return _leaderboardService; }
+        }
+
         public BrainCloudAsyncMatch AsyncMatchService
         {
             get { return _asyncMatchService; }
@@ -412,6 +419,11 @@ namespace BrainCloud
         public BrainCloudGroup GroupService
         {
             get { return _groupService; }
+        }
+
+        public BrainCloudMail MailService
+        {
+            get { return _mailService; }
         }
 
         #endregion
@@ -610,6 +622,26 @@ namespace BrainCloud
         /// <param name="anonymousId The anonymous Id</param>
         public void Initialize(string serverURL, string secretKey, string gameId, string gameVersion)
         {
+            string error = null;
+            if (string.IsNullOrEmpty(serverURL))
+                error = "serverURL was null or empty";
+            else if (string.IsNullOrEmpty(secretKey))
+                error = "secretKey was null or empty";
+            else if (string.IsNullOrEmpty(gameId))
+                error = "gameId was null or empty";
+            else if (string.IsNullOrEmpty(gameVersion))
+                error = "gameVersion was null or empty";
+
+            if (error != null)
+            {
+#if !(DOT_NET)
+                Debug.LogError("ERROR | Failed to initialize - " + error);
+#elif !XAMARIN
+                Console.WriteLine("ERROR | Failed to initialize - " + error);
+#endif
+                return;
+            }
+
             // TODO: what is our default c# platform?
             Platform platform = Platform.Windows;
 #if !(DOT_NET)

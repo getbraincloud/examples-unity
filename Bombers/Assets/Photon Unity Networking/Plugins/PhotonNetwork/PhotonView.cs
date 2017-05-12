@@ -124,8 +124,6 @@ public class PhotonView : Photon.MonoBehaviour
     /// </summary>
     protected internal object[] lastOnSerializeDataReceived = null;
 
-    public Component observed;
-
     public ViewSynchronization synchronization;
 
     public OnSerializeTransform onSerializeTransformOption = OnSerializeTransform.PositionAndRotation;
@@ -244,6 +242,12 @@ public class PhotonView : Photon.MonoBehaviour
         }
     }
 
+	/// <summary>
+	/// The current master ID so that we can compare when we receive OnMasterClientSwitched() callback
+	/// It's public so that we can check it during ownerId assignments in networkPeer script
+	/// TODO: Maybe we can have the networkPeer always aware of the previous MasterClient?
+	/// </summary>
+	public int currentMasterID = -1;
     protected internal bool didAwake;
 
     [SerializeField]
@@ -306,6 +310,21 @@ public class PhotonView : Photon.MonoBehaviour
         this.ownerId = newOwnerId;  // immediately switch ownership locally, to avoid more updates sent from this client.
     }
 
+	/// <summary>
+	///Check ownerId assignment for sceneObjects to keep being owned by the MasterClient.
+	/// </summary>
+	/// <param name="newMasterClient">New master client.</param>
+	public void OnMasterClientSwitched(PhotonPlayer newMasterClient)
+	{
+		if (this.CreatorActorNr == 0 && !this.OwnerShipWasTransfered && (this.currentMasterID== -1 || this.ownerId==this.currentMasterID))
+		{
+			this.ownerId = newMasterClient.ID;
+		}
+
+		this.currentMasterID = newMasterClient.ID;
+	}
+
+
     protected internal void OnDestroy()
     {
         if (!this.removedFromLocalViewList)
@@ -326,8 +345,6 @@ public class PhotonView : Photon.MonoBehaviour
 
     public void SerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        SerializeComponent(this.observed, stream, info);
-
         if (this.ObservedComponents != null && this.ObservedComponents.Count > 0)
         {
             for (int i = 0; i < this.ObservedComponents.Count; ++i)
@@ -339,8 +356,6 @@ public class PhotonView : Photon.MonoBehaviour
 
     public void DeserializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        DeserializeComponent(this.observed, stream, info);
-
         if (this.ObservedComponents != null && this.ObservedComponents.Count > 0)
         {
             for (int i = 0; i < this.ObservedComponents.Count; ++i)
