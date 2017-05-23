@@ -1,0 +1,1577 @@
+//----------------------------------------------------
+// brainCloud client source code
+// Copyright 2016 bitHeads, inc.
+//----------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+#if (DOT_NET)
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Threading;
+#else
+using UnityEngine;
+#endif
+
+using JsonFx.Json;
+
+namespace BrainCloud.Internal
+{
+    #region Processed Server Call Class
+    public class ServerCallProcessed
+    {
+        internal ServerCall ServerCall { get; set; }
+        public string Data { get; set; }
+    }
+    #endregion
+
+    public sealed class BrainCloudComms
+    {
+        public static bool DEBUG_PACKET_NUMBER = false;
+
+        /// <summary>
+        /// The maximum number of messages in a bundle.
+        /// Note that this is somewhat arbitrary - using the size
+        /// of the packet would be a more appropriate measuring stick.
+        /// </summary>
+        private static int MAX_MESSAGES_BUNDLE = 50;
+
+        /// <summary>
+        /// The id of _expectedIncomingPacketId when no packet expected
+        /// </summary>
+        private static int NO_PACKET_EXPECTED = -1;
+
+        /// <summary>
+        /// Reference to the brainCloud client object
+        /// </summary>
+        private BrainCloudClient _brainCloudClientRef;
+
+        /// <summary>
+        /// Set to true once Initialize has been called.
+        /// </summary>
+        private bool _initialized = false;
+
+        /// <summary>
+        /// Set to false if you want to shutdown processing on the Update.
+        /// </summary>
+        private bool _enabled = true;
+
+        /// <summary>
+        /// The next packet id to send
+        /// </summary>
+        private long _packetId = 0;
+
+        /// <summary>
+        /// The packet id we're expecting
+        /// </summary>
+        private long _expectedIncomingPacketId = NO_PACKET_EXPECTED;
+
+        /// <summary>
+        /// The service calls that are waiting to be sent.
+        /// </summary>
+        private List<ServerCall> _serviceCallsWaiting = new List<ServerCall>();
+
+        /// <summary>
+        /// The service calls that have been sent for which we are waiting for a reply
+        /// </summary>
+        private List<ServerCall> _serviceCallsInProgress = new List<ServerCall>();
+
+        /// <summary>
+        /// The service calls in the timeout queue.
+        /// </summary>
+        private List<ServerCall> _serviceCallsInTimeoutQueue = new List<ServerCall>();
+
+        /// <summary>
+        /// The current request state. Null if no request is in progress.
+        /// </summary>
+        private RequestState _activeRequest = null;
+
+        /// <summary>
+        /// The last time a packet was sent
+        /// </summary>
+        private DateTime _lastTimePacketSent;
+
+        /// <summary>
+        /// How long we wait to send a heartbeat if no packets have been sent or received.
+        /// This value is set to a percentage of the heartbeat timeout sent by the authenticate response.
+        /// </summary>
+        private TimeSpan _idleTimeout = TimeSpan.FromSeconds(5 * 60);
+
+        /// <summary>
+        /// Debug value to introduce packet loss for testing retries etc.
+        /// </summary>
+        private double _debugPacketLossRate = 0;
+
+        /// <summary>
+        /// The event handler callback method
+        /// </summary>
+        private EventCallback _eventCallback;
+
+        /// <summary>
+        /// The reward handler callback method
+        /// </summary>
+        private RewardCallback _rewardCallback;
+
+        private FileUploadSuccessCallback _fileUploadSuccessCallback;
+
+        private FileUploadFailedCallback _fileUploadFailedCallback;
+
+        private FailureCallback _globalErrorCallback;
+
+        private NetworkErrorCallback _networkErrorCallback;
+
+        private List<FileUploader> _fileUploads = new List<FileUploader>();
+
+#if DOT_NET
+        private HttpClient _httpClient = new HttpClient();
+#endif
+
+        //For handling local session errors
+        private int _cachedStatusCode;
+        private int _cachedReasonCode;
+        private string _cachedStatusMessage;
+
+        private bool _isAuthenticated = false;
+        public bool Authenticated
+        {
+            get
+            {
+                return _isAuthenticated;
+            }
+        }
+
+        private string _gameId = null;
+        public string GameId
+        {
+            get
+            {
+                return _gameId;
+            }
+        }
+
+        private string _sessionID;
+        public string SessionID
+        {
+            get
+            {
+                return _sessionID;
+            }
+        }
+
+        private string _serverURL = "";
+        public string ServerURL
+        {
+            get
+            {
+                return _serverURL;
+            }
+        }
+
+        private string _uploadURL = "";
+        public string UploadURL
+        {
+            get
+            {
+                return _uploadURL;
+            }
+        }
+
+        private string _secretKey = "";
+        public string SecretKey
+        {
+            get
+            {
+                return _secretKey;
+            }
+        }
+
+        private int _uploadLowTransferRateTimeout = 120;
+        public int UploadLowTransferRateTimeout
+        {
+            get { return _uploadLowTransferRateTimeout; }
+            set { _uploadLowTransferRateTimeout = value; }
+        }
+
+        private int _uploadLowTransferRateThreshold = 50;
+        public int UploadLowTransferRateThreshold
+        {
+            get { return _uploadLowTransferRateThreshold; }
+            set { _uploadLowTransferRateThreshold = value; }
+        }
+
+        /// <summary>
+        /// A list of packet timeouts. Index represents the packet attempt number.
+        /// </summary>
+        private List<int> _packetTimeouts = new List<int> { 10, 10, 10 };
+        public List<int> PacketTimeouts
+        {
+            get
+            {
+                return _packetTimeouts;
+            }
+            set
+            {
+                _packetTimeouts = value;
+            }
+        }
+        public void SetPacketTimeoutsToDefault()
+        {
+            _packetTimeouts = new List<int> { 10, 10, 10 };
+        }
+
+        private int _authPacketTimeoutSecs = 15;
+        public int AuthenticationPacketTimeoutSecs
+        {
+            get
+            {
+                return _authPacketTimeoutSecs;
+            }
+            set
+            {
+                _authPacketTimeoutSecs = value;
+            }
+        }
+
+        private bool _oldStyleStatusResponseInErrorCallback = false;
+        public bool OldStyleStatusResponseInErrorCallback
+        {
+            get
+            {
+                return _oldStyleStatusResponseInErrorCallback;
+            }
+            set
+            {
+                _oldStyleStatusResponseInErrorCallback = value;
+            }
+        }
+
+        private bool _cacheMessagesOnNetworkError = false;
+        public void EnableNetworkErrorMessageCaching(bool in_enabled)
+        {
+            _cacheMessagesOnNetworkError = in_enabled;
+        }
+
+        /// <summary>
+        /// This flag is set when _cacheMessagesOnNetworkError is true
+        /// and a timeout occurs. It is reset when a call is made 
+        /// to either RetryCachedMessages or FlushCachedMessages
+        /// </summary>
+        private bool _blockingQueue = false;
+
+
+
+        public BrainCloudComms(BrainCloudClient client)
+        {
+#if (DOT_NET)
+            //ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
+#endif
+            _brainCloudClientRef = client;
+            ResetErrorCache();
+        }
+
+
+        /// <summary>
+        /// Initialize the communications library with the specified serverURL and secretKey.
+        /// </summary>
+        /// <param name="serverURL">Server URL.</param>
+        /// <param name="secretKey">Secret key.</param>
+        public void Initialize(string serverURL, string gameId, string secretKey)
+        {
+            _packetId = 0;
+            _expectedIncomingPacketId = NO_PACKET_EXPECTED;
+
+            _serverURL = serverURL;
+
+            string suffix = @"/dispatcherv2";
+            _uploadURL = _serverURL.EndsWith(suffix) ? _serverURL.Substring(0, _serverURL.Length - suffix.Length) : _serverURL;
+            _uploadURL += @"/uploader";
+
+            _gameId = gameId;
+            _secretKey = secretKey;
+
+            _blockingQueue = false;
+            _initialized = true;
+        }
+
+        public void RegisterEventCallback(EventCallback cb)
+        {
+            _eventCallback = cb;
+        }
+
+        public void DeregisterEventCallback()
+        {
+            _eventCallback = null;
+        }
+
+        public void RegisterRewardCallback(RewardCallback cb)
+        {
+            _rewardCallback = cb;
+        }
+
+        public void DeregisterRewardCallback()
+        {
+            _rewardCallback = null;
+        }
+
+        public void RegisterFileUploadCallbacks(FileUploadSuccessCallback success, FileUploadFailedCallback failure)
+        {
+            _fileUploadSuccessCallback = success;
+            _fileUploadFailedCallback = failure;
+        }
+
+        public void DeregisterFileUploadCallbacks()
+        {
+            _fileUploadSuccessCallback = null;
+            _fileUploadFailedCallback = null;
+        }
+
+        public void RegisterGlobalErrorCallback(FailureCallback callback)
+        {
+            _globalErrorCallback = callback;
+        }
+
+        public void DeregisterGlobalErrorCallback()
+        {
+            _globalErrorCallback = null;
+        }
+
+        public void RegisterNetworkErrorCallback(NetworkErrorCallback callback)
+        {
+            _networkErrorCallback = callback;
+        }
+
+        public void DeregisterNetworkErrorCallback()
+        {
+            _networkErrorCallback = null;
+        }
+
+        /// <summary>
+        /// The update method needs to be called periodically to send/receive responses
+        /// and run the associated callbacks.
+        /// </summary>
+        public void Update()
+        {
+            // basic flow here is to:
+            // 1- process existing requests
+            // 2- send next request
+            // 3- handle heartbeat/timeouts
+
+            if (!_initialized)
+            {
+                return;
+            }
+            if (!_enabled)
+            {
+                return;
+            }
+            if (_blockingQueue)
+            {
+                return;
+            }
+
+            // process current request
+            if (_activeRequest != null)
+            {
+                RequestState.eWebRequestStatus status = GetWebRequestStatus(_activeRequest);
+                if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
+                {
+                    // do nothing with the error right now - let the timeout code handle it
+                }
+                else if (status == RequestState.eWebRequestStatus.STATUS_DONE)
+                {
+                    ResetIdleTimer();
+
+                    // note that active request is set to null if exception is to be thrown
+                    HandleResponseBundle(GetWebRequestResponse(_activeRequest));
+
+                    _activeRequest = null;
+                }
+            }
+
+            // is it time for a retry?
+            if (_activeRequest != null)
+            {
+                if (DateTime.Now.Subtract(_activeRequest.TimeSent) >= GetPacketTimeout(_activeRequest))
+                {
+                    // grab status/response before cancelling the request as in Unity, the www object
+                    // will set internal status fields to null when www object is disposed
+                    RequestState.eWebRequestStatus status = GetWebRequestStatus(_activeRequest);
+                    string errorResponse = "";
+                    if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
+                    {
+                        errorResponse = GetWebRequestResponse(_activeRequest);
+                    }
+                    _activeRequest.CancelRequest();
+
+                    if (!ResendMessage(_activeRequest))
+                    {
+                        // we've reached the retry limit - send timeout error to all client callbacks
+                        if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
+                        {
+                            _brainCloudClientRef.Log("Timeout with network error: " + errorResponse);
+                        }
+                        else
+                        {
+                            _brainCloudClientRef.Log("Timeout no reply from server");
+                        }
+
+                        _activeRequest = null;
+
+                        // if we're doing caching of messages on timeout, kick it in now!
+                        if (_cacheMessagesOnNetworkError && _networkErrorCallback != null)
+                        {
+                            _brainCloudClientRef.Log("Caching messages");
+                            _blockingQueue = true;
+
+                            // and insert the inProgress messages into head of wait queue
+                            lock (_serviceCallsInTimeoutQueue)
+                            {
+                                _serviceCallsInTimeoutQueue.InsertRange(0, _serviceCallsInProgress);
+                                _serviceCallsInProgress.Clear();
+                            }
+
+                            _networkErrorCallback();
+                        }
+                        else
+                        {
+                            // Fake a message bundle to keep the callback logic in one place
+                            TriggerCommsError(StatusCodes.CLIENT_NETWORK_ERROR, ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT, "Timeout trying to reach brainCloud server");
+                        }
+                    }
+                }
+            }
+            else // send the next message if we're ready
+            {
+                _activeRequest = CreateAndSendNextRequestBundle();
+            }
+
+            // is it time for a heartbeat?
+            if (_isAuthenticated && !_blockingQueue)
+            {
+                if (DateTime.Now.Subtract(_lastTimePacketSent) >= _idleTimeout)
+                {
+                    SendHeartbeat();
+                }
+            }
+
+            RunFileUploadCallbacks();
+        }
+
+        /// <summary>
+        /// Checks the status of active file uploads
+        /// </summary>
+        private void RunFileUploadCallbacks()
+        {
+            for (int i = _fileUploads.Count - 1; i >= 0; i--)
+            {
+                _fileUploads[i].Update();
+                if (_fileUploads[i].Status == FileUploader.FileUploaderStatus.CompleteSuccess)
+                {
+                    if (_fileUploadSuccessCallback != null)
+                        _fileUploadSuccessCallback(_fileUploads[i].UploadId, _fileUploads[i].Response);
+
+                    BrainCloudClient.Get().Log("Upload success: " + _fileUploads[i].UploadId + " | " + _fileUploads[i].StatusCode + "\n" + _fileUploads[i].Response);
+                    _fileUploads.RemoveAt(i);
+                }
+                else if (_fileUploads[i].Status == FileUploader.FileUploaderStatus.CompleteFailed)
+                {
+                    if (_fileUploadFailedCallback != null)
+                        _fileUploadFailedCallback(_fileUploads[i].UploadId, _fileUploads[i].StatusCode, _fileUploads[i].ReasonCode, _fileUploads[i].Response);
+
+                    BrainCloudClient.Get().Log("Upload failed: " + _fileUploads[i].UploadId + " | " + _fileUploads[i].StatusCode + "\n" + _fileUploads[i].Response);
+                    _fileUploads.RemoveAt(i);
+                }
+            }
+        }
+
+        public void CancelUpload(string uploadFileId)
+        {
+            FileUploader uploader = GetFileUploader(uploadFileId);
+            if (uploader != null) uploader.CancelUpload();
+        }
+
+        public double GetUploadProgress(string uploadFileId)
+        {
+            FileUploader uploader = GetFileUploader(uploadFileId);
+            if (uploader != null) return uploader.Progress;
+            else return -1;
+        }
+
+        public long GetUploadBytesTransferred(string uploadFileId)
+        {
+            FileUploader uploader = GetFileUploader(uploadFileId);
+            if (uploader != null) return uploader.BytesTransferred;
+            else return -1;
+        }
+
+        public long GetUploadTotalBytesToTransfer(string uploadFileId)
+        {
+            FileUploader uploader = GetFileUploader(uploadFileId);
+            if (uploader != null) return uploader.TotalBytesToTransfer;
+            else return -1;
+        }
+
+        private FileUploader GetFileUploader(string uploadId)
+        {
+            for (int i = 0; i < _fileUploads.Count; i++)
+            {
+                if (_fileUploads[i].UploadId == uploadId) return _fileUploads[i];
+            }
+            BrainCloudClient.Get().Log("GetUploadProgress could not find upload ID " + uploadId);
+            return null;
+        }
+
+        /// <summary>
+        /// Method fakes a json error from the server and sends
+        /// it along to the response callbacks.
+        /// </summary>
+        /// <param name="status">status.</param>
+        /// <param name="reasonCode">reason code.</param>
+        /// <param name="statusMessage">status message.</param>
+        private void TriggerCommsError(int status, int reasonCode, string statusMessage)
+        {
+            // error json format is
+            // {
+            // "reason_code": 40316,
+            // "status": 403,
+            // "status_message": "Processing exception: Invalid game ID in authentication request",
+            // "severity": "ERROR"
+            // }
+
+            int numMessagesToReturn = 0;
+            lock (_serviceCallsInProgress)
+            {
+                numMessagesToReturn = _serviceCallsInProgress.Count;
+            }
+            if (numMessagesToReturn <= 0)
+            {
+                numMessagesToReturn = 1; // for when we want to send to only global error callback
+            }
+
+            JsonResponseErrorBundleV2 bundleObj = new JsonResponseErrorBundleV2();
+            bundleObj.packetId = _expectedIncomingPacketId;
+            bundleObj.responses = new JsonErrorMessage[numMessagesToReturn];
+            for (int i = 0; i < numMessagesToReturn; ++i)
+            {
+                bundleObj.responses[i] = new JsonErrorMessage(status, reasonCode, statusMessage);
+            }
+            string jsonError = JsonWriter.Serialize(bundleObj);
+            HandleResponseBundle(jsonError);
+        }
+
+
+        /// <summary>
+        /// Shuts down the communications layer.
+        /// Make sure to only call this from the main thread!
+        /// </summary>
+        public void ShutDown()
+        {
+            lock (_serviceCallsWaiting)
+            {
+                _serviceCallsWaiting.Clear();
+            }
+
+            // force a log out
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(null, null, null);
+            ServerCall sc = new ServerCall(ServiceName.PlayerState, ServiceOperation.Logout, null, callback);
+            AddToQueue(sc);
+
+            _activeRequest = null;
+
+            // calling update will try to send the logout
+            Update();
+
+            // and then dump the comms layer
+            ResetCommunication();
+        }
+
+        // see BrainCloudClient.RetryCachedMessages() docs
+        public void RetryCachedMessages()
+        {
+            if (_blockingQueue)
+            {
+                _brainCloudClientRef.Log("Retrying cached messages");
+
+                if (_activeRequest != null)
+                {
+                    // this is definitely an error in the comms lib if it happens. 
+                    // we attempt to cancel it but this is uncharted territory.
+
+                    _brainCloudClientRef.Log("ERROR - retrying cached messages but there is an active request!");
+                    _activeRequest.CancelRequest();
+                    _activeRequest = null;
+                }
+
+                if (DEBUG_PACKET_NUMBER) {
+                    _packetId = 777;
+                } else {
+                    --_packetId;
+                }
+
+                
+                _activeRequest = CreateAndSendNextRequestBundle();
+                _blockingQueue = false;
+            }
+        }
+
+        // see BrainCloudClient.FlushCachedMessages() docs
+        public void FlushCachedMessages(bool in_sendApiErrorCallbacks)
+        {
+            if (_blockingQueue)
+            {
+                _brainCloudClientRef.Log("Flushing cached messages");
+
+                // try to cancel if request is in progress (shouldn't happen)
+                if (_activeRequest != null)
+                {
+                    _activeRequest.CancelRequest();
+                    _activeRequest = null;
+                }
+
+                // then flush the message queues
+                List<ServerCall> callsToProcess = new List<ServerCall>();
+                lock (_serviceCallsInTimeoutQueue)
+                {
+                    for (int i = 0, isize = _serviceCallsInTimeoutQueue.Count; i < isize; ++i)
+                    {
+                        callsToProcess.Add(_serviceCallsInTimeoutQueue[i]);
+                    }
+                    _serviceCallsInTimeoutQueue.Clear();
+                }
+                lock (_serviceCallsWaiting)
+                {
+                    for (int i = 0, isize = _serviceCallsWaiting.Count; i < isize; ++i)
+                    {
+                        callsToProcess.Add(_serviceCallsWaiting[i]);
+                    }
+                    _serviceCallsWaiting.Clear();
+                }
+                lock (_serviceCallsInProgress)
+                {
+                    _serviceCallsInProgress.Clear(); // shouldn't be anything in here...
+                }
+
+                // and send api error callbacks if required
+                if (in_sendApiErrorCallbacks)
+                {
+                    for (int i = 0, isize = callsToProcess.Count; i < isize; ++i)
+                    {
+                        ServerCall sc = callsToProcess[i];
+                        if (sc.GetCallback() != null)
+                        {
+                            sc.GetCallback().OnErrorCallback(
+                                StatusCodes.CLIENT_NETWORK_ERROR,
+                                ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT,
+                                "Timeout trying to reach brainCloud server");
+                        }
+                    }
+                }
+                _blockingQueue = false;
+            }
+        }
+
+
+        internal void InsertEndOfMessageBundleMarker()
+        {
+            this.AddToQueue(new EndOfBundleMarker());
+        }
+
+        /// <summary>
+        /// Resets the idle timer.
+        /// </summary>
+        private void ResetIdleTimer()
+        {
+            _lastTimePacketSent = DateTime.Now;
+        }
+
+
+        /// <summary>
+        /// Handles the response bundle and calls registered callbacks.
+        /// </summary>
+        /// <param name="jsonData">The received message bundle.</param>
+        private void HandleResponseBundle(string jsonData)
+        {
+            _brainCloudClientRef.Log("INCOMING: " + jsonData);
+
+            JsonResponseBundleV2 bundleObj = JsonReader.Deserialize<JsonResponseBundleV2>(jsonData);
+            long receivedPacketId = (long)bundleObj.packetId;
+            if (_expectedIncomingPacketId == NO_PACKET_EXPECTED || _expectedIncomingPacketId != receivedPacketId)
+            {
+                _brainCloudClientRef.Log("Dropping duplicate packet");
+                return;
+            }
+            _expectedIncomingPacketId = NO_PACKET_EXPECTED;
+
+            Dictionary<string, object>[] responseBundle = bundleObj.responses;
+            Dictionary<string, object> response = null;
+            IList<Exception> exceptions = new List<Exception>();
+
+            for (int j = 0; j < responseBundle.Length; ++j)
+            {
+                response = responseBundle[j];
+                int statusCode = (int)response["status"];
+                string data = "";
+
+                //
+                // It's important to note here that a user error callback *might* call
+                // ResetCommunications() based on the error being returned.
+                // ResetCommunications will clear the _serviceCallsInProgress List
+                // effectively removing all registered callbacks for this message bundle.
+                // It's also likely that the developer will want to call authenticate next.
+                // We need to ensure that this is supported as it's the best way to 
+                // reset the brainCloud communications after a session invalid or network
+                // error is triggered.
+                //
+                // This is safe to do from the main thread but just in case someone
+                // calls this method from another thread, we lock on _serviceCallsWaiting
+                //
+                ServerCall sc = null;
+                lock (_serviceCallsWaiting)
+                {
+                    if (_serviceCallsInProgress.Count > 0)
+                    {
+                        sc = _serviceCallsInProgress[0] as ServerCall;
+                        _serviceCallsInProgress.RemoveAt(0);
+                    }
+                }
+
+                // its a success response
+                if (statusCode == 200)
+                {
+                    Dictionary<string, object> responseData = null;
+                    if (response[OperationParam.ServiceMessageData.Value] != null)
+                    {
+                        responseData = (Dictionary<string, object>)response[OperationParam.ServiceMessageData.Value];
+
+                        // send the data back as not formatted
+                        data = JsonWriter.Serialize(response);
+
+                        // save the session ID
+                        try
+                        {
+                            if (GetJsonString(responseData, OperationParam.ServiceMessageSessionId.Value, null) != null)
+                            {
+                                _sessionID = (string)responseData[OperationParam.ServiceMessageSessionId.Value];
+                                _isAuthenticated = true;  // TODO confirm authentication
+                            }
+
+                            // save the profile ID
+                            if (GetJsonString(responseData, OperationParam.ServiceMessageProfileId.Value, null) != null)
+                            {
+                                _brainCloudClientRef.AuthenticationService.ProfileId = (string)responseData[OperationParam.ServiceMessageProfileId.Value];
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            _brainCloudClientRef.Log("SessionId or ProfileId do not exist " + e.ToString());
+                        }
+                    }
+
+                    // now try to execute the callback
+                    if (sc != null)
+                    {
+                        string operation = sc.GetOperation();
+
+                        if (operation == ServiceOperation.FullReset.Value ||
+                            operation == ServiceOperation.Logout.Value)
+                        {
+                            // we reset the current player or logged out
+                            // we are no longer authenticated
+                            _isAuthenticated = false;
+                            _sessionID = "";
+                            _brainCloudClientRef.AuthenticationService.ClearSavedProfileID();
+                            ResetErrorCache();
+                        }
+                        else if (operation == ServiceOperation.Authenticate.Value)
+                        {
+                            ProcessAuthenticate(data);
+                        }
+                        else if (operation == ServiceOperation.PrepareUserUpload.Value)
+                        {
+                            var uploadData = (Dictionary<string, object>)response[OperationParam.ServiceMessageData.Value];
+                            var fileData = (Dictionary<string, object>)uploadData["fileDetails"];
+                            string uploadId = (string)fileData["uploadId"];
+                            string localPath = (string)fileData["localPath"];
+                            //int fileSize = (int)fileData["fileSize"];
+
+                            var uploader = new FileUploader(uploadId, localPath, _uploadURL, _sessionID,
+                                _uploadLowTransferRateTimeout, _uploadLowTransferRateThreshold);
+#if DOT_NET
+                            uploader.HttpClient = _httpClient;
+#endif
+                            _fileUploads.Add(uploader);
+                            uploader.Start();
+                        }
+
+                        // // only process callbacks that are real
+                        if (sc.GetCallback() != null)
+                        {
+                            try
+                            {
+                                sc.GetCallback().OnSuccessCallback(data);
+                            }
+                            catch (Exception e)
+                            {
+                                _brainCloudClientRef.Log(e.StackTrace);
+                                exceptions.Add(e);
+                            }
+                        }
+
+                        // now deal with rewards
+                        if (_rewardCallback != null && responseData != null)
+                        {
+                            try
+                            {
+                                Dictionary<string, object> rewards = null;
+
+                                // it's an operation that return a reward
+                                if (operation == ServiceOperation.Authenticate.Value)
+                                {
+                                    object objRewards = null;
+                                    if (responseData.TryGetValue("rewards", out objRewards))
+                                    {
+                                        Dictionary<string, object> outerRewards = (Dictionary<string, object>)objRewards;
+                                        if (outerRewards.TryGetValue("rewards", out objRewards))
+                                        {
+                                            Dictionary<string, object> innerRewards = (Dictionary<string, object>)objRewards;
+                                            if (innerRewards.Count > 0)
+                                            {
+                                                // we found rewards
+                                                rewards = outerRewards;
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (operation == ServiceOperation.Update.Value ||
+                                    operation == ServiceOperation.Trigger.Value ||
+                                    operation == ServiceOperation.TriggerMultiple.Value)
+                                {
+                                    object objRewards = null;
+                                    if (responseData.TryGetValue("rewards", out objRewards))
+                                    {
+                                        Dictionary<string, object> innerRewards = (Dictionary<string, object>)objRewards;
+                                        if (innerRewards.Count > 0)
+                                        {
+                                            // we found rewards
+                                            rewards = responseData;
+                                        }
+                                    }
+                                }
+
+                                if (rewards != null)
+                                {
+                                    Dictionary<string, object> theReward = new Dictionary<string, object>();
+                                    theReward["rewards"] = rewards;
+                                    theReward["service"] = sc.GetService();
+                                    theReward["operation"] = sc.GetOperation();
+                                    Dictionary<string, object> apiRewards = new Dictionary<string, object>();
+                                    List<object> rewardList = new List<object>();
+                                    rewardList.Add(theReward);
+                                    apiRewards["apiRewards"] = rewardList;
+
+                                    string rewardsAsJson = JsonWriter.Serialize(apiRewards);
+                                    _rewardCallback(rewardsAsJson);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                _brainCloudClientRef.Log(e.StackTrace);
+                                exceptions.Add(e);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    object reasonCodeObj = null, statusMessageObj = null;
+                    int reasonCode = 0;
+                    string errorJson = "";
+
+                    if (response.TryGetValue("reason_code", out reasonCodeObj))
+                    {
+                        reasonCode = (int)reasonCodeObj;
+                    }
+
+                    if (_oldStyleStatusResponseInErrorCallback)
+                    {
+                        if (response.TryGetValue("status_message", out statusMessageObj))
+                        {
+                            errorJson = (string)statusMessageObj;
+                        }
+                    }
+                    else
+                    {
+                        errorJson = JsonWriter.Serialize(response);
+                    }
+
+                    if (reasonCode == ReasonCodes.PLAYER_SESSION_EXPIRED
+                        || reasonCode == ReasonCodes.NO_SESSION
+                        || reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
+                    {
+                        _isAuthenticated = false;
+                        _sessionID = "";
+                        _brainCloudClientRef.Log("Received session expired or not found, need to re-authenticate");
+
+                        // cache error if session related
+                        _cachedStatusCode = statusCode;
+                        _cachedReasonCode = reasonCode;
+
+                        object status = null;
+                        if (response.TryGetValue("status_message", out status))
+                        {
+                            _cachedStatusMessage = status as string;
+                        }
+                    }
+
+                    if (sc != null && sc.GetOperation() == ServiceOperation.Logout.Value)
+                    {
+                        if (reasonCode == ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT)
+                        {
+                            _isAuthenticated = false;
+                            _sessionID = "";
+                            _brainCloudClientRef.Log("Could not communicate with the server on logout due to network timeout");
+                        }
+                    }
+
+                    // now try to execute the callback
+                    if (sc != null && sc.GetCallback() != null)
+                    {
+                        try
+                        {
+                            sc.GetCallback().OnErrorCallback(statusCode, reasonCode, errorJson);
+                        }
+                        catch (Exception e)
+                        {
+                            _brainCloudClientRef.Log(e.StackTrace);
+                            exceptions.Add(e);
+                        }
+                    }
+
+                    if (_globalErrorCallback != null)
+                    {
+                        _globalErrorCallback(statusCode, reasonCode, errorJson, sc != null && sc.GetCallback() != null ? sc.GetCallback().m_cbObject : null);
+                    }
+                }
+            }
+
+            if (bundleObj.events != null && _eventCallback != null)
+            {
+                Dictionary<string, Dictionary<string, object>[]> eventsJsonObj = new Dictionary<string, Dictionary<string, object>[]>();
+                eventsJsonObj["events"] = bundleObj.events;
+                string eventsAsJson = JsonWriter.Serialize(eventsJsonObj);
+                try
+                {
+                    _eventCallback(eventsAsJson);
+                }
+                catch (Exception e)
+                {
+                    _brainCloudClientRef.Log(e.StackTrace);
+                    exceptions.Add(e);
+                }
+            }
+
+            if (exceptions.Count > 0)
+            {
+                _activeRequest = null; // to make sure we don't reprocess this message
+
+                throw new Exception("User callback handlers threw " + exceptions.Count + " exception(s)."
+                                    + " See the Unity log for callstacks or inner exception for first exception thrown.",
+                                    exceptions[0]);
+            }
+        }
+
+
+        /// <summary>
+        /// Creates the request state object and sends the message bundle
+        /// </summary>
+        /// <returns>The and send next request bundle.</returns>
+        private RequestState CreateAndSendNextRequestBundle()
+        {
+            RequestState requestState = null;
+            lock (_serviceCallsWaiting)
+            {
+                if (_blockingQueue)
+                {
+                    _serviceCallsInProgress.InsertRange(0, _serviceCallsInTimeoutQueue);
+                    _serviceCallsInTimeoutQueue.Clear();
+                }
+                else
+                {
+                    if (_serviceCallsWaiting.Count > 0)
+                    {
+                        int numMessagesWaiting = _serviceCallsWaiting.Count;
+                        if (numMessagesWaiting > MAX_MESSAGES_BUNDLE)
+                        {
+                            numMessagesWaiting = MAX_MESSAGES_BUNDLE;
+                        }
+
+                        // check for end of bundle markers
+                        for (int i = 0; i < numMessagesWaiting; ++i)
+                        {
+                            if (_serviceCallsWaiting[i].GetType() == typeof(EndOfBundleMarker))
+                            {
+                                // if the first message is marker, just throw it away
+                                if (i == 0)
+                                {
+                                    _serviceCallsWaiting.RemoveAt(0);
+                                    --i;
+                                    --numMessagesWaiting;
+                                }
+                                else // otherwise cut off the bundle at the marker and toss marker away
+                                {
+                                    numMessagesWaiting = i;
+                                    _serviceCallsWaiting.RemoveAt(i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (numMessagesWaiting <= 0)
+                        {
+                            return null;
+                        }
+
+                        if (_serviceCallsInProgress.Count > 0)
+                        {
+                            // this should never happen
+                            _brainCloudClientRef.Log("ERROR - in progress queue is not empty but we're ready for the next message!");
+                            _serviceCallsInProgress.Clear();
+                        }
+
+                        _serviceCallsInProgress = _serviceCallsWaiting.GetRange(0, numMessagesWaiting);
+                        _serviceCallsWaiting.RemoveRange(0, numMessagesWaiting);
+                    }
+                }
+
+                if (_serviceCallsInProgress.Count > 0)
+                {
+                    requestState = new RequestState();
+
+                    // prepare json data for server
+                    List<object> messageList = new List<object>();
+                    bool isAuth = false;
+
+                    ServerCall scIndex;
+                    for (int i = 0; i < _serviceCallsInProgress.Count; ++i)
+                    {
+                        scIndex = _serviceCallsInProgress[i] as ServerCall;
+                        string operation = scIndex.GetOperation();
+                        string service = scIndex.GetService();
+
+                        // don't send heartbeat if it was generated by comms (null callbacks)
+                        // and there are other messages in the bundle - it's unnecessary
+                        if (service.Equals(ServiceName.HeartBeat.Value)
+                            && operation.Equals(ServiceOperation.Read.Value)
+                            && (scIndex.GetCallback() == null
+                                || scIndex.GetCallback().AreCallbacksNull()))
+                        {
+                            if (_serviceCallsInProgress.Count > 1)
+                            {
+                                _serviceCallsInProgress.RemoveAt(i);
+                                --i;
+                                continue;
+                            }
+                        }
+
+                        Dictionary<string, object> message = new Dictionary<string, object>();
+                        message[OperationParam.ServiceMessageService.Value] = scIndex.Service;
+                        message[OperationParam.ServiceMessageOperation.Value] = scIndex.Operation;
+                        message[OperationParam.ServiceMessageData.Value] = scIndex.GetJsonData();
+
+                        messageList.Add(message);
+
+                        if (operation.Equals(ServiceOperation.Authenticate.Value))
+                        {
+                            requestState.PacketNoRetry = true;
+                        }
+
+                        if (operation.Equals(ServiceOperation.Authenticate.Value)
+                            || operation.Equals(ServiceOperation.ResetEmailPassword.Value))
+                        {
+                            isAuth = true;
+                        }
+
+                        if (operation.Equals(ServiceOperation.FullReset.Value)
+                            || operation.Equals(ServiceOperation.Logout.Value))
+                        {
+                            requestState.PacketRequiresLongTimeout = true;
+                        }
+                    }
+
+                    requestState.PacketId = _packetId;
+                    _expectedIncomingPacketId = _packetId;
+                    requestState.MessageList = messageList;
+
+                    if (DEBUG_PACKET_NUMBER) {
+                        _packetId = 777;
+                    } else {
+                        ++_packetId;
+                    }
+
+                    if (_isAuthenticated || isAuth)
+                        InternalSendMessage(requestState);
+                    else
+                    {
+                        HandleNoAuth(requestState);
+                        requestState = null;
+                    }
+                }
+            } // unlock _serviceCallsWaiting
+
+            return requestState;
+        }
+
+        /// <summary>
+        /// Creates a fake response to stop packets being sent to the server without a valid session.
+        /// </summary>
+        private void HandleNoAuth(RequestState requestState)
+        {
+            Dictionary<string, object> packet = new Dictionary<string, object>();
+            packet[OperationParam.ServiceMessagePacketId.Value] = requestState.PacketId;
+            packet[OperationParam.ServiceMessageSessionId.Value] = _sessionID;
+            if (_gameId != null && _gameId.Length > 0)
+            {
+                packet[OperationParam.ServiceMessageGameId.Value] = _gameId;
+            }
+            packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
+
+            string jsonRequestString = JsonWriter.Serialize(packet);
+
+            _brainCloudClientRef.Log("OUTGOING"
+                          + (requestState.Retries > 0 ? " Retry(" + requestState.Retries + "): " : ": ")
+                          + jsonRequestString);
+
+            ResetIdleTimer();
+
+            TriggerCommsError(_cachedStatusCode, _cachedReasonCode, _cachedStatusMessage);
+            _activeRequest = null;
+        }
+
+        /// <summary>
+        /// Method creates the web request and sends it immediately.
+        /// Relies upon the requestState PacketId and MessageList being
+        /// set appropriately.
+        /// </summary>
+        /// <param name="requestState">Request state.</param>
+        private void InternalSendMessage(RequestState requestState)
+        {
+            // bundle up the data into a string
+            Dictionary<string, object> packet = new Dictionary<string, object>();
+            packet[OperationParam.ServiceMessagePacketId.Value] = requestState.PacketId;
+            packet[OperationParam.ServiceMessageSessionId.Value] = _sessionID;
+            if (_gameId != null && _gameId.Length > 0)
+            {
+                packet[OperationParam.ServiceMessageGameId.Value] = _gameId;
+            }
+            packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
+
+            string jsonRequestString = JsonWriter.Serialize(packet);
+            string sig = CalculateMD5Hash(jsonRequestString + _secretKey);
+            byte[] byteArray = Encoding.UTF8.GetBytes(jsonRequestString);
+
+            requestState.Signature = sig;
+            requestState.ByteArray = byteArray;
+
+            if (_debugPacketLossRate > 0.0)
+            {
+                System.Random r = new System.Random();
+                requestState.LoseThisPacket = r.NextDouble() > _debugPacketLossRate;
+            }
+
+            if (!requestState.LoseThisPacket)
+            {
+#if !(DOT_NET)
+                Dictionary<string, string> formTable = new Dictionary<string, string>();
+                formTable["Content-Type"] = "application/json; charset=utf-8";
+                formTable["X-SIG"] = sig;
+                WWW request = new WWW(_serverURL, byteArray, formTable);
+                requestState.WebRequest = request;
+#else
+
+                HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, new Uri(_serverURL));
+                req.Content = new ByteArrayContent(byteArray);
+                req.Headers.Add("X-SIG", sig);
+                req.Method = HttpMethod.Post;
+
+                CancellationTokenSource source = new CancellationTokenSource();
+                requestState.CancelToken = source;
+
+                Task<HttpResponseMessage> httpRequest = _httpClient.SendAsync(req, HttpCompletionOption.ResponseContentRead, source.Token);
+                requestState.WebRequest = httpRequest;
+                httpRequest.ContinueWith(async (t) =>
+                {
+                    await AsyncHttpTaskCallback(t, requestState);
+                });
+#endif
+
+                requestState.RequestString = jsonRequestString;
+                requestState.TimeSent = DateTime.Now;
+
+                ResetIdleTimer();
+
+                _brainCloudClientRef.Log("OUTGOING"
+                                          + (requestState.Retries > 0 ? " Retry(" + requestState.Retries + "): " : ": ")
+                                          + jsonRequestString);
+            }
+        }
+
+        /// <summary>
+        /// Resends a message bundle. Returns true if sent or
+        /// false if max retries has been reached.
+        /// </summary>
+        /// <returns><c>true</c>, if message was resent, <c>false</c> if max retries hit.</returns>
+        /// <param name="requestState">Request state.</param>
+        private bool ResendMessage(RequestState requestState)
+        {
+            ++_activeRequest.Retries;
+            if (_activeRequest.Retries >= GetMaxRetriesForPacket(requestState))
+            {
+                return false;
+            }
+            InternalSendMessage(requestState);
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the web request status.
+        /// </summary>
+        /// <returns>The web request status.</returns>
+        /// <param name="requestState">request state.</param>
+        private RequestState.eWebRequestStatus GetWebRequestStatus(RequestState requestState)
+        {
+            RequestState.eWebRequestStatus status = RequestState.eWebRequestStatus.STATUS_PENDING;
+
+            // for testing packet loss, some packets are flagged to be lost
+            // and should always return status pending no matter what the real
+            // status is
+            if (_activeRequest.LoseThisPacket)
+            {
+                return status;
+            }
+
+#if !(DOT_NET)
+            if (_activeRequest.WebRequest.error != null)
+            {
+                status = RequestState.eWebRequestStatus.STATUS_ERROR;
+            }
+            else if (_activeRequest.WebRequest.isDone)
+            {
+                status = RequestState.eWebRequestStatus.STATUS_DONE;
+            }
+#else
+            status = _activeRequest.DotNetRequestStatus;
+#endif
+            return status;
+        }
+
+
+        /// <summary>
+        /// Gets the web request response.
+        /// </summary>
+        /// <returns>The web request response.</returns>
+        /// <param name="requestState">request state.</param>
+        private string GetWebRequestResponse(RequestState requestState)
+        {
+            string response = "";
+#if !(DOT_NET)
+            if (_activeRequest.WebRequest.error != null)
+            {
+                response = _activeRequest.WebRequest.error;
+            }
+            else
+            {
+                response = _activeRequest.WebRequest.text;
+            }
+#else
+            response = _activeRequest.DotNetResponseString;
+#endif
+            return response;
+        }
+
+        /// <summary>
+        /// Method returns the maximum retries for the given packet
+        /// </summary>
+        /// <returns>The maximum retries for the given packet.</returns>
+        /// <param name="requestState">The active request.</param>
+        private int GetMaxRetriesForPacket(RequestState requestState)
+        {
+            if (requestState.PacketNoRetry)
+            {
+                return 0;
+            }
+            return _packetTimeouts.Count;
+        }
+
+        /// <summary>
+        /// Method staggers the packet timeout value based on the currentRetry
+        /// </summary>
+        /// <returns>The packet timeout.</returns>
+        /// <param name="requestState">The active request.</param>
+        private TimeSpan GetPacketTimeout(RequestState requestState)
+        {
+            if (requestState.PacketNoRetry)
+            {
+                return TimeSpan.FromSeconds(_authPacketTimeoutSecs);
+            }
+
+            int currentRetry = requestState.Retries;
+            TimeSpan ret;
+
+            // if this is a delete player, or logout we change the
+            // timeout behaviour
+            if (requestState.PacketRequiresLongTimeout)
+            {
+                // unused as default timeouts are now quite long
+            }
+
+            if (currentRetry >= _packetTimeouts.Count)
+            {
+                int secs = 10;
+                if (_packetTimeouts.Count > 0)
+                {
+                    secs = _packetTimeouts[_packetTimeouts.Count - 1];
+                }
+                ret = TimeSpan.FromSeconds(secs);
+            }
+            else
+            {
+                ret = TimeSpan.FromSeconds(_packetTimeouts[currentRetry]);
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Sends the heartbeat.
+        /// </summary>
+        private void SendHeartbeat()
+        {
+            ServerCall sc = new ServerCall(ServiceName.HeartBeat, ServiceOperation.Read, null, null);
+            AddToQueue(sc);
+        }
+
+#if UNITY_WP8 || DOT_NET
+        //private bool AcceptAllCertifications(object sender,
+        //                                     System.Security.Cryptography.X509Certificates.X509Certificate certification,
+        //                                     System.Security.Cryptography.X509Certificates.X509Chain chain,
+        //                                     System.Net.Security.SslPolicyErrors sslPolicyErrors)
+        //{
+        //    // TODO: we should only be accepting certificates from places we deem safe [smrj]
+        //    // right now accepting all! - not that secure!
+        //    return true;
+        //}
+#endif
+
+        /// <summary>
+        /// Adds a server call to the internal queue.
+        /// </summary>
+        /// <param name="call">The server call to execute</param>
+        internal void AddToQueue(ServerCall call)
+        {
+            lock (_serviceCallsWaiting)
+            {
+                _serviceCallsWaiting.Add(call);
+            }
+        }
+
+        /// <summary>
+        /// Enables the communications layer.
+        /// </summary>
+        /// <param name="value">If set to <c>true</c> value.</param>
+        public void EnableComms(bool value)
+        {
+            _enabled = value;
+        }
+
+        /// <summary>
+        /// Resets the communication layer. Clients will need to
+        /// reauthenticate after this method is called.
+        /// </summary>
+        internal void ResetCommunication()
+        {
+            lock (_serviceCallsWaiting)
+            {
+                _isAuthenticated = false;
+                _blockingQueue = false;
+                _serviceCallsWaiting.Clear();
+                _serviceCallsInProgress.Clear();
+                _serviceCallsInTimeoutQueue.Clear();
+                _activeRequest = null;
+                _brainCloudClientRef.AuthenticationService.ProfileId = "";
+                _sessionID = "";
+            }
+        }
+
+
+#if (DOT_NET)
+        private async Task AsyncHttpTaskCallback(Task<HttpResponseMessage> asyncResult, RequestState requestState)
+        {
+            if (asyncResult.IsCanceled) return;
+
+            HttpResponseMessage message = null;
+
+            //a callback method to end receiving the data
+            try
+            {
+                message = asyncResult.Result;
+                HttpContent content = message.Content;
+
+                // End the operation
+                requestState.DotNetResponseString = await content.ReadAsStringAsync();
+                requestState.DotNetRequestStatus = message.IsSuccessStatusCode ?
+                    RequestState.eWebRequestStatus.STATUS_DONE : RequestState.eWebRequestStatus.STATUS_ERROR;
+            }
+            catch (WebException wex)
+            {
+                _brainCloudClientRef.Log("GetResponseCallback - WebException: " + wex.ToString());
+                requestState.DotNetRequestStatus = RequestState.eWebRequestStatus.STATUS_ERROR;
+            }
+            catch (Exception ex)
+            {
+                _brainCloudClientRef.Log("GetResponseCallback - Exception: " + ex.ToString());
+                requestState.DotNetRequestStatus = RequestState.eWebRequestStatus.STATUS_ERROR;
+            }
+
+            // Release the HttpResponseMessage
+            if (message != null) message.Dispose();
+        }
+#endif
+
+
+        private string CalculateMD5Hash(string input)
+        {
+#if !(DOT_NET)
+            MD5Unity.MD5 md5 = MD5Unity.MD5.Create();
+            byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(input); // UTF8, not ASCII
+            byte[] hash = md5.ComputeHash(inputBytes);
+#else
+#if UWP
+            Windows.Security.Cryptography.MD5 md5 = Windows.Security.Cryptography.MD5.Create();
+#else
+            System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+#endif
+            byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(input); // UTF8, not ASCII
+            byte[] hash = md5.ComputeHash(inputBytes);
+#endif
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++)
+            {
+                sb.Append(hash[i].ToString("X2"));
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Handles authenticate-specific data from successful request
+        /// </summary>
+        /// <param name="jsonString"></param>
+        private void ProcessAuthenticate(string jsonString)
+        {
+            Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(jsonString);
+            Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
+
+            long playerSessionExpiry = GetJsonLong(jsonData, OperationParam.AuthenticateServicePlayerSessionExpiry.Value, 5 * 60);
+            long idleTimeout = (long)(playerSessionExpiry * 0.85);
+
+            _idleTimeout = TimeSpan.FromSeconds(idleTimeout);
+
+            ResetErrorCache();
+            _isAuthenticated = true;
+        }
+
+
+        private static string GetJsonString(Dictionary<string, object> jsonData, string key, string defaultReturn)
+        {
+            try
+            {
+                return (string)jsonData[key];
+            }
+            catch (KeyNotFoundException)
+            {
+                return defaultReturn;
+            }
+        }
+
+
+        private static long GetJsonLong(Dictionary<string, object> jsonData, string key, long defaultReturn)
+        {
+            try
+            {
+                object value = jsonData[key];
+                if (value is System.Int64)
+                    return (long)value;
+                if (value is System.Int32)
+                    return (int)value;
+                return defaultReturn;
+            }
+            catch (KeyNotFoundException)
+            {
+                return defaultReturn;
+            }
+        }
+
+        /// <summary>
+        /// Resets the cached error message for local session error handling to default
+        /// </summary>
+        private void ResetErrorCache()
+        {
+            _cachedStatusCode = StatusCodes.FORBIDDEN;
+            _cachedReasonCode = ReasonCodes.NO_SESSION;
+            _cachedStatusMessage = "No session";
+        }
+    }
+
+    #region Json parsing objects
+
+    // Classes to handle JSON serialization - do not
+    // try to make variables conform to coding standards as
+    // they must match json variable name format exactly
+
+    internal class JsonResponseBundleV2
+    {
+        public long packetId = 0;
+        public Dictionary<string, object>[] responses = null;
+        public Dictionary<string, object>[] events = null;
+
+
+        public JsonResponseBundleV2()
+        { }
+    }
+
+    internal class JsonResponseErrorBundleV2
+    {
+        public long packetId;
+        public JsonErrorMessage[] responses;
+
+        public JsonResponseErrorBundleV2()
+        { }
+    }
+
+    internal class JsonErrorMessage
+    {
+        public int reason_code;
+        public int status;
+        public string status_message;
+        public string severity = "ERROR";
+
+        public JsonErrorMessage()
+        { }
+
+        public JsonErrorMessage(int status, int reasonCode, string statusMessage)
+        {
+            this.status = status;
+            reason_code = reasonCode;
+            status_message = statusMessage;
+        }
+
+        public string GetJsonString()
+        {
+            return JsonWriter.Serialize(this);
+        }
+    }
+    #endregion
+}
