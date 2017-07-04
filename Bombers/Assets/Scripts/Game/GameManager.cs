@@ -149,10 +149,10 @@ namespace BrainCloudPhotonExample.Game
             m_dialogueDisplay = GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>();
             m_photonView = GetComponent<PhotonView>();
 
-            m_allyShipSunk = GameObject.Find("ShipSink").transform.FindChild("AllyShipSunk").gameObject;
-            m_enemyShipSunk = GameObject.Find("ShipSink").transform.FindChild("EnemyShipSunk").gameObject;
-            m_redShipLogo = GameObject.Find("ShipSink").transform.FindChild("RedLogo").gameObject;
-            m_greenShipLogo = GameObject.Find("ShipSink").transform.FindChild("GreenLogo").gameObject;
+            m_allyShipSunk = GameObject.Find("ShipSink").transform.Find("AllyShipSunk").gameObject;
+            m_enemyShipSunk = GameObject.Find("ShipSink").transform.Find("EnemyShipSunk").gameObject;
+            m_redShipLogo = GameObject.Find("ShipSink").transform.Find("RedLogo").gameObject;
+            m_greenShipLogo = GameObject.Find("ShipSink").transform.Find("GreenLogo").gameObject;
             m_blackScreen = GameObject.Find("BlackScreen");
 
             m_allyShipSunk.SetActive(false);
@@ -162,8 +162,8 @@ namespace BrainCloudPhotonExample.Game
             m_quitMenu = GameObject.Find("QuitMenu");
             m_quitMenu.SetActive(false);
 
-            m_greenChevron = GameObject.Find("Team Green Score").transform.FindChild("Chevron").gameObject;
-            m_redChevron = GameObject.Find("Team Red Score").transform.FindChild("Chevron").gameObject;
+            m_greenChevron = GameObject.Find("Team Green Score").transform.Find("Chevron").gameObject;
+            m_redChevron = GameObject.Find("Team Red Score").transform.Find("Chevron").gameObject;
             m_greenLogo = GameObject.Find("Green Logo");
             m_greenLogo.SetActive(false);
             m_redLogo = GameObject.Find("Red Logo");
@@ -181,7 +181,7 @@ namespace BrainCloudPhotonExample.Game
             m_resultsWindow.SetActive(false);
             m_HUD = GameObject.Find("HUD");
             GameObject.Find("RespawnText").GetComponent<Text>().text = "";
-            m_playerController.m_missionText = m_HUD.transform.FindChild("MissionText").gameObject;
+            m_playerController.m_missionText = m_HUD.transform.Find("MissionText").gameObject;
             m_HUD.SetActive(false);
 
             //resources
@@ -515,20 +515,20 @@ namespace BrainCloudPhotonExample.Game
             int team1ShipsCount = ShipsAliveCount(m_team1Ships);
             int team2ShipsCount = ShipsAliveCount(m_team2Ships);
 
-            m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
-            m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
-            m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team2ShipsCount.ToString();
+            m_HUD.transform.Find("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
+            m_HUD.transform.Find("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
+            m_HUD.transform.Find("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team2ShipsCount.ToString();
             if (team2ShipsCount == 1)
-                m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
+                m_HUD.transform.Find("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
             else
-                m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
-            m_HUD.transform.FindChild("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
-            m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team1ShipsCount.ToString();
+                m_HUD.transform.Find("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
+            m_HUD.transform.Find("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
+            m_HUD.transform.Find("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + team1ShipsCount.ToString();
             if (team1ShipsCount == 1)
-                m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
+                m_HUD.transform.Find("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
             else
-                m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
-            m_HUD.transform.FindChild("TimeLeft").GetChild(0).GetComponent<Text>().text = timeLeft;
+                m_HUD.transform.Find("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
+            m_HUD.transform.Find("TimeLeft").GetChild(0).GetComponent<Text>().text = timeLeft;
         }
 
         private int ShipsAliveCount(List<ShipController> ships)
@@ -553,9 +553,9 @@ namespace BrainCloudPhotonExample.Game
             m_team1Score = (float)PhotonNetwork.room.CustomProperties["Team1Score"];
             m_team2Score = (float)PhotonNetwork.room.CustomProperties["Team2Score"];
             GameObject team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
 
             PhotonPlayer[] playerList = PhotonNetwork.playerList;
             List<PhotonPlayer> playerListList = new List<PhotonPlayer>();
@@ -638,13 +638,13 @@ namespace BrainCloudPhotonExample.Game
             }
 
             team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("GreenPlayers").GetComponent<Text>().text = greenNamesText;
-            team.transform.FindChild("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
-            team.transform.FindChild("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
+            team.transform.Find("GreenPlayers").GetComponent<Text>().text = greenNamesText;
+            team.transform.Find("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
+            team.transform.Find("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("RedPlayers").GetComponent<Text>().text = redNamesText;
-            team.transform.FindChild("RedPlayerKD").GetComponent<Text>().text = redKDText;
-            team.transform.FindChild("RedPlayerScores").GetComponent<Text>().text = redScoreText;
+            team.transform.Find("RedPlayers").GetComponent<Text>().text = redNamesText;
+            team.transform.Find("RedPlayerKD").GetComponent<Text>().text = redKDText;
+            team.transform.Find("RedPlayerScores").GetComponent<Text>().text = redScoreText;
         }
 
         void OnScoresWindow()
@@ -655,9 +655,9 @@ namespace BrainCloudPhotonExample.Game
             m_team1Score = (float)PhotonNetwork.room.CustomProperties["Team1Score"];
             m_team2Score = (float)PhotonNetwork.room.CustomProperties["Team2Score"];
             GameObject team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
 
             if (m_gameState != eGameState.GAME_STATE_GAME_OVER)
             {
@@ -797,13 +797,13 @@ namespace BrainCloudPhotonExample.Game
             }
 
             team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("GreenPlayers").GetComponent<Text>().text = greenNamesText;
-            team.transform.FindChild("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
-            team.transform.FindChild("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
+            team.transform.Find("GreenPlayers").GetComponent<Text>().text = greenNamesText;
+            team.transform.Find("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
+            team.transform.Find("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("RedPlayers").GetComponent<Text>().text = redNamesText;
-            team.transform.FindChild("RedPlayerKD").GetComponent<Text>().text = redKDText;
-            team.transform.FindChild("RedPlayerScores").GetComponent<Text>().text = redScoreText;
+            team.transform.Find("RedPlayers").GetComponent<Text>().text = redNamesText;
+            team.transform.Find("RedPlayerKD").GetComponent<Text>().text = redKDText;
+            team.transform.Find("RedPlayerScores").GetComponent<Text>().text = redScoreText;
         }
 
         public void ChangeTeam()
@@ -1109,7 +1109,7 @@ namespace BrainCloudPhotonExample.Game
                         bool collides = false;
                         for (int i = 0; i < m_spawnedShips.Count; i++)
                         {
-                            if (testShip.transform.FindChild("Graphic").GetComponent<Collider>().bounds.Intersects(m_spawnedShips[i].transform.FindChild("ShipGraphic").GetChild(0).FindChild("Graphic").GetComponent<Collider>().bounds))
+                            if (testShip.transform.Find("Graphic").GetComponent<Collider>().bounds.Intersects(m_spawnedShips[i].transform.Find("ShipGraphic").GetChild(0).Find("Graphic").GetComponent<Collider>().bounds))
                             {
                                 collides = true;
                                 break;
@@ -1434,7 +1434,7 @@ namespace BrainCloudPhotonExample.Game
                         {
                             targetPos = planes[i].transform.position;
                         }
-                        planes[i].transform.FindChild("NameTag").GetComponent<TextMesh>().characterSize = 0.14f;
+                        planes[i].transform.Find("NameTag").GetComponent<TextMesh>().characterSize = 0.14f;
                     }
                 }
                 else

@@ -141,10 +141,10 @@ namespace BrainCloudUNETExample.Game
                 return;
             }
 
-            m_allyShipSunk = GameObject.Find("ShipSink").transform.FindChild("AllyShipSunk").gameObject;
-            m_enemyShipSunk = GameObject.Find("ShipSink").transform.FindChild("EnemyShipSunk").gameObject;
-            m_redShipLogo = GameObject.Find("ShipSink").transform.FindChild("RedLogo").gameObject;
-            m_greenShipLogo = GameObject.Find("ShipSink").transform.FindChild("GreenLogo").gameObject;
+            m_allyShipSunk = GameObject.Find("ShipSink").transform.Find("AllyShipSunk").gameObject;
+            m_enemyShipSunk = GameObject.Find("ShipSink").transform.Find("EnemyShipSunk").gameObject;
+            m_redShipLogo = GameObject.Find("ShipSink").transform.Find("RedLogo").gameObject;
+            m_greenShipLogo = GameObject.Find("ShipSink").transform.Find("GreenLogo").gameObject;
             m_blackScreen = GameObject.Find("BlackScreen");
 
             m_allyShipSunk.SetActive(false);
@@ -154,8 +154,8 @@ namespace BrainCloudUNETExample.Game
             m_quitMenu = GameObject.Find("QuitMenu");
             m_quitMenu.SetActive(false);
 
-            m_greenChevron = GameObject.Find("Team Green Score").transform.FindChild("Chevron").gameObject;
-            m_redChevron = GameObject.Find("Team Red Score").transform.FindChild("Chevron").gameObject;
+            m_greenChevron = GameObject.Find("Team Green Score").transform.Find("Chevron").gameObject;
+            m_redChevron = GameObject.Find("Team Red Score").transform.Find("Chevron").gameObject;
             m_greenLogo = GameObject.Find("Green Logo");
             m_greenLogo.SetActive(false);
             m_redLogo = GameObject.Find("Red Logo");
@@ -174,7 +174,7 @@ namespace BrainCloudUNETExample.Game
             m_HUD = GameObject.Find("HUD");
             GameObject.Find("RespawnText").GetComponent<Text>().text = "";
 
-            m_missionText = m_HUD.transform.FindChild("MissionText").gameObject;
+            m_missionText = m_HUD.transform.Find("MissionText").gameObject;
 
             m_HUD.SetActive(false);
 
@@ -491,20 +491,20 @@ namespace BrainCloudUNETExample.Game
                 }
             }
 
-            m_HUD.transform.FindChild("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
-            m_HUD.transform.FindChild("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
-            m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team2Ships.Count / 2).ToString();
+            m_HUD.transform.Find("PlayerScore").GetChild(0).GetComponent<Text>().text = score.ToString("n0");
+            m_HUD.transform.Find("RedScore").GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
+            m_HUD.transform.Find("RedScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team2Ships.Count / 2).ToString();
             if (team2Ships.Count == 2)
-                m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
+                m_HUD.transform.Find("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
             else
-                m_HUD.transform.FindChild("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
-            m_HUD.transform.FindChild("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
-            m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team1Ships.Count / 2).ToString();
+                m_HUD.transform.Find("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
+            m_HUD.transform.Find("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
+            m_HUD.transform.Find("GreenScore").GetChild(1).GetComponent<Text>().text = "Ships Left: " + (team1Ships.Count / 2).ToString();
             if (team1Ships.Count == 2)
-                m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
+                m_HUD.transform.Find("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
             else
-                m_HUD.transform.FindChild("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
-            m_HUD.transform.FindChild("TimeLeft").GetChild(0).GetComponent<Text>().text = timeLeft;
+                m_HUD.transform.Find("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
+            m_HUD.transform.Find("TimeLeft").GetChild(0).GetComponent<Text>().text = timeLeft;
         }
 
         void OnMiniScoresWindow()
@@ -519,9 +519,9 @@ namespace BrainCloudUNETExample.Game
             m_team1Score = m_gameInfo.GetTeamScore(1);
             m_team2Score = m_gameInfo.GetTeamScore(2);
             GameObject team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
 
             GameObject[] playerList = GameObject.FindGameObjectsWithTag("PlayerController");
             List<GameObject> playerListList = new List<GameObject>();
@@ -605,13 +605,13 @@ namespace BrainCloudUNETExample.Game
             }
 
             team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("GreenPlayers").GetComponent<Text>().text = greenNamesText;
-            team.transform.FindChild("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
-            team.transform.FindChild("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
+            team.transform.Find("GreenPlayers").GetComponent<Text>().text = greenNamesText;
+            team.transform.Find("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
+            team.transform.Find("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("RedPlayers").GetComponent<Text>().text = redNamesText;
-            team.transform.FindChild("RedPlayerKD").GetComponent<Text>().text = redKDText;
-            team.transform.FindChild("RedPlayerScores").GetComponent<Text>().text = redScoreText;
+            team.transform.Find("RedPlayers").GetComponent<Text>().text = redNamesText;
+            team.transform.Find("RedPlayerKD").GetComponent<Text>().text = redKDText;
+            team.transform.Find("RedPlayerScores").GetComponent<Text>().text = redScoreText;
         }
 
         void OnScoresWindow()
@@ -621,9 +621,9 @@ namespace BrainCloudUNETExample.Game
             m_team1Score = m_gameInfo.GetTeamScore(1);
             m_team2Score = m_gameInfo.GetTeamScore(2);
             GameObject team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team1Score.ToString("n0");
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
+            team.transform.Find("Team Score").GetComponent<Text>().text = m_team2Score.ToString("n0");
 
             if (m_gameState != eGameState.GAME_STATE_GAME_OVER)
             {
@@ -765,13 +765,13 @@ namespace BrainCloudUNETExample.Game
             }
 
             team = GameObject.Find("Team Green Score");
-            team.transform.FindChild("GreenPlayers").GetComponent<Text>().text = greenNamesText;
-            team.transform.FindChild("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
-            team.transform.FindChild("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
+            team.transform.Find("GreenPlayers").GetComponent<Text>().text = greenNamesText;
+            team.transform.Find("GreenPlayerKD").GetComponent<Text>().text = greenKDText;
+            team.transform.Find("GreenPlayerScores").GetComponent<Text>().text = greenScoreText;
             team = GameObject.Find("Team Red Score");
-            team.transform.FindChild("RedPlayers").GetComponent<Text>().text = redNamesText;
-            team.transform.FindChild("RedPlayerKD").GetComponent<Text>().text = redKDText;
-            team.transform.FindChild("RedPlayerScores").GetComponent<Text>().text = redScoreText;
+            team.transform.Find("RedPlayers").GetComponent<Text>().text = redNamesText;
+            team.transform.Find("RedPlayerKD").GetComponent<Text>().text = redKDText;
+            team.transform.Find("RedPlayerScores").GetComponent<Text>().text = redScoreText;
         }
 
         public void ChangeTeam()
@@ -1045,7 +1045,7 @@ namespace BrainCloudUNETExample.Game
                         bool collides = false;
                         for (int i = 0; i < m_spawnedShips.Count; i++)
                         {
-                            if (testShip.transform.FindChild("Graphic").GetComponent<Collider>().bounds.Intersects(m_spawnedShips[i].transform.FindChild("ShipGraphic").GetChild(0).FindChild("Graphic").GetComponent<Collider>().bounds))
+                            if (testShip.transform.Find("Graphic").GetComponent<Collider>().bounds.Intersects(m_spawnedShips[i].transform.Find("ShipGraphic").GetChild(0).Find("Graphic").GetComponent<Collider>().bounds))
                             {
                                 collides = true;
                                 break;

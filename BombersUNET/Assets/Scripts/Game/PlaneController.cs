@@ -90,12 +90,12 @@ namespace BrainCloudUNETExample.Game
                 null, null, null, null
             };
 
-            transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = BombersPlayerController.GetPlayer(m_playerID).m_displayName;
+            transform.Find("NameTag").gameObject.GetComponent<TextMesh>().text = BombersPlayerController.GetPlayer(m_playerID).m_displayName;
             if (BombersPlayerController.GetPlayer(m_playerID).isLocalPlayer) //isLocal
             {
-                transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().text = "";
+                transform.Find("NameTag").gameObject.GetComponent<TextMesh>().text = "";
             }
-            m_planeBank = transform.FindChild("PlaneBank");
+            m_planeBank = transform.Find("PlaneBank");
             for (int i = 0; i < m_lastPositions.Length; i++)
             {
                 m_lastPositions[i] = new PlaneVector(transform.position, transform.up);
@@ -106,25 +106,25 @@ namespace BrainCloudUNETExample.Game
             {
                 teamBomberPath = "Bomber01";
                 gameObject.layer = 8;
-                transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().color = Color.green;
+                transform.Find("NameTag").gameObject.GetComponent<TextMesh>().color = Color.green;
             }
             else
             {
                 teamBomberPath = "Bomber02";
                 gameObject.layer = 9;
-                transform.FindChild("NameTag").gameObject.GetComponent<TextMesh>().color = Color.red;
+                transform.Find("NameTag").gameObject.GetComponent<TextMesh>().color = Color.red;
             }
-            Transform graphicPivot = transform.FindChild("PlaneBank").FindChild("PlaneGraphic");
+            Transform graphicPivot = transform.Find("PlaneBank").Find("PlaneGraphic");
             GameObject graphic = (GameObject)Instantiate((GameObject)Resources.Load(teamBomberPath), graphicPivot.position, graphicPivot.rotation);
             graphic.transform.parent = graphicPivot;
             graphic.transform.localPosition = Vector3.zero;
             graphic.transform.localRotation = Quaternion.identity;
 
-            m_bulletSpawnPoint = graphic.transform.FindChild("BulletSpawn");
-            m_leftContrail = graphic.transform.FindChild("LeftSmokeTrail").GetComponent<ParticleSystem>();
-            m_rightContrail = graphic.transform.FindChild("RightSmokeTrail").GetComponent<ParticleSystem>();
+            m_bulletSpawnPoint = graphic.transform.Find("BulletSpawn");
+            m_leftContrail = graphic.transform.Find("LeftSmokeTrail").GetComponent<ParticleSystem>();
+            m_rightContrail = graphic.transform.Find("RightSmokeTrail").GetComponent<ParticleSystem>();
 
-            m_gunCharge = transform.GetChild(0).GetChild(0).FindChild("GunCharge").gameObject;
+            m_gunCharge = transform.GetChild(0).GetChild(0).Find("GunCharge").gameObject;
             m_gunCharge.GetComponent<Animator>().speed = 1 / GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_multiShotDelay;
         }
 
@@ -142,35 +142,35 @@ namespace BrainCloudUNETExample.Game
                 case 1:
                     m_rightContrail.startColor = m_blackSmokeColor;
                     m_leftContrail.startColor = m_blackSmokeColor;
-                    if (m_planeDamage[3] == null) m_planeDamage[3] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy4").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy4").rotation);
-                    m_planeDamage[3].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy4");
-                    if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").rotation);
-                    m_planeDamage[2].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3");
-                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").rotation);
-                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2");
-                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
-                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
+                    if (m_planeDamage[3] == null) m_planeDamage[3] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy4").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy4").rotation);
+                    m_planeDamage[3].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy4");
+                    if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy3").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy3").rotation);
+                    m_planeDamage[2].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy3");
+                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy2").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy2").rotation);
+                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy2");
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy1").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy1");
                     break;
                 case 2:
                     m_leftContrail.startColor = m_blackSmokeColor;
                     m_rightContrail.startColor = m_whiteSmokeColor;
                     if (m_planeDamage[3] != null) Destroy(m_planeDamage[3]);
-                    if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3").rotation);
-                    m_planeDamage[2].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy3");
-                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").rotation);
-                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2");
-                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
-                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
+                    if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy3").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy3").rotation);
+                    m_planeDamage[2].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy3");
+                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy2").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy2").rotation);
+                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy2");
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy1").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy1");
                     break;
                 case 3:
                     m_leftContrail.startColor = m_whiteSmokeColor;
                     m_rightContrail.startColor = m_whiteSmokeColor;
                     if (m_planeDamage[3] != null) Destroy(m_planeDamage[3]);
                     if (m_planeDamage[2] != null) Destroy(m_planeDamage[2]);
-                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2").rotation);
-                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy2");
-                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
-                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
+                    if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy2").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy2").rotation);
+                    m_planeDamage[1].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy2");
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy1").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy1");
                     break;
                 case 4:
                     m_leftContrail.startColor = m_whiteSmokeColor;
@@ -178,8 +178,8 @@ namespace BrainCloudUNETExample.Game
                     if (m_planeDamage[3] != null) Destroy(m_planeDamage[3]);
                     if (m_planeDamage[2] != null) Destroy(m_planeDamage[2]);
                     if (m_planeDamage[1] != null) Destroy(m_planeDamage[1]);
-                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").position, transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1").rotation);
-                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).FindChild("LowHPDummy1");
+                    if (m_planeDamage[0] == null) m_planeDamage[0] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy1").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy1").rotation);
+                    m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy1");
                     break;
                 case 5:
                     if (m_planeDamage[3] != null) Destroy(m_planeDamage[3]);
@@ -312,8 +312,8 @@ namespace BrainCloudUNETExample.Game
         {
             if (!isLocalPlayer)
             {
-                transform.FindChild("NameTag").position = (transform.position - new Vector3(0, 7.4f, 10));
-                transform.FindChild("NameTag").eulerAngles = new Vector3(0, 0, 0);
+                transform.Find("NameTag").position = (transform.position - new Vector3(0, 7.4f, 10));
+                transform.Find("NameTag").eulerAngles = new Vector3(0, 0, 0);
                 return;
             }
 
@@ -337,8 +337,8 @@ namespace BrainCloudUNETExample.Game
 
             m_lastPositions[m_lastPositions.Length - 1] = new PlaneVector(transform.position, direction);
 
-            transform.FindChild("NameTag").position = (transform.position - new Vector3(0, 7.4f, 10));
-            transform.FindChild("NameTag").eulerAngles = new Vector3(0, 0, 0);
+            transform.Find("NameTag").position = (transform.position - new Vector3(0, 7.4f, 10));
+            transform.Find("NameTag").eulerAngles = new Vector3(0, 0, 0);
         }
 
         public void SetRotation(float aRotation)
