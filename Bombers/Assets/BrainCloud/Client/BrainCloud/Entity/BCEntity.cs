@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 using BrainCloud.Common;
 using LitJson;
@@ -63,7 +64,7 @@ namespace BrainCloud.Entity
         //protected JsonData m_cachedServerObject;
 
 
-#region properties
+        #region properties
         public string EntityId
         {
             get
@@ -133,15 +134,15 @@ namespace BrainCloud.Entity
                 m_braincloud = value;
             }
         }
-#endregion
+        #endregion
 
 
-#region abstractMethods
+        #region abstractMethods
         protected abstract void CreateEntity(SuccessCallback in_cbSuccess, FailureCallback in_cbFailure);
         protected abstract void UpdateEntity(SuccessCallback in_cbSuccess, FailureCallback in_cbFailure);
-        protected abstract void UpdateSharedEntity(string in_targetPlayerId, SuccessCallback in_cbSuccess, FailureCallback in_cbFailure);
+        protected abstract void UpdateSharedEntity(string in_targetProfileId, SuccessCallback in_cbSuccess, FailureCallback in_cbFailure);
         protected abstract void DeleteEntity(SuccessCallback in_cbSuccess, FailureCallback in_cbFailure);
-#endregion
+        #endregion
 
 
         public BCEntity()
@@ -224,7 +225,7 @@ namespace BrainCloud.Entity
         /// <param name="in_cbFailure">
         /// A callback to run when store operation fails.
         /// </param>
-        public void StoreAsyncShared(string in_targetPlayerId, SuccessCallback in_cbSuccess = null, FailureCallback in_cbFailure = null)
+        public void StoreAsyncShared(string in_targetProfileId, SuccessCallback in_cbSuccess = null, FailureCallback in_cbFailure = null)
         {
             if (m_state == EntityState.Deleting || m_state == EntityState.Deleted)
             {
@@ -248,7 +249,7 @@ namespace BrainCloud.Entity
             }
             else
             {
-                UpdateSharedEntity(in_targetPlayerId, in_cbSuccess, in_cbFailure);
+                UpdateSharedEntity(in_targetProfileId, in_cbSuccess, in_cbFailure);
                 // we don't currently need a state to say an update is in progress... and if we add this state we
                 // need to keep track of how many updates are queued in order to set the state back to ready when *all*
                 // updates have completed. So just removing the state for now... an update queued should not have any impact
@@ -395,9 +396,9 @@ namespace BrainCloud.Entity
             {
                 JsonData listJson = new JsonData();
                 IList objectList = (IList)in_object;
-                for (int i = 0; i < objectList.Count; ++i )
+                for (int i = 0; i < objectList.Count; ++i)
                 {
-                    listJson.Add(ToJsonObjectRecurse( (object)objectList[i]));
+                    listJson.Add(ToJsonObjectRecurse((object)objectList[i]));
                 }
                 return listJson;
             }
@@ -501,11 +502,16 @@ namespace BrainCloud.Entity
         protected static IDictionary<string, object> JsonToDictionary(JsonData in_jsonObj)
         {
             Dictionary<string, object> dict = new Dictionary<string, object>();
-            foreach (DictionaryEntry child in in_jsonObj)
+            IOrderedDictionary json = in_jsonObj as IOrderedDictionary;
+            var enumerator = json.GetEnumerator();
+
+            while (enumerator.MoveNext())
             {
-                var childValue = child.Value as JsonData;
-                var childKey = child.Key as string;
-                
+                var child = enumerator.Current;
+                var dictEntry = (DictionaryEntry)child;
+                var childValue = dictEntry.Value as JsonData;
+                var childKey = dictEntry.Key as string;
+
                 if (childValue.IsObject)
                 {
                     dict[childKey] = JsonToDictionary(childValue);

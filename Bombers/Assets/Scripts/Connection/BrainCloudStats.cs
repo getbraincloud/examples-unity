@@ -94,7 +94,14 @@ namespace BrainCloudPhotonExample.Connection
         public void GetLeaderboardPage(string aLeaderboardID, int aIndex, int aSecondIndex)
         {
             m_leaderboardReady = false;
-            BrainCloudWrapper.GetBC().SocialLeaderboardService.GetGlobalLeaderboardPage(aLeaderboardID, BrainCloud.BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, aIndex, aSecondIndex, true, LeaderboardSuccess_Callback, LeaderboardFailure_Callback, null);
+            BrainCloudWrapper.GetBC().SocialLeaderboardService.GetGlobalLeaderboardPage(
+				aLeaderboardID, 
+				BrainCloud.BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 
+				aIndex, 
+				aSecondIndex, 
+				LeaderboardSuccess_Callback, 
+				LeaderboardFailure_Callback, 
+				null);
         }
 
         public class Stat
