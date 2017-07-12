@@ -8,40 +8,62 @@
 // <author>developer@exitgames.com</author>
 // ----------------------------------------------------------------------------
 
-//#define PHOTON_VOICE
-
 using System;
 using ExitGames.Client.Photon;
 using UnityEditor;
 using UnityEngine;
 
+
 [CustomEditor(typeof (ServerSettings))]
 public class ServerSettingsInspector : Editor
 {
+    // has to be extended when rHTTP becomes available
     public enum ProtocolChoices
     {
         Udp = ConnectionProtocol.Udp,
         Tcp = ConnectionProtocol.Tcp
-    } // has to be extended when rHTTP becomes available
+    }
+
 
     private bool showMustHaveRegion;
+	private CloudRegionCode lastUsedRegion;
+    private ServerConnection lastServer;
 
-    private bool hasVoice = false;
-    private bool hasChat = false;
 
     [ExecuteInEditMode]
     public void OnEnable()
     {
-        this.hasVoice = Type.GetType("ExitGames.Client.Photon.Voice.VoiceClient, Assembly-CSharp") != null || Type.GetType("ExitGames.Client.Photon.Voice.VoiceClient, Assembly-CSharp-firstpass") != null;
-        this.hasChat = Type.GetType("ExitGames.Client.Photon.Chat.ChatClient, Assembly-CSharp") != null || Type.GetType("ExitGames.Client.Photon.Chat.ChatClient, Assembly-CSharp-firstpass") != null;
-    }
+		this.lastUsedRegion = ServerSettings.BestRegionCodeInPreferences;
+		EditorApplication.update += this.OnUpdate;
+	}
+
+
+	public void OnDisable()
+	{
+		EditorApplication.update -= this.OnUpdate;
+	}
+
+
+	private void OnUpdate()
+	{
+        if (this.lastUsedRegion != ServerSettings.BestRegionCodeInPreferences)
+		{
+            this.lastUsedRegion = ServerSettings.BestRegionCodeInPreferences;
+			Repaint();
+		}
+        // this won't repaint when we disconnect but it's "good enough" to update when we connect and switch servers.
+	    if (Application.isPlaying && this.lastServer != PhotonNetwork.Server)
+	    {
+	        this.lastServer = PhotonNetwork.Server;
+	        Repaint();
+	    }
+	}
 
 
     public override void OnInspectorGUI()
     {
         ServerSettings settings = (ServerSettings) target;
         Undo.RecordObject(settings, "Edit PhotonServerSettings");
-
         settings.HostType = (ServerSettings.HostingOption) EditorGUILayout.EnumPopup("Hosting", settings.HostType);
         EditorGUI.indentLevel = 1;
 
@@ -56,6 +78,34 @@ public class ServerSettingsInspector : Editor
                 }
                 else
                 {
+                    string _regionFeedback = "Prefs:"+ServerSettings.BestRegionCodeInPreferences.ToString();
+
+                    // the NameServer does not have a region itself. it's global (although it has regional instances)
+					if (PhotonNetwork.connected && PhotonNetwork.Server != ServerConnection.NameServer)
+					{
+					    _regionFeedback = "Current:" + PhotonNetwork.CloudRegion + " " + _regionFeedback;
+					}
+
+					EditorGUILayout.BeginHorizontal ();
+					EditorGUILayout.PrefixLabel (" ");
+					Rect rect = GUILayoutUtility.GetRect(new GUIContent("_regionFeedback"),"Label");
+					int indentLevel = EditorGUI.indentLevel;
+					EditorGUI.indentLevel = 0;
+					EditorGUI.LabelField (rect, _regionFeedback);
+					EditorGUI.indentLevel = indentLevel;
+
+					rect.x += rect.width-39;
+					rect.width = 39;
+
+					rect.height -=2;
+					if (GUI.Button(rect,"Reset",EditorStyles.miniButton))
+					{
+						ServerSettings.ResetBestRegionCodeInPreferences();
+					}
+					EditorGUILayout.EndHorizontal ();
+
+
+
                     CloudRegionFlag valRegions = (CloudRegionFlag)EditorGUILayout.EnumMaskField("Enabled Regions", settings.EnabledRegions);
 
                     if (valRegions != settings.EnabledRegions)
@@ -67,6 +117,10 @@ public class ServerSettingsInspector : Editor
                     {
                         EditorGUILayout.HelpBox("You should enable at least two regions for 'Best Region' hosting.", MessageType.Warning);
                     }
+
+
+
+
                 }
 
                 // appid
@@ -150,7 +204,7 @@ public class ServerSettingsInspector : Editor
 
 
         // CHAT SETTINGS
-        if (this.hasChat)
+        if (PhotonEditorUtils.HasChat)
         {
             GUILayout.Space(5);
             EditorGUI.indentLevel = 0;
@@ -172,7 +226,7 @@ public class ServerSettingsInspector : Editor
 
 
         // VOICE SETTINGS
-        if (this.hasVoice)
+        if (PhotonEditorUtils.HasVoice)
         {
             GUILayout.Space(5);
             EditorGUI.indentLevel = 0;
@@ -218,8 +272,23 @@ public class ServerSettingsInspector : Editor
         settings.JoinLobby = EditorGUILayout.Toggle("Auto-Join Lobby", settings.JoinLobby);
         settings.EnableLobbyStatistics = EditorGUILayout.Toggle("Enable Lobby Stats", settings.EnableLobbyStatistics);
 
-        settings.PunLogging = (PhotonLogLevel)EditorGUILayout.EnumPopup("Pun Logging", settings.PunLogging);            // TODO: update at runtime
-        settings.NetworkLogging = (DebugLevel)EditorGUILayout.EnumPopup("Network Logging", settings.NetworkLogging);    // TODO: update at runtime
+		// Pun Logging Level
+		PhotonLogLevel _PunLogging = (PhotonLogLevel)EditorGUILayout.EnumPopup("Pun Logging", settings.PunLogging);
+		if (EditorApplication.isPlaying && PhotonNetwork.logLevel!=_PunLogging)
+		{
+			PhotonNetwork.logLevel = _PunLogging;
+		}
+		settings.PunLogging = _PunLogging;
+
+		// Network Logging Level
+		DebugLevel _DebugLevel = (DebugLevel)EditorGUILayout.EnumPopup("Network Logging", settings.NetworkLogging);
+		if (EditorApplication.isPlaying && settings.NetworkLogging!=_DebugLevel)
+		{
+			settings.NetworkLogging = _DebugLevel;
+		}
+		settings.NetworkLogging = _DebugLevel;
+
+
         //EditorGUILayout.LabelField("automaticallySyncScene");
         //EditorGUILayout.LabelField("autoCleanUpPlayerObjects");
         //EditorGUILayout.LabelField("lobby stats");
