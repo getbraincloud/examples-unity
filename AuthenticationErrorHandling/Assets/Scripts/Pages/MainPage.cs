@@ -52,8 +52,7 @@ public class MainPage : MonoBehaviour
         GUILayout.BeginArea(SIZE.Page());
 
 
-
-		BrainCloudWrapper.GetInstance ().Client.RegisterGlobalErrorCallback (failureCallBack);
+		BrainCloudWrapper.GetBC().RegisterGlobalErrorCallback (failureCallBack);
 
 
 		GUILayout.BeginVertical("debugInfo", GUI.skin.box);
