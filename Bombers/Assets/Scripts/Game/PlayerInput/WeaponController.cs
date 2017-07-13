@@ -70,7 +70,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_bombDropPrefab = (GameObject)Resources.Load("BombDrop");
             }
 
-            m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+            m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
             m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
             m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
         }
@@ -133,7 +133,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             if (m_bombs > 0 && m_playerPlane != null)
             {
-                m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0.3f), 4 * Time.deltaTime);
+                m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0.3f), 4 * Time.deltaTime);
 
                 m_targetingReticule.GetComponent<MeshRenderer>().enabled = true;
                 Vector3 position = m_playerPlane.transform.position;
@@ -172,7 +172,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 }
 
                 m_targetingReticule.transform.position = position;
-                TextMesh bombCounter = m_targetingReticule.transform.FindChild("BombCounter").GetComponent<TextMesh>();
+                TextMesh bombCounter = m_targetingReticule.transform.Find("BombCounter").GetComponent<TextMesh>();
                 int maxBombs = _brainCloudStats.m_maxBombCapacity;
                 if (m_bombs == 0 || m_bombs == 1)
                 {
@@ -251,8 +251,8 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             else
             {
                 m_targetingReticule.GetComponent<MeshRenderer>().enabled = false;
-                m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.FindChild("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0), 4 * Time.deltaTime);
-                m_targetingReticule.transform.FindChild("BombCounter").GetComponent<TextMesh>().text = "";
+                m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0), 4 * Time.deltaTime);
+                m_targetingReticule.transform.Find("BombCounter").GetComponent<TextMesh>().text = "";
                 m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
                 m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
 

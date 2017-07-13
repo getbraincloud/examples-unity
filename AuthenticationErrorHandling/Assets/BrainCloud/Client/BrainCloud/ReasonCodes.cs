@@ -3,10 +3,6 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace BrainCloud
 {
     public static class ReasonCodes
@@ -35,7 +31,7 @@ namespace BrainCloud
         public const int SWITCHING_PROFILES = 40207;
 
         /// <summary>This means that you provide a blank profile id and the
-        /// identity doesn’t exist and forecCreate is false.
+        /// identity doesn't exist and forecCreate is false.
         ///</summary>
         public const int MISSING_PROFILE_ERROR = 40208;
 
@@ -57,25 +53,31 @@ namespace BrainCloud
         public const int MERGE_PROFILES = 40212;
         public const int INVALID_PROPERTY_NAME = 40213;
         public const int EMAIL_NOT_VALIDATED = 40214;
+        public const int DATABASE_ERROR = 40215;
+        public const int PROPERTY_NOT_OVERRIDEABLE = 40216;
+        public const int UNKNOWN_AUTH_ERROR = 40217;
 
         public const int UNABLE_TO_GET_FRIENDS_FROM_FACEBOOK = 40300;
         public const int BAD_SIGNATURE = 40301;
 
-        /// <summary>Cannot validate player
+        /// <summary>Cannot validate user
         /// </summary>
         public const int UNABLE_TO_VALIDATE_PLAYER = 40302;
+        public const int UNABLE_TO_VALIDATE_USER = UNABLE_TO_VALIDATE_PLAYER;
 
         /// <summary>Session expired</summary>
         public const int PLAYER_SESSION_EXPIRED = 40303;
+        public const int USER_SESSION_EXPIRED = PLAYER_SESSION_EXPIRED;
 
 
         /// <summary>SESSION NOT FOUND ERROR</summary>
         public const int NO_SESSION = 40304;
 
         public const int PLAYER_SESSION_MISMATCH = 40305;
+        public const int USER_SESSION_MISMATCH = PLAYER_SESSION_MISMATCH;
         public const int OPERATION_REQUIRES_A_SESSION = 40306;
 
-        /// <summary>Player provided the wrong email and / or password</summary>
+        /// <summary>User provided the wrong email and / or password</summary>
         public const int TOKEN_DOES_NOT_MATCH_USER = 40307;
 
         public const int EVENT_CAN_ONLY_SEND_TO_FRIEND_OR_SELF = 40309;
@@ -89,6 +91,7 @@ namespace BrainCloud
 
         /// <summary>You must have an active session in order to call this api</summary>
         public const int INVALID_GAME_ID = 40316;
+        public const int INVALID_APP_ID = INVALID_GAME_ID;
 
         /// <summary>This product and receipt have already been claimed</summary>
         public const int APPLE_TRANS_ID_ALREADY_CLAIMED = 40317;
@@ -97,10 +100,12 @@ namespace BrainCloud
         public const int BRAINCLOUD_VERSION_NOT_SUPPORTED = 40319;
         public const int PLATFORM_NOT_SUPPORTED = 40320;
         public const int INVALID_PLAYER_STATISTICS_EVENT_NAME = 40321;
+        public const int INVALID_USER_STATISTICS_EVENT_NAME = INVALID_PLAYER_STATISTICS_EVENT_NAME;
 
         /// <summary>App Version No Longer Supported</summary>
         public const int GAME_VERSION_NOT_SUPPORTED = 40322;
-
+        public const int APP_VERSION_NOT_SUPPORTED = GAME_VERSION_NOT_SUPPORTED;
+        
         public const int BAD_REFERENCE_DATA = 40324;
         public const int MISSING_OAUTH_TOKEN = 40325;
         public const int MISSING_OAUTH_VERIFIER = 40326;
@@ -108,6 +113,7 @@ namespace BrainCloud
         public const int MISSING_TWEET = 40328;
         public const int FACEBOOK_PAYMENT_ID_ALREADY_PROCESSED = 40329;
         public const int DISABLED_GAME = 40330;
+        public const int DISABLED_APP = DISABLED_GAME;
         public const int MATCH_MAKING_DISABLED = 40331;
         public const int UPDATE_FAILED = 40332;
         public const int INVALID_OPERATION = 40333;  // invalid operation for API call
@@ -140,11 +146,13 @@ namespace BrainCloud
         public const int S3_ERROR = 40350;
         public const int INVALID_ATTRIBUTES = 40351;
         public const int IMPORT_MISSING_GAME_DATA = 40352;
+        public const int IMPORT_MISSING_APP_DATA = IMPORT_MISSING_GAME_DATA;
         public const int IMPORT_SCHEMA_VERSION_TOO_OLD = 40353;
         public const int IMPORT_SCHEMA_VERSION_INVALID = 40355;
 
-        /// <summary>Max Concurrent Player Count Reached</summary>
+        /// <summary>Max Concurrent User Count Reached</summary>
         public const int PLAYER_SESSION_LOGGED_OUT = 40356;
+        public const int USER_SESSION_LOGGED_OUT = PLAYER_SESSION_LOGGED_OUT;
 
         public const int API_HOOK_SCRIPT_ERROR = 40357;
         public const int MISSING_REQUIRED_PARAMETER = 40358;
@@ -161,26 +169,37 @@ namespace BrainCloud
         public const int INVALID_STATISTIC_NAME = 40369;
         public const int INVALID_HTTP_REQUEST = 40370;
         public const int GAME_LIMIT_REACHED = 40371;
+        public const int APP_LIMIT_REACHED = GAME_LIMIT_REACHED;
         public const int GAME_RUNSTATE_DISABLED = 40372;
+        public const int APP_RUNSTATE_DISABLED = GAME_RUNSTATE_DISABLED;
         public const int INVALID_COMPANY_ID = 40373;
         public const int INVALID_PLAYER_ID = 40374;
+        public const int INVALID_USER_ID = INVALID_PLAYER_ID;
         public const int INVALID_TEMPLATE_ID = 40375;
         public const int MINIMUM_SEARCH_INPUT = 40376;
 
-        /// <summary>Game has to parent to switch profile to</summary>
+        /// <summary>App has to parent to switch profile to</summary>
         public const int MISSING_GAME_PARENT = 40377;
+        public const int MISSING_APP_PARENT = MISSING_GAME_PARENT;
 
         public const int GAME_PARENT_MISMATCH = 40378;
+        public const int GAME_APP_MISMATCH = GAME_PARENT_MISMATCH;
         public const int CHILD_PLAYER_MISSING = 40379;
+        public const int CHILD_USER_MISSING = CHILD_PLAYER_MISSING;
         public const int MISSING_PLAYER_PARENT = 40380;
+        public const int MISSING_USER_PARENT = MISSING_PLAYER_PARENT;
         public const int PLAYER_PARENT_MISMATCH = 40381;
+        public const int USER_PARENT_MISMATCH = PLAYER_PARENT_MISMATCH;
         public const int MISSING_PLAYER_ID = 40382;
+        public const int MISSING_APP_ID = MISSING_PLAYER_ID;
         public const int DECODE_CONTEXT = 40383;
         public const int INVALID_QUERY_CONTEXT = 40384;
         public const int GROUP_MEMBER_NOT_FOUND = 40385;
         public const int INVALID_SORT = 40386;
         public const int GAME_NOT_FOUND = 40387;
+        public const int APP_NOT_FOUND = GAME_NOT_FOUND;
         public const int GAMES_NOT_IN_SAME_COMPANY = 40388;
+        public const int APPS_NOT_IN_SAME_COMPANY = GAMES_NOT_IN_SAME_COMPANY;
         public const int IMPORT_NO_PARENT_ASSIGNED = 40389;
         public const int IMPORT_PARENT_CURRENCIES_MISMATCH = 40390;
         public const int INVALID_SUBSTITUION_ENTRY = 40391;
@@ -230,6 +249,104 @@ namespace BrainCloud
         public const int UPLOAD_JOB_EXPIRED = 40435;
         public const int UPLOADER_EXCEPTION = 40436;
         public const int UPLOADER_FILESIZE_MISMATCH = 40437;
+        public const int PUSH_NOTIFICATIONS_NOT_CONFIGURED = 40438;
+        public const int MATCHMAKING_FILTER_SCRIPT_FAILURE = 40439;
+        public const int ACCOUNT_ALREADY_EXISTS = 40440;
+        public const int PROFILE_ALREADY_EXISTS = 40441;
+        public const int MISSING_NOTIFICATION_BODY = 40442;
+        public const int INVALID_SERVICE_CODE = 40443;
+        public const int IP_ADDRESS_BLOCKED = 40444;
+        public const int UNAPPROVED_SERVICE_CODE = 40445;
+        public const int PROFILE_NOT_FOUND = 40446;
+        public const int ENTITY_NOT_SHARED = 40447;
+        public const int SELF_FRIEND = 40448;
+        public const int PARSE_NOT_CONFIGURED = 40449;
+        public const int PARSE_NOT_ENABLED = 40450;
+        public const int PARSE_REQUEST_ERROR = 40451;
+        public const int GROUP_CANNOT_ADD_OWNER = 40452;
+        public const int NOT_GROUP_MEMBER = 40453;
+        public const int INVALID_GROUP_ROLE = 40454;
+        public const int GROUP_OWNER_DELETE = 40455;
+        public const int NOT_INVITED_GROUP_MEMBER = 40456;
+        public const int GROUP_IS_FULL = 40457;
+        public const int GROUP_OWNER_CANNOT_LEAVE = 40458;
+        public const int INVALID_INCREMENT_VALUE = 40459;
+        public const int GROUP_VERSION_MISMATCH = 40460;
+        public const int GROUP_ENTITY_VERSION_MISMATCH = 40461;
+        public const int INVALID_GROUP_ID = 40462;
+        public const int INVALID_FIELD_NAME = 40463;
+        public const int UNSUPPORTED_AUTH_TYPE = 40464;
+        public const int CLOUDCODE_JOB_NOT_FOUND = 40465;
+        public const int CLOUDCODE_JOB_NOT_SCHEDULED = 40466;
+        public const int GROUP_TYPE_NOT_FOUND = 40467;
+        public const int MATCHING_GROUPS_NOT_FOUND = 40468;
+        public const int GENERATE_CDN_URL_ERROR = 40469;
+        public const int INVALID_PROFILE_IDS = 40470;
+        public const int MAX_PROFILE_IDS_EXCEEDED = 40471;
+        public const int PROFILE_ID_MISMATCH = 40472;
+        public const int LEADERBOARD_DOESNOT_EXIST = 40473;
+        public const int APP_LICENSING_EXCEEDED = 40474;
+        public const int SENDGRID_NOT_INSTALLED = 40475;
+        public const int SENDGRID_EMAIL_SEND_ERROR = 40476;
+        public const int SENDGRID_NOT_ENABLED_FOR_APP = 40477;
+        public const int SENDGRID_GET_TEMPLATES_ERROR = 40478;
+        public const int SENDGRID_INVALID_API_KEY = 40479;
+        public const int EMAIL_SERVICE_NOT_CONFIGURED = 40480;
+        public const int INVALID_EMAIL_TEMPLATE_TYPE = 40481;
+        public const int SENDGRID_KEY_EMPTY_OR_NULL = 40482;
+        public const int BODY_TEMPLATE_CANNOT_COEXIST = 40483;
+        public const int SUBSTITUTION_BODY_CANNOT_COEXIST = 40484;
+        public const int INVALID_FROM_ADDRESS = 40485;
+        public const int INVALID_FROM_NAME = 40486;
+        public const int INVALID_REPLY_TO_ADDRESS = 40487;
+        public const int INVALID_REPLY_TO_NAME = 40488;
+        public const int FROM_NAME_WITHOUT_FROM_ADDRESS = 40489;
+        public const int REPLY_TO_NAME_WITHOUT_REPLY_TO_ADDRESS = 40490;
+        public const int CURRENCY_SECURITY_ERROR = 40491;
+        public const int INVALID_PEER_CODE = 40492;
+        public const int PEER_NO_LONGER_EXISTS = 40493;
+
+        public const int CANNOT_MODIFY_TOURNAMENT_WITH_LEADERBOARD_SERVICE = 40494;
+        public const int NO_TOURNAMENT_ASSOCIATED_WITH_LEADERBOARD = 40495;
+        public const int TOURNAMENT_NOT_ASSOCIATED_WITH_LEADERBOARD = 40496;
+        public const int PLAYER_ALREADY_TOURNAMENT_FOR_LEADERBOARD = 40497;
+        public const int PLAYER_EARLY_FOR_JOINING_TOURNAMENT = 40498;
+        public const int NO_LEADERBOARD_FOUND = 40499;
+        public const int PLAYER_NOT_IN_TIME_RANGE_FOR_POSTSCORE_TOURNAMENT = 40500;
+        public const int LEADERBOARD_ID_BAD = 40501;
+        public const int SCORE_INPUT_BAD = 40502;
+        public const int ROUND_STARTED_EPOCH_INPUT_BAD = 40503;
+        public const int TOURNAMENT_CODE_INPUT_BAD = 40504;
+        public const int PLAYER_NOT_ENROLLED_IN_TOURNAMENT = 40505;
+        public const int LEADERBOARD_VERSION_ID_INVALID = 40506;
+        public const int NOT_ENOUGH_BALANCE_TO_JOIN_TOURNAMENT = 40507;
+        public const int PARENT_ALREADY_ATTACHED = 40508;
+        public const int PEER_ALREADY_ATTACHED = 40509;
+        public const int IDENTITY_NOT_ATTACHED_WITH_PARENT = 40510;
+        public const int IDENTITY_NOT_ATTACHED_WITH_PEER = 40511;
+        public const int LEADERBOARD_SCORE_UPDATE_ERROR = 40512;
+        public const int ERROR_CLAIMING_REWARD = 40513;
+        public const int NOT_ENOUGH_PARENT_BALANCE_TO_JOIN_TOURNAMENT = 40514;
+        public const int NOT_ENOUGH_PEER_BALANCE_TO_JOIN_TOURNAMENT = 40515;
+        public const int PLAYER_LATE_FOR_JOINING_TOURNAMENT = 40516;
+        public const int VIEWING_REWARD_FOR_NON_PROCESSED_TOURNAMENTS = 40517;
+        public const int NO_REWARD_ASSOCIATED_WITH_LEADERBOARD = 40518;
+        public const int PROFILE_PEER_NOT_FOUND = 40519;
+        public const int LEADERBOARD_IN_ACTIVE_STATE = 40520;
+        public const int LEADERBOARD_IN_CALCULATING_STATE = 40521;
+        public const int TOURNAMENT_RESULT_PROCESSING_FAILED = 40522;
+        public const int TOURNAMENT_REWARDS_ALREADY_CLAIMED = 40523;
+        public const int NO_TOURNAMENT_FOUND = 40524;
+        public const int UNEXPECTED_ERROR_RANK_ZERO_AFTER_PROCESSING = 40525;
+        public const int UNEXPECTED_ERROR_DELETING_TOURNAMENT_LEADERBOARD_SCORE = 40526;
+        public const int INVALID_RUN_STATE = 40527;
+        public const int LEADERBOARD_SCORE_DOESNOT_EXIST = 40528;
+        public const int INITIAL_SCORE_NULL = 40529;
+        public const int TOURNAMENT_NOTIFICATIONS_PROCESSING_FAILED = 40530;
+        public const int ACL_NOT_READABLE = 40531;
+        public const int INVALID_OWNER_ID = 40532;
+        public const int IMPORT_MISSING_PEERS_DATA = 40533;
+        public const int INVALID_CREDENTIAL = 40534;
 
         public const int NO_TWITTER_CONSUMER_KEY = 500001;
         public const int NO_TWITTER_CONSUMER_SECRET = 500002;
@@ -243,6 +360,8 @@ namespace BrainCloud
         public const int FACEBOOK_APPLICATION_TOKEN_REQUEST_ERROR = 500013;
         public const int FACEBOOK_BAD_APPLICATION_TOKEN_SIGNATURE = 500014;
 
+        public const int MONGO_DB_EXCEPTION = 600001;
+
         /// <summary>
         /// Client defined value for a timeout detected client-side.
         /// </summary>
@@ -250,5 +369,6 @@ namespace BrainCloud
         public const int CLIENT_UPLOAD_FILE_CANCELLED = 90100;
         public const int CLIENT_UPLOAD_FILE_TIMED_OUT = 90101;
         public const int CLIENT_UPLOAD_FILE_UNKNOWN = 90102;
+        public const int CLIENT_DISABLED = 90200;
     }
 }

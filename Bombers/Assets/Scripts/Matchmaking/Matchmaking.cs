@@ -351,15 +351,15 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             RoomOptions options = new RoomOptions();
 
-            m_roomMaxPlayers = int.Parse(m_createGameWindow.transform.FindChild("Max Players").GetComponent<InputField>().text.ToString());
-            m_roomLevelRangeMax = int.Parse(m_createGameWindow.transform.FindChild("Box 2").GetComponent<InputField>().text.ToString());
-            m_roomLevelRangeMin = int.Parse(m_createGameWindow.transform.FindChild("Box 1").GetComponent<InputField>().text.ToString());
+            m_roomMaxPlayers = int.Parse(m_createGameWindow.transform.Find("Max Players").GetComponent<InputField>().text.ToString());
+            m_roomLevelRangeMax = int.Parse(m_createGameWindow.transform.Find("Box 2").GetComponent<InputField>().text.ToString());
+            m_roomLevelRangeMin = int.Parse(m_createGameWindow.transform.Find("Box 1").GetComponent<InputField>().text.ToString());
 
             options.MaxPlayers = (byte)m_roomMaxPlayers;
             options.IsOpen = true;
             options.IsVisible = true;
 
-            CreateNewRoom(m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text, options);
+            CreateNewRoom(m_createGameWindow.transform.Find("Room Name").GetComponent<InputField>().text, options);
         }
 
         public void CloseDropDowns()
@@ -394,8 +394,8 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void OnNewRoomWindow()
         {
-            m_createGameWindow.transform.FindChild("Layout").FindChild("Selection").GetComponent<Text>().text = m_mapPresets[m_presetListSelection].m_name;
-            m_createGameWindow.transform.FindChild("Size").FindChild("Selection").GetComponent<Text>().text = m_mapSizes[m_sizeListSelection].m_name;
+            m_createGameWindow.transform.Find("Layout").Find("Selection").GetComponent<Text>().text = m_mapPresets[m_presetListSelection].m_name;
+            m_createGameWindow.transform.Find("Size").Find("Selection").GetComponent<Text>().text = m_mapSizes[m_sizeListSelection].m_name;
 
             if (m_showPresetList)
             {
@@ -656,10 +656,10 @@ namespace BrainCloudPhotonExample.Matchmaking
                         leaderboardNameText += "\n";
                         leaderboardLevelText += "\n";
                         leaderboardScoreText += "\n";
-                        m_playerChevron.transform.FindChild("PlayerPlace").GetComponent<Text>().text = (i + 1) + "";
-                        m_playerChevron.transform.FindChild("PlayerName").GetComponent<Text>().text = leaderboardData["leaderboard"][i]["name"].ToString() + "\n"; ;
-                        m_playerChevron.transform.FindChild("PlayerLevel").GetComponent<Text>().text = leaderboardData["leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["leaderboard"][i]["data"]["level"].ToString() + ")\n"; ;
-                        m_playerChevron.transform.FindChild("PlayerScore").GetComponent<Text>().text = (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
+                        m_playerChevron.transform.Find("PlayerPlace").GetComponent<Text>().text = (i + 1) + "";
+                        m_playerChevron.transform.Find("PlayerName").GetComponent<Text>().text = leaderboardData["leaderboard"][i]["name"].ToString() + "\n"; ;
+                        m_playerChevron.transform.Find("PlayerLevel").GetComponent<Text>().text = leaderboardData["leaderboard"][i]["data"]["rank"].ToString() + " (" + leaderboardData["leaderboard"][i]["data"]["level"].ToString() + ")\n"; ;
+                        m_playerChevron.transform.Find("PlayerScore").GetComponent<Text>().text = (Mathf.Floor(float.Parse(leaderboardData["leaderboard"][i]["score"].ToString()) / 10000) + 1).ToString("n0") + "\n";
                         //96.6
                         //17.95
                     }
@@ -688,17 +688,17 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
 
 
-            m_scoreRect.transform.FindChild("List").GetComponent<Text>().text = leaderboardNameText;
-            m_scoreRect.transform.FindChild("List Ranks").GetComponent<Text>().text = leaderboardRankText;
-            m_scoreRect.transform.FindChild("List Count").GetComponent<Text>().text = leaderboardScoreText;
-            m_scoreRect.transform.FindChild("List Level").GetComponent<Text>().text = leaderboardLevelText;
+            m_scoreRect.transform.Find("List").GetComponent<Text>().text = leaderboardNameText;
+            m_scoreRect.transform.Find("List Ranks").GetComponent<Text>().text = leaderboardRankText;
+            m_scoreRect.transform.Find("List Count").GetComponent<Text>().text = leaderboardScoreText;
+            m_scoreRect.transform.Find("List Level").GetComponent<Text>().text = leaderboardLevelText;
             m_scoreRect.GetComponent<RectTransform>().sizeDelta = new Vector2(m_scoreRect.GetComponent<RectTransform>().sizeDelta.x, 18.2f * players);
             if (!m_once)
             {
                 m_once = true;
-                m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 1;
-                m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 0.99f;
-                m_scoreRect.transform.parent.parent.FindChild("Scrollbar").GetComponent<Scrollbar>().value = 1;
+                m_scoreRect.transform.parent.parent.Find("Scrollbar").GetComponent<Scrollbar>().value = 1;
+                m_scoreRect.transform.parent.parent.Find("Scrollbar").GetComponent<Scrollbar>().value = 0.99f;
+                m_scoreRect.transform.parent.parent.Find("Scrollbar").GetComponent<Scrollbar>().value = 1;
             }
             if (!playerListed)
             {
@@ -744,7 +744,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void CreateGame()
         {
             m_state = eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS;
-            m_createGameWindow.transform.FindChild("Room Name").GetComponent<InputField>().text = BrainCloudStats.Instance.m_previousGameName;
+            m_createGameWindow.transform.Find("Room Name").GetComponent<InputField>().text = BrainCloudStats.Instance.m_previousGameName;
         }
 
         void Update()

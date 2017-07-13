@@ -219,7 +219,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             if (m_playerPlane != null)
             {
-                Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, new Vector3(m_playerPlane.transform.FindChild("CameraPosition").position.x, m_playerPlane.transform.FindChild("CameraPosition").position.y, -110), 0.5f);
+                Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, new Vector3(m_playerPlane.transform.Find("CameraPosition").position.x, m_playerPlane.transform.Find("CameraPosition").position.y, -110), 0.5f);
                 Camera.main.transform.GetChild(0).position = m_playerPlane.transform.position;
                 m_playerPlane.GetComponent<AudioSource>().spatialBlend = 0;
             }

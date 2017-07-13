@@ -177,16 +177,16 @@ namespace BrainCloudUNETExample.Game
 
 
                 m_shipPrefab = (GameObject)Resources.Load(path);
-                graphic = (GameObject)Instantiate(m_shipPrefab, transform.FindChild("ShipGraphic").position, transform.FindChild("ShipGraphic").rotation);
-                graphic.transform.parent = transform.FindChild("ShipGraphic");
+                graphic = (GameObject)Instantiate(m_shipPrefab, transform.Find("ShipGraphic").position, transform.Find("ShipGraphic").rotation);
+                graphic.transform.parent = transform.Find("ShipGraphic");
 
                 if (aTeam == 1)
                 {
-                    graphic.transform.FindChild("Graphic").gameObject.layer = 16;
+                    graphic.transform.Find("Graphic").gameObject.layer = 16;
                 }
                 else
                 {
-                    graphic.transform.FindChild("Graphic").gameObject.layer = 17;
+                    graphic.transform.Find("Graphic").gameObject.layer = 17;
                 }
 
                 bool done = false;
@@ -195,7 +195,7 @@ namespace BrainCloudUNETExample.Game
                 {
 
                     path = "TargetPosition" + index;
-                    Transform target = graphic.transform.FindChild(path);
+                    Transform target = graphic.transform.Find(path);
 
                     if (target != null)
                     {
@@ -229,7 +229,7 @@ namespace BrainCloudUNETExample.Game
                 while (!done)
                 {
                     path = "TargetPosition" + index;
-                    Transform target = graphic.transform.FindChild(path);
+                    Transform target = graphic.transform.Find(path);
 
                     if (target != null)
                     {
@@ -292,16 +292,16 @@ namespace BrainCloudUNETExample.Game
 
 
             m_shipPrefab = (GameObject)Resources.Load(path);
-            graphic = (GameObject)Instantiate(m_shipPrefab, transform.FindChild("ShipGraphic").position, transform.FindChild("ShipGraphic").rotation);
-            graphic.transform.parent = transform.FindChild("ShipGraphic");
+            graphic = (GameObject)Instantiate(m_shipPrefab, transform.Find("ShipGraphic").position, transform.Find("ShipGraphic").rotation);
+            graphic.transform.parent = transform.Find("ShipGraphic");
 
             if (aTeam == 1)
             {
-                graphic.transform.FindChild("Graphic").gameObject.layer = 16;
+                graphic.transform.Find("Graphic").gameObject.layer = 16;
             }
             else
             {
-                graphic.transform.FindChild("Graphic").gameObject.layer = 17;
+                graphic.transform.Find("Graphic").gameObject.layer = 17;
             }
 
             bool done = false;
@@ -310,7 +310,7 @@ namespace BrainCloudUNETExample.Game
             {
 
                 path = "TargetPosition" + index;
-                Transform target = graphic.transform.FindChild(path);
+                Transform target = graphic.transform.Find(path);
 
                 if (target != null)
                 {
@@ -365,16 +365,16 @@ namespace BrainCloudUNETExample.Game
 
 
                 m_shipPrefab = (GameObject)Resources.Load(path);
-                graphic = (GameObject)Instantiate(m_shipPrefab, transform.FindChild("ShipGraphic").position, transform.FindChild("ShipGraphic").rotation);
-                graphic.transform.parent = transform.FindChild("ShipGraphic");
+                graphic = (GameObject)Instantiate(m_shipPrefab, transform.Find("ShipGraphic").position, transform.Find("ShipGraphic").rotation);
+                graphic.transform.parent = transform.Find("ShipGraphic");
 
                 if (aTeam == 1)
                 {
-                    graphic.transform.FindChild("Graphic").gameObject.layer = 16;
+                    graphic.transform.Find("Graphic").gameObject.layer = 16;
                 }
                 else
                 {
-                    graphic.transform.FindChild("Graphic").gameObject.layer = 17;
+                    graphic.transform.Find("Graphic").gameObject.layer = 17;
                 }
 
                 bool done = false;
@@ -383,7 +383,7 @@ namespace BrainCloudUNETExample.Game
                 {
 
                     path = "TargetPosition" + index;
-                    Transform target = graphic.transform.FindChild(path);
+                    Transform target = graphic.transform.Find(path);
 
                     if (target != null)
                     {
@@ -417,7 +417,7 @@ namespace BrainCloudUNETExample.Game
                 while (!done)
                 {
                     path = "TargetPosition" + index;
-                    Transform target = graphic.transform.FindChild(path);
+                    Transform target = graphic.transform.Find(path);
 
                     if (target != null)
                     {
@@ -480,16 +480,16 @@ namespace BrainCloudUNETExample.Game
 
 
             m_shipPrefab = (GameObject)Resources.Load(path);
-            graphic = (GameObject)Instantiate(m_shipPrefab, transform.FindChild("ShipGraphic").position, transform.FindChild("ShipGraphic").rotation);
-            graphic.transform.parent = transform.FindChild("ShipGraphic");
+            graphic = (GameObject)Instantiate(m_shipPrefab, transform.Find("ShipGraphic").position, transform.Find("ShipGraphic").rotation);
+            graphic.transform.parent = transform.Find("ShipGraphic");
 
             if (aTeam == 1)
             {
-                graphic.transform.FindChild("Graphic").gameObject.layer = 16;
+                graphic.transform.Find("Graphic").gameObject.layer = 16;
             }
             else
             {
-                graphic.transform.FindChild("Graphic").gameObject.layer = 17;
+                graphic.transform.Find("Graphic").gameObject.layer = 17;
             }
 
             bool done = false;
@@ -498,7 +498,7 @@ namespace BrainCloudUNETExample.Game
             {
 
                 path = "TargetPosition" + index;
-                Transform target = graphic.transform.FindChild(path);
+                Transform target = graphic.transform.Find(path);
 
                 if (target != null)
                 {

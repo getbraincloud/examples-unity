@@ -19,9 +19,10 @@ public class BrainCloudConnectScene : MonoBehaviour
 
 		BrainCloudWrapper.Initialize();
 
-		///////////////////////////////////////////////////////////////////
+        BrainCloudWrapper.GetInstance().SetAlwaysAllowProfileSwitch(true);
+        ///////////////////////////////////////////////////////////////////
 
-		m_username = PlayerPrefs.GetString("username");
+        m_username = PlayerPrefs.GetString("username");
 
         // Stores the password in plain text directly in the unity store.
         // This is obviously not secure but speeds up debugging/testing.

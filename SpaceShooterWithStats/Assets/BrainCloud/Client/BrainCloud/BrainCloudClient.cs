@@ -9,6 +9,7 @@ using BrainCloud.Common;
 
 #if !XAMARIN
 using BrainCloud.Entity;
+using System;
 #endif
 
 #if !(DOT_NET)
@@ -83,7 +84,7 @@ namespace BrainCloud
         private string s_defaultServerURL = "https://sharedprod.braincloudservers.com/dispatcherv2";
         private static BrainCloudClient s_instance;
 
-        private string _gameVersion = "";
+        private string _appVersion = "";
         private Platform _platform;
         private string _languageCode;
         private string _countryCode;
@@ -115,6 +116,7 @@ namespace BrainCloud
         private BrainCloudSocialLeaderboard _leaderboardService;
         private BrainCloudAsyncMatch _asyncMatchService;
         private BrainCloudTime _timeService;
+        private BrainCloudTournament _tournamentService;
         private BrainCloudAuthentication _authenticationService;
         private BrainCloudPushNotification _pushNotificationService;
         private BrainCloudPlayerStatisticsEvent _playerStatisticsEventService;
@@ -124,6 +126,7 @@ namespace BrainCloud
         private BrainCloudProfanity _profanityService;
         private BrainCloudFile _fileService;
         private BrainCloudGroup _groupService;
+        private BrainCloudMail _mailService;
 
         #endregion Private Data
 
@@ -183,6 +186,7 @@ namespace BrainCloud
             _leaderboardService = new BrainCloudSocialLeaderboard(this);
             _asyncMatchService = new BrainCloudAsyncMatch(this);
             _timeService = new BrainCloudTime(this);
+            _tournamentService = new BrainCloudTournament(this);
 
             _authenticationService = new BrainCloudAuthentication(this);
             _pushNotificationService = new BrainCloudPushNotification(this);
@@ -194,6 +198,7 @@ namespace BrainCloud
             _profanityService = new BrainCloudProfanity(this);
             _fileService = new BrainCloudFile(this);
             _groupService = new BrainCloudGroup(this);
+            _mailService = new BrainCloudMail(this);
         }
 
         //---------------------------------------------------------------
@@ -232,18 +237,31 @@ namespace BrainCloud
             get { return _comms != null ? _comms.SessionID : ""; }
         }
 
+        [Obsolete("This has been deprecated. Use appId instead - removal after September 1 2017")]
         public string GameId
         {
-            get { return _comms != null ? _comms.GameId : ""; }
+            get { return _comms != null ? _comms.AppId : ""; }
         }
 
+        public string AppId
+        {
+            get { return _comms != null ? _comms.AppId : ""; }
+        }
+
+        [Obsolete("This has been deprecated. Use AppVersion instead - removal after September 1 2017")]
         public string GameVersion
         {
-            get { return _gameVersion; }
+            get { return _appVersion; }
         }
+
+        public string AppVersion
+        {
+            get { return _appVersion; }
+        }
+
         public string BrainCloudClientVersion
         {
-            get { return Version.GetVersion(); }
+            get { return BrainCloud.Version.GetVersion(); }
         }
 
         public Platform ReleasePlatform
@@ -359,6 +377,11 @@ namespace BrainCloud
             get { return _leaderboardService; }
         }
 
+        public BrainCloudSocialLeaderboard LeaderboardService
+        {
+            get { return _leaderboardService; }
+        }
+
         public BrainCloudAsyncMatch AsyncMatchService
         {
             get { return _asyncMatchService; }
@@ -367,6 +390,11 @@ namespace BrainCloud
         public BrainCloudTime TimeService
         {
             get { return _timeService; }
+        }
+
+        public BrainCloudTournament TournamentService
+        {
+            get { return _tournamentService; }
         }
 
         public BrainCloudAuthentication AuthenticationService
@@ -412,6 +440,11 @@ namespace BrainCloud
         public BrainCloudGroup GroupService
         {
             get { return _groupService; }
+        }
+
+        public BrainCloudMail MailService
+        {
+            get { return _mailService; }
         }
 
         #endregion
@@ -515,6 +548,11 @@ namespace BrainCloud
             return _timeService;
         }
 
+        public BrainCloudTournament GetTournamentService()
+        {
+            return _tournamentService;
+        }
+
         public BrainCloudAuthentication GetAuthenticationService()
         {
             return _authenticationService;
@@ -591,25 +629,45 @@ namespace BrainCloud
         #endregion
 
         /// <summary>Method initializes the BrainCloudClient.</summary>
-        /// <param name="secretKey">The secret key for your game
-        /// <param name="gameId ">The game id</param>
-        /// <param name="gameVersion The game version</param>
+        /// <param name="secretKey">The secret key for your app
+        /// <param name="appId ">The app id</param>
+        /// <param name="appVersion The app version</param>
         /// <param name="cachedProfileId The profile Id</param>
         /// <param name="anonymousId The anonymous Id</param>
-        public void Initialize(string secretKey, string gameId, string gameVersion)
+        public void Initialize(string secretKey, string appId, string appVersion)
         {
-            Initialize(s_defaultServerURL, secretKey, gameId, gameVersion);
+            Initialize(s_defaultServerURL, secretKey, appId, appVersion);
         }
 
         /// <summary>Method initializes the BrainCloudClient.</summary>
         /// <param name="serverURL">The URL to the brainCloud server</param>
-        /// <param name="secretKey">The secret key for your game
-        /// <param name="gameId ">The game id</param>
-        /// <param name="gameVersion The game version</param>
-        /// <param name="cachedProfileId The profile Id</param>
-        /// <param name="anonymousId The anonymous Id</param>
-        public void Initialize(string serverURL, string secretKey, string gameId, string gameVersion)
+        /// <param name="secretKey">The secret key for your app
+        /// <param name="appId">The app id</param>
+        /// <param name="appVersion">The app version</param>
+        /// <param name="cachedProfileId">The profile Id</param>
+        /// <param name="anonymousId">The anonymous Id</param>
+        public void Initialize(string serverURL, string secretKey, string appId, string appVersion)
         {
+            string error = null;
+            if (string.IsNullOrEmpty(serverURL))
+                error = "serverURL was null or empty";
+            else if (string.IsNullOrEmpty(secretKey))
+                error = "secretKey was null or empty";
+            else if (string.IsNullOrEmpty(appId))
+                error = "appId was null or empty";
+            else if (string.IsNullOrEmpty(appVersion))
+                error = "appVerson was null or empty";
+
+            if (error != null)
+            {
+#if !(DOT_NET)
+                Debug.LogError("ERROR | Failed to initialize brainCloud - " + error);
+#elif !XAMARIN
+                Console.WriteLine("ERROR | Failed to initialize brainCloud - " + error);
+#endif
+                return;
+            }
+
             // TODO: what is our default c# platform?
             Platform platform = Platform.Windows;
 #if !(DOT_NET)
@@ -617,9 +675,9 @@ namespace BrainCloud
 #endif
 
             // set up braincloud which does the message handling
-            _comms.Initialize(serverURL, gameId, secretKey);
+            _comms.Initialize(serverURL, appId, secretKey);
 
-            _gameVersion = gameVersion;
+            _appVersion = appVersion;
             _platform = platform;
 
             //setup region/country code

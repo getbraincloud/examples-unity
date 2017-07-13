@@ -31,13 +31,6 @@ namespace BrainCloud.Internal
     internal sealed class BrainCloudComms
     {
         /// <summary>
-        /// The maximum number of messages in a bundle.
-        /// Note that this is somewhat arbitrary - using the size
-        /// of the packet would be a more appropriate measuring stick.
-        /// </summary>
-        private static int MAX_MESSAGES_BUNDLE = 50;
-
-        /// <summary>
         /// The id of _expectedIncomingPacketId when no packet expected
         /// </summary>
         private static int NO_PACKET_EXPECTED = -1;
@@ -99,6 +92,18 @@ namespace BrainCloud.Internal
         private TimeSpan _idleTimeout = TimeSpan.FromSeconds(5 * 60);
 
         /// <summary>
+        /// The maximum number of messages in a bundle.
+        /// This is set to a value from the server on authenticate
+        /// </summary>
+        private int _maxBundleMessages = 10;
+
+        /// <summary>
+        /// The maximum number of sequential errors before client lockout
+        /// This is set to a value from the server on authenticate
+        /// </summary>
+        private int _killSwitchThreshold = 11;
+
+        /// <summary>
         /// Debug value to introduce packet loss for testing retries etc.
         /// </summary>
         private double _debugPacketLossRate = 0;
@@ -132,6 +137,12 @@ namespace BrainCloud.Internal
         private int _cachedReasonCode;
         private string _cachedStatusMessage;
 
+        //For kill switch
+        private bool _killSwitchEngaged;
+        private int _killSwitchErrorCount;
+        private string _killSwitchService;
+        private string _killSwitchOperation;
+
         private bool _isAuthenticated = false;
         public bool Authenticated
         {
@@ -141,12 +152,26 @@ namespace BrainCloud.Internal
             }
         }
 
-        private string _gameId = null;
+		internal void setAuthenticated() {
+			_isAuthenticated = true;
+		}
+
+        private string _appId = null;
+
+        [Obsolete("This has been deprecated. Use AppId instead - removal after September 1 2017")]
         public string GameId
         {
             get
             {
-                return _gameId;
+                return _appId;
+            }
+        }
+
+        public string AppId
+        {
+            get
+            {
+                return _appId;
             }
         }
 
@@ -158,6 +183,9 @@ namespace BrainCloud.Internal
                 return _sessionID;
             }
         }
+		internal void setSessionId(String sessionId) {
+			_sessionID = sessionId;
+		}
 
         private string _serverURL = "";
         public string ServerURL
@@ -287,7 +315,7 @@ namespace BrainCloud.Internal
             _uploadURL = _serverURL.EndsWith(suffix) ? _serverURL.Substring(0, _serverURL.Length - suffix.Length) : _serverURL;
             _uploadURL += @"/uploader";
 
-            _gameId = gameId;
+            _appId = gameId;
             _secretKey = secretKey;
 
             _blockingQueue = false;
@@ -380,7 +408,7 @@ namespace BrainCloud.Internal
                 }
                 else if (status == RequestState.eWebRequestStatus.STATUS_DONE)
                 {
-                    ResetIdleTimer();
+                     ResetIdleTimer();
 
                     // note that active request is set to null if exception is to be thrown
                     HandleResponseBundle(GetWebRequestResponse(_activeRequest));
@@ -458,6 +486,8 @@ namespace BrainCloud.Internal
             RunFileUploadCallbacks();
         }
 
+        #region File Upload
+
         /// <summary>
         /// Checks the status of active file uploads
         /// </summary>
@@ -521,6 +551,8 @@ namespace BrainCloud.Internal
             BrainCloudClient.Get().Log("GetUploadProgress could not find upload ID " + uploadId);
             return null;
         }
+
+        #endregion
 
         /// <summary>
         /// Method fakes a json error from the server and sends
@@ -688,6 +720,12 @@ namespace BrainCloud.Internal
         {
             _brainCloudClientRef.Log("INCOMING: " + jsonData);
 
+            if(string.IsNullOrEmpty(jsonData))
+            {
+                _brainCloudClientRef.Log("ERROR - Incoming packet data was null or empty! This is probably a network issue.");
+                return;
+            }
+
             JsonResponseBundleV2 bundleObj = JsonReader.Deserialize<JsonResponseBundleV2>(jsonData);
             long receivedPacketId = (long)bundleObj.packetId;
             if (_expectedIncomingPacketId == NO_PACKET_EXPECTED || _expectedIncomingPacketId != receivedPacketId)
@@ -733,6 +771,8 @@ namespace BrainCloud.Internal
                 // its a success response
                 if (statusCode == 200)
                 {
+                    ResetKillSwitch();
+
                     Dictionary<string, object> responseData = null;
                     if (response[OperationParam.ServiceMessageData.Value] != null)
                     {
@@ -742,23 +782,17 @@ namespace BrainCloud.Internal
                         data = JsonWriter.Serialize(response);
 
                         // save the session ID
-                        try
+                        string sessionId = GetJsonString(responseData, OperationParam.ServiceMessageSessionId.Value, null);
+                        if (sessionId != null)
                         {
-                            if (GetJsonString(responseData, OperationParam.ServiceMessageSessionId.Value, null) != null)
-                            {
-                                _sessionID = (string)responseData[OperationParam.ServiceMessageSessionId.Value];
-                                _isAuthenticated = true;  // TODO confirm authentication
-                            }
-
-                            // save the profile ID
-                            if (GetJsonString(responseData, OperationParam.ServiceMessageProfileId.Value, null) != null)
-                            {
-                                _brainCloudClientRef.AuthenticationService.ProfileId = (string)responseData[OperationParam.ServiceMessageProfileId.Value];
-                            }
+                            _sessionID = sessionId;
+                            _isAuthenticated = true;
                         }
-                        catch (Exception e)
+
+                        string profileId = GetJsonString(responseData, OperationParam.ProfileId.Value, null);
+                        if (sessionId != null)
                         {
-                            _brainCloudClientRef.Log("SessionId or ProfileId do not exist " + e.ToString());
+                            _brainCloudClientRef.AuthenticationService.ProfileId = profileId;
                         }
                     }
 
@@ -876,7 +910,7 @@ namespace BrainCloud.Internal
                         }
                     }
                 }
-                else
+                else //if non-200
                 {
                     object reasonCodeObj = null, statusMessageObj = null;
                     int reasonCode = 0;
@@ -944,8 +978,22 @@ namespace BrainCloud.Internal
 
                     if (_globalErrorCallback != null)
                     {
-                        _globalErrorCallback(statusCode, reasonCode, errorJson, sc != null && sc.GetCallback() != null ? sc.GetCallback().m_cbObject : null);
+                        object cbObject = null;
+                        if (sc != null && sc.GetCallback() != null)
+                        {
+                            cbObject = sc.GetCallback().m_cbObject;
+                            // if this is the internal BrainCloudWrapper callback object return the user-supplied
+                            // callback object instead
+                            if (cbObject != null && cbObject is WrapperAuthCallbackObject)
+                            {
+                                cbObject = ((WrapperAuthCallbackObject)cbObject)._cbObject;
+                            }
+                        }
+
+                        _globalErrorCallback(statusCode, reasonCode, errorJson, cbObject);
                     }
+
+                    UpdateKillSwitch(sc.Service, sc.Operation, statusCode);
                 }
             }
 
@@ -975,6 +1023,32 @@ namespace BrainCloud.Internal
             }
         }
 
+        private void UpdateKillSwitch(string service, string operation, int statusCode)
+        {
+            if (statusCode == StatusCodes.CLIENT_NETWORK_ERROR) return;
+
+            if (_killSwitchService == null)
+            {
+                _killSwitchService = service;
+                _killSwitchOperation = operation;
+                _killSwitchErrorCount++;
+            }
+            else if (service == _killSwitchService && operation == _killSwitchOperation)
+                _killSwitchErrorCount++;
+
+            if (!_killSwitchEngaged && _killSwitchErrorCount >= _killSwitchThreshold)
+            {
+                _killSwitchEngaged = true;
+                _brainCloudClientRef.Log("Client disabled due to repeated errors from a single API call: " + service + " | " + operation);
+            }
+        }
+
+        private void ResetKillSwitch()
+        {
+            _killSwitchErrorCount = 0;
+            _killSwitchService = null;
+            _killSwitchOperation = null;
+        }
 
         /// <summary>
         /// Creates the request state object and sends the message bundle
@@ -994,10 +1068,32 @@ namespace BrainCloud.Internal
                 {
                     if (_serviceCallsWaiting.Count > 0)
                     {
+
                         int numMessagesWaiting = _serviceCallsWaiting.Count;
-                        if (numMessagesWaiting > MAX_MESSAGES_BUNDLE)
+
+                        //put auth first
+                        for (int i = 0; i < numMessagesWaiting; ++i)
                         {
-                            numMessagesWaiting = MAX_MESSAGES_BUNDLE;
+                            if (_serviceCallsWaiting[i].GetType() == typeof(EndOfBundleMarker))
+                                break;
+
+                            if (_serviceCallsWaiting[i].GetOperation() == ServiceOperation.Authenticate.Value)
+                            {
+                                if (i != 0)
+                                {
+                                    var call = _serviceCallsWaiting[i];
+                                    _serviceCallsWaiting.RemoveAt(i);
+                                    _serviceCallsWaiting.Insert(0, call);
+                                }
+
+                                numMessagesWaiting = 1;
+                                break;
+                            }
+                        }
+
+                        if (numMessagesWaiting > _maxBundleMessages)
+                        {
+                            numMessagesWaiting = _maxBundleMessages;
                         }
 
                         // check for end of bundle markers
@@ -1098,11 +1194,20 @@ namespace BrainCloud.Internal
                     requestState.MessageList = messageList;
                     ++_packetId;
 
-                    if (_isAuthenticated || isAuth)
-                        InternalSendMessage(requestState);
+                    if (!_killSwitchEngaged)
+                    {
+                        if (_isAuthenticated || isAuth)
+                            InternalSendMessage(requestState);
+                        else
+                        {
+                            FakeErrorResponse(requestState, _cachedStatusCode, _cachedReasonCode, _cachedStatusMessage);
+                            requestState = null;
+                        }
+                    }
                     else
                     {
-                        HandleNoAuth(requestState);
+                        FakeErrorResponse(requestState, StatusCodes.CLIENT_NETWORK_ERROR, ReasonCodes.CLIENT_DISABLED,
+                            "Client has been disabled due to repeated errors from a single API call");
                         requestState = null;
                     }
                 }
@@ -1114,14 +1219,14 @@ namespace BrainCloud.Internal
         /// <summary>
         /// Creates a fake response to stop packets being sent to the server without a valid session.
         /// </summary>
-        private void HandleNoAuth(RequestState requestState)
+        private void FakeErrorResponse(RequestState requestState, int statusCode, int reasonCode, string statusMessage)
         {
             Dictionary<string, object> packet = new Dictionary<string, object>();
             packet[OperationParam.ServiceMessagePacketId.Value] = requestState.PacketId;
             packet[OperationParam.ServiceMessageSessionId.Value] = _sessionID;
-            if (_gameId != null && _gameId.Length > 0)
+            if (_appId != null && _appId.Length > 0)
             {
-                packet[OperationParam.ServiceMessageGameId.Value] = _gameId;
+                packet[OperationParam.ServiceMessageGameId.Value] = _appId;
             }
             packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
 
@@ -1133,7 +1238,7 @@ namespace BrainCloud.Internal
 
             ResetIdleTimer();
 
-            TriggerCommsError(_cachedStatusCode, _cachedReasonCode, _cachedStatusMessage);
+            TriggerCommsError(statusCode, reasonCode, statusMessage);
             _activeRequest = null;
         }
 
@@ -1149,9 +1254,9 @@ namespace BrainCloud.Internal
             Dictionary<string, object> packet = new Dictionary<string, object>();
             packet[OperationParam.ServiceMessagePacketId.Value] = requestState.PacketId;
             packet[OperationParam.ServiceMessageSessionId.Value] = _sessionID;
-            if (_gameId != null && _gameId.Length > 0)
+            if (_appId != null && _appId.Length > 0)
             {
-                packet[OperationParam.ServiceMessageGameId.Value] = _gameId;
+                packet[OperationParam.ServiceMessageGameId.Value] = _appId;
             }
             packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
 
@@ -1240,7 +1345,7 @@ namespace BrainCloud.Internal
             }
 
 #if !(DOT_NET)
-            if (_activeRequest.WebRequest.error != null)
+			if (!string.IsNullOrEmpty(_activeRequest.WebRequest.error))
             {
                 status = RequestState.eWebRequestStatus.STATUS_ERROR;
             }
@@ -1264,7 +1369,7 @@ namespace BrainCloud.Internal
         {
             string response = "";
 #if !(DOT_NET)
-            if (_activeRequest.WebRequest.error != null)
+			if (!string.IsNullOrEmpty( _activeRequest.WebRequest.error))
             {
                 response = _activeRequest.WebRequest.error;
             }
@@ -1466,6 +1571,14 @@ namespace BrainCloud.Internal
 
             _idleTimeout = TimeSpan.FromSeconds(idleTimeout);
 
+            object bundleMsgs = null;
+            jsonData.TryGetValue("maxBundleMsgs", out bundleMsgs);
+            if (bundleMsgs != null) _maxBundleMessages = (int)bundleMsgs;
+
+            object killCount = null;
+            jsonData.TryGetValue("maxKillCount", out killCount);
+            if (killCount != null) _killSwitchThreshold = (int)killCount;
+
             ResetErrorCache();
             _isAuthenticated = true;
         }
@@ -1473,32 +1586,24 @@ namespace BrainCloud.Internal
 
         private static string GetJsonString(Dictionary<string, object> jsonData, string key, string defaultReturn)
         {
-            try
-            {
-                return (string)jsonData[key];
-            }
-            catch (KeyNotFoundException)
-            {
-                return defaultReturn;
-            }
+            object retVal = null;
+            jsonData.TryGetValue(key, out retVal);
+            return retVal != null ? retVal as string : defaultReturn;
         }
 
 
         private static long GetJsonLong(Dictionary<string, object> jsonData, string key, long defaultReturn)
         {
-            try
+            object outObj = null;
+            if (jsonData.TryGetValue(key, out outObj))
             {
-                object value = jsonData[key];
-                if (value is System.Int64)
-                    return (long)value;
-                if (value is System.Int32)
-                    return (int)value;
-                return defaultReturn;
+                if (outObj is long)
+                    return (long)outObj;
+                if (outObj is int)
+                    return (int)outObj;
             }
-            catch (KeyNotFoundException)
-            {
-                return defaultReturn;
-            }
+
+            return defaultReturn;
         }
 
         /// <summary>

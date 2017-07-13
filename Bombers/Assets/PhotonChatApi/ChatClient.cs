@@ -23,7 +23,10 @@ namespace ExitGames.Client.Photon.Chat
     /// <summary>Central class of the Photon Chat API to connect, handle channels and messages.</summary>
     /// <remarks>
     /// This class must be instantiated with a IChatClientListener instance to get the callbacks.
-    /// Integrate it into your game loop by calling Service regularly.
+    /// Integrate it into your game loop by calling Service regularly. If the target platform supports Threads/Tasks,
+    /// set UseBackgroundWorkerForSending = true, to let the ChatClient keep the connection by sending from
+    /// an independent thread.
+    ///
     /// Call Connect with an AppId that is setup as Photon Chat application. Note: Connect covers multiple
     /// messages between this client and the servers. A short workflow will connect you to a chat server.
     ///
@@ -90,7 +93,10 @@ namespace ExitGames.Client.Photon.Chat
         /// It's not a nickname and we assume users with the same userID are the same person.</remarks>
         public string UserId
         {
-            get { return (this.AuthValues != null) ? this.AuthValues.UserId : null; }
+            get
+            {
+                return (this.AuthValues != null) ? this.AuthValues.UserId : null;
+            }
             private set
             {
                 if (this.AuthValues == null)
@@ -120,12 +126,24 @@ namespace ExitGames.Client.Photon.Chat
 
         private readonly IChatClientListener listener = null;
         public ChatPeer chatPeer = null;
-
+        private const string ChatAppName = "chat";
         private bool didAuthenticate;
+
         private int msDeltaForServiceCalls = 50;
         private int msTimestampOfLastServiceCall;
 
-        private const string ChatAppName = "chat";
+        /// <summary>Defines if a background thread will call SendOutgoingCommands, while your code calls Service to dispatch received messages.</summary>
+        /// <remarks>
+        /// The benefit of using a background thread to call SendOutgoingCommands is this:
+        ///
+        /// Even if your game logic is being paused, the background thread will keep the connection to the server up.
+        /// On a lower level, acknowledgements and pings will prevent a server-side timeout while (e.g.) Unity loads assets.
+        ///
+        /// Your game logic still has to call Service regularly, or else incoming messages are not dispatched.
+        /// As this typicalls triggers UI updates, it's easier to call Service from the main/UI thread.
+        /// </remarks>
+        public bool UseBackgroundWorkerForSending { get; set; }
+
 
         public ChatClient(IChatClientListener listener, ConnectionProtocol protocol = ConnectionProtocol.Udp)
         {
@@ -155,11 +173,11 @@ namespace ExitGames.Client.Photon.Chat
             if (authValues != null)
             {
                 this.AuthValues = authValues;
-                if (this.AuthValues.UserId == null || this.AuthValues.UserId == "")
+                if (string.IsNullOrEmpty(this.AuthValues.UserId))
                 {
                     if (this.DebugOut >= DebugLevel.ERROR)
                     {
-                        this.listener.DebugReturn(DebugLevel.ERROR, "Connect failed: no UserId specified in authentication values");
+                        this.listener.DebugReturn(DebugLevel.ERROR, "Connect failed: no UserId specified in authentication values.");
                     }
                     return false;
                 }
@@ -175,7 +193,6 @@ namespace ExitGames.Client.Photon.Chat
             this.AppId = appId;
             this.AppVersion = appVersion;
             this.didAuthenticate = false;
-            this.msDeltaForServiceCalls = 100;
             this.chatPeer.QuickResendAttempts = 2;
             this.chatPeer.SentCountAllowance = 7;
 
@@ -191,6 +208,12 @@ namespace ExitGames.Client.Photon.Chat
             {
                 this.State = ChatState.ConnectingToNameServer;
             }
+
+            if (this.UseBackgroundWorkerForSending)
+            {
+                SupportClass.StartBackgroundCalls(this.SendOutgoingInBackground, this.msDeltaForServiceCalls, "ChatClient Service Thread");
+            }
+
             return isConnecting;
         }
 
@@ -203,13 +226,49 @@ namespace ExitGames.Client.Photon.Chat
         /// </remarks>
         public void Service()
         {
-            if (this.HasPeer && (Environment.TickCount - this.msTimestampOfLastServiceCall > this.msDeltaForServiceCalls || this.msTimestampOfLastServiceCall == 0))
+            // Dispatch until every already-received message got dispatched
+            while (this.HasPeer && this.chatPeer.DispatchIncomingCommands())
             {
-                this.msTimestampOfLastServiceCall = Environment.TickCount;
-                this.chatPeer.Service(); //TODO: make sure to call service regularly. in best case it could be integrated into PhotonHandler.FallbackSendAckThread()!
+            }
+
+            // if there is no background thread for sending, Service() will do that as well, in intervals
+            if (!this.UseBackgroundWorkerForSending)
+            {
+                if (Environment.TickCount - this.msTimestampOfLastServiceCall > this.msDeltaForServiceCalls || this.msTimestampOfLastServiceCall == 0)
+                {
+                    this.msTimestampOfLastServiceCall = Environment.TickCount;
+
+                    while (this.HasPeer && this.chatPeer.SendOutgoingCommands())
+                    {
+                    }
+                }
             }
         }
 
+        /// <summary>
+        /// Called by a separate thread, this sends outgoing commands of this peer, as long as it's connected.
+        /// </summary>
+        /// <returns>True as long as the client is not disconnected.</returns>
+        private bool SendOutgoingInBackground()
+        {
+            while (this.HasPeer && this.chatPeer.SendOutgoingCommands())
+            {
+            }
+
+            return this.State != ChatState.Disconnected;
+        }
+
+
+        [Obsolete("Better use UseBackgroundWorkerForSending and Service().")]
+        public void SendAcksOnly()
+        {
+            if (this.HasPeer) this.chatPeer.SendAcksOnly();
+        }
+
+
+        /// <summary>
+        /// Disconnects from the Chat Server by sending a "disconnect command", which prevents a timeout server-side.
+        /// </summary>
         public void Disconnect()
         {
             if (this.HasPeer && this.chatPeer.PeerState != PeerStateValue.Disconnected)
@@ -218,6 +277,9 @@ namespace ExitGames.Client.Photon.Chat
             }
         }
 
+        /// <summary>
+        /// Locally shuts down the connection to the Chat Server. This resets states locally but the server will have to timeout this peer.
+        /// </summary>
         public void StopThread()
         {
             if (this.HasPeer)
@@ -312,18 +374,19 @@ namespace ExitGames.Client.Photon.Chat
         /// </remarks>
         /// <param name="channelName">Name of the channel to publish to.</param>
         /// <param name="message">Your message (string or any serializable data).</param>
+        /// <param name="forwardAsWebhook">Optionally, public messages can be forwarded as webhooks. Configure webhooks for your Chat app to use this.</param>
         /// <returns>False if the client is not yet ready to send messages.</returns>
-        public bool PublishMessage(string channelName, object message)
+        public bool PublishMessage(string channelName, object message, bool forwardAsWebhook = false)
         {
-            return this.publishMessage(channelName, message, true);
+            return this.publishMessage(channelName, message, true, forwardAsWebhook);
         }
 
-        internal bool PublishMessageUnreliable(string channelName, object message)
+        internal bool PublishMessageUnreliable(string channelName, object message, bool forwardAsWebhook = false)
         {
-            return this.publishMessage(channelName, message, false);
+            return this.publishMessage(channelName, message, false, forwardAsWebhook);
         }
 
-        private bool publishMessage(string channelName, object message, bool reliable)
+        private bool publishMessage(string channelName, object message, bool reliable, bool forwardAsWebhook = false)
         {
             if (!this.CanChat)
             {
@@ -348,7 +411,10 @@ namespace ExitGames.Client.Photon.Chat
                     { (byte)ChatParameterCode.Channel, channelName },
                     { (byte)ChatParameterCode.Message, message }
                 };
-
+            if (forwardAsWebhook)
+            {
+                parameters.Add(ChatParameterCode.WebFlags, (byte)0x1);
+            }
             return this.chatPeer.OpCustom((byte)ChatOperationCode.Publish, parameters, reliable);
         }
 
@@ -357,10 +423,11 @@ namespace ExitGames.Client.Photon.Chat
         /// </summary>
         /// <param name="target">Username to send this message to.</param>
         /// <param name="message">The message you want to send. Can be a simple string or anything serializable.</param>
+        /// <param name="forwardAsWebhook">Optionally, private messages can be forwarded as webhooks. Configure webhooks for your Chat app to use this.</param>
         /// <returns>True if this clients can send the message to the server.</returns>
-        public bool SendPrivateMessage(string target, object message)
+        public bool SendPrivateMessage(string target, object message, bool forwardAsWebhook = false)
         {
-            return this.SendPrivateMessage(target, message, false);
+            return this.SendPrivateMessage(target, message, false, forwardAsWebhook);
         }
 
         /// <summary>
@@ -369,18 +436,19 @@ namespace ExitGames.Client.Photon.Chat
         /// <param name="target">Username to send this message to.</param>
         /// <param name="message">The message you want to send. Can be a simple string or anything serializable.</param>
         /// <param name="encrypt">Optionally, private messages can be encrypted. Encryption is not end-to-end as the server decrypts the message.</param>
+        /// <param name="forwardAsWebhook">Optionally, private messages can be forwarded as webhooks. Configure webhooks for your Chat app to use this.</param>
         /// <returns>True if this clients can send the message to the server.</returns>
-        public bool SendPrivateMessage(string target, object message, bool encrypt)
+        public bool SendPrivateMessage(string target, object message, bool encrypt, bool forwardAsWebhook)
         {
-            return this.sendPrivateMessage(target, message, encrypt, true);
+            return this.sendPrivateMessage(target, message, encrypt, true, forwardAsWebhook);
         }
 
-        internal bool SendPrivateMessageUnreliable(string target, object message, bool encrypt)
+        internal bool SendPrivateMessageUnreliable(string target, object message, bool encrypt, bool forwardAsWebhook = false)
         {
-            return this.sendPrivateMessage(target, message, encrypt, false);
+            return this.sendPrivateMessage(target, message, encrypt, false, forwardAsWebhook);
         }
 
-        private bool sendPrivateMessage(string target, object message, bool encrypt, bool reliable)
+        private bool sendPrivateMessage(string target, object message, bool encrypt, bool reliable, bool forwardAsWebhook = false)
         {
             if (!this.CanChat)
             {
@@ -405,9 +473,11 @@ namespace ExitGames.Client.Photon.Chat
                     { ChatParameterCode.UserId, target },
                     { ChatParameterCode.Message, message }
                 };
-
-            bool sent = this.chatPeer.OpCustom((byte)ChatOperationCode.SendPrivate, parameters, reliable, 0, encrypt);
-            return sent;
+            if (forwardAsWebhook)
+            {
+                parameters.Add(ChatParameterCode.WebFlags, (byte)0x1);
+            }
+            return this.chatPeer.OpCustom((byte)ChatOperationCode.SendPrivate, parameters, reliable, 0, encrypt);
         }
 
         /// <summary>Sets the user's status (pre-defined or custom) and an optional message.</summary>
@@ -667,11 +737,6 @@ namespace ExitGames.Client.Photon.Chat
 
             found = this.PrivateChannels.TryGetValue(channelName, out channel);
             return found;
-        }
-
-        public void SendAcksOnly()
-        {
-            if (this.chatPeer != null) this.chatPeer.SendAcksOnly();
         }
 
         /// <summary>
@@ -958,8 +1023,6 @@ namespace ExitGames.Client.Photon.Chat
                 }
                 else if (this.State == ChatState.ConnectingToFrontEnd)
                 {
-                    this.msDeltaForServiceCalls = this.msDeltaForServiceCalls * 4; // when we arrived on chat server: limit Service calls some more
-
                     this.State = ChatState.ConnectedToFrontEnd;
                     this.listener.OnChatStateChange(this.State);
                     this.listener.OnConnected();
