@@ -94,6 +94,7 @@ public class MainPage : MonoBehaviour
 
         GUILayout.EndArea();
     }
+	    GUI.enabled = true;
 
 
 }
