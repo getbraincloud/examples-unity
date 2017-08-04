@@ -12,7 +12,6 @@ public class MainPage : MonoBehaviour
 
     public LoginValuesSection m_loginValueSection = new LoginValuesSection();
 
-
     public WrapperInformationSection m_wrapperInformationSection = new WrapperInformationSection();
     public WrapperIdValuesSection m_wrapperIdValuesSection = new WrapperIdValuesSection();
     public WrapperLoginSection m_wrapperLoginSection = new WrapperLoginSection();
@@ -39,18 +38,13 @@ public class MainPage : MonoBehaviour
         BrainCloudWrapper.Initialize();
     }
 
-	void OnDestroy() {
-		
-	}
-
+	private Vector2 scrollPosition = Vector2.zero;
     void OnGUI()
     {
-        GUILayout.BeginArea(SIZE.FullScreen());
+        
+	    scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.MinWidth(SIZE.FullScreen().width));
 
         GUI.enabled = !ErrorHandlingApp.getInstance().hasDialog();
-
-        GUILayout.BeginArea(SIZE.Page());
-
 
 		BrainCloudWrapper.GetBC().RegisterGlobalErrorCallback (failureCallBack);
 
@@ -89,12 +83,11 @@ public class MainPage : MonoBehaviour
         m_mergeIdentitySection.Display();
         m_screenNameSection.Display();
         GUILayout.EndVertical();
-
-        GUILayout.EndArea();
-
-        GUILayout.EndArea();
-    }
+	    
+	    GUILayout.EndScrollView();
+	    
 	    GUI.enabled = true;
+	 }
 
 
 }
