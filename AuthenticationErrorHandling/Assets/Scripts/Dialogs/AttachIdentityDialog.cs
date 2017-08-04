@@ -115,6 +115,7 @@ public class AttachIdentityDialog : Dialog
             }
 
             case ReasonCodes.MERGE_PROFILES:
+            case ReasonCodes.SWITCHING_PROFILES:
             {
                 //User cannot attach an identity that is already in use by another user
                 // decide how this will be handled, such as prompting the user to merge the
