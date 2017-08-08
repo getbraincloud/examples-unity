@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using BrainCloud.Common;
 using Firebase;
 using Firebase.Messaging;
@@ -151,10 +152,16 @@ public
             GUILayout.Label("Token: ", GUILayout.Width(Screen.width * 0.20f));
             GUILayout.TextField(firebaseToken, GUILayout.Width(inputWidth));
             GUILayout.EndHorizontal();
-            
+
             if (!BrainCloudWrapper.GetBC().IsAuthenticated())
             {
-                if (GUILayout.Button("Authenticate"))
+                if (!String.IsNullOrEmpty(BrainCloudWrapper.GetInstance().GetStoredAnonymousId()) ||
+                    !String.IsNullOrEmpty(BrainCloudWrapper.GetInstance().GetStoredProfileId())) {
+                    BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
+                    BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+                }
+
+            if (GUILayout.Button("Authenticate"))
                     BrainCloudWrapper.GetInstance().AuthenticateAnonymous(
                         (response, cbObject) =>
                         {
