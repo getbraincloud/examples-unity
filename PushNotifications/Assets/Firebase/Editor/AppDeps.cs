@@ -54,7 +54,7 @@ public class FirebaseAppDeps : AssetPostprocessor
             new object[] {
                 "com.google.android.gms",
                 "play-services-base",
-                "11.0.0"
+                "11.0.4"
             },
             namedArgs: new Dictionary<string, object>() {
                 { "packageIds",
@@ -71,7 +71,7 @@ public class FirebaseAppDeps : AssetPostprocessor
             new object[] {
                 "com.google.firebase",
                 "firebase-common",
-                "11.0.0"
+                "11.0.4"
             },
             namedArgs: new Dictionary<string, object>() {
                 { "packageIds",
@@ -89,7 +89,7 @@ public class FirebaseAppDeps : AssetPostprocessor
             new object[] {
                 "com.google.firebase",
                 "firebase-core",
-                "11.0.0"
+                "11.0.4"
             },
             namedArgs: new Dictionary<string, object>() {
                 { "packageIds",
@@ -107,7 +107,7 @@ public class FirebaseAppDeps : AssetPostprocessor
             new object[] {
                 "com.google.firebase",
                 "firebase-app-unity",
-                "4.0.2"
+                "4.0.3"
             },
             namedArgs: new Dictionary<string, object>() {
                 { "packageIds",
@@ -129,7 +129,7 @@ public class FirebaseAppDeps : AssetPostprocessor
             iosResolver, "AddPod",
             new object[] { "Firebase/Core" }, 
             new Dictionary<string, object>() { 
-                { "version", "4.0.2" },
+                { "version", "4.0.4" },
                 { "minTargetSdk", null },
                 { "sources", null }
             });

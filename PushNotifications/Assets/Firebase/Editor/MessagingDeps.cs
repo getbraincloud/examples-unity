@@ -54,7 +54,7 @@ public class FirebaseMessagingDeps : AssetPostprocessor
             new object[] {
                 "com.google.firebase",
                 "firebase-messaging",
-                "11.0.0"
+                "11.0.4"
             },
             namedArgs: new Dictionary<string, object>() {
                 { "packageIds",
@@ -72,7 +72,7 @@ public class FirebaseMessagingDeps : AssetPostprocessor
             new object[] {
                 "com.google.firebase",
                 "firebase-core",
-                "11.0.0"
+                "11.0.4"
             },
             namedArgs: new Dictionary<string, object>() {
                 { "packageIds",
@@ -90,7 +90,7 @@ public class FirebaseMessagingDeps : AssetPostprocessor
             new object[] {
                 "com.google.firebase",
                 "firebase-messaging-unity",
-                "4.0.2"
+                "4.0.3"
             },
             namedArgs: new Dictionary<string, object>() {
                 { "packageIds",
@@ -112,7 +112,7 @@ public class FirebaseMessagingDeps : AssetPostprocessor
             iosResolver, "AddPod",
             new object[] { "Firebase/Messaging" }, 
             new Dictionary<string, object>() { 
-                { "version", "4.0.2" },
+                { "version", "4.0.4" },
                 { "minTargetSdk", null },
                 { "sources", null }
             });
