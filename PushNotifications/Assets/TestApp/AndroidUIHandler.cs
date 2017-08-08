@@ -20,8 +20,8 @@ using UnityEngine;
 
 
 //Note - This example is modified and based on the code found here: https://github.com/firebase/quickstart-unity 
-//Also, be sure to add your google-services.json file, App Id, and App Secret to get this demo to work
-// 
+//Be sure to add your google-services.json file, App Id, and App Secret to get this demo to work
+//You will also need to import the Firebase Unity SDK https://firebase.google.com/docs/unity/setup 
 
 
 // Handler for UI buttons on the scene.  Also performs some
