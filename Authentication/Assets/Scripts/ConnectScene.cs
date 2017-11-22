@@ -44,11 +44,7 @@ public class ConnectScene : MonoBehaviour
         BrainCloudWrapper.Initialize();
         m_AccessTokenResponse = new Twitter.AccessTokenResponse();
     }
-    
-    void Update()
-    {
-    }
-
+   
     void OnGUI()
     {
         float tw = Screen.width / 14;
@@ -65,7 +61,7 @@ public class ConnectScene : MonoBehaviour
 
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        m_selectedAuth = GUILayout.SelectionGrid(m_selectedAuth, m_authTypes, m_authTypes.Length);
+        m_selectedAuth = GUILayout.SelectionGrid(m_selectedAuth, m_authTypes, 3);
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
         
@@ -181,7 +177,9 @@ public class ConnectScene : MonoBehaviour
             
             if (GUILayout.Button("Google Signin", GUILayout.ExpandWidth(false)))
             {
+                #if UNITY_ANDROID
                 m_authStatus += "\n\nInfo: If the authentication popup appears but nothing occurs after, it probably means the app isn't fully set up. Please follow the instruction here:\nhttp://getbraincloud.com/apidocs/portal-usage/authentication-google/ \n\n";
+                
                 
                 PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
                     .RequestIdToken()
@@ -203,6 +201,13 @@ public class ConnectScene : MonoBehaviour
                         m_authStatus += "\nGoogle Auth Failed. See documentation: https://github.com/playgameservices/play-games-plugin-for-unity\n\n";
                     }
                 });
+    
+                #else
+                
+                m_authStatus += "\n\nGoogle Login will only work on an Android Device. Please build to a test device\n\n";
+                
+                
+                #endif
             }
 
 
