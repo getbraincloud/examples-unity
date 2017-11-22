@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using LitJson;
+using UnityEngine.SceneManagement;
 
 public class ScreenIdentity : BCScreen {
 	
@@ -174,6 +175,6 @@ public class ScreenIdentity : BCScreen {
 
 	private void Logout_Success(string json, object o)
 	{
-		Application.LoadLevel("Connect");
+	    SceneManager.LoadScene("Connect");
 	}
 }

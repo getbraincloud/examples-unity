@@ -53,7 +53,7 @@ public class ScreenEntityCustomClass : BCScreen
     {
         BrainCloudWrapper.GetBC().EntityFactory.RegisterEntityClass<Player>(Player.ENTITY_TYPE);
 
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(ReadPlayerStateSuccess, Failure_Callback);
+        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
 
     }

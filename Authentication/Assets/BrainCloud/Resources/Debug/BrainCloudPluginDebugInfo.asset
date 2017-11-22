@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18fbebac9e48cae4cb55d735591d63e4, type: 3}
+  m_Name: BrainCloudPluginDebugInfo
+  m_EditorClassIdentifier: 
+  DebugInformation:
+    ProfileId: 737f7a7a-437c-4395-8c58-4a4f10d3d533
+    LastSentRequest: "playerState READ \nnull"
+    LastResponse: "OnSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"abTestingId\":
+      25,\r\n            \"lastLogin\": 1511383835973,\r\n            \"server_time\":
+      1511383836217,\r\n            \"refundCount\": 0,\r\n            \"timeZoneOffset\":
+      -5,\r\n            \"experiencePoints\": 0,\r\n            \"createdAt\": 1511383835971,\r\n
+      \           \"parentProfileId\": null,\r\n            \"emailAddress\": null,\r\n
+      \           \"experienceLevel\": 0,\r\n            \"countryCode\": null,\r\n
+      \           \"vcClaimed\": 0,\r\n            \"currency\": \r\n                {\r\n
+      \                   \"gold\": \r\n                        {\r\n                            \"consumed\":
+      0,\r\n                            \"balance\": 1000,\r\n                            \"purchased\":
+      0,\r\n                            \"awarded\": 1000\r\n                        },\r\n
+      \                   \"gems\": \r\n                        {\r\n                            \"consumed\":
+      0,\r\n                            \"balance\": 10,\r\n                            \"purchased\":
+      0,\r\n                            \"awarded\": 10\r\n                        }\r\n
+      \               },\r\n            \"id\": \"737f7a7a-437c-4395-8c58-4a4f10d3d533\",\r\n
+      \           \"amountSpent\": 0,\r\n            \"previousLogin\": null,\r\n
+      \           \"playerName\": \"\",\r\n            \"pictureUrl\": null,\r\n            \"incoming_events\":
+      \r\n                [],\r\n            \"languageCode\": \"en\",\r\n            \"vcPurchased\":
+      0,\r\n            \"isTester\": false,\r\n            \"loginCount\": 1,\r\n
+      \           \"xpCapped\": false,\r\n            \"profileId\": \"737f7a7a-437c-4395-8c58-4a4f10d3d533\",\r\n
+      \           \"sent_events\": \r\n                [],\r\n            \"statistics\":
+      \r\n                {\r\n                    \"pantelons\": 3,\r\n                    \"iron\":
+      0,\r\n                    \"wood\": 50,\r\n                    \"minions\":
+      0\r\n                }\r\n        },\r\n    \"status\": 200\r\n}"
+    FullLog: 'RESPONSE - 11/22/2017 3:50:34 PM
+
+      {"packetId":1,"responses":[{"data":{"abTestingId":25,"lastLogin":1511383835973,"server_time":1511383836217,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1511383835971,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10}},"id":"737f7a7a-437c-4395-8c58-4a4f10d3d533","amountSpent":0,"previousLogin":null,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":1,"xpCapped":false,"profileId":"737f7a7a-437c-4395-8c58-4a4f10d3d533","sent_events":[],"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}]}
+
+
+      REQUEST - 11/22/2017 3:50:34 PM
+
+      {"packetId":1,"sessionId":"m4j1plfcglm1f2jdil3g4vkctm","gameId":"10068","messages":[{"service":"playerState","operation":"READ","data":null}]}
+
+
+      RESPONSE - 11/22/2017 3:50:34 PM
+
+      {"packetId":0,"responses":[{"data":{"abTestingId":25,"lastLogin":1511383835973,"server_time":1511383836001,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1511383835971,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10}},"id":"737f7a7a-437c-4395-8c58-4a4f10d3d533","amountSpent":0,"previousLogin":null,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"m4j1plfcglm1f2jdil3g4vkctm","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":1,"xpCapped":false,"profileId":"737f7a7a-437c-4395-8c58-4a4f10d3d533","newUser":"true","playerSessionExpiry":240,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{"milestones":[{"questId":null,"milestoneId":"milestone02","rewards":{"currency":{"gold":1000}}},{"questId":null,"milestoneId":"milestone01","rewards":{"currency":{"gems":10}}}]},"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10}},"rewards":{"milestonesAchieved":["milestone02","milestone01"],"currency":{"gold":1000,"gems":10}}},"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}]}
+
+
+      REQUEST - 11/22/2017 3:50:34 PM
+
+      {"packetId":0,"sessionId":null,"gameId":"10068","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"d9aceb5b-c362-478f-a1e9-208ce1b3905d","authenticationToken":"","authenticationType":"Anonymous","forceCreate":true,"profileId":"","anonymousId":"d9aceb5b-c362-478f-a1e9-208ce1b3905d","gameId":"10068","releasePlatform":"WINDOWS","gameVersion":"1.0.0","clientLibVersion":"3.6.2","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
+
+
+'
+    ConsoleLogOffset: {x: 0, y: 0}
+  DebugScrollPosition: {x: 0, y: 0}

@@ -121,8 +121,8 @@ public class MainScene : MonoBehaviour
     void OnGUIBottom()
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Box("Game Id: " + BrainCloudWrapper.GetBC().GameId);
-        GUILayout.Box("Game Version: " + BrainCloudWrapper.GetBC().GameVersion);
+        GUILayout.Box("Game Id: " + BrainCloudWrapper.GetBC().AppId);
+        GUILayout.Box("Game Version: " + BrainCloudWrapper.GetBC().AppVersion);
         GUILayout.Box("Profile Id: " + BrainCloudWrapper.GetBC().AuthenticationService.ProfileId);
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
