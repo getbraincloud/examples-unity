@@ -34,7 +34,7 @@ public class ScreenPlayerXp : BCScreen
 
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(ReadPlayerState_Success, Failure_Callback);
+        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
 
@@ -163,7 +163,9 @@ public class ScreenPlayerXp : BCScreen
                 ulong valueAsULong = 0;
                 if (ulong.TryParse(c.award, out valueAsULong))
                 {
+#pragma warning disable 618
                     BrainCloudWrapper.GetBC().ProductService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+#pragma warning restore 618
                     m_mainScene.AddLogNoLn("[AwardPlayerVC " + c.currencyType +"]... ");
                 }
             }
@@ -178,7 +180,9 @@ public class ScreenPlayerXp : BCScreen
                 ulong valueAsULong = 0;
                 if (ulong.TryParse(c.consume, out valueAsULong))
                 {
+#pragma warning disable 618
                     BrainCloudWrapper.GetBC().ProductService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+#pragma warning restore 618
                     m_mainScene.AddLogNoLn("[ConsumePlayerVC " + c.currencyType +"]... ");
                 }
             }
@@ -188,7 +192,9 @@ public class ScreenPlayerXp : BCScreen
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Reset All Currencies"))
         {
+#pragma warning disable 618
             BrainCloudWrapper.GetBC().ProductService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
+#pragma warning restore 618
             m_mainScene.AddLogNoLn("[ResetPlayerVC]... ");
         }
         GUILayout.FlexibleSpace();
@@ -211,7 +217,7 @@ public class ScreenPlayerXp : BCScreen
     {
         m_currencies.Clear();
 
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(ReadPlayerState_Success, Failure_Callback);
+        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
 }
