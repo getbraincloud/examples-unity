@@ -66,8 +66,8 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		PlayerSettings.SetPropertyInt("ScriptingBackend", scriptingImplementation, BuildTargetGroup.iPhone);
 		PlayerSettings.SetPropertyInt("Architecture", architectureValue, BuildTargetGroup.iPhone);
 		#else
-		PlayerSettings.SetPropertyInt("ScriptingBackend", scriptingImplementation, BuildTargetGroup.iOS);
-		PlayerSettings.SetPropertyInt("Architecture", architectureValue, BuildTargetGroup.iOS);
+		PlayerSettings.SetScriptingBackend(BuildTargetGroup.iOS, enableIl2cpp ? ScriptingImplementation.IL2CPP : ScriptingImplementation.Mono2x);
+		PlayerSettings.SetArchitecture(BuildTargetGroup.iOS, architectureValue);
 		#endif
 	}
 	
@@ -114,7 +114,9 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	static void PerformBuildWP8()
 	{
 		BuildTarget target;
+#pragma warning disable 618
 		target = BuildTarget.WP8Player;
+#pragma warning restore 618
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();

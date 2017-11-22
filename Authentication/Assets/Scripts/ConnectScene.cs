@@ -14,14 +14,14 @@ public class ConnectScene : MonoBehaviour
     enum eAuthTypes {
         EMAIL,
         UNIVERSAL,
-        TWITTER,
+        //TWITTER,
         ANONYMOUS,
         GOOGLE
     };
     string[] m_authTypes = {
         "Email",
         "Universal",
-        "Twitter",
+        //"Twitter",
         "Anonymous",
         "Google (Android Devices)"
     };
@@ -35,20 +35,20 @@ public class ConnectScene : MonoBehaviour
     public static string CONSUMER_KEY = "";
     public static string CONSUMER_SECRET = "";
     Twitter.RequestTokenResponse m_RequestTokenResponse;
-    Twitter.AccessTokenResponse m_AccessTokenResponse;
+    //Twitter.AccessTokenResponse m_AccessTokenResponse;
     //string m_facebookUserId = "";
     //string m_facebookAuthToken = "";
 
     void Start()
     {
         BrainCloudWrapper.Initialize();
-        m_AccessTokenResponse = new Twitter.AccessTokenResponse();
+        //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
     }
    
     void OnGUI()
     {
-        float tw = Screen.width / 14;
-        float th = Screen.height / 7;
+        float tw = Screen.width / 14.0f;
+        float th = Screen.height / 7.0f;
         Rect dialog = new Rect(tw, th, Screen.width - tw*2, Screen.height - th*2);
         float offsetX = 30;
         float offsetY = 30;
@@ -61,7 +61,7 @@ public class ConnectScene : MonoBehaviour
 
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        m_selectedAuth = GUILayout.SelectionGrid(m_selectedAuth, m_authTypes, 3);
+        m_selectedAuth = GUILayout.SelectionGrid(m_selectedAuth, m_authTypes, 4);
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
         
@@ -115,7 +115,7 @@ public class ConnectScene : MonoBehaviour
                     m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
-        else if (m_selectedAuth == (int) eAuthTypes.TWITTER)
+        /*else if (m_selectedAuth == (int) eAuthTypes.TWITTER)
         {
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
@@ -147,7 +147,7 @@ public class ConnectScene : MonoBehaviour
                 //BrainCloudWrapper.GetInstance().AuthenticateEmailPassword(
                    // m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
-        }
+        }*/
         else if (m_selectedAuth == (int) eAuthTypes.ANONYMOUS)
         {
             GUILayout.Label("Profile Id: " + BrainCloudWrapper.GetInstance().GetStoredProfileId());
@@ -198,7 +198,8 @@ public class ConnectScene : MonoBehaviour
                     }
                     else
                     {
-                        m_authStatus += "\nGoogle Auth Failed. See documentation: https://github.com/playgameservices/play-games-plugin-for-unity\n\n";
+                        m_authStatus += "\nGoogle Auth Failed. See documentation: https://github.com/playgameservices/play-games-plugin-for-unity\n";
+                        m_authStatus += "Note: this can only be tested on an Android Device\n\n";
                     }
                 });
     
@@ -277,6 +278,7 @@ public class ConnectScene : MonoBehaviour
     }
 
 
+    /*
     void OnSuccess_AuthenticateTwitter(bool success, Twitter.AccessTokenResponse response)
     {
         if (success)
@@ -296,7 +298,7 @@ public class ConnectScene : MonoBehaviour
         {
             print("OnAccessTokenCallback - failed.");
         }
-    }
+    }*/
     public void OnSuccess_Authenticate(string responseData, object cbObject)
     {
         m_authStatus = "Authenticate successful!";
