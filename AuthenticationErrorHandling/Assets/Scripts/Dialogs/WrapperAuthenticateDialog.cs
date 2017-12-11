@@ -163,10 +163,12 @@ public class WrapperAuthenticateDialog : Dialog
             case ReasonCodes.MISSING_IDENTITY_ERROR:
             {
                 // User's identity doesn't match one existing on brainCloud
-                // decide how this will be handled, such as with a account creation prompt, informing
-                // them that they'll be creating a new profile
-                Destroy(gameObject);
-                WrapperCreateAccountDialog.CreateDialog(m_exampleAccountType);
+                // Clear the invalid Profile and Anon Id values, and reauthenticate
+                
+                BrainCloudWrapper.Instance.ResetStoredProfileId();
+                BrainCloudWrapper.Instance.ResetStoredAnonymousId();
+                
+                ReAuthenticate();
 
                 break;
             }
@@ -198,7 +200,8 @@ public class WrapperAuthenticateDialog : Dialog
             {
                 // User is receiving an error that they're trying to authenticate an account that doesn't exist.
                 // decide how this will be handled, such as creating the account by setting the forceCreate flag to true
-                ReAuthenticate(true);
+                Destroy(gameObject);
+                WrapperCreateAccountDialog.CreateDialog(m_exampleAccountType);
 
                 break;
             }
