@@ -1,4 +1,6 @@
 ﻿using BrainCloud;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine;
 
 public class AttachIdentityDialog : Dialog
@@ -48,6 +50,26 @@ public class AttachIdentityDialog : Dialog
             .IdentityService.AttachEmailIdentity(UtilValues.getEmail(), UtilValues.getPassword(),
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
     }
+
+    
+    public static void AttachIdentityGooglePlay()
+    {
+#if UNITY_ANDROID
+        GameObject dialogObject = new GameObject("Dialog");
+        AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
+        dialog.m_exampleAccountType = ExampleAccountType.GooglePlay;
+
+        GoogleIdentity.RefreshGoogleIdentity(identity =>
+        {
+            BrainCloudWrapper.Client.IdentityService.AttachGoogleIdentity(identity.GoogleId, identity.GoogleToken, 
+                dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
+        });
+
+#else
+        ErrorDialog.DisplayErrorDialog("AuthenticateAsGooglePlay", "You can only use GooglePlay auth on Android Devices");
+#endif
+    }
+   
 
     private void DoAuthWindow(int windowId)
     {

@@ -18,10 +18,13 @@ public class AttachIdenititySection
         {
             AttachIdentityDialog.AttachIdentityUniversal_2();
         }
-
         if (Util.Button("Email"))
         {
             AttachIdentityDialog.AttachIdentityEmail();
+        }
+        if (Util.Button("GooglePlay (Android Only)"))
+        {
+            AttachIdentityDialog.AttachIdentityGooglePlay();
         }
 
         GUILayout.EndHorizontal();

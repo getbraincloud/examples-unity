@@ -5,7 +5,8 @@ public enum ExampleAccountType
     Anonymous,
     Universal_1,
     Universal_2,
-    Email
+    Email,
+    GooglePlay
 }
 
 public abstract class UtilExampleAccountType
@@ -26,6 +27,10 @@ public abstract class UtilExampleAccountType
             case ExampleAccountType.Email:
             {
                 return "Email";
+            }
+            case ExampleAccountType.GooglePlay:
+            {
+                return "Google";
             }
         }
 

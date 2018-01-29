@@ -1,4 +1,7 @@
-﻿using BrainCloud;
+﻿using System;
+using BrainCloud;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine;
 
 public class MergeIdentityDialog : Dialog
@@ -57,13 +60,32 @@ public class MergeIdentityDialog : Dialog
                 dialog.OnSuccess_MergeIdentity, dialog.OnError_MergeIdentity);
     }
 
+    public static void MergeIdentityGooglePlay()
+    {
+#if UNITY_ANDROID
+        GameObject dialogObject = new GameObject("Dialog");
+        MergeIdentityDialog dialog = dialogObject.AddComponent<MergeIdentityDialog>();
+        dialog.m_exampleAccountType = ExampleAccountType.GooglePlay;
+
+        GoogleIdentity.RefreshGoogleIdentity(identity =>
+        {
+            BrainCloudWrapper.Client.IdentityService.MergeGoogleIdentity(identity.GoogleId, identity.GoogleToken,
+                dialog.OnSuccess_MergeIdentity, dialog.OnError_MergeIdentity);
+        });
+
+#else
+        ErrorDialog.DisplayErrorDialog("AuthenticateAsGooglePlay", "You can only use GooglePlay auth on Android Devices");
+#endif
+    }
+
     private void DoAuthWindow(int windowId)
     {
         GUILayout.BeginHorizontal();
 
         if (m_state == ResponseState.Setup)
         {
-            GUILayout.Label("This account with this identity already exists. Would you like the merge the two accounts?");
+            GUILayout.Label(
+                "This account with this identity already exists. Would you like the merge the two accounts?");
 
             if (Util.Button("Yes"))
             {
@@ -86,10 +108,16 @@ public class MergeIdentityDialog : Dialog
                         MergeIdentityEmail();
                         break;
                     }
+                    case ExampleAccountType.GooglePlay:
+                    {
+                        MergeIdentityGooglePlay();
+                        break;
+                    }
                 }
 
                 Destroy(gameObject);
             }
+
             if (Util.Button("No"))
             {
                 Destroy(gameObject);
