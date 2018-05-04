@@ -1,383 +1,370 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections.Generic;
 using LitJson;
-using System.Collections.Generic;
-using BrainCloud;
+using UnityEngine;
 
-public class GamePicker : MonoBehaviour {
+public class GamePicker : MonoBehaviour
+{
+    private static readonly List<MatchedProfile> matchedProfiles = new List<MatchedProfile>();
+    private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
+    private readonly List<MatchInfo> matches = new List<MatchInfo>();
 
-	private Vector2 m_scrollPos;
+    private Vector2 scrollPos;
+    private eState state = eState.LOADING;
 
-	public class FacebookFriend
-	{
-		public string name;
-		public string facebookId;
-		public string playerId;
-		public string picUrl;
-		public Texture2D pic;
-	}
 
-	public class MatchInfo
-	{
-		public bool yourTurn;
-		public TicTacToe.PlayerInfo playerXInfo = new TicTacToe.PlayerInfo();
-		public TicTacToe.PlayerInfo playerOInfo = new TicTacToe.PlayerInfo();
-		public string yourToken;
-		public string ownerId;
-		public string matchId;
-		public FacebookFriend fbFriend;
-		public int version;
+    // Use this for initialization
+    private void Start()
+    {
+        // Enable Match Making, so other Users can also challege this Profile
+        // http://getbraincloud.com/apidocs/apiref/#capi-matchmaking-enablematchmaking
+        BrainCloudWrapper.GetBC().MatchMakingService
+            .EnableMatchMaking((response, cbObject) => { Debug.Log(response); },
+                (status, code, error, cbObject) => { Debug.Log(error); });
 
-		public MatchInfo(JsonData jsonMatch)
-		{
-			version = (int)jsonMatch["version"];
-			ownerId = (string)jsonMatch["ownerId"];
-			matchId = (string)jsonMatch["matchId"];
-			yourTurn = ((string)jsonMatch["status"]["currentPlayer"] == FacebookLogin.PlayerId);
+        // Get Players that have matching making Enabled        
+        var rangeDelta = 10;
+        var numberOfMatches = 10;
+        BrainCloudWrapper.GetBC().MatchMakingService.FindPlayers(rangeDelta, numberOfMatches, OnReadMatchedPlayerData);
 
-			// Load player info
-			LoadPlayerInfo(jsonMatch["summary"]["players"][0]);
-			LoadPlayerInfo(jsonMatch["summary"]["players"][1]);
-		}
+        //BrainCloudWrapper.GetBC().FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
+    }
 
-		private void LoadPlayerInfo(JsonData playerData)
-		{
-			string token = (string)playerData["token"];
-			TicTacToe.PlayerInfo playerInfo;
-			if (token == "X") playerInfo = playerXInfo;
-			else playerInfo = playerOInfo;
+    private void OnReadMatchedPlayerData(string responseData, object cbPostObject)
+    {
+        matchedProfiles.Clear();
 
-			if ((string)playerData["playerId"] == FacebookLogin.PlayerId)
-			{
-				playerInfo.name = FacebookLogin.PlayerName;
-				playerInfo.picUrl = FacebookLogin.PlayerPicUrl;
-				yourToken = token;
-			}
-			else 
-			{
-				// Find your friend in your facebook list
-				foreach (FacebookFriend _fbFriend in m_fbFriends)
-				{
-					if (_fbFriend.playerId == (string)playerData["playerId"])
-					{
-						fbFriend = _fbFriend;
-						break;
-					}
-				}
-				playerInfo.name = fbFriend.name;
-				playerInfo.picUrl = fbFriend.picUrl;
-			}
-		}
-	}
+        // Construct our matched players list using response data
+        var matchesData = JsonMapper.ToObject(responseData)["data"]["matchesFound"];
 
-	enum eState
-	{
-		LOADING,
-		GAME_PICKER,
-		NEW_GAME,
-		STARTING_MATCH
-	}
-	private eState m_state = eState.LOADING;
-	static private List<FacebookFriend> m_fbFriends = new List<FacebookFriend>();
-	private List<MatchInfo> m_matches = new List<MatchInfo>();
-	private List<MatchInfo> m_completedMatches = new List<MatchInfo>();
 
-	// Use this for initialization
-	void Start () 
-	{
-		// Get our facebook friends that have played this game also.
-        //BrainCloudWrapper.GetBC().FriendService.
-        BrainCloudWrapper.GetBC().FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
-	}
+        foreach (JsonData match in matchesData)
+        {
+            Debug.Log(match.ToJson());
 
-	void OnReadFriendData(string responseData, object cbPostObject) 
-	{
-		m_fbFriends.Clear();
 
-		// Construct our friend list using response data
-		JsonData jsonFriends = JsonMapper.ToObject(responseData)["data"]["friends"];
-		for (int i = 0; i < jsonFriends.Count; ++i)
-		{
-			JsonData jsonFriend = jsonFriends[i];
-			FacebookFriend fbFriend = new FacebookFriend();
+            matchedProfiles.Add(new MatchedProfile(match));
+        }
 
-			fbFriend.playerId = (string)jsonFriend["playerId"];
-			fbFriend.facebookId = (string)jsonFriend["externalData"]["Facebook"]["externalId"];
-			fbFriend.name = (string)jsonFriend["externalData"]["Facebook"]["name"];
-			StartCoroutine(SetProfilePic((string)jsonFriend["externalData"]["Facebook"]["pictureUrl"], fbFriend)); // Load pic
 
-			m_fbFriends.Add(fbFriend);
-		}
+        BrainCloudWrapper.GetBC().GetAsyncMatchService().FindMatches(OnFindMatchesSuccess);
 
-		// After, fetch our game list from Braincloud
-		BrainCloudWrapper.GetBC().GetAsyncMatchService().FindMatches(OnFindMatchesSuccess, null, null);
-	}
+        // After, fetch our game list from Braincloud
+        BrainCloudWrapper.GetBC().GetAsyncMatchService().FindMatches(OnFindMatchesSuccess);
+    }
 
-	void OnFindMatchesSuccess(string responseData, object cbPostObject)
-	{
-		m_matches.Clear ();
+    private void OnFindMatchesSuccess(string responseData, object cbPostObject)
+    {
+        matches.Clear();
 
-		// Construct our game list using response data
-		JsonData jsonMatches = JsonMapper.ToObject(responseData)["data"]["results"];
-		for (int i = 0; i < jsonMatches.Count; ++i)
-		{
-			JsonData jsonMatch = jsonMatches[i];
-			
-			MatchInfo match = new MatchInfo(jsonMatch);
-			m_matches.Add(match);
-		}
+        // Construct our game list using response data
+        var jsonMatches = JsonMapper.ToObject(responseData)["data"]["results"];
+        for (var i = 0; i < jsonMatches.Count; ++i)
+        {
+            var jsonMatch = jsonMatches[i];
 
-		// Now, find completed matches so the user can go see the history
-		BrainCloudWrapper.GetBC().GetAsyncMatchService().FindCompleteMatches(OnFindCompletedMatches, null, null);
-	}
+            var match = new MatchInfo(jsonMatch);
+            matches.Add(match);
+        }
 
-	void OnFindCompletedMatches(string responseData, object cbPostObject)
-	{
-		m_completedMatches.Clear ();
-		
-		// Construct our game list using response data
-		JsonData jsonMatches = JsonMapper.ToObject(responseData)["data"]["results"];
-		for (int i = 0; i < jsonMatches.Count; ++i)
-		{
-			JsonData jsonMatch = jsonMatches[i];
-			MatchInfo match = new MatchInfo(jsonMatch);
-			m_completedMatches.Add(match);
-		}
+        // Now, find completed matches so the user can go see the history
+        BrainCloudWrapper.GetBC().GetAsyncMatchService().FindCompleteMatches(OnFindCompletedMatches);
+    }
 
-		m_state = eState.GAME_PICKER;
-	}
+    private void OnFindCompletedMatches(string responseData, object cbPostObject)
+    {
+        completedMatches.Clear();
 
-	// Update is called once per frame
-	void Update ()
-	{
-	
-	}
+        // Construct our game list using response data
+        var jsonMatches = JsonMapper.ToObject(responseData)["data"]["results"];
+        for (var i = 0; i < jsonMatches.Count; ++i)
+        {
+            var jsonMatch = jsonMatches[i];
+            var match = new MatchInfo(jsonMatch);
+            completedMatches.Add(match);
+        }
 
-	void OnGUI()
-	{
-		switch (m_state)
-		{
-		case eState.LOADING:
-		case eState.STARTING_MATCH:
-		{
-			GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height));
-			GUILayout.FlexibleSpace();
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			
-			GUILayout.Label("Loading...");
-			
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.EndArea();
-			break;
-		}
-		case eState.GAME_PICKER:
-		{
-			GUILayout.Window(0, new Rect(Screen.width / 2 - 150, Screen.height / 2 - 250, 300, 500), OnPickGameWindow, "Pick Game");
-			break;
-		}
-		case eState.NEW_GAME:
-		{
-			GUILayout.Window(0, new Rect(Screen.width / 2 - 150, Screen.height / 2 - 250, 300, 500), OnNewGameWindow, "Pick Opponent");
-			break;
-		}
-		}
-	}
+        state = eState.GAME_PICKER;
+    }
 
-	void OnPickGameWindow(int windowId)
-	{
-		GUILayout.BeginHorizontal ();
-		GUILayout.FlexibleSpace ();
-		GUILayout.BeginVertical ();
+    private void OnGUI()
+    {
+        switch (state)
+        {
+            case eState.LOADING:
+            case eState.STARTING_MATCH:
+            {
+                GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height));
+                GUILayout.FlexibleSpace();
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
 
-		m_scrollPos = GUILayout.BeginScrollView(m_scrollPos, false, false);
+                GUILayout.Label("Loading...");
 
-		if (GUILayout.Button ("+ New Game", GUILayout.MinHeight (50), GUILayout.MaxWidth (250))) 
-		{
-			m_state = eState.NEW_GAME;
-		}
-		foreach (MatchInfo match in m_matches)
-		{
-			GUILayout.Space(10);
-			GUILayout.BeginHorizontal ();
-			GUILayout.Box(match.fbFriend.pic, GUILayout.Height(50), GUILayout.Width(50));
-			GUI.enabled = match.yourTurn;
-			if (GUILayout.Button (match.fbFriend.name + "\n" + (match.yourTurn ? "(Your Turn)" : "(His Turn)" ), GUILayout.MinHeight (50), GUILayout.MaxWidth (200))) 
-			{
-				// Go in the match
-				EnterMatch(match);
-			}
-			GUI.enabled = true;
-			GUILayout.EndHorizontal ();
-		}
-		GUILayout.Space(10);
-		foreach (MatchInfo match in m_completedMatches)
-		{
-			GUILayout.Space(10);
-			GUILayout.BeginHorizontal ();
-			GUILayout.Box(match.fbFriend.pic, GUILayout.Height(50), GUILayout.Width(50));
-			if (GUILayout.Button (match.fbFriend.name + "\n(Completed)", GUILayout.MinHeight (50), GUILayout.MaxWidth (200))) 
-			{
-				// Go in the match
-				EnterMatch(match);
-			}
-			GUILayout.EndHorizontal ();
-		}
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+                GUILayout.FlexibleSpace();
+                GUILayout.EndArea();
+                break;
+            }
+            case eState.GAME_PICKER:
+            {
+                GUILayout.Window(0, new Rect(Screen.width / 2 - 150, Screen.height / 2 - 250, 300, 500),
+                    OnPickGameWindow, "Pick Game");
+                break;
+            }
+            case eState.NEW_GAME:
+            {
+                GUILayout.Window(0, new Rect(Screen.width / 2 - 150, Screen.height / 2 - 250, 300, 500),
+                    OnNewGameWindow, "Pick Opponent");
+                break;
+            }
+        }
+    }
 
-		GUILayout.EndScrollView();
-		
-		GUILayout.EndVertical ();
-		GUILayout.FlexibleSpace ();
-		GUILayout.EndHorizontal ();
-	}
-	
-	void OnNewGameWindow(int windowId)
-	{
-		GUILayout.BeginHorizontal ();
-		GUILayout.FlexibleSpace ();
-		GUILayout.BeginVertical ();
-		
-		m_scrollPos = GUILayout.BeginScrollView(m_scrollPos, false, false);
+    private void OnPickGameWindow(int windowId)
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical();
 
-		if (GUILayout.Button ("<- Cancel", GUILayout.MinHeight (32), GUILayout.MaxWidth (75))) 
-		{
-			m_state = eState.GAME_PICKER;
-		}
+        scrollPos = GUILayout.BeginScrollView(scrollPos, false, false);
 
-		foreach (FacebookFriend fbFriend in m_fbFriends)
-		{
-			GUILayout.BeginHorizontal ();
-			GUILayout.Box(fbFriend.pic, GUILayout.Height(50), GUILayout.Width(50));
-			if (GUILayout.Button (fbFriend.name, GUILayout.MinHeight (50), GUILayout.MaxWidth (200))) 
-			{
-				OnPickOpponent(fbFriend);
-			}
-			GUILayout.EndHorizontal ();
-		}
-		
-		GUILayout.EndScrollView();
-		
-		GUILayout.EndVertical ();
-		GUILayout.FlexibleSpace ();
-		GUILayout.EndHorizontal ();
-	}
+        if (GUILayout.Button("+ New Game", GUILayout.MinHeight(50), GUILayout.MaxWidth(250))) state = eState.NEW_GAME;
+        foreach (var match in matches)
+        {
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            GUI.enabled = match.yourTurn;
+            if (GUILayout.Button(
+                match.matchedProfile.playerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(His Turn)"),
+                GUILayout.MinHeight(50), GUILayout.MaxWidth(200))) EnterMatch(match);
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+        }
 
-	void OnPickOpponent(FacebookFriend fbFriend)
-	{
-		m_state = eState.STARTING_MATCH;
-		bool yourTurnFirst = Random.Range(0, 100) < 50;
+        GUILayout.Space(10);
+        foreach (var match in completedMatches)
+        {
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(match.matchedProfile.playerName + "\n(Completed)", GUILayout.MinHeight(50),
+                GUILayout.MaxWidth(200))) EnterMatch(match);
+            GUILayout.EndHorizontal();
+        }
 
-		// Setup our summary data. This is what we see when we query
-		// the list of games. So we want to store information about our
-		// facebook ids so we can lookup our friend's picture and name
-		JsonData summaryData = new JsonData();
-		summaryData["players"] = new JsonData();
-		{
-			// Us
-			JsonData playerData = new JsonData();
-			playerData["playerId"] = FacebookLogin.PlayerId;
-			playerData["facebookId"] = FB.UserId;
-			if (yourTurnFirst)
-				playerData["token"] = "X"; // First player has X
-			else
-				playerData["token"] = "O";
-			summaryData["players"].Add(playerData);
-		}
-		{
-			// Our friend
-			JsonData playerData = new JsonData();
-			playerData["playerId"] = fbFriend.playerId;
-			playerData["facebookId"] = fbFriend.facebookId;//fbFriend.facebookId;
-			if (!yourTurnFirst)
-				playerData["token"] = "X"; // First player has X
-			else
-				playerData["token"] = "O";
-			summaryData["players"].Add(playerData);
-		}
+        GUILayout.EndScrollView();
 
-		// Setup our match State. We only store where Os and Xs are in
-		// the tic tac toe board. 
-		JsonData matchState = new JsonData();
-		matchState["board"] = "#########"; // Empty the board. # = nothing, O,X = tokens
+        GUILayout.EndVertical();
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+    }
 
-		// Setup our opponent list. In this case, we have just one opponent.
-		//JsonData opponentIds = new JsonData();
+    private void OnNewGameWindow(int windowId)
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical();
 
-		// Create the match
-		BrainCloudWrapper.GetBC().AsyncMatchService.CreateMatchWithInitialTurn(
-			"[{\"platform\":\"BC\",\"id\":\"" + fbFriend.playerId + "\"}]", 	// Opponents
-			matchState.ToJson(),	// Current match state
-			"A friend has challenged you to a match of Tic Tac Toe.",	// Push notification Message
-			(yourTurnFirst) ? FacebookLogin.PlayerId : fbFriend.playerId, // Which turn it is. We picked randomly
-			summaryData.ToJson(),	// Summary data
-			OnCreateMatchSuccess,
-			OnCreateMatchFailed,
-			null);
-	}
+        scrollPos = GUILayout.BeginScrollView(scrollPos, false, false);
 
-	void OnCreateMatchSuccess(string responseData, object cbPostObject)
-	{
-		JsonData data = JsonMapper.ToObject(responseData);
-		MatchInfo match = new MatchInfo(data["data"]);
+        if (GUILayout.Button("<- Cancel", GUILayout.MinHeight(32), GUILayout.MaxWidth(75)))
+            state = eState.GAME_PICKER;
 
-		// Go to the game if it's your turn
-		if (match.yourTurn)
-		{
-			EnterMatch(match);
-		}
-		else
-		{
-			Application.LoadLevel("GamePicker");
-		}
-	}
-	
-	void OnCreateMatchFailed(int a, int b, string responseData, object cbPostObject)
-	{
-		Debug.LogError("Failed to create Async Match");
+        foreach (var fbFriend in matchedProfiles)
+        {
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(fbFriend.playerName, GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
+                OnPickOpponent(fbFriend);
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.EndScrollView();
+
+        GUILayout.EndVertical();
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+    }
+
+    private void OnPickOpponent(MatchedProfile fbFriend)
+    {
+        state = eState.STARTING_MATCH;
+        var yourTurnFirst = Random.Range(0, 100) < 50;
+
+        // Setup our summary data. This is what we see when we query
+        // the list of games. So we want to store information about our
+        // facebook ids so we can lookup our friend's picture and name
+        var summaryData = new JsonData();
+        summaryData["players"] = new JsonData();
+        {
+            // Us
+            var playerData = new JsonData();
+            playerData["profileId"] = BrainCloudLogin.ProfileId;
+            //playerData["facebookId"] = FB.UserId;
+            if (yourTurnFirst)
+                playerData["token"] = "X"; // First player has X
+            else
+                playerData["token"] = "O";
+            summaryData["players"].Add(playerData);
+        }
+        {
+            // Our friend
+            var playerData = new JsonData();
+            playerData["profileId"] = fbFriend.playerId;
+            if (!yourTurnFirst)
+                playerData["token"] = "X"; // First player has X
+            else
+                playerData["token"] = "O";
+            summaryData["players"].Add(playerData);
+        }
+
+        // Setup our match State. We only store where Os and Xs are in
+        // the tic tac toe board. 
+        var matchState = new JsonData();
+        matchState["board"] = "#########"; // Empty the board. # = nothing, O,X = tokens
+
+        // Setup our opponent list. In this case, we have just one opponent.
+        //JsonData opponentIds = new JsonData();
+
+        // Create the match
+        BrainCloudWrapper.GetBC().AsyncMatchService.CreateMatchWithInitialTurn(
+            "[{\"platform\":\"BC\",\"id\":\"" + fbFriend.playerId + "\"}]", // Opponents
+            matchState.ToJson(), // Current match state
+            "A friend has challenged you to a match of Tic Tac Toe.", // Push notification Message
+            yourTurnFirst ? BrainCloudLogin.ProfileId : fbFriend.playerId, // Which turn it is. We picked randomly
+            summaryData.ToJson(), // Summary data
+            OnCreateMatchSuccess,
+            OnCreateMatchFailed,
+            null);
+    }
+
+    private void OnCreateMatchSuccess(string responseData, object cbPostObject)
+    {
+        var data = JsonMapper.ToObject(responseData);
+        var match = new MatchInfo(data["data"]);
+
+        // Go to the game if it's your turn
+        if (match.yourTurn)
+            EnterMatch(match);
+        else
+            Application.LoadLevel("GamePicker");
+    }
+
+    private void OnCreateMatchFailed(int a, int b, string responseData, object cbPostObject)
+    {
+        Debug.LogError("Failed to create Async Match");
         Debug.Log(a);
         Debug.Log(b);
         Debug.Log(responseData);
-		m_state = eState.GAME_PICKER; // Just go back to game selection
-	}
+        state = eState.GAME_PICKER; // Just go back to game selection
+    }
 
-	void EnterMatch(MatchInfo match)
-	{
-		m_state = eState.LOADING;
+    private void EnterMatch(MatchInfo match)
+    {
+        state = eState.LOADING;
 
-		// Query more detail state about the match
-		BrainCloudWrapper.GetBC().AsyncMatchService.ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
-	}
+        // Query more detail state about the match
+        BrainCloudWrapper.GetBC().AsyncMatchService
+            .ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
+    }
 
-	void OnReadMatch(string responseData, object cbPostObject)
-	{
-		MatchInfo match = cbPostObject as MatchInfo;
-		JsonData data = JsonMapper.ToObject(responseData)["data"];
+    private void OnReadMatch(string responseData, object cbPostObject)
+    {
+        var match = cbPostObject as MatchInfo;
+        var data = JsonMapper.ToObject(responseData)["data"];
 
-		// Setup a couple stuff into our TicTacToe scene
-		TicTacToe.boardState = (string)data["matchState"]["board"];
-		TicTacToe.playerInfoX = match.playerXInfo;
-		TicTacToe.playerInfoO = match.playerOInfo;
-		TicTacToe.whosTurn = match.yourToken == "X" ? TicTacToe.playerInfoX : match.playerOInfo;
-		TicTacToe.ownerId = match.ownerId;
-		TicTacToe.matchId = match.matchId;
-		TicTacToe.matchVersion = (ulong)match.version;
-		
-		// Load the Tic Tac Toe scene
-		Application.LoadLevel("TicTacToe");
-	}
+        // Setup a couple stuff into our TicTacToe scene
+        TicTacToe.boardState = (string) data["matchState"]["board"];
+        TicTacToe.playerInfoX = match.playerXInfo;
+        TicTacToe.playerInfoO = match.playerOInfo;
+        TicTacToe.whosTurn = match.yourToken == "X" ? TicTacToe.playerInfoX : match.playerOInfo;
+        TicTacToe.ownerId = match.ownerId;
+        TicTacToe.matchId = match.matchId;
+        TicTacToe.matchVersion = (ulong) match.version;
 
-	void OnReadMatchFailed(int a, int b, string responseData, object cbPostObject)
-	{
-		Debug.LogError("Failed to Read Match");
-	}
+        // Load the Tic Tac Toe scene
+        Application.LoadLevel("TicTacToe");
+    }
 
-	IEnumerator SetProfilePic(string url, FacebookFriend fbFriend)
-	{
-		fbFriend.picUrl = url;
-		WWW www = new WWW(url);
-		yield return www;
-		fbFriend.pic = www.texture;
-	}
+    private void OnReadMatchFailed(int a, int b, string responseData, object cbPostObject)
+    {
+        Debug.LogError("Failed to Read Match");
+    }
+
+    public class MatchedProfile
+    {
+        public string playerId;
+        public string playerName;
+        public int playerRating;
+
+        public MatchedProfile(JsonData jsonData)
+        {
+            playerName = (string) jsonData["playerName"];
+            playerRating = (int) jsonData["playerRating"];
+            playerId = (string) jsonData["playerId"];
+        }
+    }
+
+    public class MatchInfo
+    {
+        public MatchedProfile matchedProfile;
+        public string matchId;
+        public string ownerId;
+        public TicTacToe.PlayerInfo playerOInfo = new TicTacToe.PlayerInfo();
+        public TicTacToe.PlayerInfo playerXInfo = new TicTacToe.PlayerInfo();
+        public int version;
+        public string yourToken;
+        public bool yourTurn;
+
+        public MatchInfo(JsonData jsonMatch)
+        {
+            Debug.Log(jsonMatch.ToJson());
+
+
+            version = (int) jsonMatch["version"];
+            ownerId = (string) jsonMatch["ownerId"];
+            matchId = (string) jsonMatch["matchId"];
+            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == BrainCloudLogin.ProfileId;
+
+            // Load player info
+            LoadPlayerInfo(jsonMatch["summary"]["players"][0]);
+            LoadPlayerInfo(jsonMatch["summary"]["players"][1]);
+        }
+
+        private void LoadPlayerInfo(JsonData playerData)
+        {
+            Debug.Log(playerData.ToJson());
+
+            var token = (string) playerData["token"];
+            TicTacToe.PlayerInfo playerInfo;
+            if (token == "X") playerInfo = playerXInfo;
+            else playerInfo = playerOInfo;
+
+            if ((string) playerData["profileId"] == BrainCloudLogin.ProfileId)
+            {
+                playerInfo.name = BrainCloudLogin.PlayerName;
+                //playerInfo.picUrl = FacebookLogin.PlayerPicUrl;				
+                yourToken = token;
+            }
+            else
+            {
+                // Find your friend in your facebook list
+                foreach (var _fbFriend in matchedProfiles)
+                    if (_fbFriend.playerId == (string) playerData["profileId"])
+                    {
+                        matchedProfile = _fbFriend;
+                        break;
+                    }
+
+                playerInfo.name = matchedProfile.playerName;
+            }
+        }
+    }
+
+    private enum eState
+    {
+        LOADING,
+        GAME_PICKER,
+        NEW_GAME,
+        STARTING_MATCH
+    }
 }

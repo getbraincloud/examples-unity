@@ -22,7 +22,7 @@ namespace BrainCloudUnity.HUD
 		{
 			GUILayout.BeginVertical ();
 			
-			BrainCloudClient bcc = BrainCloudWrapper.GetBC ();
+			BrainCloudClient bcc = BrainCloudLoginPF.BrainCloud.Client;
 			GUILayout.Box ("Connection Details");
 			GUILayout.BeginHorizontal();
 			GUILayout.BeginVertical();
@@ -40,8 +40,8 @@ namespace BrainCloudUnity.HUD
 			GUILayout.Label (bcc.SessionID);
 			GUILayout.Label (bcc.AuthenticationService.ProfileId);
 			GUILayout.Label (bcc.AuthenticationService.AnonymousId);
-			GUILayout.Label (bcc.GameId);
-			GUILayout.Label (bcc.GameVersion);
+			GUILayout.Label (bcc.AppId);
+			GUILayout.Label (bcc.AppVersion);
 			GUILayout.Label (bcc.BrainCloudClientVersion);
 			GUILayout.Label (bcc.ReleasePlatform.ToString());
 			GUILayout.EndVertical ();

@@ -13,10 +13,10 @@ namespace BrainCloud
 {
     public class BrainCloudScript
     {
-        private BrainCloudClient m_brainCloudClientRef;
-        public BrainCloudScript(BrainCloudClient brainCloudClientRef)
+        private BrainCloudClient _client;
+        public BrainCloudScript(BrainCloudClient client)
         {
-            m_brainCloudClientRef = brainCloudClientRef;
+            _client = client;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.Run, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.ScheduleCloudScript, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.ScheduleCloudScript, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.RunParentScript, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -195,7 +195,82 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.CancelScheduledScript, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Runs a script from the context of a peer
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Script
+        /// Service Operation - RUN_PEER_SCRIPT
+        /// </remarks>
+        /// <param name="scriptName">The name of the script to run</param>
+        /// <param name="jsonScriptData">JSON data to pass into the script</param>
+        /// <param name="peer">Identifies the peer</param>
+        /// <param name="success">The success callback</param>
+        /// <param name="failure">The failure callback</param>
+        /// <param name="cbObject">The user object sent to the callback</param>
+        public void RunPeerScript(
+            string scriptName,
+            string jsonScriptData,
+            string peer,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.ScriptServiceRunScriptName.Value] = scriptName;
+
+            if (Util.IsOptionalParameterValid(jsonScriptData))
+            {
+                Dictionary<string, object> scriptData = JsonReader.Deserialize<Dictionary<string, object>>(jsonScriptData);
+                data[OperationParam.ScriptServiceRunScriptData.Value] = scriptData;
+            }
+
+            data[OperationParam.Peer.Value] = peer;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.RunPeerScript, data, callback);
+            _client.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Runs a script asynchronously from the context of a peer
+        /// This operation does not wait for the script to complete before returning
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Script
+        /// Service Operation - RUN_PEER_SCRIPT
+        /// </remarks>
+        /// <param name="scriptName">The name of the script to run</param>
+        /// <param name="jsonScriptData">JSON data to pass into the script</param>
+        /// <param name="peer">Identifies the peer</param>
+        /// <param name="success">The success callback</param>
+        /// <param name="failure">The failure callback</param>
+        /// <param name="cbObject">The user object sent to the callback</param>
+        public void RunPeerScriptAsync(
+            string scriptName,
+            string jsonScriptData,
+            string peer,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.ScriptServiceRunScriptName.Value] = scriptName;
+
+            if (Util.IsOptionalParameterValid(jsonScriptData))
+            {
+                Dictionary<string, object> scriptData = JsonReader.Deserialize<Dictionary<string, object>>(jsonScriptData);
+                data[OperationParam.ScriptServiceRunScriptData.Value] = scriptData;
+            }
+
+            data[OperationParam.Peer.Value] = peer;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.RunPeerScriptAsync, data, callback);
+            _client.SendRequest(sc);
         }
     }
 }

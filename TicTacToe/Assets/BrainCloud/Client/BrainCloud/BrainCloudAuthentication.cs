@@ -12,14 +12,14 @@ namespace BrainCloud
 {
     public class BrainCloudAuthentication
     {
-        private BrainCloudClient m_brainCloudClientRef;
+        private BrainCloudClient _client;
 
         public string AnonymousId { get; set; }
         public string ProfileId { get; set; }
 
-        public BrainCloudAuthentication(BrainCloudClient brainCloudClientRef)
+        public BrainCloudAuthentication(BrainCloudClient client)
         {
-            m_brainCloudClientRef = brainCloudClientRef;
+            _client = client;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace BrainCloud
 
         /// <summary>
         /// Used to clear the saved profile id - to use in cases when the user is
-        /// attempting to switch to a different game profile.
+        /// attempting to switch to a different app profile.
         /// </summary>
         public void ClearSavedProfileID()
         {
@@ -214,7 +214,7 @@ namespace BrainCloud
         /// Service Operation - Authenticate
         /// </remarks>
         /// <param name="gameCenterId">
-        /// The player's game center id  (use the playerID property from the local GKPlayer object)
+        /// The user's game center id  (use the profileID property from the local GKPlayer object)
         /// </param>
         /// <param name="forceCreate">
         /// Should a new profile be created for this user if the account does not exist?
@@ -460,11 +460,11 @@ namespace BrainCloud
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.AuthenticateServiceAuthenticateExternalId.Value] = externalId;
-            data[OperationParam.AuthenticateServiceAuthenticateGameId.Value] = m_brainCloudClientRef.GameId;
+            data[OperationParam.AuthenticateServiceAuthenticateGameId.Value] = _client.AppId;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure);
             ServerCall sc = new ServerCall(ServiceName.Authenticate, ServiceOperation.ResetEmailPassword, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
 
@@ -474,13 +474,13 @@ namespace BrainCloud
             AuthenticationType authenticationType,
             string externalAuthName,
             bool forceCreate,
-            SuccessCallback success,
-            FailureCallback failure,
-            object cbObject)
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
         {
-            string languageCode = m_brainCloudClientRef.LanguageCode;
+            string languageCode = _client.LanguageCode;
             double utcOffset = Util.GetUTCOffsetForCurrentTimeZone();
-            string countryCode = m_brainCloudClientRef.CountryCode;
+            string countryCode = _client.CountryCode;
 
             Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.AuthenticateServiceAuthenticateExternalId.Value] = externalId;
@@ -490,10 +490,16 @@ namespace BrainCloud
 
             data[OperationParam.AuthenticateServiceAuthenticateProfileId.Value] = ProfileId;
             data[OperationParam.AuthenticateServiceAuthenticateAnonymousId.Value] = AnonymousId;
-            data[OperationParam.AuthenticateServiceAuthenticateGameId.Value] = m_brainCloudClientRef.GameId;
-            data[OperationParam.AuthenticateServiceAuthenticateReleasePlatform.Value] = m_brainCloudClientRef.ReleasePlatform.ToString();
-            data[OperationParam.AuthenticateServiceAuthenticateGameVersion.Value] = m_brainCloudClientRef.GameVersion;
+            data[OperationParam.AuthenticateServiceAuthenticateGameId.Value] = _client.AppId;
+            data[OperationParam.AuthenticateServiceAuthenticateReleasePlatform.Value] = _client.ReleasePlatform.ToString();
+            data[OperationParam.AuthenticateServiceAuthenticateGameVersion.Value] = _client.AppVersion;
             data[OperationParam.AuthenticateServiceAuthenticateBrainCloudVersion.Value] = Version.GetVersion();
+
+#if DOT_NET
+            data["clientLib"] = "csharp";
+#else
+            data["clientLib"] = "csharp-unity";
+#endif
 
             if (Util.IsOptionalParameterValid(externalAuthName))
             {
@@ -505,7 +511,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Authenticate, ServiceOperation.Authenticate, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
     }
 }
