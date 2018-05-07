@@ -88,7 +88,7 @@ public class TicTacToe : MonoBehaviour
                 playerTurnText.text = "Match Completed";
 
             // Read match history
-            BrainCloudWrapper.GetBC().AsyncMatchService
+            App.BC.AsyncMatchService
                 .ReadMatchHistory(ownerId, matchId, OnReadMatchHistory, null, null);
         }
     }
@@ -219,7 +219,7 @@ public class TicTacToe : MonoBehaviour
             var boardStateJson = new JsonData();
             boardStateJson["board"] = boardState;
 
-            BrainCloudWrapper.GetBC().AsyncMatchService.SubmitTurn(
+            App.BC.AsyncMatchService.SubmitTurn(
                 ownerId,
                 matchId,
                 matchVersion,
@@ -262,12 +262,12 @@ public class TicTacToe : MonoBehaviour
         if (m_winner == 0)
         {
             // Go back to game select scene
-            Application.LoadLevel("GamePicker");
+            Application.LoadLevel("MatchSelect");
             return;
         }
 
         // Otherwise, the game was done. Send a complete turn
-        BrainCloudWrapper.GetBC().AsyncMatchService.CompleteMatch(
+        App.BC.AsyncMatchService.CompleteMatch(
             ownerId,
             matchId,
             OnMatchCompleted);
@@ -276,7 +276,7 @@ public class TicTacToe : MonoBehaviour
     private void OnMatchCompleted(string responseData, object cbPostObject)
     {
         // Go back to game select scene
-        Application.LoadLevel("GamePicker");
+        Application.LoadLevel("MatchSelect");
     }
 
     public class PlayerInfo

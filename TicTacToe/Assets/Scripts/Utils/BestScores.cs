@@ -24,10 +24,10 @@ public class BestScores : MonoBehaviour
 
 
         // Fetch existing entities for this player
-        BrainCloudWrapper.GetBC().GetPlayerStateService().ReadPlayerState((responseData, cbObject) =>
+        App.BC.PlayerStateService.ReadPlayerState((responseData, cbObject) =>
         {
             // Construct a list of all entities present for this player
-            var entityFactory = new BCEntityFactory(BrainCloudWrapper.GetBC().GetEntityService());
+            var entityFactory = new BCEntityFactory(App.BC.EntityService);
             var entities = entityFactory.NewUserEntitiesFromReadPlayerState(responseData);
 
             // Search for our "BestScores" entity

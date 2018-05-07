@@ -14,7 +14,7 @@ public class SocialLeaderboards : BestScores
         foreach (var entry in entriesText) entry.text = "";
 
         // Post score to social leaderboard. The callback should have the results
-        BrainCloudWrapper.GetBC().SocialLeaderboardService.PostScoreToLeaderboard(
+        App.BC.SocialLeaderboardService.PostScoreToLeaderboard(
             "spacegame_highscores", // Leaderboard Id
             in_score, // Score
             "{}", // Optional extra data
@@ -26,7 +26,7 @@ public class SocialLeaderboards : BestScores
     private void OnPostScoreSuccess(string postResponseData, object cbPostObject)
     {
         // Now we fetch the leaderboards to see were we stand
-        BrainCloudWrapper.GetBC().SocialLeaderboardService.GetSocialLeaderboard(
+        App.BC.SocialLeaderboardService.GetSocialLeaderboard(
             "spacegame_highscores", // Leaderboard Id
             true, // If true, your name will be replaced with "You"
             OnGetLeaderboardsSuccess, // Success callback

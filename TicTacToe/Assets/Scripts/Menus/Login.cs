@@ -1,29 +1,28 @@
 ﻿using BrainCloud;
 using LitJson;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class BrainCloudLogin : MonoBehaviour
+public class Login : MonoBehaviour
 {
     public static string ProfileId;
-
-    //static public string PlayerPicUrl;
     public static string PlayerName;
+    
     public Texture brainCloudLogo;
 
     private bool isConnecting;
-    public string password = "";
+    
     public Spinner spinner;
 
-
+    public string password = "";
     public string username = "";
 
     // Use this for initialization
     private void Start()
-    {
-        BrainCloudClient.EnableSingletonMode = true;
-        BrainCloudWrapper.Initialize();
+    {   
+        username = PlayerPrefs.GetString("username");
+        password = PlayerPrefs.GetString("password");
     }
-
 
     private void OnGUI()
     {
@@ -49,34 +48,33 @@ public class BrainCloudLogin : MonoBehaviour
         GUILayout.Label("Password");
         password = GUILayout.PasswordField(password, '*', GUILayout.MinWidth(100));
 
-        if (GUILayout.Button("Connect as User", GUILayout.MinHeight(50), GUILayout.MinWidth(100)))
+        if (GUILayout.Button("Connect as Universal", GUILayout.MinHeight(50), GUILayout.MinWidth(100)))
         {
             isConnecting = true;
             spinner.gameObject.SetActive(true);
 
-            BrainCloudWrapper.Instance.AuthenticateUniversal(username, password, true, (response, cbObject) =>
+            App.BC.AuthenticateUniversal(username, password, true, (response, cbObject) =>
             {
                 var data = JsonMapper.ToObject(response)["data"];
                 ProfileId = data["profileId"].ToString();
                 PlayerName = username;
 
+                
+                PlayerPrefs.SetString("username", username);
+                PlayerPrefs.SetString("password", password);
+                
+                // If this is a new user, let's set their playerName
                 if (data["newUser"].ToString().Equals("true"))
                 {
-                    BrainCloudWrapper.Instance.PlayerStateService.UpdatePlayerName(username, (jsonResponse, o) =>
+                    App.BC.PlayerStateService.UpdatePlayerName(username, (jsonResponse, o) =>
                     {
-                        Debug.Log(jsonResponse);
-                        
-                        Application.LoadLevel("GamePicker"); // Load our game
-                        
+                        SceneManager.LoadScene("MatchSelect"); // Load our game
                     });
                 }
                 else
                 {
-
-                    Application.LoadLevel("GamePicker"); // Load our game                    
+                    SceneManager.LoadScene("MatchSelect"); // Load our game                    
                 }
-
-                Debug.Log(response);
 
             }, (status, code, error, cbObject) => { Debug.Log(error); });
         }

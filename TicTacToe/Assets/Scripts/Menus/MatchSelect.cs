@@ -2,7 +2,7 @@
 using LitJson;
 using UnityEngine;
 
-public class GamePicker : MonoBehaviour
+public class MatchSelect : MonoBehaviour
 {
     private static readonly List<MatchedProfile> matchedProfiles = new List<MatchedProfile>();
     private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
@@ -11,22 +11,22 @@ public class GamePicker : MonoBehaviour
     private Vector2 scrollPos;
     private eState state = eState.LOADING;
 
+    private const int RANGE_DELTA = 10;
+    const int NUMBER_OF_MATCHES = 10;
+
 
     // Use this for initialization
     private void Start()
     {
         // Enable Match Making, so other Users can also challege this Profile
         // http://getbraincloud.com/apidocs/apiref/#capi-matchmaking-enablematchmaking
-        BrainCloudWrapper.GetBC().MatchMakingService
+        App.BC.MatchMakingService
             .EnableMatchMaking((response, cbObject) => { Debug.Log(response); },
                 (status, code, error, cbObject) => { Debug.Log(error); });
 
-        // Get Players that have matching making Enabled        
-        var rangeDelta = 10;
-        var numberOfMatches = 10;
-        BrainCloudWrapper.GetBC().MatchMakingService.FindPlayers(rangeDelta, numberOfMatches, OnReadMatchedPlayerData);
+        App.BC.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
 
-        //BrainCloudWrapper.GetBC().FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
+        //App.BC.FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
     }
 
     private void OnReadMatchedPlayerData(string responseData, object cbPostObject)
@@ -39,17 +39,14 @@ public class GamePicker : MonoBehaviour
 
         foreach (JsonData match in matchesData)
         {
-            Debug.Log(match.ToJson());
-
-
             matchedProfiles.Add(new MatchedProfile(match));
         }
 
 
-        BrainCloudWrapper.GetBC().GetAsyncMatchService().FindMatches(OnFindMatchesSuccess);
+        App.BC.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
 
         // After, fetch our game list from Braincloud
-        BrainCloudWrapper.GetBC().GetAsyncMatchService().FindMatches(OnFindMatchesSuccess);
+        App.BC.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
     }
 
     private void OnFindMatchesSuccess(string responseData, object cbPostObject)
@@ -67,7 +64,7 @@ public class GamePicker : MonoBehaviour
         }
 
         // Now, find completed matches so the user can go see the history
-        BrainCloudWrapper.GetBC().GetAsyncMatchService().FindCompleteMatches(OnFindCompletedMatches);
+        App.BC.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
     }
 
     private void OnFindCompletedMatches(string responseData, object cbPostObject)
@@ -154,8 +151,16 @@ public class GamePicker : MonoBehaviour
 
         GUILayout.EndScrollView();
 
+        
+        if (GUILayout.Button("REFRESH"))
+        {
+            App.BC.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+        }
+        
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
+
+        
         GUILayout.EndHorizontal();
     }
 
@@ -170,11 +175,11 @@ public class GamePicker : MonoBehaviour
         if (GUILayout.Button("<- Cancel", GUILayout.MinHeight(32), GUILayout.MaxWidth(75)))
             state = eState.GAME_PICKER;
 
-        foreach (var fbFriend in matchedProfiles)
+        foreach (var profile in matchedProfiles)
         {
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(fbFriend.playerName, GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
-                OnPickOpponent(fbFriend);
+            if (GUILayout.Button(profile.playerName, GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
+                OnPickOpponent(profile);
             GUILayout.EndHorizontal();
         }
 
@@ -185,20 +190,19 @@ public class GamePicker : MonoBehaviour
         GUILayout.EndHorizontal();
     }
 
-    private void OnPickOpponent(MatchedProfile fbFriend)
+    private void OnPickOpponent(MatchedProfile matchedProfile)
     {
         state = eState.STARTING_MATCH;
         var yourTurnFirst = Random.Range(0, 100) < 50;
 
         // Setup our summary data. This is what we see when we query
-        // the list of games. So we want to store information about our
-        // facebook ids so we can lookup our friend's picture and name
+        // the list of games.
         var summaryData = new JsonData();
         summaryData["players"] = new JsonData();
         {
             // Us
             var playerData = new JsonData();
-            playerData["profileId"] = BrainCloudLogin.ProfileId;
+            playerData["profileId"] = Login.ProfileId;
             //playerData["facebookId"] = FB.UserId;
             if (yourTurnFirst)
                 playerData["token"] = "X"; // First player has X
@@ -209,7 +213,7 @@ public class GamePicker : MonoBehaviour
         {
             // Our friend
             var playerData = new JsonData();
-            playerData["profileId"] = fbFriend.playerId;
+            playerData["profileId"] = matchedProfile.playerId;
             if (!yourTurnFirst)
                 playerData["token"] = "X"; // First player has X
             else
@@ -226,11 +230,11 @@ public class GamePicker : MonoBehaviour
         //JsonData opponentIds = new JsonData();
 
         // Create the match
-        BrainCloudWrapper.GetBC().AsyncMatchService.CreateMatchWithInitialTurn(
-            "[{\"platform\":\"BC\",\"id\":\"" + fbFriend.playerId + "\"}]", // Opponents
+        App.BC.AsyncMatchService.CreateMatchWithInitialTurn(
+            "[{\"platform\":\"BC\",\"id\":\"" + matchedProfile.playerId + "\"}]", // Opponents
             matchState.ToJson(), // Current match state
             "A friend has challenged you to a match of Tic Tac Toe.", // Push notification Message
-            yourTurnFirst ? BrainCloudLogin.ProfileId : fbFriend.playerId, // Which turn it is. We picked randomly
+            yourTurnFirst ? Login.ProfileId : matchedProfile.playerId, // Which turn it is. We picked randomly
             summaryData.ToJson(), // Summary data
             OnCreateMatchSuccess,
             OnCreateMatchFailed,
@@ -246,7 +250,7 @@ public class GamePicker : MonoBehaviour
         if (match.yourTurn)
             EnterMatch(match);
         else
-            Application.LoadLevel("GamePicker");
+            Application.LoadLevel("MatchSelect");
     }
 
     private void OnCreateMatchFailed(int a, int b, string responseData, object cbPostObject)
@@ -263,7 +267,7 @@ public class GamePicker : MonoBehaviour
         state = eState.LOADING;
 
         // Query more detail state about the match
-        BrainCloudWrapper.GetBC().AsyncMatchService
+        App.BC.AsyncMatchService
             .ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
     }
 
@@ -317,13 +321,10 @@ public class GamePicker : MonoBehaviour
 
         public MatchInfo(JsonData jsonMatch)
         {
-            Debug.Log(jsonMatch.ToJson());
-
-
             version = (int) jsonMatch["version"];
             ownerId = (string) jsonMatch["ownerId"];
             matchId = (string) jsonMatch["matchId"];
-            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == BrainCloudLogin.ProfileId;
+            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == Login.ProfileId;
 
             // Load player info
             LoadPlayerInfo(jsonMatch["summary"]["players"][0]);
@@ -332,26 +333,23 @@ public class GamePicker : MonoBehaviour
 
         private void LoadPlayerInfo(JsonData playerData)
         {
-            Debug.Log(playerData.ToJson());
-
             var token = (string) playerData["token"];
             TicTacToe.PlayerInfo playerInfo;
             if (token == "X") playerInfo = playerXInfo;
             else playerInfo = playerOInfo;
 
-            if ((string) playerData["profileId"] == BrainCloudLogin.ProfileId)
+            if ((string) playerData["profileId"] == Login.ProfileId)
             {
-                playerInfo.name = BrainCloudLogin.PlayerName;
+                playerInfo.name = Login.PlayerName;
                 //playerInfo.picUrl = FacebookLogin.PlayerPicUrl;				
                 yourToken = token;
             }
             else
             {
-                // Find your friend in your facebook list
-                foreach (var _fbFriend in matchedProfiles)
-                    if (_fbFriend.playerId == (string) playerData["profileId"])
+                foreach (var profile in matchedProfiles)
+                    if (profile.playerId == (string) playerData["profileId"])
                     {
-                        matchedProfile = _fbFriend;
+                        matchedProfile = profile;
                         break;
                     }
 
