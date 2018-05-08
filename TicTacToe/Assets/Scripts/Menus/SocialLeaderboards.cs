@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class SocialLeaderboards : BestScores
 {
-
     public override void postNewScore(int in_score)
     {
         newScore = in_score;
@@ -14,7 +13,7 @@ public class SocialLeaderboards : BestScores
         foreach (var entry in entriesText) entry.text = "";
 
         // Post score to social leaderboard. The callback should have the results
-        App.BC.SocialLeaderboardService.PostScoreToLeaderboard(
+        app.bc.SocialLeaderboardService.PostScoreToLeaderboard(
             "spacegame_highscores", // Leaderboard Id
             in_score, // Score
             "{}", // Optional extra data
@@ -26,7 +25,7 @@ public class SocialLeaderboards : BestScores
     private void OnPostScoreSuccess(string postResponseData, object cbPostObject)
     {
         // Now we fetch the leaderboards to see were we stand
-        App.BC.SocialLeaderboardService.GetSocialLeaderboard(
+        app.bc.SocialLeaderboardService.GetSocialLeaderboard(
             "spacegame_highscores", // Leaderboard Id
             true, // If true, your name will be replaced with "You"
             OnGetLeaderboardsSuccess, // Success callback

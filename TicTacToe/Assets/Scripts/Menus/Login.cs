@@ -1,32 +1,30 @@
-﻿using BrainCloud;
-using LitJson;
+﻿using LitJson;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class Login : MonoBehaviour
+public class Login : GameScene
 {
-    public static string ProfileId;
-    public static string PlayerName;
-    
     public Texture brainCloudLogo;
 
     private bool isConnecting;
-    
-    public Spinner spinner;
 
     public string password = "";
+
+    public Spinner spinner;
     public string username = "";
 
     // Use this for initialization
     private void Start()
-    {   
-        username = PlayerPrefs.GetString("username");
-        password = PlayerPrefs.GetString("password");
+    {
+        gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = app.viewportRect;
+
+        username = PlayerPrefs.GetString(app.wrapperName + "_username");
+        password = PlayerPrefs.GetString(app.wrapperName + "_password");
     }
 
     private void OnGUI()
     {
-        GUILayout.Window(0, new Rect(Screen.width / 2 - 125, Screen.height / 2 - 100, 250, 200), OnWindow,
+        GUILayout.Window(app.windowId, new Rect(Screen.width / 2 - 125 + app.offset, Screen.height / 2 - 100, 250, 200),
+            OnWindow,
             "brainCloud Login");
     }
 
@@ -53,29 +51,22 @@ public class Login : MonoBehaviour
             isConnecting = true;
             spinner.gameObject.SetActive(true);
 
-            App.BC.AuthenticateUniversal(username, password, true, (response, cbObject) =>
+            app.bc.AuthenticateUniversal(username, password, true, (response, cbObject) =>
             {
                 var data = JsonMapper.ToObject(response)["data"];
-                ProfileId = data["profileId"].ToString();
-                PlayerName = username;
+                app.ProfileId = data["profileId"].ToString();
+                app.PlayerName = username;
 
-                
-                PlayerPrefs.SetString("username", username);
-                PlayerPrefs.SetString("password", password);
-                
+
+                PlayerPrefs.SetString(app.wrapperName + "_username", username);
+                PlayerPrefs.SetString(app.wrapperName + "_password", password);
+
                 // If this is a new user, let's set their playerName
                 if (data["newUser"].ToString().Equals("true"))
-                {
-                    App.BC.PlayerStateService.UpdatePlayerName(username, (jsonResponse, o) =>
-                    {
-                        SceneManager.LoadScene("MatchSelect"); // Load our game
-                    });
-                }
+                    app.bc.PlayerStateService.UpdatePlayerName(username,
+                        (jsonResponse, o) => { app.GotoMatchSelectScene(gameObject); });
                 else
-                {
-                    SceneManager.LoadScene("MatchSelect"); // Load our game                    
-                }
-
+                    app.GotoMatchSelectScene(gameObject);
             }, (status, code, error, cbObject) => { Debug.Log(error); });
         }
 
@@ -83,6 +74,7 @@ public class Login : MonoBehaviour
 
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
+
         GUILayout.EndHorizontal();
         GUILayout.FlexibleSpace();
     }

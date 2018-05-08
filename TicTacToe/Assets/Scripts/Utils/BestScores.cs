@@ -5,6 +5,7 @@ using UnityEngine;
 public class BestScores : MonoBehaviour
 {
     protected const int MAX_ENTRIES = 10;
+    public App app;
     public GUIText[] entriesText;
 
     protected int newScore;
@@ -24,10 +25,10 @@ public class BestScores : MonoBehaviour
 
 
         // Fetch existing entities for this player
-        App.BC.PlayerStateService.ReadPlayerState((responseData, cbObject) =>
+        app.bc.PlayerStateService.ReadUserState((responseData, cbObject) =>
         {
             // Construct a list of all entities present for this player
-            var entityFactory = new BCEntityFactory(App.BC.EntityService);
+            var entityFactory = new BCEntityFactory(app.bc.EntityService);
             var entities = entityFactory.NewUserEntitiesFromReadPlayerState(responseData);
 
             // Search for our "BestScores" entity

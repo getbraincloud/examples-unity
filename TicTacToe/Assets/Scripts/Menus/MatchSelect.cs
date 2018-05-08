@@ -2,29 +2,30 @@
 using LitJson;
 using UnityEngine;
 
-public class MatchSelect : MonoBehaviour
+public class MatchSelect : GameScene
 {
-    private static readonly List<MatchedProfile> matchedProfiles = new List<MatchedProfile>();
+    private const int RANGE_DELTA = 10;
+    private const int NUMBER_OF_MATCHES = 10;
     private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
+    private readonly List<MatchedProfile> matchedProfiles = new List<MatchedProfile>();
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
 
     private Vector2 scrollPos;
     private eState state = eState.LOADING;
 
-    private const int RANGE_DELTA = 10;
-    const int NUMBER_OF_MATCHES = 10;
-
 
     // Use this for initialization
     private void Start()
     {
+        gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = app.viewportRect;
+
         // Enable Match Making, so other Users can also challege this Profile
         // http://getbraincloud.com/apidocs/apiref/#capi-matchmaking-enablematchmaking
-        App.BC.MatchMakingService
+        app.bc.MatchMakingService
             .EnableMatchMaking((response, cbObject) => { Debug.Log(response); },
                 (status, code, error, cbObject) => { Debug.Log(error); });
 
-        App.BC.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+        app.bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
 
         //App.BC.FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
     }
@@ -37,16 +38,13 @@ public class MatchSelect : MonoBehaviour
         var matchesData = JsonMapper.ToObject(responseData)["data"]["matchesFound"];
 
 
-        foreach (JsonData match in matchesData)
-        {
-            matchedProfiles.Add(new MatchedProfile(match));
-        }
+        foreach (JsonData match in matchesData) matchedProfiles.Add(new MatchedProfile(match));
 
 
-        App.BC.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
+        app.bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
 
         // After, fetch our game list from Braincloud
-        App.BC.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
+        app.bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
     }
 
     private void OnFindMatchesSuccess(string responseData, object cbPostObject)
@@ -59,12 +57,12 @@ public class MatchSelect : MonoBehaviour
         {
             var jsonMatch = jsonMatches[i];
 
-            var match = new MatchInfo(jsonMatch);
+            var match = new MatchInfo(jsonMatch, this);
             matches.Add(match);
         }
 
         // Now, find completed matches so the user can go see the history
-        App.BC.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
+        app.bc.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
     }
 
     private void OnFindCompletedMatches(string responseData, object cbPostObject)
@@ -76,7 +74,7 @@ public class MatchSelect : MonoBehaviour
         for (var i = 0; i < jsonMatches.Count; ++i)
         {
             var jsonMatch = jsonMatches[i];
-            var match = new MatchInfo(jsonMatch);
+            var match = new MatchInfo(jsonMatch, this);
             completedMatches.Add(match);
         }
 
@@ -105,13 +103,15 @@ public class MatchSelect : MonoBehaviour
             }
             case eState.GAME_PICKER:
             {
-                GUILayout.Window(0, new Rect(Screen.width / 2 - 150, Screen.height / 2 - 250, 300, 500),
+                GUILayout.Window(app.windowId,
+                    new Rect(Screen.width / 2 - 150 + app.offset, Screen.height / 2 - 250, 300, 500),
                     OnPickGameWindow, "Pick Game");
                 break;
             }
             case eState.NEW_GAME:
             {
-                GUILayout.Window(0, new Rect(Screen.width / 2 - 150, Screen.height / 2 - 250, 300, 500),
+                GUILayout.Window(app.windowId,
+                    new Rect(Screen.width / 2 - 150 + app.offset, Screen.height / 2 - 250, 300, 500),
                     OnNewGameWindow, "Pick Opponent");
                 break;
             }
@@ -151,16 +151,14 @@ public class MatchSelect : MonoBehaviour
 
         GUILayout.EndScrollView();
 
-        
+
         if (GUILayout.Button("REFRESH"))
-        {
-            App.BC.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
-        }
-        
+            app.bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
 
-        
+
         GUILayout.EndHorizontal();
     }
 
@@ -202,7 +200,7 @@ public class MatchSelect : MonoBehaviour
         {
             // Us
             var playerData = new JsonData();
-            playerData["profileId"] = Login.ProfileId;
+            playerData["profileId"] = app.ProfileId;
             //playerData["facebookId"] = FB.UserId;
             if (yourTurnFirst)
                 playerData["token"] = "X"; // First player has X
@@ -230,11 +228,11 @@ public class MatchSelect : MonoBehaviour
         //JsonData opponentIds = new JsonData();
 
         // Create the match
-        App.BC.AsyncMatchService.CreateMatchWithInitialTurn(
+        app.bc.AsyncMatchService.CreateMatchWithInitialTurn(
             "[{\"platform\":\"BC\",\"id\":\"" + matchedProfile.playerId + "\"}]", // Opponents
             matchState.ToJson(), // Current match state
             "A friend has challenged you to a match of Tic Tac Toe.", // Push notification Message
-            yourTurnFirst ? Login.ProfileId : matchedProfile.playerId, // Which turn it is. We picked randomly
+            yourTurnFirst ? app.ProfileId : matchedProfile.playerId, // Which turn it is. We picked randomly
             summaryData.ToJson(), // Summary data
             OnCreateMatchSuccess,
             OnCreateMatchFailed,
@@ -244,13 +242,13 @@ public class MatchSelect : MonoBehaviour
     private void OnCreateMatchSuccess(string responseData, object cbPostObject)
     {
         var data = JsonMapper.ToObject(responseData);
-        var match = new MatchInfo(data["data"]);
+        var match = new MatchInfo(data["data"], this);
 
         // Go to the game if it's your turn
         if (match.yourTurn)
             EnterMatch(match);
         else
-            Application.LoadLevel("MatchSelect");
+            app.GotoMatchSelectScene(gameObject);
     }
 
     private void OnCreateMatchFailed(int a, int b, string responseData, object cbPostObject)
@@ -267,7 +265,7 @@ public class MatchSelect : MonoBehaviour
         state = eState.LOADING;
 
         // Query more detail state about the match
-        App.BC.AsyncMatchService
+        app.bc.AsyncMatchService
             .ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
     }
 
@@ -276,17 +274,19 @@ public class MatchSelect : MonoBehaviour
         var match = cbPostObject as MatchInfo;
         var data = JsonMapper.ToObject(responseData)["data"];
 
+
         // Setup a couple stuff into our TicTacToe scene
-        TicTacToe.boardState = (string) data["matchState"]["board"];
-        TicTacToe.playerInfoX = match.playerXInfo;
-        TicTacToe.playerInfoO = match.playerOInfo;
-        TicTacToe.whosTurn = match.yourToken == "X" ? TicTacToe.playerInfoX : match.playerOInfo;
-        TicTacToe.ownerId = match.ownerId;
-        TicTacToe.matchId = match.matchId;
-        TicTacToe.matchVersion = (ulong) match.version;
+        app.boardState = (string) data["matchState"]["board"];
+        app.playerInfoX = match.playerXInfo;
+        app.playerInfoO = match.playerOInfo;
+        app.whosTurn = match.yourToken == "X" ? app.playerInfoX : match.playerOInfo;
+        app.ownerId = match.ownerId;
+        app.matchId = match.matchId;
+        app.matchVersion = (ulong) match.version;
 
         // Load the Tic Tac Toe scene
-        Application.LoadLevel("TicTacToe");
+
+        app.GotoTicTacToeScene(gameObject);
     }
 
     private void OnReadMatchFailed(int a, int b, string responseData, object cbPostObject)
@@ -312,19 +312,23 @@ public class MatchSelect : MonoBehaviour
     {
         public MatchedProfile matchedProfile;
         public string matchId;
+
+        private readonly MatchSelect matchSelect;
         public string ownerId;
-        public TicTacToe.PlayerInfo playerOInfo = new TicTacToe.PlayerInfo();
-        public TicTacToe.PlayerInfo playerXInfo = new TicTacToe.PlayerInfo();
+        public PlayerInfo playerOInfo = new PlayerInfo();
+        public PlayerInfo playerXInfo = new PlayerInfo();
         public int version;
         public string yourToken;
         public bool yourTurn;
 
-        public MatchInfo(JsonData jsonMatch)
+        public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {
             version = (int) jsonMatch["version"];
             ownerId = (string) jsonMatch["ownerId"];
             matchId = (string) jsonMatch["matchId"];
-            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == Login.ProfileId;
+            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == matchSelect.app.ProfileId;
+
+            this.matchSelect = matchSelect;
 
             // Load player info
             LoadPlayerInfo(jsonMatch["summary"]["players"][0]);
@@ -334,19 +338,19 @@ public class MatchSelect : MonoBehaviour
         private void LoadPlayerInfo(JsonData playerData)
         {
             var token = (string) playerData["token"];
-            TicTacToe.PlayerInfo playerInfo;
+            PlayerInfo playerInfo;
             if (token == "X") playerInfo = playerXInfo;
             else playerInfo = playerOInfo;
 
-            if ((string) playerData["profileId"] == Login.ProfileId)
+            if ((string) playerData["profileId"] == matchSelect.app.ProfileId)
             {
-                playerInfo.name = Login.PlayerName;
+                playerInfo.name = matchSelect.app.PlayerName;
                 //playerInfo.picUrl = FacebookLogin.PlayerPicUrl;				
                 yourToken = token;
             }
             else
             {
-                foreach (var profile in matchedProfiles)
+                foreach (var profile in matchSelect.matchedProfiles)
                     if (profile.playerId == (string) playerData["profileId"])
                     {
                         matchedProfile = profile;

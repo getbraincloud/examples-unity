@@ -1,33 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using LitJson;
 using UnityEngine;
 
-public class TicTacToe : MonoBehaviour
+public class TicTacToe : GameScene
 {
-    public static string boardState = "#########";
-    public static PlayerInfo whosTurn;
-    public static PlayerInfo playerInfoX = new PlayerInfo();
-    public static PlayerInfo playerInfoO = new PlayerInfo();
-    public static string matchId;
-    public static string ownerId;
-    public static ulong matchVersion;
+    private readonly int[] grid = new int[9];
 
-    private static readonly int[,] m_WinningCond =
-    {
-        //List of possible winning conditions
-        {0, 1, 2},
-        {3, 4, 5},
-        {6, 7, 8},
-        {0, 3, 6},
-        {1, 4, 7},
-        {2, 5, 8},
-        {0, 4, 8},
-        {2, 4, 6}
-    };
-
-    private static readonly Vector3[] m_tokenPositions =
+    private readonly Vector3[] m_tokenPositions =
     {
         new Vector3(-2.1f, 12, 2.1f),
         new Vector3(0, 12, 2.1f),
@@ -40,7 +22,19 @@ public class TicTacToe : MonoBehaviour
         new Vector3(2.1f, 12, -2.1f)
     };
 
-    private readonly int[] grid = new int[9];
+    private readonly int[,] m_WinningCond =
+    {
+        //List of possible winning conditions
+        {0, 1, 2},
+        {3, 4, 5},
+        {6, 7, 8},
+        {0, 3, 6},
+        {1, 4, 7},
+        {2, 5, 8},
+        {0, 4, 8},
+        {2, 4, 6}
+    };
+
     public List<GameObject> gridObjList;
     private List<string> m_history;
     private bool m_isHistoryMatch;
@@ -56,8 +50,19 @@ public class TicTacToe : MonoBehaviour
     {
         m_winner = 0;
 
+
+        var parent = gameObject.transform.parent.gameObject;
+
+        parent.transform.localPosition = new Vector3(parent.transform.localPosition.x + app.offset,
+            parent.transform.localPosition.y, parent.transform.localPosition.z);
+
+        for (var i = 0; i < m_tokenPositions.Length; i++) m_tokenPositions[i].x += app.offset;
+
+        parent.GetComponentInChildren<Camera>().rect = app.viewportRect;
+
+
         // Read the state and assembly the board
-        BuildBoardFromState(boardState);
+        BuildBoardFromState(app.boardState);
 
         // Check we if are not seeing a done match
         m_winner = CheckForWinner();
@@ -68,11 +73,11 @@ public class TicTacToe : MonoBehaviour
         var playerXName = GameObject.Find("PlayerXName").GetComponent<GUIText>();
         var playerOName = GameObject.Find("PlayerOName").GetComponent<GUIText>();
 
-        StartCoroutine(SetProfilePic(playerInfoX.picUrl, playerXPic));
-        StartCoroutine(SetProfilePic(playerInfoO.picUrl, playerOPic));
+        StartCoroutine(SetProfilePic(app.playerInfoX.picUrl, playerXPic));
+        StartCoroutine(SetProfilePic(app.playerInfoO.picUrl, playerOPic));
 
-        playerXName.text = playerInfoX.name;
-        playerOName.text = playerInfoO.name;
+        playerXName.text = app.playerInfoX.name;
+        playerOName.text = app.playerInfoO.name;
         playerTurnText.text = "Your Turn";
 
         m_turnPlayed = false;
@@ -88,8 +93,8 @@ public class TicTacToe : MonoBehaviour
                 playerTurnText.text = "Match Completed";
 
             // Read match history
-            App.BC.AsyncMatchService
-                .ReadMatchHistory(ownerId, matchId, OnReadMatchHistory, null, null);
+            app.bc.AsyncMatchService
+                .ReadMatchHistory(app.ownerId, app.matchId, OnReadMatchHistory, null, null);
         }
     }
 
@@ -117,21 +122,24 @@ public class TicTacToe : MonoBehaviour
     {
         gridObjList.Add(Instantiate(token == "X" ? playerX : playerO, m_tokenPositions[index],
             Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f))));
+        gridObjList.Last().transform.parent = gameObject.transform;
         grid[index] = token == "X" ? 1 : 2;
     }
 
     public void PlayTurn(int index, PlayerInfo player)
     {
-        var token = player == playerInfoX ? "X" : "O";
+        var token = player == app.playerInfoX ? "X" : "O";
         AddToken(index, token);
         // Modify the boardState
-        var boardStateBuilder = new StringBuilder(boardState);
+        var boardStateBuilder = new StringBuilder(app.boardState);
         boardStateBuilder[index] = token[0];
-        boardState = boardStateBuilder.ToString();
+        app.boardState = boardStateBuilder.ToString();
 
         m_turnPlayed = true;
-        if (whosTurn == playerInfoX) whosTurn = playerInfoO;
-        else whosTurn = playerInfoX;
+        if (app.whosTurn == app.playerInfoX)
+            app.whosTurn = app.playerInfoO;
+        else
+            app.whosTurn = app.playerInfoX;
         m_winner = CheckForWinner();
 
         if (m_winner < 0)
@@ -140,20 +148,21 @@ public class TicTacToe : MonoBehaviour
         }
         else if (m_winner > 0)
         {
-            if (m_winner == 1) playerTurnText.text = playerInfoX.name + " Wins!";
-            else playerTurnText.text = playerInfoO.name + " Wins!";
+            if (m_winner == 1)
+                playerTurnText.text = app.playerInfoX.name + " Wins!";
+            else
+                playerTurnText.text = app.playerInfoO.name + " Wins!";
         }
         else
         {
-            playerTurnText.text = whosTurn.name + " Turn";
+            playerTurnText.text = app.whosTurn.name + " Turn";
         }
     }
 
     private void ClearTokens()
     {
         //Clear logical grid
-        for (var i = 0; i < grid.Length; i++)
-            grid[i] = 0;
+        for (var i = 0; i < grid.Length; i++) grid[i] = 0;
 
         //Clear instanciated game objects
         foreach (var obj in gridObjList) Destroy(obj);
@@ -163,8 +172,7 @@ public class TicTacToe : MonoBehaviour
     public bool AvailableSlot(int index)
     {
         if (m_turnPlayed) return false;
-        if (grid[index] == 0)
-            return true;
+        if (grid[index] == 0) return true;
         return false;
     }
 
@@ -193,8 +201,7 @@ public class TicTacToe : MonoBehaviour
             }
         }
 
-        if (gameEnded && ourWinner == 0)
-            ourWinner = -1;
+        if (gameEnded && ourWinner == 0) ourWinner = -1;
 
         return ourWinner;
     }
@@ -211,24 +218,25 @@ public class TicTacToe : MonoBehaviour
 
         if (m_isHistoryMatch)
         {
-            if (GUI.Button(new Rect(Screen.width / 2 - 70, 60, 140, 30), "Leave")) Application.LoadLevel("GamePicker");
+            if (GUI.Button(new Rect(Screen.width / 2 - 70 + app.offset, 60, 140, 30), "Leave"))
+                app.GotoMatchSelectScene(gameObject);
         }
-        else if (GUI.Button(new Rect(Screen.width / 2 - 70, 60, 140, 30), btnText))
+        else if (GUI.Button(new Rect(Screen.width / 2 - 70 + app.offset, 60, 140, 30), btnText))
         {
             // Ask the user to submit his turn
             var boardStateJson = new JsonData();
-            boardStateJson["board"] = boardState;
+            boardStateJson["board"] = app.boardState;
 
-            App.BC.AsyncMatchService.SubmitTurn(
-                ownerId,
-                matchId,
-                matchVersion,
+            app.bc.AsyncMatchService.SubmitTurn(
+                app.ownerId,
+                app.matchId,
+                app.matchVersion,
                 boardStateJson.ToJson(),
                 "A turn has been played",
                 null,
                 null,
                 null,
-                OnTurnSubmitted);
+                OnTurnSubmitted, (status, code, error, cbObject) => { Debug.Log(error); });
         }
     }
 
@@ -248,11 +256,12 @@ public class TicTacToe : MonoBehaviour
         if (m_history == null) return;
 
         var i = 0;
-        GUI.Label(new Rect(Screen.width - 90, 130, 70, 30), "History:");
+        GUI.Label(new Rect(Screen.width / 2 + app.offset, 130, 70, 30), "History:");
         foreach (var turnState in m_history)
         {
-            if (GUI.Button(new Rect(Screen.width - 90, 150 + i * 40, 70, 30), "Turn " + i))
+            if (GUI.Button(new Rect(Screen.width / 2 + app.offset, 150 + i * 40, 70, 30), "Turn " + i))
                 BuildBoardFromState(turnState);
+
             ++i;
         }
     }
@@ -262,26 +271,20 @@ public class TicTacToe : MonoBehaviour
         if (m_winner == 0)
         {
             // Go back to game select scene
-            Application.LoadLevel("MatchSelect");
+            app.GotoMatchSelectScene(gameObject);
             return;
         }
 
         // Otherwise, the game was done. Send a complete turn
-        App.BC.AsyncMatchService.CompleteMatch(
-            ownerId,
-            matchId,
+        app.bc.AsyncMatchService.CompleteMatch(
+            app.ownerId,
+            app.matchId,
             OnMatchCompleted);
     }
 
     private void OnMatchCompleted(string responseData, object cbPostObject)
     {
         // Go back to game select scene
-        Application.LoadLevel("MatchSelect");
-    }
-
-    public class PlayerInfo
-    {
-        public string name;
-        public string picUrl;
+        app.GotoMatchSelectScene(gameObject);
     }
 }

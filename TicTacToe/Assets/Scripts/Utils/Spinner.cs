@@ -2,8 +2,8 @@
 
 public class Spinner : MonoBehaviour
 {
-    private float spinTime;
     public float spinSpeed = .10f;
+    private float spinTime;
 
     private void Update()
     {
