@@ -2,5 +2,5 @@
 
 public class GameScene : MonoBehaviour
 {
-    public App app;
+    public App App;
 }

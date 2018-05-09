@@ -1,5 +1,5 @@
 ﻿public class PlayerInfo
 {
-    public string name;
-    public string picUrl;
+    public string Name;
+    public string PictureUrl;
 }

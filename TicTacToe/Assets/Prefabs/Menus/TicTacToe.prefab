@@ -1530,7 +1530,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 0
+  App: {fileID: 0}
+  GridIndex: 0
 --- !u!114 &114273122537451536
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1542,7 +1543,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 1
+  App: {fileID: 0}
+  GridIndex: 1
 --- !u!114 &114295937094242064
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1554,7 +1556,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 6
+  App: {fileID: 0}
+  GridIndex: 6
 --- !u!114 &114339251882281666
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1566,7 +1569,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 3
+  App: {fileID: 0}
+  GridIndex: 3
 --- !u!114 &114405488978343974
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1578,7 +1582,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 8
+  App: {fileID: 0}
+  GridIndex: 8
 --- !u!114 &114405627459826528
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1590,7 +1595,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 2
+  App: {fileID: 0}
+  GridIndex: 2
 --- !u!114 &114420857071024524
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1602,7 +1608,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 7
+  App: {fileID: 0}
+  GridIndex: 7
 --- !u!114 &114679668301001542
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1614,11 +1621,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b456cde081bbaa341ae3dafb8aa0a9dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  app: {fileID: 0}
-  gridObjList: []
-  playerO: {fileID: 105890, guid: 3d77798222c4bac479b5005be9b619c0, type: 2}
-  playerTurnText: {fileID: 132018711207934006}
-  playerX: {fileID: 109304, guid: a6a76c135625b434a8fa51024bf8db63, type: 2}
+  App: {fileID: 0}
+  _gridObjList: []
+  _playerO: {fileID: 105890, guid: 3d77798222c4bac479b5005be9b619c0, type: 2}
+  _playerTurnText: {fileID: 132018711207934006}
+  _playerX: {fileID: 109304, guid: a6a76c135625b434a8fa51024bf8db63, type: 2}
 --- !u!114 &114782366071524128
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1630,7 +1637,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 4
+  App: {fileID: 0}
+  GridIndex: 4
 --- !u!114 &114816352085468764
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1642,7 +1650,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9aa822f5f10f3a74f82abfc4ba6dbe95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridIndex: 5
+  App: {fileID: 0}
+  GridIndex: 5
 --- !u!124 &124487187619240220
 Behaviour:
   m_ObjectHideFlags: 1

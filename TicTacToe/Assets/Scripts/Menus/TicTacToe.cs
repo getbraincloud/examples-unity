@@ -7,9 +7,9 @@ using UnityEngine;
 
 public class TicTacToe : GameScene
 {
-    private readonly int[] grid = new int[9];
+    private readonly int[] _grid = new int[9];
 
-    private readonly Vector3[] m_tokenPositions =
+    private readonly Vector3[] _tokenPositions =
     {
         new Vector3(-2.1f, 12, 2.1f),
         new Vector3(0, 12, 2.1f),
@@ -22,7 +22,7 @@ public class TicTacToe : GameScene
         new Vector3(2.1f, 12, -2.1f)
     };
 
-    private readonly int[,] m_WinningCond =
+    private readonly int[,] _winningCond =
     {
         //List of possible winning conditions
         {0, 1, 2},
@@ -35,37 +35,39 @@ public class TicTacToe : GameScene
         {2, 4, 6}
     };
 
-    public List<GameObject> gridObjList;
-    private List<string> m_history;
-    private bool m_isHistoryMatch;
-    private bool m_turnPlayed;
+    public List<GameObject> _gridObjList;
+    private List<string> _history;
+    private bool _isHistoryMatch;
 
-    private int m_winner;
-    public GameObject playerO;
-    public GUIText playerTurnText;
+    private MatchState _matchState;
+    public GameObject _playerO;
+    public GUIText _playerTurnText;
 
-    public GameObject playerX;
+    public GameObject _playerX;
+    private bool _turnPlayed;
+
+    private int _winner;
 
     private void Start()
     {
-        m_winner = 0;
+        _winner = 0;
 
 
         var parent = gameObject.transform.parent.gameObject;
 
-        parent.transform.localPosition = new Vector3(parent.transform.localPosition.x + app.offset,
+        parent.transform.localPosition = new Vector3(parent.transform.localPosition.x + App.Offset,
             parent.transform.localPosition.y, parent.transform.localPosition.z);
 
-        for (var i = 0; i < m_tokenPositions.Length; i++) m_tokenPositions[i].x += app.offset;
+        for (var i = 0; i < _tokenPositions.Length; i++) _tokenPositions[i].x += App.Offset;
 
-        parent.GetComponentInChildren<Camera>().rect = app.viewportRect;
+        parent.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
 
         // Read the state and assembly the board
-        BuildBoardFromState(app.boardState);
+        BuildBoardFromState(App.BoardState);
 
         // Check we if are not seeing a done match
-        m_winner = CheckForWinner();
+        _winner = CheckForWinner();
 
         // Setup HUD with player pics and names
         var playerXPic = GameObject.Find("PlayerXPic").GetComponent<GUITexture>();
@@ -73,28 +75,31 @@ public class TicTacToe : GameScene
         var playerXName = GameObject.Find("PlayerXName").GetComponent<GUIText>();
         var playerOName = GameObject.Find("PlayerOName").GetComponent<GUIText>();
 
-        StartCoroutine(SetProfilePic(app.playerInfoX.picUrl, playerXPic));
-        StartCoroutine(SetProfilePic(app.playerInfoO.picUrl, playerOPic));
+        StartCoroutine(SetProfilePic(App.PlayerInfoX.PictureUrl, playerXPic));
+        StartCoroutine(SetProfilePic(App.PlayerInfoO.PictureUrl, playerOPic));
 
-        playerXName.text = app.playerInfoX.name;
-        playerOName.text = app.playerInfoO.name;
-        playerTurnText.text = "Your Turn";
+        playerXName.text = App.PlayerInfoX.Name;
+        playerOName.text = App.PlayerInfoO.Name;
+        _playerTurnText.text = "Your Turn";
 
-        m_turnPlayed = false;
+        _turnPlayed = false;
 
-        m_winner = CheckForWinner();
-        if (m_winner != 0)
+        _winner = CheckForWinner();
+        if (_winner != 0)
         {
-            m_isHistoryMatch = true;
-            m_turnPlayed = true;
-            if (m_winner == -1)
-                playerTurnText.text = "Match Tied";
+            _isHistoryMatch = true;
+            _turnPlayed = true;
+
+            _matchState = MatchState.MATCH_HISTORY;
+
+            if (_winner == -1)
+                _playerTurnText.text = "Match Tied";
             else
-                playerTurnText.text = "Match Completed";
+                _playerTurnText.text = "Match Completed";
 
             // Read match history
-            app.bc.AsyncMatchService
-                .ReadMatchHistory(app.ownerId, app.matchId, OnReadMatchHistory, null, null);
+            App.Bc.AsyncMatchService
+                .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
         }
     }
 
@@ -102,12 +107,12 @@ public class TicTacToe : GameScene
     {
         var turns = JsonMapper.ToObject(responseData)["data"]["turns"];
 
-        m_history = new List<string>();
+        _history = new List<string>();
         for (var i = 0; i < turns.Count; ++i)
         {
             var turn = turns[i];
             var turnState = (string) turn["matchState"]["board"];
-            m_history.Add(turnState);
+            _history.Add(turnState);
         }
     }
 
@@ -120,59 +125,63 @@ public class TicTacToe : GameScene
 
     private void AddToken(int index, string token)
     {
-        gridObjList.Add(Instantiate(token == "X" ? playerX : playerO, m_tokenPositions[index],
+        _gridObjList.Add(Instantiate(token == "X" ? _playerX : _playerO, _tokenPositions[index],
             Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f))));
-        gridObjList.Last().transform.parent = gameObject.transform;
-        grid[index] = token == "X" ? 1 : 2;
+        _gridObjList.Last().transform.parent = gameObject.transform;
+        _grid[index] = token == "X" ? 1 : 2;
     }
 
     public void PlayTurn(int index, PlayerInfo player)
     {
-        var token = player == app.playerInfoX ? "X" : "O";
+        var token = player == App.PlayerInfoX ? "X" : "O";
         AddToken(index, token);
         // Modify the boardState
-        var boardStateBuilder = new StringBuilder(app.boardState);
+        var boardStateBuilder = new StringBuilder(App.BoardState);
         boardStateBuilder[index] = token[0];
-        app.boardState = boardStateBuilder.ToString();
+        App.BoardState = boardStateBuilder.ToString();
 
-        m_turnPlayed = true;
-        if (app.whosTurn == app.playerInfoX)
-            app.whosTurn = app.playerInfoO;
+        _turnPlayed = true;
+
+        _matchState = MatchState.TURN_PLAYED;
+
+        if (App.WhosTurn == App.PlayerInfoX)
+            App.WhosTurn = App.PlayerInfoO;
         else
-            app.whosTurn = app.playerInfoX;
-        m_winner = CheckForWinner();
+            App.WhosTurn = App.PlayerInfoX;
 
-        if (m_winner < 0)
+        _winner = CheckForWinner();
+
+        if (_winner < 0)
         {
-            playerTurnText.text = "Game Tied!";
+            _playerTurnText.text = "Game Tied!";
         }
-        else if (m_winner > 0)
+        else if (_winner > 0)
         {
-            if (m_winner == 1)
-                playerTurnText.text = app.playerInfoX.name + " Wins!";
+            if (_winner == 1)
+                _playerTurnText.text = App.PlayerInfoX.Name + " Wins!";
             else
-                playerTurnText.text = app.playerInfoO.name + " Wins!";
+                _playerTurnText.text = App.PlayerInfoO.Name + " Wins!";
         }
         else
         {
-            playerTurnText.text = app.whosTurn.name + " Turn";
+            _playerTurnText.text = App.WhosTurn.Name + " Turn";
         }
     }
 
     private void ClearTokens()
     {
         //Clear logical grid
-        for (var i = 0; i < grid.Length; i++) grid[i] = 0;
+        for (var i = 0; i < _grid.Length; i++) _grid[i] = 0;
 
         //Clear instanciated game objects
-        foreach (var obj in gridObjList) Destroy(obj);
-        gridObjList.Clear();
+        foreach (var obj in _gridObjList) Destroy(obj);
+        _gridObjList.Clear();
     }
 
     public bool AvailableSlot(int index)
     {
-        if (m_turnPlayed) return false;
-        if (grid[index] == 0) return true;
+        if (_turnPlayed) return false;
+        if (_grid[index] == 0) return true;
         return false;
     }
 
@@ -185,8 +194,8 @@ public class TicTacToe : GameScene
 
         for (var i = 0; i < 8; i++)
         {
-            int a = m_WinningCond[i, 0], b = m_WinningCond[i, 1], c = m_WinningCond[i, 2];
-            int b1 = grid[a], b2 = grid[b], b3 = grid[c];
+            int a = _winningCond[i, 0], b = _winningCond[i, 1], c = _winningCond[i, 2];
+            int b1 = _grid[a], b2 = _grid[b], b3 = _grid[c];
 
             if (b1 == 0 || b2 == 0 || b3 == 0)
             {
@@ -211,26 +220,26 @@ public class TicTacToe : GameScene
         // Display History HUD
         OnHistoryGUI();
 
-        if (!m_turnPlayed) return;
+        if (!_turnPlayed) return;
 
         var btnText = "Submit Turn";
-        if (m_winner != 0) btnText = "Complete Game";
+        if (_winner != 0) btnText = "Complete Game";
 
-        if (m_isHistoryMatch)
+        if (_isHistoryMatch)
         {
-            if (GUI.Button(new Rect(Screen.width / 2 - 70 + app.offset, 60, 140, 30), "Leave"))
-                app.GotoMatchSelectScene(gameObject);
+            if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), "Leave"))
+                App.GotoMatchSelectScene(gameObject);
         }
-        else if (GUI.Button(new Rect(Screen.width / 2 - 70 + app.offset, 60, 140, 30), btnText))
+        else if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), btnText))
         {
             // Ask the user to submit his turn
             var boardStateJson = new JsonData();
-            boardStateJson["board"] = app.boardState;
+            boardStateJson["board"] = App.BoardState;
 
-            app.bc.AsyncMatchService.SubmitTurn(
-                app.ownerId,
-                app.matchId,
-                app.matchVersion,
+            App.Bc.AsyncMatchService.SubmitTurn(
+                App.OwnerId,
+                App.MatchId,
+                App.MatchVersion,
                 boardStateJson.ToJson(),
                 "A turn has been played",
                 null,
@@ -253,13 +262,13 @@ public class TicTacToe : GameScene
 
     private void OnHistoryGUI()
     {
-        if (m_history == null) return;
+        if (_history == null) return;
 
         var i = 0;
-        GUI.Label(new Rect(Screen.width / 2 + app.offset, 130, 70, 30), "History:");
-        foreach (var turnState in m_history)
+        GUI.Label(new Rect(Screen.width / 2 + App.Offset, 130, 70, 30), "History:");
+        foreach (var turnState in _history)
         {
-            if (GUI.Button(new Rect(Screen.width / 2 + app.offset, 150 + i * 40, 70, 30), "Turn " + i))
+            if (GUI.Button(new Rect(Screen.width / 2 + App.Offset, 150 + i * 40, 70, 30), "Turn " + i))
                 BuildBoardFromState(turnState);
 
             ++i;
@@ -268,23 +277,33 @@ public class TicTacToe : GameScene
 
     private void OnTurnSubmitted(string responseData, object cbPostObject)
     {
-        if (m_winner == 0)
+        if (_winner == 0)
         {
             // Go back to game select scene
-            app.GotoMatchSelectScene(gameObject);
+            App.GotoMatchSelectScene(gameObject);
             return;
         }
 
         // Otherwise, the game was done. Send a complete turn
-        app.bc.AsyncMatchService.CompleteMatch(
-            app.ownerId,
-            app.matchId,
+        App.Bc.AsyncMatchService.CompleteMatch(
+            App.OwnerId,
+            App.MatchId,
             OnMatchCompleted);
     }
 
     private void OnMatchCompleted(string responseData, object cbPostObject)
     {
         // Go back to game select scene
-        app.GotoMatchSelectScene(gameObject);
+        App.GotoMatchSelectScene(gameObject);
+    }
+
+
+    private enum MatchState
+    {
+        YOUR_TURN,
+        TURN_PLAYED,
+        WAIT_FOR_TURN,
+        MATCH_HISTORY,
+        COMPLETED
     }
 }

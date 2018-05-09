@@ -6,14 +6,14 @@ public class SocialLeaderboards : BestScores
 {
     public override void postNewScore(int in_score)
     {
-        newScore = in_score;
-        newScoreIndex = -1; // -1 means it's not in the top 10
-        spinner.gameObject.SetActive(true);
+        _newScore = in_score;
+        _newScoreIndex = -1; // -1 means it's not in the top 10
+        Spinner.gameObject.SetActive(true);
 
-        foreach (var entry in entriesText) entry.text = "";
+        foreach (var entry in EntriesText) entry.text = "";
 
         // Post score to social leaderboard. The callback should have the results
-        app.bc.SocialLeaderboardService.PostScoreToLeaderboard(
+        App.Bc.SocialLeaderboardService.PostScoreToLeaderboard(
             "spacegame_highscores", // Leaderboard Id
             in_score, // Score
             "{}", // Optional extra data
@@ -25,7 +25,7 @@ public class SocialLeaderboards : BestScores
     private void OnPostScoreSuccess(string postResponseData, object cbPostObject)
     {
         // Now we fetch the leaderboards to see were we stand
-        app.bc.SocialLeaderboardService.GetSocialLeaderboard(
+        App.Bc.SocialLeaderboardService.GetSocialLeaderboard(
             "spacegame_highscores", // Leaderboard Id
             true, // If true, your name will be replaced with "You"
             OnGetLeaderboardsSuccess, // Success callback
@@ -35,7 +35,7 @@ public class SocialLeaderboards : BestScores
     private void OnPostScoreFailed(int a, int b, string postResponseData, object cbPostObject)
     {
         Debug.LogError("Failed to Post score");
-        spinner.gameObject.SetActive(false); // Hide spinner
+        Spinner.gameObject.SetActive(false); // Hide spinner
     }
 
     private void OnGetLeaderboardsSuccess(string responseData, object cbObject)
@@ -53,24 +53,23 @@ public class SocialLeaderboards : BestScores
             var score = 0;
             var name = entry["name"].ToString();
             var pictureUrl = entry["pictureUrl"].ToString();
-            if (entry["score"] != null)
-                score = int.Parse(entry["score"].ToString());
+            if (entry["score"] != null) score = int.Parse(entry["score"].ToString());
 
-            entriesText[i].text = i + 1 + ". " + name + ", " + score;
+            EntriesText[i].text = i + 1 + ". " + name + ", " + score;
 
             // Set it's profile picture
-            var profilePic = entriesText[i].transform.Find("ProfilePic").gameObject.GetComponent<GUITexture>();
+            var profilePic = EntriesText[i].transform.Find("ProfilePic").gameObject.GetComponent<GUITexture>();
             StartCoroutine(setProfilePic(pictureUrl, profilePic));
         }
 
         // Stop the spinner
-        spinner.gameObject.SetActive(false);
+        Spinner.gameObject.SetActive(false);
     }
 
     private void OnGetLeaderboardsFailed(int a, int b, string responseData, object cbObject)
     {
         Debug.LogError("Failed to get Leaderboards");
-        spinner.gameObject.SetActive(false); // Hide spinner
+        Spinner.gameObject.SetActive(false); // Hide spinner
     }
 
     private IEnumerator setProfilePic(string url, GUITexture profilePic)

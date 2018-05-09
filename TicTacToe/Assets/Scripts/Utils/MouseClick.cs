@@ -2,23 +2,22 @@
 
 public class MouseClick : MonoBehaviour
 {
-    public App app;
-    public int gridIndex;
+    public App App;
+    public int GridIndex;
 
     public void Start()
     {
-        app = gameObject.transform.parent.GetComponent<GameScene>().app;
+        App = gameObject.transform.parent.GetComponent<GameScene>().App;
     }
 
 
     private void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            var board = gameObject.transform.parent;
-            var boardScript = board.GetComponent<TicTacToe>();
+        if (!Input.GetMouseButtonDown(0)) return;
 
-            if (boardScript.AvailableSlot(gridIndex)) boardScript.PlayTurn(gridIndex, app.whosTurn);
-        }
+        var board = gameObject.transform.parent;
+        var boardScript = board.GetComponent<TicTacToe>();
+
+        if (boardScript.AvailableSlot(GridIndex)) boardScript.PlayTurn(GridIndex, App.WhosTurn);
     }
 }

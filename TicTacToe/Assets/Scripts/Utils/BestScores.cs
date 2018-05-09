@@ -2,33 +2,33 @@
 using BrainCloud.Entity;
 using UnityEngine;
 
-public class BestScores : MonoBehaviour
+public class BestScores : GameScene
 {
     protected const int MAX_ENTRIES = 10;
-    public App app;
-    public GUIText[] entriesText;
 
-    protected int newScore;
-    protected int newScoreIndex;
+    protected int _newScore;
+    protected int _newScoreIndex;
 
-    public Spinner spinner;
+    public GUIText[] EntriesText;
+
+    public Spinner Spinner;
 
     public virtual void postNewScore(int in_score)
     {
-        newScore = in_score;
-        newScoreIndex = -1; // -1 means it's not in the top 10
-        spinner.gameObject.SetActive(true);
+        _newScore = in_score;
+        _newScoreIndex = -1; // -1 means it's not in the top 10
+        Spinner.gameObject.SetActive(true);
 
-        foreach (var entry in entriesText) entry.text = "";
+        foreach (var entry in EntriesText) entry.text = "";
 
         // Save 10 last best scores into a player entity in brainCloud
 
 
         // Fetch existing entities for this player
-        app.bc.PlayerStateService.ReadUserState((responseData, cbObject) =>
+        App.Bc.PlayerStateService.ReadUserState((responseData, cbObject) =>
         {
             // Construct a list of all entities present for this player
-            var entityFactory = new BCEntityFactory(app.bc.EntityService);
+            var entityFactory = new BCEntityFactory(App.Bc.EntityService);
             var entities = entityFactory.NewUserEntitiesFromReadPlayerState(responseData);
 
             // Search for our "BestScores" entity
@@ -65,14 +65,14 @@ public class BestScores : MonoBehaviour
             for (var i = 0; i < MAX_ENTRIES; ++i)
             {
                 var previous = entries[i];
-                if (newScore > previous)
+                if (_newScore > previous)
                 {
                     // Shift previous entries back
                     for (var j = MAX_ENTRIES - 1; j > i; --j) entries[j] = entries[j - 1];
 
                     // Insert new one here
-                    entries[i] = newScore;
-                    newScoreIndex = i;
+                    entries[i] = _newScore;
+                    _newScoreIndex = i;
                     break;
                 }
             }
@@ -85,15 +85,15 @@ public class BestScores : MonoBehaviour
             {
                 var score = entries[i];
                 if (score == 0)
-                    entriesText[i].text = "---"; // No entry here
+                    EntriesText[i].text = "---"; // No entry here
                 else
-                    entriesText[i].text = score.ToString();
+                    EntriesText[i].text = score.ToString();
 
                 // Show our new score if it's high enough, with little arrows --> score <--
-                if (newScoreIndex == i) entriesText[i].text = "--> " + entriesText[i].text + " <--";
+                if (_newScoreIndex == i) EntriesText[i].text = "--> " + EntriesText[i].text + " <--";
             }
 
-            spinner.gameObject.SetActive(false);
+            Spinner.gameObject.SetActive(false);
         }, null, null);
     }
 }

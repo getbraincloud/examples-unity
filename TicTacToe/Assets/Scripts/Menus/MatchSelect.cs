@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using LitJson;
 using UnityEngine;
+
+#endregion
 
 public class MatchSelect : GameScene
 {
@@ -10,22 +14,22 @@ public class MatchSelect : GameScene
     private readonly List<MatchedProfile> matchedProfiles = new List<MatchedProfile>();
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
 
-    private Vector2 scrollPos;
-    private eState state = eState.LOADING;
+    private Vector2 _scrollPos;
+    private eState _state = eState.LOADING;
 
 
     // Use this for initialization
     private void Start()
     {
-        gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = app.viewportRect;
+        gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
         // Enable Match Making, so other Users can also challege this Profile
         // http://getbraincloud.com/apidocs/apiref/#capi-matchmaking-enablematchmaking
-        app.bc.MatchMakingService
+        App.Bc.MatchMakingService
             .EnableMatchMaking((response, cbObject) => { Debug.Log(response); },
                 (status, code, error, cbObject) => { Debug.Log(error); });
 
-        app.bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+        App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
 
         //App.BC.FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
     }
@@ -41,10 +45,10 @@ public class MatchSelect : GameScene
         foreach (JsonData match in matchesData) matchedProfiles.Add(new MatchedProfile(match));
 
 
-        app.bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
+        App.Bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
 
         // After, fetch our game list from Braincloud
-        app.bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
+        App.Bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
     }
 
     private void OnFindMatchesSuccess(string responseData, object cbPostObject)
@@ -62,7 +66,7 @@ public class MatchSelect : GameScene
         }
 
         // Now, find completed matches so the user can go see the history
-        app.bc.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
+        App.Bc.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
     }
 
     private void OnFindCompletedMatches(string responseData, object cbPostObject)
@@ -78,12 +82,12 @@ public class MatchSelect : GameScene
             completedMatches.Add(match);
         }
 
-        state = eState.GAME_PICKER;
+        _state = eState.GAME_PICKER;
     }
 
     private void OnGUI()
     {
-        switch (state)
+        switch (_state)
         {
             case eState.LOADING:
             case eState.STARTING_MATCH:
@@ -103,15 +107,15 @@ public class MatchSelect : GameScene
             }
             case eState.GAME_PICKER:
             {
-                GUILayout.Window(app.windowId,
-                    new Rect(Screen.width / 2 - 150 + app.offset, Screen.height / 2 - 250, 300, 500),
+                GUILayout.Window(App.WindowId,
+                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height / 2 - 250, 300, 500),
                     OnPickGameWindow, "Pick Game");
                 break;
             }
             case eState.NEW_GAME:
             {
-                GUILayout.Window(app.windowId,
-                    new Rect(Screen.width / 2 - 150 + app.offset, Screen.height / 2 - 250, 300, 500),
+                GUILayout.Window(App.WindowId,
+                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height / 2 - 250, 300, 500),
                     OnNewGameWindow, "Pick Opponent");
                 break;
             }
@@ -124,9 +128,9 @@ public class MatchSelect : GameScene
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical();
 
-        scrollPos = GUILayout.BeginScrollView(scrollPos, false, false);
+        _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
 
-        if (GUILayout.Button("+ New Game", GUILayout.MinHeight(50), GUILayout.MaxWidth(250))) state = eState.NEW_GAME;
+        if (GUILayout.Button("+ New Game", GUILayout.MinHeight(50), GUILayout.MaxWidth(250))) _state = eState.NEW_GAME;
         foreach (var match in matches)
         {
             GUILayout.Space(10);
@@ -134,7 +138,8 @@ public class MatchSelect : GameScene
             GUI.enabled = match.yourTurn;
             if (GUILayout.Button(
                 match.matchedProfile.playerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(His Turn)"),
-                GUILayout.MinHeight(50), GUILayout.MaxWidth(200))) EnterMatch(match);
+                GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
+                EnterMatch(match);
             GUI.enabled = true;
             GUILayout.EndHorizontal();
         }
@@ -153,7 +158,10 @@ public class MatchSelect : GameScene
 
 
         if (GUILayout.Button("REFRESH"))
-            app.bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+            App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+
+        if (GUILayout.Button("LOGOUT"))
+            App.Bc.PlayerStateService.Logout((response, cbObject) => { App.GotoLoginScene(gameObject); });
 
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
@@ -168,10 +176,10 @@ public class MatchSelect : GameScene
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical();
 
-        scrollPos = GUILayout.BeginScrollView(scrollPos, false, false);
+        _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
 
         if (GUILayout.Button("<- Cancel", GUILayout.MinHeight(32), GUILayout.MaxWidth(75)))
-            state = eState.GAME_PICKER;
+            _state = eState.GAME_PICKER;
 
         foreach (var profile in matchedProfiles)
         {
@@ -190,7 +198,7 @@ public class MatchSelect : GameScene
 
     private void OnPickOpponent(MatchedProfile matchedProfile)
     {
-        state = eState.STARTING_MATCH;
+        _state = eState.STARTING_MATCH;
         var yourTurnFirst = Random.Range(0, 100) < 50;
 
         // Setup our summary data. This is what we see when we query
@@ -200,12 +208,13 @@ public class MatchSelect : GameScene
         {
             // Us
             var playerData = new JsonData();
-            playerData["profileId"] = app.ProfileId;
+            playerData["profileId"] = App.ProfileId;
             //playerData["facebookId"] = FB.UserId;
             if (yourTurnFirst)
                 playerData["token"] = "X"; // First player has X
             else
                 playerData["token"] = "O";
+
             summaryData["players"].Add(playerData);
         }
         {
@@ -216,6 +225,7 @@ public class MatchSelect : GameScene
                 playerData["token"] = "X"; // First player has X
             else
                 playerData["token"] = "O";
+
             summaryData["players"].Add(playerData);
         }
 
@@ -228,11 +238,11 @@ public class MatchSelect : GameScene
         //JsonData opponentIds = new JsonData();
 
         // Create the match
-        app.bc.AsyncMatchService.CreateMatchWithInitialTurn(
+        App.Bc.AsyncMatchService.CreateMatchWithInitialTurn(
             "[{\"platform\":\"BC\",\"id\":\"" + matchedProfile.playerId + "\"}]", // Opponents
             matchState.ToJson(), // Current match state
             "A friend has challenged you to a match of Tic Tac Toe.", // Push notification Message
-            yourTurnFirst ? app.ProfileId : matchedProfile.playerId, // Which turn it is. We picked randomly
+            yourTurnFirst ? App.ProfileId : matchedProfile.playerId, // Which turn it is. We picked randomly
             summaryData.ToJson(), // Summary data
             OnCreateMatchSuccess,
             OnCreateMatchFailed,
@@ -248,7 +258,7 @@ public class MatchSelect : GameScene
         if (match.yourTurn)
             EnterMatch(match);
         else
-            app.GotoMatchSelectScene(gameObject);
+            App.GotoMatchSelectScene(gameObject);
     }
 
     private void OnCreateMatchFailed(int a, int b, string responseData, object cbPostObject)
@@ -257,15 +267,15 @@ public class MatchSelect : GameScene
         Debug.Log(a);
         Debug.Log(b);
         Debug.Log(responseData);
-        state = eState.GAME_PICKER; // Just go back to game selection
+        _state = eState.GAME_PICKER; // Just go back to game selection
     }
 
     private void EnterMatch(MatchInfo match)
     {
-        state = eState.LOADING;
+        _state = eState.LOADING;
 
         // Query more detail state about the match
-        app.bc.AsyncMatchService
+        App.Bc.AsyncMatchService
             .ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
     }
 
@@ -276,17 +286,17 @@ public class MatchSelect : GameScene
 
 
         // Setup a couple stuff into our TicTacToe scene
-        app.boardState = (string) data["matchState"]["board"];
-        app.playerInfoX = match.playerXInfo;
-        app.playerInfoO = match.playerOInfo;
-        app.whosTurn = match.yourToken == "X" ? app.playerInfoX : match.playerOInfo;
-        app.ownerId = match.ownerId;
-        app.matchId = match.matchId;
-        app.matchVersion = (ulong) match.version;
+        App.BoardState = (string) data["matchState"]["board"];
+        App.PlayerInfoX = match.playerXInfo;
+        App.PlayerInfoO = match.playerOInfo;
+        App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
+        App.OwnerId = match.ownerId;
+        App.MatchId = match.matchId;
+        App.MatchVersion = (ulong) match.version;
 
         // Load the Tic Tac Toe scene
 
-        app.GotoTicTacToeScene(gameObject);
+        App.GotoTicTacToeScene(gameObject);
     }
 
     private void OnReadMatchFailed(int a, int b, string responseData, object cbPostObject)
@@ -310,10 +320,9 @@ public class MatchSelect : GameScene
 
     public class MatchInfo
     {
+        private readonly MatchSelect matchSelect;
         public MatchedProfile matchedProfile;
         public string matchId;
-
-        private readonly MatchSelect matchSelect;
         public string ownerId;
         public PlayerInfo playerOInfo = new PlayerInfo();
         public PlayerInfo playerXInfo = new PlayerInfo();
@@ -326,7 +335,7 @@ public class MatchSelect : GameScene
             version = (int) jsonMatch["version"];
             ownerId = (string) jsonMatch["ownerId"];
             matchId = (string) jsonMatch["matchId"];
-            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == matchSelect.app.ProfileId;
+            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == matchSelect.App.ProfileId;
 
             this.matchSelect = matchSelect;
 
@@ -342,9 +351,9 @@ public class MatchSelect : GameScene
             if (token == "X") playerInfo = playerXInfo;
             else playerInfo = playerOInfo;
 
-            if ((string) playerData["profileId"] == matchSelect.app.ProfileId)
+            if ((string) playerData["profileId"] == matchSelect.App.ProfileId)
             {
-                playerInfo.name = matchSelect.app.PlayerName;
+                playerInfo.Name = matchSelect.App.PlayerName;
                 //playerInfo.picUrl = FacebookLogin.PlayerPicUrl;				
                 yourToken = token;
             }
@@ -357,7 +366,7 @@ public class MatchSelect : GameScene
                         break;
                     }
 
-                playerInfo.name = matchedProfile.playerName;
+                playerInfo.Name = matchedProfile.playerName;
             }
         }
     }

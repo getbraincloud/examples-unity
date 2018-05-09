@@ -3,27 +3,27 @@ using UnityEngine;
 
 public class Login : GameScene
 {
-    public Texture brainCloudLogo;
+    private bool _isConnecting;
+    public Texture BrainCloudLogo;
+    public string Password;
 
-    private bool isConnecting;
 
-    public string password = "";
+    public Spinner Spinner;
 
-    public Spinner spinner;
-    public string username = "";
+    public string Username;
 
     // Use this for initialization
     private void Start()
     {
-        gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = app.viewportRect;
+        gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
-        username = PlayerPrefs.GetString(app.wrapperName + "_username");
-        password = PlayerPrefs.GetString(app.wrapperName + "_password");
+        Username = PlayerPrefs.GetString(App.WrapperName + "_username");
+        Password = PlayerPrefs.GetString(App.WrapperName + "_password");
     }
 
     private void OnGUI()
     {
-        GUILayout.Window(app.windowId, new Rect(Screen.width / 2 - 125 + app.offset, Screen.height / 2 - 100, 250, 200),
+        GUILayout.Window(App.WindowId, new Rect(Screen.width / 2 - 125 + App.Offset, Screen.height / 2 - 100, 250, 200),
             OnWindow,
             "brainCloud Login");
     }
@@ -35,38 +35,38 @@ public class Login : GameScene
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical();
 
-        GUILayout.Box(brainCloudLogo);
+        GUILayout.Box(BrainCloudLogo);
         GUILayout.Space(30);
 
-        GUI.enabled = !isConnecting;
+        GUI.enabled = !_isConnecting;
 
         GUILayout.Label("Username");
-        username = GUILayout.TextField(username, GUILayout.MinWidth(200));
+        Username = GUILayout.TextField(Username, GUILayout.MinWidth(200));
 
         GUILayout.Label("Password");
-        password = GUILayout.PasswordField(password, '*', GUILayout.MinWidth(100));
+        Password = GUILayout.PasswordField(Password, '*', GUILayout.MinWidth(100));
 
         if (GUILayout.Button("Connect as Universal", GUILayout.MinHeight(50), GUILayout.MinWidth(100)))
         {
-            isConnecting = true;
-            spinner.gameObject.SetActive(true);
+            _isConnecting = true;
+            Spinner.gameObject.SetActive(true);
 
-            app.bc.AuthenticateUniversal(username, password, true, (response, cbObject) =>
+            App.Bc.AuthenticateUniversal(Username, Password, true, (response, cbObject) =>
             {
                 var data = JsonMapper.ToObject(response)["data"];
-                app.ProfileId = data["profileId"].ToString();
-                app.PlayerName = username;
+                App.ProfileId = data["profileId"].ToString();
+                App.PlayerName = Username;
 
 
-                PlayerPrefs.SetString(app.wrapperName + "_username", username);
-                PlayerPrefs.SetString(app.wrapperName + "_password", password);
+                PlayerPrefs.SetString(App.WrapperName + "_username", Username);
+                PlayerPrefs.SetString(App.WrapperName + "_password", Password);
 
                 // If this is a new user, let's set their playerName
                 if (data["newUser"].ToString().Equals("true"))
-                    app.bc.PlayerStateService.UpdatePlayerName(username,
-                        (jsonResponse, o) => { app.GotoMatchSelectScene(gameObject); });
+                    App.Bc.PlayerStateService.UpdatePlayerName(Username,
+                        (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
                 else
-                    app.GotoMatchSelectScene(gameObject);
+                    App.GotoMatchSelectScene(gameObject);
             }, (status, code, error, cbObject) => { Debug.Log(error); });
         }
 

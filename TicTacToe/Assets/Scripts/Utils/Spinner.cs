@@ -2,16 +2,16 @@
 
 public class Spinner : MonoBehaviour
 {
-    public float spinSpeed = .10f;
-    private float spinTime;
+    private float _spinTime;
+    public float SpinSpeed = .10f;
 
     private void Update()
     {
-        spinTime -= Time.deltaTime;
-        while (spinTime <= 0)
+        _spinTime -= Time.deltaTime;
+        while (_spinTime <= 0)
         {
-            if (spinSpeed <= 0) spinSpeed = .10f;
-            spinTime += spinSpeed;
+            if (SpinSpeed <= 0) SpinSpeed = .10f;
+            _spinTime += SpinSpeed;
             transform.Rotate(new Vector3(0, 45.0f, 0));
         }
     }
