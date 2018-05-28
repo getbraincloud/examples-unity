@@ -7,7 +7,7 @@ using UnityEngine;
 
 #endregion
 
-// Achievements are set on the brainCloud Dashboard, under Design | Leaderboard | Leaderboard Configs
+// Leaderbaords are set on the brainCloud Dashboard, under Design | Leaderboard | Leaderboard Configs
 
 public class Leaderboard : GameScene
 {
@@ -21,6 +21,7 @@ public class Leaderboard : GameScene
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
+        // Get the Player_Rating leaderboard that would have have created on the brainCloud Dashboard
         App.Bc.LeaderboardService.GetGlobalLeaderboardPage("Player_Rating",
             BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadLeaderboardData);
     }
@@ -29,9 +30,7 @@ public class Leaderboard : GameScene
     {
         scores.Clear();
         
-        // Construct our matched players list using response data
         var leaderboardData = JsonMapper.ToObject(responseData)["data"]["leaderboard"];
-
 
         foreach (JsonData score in leaderboardData) scores.Add(new PlayerInfo(score));
     }
@@ -57,6 +56,7 @@ public class Leaderboard : GameScene
             OnPickGameWindow, "Pick Game");
     }
 
+    #region PlayerInfoWindow
     private void OnPlayerInfoWindow(int windowId)
     {
         GUILayout.BeginHorizontal();
@@ -89,7 +89,6 @@ public class Leaderboard : GameScene
             }
         }
 
-
         GUILayout.EndHorizontal();
 
         GUILayout.Label(string.Format("PlayerRating: {0}", App.PlayerRating), GUILayout.MinWidth(200));
@@ -107,6 +106,7 @@ public class Leaderboard : GameScene
 
         GUILayout.EndHorizontal();
     }
+    #endregion
 
     private void OnPickGameWindow(int windowId)
     {
@@ -116,16 +116,9 @@ public class Leaderboard : GameScene
 
         _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
 
-
         GUILayout.Space(10);
-        foreach (var score in scores)
-        {
-            GUILayout.Space(10);
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(string.Format("{0}.  {1} ({2})", score.Rank, score.PlayerName, score.Score));
-
-            GUILayout.EndHorizontal();
-        }
+        
+        DisplayScores();
 
         GUILayout.EndScrollView();
 
@@ -142,5 +135,18 @@ public class Leaderboard : GameScene
 
 
         GUILayout.EndHorizontal();
+    }
+
+    private void DisplayScores()
+    {
+        // We are displaying the leaderboard scores taken from the GetGlobalLeaderboardPage call
+        foreach (var score in scores)
+        {
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(string.Format("{0}.  {1} ({2})", score.Rank, score.PlayerName, score.Score));
+
+            GUILayout.EndHorizontal();
+        }
     }
 }

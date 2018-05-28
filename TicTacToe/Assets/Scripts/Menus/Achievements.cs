@@ -28,7 +28,6 @@ public class Achievements : GameScene
     {
         achievements.Clear();
 
-        // Construct our matched players list using response data
         var achievementData = JsonMapper.ToObject(responseData)["data"]["achievements"];
 
 
@@ -56,6 +55,7 @@ public class Achievements : GameScene
             OnPickGameWindow, "Pick Game");
     }
 
+    #region PlayerInfoWindow
     private void OnPlayerInfoWindow(int windowId)
     {
         GUILayout.BeginHorizontal();
@@ -106,6 +106,7 @@ public class Achievements : GameScene
 
         GUILayout.EndHorizontal();
     }
+    #endregion
 
     private void OnPickGameWindow(int windowId)
     {
@@ -115,22 +116,8 @@ public class Achievements : GameScene
 
         _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
 
-
         GUILayout.Space(10);
-        foreach (var achievement in achievements)
-        {
-            GUILayout.Space(10);
-            GUILayout.BeginHorizontal();
-
-            if (achievement.Status.Equals("NOT_AWARDED"))
-                GUILayout.Label(string.Format("{0}", achievement.UnlockText));
-            else
-                GUILayout.Label(string.Format("[{0}]", achievement.UnlockedText), GUI.skin.button,
-                    GUILayout.MinWidth(200));
-
-
-            GUILayout.EndHorizontal();
-        }
+        DisplayAchievements();
 
         GUILayout.EndScrollView();
 
@@ -147,6 +134,24 @@ public class Achievements : GameScene
 
 
         GUILayout.EndHorizontal();
+    }
+
+    private void DisplayAchievements()
+    {
+        foreach (var achievement in achievements)
+        {
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+
+            if (achievement.Status.Equals("NOT_AWARDED"))
+                GUILayout.Label(string.Format("{0}", achievement.UnlockText));
+            else
+                GUILayout.Label(string.Format("[{0}]", achievement.UnlockedText), GUI.skin.button,
+                    GUILayout.MinWidth(200));
+
+
+            GUILayout.EndHorizontal();
+        }
     }
 
     public class AchievementInfo
