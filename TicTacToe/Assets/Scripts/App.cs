@@ -6,13 +6,13 @@ using UnityEngine;
 
 public class App : MonoBehaviour
 {
-    [SerializeField] public GameObject Achievements;
+    
     public BrainCloudWrapper Bc;
 
 
     // Setup a couple stuff into our TicTacToe scene
     public string BoardState = "#########";
-    [SerializeField] public GameObject Leaderboard;
+    
     public string MatchId;
     public ulong MatchVersion;
     public string OwnerId;
@@ -26,6 +26,8 @@ public class App : MonoBehaviour
 
     
     // All Game Scenes
+    [SerializeField] public GameObject Achievements;
+    [SerializeField] public GameObject Leaderboard;
     [SerializeField] public GameObject Login;
     [SerializeField] public GameObject MatchSelect;
     [SerializeField] public GameObject TicTacToe;
@@ -54,6 +56,18 @@ public class App : MonoBehaviour
         loginObject.transform.parent = playerOneObject.transform;
     }
 
+    private void Update()
+    {
+        // If you aren't attaching brainCloud as a Component to a gameObject,
+        // you must manually update it with this call.
+        // _bc.Update();
+        // 
+        // Given we are using a game Object. Leave _bc.Update commented out.
+    }
+    
+    
+    
+    // Scene Swapping Logic
     public void GotoLoginScene(GameObject previousScene)
     {
         var newScene = Instantiate(Login);
@@ -92,14 +106,5 @@ public class App : MonoBehaviour
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
         newScene.GetComponentInChildren<GameScene>().App = this;
         Destroy(previousScene.transform.parent.gameObject);
-    }
-
-    private void Update()
-    {
-        // If you aren't attaching brainCloud as a Component to a gameObject,
-        // you must manually update it with this call.
-        // _bc.Update();
-        // 
-        // Given we are using a game Object. Leave _bc.Update commented out.
     }
 }
