@@ -10,6 +10,8 @@ using UnityEngine;
 
 public class TicTacToe : GameScene
 {
+    
+    #region Variables
     private readonly int[] _grid = new int[9];
 
     private readonly Vector3[] _tokenPositions =
@@ -56,6 +58,7 @@ public class TicTacToe : GameScene
     public PlayerInfo LoserInfo;
 
     private bool hasNoNewTurn;
+    #endregion
 
     private void Start()
     {
@@ -393,7 +396,7 @@ public class TicTacToe : GameScene
             // Complete the match
             var ownerSession = bridge.getSessionForProfile(ownerId);
             var asyncMatchProxy = bridge.getAsyncMatchServiceProxy(ownerSession);
-            asyncMatchProxy.completeMatch(ownerId, matchId);
+            retVal = asyncMatchProxy.completeMatch(ownerId, matchId);
             
             // If its not a tie, let process the remaining match results
             if(!isTie) {
@@ -415,7 +418,6 @@ public class TicTacToe : GameScene
             
             
                 // Post Scores to Rating Leaderboard
-            
                 var leaderboardId = "Player_Rating";
             
                 var winnerRating = winnerDelta + winnerRating;
@@ -434,10 +436,8 @@ public class TicTacToe : GameScene
                 playerStatisticsProxy.incrementPlayerStats(playerStats);
             }
             
-            
             var matchMakingProxy = bridge.getMatchMakingServiceProxy();
             var retVal = matchMakingProxy.read();
-
             
             retVal;
          */
