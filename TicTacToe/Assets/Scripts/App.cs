@@ -6,11 +6,13 @@ using UnityEngine;
 
 public class App : MonoBehaviour
 {
+    [SerializeField] public GameObject Achievements;
     public BrainCloudWrapper Bc;
 
 
     // Setup a couple stuff into our TicTacToe scene
     public string BoardState = "#########";
+    [SerializeField] public GameObject Leaderboard;
     public string MatchId;
     public ulong MatchVersion;
     public string OwnerId;
@@ -18,6 +20,7 @@ public class App : MonoBehaviour
     public PlayerInfo PlayerInfoX = new PlayerInfo();
     public PlayerInfo WhosTurn;
     public string PlayerName;
+    public string PlayerRating;
     public string ProfileId;
 
     
@@ -61,6 +64,22 @@ public class App : MonoBehaviour
     public void GotoMatchSelectScene(GameObject previousScene)
     {
         var newScene = Instantiate(MatchSelect);
+        newScene.transform.parent = previousScene.transform.parent.transform.parent;
+        newScene.GetComponentInChildren<GameScene>().App = this;
+        Destroy(previousScene.transform.parent.gameObject);
+    }
+
+    public void GotoLeaderboardScene(GameObject previousScene)
+    {
+        var newScene = Instantiate(Leaderboard);
+        newScene.transform.parent = previousScene.transform.parent.transform.parent;
+        newScene.GetComponentInChildren<GameScene>().App = this;
+        Destroy(previousScene.transform.parent.gameObject);
+    }
+
+    public void GotoAchievementsScene(GameObject previousScene)
+    {
+        var newScene = Instantiate(Achievements);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
         newScene.GetComponentInChildren<GameScene>().App = this;
         Destroy(previousScene.transform.parent.gameObject);

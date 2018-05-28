@@ -1,5 +1,9 @@
-﻿using LitJson;
+﻿#region
+
+using LitJson;
 using UnityEngine;
+
+#endregion
 
 public class Login : GameScene
 {
@@ -55,18 +59,33 @@ public class Login : GameScene
             {
                 var data = JsonMapper.ToObject(response)["data"];
                 App.ProfileId = data["profileId"].ToString();
-                App.PlayerName = Username;
+                App.PlayerName = data["playerName"].ToString();
+
+                App.Bc.MatchMakingService.Read((jsonResponse, o) =>
+                    {
+                        var matchMakingData = JsonMapper.ToObject(jsonResponse)["data"];
+                        App.PlayerRating = matchMakingData["playerRating"].ToString();
+                    },
+                    (status, code, error, o) => { Debug.Log("Failed to Get MatchMaking Data"); });
 
 
                 PlayerPrefs.SetString(App.WrapperName + "_username", Username);
                 PlayerPrefs.SetString(App.WrapperName + "_password", Password);
 
-                // If this is a new user, let's set their playerName
+
                 if (data["newUser"].ToString().Equals("true"))
-                    App.Bc.PlayerStateService.UpdatePlayerName(Username,
+                {
+                    // If this is a new user, let's set their playerName to their universalId
+                    App.PlayerName = Username;
+
+                    // and also update their name on brainCloud
+                    App.Bc.PlayerStateService.UpdateUserName(Username,
                         (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
+                }
                 else
+                {
                     App.GotoMatchSelectScene(gameObject);
+                }
             }, (status, code, error, cbObject) => { Debug.Log(error); });
         }
 

@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿#region
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using LitJson;
 using UnityEngine;
+
+#endregion
 
 public class TicTacToe : GameScene
 {
@@ -48,10 +51,12 @@ public class TicTacToe : GameScene
 
     private int _winner;
 
+    public PlayerInfo WinnerInfo;
+    public PlayerInfo LoserInfo;
+
     private void Start()
     {
         _winner = 0;
-
 
         var parent = gameObject.transform.parent.gameObject;
 
@@ -70,16 +75,12 @@ public class TicTacToe : GameScene
         _winner = CheckForWinner();
 
         // Setup HUD with player pics and names
-        var playerXPic = GameObject.Find("PlayerXPic").GetComponent<GUITexture>();
-        var playerOPic = GameObject.Find("PlayerOPic").GetComponent<GUITexture>();
         var playerXName = GameObject.Find("PlayerXName").GetComponent<GUIText>();
         var playerOName = GameObject.Find("PlayerOName").GetComponent<GUIText>();
 
-        StartCoroutine(SetProfilePic(App.PlayerInfoX.PictureUrl, playerXPic));
-        StartCoroutine(SetProfilePic(App.PlayerInfoO.PictureUrl, playerOPic));
 
-        playerXName.text = App.PlayerInfoX.Name;
-        playerOName.text = App.PlayerInfoO.Name;
+        playerXName.text = App.PlayerInfoX.PlayerName;
+        playerOName.text = App.PlayerInfoO.PlayerName;
         _playerTurnText.text = "Your Turn";
 
         _turnPlayed = false;
@@ -114,13 +115,6 @@ public class TicTacToe : GameScene
             var turnState = (string) turn["matchState"]["board"];
             _history.Add(turnState);
         }
-    }
-
-    private IEnumerator SetProfilePic(string url, GUITexture playerPic)
-    {
-        var www = new WWW(url);
-        yield return www;
-        playerPic.texture = www.texture;
     }
 
     private void AddToken(int index, string token)
@@ -158,13 +152,21 @@ public class TicTacToe : GameScene
         else if (_winner > 0)
         {
             if (_winner == 1)
-                _playerTurnText.text = App.PlayerInfoX.Name + " Wins!";
+            {
+                _playerTurnText.text = App.PlayerInfoX.PlayerName + " Wins!";
+                WinnerInfo = App.PlayerInfoX;
+                LoserInfo = App.PlayerInfoO;
+            }
             else
-                _playerTurnText.text = App.PlayerInfoO.Name + " Wins!";
+            {
+                _playerTurnText.text = App.PlayerInfoO.PlayerName + " Wins!";
+                WinnerInfo = App.PlayerInfoO;
+                LoserInfo = App.PlayerInfoX;
+            }
         }
         else
         {
-            _playerTurnText.text = App.WhosTurn.Name + " Turn";
+            _playerTurnText.text = App.WhosTurn.PlayerName + " Turn";
         }
     }
 
@@ -245,7 +247,7 @@ public class TicTacToe : GameScene
                 null,
                 null,
                 null,
-                OnTurnSubmitted, (status, code, error, cbObject) => { Debug.Log(error); });
+                OnTurnSubmitted);
         }
     }
 
@@ -284,15 +286,115 @@ public class TicTacToe : GameScene
             return;
         }
 
-        // Otherwise, the game was done. Send a complete turn
-        App.Bc.AsyncMatchService.CompleteMatch(
-            App.OwnerId,
-            App.MatchId,
-            OnMatchCompleted);
+        // Otherwise, the game was done. Can send complete turn
+        /*
+         App.Bc.AsyncMatchService.CompleteMatch(
+             App.OwnerId,
+             App.MatchId,
+             OnMatchCompleted);
+          */
+
+        // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
+        var matchResults = new JsonData();
+
+        matchResults["ownerId"] = App.OwnerId;
+        matchResults["matchId"] = App.MatchId;
+
+        if (_winner < 0)
+        {
+            matchResults["isTie"] = true;
+        }
+        else
+        {
+            matchResults["isTie"] = false;
+            matchResults["winnerId"] = WinnerInfo.ProfileId;
+            matchResults["loserId"] = LoserInfo.ProfileId;
+            matchResults["winnerRating"] = int.Parse(WinnerInfo.PlayerRating);
+            matchResults["loserRating"] = int.Parse(LoserInfo.PlayerRating);
+        }
+
+
+        App.Bc.ScriptService.RunScript("FINISH_RANK_MATCH", matchResults.ToJson(), OnMatchCompleted,
+            (status, code, error, cbObject) => { });
+
+        /**     Cloud Code Script Contents: FINISH_RANK_MATCH
+         
+            // cloud code can be created on the brainCloud dashboard, under Design | Cloud Code | Scripts
+            var retVal = {};
+            
+            
+            var ownerId = data.ownerId;
+            var matchId = data.matchId;
+            var winnerId = data.winnerId;
+            var loserId = data.loserId;
+            
+            var winnerRating = data.winnerRating;
+            var loserRating = data.loserRating;
+            
+            var isTie = data.isTie;
+            
+            
+            
+            // Complete the match
+            var ownerSession = bridge.getSessionForProfile(ownerId);
+            var asyncMatchProxy = bridge.getAsyncMatchServiceProxy(ownerSession);
+            asyncMatchProxy.completeMatch(ownerId, matchId);
+            
+            // If its not a tie, let process the remaining match results
+            if(!isTie) {
+                // Declare winner and loser session
+                var winnerSession = bridge.getSessionForProfile(winnerId);
+                var loserSession = bridge.getSessionForProfile(loserId);
+            
+            
+                var winnerMatchMakingProxy = bridge.getMatchMakingServiceProxy(winnerSession);
+                var loserMatchMakingProxy = bridge.getMatchMakingServiceProxy(loserSession);
+            
+            
+                // Alter Ratings. Rating defaults and match making controls can be found on the brainCloud dashboard, under Design | Multiplayer | Matchmaking
+                var winnerDelta =  ((loserRating + 400) / winnerRating) * 40;
+                var loserDelta =  ((loserRating - 400) / winnerRating) * 40;
+            
+                winnerMatchMakingProxy.incrementPlayerRating(winnerDelta);
+                loserMatchMakingProxy.decrementPlayerRating(loserDelta);
+            
+            
+                // Post Scores to Rating Leaderboard
+            
+                var leaderboardId = "Player_Rating";
+            
+                var winnerRating = winnerDelta + winnerRating;
+                var loserRating = loserRating - loserDelta;
+            
+                var winnerLeaderboardProxy = bridge.getLeaderboardServiceProxy(winnerSession);
+                var loserLeaderboardProxy = bridge.getLeaderboardServiceProxy(loserSession);
+            
+                winnerLeaderboardProxy.postScoreToLeaderboard(leaderboardId, winnerRating, null);
+                loserLeaderboardProxy.postScoreToLeaderboard(leaderboardId, loserRating, null);
+            
+            
+                // Stats are set on the brainCloud Dashboard under Design | Statistics Rules | User Stats.
+                var playerStats = { "WON_RANKED_MATCH" : 1 };
+                var playerStatisticsProxy = bridge.getPlayerStatisticsServiceProxy(winnerSession);
+                playerStatisticsProxy.incrementPlayerStats(playerStats);
+            }
+            
+            
+            var matchMakingProxy = bridge.getMatchMakingServiceProxy();
+            var retVal = matchMakingProxy.read();
+
+            
+            retVal;
+         */
     }
 
     private void OnMatchCompleted(string responseData, object cbPostObject)
     {
+        // Get the new PlayerRating
+        App.PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
+
+
+        
         // Go back to game select scene
         App.GotoMatchSelectScene(gameObject);
     }

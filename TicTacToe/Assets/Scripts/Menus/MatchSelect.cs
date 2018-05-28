@@ -8,14 +8,17 @@ using UnityEngine;
 
 public class MatchSelect : GameScene
 {
-    private const int RANGE_DELTA = 10;
+    private const int RANGE_DELTA = 500;
     private const int NUMBER_OF_MATCHES = 10;
     private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
-    private readonly List<MatchedProfile> matchedProfiles = new List<MatchedProfile>();
+    private readonly List<PlayerInfo> matchedProfiles = new List<PlayerInfo>();
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
 
     private Vector2 _scrollPos;
     private eState _state = eState.LOADING;
+    private string editablePlayerName = "";
+
+    private bool isEditingPlayerName;
 
 
     // Use this for initialization
@@ -30,8 +33,6 @@ public class MatchSelect : GameScene
                 (status, code, error, cbObject) => { Debug.Log(error); });
 
         App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
-
-        //App.BC.FriendService.ListFriends(BrainCloudFriend.FriendPlatform.Facebook, false, OnReadFriendData, null, null);// ReadFriendData(OnReadFriendData, null, null);
     }
 
     private void OnReadMatchedPlayerData(string responseData, object cbPostObject)
@@ -42,10 +43,8 @@ public class MatchSelect : GameScene
         var matchesData = JsonMapper.ToObject(responseData)["data"]["matchesFound"];
 
 
-        foreach (JsonData match in matchesData) matchedProfiles.Add(new MatchedProfile(match));
+        foreach (JsonData match in matchesData) matchedProfiles.Add(new PlayerInfo(match));
 
-
-        App.Bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
 
         // After, fetch our game list from Braincloud
         App.Bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
@@ -87,6 +86,17 @@ public class MatchSelect : GameScene
 
     private void OnGUI()
     {
+        var verticalMargin = 10;
+
+
+        var profileWindowHeight = Screen.height * 0.20f - verticalMargin * 1.3f;
+        var selectorWindowHeight = Screen.height * 0.80f - verticalMargin * 1.3f;
+
+
+        GUILayout.Window(App.WindowId + 100,
+            new Rect(Screen.width / 2 - 150 + App.Offset, verticalMargin, 300, profileWindowHeight),
+            OnPlayerInfoWindow, "Profile");
+
         switch (_state)
         {
             case eState.LOADING:
@@ -108,18 +118,73 @@ public class MatchSelect : GameScene
             case eState.GAME_PICKER:
             {
                 GUILayout.Window(App.WindowId,
-                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height / 2 - 250, 300, 500),
+                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height - selectorWindowHeight - verticalMargin,
+                        300, selectorWindowHeight),
                     OnPickGameWindow, "Pick Game");
                 break;
             }
             case eState.NEW_GAME:
             {
                 GUILayout.Window(App.WindowId,
-                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height / 2 - 250, 300, 500),
+                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height - selectorWindowHeight - verticalMargin,
+                        300, selectorWindowHeight),
                     OnNewGameWindow, "Pick Opponent");
                 break;
             }
         }
+    }
+
+    private void OnPlayerInfoWindow(int windowId)
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical();
+
+
+        GUILayout.BeginHorizontal();
+
+        if (!isEditingPlayerName)
+        {
+            GUILayout.Label(string.Format("PlayerName: {0}", App.PlayerName), GUILayout.MinWidth(200));
+            if (GUILayout.Button("Edit", GUILayout.MinWidth(50)))
+            {
+                editablePlayerName = App.PlayerName;
+                isEditingPlayerName = true;
+            }
+        }
+        else
+        {
+            editablePlayerName = GUILayout.TextField(editablePlayerName, GUILayout.MinWidth(200));
+            if (GUILayout.Button("Save", GUILayout.MinWidth(50)))
+            {
+                App.PlayerName = editablePlayerName;
+                isEditingPlayerName = false;
+
+                App.Bc.PlayerStateService.UpdateUserName(App.PlayerName,
+                    (response, cbObject) => { },
+                    (status, code, error, cbObject) => { Debug.Log("Failed to change Player Name"); });
+            }
+        }
+
+
+        GUILayout.EndHorizontal();
+
+        GUILayout.Label(string.Format("PlayerRating: {0}", App.PlayerRating), GUILayout.MinWidth(200));
+
+        GUILayout.BeginHorizontal();
+
+        if (GUILayout.Button("Leaderboard", GUILayout.MinWidth(50))) App.GotoLeaderboardScene(gameObject);
+
+        if (GUILayout.Button("Achievements", GUILayout.MinWidth(50))) App.GotoAchievementsScene(gameObject);
+
+        GUILayout.EndHorizontal();
+
+
+        GUILayout.EndVertical();
+        GUILayout.FlexibleSpace();
+
+
+        GUILayout.EndHorizontal();
     }
 
     private void OnPickGameWindow(int windowId)
@@ -137,7 +202,7 @@ public class MatchSelect : GameScene
             GUILayout.BeginHorizontal();
             GUI.enabled = match.yourTurn;
             if (GUILayout.Button(
-                match.matchedProfile.playerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(His Turn)"),
+                match.matchedProfile.PlayerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(His Turn)"),
                 GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
                 EnterMatch(match);
             GUI.enabled = true;
@@ -149,7 +214,8 @@ public class MatchSelect : GameScene
         {
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(match.matchedProfile.playerName + "\n(Completed)", GUILayout.MinHeight(50),
+            if(match.matchedProfile != null)
+            if (GUILayout.Button(match.matchedProfile.PlayerName + "\n(Completed)", GUILayout.MinHeight(50),
                 GUILayout.MaxWidth(200))) EnterMatch(match);
             GUILayout.EndHorizontal();
         }
@@ -184,7 +250,8 @@ public class MatchSelect : GameScene
         foreach (var profile in matchedProfiles)
         {
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(profile.playerName, GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
+            if (GUILayout.Button(string.Format("{0} ({1})", profile.PlayerName, profile.PlayerRating),
+                GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
                 OnPickOpponent(profile);
             GUILayout.EndHorizontal();
         }
@@ -196,7 +263,7 @@ public class MatchSelect : GameScene
         GUILayout.EndHorizontal();
     }
 
-    private void OnPickOpponent(MatchedProfile matchedProfile)
+    private void OnPickOpponent(PlayerInfo matchedProfile)
     {
         _state = eState.STARTING_MATCH;
         var yourTurnFirst = Random.Range(0, 100) < 50;
@@ -220,7 +287,7 @@ public class MatchSelect : GameScene
         {
             // Our friend
             var playerData = new JsonData();
-            playerData["profileId"] = matchedProfile.playerId;
+            playerData["profileId"] = matchedProfile.ProfileId;
             if (!yourTurnFirst)
                 playerData["token"] = "X"; // First player has X
             else
@@ -239,10 +306,10 @@ public class MatchSelect : GameScene
 
         // Create the match
         App.Bc.AsyncMatchService.CreateMatchWithInitialTurn(
-            "[{\"platform\":\"BC\",\"id\":\"" + matchedProfile.playerId + "\"}]", // Opponents
+            "[{\"platform\":\"BC\",\"id\":\"" + matchedProfile.ProfileId + "\"}]", // Opponents
             matchState.ToJson(), // Current match state
             "A friend has challenged you to a match of Tic Tac Toe.", // Push notification Message
-            yourTurnFirst ? App.ProfileId : matchedProfile.playerId, // Which turn it is. We picked randomly
+            yourTurnFirst ? App.ProfileId : matchedProfile.ProfileId, // Which turn it is. We picked randomly
             summaryData.ToJson(), // Summary data
             OnCreateMatchSuccess,
             OnCreateMatchFailed,
@@ -304,24 +371,10 @@ public class MatchSelect : GameScene
         Debug.LogError("Failed to Read Match");
     }
 
-    public class MatchedProfile
-    {
-        public string playerId;
-        public string playerName;
-        public int playerRating;
-
-        public MatchedProfile(JsonData jsonData)
-        {
-            playerName = (string) jsonData["playerName"];
-            playerRating = (int) jsonData["playerRating"];
-            playerId = (string) jsonData["playerId"];
-        }
-    }
-
     public class MatchInfo
     {
         private readonly MatchSelect matchSelect;
-        public MatchedProfile matchedProfile;
+        public PlayerInfo matchedProfile;
         public string matchId;
         public string ownerId;
         public PlayerInfo playerOInfo = new PlayerInfo();
@@ -339,6 +392,7 @@ public class MatchSelect : GameScene
 
             this.matchSelect = matchSelect;
 
+            
             // Load player info
             LoadPlayerInfo(jsonMatch["summary"]["players"][0]);
             LoadPlayerInfo(jsonMatch["summary"]["players"][1]);
@@ -353,20 +407,29 @@ public class MatchSelect : GameScene
 
             if ((string) playerData["profileId"] == matchSelect.App.ProfileId)
             {
-                playerInfo.Name = matchSelect.App.PlayerName;
+                playerInfo.PlayerName = matchSelect.App.PlayerName;
+                playerInfo.PlayerRating = matchSelect.App.PlayerRating;
+                playerInfo.ProfileId = matchSelect.App.ProfileId;
+                
                 //playerInfo.picUrl = FacebookLogin.PlayerPicUrl;				
                 yourToken = token;
             }
             else
             {
-                foreach (var profile in matchSelect.matchedProfiles)
-                    if (profile.playerId == (string) playerData["profileId"])
-                    {
-                        matchedProfile = profile;
-                        break;
-                    }
+                if (matchSelect.matchedProfiles.Count > 0)
+                {
 
-                playerInfo.Name = matchedProfile.playerName;
+                    foreach (var profile in matchSelect.matchedProfiles)
+                        if (profile.ProfileId == (string) playerData["profileId"])
+                        {
+                            matchedProfile = profile;
+                            break;
+                        }
+
+                    playerInfo.PlayerName = matchedProfile.PlayerName;
+                    playerInfo.ProfileId = matchedProfile.ProfileId;
+                    playerInfo.PlayerRating = matchedProfile.PlayerRating;
+                }
             }
         }
     }

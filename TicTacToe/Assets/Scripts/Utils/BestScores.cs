@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using BrainCloud.Entity;
 using UnityEngine;
+
+#endregion
 
 public class BestScores : GameScene
 {

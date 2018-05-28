@@ -1,6 +1,13 @@
-﻿using System.Collections;
+﻿#region
+
+using System.Collections;
 using LitJson;
 using UnityEngine;
+
+#endregion
+
+// Currently NOT USED in this example.
+// Social Leaderboards use Facebook friends to populate the leaderboard.
 
 public class SocialLeaderboards : BestScores
 {
