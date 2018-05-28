@@ -227,7 +227,10 @@ public class MatchSelect : GameScene
             App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
 
         if (GUILayout.Button("LOGOUT"))
+        {
             App.Bc.PlayerStateService.Logout((response, cbObject) => { App.GotoLoginScene(gameObject); });
+            PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "false");
+        }
 
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();

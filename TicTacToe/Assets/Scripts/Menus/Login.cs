@@ -65,6 +65,20 @@ public class Login : GameScene
         GUILayout.Label("Password");
         Password = GUILayout.PasswordField(Password, '*', GUILayout.MinWidth(100));
 
+        #region Reconnect
+        // Use Reconnect for re-authentication. It uses an GUID (anonymousId) to authenticate the user
+        // Don't save the Username and Password locally for re-authentication! This is bad practice!
+        if (false && !_isConnecting && PlayerPrefs.GetString(App.WrapperName + "_hasAuthenticated", "false").Equals("true"))
+        {
+            _isConnecting = true;
+            Spinner.gameObject.SetActive(true);
+            
+            App.Bc.Reconnect(OnAuthentication,
+                (status, code, error, cbObject) => { });
+
+
+        }
+        #endregion
         
         if (GUILayout.Button("Connect as Universal", GUILayout.MinHeight(50), GUILayout.MinWidth(100)))
         {
@@ -72,32 +86,37 @@ public class Login : GameScene
             Spinner.gameObject.SetActive(true);
 
             // This Authentication is using a UniversalId
-            App.Bc.AuthenticateUniversal(Username, Password, true, (response, cbObject) =>
-            {
-                var data = JsonMapper.ToObject(response)["data"];
-                App.ProfileId = data["profileId"].ToString();
-                App.PlayerName = data["playerName"].ToString();
+            App.Bc.AuthenticateUniversal(Username, Password, true, OnAuthentication, (status, code, error, cbObject) => { Debug.Log(error); });
+        }
+    }
 
-                
-                PlayerPrefs.SetString(App.WrapperName + "_username", Username);
-                PlayerPrefs.SetString(App.WrapperName + "_password", Password);
+    private void OnAuthentication(string response, object cbObject)
+    {
+        var data = JsonMapper.ToObject(response)["data"];
+        App.ProfileId = data["profileId"].ToString();
+        App.PlayerName = data["playerName"].ToString();
 
-                
-                GetPlayerRating();
 
-                // brainCloud gives us a newUser value to indicate if this account was just created.
-                bool isNewUser = data["newUser"].ToString().Equals("true");
-                
-                
-                if (isNewUser)
-                {
-                    SetupNewPlayer();
-                }
-                else
-                {
-                    App.GotoMatchSelectScene(gameObject);
-                }
-            }, (status, code, error, cbObject) => { Debug.Log(error); });
+        PlayerPrefs.SetString(App.WrapperName + "_username", Username);
+        PlayerPrefs.SetString(App.WrapperName + "_password", Password);
+
+
+        //PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
+
+
+        GetPlayerRating();
+
+        // brainCloud gives us a newUser value to indicate if this account was just created.
+        bool isNewUser = data["newUser"].ToString().Equals("true");
+
+
+        if (isNewUser)
+        {
+            SetupNewPlayer();
+        }
+        else
+        {
+            App.GotoMatchSelectScene(gameObject);
         }
     }
 
