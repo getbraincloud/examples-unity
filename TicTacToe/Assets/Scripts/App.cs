@@ -16,6 +16,7 @@ public class App : MonoBehaviour
     public string MatchId;
     public ulong MatchVersion;
     public string OwnerId;
+    public MatchSelect.MatchInfo CurrentMatch;
     public PlayerInfo PlayerInfoO = new PlayerInfo();
     public PlayerInfo PlayerInfoX = new PlayerInfo();
     public PlayerInfo WhosTurn;

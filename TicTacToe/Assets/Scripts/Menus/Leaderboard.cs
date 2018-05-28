@@ -21,9 +21,6 @@ public class Leaderboard : GameScene
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
-
-       
-
         App.Bc.LeaderboardService.GetGlobalLeaderboardPage("Player_Rating",
             BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadLeaderboardData);
     }

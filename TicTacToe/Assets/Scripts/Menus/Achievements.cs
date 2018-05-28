@@ -21,7 +21,6 @@ public class Achievements : GameScene
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
-
         App.Bc.GamificationService.ReadAchievements(true, OnReadAchievementData);
     }
 

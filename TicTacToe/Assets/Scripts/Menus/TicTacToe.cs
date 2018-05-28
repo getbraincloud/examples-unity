@@ -48,11 +48,14 @@ public class TicTacToe : GameScene
 
     public GameObject _playerX;
     private bool _turnPlayed;
+    private bool _turnSubmitted;
 
     private int _winner;
 
     public PlayerInfo WinnerInfo;
     public PlayerInfo LoserInfo;
+
+    private bool hasNoNewTurn;
 
     private void Start()
     {
@@ -232,6 +235,58 @@ public class TicTacToe : GameScene
             if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), "Leave"))
                 App.GotoMatchSelectScene(gameObject);
         }
+
+        if (_turnSubmitted)
+        {
+            if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), "Leave"))
+            {
+                App.GotoMatchSelectScene(gameObject);
+            }
+            if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60 - 45, 140, 30), "Refresh"))
+            {
+                // Query more detail state about the match
+                App.Bc.AsyncMatchService
+                    .ReadMatch(App.OwnerId, App.MatchId, (response, cbObject) =>
+                    {
+                                                
+                        var match = App.CurrentMatch;
+                        var data = JsonMapper.ToObject(response)["data"];
+
+                        
+                        int newVersion = int.Parse(data["version"].ToString());
+
+                        if (App.MatchVersion + 1 >= (ulong)newVersion)
+                        {
+                            hasNoNewTurn = true;
+                        }
+                        else
+                        {
+                            App.MatchVersion = (ulong)newVersion;
+
+                            // Setup a couple stuff into our TicTacToe scene
+                            App.BoardState = (string) data["matchState"]["board"];
+                            App.PlayerInfoX = match.playerXInfo;
+                            App.PlayerInfoO = match.playerOInfo;
+                            App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
+                            App.OwnerId = match.ownerId;
+                            App.MatchId = match.matchId;
+                        
+                        
+
+                            // Load the Tic Tac Toe scene
+
+                            App.GotoTicTacToeScene(gameObject); 
+
+                        }
+                    });
+            }
+
+            if (hasNoNewTurn)
+            {
+                GUI.Label(new Rect(Screen.width / 2 - 70 + App.Offset, 60 + 45, 140, 30), "Has no new turn");
+            }
+            
+        }
         else if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), btnText))
         {
             // Ask the user to submit his turn
@@ -247,7 +302,7 @@ public class TicTacToe : GameScene
                 null,
                 null,
                 null,
-                OnTurnSubmitted);
+                OnTurnSubmitted, (status, code, error, cbObject) => { Debug.Log(status); Debug.Log(code); Debug.Log(error.ToString()); });
         }
     }
 
@@ -279,10 +334,10 @@ public class TicTacToe : GameScene
 
     private void OnTurnSubmitted(string responseData, object cbPostObject)
     {
+        
         if (_winner == 0)
         {
-            // Go back to game select scene
-            App.GotoMatchSelectScene(gameObject);
+            _turnSubmitted = true;
             return;
         }
 
@@ -392,7 +447,6 @@ public class TicTacToe : GameScene
     {
         // Get the new PlayerRating
         App.PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
-
 
         
         // Go back to game select scene

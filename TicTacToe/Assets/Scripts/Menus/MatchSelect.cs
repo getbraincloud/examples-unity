@@ -339,6 +339,7 @@ public class MatchSelect : GameScene
 
     private void EnterMatch(MatchInfo match)
     {
+        App.CurrentMatch = match;
         _state = eState.LOADING;
 
         // Query more detail state about the match
