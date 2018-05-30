@@ -124,10 +124,10 @@ public class Leaderboard : GameScene
 
         if (!isEditingPlayerName)
         {
-            GUILayout.Label(string.Format("PlayerName: {0}", App.PlayerName), GUILayout.MinWidth(200));
+            GUILayout.Label(string.Format("PlayerName: {0}", App.Name), GUILayout.MinWidth(200));
             if (GUILayout.Button("Edit", GUILayout.MinWidth(50)))
             {
-                editablePlayerName = App.PlayerName;
+                editablePlayerName = App.Name;
                 isEditingPlayerName = true;
             }
         }
@@ -136,10 +136,10 @@ public class Leaderboard : GameScene
             editablePlayerName = GUILayout.TextField(editablePlayerName, GUILayout.MinWidth(200));
             if (GUILayout.Button("Save", GUILayout.MinWidth(50)))
             {
-                App.PlayerName = editablePlayerName;
+                App.Name = editablePlayerName;
                 isEditingPlayerName = false;
 
-                App.Bc.PlayerStateService.UpdateUserName(App.PlayerName,
+                App.Bc.PlayerStateService.UpdateUserName(App.Name,
                     (response, cbObject) => { },
                     (status, code, error, cbObject) => { Debug.Log("Failed to change Player Name"); });
             }

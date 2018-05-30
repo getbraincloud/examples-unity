@@ -1,5 +1,8 @@
 ﻿#region
 
+using System;
+using System.Collections.Generic;
+using BrainCloud.Entity;
 using LitJson;
 using UnityEngine;
 
@@ -14,14 +17,15 @@ public class Login : GameScene
 
     public Spinner Spinner;
 
-    public string Username;
+    public string UniversalId;
 
     // Use this for initialization
     private void Start()
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
-        Username = PlayerPrefs.GetString(App.WrapperName + "_username");
+        PlayerPrefs.DeleteAll();
+        UniversalId = PlayerPrefs.GetString(App.WrapperName + "_universalId");
         Password = PlayerPrefs.GetString(App.WrapperName + "_password");
     }
 
@@ -59,8 +63,8 @@ public class Login : GameScene
     // Authenticating Users into brainCloud
     private void LoginUI()
     {
-        GUILayout.Label("Username");
-        Username = GUILayout.TextField(Username, GUILayout.MinWidth(200));
+        GUILayout.Label("UserId");
+        UniversalId = GUILayout.TextField(UniversalId, GUILayout.MinWidth(200));
 
         GUILayout.Label("Password");
         Password = GUILayout.PasswordField(Password, '*', GUILayout.MinWidth(100));
@@ -68,7 +72,7 @@ public class Login : GameScene
         #region Reconnect
         // Use Reconnect for re-authentication. It uses an GUID (anonymousId) to authenticate the user
         // Don't save the Username and Password locally for re-authentication! This is bad practice!
-        if (false && !_isConnecting && PlayerPrefs.GetString(App.WrapperName + "_hasAuthenticated", "false").Equals("true"))
+        if (true && !_isConnecting && PlayerPrefs.GetString(App.WrapperName + "_hasAuthenticated", "false").Equals("true"))
         {
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
@@ -86,22 +90,28 @@ public class Login : GameScene
             Spinner.gameObject.SetActive(true);
 
             // This Authentication is using a UniversalId
-            App.Bc.AuthenticateUniversal(Username, Password, true, OnAuthentication, (status, code, error, cbObject) => { Debug.Log(error); });
+            App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
+                (status, code, error, cbObject) =>
+                {
+                    // See the AuthenticationErrorHandling Example for ways of handling errors
+                    Debug.Log("Login Error Occured");
+                });
         }
     }
 
     private void OnAuthentication(string response, object cbObject)
-    {
+    {   
+        
         var data = JsonMapper.ToObject(response)["data"];
         App.ProfileId = data["profileId"].ToString();
-        App.PlayerName = data["playerName"].ToString();
+        App.Name = data["playerName"].ToString();
 
 
-        PlayerPrefs.SetString(App.WrapperName + "_username", Username);
+        PlayerPrefs.SetString(App.WrapperName + "_universalId", UniversalId);
         PlayerPrefs.SetString(App.WrapperName + "_password", Password);
 
 
-        //PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
+        PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
 
 
         GetPlayerRating();
@@ -119,18 +129,7 @@ public class Login : GameScene
             App.GotoMatchSelectScene(gameObject);
         }
     }
-
-    private void SetupNewPlayer()
-    {
-        // If this is a new user, let's set their playerName to their universalId
-        App.PlayerName = Username;
-
-        // and also update their name on brainCloud
-        App.Bc.PlayerStateService.UpdateUserName(Username,
-            (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
-    }
-
-
+    
     private void GetPlayerRating()
     {
         // We are Going to Read the Match Making to get the Current Player Rating.
@@ -141,4 +140,14 @@ public class Login : GameScene
             },
             (status, code, error, o) => { Debug.Log("Failed to Get MatchMaking Data"); });
     }
+
+    private void SetupNewPlayer()
+    {
+        // If this is a new user, let's set their Name to their universalId
+        App.Name = UniversalId;
+
+        // and also update their name on brainCloud
+        App.Bc.PlayerStateService.UpdateUserName(UniversalId,
+            (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
+    }    
 }

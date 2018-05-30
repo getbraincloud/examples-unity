@@ -20,7 +20,7 @@ public class App : MonoBehaviour
     public PlayerInfo PlayerInfoO = new PlayerInfo();
     public PlayerInfo PlayerInfoX = new PlayerInfo();
     public PlayerInfo WhosTurn;
-    public string PlayerName;
+    public string Name;
     public string PlayerRating;
     public string ProfileId;
 
