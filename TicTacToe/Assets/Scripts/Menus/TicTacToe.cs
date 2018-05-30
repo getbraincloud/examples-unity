@@ -58,6 +58,10 @@ public class TicTacToe : GameScene
     public PlayerInfo LoserInfo;
 
     private bool hasNoNewTurn;
+
+    public GUIText PlayerXName;
+    public GUIText PlayerOName;
+    
     #endregion
 
     private void Start()
@@ -81,12 +85,10 @@ public class TicTacToe : GameScene
         _winner = CheckForWinner();
 
         // Setup HUD with player pics and names
-        var playerXName = GameObject.Find("PlayerXName").GetComponent<GUIText>();
-        var playerOName = GameObject.Find("PlayerOName").GetComponent<GUIText>();
+        
 
-
-        playerXName.text = App.PlayerInfoX.PlayerName;
-        playerOName.text = App.PlayerInfoO.PlayerName;
+        PlayerXName.text = App.PlayerInfoX.PlayerName;
+        PlayerOName.text = App.PlayerInfoO.PlayerName;
         _playerTurnText.text = "Your Turn";
 
         _turnPlayed = false;

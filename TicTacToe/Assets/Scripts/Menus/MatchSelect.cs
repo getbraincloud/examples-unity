@@ -29,8 +29,8 @@ public class MatchSelect : GameScene
         // Enable Match Making, so other Users can also challege this Profile
         // http://getbraincloud.com/apidocs/apiref/#capi-matchmaking-enablematchmaking
         App.Bc.MatchMakingService
-            .EnableMatchMaking((response, cbObject) => { Debug.Log(response); },
-                (status, code, error, cbObject) => { Debug.Log(error); });
+            .EnableMatchMaking((response, cbObject) => { Debug.Log(response.ToString()); },
+                (status, code, error, cbObject) => { Debug.Log(error.ToString()); });
 
         App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
     }

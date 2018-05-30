@@ -8,6 +8,62 @@ using UnityEngine;
 #endregion
 
 // Leaderbaords are set on the brainCloud Dashboard, under Design | Leaderboard | Leaderboard Configs
+/**
+ {
+    "configList": [
+        {
+            "gameId": "10228",
+            "leaderboardId": "Player_Rating",
+            "resetAt": 1526670180000,
+            "leaderboardType": "LAST_VALUE",
+            "rotationType": "NEVER",
+            "retainedCount": 2,
+            "pacerEnabled": true,
+            "pacerConfig": [
+                {
+                    "score": 1400,
+                    "pacerLeaderboardTag": {},
+                    "pacerId": "1"
+                },
+                {
+                    "score": 1000,
+                    "pacerLeaderboardTag": {},
+                    "pacerId": "2"
+                },
+                {
+                    "score": 0,
+                    "pacerLeaderboardTag": {},
+                    "pacerId": "3"
+                },
+                {
+                    "score": 1800,
+                    "pacerLeaderboardTag": {},
+                    "pacerId": "4"
+                },
+                {
+                    "score": 9999,
+                    "pacerLeaderboardTag": {},
+                    "pacerId": "5"
+                }
+            ],
+            "data": {},
+            "numDaysToRotate": 0,
+            "currentVersionId": 1,
+            "retainedVersionsInfo": [
+                {
+                    "versionId": 1,
+                    "startingAt": 1526666569839,
+                    "endingAt": null,
+                    "rotationType": "NEVER",
+                    "numDaysToRotate": 0
+                }
+            ],
+            "lastPurgedAt": 0
+        }
+    ],
+    "maxRetainedCount": 8
+}
+ */
 
 public class Leaderboard : GameScene
 {

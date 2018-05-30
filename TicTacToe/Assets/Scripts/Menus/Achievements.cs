@@ -8,6 +8,73 @@ using UnityEngine;
 #endregion
 
 // Achievements are set on the brainCloud Dashboard, under Design | Gamification | Achievements
+/**
+[
+    {
+        "gameId": "10228",
+        "achievementId": "WON_100_RANKED_MATCHES",
+        "title": "Won 100 ranked matches.",
+        "description": "Won 100 ranked matches.",
+        "extraData": {
+            "TODO": "Win 100 ranked matches.",
+            "DONE": "Won 100 ranked matches."
+        },
+        "invisibleUntilEarned": false,
+        "fbEnabled": false,
+        "imageUrl": "/metadata/achievements/WON_100_RANKED_MATCHES.png",
+        "fbGamePoints": null,
+        "appleEnabled": false,
+        "appleAchievementId": null,
+        "steamEnabled": false,
+        "steamAchievementId": null,
+        "googleEnabled": false,
+        "googleAchievementId": null,
+        "absoluteImageUrl": "https://portal.braincloudservers.com/files/portal/g/10228/metadata/achievements/WON_100_RANKED_MATCHES.png"
+    },
+    {
+        "gameId": "10228",
+        "achievementId": "WON_10_RANKED_MATCHES",
+        "title": "Won 10 ranked matches.",
+        "description": "Won 10 ranked matches.",
+        "extraData": {
+            "TODO": "Win 10 ranked matches.",
+            "DONE": "Won 10 ranked matches."
+        },
+        "invisibleUntilEarned": false,
+        "fbEnabled": false,
+        "imageUrl": "/metadata/achievements/WON_10_RANKED_MATCHES.png",
+        "fbGamePoints": null,
+        "appleEnabled": false,
+        "appleAchievementId": null,
+        "steamEnabled": false,
+        "steamAchievementId": null,
+        "googleEnabled": false,
+        "googleAchievementId": null,
+        "absoluteImageUrl": "https://portal.braincloudservers.com/files/portal/g/10228/metadata/achievements/WON_10_RANKED_MATCHES.png"
+    },
+    {
+        "gameId": "10228",
+        "achievementId": "WON_A_RANKED_MATCH",
+        "title": "Won a ranked match.",
+        "description": "Won a ranked match.",
+        "extraData": {
+            "TODO": "Win a ranked match.",
+            "DONE": "Won a ranked match."
+        },
+        "invisibleUntilEarned": false,
+        "fbEnabled": false,
+        "imageUrl": "/metadata/achievements/WON_A_RANKED_MATCH.png",
+        "fbGamePoints": null,
+        "appleEnabled": false,
+        "appleAchievementId": null,
+        "steamEnabled": false,
+        "steamAchievementId": null,
+        "googleEnabled": false,
+        "googleAchievementId": null,
+        "absoluteImageUrl": "https://portal.braincloudservers.com/files/portal/g/10228/metadata/achievements/WON_A_RANKED_MATCH.png"
+    }
+]
+ */
 
 public class Achievements : GameScene
 {

@@ -8,18 +8,18 @@ Prefab:
     m_TransformParent: {fileID: 0}
     m_Modifications: []
     m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1989756578506508}
-  m_IsPrefabAsset: 1
---- !u!1 &1989756578506508
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1067153630192374}
+  m_IsPrefabParent: 1
+--- !u!1 &1067153630192374
 GameObject:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 6
+  serializedVersion: 5
   m_Component:
-  - component: {fileID: 4237057511931612}
-  - component: {fileID: 114892574489047088}
+  - component: {fileID: 4337650201791178}
+  - component: {fileID: 114502347923553878}
   m_Layer: 0
   m_Name: PlayerSetup
   m_TagString: Untagged
@@ -27,25 +27,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4237057511931612
+--- !u!4 &4337650201791178
 Transform:
   m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1989756578506508}
+  m_GameObject: {fileID: 1067153630192374}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.1, y: 0.85999995, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114892574489047088
+--- !u!114 &114502347923553878
 MonoBehaviour:
   m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1989756578506508}
+  m_GameObject: {fileID: 1067153630192374}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d352a19d02514a7e82956e92812c696, type: 3}
@@ -57,22 +57,22 @@ MonoBehaviour:
   MatchVersion: 0
   OwnerId: 
   PlayerName: 
-  ProfileId: 
   PlayerRating: 
-  Login: {fileID: 1333240632149822, guid: a555c961df84240c2a621649a0a480fb, type: 2}
-  MatchSelect: {fileID: 1017514425004200, guid: 77070bd03ae364aee88eb4040b99e679,
+  ProfileId: 
+  Achievements: {fileID: 1744570849932162, guid: f6eaf7d93fadf43ba88fc2a0da4d5344,
     type: 2}
-  TicTacToe: {fileID: 1587577777078858, guid: 4089d9eb8c4fd45dab53adc6697080cb, type: 2}
-  Leaderboard: {fileID: 1195133622628128, guid: 5de9c5da0cb904092a7dba36937d670f,
+  Leaderboard: {fileID: 1454836892881864, guid: 936030d9c17be407dab66a22c927d96e,
     type: 2}
-  Achievements: {fileID: 1878284421606890, guid: d466d7da9b45e49f3bcc55c1f99c3c13,
+  Login: {fileID: 1218560278102842, guid: 5c28323616ac445bb87752074cd34050, type: 2}
+  MatchSelect: {fileID: 1708571160960586, guid: 1b28d6967930a43b99eb47b8bae4c11b,
     type: 2}
+  TicTacToe: {fileID: 1659163261473292, guid: 55b2a6cd8ac974ffbab7e6d48b544bd0, type: 2}
   Offset: 0
   ViewportRect:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1
-    height: 1
+    width: 0
+    height: 0
   WindowId: 0
   WrapperName: 
