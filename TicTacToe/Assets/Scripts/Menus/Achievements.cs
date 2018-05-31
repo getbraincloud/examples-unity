@@ -122,59 +122,6 @@ public class Achievements : GameScene
             OnPickGameWindow, "Pick Game");
     }
 
-    #region PlayerInfoWindow
-    private void OnPlayerInfoWindow(int windowId)
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginVertical();
-
-
-        GUILayout.BeginHorizontal();
-
-        if (!isEditingPlayerName)
-        {
-            GUILayout.Label(string.Format("PlayerName: {0}", App.Name), GUILayout.MinWidth(200));
-            if (GUILayout.Button("Edit", GUILayout.MinWidth(50)))
-            {
-                editablePlayerName = App.Name;
-                isEditingPlayerName = true;
-            }
-        }
-        else
-        {
-            editablePlayerName = GUILayout.TextField(editablePlayerName, GUILayout.MinWidth(200));
-            if (GUILayout.Button("Save", GUILayout.MinWidth(50)))
-            {
-                App.Name = editablePlayerName;
-                isEditingPlayerName = false;
-
-                App.Bc.PlayerStateService.UpdateUserName(App.Name,
-                    (response, cbObject) => { },
-                    (status, code, error, cbObject) => { Debug.Log("Failed to change Player Name"); });
-            }
-        }
-
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Label(string.Format("PlayerRating: {0}", App.PlayerRating), GUILayout.MinWidth(200));
-
-        GUILayout.BeginHorizontal();
-
-        if (GUILayout.Button("MatchSelect", GUILayout.MinWidth(50))) App.GotoMatchSelectScene(gameObject);
-
-        GUILayout.EndHorizontal();
-
-
-        GUILayout.EndVertical();
-        GUILayout.FlexibleSpace();
-
-
-        GUILayout.EndHorizontal();
-    }
-    #endregion
-
     private void OnPickGameWindow(int windowId)
     {
         GUILayout.BeginHorizontal();

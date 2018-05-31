@@ -436,7 +436,7 @@ namespace BrainCloud
         /// <param name="cbObject">
         /// The user object sent to the callback.e is received.
         /// </param>
-        public void FindCompleteMatches(
+        public void OnFindCompleteMatches(
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)

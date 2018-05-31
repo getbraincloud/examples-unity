@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using LitJson;
 using UnityEngine;
+using UnityEngine.UI;
 
 #endregion
 
@@ -40,15 +41,15 @@ public class TicTacToe : GameScene
         {2, 4, 6}
     };
 
-    public List<GameObject> _gridObjList;
+    public List<GameObject> GridObjList;
     private List<string> _history;
     private bool _isHistoryMatch;
 
     private MatchState _matchState;
-    public GameObject _playerO;
-    public GUIText _playerTurnText;
+    public GameObject PlayerO;
+    public TextMesh PlayerTurnText;
 
-    public GameObject _playerX;
+    public GameObject PlayerX;
     private bool _turnPlayed;
     private bool _turnSubmitted;
 
@@ -59,8 +60,8 @@ public class TicTacToe : GameScene
 
     private bool hasNoNewTurn;
 
-    public GUIText PlayerXName;
-    public GUIText PlayerOName;
+    public TextMesh PlayerXName;
+    public TextMesh PlayerOName;
     
     #endregion
 
@@ -89,7 +90,7 @@ public class TicTacToe : GameScene
 
         PlayerXName.text = App.PlayerInfoX.PlayerName;
         PlayerOName.text = App.PlayerInfoO.PlayerName;
-        _playerTurnText.text = "Your Turn";
+        PlayerTurnText.text = "Your Turn";
 
         _turnPlayed = false;
 
@@ -102,9 +103,9 @@ public class TicTacToe : GameScene
             _matchState = MatchState.MATCH_HISTORY;
 
             if (_winner == -1)
-                _playerTurnText.text = "Match Tied";
+                PlayerTurnText.text = "Match Tied";
             else
-                _playerTurnText.text = "Match Completed";
+                PlayerTurnText.text = "Match Completed";
 
             // Read match history
             App.Bc.AsyncMatchService
@@ -127,9 +128,9 @@ public class TicTacToe : GameScene
 
     private void AddToken(int index, string token)
     {
-        _gridObjList.Add(Instantiate(token == "X" ? _playerX : _playerO, _tokenPositions[index],
+        GridObjList.Add(Instantiate(token == "X" ? PlayerX : PlayerO, _tokenPositions[index],
             Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f))));
-        _gridObjList.Last().transform.parent = gameObject.transform;
+        GridObjList.Last().transform.parent = gameObject.transform;
         _grid[index] = token == "X" ? 1 : 2;
     }
 
@@ -155,26 +156,26 @@ public class TicTacToe : GameScene
 
         if (_winner < 0)
         {
-            _playerTurnText.text = "Game Tied!";
+            PlayerTurnText.text = "Game Tied!";
         }
         else if (_winner > 0)
         {
             if (_winner == 1)
             {
-                _playerTurnText.text = App.PlayerInfoX.PlayerName + " Wins!";
+                PlayerTurnText.text = App.PlayerInfoX.PlayerName + " Wins!";
                 WinnerInfo = App.PlayerInfoX;
                 LoserInfo = App.PlayerInfoO;
             }
             else
             {
-                _playerTurnText.text = App.PlayerInfoO.PlayerName + " Wins!";
+                PlayerTurnText.text = App.PlayerInfoO.PlayerName + " Wins!";
                 WinnerInfo = App.PlayerInfoO;
                 LoserInfo = App.PlayerInfoX;
             }
         }
         else
         {
-            _playerTurnText.text = App.WhosTurn.PlayerName + " Turn";
+            PlayerTurnText.text = App.WhosTurn.PlayerName + " Turn";
         }
     }
 
@@ -184,8 +185,8 @@ public class TicTacToe : GameScene
         for (var i = 0; i < _grid.Length; i++) _grid[i] = 0;
 
         //Clear instanciated game objects
-        foreach (var obj in _gridObjList) Destroy(obj);
-        _gridObjList.Clear();
+        foreach (var obj in GridObjList) Destroy(obj);
+        GridObjList.Clear();
     }
 
     public bool AvailableSlot(int index)

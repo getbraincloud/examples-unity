@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Collections.Generic;
+using BrainCloud.Entity;
 using LitJson;
 using UnityEngine;
 
@@ -16,9 +17,6 @@ public class MatchSelect : GameScene
 
     private Vector2 _scrollPos;
     private eState _state = eState.LOADING;
-    private string editablePlayerName = "";
-
-    private bool isEditingPlayerName;
 
 
     // Use this for initialization
@@ -28,13 +26,17 @@ public class MatchSelect : GameScene
 
         // Enable Match Making, so other Users can also challege this Profile
         // http://getbraincloud.com/apidocs/apiref/#capi-matchmaking-enablematchmaking
-        App.Bc.MatchMakingService
-            .EnableMatchMaking();
+        App.Bc.MatchMakingService.EnableMatchMaking(null, (status, code, error, cbObject) =>
+        {
+            Debug.Log("MatchMaking enabled failed");
+        });
 
-        App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+        
+        App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
+        
     }
 
-    private void OnReadMatchedPlayerData(string responseData, object cbPostObject)
+    private void OnFindPlayers(string responseData, object cbPostObject)
     {
         matchedProfiles.Clear();
 
@@ -46,10 +48,10 @@ public class MatchSelect : GameScene
 
 
         // After, fetch our game list from Braincloud
-        App.Bc.AsyncMatchService.FindMatches(OnFindMatchesSuccess);
+        App.Bc.AsyncMatchService.FindMatches(OnFindMatches);
     }
 
-    private void OnFindMatchesSuccess(string responseData, object cbPostObject)
+    private void OnFindMatches(string responseData, object cbPostObject)
     {
         matches.Clear();
 
@@ -64,7 +66,7 @@ public class MatchSelect : GameScene
         }
 
         // Now, find completed matches so the user can go see the history
-        App.Bc.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
+        App.Bc.AsyncMatchService.OnFindCompleteMatches(OnFindCompletedMatches);
     }
 
     private void OnFindCompletedMatches(string responseData, object cbPostObject)
@@ -133,59 +135,6 @@ public class MatchSelect : GameScene
         }
     }
 
-    private void OnPlayerInfoWindow(int windowId)
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginVertical();
-
-
-        GUILayout.BeginHorizontal();
-
-        if (!isEditingPlayerName)
-        {
-            GUILayout.Label(string.Format("PlayerName: {0}", App.Name), GUILayout.MinWidth(200));
-            if (GUILayout.Button("Edit", GUILayout.MinWidth(50)))
-            {
-                editablePlayerName = App.Name;
-                isEditingPlayerName = true;
-            }
-        }
-        else
-        {
-            editablePlayerName = GUILayout.TextField(editablePlayerName, GUILayout.MinWidth(200));
-            if (GUILayout.Button("Save", GUILayout.MinWidth(50)))
-            {
-                App.Name = editablePlayerName;
-                isEditingPlayerName = false;
-
-                App.Bc.PlayerStateService.UpdateUserName(App.Name,
-                    (response, cbObject) => { },
-                    (status, code, error, cbObject) => { Debug.Log("Failed to change Player Name"); });
-            }
-        }
-
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Label(string.Format("PlayerRating: {0}", App.PlayerRating), GUILayout.MinWidth(200));
-
-        GUILayout.BeginHorizontal();
-
-        if (GUILayout.Button("Leaderboard", GUILayout.MinWidth(50))) App.GotoLeaderboardScene(gameObject);
-
-        if (GUILayout.Button("Achievements", GUILayout.MinWidth(50))) App.GotoAchievementsScene(gameObject);
-
-        GUILayout.EndHorizontal();
-
-
-        GUILayout.EndVertical();
-        GUILayout.FlexibleSpace();
-
-
-        GUILayout.EndHorizontal();
-    }
-
     private void OnPickGameWindow(int windowId)
     {
         GUILayout.BeginHorizontal();
@@ -223,7 +172,7 @@ public class MatchSelect : GameScene
 
 
         if (GUILayout.Button("REFRESH"))
-            App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnReadMatchedPlayerData);
+            App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
 
         if (GUILayout.Button("LOGOUT"))
         {

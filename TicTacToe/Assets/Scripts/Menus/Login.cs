@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using BrainCloud.Entity;
 using LitJson;
+using NUnit.Framework.Constraints;
 using UnityEngine;
 
 #endregion
@@ -24,9 +25,6 @@ public class Login : GameScene
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
-        PlayerPrefs.DeleteAll();
-        UniversalId = PlayerPrefs.GetString(App.WrapperName + "_universalId");
-        Password = PlayerPrefs.GetString(App.WrapperName + "_password");
     }
 
     private void OnGUI()
@@ -93,8 +91,7 @@ public class Login : GameScene
             App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
                 (status, code, error, cbObject) =>
                 {
-                    // See the AuthenticationErrorHandling Example for ways of handling errors
-                    Debug.Log("Login Error Occured");
+                    Debug.Log("An Error Occured in Login");   
                 });
         }
     }
@@ -102,13 +99,12 @@ public class Login : GameScene
     private void OnAuthentication(string response, object cbObject)
     {   
         
+        
         var data = JsonMapper.ToObject(response)["data"];
         App.ProfileId = data["profileId"].ToString();
         App.Name = data["playerName"].ToString();
 
 
-        PlayerPrefs.SetString(App.WrapperName + "_universalId", UniversalId);
-        PlayerPrefs.SetString(App.WrapperName + "_password", Password);
 
 
         PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
