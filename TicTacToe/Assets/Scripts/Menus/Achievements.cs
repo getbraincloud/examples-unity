@@ -80,9 +80,6 @@ public class Achievements : GameScene
 {
     private readonly List<AchievementInfo> achievements = new List<AchievementInfo>();
     private Vector2 _scrollPos;
-    private string editablePlayerName = "";
-
-    private bool isEditingPlayerName;
 
     private void Start()
     {

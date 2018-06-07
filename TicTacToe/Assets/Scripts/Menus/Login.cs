@@ -76,7 +76,15 @@ public class Login : GameScene
             Spinner.gameObject.SetActive(true);
             
             App.Bc.Reconnect(OnAuthentication,
-                (status, code, error, cbObject) => { });
+                (status, code, error, cbObject) =>
+                {
+                    // An error occured on reconnecting. Perhaps the User and Tester Data was cleared on the brainCloud dashboard,
+                    // or perhaps there is no internet connection.
+                    // Lets handle this error, by disabling this reconnect state
+                    _isConnecting = false;
+                    PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "false");
+                    Spinner.gameObject.SetActive(false);
+                });
 
 
         }
@@ -98,12 +106,9 @@ public class Login : GameScene
 
     private void OnAuthentication(string response, object cbObject)
     {   
-        
-        
         var data = JsonMapper.ToObject(response)["data"];
         App.ProfileId = data["profileId"].ToString();
         App.Name = data["playerName"].ToString();
-
 
 
 

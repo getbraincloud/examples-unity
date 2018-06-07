@@ -69,9 +69,6 @@ public class Leaderboard : GameScene
 {
     private readonly List<PlayerInfo> scores = new List<PlayerInfo>();
     private Vector2 _scrollPos;
-    private string editablePlayerName = "";
-
-    private bool isEditingPlayerName;
 
     private void Start()
     {
