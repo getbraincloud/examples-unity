@@ -1,9 +1,12 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
+using BrainCloud;
 using BrainCloud.Entity;
 using LitJson;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 #endregion
 
@@ -17,6 +20,10 @@ public class MatchSelect : GameScene
 
     private Vector2 _scrollPos;
     private eState _state = eState.LOADING;
+
+    private string autoJoinText = "Auto Join";
+
+    private bool isLookingForMatch = false;
 
 
     // Use this for initialization
@@ -170,9 +177,135 @@ public class MatchSelect : GameScene
 
         GUILayout.EndScrollView();
 
+        if (isLookingForMatch)
+        {
+            GUILayout.Label(
+                "No open games.\nAccount will be auto match with\nnext player using auto join.\n\nCome back later and refresh",
+                GUILayout.MinHeight(100), GUILayout.MaxWidth(250));
+        }
+        
+        if (GUILayout.Button(autoJoinText, GUILayout.MaxWidth(250)))
+        {
+
+            if (isLookingForMatch)
+            {
+                isLookingForMatch = false;
+                autoJoinText = "Auto Join";
+                
+                var MATCH_STATE = "MATCH_STATE";
+                var CANCEL_LOOKING= "CANCEL_LOOKING";
+                
+                var attributesJson = new JsonData();
+                attributesJson[MATCH_STATE] = CANCEL_LOOKING;
+                
+                App.Bc.PlayerStateService.UpdateAttributes(attributesJson.ToJson(), false);
+            }
+            else
+            {
+                var scriptDataJson = new JsonData();
+                scriptDataJson["rankRangeDelta"] = RANGE_DELTA;
+                scriptDataJson["pushNotificationMessage"] = null;
+
+            
+
+                App.Bc.ScriptService.RunScript("AUTO_JOIN_MATCH", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
+
+                /**     Cloud Code Script Contents: AUTO_JOIN_MATCH
+                    // cloud code can be created on the brainCloud dashboard, under Design | Cloud Code | Scripts
+
+                    var NO_MATCHES_FOUND_MESSAGE = "No matches found. You will be entered into a match with the next player looking for one.";
+                    
+                    var MATCH_STATE = "MATCH_STATE";
+                    var LOOKING_FOR_MATCH = "LOOKING_FOR_MATCH";
+                    var FOUND_MATCH = "FOUND_MATCH";
+                    
+                    
+                    // cloud code can be created on the brainCloud dashboard, under Design | Cloud Code | Scripts
+                    var retVal = {};
+                    
+                    var rankRangeDelta = data.rankRangeDelta;
+                    
+                    var pushNotificationMessage = data.pushNotificationMessage;
+                    
+                    var numberOfResults = 1;
+                    var jsonAttributes = { MATCH_STATE : LOOKING_FOR_MATCH };
+                    
+                    var matchMakingProxy = bridge.getMatchMakingServiceProxy();
+                    
+                    // Find a player looking for a match.
+                    var retVal = matchMakingProxy.findPlayersWithAttributes(
+                        rankRangeDelta,
+                        numberOfResults,
+                        jsonAttributes);
+                        
+                    // No player looking for a match found
+                    if(retVal.data.matchesFound.length === 0) {
+                        retVal = NO_MATCHES_FOUND_MESSAGE;
+                        
+                        // So let's set our player attributes to indicate we are looking for a match
+                        var attributesToUpdate = { MATCH_STATE : LOOKING_FOR_MATCH };
+                        var playerStateProxy = bridge.getPlayerStateServiceProxy();
+                        playerStateProxy.updateAttributes(attributesToUpdate, false);
+                        
+                    } 
+                    // We found a player looking for a match!
+                    else {
+                        var currentProfileId = bridge.getProfileId();
+                        var matchedPlayerId = retVal.data.matchesFound[0].playerId;
+                        
+                        var players = [ { "platform": "BC", "id": matchedPlayerId } ];
+                        
+                        var asyncMatchProxy = bridge.getAsyncMatchServiceProxy();
+                        
+                        // When using Cloud Code, we are always going the current session go first
+                        var yourTurnFirst = true;
+                        
+                        var jsonSummary = {
+                            "players" : [
+                                { "profileId" : currentProfileId, "token" : yourTurnFirst ? "X" : "O" },
+                                { "profileId" : matchedPlayerId, "token" : yourTurnFirst ? "O" : "X" }
+                            ]
+                        }
+                        
+                        var nextPlayer = yourTurnFirst ? currentProfileId : matchedPlayerId;
+                        
+                        // And setup a blank board
+                        var jsonMatchState = { "board" : "#########" };
+                        
+                        
+                        retVal = asyncMatchProxy.createMatchWithInitialTurn(players, jsonMatchState, pushNotificationMessage, nextPlayer, jsonSummary);
+                        
+                        // Indicate the matched player found a match
+                        var matchedSession = bridge.getSessionForProfile(matchedPlayerId);
+                        var matchedPlayerStateProxy = bridge.getPlayerStateServiceProxy(matchedSession);
+                    
+                        var attributesToUpdate = { MATCH_STATE : FOUND_MATCH };
+                        matchedPlayerStateProxy.updateAttributes(attributesToUpdate, false);
+                    }
+                    
+                    retVal;
+                 */                
+            }
+            
+        }
 
         if (GUILayout.Button("REFRESH"))
+        {
             App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
+
+            App.Bc.PlayerStateService.GetAttributes((responseData, cbObject) =>
+            {
+                var data = JsonMapper.ToObject(responseData)["data"];
+
+                if (data["attributes"]["MATCH_STATE"].ToString().Equals("FOUND_MATCH"))
+                {
+                    isLookingForMatch = false;
+                    autoJoinText = "MatchFound";
+
+                }
+            });
+
+        }
 
         if (GUILayout.Button("LOGOUT"))
         {
@@ -270,7 +403,34 @@ public class MatchSelect : GameScene
     private void OnCreateMatchSuccess(string responseData, object cbPostObject)
     {
         var data = JsonMapper.ToObject(responseData);
-        var match = new MatchInfo(data["data"], this);
+        MatchInfo match;
+
+        // Cloud Code returns wrap the data in a responseJson
+        if (data["data"].Keys.Contains("response"))
+        {
+            if (data["data"]["response"].IsObject && data["data"]["response"].Keys.Contains("data"))
+            {
+                match = new MatchInfo(data["data"]["response"]["data"], this);    
+            }
+            else
+            {
+                // No match found. Handle this result
+                Debug.Log(data["data"]["response"].ToString());
+                _state = eState.GAME_PICKER;
+
+                isLookingForMatch = true;
+                autoJoinText = "Cancel Looking for Match";
+
+                return;
+            }
+            
+        }
+        else
+        {
+            match = new MatchInfo(data["data"], this);   
+        }
+
+            
 
         // Go to the game if it's your turn
         if (match.yourTurn)
