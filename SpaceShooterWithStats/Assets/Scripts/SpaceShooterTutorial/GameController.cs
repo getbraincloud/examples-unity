@@ -13,7 +13,7 @@ public class GameController : MonoBehaviour
 	private void ReadStatistics()
 	{
 		// Ask brainCloud for statistics
-		BrainCloudWrapper.GetBC().PlayerStatisticsService.ReadAllPlayerStats(StatsSuccess_Callback, StatsFailure_Callback, null);
+		App.Bc.PlayerStatisticsService.ReadAllPlayerStats(StatsSuccess_Callback, StatsFailure_Callback, null);
 		
 		brainCloudStatusText.text = "Reading statistics from brainCloud...";
 		brainCloudStatusText.gameObject.SetActive(true);
@@ -30,7 +30,7 @@ public class GameController : MonoBehaviour
 		};
 		
 		// Send to the cloud
-		BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementPlayerStats(
+		App.Bc.PlayerStatisticsService.IncrementPlayerStats(
 			stats, StatsSuccess_Callback, StatsFailure_Callback, null);
 
 		brainCloudStatusText.text = "Incrementing statistics on brainCloud...";
@@ -136,7 +136,7 @@ public class GameController : MonoBehaviour
 
 	void Start ()
 	{
-		if (!BrainCloudWrapper.GetBC ().IsAuthenticated())
+		if (!App.Bc.Client.IsAuthenticated())
 		{
 			Application.LoadLevel("BrainCloudConnect");
 		}
