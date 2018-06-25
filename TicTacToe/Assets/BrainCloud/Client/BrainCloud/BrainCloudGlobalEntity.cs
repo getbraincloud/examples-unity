@@ -6,16 +6,17 @@
 using System.Collections.Generic;
 using JsonFx.Json;
 using BrainCloud.Internal;
+using BrainCloud.Common;
 
 namespace BrainCloud
 {
     public class BrainCloudGlobalEntity
     {
-        private BrainCloudClient _brainCloudClient;
+        private BrainCloudClient _client;
 
-        public BrainCloudGlobalEntity(BrainCloudClient brainCloudClient)
+        public BrainCloudGlobalEntity(BrainCloudClient client)
         {
-            _brainCloudClient = brainCloudClient;
+            _client = client;
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.Create, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -130,7 +131,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.CreateWithIndexedId, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -175,7 +176,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.Update, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -223,7 +224,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.UpdateAcl, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -266,7 +267,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.UpdateTimeToLive, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -304,7 +305,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.Delete, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -337,7 +338,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.Read, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -389,7 +390,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.GetList, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -427,7 +428,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.GetListByIndexedId, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -465,7 +466,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.GetListCount, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -496,7 +497,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.GetPage, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -533,7 +534,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.GetPageOffset, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
 
@@ -567,7 +568,132 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.IncrementGlobalEntityData, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
+        }
+        
+        /// <summary>
+        /// Gets a list of up to randomCount randomly selected entities from the server based on the where condition and specified maximum return count.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - globalEntity
+        /// Service Operation - GET_RANDOM_ENTITIES_MATCHING
+        /// </remarks>
+        /// <param name="where">Mongo style query string</param>
+        /// <param name="maxReturn">The maximum number of entities to return</param>
+        /// <param name="success">The success callback</param>
+        /// <param name="failure">The failure callback</param>
+        /// <param name="cbObject">The callback object</param>
+        public void GetRandomEntitiesMatching(
+            string whereJson,
+            int maxReturn,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            var data = new Dictionary<string, object>();
+
+            if (Util.IsOptionalParameterValid(whereJson))
+            {
+                var where = JsonReader.Deserialize<Dictionary<string, object>>(whereJson);
+                data[OperationParam.GlobalEntityServiceWhere.Value] = where;
+            }
+            
+            data[OperationParam.GlobalEntityServiceMaxReturn.Value] = maxReturn;
+            
+            var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.GetRandomEntitiesMatching, data, callback);
+            _client.SendRequest(serverCall);
+        }
+        
+        /// <summary>
+        /// Method updates an existing entity's Owner and Acl on the server.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - globalEntity
+        /// Service Operation - UPDATE_ENTITY_OWNER_AND_ACL
+        /// </remarks>
+        /// <param name="entityId">
+        /// The entity ID
+        /// </param>
+        /// <param name="version">
+        /// The version of the entity
+        /// </param>
+        /// <param name="ownerId">
+        /// The owner ID
+        /// </param>
+        /// <param name="acl">
+        /// The entity's access control list
+        /// </param>
+        /// <param name="success">
+        /// The success callback.
+        /// </param>
+        /// <param name="failure">
+        /// The failure callback.
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void UpdateEntityOwnerAndAcl(
+            string entityId,
+            long version,
+            string ownerId,
+            ACL acl,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            var data = new Dictionary<string, object>();
+            data[OperationParam.GlobalEntityServiceEntityId.Value] = entityId;
+            data[OperationParam.GlobalEntityServiceVersion.Value] = version;
+            data[OperationParam.OwnerId.Value] = ownerId;
+            data[OperationParam.GlobalEntityServiceAcl.Value] = JsonReader.Deserialize(acl.ToJsonString());
+
+            var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.UpdateEntityOwnerAndAcl, data, callback);
+            _client.SendRequest(serverCall);
+        }
+
+        /// <summary>
+        /// Method clears the owner id of an existing entity and sets the Acl on the server.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - globalEntity
+        /// Service Operation - UPDATE_ENTITY_OWNER_AND_ACL
+        /// </remarks>
+        /// <param name="entityId">
+        /// The entity ID
+        /// </param>
+        /// <param name="version">
+        /// The version of the entity
+        /// </param>
+        /// <param name="acl">
+        /// The entity's access control list
+        /// </param>
+        /// <param name="success">
+        /// The success callback.
+        /// </param>
+        /// <param name="failure">
+        /// The failure callback.
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void MakeSystemEntity(
+            string entityId,
+            long version,
+            ACL acl,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            var data = new Dictionary<string, object>();
+            data[OperationParam.GlobalEntityServiceEntityId.Value] = entityId;
+            data[OperationParam.GlobalEntityServiceVersion.Value] = version;
+            data[OperationParam.GlobalEntityServiceAcl.Value] = JsonReader.Deserialize(acl.ToJsonString());
+
+            var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            var serverCall = new ServerCall(ServiceName.GlobalEntity, ServiceOperation.MakeSystemEntity, data, callback);
+            _client.SendRequest(serverCall);
         }
     }
 }

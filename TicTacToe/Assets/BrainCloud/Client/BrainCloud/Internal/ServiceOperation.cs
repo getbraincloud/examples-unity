@@ -19,6 +19,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ResetEmailPassword = new ServiceOperation("RESET_EMAIL_PASSWORD");
         public static readonly ServiceOperation SwitchToChildProfile = new ServiceOperation("SWITCH_TO_CHILD_PROFILE");
         public static readonly ServiceOperation SwitchToParentProfile = new ServiceOperation("SWITCH_TO_PARENT_PROFILE");
+        public static readonly ServiceOperation DetachParent = new ServiceOperation("DETACH_PARENT");
+        public static readonly ServiceOperation AttachParentWithIdentity = new ServiceOperation("ATTACH_PARENT_WITH_IDENTITY");
 
         public static readonly ServiceOperation Create = new ServiceOperation("CREATE");
         public static readonly ServiceOperation CreateWithIndexedId = new ServiceOperation("CREATE_WITH_INDEXED_ID");
@@ -29,6 +31,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation Verify = new ServiceOperation("VERIFY");
         public static readonly ServiceOperation ReadShared = new ServiceOperation("READ_SHARED");
         public static readonly ServiceOperation ReadSharedEntity = new ServiceOperation("READ_SHARED_ENTITY");
+        public static readonly ServiceOperation UpdateEntityOwnerAndAcl = new ServiceOperation("UPDATE_ENTITY_OWNER_AND_ACL");
+        public static readonly ServiceOperation MakeSystemEntity = new ServiceOperation("MAKE_SYSTEM_ENTITY");
 
         // push notification
         public static readonly ServiceOperation DeregisterAll = new ServiceOperation("DEREGISTER_ALL");
@@ -36,11 +40,18 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation Register = new ServiceOperation("REGISTER");
         public static readonly ServiceOperation SendSimple = new ServiceOperation("SEND_SIMPLE");
         public static readonly ServiceOperation SendRich = new ServiceOperation("SEND_RICH");
+        public static readonly ServiceOperation SendRaw = new ServiceOperation("SEND_RAW");
+        public static readonly ServiceOperation SendRawBatch = new ServiceOperation("SEND_RAW_BATCH");
+        public static readonly ServiceOperation SendRawToGroup = new ServiceOperation("SEND_RAW_TO_GROUP");
         public static readonly ServiceOperation SendTemplatedToGroup = new ServiceOperation("SEND_TEMPLATED_TO_GROUP");
         public static readonly ServiceOperation SendNormalizedToGroup = new ServiceOperation("SEND_NORMALIZED_TO_GROUP");
         public static readonly ServiceOperation SendNormalized = new ServiceOperation("SEND_NORMALIZED");
         public static readonly ServiceOperation SendNormalizedBatch = new ServiceOperation("SEND_NORMALIZED_BATCH");
+        public static readonly ServiceOperation ScheduleRichNotification = new ServiceOperation("SCHEDULE_RICH_NOTIFICATION");
+        public static readonly ServiceOperation ScheduleNormalizedNotification = new ServiceOperation("SCHEDULE_NORMALIZED_NOTIFICATION");
 
+        public static readonly ServiceOperation ScheduleRawNotification = new ServiceOperation("SCHEDULE_RAW_NOTIFICATION");
+        
         public static readonly ServiceOperation FullReset = new ServiceOperation("FULL_PLAYER_RESET");
         public static readonly ServiceOperation DataReset = new ServiceOperation("GAME_DATA_RESET");
 
@@ -57,6 +68,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation UpdateSetMinimum = new ServiceOperation("UPDATE_SET_MINIMUM");
         public static readonly ServiceOperation UpdateIncrementToMaximum = new ServiceOperation("UPDATE_INCREMENT_TO_MAXIMUM");
         public static readonly ServiceOperation GetFriendProfileInfoForExternalId = new ServiceOperation("GET_FRIEND_PROFILE_INFO_FOR_EXTERNAL_ID");
+        public static readonly ServiceOperation GetProfileInfoForCredential = new ServiceOperation("GET_PROFILE_INFO_FOR_CREDENTIAL");
+        public static readonly ServiceOperation GetProfileInfoForExternalAuthId = new ServiceOperation("GET_PROFILE_INFO_FOR_EXTERNAL_AUTH_ID");
         public static readonly ServiceOperation GetExternalIdForProfileId = new ServiceOperation("GET_EXTERNAL_ID_FOR_PROFILE_ID");
         public static readonly ServiceOperation FindPlayerByUniversalId = new ServiceOperation("FIND_PLAYER_BY_UNIVERSAL_ID");
         public static readonly ServiceOperation ReadFriends = new ServiceOperation("READ_FRIENDS");
@@ -66,6 +79,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ReadFriendPlayerState = new ServiceOperation("READ_FRIEND_PLAYER_STATE");
         public static readonly ServiceOperation GetSummaryDataForProfileId = new ServiceOperation("GET_SUMMARY_DATA_FOR_PROFILE_ID");
         public static readonly ServiceOperation FindPlayerByName = new ServiceOperation("FIND_PLAYER_BY_NAME");
+        public static readonly ServiceOperation FindUsersByExactName = new ServiceOperation("FIND_USERS_BY_EXACT_NAME");
+        public static readonly ServiceOperation FindUsersBySubstrName = new ServiceOperation("FIND_USERS_BY_SUBSTR_NAME");
         public static readonly ServiceOperation ListFriends = new ServiceOperation("LIST_FRIENDS");
         public static readonly ServiceOperation AddFriends = new ServiceOperation("ADD_FRIENDS");
         public static readonly ServiceOperation RemoveFriends = new ServiceOperation("REMOVE_FRIENDS");
@@ -78,10 +93,15 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetGlobalLeaderboardVersions = new ServiceOperation("GET_GLOBAL_LEADERBOARD_VERSIONS");
         public static readonly ServiceOperation PostScore = new ServiceOperation("POST_SCORE");
         public static readonly ServiceOperation PostScoreDynamic = new ServiceOperation("POST_SCORE_DYNAMIC");
+        public static readonly ServiceOperation RemovePlayerScore = new ServiceOperation("REMOVE_PLAYER_SCORE");
         public static readonly ServiceOperation GetCompletedTournament = new ServiceOperation("GET_COMPLETED_TOURNAMENT");
         public static readonly ServiceOperation RewardTournament = new ServiceOperation("REWARD_TOURNAMENT");
         public static readonly ServiceOperation GetGroupSocialLeaderboard = new ServiceOperation("GET_GROUP_SOCIAL_LEADERBOARD");
         public static readonly ServiceOperation GetPlayersSocialLeaderboard = new ServiceOperation("GET_PLAYERS_SOCIAL_LEADERBOARD");
+        public static readonly ServiceOperation ListAllLeaderboards = new ServiceOperation("LIST_ALL_LEADERBOARDS");
+        public static readonly ServiceOperation GetGlobalLeaderboardEntryCount = new ServiceOperation("GET_GLOBAL_LEADERBOARD_ENTRY_COUNT");
+        public static readonly ServiceOperation GetPlayerScore = new ServiceOperation("GET_PLAYER_SCORE");
+        public static readonly ServiceOperation GetPlayerScoresFromLeaderboards = new ServiceOperation("GET_PLAYER_SCORES_FROM_LEADERBOARDS");
 
         public static readonly ServiceOperation ReadFriendsPlayerState = new ServiceOperation("READ_FRIEND_PLAYER_STATE");
 
@@ -132,6 +152,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ShieldOn = new ServiceOperation("SHIELD_ON");
         public static readonly ServiceOperation ShieldOnFor = new ServiceOperation("SHIELD_ON_FOR");
         public static readonly ServiceOperation ShieldOff = new ServiceOperation("SHIELD_OFF");
+        public static readonly ServiceOperation IncrementShieldOnFor = new ServiceOperation("INCREMENT_SHIELD_ON_FOR");
         public static readonly ServiceOperation GetShieldExpiry = new ServiceOperation("GET_SHIELD_EXPIRY");
         public static readonly ServiceOperation FindPlayers = new ServiceOperation("FIND_PLAYERS");
         public static readonly ServiceOperation FindPlayersUsingFilter = new ServiceOperation("FIND_PLAYERS_USING_FILTER");
@@ -185,7 +206,9 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation AddEvent = new ServiceOperation("ADD_EVENT");
         public static readonly ServiceOperation GetStreamSummariesForInitiatingPlayer = new ServiceOperation("GET_STREAM_SUMMARIES_FOR_INITIATING_PLAYER");
         public static readonly ServiceOperation GetStreamSummariesForTargetPlayer = new ServiceOperation("GET_STREAM_SUMMARIES_FOR_TARGET_PLAYER");
-
+        public static readonly ServiceOperation GetRecentStreamsForInitiatingPlayer = new ServiceOperation("GET_RECENT_STREAMS_FOR_INITIATING_PLAYER");
+        public static readonly ServiceOperation GetRecentStreamsForTargetPlayer = new ServiceOperation("GET_RECENT_STREAMS_FOR_TARGET_PLAYER");
+        
         public static readonly ServiceOperation GetUserInfo = new ServiceOperation("GET_USER_INFO");
         public static readonly ServiceOperation InitializeTransaction = new ServiceOperation("INITIALIZE_TRANSACTION");
         public static readonly ServiceOperation FinalizeTransaction = new ServiceOperation("FINALIZE_TRANSACTION");
@@ -202,6 +225,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetPage = new ServiceOperation("GET_PAGE");
         public static readonly ServiceOperation GetPageOffset = new ServiceOperation("GET_PAGE_BY_OFFSET");
         public static readonly ServiceOperation IncrementGlobalEntityData = new ServiceOperation("INCREMENT_GLOBAL_ENTITY_DATA");
+        public static readonly ServiceOperation GetRandomEntitiesMatching = new ServiceOperation("GET_RANDOM_ENTITIES_MATCHING");
         public static readonly ServiceOperation IncrementUserEntityData = new ServiceOperation("INCREMENT_USER_ENTITY_DATA");
         public static readonly ServiceOperation IncrementSharedUserEntityData = new ServiceOperation("INCREMENT_SHARED_USER_ENTITY_DATA");
 
@@ -215,7 +239,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetIdentities = new ServiceOperation("GET_IDENTITIES");
         public static readonly ServiceOperation GetExpiredIdentities = new ServiceOperation("GET_EXPIRED_IDENTITIES");
         public static readonly ServiceOperation RefreshIdentity = new ServiceOperation("REFRESH_IDENTITY");
-
+        public static readonly ServiceOperation ChangeEmailIdentity = new ServiceOperation("CHANGE_EMAIL_IDENTITY");
+        
         public static readonly ServiceOperation FbConfirmPurchase = new ServiceOperation("FB_CONFIRM_PURCHASE");
         public static readonly ServiceOperation GooglePlayConfirmPurchase = new ServiceOperation("CONFIRM_GOOGLEPLAY_PURCHASE");
 
@@ -227,6 +252,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ScheduleCloudScript = new ServiceOperation("SCHEDULE_CLOUD_SCRIPT");
         public static readonly ServiceOperation RunParentScript = new ServiceOperation("RUN_PARENT_SCRIPT");
         public static readonly ServiceOperation CancelScheduledScript = new ServiceOperation("CANCEL_SCHEDULED_SCRIPT");
+        public static readonly ServiceOperation RunPeerScript = new ServiceOperation("RUN_PEER_SCRIPT");
+        public static readonly ServiceOperation RunPeerScriptAsync = new ServiceOperation("RUN_PEER_SCRIPT_ASYNC");
 
         //RedemptionCode
         public static readonly ServiceOperation GetRedeemedCodes = new ServiceOperation("GET_REDEEMED_CODES");
@@ -283,6 +310,26 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation UpdateGroupMember = new ServiceOperation("UPDATE_GROUP_MEMBER");
         public static readonly ServiceOperation UpdateGroupName = new ServiceOperation("UPDATE_GROUP_NAME");
 
+        //mail
+        public static readonly ServiceOperation SendBasicEmail = new ServiceOperation("SEND_BASIC_EMAIL");
+        public static readonly ServiceOperation SendAdvancedEmail = new ServiceOperation("SEND_ADVANCED_EMAIL");
+        public static readonly ServiceOperation SendAdvancedEmailByAddress = new ServiceOperation("SEND_ADVANCED_EMAIL_BY_ADDRESS");
+
+        //peer
+        public static readonly ServiceOperation AttachPeerProfile = new ServiceOperation("ATTACH_PEER_PROFILE");
+        public static readonly ServiceOperation DetachPeer = new ServiceOperation("DETACH_PEER");
+        public static readonly ServiceOperation GetPeerProfiles = new ServiceOperation("GET_PEER_PROFILES");
+
+        //tournament
+        public static readonly ServiceOperation GetTournamentStatus = new ServiceOperation("GET_TOURNAMENT_STATUS");
+        public static readonly ServiceOperation JoinTournament = new ServiceOperation("JOIN_TOURNAMENT");
+        public static readonly ServiceOperation LeaveTournament = new ServiceOperation("LEAVE_TOURNAMENT");
+        public static readonly ServiceOperation PostTournamentScore = new ServiceOperation("POST_TOURNAMENT_SCORE");
+        public static readonly ServiceOperation PostTournamentScoreWithResults = new ServiceOperation("POST_TOURNAMENT_SCORE_WITH_RESULTS");
+        public static readonly ServiceOperation ViewCurrentReward = new ServiceOperation("VIEW_CURRENT_REWARD");
+        public static readonly ServiceOperation ViewReward = new ServiceOperation("VIEW_REWARD");
+        public static readonly ServiceOperation ClaimTournamentReward = new ServiceOperation("CLAIM_TOURNAMENT_REWARD");
+
         private ServiceOperation(string value)
         {
             Value = value;
@@ -293,6 +340,5 @@ namespace BrainCloud.Internal
             get;
             private set;
         }
-
     }
 }

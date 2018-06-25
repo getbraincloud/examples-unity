@@ -1,4 +1,7 @@
-﻿using BrainCloud;
+﻿using System;
+using BrainCloud;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine;
 
 public class AuthenticateDialog : Dialog
@@ -8,9 +11,8 @@ public class AuthenticateDialog : Dialog
         Detach();
     }
 
-    ResponseState m_state = ResponseState.InProgress;
-    ExampleAccountType m_exampleAccountType = ExampleAccountType.Anonymous;
-
+    private ResponseState m_state = ResponseState.InProgress;
+    private ExampleAccountType m_exampleAccountType = ExampleAccountType.Anonymous;
 
     public void OnGUI()
     {
@@ -23,7 +25,7 @@ public class AuthenticateDialog : Dialog
         AuthenticateDialog dialog = dialogObject.AddComponent<AuthenticateDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Anonymous;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .AuthenticationService.AuthenticateAnonymous(false, dialog.OnSuccess_Authenticate,
                 dialog.OnError_AuthenticateAnonymous);
     }
@@ -35,7 +37,7 @@ public class AuthenticateDialog : Dialog
         dialog.m_exampleAccountType = ExampleAccountType.Universal_1;
 
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .AuthenticationService.AuthenticateUniversal(UtilValues.getUniversal_1(), UtilValues.getPassword(),
                 forceCreate, dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
     }
@@ -46,7 +48,7 @@ public class AuthenticateDialog : Dialog
         AuthenticateDialog dialog = dialogObject.AddComponent<AuthenticateDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_2;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .AuthenticationService.AuthenticateUniversal(UtilValues.getUniversal_2(), UtilValues.getPassword(),
                 forceCreate, dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
     }
@@ -57,9 +59,27 @@ public class AuthenticateDialog : Dialog
         AuthenticateDialog dialog = dialogObject.AddComponent<AuthenticateDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Email;
 
-        BrainCloudClient.Get().AuthenticationService
+        App.Bc.Client.AuthenticationService
             .AuthenticateEmailPassword(UtilValues.getEmail(), UtilValues.getPassword(), forceCreate,
                 dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
+    }
+
+    public static void AuthenticateAsGooglePlay(bool forceCreate = false)
+    {
+#if UNITY_ANDROID
+        GameObject dialogObject = new GameObject("Dialog");
+        AuthenticateDialog dialog = dialogObject.AddComponent<AuthenticateDialog>();
+        dialog.m_exampleAccountType = ExampleAccountType.GooglePlay;
+
+        GoogleIdentity.RefreshGoogleIdentity(identity =>
+        {
+            BrainCloudWrapper.Instance.AuthenticateGoogle(identity.GoogleId, identity.GoogleToken, forceCreate,
+                dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
+        });
+
+#else
+        ErrorDialog.DisplayErrorDialog("AuthenticateAsGooglePlay", "You can only use GooglePlay auth on Android Devices");
+#endif
     }
 
     private void DoAuthWindow(int windowId)
@@ -115,10 +135,10 @@ public class AuthenticateDialog : Dialog
             {
                 // Anonymous id is invalid
                 // Clear the profile id, generate a new Anonymous id, and re-authenticate
-                BrainCloudClient.Get().AuthenticationService.ClearSavedProfileID();
-                BrainCloudClient.Get().AuthenticationService.AnonymousId =
-                    BrainCloudClient.Get().AuthenticationService.GenerateAnonymousId();
-                BrainCloudClient.Get()
+                App.Bc.Client.AuthenticationService.ClearSavedProfileID();
+                App.Bc.Client.AuthenticationService.AnonymousId =
+                    App.Bc.Client.AuthenticationService.GenerateAnonymousId();
+                App.Bc.Client
                     .AuthenticationService.AuthenticateAnonymous(true, OnSuccess_Authenticate,
                         OnError_AuthenticateAnonymous);
                 break;
@@ -127,7 +147,7 @@ public class AuthenticateDialog : Dialog
             {
                 // Anonymous id doesn't exist in database
                 // Must set forceCreate to true
-                BrainCloudClient.Get()
+                App.Bc.Client
                     .AuthenticationService.AuthenticateAnonymous(true, OnSuccess_Authenticate,
                         OnError_AuthenticateAnonymous);
                 break;
@@ -137,9 +157,9 @@ public class AuthenticateDialog : Dialog
             {
                 // Credentials are invalid
                 // Generate a new Anonymous id, and re-authenticate
-                BrainCloudClient.Get().AuthenticationService.AnonymousId =
-                    BrainCloudClient.Get().AuthenticationService.GenerateAnonymousId();
-                BrainCloudClient.Get()
+                App.Bc.Client.AuthenticationService.AnonymousId =
+                    App.Bc.Client.AuthenticationService.GenerateAnonymousId();
+                App.Bc.Client
                     .AuthenticationService.AuthenticateAnonymous(true, OnSuccess_Authenticate,
                         OnError_AuthenticateAnonymous);
                 break;
@@ -149,9 +169,9 @@ public class AuthenticateDialog : Dialog
             {
                 // Anonymous id cannot be blank
                 // Generate a new Anonymous id, and re-authenticate
-                BrainCloudClient.Get().AuthenticationService.AnonymousId =
-                    BrainCloudClient.Get().AuthenticationService.GenerateAnonymousId();
-                BrainCloudClient.Get()
+                App.Bc.Client.AuthenticationService.AnonymousId =
+                    App.Bc.Client.AuthenticationService.GenerateAnonymousId();
+                App.Bc.Client
                     .AuthenticationService.AuthenticateAnonymous(true, OnSuccess_Authenticate,
                         OnError_AuthenticateAnonymous);
                 break;
@@ -184,7 +204,7 @@ public class AuthenticateDialog : Dialog
             {
                 // User's identity doesn't match one existing on brainCloud
                 // Reset profile id and re-authenticate
-                BrainCloudClient.Get().AuthenticationService.ClearSavedProfileID();
+                App.Bc.Client.AuthenticationService.ClearSavedProfileID();
                 ReAuthenticate(true);
 
                 // @see WrapperAuthenticateDialog for an example that uses
@@ -196,7 +216,7 @@ public class AuthenticateDialog : Dialog
             {
                 // User profile id doesn't match the identity they are attempting to authenticate
                 // Reset profile id and re-authenticate
-                BrainCloudClient.Get().AuthenticationService.ClearSavedProfileID();
+                App.Bc.Client.AuthenticationService.ClearSavedProfileID();
                 ReAuthenticate();
 
                 // @see WrapperAuthenticateDialog for an example that uses
@@ -255,6 +275,13 @@ public class AuthenticateDialog : Dialog
             case ExampleAccountType.Email:
             {
                 AuthenticateAsEmail(forceCreate);
+
+                break;
+            }
+
+            case ExampleAccountType.GooglePlay:
+            {
+                AuthenticateAsGooglePlay(forceCreate);
 
                 break;
             }

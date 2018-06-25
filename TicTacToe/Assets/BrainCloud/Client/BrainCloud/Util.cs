@@ -90,21 +90,21 @@ namespace BrainCloud
 #endif
         }
 
-        public static string GetIsoCodeForLanguage(SysLanguageObject in_lang)
+        public static string GetIsoCodeForLanguage(SysLanguageObject lang)
         {
             string isoCode;
-            if (!s_langCodes.TryGetValue(in_lang, out isoCode))
+            if (!s_langCodes.TryGetValue(lang, out isoCode))
             {
                 isoCode = "en";
             }
             return isoCode;
         }
 
-        public static SysLanguageObject GetLanguageForIsoCode(string in_isoCode)
+        public static SysLanguageObject GetLanguageForIsoCode(string isoCode)
         {
             foreach (SysLanguageObject key in s_langCodes.Keys)
             {
-                if (s_langCodes[key].Equals(in_isoCode))
+                if (s_langCodes[key].Equals(isoCode))
                 {
                     return key;
                 }
@@ -153,10 +153,10 @@ namespace BrainCloud
         /// <summary>
         /// Manually set the country code overriding the automatic value
         /// </summary>
-        /// <param name="in_string">Two letter ISO country code</param>
-        public static void SetCurrentCountryCode(string in_string)
+        /// <param name="string">Two letter ISO country code</param>
+        public static void SetCurrentCountryCode(string isoCode)
         {
-            _usersLocale = in_string;
+            _usersLocale = isoCode;
         }
 
         /// <summary>
@@ -171,6 +171,12 @@ namespace BrainCloud
         public static bool IsOptionalParameterValid(string s)
         {
             return (s != null && s.Length > 0);
+        }
+
+        public static long DateTimeToUnixTimestamp(DateTime dateTime)
+        {
+            return (long)((TimeZoneInfo.ConvertTimeToUtc(dateTime) -
+                   new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
         }
         #endregion
     }

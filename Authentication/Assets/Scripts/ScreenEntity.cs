@@ -11,7 +11,7 @@ public class ScreenEntity : BCScreen
 
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(ReadPlayerStateSuccess, Failure_Callback);
+        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
 
     }

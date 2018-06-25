@@ -11,11 +11,11 @@ namespace BrainCloud
 {
     public class BrainCloudIdentity
     {
-        private BrainCloudClient m_brainCloudClientRef;
+        private BrainCloudClient _client;
 
-        public BrainCloudIdentity(BrainCloudClient brainCloudClientRef)
+        public BrainCloudIdentity(BrainCloudClient client)
         {
-            m_brainCloudClientRef = brainCloudClientRef;
+            _client = client;
         }
 
         /// <summary>
@@ -44,8 +44,8 @@ namespace BrainCloud
         public void AttachFacebookIdentity(
             string facebookId,
             string authenticationToken,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(facebookId, authenticationToken, AuthenticationType.Facebook, success, failure, cbObject);
@@ -78,8 +78,8 @@ namespace BrainCloud
         public void MergeFacebookIdentity(
             string facebookId,
             string authenticationToken,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(facebookId, authenticationToken, AuthenticationType.Facebook, success, failure, cbObject);
@@ -110,8 +110,8 @@ namespace BrainCloud
         public void DetachFacebookIdentity(
             string facebookId,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(facebookId, AuthenticationType.Facebook, continueAnon, success, failure, cbObject);
@@ -138,8 +138,8 @@ namespace BrainCloud
         /// </param>
         public void AttachGameCenterIdentity(
             string gameCenterId,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(gameCenterId, "", AuthenticationType.GameCenter, success, failure, cbObject);
@@ -165,8 +165,8 @@ namespace BrainCloud
         /// </param>
         public void MergeGameCenterIdentity(
             string gameCenterId,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(gameCenterId, "", AuthenticationType.GameCenter, success, failure, cbObject);
@@ -195,8 +195,8 @@ namespace BrainCloud
         public void DetachGameCenterIdentity(
             string gameCenterId,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(gameCenterId, AuthenticationType.GameCenter, continueAnon, success, failure, cbObject);
@@ -227,8 +227,8 @@ namespace BrainCloud
         public void AttachEmailIdentity(
             string email,
             string password,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(email, password, AuthenticationType.Email, success, failure, cbObject);
@@ -259,8 +259,8 @@ namespace BrainCloud
         public void MergeEmailIdentity(
             string email,
             string password,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(email, password, AuthenticationType.Email, success, failure, cbObject);
@@ -290,8 +290,8 @@ namespace BrainCloud
         public void DetachEmailIdentity(
             string email,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(email, AuthenticationType.Email, continueAnon, success, failure, cbObject);
@@ -322,8 +322,8 @@ namespace BrainCloud
         public void AttachUniversalIdentity(
             string userId,
             string password,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(userId, password, AuthenticationType.Universal, success, failure, cbObject);
@@ -354,8 +354,8 @@ namespace BrainCloud
         public void MergeUniversalIdentity(
             string userId,
             string password,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(userId, password, AuthenticationType.Universal, success, failure, cbObject);
@@ -385,8 +385,8 @@ namespace BrainCloud
         public void DetachUniversalIdentity(
             string userId,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(userId, AuthenticationType.Universal, continueAnon, success, failure, cbObject);
@@ -417,8 +417,8 @@ namespace BrainCloud
         public void AttachSteamIdentity(
             string steamId,
             string sessionTicket,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(steamId, sessionTicket, AuthenticationType.Steam, success, failure, cbObject);
@@ -449,8 +449,8 @@ namespace BrainCloud
         public void MergeSteamIdentity(
             string steamId,
             string sessionTicket,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(steamId, sessionTicket, AuthenticationType.Steam, success, failure, cbObject);
@@ -480,8 +480,8 @@ namespace BrainCloud
         public void DetachSteamIdentity(
             string steamId,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(steamId, AuthenticationType.Steam, continueAnon, success, failure, cbObject);
@@ -513,8 +513,8 @@ namespace BrainCloud
         public void AttachGoogleIdentity(
             string googleId,
             string authenticationToken,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
@@ -547,8 +547,8 @@ namespace BrainCloud
         public void MergeGoogleIdentity(
             string googleId,
             string authenticationToken,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
@@ -579,8 +579,8 @@ namespace BrainCloud
         public void DetachGoogleIdentity(
             string googleId,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(googleId, AuthenticationType.Google, continueAnon, success, failure, cbObject);
@@ -615,8 +615,8 @@ namespace BrainCloud
             string twitterId,
             string authenticationToken,
             string secret,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(twitterId, authenticationToken + ":" + secret, AuthenticationType.Twitter, success, failure, cbObject);
@@ -652,8 +652,8 @@ namespace BrainCloud
             string twitterId,
             string authenticationToken,
             string secret,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(twitterId, authenticationToken + ":" + secret, AuthenticationType.Twitter, success, failure, cbObject);
@@ -684,8 +684,8 @@ namespace BrainCloud
         public void DetachTwitterIdentity(
             string twitterId,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(twitterId, AuthenticationType.Twitter, continueAnon, success, failure, cbObject);
@@ -717,8 +717,8 @@ namespace BrainCloud
         public void AttachParseIdentity(
             string parseId,
             string authenticationToken,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             AttachIdentity(parseId, authenticationToken, AuthenticationType.Parse, success, failure, cbObject);
@@ -751,8 +751,8 @@ namespace BrainCloud
         public void MergeParseIdentity(
             string parseId,
             string authenticationToken,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             MergeIdentity(parseId, authenticationToken, AuthenticationType.Parse, success, failure, cbObject);
@@ -783,8 +783,8 @@ namespace BrainCloud
         public void DetachParseIdentity(
             string parseId,
             bool continueAnon,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             DetachIdentity(parseId, AuthenticationType.Parse, continueAnon, success, failure, cbObject);
@@ -820,8 +820,8 @@ namespace BrainCloud
             string childProfileId,
             string childAppId,
             bool forceCreate,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             SwitchToChildProfile(childProfileId, childAppId, forceCreate, false, success, failure, cbObject);
@@ -853,8 +853,8 @@ namespace BrainCloud
         public void SwitchToSingletonChildProfile(
             string childAppId,
             bool forceCreate,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             SwitchToChildProfile(null, childAppId, forceCreate, true, success, failure, cbObject);
@@ -910,7 +910,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.AttachParentWithIdentity, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -934,8 +934,8 @@ namespace BrainCloud
         /// </param>
         public void SwitchToParentProfile(
             string parentLevelName,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
@@ -943,7 +943,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.SwitchToParentProfile, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -969,7 +969,7 @@ namespace BrainCloud
         {
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.DetachParent, null, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -1002,7 +1002,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.GetChildProfiles, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -1025,7 +1025,7 @@ namespace BrainCloud
         {
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.GetIdentities, null, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -1048,7 +1048,7 @@ namespace BrainCloud
         {
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.GetExpiredIdentities, null, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -1080,8 +1080,8 @@ namespace BrainCloud
             string externalId,
             string authenticationToken,
             AuthenticationType authenticationType,
-            SuccessCallback success,
-            FailureCallback failure,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
             object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
@@ -1091,9 +1091,58 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.RefreshIdentity, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
+        /// <summary>
+        /// Allows email identity email address to be changed
+        /// </summary>
+        /// <remarks>
+        /// Service Name - identity
+        /// Service Operation - REFRESH_IDENTITY
+        /// </remarks>
+        /// <param name="oldEmailAddress">
+        /// Old email address
+        /// </param>
+        /// <param name="password">
+        /// Password for identity
+        /// </param>
+        /// <param name="newEmailAddress">
+        /// New email address
+        /// </param>
+        /// <param name="updateContactEmail">
+        /// Whether to update contact email in profile
+        /// </param>
+        /// <param name="success">
+        /// The success callback.
+        /// </param>
+        /// <param name="failure">
+        /// The failure callback.
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void ChangeEmailIdentity(
+            string oldEmailAddress,
+            string password,
+            string newEmailAddress,
+            bool updateContactEmail,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.IdentityServiceOldEmailAddress.Value] = oldEmailAddress;
+            data[OperationParam.AuthenticateServiceAuthenticateAuthenticationToken.Value] = password;
+            data[OperationParam.IdentityServiceNewEmailAddress.Value] = newEmailAddress;
+            data[OperationParam.IdentityServiceUpdateContactEmail.Value] = updateContactEmail;
+
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.ChangeEmailIdentity, data, callback);
+            _client.SendRequest(sc);
+        }
+        
 
         /// <summary>
         /// Attaches a peer identity to this user's profile
@@ -1150,7 +1199,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.AttachPeerProfile, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -1180,7 +1229,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.DetachPeer, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -1202,7 +1251,7 @@ namespace BrainCloud
         {
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.GetPeerProfiles, null, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
 
@@ -1218,7 +1267,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.Attach, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         private void MergeIdentity(string externalId, string authenticationToken, AuthenticationType authenticationType, SuccessCallback success, FailureCallback failure,
@@ -1231,7 +1280,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.Merge, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         private void DetachIdentity(string externalId, AuthenticationType authenticationType, bool continueAnon, SuccessCallback success, FailureCallback failure,
@@ -1244,7 +1293,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.Detach, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         private void SwitchToChildProfile(string childProfileId, string childAppd, bool forceCreate, bool forceSingleton, SuccessCallback success, FailureCallback failure,
@@ -1261,14 +1310,14 @@ namespace BrainCloud
             data[OperationParam.AuthenticateServiceAuthenticateForceCreate.Value] = forceCreate;
             data[OperationParam.IdentityServiceForceSingleton.Value] = forceSingleton;
 
-            data[OperationParam.AuthenticateServiceAuthenticateReleasePlatform.Value] = m_brainCloudClientRef.ReleasePlatform.ToString();
+            data[OperationParam.AuthenticateServiceAuthenticateReleasePlatform.Value] = _client.ReleasePlatform.ToString();
             data[OperationParam.AuthenticateServiceAuthenticateCountryCode.Value] = Util.GetCurrentCountryCode();
             data[OperationParam.AuthenticateServiceAuthenticateLanguageCode.Value] = Util.GetIsoCodeForCurrentLanguage();
             data[OperationParam.AuthenticateServiceAuthenticateTimeZoneOffset.Value] = Util.GetUTCOffsetForCurrentTimeZone();
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Identity, ServiceOperation.SwitchToChildProfile, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         #endregion

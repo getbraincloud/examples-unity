@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1067153630192374}
+  m_IsPrefabParent: 1
+--- !u!1 &1067153630192374
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4337650201791178}
+  - component: {fileID: 114502347923553878}
+  m_Layer: 0
+  m_Name: PlayerSetup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4337650201791178
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1067153630192374}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.1, y: 0.85999995, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114502347923553878
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1067153630192374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d352a19d02514a7e82956e92812c696, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Bc: {fileID: 0}
+  BoardState: '#########'
+  MatchId: 
+  MatchVersion: 0
+  OwnerId: 
+  Name: 
+  PlayerRating: 
+  ProfileId: 
+  Achievements: {fileID: 1744570849932162, guid: f6eaf7d93fadf43ba88fc2a0da4d5344,
+    type: 2}
+  Leaderboard: {fileID: 1454836892881864, guid: 936030d9c17be407dab66a22c927d96e,
+    type: 2}
+  Login: {fileID: 1218560278102842, guid: 5c28323616ac445bb87752074cd34050, type: 2}
+  MatchSelect: {fileID: 1708571160960586, guid: 1b28d6967930a43b99eb47b8bae4c11b,
+    type: 2}
+  TicTacToe: {fileID: 1114401991282164, guid: af2b0accb7155434cb57ae5acfbdf191, type: 2}
+  Offset: 0
+  ViewportRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0
+    height: 0
+  WindowId: 0
+  WrapperName: 

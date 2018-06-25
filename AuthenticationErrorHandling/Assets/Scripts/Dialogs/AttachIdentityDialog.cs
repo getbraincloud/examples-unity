@@ -1,4 +1,6 @@
 ﻿using BrainCloud;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine;
 
 public class AttachIdentityDialog : Dialog
@@ -22,7 +24,7 @@ public class AttachIdentityDialog : Dialog
         AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_1;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.AttachUniversalIdentity(UtilValues.getUniversal_1(), UtilValues.getPassword(),
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
     }
@@ -33,7 +35,7 @@ public class AttachIdentityDialog : Dialog
         AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_2;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.AttachUniversalIdentity(UtilValues.getUniversal_2(), UtilValues.getPassword(),
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
     }
@@ -44,10 +46,30 @@ public class AttachIdentityDialog : Dialog
         AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Email;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.AttachEmailIdentity(UtilValues.getEmail(), UtilValues.getPassword(),
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
     }
+
+    
+    public static void AttachIdentityGooglePlay()
+    {
+#if UNITY_ANDROID
+        GameObject dialogObject = new GameObject("Dialog");
+        AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
+        dialog.m_exampleAccountType = ExampleAccountType.GooglePlay;
+
+        GoogleIdentity.RefreshGoogleIdentity(identity =>
+        {
+            BrainCloudWrapper.Client.IdentityService.AttachGoogleIdentity(identity.GoogleId, identity.GoogleToken, 
+                dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
+        });
+
+#else
+        ErrorDialog.DisplayErrorDialog("AuthenticateAsGooglePlay", "You can only use GooglePlay auth on Android Devices");
+#endif
+    }
+   
 
     private void DoAuthWindow(int windowId)
     {
@@ -115,6 +137,7 @@ public class AttachIdentityDialog : Dialog
             }
 
             case ReasonCodes.MERGE_PROFILES:
+            case ReasonCodes.SWITCHING_PROFILES:
             {
                 //User cannot attach an identity that is already in use by another user
                 // decide how this will be handled, such as prompting the user to merge the

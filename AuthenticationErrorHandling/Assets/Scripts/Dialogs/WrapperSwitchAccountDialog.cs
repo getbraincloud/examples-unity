@@ -33,9 +33,9 @@ public class WrapperSwitchAccountDialog : Dialog
 
         if (Util.Button("Yes"))
         {
-            BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
-            BrainCloudWrapper.GetInstance().ResetStoredAuthenticationType();
-            BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+            App.Bc.ResetStoredAnonymousId();
+            App.Bc.ResetStoredAuthenticationType();
+            App.Bc.ResetStoredProfileId();
 
             switch (m_exampleAccountType)
             {

@@ -8,10 +8,10 @@ public class WrapperIdValuesSection
 
     public void Display()
     {
-        if (BrainCloudWrapper.GetInstance().GetStoredAnonymousId() != null)
-            m_anonymousId = BrainCloudWrapper.GetInstance().GetStoredAnonymousId();
-        if (BrainCloudWrapper.GetInstance().GetStoredProfileId() != null)
-            m_profileId = BrainCloudWrapper.GetInstance().GetStoredProfileId();
+        if (App.Bc.GetStoredAnonymousId() != null)
+            m_anonymousId = App.Bc.GetStoredAnonymousId();
+        if (App.Bc.GetStoredProfileId() != null)
+            m_profileId = App.Bc.GetStoredProfileId();
 
         GUILayout.BeginVertical();
 
@@ -27,7 +27,7 @@ public class WrapperIdValuesSection
         GUILayout.BeginHorizontal();
         if (Util.Button("Generate"))
         {
-            m_anonymousId = BrainCloudWrapper.GetBC().AuthenticationService.GenerateAnonymousId();
+            m_anonymousId = App.Bc.Client.AuthenticationService.GenerateAnonymousId();
         }
 
         if (Util.Button("Clear"))
@@ -46,7 +46,7 @@ public class WrapperIdValuesSection
         {
             // Profile id should not be generated with GenerateAnonymousId().
             // This button is to purposely create bugs for the sake of debugging
-            m_profileId = BrainCloudWrapper.GetBC().AuthenticationService.GenerateAnonymousId();
+            m_profileId = App.Bc.Client.AuthenticationService.GenerateAnonymousId();
         }
 
         if (Util.Button("Clear"))
@@ -61,7 +61,7 @@ public class WrapperIdValuesSection
 
         GUILayout.EndVertical();
 
-        BrainCloudWrapper.GetInstance().SetStoredAnonymousId(m_anonymousId);
-        BrainCloudWrapper.GetInstance().SetStoredProfileId(m_profileId);
+        App.Bc.SetStoredAnonymousId(m_anonymousId);
+        App.Bc.SetStoredProfileId(m_profileId);
     }
 }

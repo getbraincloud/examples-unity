@@ -17,9 +17,7 @@ public class BrainCloudConnectScene : MonoBehaviour
 		// brainCloud game configuration
 		///////////////////////////////////////////////////////////////////
 
-		BrainCloudWrapper.Initialize();
-
-        BrainCloudWrapper.GetInstance().SetAlwaysAllowProfileSwitch(true);
+        App.Bc.SetAlwaysAllowProfileSwitch(true);
         ///////////////////////////////////////////////////////////////////
 
         m_username = PlayerPrefs.GetString("username");
@@ -80,7 +78,7 @@ public class BrainCloudConnectScene : MonoBehaviour
 				// brainCloud authentication
 				///////////////////////////////////////////////////////////////////
 
-				BrainCloudWrapper.GetInstance().AuthenticateUniversal(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
+				App.Bc.AuthenticateUniversal(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
 
 				///////////////////////////////////////////////////////////////////
 			}

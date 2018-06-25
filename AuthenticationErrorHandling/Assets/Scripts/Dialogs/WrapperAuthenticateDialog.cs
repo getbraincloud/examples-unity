@@ -23,7 +23,7 @@ public class WrapperAuthenticateDialog : Dialog
         WrapperAuthenticateDialog dialog = dialogObject.AddComponent<WrapperAuthenticateDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Anonymous;
 
-        BrainCloudWrapper.GetInstance()
+        App.Bc
             .AuthenticateAnonymous(dialog.OnSuccess_Authenticate, dialog.OnError_AuthenticateAnonymous);
     }
 
@@ -35,7 +35,7 @@ public class WrapperAuthenticateDialog : Dialog
         dialog.m_exampleAccountType = ExampleAccountType.Universal_1;
 
 
-        BrainCloudWrapper.GetInstance()
+        App.Bc
             .AuthenticateUniversal(UtilValues.getUniversal_1(), UtilValues.getPassword(), forceCreate,
                 dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
     }
@@ -46,7 +46,7 @@ public class WrapperAuthenticateDialog : Dialog
         WrapperAuthenticateDialog dialog = dialogObject.AddComponent<WrapperAuthenticateDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_2;
 
-        BrainCloudWrapper.GetInstance()
+        App.Bc
             .AuthenticateUniversal(UtilValues.getUniversal_2(), UtilValues.getPassword(), forceCreate,
                 dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
     }
@@ -57,7 +57,7 @@ public class WrapperAuthenticateDialog : Dialog
         WrapperAuthenticateDialog dialog = dialogObject.AddComponent<WrapperAuthenticateDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Email;
 
-        BrainCloudWrapper.GetInstance()
+        App.Bc
             .AuthenticateEmailPassword(UtilValues.getEmail(), UtilValues.getPassword(), forceCreate,
                 dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
     }
@@ -97,7 +97,7 @@ public class WrapperAuthenticateDialog : Dialog
         m_response = responseData;
         Debug.Log("OnSuccess_Authenticate: " + responseData);
 
-        BrainCloudWrapper.GetInstance()
+        App.Bc
             .SetStoredAuthenticationType(UtilExampleAccountType.getTypeName(m_exampleAccountType));
     }
 
@@ -118,7 +118,7 @@ public class WrapperAuthenticateDialog : Dialog
             {
                 // User's identity doesn't match one existing on brainCloud
                 // Reset the profile id, and re-authenticate
-                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+                App.Bc.ResetStoredProfileId();
                 Destroy(gameObject);
                 AuthenticateAsAnonymous();
 
@@ -129,7 +129,7 @@ public class WrapperAuthenticateDialog : Dialog
             {
                 // User profile id doesn't match the identity they are attempting to authenticate
                 // Reset the profile id, and re-authenticate
-                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+                App.Bc.ResetStoredProfileId();
                 Destroy(gameObject);
                 AuthenticateAsAnonymous();
 
@@ -163,10 +163,12 @@ public class WrapperAuthenticateDialog : Dialog
             case ReasonCodes.MISSING_IDENTITY_ERROR:
             {
                 // User's identity doesn't match one existing on brainCloud
-                // decide how this will be handled, such as with a account creation prompt, informing
-                // them that they'll be creating a new profile
-                Destroy(gameObject);
-                WrapperCreateAccountDialog.CreateDialog(m_exampleAccountType);
+                // Clear the invalid Profile and Anon Id values, and reauthenticate
+                
+                App.Bc.ResetStoredProfileId();
+                App.Bc.ResetStoredAnonymousId();
+                
+                ReAuthenticate();
 
                 break;
             }
@@ -198,7 +200,8 @@ public class WrapperAuthenticateDialog : Dialog
             {
                 // User is receiving an error that they're trying to authenticate an account that doesn't exist.
                 // decide how this will be handled, such as creating the account by setting the forceCreate flag to true
-                ReAuthenticate(true);
+                Destroy(gameObject);
+                WrapperCreateAccountDialog.CreateDialog(m_exampleAccountType);
 
                 break;
             }

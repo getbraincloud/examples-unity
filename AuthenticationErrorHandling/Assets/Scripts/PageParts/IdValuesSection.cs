@@ -8,10 +8,10 @@ public class IdValuesSection
 
     public void Display()
     {
-        if (BrainCloud.BrainCloudClient.Get().AuthenticationService.AnonymousId != null)
-            m_anonymousId = BrainCloud.BrainCloudClient.Get().AuthenticationService.AnonymousId;
-        if (BrainCloud.BrainCloudClient.Get().AuthenticationService.ProfileId != null)
-            m_profileId = BrainCloud.BrainCloudClient.Get().AuthenticationService.ProfileId;
+        if (App.Bc.Client.AuthenticationService.AnonymousId != null)
+            m_anonymousId = App.Bc.Client.AuthenticationService.AnonymousId;
+        if (App.Bc.Client.AuthenticationService.ProfileId != null)
+            m_profileId = App.Bc.Client.AuthenticationService.ProfileId;
 
         GUILayout.BeginVertical();
 
@@ -26,7 +26,7 @@ public class IdValuesSection
         GUILayout.BeginHorizontal();
         if (Util.Button("Generate"))
         {
-            m_anonymousId = BrainCloud.BrainCloudClient.Get().AuthenticationService.GenerateAnonymousId();
+            m_anonymousId = App.Bc.Client.AuthenticationService.GenerateAnonymousId();
         }
 
 
@@ -46,8 +46,8 @@ public class IdValuesSection
         {
             // Profile id should not be generated with GenerateAnonymousId().
             // This button is to purposely create bugs for the sake of debugging
-            m_profileId = BrainCloud.BrainCloudClient.Get().AuthenticationService.GenerateAnonymousId();
-            BrainCloud.BrainCloudClient.Get().AuthenticationService.ProfileId = m_profileId;
+            m_profileId = App.Bc.Client.AuthenticationService.GenerateAnonymousId();
+            App.Bc.Client.AuthenticationService.ProfileId = m_profileId;
         }
 
         if (Util.Button("Clear"))
@@ -63,7 +63,7 @@ public class IdValuesSection
         GUILayout.EndVertical();
 
 
-        BrainCloud.BrainCloudClient.Get().AuthenticationService.AnonymousId = m_anonymousId;
-        BrainCloud.BrainCloudClient.Get().AuthenticationService.ProfileId = m_profileId;
+        App.Bc.Client.AuthenticationService.AnonymousId = m_anonymousId;
+        App.Bc.Client.AuthenticationService.ProfileId = m_profileId;
     }
 }

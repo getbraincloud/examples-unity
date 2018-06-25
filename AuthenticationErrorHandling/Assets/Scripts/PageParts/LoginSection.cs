@@ -15,7 +15,6 @@ public class LoginSection
         {
             AuthenticateDialog.AuthenticateAsAnonymous();
         }
-
         if (Util.Button("Universal #1"))
         {
             AuthenticateDialog.AuthenticateAsUniversal_1();
@@ -24,10 +23,13 @@ public class LoginSection
         {
             AuthenticateDialog.AuthenticateAsUniversal_2();
         }
-
         if (Util.Button("Email"))
         {
             AuthenticateDialog.AuthenticateAsEmail();
+        }
+        if (Util.Button("GooglePlay (Android Only)"))
+        {
+            AuthenticateDialog.AuthenticateAsGooglePlay();
         }
 
 

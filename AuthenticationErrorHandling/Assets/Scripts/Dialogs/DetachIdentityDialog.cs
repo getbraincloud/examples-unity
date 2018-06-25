@@ -1,4 +1,6 @@
 ﻿using BrainCloud;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine;
 
 public class DetachIdentityDialog : Dialog
@@ -22,7 +24,7 @@ public class DetachIdentityDialog : Dialog
         DetachIdentityDialog dialog = dialogObject.AddComponent<DetachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_1;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.DetachUniversalIdentity(UtilValues.getUniversal_1(), contiuneAsAnonymous,
                 dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
     }
@@ -33,7 +35,7 @@ public class DetachIdentityDialog : Dialog
         DetachIdentityDialog dialog = dialogObject.AddComponent<DetachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_2;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.DetachUniversalIdentity(UtilValues.getUniversal_2(), contiuneAsAnonymous,
                 dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
     }
@@ -44,11 +46,29 @@ public class DetachIdentityDialog : Dialog
         DetachIdentityDialog dialog = dialogObject.AddComponent<DetachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Email;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.DetachEmailIdentity(UtilValues.getEmail(), contiuneAsAnonymous,
                 dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
     }
+    
+    public static void DetachIdentityGooglePlay(bool contiuneAsAnonymous = false)
+    {
+#if UNITY_ANDROID
+        GameObject dialogObject = new GameObject("Dialog");
+        DetachIdentityDialog dialog = dialogObject.AddComponent<DetachIdentityDialog>();
+        dialog.m_exampleAccountType = ExampleAccountType.GooglePlay;
 
+        GoogleIdentity.RefreshGoogleIdentity(identity =>
+        {
+            BrainCloudWrapper.Client.IdentityService.DetachGoogleIdentity(identity.GoogleId, contiuneAsAnonymous,
+                dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
+        });
+
+#else
+        ErrorDialog.DisplayErrorDialog("AuthenticateAsGooglePlay", "You can only use GooglePlay auth on Android Devices");
+#endif
+    }
+   
     private void DoAuthWindow(int windowId)
     {
         GUILayout.BeginHorizontal();

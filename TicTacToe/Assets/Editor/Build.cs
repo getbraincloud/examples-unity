@@ -161,13 +161,6 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(DESKTOP_OUTPUT), target, BuildOptions.None);
 	}
 	
-	static void PerformBuildWeb()
-	{
-		UpdateBrainCloudSettings();
-		string[] scenes = GetScenes();
-		BuildPipeline.BuildPlayer(scenes, System.IO.Path.GetFullPath(WEB_OUTPUT_FOLDER), BuildTarget.WebPlayer, BuildOptions.None);
-	}
-	
 	static void PerformBuildWebGL()
 	{
 		#if UNITY_4_6

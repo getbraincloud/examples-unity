@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using JsonFx.Json;
 using BrainCloud.Internal;
+using BrainCloud.Common;
 
 namespace BrainCloud
 {
@@ -19,11 +20,28 @@ namespace BrainCloud
             Facebook
         }
 
-        private BrainCloudClient m_brainCloudClientRef;
+        private BrainCloudClient _client;
 
-        public BrainCloudFriend(BrainCloudClient brainCloudClientRef)
+        public BrainCloudFriend(BrainCloudClient client)
         {
-            m_brainCloudClientRef = brainCloudClientRef;
+            _client = client;
+        }
+
+        [Obsolete("This has been deprecated. Use FindUserByUniversalId instead - removal after September 1 2017")]
+        public void FindPlayerByUniversalId(
+            string searchText,
+            int maxResults,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.FriendServiceSearchText.Value] = searchText;
+            data[OperationParam.FriendServiceMaxResults.Value] = maxResults;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.FindPlayerByUniversalId, data, callback);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -48,7 +66,7 @@ namespace BrainCloud
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void FindPlayerByUniversalId(
+        public void FindUserByUniversalId(
             string searchText,
             int maxResults,
             SuccessCallback success = null,
@@ -61,21 +79,21 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.FindPlayerByUniversalId, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Retrieves profile information for the specified user.
+        /// Retrieves profile information of the specified user.
         /// </summary>
         /// <remarks>
         /// Service Name - Friend
-        /// Service Operation - GetFriendProfileInfoForExternalId
+        /// Service Operation - GET_PROFILE_INFO_FOR_CREDENTIAL
         /// </remarks>
         /// <param name="externalId">
-        /// External id of the friend to find
+        /// External id of the user to find
         /// </param>
         /// <param name="authenticationType">
-        /// The authentication type used for this friend's external id e.g. Facebook
+        /// The authentication type used for the user's ID
         /// </param>
         /// <param name="success">
         /// The success callback.
@@ -86,20 +104,58 @@ namespace BrainCloud
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void GetFriendProfileInfoForExternalId(
+        public void GetProfileInfoForCredential(
             string externalId,
-            string authenticationType,
+            AuthenticationType authenticationType,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
             data[OperationParam.FriendServiceExternalId.Value] = externalId;
-            data[OperationParam.FriendServiceAuthenticationType.Value] = authenticationType;
+            data[OperationParam.FriendServiceAuthenticationType.Value] = authenticationType.ToString();
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
-            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.GetFriendProfileInfoForExternalId, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.GetProfileInfoForCredential, data, callback);
+            _client.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Retrieves profile information for the specified external auth user.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Friend
+        /// Service Operation - GET_PROFILE_INFO_FOR_EXTERNAL_AUTH_ID
+        /// </remarks>
+        /// <param name="externalId">
+        /// External id of the friend to find
+        /// </param>
+        /// <param name="externalAuthType">
+        /// The external authentication type used for this friend's external id
+        /// </param>
+        /// <param name="success">
+        /// The success callback.
+        /// </param>
+        /// <param name="failure">
+        /// The failure callback.
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void GetProfileInfoForExternalAuthId(
+            string externalId,
+            string externalAuthType,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.FriendServiceExternalId.Value] = externalId;
+            data[OperationParam.ExternalAuthType.Value] = externalAuthType;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.GetProfileInfoForExternalAuthId, data, callback);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -110,7 +166,7 @@ namespace BrainCloud
         /// Service Operation - GET_EXTERNAL_ID_FOR_PROFILE_ID
         /// </remarks>
         /// <param name="profileId">
-        /// Profile (player) ID.
+        /// Profile (user) ID.
         /// </param>
         /// <param name="authenticationType">
         /// Associated authentication type.
@@ -137,7 +193,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.GetExternalIdForProfileId, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -175,7 +231,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.ReadFriendEntity, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -208,28 +264,10 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.ReadFriendsEntities, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
-        /// <summary>
-        /// Returns player state of a particular friend.
-        /// </summary>
-        /// <remarks>
-        /// Service Name - Friend
-        /// Service Operation - ReadFriendPlayerState
-        /// </remarks>
-        /// <param name="friendId">
-        /// Profile Id of friend to retrieve player state for.
-        /// </param>
-        /// <param name="success">
-        /// The success callback.
-        /// </param>
-        /// <param name="failure">
-        /// The failure callback.
-        /// </param>
-        /// <param name="cbObject">
-        /// The user object sent to the callback.
-        /// </param>
+        [Obsolete("This has been deprecated. Use ReadFriendUserState instead - removal after September 1 2017")]
         public void ReadFriendPlayerState(
             string friendId,
             SuccessCallback success = null,
@@ -241,18 +279,51 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.ReadFriendPlayerState, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Returns player state of a particular user.
+        /// Returns user state of a particular friend.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Friend
+        /// Service Operation - ReadFriendPlayerState
+        /// </remarks>
+        /// <param name="friendId">
+        /// Profile Id of friend to retrieve user state for.
+        /// </param>
+        /// <param name="success">
+        /// The success callback.
+        /// </param>
+        /// <param name="failure">
+        /// The failure callback.
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void ReadFriendUserState(
+            string friendId,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.FriendServiceReadPlayerStateFriendId.Value] = friendId;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.ReadFriendPlayerState, data, callback);
+            _client.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Returns user state of a particular user.
         /// </summary>
         /// <remarks>
         /// Service Name - Friend
         /// Service Operation - GET_SUMMARY_DATA_FOR_PROFILE_ID
         /// </remarks>
         /// <param name="profileId">
-        /// Profile Id of player to retrieve player state for.
+        /// Profile Id of user to retrieve player state for.
         /// </param>
         /// <param name="success">
         /// The success callback.
@@ -274,33 +345,27 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.GetSummaryDataForProfileId, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Finds a list of players matching the search text by performing a substring
-        /// search of all player names.
-        /// If the number of results exceeds maxResults the message
-        /// "Too many results to return." is received and no players are returned
+        /// Finds a list of users matching the search text by performing an exact
+        /// search of all user names.
         /// </summary>
-        /// 
         /// <remarks>
         /// Service Name - Friend
-        /// Service Operation - FindPlayerByName
+        /// Service Operation - FIND_USERS_BY_EXACT_NAME
         /// </remarks>
-        /// 
         /// <param name="searchText"> 
-        /// The substring to search for. Minimum length of 3 characters.
+        /// The string to search for.
         /// </param>
         /// <param name="maxResults"> 
-        /// Maximum number of results to return. If there are more the message 
-        /// "Too many results to return." is sent back instead of the players.
+        /// Maximum number of results to return.
         /// </param>
-        /// <param name="success"> The success callback. </param>
-        /// <param name="failure"> The failure callback. </param>
-        /// <param name="cbObject"> The user object sent to the callback. </param>
-        /// 
-        public void FindPlayerByName(
+        /// <param name="success">The success callback.</param>
+        /// <param name="failure">The failure callback.</param>
+        /// <param name="cbObject">The user object sent to the callback.</param>
+        public void FindUsersByExactName(
             string searchText,
             int maxResults,
             SuccessCallback success = null,
@@ -313,12 +378,46 @@ namespace BrainCloud
             data[OperationParam.FriendServiceMaxResults.Value] = maxResults;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
-            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.FindPlayerByName, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.FindUsersByExactName, data, callback);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Retrieves a list of player and friend platform information for all friends of the current player.
+        /// Finds a list of users matching the search text by performing a substring
+        /// search of all user names.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Friend
+        /// Service Operation - FIND_USERS_BY_EXACT_NAME
+        /// </remarks>
+        /// <param name="searchText"> 
+        /// The substring to search for. Minimum length of 3 characters.
+        /// </param>
+        /// <param name="maxResults"> 
+        /// Maximum number of results to return.
+        /// </param>
+        /// <param name="success">The success callback.</param>
+        /// <param name="failure">The failure callback.</param>
+        /// <param name="cbObject">The user object sent to the callback.</param>
+        public void FindUsersBySubstrName(
+            string searchText,
+            int maxResults,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+
+            data[OperationParam.FriendServiceSearchText.Value] = searchText;
+            data[OperationParam.FriendServiceMaxResults.Value] = maxResults;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.FindUsersBySubstrName, data, callback);
+            _client.SendRequest(sc);
+        }
+
+        /// <summary>
+        /// Retrieves a list of user and friend platform information for all friends of the current user.
         /// </summary>
         /// <remarks>
         /// Service Name - Friend
@@ -343,17 +442,17 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.ListFriends, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Links the current player and the specified players as brainCloud friends.
+        /// Links the current user and the specified users as brainCloud friends.
         /// </summary>
         /// <remarks>
         /// Service Name - Friend
         /// Service Operation - ADD_FRIENDS
         /// </remarks>
-        /// <param name="profileIds">Collection of player IDs.</param>
+        /// <param name="profileIds">Collection of profile IDs.</param>
         /// <param name="success"> The success callback. </param>
         /// <param name="failure"> The failure callback. </param>
         /// <param name="cbObject"> The user object sent to the callback. </param>
@@ -369,17 +468,17 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.AddFriends, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Unlinks the current player and the specified players as brainCloud friends.
+        /// Unlinks the current user and the specified users as brainCloud friends.
         /// </summary>
         /// <remarks>
         /// Service Name - Friend
         /// Service Operation - REMOVE_FRIENDS
         /// </remarks>
-        /// <param name="profileIds">Collection of player IDs.</param>
+        /// <param name="profileIds">Collection of profile IDs.</param>
         /// <param name="success"> The success callback. </param>
         /// <param name="failure"> The failure callback. </param>
         /// <param name="cbObject"> The user object sent to the callback. </param>
@@ -395,7 +494,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.RemoveFriends, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -421,7 +520,7 @@ namespace BrainCloud
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Friend, ServiceOperation.GetUsersOnlineStatus, data, callback);
-            m_brainCloudClientRef.SendRequest(sc);
+            _client.SendRequest(sc);
         }
     }
 }

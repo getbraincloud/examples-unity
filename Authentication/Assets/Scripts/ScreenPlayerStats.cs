@@ -17,7 +17,7 @@ public class ScreenPlayerStats : BCScreen
     
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadPlayerState(ReadPlayerStateSuccess, Failure_Callback);
+        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
     
@@ -77,7 +77,7 @@ public class ScreenPlayerStats : BCScreen
                 if (long.TryParse(ps.increment, out valueAsLong)
                     || double.TryParse(ps.increment, out valueAsDouble))
                 {
-                	BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementPlayerStats(
+                	BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementUserStats(
                	    	"{ '" + ps.name +"':" + ps.increment +"}",
                     	Success_Callback, Failure_Callback);
                		m_mainScene.AddLogNoLn("[IncrementStat]... ");

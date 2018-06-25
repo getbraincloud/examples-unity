@@ -19,10 +19,13 @@ public class DetachIdenititySection
         {
             DetachIdentityDialog.DetachIdentityUniversal_2();
         }
-
         if (Util.Button("Email"))
         {
             DetachIdentityDialog.DetachIdentityEmail();
+        }
+        if (Util.Button("GooglePlay (Android Only)"))
+        {
+            DetachIdentityDialog.DetachIdentityGooglePlay();
         }
 
         GUILayout.EndHorizontal();

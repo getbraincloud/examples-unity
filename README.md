@@ -42,3 +42,11 @@ The Getting Started With Unity video uses the Space Shooter example as a backing
 Find more information including the video itself here:
 
 http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-tutorial-1-getting-started/
+
+## PushNotifications
+
+Example of connecting Firebase FCM Notifications to brainCloud.
+
+Find more information here:
+
+http://getbraincloud.com/apidocs/portal-usage/push-notification-setup-firebase/

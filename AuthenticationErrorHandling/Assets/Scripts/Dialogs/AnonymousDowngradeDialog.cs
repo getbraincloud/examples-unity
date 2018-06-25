@@ -54,6 +54,13 @@ public class AnonymousDowngradeDialog : Dialog
 
                     break;
                 }
+
+                case ExampleAccountType.GooglePlay:
+                {
+                    DetachIdentityDialog.DetachIdentityGooglePlay();
+                    
+                    break;
+                }
             }
 
             Destroy(gameObject);

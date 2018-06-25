@@ -12,7 +12,6 @@ public class MainPage : MonoBehaviour
 
     public LoginValuesSection m_loginValueSection = new LoginValuesSection();
 
-
     public WrapperInformationSection m_wrapperInformationSection = new WrapperInformationSection();
     public WrapperIdValuesSection m_wrapperIdValuesSection = new WrapperIdValuesSection();
     public WrapperLoginSection m_wrapperLoginSection = new WrapperLoginSection();
@@ -24,35 +23,19 @@ public class MainPage : MonoBehaviour
     public DetachIdenititySection m_detachIdentitySection = new DetachIdenititySection();
     public MergeIdenititySection m_mergeIdentitySection = new MergeIdenititySection();
 
-	BrainCloud.FailureCallback failureCallBack = new BrainCloud.FailureCallback((int status, int reasonCode, string jsonError, object cbObject) => {
+	readonly BrainCloud.FailureCallback failureCallBack = (status, reasonCode, jsonError, cbObject) => {
 		lastErrorMessage = reasonCode.ToString();
+	};
 
-	});
-
-	public void FailureCallback(int status, int reasonCode, string jsonError, object cbObject) {
-		lastErrorMessage = reasonCode.ToString();
-	}
-
-
-    void Start()
-    {
-        BrainCloudWrapper.Initialize();
-    }
-
-	void OnDestroy() {
-		
-	}
-
+	private Vector2 scrollPosition = Vector2.zero;
     void OnGUI()
     {
-        GUILayout.BeginArea(SIZE.FullScreen());
+        
+	    scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.MinWidth(SIZE.FullScreen().width));
 
         GUI.enabled = !ErrorHandlingApp.getInstance().hasDialog();
 
-        GUILayout.BeginArea(SIZE.Page());
-
-
-		BrainCloudWrapper.GetBC().RegisterGlobalErrorCallback (failureCallBack);
+		App.Bc.Client.RegisterGlobalErrorCallback (failureCallBack);
 
 
 		GUILayout.BeginVertical("debugInfo", GUI.skin.box);
@@ -89,11 +72,11 @@ public class MainPage : MonoBehaviour
         m_mergeIdentitySection.Display();
         m_screenNameSection.Display();
         GUILayout.EndVertical();
-
-        GUILayout.EndArea();
-
-        GUILayout.EndArea();
-    }
+	    
+	    GUILayout.EndScrollView();
+	    
+	    GUI.enabled = true;
+	 }
 
 
 }

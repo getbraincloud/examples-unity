@@ -9,7 +9,7 @@ public abstract class Util
 #if UNITY_IOS || UNITY_ANDROID || UNITY_WP_8_1
     private const int MIN_SIZE = 32;
 #else
-    private const int MIN_SIZE = 0;
+    private const int MIN_SIZE = 20;
 #endif
 
     public static bool Toggle(bool withState, string withText)
