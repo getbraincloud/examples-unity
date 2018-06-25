@@ -33,7 +33,7 @@ public class MergeIdentityDialog : Dialog
         MergeIdentityDialog dialog = dialogObject.AddComponent<MergeIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_1;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.MergeUniversalIdentity(UtilValues.getUniversal_1(), UtilValues.getPassword(),
                 dialog.OnSuccess_MergeIdentity, dialog.OnError_MergeIdentity);
     }
@@ -44,7 +44,7 @@ public class MergeIdentityDialog : Dialog
         MergeIdentityDialog dialog = dialogObject.AddComponent<MergeIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_2;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.MergeUniversalIdentity(UtilValues.getUniversal_2(), UtilValues.getPassword(),
                 dialog.OnSuccess_MergeIdentity, dialog.OnError_MergeIdentity);
     }
@@ -55,7 +55,7 @@ public class MergeIdentityDialog : Dialog
         MergeIdentityDialog dialog = dialogObject.AddComponent<MergeIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Email;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.MergeEmailIdentity(UtilValues.getEmail(), UtilValues.getPassword(),
                 dialog.OnSuccess_MergeIdentity, dialog.OnError_MergeIdentity);
     }

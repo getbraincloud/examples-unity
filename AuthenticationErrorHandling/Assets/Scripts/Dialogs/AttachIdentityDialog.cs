@@ -24,7 +24,7 @@ public class AttachIdentityDialog : Dialog
         AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_1;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.AttachUniversalIdentity(UtilValues.getUniversal_1(), UtilValues.getPassword(),
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
     }
@@ -35,7 +35,7 @@ public class AttachIdentityDialog : Dialog
         AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_2;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.AttachUniversalIdentity(UtilValues.getUniversal_2(), UtilValues.getPassword(),
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
     }
@@ -46,7 +46,7 @@ public class AttachIdentityDialog : Dialog
         AttachIdentityDialog dialog = dialogObject.AddComponent<AttachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Email;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.AttachEmailIdentity(UtilValues.getEmail(), UtilValues.getPassword(),
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
     }

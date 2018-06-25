@@ -33,21 +33,21 @@ public class User
             if (newUser)
             {
                 // Perform any logic needed for new users
-                BrainCloudClient.Get()
+                App.Bc.Client
                     .PlayerStateService.UpdatePlayerName(m_userData.m_screenName, OnSuccess_UpdatePlayerName,
                         OnFailed_UpdatePlayerName);
                 ErrorHandlingApp.getInstance().m_user.m_userData.m_screenName = "";
 
-                BrainCloudClient.Get().IdentityService.GetIdentities(OnSuccess_GetIdentities, OnFailed_GetIdentities);
+                App.Bc.Client.IdentityService.GetIdentities(OnSuccess_GetIdentities, OnFailed_GetIdentities);
             }
             else
             {
                 // Load any content on brainCloud that is needed for preexisting users
-                BrainCloudClient.Get()
+                App.Bc.Client
                     .PlayerStateService.ReadPlayerState(OnSuccess_ReadPlayerState, OnFailed_ReadPlayerState);
-                BrainCloudClient.Get()
+                App.Bc.Client
                     .PlayerStateService.GetAttributes(OnSuccess_GetAttributes, OnFailed_GetAttributes);
-                BrainCloudClient.Get().IdentityService.GetIdentities(OnSuccess_GetIdentities, OnFailed_GetIdentities);
+                App.Bc.Client.IdentityService.GetIdentities(OnSuccess_GetIdentities, OnFailed_GetIdentities);
             }
         }
         catch (Exception e)
@@ -58,12 +58,12 @@ public class User
 
     public void OnIdentitiesChangedResponse(string responseData)
     {
-        BrainCloudClient.Get()
+        App.Bc.Client
             .PlayerStateService.ReadPlayerState(OnSuccess_ReadPlayerState, OnFailed_ReadPlayerState);
-        BrainCloudClient.Get()
+        App.Bc.Client
             .PlayerStateService.GetAttributes(OnSuccess_GetAttributes, OnFailed_GetAttributes);
 
-        BrainCloudClient.Get().IdentityService.GetIdentities(OnSuccess_GetIdentities, OnFailed_GetIdentities);
+        App.Bc.Client.IdentityService.GetIdentities(OnSuccess_GetIdentities, OnFailed_GetIdentities);
     }
 
     public void OnNameChangedResponse(string responseData)

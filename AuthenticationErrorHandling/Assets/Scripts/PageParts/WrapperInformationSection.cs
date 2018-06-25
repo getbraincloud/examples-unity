@@ -6,8 +6,8 @@ public class WrapperInformationSection
     {
         GUILayout.BeginHorizontal();
         
-        GUILayout.Label("anonId: " + BrainCloudWrapper.GetInstance().GetStoredAnonymousId());
-        GUILayout.Label("profileId: " + BrainCloudWrapper.GetInstance().GetStoredProfileId());
+        GUILayout.Label("anonId: " + App.Bc.GetStoredAnonymousId());
+        GUILayout.Label("profileId: " + App.Bc.GetStoredProfileId());
 
         GUILayout.EndHorizontal();
     }

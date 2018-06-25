@@ -24,7 +24,7 @@ public class DetachIdentityDialog : Dialog
         DetachIdentityDialog dialog = dialogObject.AddComponent<DetachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_1;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.DetachUniversalIdentity(UtilValues.getUniversal_1(), contiuneAsAnonymous,
                 dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
     }
@@ -35,7 +35,7 @@ public class DetachIdentityDialog : Dialog
         DetachIdentityDialog dialog = dialogObject.AddComponent<DetachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Universal_2;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.DetachUniversalIdentity(UtilValues.getUniversal_2(), contiuneAsAnonymous,
                 dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
     }
@@ -46,7 +46,7 @@ public class DetachIdentityDialog : Dialog
         DetachIdentityDialog dialog = dialogObject.AddComponent<DetachIdentityDialog>();
         dialog.m_exampleAccountType = ExampleAccountType.Email;
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .IdentityService.DetachEmailIdentity(UtilValues.getEmail(), contiuneAsAnonymous,
                 dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
     }

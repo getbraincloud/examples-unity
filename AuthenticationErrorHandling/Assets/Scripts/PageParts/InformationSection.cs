@@ -6,8 +6,8 @@ public class InformationSection
     {
         GUILayout.BeginHorizontal();
 
-        GUILayout.Label("anonId: " + BrainCloud.BrainCloudClient.Get().AuthenticationService.AnonymousId);
-        GUILayout.Label("profileId: " + BrainCloud.BrainCloudClient.Get().AuthenticationService.ProfileId);
+        GUILayout.Label("anonId: " + App.Bc.Client.AuthenticationService.AnonymousId);
+        GUILayout.Label("profileId: " + App.Bc.Client.AuthenticationService.ProfileId);
         
         GUILayout.EndHorizontal();
         

@@ -27,11 +27,6 @@ public class MainPage : MonoBehaviour
 		lastErrorMessage = reasonCode.ToString();
 	};
 
-	void Start()
-    {
-        BrainCloudWrapper.Initialize();
-    }
-
 	private Vector2 scrollPosition = Vector2.zero;
     void OnGUI()
     {
@@ -40,7 +35,7 @@ public class MainPage : MonoBehaviour
 
         GUI.enabled = !ErrorHandlingApp.getInstance().hasDialog();
 
-		BrainCloudWrapper.GetBC().RegisterGlobalErrorCallback (failureCallBack);
+		App.Bc.Client.RegisterGlobalErrorCallback (failureCallBack);
 
 
 		GUILayout.BeginVertical("debugInfo", GUI.skin.box);

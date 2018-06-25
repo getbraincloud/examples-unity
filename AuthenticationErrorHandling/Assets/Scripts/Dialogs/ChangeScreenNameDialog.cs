@@ -20,7 +20,7 @@ public class ChangeScreenNameDialog : Dialog
         GameObject dialogObject = new GameObject("Dialog");
         ChangeScreenNameDialog dialog = dialogObject.AddComponent<ChangeScreenNameDialog>();
 
-        BrainCloudClient.Get()
+        App.Bc.Client
             .PlayerStateService.UpdatePlayerName(newName, dialog.OnSuccess_ChangeScreenName,
                 dialog.OnError_ChangeScreenName);
     }
