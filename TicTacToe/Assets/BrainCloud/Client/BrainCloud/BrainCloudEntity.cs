@@ -6,16 +6,17 @@
 using System.Collections.Generic;
 using BrainCloud.Internal;
 using JsonFx.Json;
+using System;
 
 namespace BrainCloud
 {
     public class BrainCloudEntity
     {
-        private BrainCloudClient _brainCloudClient;
+        private BrainCloudClient _client;
 
         public BrainCloudEntity(BrainCloudClient brainCloudClient)
         {
-            _brainCloudClient = brainCloudClient;
+            _client = brainCloudClient;
         }
 
         /// <summary>
@@ -33,7 +34,7 @@ namespace BrainCloud
         /// </param>
         /// <param name="jsonEntityAcl">
         /// The entity's access control list as json. A null acl implies default
-        /// permissions which make the entity readable/writeable by only the player.
+        /// permissions which make the entity readable/writeable by only the user.
         /// </param>
         /// <param name="success">
         /// The success callback.
@@ -66,11 +67,11 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.Create, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
 
-        /// <summary> Method returns all player entities that match the given type.
+        /// <summary> Method returns all user entities that match the given type.
         /// </summary>
         /// <remarks>
         /// Service Name - Entity
@@ -99,7 +100,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.ReadByType, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
 
@@ -122,7 +123,7 @@ namespace BrainCloud
         /// </param>
         /// <param name="jsonEntityAcl">
         /// The entity's access control list as json. A null acl implies default
-        /// permissions which make the entity readable/writeable by only the player.
+        /// permissions which make the entity readable/writeable by only the user.
         /// </param>
         /// <param name="version">
         /// Current version of the entity. If the version of the
@@ -164,11 +165,11 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.Update, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Method updates a shared entity owned by another player. This operation results in the entity
+        /// Method updates a shared entity owned by another user. This operation results in the entity
         /// data being completely replaced by the passed in JSON string.
         /// </summary>
         /// <remarks>
@@ -178,7 +179,7 @@ namespace BrainCloud
         /// <param name="entityId">
         /// The id of the entity to update
         /// </param>
-        /// <param name="targetPlayerId">
+        /// <param name="targetProfileId">
         /// The id of the entity's owner
         /// </param>
         /// <param name="entityType">
@@ -203,7 +204,7 @@ namespace BrainCloud
         /// </param>
         public void UpdateSharedEntity(
             string entityId,
-            string targetPlayerId,
+            string targetProfileId,
             string entityType,
             string jsonEntityData,
             int version,
@@ -213,7 +214,7 @@ namespace BrainCloud
         {
             var data = new Dictionary<string, object>();
             data[OperationParam.EntityServiceEntityId.Value] = entityId;
-            data[OperationParam.EntityServiceTargetPlayerId.Value] = targetPlayerId;
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = targetProfileId;
 
             data[OperationParam.EntityServiceEntityType.Value] = entityType;
 
@@ -224,11 +225,11 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.UpdateShared, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /*Unavailable for now...
-         * public void UpdateEntityPartial(string entityId, string entityType, string jsonEntityData, SuccessCallback success, FailureCallback failure, object cbObject)
+         * public void UpdateEntityPartial(string entityId, string entityType, string jsonEntityData, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
         {
             // TODO: actually call the right method...
             UpdateEntity(entityId, entityType, jsonEntityData, success, failure, cbObject);
@@ -272,7 +273,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.Delete, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -331,7 +332,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.UpdateSingleton, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
 
@@ -372,7 +373,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.DeleteSingleton, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -405,7 +406,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.Read, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -438,20 +439,37 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.ReadSingleton, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
+        }
+
+        [Obsolete("This has been deprecated. Use GetSharedEntityForProfileId instead - removal after September 1 2017")]
+        public void GetSharedEntityForPlayerId(
+            string profileId,
+            string entityId,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            var data = new Dictionary<string, object>();
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = profileId;
+            data[OperationParam.EntityServiceEntityId.Value] = entityId;
+
+            var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            var sc = new ServerCall(ServiceName.Entity, ServiceOperation.ReadSharedEntity, data, callback);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Method returns a shared entity for the given player and entity ID.
+        /// Method returns a shared entity for the given profile and entity ID.
         /// An entity is shared if its ACL allows for the currently logged
-        /// in player to read the data.
+        /// in user to read the data.
         /// </summary>
         /// <remarks>
         /// Service Name - Entity
         /// Service Operation - READ_SHARED_ENTITY
         /// </remarks>
-        /// <param name="playerId">
-        /// The the profile ID of the player who owns the entity
+        /// <param name="profileId">
+        /// The the profile ID of the user who owns the entity
         /// </param>
         /// <param name="entityId">
         /// The ID of the entity that will be retrieved
@@ -465,33 +483,48 @@ namespace BrainCloud
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void GetSharedEntityForPlayerId(
-            string playerId,
+        public void GetSharedEntityForProfileId(
+            string profileId,
             string entityId,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
             var data = new Dictionary<string, object>();
-            data[OperationParam.EntityServiceTargetPlayerId.Value] = playerId;
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = profileId;
             data[OperationParam.EntityServiceEntityId.Value] = entityId;
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.ReadSharedEntity, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
+        }
+
+        [Obsolete("This has been deprecated. Use GetSharedEntitiesForProfileId instead - removal after September 1 2017")]
+        public void GetSharedEntitiesForPlayerId(
+            string profileId,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            var data = new Dictionary<string, object>();
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = profileId;
+
+            var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            var sc = new ServerCall(ServiceName.Entity, ServiceOperation.ReadShared, data, callback);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
-        /// Method returns all shared entities for the given player id.
+        /// Method returns all shared entities for the given profile id.
         /// An entity is shared if its ACL allows for the currently logged
-        /// in player to read the data.
+        /// in user to read the data.
         /// </summary>
         /// <remarks>
         /// Service Name - Entity
         /// Service Operation - ReadShared
         /// </remarks>
-        /// <param name="playerId">
-        /// The player id to retrieve shared entities for
+        /// <param name="profileId">
+        /// The profile id to retrieve shared entities for
         /// </param>
         /// <param name="success">
         /// The success callback.
@@ -502,18 +535,18 @@ namespace BrainCloud
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void GetSharedEntitiesForPlayerId(
-            string playerId,
+        public void GetSharedEntitiesForProfileId(
+            string profileId,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
             var data = new Dictionary<string, object>();
-            data[OperationParam.EntityServiceTargetPlayerId.Value] = playerId;
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = profileId;
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var sc = new ServerCall(ServiceName.Entity, ServiceOperation.ReadShared, data, callback);
-            _brainCloudClient.SendRequest(sc);
+            _client.SendRequest(sc);
         }
 
         /// <summary>
@@ -565,18 +598,48 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.GetList, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
+        }
+        
+        [Obsolete("This has been deprecated. Use GetSharedEntitiesListForProfileId instead - removal after September 1 2017")]
+        public void GetSharedEntitiesListForPlayerId(
+           string profileId,
+           string whereJson,
+           string orderByJson,
+           int maxReturn,
+           SuccessCallback success = null,
+           FailureCallback failure = null,
+           object cbObject = null)
+        {
+            var data = new Dictionary<string, object>();
+
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = profileId;
+            if (Util.IsOptionalParameterValid(whereJson))
+            {
+                var where = JsonReader.Deserialize<Dictionary<string, object>>(whereJson);
+                data[OperationParam.GlobalEntityServiceWhere.Value] = where;
+            }
+            if (Util.IsOptionalParameterValid(orderByJson))
+            {
+                var orderBy = JsonReader.Deserialize<Dictionary<string, object>>(orderByJson);
+                data[OperationParam.GlobalEntityServiceOrderBy.Value] = orderBy;
+            }
+            data[OperationParam.GlobalEntityServiceMaxReturn.Value] = maxReturn;
+
+            var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.ReadSharedEntitiesList, data, callback);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
-        /// Method gets list of shared entities for the specified player based on type and/or where clause
+        /// Method gets list of shared entities for the specified user based on type and/or where clause
         /// </summary>
         /// <remarks>
         /// Service Name - Entity
         /// Service Operation - GET_LIST
         /// </remarks>
-        /// <param name="playerId">
-        /// The player ID to retrieve shared entities for
+        /// <param name="profileId">
+        /// The profile ID to retrieve shared entities for
         /// </param>
         /// <param name="whereJson">
         /// Mongo style query string
@@ -596,8 +659,8 @@ namespace BrainCloud
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void GetSharedEntitiesListForPlayerId(
-            string playerId,
+        public void GetSharedEntitiesListForProfileId(
+            string profileId,
             string whereJson,
             string orderByJson,
             int maxReturn,
@@ -607,7 +670,7 @@ namespace BrainCloud
         {
             var data = new Dictionary<string, object>();
 
-            data[OperationParam.EntityServiceTargetPlayerId.Value] = playerId;
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = profileId;
             if (Util.IsOptionalParameterValid(whereJson))
             {
                 var where = JsonReader.Deserialize<Dictionary<string, object>>(whereJson);
@@ -622,7 +685,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.ReadSharedEntitiesList, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -660,7 +723,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.GetListCount, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -691,7 +754,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.GetPage, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -728,7 +791,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.GetPageOffset, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -761,7 +824,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.IncrementUserEntityData, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
 
         /// <summary>
@@ -772,14 +835,14 @@ namespace BrainCloud
         /// Service Operation - INCREMENT_SHARED_USER_ENTITY_DATA
         /// </remarks>
         /// <param name="entityId">The entity to increment</param>
-        /// <param name="targetPlayerId">Profile ID of the entity owner</param>
+        /// <param name="targetProfileId">Profile ID of the entity owner</param>
         /// <param name="jsonData">The subset of data to increment</param>
         /// <param name="success">The success callback</param>
         /// <param name="failure">The failure callback</param>
         /// <param name="cbObject">The callback object</param>
         public void IncrementSharedUserEntityData(
             string entityId,
-            string targetPlayerId,
+            string targetProfileId,
             string jsonData,
             SuccessCallback success = null,
             FailureCallback failure = null,
@@ -788,7 +851,7 @@ namespace BrainCloud
             var data = new Dictionary<string, object>();
 
             data[OperationParam.EntityServiceEntityId.Value] = entityId;
-            data[OperationParam.EntityServiceTargetPlayerId.Value] = targetPlayerId;
+            data[OperationParam.EntityServiceTargetPlayerId.Value] = targetProfileId;
             if (Util.IsOptionalParameterValid(jsonData))
             {
                 var where = JsonReader.Deserialize<Dictionary<string, object>>(jsonData);
@@ -797,7 +860,7 @@ namespace BrainCloud
 
             var callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             var serverCall = new ServerCall(ServiceName.Entity, ServiceOperation.IncrementSharedUserEntityData, data, callback);
-            _brainCloudClient.SendRequest(serverCall);
+            _client.SendRequest(serverCall);
         }
     }
 }
