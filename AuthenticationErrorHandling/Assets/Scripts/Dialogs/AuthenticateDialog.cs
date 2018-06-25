@@ -1,4 +1,7 @@
-﻿using BrainCloud;
+﻿using System;
+using BrainCloud;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 using UnityEngine;
 
 public class AuthenticateDialog : Dialog
@@ -8,9 +11,8 @@ public class AuthenticateDialog : Dialog
         Detach();
     }
 
-    ResponseState m_state = ResponseState.InProgress;
-    ExampleAccountType m_exampleAccountType = ExampleAccountType.Anonymous;
-
+    private ResponseState m_state = ResponseState.InProgress;
+    private ExampleAccountType m_exampleAccountType = ExampleAccountType.Anonymous;
 
     public void OnGUI()
     {
@@ -60,6 +62,24 @@ public class AuthenticateDialog : Dialog
         BrainCloudClient.Get().AuthenticationService
             .AuthenticateEmailPassword(UtilValues.getEmail(), UtilValues.getPassword(), forceCreate,
                 dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
+    }
+
+    public static void AuthenticateAsGooglePlay(bool forceCreate = false)
+    {
+#if UNITY_ANDROID
+        GameObject dialogObject = new GameObject("Dialog");
+        AuthenticateDialog dialog = dialogObject.AddComponent<AuthenticateDialog>();
+        dialog.m_exampleAccountType = ExampleAccountType.GooglePlay;
+
+        GoogleIdentity.RefreshGoogleIdentity(identity =>
+        {
+            BrainCloudWrapper.Instance.AuthenticateGoogle(identity.GoogleId, identity.GoogleToken, forceCreate,
+                dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
+        });
+
+#else
+        ErrorDialog.DisplayErrorDialog("AuthenticateAsGooglePlay", "You can only use GooglePlay auth on Android Devices");
+#endif
     }
 
     private void DoAuthWindow(int windowId)
@@ -255,6 +275,13 @@ public class AuthenticateDialog : Dialog
             case ExampleAccountType.Email:
             {
                 AuthenticateAsEmail(forceCreate);
+
+                break;
+            }
+
+            case ExampleAccountType.GooglePlay:
+            {
+                AuthenticateAsGooglePlay(forceCreate);
 
                 break;
             }

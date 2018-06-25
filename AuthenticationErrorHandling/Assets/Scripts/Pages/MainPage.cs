@@ -23,17 +23,11 @@ public class MainPage : MonoBehaviour
     public DetachIdenititySection m_detachIdentitySection = new DetachIdenititySection();
     public MergeIdenititySection m_mergeIdentitySection = new MergeIdenititySection();
 
-	BrainCloud.FailureCallback failureCallBack = new BrainCloud.FailureCallback((int status, int reasonCode, string jsonError, object cbObject) => {
+	readonly BrainCloud.FailureCallback failureCallBack = (status, reasonCode, jsonError, cbObject) => {
 		lastErrorMessage = reasonCode.ToString();
+	};
 
-	});
-
-	public void FailureCallback(int status, int reasonCode, string jsonError, object cbObject) {
-		lastErrorMessage = reasonCode.ToString();
-	}
-
-
-    void Start()
+	void Start()
     {
         BrainCloudWrapper.Initialize();
     }

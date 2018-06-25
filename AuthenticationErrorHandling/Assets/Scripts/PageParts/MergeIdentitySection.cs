@@ -23,6 +23,10 @@ public class MergeIdenititySection
         {
             MergeIdentityDialog.MergeIdentityEmail();
         }
+        if (Util.Button("GooglePlay (Android Only)"))
+        {
+            MergeIdentityDialog.MergeIdentityGooglePlay();
+        }
 
         GUILayout.EndHorizontal();
 
