@@ -40,6 +40,8 @@ public
     private Vector2 scrollViewVector = Vector2.zero;
     private readonly bool UIEnabled = true;
 
+    private BrainCloudWrapper _bc;
+
     // When the app starts, check to make sure that we have
     // the required dependencies to use Firebase, and if not,
     // add them if possible.
@@ -57,10 +59,13 @@ public
             });
         else InitializeFirebase();
 
+        
+        
         //Set up brainCloud
-        BrainCloudWrapper.Initialize();
+        _bc = gameObject.AddComponent<BrainCloudWrapper>();        
+        _bc.Init();
 
-        BrainCloudWrapper.GetInstance().AlwaysAllowProfileSwitch = true;
+        _bc.AlwaysAllowProfileSwitch = true;
     }
 
     // Setup message event handlers.
@@ -95,11 +100,6 @@ public
         firebaseToken = token.Token;
 
         DebugLog("Received Registration Token: " + token.Token);
-    }
-
-    private void Update()
-    {
-        BrainCloudWrapper.GetInstance().Update();
     }
 
     // End our messaging session when the program exits.
@@ -145,7 +145,7 @@ public
             
             GUILayout.BeginHorizontal();
             GUILayout.Label("Profile Id: ", GUILayout.Width( Screen.width * 0.20f));
-            GUILayout.TextField(BrainCloudWrapper.GetInstance().GetStoredProfileId(), GUILayout.Width(inputWidth));
+            GUILayout.TextField(_bc.GetStoredProfileId(), GUILayout.Width(inputWidth));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -153,16 +153,16 @@ public
             GUILayout.TextField(firebaseToken, GUILayout.Width(inputWidth));
             GUILayout.EndHorizontal();
 
-            if (!BrainCloudWrapper.GetBC().IsAuthenticated())
+            if (!_bc.Client.IsAuthenticated())
             {
-                if (!String.IsNullOrEmpty(BrainCloudWrapper.GetInstance().GetStoredAnonymousId()) ||
-                    !String.IsNullOrEmpty(BrainCloudWrapper.GetInstance().GetStoredProfileId())) {
-                    BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
-                    BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+                if (!string.IsNullOrEmpty(_bc.GetStoredAnonymousId()) ||
+                    !string.IsNullOrEmpty(_bc.GetStoredProfileId())) {
+                    _bc.ResetStoredAnonymousId();
+                    _bc.ResetStoredProfileId();
                 }
 
             if (GUILayout.Button("Authenticate"))
-                    BrainCloudWrapper.GetInstance().AuthenticateAnonymous(
+                _bc.AuthenticateAnonymous(
                         (response, cbObject) =>
                         {
                             DebugLog(string.Format("brainCloud Authentication Success: {0}", response));
@@ -177,14 +177,14 @@ public
             {
                 if (GUILayout.Button("Register"))
                 {
-                    BrainCloudWrapper.GetBC().PushNotificationService
+                    _bc.PushNotificationService
                         .RegisterPushNotificationDeviceToken(Platform.GooglePlayAndroid, firebaseToken);
 
                     DebugLog("Registered to brainCloud");
                 }
                 if (GUILayout.Button("Deregister"))
                 {
-                    BrainCloudWrapper.GetBC().PushNotificationService
+                    _bc.PushNotificationService
                         .DeregisterPushNotificationDeviceToken(Platform.GooglePlayAndroid, firebaseToken);
 
                     DebugLog("Deregistered from brainCloud");
@@ -194,8 +194,8 @@ public
                 {
                     DebugLog("SendNormalizedPushNotification");
 
-                    BrainCloudWrapper.GetBC().PushNotificationService.SendNormalizedPushNotification(
-                        BrainCloudWrapper.GetInstance().GetStoredProfileId(),
+                    _bc.PushNotificationService.SendNormalizedPushNotification(
+                        _bc.GetStoredProfileId(),
                         "{ \"body\": \"content of message\", \"title\": \"message title\" }",
                         null,
                         (response, cbObject) => { DebugLog(string.Format("Success: {0}", response)); },
@@ -209,8 +209,8 @@ public
                 {
                     DebugLog("SendRichPushNotification");
 
-                    BrainCloudWrapper.GetBC().PushNotificationService.SendRichPushNotification(
-                        BrainCloudWrapper.GetInstance().GetStoredProfileId(),
+                    _bc.PushNotificationService.SendRichPushNotification(
+                        _bc.GetStoredProfileId(),
                         1,
                         (response, cbObject) => { DebugLog(string.Format("Success: {0}", response)); },
                         (status, code, error, cbObject) =>
@@ -223,8 +223,8 @@ public
                 {
                     DebugLog("SendRawPushNotification");
 
-                    BrainCloudWrapper.GetBC().PushNotificationService.SendRawPushNotification(
-                        BrainCloudWrapper.GetInstance().GetStoredProfileId(),
+                    _bc.PushNotificationService.SendRawPushNotification(
+                        _bc.GetStoredProfileId(),
                         "{ \"notification\": { \"body\": \"content of message\", \"title\": \"message title\" }, \"data\": { \"customfield1\": \"customValue1\", \"customfield2\": \"customValue2\" }, \"priority\": \"normal\" }",
                         "{ \"aps\": { \"alert\": { \"body\": \"content of message\", \"title\": \"message title\" }, \"badge\": 0, \"sound\": \"gggg\" } }",
                         "{\"template\": \"content of message\"}",

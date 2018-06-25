@@ -23,15 +23,17 @@ namespace BrainCloudUnity
         private Vector2 _scrollPosition;
         private string _authStatus = "Welcome to brainCloud";
 
+        public static BrainCloudWrapper BrainCloud;
+        
         void Start()
         {
             ///////////////////////////////////////////////////////////////////
             // brainCloud game configuration
             ///////////////////////////////////////////////////////////////////
-
-            BrainCloudWrapper.Initialize();
-
-            BrainCloudWrapper.GetInstance().AlwaysAllowProfileSwitch = true;
+            
+            
+            BrainCloud = gameObject.AddComponent<BrainCloudWrapper>();
+            BrainCloud.Init();
 
             ///////////////////////////////////////////////////////////////////
 
@@ -40,11 +42,15 @@ namespace BrainCloudUnity
             // Stores the password in plain text directly in the unity store.
             // This is obviously not secure but speeds up debugging/testing.
             _password = PlayerPrefs.GetString("password");
+            
+            // Clearing current profile
+            BrainCloud.ResetStoredAnonymousId();
+            BrainCloud.ResetStoredProfileId();
         }
 
         void OnGUI()
         {
-            if (!BrainCloudWrapper.GetBC().IsAuthenticated())
+            if (!BrainCloud.Client.IsAuthenticated())
             {
                 int width = Screen.width / 2 - 125;
                 if (width < 500) width = 500;
@@ -92,7 +98,7 @@ namespace BrainCloudUnity
                     // brainCloud authentication
                     ///////////////////////////////////////////////////////////////////
 
-                    BrainCloudWrapper.GetInstance().AuthenticateUniversal(_username, _password, true, OnSuccess_Authenticate, OnError_Authenticate);
+                    BrainCloud.AuthenticateUniversal(_username, _password, true, OnSuccess_Authenticate, OnError_Authenticate);
 
                     ///////////////////////////////////////////////////////////////////
                 }

@@ -81,16 +81,19 @@ namespace BrainCloudUnity.HUD
 				GUILayout.FlexibleSpace ();
 				GUILayout.BeginHorizontal ();
 				GUILayout.FlexibleSpace ();
+				
+				/** // Debug menu appears to have an issue in the current verion of Unity. Look into adjusting
 				if (GUILayout.Button ("bC Debug"))
 				{
 					Minimized = false;
 				}
+				*/
 				GUILayout.EndHorizontal ();
 				GUILayout.EndVertical ();
 			}
 			else
 			{
-				GUILayout.Window(0, new Rect(0, 0, Screen.width, Screen.height), OnWindow, m_screens[m_activeScreen].GetHUDTitle());
+				GUILayout.Window(0, new Rect(0, 0, 350, Screen.height), OnWindow, m_screens[m_activeScreen].GetHUDTitle());
 			}
 		}
 
