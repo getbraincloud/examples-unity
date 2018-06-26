@@ -21,7 +21,7 @@ public class ChangeScreenNameDialog : Dialog
         ChangeScreenNameDialog dialog = dialogObject.AddComponent<ChangeScreenNameDialog>();
 
         App.Bc.Client
-            .PlayerStateService.UpdatePlayerName(newName, dialog.OnSuccess_ChangeScreenName,
+            .PlayerStateService.UpdateUserName(newName, dialog.OnSuccess_ChangeScreenName,
                 dialog.OnError_ChangeScreenName);
     }
 

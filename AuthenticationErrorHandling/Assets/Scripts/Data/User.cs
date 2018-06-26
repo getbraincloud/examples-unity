@@ -34,7 +34,7 @@ public class User
             {
                 // Perform any logic needed for new users
                 App.Bc.Client
-                    .PlayerStateService.UpdatePlayerName(m_userData.m_screenName, OnSuccess_UpdatePlayerName,
+                    .PlayerStateService.UpdateUserName(m_userData.m_screenName, OnSuccess_UpdatePlayerName,
                         OnFailed_UpdatePlayerName);
                 ErrorHandlingApp.getInstance().m_user.m_userData.m_screenName = "";
 
@@ -44,7 +44,7 @@ public class User
             {
                 // Load any content on brainCloud that is needed for preexisting users
                 App.Bc.Client
-                    .PlayerStateService.ReadPlayerState(OnSuccess_ReadPlayerState, OnFailed_ReadPlayerState);
+                    .PlayerStateService.ReadUserState(OnSuccess_ReadPlayerState, OnFailed_ReadPlayerState);
                 App.Bc.Client
                     .PlayerStateService.GetAttributes(OnSuccess_GetAttributes, OnFailed_GetAttributes);
                 App.Bc.Client.IdentityService.GetIdentities(OnSuccess_GetIdentities, OnFailed_GetIdentities);
@@ -59,7 +59,7 @@ public class User
     public void OnIdentitiesChangedResponse(string responseData)
     {
         App.Bc.Client
-            .PlayerStateService.ReadPlayerState(OnSuccess_ReadPlayerState, OnFailed_ReadPlayerState);
+            .PlayerStateService.ReadUserState(OnSuccess_ReadPlayerState, OnFailed_ReadPlayerState);
         App.Bc.Client
             .PlayerStateService.GetAttributes(OnSuccess_GetAttributes, OnFailed_GetAttributes);
 
