@@ -96,10 +96,14 @@ namespace BrainCloudUNETExample.Matchmaking
 
         private string m_filterName = "";
         private DialogDisplay m_dialogueDisplay;
+        
+        private BrainCloudWrapper _bc;
 
         void Start()
         {
-            if (!BrainCloudWrapper.GetBC().Initialized)
+            _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+            
+            if (!_bc.Client.Initialized)
             {
                 SceneManager.LoadScene("Connect");
                 return;
@@ -185,7 +189,7 @@ namespace BrainCloudUNETExample.Matchmaking
         public void FinishEditName()
         {
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName = GameObject.Find("PlayerName").GetComponent<InputField>().text;
-            BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(GameObject.Find("PlayerName").GetComponent<InputField>().text);
+            _bc.Client.PlayerStateService.UpdateUserName(GameObject.Find("PlayerName").GetComponent<InputField>().text);
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
             GameObject.Find("PlayerName").GetComponent<Image>().enabled = false;
         }
@@ -746,8 +750,8 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void QuitToLogin()
         {
-            BrainCloudWrapper.GetBC().PlayerStateService.Logout();
-            BrainCloudWrapper.GetBC().AuthenticationService.ClearSavedProfileID();
+            _bc.Client.PlayerStateService.Logout();
+            _bc.Client.AuthenticationService.ClearSavedProfileID();
             SceneManager.LoadScene("Connect");
         }
 
@@ -829,7 +833,7 @@ namespace BrainCloudUNETExample.Matchmaking
             matchAttributes["MapLayout"] = m_presetListSelection;
             matchAttributes["MapSize"] = m_sizeListSelection;
 
-            BrainCloudWrapper.GetBC().EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + roomName + "\"}", null, -1, null, null, null);
+            _bc.Client.EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + roomName + "\"}", null, -1, null, null, null);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
             m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
 

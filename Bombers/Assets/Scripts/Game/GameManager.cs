@@ -134,10 +134,14 @@ namespace BrainCloudPhotonExample.Game
         private GameObject m_bombExplosion;
         private GameObject m_bombWaterExplosion;
         private GameObject m_bombDud;
+        
+        private BrainCloudWrapper _bc;
 
         void Awake()
         {
-            if (!BrainCloudWrapper.GetBC().Initialized)
+            _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+            
+            if (!_bc.Client.Initialized)
             {
                 SceneManager.LoadScene("Connect");
                 return;

@@ -97,10 +97,14 @@ namespace BrainCloudPhotonExample.Matchmaking
         private Text m_acesTabText;
         private Image m_bombersTabImg;
         private Text m_bombersTabText;
+        
+        private BrainCloudWrapper _bc;
 
         private void Start()
         {
-            if (!BrainCloudWrapper.GetBC().Initialized)
+            _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+            
+            if (!_bc.Client.Initialized)
             {
                 SceneManager.LoadScene("Connect");
                 return;
@@ -195,7 +199,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void FinishEditName()
         {
             PhotonNetwork.player.NickName = m_playerName.text;
-            BrainCloudWrapper.GetBC().PlayerStateService.UpdatePlayerName(m_playerName.text);
+            _bc.Client.PlayerStateService.UpdateUserName(m_playerName.text);
             m_playerName.interactable = false;
             m_playerNameImage.enabled = false;
         }
@@ -736,8 +740,8 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         public void QuitToLogin()
         {
-            BrainCloudWrapper.GetBC().PlayerStateService.Logout();
-            BrainCloudWrapper.GetBC().AuthenticationService.ClearSavedProfileID();
+            _bc.Client.PlayerStateService.Logout();
+            _bc.Client.AuthenticationService.ClearSavedProfileID();
             PhotonNetwork.LoadLevel("Connect");
         }
 
@@ -828,7 +832,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             customProperties["MapSize"] = m_sizeListSelection;
             aOptions.CustomRoomProperties = customProperties;
             aOptions.CustomRoomPropertiesForLobby = new string[] { "roomMinLevel", "roomMaxLevel", "IsPlaying" };
-            BrainCloudWrapper.GetBC().EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + aName + "\"}", null, -1, null, null, null);
+            _bc.Client.EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + aName + "\"}", null, -1, null, null, null);
             BrainCloudStats.Instance.ReadStatistics();
             m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
             PhotonNetwork.CreateRoom(aName, aOptions, TypedLobby.Default);

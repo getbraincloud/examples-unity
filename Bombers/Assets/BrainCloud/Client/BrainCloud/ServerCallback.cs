@@ -11,14 +11,14 @@ namespace BrainCloud
     public class ServerCallback
     {
         /// ServerCallback
-        /// @param in_fnSuccessCallback : SuccessCallback
-        /// @param in_fnFailureCallback : FailureCallback
+        /// @param fnSuccessCallback : SuccessCallback
+        /// @param fnFailureCallback : FailureCallback
         #region Constructor
-        public ServerCallback(SuccessCallback in_fnSuccessCallback, FailureCallback in_fnFailureCallback, object in_cbObject)
+        public ServerCallback(SuccessCallback fnSuccessCallback, FailureCallback fnFailureCallback, object cbObject)
         {
-            m_fnFailureCallback = in_fnFailureCallback;
-            m_fnSuccessCallback = in_fnSuccessCallback;
-            m_cbObject = in_cbObject;
+            m_fnFailureCallback = fnFailureCallback;
+            m_fnSuccessCallback = fnSuccessCallback;
+            m_cbObject = cbObject;
         }
         #endregion
 
@@ -31,6 +31,9 @@ namespace BrainCloud
         {
             if ( m_fnSuccessCallback != null )
             {
+#if UNITY_EDITOR
+                BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnSuccess(jsonResponse);
+#endif
                 m_fnSuccessCallback(jsonResponse, m_cbObject);
             }
         }
@@ -39,6 +42,10 @@ namespace BrainCloud
         {
             if ( m_fnFailureCallback != null )
             {
+#if UNITY_EDITOR
+                BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnFailedResponse(statusMessage);
+#endif
+                        
                 m_fnFailureCallback(statusCode, reasonCode, statusMessage, m_cbObject);
             }
         }

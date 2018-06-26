@@ -23,6 +23,8 @@ namespace BrainCloudPhotonExample.Connection
         private Button m_loginBtn;
         private Button m_forgotPasswordBtn;
         private Toggle m_savePassToggle;
+        
+        private BrainCloudWrapper _bc;
 
         void Awake()
         {
@@ -32,6 +34,7 @@ namespace BrainCloudPhotonExample.Connection
             m_loginBtn = GameObject.Find("Login Button").GetComponent<Button>();
             m_forgotPasswordBtn = GameObject.Find("Forgot Password").GetComponent<Button>();
             m_savePassToggle = GameObject.Find("Toggle").GetComponent<Toggle>();
+            _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
         }
 
         void Start()
@@ -39,14 +42,6 @@ namespace BrainCloudPhotonExample.Connection
             Application.runInBackground = true;
             if (!PhotonNetwork.connectedAndReady) PhotonNetwork.ConnectUsingSettings("1.0");
 
-            ///////////////////////////////////////////////////////////////////
-            // brainCloud game configuration
-            ///////////////////////////////////////////////////////////////////
-
-            BrainCloudWrapper.Initialize();
-            BrainCloudWrapper.Instance.AlwaysAllowProfileSwitch = true;
-
-            ///////////////////////////////////////////////////////////////////
 
             if (!PhotonNetwork.connectedAndReady) AppendLog("Connecting to Photon...");
             else
@@ -110,7 +105,7 @@ namespace BrainCloudPhotonExample.Connection
                     m_isLoggingIn = true;
                     
                     // brainCloud authentication
-                    BrainCloudWrapper.Instance.AuthenticateEmailPassword(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
+                    _bc.AuthenticateEmailPassword(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
                 }
             }
         }
@@ -175,7 +170,7 @@ namespace BrainCloudPhotonExample.Connection
                 m_dialogueDisplay.DisplayDialog("You need to enter an email first!");
                 return;
             }
-            BrainCloudWrapper.Client.AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
+            _bc.Client.AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
 
         }
 
@@ -210,7 +205,7 @@ namespace BrainCloudPhotonExample.Connection
                         break;
                     }
                 }
-                BrainCloudWrapper.Client.PlayerStateService.UpdatePlayerName(username);
+                _bc.Client.PlayerStateService.UpdateUserName(username);
                 PhotonNetwork.player.NickName = username;
             }
             else
