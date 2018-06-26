@@ -135,8 +135,8 @@ namespace BrainCloudUNETExample.Connection
         public void ReadStatistics()
         {
             // Ask brainCloud for statistics
-            _bc.Client.PlayerStatisticsService.ReadAllPlayerStats(StatsSuccess_Callback, StatsFailure_Callback, null);
-            _bc.Client.PlayerStateService.ReadPlayerState(StateSuccess_Callback, StateFailure_Callback, null);
+            _bc.Client.PlayerStatisticsService.ReadAllUserStats(StatsSuccess_Callback, StatsFailure_Callback, null);
+            _bc.Client.PlayerStateService.ReadUserState(StateSuccess_Callback, StateFailure_Callback, null);
             _bc.Client.GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
             _bc.Client.GamificationService.ReadAchievements(true, AchievementSuccess_Callback, AchievementFailure_Callback, null);
         }
@@ -267,7 +267,7 @@ namespace BrainCloudUNETExample.Connection
         };
 
             // Send to the cloud
-            _bc.Client.PlayerStatisticsService.IncrementPlayerStats(
+            _bc.Client.PlayerStatisticsService.IncrementUserStats(
                 stats, StatsSuccess_Callback, StatsFailure_Callback, null);
         }
 

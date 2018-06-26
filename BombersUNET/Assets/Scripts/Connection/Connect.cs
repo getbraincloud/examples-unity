@@ -173,7 +173,7 @@ namespace BrainCloudUNETExample.Connection
                         break;
                     }
                 }
-                _bc.Client.PlayerStateService.UpdatePlayerName(username);
+                _bc.Client.PlayerStateService.UpdateUserName(username);
             }
             else
             {

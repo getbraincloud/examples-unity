@@ -125,15 +125,15 @@ namespace BrainCloudPhotonExample.Connection
         ////////////////////////////////////////////
 
         public void ReadGlobalProperties()
-        {
+      {
             _bc.Client.GlobalAppService.ReadProperties(PropertiesSuccess_Callback, PropertiesFailure_Callback, null);
         }
 
         public void ReadStatistics()
         {
             // Ask brainCloud for statistics
-            _bc.Client.PlayerStatisticsService.ReadAllPlayerStats(StatsSuccess_Callback, StatsFailure_Callback, null);
-            _bc.Client.PlayerStateService.ReadPlayerState(StateSuccess_Callback, StateFailure_Callback, null);
+            _bc.Client.PlayerStatisticsService.ReadAllUserStats(StatsSuccess_Callback, StatsFailure_Callback, null);
+            _bc.Client.PlayerStateService.ReadUserState(StateSuccess_Callback, StateFailure_Callback, null);
             _bc.Client.GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
             _bc.Client.GamificationService.ReadAchievements(true, AchievementSuccess_Callback, AchievementFailure_Callback, null);
         }
@@ -264,7 +264,7 @@ namespace BrainCloudPhotonExample.Connection
         };
 
             // Send to the cloud
-            _bc.Client.PlayerStatisticsService.IncrementPlayerStats(
+            _bc.Client.PlayerStatisticsService.IncrementUserStats(
                 stats, StatsSuccess_Callback, StatsFailure_Callback, null);
         }
 

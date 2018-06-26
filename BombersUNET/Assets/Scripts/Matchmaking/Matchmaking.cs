@@ -189,7 +189,7 @@ namespace BrainCloudUNETExample.Matchmaking
         public void FinishEditName()
         {
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName = GameObject.Find("PlayerName").GetComponent<InputField>().text;
-            _bc.Client.PlayerStateService.UpdatePlayerName(GameObject.Find("PlayerName").GetComponent<InputField>().text);
+            _bc.Client.PlayerStateService.UpdateUserName(GameObject.Find("PlayerName").GetComponent<InputField>().text);
             GameObject.Find("PlayerName").GetComponent<InputField>().interactable = false;
             GameObject.Find("PlayerName").GetComponent<Image>().enabled = false;
         }

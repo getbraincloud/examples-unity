@@ -199,7 +199,7 @@ namespace BrainCloudPhotonExample.Matchmaking
         public void FinishEditName()
         {
             PhotonNetwork.player.NickName = m_playerName.text;
-            _bc.Client.PlayerStateService.UpdatePlayerName(m_playerName.text);
+            _bc.Client.PlayerStateService.UpdateUserName(m_playerName.text);
             m_playerName.interactable = false;
             m_playerNameImage.enabled = false;
         }
