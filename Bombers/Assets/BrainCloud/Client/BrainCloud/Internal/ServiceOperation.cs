@@ -152,6 +152,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation ShieldOn = new ServiceOperation("SHIELD_ON");
         public static readonly ServiceOperation ShieldOnFor = new ServiceOperation("SHIELD_ON_FOR");
         public static readonly ServiceOperation ShieldOff = new ServiceOperation("SHIELD_OFF");
+        public static readonly ServiceOperation IncrementShieldOnFor = new ServiceOperation("INCREMENT_SHIELD_ON_FOR");
         public static readonly ServiceOperation GetShieldExpiry = new ServiceOperation("GET_SHIELD_EXPIRY");
         public static readonly ServiceOperation FindPlayers = new ServiceOperation("FIND_PLAYERS");
         public static readonly ServiceOperation FindPlayersUsingFilter = new ServiceOperation("FIND_PLAYERS_USING_FILTER");
@@ -224,6 +225,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetPage = new ServiceOperation("GET_PAGE");
         public static readonly ServiceOperation GetPageOffset = new ServiceOperation("GET_PAGE_BY_OFFSET");
         public static readonly ServiceOperation IncrementGlobalEntityData = new ServiceOperation("INCREMENT_GLOBAL_ENTITY_DATA");
+        public static readonly ServiceOperation GetRandomEntitiesMatching = new ServiceOperation("GET_RANDOM_ENTITIES_MATCHING");
         public static readonly ServiceOperation IncrementUserEntityData = new ServiceOperation("INCREMENT_USER_ENTITY_DATA");
         public static readonly ServiceOperation IncrementSharedUserEntityData = new ServiceOperation("INCREMENT_SHARED_USER_ENTITY_DATA");
 
@@ -237,7 +239,8 @@ namespace BrainCloud.Internal
         public static readonly ServiceOperation GetIdentities = new ServiceOperation("GET_IDENTITIES");
         public static readonly ServiceOperation GetExpiredIdentities = new ServiceOperation("GET_EXPIRED_IDENTITIES");
         public static readonly ServiceOperation RefreshIdentity = new ServiceOperation("REFRESH_IDENTITY");
-
+        public static readonly ServiceOperation ChangeEmailIdentity = new ServiceOperation("CHANGE_EMAIL_IDENTITY");
+        
         public static readonly ServiceOperation FbConfirmPurchase = new ServiceOperation("FB_CONFIRM_PURCHASE");
         public static readonly ServiceOperation GooglePlayConfirmPurchase = new ServiceOperation("CONFIRM_GOOGLEPLAY_PURCHASE");
 
