@@ -21,7 +21,7 @@ using System.IO.IsolatedStorage;
 /// <summary>
 /// The BrainCloudWrapper class provides some glue between the Unity environment and the
 /// brainCloud C# library. Specifically the BrainCloudWrapper does the following:
-/// 
+///
 /// 1) Creates and uses a global singleton GameObject to manage it's lifetime across the game
 /// 2) Provides an Initialize method which uses the game id, secret, version, and server url
 ///    defined in the brainCloud Settings Unity window.
@@ -29,22 +29,22 @@ using System.IO.IsolatedStorage;
 /// 4) For Anonymous authentication, stores the anonymous id and profile id to the Unity player prefs
 ///    upon successful authentication. This is important as once an anonymous account is created,
 ///    both the anonymous id and profile id of the account are required to authenticate.
-/// 
+///
 /// Note that this class is *not* required to use brainCloud - you are free to reimplement the
 /// functionality as you see fit. It is simply used as a starting point to get developers off the
 /// ground - especially with authentications.
-/// 
+///
 /// The meat of the BrainCloud api is available by using
-/// 
+///
 /// BrainCloudWrapper.GetBC()
-/// 
+///
 /// to grab an instance of the BrainCloudClient. From here you have access to all of the brainCloud
 /// API service. So for instance, to execute a read player statistics API you would do the following:
-/// 
+///
 /// BrainCloudWrapper.GetBC().PlayerStatisticsService.ReadAllUserStats()
-/// 
+///
 /// Similar services exist for other APIs.
-/// 
+///
 /// See http://getbraincloud.com/apidocs/ for the full list of brainCloud APIs.
 /// </summary>
 #if !DOT_NET
@@ -72,37 +72,38 @@ public class BrainCloudWrapper
     /// The name of the singleton brainCloud game object
     /// </summary>
     public static string GAMEOBJECT_BRAINCLOUD = "BrainCloudWrapper";
-    
+
     public static string AUTHENTICATION_ANONYMOUS = "anonymous";
 
     private static BrainCloudWrapper _instance = null;
     private static bool _applicationIsQuitting = false;
 
-    
+
     private string _lastUrl = "";
     private string _lastSecretKey = "";
     private string _lastAppId = "";
     private string _lastAppVersion = "";
 
+    private bool _alwaysAllowProfileSwitch = true;
+    
     private WrapperData _wrapperData = new WrapperData();
 
-    
+
     //Getting this error? - "An object reference is required for the non-static field, method, or property 'BrainCloudWrapper.Client'"
     //Switch to BrainCloudWrapper.GetBC();
     public BrainCloudClient Client { get; private set; }
-    public bool AlwaysAllowProfileSwitch { get; set; }
+    public bool AlwaysAllowProfileSwitch
+    {
+        get { return _alwaysAllowProfileSwitch; }
+        set { _alwaysAllowProfileSwitch = value; }
+    }
 
     /// <summary>
     /// Name of this wrapper instance. Used for data loading
     /// </summary>
-    public string WrapperName { get; private set; }
-    
-    #region Client Service Properties
+    public string WrapperName { get; set; }
 
-        internal BrainCloudComms Comms
-        {
-            get { return Client.Comms; }
-        }
+    #region Client Service Properties
 
         public BrainCloudEntity EntityService
         {
@@ -211,11 +212,6 @@ public class BrainCloudWrapper
             get { return Client.TournamentService; }
         }
 
-        public BrainCloudAuthentication AuthenticationService
-        {
-            get { return Client.AuthenticationService; }
-        }
-
         public BrainCloudPushNotification PushNotificationService
         {
             get { return Client.PushNotificationService; }
@@ -262,7 +258,7 @@ public class BrainCloudWrapper
         }
 
         #endregion
-    
+
     /// <summary>
     /// Create the brainCloud Wrapper, which has utility helpers for using the brainCloud API
     /// </summary>
@@ -270,7 +266,7 @@ public class BrainCloudWrapper
     {
         Client = new BrainCloudClient();
     }
-    
+
     /// <summary>
     /// Create the brainCloud Wrapper, which has utility helpers for using the brainCloud API
     /// </summary>
@@ -279,9 +275,10 @@ public class BrainCloudWrapper
     {
         Client = client;
     }
-    
+
     /// <summary>
     /// Create the brainCloud Wrapper, which has utility helpers for using the brainCloud API
+    /// Can't set the wrapperName on construction? use the WrapperName property instead
     /// </summary>
     /// <param name="wrapperName">string value used to differentiate saved wrapper data</param>
     public BrainCloudWrapper(string wrapperName)
@@ -290,7 +287,6 @@ public class BrainCloudWrapper
         WrapperName = wrapperName;
     }
 
-    
 
     public void Update()
     {
@@ -307,20 +303,19 @@ public class BrainCloudWrapper
     }
 #endif
 
-   
+
 #if !DOT_NET
     /// <summary>
     /// Initializes the brainCloud client. This method uses the parameters as configured
     /// in the Unity brainCloud Settings window.
     /// </summary>
-    public void Init(String wrapperName = "")
+    public void Init()
     {
         Init(
             BrainCloudSettings.Instance.DispatcherURL,
             BrainCloudSettings.Instance.SecretKey,
             BrainCloudSettings.Instance.GameId,
-            BrainCloudSettings.Instance.GameVersion,
-            wrapperName);
+            BrainCloudSettings.Instance.GameVersion);
 
         Client.EnableLogging(BrainCloudSettings.Instance.EnableLogging);
     }
@@ -334,9 +329,8 @@ public class BrainCloudWrapper
     /// <param name="secretKey">The app's secret</param>
     /// <param name="appId">The app's id</param>
     /// <param name="version">The app's version</param>
-    public void Init(string url, string secretKey, string appId, string version, string wrapperName = "")
+    public void Init(string url, string secretKey, string appId, string version)
     {
-        WrapperName = wrapperName;
         _lastUrl = url;
         _lastSecretKey = secretKey;
         _lastAppId = appId;
@@ -363,7 +357,7 @@ public class BrainCloudWrapper
     /// <summary>
     /// Authenticate a user anonymously with brainCloud - used for apps that don't want to bother
     /// the user to login, or for users who are sensitive to their privacy
-    /// 
+    ///
     /// Note that this method is special in that the anonymous id and profile id
     /// are persisted to the Unity player prefs cache if authentication is successful.
     /// Both pieces of information are required to successfully log into that account
@@ -747,7 +741,7 @@ public class BrainCloudWrapper
     /// </param>
     /// <param name="cbObject">
     /// The user supplied callback object
-    /// </param> 
+    /// </param>
     public void AuthenticateUniversal(
         string username,
         string password,
@@ -765,6 +759,419 @@ public class BrainCloudWrapper
 
         Client.AuthenticationService.AuthenticateUniversal(
             username, password, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user with a custom Email and Password.  Note that the client app
+    /// is responsible for collecting (and storing) the e-mail and potentially password
+    /// (for convenience) in the client data.  For the greatest security,
+    /// force the user to re-enter their password at each login.
+    /// (Or at least give them that option).
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="email">
+    /// The e-mail address of the user
+    /// </param>
+    /// <param name="password">
+    /// The password of the user
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateEmail(
+        string email,
+        string password,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateEmailPassword(email, password, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user via cloud code (which in turn validates the supplied credentials against an external system).
+    /// This allows the developer to extend brainCloud authentication to support other backend authentication systems.
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="userid">
+    /// The user id
+    /// </param>
+    /// <param name="token">
+    /// The user token (password etc)
+    /// </param>
+    /// /// <param name="externalAuthName">
+    /// The name of the cloud script to call for external authentication
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateExternal(
+        string userid,
+        string token,
+        string externalAuthName,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateExternal(userid, token, externalAuthName, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user with brainCloud using their Facebook Credentials
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="externalId">
+    /// The facebook id of the user
+    /// </param>
+    /// <param name="authenticationToken">
+    /// The validated token from the Facebook SDK (that will be further
+    /// validated when sent to the bC service)
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateFacebook(
+        string fbUserId,
+        string fbAuthToken,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateFacebook(fbUserId, fbAuthToken, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user using their Game Center id
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="gameCenterId">
+    /// The user's game center id  (use the playerID property from the local GKPlayer object)
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateGameCenter(
+        string gameCenterId,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateGameCenter(gameCenterId, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user using a google userid(email address) and google authentication token.
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="userid">
+    /// String representation of google+ userid (email)
+    /// </param>
+    /// <param name="token">
+    /// The authentication token derived via the google apis.
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateGoogle(
+        string userid,
+        string token,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateGoogle(userid, token, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user using a steam userid and session ticket (without any validation on the userid).
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="userid">
+    /// String representation of 64 bit steam id
+    /// </param>
+    /// <param name="sessionticket">
+    /// The session ticket of the user (hex encoded)
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitcAuthenticateSteam(
+        string userid,
+        string sessionticket,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateSteam(userid, sessionticket, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user using a Twitter userid, authentication token, and secret from twitter.
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="userid">
+    /// String representation of a Twitter user ID
+    /// </param>
+    /// <param name="token">
+    /// The authentication token derived via the Twitter apis
+    /// </param>
+    /// <param name="secret">
+    /// The secret given when attempting to link with Twitter
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitcAuthenticateTwitter(
+        string userid,
+        string token,
+        string secret,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateTwitter(userid, token, secret, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user using a userid and password (without any validation on the userid).
+    /// Similar to AuthenticateEmailPassword - except that that method has additional features to
+    /// allow for e-mail validation, password resets, etc.
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="email">
+    /// The e-mail address of the user
+    /// </param>
+    /// <param name="password">
+    /// The password of the user
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param> 
+    public virtual void SmartSwitchAuthenticateUniversal(
+        string username,
+        string password,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null, 
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) => 
+        {
+            AuthenticateUniversal(username, password, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+
+    private void SmartSwitchAuthentication(SuccessCallback authenticateCallback, FailureCallback failureCallback)
+    {
+        var getIdentitiesCallback = GetIdentitiesCallback(authenticateCallback, failureCallback);
+
+        if (Client.Authenticated)
+        {
+            Client.IdentityService.GetIdentities(getIdentitiesCallback);            
+        }
+        else
+        {
+            authenticateCallback("", null);
+        }
+    }
+
+    private SuccessCallback GetIdentitiesCallback(SuccessCallback success, FailureCallback failure)
+    {
+        const string JSON_DATA = "data";
+        const string JSON_IDENTITIES = "identities";
+
+        SuccessCallback getIdentitiesCallback = (response, cbObject) =>
+        {
+            Dictionary<string, object> jsonMessage = (Dictionary<string, object>) JsonReader.Deserialize(response);
+            Dictionary<string, object> jsonData = (Dictionary<string, object>) jsonMessage[JSON_DATA];
+
+            if (jsonData.ContainsKey(JSON_IDENTITIES))
+            {
+                Dictionary<string, object> jsonIdentities = (Dictionary<string, object>) jsonData[JSON_IDENTITIES];
+                if (jsonIdentities.Count == 0)
+                {
+                    Client.PlayerStateService.DeleteUser(success, failure);
+                }
+                else
+                {
+                    Client.PlayerStateService.Logout(success, failure);
+                }
+            }
+        };
+        
+        return getIdentitiesCallback;
     }
 
     /// <summary>
@@ -794,8 +1201,8 @@ public class BrainCloudWrapper
     /// AuthenticateAnonymous method, a success callback handler hook will be installed
     /// that will trap the return from the brainCloud server and persist the anonymous id
     /// and profile id.
-    /// 
-    /// Note that clients are free to implement this logic on their own as well if they 
+    ///
+    /// Note that clients are free to implement this logic on their own as well if they
     /// wish to store the information in another location and/or change the behaviour.
     /// </summary>
     protected virtual void InitializeIdentity(bool isAnonymousAuth = false)
@@ -912,7 +1319,7 @@ public class BrainCloudWrapper
     /// </summary>
     protected virtual void Reauthenticate()
     {
-        Init(_instance._lastUrl, _instance._lastSecretKey, _instance._lastAppId, _instance._lastAppVersion, WrapperName);
+        Init(_instance._lastUrl, _instance._lastSecretKey, _instance._lastAppId, _instance._lastAppVersion);
         string authType = GetStoredAuthenticationType();
         if (authType == AUTHENTICATION_ANONYMOUS)
         {
@@ -940,14 +1347,14 @@ public class BrainCloudWrapper
             SetStoredProfileId(profileId);
         }
         if (cbObject != null)
-        {            
+        {
             WrapperAuthCallbackObject aco = (WrapperAuthCallbackObject)cbObject;
             if (aco._successCallback != null)
             {
                 aco._successCallback(json, aco._cbObject);
             }
         }
-        
+
 #if UNITY_EDITOR
         BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnAuthenticateSuccess(json);
 #endif
@@ -970,7 +1377,7 @@ public class BrainCloudWrapper
                 aco._failureCallback(statusCode, reasonCode, errorJson, aco._cbObject);
             }
         }
-        
+
 #if UNITY_EDITOR
         BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnAuthenticateFailed(string.Format("statusCode[{0}] reasonCode[{1}] errorJson[{2}]", statusCode, reasonCode, errorJson));
 #endif
@@ -981,7 +1388,7 @@ public class BrainCloudWrapper
 #if DOT_NET
         string prefix = string.IsNullOrEmpty(WrapperName).Equals("") ? "" : WrapperName + ".";
         string fileName = prefix + WrapperData.FileName;
-        
+
         IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
 
         using (IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream(fileName, FileMode.OpenOrCreate, isoStore))
@@ -1005,7 +1412,7 @@ public class BrainCloudWrapper
 #if DOT_NET
         string prefix = string.IsNullOrEmpty(WrapperName) ? "" : WrapperName + ".";
         string fileName = prefix + WrapperData.FileName;
-        
+
         IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
 
         if (isoStore.FileExists(fileName))
@@ -1039,9 +1446,9 @@ public class BrainCloudWrapper
 
         public static readonly string FileName = "BrainCloudWrapper.json";
     }
-    
+
     #region Deprecated
-    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/blog")]
+    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
     public static BrainCloudWrapper Instance { get { return GetInstance(); } }
 
     /// <summary>
@@ -1049,7 +1456,7 @@ public class BrainCloudWrapper
     /// The BrainCloudWrapper object is stored in a Unity Game Object.
     /// </summary>
     /// <returns>The instance</returns>
-    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/blog")]
+    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
     public static BrainCloudWrapper GetInstance()
     {
         if (!BrainCloudClient.EnableSingletonMode)
@@ -1058,7 +1465,7 @@ public class BrainCloudWrapper
             throw new Exception(BrainCloudClient.SingletonUseErrorMessage);
         }
 #pragma warning restore 162
-        
+
         if (_applicationIsQuitting)
         {
             return null;
@@ -1083,12 +1490,12 @@ public class BrainCloudWrapper
             if (_instance == null)
             {
                 GameObject go = new GameObject(GAMEOBJECT_BRAINCLOUD);
-                
+
                 _instance = go.AddComponent<BrainCloudWrapper>();
 #pragma warning disable 618
                 _instance.Client = BrainCloudClient.Get();
 #pragma warning restore 618
-                
+
                 DontDestroyOnLoad(go);
             }
 #else
@@ -1098,24 +1505,24 @@ public class BrainCloudWrapper
         }
         return _instance;
     }
-    
+
     /// <summary>
     /// Returns a singleton instance of the BrainCloudClient. All brainCloud APIs are
     /// accessible through the client.
     /// </summary>
     /// <returns>The brainCloud client object</returns>
-    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/blog")]
+    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
     public static BrainCloudClient GetBC()
     {
         return GetInstance().Client;
     }
-    
+
 #if !DOT_NET
     /// <summary>
     /// Initializes the brainCloud client. This method uses the parameters as configured
     /// in the Unity brainCloud Settings window.
     /// </summary>
-    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/blog")]
+    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
     public static void Initialize()
     {
         Initialize(
@@ -1127,7 +1534,7 @@ public class BrainCloudWrapper
         Instance.Client.EnableLogging(BrainCloudSettings.Instance.EnableLogging);
     }
 #endif
-    
+
     /// <summary>
     /// Initialize the brainCloud client with the passed in parameters. This version of Initialize
     /// overrides the parameters configured in the Unity brainCloud Settings window.
@@ -1136,7 +1543,7 @@ public class BrainCloudWrapper
     /// <param name="secretKey">The app's secret</param>
     /// <param name="appId">The app's id</param>
     /// <param name="version">The app's version</param>
-    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/blog")]
+    [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
     public static void Initialize(string url, string secretKey, string appId, string version)
     {
         BrainCloudWrapper bcw = GetInstance();
@@ -1148,6 +1555,6 @@ public class BrainCloudWrapper
 
         _instance.LoadData();
     }
-    
+
     #endregion
 }

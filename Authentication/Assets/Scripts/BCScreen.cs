@@ -3,9 +3,17 @@ using System.Collections;
 using LitJson;
 using System.Text;
 
-public abstract class BCScreen 
+public abstract class BCScreen
 {
+    protected BrainCloudWrapper _bc;
+    
     protected MainScene m_mainScene = null;
+
+    protected BCScreen(BrainCloudWrapper bc)
+    {
+        _bc = bc;
+    }
+    
     
     public void SetMainScene(MainScene in_scene)
     {

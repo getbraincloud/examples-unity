@@ -8,10 +8,12 @@ public class ScreenEntity : BCScreen
 {
     private static string ENTITY_TYPE_PLAYER = "player";
     private BCUserEntity m_player;
+    
+    public ScreenEntity(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
+        _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
 
     }
@@ -23,7 +25,7 @@ public class ScreenEntity : BCScreen
         m_mainScene.AddLog("");
         
         // look for the player entity
-        IList<BCUserEntity> entities = BrainCloudWrapper.GetBC().EntityFactory.NewUserEntitiesFromReadPlayerState(json);
+        IList<BCUserEntity> entities = _bc.EntityFactory.NewUserEntitiesFromReadPlayerState(json);
         foreach (BCUserEntity entity in entities)
         {
             if (entity.EntityType == ENTITY_TYPE_PLAYER)
@@ -87,7 +89,7 @@ public class ScreenEntity : BCScreen
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Create Entity"))
             {
-                m_player = BrainCloudWrapper.GetBC().EntityFactory.NewUserEntity(ENTITY_TYPE_PLAYER);
+                m_player = _bc.EntityFactory.NewUserEntity(ENTITY_TYPE_PLAYER);
                 m_player ["name"] = "Johnny Philharmonica";
                 m_player ["age"] = 49;
             }

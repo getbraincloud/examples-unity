@@ -15,9 +15,11 @@ public class ScreenPlayerStats : BCScreen
     }
     IDictionary<string, PlayerStatistic> m_stats = new Dictionary<string, PlayerStatistic>();
     
+    public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
+    
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
+        _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
     
@@ -77,7 +79,7 @@ public class ScreenPlayerStats : BCScreen
                 if (long.TryParse(ps.increment, out valueAsLong)
                     || double.TryParse(ps.increment, out valueAsDouble))
                 {
-                	BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementUserStats(
+                	_bc.PlayerStatisticsService.IncrementUserStats(
                	    	"{ '" + ps.name +"':" + ps.increment +"}",
                     	Success_Callback, Failure_Callback);
                		m_mainScene.AddLogNoLn("[IncrementStat]... ");

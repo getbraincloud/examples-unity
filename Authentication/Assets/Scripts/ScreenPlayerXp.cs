@@ -31,10 +31,11 @@ public class ScreenPlayerXp : BCScreen
         "gems"
     };
 
+    public ScreenPlayerXp(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
+        _bc.PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
 
@@ -51,7 +52,7 @@ public class ScreenPlayerXp : BCScreen
         // now grab our currencies
         foreach (string curType in m_currencyTypes)
         {
-            BrainCloudWrapper.GetBC().ProductService.GetCurrency(curType, GetPlayerVC_Success, Failure_Callback);
+            _bc.ProductService.GetCurrency(curType, GetPlayerVC_Success, Failure_Callback);
             m_mainScene.AddLogNoLn("[GetPlayerVC (" + curType +")]... ");
         }
     }
@@ -124,7 +125,7 @@ public class ScreenPlayerXp : BCScreen
             int valueAsInt = 0;
             if (int.TryParse(m_incrementXp, out valueAsInt))
             {
-                BrainCloudWrapper.GetBC().PlayerStatisticsService.IncrementExperiencePoints(valueAsInt, IncrementXp_Success, Failure_Callback);
+                _bc.PlayerStatisticsService.IncrementExperiencePoints(valueAsInt, IncrementXp_Success, Failure_Callback);
                 m_mainScene.AddLogNoLn("[IncrementXp]... ");
             }
         }
@@ -164,7 +165,7 @@ public class ScreenPlayerXp : BCScreen
                 if (ulong.TryParse(c.award, out valueAsULong))
                 {
 #pragma warning disable 618
-                    BrainCloudWrapper.GetBC().ProductService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+                    _bc.ProductService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
 #pragma warning restore 618
                     m_mainScene.AddLogNoLn("[AwardPlayerVC " + c.currencyType +"]... ");
                 }
@@ -181,7 +182,7 @@ public class ScreenPlayerXp : BCScreen
                 if (ulong.TryParse(c.consume, out valueAsULong))
                 {
 #pragma warning disable 618
-                    BrainCloudWrapper.GetBC().ProductService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+                    _bc.ProductService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
 #pragma warning restore 618
                     m_mainScene.AddLogNoLn("[ConsumePlayerVC " + c.currencyType +"]... ");
                 }
@@ -193,7 +194,7 @@ public class ScreenPlayerXp : BCScreen
         if (GUILayout.Button("Reset All Currencies"))
         {
 #pragma warning disable 618
-            BrainCloudWrapper.GetBC().ProductService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
+            _bc.ProductService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
 #pragma warning restore 618
             m_mainScene.AddLogNoLn("[ResetPlayerVC]... ");
         }
@@ -217,7 +218,7 @@ public class ScreenPlayerXp : BCScreen
     {
         m_currencies.Clear();
 
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
+        _bc.PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
 }

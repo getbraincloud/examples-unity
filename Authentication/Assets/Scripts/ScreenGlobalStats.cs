@@ -12,10 +12,12 @@ public class ScreenGlobalStats : BCScreen {
         public string increment = "0";
     }
     IDictionary<string, GlobalStatistic> m_stats = new Dictionary<string, GlobalStatistic>();
+    
+    public ScreenGlobalStats(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().GlobalStatisticsService.ReadAllGlobalStats(ReadAllGlobalStatsSuccess, Failure_Callback);
+        _bc.GlobalStatisticsService.ReadAllGlobalStats(ReadAllGlobalStatsSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadAllGlobalStats]... ");
     }
     
@@ -75,7 +77,7 @@ public class ScreenGlobalStats : BCScreen {
                 if (long.TryParse(ps.increment, out valueAsLong)
                     || double.TryParse(ps.increment, out valueAsDouble))
                 {
-                    BrainCloudWrapper.GetBC().GlobalStatisticsService.IncrementGlobalStats(
+                    _bc.GlobalStatisticsService.IncrementGlobalStats(
                         "{ '" + ps.name +"':" + ps.increment +"}",
                         Success_Callback, Failure_Callback);
                     m_mainScene.AddLogNoLn("[IncrementStat]... ");

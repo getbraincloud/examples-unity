@@ -8,6 +8,11 @@ using UnityEngine.SceneManagement;
 
 public class ConnectScene : MonoBehaviour
 {
+    public GameObject MainScene;
+    public BCConfig BCConfig;
+    
+    private BrainCloudWrapper _bc;
+    
     Vector2 m_scrollPosition;
     string m_authStatus = "Welcome to brainCloud!";
     int m_selectedAuth = 0;
@@ -41,7 +46,8 @@ public class ConnectScene : MonoBehaviour
 
     void Start()
     {
-        BrainCloudWrapper.Initialize();
+        _bc = BCConfig.GetBrainCloud();
+        
         //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
     }
    
@@ -84,9 +90,9 @@ public class ConnectScene : MonoBehaviour
                 m_authStatus = "Attempting to authenticate";
 
                 // clear out any previous profile or anonymous ids
-                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
-                BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
-                BrainCloudWrapper.GetInstance().AuthenticateEmailPassword(
+                _bc.ResetStoredProfileId();
+                _bc.ResetStoredAnonymousId();
+                _bc.AuthenticateEmailPassword(
                     m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
@@ -109,9 +115,9 @@ public class ConnectScene : MonoBehaviour
                 m_authStatus = "Attempting to authenticate";
 
                 // clear out any previous profile or anonymous ids
-                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
-                BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
-                BrainCloudWrapper.GetInstance().AuthenticateUniversal(
+                _bc.ResetStoredProfileId();
+                _bc.ResetStoredAnonymousId();
+                _bc.AuthenticateUniversal(
                     m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
@@ -138,33 +144,33 @@ public class ConnectScene : MonoBehaviour
                 m_authStatus = "Attempting to authenticate";
 
                 // clear out any previous profile or anonymous ids
-                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
-                BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
+                _bc.ResetStoredProfileId();
+                _bc.ResetStoredAnonymousId();
                 StartCoroutine(Twitter.API.GetAccessToken(CONSUMER_KEY, CONSUMER_SECRET, m_RequestTokenResponse.Token, m_emailId,
                                new Twitter.AccessTokenCallback(this.OnSuccess_AuthenticateTwitter)));
-                //BrainCloudWrapper.GetBC().AuthenticationService.AuthenticateTwitter()
+                //_bc.AuthenticationService.AuthenticateTwitter()
 
-                //BrainCloudWrapper.GetInstance().AuthenticateEmailPassword(
+                //_bc.AuthenticateEmailPassword(
                    // m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }*/
         else if (m_selectedAuth == (int) eAuthTypes.ANONYMOUS)
         {
-            GUILayout.Label("Profile Id: " + BrainCloudWrapper.GetInstance().GetStoredProfileId());
-            GUILayout.Label("Anonymous Id: " + BrainCloudWrapper.GetInstance().GetStoredAnonymousId());
+            GUILayout.Label("Profile Id: " + _bc.GetStoredProfileId());
+            GUILayout.Label("Anonymous Id: " + _bc.GetStoredAnonymousId());
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
             {
                 m_authStatus = "Attempting to authenticate";
-                BrainCloudWrapper.GetInstance().AuthenticateAnonymous(OnSuccess_Authenticate, OnError_Authenticate);
+                _bc.AuthenticateAnonymous(OnSuccess_Authenticate, OnError_Authenticate);
             }
             if (GUILayout.Button("Reset Profile Id", GUILayout.ExpandWidth(false)))
             {
-                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+                _bc.ResetStoredProfileId();
             }
             if (GUILayout.Button("Reset Anonymous Id", GUILayout.ExpandWidth(false)))
             {
-                BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
+                _bc.ResetStoredAnonymousId();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -212,21 +218,21 @@ public class ConnectScene : MonoBehaviour
             }
 
 
-            GUILayout.Label("Profile Id: " + BrainCloudWrapper.GetInstance().GetStoredProfileId());
-            GUILayout.Label("Anonymous Id: " + BrainCloudWrapper.GetInstance().GetStoredAnonymousId());
+            GUILayout.Label("Profile Id: " + _bc.GetStoredProfileId());
+            GUILayout.Label("Anonymous Id: " + _bc.GetStoredAnonymousId());
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
             {
                 m_authStatus = "Attempting to authenticate";
-                BrainCloudWrapper.GetInstance().AuthenticateGoogle(m_googleId, m_serverAuthCode, true, OnSuccess_Authenticate, OnError_Authenticate);
+                _bc.AuthenticateGoogle(m_googleId, m_serverAuthCode, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
             if (GUILayout.Button("Reset Profile Id", GUILayout.ExpandWidth(false)))
             {
-                BrainCloudWrapper.GetInstance().ResetStoredProfileId();
+                _bc.ResetStoredProfileId();
             }
             if (GUILayout.Button("Reset Anonymous Id", GUILayout.ExpandWidth(false)))
             {
-                BrainCloudWrapper.GetInstance().ResetStoredAnonymousId();
+                _bc.ResetStoredAnonymousId();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -292,7 +298,7 @@ public class ConnectScene : MonoBehaviour
 
             m_AccessTokenResponse = response;
 
-            BrainCloudWrapper.GetBC().AuthenticationService.AuthenticateTwitter(response.UserId, response.Token, response.TokenSecret, true, OnSuccess_Authenticate, OnError_Authenticate);
+            _bc.AuthenticationService.AuthenticateTwitter(response.UserId, response.Token, response.TokenSecret, true, OnSuccess_Authenticate, OnError_Authenticate);
         }
         else
         {
@@ -302,7 +308,8 @@ public class ConnectScene : MonoBehaviour
     public void OnSuccess_Authenticate(string responseData, object cbObject)
     {
         m_authStatus = "Authenticate successful!";
-        SceneManager.LoadScene("Main");
+        gameObject.SetActive(false);
+        MainScene.SetActive(true);
     }
     
 	public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)

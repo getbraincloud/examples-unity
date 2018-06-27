@@ -8,6 +8,10 @@ using LitJson;
 
 public class MainScene : MonoBehaviour
 {
+    public BCConfig BCConfig;
+
+    private BrainCloudWrapper _bc;
+    
     static int MIN_LEFT_SIDE_WIDTH = 350;
     Vector2 m_scrollPosition;
     string m_log = "";
@@ -41,6 +45,8 @@ public class MainScene : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        _bc = BCConfig.GetBrainCloud();
+        
         MoveToScreen(m_bcFunc);
     }
     // Update is called once per frame
@@ -53,25 +59,25 @@ public class MainScene : MonoBehaviour
         switch (in_fn)
         {
             case BrainCloudFunction.FN_ENTITY:
-                m_screen = new ScreenEntity();
+                m_screen = new ScreenEntity(_bc);
                 break;
             case BrainCloudFunction.FN_ENTITY_CUSTOM_CLASS:
-                m_screen = new ScreenEntityCustomClass();
+                m_screen = new ScreenEntityCustomClass(_bc);
                 break;
             case BrainCloudFunction.FN_PLAYER_XP_CURRENCY:
-                m_screen = new ScreenPlayerXp();
+                m_screen = new ScreenPlayerXp(_bc);
                 break;
             case BrainCloudFunction.FN_PLAYER_STATS:
-                m_screen = new ScreenPlayerStats();
+                m_screen = new ScreenPlayerStats(_bc);
                 break;
             case BrainCloudFunction.FN_GLOBAL_STATS:
-                m_screen = new ScreenGlobalStats();
+                m_screen = new ScreenGlobalStats(_bc);
                 break;
             case BrainCloudFunction.FN_CLOUD_CODE:
-                m_screen = new ScreenCloudCode();
+                m_screen = new ScreenCloudCode(_bc);
                 break;
 			case BrainCloudFunction.FN_IDENTITY:
-				m_screen = new ScreenIdentity();
+				m_screen = new ScreenIdentity(_bc);
 				break;
         }
         m_bcFunc = in_fn;
@@ -121,9 +127,9 @@ public class MainScene : MonoBehaviour
     void OnGUIBottom()
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Box("Game Id: " + BrainCloudWrapper.GetBC().AppId);
-        GUILayout.Box("Game Version: " + BrainCloudWrapper.GetBC().AppVersion);
-        GUILayout.Box("Profile Id: " + BrainCloudWrapper.GetBC().AuthenticationService.ProfileId);
+        GUILayout.Box("Game Id: " + _bc.Client.AppId);
+        GUILayout.Box("Game Version: " + _bc.Client.AppVersion);
+        GUILayout.Box("Profile Id: " + _bc.Client.AuthenticationService.ProfileId);
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
     }
