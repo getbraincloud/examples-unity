@@ -8,10 +8,6 @@ using UnityEngine.SceneManagement;
 
 public class ScreenIdentity : BCScreen {
 	
-	public override void Activate()
-	{
-	}
-
     string m_twitterPin = "";
 
     string m_email = "";
@@ -21,6 +17,12 @@ public class ScreenIdentity : BCScreen {
     string m_password = "";
     
     Twitter.RequestTokenResponse m_RequestTokenResponse;
+    
+    public ScreenIdentity(BrainCloudWrapper bc) : base(bc) { }
+    
+    public override void Activate()
+    {
+    }
 
 	public override void OnScreenGUI()
 	{
@@ -65,12 +67,12 @@ public class ScreenIdentity : BCScreen {
         if (GUILayout.Button("Attach New Email"))
         {
             m_mainScene.AddLog("Attaching new email account...");
-            BrainCloudWrapper.GetBC().IdentityService.AttachEmailIdentity(m_email, m_emailPass, Attach_Success, Attach_Fail);
+            _bc.IdentityService.AttachEmailIdentity(m_email, m_emailPass, Attach_Success, Attach_Fail);
         }
         if (GUILayout.Button("Merge Existing Email"))
         {
             m_mainScene.AddLog("Merging existing email account...");
-            BrainCloudWrapper.GetBC().IdentityService.MergeEmailIdentity(m_email, m_emailPass, Attach_Success, Attach_Fail);
+            _bc.IdentityService.MergeEmailIdentity(m_email, m_emailPass, Attach_Success, Attach_Fail);
         }
         GUILayout.EndVertical();
 
@@ -88,12 +90,12 @@ public class ScreenIdentity : BCScreen {
         if (GUILayout.Button("Attach New Universal"))
         {
             m_mainScene.AddLog("Attaching new universal account...");
-            BrainCloudWrapper.GetBC().IdentityService.AttachUniversalIdentity(m_username, m_password, Attach_Success, Attach_Fail);
+            _bc.IdentityService.AttachUniversalIdentity(m_username, m_password, Attach_Success, Attach_Fail);
         }
         if (GUILayout.Button("Merge Existing Universal"))
         {
             m_mainScene.AddLog("Merging existing universal account...");
-            BrainCloudWrapper.GetBC().IdentityService.MergeUniversalIdentity(m_username, m_password, Attach_Success, Attach_Fail);
+            _bc.IdentityService.MergeUniversalIdentity(m_username, m_password, Attach_Success, Attach_Fail);
         }
         GUILayout.EndVertical();
 
@@ -103,7 +105,7 @@ public class ScreenIdentity : BCScreen {
 
 		if (GUILayout.Button("Logout"))
 		{
-			BrainCloudWrapper.GetBC().PlayerStateService.Logout(Logout_Success, Failure_Callback, null);
+			_bc.PlayerStateService.Logout(Logout_Success, Failure_Callback, null);
 		}
 		GUILayout.EndHorizontal();
 		
@@ -151,8 +153,8 @@ public class ScreenIdentity : BCScreen {
     {
         if (success)
         {
-            BrainCloudWrapper.GetBC().IdentityService.AttachTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
-            //BrainCloudWrapper.GetBC().IdentityService.AttachTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
+            _bc.IdentityService.AttachTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
+            //_bc.IdentityService.AttachTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
         }
         else
         {
@@ -164,8 +166,8 @@ public class ScreenIdentity : BCScreen {
     {
         if (success)
         {
-            BrainCloudWrapper.GetBC().IdentityService.MergeTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
-            //BrainCloudWrapper.GetBC().IdentityService.AttachTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
+            _bc.IdentityService.MergeTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
+            //_bc.IdentityService.AttachTwitterIdentity(response.UserId, response.Token, response.TokenSecret, Attach_Success, Attach_Fail);
         }
         else
         {

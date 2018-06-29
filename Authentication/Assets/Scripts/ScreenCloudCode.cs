@@ -10,6 +10,8 @@ public class ScreenCloudCode : BCScreen
     private string m_cloudCodeScript = "";
     private string m_cloudCodeData = "";
 
+    public ScreenCloudCode(BrainCloudWrapper bc) : base(bc) { }
+    
     public override void Activate()
     {
     }
@@ -76,7 +78,7 @@ public class ScreenCloudCode : BCScreen
                 throw;
             }
 
-            BrainCloudWrapper.GetBC().ScriptService.RunScript(m_cloudCodeScript, m_cloudCodeData, CloudCode_Success, Failure_Callback);
+            _bc.ScriptService.RunScript(m_cloudCodeScript, m_cloudCodeData, CloudCode_Success, Failure_Callback);
         }
         GUILayout.EndHorizontal();
         GUILayout.EndVertical();

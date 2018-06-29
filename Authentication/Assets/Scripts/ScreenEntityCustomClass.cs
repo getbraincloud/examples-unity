@@ -18,7 +18,7 @@ public class ScreenEntityCustomClass : BCScreen
     {
         public static string ENTITY_TYPE = "player";
 
-        public Player() : base(BrainCloudWrapper.GetBC().EntityService)
+        public Player()
         {
             // set up some defaults
             m_entityType = "player";
@@ -48,12 +48,14 @@ public class ScreenEntityCustomClass : BCScreen
 
 
     private Player m_player;
+    
+    public ScreenEntityCustomClass(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        BrainCloudWrapper.GetBC().EntityFactory.RegisterEntityClass<Player>(Player.ENTITY_TYPE);
+        _bc.EntityFactory.RegisterEntityClass<Player>(Player.ENTITY_TYPE);
 
-        BrainCloudWrapper.GetBC().PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
+        _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
 
     }
@@ -65,7 +67,7 @@ public class ScreenEntityCustomClass : BCScreen
         m_mainScene.AddLog("");
 
         // look for the player entity
-        IList<BCUserEntity> entities = BrainCloudWrapper.GetBC().EntityFactory.NewUserEntitiesFromReadPlayerState(json);
+        IList<BCUserEntity> entities = _bc.EntityFactory.NewUserEntitiesFromReadPlayerState(json);
         foreach (BCUserEntity e in entities)
         {
             if (e.EntityType == Player.ENTITY_TYPE)
