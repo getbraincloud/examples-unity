@@ -32,6 +32,7 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             GAME_STATE_SHOW_ROOMS,
             GAME_STATE_NEW_ROOM_OPTIONS,
+            GAME_STATE_FIND_ROOM_OPTIONS,
             GAME_STATE_CREATE_NEW_ROOM,
             GAME_STATE_JOIN_ROOM,
             GAME_STATE_SHOW_LEADERBOARDS,
@@ -102,6 +103,7 @@ namespace BrainCloudUNETExample.Matchmaking
         void Start()
         {
             _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+            _bc.Client.EnableRTT();
             
             if (!_bc.Client.Initialized)
             {
@@ -211,6 +213,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     break;
 
                 case eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS:
+                case eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS:
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(true);
@@ -348,7 +351,7 @@ namespace BrainCloudUNETExample.Matchmaking
             m_roomLevelRangeMax = int.Parse(m_createGameWindow.transform.Find("Box 2").GetComponent<InputField>().text.ToString());
             m_roomLevelRangeMin = int.Parse(m_createGameWindow.transform.Find("Box 1").GetComponent<InputField>().text.ToString());
 
-            var matchAttributes = new Dictionary<string, long>() { { "minLevel", m_roomLevelRangeMin }, { "maxLevel", m_roomLevelRangeMax } };
+            var matchAttributes = new Dictionary<string, object>() { { "minLevel", m_roomLevelRangeMin }, { "maxLevel", m_roomLevelRangeMax } };
 
             CreateNewRoom(m_createGameWindow.transform.Find("Room Name").GetComponent<InputField>().text, (uint)m_roomMaxPlayers, matchAttributes);
         }
@@ -435,7 +438,7 @@ namespace BrainCloudUNETExample.Matchmaking
                 m_state = eMatchmakingState.GAME_STATE_JOIN_ROOM;
                 try
                 {
-                    BombersNetworkManager.singleton.matchMaker.JoinMatch(aRoomInfo.networkId, "", "", "", 0, 0, OnMatchJoined);
+                    BombersNetworkManager.singleton.matchMaker.JoinMatch(aRoomInfo.networkId, "", "", "", 0, 0, BombersNetworkManager.singleton.OnMatchJoined);
                 }
                 catch (ArgumentException e)
                 {
@@ -451,14 +454,13 @@ namespace BrainCloudUNETExample.Matchmaking
                 }
             }
         }
-
-
+        
         public void RefreshRoomsList()
         {
             m_refreshLabel.GetComponent<Text>().text = "Refreshing List...";
             OnRoomsWindow();
         }
-
+        
         private void OrderRoomButtons()
         {
             m_roomFilters["HideFull"] = GameObject.Find("Toggle-Hide").GetComponent<Toggle>().isOn;
@@ -706,48 +708,7 @@ namespace BrainCloudUNETExample.Matchmaking
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
             m_dialogueDisplay.DisplayDialog("Could not join room!");
         }
-
-        public void OnMatchCreate(bool success, string extendedInfo, MatchInfo matchInfo)
-        {
-            if (success)
-            {
-                NetworkManager.singleton.OnMatchCreate(success, extendedInfo, matchInfo);
-            }
-            else
-            {
-                Debug.LogError("Create match failed");
-            }
-        }
-
-        public void OnMatchJoined(bool success, string extendedInfo, MatchInfo matchInfo)
-        {
-            if (success)
-            {
-                try
-                {
-                    NetworkManager.singleton.OnMatchJoined(success, extendedInfo, matchInfo);
-                }
-                catch (ArgumentException e)
-                {
-                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    m_dialogueDisplay.DisplayDialog("You just left that room!");
-                    Debug.Log("caught ArgumentException " + e);
-                }
-                catch (Exception e)
-                {
-                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                    m_dialogueDisplay.DisplayDialog("Error joining room! Try restarting.");
-                    Debug.Log("caught Exception " + e);
-                }
-            }
-            else
-            {
-                m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                m_dialogueDisplay.DisplayDialog("Could not join room!");
-                Debug.LogError("Join match failed");
-            }
-        }
-
+        
         public void QuitToLogin()
         {
             _bc.Client.PlayerStateService.Logout();
@@ -758,20 +719,28 @@ namespace BrainCloudUNETExample.Matchmaking
         public void CreateGame()
         {
             m_state = eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS;
-            m_createGameWindow.transform.Find("Room Name").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_previousGameName;
+            m_createGameWindow.transform.Find("Room Name").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_previousGameName; 
+        }
+
+        public void FindLobby()
+        {
+            m_state = eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS;
         }
 
         void Update()
         {
-            if (m_state == eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS && Input.GetKeyDown(KeyCode.Return))
+            if (Input.GetKeyDown(KeyCode.Return) && 
+                (m_state == eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS || 
+                m_state == eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS))
             {
                 ConfirmCreateGame();
             }
         }
 
-        void CreateNewRoom(string aName, uint size, Dictionary<string, long> matchAttributes)
+        void CreateNewRoom(string aName, uint size, Dictionary<string, object> matchAttributes)
         {
-            List<MatchInfoSnapshot> rooms = BombersNetworkManager.singleton.matches;
+            BombersNetworkManager networkMgr = BombersNetworkManager.singleton as BombersNetworkManager;
+            List<MatchInfoSnapshot> rooms = networkMgr.matches;
             bool roomExists = false;
             string roomName = aName;
 
@@ -835,20 +804,33 @@ namespace BrainCloudUNETExample.Matchmaking
 
             _bc.Client.EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + roomName + "\"}", null, -1, null, null, null);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
-            m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
-
-
-            Dictionary<string, string> matchOptions = new Dictionary<string, string>();
-            matchOptions.Add("gameTime", 600.ToString());
-            matchOptions.Add("isPlaying", 0.ToString());
-            matchOptions.Add("mapLayout", m_presetListSelection.ToString());
-            matchOptions.Add("mapSize", m_sizeListSelection.ToString());
+            
+            Dictionary<string, object> matchOptions = new Dictionary<string, object>();
+            matchOptions.Add("gameTime", 600);
+            matchOptions.Add("isPlaying", 0);
+            matchOptions.Add("mapLayout", m_presetListSelection);
+            matchOptions.Add("mapSize", m_sizeListSelection);
             matchOptions.Add("gameName", roomName);
-            matchOptions.Add("maxPlayers", size.ToString());
-            matchOptions.Add("lightPosition", 0.ToString());
+            matchOptions.Add("maxPlayers", size);
+            matchOptions.Add("lightPosition", 0);
 
-            BombersNetworkManager.m_matchOptions = matchOptions;
-            BombersNetworkManager.singleton.matchMaker.CreateMatch(aName, size, true, "", "", "", 0, 0, OnMatchCreate);
+            switch (m_state)
+            {
+                default:
+                case eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS:
+                    {
+                        networkMgr.CreateLobby(matchOptions);
+                        m_state = eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM;
+                    }
+                    break;
+
+                case eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS:
+                    {
+                        networkMgr.FindLobby(matchOptions);
+                        m_state = eMatchmakingState.GAME_STATE_JOIN_ROOM;
+                    }
+                    break;
+            }
         }
     }
 }

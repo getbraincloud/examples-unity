@@ -137,11 +137,15 @@ namespace BrainCloudUNETExample.Game
         void Update()
         {
             m_health = GetComponent<BombersPlayerController>().m_health;
+            ParticleSystem.MainModule rtContrail = m_rightContrail.main;
+            ParticleSystem.MainModule ltContrail = m_leftContrail.main;
+
+
             switch (m_health)
             {
                 case 1:
-                    m_rightContrail.startColor = m_blackSmokeColor;
-                    m_leftContrail.startColor = m_blackSmokeColor;
+                    ltContrail.startColor = m_blackSmokeColor;
+                    rtContrail.startColor = m_blackSmokeColor;
                     if (m_planeDamage[3] == null) m_planeDamage[3] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy4").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy4").rotation);
                     m_planeDamage[3].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy4");
                     if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy3").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy3").rotation);
@@ -152,8 +156,8 @@ namespace BrainCloudUNETExample.Game
                     m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy1");
                     break;
                 case 2:
-                    m_leftContrail.startColor = m_blackSmokeColor;
-                    m_rightContrail.startColor = m_whiteSmokeColor;
+                    ltContrail.startColor = m_blackSmokeColor;
+                    rtContrail.startColor = m_whiteSmokeColor;
                     if (m_planeDamage[3] != null) Destroy(m_planeDamage[3]);
                     if (m_planeDamage[2] == null) m_planeDamage[2] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy3").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy3").rotation);
                     m_planeDamage[2].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy3");
@@ -163,8 +167,8 @@ namespace BrainCloudUNETExample.Game
                     m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy1");
                     break;
                 case 3:
-                    m_leftContrail.startColor = m_whiteSmokeColor;
-                    m_rightContrail.startColor = m_whiteSmokeColor;
+                    ltContrail.startColor = m_whiteSmokeColor;
+                    rtContrail.startColor = m_whiteSmokeColor;
                     if (m_planeDamage[3] != null) Destroy(m_planeDamage[3]);
                     if (m_planeDamage[2] != null) Destroy(m_planeDamage[2]);
                     if (m_planeDamage[1] == null) m_planeDamage[1] = (GameObject)Instantiate((GameObject)Resources.Load("LowHPEffect"), transform.GetChild(0).GetChild(0).Find("LowHPDummy2").position, transform.GetChild(0).GetChild(0).Find("LowHPDummy2").rotation);
@@ -173,8 +177,8 @@ namespace BrainCloudUNETExample.Game
                     m_planeDamage[0].transform.parent = transform.GetChild(0).GetChild(0).Find("LowHPDummy1");
                     break;
                 case 4:
-                    m_leftContrail.startColor = m_whiteSmokeColor;
-                    m_rightContrail.startColor = m_whiteSmokeColor;
+                    ltContrail.startColor = m_whiteSmokeColor;
+                    rtContrail.startColor = m_whiteSmokeColor;
                     if (m_planeDamage[3] != null) Destroy(m_planeDamage[3]);
                     if (m_planeDamage[2] != null) Destroy(m_planeDamage[2]);
                     if (m_planeDamage[1] != null) Destroy(m_planeDamage[1]);
@@ -186,8 +190,8 @@ namespace BrainCloudUNETExample.Game
                     if (m_planeDamage[2] != null) Destroy(m_planeDamage[2]);
                     if (m_planeDamage[1] != null) Destroy(m_planeDamage[1]);
                     if (m_planeDamage[0] != null) Destroy(m_planeDamage[0]);
-                    m_leftContrail.startColor = m_whiteSmokeColor;
-                    m_rightContrail.startColor = m_whiteSmokeColor;
+                    ltContrail.startColor = m_whiteSmokeColor;
+                    rtContrail.startColor = m_whiteSmokeColor;
                     break;
             }
 

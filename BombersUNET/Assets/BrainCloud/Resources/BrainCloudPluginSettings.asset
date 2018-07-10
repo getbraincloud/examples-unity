@@ -11,24 +11,124 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb4fd16f854e89249a23146eeaf1cd10, type: 3}
   m_Name: BrainCloudPluginSettings
   m_EditorClassIdentifier: 
-  PluginState: 7
+  PluginState: 6
   TeamType: 0
-  WasSelectedTeam: 0
-  WasSelectedApp: 0
-  ServerUrl: https://sharedprod.braincloudservers.com
+  WasSelectedTeam: 5
+  WasSelectedApp: 1
+  ServerUrl: https://internal.braincloudservers.com
   NewAppName: New App Name
   AdminData:
-    TeamList: []
-    TeamNameList: []
-    SelectedTeamIndex: 0
+    TeamList:
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      SelectedAppIndex: 0
+      TeamName: Select Team
+      TeamId: null
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      SelectedAppIndex: 0
+      TeamName: playBrains - STUDIO
+      TeamId: 5784b68c-ba9d-4eee-80d7-9b67f4ae5dfc
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      SelectedAppIndex: 0
+      TeamName: brainCloud - SUPER
+      TeamId: cdf9f44f-4b2f-44dd-b86f-8223553e827f
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      SelectedAppIndex: 0
+      TeamName: brainCloud - SUPPORT
+      TeamId: 29be46bf-6cae-489c-a8fd-82606d9cf0ac
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      SelectedAppIndex: 0
+      TeamName: StatSims
+      TeamId: ff13a28c-b5d6-4024-bf3b-82ec617d3448
+    - AppList:
+      - AppName: ARTEMIS KYC - INTERNAL
+        AppId: 22803
+        AppSecret: b6f52728-47b7-48cc-a1da-47696dfacee0
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Bombers UNET
+        AppId: 22814
+        AppSecret: ff140bce-acbf-4f7f-98f4-294ea827654f
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Game Loot Network (V2) - INTERNAL
+        AppId: 22804
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: PBCasino - GLNV2 - INTERNAL
+        AppId: 22805
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Blockchain Proxy
+        AppId: 22820
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      AppNameList:
+      - ARTEMIS KYC - INTERNAL (22803)
+      - Bombers UNET (22814)
+      - Game Loot Network (V2) - INTERNAL (22804)
+      - PBCasino - GLNV2 - INTERNAL (22805)
+      - Blockchain Proxy (22820)
+      RenderAppNameList:
+      - ARTEMIS KYC - INTERNAL (22803)
+      - Bombers UNET (22814)
+      - Game Loot Network (V2) - INTERNAL (22804)
+      - PBCasino - GLNV2 - INTERNAL (22805)
+      - Blockchain Proxy (22820)
+      - Create New App ...
+      RenderedAppNameList: []
+      SelectedAppIndex: 1
+      TeamName: GLNV2 - Internal
+      TeamId: 1bf97dbd-1cf6-49dd-8560-c995c31f826b
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      SelectedAppIndex: 0
+      TeamName: brainCloud - CLIENT UNIT
+      TeamId: 5506f57c-185d-4872-a5bf-c71bf1d87e80
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      SelectedAppIndex: 0
+      TeamName: brainCloud - SCRATCH
+      TeamId: fc072b84-4aca-4c95-ac46-9f4626f385f1
+    TeamNameList:
+    - -- Select Team --
+    - playBrains - STUDIO (1662006)
+    - brainCloud - SUPER (1662002)
+    - brainCloud - SUPPORT (1662253)
+    - StatSims (2690749)
+    - GLNV2 - Internal (4430306)
+    - brainCloud - CLIENT UNIT (1662008)
+    - brainCloud - SCRATCH (1662005)
+    SelectedTeamIndex: 5
     AdminFullName: 
     AdminEmailAddress: 
     TeamType: 0
     StartingTeamName: 
-    Email: 
+    Email: stevej@bitheads.com
     Credentials:
-      AdminId: 
-      Token: 
+      AdminId: 4
+      Token: 3c73c9d3-c1e8-473c-860f-ea5139629e1b
   AppOptions:
     GamficationEnabled: 1
     SupportedPlatforms:
@@ -92,6 +192,6 @@ MonoBehaviour:
     - PlatformName: XBOX_ONE
       DisplayName: Xbox One
       IsEnabled: 0
-  UseDefaultServerUrl: 1
+  UseDefaultServerUrl: 0
   ShouldShowLogs: 0
   AdvanceSelection: 0
