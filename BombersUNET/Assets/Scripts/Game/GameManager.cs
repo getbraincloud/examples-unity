@@ -925,7 +925,7 @@ namespace BrainCloudUNETExample.Game
             {
                 byte errorByte;
                 if (BombersNetworkManager.LocalConnection.hostId != -1)
-                    BombersNetworkManager.LocalPlayer.m_ping = NetworkTransport.GetCurrentRtt(BombersNetworkManager.LocalConnection.hostId, BombersNetworkManager.LocalConnection.connectionId, out errorByte);
+                    BombersNetworkManager.LocalPlayer.m_ping = NetworkTransport.GetCurrentRTT(BombersNetworkManager.LocalConnection.hostId, BombersNetworkManager.LocalConnection.connectionId, out errorByte);
                 yield return new WaitForSeconds(5);
             }
         }
