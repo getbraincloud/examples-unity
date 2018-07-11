@@ -132,7 +132,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	static void PerformBuildOSX32()
 	{
 		BuildTarget target;
-		target = BuildTarget.StandaloneOSXIntel;
+		target = BuildTarget.StandaloneOSX;
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
@@ -142,7 +142,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	static void PerformBuildOSX64()
 	{
 		BuildTarget target;
-		target = BuildTarget.StandaloneOSXIntel64;
+		target = BuildTarget.StandaloneOSX;
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
