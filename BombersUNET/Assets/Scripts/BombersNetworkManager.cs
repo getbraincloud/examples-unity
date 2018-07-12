@@ -173,6 +173,8 @@ public class BombersNetworkManager : NetworkManager
 
     private void LobbyCallback(string in_response)
     {
+        BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
+
         Debug.Log("LobbyCallback --- " + in_response);
 
         Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_response);
@@ -193,6 +195,16 @@ public class BombersNetworkManager : NetworkManager
         }
         switch (operation)
         {
+            case "SIGNAL":
+                {
+                    if (matcher != null)
+                    {
+                        Dictionary<string, object> tempAddLobby = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_response);
+                        matcher.AddLobbyChatMessage(tempAddLobby);
+                    }
+                }
+                break;
+
             case "STATUS_UPDATE":
             case "JOIN_SUCCESS":
             case "SETTINGS_UPDATE":
@@ -227,7 +239,6 @@ public class BombersNetworkManager : NetworkManager
 
                     if (operation == "MEMBER_JOIN" && jsonData.ContainsKey("member"))
                     {
-                        BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
                         if (matcher != null)
                         {
                             matcher.ShowLobby();

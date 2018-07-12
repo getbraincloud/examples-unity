@@ -10,8 +10,6 @@ using UnityEngine.UI;
 using BrainCloudUNETExample.Connection;
 using UnityEngine.Networking.Match;
 using UnityEngine.SceneManagement;
-using BrainCloudUNETExample.Game.PlayerInput;
-using System.Linq;
 
 namespace BrainCloudUNETExample.Matchmaking
 {
@@ -85,6 +83,9 @@ namespace BrainCloudUNETExample.Matchmaking
         [SerializeField]
         private GameObject m_playerChevron;
 
+        [SerializeField]
+        private GameObject ChatCell = null;
+
         private GameObject m_joiningGameWindow;
 
         private GameObject m_controlWindow;
@@ -102,7 +103,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
         private string m_filterName = "";
         private DialogDisplay m_dialogueDisplay;
-        
+
         private BrainCloudWrapper _bc;
 
         void Start()
@@ -112,6 +113,8 @@ namespace BrainCloudUNETExample.Matchmaking
 
             m_lobbyWindow = GameObject.Find("Lobby");
             m_gameStartButton = GameObject.Find("StartGame");
+            m_chatContent = GameObject.Find("content"); ;
+
             if (!_bc.Client.Initialized)
             {
                 SceneManager.LoadScene("Connect");
@@ -357,6 +360,42 @@ namespace BrainCloudUNETExample.Matchmaking
             //(BombersNetworkManager.singleton as BombersNetworkManager).CreateOrJoinUNETMatch(member);
         }
 
+        public void OnSendLobbyChatSignal(InputField in_field)
+        {
+            if (in_field.text != "")
+            {
+                Dictionary<string, object> jsonData = new Dictionary<string, object>();
+                jsonData["message"] = in_field.text;
+                jsonData["name"] = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
+                jsonData["id"] = _bc.Client.ProfileId;
+
+                _bc.LobbyService.SendSignal(BombersNetworkManager.LobbyInfo.LobbyId, jsonData);
+                in_field.text = "";
+            }
+        }
+
+        private GameObject m_chatContent = null;
+        public void AddLobbyChatMessage(Dictionary<string, object> in_jsonMessage)
+        {
+            Transform contentTransform = m_chatContent.transform;
+            lock (contentTransform)
+            {
+                // populate based on the incoming data
+                if (contentTransform.childCount >= 30)
+                {
+                    Destroy(contentTransform.transform.GetChild(0).gameObject);
+                }
+
+                ChatCell tempCell;
+                GameObject tempObj;
+                Dictionary<string, object> jsonData = in_jsonMessage.ContainsKey("data") ?
+                                                        (Dictionary<string, object>)in_jsonMessage["data"] : in_jsonMessage;
+                tempObj = (GameObject)Instantiate(ChatCell, Vector3.zero, Quaternion.identity, contentTransform);
+                tempCell = tempObj.GetComponent<ChatCell>();
+                tempCell.Init(jsonData["name"] as string, jsonData["message"] as string, jsonData["id"] as string, "");//, jsonData["pic"] as string, Convert.ToUInt64(jsonData["msgId"]));
+            }
+        }
+
         private void OnWaitingForPlayersWindow()
         {
             List<BCLobbyMemberInfo> greenPlayers = new List<BCLobbyMemberInfo>();
@@ -590,7 +629,7 @@ namespace BrainCloudUNETExample.Matchmaking
             m_refreshLabel.GetComponent<Text>().text = "Refreshing List...";
             OnRoomsWindow();
         }
-        
+
         private void OrderRoomButtons()
         {
             m_roomFilters["HideFull"] = GameObject.Find("Toggle-Hide").GetComponent<Toggle>().isOn;
@@ -838,7 +877,7 @@ namespace BrainCloudUNETExample.Matchmaking
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
             m_dialogueDisplay.DisplayDialog("Could not join room!");
         }
-        
+
         public void QuitToLogin()
         {
             _bc.Client.PlayerStateService.Logout();
@@ -849,7 +888,7 @@ namespace BrainCloudUNETExample.Matchmaking
         public void CreateGame()
         {
             m_state = eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS;
-            m_createGameWindow.transform.Find("Room Name").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_previousGameName; 
+            m_createGameWindow.transform.Find("Room Name").GetComponent<InputField>().text = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_previousGameName;
         }
 
         public void FindLobby()
@@ -859,8 +898,8 @@ namespace BrainCloudUNETExample.Matchmaking
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Return) && 
-                (m_state == eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS || 
+            if (Input.GetKeyDown(KeyCode.Return) &&
+                (m_state == eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS ||
                 m_state == eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS))
             {
                 ConfirmCreateGame();
@@ -927,16 +966,16 @@ namespace BrainCloudUNETExample.Matchmaking
 
             matchAttributes["minLevel"] = m_roomLevelRangeMin;
             matchAttributes["maxLevel"] = m_roomLevelRangeMax;
-            matchAttributes["StartGameTime"] = 600;
+            matchAttributes["StartGameTime"] = 300;
             matchAttributes["IsPlaying"] = 0;
             matchAttributes["MapLayout"] = m_presetListSelection;
             matchAttributes["MapSize"] = m_sizeListSelection;
 
             _bc.Client.EntityService.UpdateSingleton("gameName", "{\"gameName\": \"" + roomName + "\"}", null, -1, null, null, null);
             GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().ReadStatistics();
-            
+
             Dictionary<string, object> matchOptions = new Dictionary<string, object>();
-            matchOptions.Add("gameTime", 600);
+            matchOptions.Add("gameTime", 300);
             matchOptions.Add("isPlaying", 0);
             matchOptions.Add("mapLayout", m_presetListSelection);
             matchOptions.Add("mapSize", m_sizeListSelection);
