@@ -159,21 +159,6 @@ namespace BrainCloudUNETExample.Game
         {
             m_bombInfo = aBombInfo;
             m_bombInfo.gameObject = this.gameObject;
-
-			/*
-            string teamBombPath = "";
-
-            if (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1)
-            {
-                teamBombPath = "Bomb01";
-            }
-            else
-            {
-                teamBombPath = "Bomb02";
-            }
-			*/
-            //GameObject graphic = (GameObject)Instantiate((GameObject)Resources.Load(teamBombPath), transform.position, transform.rotation);
-            //graphic.transform.parent = transform;
         }
 
         public BombInfo GetBombInfo()

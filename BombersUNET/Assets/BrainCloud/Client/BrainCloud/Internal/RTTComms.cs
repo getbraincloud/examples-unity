@@ -120,7 +120,8 @@ namespace BrainCloud.Internal
                             disconnect();
 
                         // TODO:
-                        m_connectionFailureCallback(400, -1, toProcessResponse.JsonMessage, m_connectedObj);
+                        if (m_connectionFailureCallback != null)
+                            m_connectionFailureCallback(400, -1, toProcessResponse.JsonMessage, m_connectedObj);
                     }
 
                     // first time connecting? send the server connection call
@@ -210,7 +211,7 @@ namespace BrainCloud.Internal
             Dictionary<string, object> jsonData = new Dictionary<string, object>();
             jsonData["appId"] = m_clientRef.AppId;
             jsonData["sessionId"] = m_clientRef.SessionID;
-            jsonData["profileId"] = m_clientRef.AuthenticationService.ProfileId;
+            jsonData["profileId"] = m_clientRef.ProfileId;
             jsonData["system"] = system;
 
             jsonData["auth"] = m_rttHeaders;

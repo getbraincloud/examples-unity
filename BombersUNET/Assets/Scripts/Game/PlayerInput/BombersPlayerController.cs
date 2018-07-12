@@ -94,6 +94,8 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         [SyncVar]
         public bool m_planeActive = false;
 
+        public BCLobbyMemberInfo MemberInfo;
+
         void Awake()
         {
             if (!isLocalPlayer || !hasAuthority)
@@ -132,7 +134,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         }
 
         [Command(channel=1)]
-        void CmdUpdateSyncVarsFromClient(int aScore, byte aPlayerID, byte aTeam, byte aKills, byte aDeaths, int aPing, string aDisplayName, bool isActive, byte aHealth)
+        void CmdUpdateSyncVarsFromClient(int aScore, byte aPlayerID, byte aTeam, byte aKills, byte aDeaths, int aPing, string aDisplayName, bool isActive, byte aHealth, string in_profileId)
         {
             m_score = aScore;
             m_playerID = (int)aPlayerID;
@@ -143,6 +145,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             m_displayName = aDisplayName;
             m_planeActive = isActive;
             m_health = (int)aHealth;
+            m_profileId = in_profileId;
         }
 
         IEnumerator UpdateVars()
@@ -160,7 +163,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
             while (true)
             {
-                CmdUpdateSyncVarsFromClient(m_score, (byte)m_playerID, (byte)m_team, (byte)m_kills, (byte)m_deaths, m_ping, m_displayName, m_planeActive, (byte)m_health);
+                CmdUpdateSyncVarsFromClient(m_score, (byte)m_playerID, (byte)m_team, (byte)m_kills, (byte)m_deaths, m_ping, m_displayName, m_planeActive, (byte)m_health, m_profileId);
                 yield return new WaitForSeconds(0.5f);
             }
         }
@@ -583,28 +586,6 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             }
             RpcDestroyedShip((byte)shipID, (byte)aBombInfo.m_shooter);
         }
-
-        /*[Command]
-        public void CmdDestroyedShip(int aShipID, string aBombInfoString)
-        {
-            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
-
-            if (isServer)
-            {
-                if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
-                {
-                    m_gMan.m_gameInfo.SetTeamScore(1, m_gMan.m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
-
-                }
-                else
-                {
-                    m_gMan.m_gameInfo.SetTeamScore(2, m_gMan.m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
-
-                }
-            }
-
-            
-        }*/
 
         [ClientRpc]
         void RpcDestroyedShip(byte aShipID, byte aShooter)
@@ -1301,7 +1282,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             RpcSpawnPlayers();
             return;
         }
-
+        
         public void SpawnPlayerLocal(int aPlayerID)
         {
             RpcSpawnPlayerLocal();
@@ -1425,18 +1406,21 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         [Command(channel = 1)]
         void CmdAnnounceJoin(int aPlayerID, string aPlayerName, int aTeam)
         {
-            SpawnPlayers();
+            //SpawnPlayers();
+            BombersPlayerController controller = null;
             foreach (GameObject plane in GameObject.FindGameObjectsWithTag("PlayerController"))
             {
-                plane.GetComponent<BombersPlayerController>().RpcAnnounceJoin(aPlayerID, aPlayerName, aTeam);
+                controller = plane.GetComponent<BombersPlayerController>();
+                if (controller.m_profileId != BombersNetworkManager._BC.Client.ProfileId)
+                    controller.RpcAnnounceJoin(aPlayerID, aPlayerName, aTeam);
             }
         }
 
         [ClientRpc(channel = 1)]
         void RpcAnnounceJoin(int aPlayerID, string aPlayerName, int aTeam)
         {
-            string message = aPlayerName + " has joined the fight\n on the ";
-            message += (aTeam == 1) ? "green team!" : "red team!";
+            string message = aPlayerName + " has joined to spectate the game! ";
+            //message += (aTeam == 1) ? "green team!" : "red team!";
             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog(message, true);
         }
     }

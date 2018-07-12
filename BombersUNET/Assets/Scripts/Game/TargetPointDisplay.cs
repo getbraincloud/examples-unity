@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using BrainCloudUNETExample.Game.PlayerInput;
 
 namespace BrainCloudUNETExample.Game

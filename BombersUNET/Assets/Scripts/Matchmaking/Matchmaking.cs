@@ -8,9 +8,10 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
 using BrainCloudUNETExample.Connection;
-using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 using UnityEngine.SceneManagement;
+using BrainCloudUNETExample.Game.PlayerInput;
+using System.Linq;
 
 namespace BrainCloudUNETExample.Matchmaking
 {
@@ -37,7 +38,8 @@ namespace BrainCloudUNETExample.Matchmaking
             GAME_STATE_JOIN_ROOM,
             GAME_STATE_SHOW_LEADERBOARDS,
             GAME_STATE_SHOW_CONTROLS,
-            GAME_STATE_SHOW_ACHIEVEMENTS
+            GAME_STATE_SHOW_ACHIEVEMENTS,
+            GAME_STATE_WAITING_FOR_PLAYERS
         }
         private eMatchmakingState m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
 
@@ -87,6 +89,9 @@ namespace BrainCloudUNETExample.Matchmaking
 
         private GameObject m_controlWindow;
         private GameObject m_achievementsWindow;
+
+        private GameObject m_lobbyWindow;
+        private GameObject m_gameStartButton;
         List<MatchInfoSnapshot> m_roomList = null;
 
         private Dictionary<string, bool> m_roomFilters = new Dictionary<string, bool>()
@@ -104,7 +109,9 @@ namespace BrainCloudUNETExample.Matchmaking
         {
             _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
             _bc.Client.EnableRTT();
-            
+
+            m_lobbyWindow = GameObject.Find("Lobby");
+            m_gameStartButton = GameObject.Find("StartGame");
             if (!_bc.Client.Initialized)
             {
                 SceneManager.LoadScene("Connect");
@@ -201,19 +208,35 @@ namespace BrainCloudUNETExample.Matchmaking
 
             switch (m_state)
             {
+                case eMatchmakingState.GAME_STATE_WAITING_FOR_PLAYERS:
+
+                    m_lobbyWindow.gameObject.SetActive(true);
+                    m_achievementsWindow.SetActive(false);
+                    m_showRoomsWindow.SetActive(false);
+                    m_createGameWindow.SetActive(false);
+                    m_leaderboardWindow.SetActive(false);
+                    m_controlWindow.SetActive(false);
+                    m_joiningGameWindow.SetActive(false);
+
+                    OnWaitingForPlayersWindow();
+                    break;
+
                 case eMatchmakingState.GAME_STATE_SHOW_ROOMS:
+                    m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(true);
                     m_createGameWindow.SetActive(false);
                     m_leaderboardWindow.SetActive(false);
                     m_controlWindow.SetActive(false);
                     m_joiningGameWindow.SetActive(false);
+
                     OnStatsWindow();
                     OrderRoomButtons();
                     break;
 
                 case eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS:
                 case eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS:
+                    m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(true);
@@ -222,10 +245,10 @@ namespace BrainCloudUNETExample.Matchmaking
                     m_joiningGameWindow.SetActive(false);
 
                     OnNewRoomWindow();
-
                     break;
 
                 case eMatchmakingState.GAME_STATE_JOIN_ROOM:
+                    m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
@@ -236,6 +259,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     break;
 
                 case eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM:
+                    m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
@@ -245,6 +269,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_LEADERBOARDS:
+                    m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_createGameWindow.SetActive(false);
@@ -256,6 +281,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_CONTROLS:
+                    m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
                     m_controlWindow.SetActive(true);
@@ -265,6 +291,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_ACHIEVEMENTS:
+                    m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(true);
                     m_showRoomsWindow.SetActive(false);
                     m_controlWindow.SetActive(false);
@@ -311,6 +338,76 @@ namespace BrainCloudUNETExample.Matchmaking
         public void ShowAchievements()
         {
             m_state = eMatchmakingState.GAME_STATE_SHOW_ACHIEVEMENTS;
+        }
+
+        public void ShowLobby()
+        {
+            m_state = eMatchmakingState.GAME_STATE_WAITING_FOR_PLAYERS;
+        }
+
+        public void ChangeTeam()
+        {
+            _bc.LobbyService.SwitchTeam(BombersNetworkManager.LobbyInfo.LobbyId, BombersNetworkManager.LobbyInfo.GetOppositeTeamCodeWithProfileId(_bc.Client.ProfileId));
+        }
+
+        public void StartGame()
+        {
+            _bc.LobbyService.UpdateReady(BombersNetworkManager.LobbyInfo.LobbyId, true, BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId).ExtraData);
+            //BCLobbyMemberInfo member = BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId);
+            //(BombersNetworkManager.singleton as BombersNetworkManager).CreateOrJoinUNETMatch(member);
+        }
+
+        private void OnWaitingForPlayersWindow()
+        {
+            List<BCLobbyMemberInfo> greenPlayers = new List<BCLobbyMemberInfo>();
+            List<BCLobbyMemberInfo> redPlayers = new List<BCLobbyMemberInfo>();
+
+            for (int i = 0; i < BombersNetworkManager.LobbyInfo.Members.Count; i++)
+            {
+                if (BombersNetworkManager.LobbyInfo.Members[i].Team == "green")
+                {
+                    greenPlayers.Add(BombersNetworkManager.LobbyInfo.Members[i]);
+                }
+                else
+                {
+                    redPlayers.Add(BombersNetworkManager.LobbyInfo.Members[i]);
+                }
+            }
+
+            Text teamText = GameObject.Find("GreenPlayerNames").GetComponent<Text>();
+            Text teamPingText = GameObject.Find("GreenPings").GetComponent<Text>();
+
+            string nameText = "";
+            string pingText = "";
+            for (int i = 0; i < greenPlayers.Count; i++)
+            {
+                nameText += greenPlayers[i].Name + "\n";
+                pingText += greenPlayers[i].Rating + "\n";
+            }
+
+            teamText.text = nameText;
+            teamPingText.text = pingText;
+            teamText = GameObject.Find("RedPlayerNames").GetComponent<Text>();
+            teamPingText = GameObject.Find("RedPings").GetComponent<Text>();
+            nameText = "";
+            pingText = "";
+
+            for (int i = 0; i < redPlayers.Count; i++)
+            {
+                nameText += redPlayers[i].Name + "\n";
+                pingText += redPlayers[i].Rating + "\n";
+            }
+            teamText.text = nameText;
+            teamPingText.text = pingText;
+
+            float halfMax = Mathf.Floor((int)BombersNetworkManager.LobbyInfo.Settings["maxPlayers"] / 2.0f);
+            GameObject.Find("GreenPlayers").GetComponent<Text>().text = greenPlayers.Count + "/" + halfMax;
+            GameObject.Find("RedPlayers").GetComponent<Text>().text = redPlayers.Count + "/" + halfMax;
+            GameObject.Find("GameName").GetComponent<Text>().text = BombersNetworkManager.LobbyInfo.Settings["gameName"] as string;
+            m_gameStartButton.SetActive(_bc.Client.ProfileId == BombersNetworkManager.LobbyInfo.OwnerProfileId);
+
+            if (!m_gameStartButton.activeInHierarchy)
+                GameObject.Find("ChangeTeam").transform.position = m_gameStartButton.transform.position;
         }
 
         private void OnStatsWindow()
@@ -438,7 +535,7 @@ namespace BrainCloudUNETExample.Matchmaking
                 m_state = eMatchmakingState.GAME_STATE_JOIN_ROOM;
                 try
                 {
-                    BombersNetworkManager.singleton.matchMaker.JoinMatch(aRoomInfo.networkId, "", "", "", 0, 0, BombersNetworkManager.singleton.OnMatchJoined);
+                    BombersNetworkManager.singleton.matchMaker.JoinMatch(aRoomInfo.networkId, "", "", "", 0, 0, OnMatchJoined);
                 }
                 catch (ArgumentException e)
                 {
@@ -454,7 +551,40 @@ namespace BrainCloudUNETExample.Matchmaking
                 }
             }
         }
-        
+
+        public void OnMatchJoined(bool success, string extendedInfo, MatchInfo matchInfo)
+        {
+            (BombersNetworkManager.singleton as BombersNetworkManager).LeaveLobby();
+            if (success)
+            {
+                try
+                {
+                    BombersNetworkManager.singleton.OnMatchJoined(success, extendedInfo, matchInfo);
+                }
+                catch (ArgumentException e)
+                {
+                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                    m_dialogueDisplay.DisplayDialog("You just left that room!");
+                    RefreshRoomsList();
+                    Debug.Log("caught ArgumentException " + e);
+                }
+                catch (Exception e)
+                {
+                    m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                    RefreshRoomsList();
+                    m_dialogueDisplay.DisplayDialog("Error joining room! Try restarting.");
+                    Debug.Log("caught Exception " + e);
+                }
+            }
+            else
+            {
+                m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
+                RefreshRoomsList();
+                m_dialogueDisplay.DisplayDialog("Could not join room!");
+                Debug.LogError("Join match failed");
+            }
+        }
+
         public void RefreshRoomsList()
         {
             m_refreshLabel.GetComponent<Text>().text = "Refreshing List...";
@@ -593,6 +723,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void HideControls()
         {
+            (BombersNetworkManager.singleton as BombersNetworkManager).LeaveLobby();
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
             RefreshRoomsList();
         }
@@ -610,7 +741,6 @@ namespace BrainCloudUNETExample.Matchmaking
             {
                 m_leaderboardReady = false;
                 m_scoreRect.GetComponent<RectTransform>().localPosition = new Vector3(m_scoreRect.GetComponent<RectTransform>().localPosition.x, -(m_scoreRect.GetComponent<RectTransform>().sizeDelta.y / 2), m_scoreRect.GetComponent<RectTransform>().localPosition.z);
-
             }
 
             if (m_currentLeaderboardID == "KDR")

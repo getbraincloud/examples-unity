@@ -22,7 +22,7 @@ public class BombersNetworkManager : NetworkManager
     public static BCLobbyInfo LobbyInfo;
     public static NetworkConnection LocalConnection;
 
-    public static BombersPlayerController LocalPlayer { get { return m_localPlayer; } set { m_localPlayer = value; m_localPlayer.m_profileId = _bc.Client.AuthenticationService.ProfileId; } }
+    public static BombersPlayerController LocalPlayer { get { return m_localPlayer; } set { m_localPlayer = value; m_localPlayer.m_profileId = _BC.Client.ProfileId; } }
     private static BombersPlayerController m_localPlayer;
 
     public override void OnClientSceneChanged(NetworkConnection conn)
@@ -30,7 +30,12 @@ public class BombersNetworkManager : NetworkManager
         LocalConnection = conn;
         if (SceneManager.GetActiveScene().name == "Game" && m_matchOptions != null)
         {
-            StartCoroutine(InitializeGameInfo(m_matchOptions));
+            // only the owner will init the game info
+            if (LobbyInfo != null && LobbyInfo.OwnerProfileId == _BC.Client.ProfileId)
+            {
+                StartCoroutine(InitializeGameInfo(m_matchOptions));
+            }
+
             m_matchOptions = null;
         }
         base.OnClientSceneChanged(conn);
@@ -84,6 +89,7 @@ public class BombersNetworkManager : NetworkManager
         {
             updateLobbyInfo((ulong)matchInfo.networkId);
             base.OnMatchCreate(success, extendedInfo, matchInfo);
+            //LeaveLobby();
         }
         else
         {
@@ -101,23 +107,19 @@ public class BombersNetworkManager : NetworkManager
             }
             catch (ArgumentException e)
             {
-                //m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                //m_dialogueDisplay.DisplayDialog("You just left that room!");
                 Debug.Log("caught ArgumentException " + e);
             }
             catch (Exception e)
             {
-                //m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-                //m_dialogueDisplay.DisplayDialog("Error joining room! Try restarting.");
                 Debug.Log("caught Exception " + e);
             }
         }
         else
         {
-            //m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
-            //m_dialogueDisplay.DisplayDialog("Could not join room!");
             Debug.LogError("Join match failed");
         }
+
+        LeaveLobby();
     }
 
 
@@ -125,47 +127,48 @@ public class BombersNetworkManager : NetworkManager
     {
         m_matchOptions = in_matchOptions;
 
-        _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
-        _bc.Client.RegisterRTTLobbyCallback(LobbyCallback);
+        _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+        _BC.Client.RegisterRTTLobbyCallback(LobbyCallback);
 
         Dictionary<string, object> playerExtra = new Dictionary<string, object>();
         playerExtra.Add("nothing", "");
 
-        _bc.LobbyService.CreateLobby("4v4", 76, false, playerExtra, "", m_matchOptions);
+        _BC.LobbyService.CreateLobby("4v4", 76, false, playerExtra, "", m_matchOptions);
     }
 
     public void FindLobby(Dictionary<string, object> in_matchOptions)
     {
         m_matchOptions = in_matchOptions;
 
-        _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
-        _bc.Client.RegisterRTTLobbyCallback(LobbyCallback);
+        _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+        _BC.Client.RegisterRTTLobbyCallback(LobbyCallback);
 
         Dictionary<string, object> playerExtra = new Dictionary<string, object>();
         playerExtra.Add("nothing", "");
         int[] arry = { 10, 20, 80 };
-        
+
         Dictionary<string, object> algo = new Dictionary<string, object>();
         algo[OperationParam.LobbyStrategy.Value] = "ranged-percent";
         algo[OperationParam.LobbyAlignment.Value] = "center";
         algo[OperationParam.LobbyRanges.Value] = arry;
-        
-        _bc.LobbyService.FindLobby("4v4", 76, 2, algo, m_matchOptions, 1, false, playerExtra, "");
+
+        _BC.LobbyService.FindOrCreateLobby("4v4", 76, 2, algo, m_matchOptions, 1, false, playerExtra, "", m_matchOptions);
     }
 
     private void updateLobbyInfo(ulong in_unetId)
     {
         m_matchOptions["unetId"] = in_unetId;
-        _bc.LobbyService.UpdateLobbyConfig(LobbyInfo.LobbyId, m_matchOptions);
+        _BC.LobbyService.UpdateLobbyConfig(LobbyInfo.LobbyId, m_matchOptions);
     }
 
     public void LeaveLobby()
     {
-        if (LobbyInfo != null) _bc.LobbyService.LeaveLobby(LobbyInfo.LobbyId);
+        if (LobbyInfo != null) _BC.LobbyService.LeaveLobby(LobbyInfo.LobbyId);
 
-        _bc.Client.DeregisterRTTChatCallback();
-        _bc.ChatService.ChannelDisconnect("22814:gl:main");
-        _bc.Update();
+        if (_BC == null) _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+        
+        _BC.ChatService.ChannelDisconnect("22814:gl:main");
+        _BC.Update();
     }
 
     private void LobbyCallback(string in_response)
@@ -192,11 +195,13 @@ public class BombersNetworkManager : NetworkManager
         {
             case "STATUS_UPDATE":
             case "JOIN_SUCCESS":
-            case "SETTINGS_UPDATED":
+            case "SETTINGS_UPDATE":
             case "MEMBER_LEFT":
             case "MEMBER_JOIN":
             case "MEMBER_UPDATE":
                 {
+                    bool bHasUNetIdSet = LobbyInfo.Settings != null ? LobbyInfo.Settings.ContainsKey("unetId") : false;
+
                     LobbyInfo.LobbyJsonDataRaw = lobbyData;
                     LobbyInfo.LobbyId = (string)lobbyData["id"];
                     LobbyInfo.AppId = (string)lobbyData["appId"];
@@ -222,33 +227,18 @@ public class BombersNetworkManager : NetworkManager
 
                     if (operation == "MEMBER_JOIN" && jsonData.ContainsKey("member"))
                     {
-                        BCLobbyMemberInfo member = new BCLobbyMemberInfo(jsonData["member"] as Dictionary<string, object>);
-
-                        // lets create the match
-                        if (!LobbyInfo.Settings.ContainsKey("unetId") && member.ProfileId == LobbyInfo.OwnerProfileId)
+                        BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
+                        if (matcher != null)
                         {
-                            string gameName = LobbyInfo.Settings["gameName"] as string;
-                            uint maxPlayers = (uint)(int)LobbyInfo.Settings["maxPlayers"];
-
-                            matchMaker.CreateMatch(gameName, maxPlayers, true, "", "", "", 0, 0, this.OnMatchCreate);
+                            matcher.ShowLobby();
                         }
-                        // lets join the match 
-                        else if (member.ProfileId != LobbyInfo.OwnerProfileId && member.ProfileId == _bc.Client.AuthenticationService.ProfileId)
-                        {
-                            long netId;
-                            try
-                            {
-                                netId = (long)LobbyInfo.Settings["unetId"];
-                            }
-                            catch (Exception)
-                            {
+                    }
 
-                                long.TryParse(LobbyInfo.Settings["unetId"] as string, out netId);
-                            }
-
-                            m_matchOptions = null;
-                            matchMaker.JoinMatch((NetworkID)netId, "", "", "", 0, 0, this.OnMatchJoined);
-                        }
+                    if (operation == "SETTINGS_UPDATE" &&
+                        !bHasUNetIdSet && LobbyInfo.Settings.ContainsKey("unetId") &&
+                        LobbyInfo.OwnerProfileId != _BC.Client.ProfileId)
+                    {
+                        JoinUNETMatch();
                     }
                 }
                 break;
@@ -257,7 +247,7 @@ public class BombersNetworkManager : NetworkManager
                 {
                     if (LobbyInfo != null && LobbyInfo.LobbyId == (string)lobbyData["id"])
                     {
-                        _bc.Client.DeregisterRTTLobbyCallback();
+                        _BC.Client.DeregisterRTTLobbyCallback();
                         LobbyInfo = null;
                     }
                 }
@@ -273,7 +263,42 @@ public class BombersNetworkManager : NetworkManager
         }
     }
 
-    private static BrainCloudWrapper _bc;
+    public void CreateOrJoinUNETMatch(BCLobbyMemberInfo member)
+    {
+        // lets create the match
+        if (!LobbyInfo.Settings.ContainsKey("unetId") && member.ProfileId == LobbyInfo.OwnerProfileId)
+        {
+            string gameName = LobbyInfo.Settings["gameName"] as string;
+            uint maxPlayers = (uint)(int)LobbyInfo.Settings["maxPlayers"];
+
+            matchMaker.CreateMatch(gameName, maxPlayers, true, "", "", "", 0, 0, this.OnMatchCreate);
+        }
+        // lets join the match 
+        else if (member.ProfileId != LobbyInfo.OwnerProfileId && member.ProfileId == _BC.Client.ProfileId)
+        {
+            JoinUNETMatch();
+        }
+    }
+
+    private void JoinUNETMatch()
+    {
+        long netId;
+        try
+        {
+            netId = (long)LobbyInfo.Settings["unetId"];
+        }
+        catch (Exception)
+        {
+
+            long.TryParse(LobbyInfo.Settings["unetId"] as string, out netId);
+        }
+
+        m_matchOptions = null;
+        _BC.Client.DeregisterRTTLobbyCallback();
+        matchMaker.JoinMatch((NetworkID)netId, "", "", "", 0, 0, this.OnMatchJoined);
+    }
+
+    public static BrainCloudWrapper _BC;
     public static Dictionary<string, object> m_matchOptions;
 
     void OnApplicationQuit()

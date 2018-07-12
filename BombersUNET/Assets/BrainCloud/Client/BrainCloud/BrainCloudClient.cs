@@ -253,6 +253,11 @@ namespace BrainCloud
             get { return _comms != null ? _comms.AppId : ""; }
         }
 
+        public string ProfileId
+        {
+            get { return AuthenticationService != null ? AuthenticationService.ProfileId : ""; }
+        }
+
         public string AppVersion
         {
             get { return _appVersion; }
