@@ -37,7 +37,8 @@ namespace BrainCloudUNETExample.Matchmaking
             GAME_STATE_SHOW_LEADERBOARDS,
             GAME_STATE_SHOW_CONTROLS,
             GAME_STATE_SHOW_ACHIEVEMENTS,
-            GAME_STATE_WAITING_FOR_PLAYERS
+            GAME_STATE_WAITING_FOR_PLAYERS,
+            GAME_STATE_GLOBAL_CHAT
         }
         private eMatchmakingState m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
 
@@ -86,12 +87,16 @@ namespace BrainCloudUNETExample.Matchmaking
         [SerializeField]
         private GameObject ChatCell = null;
 
+        [SerializeField]
+        private GameObject GlobalChatCell = null;
+
         private GameObject m_joiningGameWindow;
 
         private GameObject m_controlWindow;
         private GameObject m_achievementsWindow;
 
         private GameObject m_lobbyWindow;
+        private GameObject m_chatWindow;
         private GameObject m_gameStartButton;
         List<MatchInfoSnapshot> m_roomList = null;
 
@@ -112,8 +117,10 @@ namespace BrainCloudUNETExample.Matchmaking
             _bc.Client.EnableRTT();
 
             m_lobbyWindow = GameObject.Find("Lobby");
+            m_chatWindow = GameObject.Find("GlobalChat");
             m_gameStartButton = GameObject.Find("StartGame");
-            m_chatContent = GameObject.Find("content"); ;
+            m_globaChatContent = GameObject.Find("globalChatContent");
+            m_chatContent = GameObject.Find("lobbyChatContent");
 
             if (!_bc.Client.Initialized)
             {
@@ -208,11 +215,21 @@ namespace BrainCloudUNETExample.Matchmaking
 
         private void OnGUI()
         {
-
             switch (m_state)
             {
-                case eMatchmakingState.GAME_STATE_WAITING_FOR_PLAYERS:
+                case eMatchmakingState.GAME_STATE_GLOBAL_CHAT:
+                    m_chatWindow.gameObject.SetActive(true);
+                    m_lobbyWindow.gameObject.SetActive(false);
+                    m_achievementsWindow.SetActive(false);
+                    m_showRoomsWindow.SetActive(false);
+                    m_createGameWindow.SetActive(false);
+                    m_leaderboardWindow.SetActive(false);
+                    m_controlWindow.SetActive(false);
+                    m_joiningGameWindow.SetActive(false);
+                    break;
 
+                case eMatchmakingState.GAME_STATE_WAITING_FOR_PLAYERS:
+                    m_chatWindow.gameObject.SetActive(false);
                     m_lobbyWindow.gameObject.SetActive(true);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
@@ -225,6 +242,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     break;
 
                 case eMatchmakingState.GAME_STATE_SHOW_ROOMS:
+                    m_chatWindow.gameObject.SetActive(false);
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(true);
@@ -239,6 +257,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                 case eMatchmakingState.GAME_STATE_NEW_ROOM_OPTIONS:
                 case eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS:
+                    m_chatWindow.gameObject.SetActive(false);
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
@@ -262,6 +281,7 @@ namespace BrainCloudUNETExample.Matchmaking
                     break;
 
                 case eMatchmakingState.GAME_STATE_CREATE_NEW_ROOM:
+                    m_chatWindow.gameObject.SetActive(false);
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
@@ -272,6 +292,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_LEADERBOARDS:
+                    m_chatWindow.gameObject.SetActive(false);
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
@@ -284,6 +305,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_CONTROLS:
+                    m_chatWindow.gameObject.SetActive(false);
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(false);
                     m_showRoomsWindow.SetActive(false);
@@ -294,6 +316,7 @@ namespace BrainCloudUNETExample.Matchmaking
 
                     break;
                 case eMatchmakingState.GAME_STATE_SHOW_ACHIEVEMENTS:
+                    m_chatWindow.gameObject.SetActive(false);
                     m_lobbyWindow.gameObject.SetActive(false);
                     m_achievementsWindow.SetActive(true);
                     m_showRoomsWindow.SetActive(false);
@@ -355,9 +378,9 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void StartGame()
         {
-            //_bc.LobbyService.UpdateReady(BombersNetworkManager.LobbyInfo.LobbyId, true, BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId).ExtraData);
-            BCLobbyMemberInfo member = BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId);
-            (BombersNetworkManager.singleton as BombersNetworkManager).CreateOrJoinUNETMatch(member);
+            _bc.LobbyService.UpdateReady(BombersNetworkManager.LobbyInfo.LobbyId, true, BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId).ExtraData);
+            //BCLobbyMemberInfo member = BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId);
+            //(BombersNetworkManager.singleton as BombersNetworkManager).CreateOrJoinUNETMatch(member);
         }
 
         public void OnSendLobbyChatSignal(InputField in_field)
@@ -392,10 +415,91 @@ namespace BrainCloudUNETExample.Matchmaking
                                                         (Dictionary<string, object>)in_jsonMessage["data"] : in_jsonMessage;
                 tempObj = (GameObject)Instantiate(ChatCell, Vector3.zero, Quaternion.identity, contentTransform);
                 tempCell = tempObj.GetComponent<ChatCell>();
-                tempCell.Init(jsonData["name"] as string, jsonData["message"] as string, jsonData["id"] as string, "");//, jsonData["pic"] as string, Convert.ToUInt64(jsonData["msgId"]));
+                tempCell.Init(jsonData["name"] as string, jsonData["message"] as string, jsonData["id"] as string, "");
             }
         }
 
+        private GameObject m_globaChatContent = null;
+        public void AddGlobalChatMessage(Dictionary<string, object> in_jsonMessage)
+        {
+            Transform contentTransform = m_globaChatContent.transform;
+            lock (contentTransform)
+            {
+                // populate based on the incoming data
+                if (contentTransform.childCount >= 30)
+                {
+                    Destroy(contentTransform.transform.GetChild(0).gameObject);
+                }
+
+                ChatCell tempCell;
+                GameObject tempObj;
+                Dictionary<string, object> jsonData = in_jsonMessage.ContainsKey("data") ?
+                                                                    (Dictionary<string, object>)in_jsonMessage["data"] : in_jsonMessage;
+
+                Dictionary<string, object> fromData = (Dictionary<string, object>)jsonData["from"];
+                Dictionary<string, object> contentData = (Dictionary<string, object>)jsonData["content"];
+                tempObj = (GameObject)Instantiate(GlobalChatCell, Vector3.zero, Quaternion.identity, contentTransform);
+                tempCell = tempObj.GetComponent<ChatCell>();
+
+                tempCell.Init(fromData["name"] as string, contentData["text"] as string, fromData["id"] as string, fromData["pic"] as string, Convert.ToUInt64(jsonData["msgId"]));
+            }
+        }
+
+        public void OnGlobalChatEntered(InputField in_field)
+        {
+            in_field.text = in_field.text.Replace("\n", "").Trim();
+            if (in_field.text.Length > 0)
+                _bc.ChatService.PostChatMessage(_bc.Client.AppId + ":gl:main", in_field.text, "");
+
+            in_field.text = "";
+        }
+
+        public void OnChatMessageDeleted(Dictionary<string, object> in_jsonMessage)
+        {
+            Transform contentTransform = m_chatContent.transform;
+            lock (contentTransform)
+            {
+                Dictionary<string, object> jsonData = in_jsonMessage.ContainsKey("data") ?
+                                                    (Dictionary<string, object>)in_jsonMessage["data"] : in_jsonMessage;
+
+                for (int i = 0; i < contentTransform.childCount; ++i)
+                {
+                    if (Convert.ToUInt64(jsonData["msgId"]) == contentTransform.GetChild(i).GetComponent<ChatCell>().MessageId)
+                    {
+                        Destroy(contentTransform.GetChild(i).gameObject);
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void OnChatMessageUpdated(Dictionary<string, object> in_jsonMessage)
+        {
+            Transform contentTransform = m_chatContent.transform;
+            lock (contentTransform)
+            {
+                Dictionary<string, object> jsonData = in_jsonMessage.ContainsKey("data") ?
+                                                                    (Dictionary<string, object>)in_jsonMessage["data"] : in_jsonMessage;
+
+                Dictionary<string, object> fromData = (Dictionary<string, object>)jsonData["from"];
+                Dictionary<string, object> contentData = (Dictionary<string, object>)jsonData["content"];
+
+                ChatCell cell;
+                for (int i = 0; i < contentTransform.childCount; ++i)
+                {
+                    cell = contentTransform.GetChild(i).GetComponent<ChatCell>();
+                    if (Convert.ToUInt64(jsonData["msgId"]) == cell.MessageId)
+                    {
+                        cell.transform.SetParent(null);
+                        cell.Init(fromData["name"] as string, contentData["text"] as string, fromData["id"] as string, fromData["pic"] as string, Convert.ToUInt64(jsonData["msgId"]));
+                        cell.transform.SetParent(contentTransform);
+                        cell.transform.SetSiblingIndex(i);
+                        break;
+                    }
+                }
+            }
+        }
+        
         private void OnWaitingForPlayersWindow()
         {
             List<BCLobbyMemberInfo> greenPlayers = new List<BCLobbyMemberInfo>();
@@ -450,10 +554,10 @@ namespace BrainCloudUNETExample.Matchmaking
                 if (m_changeTeamOrigPosition == Vector3.zero) m_changeTeamOrigPosition = GameObject.Find("ChangeTeam").transform.position;
                 GameObject.Find("ChangeTeam").transform.position = m_gameStartButton.transform.position;
             }
-            else if(m_changeTeamOrigPosition != Vector3.zero)
+            else if (m_changeTeamOrigPosition != Vector3.zero)
             {
                 GameObject.Find("ChangeTeam").transform.position = m_changeTeamOrigPosition;
-            }   
+            }
         }
 
         private Vector3 m_changeTeamOrigPosition = Vector3.zero;
@@ -772,6 +876,7 @@ namespace BrainCloudUNETExample.Matchmaking
         public void HideControls()
         {
             (BombersNetworkManager.singleton as BombersNetworkManager).LeaveLobby();
+            (BombersNetworkManager.singleton as BombersNetworkManager).DisconnectGlobalChat();
             m_state = eMatchmakingState.GAME_STATE_SHOW_ROOMS;
             RefreshRoomsList();
         }
@@ -905,6 +1010,19 @@ namespace BrainCloudUNETExample.Matchmaking
             m_state = eMatchmakingState.GAME_STATE_FIND_ROOM_OPTIONS;
         }
 
+        public void GlobalChat()
+        {
+            m_state = eMatchmakingState.GAME_STATE_GLOBAL_CHAT;
+
+            // clear all previous messages
+            for (int i = 0; i < m_globaChatContent.transform.childCount; ++i)
+            {
+                Destroy(m_globaChatContent.transform.GetChild(i).gameObject);
+            }
+
+            (BombersNetworkManager.singleton as BombersNetworkManager).ConnectToGlobalChat();
+        }
+
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.Return) &&
@@ -993,7 +1111,7 @@ namespace BrainCloudUNETExample.Matchmaking
             matchOptions.Add("lightPosition", 0);
 
             // clear all previous messages
-            for(int i = 0; i < m_chatContent.transform.childCount; ++i)
+            for (int i = 0; i < m_chatContent.transform.childCount; ++i)
             {
                 Destroy(m_chatContent.transform.GetChild(i).gameObject);
             }

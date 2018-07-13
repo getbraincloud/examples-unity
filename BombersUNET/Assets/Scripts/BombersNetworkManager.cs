@@ -166,9 +166,8 @@ public class BombersNetworkManager : NetworkManager
         if (LobbyInfo != null) _BC.LobbyService.LeaveLobby(LobbyInfo.LobbyId);
 
         if (_BC == null) _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
-        
+
         _BC.ChatService.ChannelDisconnect("22814:gl:main");
-        _BC.Update();
     }
 
     private void LobbyCallback(string in_response)
@@ -309,14 +308,90 @@ public class BombersNetworkManager : NetworkManager
         matchMaker.JoinMatch((NetworkID)netId, "", "", "", 0, 0, this.OnMatchJoined);
     }
 
+    public void ConnectToGlobalChat()
+    {
+        _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+        _BC.Client.RegisterRTTChatCallback(chatCallback);
+        _BC.ChatService.ChannelConnect(_BC.Client.AppId + ":gl:main", 25, onChannelConnected);
+    }
+
+    private void onChannelConnected(string in_json, object obj)
+    {
+        BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
+        if (matcher == null) return;
+
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_json);
+
+        Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
+        Array firstChatMessagesData = (Array)jsonData["messages"];
+
+        Dictionary<string, object> messageData = null;
+        for (int i = 0; i < firstChatMessagesData.Length; ++i)
+        {
+            messageData = firstChatMessagesData.GetValue(i) as Dictionary<string, object>;
+            matcher.AddGlobalChatMessage(messageData);
+        }
+    }
+
+    public void DisconnectGlobalChat()
+    {
+        _BC.Client.DeregisterRTTChatCallback();
+    }
+
+    private void chatCallback(string in_message)
+    {
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_message);
+        if (jsonMessage.ContainsKey("operation"))
+        {
+            BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
+
+            string operation = jsonMessage["operation"] as string;
+
+            switch (operation)
+            {
+                case "INCOMING":
+                    {
+                        if (matcher != null)
+                        {
+                            matcher.AddGlobalChatMessage(jsonMessage);
+                        }
+                    }
+                    break;
+
+                case "DELETE":
+                    {
+                        if (matcher != null)
+                        {
+                            matcher.OnChatMessageDeleted(jsonMessage);
+                        }
+                    }
+                    break;
+
+                case "UPDATE":
+                    {
+                        if (matcher != null)
+                        {
+                            matcher.OnChatMessageUpdated(jsonMessage);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     public static BrainCloudWrapper _BC;
     public static Dictionary<string, object> m_matchOptions;
 
     void OnApplicationQuit()
     {
         LeaveLobby();
-    }
+        DisconnectGlobalChat();
 
+        // force whatever is aroudn to be sent out
+        _BC.Update();
+    }
 }
 
 

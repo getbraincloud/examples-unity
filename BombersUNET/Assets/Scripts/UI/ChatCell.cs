@@ -21,7 +21,7 @@ public class ChatCell : ImageDownloader
     public bool IsYou { get { return BombersNetworkManager._BC.Client.ProfileId == ProfileId; } }
     #endregion
 
-    public void Init(string in_userName, string in_message, string in_profileId, string in_imageURL)//, ulong in_messageId)
+    public void Init(string in_userName, string in_message, string in_profileId, string in_imageURL, ulong in_messageId = 0)
     {
         ProfileId = in_profileId;
         NameDisplay.SetActive(!IsYou);
@@ -31,7 +31,7 @@ public class ChatCell : ImageDownloader
         Message.resizeTextMaxSize = Message.fontSize;
         Message.text = in_message;
 
-        MessageId = -1;// in_messageId;
+        MessageId = in_messageId;
 
         Canvas.ForceUpdateCanvases();
 
