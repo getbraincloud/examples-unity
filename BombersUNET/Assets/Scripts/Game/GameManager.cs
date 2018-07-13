@@ -132,6 +132,7 @@ namespace BrainCloudUNETExample.Game
         private GameObject m_bombWaterExplosion;
         private GameObject m_bombDud;
 
+        private Text m_countDownText;
         private BrainCloudWrapper _bc;
 
         void Awake()
@@ -149,6 +150,7 @@ namespace BrainCloudUNETExample.Game
             m_redShipLogo = GameObject.Find("ShipSink").transform.Find("RedLogo").gameObject;
             m_greenShipLogo = GameObject.Find("ShipSink").transform.Find("GreenLogo").gameObject;
             m_blackScreen = GameObject.Find("BlackScreen");
+            m_countDownText = GameObject.Find("CountDown").GetComponent<Text>();
 
             m_allyShipSunk.SetActive(false);
             m_enemyShipSunk.SetActive(false);
@@ -515,7 +517,7 @@ namespace BrainCloudUNETExample.Game
         private void updateSpectorFocusController()
         {
             GameObject[] playerList = GameObject.FindGameObjectsWithTag("PlayerController");
-          
+
             foreach (GameObject item in playerList)
             {
                 if (item.GetComponent<BombersPlayerController>().m_profileId == _bc.Client.ProfileId)
@@ -528,7 +530,7 @@ namespace BrainCloudUNETExample.Game
             }
             GameObject playerController = playerList.GetValue(m_spectatingIndex) as GameObject;
             m_spectatorFocusController = playerController != null ? playerController.GetComponent<BombersPlayerController>() : null;
-            if (m_spectatorFocusController.m_profileId == _bc.Client.ProfileId)
+            if (m_spectatorFocusController == null || m_spectatorFocusController.m_profileId == _bc.Client.ProfileId)
             {
                 incrementSpectatorIndex(1);
                 updateSpectorFocusController();
@@ -579,7 +581,7 @@ namespace BrainCloudUNETExample.Game
             else
                 m_HUD.transform.GetChild(0).GetChild(1).Find("RedScore").GetChild(1).GetComponent<Text>().color = new Color(1, 1, 1, 1);
             m_HUD.transform.GetChild(0).GetChild(1).Find("GreenScore").GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
-            m_HUD.transform.GetChild(0).GetChild(1).Find("GreenScore").GetChild(1).GetComponent<Text>().text = m_gameState != eGameState.GAME_STATE_SPECTATING ?  "Ships Left: " + (team1Ships.Count / 2).ToString() : "";
+            m_HUD.transform.GetChild(0).GetChild(1).Find("GreenScore").GetChild(1).GetComponent<Text>().text = m_gameState != eGameState.GAME_STATE_SPECTATING ? "Ships Left: " + (team1Ships.Count / 2).ToString() : "";
             if (team1Ships.Count == 2)
                 m_HUD.transform.GetChild(0).GetChild(1).Find("GreenScore").GetChild(1).GetComponent<Text>().color = new Color(1, 0, 0, 1);
             else
@@ -1045,6 +1047,13 @@ namespace BrainCloudUNETExample.Game
 
         IEnumerator SpawnGameStart()
         {
+            m_countDownText.text = "3";
+            yield return new WaitForSeconds(1.0f);
+            m_countDownText.text = "2";
+            yield return new WaitForSeconds(1.0f);
+            m_countDownText.text = "1";
+            yield return new WaitForSeconds(1.0f);
+
             MapPresets.MapSize mapSize = m_mapSizes[m_mapSize];
             GameObject mapBound = GameObject.Find("MapBounds");
             mapBound.transform.localScale = new Vector3(mapSize.m_horizontalSize, 1, mapSize.m_verticalSize);
@@ -1252,8 +1261,7 @@ namespace BrainCloudUNETExample.Game
                     if (isServer && !m_once)
                     {
                         m_once = true;
-                        //StartCoroutine("SpawnGameStart");
-                        Invoke("StartGameStart", 3.0f); // give 3 seconds to join everyone, otherwise, they will be handled as late joiners
+                        StartCoroutine("SpawnGameStart");
                     }
 
                     break;
@@ -1281,11 +1289,16 @@ namespace BrainCloudUNETExample.Game
                         GameObject.Find("BackgroundMusic").GetComponent<AudioSource>().Play();
                         m_once = true;
                     }
+
                     if (isServer)
                     {
-                        m_gameTime = m_gameInfo.GetGameTime();
-                        m_gameTime -= Time.deltaTime;
-                        m_gameInfo.SetGameTime(m_gameTime);
+                        if (m_blackScreen.GetComponent<CanvasGroup>().alpha <= 0)
+                        {
+                            m_gameTime = m_gameInfo.GetGameTime();
+                            m_gameTime -= Time.deltaTime;
+                            m_gameInfo.SetGameTime(m_gameTime);
+                        }
+
                         List<ShipController> team1Ships = new List<ShipController>();
                         List<ShipController> team2Ships = new List<ShipController>();
                         for (int i = 0; i < m_spawnedShips.Count; i++)
@@ -1328,9 +1341,7 @@ namespace BrainCloudUNETExample.Game
                     {
                         m_gameTime = m_gameInfo.GetGameTime();
                     }
-
                     break;
-
 
                 case eGameState.GAME_STATE_SPECTATING:
                     {

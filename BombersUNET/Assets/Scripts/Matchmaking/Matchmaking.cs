@@ -355,9 +355,9 @@ namespace BrainCloudUNETExample.Matchmaking
 
         public void StartGame()
         {
-            _bc.LobbyService.UpdateReady(BombersNetworkManager.LobbyInfo.LobbyId, true, BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId).ExtraData);
-            //BCLobbyMemberInfo member = BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId);
-            //(BombersNetworkManager.singleton as BombersNetworkManager).CreateOrJoinUNETMatch(member);
+            //_bc.LobbyService.UpdateReady(BombersNetworkManager.LobbyInfo.LobbyId, true, BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId).ExtraData);
+            BCLobbyMemberInfo member = BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(_bc.Client.ProfileId);
+            (BombersNetworkManager.singleton as BombersNetworkManager).CreateOrJoinUNETMatch(member);
         }
 
         public void OnSendLobbyChatSignal(InputField in_field)
@@ -446,8 +446,17 @@ namespace BrainCloudUNETExample.Matchmaking
             m_gameStartButton.SetActive(_bc.Client.ProfileId == BombersNetworkManager.LobbyInfo.OwnerProfileId);
 
             if (!m_gameStartButton.activeInHierarchy)
+            {
+                if (m_changeTeamOrigPosition == Vector3.zero) m_changeTeamOrigPosition = GameObject.Find("ChangeTeam").transform.position;
                 GameObject.Find("ChangeTeam").transform.position = m_gameStartButton.transform.position;
+            }
+            else if(m_changeTeamOrigPosition != Vector3.zero)
+            {
+                GameObject.Find("ChangeTeam").transform.position = m_changeTeamOrigPosition;
+            }   
         }
+
+        private Vector3 m_changeTeamOrigPosition = Vector3.zero;
 
         private void OnStatsWindow()
         {
@@ -982,6 +991,12 @@ namespace BrainCloudUNETExample.Matchmaking
             matchOptions.Add("gameName", roomName);
             matchOptions.Add("maxPlayers", size);
             matchOptions.Add("lightPosition", 0);
+
+            // clear all previous messages
+            for(int i = 0; i < m_chatContent.transform.childCount; ++i)
+            {
+                Destroy(m_chatContent.transform.GetChild(i).gameObject);
+            }
 
             switch (m_state)
             {
