@@ -212,6 +212,7 @@ public class BombersNetworkManager : NetworkManager
             case "MEMBER_UPDATE":
                 {
                     bool bHasUNetIdSet = LobbyInfo.Settings != null ? LobbyInfo.Settings.ContainsKey("unetId") : false;
+                    string preLobbyState = LobbyInfo.State;
 
                     LobbyInfo.LobbyJsonDataRaw = lobbyData;
                     LobbyInfo.LobbyId = (string)lobbyData["id"];
@@ -244,7 +245,13 @@ public class BombersNetworkManager : NetworkManager
                         }
                     }
 
-                    if (operation == "SETTINGS_UPDATE" &&
+                    if (operation == "STATUS_UPDATE" && preLobbyState != "starting" && 
+                        LobbyInfo.State == "starting" && 
+                        LobbyInfo.OwnerProfileId == _BC.Client.ProfileId)
+                    {
+                        CreateUNETMatch();
+                    }
+                    else if (operation == "SETTINGS_UPDATE" &&
                         !bHasUNetIdSet && LobbyInfo.Settings.ContainsKey("unetId") &&
                         LobbyInfo.OwnerProfileId != _BC.Client.ProfileId)
                     {
@@ -288,6 +295,12 @@ public class BombersNetworkManager : NetworkManager
         {
             JoinUNETMatch();
         }
+    }
+
+    private void CreateUNETMatch()
+    {
+        BCLobbyMemberInfo member = LobbyInfo.GetMemberWithProfileId(_BC.Client.ProfileId);
+        CreateOrJoinUNETMatch(member);
     }
 
     private void JoinUNETMatch()
