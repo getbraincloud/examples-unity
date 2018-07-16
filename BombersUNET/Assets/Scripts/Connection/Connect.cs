@@ -22,18 +22,17 @@ namespace BrainCloudUNETExample.Connection
         private Button m_loginBtn;
         private Button m_forgotPasswordBtn;
         private Toggle m_savePassToggle;
-
-        private BrainCloudWrapper _bc;
-
+        
         void Awake()
         {
+            BombersNetworkManager.RefreshBCVariable();
+
             m_dialogueDisplay = GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>();
             m_usernameField = GameObject.Find("UsernameBox").GetComponent<InputField>();
             m_passwordField = GameObject.Find("PasswordBox").GetComponent<InputField>();
             m_loginBtn = GameObject.Find("Login Button").GetComponent<Button>();
             m_forgotPasswordBtn = GameObject.Find("Forgot Password").GetComponent<Button>();
             m_savePassToggle = GameObject.Find("Toggle").GetComponent<Toggle>();
-            _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
         }
 
         void Start()
@@ -96,7 +95,7 @@ namespace BrainCloudUNETExample.Connection
                 m_isLoggingIn = true;
 
                 // brainCloud authentication
-                _bc.AuthenticateEmailPassword(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
+                BombersNetworkManager._BC.AuthenticateEmailPassword(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
 
@@ -138,7 +137,7 @@ namespace BrainCloudUNETExample.Connection
                 m_dialogueDisplay.DisplayDialog("You need to enter an email first!");
                 return;
             }
-            _bc.Client.AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
+            BombersNetworkManager._BC.Client.AuthenticationService.ResetEmailPassword(m_username, OnSuccess_Reset, OnError_Reset);
 
         }
 
@@ -173,7 +172,7 @@ namespace BrainCloudUNETExample.Connection
                         break;
                     }
                 }
-                _bc.Client.PlayerStateService.UpdateUserName(username);
+                BombersNetworkManager._BC.Client.PlayerStateService.UpdateUserName(username);
             }
             else
             {

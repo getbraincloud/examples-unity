@@ -133,13 +133,11 @@ namespace BrainCloudUNETExample.Game
         private GameObject m_bombDud;
 
         private Text m_countDownText;
-        private BrainCloudWrapper _bc;
 
         void Awake()
         {
-            _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
-
-            if (!_bc.Client.Initialized)
+            BombersNetworkManager.RefreshBCVariable();
+            if (!BombersNetworkManager._BC.Client.Initialized)
             {
                 SceneManager.LoadScene("Connect");
                 return;
@@ -520,7 +518,7 @@ namespace BrainCloudUNETExample.Game
 
             foreach (GameObject item in playerList)
             {
-                if (item.GetComponent<BombersPlayerController>().m_profileId == _bc.Client.ProfileId)
+                if (item.GetComponent<BombersPlayerController>().m_profileId == BombersNetworkManager._BC.Client.ProfileId)
                 {
                     item.tag = "Untagged";
                     item.SetActive(false);
@@ -530,7 +528,7 @@ namespace BrainCloudUNETExample.Game
             }
             GameObject playerController = playerList.GetValue(m_spectatingIndex) as GameObject;
             m_spectatorFocusController = playerController != null ? playerController.GetComponent<BombersPlayerController>() : null;
-            if (m_spectatorFocusController == null || m_spectatorFocusController.m_profileId == _bc.Client.ProfileId)
+            if (m_spectatorFocusController == null || m_spectatorFocusController.m_profileId == BombersNetworkManager._BC.Client.ProfileId)
             {
                 incrementSpectatorIndex(1);
                 updateSpectorFocusController();
@@ -858,7 +856,7 @@ namespace BrainCloudUNETExample.Game
 
         public void ChangeTeam()
         {
-            _bc.LobbyService.SwitchTeam(BombersNetworkManager.LobbyInfo.LobbyId, BombersNetworkManager.LobbyInfo.GetOppositeTeamCodeWithProfileId(_bc.Client.ProfileId));
+            BombersNetworkManager._BC.LobbyService.SwitchTeam(BombersNetworkManager.LobbyInfo.LobbyId, BombersNetworkManager.LobbyInfo.GetOppositeTeamCodeWithProfileId(BombersNetworkManager._BC.Client.ProfileId));
         }
 
         public BombersPlayerController FindPlayerWithID(int aID)

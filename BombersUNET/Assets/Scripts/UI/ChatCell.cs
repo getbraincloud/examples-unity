@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using BrainCloudUNETExample.Connection;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ChatCell : ImageDownloader
@@ -18,10 +20,12 @@ public class ChatCell : ImageDownloader
     public double MessageId { get; private set; }
 
     public string ProfileId { get; private set; }
+    public string LastConnectionId { get; private set; }
+
     public bool IsYou { get { return BombersNetworkManager._BC.Client.ProfileId == ProfileId; } }
     #endregion
 
-    public void Init(string in_userName, string in_message, string in_profileId, string in_imageURL, ulong in_messageId = 0)
+    public void Init(string in_userName, string in_message, string in_profileId, string in_imageURL, string in_lastConnectionId, ulong in_messageId = 0)
     {
         ProfileId = in_profileId;
         NameDisplay.SetActive(!IsYou);
@@ -31,6 +35,7 @@ public class ChatCell : ImageDownloader
         Message.resizeTextMaxSize = Message.fontSize;
         Message.text = in_message;
 
+        LastConnectionId = in_lastConnectionId;
         MessageId = in_messageId;
 
         Canvas.ForceUpdateCanvases();
@@ -56,5 +61,34 @@ public class ChatCell : ImageDownloader
         int lineHeightIncrement = 4;
         int lineHeighDelta = Message.cachedTextGenerator.lineCount == 1 ? Message.fontSize + (lineHeightIncrement + 2) : Message.fontSize + lineHeightIncrement;
         rt.sizeDelta = new Vector2(rt.rect.width, 30 + (lineHeighDelta * Message.cachedTextGenerator.lineCount));
+
+        updateLobbyInviteDisplay();
     }
+    
+    private void updateLobbyInviteDisplay()
+    {
+        Transform tempTrans = NameDisplay.activeInHierarchy ? NameDisplay.transform.GetChild(NameDisplay.transform.childCount - 1) :
+                                   NameDisplayYou.activeInHierarchy ? NameDisplayYou.transform.GetChild(NameDisplayYou.transform.childCount - 1) : null;
+        if (tempTrans != null) m_inviteToLobbyObject = tempTrans.gameObject;
+        if (m_inviteToLobbyObject != null) m_inviteToLobbyObject.SetActive(!IsYou && LastConnectionId != "");
+    }
+
+    public void OnInviteToLobby()
+    {
+        if (m_inviteToLobbyObject != null)
+        {
+            BombersNetworkManager.RefreshBCVariable();
+
+            // send event to other person
+            Dictionary<string, object> jsonData = new Dictionary<string, object>();
+            jsonData["lastConnectionId"] = BombersNetworkManager._BC.Client.RTTConnectionID;
+            jsonData["profileId"] = BombersNetworkManager._BC.Client.ProfileId;
+            jsonData["userName"] = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
+
+            BombersNetworkManager._BC.Client.EventService.SendEvent(ProfileId, "OFFER_JOIN_LOBBY", 
+                BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonWriter.Serialize(jsonData));
+        }
+    }
+
+    private GameObject m_inviteToLobbyObject;
 }

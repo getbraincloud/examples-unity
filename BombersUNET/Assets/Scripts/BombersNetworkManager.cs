@@ -13,6 +13,7 @@ using System;
 using UnityEngine.Networking.Match;
 using UnityEngine.Networking.Types;
 using BrainCloud;
+using BrainCloudUNETExample.Connection;
 
 public class BombersNetworkManager : NetworkManager
 {
@@ -121,26 +122,25 @@ public class BombersNetworkManager : NetworkManager
 
         LeaveLobby();
     }
+    public static void RefreshBCVariable()
+    {
+        if (_BC == null) _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
+    }
 
-
-    public void CreateLobby(Dictionary<string, object> in_matchOptions)
+    public void CreateLobby(Dictionary<string, object> in_matchOptions, string[] in_otherCxIds = null)
     {
         m_matchOptions = in_matchOptions;
-
-        _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
         _BC.Client.RegisterRTTLobbyCallback(LobbyCallback);
 
         Dictionary<string, object> playerExtra = new Dictionary<string, object>();
         playerExtra.Add("nothing", "");
 
-        _BC.LobbyService.CreateLobby("4v4", 76, false, playerExtra, "", m_matchOptions);
+        _BC.LobbyService.CreateLobby("4v4", 76, false, playerExtra, "", m_matchOptions, in_otherCxIds);
     }
 
-    public void FindLobby(Dictionary<string, object> in_matchOptions)
+    public void FindLobby(Dictionary<string, object> in_matchOptions, string[] in_otherCxIds = null)
     {
         m_matchOptions = in_matchOptions;
-
-        _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
         _BC.Client.RegisterRTTLobbyCallback(LobbyCallback);
 
         Dictionary<string, object> playerExtra = new Dictionary<string, object>();
@@ -152,7 +152,7 @@ public class BombersNetworkManager : NetworkManager
         algo[OperationParam.LobbyAlignment.Value] = "center";
         algo[OperationParam.LobbyRanges.Value] = arry;
 
-        _BC.LobbyService.FindOrCreateLobby("4v4", 76, 2, algo, m_matchOptions, 1, false, playerExtra, "", m_matchOptions);
+        _BC.LobbyService.FindOrCreateLobby("4v4", 76, 2, algo, m_matchOptions, 1, false, playerExtra, "", m_matchOptions, in_otherCxIds);
     }
 
     private void updateLobbyInfo(ulong in_unetId)
@@ -164,9 +164,6 @@ public class BombersNetworkManager : NetworkManager
     public void LeaveLobby()
     {
         if (LobbyInfo != null) _BC.LobbyService.LeaveLobby(LobbyInfo.LobbyId);
-
-        if (_BC == null) _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
-
         _BC.ChatService.ChannelDisconnect("22814:gl:main");
     }
 
@@ -245,8 +242,8 @@ public class BombersNetworkManager : NetworkManager
                         }
                     }
 
-                    if (operation == "STATUS_UPDATE" && preLobbyState != "starting" && 
-                        LobbyInfo.State == "starting" && 
+                    if (operation == "STATUS_UPDATE" && preLobbyState != "starting" &&
+                        LobbyInfo.State == "starting" &&
                         LobbyInfo.OwnerProfileId == _BC.Client.ProfileId)
                     {
                         CreateUNETMatch();
@@ -323,8 +320,8 @@ public class BombersNetworkManager : NetworkManager
 
     public void ConnectToGlobalChat()
     {
-        _BC = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
         _BC.Client.RegisterRTTChatCallback(chatCallback);
+        _BC.Client.RegisterRTTEventCallback(eventCallback);
         _BC.ChatService.ChannelConnect(_BC.Client.AppId + ":gl:main", 25, onChannelConnected);
     }
 
@@ -349,6 +346,7 @@ public class BombersNetworkManager : NetworkManager
     public void DisconnectGlobalChat()
     {
         _BC.Client.DeregisterRTTChatCallback();
+        _BC.Client.DeregisterRTTEventCallback();
     }
 
     private void chatCallback(string in_message)
@@ -391,6 +389,73 @@ public class BombersNetworkManager : NetworkManager
                 default:
                     break;
             }
+        }
+    }
+
+    private void eventCallback(string in_message)
+    {
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_message);
+        switch (jsonMessage["operation"] as string)
+        {
+            case "GET_EVENTS":
+                {
+                    Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
+                    _BC.Client.EventService.DeleteIncomingEvent(jsonData["evId"] as string);
+
+                    switch (jsonData["eventType"] as string)
+                    {
+                        case "OFFER_JOIN_LOBBY":
+                            {
+                                // bring up the offer to join display
+                                // on the requested client
+                                BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
+                                if (matcher)
+                                {
+                                    Dictionary<string, object> eventData = (Dictionary<string, object>)jsonData["eventData"];
+                                    matcher.DisplayJoinLobbyOffer(eventData["profileId"] as string, eventData["userName"] as string);
+                                }
+                            }
+                            break;
+
+                        case "CONFIRM_JOIN_LOBBY":
+                            {
+                                // they confirmed to join the lobby!
+                                Dictionary<string, object> eventData = (Dictionary<string, object>)jsonData["eventData"];
+                                string[] cxIds = { eventData["lastConnectionId"] as string };
+
+                                Dictionary<string, object> matchOptions = new Dictionary<string, object>();
+                                matchOptions["gameTime"] = 300;
+                                matchOptions["isPlaying"] = 0;
+                                matchOptions["mapLayout"] = 0;
+                                matchOptions["mapSize"] = 1;
+                                matchOptions["gameName"] = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName + "'s Room";
+                                matchOptions["maxPlayers"] = 8;
+                                matchOptions["lightPosition"] = 0;
+
+                                BombersNetworkManager.WaitOnLobbyJoin();
+                                // Find or create with someone else!
+                                (BombersNetworkManager.singleton as BombersNetworkManager).FindLobby(matchOptions, cxIds);
+                            }
+                            break;
+
+                        default: break;
+                    }
+                }
+                break;
+
+            default: break;
+        }
+    }
+
+    public static void WaitOnLobbyJoin()
+    {
+        // if matchmaking, go to find lobby state
+        BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
+        if (matcher)
+        {
+            matcher.HideControls();
+            matcher.OnJoinRoomState();
+            _BC.Client.RegisterRTTLobbyCallback((BombersNetworkManager.singleton as BombersNetworkManager).LobbyCallback);
         }
     }
 
