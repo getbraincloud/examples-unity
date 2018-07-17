@@ -14,359 +14,105 @@ MonoBehaviour:
   DebugInformation:
     ProfileId: 48688da3-4f9d-453d-a3a0-d2bd530d8678
     LastSentRequest: "chat CHANNEL_DISCONNECT \n{\r\n    \"channelId\": \"22814:gl:main\"\r\n}"
-    LastResponse: "OnSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"messages\":
-      \r\n                [\r\n                    {\r\n                        \"date\":
-      1530730196052,\r\n                        \"ver\": 1,\r\n                        \"msgId\":
-      \"783733860378653\",\r\n                        \"from\": \r\n                            {\r\n
-      \                               \"id\": \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n
-      \                               \"name\": \"st\",\r\n                                \"pic\":
-      null\r\n                            },\r\n                        \"chId\":
-      \"22814:gl:main\",\r\n                        \"seq\": 29,\r\n                        \"content\":
-      \r\n                            {\r\n                                \"text\":
-      \"asdfa\",\r\n                                \"rich\": \r\n                                    {}\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531496009283,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784125956752926\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      30,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"asdf asdf a\",\r\n                                \"rich\":
-      \r\n                                    {}\r\n                            }\r\n
-      \                   },\r\n                    {\r\n                        \"date\":
-      1531496012155,\r\n                        \"ver\": 1,\r\n                        \"msgId\":
-      \"784125958223391\",\r\n                        \"from\": \r\n                            {\r\n
-      \                               \"id\": \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n
-      \                               \"name\": \"st\",\r\n                                \"pic\":
-      null\r\n                            },\r\n                        \"chId\":
-      \"22814:gl:main\",\r\n                        \"seq\": 31,\r\n                        \"content\":
-      \r\n                            {\r\n                                \"text\":
-      \"hey  greg\",\r\n                                \"rich\": \r\n                                    {}\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531496037537,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784125971218976\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      32,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"swheeing\",\r\n                                \"rich\":
-      \r\n                                    {}\r\n                            }\r\n
-      \                   },\r\n                    {\r\n                        \"date\":
-      1531496051856,\r\n                        \"ver\": 1,\r\n                        \"msgId\":
-      \"784125978550305\",\r\n                        \"from\": \r\n                            {\r\n
-      \                               \"id\": \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n
-      \                               \"name\": \"st\",\r\n                                \"pic\":
-      null\r\n                            },\r\n                        \"chId\":
-      \"22814:gl:main\",\r\n                        \"seq\": 33,\r\n                        \"content\":
-      \r\n                            {\r\n                                \"text\":
-      \"zga s\",\r\n                                \"rich\": \r\n                                    {}\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531502583398,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784129322699810\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      34,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"hello\",\r\n                                \"rich\":
-      \r\n                                    {}\r\n                            }\r\n
-      \                   },\r\n                    {\r\n                        \"date\":
-      1531504502185,\r\n                        \"ver\": 1,\r\n                        \"msgId\":
-      \"784130305118755\",\r\n                        \"from\": \r\n                            {\r\n
-      \                               \"id\": \"7475ad73-d351-4090-9468-30085a12e01d\",\r\n
-      \                               \"name\": \"st1\",\r\n                                \"pic\":
-      null\r\n                            },\r\n                        \"chId\":
-      \"22814:gl:main\",\r\n                        \"seq\": 35,\r\n                        \"content\":
-      \r\n                            {\r\n                                \"text\":
-      \"jknfjkashdfasd\",\r\n                                \"rich\": \r\n                                    {}\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531507084725,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784131627379236\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      36,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"helll\",\r\n                                \"rich\":
-      \r\n                                    {}\r\n                            }\r\n
-      \                   },\r\n                    {\r\n                        \"date\":
-      1531507130671,\r\n                        \"ver\": 1,\r\n                        \"msgId\":
-      \"784131650903589\",\r\n                        \"from\": \r\n                            {\r\n
-      \                               \"id\": \"7475ad73-d351-4090-9468-30085a12e01d\",\r\n
-      \                               \"name\": \"st1\",\r\n                                \"pic\":
-      null\r\n                            },\r\n                        \"chId\":
-      \"22814:gl:main\",\r\n                        \"seq\": 37,\r\n                        \"content\":
-      \r\n                            {\r\n                                \"text\":
-      \"we got some interesting stuff\",\r\n                                \"rich\":
-      \r\n                                    {}\r\n                            }\r\n
-      \                   },\r\n                    {\r\n                        \"date\":
-      1531747488057,\r\n                        \"ver\": 1,\r\n                        \"msgId\":
-      \"784254713885222\",\r\n                        \"from\": \r\n                            {\r\n
-      \                               \"id\": \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n
-      \                               \"name\": \"st\",\r\n                                \"pic\":
-      null\r\n                            },\r\n                        \"chId\":
-      \"22814:gl:main\",\r\n                        \"seq\": 38,\r\n                        \"content\":
-      \r\n                            {\r\n                                \"text\":
-      \"hello\",\r\n                                \"rich\": \r\n                                    {\r\n
-      \                                       \"message\": \"hello\",\r\n                                        \"name\":
-      \"st\",\r\n                                        \"id\": \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n
-      \                                       \"lastConnectionId\": \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:8e9rummhv8sukg1h8fdo81j23a\"\r\n
-      \                                   }\r\n                            }\r\n                    },\r\n
-      \                   {\r\n                        \"date\": 1531747943184,\r\n
-      \                       \"ver\": 1,\r\n                        \"msgId\": \"784254946910247\",\r\n
-      \                       \"from\": \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      39,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"whats going on\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:mndcdi3fvgfs38peqpdotm10us\",\r\n
-      \                                       \"timeSent\": \"1:32:23 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531753052729,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784257562997288\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"7475ad73-d351-4090-9468-30085a12e01d\",\r\n                                \"name\":
-      \"st1\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      40,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"hehlll\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:4dja9076ip8ifoh12s5i78f7mt\",\r\n
-      \                                       \"timeSent\": \"2:57:32 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531753613488,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784257850105897\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      41,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"tests\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:uc6g31qi93b01avavjcvvdlaeg\",\r\n
-      \                                       \"timeSent\": \"3:06:53 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531753617527,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784257852173866\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"7475ad73-d351-4090-9468-30085a12e01d\",\r\n                                \"name\":
-      \"st1\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      42,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"another\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:jpqg99o6rofq30s63k5bm0uta7\",\r\n
-      \                                       \"timeSent\": \"3:06:57 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531753737483,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784257913591339\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      43,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"tests\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:p4nc16jkpim1kencuf1u8telpg\",\r\n
-      \                                       \"timeSent\": \"3:08:57 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531753746576,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784257918246956\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      44,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"fa\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:p4nc16jkpim1kencuf1u8telpg\",\r\n
-      \                                       \"timeSent\": \"3:09:06 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531755792406,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784258965711917\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      45,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"heyouo\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm\",\r\n
-      \                                       \"timeSent\": \"3:43:12 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531755797545,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784258968343086\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      46,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"asdas\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm\",\r\n
-      \                                       \"timeSent\": \"3:43:16 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531755802791,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784258971029039\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"7475ad73-d351-4090-9468-30085a12e01d\",\r\n                                \"name\":
-      \"st1\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      47,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"asfda\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:difd76vmuh9bmpa1ovlufedrb1\",\r\n
-      \                                       \"timeSent\": \"3:43:22 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531755976970,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784259060208688\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      48,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"hasda\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm\",\r\n
-      \                                       \"timeSent\": \"3:46:16 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531756008085,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784259076139569\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      49,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"whats up\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm\",\r\n
-      \                                       \"timeSent\": \"3:46:44 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531756028191,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784259086433842\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"7475ad73-d351-4090-9468-30085a12e01d\",\r\n                                \"name\":
-      \"st1\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      50,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"there is a delay\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:difd76vmuh9bmpa1ovlufedrb1\",\r\n
-      \                                       \"timeSent\": \"3:47:08 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531756221791,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784259185557043\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      51,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"yup\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm\",\r\n
-      \                                       \"timeSent\": \"3:50:20 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531757227219,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784259700336180\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      52,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"asdfa\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:gua7undskmon8aasrrf72ichqk\",\r\n
-      \                                       \"timeSent\": \"4:07:07 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    },\r\n                    {\r\n
-      \                       \"date\": 1531757543373,\r\n                        \"ver\":
-      1,\r\n                        \"msgId\": \"784259862207029\",\r\n                        \"from\":
-      \r\n                            {\r\n                                \"id\":
-      \"48688da3-4f9d-453d-a3a0-d2bd530d8678\",\r\n                                \"name\":
-      \"st\",\r\n                                \"pic\": null\r\n                            },\r\n
-      \                       \"chId\": \"22814:gl:main\",\r\n                        \"seq\":
-      53,\r\n                        \"content\": \r\n                            {\r\n
-      \                               \"text\": \"heyyoo\",\r\n                                \"rich\":
-      \r\n                                    {\r\n                                        \"lastConnectionId\":
-      \"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:8hgp882ohbk7sj576lcsajjg85\",\r\n
-      \                                       \"timeSent\": \"4:12:23 PM\"\r\n                                    }\r\n
-      \                           }\r\n                    }\r\n                ]\r\n
-      \       },\r\n    \"status\": 200\r\n}"
-    FullLog: 'REQUEST - 7/16/2018 1:27:41 PM
+    LastResponse: "OnSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"achievements\":
+      \r\n                [\r\n                    {\r\n                        \"extraData\":
+      null,\r\n                        \"googleAchievementId\": null,\r\n                        \"achievementId\":
+      \"0\",\r\n                        \"description\": \"Shoot down 5 airplanes
+      in one match\",\r\n                        \"title\": \"Quickshot\",\r\n                        \"appleAchievementId\":
+      null,\r\n                        \"steamEnabled\": false,\r\n                        \"fbGamePoints\":
+      null,\r\n                        \"imageUrl\": \"https://internal.braincloudservers.com/files/portal/g/22814/metadata/achievements/0.png\",\r\n
+      \                       \"steamAchievementId\": null,\r\n                        \"invisibleUntilEarned\":
+      false,\r\n                        \"fbEnabled\": false,\r\n                        \"appleEnabled\":
+      false,\r\n                        \"googleEnabled\": null,\r\n                        \"id\":
+      \"0\",\r\n                        \"status\": \"NOT_AWARDED\"\r\n                    },\r\n
+      \                   {\r\n                        \"extraData\": null,\r\n                        \"googleAchievementId\":
+      null,\r\n                        \"achievementId\": \"1\",\r\n                        \"description\":
+      \"Sink 10 ships\",\r\n                        \"title\": \"Bombardier\",\r\n
+      \                       \"appleAchievementId\": null,\r\n                        \"steamEnabled\":
+      false,\r\n                        \"fbGamePoints\": null,\r\n                        \"imageUrl\":
+      \"https://internal.braincloudservers.com/files/portal/g/22814/metadata/achievements/1.png\",\r\n
+      \                       \"steamAchievementId\": null,\r\n                        \"invisibleUntilEarned\":
+      false,\r\n                        \"fbEnabled\": false,\r\n                        \"appleEnabled\":
+      false,\r\n                        \"googleEnabled\": null,\r\n                        \"id\":
+      \"1\",\r\n                        \"status\": \"NOT_AWARDED\"\r\n                    },\r\n
+      \                   {\r\n                        \"extraData\": null,\r\n                        \"googleAchievementId\":
+      null,\r\n                        \"achievementId\": \"2\",\r\n                        \"description\":
+      \"Shoot down 50 airplanes\",\r\n                        \"title\": \"Sky Ace\",\r\n
+      \                       \"appleAchievementId\": null,\r\n                        \"steamEnabled\":
+      false,\r\n                        \"fbGamePoints\": null,\r\n                        \"imageUrl\":
+      \"https://internal.braincloudservers.com/files/portal/g/22814/metadata/achievements/2.png\",\r\n
+      \                       \"steamAchievementId\": null,\r\n                        \"invisibleUntilEarned\":
+      false,\r\n                        \"fbEnabled\": false,\r\n                        \"appleEnabled\":
+      false,\r\n                        \"googleEnabled\": null,\r\n                        \"id\":
+      \"2\",\r\n                        \"status\": \"NOT_AWARDED\"\r\n                    }\r\n
+      \               ]\r\n        },\r\n    \"status\": 200\r\n}"
+    FullLog: 'REQUEST - 7/17/2018 8:51:31 AM
 
-      {"packetId":6,"sessionId":"u1s6mtvhkat4k9pra8o48vuj59","gameId":"22814","messages":[{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"22814:gl:main"}}]}
+      {"packetId":7,"sessionId":"c1c5rui6m8d0gdlsme87tr7f7h","gameId":"22814","messages":[{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"22814:gl:main"}}]}
 
 
-      RESPONSE - 7/16/2018 1:27:26 PM
-
-      {"packetId":5,"responses":[{"data":{"evId":"5b4cd57ee3adc17cb69f7f6a"},"status":200},{"data":{},"status":200}]}
-
-
-      REQUEST - 7/16/2018 1:27:26 PM
-
-      {"packetId":5,"sessionId":"u1s6mtvhkat4k9pra8o48vuj59","gameId":"22814","messages":[{"service":"event","operation":"SEND","data":{"toId":"7475ad73-d351-4090-9468-30085a12e01d","eventType":"CONFIRM_JOIN_LOBBY","eventData":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:u1s6mtvhkat4k9pra8o48vuj59","profileId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","userName":"st"}}},{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"22814:gl:main"}}]}
+      RTT RECV: {"service":"lobby","operation":"DISBANDED","data":{"lobbyId":"22814:4v4:99","lobby":{"id":"22814:4v4:99","appId":"22814","lobbyType":"4v4","seq":99,"state":"pending","owner":"48688da3-4f9d-453d-a3a0-d2bd530d8678","rating":76,"lobbyTypeDef":{"roomConfig":null,"lobbyTypeId":"4v4","teams":{"red":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"red"},"green":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"green"}},"rules":{"allowEarlyStartWithoutMax":true,"forceOnTimeStartWithoutReady":false,"onTimeStartSecs":60,"everyReadyMinPercent":25,"everyReadyMinNum":1,"earliestStartSecs":10,"tooLateSecs":300},"launch":{"endpoint":"bcrms","secret":"eefa2e03094545c99b515c73991515eb","serviceId":"cloudCodeServiceIdserviceId"},"scripts":{"filter":"lobbyFilter"},"desc":"Four
+      by four match"},"settings":{"gameTime":300,"isPlaying":0,"mapLayout":0,"mapSize":1,"gameName":"st''s
+      Room","maxPlayers":8,"lightPosition":0},"version":1,"numMembers":0,"members":[]},"reason":{"code":"LAST_MEMBER_LEFT","desc":"Last
+      member of lobby left"}}}
 
 
-      RTT RECV: {"service":"event","operation":"GET_EVENTS","data":{"eventData":{"lastConnectionId":"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:1rskivo7tkpvnl1v573bn4nnmr","profileId":"7475ad73-d351-4090-9468-30085a12e01d","userName":"st1"},"createdAt":1531762041977,"fromPlayerId":"7475ad73-d351-4090-9468-30085a12e01d","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"OFFER_JOIN_LOBBY","evId":"5b4cd579e5a761708c6e93de"}}
+      RESPONSE - 7/17/2018 8:51:28 AM
+
+      {"packetId":6,"responses":[{"data":null,"status":200},{"data":{},"status":200}]}
 
 
-      RESPONSE - 7/16/2018 1:27:19 PM
-
-      {"packetId":4,"responses":[{"data":{"msgId":"784262163893302"},"status":200}]}
-
-
-      RTT RECV: {"service":"chat","operation":"INCOMING","data":{"date":1531762038854,"ver":1,"msgId":"784262163893302","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":54,"content":{"text":"hers''a
-      tests","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:u1s6mtvhkat4k9pra8o48vuj59","timeSent":"5:27:18
-      PM"}}}}
+      RTT RECV: {"service":"lobby","operation":"MEMBER_LEFT","data":{"lobbyId":"22814:4v4:99","lobby":{"id":"22814:4v4:99","appId":"22814","lobbyType":"4v4","seq":99,"state":"pending","owner":"48688da3-4f9d-453d-a3a0-d2bd530d8678","rating":76,"lobbyTypeDef":{"roomConfig":null,"lobbyTypeId":"4v4","teams":{"red":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"red"},"green":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"green"}},"rules":{"allowEarlyStartWithoutMax":true,"forceOnTimeStartWithoutReady":false,"onTimeStartSecs":60,"everyReadyMinPercent":25,"everyReadyMinNum":1,"earliestStartSecs":10,"tooLateSecs":300},"launch":{"endpoint":"bcrms","secret":"eefa2e03094545c99b515c73991515eb","serviceId":"cloudCodeServiceIdserviceId"},"scripts":{"filter":"lobbyFilter"},"desc":"Four
+      by four match"},"settings":{"gameTime":300,"isPlaying":0,"mapLayout":0,"mapSize":1,"gameName":"st''s
+      Room","maxPlayers":8,"lightPosition":0},"version":1,"numMembers":0,"members":[]},"member":{"appId":"22814","profileId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","sessionId":"c1c5rui6m8d0gdlsme87tr7f7h","lobbyType":"4v4","seq":99,"name":"st","pic":"","rating":0,"team":"red","isReady":false,"extra":{"nothing":""}},"reason":{"code":"LEFT_BY_CHOICE","desc":"Left
+      by choice"}}}
 
 
-      REQUEST - 7/16/2018 1:27:18 PM
+      REQUEST - 7/17/2018 8:51:27 AM
 
-      {"packetId":4,"sessionId":"u1s6mtvhkat4k9pra8o48vuj59","gameId":"22814","messages":[{"service":"chat","operation":"POST_CHAT_MESSAGE","data":{"channelId":"22814:gl:main","content":{"text":"hers''a
-      tests","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:u1s6mtvhkat4k9pra8o48vuj59","timeSent":"5:27:18
-      PM"}},"recordInHisory":true}}]}
+      {"packetId":6,"sessionId":"c1c5rui6m8d0gdlsme87tr7f7h","gameId":"22814","messages":[{"service":"lobby","operation":"LEAVE_LOBBY","data":{"lobbyId":"22814:4v4:99"}},{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"22814:gl:main"}}]}
 
 
-      RESPONSE - 7/16/2018 1:27:15 PM
-
-      {"packetId":3,"responses":[{"data":{"messages":[{"date":1530730196052,"ver":1,"msgId":"783733860378653","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":29,"content":{"text":"asdfa","rich":{}}},{"date":1531496009283,"ver":1,"msgId":"784125956752926","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":30,"content":{"text":"asdf
-      asdf a","rich":{}}},{"date":1531496012155,"ver":1,"msgId":"784125958223391","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":31,"content":{"text":"hey  greg","rich":{}}},{"date":1531496037537,"ver":1,"msgId":"784125971218976","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":32,"content":{"text":"swheeing","rich":{}}},{"date":1531496051856,"ver":1,"msgId":"784125978550305","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":33,"content":{"text":"zga
-      s","rich":{}}},{"date":1531502583398,"ver":1,"msgId":"784129322699810","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":34,"content":{"text":"hello","rich":{}}},{"date":1531504502185,"ver":1,"msgId":"784130305118755","from":{"id":"7475ad73-d351-4090-9468-30085a12e01d","name":"st1","pic":null},"chId":"22814:gl:main","seq":35,"content":{"text":"jknfjkashdfasd","rich":{}}},{"date":1531507084725,"ver":1,"msgId":"784131627379236","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":36,"content":{"text":"helll","rich":{}}},{"date":1531507130671,"ver":1,"msgId":"784131650903589","from":{"id":"7475ad73-d351-4090-9468-30085a12e01d","name":"st1","pic":null},"chId":"22814:gl:main","seq":37,"content":{"text":"we
-      got some interesting stuff","rich":{}}},{"date":1531747488057,"ver":1,"msgId":"784254713885222","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":38,"content":{"text":"hello","rich":{"message":"hello","name":"st","id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:8e9rummhv8sukg1h8fdo81j23a"}}},{"date":1531747943184,"ver":1,"msgId":"784254946910247","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":39,"content":{"text":"whats
-      going on","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:mndcdi3fvgfs38peqpdotm10us","timeSent":"1:32:23
-      PM"}}},{"date":1531753052729,"ver":1,"msgId":"784257562997288","from":{"id":"7475ad73-d351-4090-9468-30085a12e01d","name":"st1","pic":null},"chId":"22814:gl:main","seq":40,"content":{"text":"hehlll","rich":{"lastConnectionId":"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:4dja9076ip8ifoh12s5i78f7mt","timeSent":"2:57:32
-      PM"}}},{"date":1531753613488,"ver":1,"msgId":"784257850105897","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":41,"content":{"text":"tests","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:uc6g31qi93b01avavjcvvdlaeg","timeSent":"3:06:53
-      PM"}}},{"date":1531753617527,"ver":1,"msgId":"784257852173866","from":{"id":"7475ad73-d351-4090-9468-30085a12e01d","name":"st1","pic":null},"chId":"22814:gl:main","seq":42,"content":{"text":"another","rich":{"lastConnectionId":"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:jpqg99o6rofq30s63k5bm0uta7","timeSent":"3:06:57
-      PM"}}},{"date":1531753737483,"ver":1,"msgId":"784257913591339","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":43,"content":{"text":"tests","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:p4nc16jkpim1kencuf1u8telpg","timeSent":"3:08:57
-      PM"}}},{"date":1531753746576,"ver":1,"msgId":"784257918246956","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":44,"content":{"text":"fa","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:p4nc16jkpim1kencuf1u8telpg","timeSent":"3:09:06
-      PM"}}},{"date":1531755792406,"ver":1,"msgId":"784258965711917","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":45,"content":{"text":"heyouo","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm","timeSent":"3:43:12
-      PM"}}},{"date":1531755797545,"ver":1,"msgId":"784258968343086","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":46,"content":{"text":"asdas","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm","timeSent":"3:43:16
-      PM"}}},{"date":1531755802791,"ver":1,"msgId":"784258971029039","from":{"id":"7475ad73-d351-4090-9468-30085a12e01d","name":"st1","pic":null},"chId":"22814:gl:main","seq":47,"content":{"text":"asfda","rich":{"lastConnectionId":"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:difd76vmuh9bmpa1ovlufedrb1","timeSent":"3:43:22
-      PM"}}},{"date":1531755976970,"ver":1,"msgId":"784259060208688","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":48,"content":{"text":"hasda","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm","timeSent":"3:46:16
-      PM"}}},{"date":1531756008085,"ver":1,"msgId":"784259076139569","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":49,"content":{"text":"whats
-      up","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm","timeSent":"3:46:44
-      PM"}}},{"date":1531756028191,"ver":1,"msgId":"784259086433842","from":{"id":"7475ad73-d351-4090-9468-30085a12e01d","name":"st1","pic":null},"chId":"22814:gl:main","seq":50,"content":{"text":"there
-      is a delay","rich":{"lastConnectionId":"cx:22814:7475ad73-d351-4090-9468-30085a12e01d:difd76vmuh9bmpa1ovlufedrb1","timeSent":"3:47:08
-      PM"}}},{"date":1531756221791,"ver":1,"msgId":"784259185557043","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":51,"content":{"text":"yup","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:i84toe07843outr7fm7t9f7vdm","timeSent":"3:50:20
-      PM"}}},{"date":1531757227219,"ver":1,"msgId":"784259700336180","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":52,"content":{"text":"asdfa","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:gua7undskmon8aasrrf72ichqk","timeSent":"4:07:07
-      PM"}}},{"date":1531757543373,"ver":1,"msgId":"784259862207029","from":{"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":null},"chId":"22814:gl:main","seq":53,"content":{"text":"heyyoo","rich":{"lastConnectionId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:8hgp882ohbk7sj576lcsajjg85","timeSent":"4:12:23
-      PM"}}}]},"status":200}]}
+      RTT RECV: {"service":"rtt","operation":"HEARTBEAT","data":null,"evs":"433-a70773"}
 
 
-      REQUEST - 7/16/2018 1:27:14 PM
-
-      {"packetId":3,"sessionId":"u1s6mtvhkat4k9pra8o48vuj59","gameId":"22814","messages":[{"service":"chat","operation":"CHANNEL_CONNECT","data":{"channelId":"22814:gl:main","maxReturn":25}}]}
+      RTT SEND: {"service":"rtt","operation":"HEARTBEAT","data":null}
 
 
-      RTT RECV: {"service":"rtt","operation":"CONNECT","data":{"heartbeatSeconds":30,"cxId":"cx:22814:48688da3-4f9d-453d-a3a0-d2bd530d8678:u1s6mtvhkat4k9pra8o48vuj59","evs":"433-a70773"}}
+      RTT RECV: {"service":"lobby","operation":"STATUS_UPDATE","data":{"lobbyId":"22814:4v4:99","lobby":{"id":"22814:4v4:99","appId":"22814","lobbyType":"4v4","seq":99,"state":"pending","owner":"48688da3-4f9d-453d-a3a0-d2bd530d8678","rating":76,"lobbyTypeDef":{"roomConfig":null,"lobbyTypeId":"4v4","teams":{"red":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"red"},"green":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"green"}},"rules":{"allowEarlyStartWithoutMax":true,"forceOnTimeStartWithoutReady":false,"onTimeStartSecs":60,"everyReadyMinPercent":25,"everyReadyMinNum":1,"earliestStartSecs":10,"tooLateSecs":300},"launch":{"endpoint":"bcrms","secret":"eefa2e03094545c99b515c73991515eb","serviceId":"cloudCodeServiceIdserviceId"},"scripts":{"filter":"lobbyFilter"},"desc":"Four
+      by four match"},"settings":{"gameTime":300,"isPlaying":0,"mapLayout":0,"mapSize":1,"gameName":"st''s
+      Room","maxPlayers":8,"lightPosition":0},"version":1,"numMembers":1,"members":[{"profileId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":"","rating":0,"team":"red","isReady":false,"extra":{"nothing":""}}]}}}
 
 
-      RTT SEND: {"service":"rtt","operation":"CONNECT","data":{"appId":"22814","sessionId":"u1s6mtvhkat4k9pra8o48vuj59","profileId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","system":{"platform":{},"protocol":"ws"},"auth":{"X-APPID":"22814","X-RTT-SECRET":"mysecret2"}}}
+      RTT RECV: {"service":"rtt","operation":"HEARTBEAT","data":null,"evs":"433-a70773"}
 
 
-      Co'
+      RTT SEND: {"service":"rtt","operation":"HEARTBEAT","data":null}
+
+
+      RTT RECV: {"service":"lobby","operation":"STATUS_UPDATE","data":{"lobbyId":"22814:4v4:99","lobby":{"id":"22814:4v4:99","appId":"22814","lobbyType":"4v4","seq":99,"state":"early","owner":"48688da3-4f9d-453d-a3a0-d2bd530d8678","rating":76,"lobbyTypeDef":{"roomConfig":null,"lobbyTypeId":"4v4","teams":{"red":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"red"},"green":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"green"}},"rules":{"allowEarlyStartWithoutMax":true,"forceOnTimeStartWithoutReady":false,"onTimeStartSecs":60,"everyReadyMinPercent":25,"everyReadyMinNum":1,"earliestStartSecs":10,"tooLateSecs":300},"launch":{"endpoint":"bcrms","secret":"eefa2e03094545c99b515c73991515eb","serviceId":"cloudCodeServiceIdserviceId"},"scripts":{"filter":"lobbyFilter"},"desc":"Four
+      by four match"},"settings":{"gameTime":300,"isPlaying":0,"mapLayout":0,"mapSize":1,"gameName":"st''s
+      Room","maxPlayers":8,"lightPosition":0},"version":1,"numMembers":1,"members":[{"profileId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":"","rating":0,"team":"red","isReady":false,"extra":{"nothing":""}}]}}}
+
+
+      RTT RECV: {"service":"lobby","operation":"MEMBER_JOIN","data":{"lobbyId":"22814:4v4:99","lobby":{"id":"22814:4v4:99","appId":"22814","lobbyType":"4v4","seq":99,"state":"setup","owner":"48688da3-4f9d-453d-a3a0-d2bd530d8678","rating":76,"lobbyTypeDef":{"roomConfig":null,"lobbyTypeId":"4v4","teams":{"red":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"red"},"green":{"minUsers":0,"maxUsers":4,"autoAssign":true,"code":"green"}},"rules":{"allowEarlyStartWithoutMax":true,"forceOnTimeStartWithoutReady":false,"onTimeStartSecs":60,"everyReadyMinPercent":25,"everyReadyMinNum":1,"earliestStartSecs":10,"tooLateSecs":300},"launch":{"endpoint":"bcrms","secret":"eefa2e03094545c99b515c73991515eb","serviceId":"cloudCodeServiceIdserviceId"},"scripts":{"filter":"lobbyFilter"},"desc":"Four
+      by four match"},"settings":{"gameTime":300,"isPlaying":0,"mapLayout":0,"mapSize":1,"gameName":"st''s
+      Room","maxPlayers":8,"lightPosition":0},"version":1,"numMembers":1,"members":[{"profileId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","name":"st","pic":"","rating":0,"team":"red","isReady":false,"extra":{"nothing":""}}]},"member":{"appId":"22814","profileId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","sessionId":"c1c5rui6m8d0gdlsme87tr7f7h","lobbyType":"4v4","seq":99,"name":"st","pic":"","rating":0,"team":"red","isReady":false,"extra":{"nothing":""}}}}
+
+
+      RTT RECV: {"service":"lobby","operation":"MATCHMAKING_IN_PROGRESS","data":{"lobbyType":"4v4","step":3,"minRating":15.1999990940094,"maxRating":136.8000009059906,"lobbiesInRange":0}}
+
+
+      RTT RECV: {"service":"lobby","operation":"MATCHMAKING_IN_PROGRESS","data":{"lobbyType":"4v4","step":2,"minRating":60.79999977350235,"maxRating":91.20000022649765,"lobbiesInRange":0}}
+
+
+      RTT RECV: {"service":"lobby","operation":"MATCHMAKING_IN_PROGRESS","data":{"lobbyType":"4v4","step":1,"minRating":68.39999988675117,"maxRating":83.60000011324883,"lobbiesInRange":0}}
+
+
+      RESPONSE - 7/17/2018 8:49:36 AM
+
+      {"packetId":5,"responses":[{"data":{"entityId":"b915e0e3-1453-4170-b1fa-3566720cd6b3","entityType":"gameName","version":563,"data":{"gameName":"st''s
+      Room"},"acl":{"other":0},"createdAt":1530191786879,"updatedAt":1531831776242},"status":200},{"data":{"statistics":{"planesDestroyed":0,"bombsHit":15,"bombsDropped":16,"gamesPlayed":1,"timesDestroyed":0,"carriersDestroyed":5,"shotsFired":7,"gamesWon":1}},"status":200},{"data":{"abTestingId":11,"lastLogin":1531831539972,"server_time":1531831776250,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1530033301475,"parentProfileId":null,"emailAddress":"st@st.com","experienceLevel":1,"countryCode":null,"vcClaimed":0,"currency":{},"id":"48688da3-4f9d-453d-a3a0-d2bd530d8678","amountSpent":0,"previousLogin":1531831292284,"playerName":"st","pictureUrl":null,"incoming_events":[{"gameId":"22814","eventData":null,"createdAt":1531755829925,"eventId":26557,"fromPlayerId":"7475ad73-d351-4090-9468-30085a12e01d","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"OFFER_JOIN_LOBBY","evId":"5b4cbd35e3adc13e80a736aa"},{"gameId":"22814","eventData":null,"createdAt":1531755833687,"eventId":30318,"fromPlayerId":"7475ad73-d351-4090-9468-30085a12e01d","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"OFFER_JOIN_LOBBY","evId":"5b4cbd39e3adc13e80a736ad"},{"gameId":"22814","eventData":null,"createdAt":1531756020271,"eventId":20301,"fromPlayerId":"7475ad73-d351-4090-9468-30085a12e01d","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"OFFER_JOIN_LOBBY","evId":"5b4cbdf4e3adc13e80a736cc"},{"gameId":"22814","eventData":{"someMapAttribute":"someValue"},"createdAt":1531756066192,"eventId":687,"fromPlayerId":"7475ad73-d351-4090-9468-30085a12e01d","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"type1","evId":"5b4cbe22e3adc13e80a736f0"},{"gameId":"22814","eventData":{"someMapAttribute":"someValue"},"createdAt":1531756160014,"eventId":28975,"fromPlayerId":"ba3eb10c-6b10-4aef-804e-9531f8a08b6c","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"type1","evId":"5b4cbe80e3adc13e80a736fd"},{"gameId":"22814","eventData":{"someMapAttribute":"someValue
+      48688da3-4f9d-453d-a3a0-d2bd530d8678 "},"createdAt":1531757280328,"eventId":null,"fromPlayerId":"ba3eb10c-6b10-4aef-804e-9531f8a08b6c","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"test","evId":"5b4cc2e0e3adc13e80a73772"},{"gameId":"22814","eventData":null,"createdAt":1531757547372,"eventId":null,"fromPlayerId":"7475ad73-d351-4090-9468-30085a12e01d","toPlayerId":"48688da3-4f9d-453d-a3a0-d2bd530d8678","eventType":"OFFER_JOIN_LOBBY","evId":"5b4cc3ebe'
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}

@@ -170,9 +170,6 @@ public class BombersNetworkManager : NetworkManager
     private void LobbyCallback(string in_response)
     {
         BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
-
-        Debug.Log("LobbyCallback --- " + in_response);
-
         Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_response);
         Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
         Dictionary<string, object> lobbyData = jsonData;
@@ -432,9 +429,9 @@ public class BombersNetworkManager : NetworkManager
                                 matchOptions["maxPlayers"] = 8;
                                 matchOptions["lightPosition"] = 0;
 
-                                BombersNetworkManager.WaitOnLobbyJoin();
+                                WaitOnLobbyJoin();
                                 // Find or create with someone else!
-                                (BombersNetworkManager.singleton as BombersNetworkManager).FindLobby(matchOptions, cxIds);
+                                FindLobby(matchOptions, cxIds);
                             }
                             break;
 
@@ -447,7 +444,7 @@ public class BombersNetworkManager : NetworkManager
         }
     }
 
-    public static void WaitOnLobbyJoin()
+    public static void WaitOnLobbyJoin()//Dictionary<string, object> in_matchOptions)
     {
         // if matchmaking, go to find lobby state
         BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
@@ -455,7 +452,11 @@ public class BombersNetworkManager : NetworkManager
         {
             matcher.HideControls();
             matcher.OnJoinRoomState();
-            _BC.Client.RegisterRTTLobbyCallback((BombersNetworkManager.singleton as BombersNetworkManager).LobbyCallback);
+            BombersNetworkManager thisInstance = BombersNetworkManager.singleton as BombersNetworkManager;
+            _BC.Client.RegisterRTTLobbyCallback(thisInstance.LobbyCallback);
+
+            // TODO delete this once join with others is working
+            //thisInstance.FindLobby(in_matchOptions);
         }
     }
 

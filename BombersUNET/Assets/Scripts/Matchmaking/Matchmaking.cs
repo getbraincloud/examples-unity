@@ -660,16 +660,15 @@ namespace BrainCloudUNETExample.Matchmaking
         public void ConfirmJoinGameWithOther()
         {
             // send event to confirm
-            // send event to other person
             Dictionary<string, object> jsonData = new Dictionary<string, object>();
             jsonData["lastConnectionId"] = BombersNetworkManager._BC.Client.RTTConnectionID;
             jsonData["profileId"] = BombersNetworkManager._BC.Client.ProfileId;
             jsonData["userName"] = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
-
+            
+            // send event to other person
             BombersNetworkManager._BC.Client.EventService.SendEvent(m_lastOfferedJoinLobby, "CONFIRM_JOIN_LOBBY",
                 BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonWriter.Serialize(jsonData));
 
-            // and wait for the creation to occur
             BombersNetworkManager.WaitOnLobbyJoin();
         }
 
