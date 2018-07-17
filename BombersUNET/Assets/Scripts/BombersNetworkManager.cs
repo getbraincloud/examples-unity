@@ -163,7 +163,7 @@ public class BombersNetworkManager : NetworkManager
 
     public void LeaveLobby()
     {
-        if (LobbyInfo != null) _BC.LobbyService.LeaveLobby(LobbyInfo.LobbyId);
+        if (LobbyInfo != null && LobbyInfo.LobbyId != "") _BC.LobbyService.LeaveLobby(LobbyInfo.LobbyId);
         _BC.ChatService.ChannelDisconnect("22814:gl:main");
     }
 

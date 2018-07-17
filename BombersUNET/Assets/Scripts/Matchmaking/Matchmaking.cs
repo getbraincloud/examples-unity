@@ -416,7 +416,6 @@ namespace BrainCloudUNETExample.Matchmaking
                 Dictionary<string, object> jsonData = new Dictionary<string, object>();
                 jsonData["message"] = in_field.text;
                 jsonData["name"] = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
-                jsonData["id"] = BombersNetworkManager._BC.Client.ProfileId;
 
                 BombersNetworkManager._BC.LobbyService.SendSignal(BombersNetworkManager.LobbyInfo.LobbyId, jsonData);
                 in_field.text = "";
@@ -439,9 +438,15 @@ namespace BrainCloudUNETExample.Matchmaking
                 GameObject tempObj;
                 Dictionary<string, object> jsonData = in_jsonMessage.ContainsKey("data") ?
                                                         (Dictionary<string, object>)in_jsonMessage["data"] : in_jsonMessage;
+
+                Dictionary<string, object> fromData = (Dictionary<string, object>)jsonData["from"];
+                
+                Dictionary<string, object> signalData = jsonData.ContainsKey("signalData") ?
+                                                        (Dictionary<string, object>)jsonData["signalData"] : jsonData;
+
                 tempObj = (GameObject)Instantiate(ChatCell, Vector3.zero, Quaternion.identity, contentTransform);
                 tempCell = tempObj.GetComponent<ChatCell>();
-                tempCell.Init(jsonData["name"] as string, jsonData["message"] as string, jsonData["id"] as string, "", "");
+                tempCell.Init(fromData["name"] as string, signalData["message"] as string, fromData["id"] as string, fromData["pic"] as string, "");
             }
         }
 
