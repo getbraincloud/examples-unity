@@ -163,7 +163,9 @@ public class BombersNetworkManager : NetworkManager
 
     public void LeaveLobby()
     {
-        if (LobbyInfo != null && LobbyInfo.LobbyId != "") _BC.LobbyService.LeaveLobby(LobbyInfo.LobbyId);
+        if (LobbyInfo != null && LobbyInfo.LobbyId != "") _BC.LobbyService.LeaveLobby("1238812");// LobbyInfo.LobbyId);
+
+        // cache the channel Id that you are connected to in order to disconnect, this is for demo purposes
         _BC.ChatService.ChannelDisconnect("22814:gl:main");
     }
 
@@ -319,6 +321,8 @@ public class BombersNetworkManager : NetworkManager
     {
         _BC.Client.RegisterRTTChatCallback(chatCallback);
         _BC.Client.RegisterRTTEventCallback(eventCallback);
+
+        // do a get channel call instead of manually appending these, this is for demo purposes
         _BC.ChatService.ChannelConnect(_BC.Client.AppId + ":gl:main", 25, onChannelConnected);
     }
 
