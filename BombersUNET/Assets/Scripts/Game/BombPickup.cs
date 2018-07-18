@@ -13,9 +13,9 @@ namespace BrainCloudUNETExample.Game
         void OnTriggerEnter(Collider aOther)
         {
             if (!m_isActive) return;
-            if (aOther.GetComponent<PlaneController>() != null && aOther.GetComponent<PlaneController>().m_playerID == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aOther.GetComponent<PlaneController>() != null && aOther.GetComponent<PlaneController>().m_playerID == BombersNetworkManager.LocalPlayer.m_playerID)
             {
-                BombersNetworkManager.m_localPlayer.BombPickedUpCommand(BombersNetworkManager.m_localPlayer.m_playerID, m_pickupID);
+                BombersNetworkManager.LocalPlayer.BombPickedUpCommand(BombersNetworkManager.LocalPlayer.m_playerID, m_pickupID);
                 m_isActive = false;
                 Destroy(gameObject);
             }
@@ -24,9 +24,9 @@ namespace BrainCloudUNETExample.Game
         void OnTriggerStay(Collider aOther)
         {
             if (!m_isActive) return;
-            if (aOther.GetComponent<PlaneController>() != null && aOther.GetComponent<PlaneController>().m_playerID == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aOther.GetComponent<PlaneController>() != null && aOther.GetComponent<PlaneController>().m_playerID == BombersNetworkManager.LocalPlayer.m_playerID)
             {
-                BombersNetworkManager.m_localPlayer.BombPickedUpCommand(BombersNetworkManager.m_localPlayer.m_playerID, m_pickupID);
+                BombersNetworkManager.LocalPlayer.BombPickedUpCommand(BombersNetworkManager.LocalPlayer.m_playerID, m_pickupID);
                 m_isActive = false;
                 Destroy(gameObject);
             }
@@ -58,7 +58,7 @@ namespace BrainCloudUNETExample.Game
             m_lifeTime -= Time.fixedDeltaTime;
             if (m_lifeTime <= 0 && m_isActive)
             {
-                BombersNetworkManager.m_localPlayer.DespawnBombPickupCommand(m_pickupID);
+                BombersNetworkManager.LocalPlayer.DespawnBombPickupCommand(m_pickupID);
                 m_isActive = false;
                 return;
             }

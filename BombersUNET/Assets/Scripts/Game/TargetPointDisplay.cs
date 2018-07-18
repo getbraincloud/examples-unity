@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using BrainCloudUNETExample.Game.PlayerInput;
 
 namespace BrainCloudUNETExample.Game
@@ -17,10 +16,10 @@ namespace BrainCloudUNETExample.Game
 
         void LateUpdate()
         {
-            if (BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().HasBombs())
+            if (BombersNetworkManager.LocalPlayer.GetComponent<WeaponController>().HasBombs())
             {
                 
-                if (m_team == BombersNetworkManager.m_localPlayer.m_team)
+                if (m_team == BombersNetworkManager.LocalPlayer.m_team)
                 {
                     GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0.0f);
                 }

@@ -61,18 +61,18 @@ public class GameInfo : NetworkBehaviour {
     }
 
     [Server]
-    public void Initialize(Dictionary<string, string> aOptions)
+    public void Initialize(Dictionary<string, object> aOptions)
     {
         m_team1Score = 0;
         m_team2Score = 0;
-        m_gameTime = int.Parse(aOptions["gameTime"]);
+        m_gameTime = (int)aOptions["gameTime"];
         m_originalGameTime = m_gameTime;
-        m_mapLayout = int.Parse(aOptions["mapLayout"]);
-        m_mapSize = int.Parse(aOptions["mapSize"]);
-        m_lightPosition = int.Parse(aOptions["lightPosition"]);
-        m_maxPlayers = int.Parse(aOptions["maxPlayers"]);
-        m_gameName = aOptions["gameName"];
-        m_isPlaying = int.Parse(aOptions["isPlaying"]);
+        m_mapLayout = (int)aOptions["mapLayout"];
+        m_mapSize = (int)aOptions["mapSize"];
+        m_lightPosition = (int)aOptions["lightPosition"];
+        m_maxPlayers = (int)(uint)aOptions["maxPlayers"];
+        m_gameName = (string)aOptions["gameName"];
+        m_isPlaying = (int)aOptions["isPlaying"];
         m_team1Players = 0;
         m_team2Players = 0;
     }
