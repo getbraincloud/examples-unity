@@ -41,6 +41,9 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         public int m_playerID;
 
         [SyncVar]
+        public string m_profileId;
+
+        [SyncVar]
         public int m_team;
 
         [SyncVar]
@@ -91,6 +94,8 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         [SyncVar]
         public bool m_planeActive = false;
 
+        public BCLobbyMemberInfo MemberInfo;
+
         void Awake()
         {
             if (!isLocalPlayer || !hasAuthority)
@@ -105,12 +110,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             {
                 return;
             }
-
-
+            
             m_gMan = GameObject.Find("GameManager").GetComponent<GameManager>();
-            StartCoroutine("UpdateVarsClient");
-            CmdUpdateSyncVars();
-            BombersNetworkManager.m_localPlayer = this;
+            
+            BombersNetworkManager.LocalPlayer = this;
             m_displayName = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
             m_playerID = (int)netId.Value;
 
@@ -119,6 +122,9 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             m_acceleration = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_planeAcceleration;
             m_baseHealth = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_basePlaneHealth;
             m_maxSpeedMultiplier = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_maxPlaneSpeedMultiplier;
+
+            StartCoroutine("UpdateVarsClient");
+            CmdUpdateSyncVars();
         }
 
         [Command(channel=1)]
@@ -128,7 +134,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         }
 
         [Command(channel=1)]
-        void CmdUpdateSyncVarsFromClient(int aScore, byte aPlayerID, byte aTeam, byte aKills, byte aDeaths, int aPing, string aDisplayName, bool isActive, byte aHealth)
+        void CmdUpdateSyncVarsFromClient(int aScore, byte aPlayerID, byte aTeam, byte aKills, byte aDeaths, int aPing, string aDisplayName, bool isActive, byte aHealth, string in_profileId)
         {
             m_score = aScore;
             m_playerID = (int)aPlayerID;
@@ -139,6 +145,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             m_displayName = aDisplayName;
             m_planeActive = isActive;
             m_health = (int)aHealth;
+            m_profileId = in_profileId;
         }
 
         IEnumerator UpdateVars()
@@ -156,7 +163,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
             while (true)
             {
-                CmdUpdateSyncVarsFromClient(m_score, (byte)m_playerID, (byte)m_team, (byte)m_kills, (byte)m_deaths, m_ping, m_displayName, m_planeActive, (byte)m_health);
+                CmdUpdateSyncVarsFromClient(m_score, (byte)m_playerID, (byte)m_team, (byte)m_kills, (byte)m_deaths, m_ping, m_displayName, m_planeActive, (byte)m_health, m_profileId);
                 yield return new WaitForSeconds(0.5f);
             }
         }
@@ -555,9 +562,9 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 }
             }
 
-            if (aPlayer == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aPlayer == BombersNetworkManager.LocalPlayer.m_playerID)
             {
-                BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().AddBomb();
+                BombersNetworkManager.LocalPlayer.GetComponent<WeaponController>().AddBomb();
             }
         }
 
@@ -580,28 +587,6 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             RpcDestroyedShip((byte)shipID, (byte)aBombInfo.m_shooter);
         }
 
-        /*[Command]
-        public void CmdDestroyedShip(int aShipID, string aBombInfoString)
-        {
-            BombController.BombInfo aBombInfo = BombController.BombInfo.GetBombInfo(aBombInfoString);
-
-            if (isServer)
-            {
-                if (BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1)
-                {
-                    m_gMan.m_gameInfo.SetTeamScore(1, m_gMan.m_gameInfo.GetTeamScore(1) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
-
-                }
-                else
-                {
-                    m_gMan.m_gameInfo.SetTeamScore(2, m_gMan.m_gameInfo.GetTeamScore(2) + GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction);
-
-                }
-            }
-
-            
-        }*/
-
         [ClientRpc]
         void RpcDestroyedShip(byte aShipID, byte aShooter)
         {
@@ -618,7 +603,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
             if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
             {
-                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shipIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+                BombersNetworkManager.LocalPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shipIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
             }
 
             if (ship == null) return;
@@ -627,22 +612,22 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             StopCoroutine("FadeOutShipMessage");
             if (ship.m_team == 1)
             {
-                if (BombersNetworkManager.m_localPlayer.m_team == 1)
+                if (BombersNetworkManager.LocalPlayer.m_team == 1)
                 {
                     StartCoroutine(m_gMan.FadeOutShipMessage(m_gMan.m_allyShipSunk, m_gMan.m_greenShipLogo));
                 }
-                else if (BombersNetworkManager.m_localPlayer.m_team == 2)
+                else if (BombersNetworkManager.LocalPlayer.m_team == 2)
                 {
                     StartCoroutine(m_gMan.FadeOutShipMessage(m_gMan.m_enemyShipSunk, m_gMan.m_greenShipLogo));
                 }
             }
             else
             {
-                if (BombersNetworkManager.m_localPlayer.m_team == 1)
+                if (BombersNetworkManager.LocalPlayer.m_team == 1)
                 {
                     StartCoroutine(m_gMan.FadeOutShipMessage(m_gMan.m_enemyShipSunk, m_gMan.m_redShipLogo));
                 }
-                else if (BombersNetworkManager.m_localPlayer.m_team == 2)
+                else if (BombersNetworkManager.LocalPlayer.m_team == 2)
                 {
                     StartCoroutine(m_gMan.FadeOutShipMessage(m_gMan.m_allyShipSunk, m_gMan.m_redShipLogo));
                 }
@@ -745,10 +730,10 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             if (isServer)
                 ship.StartRespawn();
 
-            if (aShooter == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aShooter == BombersNetworkManager.LocalPlayer.m_playerID)
             {
                 m_gMan.m_carriersDestroyed++;
-                BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
+                BombersNetworkManager.LocalPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForShipDestruction;
             }
         }
 
@@ -780,7 +765,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
             if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
             {
-                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+                BombersNetworkManager.LocalPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
             }
 
             if (shipTarget != null)
@@ -836,16 +821,16 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 }
             }
 
-            if (aShooter == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aShooter == BombersNetworkManager.LocalPlayer.m_playerID)
             {
                 m_gMan.m_bombsHit++;
-                BombersNetworkManager.m_localPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
+                BombersNetworkManager.LocalPlayer.m_score += GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_pointsForWeakpointDestruction;
             }
 
             Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
             if (GeometryUtility.TestPlanesAABB(frustrum, ship.transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Collider>().bounds))
             {
-                BombersNetworkManager.m_localPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
+                BombersNetworkManager.LocalPlayer.ShakeCamera(GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_weakpointIntensity, GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_shakeTime);
             }
 
             if (shipTarget == null) return;
@@ -991,9 +976,9 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 }
             }
 
-            if (aHitPlayer == BombersNetworkManager.m_localPlayer.m_playerID)
+            if (aHitPlayer == BombersNetworkManager.LocalPlayer.m_playerID)
             {
-                BombersNetworkManager.m_localPlayer.TakeBulletDamage(aShooter);
+                BombersNetworkManager.LocalPlayer.TakeBulletDamage(aShooter);
             }
         }
 
@@ -1085,7 +1070,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             {
                 return;
             }
-            CmdSpawnFlare(aPosition, aVelocity, BombersNetworkManager.m_localPlayer.m_playerID);
+            CmdSpawnFlare(aPosition, aVelocity, BombersNetworkManager.LocalPlayer.m_playerID);
         }
 
         [Command(channel = 1)]
@@ -1132,7 +1117,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 aBombInfo.m_isMaster = true;
             }
 
-            GameObject bomb = BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().SpawnBomb(aBombInfo);
+            GameObject bomb = BombersNetworkManager.LocalPlayer.GetComponent<WeaponController>().SpawnBomb(aBombInfo);
             m_gMan.m_spawnedBombs.Add(bomb.GetComponent<BombController>().GetBombInfo());
             int playerTeam = BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team;
 
@@ -1159,7 +1144,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
                 aBombInfo.m_isMaster = true;
             }
 
-            GameObject bomb = BombersNetworkManager.m_localPlayer.GetComponent<WeaponController>().SpawnBomb(aBombInfo);
+            GameObject bomb = BombersNetworkManager.LocalPlayer.GetComponent<WeaponController>().SpawnBomb(aBombInfo);
             m_gMan.m_spawnedBombs.Add(bomb.GetComponent<BombController>().GetBombInfo());
             int playerTeam = BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team;
 
@@ -1231,27 +1216,27 @@ namespace BrainCloudUNETExample.Game.PlayerInput
 
             if (aShooter == -1)
             {
-                if (aVictim == BombersNetworkManager.m_localPlayer.m_playerID)
+                if (aVictim == BombersNetworkManager.LocalPlayer.m_playerID)
                 {
                     m_respawning = true;
-                    BombersNetworkManager.m_localPlayer.DestroyPlayerPlane();
-                    BombersNetworkManager.m_localPlayer.m_deaths += 1;
+                    BombersNetworkManager.LocalPlayer.DestroyPlayerPlane();
+                    BombersNetworkManager.LocalPlayer.m_deaths += 1;
                     CmdStartRespawn(m_playerID);
                 }
             }
             else
             {
 
-                if (aVictim == BombersNetworkManager.m_localPlayer.m_playerID)
+                if (aVictim == BombersNetworkManager.LocalPlayer.m_playerID)
                 {
                     m_respawning = true;
-                    BombersNetworkManager.m_localPlayer.DestroyPlayerPlane();
-                    BombersNetworkManager.m_localPlayer.m_deaths += 1;
+                    BombersNetworkManager.LocalPlayer.DestroyPlayerPlane();
+                    BombersNetworkManager.LocalPlayer.m_deaths += 1;
                     CmdStartRespawn(m_playerID);
                 }
-                else if (aShooter == BombersNetworkManager.m_localPlayer.m_playerID)
+                else if (aShooter == BombersNetworkManager.LocalPlayer.m_playerID)
                 {
-                    BombersNetworkManager.m_localPlayer.m_kills += 1;
+                    BombersNetworkManager.LocalPlayer.m_kills += 1;
                 }
             }
         }
@@ -1297,7 +1282,7 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             RpcSpawnPlayers();
             return;
         }
-
+        
         public void SpawnPlayerLocal(int aPlayerID)
         {
             RpcSpawnPlayerLocal();
@@ -1315,12 +1300,12 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             Vector3 spawnPoint = Vector3.zero;
             spawnPoint.z = 22;
 
-            if (BombersNetworkManager.m_localPlayer.m_team == 1)
+            if (BombersNetworkManager.LocalPlayer.m_team == 1)
             {
                 spawnPoint.x = Random.Range(m_gMan.m_team1SpawnBounds.bounds.center.x - m_gMan.m_team1SpawnBounds.bounds.size.x / 2, m_gMan.m_team1SpawnBounds.bounds.center.x + m_gMan.m_team1SpawnBounds.bounds.size.x / 2) - 10;
                 spawnPoint.y = Random.Range(m_gMan.m_team1SpawnBounds.bounds.center.y - m_gMan.m_team1SpawnBounds.bounds.size.y / 2, m_gMan.m_team1SpawnBounds.bounds.center.y + m_gMan.m_team1SpawnBounds.bounds.size.y / 2);
             }
-            else if (BombersNetworkManager.m_localPlayer.m_team == 2)
+            else if (BombersNetworkManager.LocalPlayer.m_team == 2)
             {
                 spawnPoint.x = Random.Range(m_gMan.m_team2SpawnBounds.bounds.center.x - m_gMan.m_team2SpawnBounds.bounds.size.x / 2, m_gMan.m_team2SpawnBounds.bounds.center.x + m_gMan.m_team2SpawnBounds.bounds.size.x / 2) + 10;
                 spawnPoint.y = Random.Range(m_gMan.m_team2SpawnBounds.bounds.center.y - m_gMan.m_team2SpawnBounds.bounds.size.y / 2, m_gMan.m_team2SpawnBounds.bounds.center.y + m_gMan.m_team2SpawnBounds.bounds.size.y / 2);
@@ -1349,12 +1334,12 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             Vector3 spawnPoint = Vector3.zero;
             spawnPoint.z = 22;
 
-            if (BombersNetworkManager.m_localPlayer.m_team == 1)
+            if (BombersNetworkManager.LocalPlayer.m_team == 1)
             {
                 spawnPoint.x = Random.Range(m_gMan.m_team1SpawnBounds.bounds.center.x - m_gMan.m_team1SpawnBounds.bounds.size.x / 2, m_gMan.m_team1SpawnBounds.bounds.center.x + m_gMan.m_team1SpawnBounds.bounds.size.x / 2) - 10;
                 spawnPoint.y = Random.Range(m_gMan.m_team1SpawnBounds.bounds.center.y - m_gMan.m_team1SpawnBounds.bounds.size.y / 2, m_gMan.m_team1SpawnBounds.bounds.center.y + m_gMan.m_team1SpawnBounds.bounds.size.y / 2);
             }
-            else if (BombersNetworkManager.m_localPlayer.m_team == 2)
+            else if (BombersNetworkManager.LocalPlayer.m_team == 2)
             {
                 spawnPoint.x = Random.Range(m_gMan.m_team2SpawnBounds.bounds.center.x - m_gMan.m_team2SpawnBounds.bounds.size.x / 2, m_gMan.m_team2SpawnBounds.bounds.center.x + m_gMan.m_team2SpawnBounds.bounds.size.x / 2) + 10;
                 spawnPoint.y = Random.Range(m_gMan.m_team2SpawnBounds.bounds.center.y - m_gMan.m_team2SpawnBounds.bounds.size.y / 2, m_gMan.m_team2SpawnBounds.bounds.center.y + m_gMan.m_team2SpawnBounds.bounds.size.y / 2);
@@ -1384,12 +1369,12 @@ namespace BrainCloudUNETExample.Game.PlayerInput
             Vector3 spawnPoint = Vector3.zero;
             spawnPoint.z = 22;
 
-            if (BombersNetworkManager.m_localPlayer.m_team == 1)
+            if (BombersNetworkManager.LocalPlayer.m_team == 1)
             {
                 spawnPoint.x = Random.Range(m_gMan.m_team1SpawnBounds.bounds.center.x - m_gMan.m_team1SpawnBounds.bounds.size.x / 2, m_gMan.m_team1SpawnBounds.bounds.center.x + m_gMan.m_team1SpawnBounds.bounds.size.x / 2) - 10;
                 spawnPoint.y = Random.Range(m_gMan.m_team1SpawnBounds.bounds.center.y - m_gMan.m_team1SpawnBounds.bounds.size.y / 2, m_gMan.m_team1SpawnBounds.bounds.center.y + m_gMan.m_team1SpawnBounds.bounds.size.y / 2);
             }
-            else if (BombersNetworkManager.m_localPlayer.m_team == 2)
+            else if (BombersNetworkManager.LocalPlayer.m_team == 2)
             {
                 spawnPoint.x = Random.Range(m_gMan.m_team2SpawnBounds.bounds.center.x - m_gMan.m_team2SpawnBounds.bounds.size.x / 2, m_gMan.m_team2SpawnBounds.bounds.center.x + m_gMan.m_team2SpawnBounds.bounds.size.x / 2) + 10;
                 spawnPoint.y = Random.Range(m_gMan.m_team2SpawnBounds.bounds.center.y - m_gMan.m_team2SpawnBounds.bounds.size.y / 2, m_gMan.m_team2SpawnBounds.bounds.center.y + m_gMan.m_team2SpawnBounds.bounds.size.y / 2);
@@ -1421,18 +1406,21 @@ namespace BrainCloudUNETExample.Game.PlayerInput
         [Command(channel = 1)]
         void CmdAnnounceJoin(int aPlayerID, string aPlayerName, int aTeam)
         {
-            SpawnPlayers();
+            //SpawnPlayers();
+            BombersPlayerController controller = null;
             foreach (GameObject plane in GameObject.FindGameObjectsWithTag("PlayerController"))
             {
-                plane.GetComponent<BombersPlayerController>().RpcAnnounceJoin(aPlayerID, aPlayerName, aTeam);
+                controller = plane.GetComponent<BombersPlayerController>();
+                if (controller.m_profileId != BombersNetworkManager._BC.Client.ProfileId)
+                    controller.RpcAnnounceJoin(aPlayerID, aPlayerName, aTeam);
             }
         }
 
         [ClientRpc(channel = 1)]
         void RpcAnnounceJoin(int aPlayerID, string aPlayerName, int aTeam)
         {
-            string message = aPlayerName + " has joined the fight\n on the ";
-            message += (aTeam == 1) ? "green team!" : "red team!";
+            string message = aPlayerName + " has joined to spectate the game! ";
+            //message += (aTeam == 1) ? "green team!" : "red team!";
             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayDialog(message, true);
         }
     }

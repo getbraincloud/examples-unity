@@ -18,7 +18,7 @@ public class BCConfig : MonoBehaviour
 		_bc = gameObject.AddComponent<BrainCloudWrapper>();
 		
 		_bc.WrapperName = gameObject.name;    // Optional: Set a wrapper name
-		_bc.Init();      // Init data is taken from the brainCloud Unity Plugin
-		
+        _bc.Init();      // Init data is taken from the brainCloud Unity Plugin
+        _bc.Client.EnableLogging(true);
 	}
 }

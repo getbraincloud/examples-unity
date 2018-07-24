@@ -76,9 +76,6 @@ namespace BrainCloudUNETExample.Connection
         public JsonData m_leaderboardData;
 
         public static BrainCloudStats s_instance;
-        
-        private BrainCloudWrapper _bc;
-
         void Awake()
         {
             if (s_instance)
@@ -87,9 +84,7 @@ namespace BrainCloudUNETExample.Connection
                 s_instance = this;
 
             m_achievements = new List<Achievement>();
-            
-            _bc = GameObject.Find("MainPlayer").GetComponent<BCConfig>().GetBrainCloud();
-
+            BombersNetworkManager.RefreshBCVariable();
         }
 
         public void GetLeaderboard(string aLeaderboardID)
@@ -101,7 +96,7 @@ namespace BrainCloudUNETExample.Connection
         public void GetLeaderboardPage(string aLeaderboardID, int aIndex, int aSecondIndex)
         {
             m_leaderboardReady = false;
-            _bc.Client.SocialLeaderboardService.GetGlobalLeaderboardPage(
+            BombersNetworkManager._BC.Client.SocialLeaderboardService.GetGlobalLeaderboardPage(
 				aLeaderboardID, 
 				BrainCloud.BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 
 				aIndex, 
@@ -129,16 +124,16 @@ namespace BrainCloudUNETExample.Connection
 
         public void ReadGlobalProperties()
         {
-            _bc.Client.GlobalAppService.ReadProperties(PropertiesSuccess_Callback, PropertiesFailure_Callback, null);
+            BombersNetworkManager._BC.Client.GlobalAppService.ReadProperties(PropertiesSuccess_Callback, PropertiesFailure_Callback, null);
         }
 
         public void ReadStatistics()
         {
             // Ask brainCloud for statistics
-            _bc.Client.PlayerStatisticsService.ReadAllUserStats(StatsSuccess_Callback, StatsFailure_Callback, null);
-            _bc.Client.PlayerStateService.ReadUserState(StateSuccess_Callback, StateFailure_Callback, null);
-            _bc.Client.GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
-            _bc.Client.GamificationService.ReadAchievements(true, AchievementSuccess_Callback, AchievementFailure_Callback, null);
+            BombersNetworkManager._BC.Client.PlayerStatisticsService.ReadAllUserStats(StatsSuccess_Callback, StatsFailure_Callback, null);
+            BombersNetworkManager._BC.Client.PlayerStateService.ReadUserState(StateSuccess_Callback, StateFailure_Callback, null);
+            BombersNetworkManager._BC.Client.GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
+            BombersNetworkManager._BC.Client.GamificationService.ReadAchievements(true, AchievementSuccess_Callback, AchievementFailure_Callback, null);
         }
 
         public void AchievementSuccess_Callback(string responseData, object cbObject)
@@ -161,7 +156,7 @@ namespace BrainCloudUNETExample.Connection
                         if (!m_achievements[i].m_achieved)
                         {
                             m_achievements[i].m_achieved = true;
-                            _bc.Client.GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
+                            BombersNetworkManager._BC.Client.GamificationService.AwardAchievements(m_achievements[i].m_id, null, null, null);
                             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                         }
                         break;
@@ -178,7 +173,7 @@ namespace BrainCloudUNETExample.Connection
                         if (!m_achievements[i].m_achieved)
                         {
                             m_achievements[i].m_achieved = true;
-                            _bc.Client.GamificationService.AwardAchievements(m_achievements[i].m_id, AwardSuccess_Callback, AwardFailure_Callback, null);
+                            BombersNetworkManager._BC.Client.GamificationService.AwardAchievements(m_achievements[i].m_id, AwardSuccess_Callback, AwardFailure_Callback, null);
                             GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                         }
                         break;
@@ -207,7 +202,7 @@ namespace BrainCloudUNETExample.Connection
                     {
                         m_achievements[i].m_achieved = true;
                         string[] achArray = new string[] { m_achievements[i].m_id };
-                        _bc.Client.GamificationService.AwardAchievements(achArray, null, null, null);
+                        BombersNetworkManager._BC.Client.GamificationService.AwardAchievements(achArray, null, null, null);
                         GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>().DisplayAchievement(int.Parse(m_achievements[i].m_id), m_achievements[i].m_name, m_achievements[i].m_description);
                     }
                     break;
@@ -245,8 +240,8 @@ namespace BrainCloudUNETExample.Connection
 
             int killScore = (kills) * 10000 - (m_statTimesDestroyed + aDeaths);
             int bombScore = (bombs) * 10000 - (m_statTimesDestroyed + aDeaths);
-            _bc.Client.SocialLeaderboardService.PostScoreToLeaderboard("KDR", killScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
-            _bc.Client.SocialLeaderboardService.PostScoreToLeaderboard("BDR", bombScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
+            BombersNetworkManager._BC.Client.SocialLeaderboardService.PostScoreToLeaderboard("KDR", killScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
+            BombersNetworkManager._BC.Client.SocialLeaderboardService.PostScoreToLeaderboard("BDR", bombScore, "{\"rank\":\"" + m_playerLevelTitles[m_playerLevel - 1] + "\", \"level\":\"" + m_playerLevel + "\"}");
             ReadStatistics();
         }
 
@@ -267,14 +262,14 @@ namespace BrainCloudUNETExample.Connection
         };
 
             // Send to the cloud
-            _bc.Client.PlayerStatisticsService.IncrementUserStats(
+            BombersNetworkManager._BC.Client.PlayerStatisticsService.IncrementUserStats(
                 stats, StatsSuccess_Callback, StatsFailure_Callback, null);
         }
 
         public void IncrementExperienceToBrainCloud(int aExperience)
         {
 
-            _bc.Client.PlayerStatisticsService.IncrementExperiencePoints(aExperience, StateSuccess_Callback, StateFailure_Callback, null);
+            BombersNetworkManager._BC.Client.PlayerStatisticsService.IncrementExperiencePoints(aExperience, StateSuccess_Callback, StateFailure_Callback, null);
         }
 
         private void StateSuccess_Callback(string responseData, object cbObject)

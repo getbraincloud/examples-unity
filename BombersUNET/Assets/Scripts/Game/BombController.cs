@@ -79,17 +79,17 @@ namespace BrainCloudUNETExample.Game
             {
                 if (aCollision.gameObject.layer == 4)
                 {
-                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 0);
+                    BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 0);
                 }
                 else if (aCollision.gameObject.layer == 20) //it hit a rock
                 {
-                    BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 1);
+                    BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 1);
                 }
                 else //it hit a ship
                 {
                     if ((BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1 && aCollision.gameObject.layer == 16) || (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 2 && aCollision.gameObject.layer == 17))
                     {
-                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 2);
+                        BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 2);
                     }
                     else
                     {
@@ -105,17 +105,17 @@ namespace BrainCloudUNETExample.Game
                                 else
                                 {
                                     shipTargets[i].m_isAlive = false;
-                                    BombersNetworkManager.m_localPlayer.HitShipTargetPointCommand(shipTargets[i].m_shipID, shipTargets[i].m_index, m_bombInfo.GetJson());
+                                    BombersNetworkManager.LocalPlayer.HitShipTargetPointCommand(shipTargets[i].m_shipID, shipTargets[i].m_index, m_bombInfo.GetJson());
                                 }
 
                                 if (!aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().IsAlive())
                                 {
-                                    BombersNetworkManager.m_localPlayer.DestroyShipCommand(aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().m_shipID, m_bombInfo.GetJson());
+                                    BombersNetworkManager.LocalPlayer.DestroyShipCommand(aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().m_shipID, m_bombInfo.GetJson());
                                     break;
                                 }
                             }
                         }
-                        BombersNetworkManager.m_localPlayer.DeleteBombCommand(this, 1);
+                        BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 1);
                     }
                 }
                 NetworkServer.Destroy(gameObject);
@@ -159,21 +159,6 @@ namespace BrainCloudUNETExample.Game
         {
             m_bombInfo = aBombInfo;
             m_bombInfo.gameObject = this.gameObject;
-
-			/*
-            string teamBombPath = "";
-
-            if (BombersPlayerController.GetPlayer(m_bombInfo.m_shooter).m_team == 1)
-            {
-                teamBombPath = "Bomb01";
-            }
-            else
-            {
-                teamBombPath = "Bomb02";
-            }
-			*/
-            //GameObject graphic = (GameObject)Instantiate((GameObject)Resources.Load(teamBombPath), transform.position, transform.rotation);
-            //graphic.transform.parent = transform;
         }
 
         public BombInfo GetBombInfo()
