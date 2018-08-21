@@ -3,7 +3,7 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -12,9 +12,27 @@ MonoBehaviour:
   m_Name: BrainCloudPluginDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: 
-    LastSentRequest: 
-    LastResponse: 
-    FullLog: 
+    ProfileId: 6a658282-cd73-47a3-b018-c237ba8ae41b
+    LastSentRequest: "playerStatistics READ \nnull"
+    LastResponse: "OnEvent \n{\r\n    \"events\": \r\n        []\r\n}"
+    FullLog: "REQUEST - 8/21/2018 10:22:34 AM\n{\"packetId\":3,\"sessionId\":\"d55o102jpoonb7m82pm0t8gvna\",\"gameId\":\"10008\",\"messages\":[{\"service\":\"playerStatistics\",\"operation\":\"READ\",\"data\":null}]}\n\n
+      \ at (wrapper managed-to-native) UnityEngine.GUIText:set_text (string)\r\n  at
+      GameController.ShowStatistics () [0x0001c] in C:\\Users\\Jon\\Documents\\GitHub\\examples-unity\\SpaceShooterWithStats\\Assets\\Scripts\\SpaceShooterTutorial\\GameController.cs:308
+      \r\n  at GameController.StatsSuccess_Callback (System.String responseData, System.Object
+      cbObject) [0x0008b] in C:\\Users\\Jon\\Documents\\GitHub\\examples-unity\\SpaceShooterWithStats\\Assets\\Scripts\\SpaceShooterTutorial\\GameController.cs:51
+      \r\n  at BrainCloud.ServerCallback.OnSuccessCallback (System.String jsonResponse)
+      [0x00020] in C:\\Users\\Jon\\Documents\\GitHub\\examples-unity\\SpaceShooterWithStats\\Assets\\BrainCloud\\Client\\BrainCloud\\ServerCallback.cs:37
+      \r\n  at BrainCloud.Internal.BrainCloudComms.HandleResponseBundle (System.String
+      jsonData) [0x00314] in C:\\Users\\Jon\\Documents\\GitHub\\examples-unity\\SpaceShooterWithStats\\Assets\\BrainCloud\\Client\\BrainCloud\\Internal\\BrainCloudComms.cs:864
+      \n\nRESPONSE - 8/21/2018 10:22:34 AM\n{\"packetId\":2,\"responses\":[{\"data\":{\"statistics\":{\"asteroidsDestroyed\":3,\"enemiesKilled\":0,\"enemyShipsKilled\":0,\"gamesPlayed\":2,\"shotsFired\":4}},\"status\":200}],\"events\":[]}\n\nREQUEST
+      - 8/21/2018 10:22:33 AM\n{\"packetId\":2,\"sessionId\":\"d55o102jpoonb7m82pm0t8gvna\",\"gameId\":\"10008\",\"messages\":[{\"service\":\"playerStatistics\",\"operation\":\"READ\",\"data\":null}]}\n\nRESPONSE
+      - 8/21/2018 10:22:33 AM\n{\"packetId\":1,\"responses\":[{\"data\":{\"abTestingId\":67,\"lastLogin\":1534861354967,\"server_time\":1534861354999,\"refundCount\":0,\"timeZoneOffset\":-5.0,\"experiencePoints\":0,\"maxBundleMsgs\":10,\"createdAt\":1499887049735,\"parentProfileId\":null,\"emailAddress\":null,\"experienceLevel\":0,\"countryCode\":null,\"vcClaimed\":0,\"currency\":{},\"id\":\"6a658282-cd73-47a3-b018-c237ba8ae41b\",\"amountSpent\":0,\"previousLogin\":1534861354069,\"playerName\":\"\",\"pictureUrl\":null,\"incoming_events\":[],\"sessionId\":\"d55o102jpoonb7m82pm0t8gvna\",\"languageCode\":\"en\",\"vcPurchased\":0,\"isTester\":false,\"loginCount\":8,\"xpCapped\":false,\"profileId\":\"6a658282-cd73-47a3-b018-c237ba8ae41b\",\"newUser\":\"false\",\"playerSessionExpiry\":1200,\"sent_events\":[],\"maxKillCount\":11,\"rewards\":{\"rewardDetails\":{},\"currency\":{},\"rewards\":{}},\"statistics\":{\"asteroidsDestroyed\":3,\"enemiesKilled\":0,\"enemyShipsKilled\":0,\"gamesPlayed\":2,\"shotsFired\":4}},\"status\":200}],\"events\":[]}\n\nREQUEST
+      - 8/21/2018 10:22:33 AM\n{\"packetId\":1,\"sessionId\":\"e2mau870sp3p1ugq1tvf9rhpid\",\"gameId\":\"10008\",\"messages\":[{\"service\":\"authenticationV2\",\"operation\":\"AUTHENTICATE\",\"data\":{\"externalId\":\"zxcxzcasdqwe\",\"authenticationToken\":\"Test\",\"authenticationType\":\"Universal\",\"forceCreate\":true,\"profileId\":\"\",\"anonymousId\":\"c0984106-3a7c-4092-ac62-0829a5486c8c\",\"gameId\":\"10008\",\"releasePlatform\":\"WINDOWS\",\"gameVersion\":\"1.0.0\",\"clientLibVersion\":\"3.7.1\",\"clientLib\":\"csharp-unity\",\"countryCode\":\"\",\"languageCode\":\"en\",\"timeZoneOffset\":-5}}]}\n\nRESPONSE
+      - 8/21/2018 10:22:33 AM\n{\"packetId\":0,\"responses\":[{\"data\":{\"abTestingId\":67,\"lastLogin\":1534861354069,\"server_time\":1534861354094,\"refundCount\":0,\"timeZoneOffset\":-5.0,\"experiencePoints\":0,\"maxBundleMsgs\":10,\"createdAt\":1499887049735,\"parentProfileId\":null,\"emailAddress\":null,\"experienceLevel\":0,\"countryCode\":null,\"vcClaimed\":0,\"currency\":{},\"id\":\"6a658282-cd73-47a3-b018-c237ba8ae41b\",\"amountSpent\":0,\"previousLogin\":1534861344563,\"playerName\":\"\",\"pictureUrl\":null,\"incoming_events\":[],\"sessionId\":\"e2mau870sp3p1ugq1tvf9rhpid\",\"languageCode\":\"en\",\"vcPurchased\":0,\"isTester\":false,\"loginCount\":7,\"xpCapped\":false,\"profileId\":\"6a658282-cd73-47a3-b018-c237ba8ae41b\",\"newUser\":\"false\",\"playerSessionExpiry\":1200,\"sent_events\":[],\"maxKillCount\":11,\"rewards\":{\"rewardDetails\":{},\"currency\":{},\"rewards\":{}},\"statistics\":{\"asteroidsDestroyed\":3,\"enemiesKilled\":0,\"enemyShipsKilled\":0,\"gamesPlayed\":2,\"shotsFired\":4}},\"status\":200}]}\n\nREQUEST
+      - 8/21/2018 10:22:32 AM\n{\"packetId\":0,\"sessionId\":null,\"gameId\":\"10008\",\"messages\":[{\"service\":\"authenticationV2\",\"operation\":\"AUTHENTICATE\",\"data\":{\"externalId\":\"zxcxzcasdqwe\",\"authenticationToken\":\"Test\",\"authenticationType\":\"Universal\",\"forceCreate\":true,\"profileId\":\"\",\"anonymousId\":\"c0984106-3a7c-4092-ac62-0829a5486c8c\",\"gameId\":\"10008\",\"releasePlatform\":\"WINDOWS\",\"gameVersion\":\"1.0.0\",\"clientLibVersion\":\"3.7.1\",\"clientLib\":\"csharp-unity\",\"countryCode\":\"\",\"languageCode\":\"en\",\"timeZoneOffset\":-5}}]}\n\nRESPONSE
+      - 8/21/2018 10:22:24 AM\n{\"packetId\":1,\"responses\":[{\"data\":{\"statistics\":{\"asteroidsDestroyed\":3,\"enemiesKilled\":0,\"enemyShipsKilled\":0,\"gamesPlayed\":2,\"shotsFired\":4}},\"status\":200}],\"events\":[]}\n\nREQUEST
+      - 8/21/2018 10:22:23 AM\n{\"packetId\":1,\"sessionId\":\"7rqu40mf52g40l0liaf6q8tb15\",\"gameId\":\"10008\",\"messages\":[{\"service\":\"playerStatistics\",\"operation\":\"READ\",\"data\":null}]}\n\nRESPONSE
+      - 8/21/2018 10:22:23 AM\n{\"packetId\":0,\"responses\":[{\"data\":{\"abTestingId\":67,\"lastLogin\":1534861344563,\"server_time\":1534861344605,\"refundCount\":0,\"timeZoneOffset\":-5.0,\"experiencePoints\":0,\"maxBundleMsgs\":10,\"createdAt\":1499887049735,\"parentProfileId\":null,\"emailAddress\":null,\"experienceLevel\":0,\"countryCode\":null,\"vcClaimed\":0,\"currency\":{},\"id\":\"6a658282-cd73-47a3-b018-c237ba8ae41b\",\"amountSpent\":0,\"previousLogin\":1529955492110,\"playerName\":\"\",\"pictureUrl\":null,\"incoming_events\":[],\"sessionId\":\"7rqu40mf52g40l0liaf6q8tb15\",\"languageCode\":\"en\",\"vcPurchased\":0,\"isTester\":false,\"loginCount\":6,\"xpCapped\":false,\"profileId\":\"6a658282-cd73-47a3-b018-c237ba8ae41b\",\"newUser\":\"false\",\"playerSessionExpiry\":1200,\"sent_events\":[],\"maxKillCount\":11,\"rewards\":{\"rewardDetails\":{},\"currency\":{},\"rewards\":{}},\"statistics\":{\"asteroidsDestroyed\":3,\"enemiesKilled\":0,\"enemyShipsKilled\":0,\"gamesPlayed\":2,\"shotsFired\":4}},\"status\":200}]}\n\nREQUEST
+      - 8/21/2018 10:22:22 AM\n{\"packetId\":0,\"sessionId\":null,\"gameId\":\"10008\",\"messages\":[{\"service\":\"authenticationV2\",\"operation\":\"AUTHENTICATE\",\"data\":{\"externalId\":\"zxcxzcasdqwe\",\"authenticationToken\":\"Test\",\"authenticationType\":\"Universal\",\"forceCreate\":true,\"profileId\":\"\",\"anonymousId\":\"c0984106-3a7c-4092-ac62-0829a5486c8c\",\"gameId\":\"10008\",\"releasePlatform\":\"WINDOWS\",\"gameVersion\":\"1.0.0\",\"clientLibVersion\":\"3.7.1\",\"clientLib\":\"csharp-unity\",\"countryCode\":\"\",\"languageCode\":\"en\",\"timeZoneOffset\":-5}}]}\n\n"
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}
