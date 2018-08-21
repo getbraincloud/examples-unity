@@ -3,7 +3,7 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -13,57 +13,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DebugInformation:
     ProfileId: 20c8d823-c653-457a-b2ee-be9d4ed2c5a8
-    LastSentRequest: "authenticationV2 AUTHENTICATE \n{\r\n    \"externalId\": \"asd\",\r\n
-      \   \"authenticationToken\": \"asd\",\r\n    \"authenticationType\": \"Email\",\r\n
-      \   \"forceCreate\": true,\r\n    \"profileId\": \"\",\r\n    \"anonymousId\":
-      \"888b7f0b-0ad3-43d8-9296-66454d7ba2f1\",\r\n    \"gameId\": \"10068\",\r\n
-      \   \"releasePlatform\": \"WINDOWS\",\r\n    \"gameVersion\": \"1.0.0\",\r\n
-      \   \"clientLibVersion\": \"3.7.1\",\r\n    \"clientLib\": \"csharp-unity\",\r\n
-      \   \"countryCode\": \"\",\r\n    \"languageCode\": \"en\",\r\n    \"timeZoneOffset\":
-      -5\r\n}"
-    LastResponse: "OnAuthenticateSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"abTestingId\":
-      46,\r\n            \"lastLogin\": 1530121809019,\r\n            \"server_time\":
-      1530121809360,\r\n            \"refundCount\": 0,\r\n            \"timeZoneOffset\":
-      -5,\r\n            \"experiencePoints\": 0,\r\n            \"maxBundleMsgs\":
-      10,\r\n            \"createdAt\": 1499889879644,\r\n            \"parentProfileId\":
-      null,\r\n            \"emailAddress\": \"asd\",\r\n            \"experienceLevel\":
-      0,\r\n            \"countryCode\": null,\r\n            \"vcClaimed\": 0,\r\n
-      \           \"currency\": \r\n                {\r\n                    \"gold\":
-      \r\n                        {\r\n                            \"consumed\": 0,\r\n
-      \                           \"balance\": 1000,\r\n                            \"purchased\":
-      0,\r\n                            \"awarded\": 1000\r\n                        },\r\n
-      \                   \"gems\": \r\n                        {\r\n                            \"consumed\":
-      0,\r\n                            \"balance\": 10,\r\n                            \"purchased\":
-      0,\r\n                            \"awarded\": 10\r\n                        },\r\n
-      \                   \"coins\": \r\n                        {\r\n                            \"consumed\":
-      0,\r\n                            \"balance\": 0,\r\n                            \"purchased\":
-      0,\r\n                            \"awarded\": 0\r\n                        }\r\n
-      \               },\r\n            \"id\": \"20c8d823-c653-457a-b2ee-be9d4ed2c5a8\",\r\n
-      \           \"amountSpent\": 0,\r\n            \"previousLogin\": 1530120062248,\r\n
-      \           \"playerName\": \"\",\r\n            \"pictureUrl\": null,\r\n            \"incoming_events\":
-      \r\n                [],\r\n            \"sessionId\": \"52e28vml26d0flpcsqrf1lvo1e\",\r\n
-      \           \"languageCode\": \"en\",\r\n            \"vcPurchased\": 0,\r\n
-      \           \"isTester\": false,\r\n            \"loginCount\": 17,\r\n            \"xpCapped\":
-      false,\r\n            \"entities\": \r\n                [\r\n                    {\r\n
-      \                       \"entityId\": \"a8ebd17f-e3ea-4577-b99d-eff7c6d7e908\",\r\n
-      \                       \"entityType\": \"player\",\r\n                        \"version\":
-      1,\r\n                        \"data\": \r\n                            {\r\n
-      \                               \"name\": \"Johnny Philharmonica\",\r\n                                \"age\":
-      49,\r\n                                \"hobbies\": null\r\n                            },\r\n
-      \                       \"acl\": \r\n                            {\r\n                                \"other\":
-      0\r\n                            },\r\n                        \"createdAt\":
-      1499889892701,\r\n                        \"updatedAt\": 1499889892701\r\n                    }\r\n
-      \               ],\r\n            \"profileId\": \"20c8d823-c653-457a-b2ee-be9d4ed2c5a8\",\r\n
-      \           \"newUser\": \"false\",\r\n            \"playerSessionExpiry\":
-      240,\r\n            \"sent_events\": \r\n                [],\r\n            \"maxKillCount\":
-      11,\r\n            \"rewards\": \r\n                {\r\n                    \"rewardDetails\":
-      \r\n                        {},\r\n                    \"currency\": \r\n                        {},\r\n
-      \                   \"rewards\": \r\n                        {}\r\n                },\r\n
-      \           \"statistics\": \r\n                {\r\n                    \"pantelons\":
-      3,\r\n                    \"iron\": 0,\r\n                    \"wood\": 50,\r\n
-      \                   \"minions\": 0\r\n                }\r\n        },\r\n    \"status\":
-      200\r\n}"
-    FullLog: 'RESPONSE - 6/27/2018 1:50:08 PM
+    LastSentRequest: "playerState READ \nnull"
+    LastResponse: "OnEvent \n{\r\n    \"events\": \r\n        []\r\n}"
+    FullLog: 'RESPONSE - 8/21/2018 10:11:44 AM
+
+      {"packetId":1,"responses":[{"data":{"abTestingId":46,"lastLogin":1534860705085,"server_time":1534860705848,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":24,"createdAt":1499889879644,"parentProfileId":null,"emailAddress":"asd","experienceLevel":2,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":1,"balance":4011,"purchased":0,"awarded":4012},"gems":{"consumed":0,"balance":32,"purchased":0,"awarded":32},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"20c8d823-c653-457a-b2ee-be9d4ed2c5a8","amountSpent":0,"previousLogin":1534859650716,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":24,"xpCapped":true,"entities":[{"entityId":"a8ebd17f-e3ea-4577-b99d-eff7c6d7e908","entityType":"player","version":1,"data":{"name":"Johnny
+      Philharmonica","age":49,"hobbies":null},"acl":{"other":0},"createdAt":1499889892701,"updatedAt":1499889892701}],"profileId":"20c8d823-c653-457a-b2ee-be9d4ed2c5a8","sent_events":[],"statistics":{"pantelons":15,"iron":12,"wood":50,"minions":0}},"status":200}],"events":[]}
+
+
+      REQUEST - 8/21/2018 10:11:44 AM
+
+      {"packetId":1,"sessionId":"uthje35k7kp9h7fo8dprscv9i0","gameId":"10068","messages":[{"service":"playerState","operation":"READ","data":null}]}
+
+
+      RESPONSE - 8/21/2018 10:11:43 AM
+
+      {"packetId":0,"responses":[{"data":{"abTestingId":46,"lastLogin":1534860705085,"server_time":1534860705106,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":24,"maxBundleMsgs":10,"createdAt":1499889879644,"parentProfileId":null,"emailAddress":"asd","experienceLevel":2,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":1,"balance":4011,"purchased":0,"awarded":4012},"gems":{"consumed":0,"balance":32,"purchased":0,"awarded":32},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"20c8d823-c653-457a-b2ee-be9d4ed2c5a8","amountSpent":0,"previousLogin":1534859650716,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"uthje35k7kp9h7fo8dprscv9i0","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":24,"xpCapped":true,"entities":[{"entityId":"a8ebd17f-e3ea-4577-b99d-eff7c6d7e908","entityType":"player","version":1,"data":{"name":"Johnny
+      Philharmonica","age":49,"hobbies":null},"acl":{"other":0},"createdAt":1499889892701,"updatedAt":1499889892701}],"profileId":"20c8d823-c653-457a-b2ee-be9d4ed2c5a8","newUser":"false","playerSessionExpiry":240,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"pantelons":15,"iron":12,"wood":50,"minions":0}},"status":200}]}
+
+
+      REQUEST - 8/21/2018 10:11:42 AM
+
+      {"packetId":0,"sessionId":null,"gameId":"10068","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"asd","authenticationToken":"asd","authenticationType":"Email","forceCreate":true,"profileId":"","anonymousId":"1a1664b0-2b05-43fa-8834-0c16796783e2","gameId":"10068","releasePlatform":"WINDOWS","gameVersion":"1.0.0","clientLibVersion":"3.7.1","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
+
+
+      RESPONSE - 6/27/2018 1:50:08 PM
 
       {"packetId":0,"responses":[{"data":{"abTestingId":46,"lastLogin":1530121809019,"server_time":1530121809360,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1499889879644,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"20c8d823-c653-457a-b2ee-be9d4ed2c5a8","amountSpent":0,"previousLogin":1530120062248,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"52e28vml26d0flpcsqrf1lvo1e","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":17,"xpCapped":false,"entities":[{"entityId":"a8ebd17f-e3ea-4577-b99d-eff7c6d7e908","entityType":"player","version":1,"data":{"name":"Johnny
       Philharmonica","age":49,"hobbies":null},"acl":{"other":0},"createdAt":1499889892701,"updatedAt":1499889892701}],"profileId":"20c8d823-c653-457a-b2ee-be9d4ed2c5a8","newUser":"false","playerSessionExpiry":240,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}]}
