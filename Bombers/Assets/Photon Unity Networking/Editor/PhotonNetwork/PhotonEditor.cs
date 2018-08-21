@@ -658,7 +658,7 @@ public class PhotonEditor : EditorWindow
                 bool isOldRpc = false;
                 #pragma warning disable 618
                 // we let the Editor check for outdated RPC attributes in code. that should not cause a compile warning
-                if (method.IsDefined(typeof (RPC), false))
+            //TODO[JON]    if (method.IsDefined(typeof (RPC), false))
                 {
                     countOldRpcs++;
                     isOldRpc = true;

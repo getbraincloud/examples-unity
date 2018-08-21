@@ -183,9 +183,9 @@ public class PhotonViewHandler : EditorWindow
 
         foreach (string scene in scenes)
         {
-            EditorSceneManager.OpenScene(scene);
+            //TODO[JON] EditorSceneManager.OpenScene(scene);
             PhotonViewHandler.HierarchyChange();//NOTE: most likely on load also triggers a hierarchy change
-            EditorSceneManager.SaveOpenScenes();
+            //TODO[JON] EditorSceneManager.SaveOpenScenes();
         }
 
         Debug.Log("Corrected scene views where needed.");
