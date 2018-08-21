@@ -20,7 +20,7 @@ namespace BrainCloudPhotonExample.Connection
             else
             {
                 s_instance = this;
-                SceneManager.sceneLoaded += OnSceneLoaded;
+                // SceneManager.sceneLoaded += OnSceneLoaded;
             }
         }
 
@@ -202,7 +202,7 @@ namespace BrainCloudPhotonExample.Connection
 
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            // SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
