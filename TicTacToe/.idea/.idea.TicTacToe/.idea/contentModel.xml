@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/Library/Caches/Rider2018.1/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_TicTacToe.861156032.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="C:\Users\Jon\.Rider2018.1\system\resharper-host\local\Transient\ReSharperHost\v12\SolutionCaches\_TicTacToe.650821184.00" t="ExcludeRecursive" />
+    <e p="C:\Users\Jon\Documents\GitHub\examples-unity\TicTacToe" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -150,16 +150,19 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
-          <e p="2-SocialLeaderboards" t="Include">
-            <e p="BrainCloudLogin.cs" t="Include" />
-            <e p="SocialLeaderboards.cs" t="Include" />
-          </e>
-          <e p="BestScores.cs" t="Include" />
-          <e p="Spinner.cs" t="Include" />
-          <e p="TicTacToe" t="Include">
-            <e p="GamePicker.cs" t="Include" />
-            <e p="MouseClick.cs" t="Include" />
+          <e p="App.cs" t="Include" />
+          <e p="Menus" t="Include">
+            <e p="Achievements.cs" t="Include" />
+            <e p="GameScene.cs" t="Include" />
+            <e p="Leaderboard.cs" t="Include" />
+            <e p="Login.cs" t="Include" />
+            <e p="MatchSelect.cs" t="Include" />
             <e p="TicTacToe.cs" t="Include" />
+          </e>
+          <e p="Utils" t="Include">
+            <e p="MouseClick.cs" t="Include" />
+            <e p="PlayerInfo.cs" t="Include" />
+            <e p="Spinner.cs" t="Include" />
           </e>
         </e>
       </e>

@@ -297,11 +297,18 @@ public class MatchSelect : GameScene
             {
                 var data = JsonMapper.ToObject(responseData)["data"];
 
-                if (data["attributes"]["MATCH_STATE"].ToString().Equals("FOUND_MATCH"))
+                try
                 {
-                    isLookingForMatch = false;
-                    autoJoinText = "MatchFound";
+                    if (data["attributes"]["MATCH_STATE"].ToString().Equals("FOUND_MATCH"))
+                    {
+                        isLookingForMatch = false;
+                        autoJoinText = "MatchFound";
 
+                    }
+                }
+                catch (Exception e)
+                {
+                    // ignored
                 }
             });
 

@@ -2,7 +2,7 @@ fileFormatVersion: 2
 guid: 601e8e1d2d2744929ede33676cbeccc0
 labels:
 - gvh
-- gvh_version-5.1.0
+- gvh_version-5.2.1
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -26,7 +26,8 @@ PluginImporter:
       iPhone: iOS
     second:
       enabled: 1
-      settings: {}
+      settings:
+        AddToEmbeddedBinaries: false
   userData: 
   assetBundleName: 
   assetBundleVariant: 
