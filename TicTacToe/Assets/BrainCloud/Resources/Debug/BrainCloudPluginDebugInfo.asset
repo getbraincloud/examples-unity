@@ -3,7 +3,7 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -12,227 +12,143 @@ MonoBehaviour:
   m_Name: BrainCloudPluginDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: c9049282-e65b-4cc0-8971-761fc96ed5a9
+    ProfileId: f7d79bd8-e704-4374-9a99-f7edef3b4ef7
     LastSentRequest: "asyncMatch FIND_MATCHES_COMPLETED \nnull"
     LastResponse: "OnSuccess \n{\n    \"data\": \n        {\n            \"results\":
-      \n                [\n                    {\n                        \"gameId\":
-      \"10228\",\n                        \"ownerId\": \"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986\",\n
-      \                       \"matchId\": \"ceb8e4e8-e6ed-4860-b986-5f8dd6361b78\",\n
-      \                       \"version\": 7,\n                        \"players\":
-      \n                            [\n                                {\n                                    \"playerId\":
-      \"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986\",\n                                    \"playerName\":
-      \"Player One\",\n                                    \"pictureUrl\": null\n
-      \                               },\n                                {\n                                    \"playerId\":
-      \"c9049282-e65b-4cc0-8971-761fc96ed5a9\",\n                                    \"playerName\":
-      \"Player Two\",\n                                    \"pictureUrl\": null\n
-      \                               }\n                            ],\n                        \"status\":
-      \n                            {\n                                \"status\":
-      \"COMPLETE\",\n                                \"currentPlayer\": \"c9049282-e65b-4cc0-8971-761fc96ed5a9\"\n
-      \                           },\n                        \"summary\": \n                            {\n
-      \                               \"players\": \n                                    [\n
-      \                                       {\n                                            \"profileId\":
-      \"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986\",\n                                            \"token\":
-      \"X\"\n                                        },\n                                        {\n
-      \                                           \"profileId\": \"c9049282-e65b-4cc0-8971-761fc96ed5a9\",\n
-      \                                           \"token\": \"O\"\n                                        }\n
-      \                                   ]\n                            },\n                        \"createdAt\":
-      1527654995673,\n                        \"updatedAt\": 1527655018506\n                    }\n
-      \               ]\n        },\n    \"status\": 200\n}"
-    FullLog: 'RESPONSE - 05/30/2018 13:02:53
+      \n                []\n        },\n    \"status\": 200\n}"
+    FullLog: 'RESPONSE - 08/27/2018 20:35:41
 
-      {"packetId":4,"responses":[{"data":{"results":[{"gameId":"10228","ownerId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","matchId":"ceb8e4e8-e6ed-4860-b986-5f8dd6361b78","version":7,"players":[{"playerId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","playerName":"Player
-      One","pictureUrl":null},{"playerId":"c9049282-e65b-4cc0-8971-761fc96ed5a9","playerName":"Player
-      Two","pictureUrl":null}],"status":{"status":"COMPLETE","currentPlayer":"c9049282-e65b-4cc0-8971-761fc96ed5a9"},"summary":{"players":[{"profileId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","token":"X"},{"profileId":"c9049282-e65b-4cc0-8971-761fc96ed5a9","token":"O"}]},"createdAt":1527654995673,"updatedAt":1527655018506}]},"status":200}]}
+      {"packetId":4,"responses":[{"data":{"results":[]},"status":200}]}
 
 
-      REQUEST - 05/30/2018 13:02:53
+      REQUEST - 08/27/2018 20:35:41
 
-      {"packetId":4,"sessionId":"2l9bbqldkredvbdjg2e4ne6g11","gameId":"10228","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
+      {"packetId":4,"sessionId":"gtelbbe1l4l1ka4qtp2tfuk3vr","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
 
 
-      RESPONSE - 05/30/2018 13:02:53
+      RESPONSE - 08/27/2018 20:35:41
 
       {"packetId":3,"responses":[{"data":{"results":[]},"status":200}]}
 
 
-      RESPONSE - 05/30/2018 13:02:52
+      REQUEST - 08/27/2018 20:35:41
 
-      {"packetId":4,"responses":[{"data":{"results":[{"gameId":"10228","ownerId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","matchId":"ceb8e4e8-e6ed-4860-b986-5f8dd6361b78","version":7,"players":[{"playerId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","playerName":"Player
-      One","pictureUrl":null},{"playerId":"c9049282-e65b-4cc0-8971-761fc96ed5a9","playerName":"Player
-      Two","pictureUrl":null}],"status":{"status":"COMPLETE","currentPlayer":"c9049282-e65b-4cc0-8971-761fc96ed5a9"},"summary":{"players":[{"profileId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","token":"X"},{"profileId":"c9049282-e65b-4cc0-8971-761fc96ed5a9","token":"O"}]},"createdAt":1527654995673,"updatedAt":1527655018506}]},"status":200}]}
+      {"packetId":3,"sessionId":"gtelbbe1l4l1ka4qtp2tfuk3vr","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES","data":null}]}
 
 
-      REQUEST - 05/30/2018 13:02:52
+      RESPONSE - 08/27/2018 20:35:41
 
-      {"packetId":4,"sessionId":"ajvom7nmraqsck5de0hn1eprg8","gameId":"10228","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
+      {"packetId":2,"responses":[{"data":null,"status":200},{"data":{"matchesFound":[{"playerName":"asdf","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"076fc183-b5b7-4358-9ad7-363d0add10ab"},{"playerName":"asd","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"489065aa-e228-441b-9aa0-24d1e01a0411"}],"rejectCount":0},"status":200}]}
 
 
-      RESPONSE - 05/30/2018 13:02:52
+      REQUEST - 08/27/2018 20:35:41
+
+      {"packetId":2,"sessionId":"gtelbbe1l4l1ka4qtp2tfuk3vr","gameId":"12063","messages":[{"service":"matchMaking","operation":"ENABLE_FOR_MATCH","data":null},{"service":"matchMaking","operation":"FIND_PLAYERS","data":{"rangeDelta":500,"numMatches":10}}]}
+
+
+      RESPONSE - 08/27/2018 20:35:41
+
+      {"packetId":1,"responses":[{"data":{"matchAttackExpiry":0,"matchesPlayed":0,"lastMatch":0,"matchEnabled":true,"sharedAPIToken":null,"playerRating":1200,"shieldExpiry":0},"status":200}]}
+
+
+      REQUEST - 08/27/2018 20:35:41
+
+      {"packetId":1,"sessionId":"gtelbbe1l4l1ka4qtp2tfuk3vr","gameId":"12063","messages":[{"service":"matchMaking","operation":"READ","data":null}]}
+
+
+      RESPONSE - 08/27/2018 20:35:40
+
+      {"packetId":0,"responses":[{"data":{"abTestingId":37,"lastLogin":1535416533446,"server_time":1535416533462,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1535406923525,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","amountSpent":0,"previousLogin":1535416177887,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"gtelbbe1l4l1ka4qtp2tfuk3vr","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":4,"xpCapped":false,"profileId":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","newUser":"false","playerSessionExpiry":1200,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"WON_RANKED_MATCH":0}},"status":200}]}
+
+
+      REQUEST - 08/27/2018 20:35:40
+
+      {"packetId":0,"sessionId":null,"gameId":"12063","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"6e53ba38-4e05-4e3d-b218-951fcb1af1f0","authenticationToken":"","authenticationType":"Anonymous","forceCreate":true,"profileId":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","anonymousId":"6e53ba38-4e05-4e3d-b218-951fcb1af1f0","gameId":"12063","releasePlatform":"MAC","gameVersion":"1.0","clientLibVersion":"3.8.2","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
+
+
+      RESPONSE - 08/27/2018 20:29:46
+
+      {"packetId":4,"responses":[{"data":{"results":[]},"status":200}]}
+
+
+      REQUEST - 08/27/2018 20:29:46
+
+      {"packetId":4,"sessionId":"v6990sgodvq0i69mf8lssp3229","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
+
+
+      RESPONSE - 08/27/2018 20:29:46
 
       {"packetId":3,"responses":[{"data":{"results":[]},"status":200}]}
 
 
-      REQUEST - 05/30/2018 13:02:52
+      REQUEST - 08/27/2018 20:29:45
 
-      {"packetId":3,"sessionId":"2l9bbqldkredvbdjg2e4ne6g11","gameId":"10228","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES","data":null}]}
+      {"packetId":3,"sessionId":"v6990sgodvq0i69mf8lssp3229","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES","data":null}]}
 
 
-      RESPONSE - 05/30/2018 13:02:52
+      RESPONSE - 08/27/2018 20:29:45
 
-      {"packetId":2,"responses":[{"data":null,"status":200},{"data":{"matchesFound":[{"playerName":"Player
-      One","pictureUrl":null,"playerRating":1253,"summaryFriendData":null,"playerId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986"}],"rejectCount":0},"status":200}]}
+      {"packetId":2,"responses":[{"data":null,"status":200},{"data":{"matchesFound":[{"playerName":"asdf","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"076fc183-b5b7-4358-9ad7-363d0add10ab"},{"playerName":"asd","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"489065aa-e228-441b-9aa0-24d1e01a0411"}],"rejectCount":0},"status":200}]}
 
 
-      REQUEST - 05/30/2018 13:02:52
+      REQUEST - 08/27/2018 20:29:45
 
-      {"packetId":2,"sessionId":"2l9bbqldkredvbdjg2e4ne6g11","gameId":"10228","messages":[{"service":"matchMaking","operation":"ENABLE_FOR_MATCH","data":null},{"service":"matchMaking","operation":"FIND_PLAYERS","data":{"rangeDelta":500,"numMatches":10}}]}
+      {"packetId":2,"sessionId":"v6990sgodvq0i69mf8lssp3229","gameId":"12063","messages":[{"service":"matchMaking","operation":"ENABLE_FOR_MATCH","data":null},{"service":"matchMaking","operation":"FIND_PLAYERS","data":{"rangeDelta":500,"numMatches":10}}]}
 
 
-      RESPONSE - 05/30/2018 13:02:52
+      RESPONSE - 08/27/2018 20:29:45
 
-      {"packetId":1,"responses":[{"data":{"matchAttackExpiry":0,"matchesPlayed":0,"lastMatch":0,"matchEnabled":true,"sharedAPIToken":null,"playerRating":1174,"shieldExpiry":0},"status":200}]}
+      {"packetId":1,"responses":[{"data":{"matchAttackExpiry":0,"matchesPlayed":0,"lastMatch":0,"matchEnabled":false,"sharedAPIToken":null,"playerRating":1200,"shieldExpiry":0},"status":200}]}
 
 
-      REQUEST - 05/30/2018 13:02:52
+      REQUEST - 08/27/2018 20:29:45
 
-      {"packetId":1,"sessionId":"2l9bbqldkredvbdjg2e4ne6g11","gameId":"10228","messages":[{"service":"matchMaking","operation":"READ","data":null}]}
+      {"packetId":1,"sessionId":"v6990sgodvq0i69mf8lssp3229","gameId":"12063","messages":[{"service":"matchMaking","operation":"READ","data":null}]}
 
 
-      RESPONSE - 05/30/2018 13:02:52
+      RESPONSE - 08/27/2018 20:29:45
 
-      {"packetId":0,"responses":[{"data":{"abTestingId":21,"lastLogin":1527699772066,"server_time":1527699772082,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1527654991394,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"c9049282-e65b-4cc0-8971-761fc96ed5a9","amountSpent":0,"previousLogin":1527654991397,"playerName":"Player
-      Two","pictureUrl":null,"incoming_events":[],"sessionId":"2l9bbqldkredvbdjg2e4ne6g11","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":2,"xpCapped":false,"profileId":"c9049282-e65b-4cc0-8971-761fc96ed5a9","newUser":"false","playerSessionExpiry":1200,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"WON_RANKED_MATCH":0}},"status":200}]}
+      {"packetId":0,"responses":[{"data":{"abTestingId":37,"lastLogin":1535416177887,"server_time":1535416177909,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1535406923525,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","amountSpent":0,"previousLogin":1535416169007,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"v6990sgodvq0i69mf8lssp3229","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":3,"xpCapped":false,"profileId":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","newUser":"false","playerSessionExpiry":1200,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"WON_RANKED_MATCH":0}},"status":200}]}
 
 
-      REQUEST - 05/30/2018 13:02:51
+      REQUEST - 08/27/2018 20:29:45
 
-      {"packetId":3,"sessionId":"ajvom7nmraqsck5de0hn1eprg8","gameId":"10228","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES","data":null}]}
+      {"packetId":0,"sessionId":null,"gameId":"12063","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"6e53ba38-4e05-4e3d-b218-951fcb1af1f0","authenticationToken":"","authenticationType":"Anonymous","forceCreate":true,"profileId":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","anonymousId":"6e53ba38-4e05-4e3d-b218-951fcb1af1f0","gameId":"12063","releasePlatform":"MAC","gameVersion":"1.0","clientLibVersion":"3.8.2","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
 
 
-      RESPONSE - 05/30/2018 13:02:51
+      RESPONSE - 08/27/2018 20:29:36
 
-      {"packetId":2,"responses":[{"data":null,"status":200},{"data":{"matchesFound":[{"playerName":"Player
-      Two","pictureUrl":null,"playerRating":1174,"summaryFriendData":null,"playerId":"c9049282-e65b-4cc0-8971-761fc96ed5a9"}],"rejectCount":0},"status":200}]}
+      {"packetId":0,"responses":[{"data":{"abTestingId":37,"lastLogin":1535416169007,"server_time":1535416169026,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1535406923525,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","amountSpent":0,"previousLogin":1535406923530,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"kde03m24isqmujnp9fdo9rm5i1","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":2,"xpCapped":false,"profileId":"f7d79bd8-e704-4374-9a99-f7edef3b4ef7","newUser":"false","playerSessionExpiry":1200,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"WON_RANKED_MATCH":0}},"status":200}]}
 
 
-      REQUEST - 05/30/2018 13:02:51
+      REQUEST - 08/27/2018 20:29:36
 
-      {"packetId":2,"sessionId":"ajvom7nmraqsck5de0hn1eprg8","gameId":"10228","messages":[{"service":"matchMaking","operation":"ENABLE_FOR_MATCH","data":null},{"service":"matchMaking","operation":"FIND_PLAYERS","data":{"rangeDelta":500,"numMatches":10}}]}
+      {"packetId":0,"sessionId":null,"gameId":"12063","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"Test
+      2","authenticationToken":"Test 2","authenticationType":"Universal","forceCreate":true,"profileId":"","anonymousId":"6e53ba38-4e05-4e3d-b218-951fcb1af1f0","gameId":"12063","releasePlatform":"MAC","gameVersion":"1.0","clientLibVersion":"3.8.2","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
 
 
-      RESPONSE - 05/30/2018 13:02:51
+      RESPONSE - 08/27/2018 17:57:10
 
-      {"packetId":1,"responses":[{"data":{"matchAttackExpiry":0,"matchesPlayed":0,"lastMatch":0,"matchEnabled":true,"sharedAPIToken":null,"playerRating":1253,"shieldExpiry":0},"status":200}]}
+      {"packetId":5,"responses":[{"data":{"gameId":"12063","ownerId":"489065aa-e228-441b-9aa0-24d1e01a0411","matchId":"8c375aed-20f4-4caa-9d60-f745a3baaeb7","version":3,"players":[{"playerId":"489065aa-e228-441b-9aa0-24d1e01a0411","playerName":"asd","pictureUrl":null},{"playerId":"076fc183-b5b7-4358-9ad7-363d0add10ab","playerName":"asdf","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"489065aa-e228-441b-9aa0-24d1e01a0411"},"summary":{"players":[{"profileId":"489065aa-e228-441b-9aa0-24d1e01a0411","token":"X"},{"profileId":"076fc183-b5b7-4358-9ad7-363d0add10ab","token":"O"}]},"statistics":{},"matchState":{"board":"O####X###"},"createdAt":1534951377953,"updatedAt":1534951387909},"status":200}]}
 
 
-      REQUEST - 05/30/2018 13:02:51
+      REQUEST - 08/27/2018 17:57:10
 
-      {"packetId":0,"sessionId":null,"gameId":"10228","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"Player
-      Two","authenticationToken":"password","authenticationType":"Universal","forceCreate":true,"profileId":"","anonymousId":"7fda2367-4b90-4865-8302-e92ce1d76756","gameId":"10228","releasePlatform":"MAC","gameVersion":"1.0.0","clientLibVersion":"3.7.1","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
+      {"packetId":5,"sessionId":"jn3bvvc6l30u8cd309gekkdqav","gameId":"12063","messages":[{"service":"asyncMatch","operation":"READ_MATCH","data":{"ownerId":"489065aa-e228-441b-9aa0-24d1e01a0411","matchId":"8c375aed-20f4-4caa-9d60-f745a3baaeb7"}}]}
 
 
-      REQUEST - 05/30/2018 13:02:51
+      RESPONSE - 08/27/2018 17:57:09
 
-      {"packetId":1,"sessionId":"ajvom7nmraqsck5de0hn1eprg8","gameId":"10228","messages":[{"service":"matchMaking","operation":"READ","data":null}]}
+      {"packetId":4,"responses":[{"data":{"results":[]},"status":200}]}
 
 
-      RESPONSE - 05/30/2018 13:02:51
+      REQUEST - 08/27/2018 17:57:08
 
-      {"packetId":0,"responses":[{"data":{"abTestingId":98,"lastLogin":1527699771209,"server_time":1527699771234,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1527654992051,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","amountSpent":0,"previousLogin":1527654992053,"playerName":"Player
-      One","pictureUrl":null,"incoming_events":[],"sessionId":"ajvom7nmraqsck5de0hn1eprg8","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":2,"xpCapped":false,"profileId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","newUser":"false","playerSessionExpiry":1200,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"WON_RANKED_MATCH":1}},"status":200}]}
+      {"packetId":4,"sessionId":"jn3bvvc6l30u8cd309gekkdqav","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
 
 
-      REQUEST - 05/30/2018 13:02:50
+      RESPONSE - 08/27/2018 17:57:08
 
-      {"packetId":0,"sessionId":null,"gameId":"10228","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"Player
-      One","authenticationToken":"password","authenticationType":"Universal","forceCreate":true,"profileId":"","anonymousId":"e77dab59-1fbe-4410-8668-3fa97a38ed0a","gameId":"10228","releasePlatform":"MAC","gameVersion":"1.0.0","clientLibVersion":"3.7.1","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
-
-
-      RESPONSE - 05/30/2018 01:28:11
-
-      {"packetId":29,"responses":[{"data":null,"status":200}]}
-
-
-      REQUEST - 05/30/2018 01:28:11
-
-      {"packetId":29,"sessionId":"nc76tp04kcl3jmec68dttha7na","gameId":"10228","messages":[{"service":"heartbeat","operation":"READ","data":null}]}
-
-
-      RESPONSE - 05/30/2018 01:28:04
-
-      {"packetId":25,"responses":[{"data":null,"status":200}]}
-
-
-      REQUEST - 05/30/2018 01:28:04
-
-      {"packetId":25,"sessionId":"757mqjlqfha5ga8gkfckgvnpok","gameId":"10228","messages":[{"service":"heartbeat","operation":"READ","data":null}]}
-
-
-      RESPONSE - 05/30/2018 01:11:11
-
-      {"packetId":28,"responses":[{"data":null,"status":200}]}
-
-
-      REQUEST - 05/30/2018 01:11:11
-
-      {"packetId":28,"sessionId":"nc76tp04kcl3jmec68dttha7na","gameId":"10228","messages":[{"service":"heartbeat","operation":"READ","data":null}]}
-
-
-      RESPONSE - 05/30/2018 01:11:04
-
-      {"packetId":24,"responses":[{"data":null,"status":200}]}
-
-
-      REQUEST - 05/30/2018 01:11:03
-
-      {"packetId":24,"sessionId":"757mqjlqfha5ga8gkfckgvnpok","gameId":"10228","messages":[{"service":"heartbeat","operation":"READ","data":null}]}
-
-
-      RESPONSE - 05/30/2018 00:54:11
-
-      {"packetId":27,"responses":[{"data":null,"status":200}]}
-
-
-      REQUEST - 05/30/2018 00:54:11
-
-      {"packetId":27,"sessionId":"nc76tp04kcl3jmec68dttha7na","gameId":"10228","messages":[{"service":"heartbeat","operation":"READ","data":null}]}
-
-
-      RESPONSE - 05/30/2018 00:54:03
-
-      {"packetId":23,"responses":[{"data":null,"status":200}]}
-
-
-      REQUEST - 05/30/2018 00:54:03
-
-      {"packetId":23,"sessionId":"757mqjlqfha5ga8gkfckgvnpok","gameId":"10228","messages":[{"service":"heartbeat","operation":"READ","data":null}]}
-
-
-      RESPONSE - 05/30/2018 00:37:11
-
-      {"packetId":26,"responses":[{"data":{"results":[{"gameId":"10228","ownerId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","matchId":"ceb8e4e8-e6ed-4860-b986-5f8dd6361b78","version":7,"players":[{"playerId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","playerName":"Player
-      One","pictureUrl":null},{"playerId":"c9049282-e65b-4cc0-8971-761fc96ed5a9","playerName":"Player
-      Two","pictureUrl":null}],"status":{"status":"COMPLETE","currentPlayer":"c9049282-e65b-4cc0-8971-761fc96ed5a9"},"summary":{"players":[{"profileId":"9f69cb2c-a0c6-49ac-bc55-9fb431e7f986","token":"X"},{"profileId":"c9049282-e65b-4cc0-8971-761fc96ed5a9","token":"O"}]},"createdAt":1527654995673,"updatedAt":1527655018506}]},"status":200}]}
-
-
-      REQUEST - 05/30/2018 00:37:10
-
-      {"packetId":26,"sessionId":"nc76tp04kcl3jmec68dttha7na","gameId":"10228","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
-
-
-      RESPONSE - 05/30/2018 00:37:10
-
-      {"packetId":25,"responses":[{"data":{"results":[]},"status":200}]}
-
-
-      REQUEST - 05/30/2018 00:37:10
-
-      {"packetId":25,"sessionId":"nc76tp04kcl3jmec68dttha7na","gameId":"10228","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES","data":null}]}
-
-
-      RESPONSE - 05/30/2018 00:37:10
-
-      {"packetId":24,"responses":[{"data":null,"status":200},{"data":{"matchesFound":[{"playerName":"Player
-      Two","pictureUrl":'
+      {"packetId":3,"responses":[{"data":{"results":[{"gameId":"12063","ownerId":"489065aa-e228-441b-9aa0-24d1e01a0411","matchId":"8c375aed-20f4-4caa-9d60-f745a3baaeb7","version":3,"players":[{"playerId":"489065aa-e228-441b-9aa0-24d1e01a0411","playerName":"asd","pictureUrl":null},{"playerId":"076fc183-b5b7-4358-9ad7-363d0add10ab","playerName":"asdf","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"489065aa-e228-441b-9aa0-24d1e01a0411"},"summary":{"players":[{"profileId":"489065aa-e228-441b-9aa0-24d1e01a0411","token":"X"},{"profileId":"076fc183-b5b7-4358-9ad7-363d0add10ab","token":"O"}]},"createdAt":1534951377953,"updatedAt":1534951387909},{"gameId":"12063","ownerId":"489065aa-e228-441b-9aa0-24d1e01a0411","matchId":"4d6d3654-8d54-4837-92a8-c81a6abfc492","version":1,"players":[{"playerId":"489065aa-e228-441b-9aa0-24d1e01a0411","playerName":"asd","pictureUrl":null},{"playerId":"076fc183-b5b7-4358-9ad7-363d0add10ab","playerName":"asdf","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"076fc183-b5b7-4358-9ad7-363d0add10ab"},"summary":{"players":[{"profileId":"489065aa-e228-441b'
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}

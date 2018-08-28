@@ -18,7 +18,7 @@ public class ScreenEntityCustomClass : BCScreen
     {
         public static string ENTITY_TYPE = "player";
 
-        public Player()
+        public Player(BrainCloudEntity in_bcEntityService) : base(in_bcEntityService)
         {
             // set up some defaults
             m_entityType = "player";
@@ -130,7 +130,7 @@ public class ScreenEntityCustomClass : BCScreen
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Create Entity"))
             {
-                m_player = new Player();
+                m_player = new Player(ConnectScene._bc.EntityService);
                 m_player.Name = "Johnny Philharmonica";
                 m_player.Age = 49;
             }

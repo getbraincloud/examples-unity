@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d7e0de02-c2f2-4588-9336-cf6c4a67a0d8" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Version.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Client/BrainCloud/Version.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/JsonFx/JsonReader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/JsonFx/JsonReader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/LitJson/JsonData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/LitJson/JsonData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Resources/BrainCloudSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Resources/BrainCloudSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Authentication/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../Authentication/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Version.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Client/BrainCloud/Version.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/JsonFx/JsonReader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/JsonFx/JsonReader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/LitJson/JsonData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/LitJson/JsonData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Resources/BrainCloudSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Resources/BrainCloudSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/FacebookSDK/Examples.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/FacebookSDK/Plugins/iOS.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/Assets/FacebookSDK/SDK.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AuthenticationErrorHandling/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../AuthenticationErrorHandling/ProjectSettings/ProjectSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Bombers/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Bombers/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Bombers/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Bombers/.idea/indexLayout.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Bombers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Bombers/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Bombers/riderModule.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Bombers/riderModule.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Version.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Version.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/JsonFx/JsonReader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/JsonFx/JsonReader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/LitJson/JsonData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/LitJson/JsonData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Resources/BrainCloudSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Resources/BrainCloudSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudChat.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudChat.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudLobby.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudLobby.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudMessaging.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudMessaging.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudWebSocket.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudWebSocket.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/RTTComms.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Internal/RTTComms.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Version.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Client/BrainCloud/Version.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/JsonFx/JsonReader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/JsonFx/JsonReader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/UnityWebSocketsForWebGL/NativeWebSocket.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BombersUNET/Assets/BrainCloud/UnityWebSocketsForWebGL/NativeWebSocket.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BombersUNET/Assets/Plugins/UnityPurchasing/Bin/unitypurchasing.bundle.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../PushNotifications/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Version.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Client/BrainCloud/Version.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/JsonFx/JsonReader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/JsonFx/JsonReader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/LitJson/JsonData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/LitJson/JsonData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Resources/BrainCloudSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Resources/BrainCloudSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../SpaceShooterWithStats/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/.idea/indexLayout.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/riderModule.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/.idea/.idea.TicTacToe/riderModule.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudAsyncMatch.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudAsyncMatch.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudFriend.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlaybackStream.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatistics.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudPlayerStatisticsEvent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/BrainCloudWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Common/ACL.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Entity/BCEntityFactory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Entity/BCUserEntity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudComms.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/FileUploader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/OperationParam.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceName.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Internal/ServiceOperation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/ReasonCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/StatusCodes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Version.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Client/BrainCloud/Version.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/JsonFx/JsonReader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/JsonFx/JsonReader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/LitJson/JsonData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/LitJson/JsonData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Resources/BrainCloudSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Resources/BrainCloudSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Resources/Debug/BrainCloudPluginDebugInfo.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Editor/BrainCloudUnityPluginEditor.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/BrainCloudUnityPlugin/Scripts/BrainCloudUnityPlugin.dll.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/BrainCloudPluginSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/BrainCloudHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDGlobalStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDLeaderboard.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/BrainCloud/Unity/Scripts/HUD/HUDPlayerStats.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TicTacToe/Assets/Scripts/Menus/MatchSelect.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../TicTacToe/Assets/Scripts/Menus/MatchSelect.cs" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="-1879950833">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="2" />
+          <entry key="project.open.time.5" value="1" />
+          <entry key="project.open.time.6" value="1" />
+          <entry key="project.opened" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="cs" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="C#" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="cs" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="C#" value="1" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Plugins/PhotonNetwork/LoadbalancingPeer.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="9720">
+              <caret line="648" column="19" selection-start-line="648" selection-start-column="19" selection-end-line="648" selection-end-column="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/Scripts/Connection/DialogDisplay.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2745">
+              <caret line="183" selection-start-line="183" selection-end-line="183" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/Views/PhotonAnimatorViewEditor.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1230">
+              <caret line="82" selection-start-line="82" selection-end-line="82" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/RTTComms.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="447">
+              <caret line="519" lean-forward="true" selection-start-line="519" selection-end-line="519" />
+              <folding>
+                <marker date="1535423881294" expanded="true" signature="0:175" ph="/* ---------------------------------------------------- ... */" />
+                <marker date="1535423881294" expanded="false" signature="183:312" ph="..." />
+                <marker date="1535423881294" expanded="true" signature="343:19464" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="380:19462" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="395:444" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="496:553" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="563:1192" ph="/// Enables Real Time event for this session. ... " />
+                <marker date="1535423881294" expanded="true" signature="1386:1840" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="1429:1830" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="1850:1941" ph="/// Disables Real Time event for this session. ... " />
+                <marker date="1535423881294" expanded="true" signature="1974:2151" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="2161:2210" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="2303:2394" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="2404:2453" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="2523:2712" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="2606:2702" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="2722:2771" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="2819:2882" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="2892:2941" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="2998:3065" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="3195:3244" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="3273:5744" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="3454:5180" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="3704:3853" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="4088:4283" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="4480:4851" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="5015:5162" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="5292:5715" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="5566:5701" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="5754:19456" ph="private" />
+                <marker date="1535423881294" expanded="true" signature="5778:5827" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="5858:6711" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="5901:6701" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="5935:6417" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="6078:6183" ph="/* Start an asynchronous read invoking DoRead to avoid lagging the user ... */" />
+                <marker date="1535423881294" expanded="true" signature="6453:6687" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="6721:6770" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="6810:6934" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="6853:6924" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="6944:6993" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="7027:7252" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="7301:8132" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="8180:8459" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="8469:8518" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="8563:10083" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="8734:8799" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="8856:9753" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="8992:9582" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="9633:9739" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="9805:10039" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="10129:11133" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="10182:10937" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="10389:10657" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="10969:11123" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="11143:11192" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="11230:12774" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="11256:12476" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="11418:12462" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="11564:11711" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="11885:12407" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="12528:12764" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="12784:12833" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="12880:13137" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="13185:13531" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="13330:13490" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="13583:13603" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="13614:13663" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="13710:14967" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="14184:14571" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="14274:14373" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="14407:14505" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="14602:14799" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="14977:15026" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="15112:16286" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="15506:15881" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="15537:15605" ph="/* 1st choice: websocket + ssl ... */" />
+                <marker date="1535423881294" expanded="true" signature="15717:15830" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="15898:16276" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="15929:16007" ph="/* 1st choice: tcp ... */" />
+                <marker date="1535423881294" expanded="true" signature="16121:16234" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="16295:16344" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="16454:17312" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="16635:17272" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="16797:17258" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="16852:17091" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="16929:17069" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="17116:17240" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="17322:17371" ph="///  ... " />
+                <marker date="1535423881294" expanded="true" signature="17480:17748" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="17823:17963" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="19042:19437" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="19138:19277" ph="{...}" />
+                <marker date="1535423881294" expanded="true" signature="19486:19639" ph="{...}" />
+                <marker date="1535423881294" expanded="false" signature="19493:19637" ph="public enums" />
+                <marker date="1535423881294" expanded="true" signature="19548:19622" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../Authentication/Assets/Scripts/ScreenEntityCustomClass.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="16" column="30" lean-forward="true" selection-start-line="16" selection-start-column="30" selection-end-line="16" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonEditor.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="9900">
+              <caret line="660" column="23" selection-start-line="660" selection-start-column="12" selection-end-line="660" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonViewHandler.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2805">
+              <caret line="187" column="23" selection-start-line="187" selection-start-column="23" selection-end-line="187" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>WebSocket WebSocket</find>
+      <find>WebSocket</find>
+      <find>WebSco</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonEditor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/38D3CEF1-4C5A-4FC9-A92D-E0991034BC1A/d2/8e3501db/WebSocket.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Authentication/Assets/Scripts/ScreenEntityCustomClass.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Connection/DialogDisplay.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/RTTComms.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Plugins/PhotonNetwork/LoadbalancingPeer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonViewHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/Views/PhotonAnimatorViewEditor.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Assets/Photon Unity Networking/Plugins/PhotonNetwork/LoadbalancingPeer.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Connection/DialogDisplay.cs" />
+        <option value="$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonEditor.cs" />
+        <option value="$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonViewHandler.cs" />
+        <option value="$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/Views/PhotonAnimatorViewEditor.cs" />
+        <option value="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudWebSocket.cs" />
+        <option value="$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/RTTComms.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="588" />
+    <option name="y" value="23" />
+    <option name="width" value="1332" />
+    <option name="height" value="1177" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="UnityExplorer" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="UnityExplorer">
+        <subPane>
+          <expand>
+            <path>
+              <item name="Project" type="e068e287:UnityExplorerRootNode" />
+              <item name="Packages" type="4e2708dd:PackagesRoot" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+        <option name="show-hidden-items" value="false" />
+      </pane>
+      <pane id="FileSystemExplorer" />
+      <pane id="SolutionExplorer">
+        <option name="show-all-files" value="false" />
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
+    <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Attach to Unity Editor.Attach to Unity Editor" />
+      <item itemvalue="Attach to Unity Editor.Attach to Unity Editor &amp; Play" />
+    </list>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d7e0de02-c2f2-4588-9336-cf6c4a67a0d8" name="Default" comment="" />
+      <created>1534862975956</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1534862975956</updated>
+      <workItem from="1534862978367" duration="871000" />
+      <workItem from="1535416906797" duration="38000" />
+      <workItem from="1535417015726" duration="1429000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="2338000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="588" y="23" width="1332" height="1177" extended-state="0" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.37131783" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="NuGet" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Unity" order="9" />
+      <window_info anchor="bottom" id="Database Changes" order="10" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Unit Tests" order="11" />
+      <window_info anchor="bottom" id="Terminal" order="12" />
+      <window_info anchor="bottom" id="Event Log" order="13" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="14" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Errors In Solution" order="3" />
+      <window_info anchor="right" id="Database" order="4" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" suspend="NONE" type="DotNet Exception Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Plugins/PhotonNetwork/LoadbalancingPeer.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9720">
+          <caret line="648" column="19" selection-start-line="648" selection-start-column="19" selection-end-line="648" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/Scripts/Connection/DialogDisplay.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2745">
+          <caret line="183" selection-start-line="183" selection-end-line="183" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/Views/PhotonAnimatorViewEditor.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1230">
+          <caret line="82" selection-start-line="82" selection-end-line="82" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonEditor.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9900">
+          <caret line="660" column="23" selection-start-line="660" selection-start-column="12" selection-end-line="660" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/Photon Unity Networking/Editor/PhotonNetwork/PhotonViewHandler.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2805">
+          <caret line="187" column="23" selection-start-line="187" selection-start-column="23" selection-end-line="187" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/38D3CEF1-4C5A-4FC9-A92D-E0991034BC1A/d2/8e3501db/WebSocket.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" column="15" selection-start-line="21" selection-start-column="15" selection-end-line="21" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/BrainCloudWebSocket.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="19" column="15" selection-start-line="19" selection-start-column="15" selection-end-line="19" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Assets/BrainCloud/Client/BrainCloud/Internal/RTTComms.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="447">
+          <caret line="519" lean-forward="true" selection-start-line="519" selection-end-line="519" />
+          <folding>
+            <marker date="1535423881294" expanded="true" signature="0:175" ph="/* ---------------------------------------------------- ... */" />
+            <marker date="1535423881294" expanded="false" signature="183:312" ph="..." />
+            <marker date="1535423881294" expanded="true" signature="343:19464" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="380:19462" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="395:444" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="496:553" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="563:1192" ph="/// Enables Real Time event for this session. ... " />
+            <marker date="1535423881294" expanded="true" signature="1386:1840" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="1429:1830" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="1850:1941" ph="/// Disables Real Time event for this session. ... " />
+            <marker date="1535423881294" expanded="true" signature="1974:2151" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="2161:2210" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="2303:2394" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="2404:2453" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="2523:2712" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="2606:2702" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="2722:2771" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="2819:2882" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="2892:2941" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="2998:3065" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="3195:3244" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="3273:5744" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="3454:5180" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="3704:3853" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="4088:4283" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="4480:4851" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="5015:5162" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="5292:5715" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="5566:5701" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="5754:19456" ph="private" />
+            <marker date="1535423881294" expanded="true" signature="5778:5827" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="5858:6711" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="5901:6701" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="5935:6417" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="6078:6183" ph="/* Start an asynchronous read invoking DoRead to avoid lagging the user ... */" />
+            <marker date="1535423881294" expanded="true" signature="6453:6687" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="6721:6770" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="6810:6934" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="6853:6924" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="6944:6993" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="7027:7252" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="7301:8132" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="8180:8459" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="8469:8518" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="8563:10083" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="8734:8799" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="8856:9753" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="8992:9582" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="9633:9739" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="9805:10039" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="10129:11133" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="10182:10937" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="10389:10657" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="10969:11123" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="11143:11192" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="11230:12774" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="11256:12476" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="11418:12462" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="11564:11711" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="11885:12407" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="12528:12764" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="12784:12833" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="12880:13137" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="13185:13531" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="13330:13490" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="13583:13603" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="13614:13663" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="13710:14967" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="14184:14571" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="14274:14373" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="14407:14505" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="14602:14799" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="14977:15026" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="15112:16286" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="15506:15881" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="15537:15605" ph="/* 1st choice: websocket + ssl ... */" />
+            <marker date="1535423881294" expanded="true" signature="15717:15830" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="15898:16276" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="15929:16007" ph="/* 1st choice: tcp ... */" />
+            <marker date="1535423881294" expanded="true" signature="16121:16234" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="16295:16344" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="16454:17312" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="16635:17272" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="16797:17258" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="16852:17091" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="16929:17069" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="17116:17240" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="17322:17371" ph="///  ... " />
+            <marker date="1535423881294" expanded="true" signature="17480:17748" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="17823:17963" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="19042:19437" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="19138:19277" ph="{...}" />
+            <marker date="1535423881294" expanded="true" signature="19486:19639" ph="{...}" />
+            <marker date="1535423881294" expanded="false" signature="19493:19637" ph="public enums" />
+            <marker date="1535423881294" expanded="true" signature="19548:19622" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Authentication/Assets/Scripts/ScreenEntityCustomClass.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="16" column="30" lean-forward="true" selection-start-line="16" selection-start-column="30" selection-end-line="16" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

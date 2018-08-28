@@ -73,7 +73,7 @@ public class MatchSelect : GameScene
         }
 
         // Now, find completed matches so the user can go see the history
-        App.Bc.AsyncMatchService.OnFindCompleteMatches(OnFindCompletedMatches);
+        App.Bc.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
     }
 
     private void OnFindCompletedMatches(string responseData, object cbPostObject)
@@ -297,11 +297,18 @@ public class MatchSelect : GameScene
             {
                 var data = JsonMapper.ToObject(responseData)["data"];
 
-                if (data["attributes"]["MATCH_STATE"].ToString().Equals("FOUND_MATCH"))
+                try
                 {
-                    isLookingForMatch = false;
-                    autoJoinText = "MatchFound";
+                    if (data["attributes"]["MATCH_STATE"].ToString().Equals("FOUND_MATCH"))
+                    {
+                        isLookingForMatch = false;
+                        autoJoinText = "MatchFound";
 
+                    }
+                }
+                catch (Exception e)
+                {
+                    // ignored
                 }
             });
 
