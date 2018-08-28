@@ -198,12 +198,14 @@ namespace BrainCloud.Internal
         private void disconnect()
         {
             if (m_tcpClient != null) m_tcpClient.Close();
-      
+            if (m_webSocket != null) m_webSocket.Close();
+
             RTTConnectionID = "";
             RTTEventServer = "";
 
             m_tcpClient = null;
-   
+            m_webSocket = null;
+
             m_bIsConnected = false;
         }
 
@@ -247,7 +249,7 @@ namespace BrainCloud.Internal
             bool bMessageSent = false;
             // early return
             if ((!m_useWebSocket && m_tcpClient == null) ||
-                (m_useWebSocket))
+                (m_useWebSocket && m_webSocket == null))
             {
                 return bMessageSent;
             }
@@ -275,6 +277,7 @@ namespace BrainCloud.Internal
                 else
                 {
                     byte[] data = Encoding.UTF8.GetBytes(in_message);
+                    m_webSocket.SendAsync(data);
                 }
             }
             catch (SocketException socketException)
@@ -378,8 +381,36 @@ namespace BrainCloud.Internal
 
         private void setupWebSocket(string in_url)
         {
+            m_webSocket = new BrainCloudWebSocket(in_url);
+            m_webSocket.OnClose += WebSocket_OnClose;
+            m_webSocket.OnOpen += Websocket_OnOpen;
+            m_webSocket.OnMessage += WebSocket_OnMessage;
+            m_webSocket.OnError += WebSocket_OnError;
         }
 
+        private void WebSocket_OnClose(BrainCloudWebSocket sender, int code, string reason)
+        {
+            m_clientRef.Log("Connection closed: " + reason);
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "disconnect", reason));
+        }
+
+        private void Websocket_OnOpen(BrainCloudWebSocket accepted)
+        {
+            m_clientRef.Log("Connection established.");
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "connect", ""));
+        }
+
+        private void WebSocket_OnMessage(BrainCloudWebSocket sender, byte[] data)
+        {
+            string message = Encoding.UTF8.GetString(data);
+            onRecv(message);
+        }
+
+        private void WebSocket_OnError(BrainCloudWebSocket sender, string message)
+        {
+            m_clientRef.Log("Error: " + message);
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "error", message));
+        }
 
         /// <summary>
         /// 
@@ -511,6 +542,7 @@ namespace BrainCloud.Internal
 
         private bool m_useWebSocket = false;
         private bool m_bIsConnected = false;
+        private BrainCloudWebSocket m_webSocket = null;
 
         private DateTime m_lastNowMS;
 
