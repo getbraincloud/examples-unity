@@ -14,7 +14,8 @@ MonoBehaviour:
   PluginState: 6
   TeamType: 0
   WasSelectedTeam: 1
-  WasSelectedApp: 0
+  WasSelectedApp: 7
+  ClientVersion: 3.8.2
   ServerUrl: https://sharedprod.braincloudservers.com
   NewAppName: New App Name
   AdminData:
@@ -27,23 +28,72 @@ MonoBehaviour:
       TeamName: Select Team
       TeamId: null
     - AppList:
+      - AppName: Authentication
+        AppId: 12060
+        AppSecret: a010006e-555e-40d8-bed6-2b2a0514808c
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Error Handling
+        AppId: 12062
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Bombers Photon
+        AppId: 12061
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: TicTacToe
+        AppId: 12063
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Space Shooter
+        AppId: 12066
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Blank Example
+        AppId: 12034
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
+      - AppName: Push Notifications
+        AppId: 12067
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
       - AppName: Bombers UNET
         AppId: 12025
         AppSecret: 859b93ed-6e18-43b0-b1dd-e2478944422b
         AppVersion: 1.0
         IsDisabled: 0
       AppNameList:
+      - Authentication (12060)
+      - Error Handling (12062)
+      - Bombers Photon (12061)
+      - TicTacToe (12063)
+      - Space Shooter (12066)
+      - Blank Example (12034)
+      - Push Notifications (12067)
       - Bombers UNET (12025)
       RenderAppNameList:
+      - Authentication (12060)
+      - Error Handling (12062)
+      - Bombers Photon (12061)
+      - TicTacToe (12063)
+      - Space Shooter (12066)
+      - Blank Example (12034)
+      - Push Notifications (12067)
       - Bombers UNET (12025)
       - Create New App ...
       RenderedAppNameList: []
-      SelectedAppIndex: 0
-      TeamName: brainCloud Tutorial
+      SelectedAppIndex: 7
+      TeamName: brainCloud Tutorials for Unity
       TeamId: 13363b65-5cf2-4b5e-937b-05a866795614
     TeamNameList:
     - -- Select Team --
-    - brainCloud Tutorial (4528926)
+    - brainCloud Tutorials for Unity (4528926)
     SelectedTeamIndex: 1
     AdminFullName: 
     AdminEmailAddress: 

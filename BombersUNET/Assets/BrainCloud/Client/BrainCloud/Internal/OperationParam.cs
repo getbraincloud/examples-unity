@@ -69,7 +69,7 @@ namespace BrainCloud
         public static readonly OperationParam IdentityServiceExternalId = new OperationParam("externalId");
         public static readonly OperationParam IdentityServiceAuthenticationType = new OperationParam("authenticationType");
         public static readonly OperationParam IdentityServiceConfirmAnonymous = new OperationParam("confirmAnonymous");
-
+        
         public static readonly OperationParam IdentityServiceOldEmailAddress = new OperationParam("oldEmailAddress");
         public static readonly OperationParam IdentityServiceNewEmailAddress = new OperationParam("newEmailAddress");
         public static readonly OperationParam IdentityServiceUpdateContactEmail = new OperationParam("updateContactEmail");
@@ -388,7 +388,7 @@ namespace BrainCloud
         public static readonly OperationParam ChatMaxReturn = new OperationParam("maxReturn");
         public static readonly OperationParam ChatMessageId = new OperationParam("msgId");
         public static readonly OperationParam ChatVersion = new OperationParam("version");
-
+        
         public static readonly OperationParam ChatChannelType = new OperationParam("channelType");
         public static readonly OperationParam ChatChannelSubId = new OperationParam("channelSubId");
         public static readonly OperationParam ChatContent = new OperationParam("content");
@@ -404,13 +404,13 @@ namespace BrainCloud
         public static readonly OperationParam GroupChannelType = new OperationParam("gr");
 
         // messaging
-        public static readonly OperationParam MessagingMessageBox = new OperationParam("msgBox");
+        public static readonly OperationParam MessagingMessageBox = new OperationParam("msgbox");
         public static readonly OperationParam MessagingMessageIds = new OperationParam("msgIds");
         public static readonly OperationParam MessagingContext = new OperationParam("context");
         public static readonly OperationParam MessagingPageOffset = new OperationParam("pageOffset");
         public static readonly OperationParam MessagingFromName = new OperationParam("fromName");
         public static readonly OperationParam MessagingToProfileIds = new OperationParam("toProfileIds");
-        public static readonly OperationParam MessagingContent = new OperationParam("content");
+        public static readonly OperationParam MessagingContent = new OperationParam("contentJson");
         public static readonly OperationParam MessagingSubject = new OperationParam("subject");
         public static readonly OperationParam MessagingText = new OperationParam("text");
 

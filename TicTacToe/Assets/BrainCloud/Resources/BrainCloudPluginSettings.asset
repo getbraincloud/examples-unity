@@ -15,6 +15,7 @@ MonoBehaviour:
   TeamType: 0
   WasSelectedTeam: 1
   WasSelectedApp: 3
+  ClientVersion: 3.8.2
   ServerUrl: https://sharedprod.braincloudservers.com
   NewAppName: New App Name
   AdminData:
@@ -57,6 +58,11 @@ MonoBehaviour:
         AppSecret: 
         AppVersion: 1.0
         IsDisabled: 0
+      - AppName: Push Notifications
+        AppId: 12067
+        AppSecret: 
+        AppVersion: 1.0
+        IsDisabled: 0
       - AppName: Bombers UNET
         AppId: 12025
         AppSecret: 
@@ -69,6 +75,7 @@ MonoBehaviour:
       - TicTacToe (12063)
       - Space Shooter (12066)
       - Blank Example (12034)
+      - Push Notifications (12067)
       - Bombers UNET (12025)
       RenderAppNameList:
       - Authentication (12060)
@@ -77,6 +84,7 @@ MonoBehaviour:
       - TicTacToe (12063)
       - Space Shooter (12066)
       - Blank Example (12034)
+      - Push Notifications (12067)
       - Bombers UNET (12025)
       - Create New App ...
       RenderedAppNameList: []

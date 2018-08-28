@@ -11,7 +11,7 @@ public class ConnectScene : MonoBehaviour
     public GameObject MainScene;
     public BCConfig BCConfig;
     
-    private BrainCloudWrapper _bc;
+    public static BrainCloudWrapper _bc;
     
     Vector2 m_scrollPosition;
     string m_authStatus = "Welcome to brainCloud!";

@@ -38,7 +38,7 @@ namespace BrainCloudUnity.HUD
 			GUILayout.BeginVertical();
 			GUILayout.Label (bcc.Authenticated ? "True" : "False");
 			GUILayout.Label (bcc.SessionID);
-			GUILayout.Label (bcc.ProfileId);
+			GUILayout.Label (bcc.AuthenticationService.ProfileId);
 			GUILayout.Label (bcc.AuthenticationService.AnonymousId);
 			GUILayout.Label (bcc.AppId);
 			GUILayout.Label (bcc.AppVersion);

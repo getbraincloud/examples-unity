@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\Jon\.Rider2018.1\system\resharper-host\Local\Transient\ReSharperHost\v12\SolutionCaches\_Bombers.1820001092.00" t="ExcludeRecursive" />
-    <e p="C:\Users\Jon\Documents\GitHub\examples-unity\Bombers" t="IncludeRecursive">
+    <e p="/776813ef" t="IncludeRecursive" />
+    <e p="/app" t="IncludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
@@ -12,6 +13,7 @@
             <e p="BrainCloud" t="Include">
               <e p="BrainCloudAsyncMatch.cs" t="Include" />
               <e p="BrainCloudAuthentication.cs" t="Include" />
+              <e p="BrainCloudChat.cs" t="Include" />
               <e p="BrainCloudClient.cs" t="Include" />
               <e p="BrainCloudDataStream.cs" t="Include" />
               <e p="BrainCloudEntity.cs" t="Include" />
@@ -24,8 +26,10 @@
               <e p="BrainCloudGlobalStatistics.cs" t="Include" />
               <e p="BrainCloudGroup.cs" t="Include" />
               <e p="BrainCloudIdentity.cs" t="Include" />
+              <e p="BrainCloudLobby.cs" t="Include" />
               <e p="BrainCloudMail.cs" t="Include" />
               <e p="BrainCloudMatchMaking.cs" t="Include" />
+              <e p="BrainCloudMessaging.cs" t="Include" />
               <e p="BrainCloudOneWayMatch.cs" t="Include" />
               <e p="BrainCloudPlaybackStream.cs" t="Include" />
               <e p="BrainCloudPlayerState.cs" t="Include" />
@@ -35,6 +39,7 @@
               <e p="BrainCloudProfanity.cs" t="Include" />
               <e p="BrainCloudPushNotification.cs" t="Include" />
               <e p="BrainCloudRedemptionCode.cs" t="Include" />
+              <e p="BrainCloudRTT.cs" t="Include" />
               <e p="BrainCloudS3Handling.cs" t="Include" />
               <e p="BrainCloudScript.cs" t="Include" />
               <e p="BrainCloudSocialLeaderboard.cs" t="Include" />
@@ -68,6 +73,7 @@
                 <e p="OperationParam.cs" t="Include" />
                 <e p="ProgressStream.cs" t="Include" />
                 <e p="RequestState.cs" t="Include" />
+                <e p="RTTComms.cs" t="Include" />
                 <e p="ServerCall.cs" t="Include" />
                 <e p="ServiceName.cs" t="Include" />
                 <e p="ServiceOperation.cs" t="Include" />
@@ -139,6 +145,9 @@
                 <e p="IHUDElement.cs" t="Include" />
               </e>
             </e>
+          </e>
+          <e p="UnityWebSocketsForWebGL" t="Include">
+            <e p="NativeWebSocket.cs" t="Include" />
           </e>
         </e>
         <e p="Editor" t="Include">
@@ -246,18 +255,6 @@
             </e>
           </e>
         </e>
-        <e p="PhotonChatApi" t="Include">
-          <e p="ChatChannel.cs" t="Include" />
-          <e p="ChatClient.cs" t="Include" />
-          <e p="ChatDisconnectCause.cs" t="Include" />
-          <e p="ChatEventCode.cs" t="Include" />
-          <e p="ChatOperationCode.cs" t="Include" />
-          <e p="ChatParameterCode.cs" t="Include" />
-          <e p="ChatPeer.cs" t="Include" />
-          <e p="ChatState.cs" t="Include" />
-          <e p="ChatUserStatus.cs" t="Include" />
-          <e p="IChatClientListener.cs" t="Include" />
-        </e>
         <e p="Plugins" t="Include">
           <e p="Photon3Unity3D.xml" t="Include" />
           <e p="release_history.txt" t="Include" />
@@ -313,5 +310,7 @@
         <e p="bin" t="ExcludeRecursive" />
       </e>
     </e>
+    <e p="$USER_HOME$/Library/Caches/Rider2018.2/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2018.2/resharper-host/local/Transient/ReSharperHost/v182/SolutionCaches/_Bombers.1299814814.00" t="ExcludeRecursive" />
   </component>
 </project>

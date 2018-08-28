@@ -73,7 +73,7 @@ public class MatchSelect : GameScene
         }
 
         // Now, find completed matches so the user can go see the history
-        App.Bc.AsyncMatchService.OnFindCompleteMatches(OnFindCompletedMatches);
+        App.Bc.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
     }
 
     private void OnFindCompletedMatches(string responseData, object cbPostObject)

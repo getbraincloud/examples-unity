@@ -782,7 +782,7 @@ namespace BrainCloud
         ///
         ///This function will first call requestClientConnection, then connect to the address
         /// </summary>
-        /// <param name="in_useWebSockets"></param>
+        /// <param name="in_connectionType"></param>
         /// <param name="in_success"></param>
         /// <param name="in_failure"></param>
         /// <param name="cb_object"></param>
@@ -1314,20 +1314,6 @@ namespace BrainCloud
                 return s_instance;
             }
         }
-
-        [Obsolete("This has been deprecated. Use appId instead - removal after September 1 2017")]
-        public string GameId
-        {
-            get { return _comms != null ? _comms.AppId : ""; }
-        }
-
-        [Obsolete("This has been deprecated. Use AppVersion instead - removal after September 1 2017")]
-        public string GameVersion
-        {
-            get { return _appVersion; }
-        }
-
-
         #endregion
     }
 }

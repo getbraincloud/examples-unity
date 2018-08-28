@@ -372,6 +372,13 @@ namespace LitJson
                 return;
             }
 
+            if (obj is ulong)
+            {
+                type = JsonType.Long;
+                inst_ulong = (ulong)obj;
+                return;
+            }
+
             if (obj is String) {
                 type = JsonType.String;
                 inst_string = (string) obj;
@@ -423,7 +430,7 @@ namespace LitJson
         {
             if (data.type != JsonType.Boolean)
                 throw new InvalidCastException (
-                    "Instance of JsonData doesn't hold a boolean");
+                    "Instance of JsonData doesn't hold a double");
 
             return data.inst_boolean;
         }
