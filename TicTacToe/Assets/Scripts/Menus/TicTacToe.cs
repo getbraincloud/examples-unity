@@ -375,75 +375,8 @@ public class TicTacToe : GameScene
         }
 
 
-        App.Bc.ScriptService.RunScript("FINISH_RANK_MATCH", matchResults.ToJson(), OnMatchCompleted,
+        App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
             (status, code, error, cbObject) => { });
-
-        /**     Cloud Code Script Contents: FINISH_RANK_MATCH
-         
-            // cloud code can be created on the brainCloud dashboard, under Design | Cloud Code | Scripts
-            var retVal = {};
-            
-            
-            var ownerId = data.ownerId;
-            var matchId = data.matchId;
-            var winnerId = data.winnerId;
-            var loserId = data.loserId;
-            
-            var winnerRating = data.winnerRating;
-            var loserRating = data.loserRating;
-            
-            var isTie = data.isTie;
-            
-            
-            
-            // Complete the match
-            var ownerSession = bridge.getSessionForProfile(ownerId);
-            var asyncMatchProxy = bridge.getAsyncMatchServiceProxy(ownerSession);
-            retVal = asyncMatchProxy.completeMatch(ownerId, matchId);
-            
-            // If its not a tie, let process the remaining match results
-            if(!isTie) {
-                // Declare winner and loser session
-                var winnerSession = bridge.getSessionForProfile(winnerId);
-                var loserSession = bridge.getSessionForProfile(loserId);
-            
-            
-                var winnerMatchMakingProxy = bridge.getMatchMakingServiceProxy(winnerSession);
-                var loserMatchMakingProxy = bridge.getMatchMakingServiceProxy(loserSession);
-            
-            
-                // Alter Ratings. Rating defaults and match making controls can be found on the brainCloud dashboard, under Design | Multiplayer | Matchmaking
-                var winnerDelta =  ((loserRating + 400) / winnerRating) * 40;
-                var loserDelta =  ((loserRating - 400) / winnerRating) * 40;
-            
-                winnerMatchMakingProxy.incrementPlayerRating(winnerDelta);
-                loserMatchMakingProxy.decrementPlayerRating(loserDelta);
-            
-            
-                // Post Scores to Rating Leaderboard
-                var leaderboardId = "Player_Rating";
-            
-                var winnerRating = winnerDelta + winnerRating;
-                var loserRating = loserRating - loserDelta;
-            
-                var winnerLeaderboardProxy = bridge.getLeaderboardServiceProxy(winnerSession);
-                var loserLeaderboardProxy = bridge.getLeaderboardServiceProxy(loserSession);
-            
-                winnerLeaderboardProxy.postScoreToLeaderboard(leaderboardId, winnerRating, null);
-                loserLeaderboardProxy.postScoreToLeaderboard(leaderboardId, loserRating, null);
-            
-            
-                // Stats are set on the brainCloud Dashboard under Design | Statistics Rules | User Stats.
-                var playerStats = { "WON_RANKED_MATCH" : 1 };
-                var playerStatisticsProxy = bridge.getPlayerStatisticsServiceProxy(winnerSession);
-                playerStatisticsProxy.incrementPlayerStats(playerStats);
-            }
-            
-            var matchMakingProxy = bridge.getMatchMakingServiceProxy();
-            var retVal = matchMakingProxy.read();
-            
-            retVal;
-         */
     }
 
     private void OnMatchCompleted(string responseData, object cbPostObject)
