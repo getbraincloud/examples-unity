@@ -18,7 +18,21 @@ MonoBehaviour:
       1535416692710,\n            \"leaderboard\": \n                [],\n            \"versionId\":
       1,\n            \"leaderboardId\": \"KDR\",\n            \"moreAfter\": false,\n
       \           \"moreBefore\": false\n        },\n    \"status\": 200\n}"
-    FullLog: 'REQUEST - 08/27/2018 20:38:21
+    FullLog: 'Received session expired or not found, need to re-authenticate
+
+
+      RESPONSE - 10/5/2018 1:18:21 PM
+
+      {"packetId":0,"responses":[{"reason_code":40304,"status":403,"status_message":"No
+      session","severity":"ERROR"}]}
+
+
+      REQUEST - 10/5/2018 1:18:21 PM
+
+      {"packetId":0,"sessionId":null,"gameId":"12025","messages":[{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"22814:gl:main"}}]}
+
+
+      REQUEST - 08/27/2018 20:38:21
 
       {"packetId":3,"sessionId":"d1s0nugd286urmpqe33tk66cg9","gameId":"12025","messages":[{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"22814:gl:main"}}]}
 
@@ -63,11 +77,6 @@ MonoBehaviour:
 
       REQUEST - 08/27/2018 20:38:19
 
-      {"packetId":1,"sessionId":"d1s0nugd286urmpqe33tk66cg9","gameId":"12025","messages":[{"service":"playerStatistics","operation":"READ","data":null},{"service":"playerState","operation":"READ","data":null},{"service":"gamification","operation":"READ_XP_LEVELS","data":null},{"service":"gamification","operation":"READ_ACHIEVEMENTS","data":{"includeMetaData":true}},{"service":"globalApp","operation":"READ_PROPERTIES","data":null}]}
-
-
-      RESPONSE - 08/27/2018 20:38:19
-
-      {"packetId":0,"responses":[{"data":{"abTestingId":27,"lastLogin":1535416692261,"server_time":1535416692306,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":1'
+      {"packetId":1,"sessionId":"d1s0nugd286urmpqe33tk66cg9","gameId":"12025","messages":[{"service":"playerStatistics","operation":"READ","data":null},{"service":"playerState","operation":"READ","data":null},{"service":"gamification","operation":"READ_XP_LE'
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}
