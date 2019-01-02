@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BrainCloudPhotonExample.Connection;
+using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
@@ -13,9 +14,9 @@ namespace BrainCloudPhotonExample.Game
         void OnTriggerEnter(Collider aOther)
         {
             if (!m_isActive) return;
-            if (aOther.GetComponent<PhotonView>() != null && aOther.GetComponent<PhotonView>().owner == PhotonNetwork.player)
+            if (aOther.GetComponent<PhotonView>() != null && aOther.GetComponent<PhotonView>().Owner == PhotonNetwork.LocalPlayer)
             {
-                GameObject.Find("GameManager").GetComponent<GameManager>().BombPickedUp(aOther.GetComponent<PhotonView>().owner, m_pickupID);
+                GameObject.Find("GameManager").GetComponent<GameManager>().BombPickedUp(aOther.GetComponent<PhotonView>().Owner, m_pickupID);
                 m_isActive = false;
                 Destroy(gameObject);
             }
@@ -24,9 +25,9 @@ namespace BrainCloudPhotonExample.Game
         void OnTriggerStay(Collider aOther)
         {
             if (!m_isActive) return;
-            if (aOther.GetComponent<PhotonView>() != null && aOther.GetComponent<PhotonView>().owner == PhotonNetwork.player)
+            if (aOther.GetComponent<PhotonView>() != null && aOther.GetComponent<PhotonView>().Owner == PhotonNetwork.LocalPlayer)
             {
-                GameObject.Find("GameManager").GetComponent<GameManager>().BombPickedUp(aOther.GetComponent<PhotonView>().owner, m_pickupID);
+                GameObject.Find("GameManager").GetComponent<GameManager>().BombPickedUp(aOther.GetComponent<PhotonView>().Owner, m_pickupID);
                 m_isActive = false;
                 Destroy(gameObject);
             }

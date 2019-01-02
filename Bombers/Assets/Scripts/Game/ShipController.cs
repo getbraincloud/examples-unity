@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
@@ -143,12 +144,12 @@ namespace BrainCloudPhotonExample.Game
 
         public void SetShipType(eShipType aShipType, int aTeam, int aShipID)
         {
-            GetComponent<PhotonView>().RPC("SetShipTypeRPC", PhotonTargets.AllBuffered, (int)aShipType, aTeam, aShipID);
+            GetComponent<PhotonView>().RPC("SetShipTypeRPC", RpcTarget.AllBuffered, (int)aShipType, aTeam, aShipID);
         }
 
         public void SetShipType(eShipType aShipType, int aTeam, int aShipID, float aAngle, Vector3 aPosition, float aRespawnTime, Vector3[] aPath, float aPathSpeed)
         {
-            GetComponent<PhotonView>().RPC("SetShipTypeRPC", PhotonTargets.AllBuffered, (int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
+            GetComponent<PhotonView>().RPC("SetShipTypeRPC", RpcTarget.AllBuffered, (int)aShipType, aTeam, aShipID, aAngle, aPosition, aRespawnTime, aPath, aPathSpeed);
         }
 
         [PunRPC]

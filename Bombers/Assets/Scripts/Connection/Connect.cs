@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using BrainCloud;
 using ExitGames.Client.Photon;
+using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Connection
 {
@@ -40,10 +41,10 @@ namespace BrainCloudPhotonExample.Connection
         void Start()
         {
             Application.runInBackground = true;
-            if (!PhotonNetwork.connectedAndReady) PhotonNetwork.ConnectUsingSettings("1.0");
+            if (!PhotonNetwork.IsConnectedAndReady) PhotonNetwork.ConnectUsingSettings();
 
 
-            if (!PhotonNetwork.connectedAndReady) AppendLog("Connecting to Photon...");
+            if (!PhotonNetwork.IsConnectedAndReady) AppendLog("Connecting to Photon...");
             else
             {
                 AppendLog("Connected to Photon");
@@ -68,7 +69,7 @@ namespace BrainCloudPhotonExample.Connection
 
         void Update()
         {
-            m_connectedToPhoton = PhotonNetwork.connectedAndReady;
+            m_connectedToPhoton = PhotonNetwork.IsConnectedAndReady;
             OnWindow();
         }
 
@@ -135,7 +136,7 @@ namespace BrainCloudPhotonExample.Connection
 
         void OnConnectedToPhoton()
         {
-            m_connectedToPhoton = PhotonNetwork.connectedAndReady;
+            m_connectedToPhoton = PhotonNetwork.IsConnectedAndReady;
             AppendLog("Connected to Photon");
             PhotonPeer.RegisterType(typeof(BulletController.BulletInfo), (byte)'B', BulletController.BulletInfo.SerializeBulletInfo, BulletController.BulletInfo.DeserializeBulletInfo);
             PhotonPeer.RegisterType(typeof(BombController.BombInfo), (byte)'b', BombController.BombInfo.SerializeBombInfo, BombController.BombInfo.DeserializeBombInfo);
@@ -206,16 +207,16 @@ namespace BrainCloudPhotonExample.Connection
                     }
                 }
                 _bc.Client.PlayerStateService.UpdateUserName(username);
-                PhotonNetwork.player.NickName = username;
+                PhotonNetwork.LocalPlayer.NickName = username;
             }
             else
             {
-                PhotonNetwork.player.NickName = response["data"]["playerName"].ToString();
+                PhotonNetwork.LocalPlayer.NickName = response["data"]["playerName"].ToString();
             }
 
             BrainCloudStats.Instance.ReadStatistics();
             BrainCloudStats.Instance.ReadGlobalProperties();
-            PhotonNetwork.sendRate = 20;
+            PhotonNetwork.SendRate = 20;
             SceneManager.LoadScene("Matchmaking");
         }
 

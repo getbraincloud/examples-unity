@@ -2,10 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloudPhotonExample.Connection;
+using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class PlaneController : Photon.MonoBehaviour
+    public class PlaneController : MonoBehaviourPun
     {
         public class PlaneVector
         {
@@ -67,7 +68,7 @@ namespace BrainCloudPhotonExample.Game
 
         public void OnPhotonSerializeView(PhotonStream aStream, PhotonMessageInfo aInfo)
         {
-            if (aStream.isWriting)
+            if (aStream.IsWriting)
             {
                 aStream.SendNext(transform.position);
                 aStream.SendNext(transform.rotation.eulerAngles.z);
@@ -81,7 +82,7 @@ namespace BrainCloudPhotonExample.Game
                 m_health = (int)aStream.ReceiveNext();
 
                 stopWatch.Stop();
-                if (stopWatch.ElapsedMilliseconds > (1000 / PhotonNetwork.sendRate))
+                if (stopWatch.ElapsedMilliseconds > (1000 / PhotonNetwork.SendRate))
                 {
                     m_photonReleasedPositions.Add(new TimePosition(m_photonPosition, (float)stopWatch.ElapsedMilliseconds, m_photonRotation));
                     if (m_once && m_photonReleasedPositions.Count >= 4)
@@ -152,7 +153,7 @@ namespace BrainCloudPhotonExample.Game
                     }
 
                     Vector3 velocity = (m_photonReleasedPositions[0].m_position - m_photonPositions[m_photonPositions.Length - 1]);
-                    velocity *= (((float)(1000 / PhotonNetwork.sendRate)) / m_photonReleasedPositions[0].m_time);
+                    velocity *= (((float)(1000 / PhotonNetwork.SendRate)) / m_photonReleasedPositions[0].m_time);
                     Vector3 calculatedPosition = m_photonPositions[m_photonPositions.Length - 1] + velocity;
 
                     if (!float.IsNaN(calculatedPosition.x) && !float.IsNaN(calculatedPosition.y) && !float.IsNaN(calculatedPosition.z))
@@ -245,7 +246,7 @@ namespace BrainCloudPhotonExample.Game
 
                     m_bezierTime = properBezierTime;
                 }
-                yield return YieldFactory.GetWaitForSeconds(((float)(1000 / PhotonNetwork.sendRate)) / 1000);
+                yield return YieldFactory.GetWaitForSeconds(((float)(1000 / PhotonNetwork.SendRate)) / 1000);
             }
         }
 
@@ -258,8 +259,8 @@ namespace BrainCloudPhotonExample.Game
             {
                 null, null, null, null
             };
-            transform.Find("NameTag").gameObject.GetComponent<TextMesh>().text = GetComponent<PhotonView>().owner.CustomProperties["RoomDisplayName"].ToString();
-            if (GetComponent<PhotonView>().isMine)
+            transform.Find("NameTag").gameObject.GetComponent<TextMesh>().text = GetComponent<PhotonView>().Owner.CustomProperties["RoomDisplayName"].ToString();
+            if (GetComponent<PhotonView>().IsMine)
             {
                 transform.Find("NameTag").gameObject.GetComponent<TextMesh>().text = "";
             }
@@ -277,7 +278,7 @@ namespace BrainCloudPhotonExample.Game
             }
 
             string teamBomberPath = "";
-            if ((int)GetComponent<PhotonView>().owner.CustomProperties["Team"] == 1)
+            if ((int)GetComponent<PhotonView>().Owner.CustomProperties["Team"] == 1)
             {
                 teamBomberPath = "Bomber01";
                 gameObject.layer = 8;
@@ -396,7 +397,7 @@ namespace BrainCloudPhotonExample.Game
 
         void FixedUpdate()
         {
-            if (!photonView.isMine)
+            if (!photonView.IsMine)
             {
                 m_bezierTime += Time.deltaTime * m_bezierSpeed;
                 if (m_bezierTime > 1) m_bezierTime = 1;

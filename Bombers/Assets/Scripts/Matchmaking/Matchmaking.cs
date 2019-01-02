@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using BrainCloudPhotonExample.Connection;
+using BrainCloudPhotonExample.Game;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Matchmaking
@@ -178,7 +181,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_createGameWindow = GameObject.Find("CreateGame");
 
             m_createGameWindow.SetActive(false);
-            m_playerName.text = PhotonNetwork.player.NickName;
+            m_playerName.text = PhotonNetwork.LocalPlayer.NickName;
             m_playerName.interactable = false;
 
             PhotonNetwork.JoinLobby();
@@ -198,7 +201,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         public void FinishEditName()
         {
-            PhotonNetwork.player.NickName = m_playerName.text;
+            PhotonNetwork.LocalPlayer.NickName = m_playerName.text;
             _bc.Client.PlayerStateService.UpdateUserName(m_playerName.text);
             m_playerName.interactable = false;
             m_playerNameImage.enabled = false;
@@ -516,7 +519,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
 
             m_roomButtons.Clear();
-            RoomInfo[] rooms = PhotonNetwork.GetRoomList();
+            
+            RoomInfo[] rooms = FindObjectOfType<GameManager>().GetRoomList();
 
             for (int i = 0; i < rooms.Length; i++)
             {
@@ -652,7 +656,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
                 for (int i = 0; i < players; i++)
                 {
-                    if (leaderboardData["leaderboard"][i]["name"].ToString() == PhotonNetwork.playerName)
+                    if (leaderboardData["leaderboard"][i]["name"].ToString() == PhotonNetwork.LocalPlayer.NickName)
                     {
                         playerListed = true;
                         playerChevronPosition = i;
@@ -724,7 +728,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void OnJoinedRoom()
         {
-            PhotonNetwork.automaticallySyncScene = true;
+            PhotonNetwork.AutomaticallySyncScene = true;
             PhotonNetwork.LoadLevel("Game");
         }
 
@@ -767,12 +771,12 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void CreateNewRoom(string aName, RoomOptions aOptions)
         {
-            RoomInfo[] rooms = PhotonNetwork.GetRoomList();
+            RoomInfo[] rooms = FindObjectOfType<GameManager>().GetRoomList();
             bool roomExists = false;
 
             if (aName == "")
             {
-                aName = PhotonNetwork.player.NickName + "'s Room";
+                aName = PhotonNetwork.LocalPlayer.NickName + "'s Room";
             }
 
             for (int i = 0; i < rooms.Length; i++)

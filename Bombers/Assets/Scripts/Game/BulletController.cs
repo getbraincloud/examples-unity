@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BrainCloudPhotonExample.Connection;
+using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
@@ -15,13 +16,13 @@ namespace BrainCloudPhotonExample.Game
         {
             public Vector3 m_startPosition;
             public Vector3 m_startDirection;
-            public PhotonPlayer m_shooter;
+            public Photon.Realtime.Player m_shooter;
             public Vector3 m_startVelocity;
             public int m_bulletID;
             public bool m_isMaster = false;
             public GameObject gameObject;
 
-            public BulletInfo(Vector3 aStartPos, Vector3 aStartDir, PhotonPlayer aPlayer, Vector3 aSpeed, int aID = 0)
+            public BulletInfo(Vector3 aStartPos, Vector3 aStartDir, Photon.Realtime.Player aPlayer, Vector3 aSpeed, int aID = 0)
             {
                 m_startPosition = aStartPos;
                 m_startDirection = aStartDir;
@@ -41,7 +42,7 @@ namespace BrainCloudPhotonExample.Game
                 ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startDirection.x, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startDirection.y, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startDirection.z, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_shooter.ID, bytes, ref index);
+                ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_shooter.ActorNumber, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startVelocity.x, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startVelocity.y, bytes, ref index);
                 ExitGames.Client.Photon.Protocol.Serialize(bulletInfo.m_startVelocity.z, bytes, ref index);
@@ -55,7 +56,7 @@ namespace BrainCloudPhotonExample.Game
             {
                 Vector3 startPos = Vector3.zero;
                 Vector3 direction = Vector3.zero;
-                PhotonPlayer shooter = PhotonNetwork.player;
+                Photon.Realtime.Player shooter = PhotonNetwork.LocalPlayer;
                 int shooterID = 0;
                 Vector3 speed = Vector3.zero;
                 int id = 0;
