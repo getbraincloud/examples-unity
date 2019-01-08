@@ -771,6 +771,9 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         void CreateNewRoom(string aName, RoomOptions aOptions)
         {
+            var test = FindObjectOfType<GameManager>();
+            var test2 = FindObjectOfType<GameManager>().GetRoomList();
+        
             RoomInfo[] rooms = FindObjectOfType<GameManager>().GetRoomList();
             bool roomExists = false;
 
