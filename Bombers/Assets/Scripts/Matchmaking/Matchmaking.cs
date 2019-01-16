@@ -9,7 +9,8 @@ using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Matchmaking
 {
-    public class Matchmaking : MonoBehaviour
+    
+    public class Matchmaking : MonoBehaviourPunCallbacks, ILobbyCallbacks
     {
         public class RoomButton
         {
@@ -726,7 +727,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_dialogDisplay.DisplayDialog("Could not join room!");
         }
 
-        void OnJoinedRoom()
+        public override void OnJoinedRoom()
         {
             PhotonNetwork.AutomaticallySyncScene = true;
             PhotonNetwork.LoadLevel("Game");
@@ -737,7 +738,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             OnRoomsWindow();
         }
 
-        void OnConnectedToMaster()
+        public override void OnConnectedToMaster()
         {
             PhotonNetwork.JoinLobby();
         }
@@ -769,12 +770,17 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
         }
 
+        List<RoomInfo> roomList = new List<RoomInfo>();
+        
+        public override void OnRoomListUpdate(List<RoomInfo> roomList)
+        {
+            this.roomList = roomList;
+        }
+
         void CreateNewRoom(string aName, RoomOptions aOptions)
         {
-            var test = FindObjectOfType<GameManager>();
-            var test2 = FindObjectOfType<GameManager>().GetRoomList();
-        
-            RoomInfo[] rooms = FindObjectOfType<GameManager>().GetRoomList();
+            
+            RoomInfo[] rooms = roomList.ToArray();
             bool roomExists = false;
 
             if (aName == "")
