@@ -131,10 +131,27 @@ namespace BrainCloud
         }
 
         /// <summary>
+        /// Sends a potentially richer member chat message. By convention, content should contain a field named text for plain-text content. Returns the id of the message created.
+        /// </summary>
+        /// 
+        public void PostChatMessage(string in_channelId, string in_contentJson, bool in_recordInHistory = true, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+
+            data[OperationParam.ChatChannelId.Value] = in_channelId;
+            data[OperationParam.ChatContent.Value] = JsonReader.Deserialize<Dictionary<string, object>> (in_contentJson);
+            data[OperationParam.ChatRecordInHistory.Value] = in_recordInHistory;
+            
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Chat, ServiceOperation.PostChatMessage, data, callback);
+            m_clientRef.SendRequest(sc);
+        }
+        
+        /// <summary>
         /// Send a potentially rich chat message. <content> must contain at least a "plain" field for plain-text messaging.
         /// </summary>
         /// 
-        public void PostChatMessage(string in_channelId, string in_plain, string in_jsonRich, bool in_recordInHisory = true, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
+        public void PostChatMessage(string in_channelId, string in_plain, string in_jsonRich, bool in_recordInHistory = true, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
 
@@ -154,7 +171,7 @@ namespace BrainCloud
 
             data[OperationParam.ChatChannelId.Value] = in_channelId;
             data[OperationParam.ChatContent.Value] = content;
-            data[OperationParam.ChatRecordInHistory.Value] = in_recordInHisory;
+            data[OperationParam.ChatRecordInHistory.Value] = in_recordInHistory;
             
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Chat, ServiceOperation.PostChatMessage, data, callback);
@@ -165,19 +182,36 @@ namespace BrainCloud
         /// Sends a plain-text chat message.
         /// </summary>
         /// 
-        public void PostChatMessageSimple(string in_channelId, string in_plain, bool in_recordInHisory = true, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
+        public void PostChatMessageSimple(string in_channelId, string in_plain, bool in_recordInHistory = true, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>();
             
             data[OperationParam.ChatChannelId.Value] = in_channelId;
             data[OperationParam.ChatText.Value] = in_plain;
-            data[OperationParam.ChatRecordInHistory.Value] = in_recordInHisory;
+            data[OperationParam.ChatRecordInHistory.Value] = in_recordInHistory;
             
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Chat, ServiceOperation.PostChatMessageSimple, data, callback);
             m_clientRef.SendRequest(sc);
         }
 
+        /// <summary>
+        /// Update the specified chat message. Message must have been from this user. Version provided must match (or pass -1 to bypass version enforcement).
+        /// </summary>
+        public void UpdateChatMessage(string in_channelId, string in_messageId, int in_version, string in_contentJson, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            
+            data[OperationParam.ChatChannelId.Value] = in_channelId;
+            data[OperationParam.ChatMessageId.Value] = in_messageId;
+            data[OperationParam.ChatVersion.Value] = in_version;
+            data[OperationParam.ChatContent.Value] = JsonReader.Deserialize<Dictionary<string, object>> (in_contentJson);
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Chat, ServiceOperation.UpdateChatMessage, data, callback);
+            m_clientRef.SendRequest(sc);
+        }
+        
         /// <summary>
         /// Update a chat message. <content> must contain at least a "plain" field for plain-text messaging. <version> must match the latest or pass -1 to bypass version check.
         /// </summary>

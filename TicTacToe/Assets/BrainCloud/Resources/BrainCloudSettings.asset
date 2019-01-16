@@ -3,16 +3,22 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56a97abc078c945fc95d75a6dd902d96, type: 3}
   m_Name: BrainCloudSettings
   m_EditorClassIdentifier: 
+  m_dispatchUrl: https://sharedprod.braincloudservers.com/dispatcherv2
   m_serverURL: https://sharedprod.braincloudservers.com
-  m_secretKey: 
-  m_gameId: 
-  m_gameVersion: 1.0.0
+  m_secretKey: 6632e59a-02f0-46b7-9d77-9d81f2d255e3
+  m_appId: 12063
+  m_appVersion: 1.0
+  m_appIdSecrets:
+  - appName: 
+    appId: 12063
+    appSecret: 6632e59a-02f0-46b7-9d77-9d81f2d255e3
   m_enableLogging: 0
