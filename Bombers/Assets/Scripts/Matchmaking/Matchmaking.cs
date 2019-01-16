@@ -521,7 +521,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
             m_roomButtons.Clear();
             
-            RoomInfo[] rooms = FindObjectOfType<GameManager>().GetRoomList();
+            var rooms = roomList.ToArray();
 
             for (int i = 0; i < rooms.Length; i++)
             {
@@ -775,6 +775,9 @@ namespace BrainCloudPhotonExample.Matchmaking
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
         {
             this.roomList = roomList;
+
+            OnReceivedRoomListUpdate();
+
         }
 
         void CreateNewRoom(string aName, RoomOptions aOptions)
