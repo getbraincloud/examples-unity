@@ -5,7 +5,7 @@ using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class ShipController : MonoBehaviour
+    public class ShipController : MonoBehaviour, IPunObservable
     {
         public enum eShipType
         {
