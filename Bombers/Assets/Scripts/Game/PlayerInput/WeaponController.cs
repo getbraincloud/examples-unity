@@ -6,7 +6,7 @@ using Photon.Realtime;
 
 namespace BrainCloudPhotonExample.Game.PlayerInput
 {
-    public class WeaponController : MonoBehaviour
+    public class WeaponController : MonoBehaviour, IPunObservable
     {
         private GameObject m_playerPlane;
 
@@ -406,6 +406,11 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             bullet.GetComponent<BulletController>().SetBulletInfo(aBulletInfo);
 
             return bullet;
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 

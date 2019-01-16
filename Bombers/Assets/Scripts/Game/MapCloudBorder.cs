@@ -2,8 +2,9 @@
 
 using UnityEngine;
 using System.Collections;
+using Photon.Pun;
 
-public class MapCloudBorder : MonoBehaviour {
+public class MapCloudBorder : MonoBehaviour, IPunObservable {
 
 	private Collider m_playfieldExtents; //the bounds of the playfield adjusted by the playfield size choice when creating a game
 	public Transform[] m_cloudEmitters; //the cloud border effects (0=right 1=left 2=top 3=bottom)
@@ -21,6 +22,10 @@ public class MapCloudBorder : MonoBehaviour {
 		m_cloudEmitters[3].position = new Vector3( 0.0f , m_playfieldExtents.bounds.min.y + m_inset , m_heightOffset );
 
 	}
-	
 
+
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+		
+	}
 }

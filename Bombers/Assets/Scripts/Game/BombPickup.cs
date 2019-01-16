@@ -5,7 +5,7 @@ using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class BombPickup : MonoBehaviour
+    public class BombPickup : MonoBehaviour, IPunObservable
     {
         public int m_pickupID;
         private bool m_isActive = false;
@@ -89,6 +89,11 @@ namespace BrainCloudPhotonExample.Game
 
             transform.position = position;
 
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 }

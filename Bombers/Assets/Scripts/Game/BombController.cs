@@ -6,7 +6,7 @@ using Photon.Realtime;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class BombController : MonoBehaviour
+    public class BombController : MonoBehaviour, IPunObservable
     {
         public class BombInfo
         {
@@ -191,6 +191,11 @@ namespace BrainCloudPhotonExample.Game
         void LateUpdate()
         {
             transform.rotation = Quaternion.LookRotation(GetComponent<Rigidbody>().velocity.normalized, transform.up);
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 }

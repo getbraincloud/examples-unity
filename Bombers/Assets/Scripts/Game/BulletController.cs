@@ -5,7 +5,7 @@ using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class BulletController : MonoBehaviour
+    public class BulletController : MonoBehaviour, IPunObservable
     {
         [SerializeField]
         private float m_lifeTime = 2.5f;
@@ -127,6 +127,10 @@ namespace BrainCloudPhotonExample.Game
             {
                 GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBullet(m_bulletInfo);
             }
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
         }
     }
 }

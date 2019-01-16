@@ -5,7 +5,7 @@ using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class TargetPointDisplay : MonoBehaviour
+    public class TargetPointDisplay : MonoBehaviour, IPunObservable
     {
         private Color m_color;
         private int m_team;
@@ -34,6 +34,11 @@ namespace BrainCloudPhotonExample.Game
             {
                 GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0.0f);
             }
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 }

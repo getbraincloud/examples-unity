@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BrainCloudPhotonExample.Game.PlayerInput;
+using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class MapBoundsCheck : MonoBehaviour
+    public class MapBoundsCheck : MonoBehaviour, IPunObservable
     {
         public GameObject m_playerPlane;
 
@@ -21,6 +22,11 @@ namespace BrainCloudPhotonExample.Game
                     GameObject.Find("PlayerController").GetComponent<PlayerController>().EnteredBounds();
                 }
             }
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 }

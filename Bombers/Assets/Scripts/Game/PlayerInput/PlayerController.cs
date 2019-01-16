@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace BrainCloudPhotonExample.Game.PlayerInput
 {
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IPunObservable
     {
         private bool m_isAccelerating = false;
         private bool m_isTurningRight = false;
@@ -343,6 +343,11 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public void LeftBounds()
         {
             m_leftBounds = true;
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 }

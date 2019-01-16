@@ -6,7 +6,7 @@ using Photon.Realtime;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class FlareController : MonoBehaviour
+    public class FlareController : MonoBehaviour, IPunObservable
     {
         private bool m_isActive = false;
         private float m_lifeTime = 100;
@@ -116,6 +116,11 @@ namespace BrainCloudPhotonExample.Game
                 transform.GetChild(1).gameObject.SetActive(false);
                 transform.GetChild(2).gameObject.SetActive(false);
             }
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 }
