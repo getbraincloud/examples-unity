@@ -12,7 +12,7 @@ namespace BrainCloudPhotonExample.Game
 
         private BulletInfo m_bulletInfo;
 
-        public class BulletInfo
+        public class BulletInfo : IPunObservable
         {
             public Vector3 m_startPosition;
             public Vector3 m_startDirection;
@@ -89,6 +89,11 @@ namespace BrainCloudPhotonExample.Game
             public override int GetHashCode()
             {
                 return m_bulletID.GetHashCode();
+            }
+
+            public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+            {
+                
             }
         }
 
