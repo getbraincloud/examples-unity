@@ -6,7 +6,7 @@ using Photon.Pun;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class PlaneController : MonoBehaviourPun
+    public class PlaneController : MonoBehaviourPun, IPunObservable
     {
         public class PlaneVector
         {

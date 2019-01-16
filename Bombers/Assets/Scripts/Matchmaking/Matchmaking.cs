@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 namespace BrainCloudPhotonExample.Matchmaking
 {
     
-    public class Matchmaking : MonoBehaviourPunCallbacks, ILobbyCallbacks
+    public class Matchmaking : MonoBehaviourPunCallbacks
     {
         public class RoomButton
         {

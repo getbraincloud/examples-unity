@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Game
 {
-    public class GameManager : MonoBehaviourPunCallbacks
+    public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     {
         private enum eGameState
         {
