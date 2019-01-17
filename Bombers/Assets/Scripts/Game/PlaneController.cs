@@ -250,6 +250,11 @@ namespace BrainCloudPhotonExample.Game
             }
         }
 
+        void Awake()
+        {
+            m_rigidobdy = GetComponent<Rigidbody>();
+        }
+
         void Start()
         {
             m_rigidobdy = GetComponent<Rigidbody>();
@@ -468,6 +473,8 @@ namespace BrainCloudPhotonExample.Game
 
         public void Accelerate(float aAcceleration, float aSpeedMultiplier)
         {
+            m_rigidobdy = GetComponent<Rigidbody>();
+            
             m_rigidobdy.AddForce(transform.up * aAcceleration * aSpeedMultiplier);
             if (m_rigidobdy.velocity.magnitude > 30 * aSpeedMultiplier)
             {
