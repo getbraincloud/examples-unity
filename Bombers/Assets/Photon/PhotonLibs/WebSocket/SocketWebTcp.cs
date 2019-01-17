@@ -47,7 +47,7 @@ namespace ExitGames.Client.Photon
         /// <remarks>This is a temporary workaround, until the serialization protocol becomes available via the PeerBase.</remarks>
         public static string SerializationProtocol = "GpBinaryV18";
 
-        private MyPhotonWebSocket sock;
+        private WebSocket sock;
 
         private readonly object syncer = new object();
 
@@ -104,7 +104,7 @@ namespace ExitGames.Client.Photon
             MonoBehaviour mb = this.websocketConnectionObject.AddComponent<MonoBehaviourExt>();
             this.websocketConnectionObject.hideFlags = HideFlags.HideInHierarchy;
             UnityEngine.Object.DontDestroyOnLoad(this.websocketConnectionObject);
-            this.sock = new MyPhotonWebSocket(new Uri(this.ServerAddress), SerializationProtocol);          // TODO: The protocol should be set based on current PeerBase value (but that's currently not accessible)
+            this.sock = new WebSocket(new Uri(this.ServerAddress), SerializationProtocol);          // TODO: The protocol should be set based on current PeerBase value (but that's currently not accessible)
             this.sock.Connect();
 
             mb.StartCoroutine(this.ReceiveLoop());

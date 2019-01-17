@@ -29,6 +29,9 @@ MonoBehaviour:
   EnableSupportLogger: 0
   RunInBackground: 1
   RpcList:
+  - DestroySpaceship
+  - Fire
+  - RespawnSpaceship
   - AnnounceJoin
   - AwardExperienceRPC
   - BombPickedUpRPC
@@ -40,14 +43,11 @@ MonoBehaviour:
   - DespawnBombPickupRPC
   - DestroyedShipRPC
   - DestroyPlayerPlaneRPC
-  - DestroySpaceship
   - EndGame
-  - Fire
   - GetReady
   - HitShipTargetPointRPC
   - ResetGame
   - RespawnShipRPC
-  - RespawnSpaceship
   - SetLightPosition
   - SetMapSizeRPC
   - SetShipTypeRPC

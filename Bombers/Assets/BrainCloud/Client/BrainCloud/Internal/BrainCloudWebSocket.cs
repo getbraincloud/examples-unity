@@ -6,7 +6,9 @@ using System.Net.WebSockets;
 using AOT;
 using System.Collections.Generic;
 #else
+#if !UNITY_WEBGL 
 using WebSocketSharp;
+#endif
 #endif
 
 public class BrainCloudWebSocket
@@ -31,6 +33,7 @@ public class BrainCloudWebSocket
 		NativeWebSocket.SetOnClose(NativeSocket_OnClose);
 		webSocketInstances.Add(NativeWebSocket.Id, this);
 #else
+#if !UNITY_WEBGL 
         WebSocket = new WebSocket(url);
         WebSocket.ConnectAsync();
         WebSocket.AcceptAsync();
@@ -38,6 +41,7 @@ public class BrainCloudWebSocket
         WebSocket.OnMessage += WebSocket_OnMessage;
         WebSocket.OnError += WebSocket_OnError;
         WebSocket.OnClose += WebSocket_OnClose;
+	    #endif
 #endif
     }
 
@@ -51,6 +55,7 @@ public class BrainCloudWebSocket
 		NativeWebSocket.CloseAsync();
 		NativeWebSocket = null;
 #else
+#if !UNITY_WEBGL 
         if (WebSocket == null)
             return;
         WebSocket.CloseAsync();
@@ -59,6 +64,7 @@ public class BrainCloudWebSocket
         WebSocket.OnError -= WebSocket_OnError;
         WebSocket.OnClose -= WebSocket_OnClose;
         WebSocket = null;
+#endif
 #endif
     }
 
@@ -97,6 +103,7 @@ public class BrainCloudWebSocket
 			webSocketInstances[id].OnClose(webSocketInstances[id], errorInfo.Code, errorInfo.Message);
 	}
 #else
+#if !UNITY_WEBGL 
     private void WebSocket_OnOpen(object sender, EventArgs e)
     {
         if (OnOpen != null)
@@ -121,6 +128,7 @@ public class BrainCloudWebSocket
             OnClose(this, e.Code, e.Reason);
     }
 #endif
+#endif
 
     public void SendAsync(byte[] packet)
     {
@@ -128,7 +136,9 @@ public class BrainCloudWebSocket
 #elif UNITY_WEBGL && !UNITY_EDITOR
     	NativeWebSocket.SendAsync(packet);
 #else
+#if !UNITY_WEBGL 
         WebSocket.SendAsync(packet, null);
+#endif	    
 #endif
     }
 

@@ -11,13 +11,13 @@ using System.Security.Authentication;
 #endif
 
 
-public class MyPhotonWebSocket
+public class WebSocket
 {
     private Uri mUrl;
     /// <summary>Photon uses this to agree on a serialization protocol. Either: GpBinaryV16 or GpBinaryV18. Based on enum SerializationProtocol.</summary>
     private string protocols = "GpBinaryV16";
 
-    public MyPhotonWebSocket(Uri url, string protocols = null)
+    public WebSocket(Uri url, string protocols = null)
     {
         this.mUrl = url;
         if (protocols != null)

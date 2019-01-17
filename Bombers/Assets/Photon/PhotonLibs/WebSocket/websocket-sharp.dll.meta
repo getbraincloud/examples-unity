@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 3b5a0a7dce46a13459199d174ad3db3f
+guid: 748eb70bc0d7515498ef73fed155520a
 PluginImporter:
   serializedVersion: 1
   iconMap: {}
@@ -14,7 +14,7 @@ PluginImporter:
       enabled: 0
       settings: {}
     Editor:
-      enabled: 0
+      enabled: 1
       settings:
         CPU: AnyCPU
         DefaultValueInitialized: true
@@ -36,13 +36,11 @@ PluginImporter:
       settings:
         CPU: AnyCPU
     WP8:
-      enabled: 1
+      enabled: 0
       settings:
         CPU: AnyCPU
         DontProcess: False
-        PlaceholderPath: Assets/Photon/PhotonLibs/Photon3Unity3D.dll
-        SDK: AnySDK
-        ScriptingBackend: DotNet
+        PlaceholderPath: 
     Win:
       enabled: 0
       settings:
@@ -52,13 +50,15 @@ PluginImporter:
       settings:
         CPU: AnyCPU
     WindowsStoreApps:
-      enabled: 1
+      enabled: 0
       settings:
         CPU: AnyCPU
         DontProcess: False
-        PlaceholderPath: Assets/Photon/PhotonLibs/Photon3Unity3D.dll
+        PlaceholderPath: 
         SDK: AnySDK
-        ScriptingBackend: DotNet
+    XboxOne:
+      enabled: 1
+      settings: {}
     iOS:
       enabled: 0
       settings:
