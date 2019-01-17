@@ -6,10 +6,11 @@ using UnityEngine.SceneManagement;
 using BrainCloud;
 using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Realtime;
 
 namespace BrainCloudPhotonExample.Connection
 {
-    public class Connect : MonoBehaviour
+    public class Connect : MonoBehaviourPunCallbacks, IConnectionCallbacks
     {
         private bool m_connectedToPhoton = false;
 
@@ -134,7 +135,7 @@ namespace BrainCloudPhotonExample.Connection
             }
         }
 
-        void OnConnectedToPhoton()
+        public override void OnConnected()
         {
             m_connectedToPhoton = PhotonNetwork.IsConnectedAndReady;
             AppendLog("Connected to Photon");
@@ -228,6 +229,11 @@ namespace BrainCloudPhotonExample.Connection
             }
             m_isLoggingIn = false;
             m_forgotPasswordBtn.interactable = true;
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+           
         }
     }
 }
