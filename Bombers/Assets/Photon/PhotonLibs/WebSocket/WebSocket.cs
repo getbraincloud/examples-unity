@@ -2,8 +2,8 @@
 
 using System;
 using System.Text;
-
-#if UNITY_WEBGL && !UNITY_EDITOR
+using UnityEngine;
+#if UNITY_WEBGL
 using System.Runtime.InteropServices;
 #else
 using System.Collections.Generic;
@@ -19,6 +19,8 @@ public class WebSocket
 
     public WebSocket(Uri url, string protocols = null)
     {
+        Debug.Log("Photon WebSocket");
+        
         this.mUrl = url;
         if (protocols != null)
         {
@@ -43,7 +45,7 @@ public class WebSocket
         return Encoding.UTF8.GetString (retval);
     }
 
-#if UNITY_WEBGL && !UNITY_EDITOR
+#if UNITY_WEBGL
     [DllImport("__Internal")]
     private static extern int SocketCreate (string url, string protocols);
 
@@ -69,6 +71,8 @@ public class WebSocket
 
     public void Send(byte[] buffer)
     {
+        Debug.Log("Photon Send");
+        
         SocketSend (m_NativeRef, buffer, buffer.Length);
     }
 

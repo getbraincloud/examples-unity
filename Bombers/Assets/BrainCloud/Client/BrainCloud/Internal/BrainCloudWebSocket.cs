@@ -1,8 +1,8 @@
 ﻿using System;
-
+using UnityEngine;
 #if DOT_NET
 using System.Net.WebSockets;
-#elif UNITY_WEBGL && !UNITY_EDITOR
+#elif UNITY_WEBGL
 using AOT;
 using System.Collections.Generic;
 #elif !UNITY_WEBGL
@@ -12,7 +12,7 @@ using WebSocketSharp;
 public class BrainCloudWebSocket
 {
 #if DOT_NET
-#elif UNITY_WEBGL && !UNITY_EDITOR
+#elif UNITY_WEBGL 
 	private NativeWebSocket NativeWebSocket;   
     private static Dictionary<int, BrainCloudWebSocket> webSocketInstances =
         new Dictionary<int, BrainCloudWebSocket>();
@@ -23,7 +23,10 @@ public class BrainCloudWebSocket
     public BrainCloudWebSocket(string url)
     {
 #if DOT_NET
-#elif UNITY_WEBGL && !UNITY_EDITOR
+#elif UNITY_WEBGL 
+	    
+	    Debug.Log("BrainCloudWebSocket");
+	    
 		NativeWebSocket = new NativeWebSocket(url);
 		NativeWebSocket.SetOnOpen(NativeSocket_OnOpen);
 		NativeWebSocket.SetOnMessage(NativeSocket_OnMessage);
@@ -44,7 +47,7 @@ public class BrainCloudWebSocket
     public void Close()
     {
 #if DOT_NET
-#elif UNITY_WEBGL && !UNITY_EDITOR
+#elif UNITY_WEBGL
         if (NativeWebSocket == null)
 			return;
         webSocketInstances.Remove(NativeWebSocket.Id);
@@ -63,10 +66,12 @@ public class BrainCloudWebSocket
     }
 
 #if DOT_NET
-#elif UNITY_WEBGL && !UNITY_EDITOR
+#elif UNITY_WEBGL 
     [MonoPInvokeCallback(typeof(Action<int>))]
 	public static void NativeSocket_OnOpen(int id) {
 	
+		Debug.Log("BrainCloudWebSocket NativeSocket_OnOpen");
+		
 		if (webSocketInstances.ContainsKey(id) && webSocketInstances[id].OnOpen != null)
 			webSocketInstances[id].OnOpen(webSocketInstances[id]);
 	}
@@ -74,6 +79,8 @@ public class BrainCloudWebSocket
 	[MonoPInvokeCallback(typeof(Action<int>))]
 	public static void NativeSocket_OnMessage(int id) {
     
+		Debug.Log("BrainCloudWebSocket NativeSocket_OnMessage");
+		
         if (webSocketInstances.ContainsKey(id))
         {
 	    	byte[] data = webSocketInstances[id].NativeWebSocket.Receive();
@@ -85,6 +92,8 @@ public class BrainCloudWebSocket
 	[MonoPInvokeCallback(typeof(Action<int>))]
 	public static void NativeSocket_OnError(int id) {
 		
+		Debug.Log("BrainCloudWebSocket NativeSocket_OnError");
+		
 		if (webSocketInstances.ContainsKey(id) && webSocketInstances[id].OnError != null)
 			webSocketInstances[id].OnError(webSocketInstances[id], webSocketInstances[id].NativeWebSocket.Error);
 	}
@@ -92,6 +101,8 @@ public class BrainCloudWebSocket
 	[MonoPInvokeCallback(typeof(Action<int, int>))]
 	public static void NativeSocket_OnClose(int code, int id) {
     
+		Debug.Log("BrainCloudWebSocket NativeSocket_OnClose");
+		
 		CloseError errorInfo = CloseError.Get(code);
 		if (webSocketInstances.ContainsKey(id) && webSocketInstances[id].OnClose != null)
 			webSocketInstances[id].OnClose(webSocketInstances[id], errorInfo.Code, errorInfo.Message);
@@ -125,7 +136,7 @@ public class BrainCloudWebSocket
     public void SendAsync(byte[] packet)
     {
 #if DOT_NET
-#elif UNITY_WEBGL && !UNITY_EDITOR
+#elif UNITY_WEBGL 
     	NativeWebSocket.SendAsync(packet);
 #elif !UNITY_WEBGL	    
         WebSocket.SendAsync(packet, null);
