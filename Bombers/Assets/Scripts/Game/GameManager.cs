@@ -404,7 +404,7 @@ namespace BrainCloudPhotonExample.Game
             PhotonNetwork.LeaveRoom();
         }
 
-        public void OnLeftRoom()
+        public override void OnLeftRoom()
         {
             PhotonNetwork.LoadLevel("Matchmaking");
         }
@@ -427,7 +427,7 @@ namespace BrainCloudPhotonExample.Game
             m_showQuitMenu = false;
         }
 
-        void OnMasterClientSwitched(Photon.Realtime.Player newMasterClient)
+        public override void OnMasterClientSwitched(Photon.Realtime.Player newMasterClient)
         {
             m_dialogueDisplay.HostLeft();
             PhotonNetwork.LeaveRoom();
