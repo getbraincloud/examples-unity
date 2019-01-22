@@ -198,13 +198,13 @@ namespace BrainCloud.Internal
         private void disconnect()
         {
             if (m_tcpClient != null) m_tcpClient.Close();
-            //if (m_webSocket != null) m_webSocket.Close();
+            if (m_webSocket != null) m_webSocket.Close();
 
             RTTConnectionID = "";
             RTTEventServer = "";
 
             m_tcpClient = null;
-            //m_webSocket = null;
+            m_webSocket = null;
 
             m_bIsConnected = false;
         }
@@ -248,8 +248,8 @@ namespace BrainCloud.Internal
         {
             bool bMessageSent = false;
             // early return
-            if ((!m_useWebSocket && m_tcpClient == null)/* ||
-                (m_useWebSocket && m_webSocket == null)*/)
+            if ((!m_useWebSocket && m_tcpClient == null) ||
+                (m_useWebSocket && m_webSocket == null))
             {
                 return bMessageSent;
             }
@@ -381,13 +381,11 @@ namespace BrainCloud.Internal
 
         private void setupWebSocket(string in_url)
         {
-            /*
             m_webSocket = new BrainCloudWebSocket(in_url);
             m_webSocket.OnClose += WebSocket_OnClose;
             m_webSocket.OnOpen += Websocket_OnOpen;
             m_webSocket.OnMessage += WebSocket_OnMessage;
             m_webSocket.OnError += WebSocket_OnError;
-            */
         }
 
         private void WebSocket_OnClose(BrainCloudWebSocket sender, int code, string reason)
@@ -544,7 +542,7 @@ namespace BrainCloud.Internal
 
         private bool m_useWebSocket = false;
         private bool m_bIsConnected = false;
-       // private BrainCloudWebSocket m_webSocket = null;
+        private BrainCloudWebSocket m_webSocket = null;
 
         private DateTime m_lastNowMS;
 
