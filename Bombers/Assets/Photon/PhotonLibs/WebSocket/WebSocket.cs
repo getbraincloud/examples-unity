@@ -71,8 +71,6 @@ public class WebSocket
 
     public void Send(byte[] buffer)
     {
-        Debug.Log("Photon Send");
-        
         SocketSend (m_NativeRef, buffer, buffer.Length);
     }
 

@@ -1,4 +1,4 @@
-﻿#if UNITY_WEBGL
+﻿#if UNITY_WEBGL && !UNITY_EDITOR
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,92 +13,92 @@ public class NativeWebSocket
         {
             const int bufferSize = 1024;
             byte[] buffer = new byte[bufferSize];
-            int result = BrainCloudSocketError(buffer, bufferSize, Id);
+            int result = SocketError(buffer, bufferSize, Id);
             if (result == 0)
                 return null;
             return Encoding.UTF8.GetString(buffer);
         }
     }
 
-    public int State { get { return BrainCloudSocketState(Id); } }
+    public int State { get { return SocketState(Id); } }
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketCreate(string url, int id);
+    private static extern void SocketCreate(string url, int id);
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketClose(int id);
+    private static extern void SocketClose(int id);
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketSend(byte[] data, int length, int id);
+    private static extern void SocketSend(byte[] data, int length, int id);
 
     [DllImport("__Internal")]
-    private static extern int BrainCloudSocketState(int id);
+    private static extern int SocketState(int id);
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketOnOpen(Action<int> action, int id);
+    private static extern void SocketOnOpen(Action<int> action, int id);
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketOnMessage(Action<int> action, int id);
+    private static extern void SocketOnMessage(Action<int> action, int id);
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketOnError(Action<int> action, int id);
+    private static extern void SocketOnError(Action<int> action, int id);
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketOnClose(Action<int, int> action, int id);
+    private static extern void SocketOnClose(Action<int, int> action, int id);
 
     [DllImport("__Internal")]
-    private static extern void BrainCloudSocketReceive(byte[] ptr, int length, int id);
+    private static extern void SocketReceive(byte[] ptr, int length, int id);
 
     [DllImport("__Internal")]
-    private static extern int BrainCloudSocketReceiveLength(int id);
+    private static extern int SocketReceiveLength(int id);
 
     [DllImport("__Internal")]
-    private static extern int BrainCloudSocketError(byte[] ptr, int length, int id);
+    private static extern int SocketError(byte[] ptr, int length, int id);
 
 
     public NativeWebSocket(string url)
     {
         Id = UnityEngine.Random.Range(0, int.MaxValue);
-        BrainCloudSocketCreate(url, Id);
+        SocketCreate(url, Id);
     }
 
     public void SendAsync(byte[] packet)
     {
-        BrainCloudSocketSend(packet, packet.Length, Id);
+        SocketSend(packet, packet.Length, Id);
     }
 
     public void CloseAsync()
     {
-        BrainCloudSocketClose(Id);
+        SocketClose(Id);
     }
 
     public void SetOnOpen(Action<int> action)
     {
-        BrainCloudSocketOnOpen(action, Id);
+        SocketOnOpen(action, Id);
     }
 
     public void SetOnMessage(Action<int> action)
     {
-        BrainCloudSocketOnMessage(action, Id);
+        SocketOnMessage(action, Id);
     }
 
     public void SetOnError(Action<int> action)
     {
-        BrainCloudSocketOnError(action, Id);
+        SocketOnError(action, Id);
     }
 
     public void SetOnClose(Action<int, int> action)
     {
-        BrainCloudSocketOnClose(action, Id);
+        SocketOnClose(action, Id);
     }
 
     public byte[] Receive()
     {
-        int length = BrainCloudSocketReceiveLength(Id);
+        int length = SocketReceiveLength(Id);
         if (length == 0)
             return null;
         byte[] buffer = new byte[length];
-        BrainCloudSocketReceive(buffer, length, Id);
+        SocketReceive(buffer, length, Id);
         return buffer;
     }
 }
