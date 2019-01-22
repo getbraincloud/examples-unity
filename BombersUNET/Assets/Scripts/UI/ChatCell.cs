@@ -86,7 +86,7 @@ public class ChatCell : ImageDownloader
             jsonData["userName"] = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().PlayerName;
 
             BombersNetworkManager._BC.Client.EventService.SendEvent(ProfileId, "OFFER_JOIN_LOBBY", 
-                BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonWriter.Serialize(jsonData));
+                JsonFx.Json.JsonWriter.Serialize(jsonData));
         }
     }
 
