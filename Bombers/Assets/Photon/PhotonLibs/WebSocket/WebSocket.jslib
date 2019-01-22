@@ -1,7 +1,7 @@
 var LibraryWebSockets = {
 $webSocketInstances: [],
 
-SocketCreate: function(url, protocols)
+PhotonSocketCreate: function(url, protocols)
 {
     var str = Pointer_stringify(url);
     var prot = Pointer_stringify(protocols);
@@ -65,13 +65,13 @@ SocketCreate: function(url, protocols)
     return instance;
 },
 
-SocketState: function (socketInstance)
+PhotonSocketState: function (socketInstance)
 {
     var socket = webSocketInstances[socketInstance];
     return socket.socket.readyState;
 },
 
-SocketError: function (socketInstance, ptr, bufsize)
+PhotonSocketError: function (socketInstance, ptr, bufsize)
 {
  	var socket = webSocketInstances[socketInstance];
  	if (socket.error == null)
@@ -81,13 +81,13 @@ SocketError: function (socketInstance, ptr, bufsize)
     return 1;
 },
 
-SocketSend: function (socketInstance, ptr, length)
+PhotonSocketSend: function (socketInstance, ptr, length)
 {
     var socket = webSocketInstances[socketInstance];
     socket.socket.send (HEAPU8.buffer.slice(ptr, ptr+length));
 },
 
-SocketRecvLength: function(socketInstance)
+PhotonSocketRecvLength: function(socketInstance)
 {
     var socket = webSocketInstances[socketInstance];
     if (socket.messages.length == 0)
@@ -95,7 +95,7 @@ SocketRecvLength: function(socketInstance)
     return socket.messages[0].length;
 },
 
-SocketRecv: function (socketInstance, ptr, length)
+PhotonSocketRecv: function (socketInstance, ptr, length)
 {
     var socket = webSocketInstances[socketInstance];
     if (socket.messages.length == 0)
@@ -106,7 +106,7 @@ SocketRecv: function (socketInstance, ptr, length)
     socket.messages = socket.messages.slice(1);
 },
 
-SocketClose: function (socketInstance)
+PhotonSocketClose: function (socketInstance)
 {
     var socket = webSocketInstances[socketInstance];
     socket.socket.close();

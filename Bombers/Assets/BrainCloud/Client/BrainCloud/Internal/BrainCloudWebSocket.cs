@@ -17,7 +17,7 @@ public class BrainCloudWebSocket
     private static Dictionary<int, BrainCloudWebSocket> webSocketInstances =
         new Dictionary<int, BrainCloudWebSocket>();
 #else
-    private WebSocket WebSocket;
+    private WebSocket m_webSocket;
 #endif
 
     public BrainCloudWebSocket(string url)
@@ -31,13 +31,13 @@ public class BrainCloudWebSocket
 		NativeWebSocket.SetOnClose(NativeSocket_OnClose);
 		webSocketInstances.Add(NativeWebSocket.Id, this);
 #else
-        WebSocket = new WebSocket(url);
-        WebSocket.ConnectAsync();
-        WebSocket.AcceptAsync();
-        WebSocket.OnOpen += WebSocket_OnOpen;
-        WebSocket.OnMessage += WebSocket_OnMessage;
-        WebSocket.OnError += WebSocket_OnError;
-        WebSocket.OnClose += WebSocket_OnClose;
+        m_webSocket = new WebSocket(url);
+        m_webSocket.ConnectAsync();
+        m_webSocket.AcceptAsync();
+        m_webSocket.OnOpen += WebSocket_OnOpen;
+        m_webSocket.OnMessage += WebSocket_OnMessage;
+        m_webSocket.OnError += WebSocket_OnError;
+        m_webSocket.OnClose += WebSocket_OnClose;
 #endif
     }
 
@@ -51,14 +51,14 @@ public class BrainCloudWebSocket
 		NativeWebSocket.CloseAsync();
 		NativeWebSocket = null;
 #else
-        if (WebSocket == null)
+        if (m_webSocket == null)
             return;
-        WebSocket.CloseAsync();
-        WebSocket.OnOpen -= WebSocket_OnOpen;
-        WebSocket.OnMessage -= WebSocket_OnMessage;
-        WebSocket.OnError -= WebSocket_OnError;
-        WebSocket.OnClose -= WebSocket_OnClose;
-        WebSocket = null;
+        m_webSocket.CloseAsync();
+        m_webSocket.OnOpen -= WebSocket_OnOpen;
+        m_webSocket.OnMessage -= WebSocket_OnMessage;
+        m_webSocket.OnError -= WebSocket_OnError;
+        m_webSocket.OnClose -= WebSocket_OnClose;
+        m_webSocket = null;
 #endif
     }
 
@@ -124,7 +124,7 @@ public class BrainCloudWebSocket
 #elif UNITY_WEBGL  && !UNITY_EDITOR
     	NativeWebSocket.SendAsync(packet);
 #else
-        WebSocket.SendAsync(packet, null);
+        m_webSocket.SendAsync(packet, null);
 #endif
     }
 
