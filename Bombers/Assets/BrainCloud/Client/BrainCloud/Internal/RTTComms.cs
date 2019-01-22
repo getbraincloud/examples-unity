@@ -277,7 +277,7 @@ namespace BrainCloud.Internal
                 else
                 {
                     byte[] data = Encoding.UTF8.GetBytes(in_message);
-                   // m_webSocket.SendAsync(data);
+                    m_webSocket.SendAsync(data);
                 }
             }
             catch (SocketException socketException)
