@@ -4,7 +4,8 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -12,101 +13,9 @@ MonoBehaviour:
   m_Name: BrainCloudPluginDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: f2e93551-15dc-4251-ad62-48d911360fd2
-    LastSentRequest: "globalGameStatistics READ \nnull"
-    LastResponse: "OnEvent \n{\r\n    \"events\": \r\n        []\r\n}"
-    FullLog: 'RESPONSE - 10/5/2018 1:07:30 PM
-
-      {"packetId":6,"responses":[{"data":{"statistics":{"Level01_TimesBeaten":0,"Level02_TimesBeaten":0,"PlayersWhoLikePirateClothing":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 10/5/2018 1:07:29 PM
-
-      {"packetId":6,"sessionId":"kcfsjdtkmej4f1ai7ckl0um6pg","gameId":"12060","messages":[{"service":"globalGameStatistics","operation":"READ","data":null}]}
-
-
-      RESPONSE - 10/5/2018 1:07:29 PM
-
-      {"packetId":5,"responses":[{"data":{"abTestingId":47,"lastLogin":1538759245962,"server_time":1538759249626,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"f2e93551-15dc-4251-ad62-48d911360fd2","amountSpent":0,"previousLogin":1538758519060,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":4,"xpCapped":false,"profileId":"f2e93551-15dc-4251-ad62-48d911360fd2","sent_events":[],"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 10/5/2018 1:07:29 PM
-
-      {"packetId":5,"sessionId":"kcfsjdtkmej4f1ai7ckl0um6pg","gameId":"12060","messages":[{"service":"playerState","operation":"READ","data":null}]}
-
-
-      RESPONSE - 10/5/2018 1:07:29 PM
-
-      {"packetId":4,"responses":[{"data":{"createdAt":1534963778936,"currencyMap":{"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10}},"playerId":"f2e93551-15dc-4251-ad62-48d911360fd2","updatedAt":1534963778958},"status":200},{"data":{"createdAt":1534963778936,"currencyMap":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000}},"playerId":"f2e93551-15dc-4251-ad62-48d911360fd2","updatedAt":1534963778958},"status":200},{"data":{"createdAt":1534963778936,"currencyMap":{"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10}},"playerId":"f2e93551-15dc-4251-ad62-48d911360fd2","updatedAt":1534963778958},"status":200}],"events":[]}
-
-
-      REQUEST - 10/5/2018 1:07:28 PM
-
-      {"packetId":4,"sessionId":"kcfsjdtkmej4f1ai7ckl0um6pg","gameId":"12060","messages":[{"service":"product","operation":"GET_PLAYER_VC","data":{"vc_id":"gems"}},{"service":"product","operation":"GET_PLAYER_VC","data":{"vc_id":"gold"}},{"service":"product","operation":"GET_PLAYER_VC","data":{"vc_id":"gems"}}]}
-
-
-      RESPONSE - 10/5/2018 1:07:28 PM
-
-      {"packetId":3,"responses":[{"data":{"abTestingId":47,"lastLogin":1538759245962,"server_time":1538759248531,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"f2e93551-15dc-4251-ad62-48d911360fd2","amountSpent":0,"previousLogin":1538758519060,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":4,"xpCapped":false,"profileId":"f2e93551-15dc-4251-ad62-48d911360fd2","sent_events":[],"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 10/5/2018 1:07:28 PM
-
-      {"packetId":3,"sessionId":"kcfsjdtkmej4f1ai7ckl0um6pg","gameId":"12060","messages":[{"service":"playerState","operation":"READ","data":null}]}
-
-
-      RESPONSE - 10/5/2018 1:07:27 PM
-
-      {"packetId":2,"responses":[{"data":{"abTestingId":47,"lastLogin":1538759245962,"server_time":1538759247532,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"f2e93551-15dc-4251-ad62-48d911360fd2","amountSpent":0,"previousLogin":1538758519060,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":4,"xpCapped":false,"profileId":"f2e93551-15dc-4251-ad62-48d911360fd2","sent_events":[],"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 10/5/2018 1:07:27 PM
-
-      {"packetId":2,"sessionId":"kcfsjdtkmej4f1ai7ckl0um6pg","gameId":"12060","messages":[{"service":"playerState","operation":"READ","data":null}]}
-
-
-      RESPONSE - 10/5/2018 1:07:26 PM
-
-      {"packetId":1,"responses":[{"data":{"abTestingId":47,"lastLogin":1538759245962,"server_time":1538759246302,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"f2e93551-15dc-4251-ad62-48d911360fd2","amountSpent":0,"previousLogin":1538758519060,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":4,"xpCapped":false,"profileId":"f2e93551-15dc-4251-ad62-48d911360fd2","sent_events":[],"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 10/5/2018 1:07:26 PM
-
-      {"packetId":1,"sessionId":"kcfsjdtkmej4f1ai7ckl0um6pg","gameId":"12060","messages":[{"service":"playerState","operation":"READ","data":null}]}
-
-
-      RESPONSE - 10/5/2018 1:07:26 PM
-
-      {"packetId":0,"responses":[{"data":{"abTestingId":47,"lastLogin":1538759245962,"server_time":1538759245983,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"f2e93551-15dc-4251-ad62-48d911360fd2","amountSpent":0,"previousLogin":1538758519060,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"kcfsjdtkmej4f1ai7ckl0um6pg","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":4,"xpCapped":false,"profileId":"f2e93551-15dc-4251-ad62-48d911360fd2","newUser":"false","playerSessionExpiry":240,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}]}
-
-
-      REQUEST - 10/5/2018 1:07:25 PM
-
-      {"packetId":0,"sessionId":null,"gameId":"12060","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"asd","authenticationToken":"asd","authenticationType":"Email","forceCreate":true,"profileId":"","anonymousId":"12796a86-21f8-4938-860e-ae02f0321bde","gameId":"12060","releasePlatform":"WINDOWS","gameVersion":"1.0","clientLibVersion":"3.9.0","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
-
-
-      RESPONSE - 08/27/2018 22:56:43
-
-      {"packetId":2,"responses":[{"data":{"abTestingId":47,"lastLogin":1535424993079,"server_time":1535424995895,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"f2e93551-15dc-4251-ad62-48d911360fd2","amountSpent":0,"previousLogin":1534963778934,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":2,"xpCapped":false,"profileId":"f2e93551-15dc-4251-ad62-48d911360fd2","sent_events":[],"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 08/27/2018 22:56:43
-
-      {"packetId":2,"sessionId":"6t8m954i2lbm5hqc19cps1u4r9","gameId":"12060","messages":[{"service":"playerState","operation":"READ","data":null}]}
-
-
-      RESPONSE - 08/27/2018 22:56:41
-
-      {"packetId":1,"responses":[{"data":{"abTestingId":47,"lastLogin":1535424993079,"server_time":1535424993357,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"f2e93551-15dc-4251-ad62-48d911360fd2","amountSpent":0,"previousLogin":1534963778934,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":2,"xpCapped":false,"profileId":"f2e93551-15dc-4251-ad62-48d911360fd2","sent_events":[],"statistics":{"pantelons":3,"iron":0,"wood":50,"minions":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 08/27/2018 22:56:40
-
-      {"packetId":1,"sessionId":"6t8m954i2lbm5hqc19cps1u4r9","gameId":"12060","messages":[{"service":"playerState","operation":"READ","data":null}]}
-
-
-      RESPONSE - 08/27/2018 22:56:40
-
-      {"packetId":0,"responses":[{"data":{"abTestingId":47,"lastLogin":1535424993079,"server_time":1535424993102,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1534963778923,"parentProfileId":null,"emailAddress":"asd","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{"gold":{"consumed":0,"balance":1000,"purchased":0,"awarded":1000},"gems":{"consumed":0,"balance":10,"purchased":0,"awarded":10},"coins":{"consumed":0'
+    ProfileId: 
+    LastSentRequest: 
+    LastResponse: 
+    FullLog: 
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}

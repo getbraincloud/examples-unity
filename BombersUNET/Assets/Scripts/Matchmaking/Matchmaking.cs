@@ -490,7 +490,7 @@ namespace BrainCloudUNETExample.Matchmaking
                 jsonData["timeSent"] = DateTime.UtcNow.ToLongTimeString();
 
                 BombersNetworkManager._BC.ChatService.PostChatMessage(BombersNetworkManager._BC.Client.AppId + ":gl:main", in_field.text, 
-                    BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonWriter.Serialize(jsonData) );
+                    JsonFx.Json.JsonWriter.Serialize(jsonData) );
             }
 
             in_field.text = "";
@@ -540,7 +540,7 @@ namespace BrainCloudUNETExample.Matchmaking
                         richUpdated["timeSent"] = DateTime.UtcNow.ToLongTimeString();
 
                         cell.Init(fromData["name"] as string, contentData["text"] as string, fromData["id"] as string, fromData["pic"] as string,
-                            BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonWriter.Serialize(jsonData), Convert.ToUInt64(jsonData["msgId"]));
+                            JsonFx.Json.JsonWriter.Serialize(jsonData), Convert.ToUInt64(jsonData["msgId"]));
 
                         cell.transform.SetParent(contentTransform);
                         cell.transform.SetSiblingIndex(i);
@@ -672,7 +672,7 @@ namespace BrainCloudUNETExample.Matchmaking
             
             // send event to other person
             BombersNetworkManager._BC.Client.EventService.SendEvent(m_lastOfferedJoinLobby, "CONFIRM_JOIN_LOBBY",
-                BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonWriter.Serialize(jsonData));
+                JsonFx.Json.JsonWriter.Serialize(jsonData));
 
             BombersNetworkManager.WaitOnLobbyJoin();
         }

@@ -27,6 +27,13 @@ namespace BrainCloud.Entity
         public T NewEntity<T>(string entityType) where T : BCEntity
         {
             T e = (T)CreateRegisteredEntityClass(entityType);
+            
+            //we're never creating the instance before as suspected. 
+            if (e == null)
+            {
+                //added so new entity would actually create an instance THIS WORKS! Creates the exact kind of instance we needed!
+                e = (T)Activator.CreateInstance(typeof(T), new Object[] { m_bcEntityService });
+            }
             e.BrainCloudEntityService = m_bcEntityService;
             e.EntityType = entityType;
             return e;

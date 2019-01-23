@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BrainCloudPhotonExample.Connection;
+using Photon.Pun;
+using Photon.Realtime;
 
 namespace BrainCloudPhotonExample.Game.PlayerInput
 {
-    public class WeaponController : MonoBehaviour
+    public class WeaponController : MonoBehaviour, IPunObservable
     {
         private GameObject m_playerPlane;
 
@@ -95,17 +97,17 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         {
             bool isAlone = true;
 
-            if (PhotonNetwork.room != null && PhotonNetwork.room.PlayerCount > 1)
+            if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.PlayerCount > 1)
             {
-                PhotonPlayer[] players = PhotonNetwork.playerList;
+                Player[] players = PhotonNetwork.PlayerList;
 
                 for (int i = 0; i < players.Length; i++)
                 {
-                    PhotonPlayer player = players[i];
+                    Player player = players[i];
                     if (player == null
                         || player.CustomProperties == null
-                        || PhotonNetwork.player == null
-                        || PhotonNetwork.player.CustomProperties == null)
+                        || PhotonNetwork.LocalPlayer == null
+                        || PhotonNetwork.LocalPlayer.CustomProperties == null)
                     {
                         continue;
                     }
@@ -113,9 +115,9 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                     if (player.CustomProperties["Team"] == null
                         || (int)player.CustomProperties["Team"] == 3
                         || (int)player.CustomProperties["Team"] == 0
-                        || player == PhotonNetwork.player
-                        || PhotonNetwork.player.CustomProperties["Team"] == null
-                        || (int)player.CustomProperties["Team"] == (int)PhotonNetwork.player.CustomProperties["Team"])
+                        || player == PhotonNetwork.LocalPlayer
+                        || PhotonNetwork.LocalPlayer.CustomProperties["Team"] == null
+                        || (int)player.CustomProperties["Team"] == (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"])
                     {
                         continue;
                     }
@@ -194,10 +196,10 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 GameObject ship = null;
 
-                if (PhotonNetwork.room != null && _gameManager != null && PhotonNetwork.player != null && m_playerPlane != null && PhotonNetwork.player.CustomProperties != null)
+                if (PhotonNetwork.CurrentRoom != null && _gameManager != null && PhotonNetwork.LocalPlayer != null && m_playerPlane != null && PhotonNetwork.LocalPlayer.CustomProperties != null)
                 {
-                    if (PhotonNetwork.player.CustomProperties.ContainsKey("Team"))
-                        ship = _gameManager.GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.player.CustomProperties["Team"]);
+                    if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Team"))
+                        ship = _gameManager.GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"]);
                 }
 
                 if (ship != null)
@@ -288,7 +290,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             if (m_bombs > 0)
             {
                 m_bombs--;
-                _gameManager.SpawnBomb(new BombController.BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, PhotonNetwork.player, m_playerPlane.GetComponent<Rigidbody>().velocity));
+                _gameManager.SpawnBomb(new BombController.BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, PhotonNetwork.LocalPlayer, m_playerPlane.GetComponent<Rigidbody>().velocity));
             }
         }
 
@@ -302,7 +304,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.player, m_bulletVelocity));
+                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.LocalPlayer, m_bulletVelocity));
                 yield return new WaitForSeconds(_brainCloudStats.m_multiShotBurstDelay);
             }
         }
@@ -325,7 +327,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.player, m_bulletVelocity));
+                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.LocalPlayer, m_bulletVelocity));
             }
         }
 
@@ -346,7 +348,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
             for (int i = 0; i < planes.Length; i++)
             {
-                if (planes[i].GetComponent<PhotonView>().owner == aBombInfo.m_shooter)
+                if (planes[i].GetComponent<PhotonView>().Owner == aBombInfo.m_shooter)
                 {
                     player = planes[i];
                     break;
@@ -357,7 +359,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             {
                 GameObject flare = (GameObject)Instantiate(m_bombDropPrefab, player.transform.position, player.GetComponent<PlaneController>().m_bulletSpawnPoint.rotation);
                 flare.transform.parent = player.transform;
-                if (aBombInfo.m_shooter == PhotonNetwork.player)
+                if (aBombInfo.m_shooter == PhotonNetwork.LocalPlayer)
                 {
                     flare.GetComponent<AudioSource>().spatialBlend = 0;
                 }
@@ -378,7 +380,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
             for (int i = 0; i < planes.Length; i++)
             {
-                if (planes[i].GetComponent<PhotonView>().owner == aBulletInfo.m_shooter)
+                if (planes[i].GetComponent<PhotonView>().Owner == aBulletInfo.m_shooter)
                 {
                     player = planes[i];
                     break;
@@ -392,7 +394,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 GameObject flare = (GameObject)Instantiate(m_muzzleFlarePrefab, player.GetComponent<PlaneController>().m_bulletSpawnPoint.position, player.GetComponent<PlaneController>().m_bulletSpawnPoint.rotation);
                 flare.transform.parent = player.transform;
                 flare.GetComponent<AudioSource>().pitch = 1 + Random.Range(-2.0f, 3.0f) * 0.2f;
-                if (aBulletInfo.m_shooter == PhotonNetwork.player)
+                if (aBulletInfo.m_shooter == PhotonNetwork.LocalPlayer)
                 {
                     flare.GetComponent<AudioSource>().spatialBlend = 0;
                 }
@@ -404,6 +406,11 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             bullet.GetComponent<BulletController>().SetBulletInfo(aBulletInfo);
 
             return bullet;
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 
