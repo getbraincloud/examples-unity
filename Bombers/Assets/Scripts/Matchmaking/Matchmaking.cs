@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using BrainCloudPhotonExample.Connection;
+using BrainCloudPhotonExample.Game;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine.SceneManagement;
 
 namespace BrainCloudPhotonExample.Matchmaking
 {
-    public class Matchmaking : MonoBehaviour
+    
+    public class Matchmaking : MonoBehaviourPunCallbacks, ILobbyCallbacks
     {
         public class RoomButton
         {
@@ -178,7 +182,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_createGameWindow = GameObject.Find("CreateGame");
 
             m_createGameWindow.SetActive(false);
-            m_playerName.text = PhotonNetwork.player.NickName;
+            m_playerName.text = PhotonNetwork.LocalPlayer.NickName;
             m_playerName.interactable = false;
 
             PhotonNetwork.JoinLobby();
@@ -198,7 +202,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
         public void FinishEditName()
         {
-            PhotonNetwork.player.NickName = m_playerName.text;
+            PhotonNetwork.LocalPlayer.NickName = m_playerName.text;
             _bc.Client.PlayerStateService.UpdateUserName(m_playerName.text);
             m_playerName.interactable = false;
             m_playerNameImage.enabled = false;
@@ -516,7 +520,8 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
 
             m_roomButtons.Clear();
-            RoomInfo[] rooms = PhotonNetwork.GetRoomList();
+            
+            var rooms = roomList.ToArray();
 
             for (int i = 0; i < rooms.Length; i++)
             {
@@ -652,7 +657,7 @@ namespace BrainCloudPhotonExample.Matchmaking
 
                 for (int i = 0; i < players; i++)
                 {
-                    if (leaderboardData["leaderboard"][i]["name"].ToString() == PhotonNetwork.playerName)
+                    if (leaderboardData["leaderboard"][i]["name"].ToString() == PhotonNetwork.LocalPlayer.NickName)
                     {
                         playerListed = true;
                         playerChevronPosition = i;
@@ -722,9 +727,9 @@ namespace BrainCloudPhotonExample.Matchmaking
             m_dialogDisplay.DisplayDialog("Could not join room!");
         }
 
-        void OnJoinedRoom()
+        public override void OnJoinedRoom()
         {
-            PhotonNetwork.automaticallySyncScene = true;
+            PhotonNetwork.AutomaticallySyncScene = true;
             PhotonNetwork.LoadLevel("Game");
         }
 
@@ -733,7 +738,7 @@ namespace BrainCloudPhotonExample.Matchmaking
             OnRoomsWindow();
         }
 
-        void OnConnectedToMaster()
+        public override void OnConnectedToMaster()
         {
             PhotonNetwork.JoinLobby();
         }
@@ -765,14 +770,25 @@ namespace BrainCloudPhotonExample.Matchmaking
             }
         }
 
+        List<RoomInfo> roomList = new List<RoomInfo>();
+        
+        public override void OnRoomListUpdate(List<RoomInfo> roomList)
+        {
+            this.roomList = roomList;
+
+            OnReceivedRoomListUpdate();
+
+        }
+
         void CreateNewRoom(string aName, RoomOptions aOptions)
         {
-            RoomInfo[] rooms = PhotonNetwork.GetRoomList();
+            
+            RoomInfo[] rooms = roomList.ToArray();
             bool roomExists = false;
 
             if (aName == "")
             {
-                aName = PhotonNetwork.player.NickName + "'s Room";
+                aName = PhotonNetwork.LocalPlayer.NickName + "'s Room";
             }
 
             for (int i = 0; i < rooms.Length; i++)

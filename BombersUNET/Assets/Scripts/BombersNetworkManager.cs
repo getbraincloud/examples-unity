@@ -172,7 +172,7 @@ public class BombersNetworkManager : NetworkManager
     private void LobbyCallback(string in_response)
     {
         BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
-        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_response);
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonFx.Json.JsonReader.Deserialize(in_response);
         Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
         Dictionary<string, object> lobbyData = jsonData;
 
@@ -194,7 +194,7 @@ public class BombersNetworkManager : NetworkManager
                 {
                     if (matcher != null)
                     {
-                        Dictionary<string, object> tempAddLobby = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_response);
+                        Dictionary<string, object> tempAddLobby = (Dictionary<string, object>)JsonFx.Json.JsonReader.Deserialize(in_response);
                         matcher.AddLobbyChatMessage(tempAddLobby);
                     }
                 }
@@ -331,7 +331,7 @@ public class BombersNetworkManager : NetworkManager
         BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
         if (matcher == null) return;
 
-        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_json);
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonFx.Json.JsonReader.Deserialize(in_json);
 
         Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
         Array firstChatMessagesData = (Array)jsonData["messages"];
@@ -352,7 +352,7 @@ public class BombersNetworkManager : NetworkManager
 
     private void chatCallback(string in_message)
     {
-        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_message);
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonFx.Json.JsonReader.Deserialize(in_message);
         if (jsonMessage.ContainsKey("operation"))
         {
             BrainCloudUNETExample.Matchmaking.Matchmaking matcher = FindObjectOfType<BrainCloudUNETExample.Matchmaking.Matchmaking>();
@@ -395,7 +395,7 @@ public class BombersNetworkManager : NetworkManager
 
     private void eventCallback(string in_message)
     {
-        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)BrainCloudUnity.BrainCloudPlugin.BCWrapped.JsonFx.Json.JsonReader.Deserialize(in_message);
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonFx.Json.JsonReader.Deserialize(in_message);
         switch (jsonMessage["operation"] as string)
         {
             case "GET_EVENTS":

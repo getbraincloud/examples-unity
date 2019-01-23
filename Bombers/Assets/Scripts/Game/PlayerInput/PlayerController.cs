@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BrainCloudPhotonExample.Connection;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine.UI;
 
 namespace BrainCloudPhotonExample.Game.PlayerInput
 {
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IPunObservable
     {
         private bool m_isAccelerating = false;
         private bool m_isTurningRight = false;
@@ -274,7 +276,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             m_health = 0;
             Vector3 position = m_playerPlane.transform.position;
             int bombs = GetComponent<WeaponController>().GetBombs();
-            GameObject.Find("GameManager").GetComponent<GameManager>().DestroyPlayerPlane(PhotonNetwork.player);
+            GameObject.Find("GameManager").GetComponent<GameManager>().DestroyPlayerPlane(PhotonNetwork.LocalPlayer);
             GameObject.Find("GameManager").GetComponent<GameManager>().SpawnBombPickup(position);
             for (int i = 0; i < bombs; i++)
             {
@@ -309,7 +311,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
             m_isActive = false;
         }
 
-        public void TakeBulletDamage(PhotonPlayer aShooter)
+        public void TakeBulletDamage(Player aShooter)
         {
             if (m_health == 0) return;
             m_health--;
@@ -319,7 +321,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                 m_health = 0;
                 Vector3 position = m_playerPlane.transform.position;
                 int bombs = GetComponent<WeaponController>().GetBombs();
-                GameObject.Find("GameManager").GetComponent<GameManager>().DestroyPlayerPlane(PhotonNetwork.player, aShooter);
+                GameObject.Find("GameManager").GetComponent<GameManager>().DestroyPlayerPlane(PhotonNetwork.LocalPlayer, aShooter);
                 GameObject.Find("GameManager").GetComponent<GameManager>().SpawnBombPickup(position);
                 for (int i = 0; i < bombs; i++)
                 {
@@ -341,6 +343,11 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public void LeftBounds()
         {
             m_leftBounds = true;
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            
         }
     }
 }
