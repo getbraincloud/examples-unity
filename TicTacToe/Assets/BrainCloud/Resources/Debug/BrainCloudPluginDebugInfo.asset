@@ -13,9 +13,148 @@ MonoBehaviour:
   m_Name: BrainCloudPluginDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: 
-    LastSentRequest: 
-    LastResponse: 
-    FullLog: 
+    ProfileId: c83884ec-ded5-4c9e-bbe5-03bab075574b
+    LastSentRequest: "asyncMatch READ_MATCH \n{\r\n    \"ownerId\": \"a8b85f75-ddcb-4c96-95df-f349c2fe5743\",\r\n
+      \   \"matchId\": \"062f346a-0284-498c-9b31-ba1585c777d8\"\r\n}"
+    LastResponse: "OnSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"gameId\":
+      \"12063\",\r\n            \"ownerId\": \"a8b85f75-ddcb-4c96-95df-f349c2fe5743\",\r\n
+      \           \"matchId\": \"062f346a-0284-498c-9b31-ba1585c777d8\",\r\n            \"version\":
+      5,\r\n            \"players\": \r\n                [\r\n                    {\r\n
+      \                       \"playerId\": \"a8b85f75-ddcb-4c96-95df-f349c2fe5743\",\r\n
+      \                       \"playerName\": \"mnbmbm\",\r\n                        \"pictureUrl\":
+      null\r\n                    },\r\n                    {\r\n                        \"playerId\":
+      \"c83884ec-ded5-4c9e-bbe5-03bab075574b\",\r\n                        \"playerName\":
+      \"tthrt\",\r\n                        \"pictureUrl\": null\r\n                    }\r\n
+      \               ],\r\n            \"status\": \r\n                {\r\n                    \"status\":
+      \"PENDING\",\r\n                    \"currentPlayer\": \"c83884ec-ded5-4c9e-bbe5-03bab075574b\"\r\n
+      \               },\r\n            \"summary\": \r\n                {\r\n                    \"players\":
+      \r\n                        [\r\n                            {\r\n                                \"profileId\":
+      \"a8b85f75-ddcb-4c96-95df-f349c2fe5743\",\r\n                                \"token\":
+      \"O\"\r\n                            },\r\n                            {\r\n
+      \                               \"profileId\": \"c83884ec-ded5-4c9e-bbe5-03bab075574b\",\r\n
+      \                               \"token\": \"X\"\r\n                            }\r\n
+      \                       ]\r\n                },\r\n            \"statistics\":
+      \r\n                {},\r\n            \"matchState\": \r\n                {\r\n
+      \                   \"board\": \"X#OOX####\"\r\n                },\r\n            \"createdAt\":
+      1550085510963,\r\n            \"updatedAt\": 1550088429368\r\n        },\r\n
+      \   \"status\": 200\r\n}"
+    FullLog: 'RESPONSE - 2/13/2019 3:07:11 PM
+
+      {"packetId":7,"responses":[{"data":{"gameId":"12063","ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8","version":5,"players":[{"playerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","playerName":"mnbmbm","pictureUrl":null},{"playerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","playerName":"tthrt","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"c83884ec-ded5-4c9e-bbe5-03bab075574b"},"summary":{"players":[{"profileId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","token":"O"},{"profileId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","token":"X"}]},"statistics":{},"matchState":{"board":"X#OOX####"},"createdAt":1550085510963,"updatedAt":1550088429368},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:11 PM
+
+      {"packetId":7,"sessionId":"r940511g2avhpe2ii1e69ksc7d","gameId":"12063","messages":[{"service":"asyncMatch","operation":"READ_MATCH","data":{"ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8"}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:09 PM
+
+      {"packetId":6,"responses":[{"data":{"gameId":"12063","ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8","version":5,"players":[{"playerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","playerName":"thrt","pictureUrl":null},{"playerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","playerName":"tthrt","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"c83884ec-ded5-4c9e-bbe5-03bab075574b"},"summary":{"players":[{"profileId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","token":"O"},{"profileId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","token":"X"}]},"createdAt":1550085510963,"updatedAt":1550088429368},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:09 PM
+
+      {"packetId":6,"sessionId":"r940511g2avhpe2ii1e69ksc7d","gameId":"12063","messages":[{"service":"asyncMatch","operation":"SUBMIT_TURN","data":{"ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8","version":4,"matchState":{"board":"X#OOX####"},"pushContent":"A
+      turn has been played"}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:06 PM
+
+      {"packetId":5,"responses":[{"data":{"gameId":"12063","ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8","version":4,"players":[{"playerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","playerName":"mnbmbm","pictureUrl":null},{"playerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","playerName":"tthrt","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"a8b85f75-ddcb-4c96-95df-f349c2fe5743"},"summary":{"players":[{"profileId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","token":"O"},{"profileId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","token":"X"}]},"statistics":{},"matchState":{"board":"X#O#X####"},"createdAt":1550085510963,"updatedAt":1550086026041},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:06 PM
+
+      {"packetId":5,"sessionId":"r940511g2avhpe2ii1e69ksc7d","gameId":"12063","messages":[{"service":"asyncMatch","operation":"READ_MATCH","data":{"ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8"}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:05 PM
+
+      {"packetId":4,"responses":[{"data":{"results":[]},"status":200}]}
+
+
+      RESPONSE - 2/13/2019 3:07:05 PM
+
+      {"packetId":4,"responses":[{"data":{"results":[]},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:05 PM
+
+      {"packetId":4,"sessionId":"g9estsa3a95gd1jp26qpeif3g3","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:05 PM
+
+      {"packetId":3,"responses":[{"data":{"results":[{"gameId":"12063","ownerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","matchId":"28093abc-aed9-4c6e-a9bb-081cf18eb055","version":2,"players":[{"playerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","playerName":"tthrt","pictureUrl":null},{"playerId":"a3f6e3cb-cc9f-4a99-a972-9a7b763ff786","playerName":"hgjfhgj","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"a3f6e3cb-cc9f-4a99-a972-9a7b763ff786"},"summary":{"players":[{"profileId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","token":"X"},{"profileId":"a3f6e3cb-cc9f-4a99-a972-9a7b763ff786","token":"O"}]},"createdAt":1550085520895,"updatedAt":1550085526402},{"gameId":"12063","ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8","version":4,"players":[{"playerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","playerName":"mnbmbm","pictureUrl":null},{"playerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","playerName":"tthrt","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"a8b85f75-ddcb-4c96-95df-f349c2fe5743"},"summary":{"players":[{"profileId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","token":"O"},{"profileId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","token":"X"}]},"createdAt":1550085510963,"updatedAt":1550086026041}]},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:05 PM
+
+      {"packetId":4,"sessionId":"r940511g2avhpe2ii1e69ksc7d","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES_COMPLETED","data":null}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:05 PM
+
+      {"packetId":3,"responses":[{"data":{"results":[{"gameId":"12063","ownerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","matchId":"062f346a-0284-498c-9b31-ba1585c777d8","version":4,"players":[{"playerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","playerName":"mnbmbm","pictureUrl":null},{"playerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","playerName":"tthrt","pictureUrl":null}],"status":{"status":"PENDING","currentPlayer":"a8b85f75-ddcb-4c96-95df-f349c2fe5743"},"summary":{"players":[{"profileId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743","token":"O"},{"profileId":"c83884ec-ded5-4c9e-bbe5-03bab075574b","token":"X"}]},"createdAt":1550085510963,"updatedAt":1550086026041}]},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:05 PM
+
+      {"packetId":3,"sessionId":"g9estsa3a95gd1jp26qpeif3g3","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES","data":null}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:05 PM
+
+      {"packetId":2,"responses":[{"data":null,"status":200},{"data":{"matchesFound":[{"playerName":"hjgj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"3d7e488d-6dbc-4ae5-ab3b-83bc9a4ff696"},{"playerName":"qwe","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"a4e03cfe-46ae-419d-9128-2df6f166f1d6"},{"playerName":"kingn82","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"fb79935c-61dc-46d2-be8c-d26b2930bfec"},{"playerName":"kingn8","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"24d566f9-678d-418a-8ccb-7ed1f1f01e5e"},{"playerName":"hgjhgj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"59b5be45-302e-4b07-89c9-3d18cfc7fff0"},{"playerName":"hjhgj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"1be04eb1-b716-451b-ae3b-0df4ebdf11df"},{"playerName":"tghjfghj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"cf70489b-600d-4ccb-ba7c-eb1d1cd14e9e"},{"playerName":"asd","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"1eaff7bf-63b4-46f9-99a6-f08f7ade738d"},{"playerName":"gjk","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"f81682e6-955e-4123-abc9-fb9fa926d673"},{"playerName":"mnbmbm","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"a8b85f75-ddcb-4c96-95df-f349c2fe5743"}],"rejectCount":0},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:05 PM
+
+      {"packetId":3,"sessionId":"r940511g2avhpe2ii1e69ksc7d","gameId":"12063","messages":[{"service":"asyncMatch","operation":"FIND_MATCHES","data":null}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:05 PM
+
+      {"packetId":2,"responses":[{"data":null,"status":200},{"data":{"matchesFound":[{"playerName":"kingn82","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"fb79935c-61dc-46d2-be8c-d26b2930bfec"},{"playerName":"tghjfghj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"cf70489b-600d-4ccb-ba7c-eb1d1cd14e9e"},{"playerName":"qwe","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"a4e03cfe-46ae-419d-9128-2df6f166f1d6"},{"playerName":"ert","pictureUrl":null,"playerRating":1174,"summaryFriendData":null,"playerId":"45e50cfc-2354-4b8d-b230-1a9f51e81711"},{"playerName":"gjk","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"f81682e6-955e-4123-abc9-fb9fa926d673"},{"playerName":"hgjfhgj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"a3f6e3cb-cc9f-4a99-a972-9a7b763ff786"},{"playerName":"tre","pictureUrl":null,"playerRating":1253,"summaryFriendData":null,"playerId":"fb9437c2-6a4c-4295-a0f4-45154c935fb0"},{"playerName":"hjhgj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"1be04eb1-b716-451b-ae3b-0df4ebdf11df"},{"playerName":"hjgj","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"3d7e488d-6dbc-4ae5-ab3b-83bc9a4ff696"},{"playerName":"tthrt","pictureUrl":null,"playerRating":1200,"summaryFriendData":null,"playerId":"c83884ec-ded5-4c9e-bbe5-03bab075574b"}],"rejectCount":0},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:04 PM
+
+      {"packetId":2,"sessionId":"g9estsa3a95gd1jp26qpeif3g3","gameId":"12063","messages":[{"service":"matchMaking","operation":"ENABLE_FOR_MATCH","data":null},{"service":"matchMaking","operation":"FIND_PLAYERS","data":{"rangeDelta":500,"numMatches":10}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2/13/2019 3:07:04 PM
+
+      {"packetId":1,"responses":[{"data":{"matchAttackExpiry":0,"matchesPlayed":0,"lastMatch":0,"matchEnabled":true,"sharedAPIToken":null,"playerRating":1200,"shieldExpiry":0},"status":200}]}
+
+
+      REQUEST - 2/13/2019 3:07:04 PM
+
+      {"packetId":2,"sessionId":"r940511g2avhpe2ii1e69ksc7d","gameId":"12063","messages":[{"service":"matchMaking","operation":"ENABLE_FOR_MATCH","data":null},{"service":"matchMaking","operation":"FIND_PLAYERS","data":{"rangeDelt'
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}
