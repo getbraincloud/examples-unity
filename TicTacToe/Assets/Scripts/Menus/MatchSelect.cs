@@ -417,7 +417,7 @@ public class MatchSelect : GameScene
     public class MatchInfo
     {
         private readonly MatchSelect matchSelect;
-        public PlayerInfo matchedProfile;
+        public PlayerInfo matchedProfile = new PlayerInfo();
         public string matchId;
         public string ownerId;
         public PlayerInfo playerOInfo = new PlayerInfo();
@@ -444,7 +444,7 @@ public class MatchSelect : GameScene
         private void LoadPlayerInfo(JsonData playerData)
         {
             var token = (string) playerData["token"];
-            PlayerInfo playerInfo;
+            PlayerInfo playerInfo = new PlayerInfo();
             if (token == "X") playerInfo = playerXInfo;
             else playerInfo = playerOInfo;
 
