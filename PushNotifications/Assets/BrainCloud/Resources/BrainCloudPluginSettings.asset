@@ -4,106 +4,40 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cb4fd16f854e89249a23146eeaf1cd10, type: 3}
   m_Name: BrainCloudPluginSettings
   m_EditorClassIdentifier: 
-  PluginState: 6
+  PluginState: 0
   TeamType: 0
-  WasSelectedTeam: 1
-  WasSelectedApp: 6
+  WasSelectedTeam: 0
+  WasSelectedApp: 0
+  ClientVersion: 3.10.0
   ServerUrl: https://sharedprod.braincloudservers.com
   NewAppName: New App Name
+  AppIdSecrets: []
   AdminData:
-    TeamList:
-    - AppList: []
-      AppNameList: []
-      RenderAppNameList: []
-      RenderedAppNameList: []
-      SelectedAppIndex: 0
-      TeamName: Select Team
-      TeamId: null
-    - AppList:
-      - AppName: Authentication
-        AppId: 12060
-        AppSecret: 
-        AppVersion: 1.0
-        IsDisabled: 0
-      - AppName: Error Handling
-        AppId: 12062
-        AppSecret: 
-        AppVersion: 1.0
-        IsDisabled: 0
-      - AppName: Bombers Photon
-        AppId: 12061
-        AppSecret: 
-        AppVersion: 1.0
-        IsDisabled: 0
-      - AppName: TicTacToe
-        AppId: 12063
-        AppSecret: 
-        AppVersion: 1.0
-        IsDisabled: 0
-      - AppName: Space Shooter
-        AppId: 12066
-        AppSecret: 
-        AppVersion: 1.0
-        IsDisabled: 0
-      - AppName: Blank Example
-        AppId: 12034
-        AppSecret: 
-        AppVersion: 1.0
-        IsDisabled: 0
-      - AppName: Push Notifications
-        AppId: 12067
-        AppSecret: a010006e-555e-40d8-bed6-2b2a0514808c
-        AppVersion: 1.0
-        IsDisabled: 0
-      - AppName: Bombers UNET
-        AppId: 12025
-        AppSecret: 
-        AppVersion: 1.0
-        IsDisabled: 0
-      AppNameList:
-      - Authentication (12060)
-      - Error Handling (12062)
-      - Bombers Photon (12061)
-      - TicTacToe (12063)
-      - Space Shooter (12066)
-      - Blank Example (12034)
-      - Push Notifications (12067)
-      - Bombers UNET (12025)
-      RenderAppNameList:
-      - Authentication (12060)
-      - Error Handling (12062)
-      - Bombers Photon (12061)
-      - TicTacToe (12063)
-      - Space Shooter (12066)
-      - Blank Example (12034)
-      - Push Notifications (12067)
-      - Bombers UNET (12025)
-      - Create New App ...
-      RenderedAppNameList: []
-      SelectedAppIndex: 6
-      TeamName: brainCloud Tutorials for Unity
-      TeamId: 13363b65-5cf2-4b5e-937b-05a866795614
-    TeamNameList:
-    - -- Select Team --
-    - brainCloud Tutorials for Unity (4528926)
-    SelectedTeamIndex: 1
+    TeamList: []
+    TeamNameList: []
+    SelectedTeamIndex: 0
     AdminFullName: 
     AdminEmailAddress: 
     TeamType: 0
     StartingTeamName: 
-    Email: brainCloudTutorial@bitheads.com
+    Email: 
     Credentials:
-      AdminId: 2249
-      Token: 2a72c99d-10ac-4e51-a534-21d24cb3ba7c
+      AdminId: 
+      Token: 
+  SelectedTemplate: 1
+  CreateWithTemplateEnabled: 1
+  TemplateDataList: []
+  TemplateNameList: []
   AppOptions:
-    GamficationEnabled: 1
+    GamificationEnabled: 1
     SupportedPlatforms:
     - PlatformName: APPLE_TV_OS
       DisplayName: Apple TV OS
@@ -142,7 +76,7 @@ MonoBehaviour:
       DisplayName: Tizen
       IsEnabled: 0
     - PlatformName: UNKNOWN
-      DisplayName: Unkown
+      DisplayName: Unknown
       IsEnabled: 0
     - PlatformName: WATCH_OS
       DisplayName: Apple Watch
@@ -166,5 +100,4 @@ MonoBehaviour:
       DisplayName: Xbox One
       IsEnabled: 0
   UseDefaultServerUrl: 1
-  ShouldShowLogs: 0
   AdvanceSelection: 0
