@@ -29,6 +29,7 @@ namespace BrainCloud.Internal
         public static readonly ServiceName PlayerState = new ServiceName("playerState");
         public static readonly ServiceName PlayerStatistics = new ServiceName("playerStatistics");
         public static readonly ServiceName PlayerStatisticsEvent = new ServiceName("playerStatisticsEvent");
+        public static readonly ServiceName Presence = new ServiceName("presence");
         public static readonly ServiceName Product = new ServiceName("product");
         public static readonly ServiceName Profanity = new ServiceName("profanity");
         public static readonly ServiceName PushNotification = new ServiceName("pushNotification");
@@ -40,6 +41,14 @@ namespace BrainCloud.Internal
         public static readonly ServiceName Twitter = new ServiceName("twitter");
         public static readonly ServiceName Time = new ServiceName("time");
         public static readonly ServiceName Tournament = new ServiceName("tournament");
+        public static readonly ServiceName RTTRegistration = new ServiceName("rttRegistration");
+        public static readonly ServiceName RTT = new ServiceName("rtt");
+        public static readonly ServiceName RoomServer = new ServiceName("roomServer");
+        public static readonly ServiceName Chat = new ServiceName("chat");
+        public static readonly ServiceName Messaging = new ServiceName("messaging");
+        public static readonly ServiceName Lobby = new ServiceName("lobby");
+        public static readonly ServiceName VirtualCurrency = new ServiceName("virtualCurrency");
+        public static readonly ServiceName AppStore = new ServiceName("appStore");
 
         private ServiceName(string value)
         {

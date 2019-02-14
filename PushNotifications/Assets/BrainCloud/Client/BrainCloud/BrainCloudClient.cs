@@ -21,6 +21,18 @@ using System;
 
 namespace BrainCloud
 {
+    #region Enums
+    public enum eBrainCloudUpdateType
+    {
+        ALL,
+        REST,
+        RTT,
+        RS,
+
+        MAX
+    }
+    #endregion
+
     #region Delegates
 
     /// <summary>
@@ -51,6 +63,7 @@ namespace BrainCloud
 
     /// <summary>
     /// Callback method invoked when brainCloud events are received.
+    /// TODO: should we deprecate this? [smrj], view RTTEventCallback
     /// </summary>
     public delegate void EventCallback(string jsonResponse);
 
@@ -58,6 +71,18 @@ namespace BrainCloud
     /// Callback method invoked when brainCloud rewards are received.
     /// </summary>
     public delegate void RewardCallback(string jsonResponse);
+
+    /// <summary>
+    /// Success callback for an RTT response method.
+    /// </summary>
+    /// <param name="jsonResponse">The JSON response from the server</param>
+    public delegate void RTTCallback(string jsonResponse);
+
+    /// <summary>
+    /// Success callback for a Room Server response method.
+    /// </summary>
+    /// <param name="jsonResponse">The JSON response from the server</param>
+    public delegate void RSCallback(string jsonResponse);
 
     /// <summary>
     /// Method called when a file upload has completed.
@@ -74,7 +99,6 @@ namespace BrainCloud
     /// <param name="jsonResponse">The JSON response describing the failure. This uses the
     /// usual brainCloud error format similar to this:</param>
     public delegate void FileUploadFailedCallback(string fileUploadId, int statusCode, int reasonCode, string jsonResponse);
-
     #endregion
 
     public class BrainCloudClient
@@ -104,10 +128,15 @@ namespace BrainCloud
         private BCEntityFactory _entityFactory;
 #endif
         private BrainCloudComms _comms;
+        private RTTComms _rttComms;
+
         private BrainCloudEntity _entityService;
         private BrainCloudGlobalEntity _globalEntityService;
         private BrainCloudGlobalApp _globalAppService;
+        private BrainCloudPresence _presenceService;
         private BrainCloudProduct _productService;
+        private BrainCloudVirtualCurrency _virtualCurrencyService;
+        private BrainCloudAppStore _appStore;
         private BrainCloudPlayerStatistics _playerStatisticsService;
         private BrainCloudGlobalStatistics _globalStatisticsService;
         private BrainCloudIdentity _identityService;
@@ -133,6 +162,12 @@ namespace BrainCloud
         private BrainCloudFile _fileService;
         private BrainCloudGroup _groupService;
         private BrainCloudMail _mailService;
+        private BrainCloudMessaging _messagingService;
+
+        // RTT service
+        private BrainCloudLobby _lobbyService;
+        private BrainCloudChat _chatService;
+        private BrainCloudRTT _rttService;
 
         #endregion Private Data
 
@@ -155,6 +190,8 @@ namespace BrainCloud
         public BrainCloudClient()
         {
             _comms = new BrainCloudComms(this);
+            _rttComms = new RTTComms(this);
+
             _entityService = new BrainCloudEntity(this);
 #if !XAMARIN
             _entityFactory = new BCEntityFactory(_entityService);
@@ -162,7 +199,11 @@ namespace BrainCloud
             _globalEntityService = new BrainCloudGlobalEntity(this);
 
             _globalAppService = new BrainCloudGlobalApp(this);
+            _presenceService = new BrainCloudPresence(this);
             _productService = new BrainCloudProduct(this);
+            _virtualCurrencyService = new BrainCloudVirtualCurrency(this);
+            _appStore = new BrainCloudAppStore(this);
+
             _playerStatisticsService = new BrainCloudPlayerStatistics(this);
             _globalStatisticsService = new BrainCloudGlobalStatistics(this);
 
@@ -193,10 +234,13 @@ namespace BrainCloud
             _fileService = new BrainCloudFile(this);
             _groupService = new BrainCloudGroup(this);
             _mailService = new BrainCloudMail(this);
+            _messagingService = new BrainCloudMessaging(this);
+
+            // RTT 
+            _lobbyService = new BrainCloudLobby(this);
+            _chatService = new BrainCloudChat(this);
+            _rttService = new BrainCloudRTT(this);
         }
-
-        //---------------------------------------------------------------
-
         #endregion
 
         #region Properties
@@ -220,6 +264,21 @@ namespace BrainCloud
         public string AppId
         {
             get { return _comms != null ? _comms.AppId : ""; }
+        }
+
+        public string ProfileId
+        {
+            get { return AuthenticationService != null ? AuthenticationService.ProfileId : ""; }
+        }
+
+        public string RTTConnectionID
+        {
+            get { return _rttComms != null ? _rttComms.RTTConnectionID : ""; }
+        }
+
+        public string RTTEventServer
+        {
+            get { return _rttComms != null ? _rttComms.RTTEventServer : ""; }
         }
 
         public string AppVersion
@@ -280,9 +339,24 @@ namespace BrainCloud
             get { return _globalAppService; }
         }
 
+        public BrainCloudPresence PresenceService
+        {
+            get { return _presenceService; }
+        }
+
         public BrainCloudProduct ProductService
         {
             get { return _productService; }
+        }
+
+        public BrainCloudVirtualCurrency VirtualCurrencyService
+        {
+            get { return _virtualCurrencyService; }
+        }
+
+        public BrainCloudAppStore AppStoreService
+        {
+            get { return _appStore; }
         }
 
         public BrainCloudPlayerStatistics PlayerStatisticsService
@@ -415,6 +489,25 @@ namespace BrainCloud
             get { return _mailService; }
         }
 
+        public BrainCloudRTT RTTService
+        {
+            get { return _rttService; }
+        }
+
+        public BrainCloudLobby LobbyService
+        {
+            get { return _lobbyService; }
+        }
+
+        public BrainCloudChat ChatService
+        {
+            get { return _chatService; }
+        }
+
+        public BrainCloudMessaging MessagingService
+        {
+            get { return _messagingService; }
+        }
         #endregion
 
         #region Service Getters
@@ -439,6 +532,11 @@ namespace BrainCloud
         public BrainCloudGlobalEntity GetGlobalEntityService()
         {
             return GlobalEntityService;
+        }
+
+        public BrainCloudPresence GetPresenceService()
+        {
+            return PresenceService;
         }
 
         public BrainCloudProduct GetProductService()
@@ -597,66 +695,49 @@ namespace BrainCloud
         #endregion
 
         /// <summary>Method initializes the BrainCloudClient.</summary>
-        /// <param name="secretKey">The secret key for your app
+        /// <param name="secretKey">The secret key for your app</param>
         /// <param name="appId ">The app id</param>
-        /// <param name="appVersion The app version</param>
-        /// <param name="cachedProfileId The profile Id</param>
-        /// <param name="anonymousId The anonymous Id</param>
+        /// <param name="appVersion"> The app version</param>
         public void Initialize(string secretKey, string appId, string appVersion)
         {
             Initialize(s_defaultServerURL, secretKey, appId, appVersion);
         }
 
         /// <summary>Method initializes the BrainCloudClient.</summary>
+        /// <param name="appId ">The app id</param>
+        /// <param name="appIdSecrectMap">The map of appid to secret</param>
+        /// <param name="appVersion"> The app version</param>
+        public void InitializeWithApps(string defaultAppId, Dictionary<string, string> appIdSecrectMap, string appVersion)
+        {
+            InitializeWithApps(s_defaultServerURL, defaultAppId, appIdSecrectMap, appVersion);
+        }
+
+        /// <summary>Method initializes the BrainCloudClient.</summary>
         /// <param name="serverURL">The URL to the brainCloud server</param>
-        /// <param name="secretKey">The secret key for your app
+        /// <param name="appId ">The app id</param>
+        /// <param name="appIdSecrectMap">The map of appid to secret</param>
+        /// <param name="appVersion"> The app version</param>
+        public void InitializeWithApps(string serverURL, string defaultAppId, Dictionary<string, string> appIdSecrectMap, string appVersion)
+        {
+            initializeHelper(serverURL, appIdSecrectMap[defaultAppId], defaultAppId, appVersion);
+
+            // set up braincloud which does the message handling
+            _comms.InitializeWithApps(serverURL, defaultAppId, appIdSecrectMap);
+
+            _initialized = true;
+        }
+
+        /// <summary>Method initializes the BrainCloudClient.</summary>
+        /// <param name="serverURL">The URL to the brainCloud server</param>
+        /// <param name="secretKey">The secret key for your app</param>
         /// <param name="appId">The app id</param>
         /// <param name="appVersion">The app version</param>
-        /// <param name="cachedProfileId">The profile Id</param>
-        /// <param name="anonymousId">The anonymous Id</param>
         public void Initialize(string serverURL, string secretKey, string appId, string appVersion)
         {
-            string error = null;
-            if (string.IsNullOrEmpty(serverURL))
-                error = "serverURL was null or empty";
-            else if (string.IsNullOrEmpty(secretKey))
-                error = "secretKey was null or empty";
-            else if (string.IsNullOrEmpty(appId))
-                error = "appId was null or empty";
-            else if (string.IsNullOrEmpty(appVersion))
-                error = "appVerson was null or empty";
-
-            if (error != null)
-            {
-#if !(DOT_NET)
-                Debug.LogError("ERROR | Failed to initialize brainCloud - " + error);
-#elif !XAMARIN
-                Console.WriteLine("ERROR | Failed to initialize brainCloud - " + error);
-#endif
-                return;
-            }
-
-            // TODO: what is our default c# platform?
-            Platform platform = Platform.Windows;
-#if !(DOT_NET)
-            platform = Platform.FromUnityRuntime();
-#endif
+            initializeHelper(serverURL, secretKey, appId, appVersion);
 
             // set up braincloud which does the message handling
             _comms.Initialize(serverURL, appId, secretKey);
-
-            _appVersion = appVersion;
-            _platform = platform;
-
-            //setup region/country code
-            if (Util.GetCurrentCountryCode() == string.Empty)
-            {
-#if (DOT_NET)
-                Util.SetCurrentCountryCode(RegionInfo.CurrentRegion.TwoLetterISORegionName);
-#else
-                Util.SetCurrentCountryCode(RegionLocale.UsersCountryLocale);
-#endif
-            }
 
             _initialized = true;
         }
@@ -681,9 +762,64 @@ namespace BrainCloud
         /// <summary>Update method needs to be called regularly in order
         /// to process incoming and outgoing messages.
         /// </summary>
-        public void Update()
+        /// 
+        public void Update(eBrainCloudUpdateType in_updateType = eBrainCloudUpdateType.ALL)
         {
-            if (_comms != null) _comms.Update();
+            switch (in_updateType)
+            {
+                case eBrainCloudUpdateType.REST:
+                    {
+                        if (_comms != null) _comms.Update();
+                    }
+                    break;
+
+                case eBrainCloudUpdateType.RTT:
+                    {
+                        if (_rttComms != null) _rttComms.Update();
+                    }
+                    break;
+
+                default:
+                case eBrainCloudUpdateType.ALL:
+                    {
+                        if (_rttComms != null) _rttComms.Update();
+                        if (_comms != null) _comms.Update();
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Enables Real Time event for this session.
+        /// Real Time events are disabled by default. Usually events
+        /// need to be polled using GET_EVENTS. By enabling this, events will
+        /// be received instantly when they happen through a TCP connection to an Event Server.
+        ///
+        ///This function will first call requestClientConnection, then connect to the address
+        /// </summary>
+        /// <param name="in_connectionType"></param>
+        /// <param name="in_success"></param>
+        /// <param name="in_failure"></param>
+        /// <param name="cb_object"></param>
+        public void EnableRTT(eRTTConnectionType in_connectionType = eRTTConnectionType.WEBSOCKET, SuccessCallback in_success = null, FailureCallback in_failure = null, object cb_object = null)
+        {
+            _rttComms.EnableRTT(in_connectionType, in_success, in_failure, cb_object);
+        }
+
+        /// <summary>
+        /// Disables Real Time event for this session.
+        /// </summary>
+        public void DisableRTT()
+        {
+            _rttComms.DisableRTT();
+        }
+
+        /// <summary>
+        /// Returns true if RTT is enabled
+        /// </summary>
+        public bool IsRTTEnabled()
+        {
+            return _rttComms.IsRTTEnabled();
         }
 
         /// <summary>
@@ -785,6 +921,103 @@ namespace BrainCloud
             _comms.DeregisterNetworkErrorCallback();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RegisterRTTEventCallback(RTTCallback in_callback)
+        {
+            _rttComms.RegisterRTTCallback(ServiceName.Event, in_callback);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterRTTEventCallback()
+        {
+            _rttComms.DeregisterRTTCallback(ServiceName.Event);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RegisterRTTChatCallback(RTTCallback in_callback)
+        {
+            _rttComms.RegisterRTTCallback(ServiceName.Chat, in_callback);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterRTTChatCallback()
+        {
+            _rttComms.DeregisterRTTCallback(ServiceName.Chat);
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RegisterRTTPresenceCallback(RTTCallback in_callback)
+        {
+            _rttComms.RegisterRTTCallback(ServiceName.Presence, in_callback);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterRTTPresenceCallback()
+        {
+            _rttComms.DeregisterRTTCallback(ServiceName.Presence);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RegisterRTTMessagingCallback(RTTCallback in_callback)
+        {
+            _rttComms.RegisterRTTCallback(ServiceName.Messaging, in_callback);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterRTTMessagingCallback()
+        {
+            _rttComms.DeregisterRTTCallback(ServiceName.Messaging);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RegisterRTTLobbyCallback(RTTCallback in_callback)
+        {
+            _rttComms.RegisterRTTCallback(ServiceName.Lobby, in_callback);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterRTTLobbyCallback()
+        {
+            _rttComms.DeregisterRTTCallback(ServiceName.Lobby);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterAllRTTCallbacks()
+        {
+            _rttComms.DeregisterAllRTTCallbacks();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SetRTTHeartBeatSeconds(int in_value)
+        {
+            _rttComms.SetRTTHeartBeatSeconds(in_value);
+        }
+
         /// <summary> Enable logging of brainCloud transactions (comms etc)</summary>
         /// <param name="enable">True if logging is to be enabled</param>
         public void EnableLogging(bool enable)
@@ -809,6 +1042,7 @@ namespace BrainCloud
         public void ResetCommunication()
         {
             _comms.ResetCommunication();
+            _rttComms.DisableRTT();
             AuthenticationService.ClearSavedProfileID();
         }
 
@@ -1077,6 +1311,49 @@ namespace BrainCloud
             _comms.AddToQueue(serviceMessage);
         }
 
+        private void initializeHelper(string serverURL, string secretKey, string appId, string appVersion)
+        {
+            string error = null;
+            if (string.IsNullOrEmpty(serverURL))
+                error = "serverURL was null or empty";
+            else if (string.IsNullOrEmpty(secretKey))
+                error = "secretKey was null or empty";
+            else if (string.IsNullOrEmpty(appId))
+                error = "appId was null or empty";
+            else if (string.IsNullOrEmpty(appVersion))
+                error = "appVerson was null or empty";
+
+            if (error != null)
+            {
+#if !(DOT_NET)
+                Debug.LogError("ERROR | Failed to initialize brainCloud - " + error);
+#elif !XAMARIN
+                Console.WriteLine("ERROR | Failed to initialize brainCloud - " + error);
+#endif
+                return;
+            }
+
+            // TODO: what is our default c# platform?
+            Platform platform = Platform.Windows;
+#if !(DOT_NET)
+            platform = Platform.FromUnityRuntime();
+#endif
+
+
+            _appVersion = appVersion;
+            _platform = platform;
+
+            //setup region/country code
+            if (Util.GetCurrentCountryCode() == string.Empty)
+            {
+#if (DOT_NET)
+                Util.SetCurrentCountryCode(RegionInfo.CurrentRegion.TwoLetterISORegionName);
+#else
+                Util.SetCurrentCountryCode(RegionLocale.UsersCountryLocale);
+#endif
+            }
+        }
+
         #region Deprecated
         /// <summary>A way to get a Singleton instance of brainCloud.</summary>
         [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
@@ -1120,20 +1397,6 @@ namespace BrainCloud
                 return s_instance;
             }
         }
-
-        [Obsolete("This has been deprecated. Use appId instead - removal after September 1 2017")]
-        public string GameId
-        {
-            get { return _comms != null ? _comms.AppId : ""; }
-        }
-
-        [Obsolete("This has been deprecated. Use AppVersion instead - removal after September 1 2017")]
-        public string GameVersion
-        {
-            get { return _appVersion; }
-        }
-
-
         #endregion
     }
 }

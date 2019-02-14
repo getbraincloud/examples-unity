@@ -52,8 +52,11 @@ namespace BrainCloud
         public static readonly OperationParam AuthenticateServiceAuthenticateGameVersion = new OperationParam("gameVersion");
         public static readonly OperationParam AuthenticateServiceAuthenticateBrainCloudVersion = new OperationParam("clientLibVersion");
         public static readonly OperationParam AuthenticateServiceAuthenticateExternalAuthName = new OperationParam("externalAuthName");
+        public static readonly OperationParam AuthenticateServiceAuthenticateEmailAddress = new OperationParam("emailAddress");
+        public static readonly OperationParam AuthenticateServiceAuthenticateServiceParams = new OperationParam("serviceParams");
 
         public static readonly OperationParam AuthenticateServiceAuthenticateLevelName = new OperationParam("levelName");
+        public static readonly OperationParam AuthenticateServiceAuthenticatePeerCode = new OperationParam("peerCode");
 
         public static readonly OperationParam AuthenticateServiceAuthenticateCountryCode = new OperationParam("countryCode");
         public static readonly OperationParam AuthenticateServiceAuthenticateLanguageCode = new OperationParam("languageCode");
@@ -167,6 +170,15 @@ namespace BrainCloud
         public static readonly OperationParam PlayerStatisticEventServiceEventMultiplier = new OperationParam("eventMultiplier");
         public static readonly OperationParam PlayerStatisticEventServiceEvents = new OperationParam("events");
 
+        // Presence Params
+        public static readonly OperationParam PresenceServicePlatform = new OperationParam("platform");
+        public static readonly OperationParam PresenceServiceIncludeOffline = new OperationParam("includeOffline");
+        public static readonly OperationParam PresenceServiceGroupId = new OperationParam("groupId");
+        public static readonly OperationParam PresenceServiceProfileIds = new OperationParam("profileIds");
+        public static readonly OperationParam PresenceServiceBidirectional = new OperationParam("bidirectional");
+        public static readonly OperationParam PresenceServiceVisibile = new OperationParam("visible");
+        public static readonly OperationParam PresenceServiceActivity = new OperationParam("activity");
+
         // Player State Service - Read Params
         public static readonly OperationParam PlayerStateServiceReadEntitySubtype = new OperationParam("entitySubType");
 
@@ -235,6 +247,20 @@ namespace BrainCloud
         // Product Service
         public static readonly OperationParam ProductServiceCurrencyId = new OperationParam("vc_id");
         public static readonly OperationParam ProductServiceCurrencyAmount = new OperationParam("vc_amount");
+
+        // AppStore 
+        public static readonly OperationParam AppStoreServiceStoreId = new OperationParam("storeId");
+        public static readonly OperationParam AppStoreServiceReceiptData = new OperationParam("receiptData");
+        public static readonly OperationParam AppStoreServicePurchaseData = new OperationParam("purchaseData");
+        public static readonly OperationParam AppStoreServiceTransactionId = new OperationParam("transactionId");
+        public static readonly OperationParam AppStoreServiceTransactionData = new OperationParam("transactionData");
+        public static readonly OperationParam AppStoreServicePriceInfoCriteria = new OperationParam("priceInfoCriteria");
+        public static readonly OperationParam AppStoreServiceUserCurrency = new OperationParam("userCurrency");
+        public static readonly OperationParam AppStoreServiceCategory = new OperationParam("category");
+
+        // Virtual Currency Service
+        public static readonly OperationParam VirtualCurrencyServiceCurrencyId = new OperationParam("vcId");
+        public static readonly OperationParam VirtualCurrencyServiceCurrencyAmount = new OperationParam("vcAmount");
 
         // Product Service - Get Inventory Params
         public static readonly OperationParam ProductServiceGetInventoryPlatform = new OperationParam("platform");
@@ -376,12 +402,68 @@ namespace BrainCloud
         public static readonly OperationParam EmailAddress = new OperationParam("emailAddress");
 
         public static readonly OperationParam LeaderboardId = new OperationParam("leaderboardId");
+        public static readonly OperationParam DivSetId = new OperationParam("divSetId");
         public static readonly OperationParam VersionId = new OperationParam("versionId");
         public static readonly OperationParam TournamentCode = new OperationParam("tournamentCode");
         public static readonly OperationParam InitialScore = new OperationParam("initialScore");
         public static readonly OperationParam Score = new OperationParam("score");
         public static readonly OperationParam RoundStartedEpoch = new OperationParam("roundStartedEpoch");
         public static readonly OperationParam Data = new OperationParam("data");
+
+        // chat
+        public static readonly OperationParam ChatChannelId = new OperationParam("channelId");
+        public static readonly OperationParam ChatMaxReturn = new OperationParam("maxReturn");
+        public static readonly OperationParam ChatMessageId = new OperationParam("msgId");
+        public static readonly OperationParam ChatVersion = new OperationParam("version");
+        
+        public static readonly OperationParam ChatChannelType = new OperationParam("channelType");
+        public static readonly OperationParam ChatChannelSubId = new OperationParam("channelSubId");
+        public static readonly OperationParam ChatContent = new OperationParam("content");
+        public static readonly OperationParam ChatText = new OperationParam("text");
+
+        public static readonly OperationParam ChatRich = new OperationParam("rich");
+        public static readonly OperationParam ChatRecordInHistory = new OperationParam("recordInHistory");
+
+        // TODO:: do we enumerate these ? [smrj]
+        // chat channel types 
+        public static readonly OperationParam AllChannelType = new OperationParam("all");
+        public static readonly OperationParam GlobalChannelType = new OperationParam("gl");
+        public static readonly OperationParam GroupChannelType = new OperationParam("gr");
+
+        // messaging
+        public static readonly OperationParam MessagingMessageBox = new OperationParam("msgbox");
+        public static readonly OperationParam MessagingMessageIds = new OperationParam("msgIds");
+        public static readonly OperationParam MessagingMarkAsRead = new OperationParam("markAsRead");
+        public static readonly OperationParam MessagingContext = new OperationParam("context");
+        public static readonly OperationParam MessagingPageOffset = new OperationParam("pageOffset");
+        public static readonly OperationParam MessagingFromName = new OperationParam("fromName");
+        public static readonly OperationParam MessagingToProfileIds = new OperationParam("toProfileIds");
+        public static readonly OperationParam MessagingContent = new OperationParam("contentJson");
+        public static readonly OperationParam MessagingSubject = new OperationParam("subject");
+        public static readonly OperationParam MessagingText = new OperationParam("text");
+
+        public static readonly OperationParam InboxMessageType = new OperationParam("inbox");
+        public static readonly OperationParam SentMessageType = new OperationParam("sent");
+
+        // lobby
+        public static readonly OperationParam LobbyRoomType = new OperationParam("lobbyType");
+        public static readonly OperationParam LobbyRating = new OperationParam("rating");
+        public static readonly OperationParam LobbyAlgorithm = new OperationParam("algo");
+        public static readonly OperationParam LobbyMaxSteps = new OperationParam("maxSteps");
+        public static readonly OperationParam LobbyStrategy = new OperationParam("strategy");
+        public static readonly OperationParam LobbyAlignment = new OperationParam("alignment");
+        public static readonly OperationParam LobbyRanges = new OperationParam("ranges");
+        public static readonly OperationParam LobbyFilterJson = new OperationParam("filterJson");
+        public static readonly OperationParam LobbySettings = new OperationParam("settings");
+        public static readonly OperationParam LobbyTimeoutSeconds = new OperationParam("timeoutSecs");
+        public static readonly OperationParam LobbyIsReady = new OperationParam("isReady");
+        public static readonly OperationParam LobbyOtherUserCxIds = new OperationParam("otherUserCxIds");
+        public static readonly OperationParam LobbyExtraJson = new OperationParam("extraJson");
+        public static readonly OperationParam LobbyTeamCode = new OperationParam("teamCode");
+        public static readonly OperationParam LobbyIdentifier = new OperationParam("lobbyId");
+        public static readonly OperationParam LobbyToTeamName = new OperationParam("toTeamCode");
+        public static readonly OperationParam LobbySignalData = new OperationParam("signalData");
+        public static readonly OperationParam LobbyConnectionId = new OperationParam("cxId");
 
         private OperationParam(string value)
         {
