@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BrainCloud;
 using LitJson;
 using UnityEngine;
 using UnityEngine.UI;
@@ -45,7 +46,6 @@ public class TicTacToe : GameScene
     private List<string> _history;
     private bool _isHistoryMatch;
 
-    private MatchState _matchState;
     public GameObject PlayerO;
     public TextMesh PlayerTurnText;
 
@@ -100,17 +100,92 @@ public class TicTacToe : GameScene
             _isHistoryMatch = true;
             _turnPlayed = true;
 
-            _matchState = MatchState.MATCH_HISTORY;
-
             if (_winner == -1)
                 PlayerTurnText.text = "Match Tied";
             else
                 PlayerTurnText.text = "Match Completed";
 
-            // Read match history
             App.Bc.AsyncMatchService
                 .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
         }
+        // Read match history
+        enableRTT();
+    }
+
+    // Enable RTT
+    private void enableRTT()
+    {
+        // Only Enable RTT if its not already started
+        if (!App.Bc.Client.IsRTTEnabled())
+        {
+            App.Bc.Client.EnableRTT(eRTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+        }
+        else
+        {
+            // its already started, lets call our success delegate 
+            onRTTEnabled("", null);
+        }
+    }
+
+    // rtt enabled, ensure we now request the updated match state
+    private void onRTTEnabled(string responseData, object cbPostObject)
+    {
+        // LISTEN TO THE ASYNC CALLS, when we get one of these calls, lets just refresh 
+        // match state
+        queryMatchState();
+
+        App.Bc.Client.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
+    }
+
+    // the listener, can parse the json and request just the updated match 
+    // in this example, just re-request it all
+    private void queryMatchStateRTT(string in_json)
+    {
+        queryMatchState();
+    }
+
+    private void queryMatchState()
+    {
+        // Read match history
+        // Query more detail state about the match
+        App.Bc.AsyncMatchService
+            .ReadMatch(App.OwnerId, App.MatchId, (response, cbObject) =>
+            {
+                var match = App.CurrentMatch;
+                var data = JsonMapper.ToObject(response)["data"];
+
+
+                int newVersion = int.Parse(data["version"].ToString());
+
+                if (App.MatchVersion + 1 >= (ulong)newVersion)
+                {
+                    hasNoNewTurn = true;
+                }
+                else
+                {
+                    App.MatchVersion = (ulong)newVersion;
+
+                            // Setup a couple stuff into our TicTacToe scene
+                            App.BoardState = (string)data["matchState"]["board"];
+                    App.PlayerInfoX = match.playerXInfo;
+                    App.PlayerInfoO = match.playerOInfo;
+                    App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
+                    App.OwnerId = match.ownerId;
+                    App.MatchId = match.matchId;
+
+                            // Load the Tic Tac Toe scene
+
+                            App.GotoTicTacToeScene(gameObject);
+
+                }
+            });
+    }
+
+    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
+    {
+        // TODO! Bring up a user dialog to inform of poor connection
+        // for now, try to auto connect 
+        Invoke("enableRTT", 5.0f);
     }
 
     private void OnReadMatchHistory(string responseData, object cbPostObject)
@@ -144,8 +219,6 @@ public class TicTacToe : GameScene
         App.BoardState = boardStateBuilder.ToString();
 
         _turnPlayed = true;
-
-        _matchState = MatchState.TURN_PLAYED;
 
         if (App.WhosTurn == App.PlayerInfoX)
             App.WhosTurn = App.PlayerInfoO;
@@ -250,41 +323,7 @@ public class TicTacToe : GameScene
             }
             if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60 - 45, 140, 30), "Refresh"))
             {
-                // Query more detail state about the match
-                App.Bc.AsyncMatchService
-                    .ReadMatch(App.OwnerId, App.MatchId, (response, cbObject) =>
-                    {
-                                                
-                        var match = App.CurrentMatch;
-                        var data = JsonMapper.ToObject(response)["data"];
-
-                        
-                        int newVersion = int.Parse(data["version"].ToString());
-
-                        if (App.MatchVersion + 1 >= (ulong)newVersion)
-                        {
-                            hasNoNewTurn = true;
-                        }
-                        else
-                        {
-                            App.MatchVersion = (ulong)newVersion;
-
-                            // Setup a couple stuff into our TicTacToe scene
-                            App.BoardState = (string) data["matchState"]["board"];
-                            App.PlayerInfoX = match.playerXInfo;
-                            App.PlayerInfoO = match.playerOInfo;
-                            App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
-                            App.OwnerId = match.ownerId;
-                            App.MatchId = match.matchId;
-                        
-                        
-
-                            // Load the Tic Tac Toe scene
-
-                            App.GotoTicTacToeScene(gameObject); 
-
-                        }
-                    });
+                queryMatchState();
             }
 
             if (hasNoNewTurn)

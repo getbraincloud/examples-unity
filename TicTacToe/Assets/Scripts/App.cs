@@ -48,6 +48,7 @@ public class App : MonoBehaviour
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
         Bc.Init(); // Required: Initialize the Wrapper.
+        Bc.Client.EnableLogging(true);
 
         // Now that brainCloud is setup. Let's go to the Login Scene
 
