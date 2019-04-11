@@ -334,7 +334,7 @@ public class TicTacToe : GameScene
         }
         else if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), btnText))
         {
-            // Ask the user to submit his turn
+            // Ask the user to submit their turn
             var boardStateJson = new JsonData();
             boardStateJson["board"] = App.BoardState;
 

@@ -196,7 +196,7 @@ public class MatchSelect : GameScene
             GUILayout.BeginHorizontal();
             GUI.enabled = match.yourTurn;
             if (GUILayout.Button(
-                match.matchedProfile.PlayerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(His Turn)"),
+                match.matchedProfile.PlayerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(Their Turn)"),
                 GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
                 EnterMatch(match);
             GUI.enabled = true;
