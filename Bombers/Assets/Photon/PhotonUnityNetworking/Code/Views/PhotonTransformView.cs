@@ -83,7 +83,7 @@ namespace Photon.Pun
                     this.m_NetworkPosition = (Vector3)stream.ReceiveNext();
                     this.m_Direction = (Vector3)stream.ReceiveNext();
 
-                    float lag = Mathf.Abs((float)(PhotonNetwork.Time - info.timestamp));
+                    float lag = Mathf.Abs((float)(PhotonNetwork.Time - info.SentServerTime));
                     this.m_NetworkPosition += this.m_Direction * lag;
 
                     this.m_Distance = Vector3.Distance(transform.position, this.m_NetworkPosition);

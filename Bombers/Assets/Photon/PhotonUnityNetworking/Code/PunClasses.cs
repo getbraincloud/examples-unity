@@ -532,19 +532,35 @@ namespace Photon.Pun
             this.photonView = view;
         }
 
+        [Obsolete("Use SentServerTime instead.")]
         public double timestamp
         {
             get
             {
                 uint u = (uint) this.timeInt;
                 double t = u;
-                return t / 1000;
+                return t / 1000.0d;
             }
+        }
+
+        public double SentServerTime
+        {
+            get
+            {
+                uint u = (uint)this.timeInt;
+                double t = u;
+                return t / 1000.0d;
+            }
+        }
+
+        public int SentServerTimestamp
+        {
+            get { return this.timeInt; }
         }
 
         public override string ToString()
         {
-            return string.Format("[PhotonMessageInfo: Sender='{1}' Senttime={0}]", this.timestamp, this.Sender);
+            return string.Format("[PhotonMessageInfo: Sender='{1}' Senttime={0}]", this.SentServerTime, this.Sender);
         }
     }
 
@@ -583,7 +599,7 @@ namespace Photon.Pun
     /// \ingroup publicApi
     public class PhotonStream
     {
-        private readonly Queue<object> writeData;
+        private List<object> writeData;
         private object[] readData;
         private byte currentItem; //Used to track the next item to receive.
 
@@ -608,11 +624,8 @@ namespace Photon.Pun
         public PhotonStream(bool write, object[] incomingData)
         {
             this.IsWriting = write;
-            if (incomingData == null)
-            {
-                this.writeData = new Queue<object>(10);
-            }
-            else
+
+            if (!write && incomingData != null)
             {
                 this.readData = incomingData;
             }
@@ -625,6 +638,24 @@ namespace Photon.Pun
             this.IsWriting = false;
         }
 
+        internal void SetWriteStream(List<object> newWriteData, byte pos = 0)
+        {
+            if (pos != newWriteData.Count)
+            {
+                throw new Exception("SetWriteStream failed, because count does not match position value. pos: "+ pos + " newWriteData.Count:" + newWriteData.Count);
+            }
+            this.writeData = newWriteData;
+            this.currentItem = pos;
+            this.IsWriting = true;
+        }
+
+        internal List<object> GetWriteStream()
+        {
+            return this.writeData;
+        }
+
+
+        [Obsolete("Either SET the writeData with an empty List or use Clear().")]
         internal void ResetWriteStream()
         {
             this.writeData.Clear();
@@ -667,7 +698,18 @@ namespace Photon.Pun
                 return;
             }
 
-            this.writeData.Enqueue(obj);
+            this.writeData.Add(obj);
+        }
+
+        [Obsolete("writeData is a list now. Use and re-use it directly.")]
+        public bool CopyToListAndClear(List<object> target)
+        {
+            if (!this.IsWriting) return false;
+
+            target.AddRange(this.writeData);
+            this.writeData.Clear();
+
+            return true;
         }
 
         /// <summary>Turns the stream into a new object[].</summary>
@@ -683,7 +725,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(myBool);
+                this.writeData.Add(myBool);
             }
             else
             {
@@ -702,7 +744,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(myInt);
+                this.writeData.Add(myInt);
             }
             else
             {
@@ -721,7 +763,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(value);
+                this.writeData.Add(value);
             }
             else
             {
@@ -740,7 +782,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(value);
+                this.writeData.Add(value);
             }
             else
             {
@@ -759,7 +801,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(value);
+                this.writeData.Add(value);
             }
             else
             {
@@ -778,7 +820,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(obj);
+                this.writeData.Add(obj);
             }
             else
             {
@@ -797,7 +839,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(obj);
+                this.writeData.Add(obj);
             }
             else
             {
@@ -816,7 +858,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(obj);
+                this.writeData.Add(obj);
             }
             else
             {
@@ -835,7 +877,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(obj);
+                this.writeData.Add(obj);
             }
             else
             {
@@ -854,7 +896,7 @@ namespace Photon.Pun
         {
             if (this.IsWriting)
             {
-                this.writeData.Enqueue(obj);
+                this.writeData.Add(obj);
             }
             else
             {

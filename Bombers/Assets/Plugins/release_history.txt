@@ -8,18 +8,42 @@ https://doc.photonengine.com
 http://forum.photonengine.com
 
 
+*** Version 4.1.2.10 (11. March 2019 - rev5023)
+    Fixed: A timeout issue for WS / WSS transport protocols by sending a ping.
+LoadBalancing:
+    Changed: The cached "best region" is cleared whenever a region's pinging finishes. This fixes a potential issue when the BestRegion value is used before the pinging is done. Then, you end up with a wrong selection.
+
+
+*** Version 4.1.2.9 (20. February 2019 - rev5003)
+    Note: Release .Net and Unity SDK from our page. 
+*** Version 4.1.2.9 (13. February 2019 - rev4985)
+    Removed: Setting of Thread.Name for internally used threads. This was used for debugging only (since a while) but caused issues on a console platform (due to an issue in Unity IL2CPP exports).
+
+*** Version 4.1.2.8 (31. January 2019 - rev4975)
+    Fixed: The cap for the lastRoundtripTime. When the current roundTripTime was very low this meant the rtt wasn't going up again. This was a problem with local servers.
+    Fixed: Setting the roundTripTime when the connect-command gets acknowledged. This sets a minimum of 15ms now. Before, a local server could get a 0ms roundTripTime (due to using Environment.TickCount).
+
+*** Version 4.1.2.7 (25. January 2019 - rev4954)
+    Removed: CommandBufferSize and LimitOfUnreliableCommands. Technically, those are "Obsolete" but no longer used anywhere. See comments.
+    Fixed: MessageBufferPoolTrim() was not using a lock(), so this wasn't thread safe.
+
+*** Version 4.1.2.6 (12. December 2018 - rev4935)
+    Changed: Unsequenced delivery is now available in all builds. Internally, this was wrapped in compile conditions.
+
+*** Version 4.1.2.5 (10. December 2018 - rev4911)
+    Added: PhotonPeer.SentReliableCommandsCount - reliable commands sent but not yet acknowledged. This can be used as indicator for the quality of service, aslong with ResentReliableCommands.
+    Note: This build include the "Best Region Ping" classes, to minimize changes when released with Quantum.
 
 *** Version 4.1.2.4 (23. October 2018 - rev4868)
-	Fixed: Fragment bug introduced in 4557 (12. March 2018). This kept one command per reassembled message in the incoming queue (without payload).
-	Added: An upper limit for the calculated lastRoundtripTime (per ack) to prevent uncontrolled rtt changes due to garbled incoming messages. Protecting the rtt timer improves resending commands if needed. INFO level logging starts with: "LastRoundtripTime is suspicious".
+    Fixed: Fragment bug introduced in 4557 (12. March 2018). This kept one command per reassembled message in the incoming queue (without payload).
+    Added: An upper limit for the calculated lastRoundtripTime (per ack) to prevent uncontrolled rtt changes due to garbled incoming messages. Protecting the rtt timer improves resending commands if needed. INFO level logging starts with: "LastRoundtripTime is suspicious".
     Added: SocketTcpAsync class, which is receiving with BeginReceive and EndReceive in callback. This should work for Unity's 4.x Runtime, which has a bug that blocks Socket.Receive() indefinitely.
-    Changed: TPeer.ReceiveIncomingCommands() will now use dataLength as indicator how much was received. 
-	Internal: CalculateCrc() now uses a cached lookup table, which gives it much better performance (most obviously for longer datagrams).
-
+    Changed: TPeer.ReceiveIncomingCommands() will now use dataLength as indicator how much was received.
+    Internal: CalculateCrc() now uses a cached lookup table, which gives it much better performance (most obviously for longer datagrams).
 
 *** Version 4.1.2.3 (17. October 2018 - rev4847)
     Fixed: Fragment handling. When a duplicate fragment arrived after the "original" was reassembled, this led to an exception and disconnect.
-	
+
 *** Version 4.1.2.2 (16. October 2018 - rev4843)
     Changed: Enum StatusCode values. DisconnectByServer is obsolete and replaced with DisconnectByServerTimeout.
     Added: StatusCode.DisconnectByServerReasonUnknown, as a generic case (unknown reason).

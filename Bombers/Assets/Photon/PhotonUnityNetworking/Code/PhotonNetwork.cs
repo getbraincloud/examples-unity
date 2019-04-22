@@ -64,7 +64,7 @@ namespace Photon.Pun
     public static partial class PhotonNetwork
     {
         /// <summary>Version number of PUN. Used in the AppVersion, which separates your playerbase in matchmaking.</summary>
-        public const string PunVersion = "2.5";
+        public const string PunVersion = "2.9";
 
         /// <summary>Version number of your game. Setting this updates the AppVersion, which separates your playerbase in matchmaking.</summary>
         /// <remarks>
@@ -247,6 +247,7 @@ namespace Photon.Pun
 
         /// <summary>
         /// The lobby that will be used when PUN joins a lobby or creates a game.
+        /// This is defined when joining a lobby or creating rooms
         /// </summary>
         /// <remarks>
         /// The default lobby uses an empty string as name.
@@ -258,7 +259,6 @@ namespace Photon.Pun
         public static TypedLobby CurrentLobby
         {
             get { return NetworkingClient.CurrentLobby; }
-            set { NetworkingClient.CurrentLobby = value; }
         }
 
         /// <summary>
@@ -421,6 +421,10 @@ namespace Photon.Pun
                 }
                 else
                 {
+                    if (offlineModeRoom != null)
+                    {
+                        LeftRoomCleanup();
+                    }
                     offlineModeRoom = null;
                     NetworkingClient.ChangeLocalID(-1);
                 }
@@ -431,15 +435,22 @@ namespace Photon.Pun
         private static Room offlineModeRoom = null;
 
 
-        /// <summary>Defines if all clients in a room should load the same level as the Master Client (if that used PhotonNetwork.LoadLevel).</summary>
+        /// <summary>Defines if all clients in a room should automatically load the same level as the Master Client.</summary>
         /// <remarks>
-        /// To synchronize the loaded level, the Master Client should use PhotonNetwork.LoadLevel.
-        /// All clients will load the new scene immediately when they enter a room (even before the callback OnJoinedRoom) or on change.
+        /// When enabled, clients load the same scene that is active on the Master Client.
+        /// When a client joins a room, the scene gets loaded even before the callback OnJoinedRoom gets called.
         ///
-        /// Internally, a Custom Room Property is set for the loaded scene. When a client reads that
-        /// and is not in the same scene yet, it will immediately pause the Message Queue
-        /// (PhotonNetwork.IsMessageQueueRunning = false) and load. When the scene finished loading,
-        /// PUN will automatically re-enable the Message Queue.
+        /// To synchronize the loaded level, the Master Client should use PhotonNetwork.LoadLevel, which
+        /// notifies the other clients before starting to load the scene.
+        /// If the Master Client loads a level directly via Unity's API, PUN will notify the other players after
+        /// the scene loading completed (using SceneManager.sceneLoaded).
+        /// 
+        /// Internally, a Custom Room Property is set for the loaded scene. On change, clients use LoadLevel
+        /// if they are not in the same scene.
+        ///
+        /// Note that this works only for a single active scene and that reloading the scene is not supported.
+        /// The Master Client will actually reload a scene but other clients won't.
+        /// To get everyone to reload, the game can send an RPC or event to trigger the loading.
         /// </remarks>
         public static bool AutomaticallySyncScene
         {
@@ -612,11 +623,21 @@ namespace Photon.Pun
         {
             get
             {
+                if (UnityEngine.Time.frameCount == frame)
+                {
+                    return frametime;
+                }
+
                 uint u = (uint)ServerTimestamp;
                 double t = u;
-                return t / 1000;
+                frametime =  t / 1000.0d;
+                frame = UnityEngine.Time.frameCount;
+                return frametime;
             }
         }
+
+        private static double frametime;
+        private static int frame;
 
         /// <summary>
         /// The current server's millisecond timestamp.
@@ -651,20 +672,19 @@ namespace Photon.Pun
         /// <summary>Used for Photon/PUN timing, as Time.time can't be called from Threads.</summary>
         private static readonly Stopwatch StartupStopwatch;
 
+
         /// <summary>
-        /// Defines how many seconds PUN keeps the connection, after Unity's OnApplicationPause(true) call. Default: 60 seconds.
+        /// Defines how many seconds PUN keeps the connection after Unity's OnApplicationPause(true) call. Default: 60 seconds.
         /// </summary>
         /// <remarks>
         /// It's best practice to disconnect inactive apps/connections after a while but to also allow users to take calls, etc..
-        /// We think a reasonable backgroung timeout is 60 seconds.
+        /// We think a reasonable background timeout is 60 seconds.
         ///
         /// To handle the timeout, implement: OnDisconnected(), as usual.
         /// Your application will "notice" the background disconnect when it becomes active again (running the Update() loop).
         ///
         /// If you need to separate this case from others, you need to track if the app was in the background
         /// (there is no special callback by PUN).
-        ///
-        /// A value below 0.1 seconds will disable this timeout (careful: connections can be kept indefinitely).
         ///
         ///
         /// Info:
@@ -676,10 +696,29 @@ namespace Photon.Pun
         /// In those cases, this value does not change anything, the app immediately loses connection in background.
         ///
         /// Unity's OnApplicationPause() callback is broken in some exports (Android) of some Unity versions.
-        /// Make sure OnApplicationPause() gets the callbacks you'd expect on the platform you target!
-        /// Check PhotonHandler.OnApplicationPause(bool pause), to see the implementation.
+        /// Make sure OnApplicationPause() gets the callbacks you expect on the platform you target!
+        /// Check PhotonHandler.OnApplicationPause(bool pause) to see the implementation.
         /// </remarks>
-        public static float BackgroundTimeout = 60.0f;
+        public static float KeepAliveInBackground
+        {
+            set
+            {
+                if (PhotonHandler.Instance != null)
+                {
+                    PhotonHandler.Instance.KeepAliveInBackground = (int)Mathf.Round(value * 1000.0f);
+                }
+            }
+
+            get { return PhotonHandler.Instance != null ? Mathf.Round(PhotonHandler.Instance.KeepAliveInBackground / 1000.0f) : 60.0f; }
+        }
+
+        [Obsolete("Use KeepAliveInBackground instead.")]
+        public static float BackgroundTimeout
+        {
+            set { KeepAliveInBackground = value; }
+            get { return KeepAliveInBackground; }
+        }
+
 
         /// <summary>
         /// Are we the master client?
@@ -964,6 +1003,12 @@ namespace Photon.Pun
 														{
 										                	LeftRoomCleanup();
 														}
+
+                                                        if (state == ClientState.ConnectedToMasterserver && _cachedRegionHandler != null)
+                                                        {
+                                                            BestRegionSummaryInPreferences = _cachedRegionHandler.SummaryToCache;
+                                                            _cachedRegionHandler = null;
+                                                        }
                                                     };
 
 
@@ -1034,16 +1079,23 @@ namespace Photon.Pun
                 return false;
             }
 
+            SetupLogging();
 
-            // apply the AppSettings.Protocol
-            #if UNITY_WEBGL
-            if (PhotonServerSettings.AppSettings.Protocol == ConnectionProtocol.WebSocket || PhotonServerSettings.AppSettings.Protocol == ConnectionProtocol.WebSocketSecure)
-            {
-                NetworkingClient.LoadBalancingPeer.TransportProtocol = PhotonServerSettings.AppSettings.Protocol;
-            }
-            #else
+
             NetworkingClient.LoadBalancingPeer.TransportProtocol = PhotonServerSettings.AppSettings.Protocol;
+
+            #if UNITY_WEBGL
+            if (NetworkingClient.LoadBalancingPeer.TransportProtocol != ConnectionProtocol.WebSocket && NetworkingClient.LoadBalancingPeer.TransportProtocol != ConnectionProtocol.WebSocketSecure)
+            {
+                NetworkingClient.DebugReturn(DebugLevel.WARNING, "WebGL requires WebSockets. Switching TransportProtocol to WebSocketSecure.");
+                NetworkingClient.LoadBalancingPeer.TransportProtocol = ConnectionProtocol.WebSocketSecure;
+            }
             #endif
+
+
+            IsMessageQueueRunning = true;
+            NetworkingClient.AppId = PhotonServerSettings.AppSettings.AppIdRealtime;
+            GameVersion = PhotonServerSettings.AppSettings.AppVersion;
 
 
             if (PhotonServerSettings.StartInOfflineMode)
@@ -1060,17 +1112,20 @@ namespace Photon.Pun
             }
 
 
-            IsMessageQueueRunning = true;
-            NetworkingClient.AppId = PhotonServerSettings.AppSettings.AppIdRealtime;
-            GameVersion = PhotonServerSettings.AppSettings.AppVersion;
             NetworkingClient.EnableLobbyStatistics = PhotonNetwork.PhotonServerSettings.AppSettings.EnableLobbyStatistics;
-
-            SetupLogging();
 
 
             if (PhotonServerSettings.AppSettings.IsMasterServerAddress)
             {
                 NetworkingClient.LoadBalancingPeer.SerializationProtocolType = SerializationProtocol.GpBinaryV16;   // this is a workaround to use On Premise Servers, which don't support GpBinaryV18 yet.
+                if (AuthValues == null)
+                {
+                    AuthValues = new AuthenticationValues(Guid.NewGuid().ToString());
+                }
+                else if (string.IsNullOrEmpty(AuthValues.UserId))
+                {
+                    AuthValues.UserId = Guid.NewGuid().ToString();
+                }
                 return ConnectToMaster(PhotonServerSettings.AppSettings.Server, PhotonServerSettings.AppSettings.Port, PhotonServerSettings.AppSettings.AppIdRealtime);
             }
 
@@ -1507,7 +1562,7 @@ namespace Photon.Pun
             }
             if (NetworkingClient.Server != ServerConnection.MasterServer || !IsConnectedAndReady)
             {
-                Debug.LogError("JoinRandomRoom failed. Client is not on Master Server or not yet ready to call operations. Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
+                Debug.LogError("JoinRandomRoom failed. Client is on "+ NetworkingClient.Server+ " (must be Master Server for matchmaking)" + (IsConnectedAndReady ? " and ready" : " but not ready for operations (State: "+ NetworkingClient.State + ")") + ". Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
                 return false;
             }
 
@@ -1564,7 +1619,7 @@ namespace Photon.Pun
             }
             if (NetworkingClient.Server != ServerConnection.MasterServer || !IsConnectedAndReady)
             {
-                Debug.LogError("CreateRoom failed. Client is not on Master Server or not yet ready to call operations. Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
+                Debug.LogError("CreateRoom failed. Client is on " + NetworkingClient.Server + " (must be Master Server for matchmaking)" + (IsConnectedAndReady ? " and ready" : "but not ready for operations (State: " + NetworkingClient.State + ")") + ". Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
                 return false;
             }
 
@@ -1632,7 +1687,7 @@ namespace Photon.Pun
             }
             if (NetworkingClient.Server != ServerConnection.MasterServer || !IsConnectedAndReady)
             {
-                Debug.LogError("JoinOrCreateRoom failed. Client is not on Master Server or not yet ready to call operations. Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
+                Debug.LogError("JoinOrCreateRoom failed. Client is on " + NetworkingClient.Server + " (must be Master Server for matchmaking)" + (IsConnectedAndReady ? " and ready" : "but not ready for operations (State: " + NetworkingClient.State + ")") + ". Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
                 return false;
             }
             if (string.IsNullOrEmpty(roomName))
@@ -1698,7 +1753,7 @@ namespace Photon.Pun
             }
             if (NetworkingClient.Server != ServerConnection.MasterServer || !IsConnectedAndReady)
             {
-                Debug.LogError("JoinRoom failed. Client is not on Master Server or not yet ready to call operations. Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
+                Debug.LogError("JoinRoom failed. Client is on " + NetworkingClient.Server + " (must be Master Server for matchmaking)" + (IsConnectedAndReady ? " and ready" : "but not ready for operations (State: " + NetworkingClient.State + ")") + ". Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
                 return false;
             }
             if (string.IsNullOrEmpty(roomName))
@@ -1745,7 +1800,7 @@ namespace Photon.Pun
             }
             if (NetworkingClient.Server != ServerConnection.MasterServer || !IsConnectedAndReady)
             {
-                Debug.LogError("RejoinRoom failed. Client is not on Master Server or not yet ready to call operations. Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
+                Debug.LogError("RejoinRoom failed. Client is on " + NetworkingClient.Server + " (must be Master Server for matchmaking)" + (IsConnectedAndReady ? " and ready" : "but not ready for operations (State: " + NetworkingClient.State + ")") + ". Wait for callback: OnJoinedLobby or OnConnectedToMaster.");
                 return false;
             }
             if (string.IsNullOrEmpty(roomName))
@@ -2468,7 +2523,7 @@ namespace Photon.Pun
 
             SendInstantiateRaiseEventOptions.CachingOption = (sceneObject) ? EventCaching.AddToRoomCacheGlobal : EventCaching.AddToRoomCache;
 
-            return PhotonNetwork.RaiseEventInternal(PunEvent.Instantiation, SendInstantiateEvHashtable, SendInstantiateRaiseEventOptions, new SendOptions() { Reliability = true });
+            return PhotonNetwork.RaiseEventInternal(PunEvent.Instantiation, SendInstantiateEvHashtable, SendInstantiateRaiseEventOptions, SendOptions.SendReliable);
         }
 
 
@@ -2770,24 +2825,30 @@ namespace Photon.Pun
         }
 
 
-        /// <summary>Wraps loading a level to pause the network message-queue. Optionally syncs the loaded level in a room.</summary>
+        /// <summary>This method wraps loading a level asynchronously and pausing network messages during the process.</summary>
         /// <remarks>
-        /// To sync the loaded level in a room, set PhotonNetwork.AutomaticallySyncScene to true.
+        /// While loading levels in a networked game, it makes sense to not dispatch messages received by other players.
+        /// LoadLevel takes care of that by setting PhotonNetwork.IsMessageQueueRunning = false until the scene loaded.
+        /// 
+        /// To sync the loaded level in a room, set PhotonNetwork.AutomaticallySyncScene to true. 
         /// The Master Client of a room will then sync the loaded level with every other player in the room.
-        ///
-        /// While loading levels, it makes sense to not dispatch messages received by other players.
-        /// This method takes care of that by setting PhotonNetwork.IsMessageQueueRunning = false and enabling
-        /// the queue when the level was loaded.
+        /// Note that this works only for a single active scene and that reloading the scene is not supported.
+        /// The Master Client will actually reload a scene but other clients won't.
         ///
         /// You should make sure you don't fire RPCs before you load another scene (which doesn't contain
-        /// the same GameObjects and PhotonViews). You can call this in OnJoinedRoom.
+        /// the same GameObjects and PhotonViews).
         ///
-        /// This uses SceneManager.LoadSceneAsync().
+        /// LoadLevel uses SceneManager.LoadSceneAsync().
         ///
-        /// Check the progress of the LevelLoading using PhotonNetwork.LevelLoadingProgress (-1 means no loading, then it ranges from 0 to 1)
+        /// Check the progress of the LevelLoading using PhotonNetwork.LevelLoadingProgress.
+        /// 
+        /// Calling LoadLevel before the previous scene finished loading is not recommended.
+        /// If AutomaticallySyncScene is enabled, PUN cancels the previous load (and prevent that from
+        /// becoming the active scene). If AutomaticallySyncScene is off, the previous scene loading can finish.
+        /// In both cases, a new scene is loaded locally.
         /// </remarks>
         /// <param name='levelNumber'>
-        /// Number of the level to load. When using level numbers, make sure they are identical on all clients.
+        /// Build-index number of the level to load. When using level numbers, make sure they are identical on all clients.
         /// </param>
         public static void LoadLevel(int levelNumber)
         {
@@ -2801,21 +2862,27 @@ namespace Photon.Pun
             _AsyncLevelLoadingOperation = SceneManager.LoadSceneAsync(levelNumber,LoadSceneMode.Single);
         }
 
-        /// <summary>Wraps loading a level to pause the network message-queue. Optionally syncs the loaded level in a room.</summary>
+        /// <summary>This method wraps loading a level asynchronously and pausing network messages during the process.</summary>
         /// <remarks>
-        /// While loading levels, it makes sense to not dispatch messages received by other players.
-        /// This method takes care of that by setting PhotonNetwork.IsMessageQueueRunning = false and enabling
-        /// the queue when the level was loaded.
-        ///
-        /// To sync the loaded level in a room, set PhotonNetwork.AutomaticallySyncScene to true.
+        /// While loading levels in a networked game, it makes sense to not dispatch messages received by other players.
+        /// LoadLevel takes care of that by setting PhotonNetwork.IsMessageQueueRunning = false until the scene loaded.
+        /// 
+        /// To sync the loaded level in a room, set PhotonNetwork.AutomaticallySyncScene to true. 
         /// The Master Client of a room will then sync the loaded level with every other player in the room.
+        /// Note that this works only for a single active scene and that reloading the scene is not supported.
+        /// The Master Client will actually reload a scene but other clients won't.
         ///
         /// You should make sure you don't fire RPCs before you load another scene (which doesn't contain
-        /// the same GameObjects and PhotonViews). You can call this in OnJoinedRoom.
+        /// the same GameObjects and PhotonViews).
         ///
-        /// This uses SceneManager.LoadSceneAsync().
+        /// LoadLevel uses SceneManager.LoadSceneAsync().
         ///
-        /// Check the progress of the LevelLoading using PhotonNetwork.LevelLoadingProgress (-1 means no loading, then it ranges from 0 to 1)
+        /// Check the progress of the LevelLoading using PhotonNetwork.LevelLoadingProgress.
+        /// 
+        /// Calling LoadLevel before the previous scene finished loading is not recommended.
+        /// If AutomaticallySyncScene is enabled, PUN cancels the previous load (and prevent that from
+        /// becoming the active scene). If AutomaticallySyncScene is off, the previous scene loading can finish.
+        /// In both cases, a new scene is loaded locally.
         /// </remarks>
         /// <param name='levelName'>
         /// Name of the level to load. Make sure it's available to all clients in the same room.
@@ -2864,9 +2931,9 @@ namespace Photon.Pun
         ///     // and so on
         /// }</pre>
         /// </example>
-        public static bool WebRpc(string name, object parameters)
+        public static bool WebRpc(string name, object parameters, bool sendAuthCookie = false)
         {
-            return NetworkingClient.OpWebRpc(name, parameters);
+            return NetworkingClient.OpWebRpc(name, parameters, sendAuthCookie);
         }
 
         /// <summary>
