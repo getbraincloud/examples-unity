@@ -41,7 +41,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace BC_WebSocketSharp.Net
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
 {
   internal class ResponseStream : Stream
   {

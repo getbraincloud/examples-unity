@@ -25,15 +25,15 @@ public class Build {
 		{
 			if (arg.StartsWith("-bcappid="))
 			{
-				BrainCloudSettings.Instance.GameId = arg.Substring(("-bcappid=").Length);
+				BrainCloudSettingsManual.Instance.GameId = arg.Substring(("-bcappid=").Length);
 			}
 			else if (arg.StartsWith ("-bcsecret="))
 			{
-				BrainCloudSettings.Instance.SecretKey = arg.Substring(("-bcsecret=").Length);
+				BrainCloudSettingsManual.Instance.SecretKey = arg.Substring(("-bcsecret=").Length);
 			}
 			else if (arg.StartsWith ("-bcurl="))
 			{
-				BrainCloudSettings.Instance.ServerURL = arg.Substring (("-bcurl=").Length);
+				BrainCloudSettingsManual.Instance.ServerURL = arg.Substring (("-bcurl=").Length);
 			}
 		}
 	}

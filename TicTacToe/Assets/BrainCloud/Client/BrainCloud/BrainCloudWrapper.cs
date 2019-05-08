@@ -99,7 +99,6 @@ public class BrainCloudWrapper
     private void OnApplicationQuit()
     {
         Client.DisableRTT();
-        Client.RoomServerService.Disconnect();
         Client.Update();
     }
 
@@ -296,10 +295,6 @@ public class BrainCloudWrapper
     {
         get { return Client.MessagingService; }
     }
-    public BrainCloudRoomServer RoomServerService
-    {
-        get { return Client.RoomServerService; }
-    }
     #endregion
 
     /// <summary>
@@ -350,12 +345,12 @@ public class BrainCloudWrapper
     public void Init()
     {
         Init(
-            BrainCloudSettings.Instance.DispatcherURL,
-            BrainCloudSettings.Instance.SecretKey,
-            BrainCloudSettings.Instance.AppId,
-            BrainCloudSettings.Instance.GameVersion);
+            BrainCloudSettingsManual.Instance.DispatcherURL,
+            BrainCloudSettingsManual.Instance.SecretKey,
+            BrainCloudSettingsManual.Instance.AppId,
+            BrainCloudSettingsManual.Instance.GameVersion);
 
-        Client.EnableLogging(BrainCloudSettings.Instance.EnableLogging);
+        Client.EnableLogging(BrainCloudSettingsManual.Instance.EnableLogging);
     }
 
     /// <summary>
@@ -365,12 +360,12 @@ public class BrainCloudWrapper
     public void InitWithApps()
     {
         InitWithApps(
-            BrainCloudSettings.Instance.DispatcherURL,
-            BrainCloudSettings.Instance.AppId,
-            BrainCloudSettings.Instance.AppIdSecrets,
-            BrainCloudSettings.Instance.GameVersion);
+            BrainCloudSettingsManual.Instance.DispatcherURL,
+            BrainCloudSettingsManual.Instance.AppId,
+            BrainCloudSettingsManual.Instance.AppIdSecrets,
+            BrainCloudSettingsManual.Instance.GameVersion);
 
-        Client.EnableLogging(BrainCloudSettings.Instance.EnableLogging);
+        Client.EnableLogging(BrainCloudSettingsManual.Instance.EnableLogging);
     }
 #endif
 
@@ -1499,7 +1494,7 @@ public class BrainCloudWrapper
         }
 
 #if UNITY_EDITOR
-        BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnAuthenticateSuccess(json);
+        BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnAuthenticateSuccess(json);
 #endif
     }
 
@@ -1522,7 +1517,7 @@ public class BrainCloudWrapper
         }
 
 #if UNITY_EDITOR
-        BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnAuthenticateFailed(string.Format("statusCode[{0}] reasonCode[{1}] errorJson[{2}]", statusCode, reasonCode, errorJson));
+        BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnAuthenticateFailed(string.Format("statusCode[{0}] reasonCode[{1}] errorJson[{2}]", statusCode, reasonCode, errorJson));
 #endif
     }
 

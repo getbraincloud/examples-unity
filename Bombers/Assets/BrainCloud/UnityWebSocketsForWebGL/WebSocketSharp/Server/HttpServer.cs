@@ -38,18 +38,14 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
-using BC_WebSocketSharp.Net;
-using BC_WebSocketSharp.Net.WebSockets;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net.WebSockets;
 
-namespace BC_WebSocketSharp.Server
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
 {
   /// <summary>
   /// Provides a simple HTTP server that allows to accept
@@ -316,7 +312,7 @@ namespace BC_WebSocketSharp.Server
     /// </remarks>
     /// <value>
     ///   <para>
-    ///   One of the <see cref="Net.AuthenticationSchemes"/>
+    ///   One of the <see cref="WebSocketSharp.Net.AuthenticationSchemes"/>
     ///   enum values.
     ///   </para>
     ///   <para>
@@ -324,7 +320,7 @@ namespace BC_WebSocketSharp.Server
     ///   </para>
     ///   <para>
     ///   The default value is
-    ///   <see cref="Net.AuthenticationSchemes.Anonymous"/>.
+    ///   <see cref="WebSocketSharp.Net.AuthenticationSchemes.Anonymous"/>.
     ///   </para>
     /// </value>
     public AuthenticationSchemes AuthenticationSchemes {

@@ -37,7 +37,7 @@
  */
 #endregion
 
-namespace BC_WebSocketSharp.Net
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
 {
   /// <summary>
   /// Contains the HTTP headers that may be specified in a client request.

@@ -30,7 +30,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
-namespace BC_WebSocketSharp
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
 {
   /// <summary>
   /// Represents a log data used by the <see cref="Logger"/> class.

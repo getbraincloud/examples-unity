@@ -26,9 +26,7 @@
  */
 #endregion
 
-using System;
-
-namespace BC_WebSocketSharp
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
 {
   /// <summary>
   /// Indicates whether a WebSocket frame is the final frame of a message.

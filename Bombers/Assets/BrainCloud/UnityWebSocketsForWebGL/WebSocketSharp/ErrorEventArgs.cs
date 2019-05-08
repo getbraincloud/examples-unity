@@ -35,7 +35,7 @@
 
 using System;
 
-namespace BC_WebSocketSharp
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
 {
   /// <summary>
   /// Represents the event data for the <see cref="WebSocket.OnError"/> event.

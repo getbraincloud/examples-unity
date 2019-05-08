@@ -36,7 +36,7 @@
  */
 #endregion
 
-namespace BC_WebSocketSharp.Net
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
 {
   /// <summary>
   /// Contains the values of the HTTP status codes.

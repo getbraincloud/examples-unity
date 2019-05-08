@@ -47,12 +47,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
-using System.Threading;
 
 // TODO: Logging.
-namespace BC_WebSocketSharp.Net
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
 {
   /// <summary>
   /// Provides a simple, programmatically controlled HTTP listener.
@@ -148,9 +146,9 @@ namespace BC_WebSocketSharp.Net
     /// Gets or sets the scheme used to authenticate the clients.
     /// </summary>
     /// <value>
-    /// One of the <see cref="Net.AuthenticationSchemes"/> enum values,
+    /// One of the <see cref="WebSocketSharp.Net.AuthenticationSchemes"/> enum values,
     /// represents the scheme used to authenticate the clients. The default value is
-    /// <see cref="Net.AuthenticationSchemes.Anonymous"/>.
+    /// <see cref="WebSocketSharp.Net.AuthenticationSchemes.Anonymous"/>.
     /// </value>
     /// <exception cref="ObjectDisposedException">
     /// This listener has been closed.

@@ -30,7 +30,7 @@ using System;
 using System.Collections.Specialized;
 using System.Text;
 
-namespace BC_WebSocketSharp.Net
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
 {
   internal abstract class AuthenticationBase
   {

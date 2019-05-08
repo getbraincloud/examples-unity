@@ -1,12 +1,11 @@
 ﻿using System;
-
 #if DOT_NET
 using System.Net.WebSockets;
 #elif UNITY_WEBGL && !UNITY_EDITOR
 using AOT;
 using System.Collections.Generic;
 #else
-using BC_WebSocketSharp;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 #endif
 
 public class BrainCloudWebSocket
@@ -17,7 +16,7 @@ public class BrainCloudWebSocket
     private static Dictionary<int, BrainCloudWebSocket> webSocketInstances =
         new Dictionary<int, BrainCloudWebSocket>();
 #else
-    private BC_WebSocketSharp.WebSocket WebSocket;
+    private BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.WebSocket WebSocket;
 #endif
 
     public BrainCloudWebSocket(string url)
@@ -31,7 +30,7 @@ public class BrainCloudWebSocket
 		NativeWebSocket.SetOnClose(NativeSocket_OnClose);
 		webSocketInstances.Add(NativeWebSocket.Id, this);
 #else
-        WebSocket = new BC_WebSocketSharp.WebSocket(url);
+        WebSocket = new BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.WebSocket(url);
         WebSocket.ConnectAsync();
         WebSocket.OnOpen += WebSocket_OnOpen;
         WebSocket.OnMessage += WebSocket_OnMessage;

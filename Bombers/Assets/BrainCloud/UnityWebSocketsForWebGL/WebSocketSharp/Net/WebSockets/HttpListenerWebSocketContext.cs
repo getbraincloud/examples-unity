@@ -32,7 +32,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Security.Principal;
 
-namespace BC_WebSocketSharp.Net.WebSockets
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net.WebSockets
 {
   /// <summary>
   /// Provides the access to the information in a WebSocket handshake request to
@@ -82,7 +82,7 @@ namespace BC_WebSocketSharp.Net.WebSockets
     /// </summary>
     /// <value>
     ///   <para>
-    ///   A <see cref="Net.CookieCollection"/> that contains
+    ///   A <see cref="WebSocketSharp.Net.CookieCollection"/> that contains
     ///   the cookies.
     ///   </para>
     ///   <para>
@@ -351,7 +351,7 @@ namespace BC_WebSocketSharp.Net.WebSockets
     /// the client and server.
     /// </summary>
     /// <value>
-    /// A <see cref="BC_WebSocketSharp.WebSocket"/>.
+    /// A <see cref="WebSocketSharp.WebSocket"/>.
     /// </value>
     public override WebSocket WebSocket {
       get {

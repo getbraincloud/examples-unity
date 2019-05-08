@@ -26,9 +26,7 @@
  */
 #endregion
 
-using System;
-
-namespace BC_WebSocketSharp
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
 {
   /// <summary>
   /// Specifies the logging level.

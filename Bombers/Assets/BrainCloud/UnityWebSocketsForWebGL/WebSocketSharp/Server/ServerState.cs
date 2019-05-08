@@ -26,9 +26,7 @@
  */
 #endregion
 
-using System;
-
-namespace BC_WebSocketSharp.Server
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
 {
   internal enum ServerState
   {

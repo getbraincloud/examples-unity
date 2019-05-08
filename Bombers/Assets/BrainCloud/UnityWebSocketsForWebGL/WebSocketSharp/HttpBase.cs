@@ -32,9 +32,9 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using System.Threading;
-using BC_WebSocketSharp.Net;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net;
 
-namespace BC_WebSocketSharp
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
 {
   internal abstract class HttpBase
   {
@@ -42,7 +42,7 @@ namespace BC_WebSocketSharp
 
     private NameValueCollection _headers;
     private const int           _headersMaxLength = 8192;
-    private Version             _version;
+    private System.Version             _version;
 
     #endregion
 
@@ -60,7 +60,7 @@ namespace BC_WebSocketSharp
 
     #region Protected Constructors
 
-    protected HttpBase (Version version, NameValueCollection headers)
+    protected HttpBase (System.Version version, NameValueCollection headers)
     {
       _version = version;
       _headers = headers;
@@ -91,7 +91,7 @@ namespace BC_WebSocketSharp
       }
     }
 
-    public Version ProtocolVersion {
+    public System.Version ProtocolVersion {
       get {
         return _version;
       }
