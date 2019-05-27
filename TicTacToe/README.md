@@ -3,6 +3,89 @@
 Async multiplayer, cloud code and RTT example. 
 
 
+[MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs)  | Find players to match against
+```csharp
+App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
+```
+
+[MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs)  | Get current matches
+```csharp
+App.Bc.AsyncMatchService.FindMatches(OnFindMatches);
+```
+
+[MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs)  | Find completed matches
+```csharp
+App.Bc.AsyncMatchService.FindCompleteMatches(OnFindCompletedMatches);
+```
+
+[MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs)  | Create a match
+```csharp
+App.Bc.AsyncMatchService.CreateMatchWithInitialTurn(
+    "[{\"platform\":\"BC\",\"id\":\"" + matchedProfile.ProfileId +"\"}]", // Opponents
+    matchState.ToJson(), // Current match state
+    "A friend has challenged you to a match of Tic Tac Toe.", // Pushnotification Message
+    yourTurnFirst ? App.ProfileId : matchedProfile.ProfileId, //Which turn it is. We picked randomly
+    summaryData.ToJson(), // Summary data
+    OnCreateMatchSuccess,
+    OnCreateMatchFailed,
+    null);
+```
+
+
+[MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs) | Auto join a match match with custom cloud code script: [RankGame_FinishMatch](https://getbraincloud.com/apidocs/cloud-code-central/handy-cloud-code-scripts/rankgame_autojoinmatch/)
+```csharp
+App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
+```
+
+[TicTacToe.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/TicTacToe.cs)  | Submit turn
+```csharp
+App.Bc.AsyncMatchService.SubmitTurn(
+    App.OwnerId,
+    App.MatchId,
+    App.MatchVersion,
+    boardStateJson.ToJson(),
+    "A turn has been played",
+    null,
+    null,
+    null,
+    OnTurnSubmitted, 
+    (status, code, error, cbObject) => { Debug.Log(status)Debug.Log(code); Debug.Log(error.ToString()); });
+```
+
+
+[TicTacToe.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/TicTacToe.cs) | Complete the match
+```csharp
+App.Bc.AsyncMatchService.CompleteMatch(
+             App.OwnerId,
+             App.MatchId,
+             OnMatchCompleted);
+```
+
+
+[TicTacToe.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/TicTacToe.cs)  | Finish ranked match with custom cloud code script: [RankGame_FinishMatch](https://getbraincloud.com/apidocs/cloud-code-central/handy-cloud-code-scripts/rankgame_finishmatch/)
+```csharp
+ var matchResults = new JsonData {["ownerId"] = App.OwnerId, ["matchId"] = App.MatchId};
+
+
+        if (_winner < 0)
+        {
+            matchResults["isTie"] = true;
+        }
+        else
+        {
+            matchResults["isTie"] = false;
+            matchResults["winnerId"] = WinnerInfo.ProfileId;
+            matchResults["loserId"] = LoserInfo.ProfileId;
+            matchResults["winnerRating"] = int.Parse(WinnerInfo.PlayerRating);
+            matchResults["loserRating"] = int.Parse(LoserInfo.PlayerRating);
+        }
+
+
+        App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
+            (status, code, error, cbObject) => { });
+```
+
+
 
 
 # [brainCloud AyncMatchService + RTT](https://getbraincloud.com/apidocs/tutorials/unity-tutorials/braincloud-ayncmatchservice-rtt/)
@@ -29,10 +112,11 @@ Up to date and previous versions of Tic Tac Toe are available here. Tic Tac Toe,
 https://github.com/getbraincloud/examples-unity/tree/master/TicTacToe
 
 ## Enable RTT
-From the brainCloud Portal, select the app you wish to add RTT to. Select the Real-time Tech (RTT) Enabled checkbox from **Design | Core App Info | Advanced Settings**. https://sharedprod.braincloudservers.com/admin/dashboard#/development/core-settings-advanced-settings 
+From the brainCloud Portal, select the app you wish to add RTT to. Select the Real-time Tech (RTT) Enabled checkbox from **Design | Core App Info | [Advanced Settings](https://sharedprod.braincloudservers.com/admin/dashboard#/development/core-settings-advanced-settings )**. 
 
-```
-// Enable RTT
+
+[MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs) | Set up RTT
+```csharp
 private void enableRTT()
 {
     // Only Enable RTT if it's not already started
@@ -46,7 +130,9 @@ private void enableRTT()
         onRTTEnabled("", null);
     }
 }
+```
 
+```csharp
 // RTT enabled, ensure we now request the updated match state
 private void onRTTEnabled(string responseData, object cbPostObject)
 {
@@ -55,19 +141,25 @@ private void onRTTEnabled(string responseData, object cbPostObject)
     // match state
     BcWrapper.Client.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
 }
+```
 
+```csharp
 // the listener, can parse the json and request just the updated match 
 // in this example, just re-request it all
 private void queryMatchStateRTT(string in_json)
 {
     queryMatchState();
 }
+```
 
+```csharp
 private void queryMatchState()
 {
     BcWrapper.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
 }
+```
 
+```csharp
 private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
 {
     // TODO! Bring up a user dialog to inform of poor connection
