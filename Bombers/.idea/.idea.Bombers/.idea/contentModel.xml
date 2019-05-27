@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/Library/Caches/Rider2018.3/extResources" t="IncludeRecursive" />
-    <e p="$USER_HOME$/Library/Caches/Rider2018.3/resharper-host/local/Transient/ReSharperHost/v183/SolutionCaches/_Bombers.2015898215.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="C:\Users\jonathanm\.Rider2019.1\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\jonathanm\.Rider2019.1\system\resharper-host\local\Transient\ReSharperHost\v191\SolutionCaches\_Bombers.1233269513.00" t="ExcludeRecursive" />
+    <e p="C:\Users\jonathanm\AppData\local\Android\Sdk\platforms\android-28\data\res" t="IncludeRecursive" />
+    <e p="C:\Users\jonathanm\AppData\local\Android\Sdk\sources\android-28" t="IncludeRecursive" />
+    <e p="C:\Users\jonathanm\Documents\examples\examples-unity\Bombers" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
@@ -130,15 +132,15 @@
           </e>
           <e p="Unity" t="Include">
             <e p="Editor" t="Include">
-              <e p="BrainCloudPluginSettingsInspector.cs" t="Include" />
               <e p="BrainCloudSettingsEditor.cs" t="Include" />
+              <e p="BrainCloudSettingsInspector.cs" t="Include" />
             </e>
             <e p="Scripts" t="Include">
               <e p="AppIdSecretPair.cs" t="Include" />
               <e p="BrainCloudDebugInfo.cs" t="Include" />
               <e p="BrainCloudLoginPF.cs" t="Include" />
-              <e p="BrainCloudPluginSettings.cs" t="Include" />
               <e p="BrainCloudSettings.cs" t="Include" />
+              <e p="BrainCloudSettingsManual.cs" t="Include" />
               <e p="HUD" t="Include">
                 <e p="BrainCloudHUD.cs" t="Include" />
                 <e p="HUDGlobalStats.cs" t="Include" />
@@ -152,12 +154,115 @@
           </e>
           <e p="UnityWebSocketsForWebGL" t="Include">
             <e p="NativeWebSocket.cs" t="Include" />
+            <e p="WebSocketSharp" t="Include">
+              <e p="AssemblyInfo.cs" t="Include" />
+              <e p="ByteOrder.cs" t="Include" />
+              <e p="CloseEventArgs.cs" t="Include" />
+              <e p="CloseStatusCode.cs" t="Include" />
+              <e p="CompressionMethod.cs" t="Include" />
+              <e p="ErrorEventArgs.cs" t="Include" />
+              <e p="Ext.cs" t="Include" />
+              <e p="Fin.cs" t="Include" />
+              <e p="HttpBase.cs" t="Include" />
+              <e p="HttpRequest.cs" t="Include" />
+              <e p="HttpResponse.cs" t="Include" />
+              <e p="LogData.cs" t="Include" />
+              <e p="Logger.cs" t="Include" />
+              <e p="LogLevel.cs" t="Include" />
+              <e p="Mask.cs" t="Include" />
+              <e p="MessageEventArgs.cs" t="Include" />
+              <e p="Net" t="Include">
+                <e p="AuthenticationBase.cs" t="Include" />
+                <e p="AuthenticationChallenge.cs" t="Include" />
+                <e p="AuthenticationResponse.cs" t="Include" />
+                <e p="AuthenticationSchemes.cs" t="Include" />
+                <e p="Chunk.cs" t="Include" />
+                <e p="ChunkedRequestStream.cs" t="Include" />
+                <e p="ChunkStream.cs" t="Include" />
+                <e p="ClientSslConfiguration.cs" t="Include" />
+                <e p="Cookie.cs" t="Include" />
+                <e p="CookieCollection.cs" t="Include" />
+                <e p="CookieException.cs" t="Include" />
+                <e p="EndPointListener.cs" t="Include" />
+                <e p="EndPointManager.cs" t="Include" />
+                <e p="HttpBasicIdentity.cs" t="Include" />
+                <e p="HttpConnection.cs" t="Include" />
+                <e p="HttpDigestIdentity.cs" t="Include" />
+                <e p="HttpHeaderInfo.cs" t="Include" />
+                <e p="HttpHeaderType.cs" t="Include" />
+                <e p="HttpListener.cs" t="Include" />
+                <e p="HttpListenerAsyncResult.cs" t="Include" />
+                <e p="HttpListenerContext.cs" t="Include" />
+                <e p="HttpListenerException.cs" t="Include" />
+                <e p="HttpListenerPrefix.cs" t="Include" />
+                <e p="HttpListenerPrefixCollection.cs" t="Include" />
+                <e p="HttpListenerRequest.cs" t="Include" />
+                <e p="HttpListenerResponse.cs" t="Include" />
+                <e p="HttpRequestHeader.cs" t="Include" />
+                <e p="HttpResponseHeader.cs" t="Include" />
+                <e p="HttpStatusCode.cs" t="Include" />
+                <e p="HttpStreamAsyncResult.cs" t="Include" />
+                <e p="HttpUtility.cs" t="Include" />
+                <e p="HttpVersion.cs" t="Include" />
+                <e p="InputChunkState.cs" t="Include" />
+                <e p="InputState.cs" t="Include" />
+                <e p="LineState.cs" t="Include" />
+                <e p="NetworkCredential.cs" t="Include" />
+                <e p="QueryStringCollection.cs" t="Include" />
+                <e p="ReadBufferState.cs" t="Include" />
+                <e p="RequestStream.cs" t="Include" />
+                <e p="ResponseStream.cs" t="Include" />
+                <e p="ServerSslConfiguration.cs" t="Include" />
+                <e p="WebHeaderCollection.cs" t="Include" />
+                <e p="WebSockets" t="Include">
+                  <e p="HttpListenerWebSocketContext.cs" t="Include" />
+                  <e p="TcpListenerWebSocketContext.cs" t="Include" />
+                  <e p="WebSocketContext.cs" t="Include" />
+                </e>
+              </e>
+              <e p="Opcode.cs" t="Include" />
+              <e p="PayloadData.cs" t="Include" />
+              <e p="Rsv.cs" t="Include" />
+              <e p="Server" t="Include">
+                <e p="HttpRequestEventArgs.cs" t="Include" />
+                <e p="HttpServer.cs" t="Include" />
+                <e p="IWebSocketSession.cs" t="Include" />
+                <e p="ServerState.cs" t="Include" />
+                <e p="WebSocketBehavior.cs" t="Include" />
+                <e p="WebSocketServer.cs" t="Include" />
+                <e p="WebSocketServiceHost.cs" t="Include" />
+                <e p="WebSocketServiceHost`1.cs" t="Include" />
+                <e p="WebSocketServiceManager.cs" t="Include" />
+                <e p="WebSocketSessionManager.cs" t="Include" />
+              </e>
+              <e p="WebSocket.cs" t="Include" />
+              <e p="WebSocketException.cs" t="Include" />
+              <e p="WebSocketFrame.cs" t="Include" />
+              <e p="WebSocketState.cs" t="Include" />
+            </e>
           </e>
         </e>
         <e p="Editor" t="Include">
           <e p="Build.cs" t="Include" />
         </e>
         <e p="Photon" t="Include">
+          <e p="PhotonChat" t="Include">
+            <e p="Code" t="Include">
+              <e p="ChannelCreationOptions.cs" t="Include" />
+              <e p="ChannelWellKnownProperties.cs" t="Include" />
+              <e p="ChatChannel.cs" t="Include" />
+              <e p="ChatClient.cs" t="Include" />
+              <e p="ChatDisconnectCause.cs" t="Include" />
+              <e p="ChatEventCode.cs" t="Include" />
+              <e p="ChatOperationCode.cs" t="Include" />
+              <e p="ChatParameterCode.cs" t="Include" />
+              <e p="ChatPeer.cs" t="Include" />
+              <e p="ChatState.cs" t="Include" />
+              <e p="ChatUserStatus.cs" t="Include" />
+              <e p="IChatClientListener.cs" t="Include" />
+              <e p="PhotonChat.asmdef" t="Include" />
+            </e>
+          </e>
           <e p="PhotonLibs" t="Include">
             <e p="Photon3Unity3D.xml" t="Include" />
             <e p="release_history.txt" t="Include" />
@@ -188,6 +293,7 @@
             </e>
           </e>
           <e p="PhotonUnityNetworking" t="Include">
+            <e p="changelog.txt" t="Include" />
             <e p="Code" t="Include">
               <e p="CustomTypes.cs" t="Include" />
               <e p="Editor" t="Include">
@@ -326,9 +432,9 @@
         </e>
       </e>
       <e p="Bombers.sln" t="IncludeFlat" />
-      <e p="Library" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
       <e p="packages" t="ExcludeRecursive" />
+      <e p="PhotonChat.csproj" t="IncludeRecursive" />
       <e p="PhotonRealtime.csproj" t="IncludeRecursive" />
       <e p="PhotonUnityNetworking.csproj" t="IncludeRecursive" />
       <e p="PhotonUnityNetworking.Editor.csproj" t="IncludeRecursive" />
@@ -336,9 +442,7 @@
       <e p="PhotonUnityNetworking.Utilities.Culling.Editor.csproj" t="IncludeRecursive" />
       <e p="PhotonUnityNetworking.Utilities.PhotonPlayer.Editor.csproj" t="IncludeRecursive" />
       <e p="PhotonWebSocket.csproj" t="IncludeRecursive" />
-      <e p="Temp" t="ExcludeRecursive">
-        <e p="bin" t="ExcludeRecursive" />
-      </e>
+      <e p="Temp\bin" t="ExcludeRecursive" />
     </e>
   </component>
 </project>

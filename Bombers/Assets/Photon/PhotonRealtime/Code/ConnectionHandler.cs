@@ -43,7 +43,7 @@ namespace Photon.Realtime
 
         /// <summary>Defines for how long the Fallback Thread should keep the connection, before it may time out as usual.</summary>
         /// <remarks>We want to the Client to keep it's connection when an app is in the background (and doesn't call Update / Service Clients should not keep their connection indefinitely in the background, so after some milliseconds, the Fallback Thread should stop keeping it up.</remarks>
-        public int KeepAliveInBackground = 30000;
+        public int KeepAliveInBackground = 60000;
 
         /// <summary>Counts how often the Fallback Thread called SendAcksOnly, which is purely of interest to monitor if the game logic called SendOutgoingCommands as intended.</summary>
         public int CountSendAcksOnly { get; private set; }
@@ -78,7 +78,7 @@ namespace Photon.Realtime
         {
             //Debug.Log("OnApplicationQuit");
             this.StopFallbackSendAckThread();
-            if (this.Client != null)
+            if (this.Client != null && this.Client.IsConnected)
             {
                 this.Client.Disconnect();
                 this.Client.LoadBalancingPeer.StopThread();
@@ -96,7 +96,11 @@ namespace Photon.Realtime
                 return;
             }
 
+            #if UNITY_SWITCH
+            this.fallbackThreadId = SupportClass.StartBackgroundCalls(this.RealtimeFallbackThread, 50);  // as workaround, we don't name the Thread.
+            #else
             this.fallbackThreadId = SupportClass.StartBackgroundCalls(this.RealtimeFallbackThread, 50, "RealtimeFallbackThread");
+            #endif
             #endif
         }
 

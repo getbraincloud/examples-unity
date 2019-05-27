@@ -2,8 +2,8 @@
 
 using System;
 using System.Text;
-using UnityEngine;
-#if UNITY_WEBGL
+
+#if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
 #else
 using System.Collections.Generic;
@@ -11,16 +11,14 @@ using System.Security.Authentication;
 #endif
 
 
-public class PhotonWebSocket
+public class WebSocket
 {
     private Uri mUrl;
     /// <summary>Photon uses this to agree on a serialization protocol. Either: GpBinaryV16 or GpBinaryV18. Based on enum SerializationProtocol.</summary>
     private string protocols = "GpBinaryV16";
 
-    public PhotonWebSocket(Uri url, string protocols = null)
+    public WebSocket(Uri url, string protocols = null)
     {
-        Debug.Log("Photon WebSocket");
-        
         this.mUrl = url;
         if (protocols != null)
         {
@@ -45,48 +43,48 @@ public class PhotonWebSocket
         return Encoding.UTF8.GetString (retval);
     }
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
-    private static extern int PhotonSocketCreate (string url, string protocols);
+    private static extern int SocketCreate (string url, string protocols);
 
     [DllImport("__Internal")]
-    private static extern int PhotonSocketState (int socketInstance);
+    private static extern int SocketState (int socketInstance);
 
     [DllImport("__Internal")]
-    private static extern void PhotonSocketSend (int socketInstance, byte[] ptr, int length);
+    private static extern void SocketSend (int socketInstance, byte[] ptr, int length);
 
     [DllImport("__Internal")]
-    private static extern void PhotonSocketRecv (int socketInstance, byte[] ptr, int length);
+    private static extern void SocketRecv (int socketInstance, byte[] ptr, int length);
 
     [DllImport("__Internal")]
-    private static extern int PhotonSocketRecvLength (int socketInstance);
+    private static extern int SocketRecvLength (int socketInstance);
 
     [DllImport("__Internal")]
-    private static extern void PhotonSocketClose (int socketInstance);
+    private static extern void SocketClose (int socketInstance);
 
     [DllImport("__Internal")]
-    private static extern int PhotonSocketError (int socketInstance, byte[] ptr, int length);
+    private static extern int SocketError (int socketInstance, byte[] ptr, int length);
 
     int m_NativeRef = 0;
 
     public void Send(byte[] buffer)
     {
-        PhotonSocketSend (m_NativeRef, buffer, buffer.Length);
+        SocketSend (m_NativeRef, buffer, buffer.Length);
     }
 
     public byte[] Recv()
     {
-        int length = PhotonSocketRecvLength (m_NativeRef);
+        int length = SocketRecvLength (m_NativeRef);
         if (length == 0)
             return null;
         byte[] buffer = new byte[length];
-        PhotonSocketRecv (m_NativeRef, buffer, length);
+        SocketRecv (m_NativeRef, buffer, length);
         return buffer;
     }
 
     public void Connect()
     {
-        m_NativeRef = PhotonSocketCreate (mUrl.ToString(), this.protocols);
+        m_NativeRef = SocketCreate (mUrl.ToString(), this.protocols);
 
         //while (SocketState(m_NativeRef) == 0)
         //    yield return 0;
@@ -94,12 +92,12 @@ public class PhotonWebSocket
 
     public void Close()
     {
-        PhotonSocketClose(m_NativeRef);
+        SocketClose(m_NativeRef);
     }
 
     public bool Connected
     {
-        get { return PhotonSocketState(m_NativeRef) != 0; }
+        get { return SocketState(m_NativeRef) != 0; }
     }
 
     public string Error
@@ -107,7 +105,7 @@ public class PhotonWebSocket
         get {
             const int bufsize = 1024;
             byte[] buffer = new byte[bufsize];
-            int result = PhotonSocketError (m_NativeRef, buffer, bufsize);
+            int result = SocketError (m_NativeRef, buffer, bufsize);
 
             if (result == 0)
                 return null;

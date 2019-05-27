@@ -95,7 +95,7 @@ namespace Photon.Pun
 
         protected static string UrlFreeLicense = "https://dashboard.photonengine.com/en-US/SelfHosted";
 
-        protected static string UrlDevNet = "https://doc.photonengine.com/en-us/pun/v2";
+        public const string UrlDevNet = "https://doc.photonengine.com/en-us/pun/v2";
 
         protected static string UrlForum = "https://forum.photonengine.com";
 
@@ -105,8 +105,9 @@ namespace Photon.Pun
 
         protected static string UrlAppIDExplained = "https://doc.photonengine.com/en-us/realtime/current/getting-started/obtain-your-app-id";
 
-        protected static string UrlCloudDashboard = "https://dashboard.photonengine.com/en-US/account/signin?email=";
+        public const string UrlCloudDashboard = "https://dashboard.photonengine.com/en-US/account/signin?email=";
 
+        public const string UrlPunSettings = "https://doc.photonengine.com/en-us/pun/v2/getting-started/initial-setup"; // the SeverSettings class has this url directly in it's HelpURL attribute.
 
         private enum PhotonSetupStates
         {

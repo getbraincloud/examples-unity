@@ -27,14 +27,14 @@ namespace Photon.Pun
     /// A PhotonView identifies an object across the network (viewID) and configures how the controlling client updates remote instances.
     /// </summary>
     /// \ingroup publicApi
-    [AddComponentMenu("Photon Networking/Photon View &v")]
+    [AddComponentMenu("Photon Networking/Photon View")]
     public class PhotonView : MonoBehaviour
     {
         #if UNITY_EDITOR
         [ContextMenu("Open PUN Wizard")]
         void OpenPunWizard()
         {
-            EditorApplication.ExecuteMenuItem("Window/Photon Unity Networking");
+            EditorApplication.ExecuteMenuItem("Window/Photon Unity Networking/PUN Wizard");
         }
         #endif
 
@@ -107,7 +107,8 @@ namespace Photon.Pun
         /// <summary>
         /// For internal use only, don't use
         /// </summary>
-        protected internal object[] lastOnSerializeDataSent = null;
+        protected internal List<object> lastOnSerializeDataSent = null;
+        protected internal List<object> syncValues;
 
         /// <summary>
         /// For internal use only, don't use

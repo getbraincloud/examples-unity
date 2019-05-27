@@ -80,7 +80,7 @@ namespace Photon.Pun
 
         private Animator m_Animator;
 
-        private PhotonStreamQueue m_StreamQueue;
+        private PhotonStreamQueue m_StreamQueue = new PhotonStreamQueue(120);
 
         //These fields are only used in the CustomEditor for this script and would trigger a
         //"this variable is never used" warning, which I am suppressing here
@@ -123,8 +123,6 @@ namespace Photon.Pun
         private void Awake()
         {
             this.m_PhotonView = GetComponent<PhotonView>();
-            this.m_StreamQueue = new PhotonStreamQueue(120);
-
             this.m_Animator = GetComponent<Animator>();
         }
 

@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using BrainCloud;
-using BrainCloud.Entity;
 using LitJson;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -38,9 +37,50 @@ public class MatchSelect : GameScene
             Debug.Log("MatchMaking enabled failed");
         });
 
-        
+        enableRTT();
+    }
+
+    // Enable RTT
+    private void enableRTT()
+    {
+        // Only Enable RTT if its not already started
+        if (!App.Bc.Client.IsRTTEnabled())
+        {
+            App.Bc.Client.EnableRTT(eRTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+        }
+        else
+        {
+            // its already started, lets call our success delegate 
+            onRTTEnabled("", null);
+        }
+    }
+
+    // rtt enabled, ensure we now request the updated match state
+    private void onRTTEnabled(string responseData, object cbPostObject)
+    {
+        queryMatchState();
+        // LISTEN TO THE ASYNC CALLS, when we get one of these calls, lets just refresh 
+        // match state
+        App.Bc.Client.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
+    }
+
+    // the listener, can parse the json and request just the updated match 
+    // in this example, just re-request it all
+    private void queryMatchStateRTT(string in_json)
+    {
+        queryMatchState();
+    }
+
+    private void queryMatchState()
+    {
         App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
-        
+    }
+
+    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
+    {
+        // TODO! Bring up a user dialog to inform of poor connection
+        // for now, try to auto connect 
+        Invoke("enableRTT", 5.0f);
     }
 
     private void OnFindPlayers(string responseData, object cbPostObject)
@@ -50,9 +90,7 @@ public class MatchSelect : GameScene
         // Construct our matched players list using response data
         var matchesData = JsonMapper.ToObject(responseData)["data"]["matchesFound"];
 
-
         foreach (JsonData match in matchesData) matchedProfiles.Add(new PlayerInfo(match));
-
 
         // After, fetch our game list from Braincloud
         App.Bc.AsyncMatchService.FindMatches(OnFindMatches);
@@ -157,7 +195,7 @@ public class MatchSelect : GameScene
             GUILayout.BeginHorizontal();
             GUI.enabled = match.yourTurn;
             if (GUILayout.Button(
-                match.matchedProfile.PlayerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(His Turn)"),
+                match.matchedProfile.PlayerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(Their Turn)"),
                 GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
                 EnterMatch(match);
             GUI.enabled = true;
@@ -170,8 +208,8 @@ public class MatchSelect : GameScene
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
             if(match.matchedProfile != null)
-            if (GUILayout.Button(match.matchedProfile.PlayerName + "\n(Completed)", GUILayout.MinHeight(50),
-                GUILayout.MaxWidth(200))) EnterMatch(match);
+                if (GUILayout.Button(match.matchedProfile.PlayerName + "\n(Completed)", GUILayout.MinHeight(50),
+                    GUILayout.MaxWidth(200))) EnterMatch(match);
             GUILayout.EndHorizontal();
         }
 
@@ -230,7 +268,7 @@ public class MatchSelect : GameScene
 
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // ignored
                 }

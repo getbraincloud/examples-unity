@@ -44,7 +44,7 @@ public class PlayerInfo
         {
             returnValue = jsonData[key].ToString();
         }
-        catch (Exception e)
+        catch (Exception)
         {
         }
 

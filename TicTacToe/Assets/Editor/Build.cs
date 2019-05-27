@@ -27,15 +27,15 @@ public class Build {
 		{
 			if (arg.StartsWith("-bcappid="))
 			{
-				BrainCloudSettings.Instance.GameId = arg.Substring(("-bcappid=").Length);
+				BrainCloudSettingsManual.Instance.GameId = arg.Substring(("-bcappid=").Length);
 			}
 			else if (arg.StartsWith ("-bcsecret="))
 			{
-				BrainCloudSettings.Instance.SecretKey = arg.Substring(("-bcsecret=").Length);
+				BrainCloudSettingsManual.Instance.SecretKey = arg.Substring(("-bcsecret=").Length);
 			}
 			else if (arg.StartsWith ("-bcurl="))
 			{
-				BrainCloudSettings.Instance.ServerURL = arg.Substring (("-bcurl=").Length);
+				BrainCloudSettingsManual.Instance.ServerURL = arg.Substring (("-bcurl=").Length);
 			}
 		}
 	}
@@ -61,13 +61,15 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	static void PlayerSettingsIl2cpp(bool enableIl2cpp)
 	{
 		int architectureValue = 2; // Universal
-		int scriptingImplementation = (int) (enableIl2cpp ? ScriptingImplementation.IL2CPP : ScriptingImplementation.Mono2x);
-		#if UNITY_4_6
+        ScriptingImplementation scriptingImplementation =(enableIl2cpp ? ScriptingImplementation.IL2CPP : ScriptingImplementation.Mono2x);
+#if UNITY_4_6
 		PlayerSettings.SetPropertyInt("ScriptingBackend", scriptingImplementation, BuildTargetGroup.iPhone);
 		PlayerSettings.SetPropertyInt("Architecture", architectureValue, BuildTargetGroup.iPhone);
-		#else
-		PlayerSettings.SetPropertyInt("ScriptingBackend", scriptingImplementation, BuildTargetGroup.iOS);
-		PlayerSettings.SetPropertyInt("Architecture", architectureValue, BuildTargetGroup.iOS);
+#else
+        PlayerSettings.SetScriptingBackend(BuildTargetGroup.iOS, scriptingImplementation);
+        PlayerSettings.SetArchitecture(BuildTargetGroup.iOS, architectureValue);
+		//PlayerSettings.SetPropertyInt("ScriptingBackend", scriptingImplementation, BuildTargetGroup.iOS);
+		//PlayerSettings.SetPropertyInt("Architecture", architectureValue, BuildTargetGroup.iOS);
 		#endif
 	}
 	
@@ -114,7 +116,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	static void PerformBuildWP8()
 	{
 		BuildTarget target;
-		target = BuildTarget.WP8Player;
+		target = BuildTarget.WSAPlayer;
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
@@ -144,7 +146,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	static void PerformBuildOSX32()
 	{
 		BuildTarget target;
-		target = BuildTarget.StandaloneOSXIntel;
+		target = BuildTarget.StandaloneOSX;
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();
@@ -154,7 +156,7 @@ Where 'architectureValue' is as follows (the enum for architecture seems to be i
 	static void PerformBuildOSX64()
 	{
 		BuildTarget target;
-		target = BuildTarget.StandaloneOSXIntel64;
+		target = BuildTarget.StandaloneOSX;
 
 		UpdateBrainCloudSettings();
 		string[] scenes = GetScenes();

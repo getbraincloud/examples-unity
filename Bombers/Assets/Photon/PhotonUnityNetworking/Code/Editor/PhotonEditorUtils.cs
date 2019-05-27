@@ -170,10 +170,10 @@ namespace Photon.Pun
 		/// <param name="go">The GameObject to check</param>
 		public static bool IsPrefab(GameObject go)
 		{
-			#if UNITY_2018_3_OR_NEWER
-				return UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetPrefabStage(go) != null;
-			#else
-				return EditorUtility.IsPersistent(go);
+            #if UNITY_2018_3_OR_NEWER
+				return UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetPrefabStage(go) != null || EditorUtility.IsPersistent(go);
+            #else
+                return EditorUtility.IsPersistent(go);
 			#endif
 		}
     }
