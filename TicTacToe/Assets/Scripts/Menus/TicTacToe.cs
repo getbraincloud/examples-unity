@@ -6,7 +6,6 @@ using System.Text;
 using BrainCloud;
 using LitJson;
 using UnityEngine;
-using UnityEngine.UI;
 
 #endregion
 
@@ -165,17 +164,17 @@ public class TicTacToe : GameScene
                 {
                     App.MatchVersion = (ulong)newVersion;
 
-                            // Setup a couple stuff into our TicTacToe scene
-                            App.BoardState = (string)data["matchState"]["board"];
+                    // Setup a couple stuff into our TicTacToe scene
+                    App.BoardState = (string)data["matchState"]["board"];
                     App.PlayerInfoX = match.playerXInfo;
                     App.PlayerInfoO = match.playerOInfo;
                     App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
                     App.OwnerId = match.ownerId;
                     App.MatchId = match.matchId;
 
-                            // Load the Tic Tac Toe scene
+                    // Load the Tic Tac Toe scene
 
-                            App.GotoTicTacToeScene(gameObject);
+                    App.GotoTicTacToeScene(gameObject);
 
                 }
             });
@@ -395,10 +394,8 @@ public class TicTacToe : GameScene
           */
 
         // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
-        var matchResults = new JsonData();
+        var matchResults = new JsonData {["ownerId"] = App.OwnerId, ["matchId"] = App.MatchId};
 
-        matchResults["ownerId"] = App.OwnerId;
-        matchResults["matchId"] = App.MatchId;
 
         if (_winner < 0)
         {
@@ -426,15 +423,5 @@ public class TicTacToe : GameScene
         
         // Go back to game select scene
         App.GotoMatchSelectScene(gameObject);
-    }
-
-
-    private enum MatchState
-    {
-        YOUR_TURN,
-        TURN_PLAYED,
-        WAIT_FOR_TURN,
-        MATCH_HISTORY,
-        COMPLETED
     }
 }

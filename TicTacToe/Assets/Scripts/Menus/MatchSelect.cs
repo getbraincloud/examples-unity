@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using BrainCloud;
-using BrainCloud.Entity;
 using LitJson;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -209,8 +208,8 @@ public class MatchSelect : GameScene
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
             if(match.matchedProfile != null)
-            if (GUILayout.Button(match.matchedProfile.PlayerName + "\n(Completed)", GUILayout.MinHeight(50),
-                GUILayout.MaxWidth(200))) EnterMatch(match);
+                if (GUILayout.Button(match.matchedProfile.PlayerName + "\n(Completed)", GUILayout.MinHeight(50),
+                    GUILayout.MaxWidth(200))) EnterMatch(match);
             GUILayout.EndHorizontal();
         }
 
