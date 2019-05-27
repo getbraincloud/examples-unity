@@ -1,80 +1,70 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
-using BrainCloudPhotonExample.Connection;
-using Photon.Pun;
-using Photon.Realtime;
+using System.Collections.Generic;
+using BrainCloudUNETExample.Connection;
+using Gameframework;
 
-namespace BrainCloudPhotonExample.Game.PlayerInput
+namespace BrainCloudUNETExample.Game
 {
-    public class WeaponController : MonoBehaviour, IPunObservable
+    public class WeaponController : BaseBehaviour
     {
-        private GameObject m_playerPlane;
+        private PlaneController m_playerPlane;
 
         public Transform m_bulletSpawnPoint;
 
         private float m_lastShot = 0.0f;
-        private float m_lastFlare = 0.0f;
+        //private float m_lastFlare = 0.0f;
 
         private GameObject m_bullet1Prefab;
         private GameObject m_bullet2Prefab;
 
-        private GameObject m_bombPrefab;
+        private GameObject m_bombPrefab1;
+        private GameObject m_bombPrefab2;
 
-        private GameObject m_muzzleFlarePrefab;
+        public GameObject m_muzzleFlarePrefab;
 
         private GameObject m_bombDropPrefab;
 
         private int m_bombs = 0;
 
         private GameObject m_targetingReticule;
-        private GameObject m_offscreenIndicator;
 
-        private float m_bulletSpeed = 100f;
+        public float m_bulletSpeed = 100f;
         private Vector3 m_bulletVelocity = Vector3.zero;
 
         private float m_aloneBombTimer = 0;
 
-        private GameManager _gameManager;
-        private BrainCloudStats _brainCloudStats;
-
-        void Awake()
-        {
-            _gameManager = FindObjectOfType<GameManager>();
-            _brainCloudStats = FindObjectOfType<BrainCloudStats>();
-        }
-
         void Start()
         {
-            m_targetingReticule = (GameObject)Instantiate((GameObject)Resources.Load("TargetReticule"), Vector3.zero, Quaternion.identity);
-            m_offscreenIndicator = (GameObject)Instantiate((GameObject)Resources.Load("OffscreenIndicator"), Vector3.zero, Quaternion.identity);
-            m_bulletSpeed = _brainCloudStats.m_bulletSpeed;
+            m_targetingReticule = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/Game/" + "TargetReticule"), Vector3.zero, Quaternion.identity);
+            m_bulletSpeed = GConfigManager.GetFloatValue("BulletSpeed");
             if (m_bullet1Prefab == null)
             {
-                m_bullet1Prefab = (GameObject)Resources.Load("Bullet01");
+                m_bullet1Prefab = (GameObject)Resources.Load("Prefabs/Game/" + "Bullet01");
             }
             if (m_bullet2Prefab == null)
             {
-                m_bullet2Prefab = (GameObject)Resources.Load("Bullet02");
+                m_bullet2Prefab = (GameObject)Resources.Load("Prefabs/Game/" + "Bullet02");
             }
 
-            if (m_bombPrefab == null)
+            if (m_bombPrefab1 == null)
             {
-                m_bombPrefab = (GameObject)Resources.Load("Bomb");
+                m_bombPrefab1 = (GameObject)Resources.Load("Prefabs/Game/" + "Bomb01");
+                m_bombPrefab2 = (GameObject)Resources.Load("Prefabs/Game/" + "Bomb02");
             }
 
             if (m_muzzleFlarePrefab == null)
             {
-                m_muzzleFlarePrefab = (GameObject)Resources.Load("MuzzleFlare");
+                m_muzzleFlarePrefab = (GameObject)Resources.Load("Prefabs/Game/" + "MuzzleFlare");
             }
 
             if (m_bombDropPrefab == null)
             {
-                m_bombDropPrefab = (GameObject)Resources.Load("BombDrop");
+                m_bombDropPrefab = (GameObject)Resources.Load("Prefabs/Game/" + "BombDrop");
             }
 
-            m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
-            m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-            m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
+			m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
         }
 
         public bool HasBombs()
@@ -96,36 +86,32 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         void LateUpdate()
         {
             bool isAlone = true;
-
-            if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.PlayerCount > 1)
+            BombersPlayerController tempController;
+            BombersPlayerController[] playerList;
+            List<BombersPlayerController> playerListList = new List<BombersPlayerController>();
+            foreach (LobbyMemberInfo member in BombersNetworkManager.LobbyInfo.Members)
             {
-                Player[] players = PhotonNetwork.PlayerList;
+                tempController = member.PlayerController;
+                playerListList.Add(member.PlayerController);
+            }
 
-                for (int i = 0; i < players.Length; i++)
+            int count = 0;
+            while (count < playerListList.Count)
+            {
+                if (playerListList[count] != null && 
+                        playerListList[count].m_team == 0)
                 {
-                    Player player = players[i];
-                    if (player == null
-                        || player.CustomProperties == null
-                        || PhotonNetwork.LocalPlayer == null
-                        || PhotonNetwork.LocalPlayer.CustomProperties == null)
-                    {
-                        continue;
-                    }
-
-                    if (player.CustomProperties["Team"] == null
-                        || (int)player.CustomProperties["Team"] == 3
-                        || (int)player.CustomProperties["Team"] == 0
-                        || player == PhotonNetwork.LocalPlayer
-                        || PhotonNetwork.LocalPlayer.CustomProperties["Team"] == null
-                        || (int)player.CustomProperties["Team"] == (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"])
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        isAlone = false;
-                    }
+                    playerListList.RemoveAt(count);
                 }
+                else
+                {
+                    count++;
+                }
+            }
+            playerList = playerListList.ToArray();
+            {
+                if (playerList.Length > 1)
+                    isAlone = false;
             }
             if (isAlone && m_bombs == 0 && m_aloneBombTimer >= 3)
             {
@@ -135,13 +121,14 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
             if (m_bombs > 0 && m_playerPlane != null)
             {
-                m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0.3f), 4 * Time.deltaTime);
+				m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = 
+                                                            Color.Lerp(m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, m_playerPlane.IsLocalPlayer ? 0.3f : 0.0f), 4 * Time.deltaTime);
 
-                m_targetingReticule.GetComponent<MeshRenderer>().enabled = true;
+                m_targetingReticule.GetComponent<MeshRenderer>().enabled = m_playerPlane.IsLocalPlayer;
                 Vector3 position = m_playerPlane.transform.position;
                 Vector3 planeVelocity = m_playerPlane.GetComponent<Rigidbody>().velocity;
                 Vector3 velocity = planeVelocity;
-                int count = 1;
+                count = 1;
                 Vector3 lastPos = m_playerPlane.transform.position;
                 int layerMask = (1 << 16) | (1 << 17) | (1 << 4) | (1 << 20);
                 bool hitFound = false;
@@ -166,7 +153,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                         lastPos = position;
                     }
-                    else if (position.z >= 121.5f)
+                    else if (position.y > 3000.0f || position.y < -3000.0f || position.z >= 121.5f)
                     {
                         hitFound = true;
                         position.z = 121.5f;
@@ -175,8 +162,8 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
 
                 m_targetingReticule.transform.position = position;
                 TextMesh bombCounter = m_targetingReticule.transform.Find("BombCounter").GetComponent<TextMesh>();
-                int maxBombs = _brainCloudStats.m_maxBombCapacity;
-                if (m_bombs == 0 || m_bombs == 1)
+                int maxBombs = GConfigManager.GetIntValue("MaxBombCapacity");
+                if (m_bombs == 0 || m_bombs == 1 || !m_playerPlane.IsLocalPlayer)
                 {
                     bombCounter.text = "";
                 }
@@ -190,80 +177,18 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
                     bombCounter.color = new Color(1, 0.4f, 0.4f, 0.8f);
                     bombCounter.text = m_bombs.ToString();
                 }
-
-                m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
-                m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 1);
-
-                GameObject ship = null;
-
-                if (PhotonNetwork.CurrentRoom != null && _gameManager != null && PhotonNetwork.LocalPlayer != null && m_playerPlane != null && PhotonNetwork.LocalPlayer.CustomProperties != null)
-                {
-                    if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Team"))
-                        ship = _gameManager.GetClosestEnemyShip(m_playerPlane.transform.position, (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"]);
-                }
-
-                if (ship != null)
-                {
-                    //Plane[] frustrum = GeometryUtility.CalculateFrustumPlanes(Camera.main);
-                    m_offscreenIndicator.transform.position = ship.transform.position;
-                    position = m_offscreenIndicator.transform.position;
-                    Vector3 point = Camera.main.WorldToScreenPoint(position);
-                    bool wasOffscreen = false;
-                    if (point.x > Screen.width - 35)
-                    {
-                        wasOffscreen = true;
-                        point.x = Screen.width - 35;
-                    }
-                    if (point.x < 0 + 35)
-                    {
-                        wasOffscreen = true;
-                        point.x = 0 + 35;
-                    }
-                    if (point.y > Screen.height - 35)
-                    {
-                        wasOffscreen = true;
-                        point.y = Screen.height - 35;
-                    }
-                    if (point.y < 0 + 35)
-                    {
-                        wasOffscreen = true;
-                        point.y = 0 + 35;
-                    }
-                    point.z = 10;
-                    point = Camera.main.ScreenToWorldPoint(point);
-                    m_offscreenIndicator.transform.position = point;
-                    point -= Camera.main.transform.position;
-                    m_offscreenIndicator.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(point.y, point.x) * Mathf.Rad2Deg - 90);
-
-                    if (!wasOffscreen)
-                    {
-                        m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-                        m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-
-                    }
-                }
-                else
-                {
-                    m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-                    m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-
-                }
-
             }
             else
             {
                 m_targetingReticule.GetComponent<MeshRenderer>().enabled = false;
-                m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0), 4 * Time.deltaTime);
+				m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color = Color.Lerp(m_targetingReticule.transform.Find("TargetSprite").GetComponent<SpriteRenderer>().color, new Color(1, 1, 1, 0), 4 * Time.deltaTime);
                 m_targetingReticule.transform.Find("BombCounter").GetComponent<TextMesh>().text = "";
-                m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-                m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.r, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.g, m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color.b, 0);
-
             }
         }
 
         public void AddBomb()
         {
-            if (m_bombs < _brainCloudStats.m_maxBombCapacity)
+            if (m_bombs < GConfigManager.GetIntValue("MaxBombCapacity"))
             {
                 if (m_playerPlane != null)
                     GetComponent<AudioSource>().Play();
@@ -274,7 +199,7 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         public void SetPlayerPlane(PlaneController aPlane)
         {
             m_bombs = 0;
-            m_playerPlane = aPlane.gameObject;
+            m_playerPlane = aPlane;
             m_bulletSpawnPoint = aPlane.m_bulletSpawnPoint;
         }
 
@@ -289,128 +214,125 @@ namespace BrainCloudPhotonExample.Game.PlayerInput
         {
             if (m_bombs > 0)
             {
-                m_bombs--;
-                _gameManager.SpawnBomb(new BombController.BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, PhotonNetwork.LocalPlayer, m_playerPlane.GetComponent<Rigidbody>().velocity));
+                GetComponent<BombersPlayerController>().SpawnBombCommand(new BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, GetComponent<BombersPlayerController>().NetId, m_playerPlane.GetComponent<Rigidbody>().velocity).GetJson());
             }
         }
 
         IEnumerator FireMultiShot()
         {
-            for (int i = 0; i < _brainCloudStats.m_multiShotAmount; i++)
+            for (int i = 0; i < GConfigManager.GetIntValue("MultishotAmount"); i++)
             {
                 if (m_playerPlane == null) break;
                 m_lastShot = Time.time;
-                m_bulletSpawnPoint = m_playerPlane.GetComponent<PlaneController>().m_bulletSpawnPoint;
+                m_bulletSpawnPoint = m_playerPlane.m_bulletSpawnPoint;
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.LocalPlayer, m_bulletVelocity));
-                yield return new WaitForSeconds(_brainCloudStats.m_multiShotBurstDelay);
+                GetComponent<BombersPlayerController>().FireBulletCommand(new BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, GetComponent<BombersPlayerController>().NetId, m_bulletVelocity).GetJson());
+                yield return new WaitForSeconds(GConfigManager.GetFloatValue("MultishotBurstDelay"));
             }
         }
 
         public void FireWeapon(bool aIsAccelerating)
         {
-            float fireDelay = _brainCloudStats.m_fireRateDelay;
+            float fireDelay = GConfigManager.GetFloatValue("FireRateDelay");
 
             if (aIsAccelerating)
-                fireDelay = _brainCloudStats.m_fastModeFireRateDelay;
+                fireDelay = GConfigManager.GetFloatValue("FastModeFireRateDelay");
 
-            if ((Time.time - m_lastShot) > _brainCloudStats.m_multiShotDelay)
+            if ((Time.time - m_lastShot) > GConfigManager.GetFloatValue("MultishotDelay"))
             {
                 StartCoroutine("FireMultiShot");
             }
             else if ((Time.time - m_lastShot) > fireDelay)
             {
                 m_lastShot = Time.time;
-                m_bulletSpawnPoint = m_playerPlane.GetComponent<PlaneController>().m_bulletSpawnPoint;
+                m_bulletSpawnPoint = m_playerPlane.m_bulletSpawnPoint;
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
                 m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
-                _gameManager.SpawnBullet(new BulletController.BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, PhotonNetwork.LocalPlayer, m_bulletVelocity));
+                GetComponent<BombersPlayerController>().FireBulletCommand(new BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, GetComponent<BombersPlayerController>().NetId, m_bulletVelocity).GetJson());
             }
         }
-
+        /*
         public void FireFlare(Vector3 aPosition, Vector3 aVelocity)
         {
-            float flareDelay = _brainCloudStats.m_flareCooldown;
+            float flareDelay = BrainCloudStats.Instance.m_flareCooldown;
             if ((Time.time - m_lastFlare) > flareDelay)
             {
                 m_lastFlare = Time.time;
-                _gameManager.SpawnFlare(aPosition, aVelocity);
+                GetComponent<BombersPlayerController>().FireFlareCommand(aPosition, aVelocity);
             }
         }
+        */
 
-        public GameObject SpawnBomb(BombController.BombInfo aBombInfo)
+        public GameObject SpawnBomb(BombInfo aBombInfo)
         {
+            m_bombs--;
             GameObject player = null;
-
-            GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
-            for (int i = 0; i < planes.Length; i++)
+            PlaneController playerPlaneController = null;
+            PlaneController tempPlaneController = null;
+            foreach (LobbyMemberInfo member in BombersNetworkManager.LobbyInfo.Members)
             {
-                if (planes[i].GetComponent<PhotonView>().Owner == aBombInfo.m_shooter)
+                tempPlaneController = member.PlayerController.m_playerPlane;
+                if (tempPlaneController.NetId == aBombInfo.m_shooter)
                 {
-                    player = planes[i];
+                    player = member.PlayerController.gameObject;
+                    playerPlaneController = tempPlaneController;
                     break;
                 }
             }
-
-            if (player != null)
+            if (playerPlaneController != null)
             {
-                GameObject flare = (GameObject)Instantiate(m_bombDropPrefab, player.transform.position, player.GetComponent<PlaneController>().m_bulletSpawnPoint.rotation);
+                GameObject flare = (GameObject)Instantiate(m_bombDropPrefab, player.transform.position, playerPlaneController.m_bulletSpawnPoint.rotation);
                 flare.transform.parent = player.transform;
-                if (aBombInfo.m_shooter == PhotonNetwork.LocalPlayer)
+                if (aBombInfo.m_shooter == GetComponent<BombersPlayerController>().NetId)
                 {
                     flare.GetComponent<AudioSource>().spatialBlend = 0;
                 }
                 flare.GetComponent<AudioSource>().Play();
             }
 
-            GameObject bomb = (GameObject)Instantiate(m_bombPrefab, aBombInfo.m_startPosition, Quaternion.LookRotation(aBombInfo.m_startDirection, -Vector3.forward));
+            GameObject bomb = (GameObject)Instantiate((BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1) ? m_bombPrefab1 : m_bombPrefab2, aBombInfo.m_startPosition, Quaternion.LookRotation(aBombInfo.m_startDirection, -Vector3.forward));
             bomb.GetComponent<Rigidbody>().velocity = aBombInfo.m_startVelocity;
-            bomb.GetComponent<BombController>().SetBombInfo(aBombInfo);
+            bomb.GetComponent<BombController>().BombInfo = aBombInfo;
             return bomb;
         }
 
-        public GameObject SpawnBullet(BulletController.BulletInfo aBulletInfo)
+        public GameObject SpawnBullet(BulletInfo aBulletInfo)
         {
-            if (!aBulletInfo.m_shooter.CustomProperties.ContainsKey("Team")) return null;
-
             GameObject player = null;
-            GameObject[] planes = GameObject.FindGameObjectsWithTag("Plane");
-            for (int i = 0; i < planes.Length; i++)
+            PlaneController playerPlaneController = null;
+            PlaneController tempPlaneController = null;
+            BCLobbyInfo info = BombersNetworkManager.LobbyInfo;
+            foreach (LobbyMemberInfo member in info.Members)
             {
-                if (planes[i].GetComponent<PhotonView>().Owner == aBulletInfo.m_shooter)
+                tempPlaneController = member.PlayerController.m_playerPlane;
+                if (tempPlaneController.NetId == aBulletInfo.m_shooter)
                 {
-                    player = planes[i];
+                    player = member.PlayerController.gameObject;
+                    playerPlaneController = tempPlaneController;
                     break;
                 }
             }
 
-
-            if (player != null)
+            if (playerPlaneController != null && playerPlaneController.PlayerController.m_planeActive)
             {
-                player.GetComponent<PlaneController>().ResetGunCharge();
-                GameObject flare = (GameObject)Instantiate(m_muzzleFlarePrefab, player.GetComponent<PlaneController>().m_bulletSpawnPoint.position, player.GetComponent<PlaneController>().m_bulletSpawnPoint.rotation);
+                playerPlaneController.ResetGunCharge();
+                GameObject flare = (GameObject)Instantiate(m_muzzleFlarePrefab, aBulletInfo.m_startPosition, playerPlaneController.m_bulletSpawnPoint.rotation);
                 flare.transform.parent = player.transform;
                 flare.GetComponent<AudioSource>().pitch = 1 + Random.Range(-2.0f, 3.0f) * 0.2f;
-                if (aBulletInfo.m_shooter == PhotonNetwork.LocalPlayer)
+                if (aBulletInfo.m_shooter == playerPlaneController.NetId)
                 {
                     flare.GetComponent<AudioSource>().spatialBlend = 0;
                 }
-                flare.GetComponent<AudioSource>().Play();
             }
-
-            GameObject bullet = (GameObject)Instantiate(((int)aBulletInfo.m_shooter.CustomProperties["Team"] == 1) ? m_bullet1Prefab : m_bullet2Prefab, aBulletInfo.m_startPosition, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
+            int team = player.GetComponent<BombersPlayerController>().m_team;
+            GameObject bullet = (GameObject)Instantiate((team == 1) ? m_bullet1Prefab : m_bullet2Prefab, aBulletInfo.m_startPosition, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
             bullet.GetComponent<Rigidbody>().velocity = aBulletInfo.m_startVelocity;
             bullet.GetComponent<BulletController>().SetBulletInfo(aBulletInfo);
 
             return bullet;
-        }
-
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            
         }
     }
 

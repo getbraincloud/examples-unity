@@ -1,41 +1,40 @@
 ﻿using UnityEngine;
-using System.Collections;
-using BrainCloudPhotonExample.Connection;
-using Photon.Pun;
+using Gameframework;
 
-namespace BrainCloudPhotonExample.Game
+namespace BrainCloudUNETExample.Game
 {
-    public class BombPickup : MonoBehaviour, IPunObservable
+    public class BombPickup : MonoBehaviour
     {
         public int m_pickupID;
         private bool m_isActive = false;
         private float m_lifeTime = 5;
 
-        void OnTriggerEnter(Collider aOther)
+
+        void onCollision(Collider aOther)
         {
             if (!m_isActive) return;
-            if (aOther.GetComponent<PhotonView>() != null && aOther.GetComponent<PhotonView>().Owner == PhotonNetwork.LocalPlayer)
+            PlaneController pController = aOther.GetComponent<PlaneController>();
+            if (pController != null)
             {
-                GameObject.Find("GameManager").GetComponent<GameManager>().BombPickedUp(aOther.GetComponent<PhotonView>().Owner, m_pickupID);
+                pController.PlayerController.BombPickedUpCommand(pController.PlayerController.NetId, m_pickupID);
                 m_isActive = false;
                 Destroy(gameObject);
             }
+        }
+
+        void OnTriggerEnter(Collider aOther)
+        {
+            onCollision(aOther);
         }
 
         void OnTriggerStay(Collider aOther)
         {
-            if (!m_isActive) return;
-            if (aOther.GetComponent<PhotonView>() != null && aOther.GetComponent<PhotonView>().Owner == PhotonNetwork.LocalPlayer)
-            {
-                GameObject.Find("GameManager").GetComponent<GameManager>().BombPickedUp(aOther.GetComponent<PhotonView>().Owner, m_pickupID);
-                m_isActive = false;
-                Destroy(gameObject);
-            }
+            onCollision(aOther);
         }
 
         public void Activate(int aBombID)
         {
-            m_lifeTime = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_bombPickupLifetime;
+            m_lifeTime = GConfigManager.GetFloatValue("BombPickupLifeTime");
             m_pickupID = aBombID;
             m_isActive = true;
             GetComponent<Rigidbody>().AddForce(GetRandomDirection() * 22, ForceMode.Impulse);
@@ -59,7 +58,7 @@ namespace BrainCloudPhotonExample.Game
             m_lifeTime -= Time.fixedDeltaTime;
             if (m_lifeTime <= 0 && m_isActive)
             {
-                GameObject.Find("GameManager").GetComponent<GameManager>().DespawnBombPickup(m_pickupID);
+                BombersNetworkManager.LocalPlayer.BombPickedUpCommand(-1, m_pickupID);
                 m_isActive = false;
                 return;
             }
@@ -89,11 +88,6 @@ namespace BrainCloudPhotonExample.Game
 
             transform.position = position;
 
-        }
-
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            
         }
     }
 }

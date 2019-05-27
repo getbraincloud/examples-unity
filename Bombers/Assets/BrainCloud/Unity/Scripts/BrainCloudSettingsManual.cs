@@ -45,7 +45,7 @@ namespace BrainCloudUnity
                     {
                         AssetDatabase.CreateFolder("Assets/BrainCloud", "Resources");
                     }
-
+                    
                     string fullPath = "Assets/BrainCloud/Resources/BrainCloudSettingsManual.asset";
                     AssetDatabase.CreateAsset(s_instance, fullPath);
 #endif
@@ -54,8 +54,6 @@ namespace BrainCloudUnity
                 return s_instance;
             }
         }
-
-
         public string DispatcherURL
         {
             get { return m_serverURL + "/dispatcherv2"; }

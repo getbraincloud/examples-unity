@@ -1,0 +1,867 @@
+fileFormatVersion: 2
+guid: c2cb1506d78886a48b4cd5df96c61c61
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: BB_ApplicationConfigDialogBanner
+    21300002: BB_UI_BombLoadingSpinner_0001
+    21300004: BB_UI_BombLoadingSpinner_0002
+    21300006: BB_UI_BombLoadingSpinner_0003
+    21300008: BB_UI_BombLoadingSpinner_0004
+    21300010: BB_UI_BombLoadingSpinner_0005
+    21300012: BB_UI_BombLoadingSpinner_0006
+    21300014: BB_UI_BombLoadingSpinner_0007
+    21300016: BB_UI_BombLoadingSpinner_0008
+    21300018: BB_UI_BombLoadingSpinner_0009
+    21300020: BB_UI_BombLoadingSpinner_0010
+    21300022: BB_UI_BombLoadingSpinner_0011
+    21300024: BB_UI_BombLoadingSpinner_0012
+    21300026: BB_UI_BombLoadingSpinner_0013
+    21300028: BB_UI_BombLoadingSpinner_0014
+    21300030: BB_UI_BombLoadingSpinner_0015
+    21300032: BB_UI_BombLoadingSpinner_0016
+    21300034: BB_UI_GameLogo
+    21300036: BB_UI_ImageLoadingSpinnerBackground
+    21300038: bb_ui_twoplanesloadingspinner_0001
+    21300040: bb_ui_twoplanesloadingspinner_0002
+    21300042: bb_ui_twoplanesloadingspinner_0003
+    21300044: bb_ui_twoplanesloadingspinner_0004
+    21300046: bb_ui_twoplanesloadingspinner_0005
+    21300048: bb_ui_twoplanesloadingspinner_0006
+    21300050: bb_ui_twoplanesloadingspinner_0007
+    21300052: bb_ui_twoplanesloadingspinner_0008
+    21300054: bb_ui_twoplanesloadingspinner_0009
+    21300056: bb_ui_twoplanesloadingspinner_0010
+    21300058: bb_ui_twoplanesloadingspinner_0011
+    21300060: bb_ui_twoplanesloadingspinner_0012
+    21300062: bb_ui_twoplanesloadingspinner_0013
+    21300064: bb_ui_twoplanesloadingspinner_0014
+    21300066: bb_ui_twoplanesloadingspinner_0015
+    21300068: bb_ui_twoplanesloadingspinner_0016
+  externalObjects: {}
+  serializedVersion: 9
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: -1
+    aniso: -1
+    mipBias: -100
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 300
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  platformSettings:
+  - serializedVersion: 2
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+  - serializedVersion: 2
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+  - serializedVersion: 2
+    buildTarget: iPhone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+  - serializedVersion: 2
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+  - serializedVersion: 2
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BB_ApplicationConfigDialogBanner
+      rect:
+        serializedVersion: 2
+        x: 693
+        y: 1052
+        width: 441
+        height: 167
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 222f144cc37809e43b4783a416445048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0001
+      rect:
+        serializedVersion: 2
+        x: 693
+        y: 1225
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 859ba17fbd0ad5a40b7021e7ca5f58f3
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0002
+      rect:
+        serializedVersion: 2
+        x: 955
+        y: 1225
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35c9d08eaa08b2447be2ba4747f11cb1
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0003
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 871
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c09b0d04f5d6e0e4f97dd2069946933c
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0004
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 871
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cf124d0fbb6af642b22c614ccdf315b
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0005
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 963
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49bcfaf8ff10d5441b181581dee88e24
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0006
+      rect:
+        serializedVersion: 2
+        x: 1217
+        y: 1225
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15bb7236caef1974391bf352ae19cf2a
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0007
+      rect:
+        serializedVersion: 2
+        x: 527
+        y: 790
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e683ce1c65fd974596c2a92b4ac0c27
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0008
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 609
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28dc3acd69ee52d4bb2708f40fd6b8df
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0009
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 609
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec2d23595c933584fb357cf5fbbabec1
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0010
+      rect:
+        serializedVersion: 2
+        x: 789
+        y: 790
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 703b9976586ce4649b7c30141c2e43b4
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0011
+      rect:
+        serializedVersion: 2
+        x: 1051
+        y: 701
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b822428c1bd7b0844926ac6b1a870b76
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0012
+      rect:
+        serializedVersion: 2
+        x: 527
+        y: 528
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecdbfe7309155ad4b8aae14873c53a72
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0013
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 347
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f0f9d7a8eeea4244adb1badfd81f07b
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0014
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 347
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 718aad7fb9ee5fd4a881d6e904b52cf2
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0015
+      rect:
+        serializedVersion: 2
+        x: 789
+        y: 528
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b7ba706da2e25045a87a0d905fac65b
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_BombLoadingSpinner_0016
+      rect:
+        serializedVersion: 2
+        x: 1313
+        y: 701
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe6c317f9b23d124a9caf46b579504b7
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_GameLogo
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 1487
+        width: 1668
+        height: 558
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 620757a40520e924eb88b2351a751e15
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_ImageLoadingSpinnerBackground
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 1133
+        width: 684
+        height: 348
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1d0be025d7a2ed42b56ea3e994915c9
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0001
+      rect:
+        serializedVersion: 2
+        x: 1479
+        y: 1225
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7ae375ef70129b468c31cd4e7767690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0002
+      rect:
+        serializedVersion: 2
+        x: 1677
+        y: 1789
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae36583371832d34a9bfa0ffa2ee92ad
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0003
+      rect:
+        serializedVersion: 2
+        x: 1677
+        y: 1527
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d83a7fa00d2491f41a5ea61931a9cb36
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0004
+      rect:
+        serializedVersion: 2
+        x: 1402
+        y: 963
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d12ad2b8007d7ab46b0c98f52687fb96
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0005
+      rect:
+        serializedVersion: 2
+        x: 1575
+        y: 701
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 437f88657f115c543a4017eb6f678045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0006
+      rect:
+        serializedVersion: 2
+        x: 1664
+        y: 963
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59da4e4110572134e900f575c6e9de53
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0007
+      rect:
+        serializedVersion: 2
+        x: 1741
+        y: 1265
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02d999077b305d844b6cdf409cba9482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0008
+      rect:
+        serializedVersion: 2
+        x: 1051
+        y: 439
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcd25f0320024b3478acc6c729dda8ff
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0009
+      rect:
+        serializedVersion: 2
+        x: 527
+        y: 266
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c480e5a7cbff7e4cb07b0cfe4364d95
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0010
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 85
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 378c724064523ef4194035a6b1f5205f
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0011
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 85
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7994ad9c4e46d8c4d851377a165c0b06
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0012
+      rect:
+        serializedVersion: 2
+        x: 789
+        y: 266
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad92157aab2389d48a8864dd080fb952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0013
+      rect:
+        serializedVersion: 2
+        x: 1313
+        y: 439
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41a6cdf1d4c0450419658dec947b8bcc
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0014
+      rect:
+        serializedVersion: 2
+        x: 1575
+        y: 439
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf825a80a994a2e4d9605045b3cd69b4
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0015
+      rect:
+        serializedVersion: 2
+        x: 1051
+        y: 177
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ca36f02640ede64bab2b0b2bb8565ca
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bb_ui_twoplanesloadingspinner_0016
+      rect:
+        serializedVersion: 2
+        x: 527
+        y: 4
+        width: 256
+        height: 256
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aec4954bf053e874fa33128f36850375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: cdf305a3baae18a48a28948bff9ed4b8
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+  spritePackingTag: UI
+  pSDRemoveMatte: 0
+  pSDShowRemoveMatteOption: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

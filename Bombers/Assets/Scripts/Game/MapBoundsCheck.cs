@@ -1,32 +1,28 @@
 ﻿using UnityEngine;
-using System.Collections;
-using BrainCloudPhotonExample.Game.PlayerInput;
-using Photon.Pun;
 
-namespace BrainCloudPhotonExample.Game
+namespace BrainCloudUNETExample.Game
 {
-    public class MapBoundsCheck : MonoBehaviour, IPunObservable
+    public class MapBoundsCheck : MonoBehaviour
     {
-        public GameObject m_playerPlane;
-
         void Update()
         {
-            if (m_playerPlane != null)
+            BombersPlayerController controller = null;
+            for (int i = 0; i < BombersNetworkManager.LobbyInfo.Members.Count; ++i)
             {
-                if (!GetComponent<Collider>().bounds.Contains(m_playerPlane.transform.position))
+                controller = BombersNetworkManager.LobbyInfo.Members[i].PlayerController;
+                if (controller != null && controller.m_planeActive && controller.m_playerPlane != null && 
+                    (controller.IsLocalPlayer || (controller.m_playerPlane.IsServerBot && controller.IsServer)))
                 {
-                    GameObject.Find("PlayerController").GetComponent<PlayerController>().LeftBounds();
-                }
-                else
-                {
-                    GameObject.Find("PlayerController").GetComponent<PlayerController>().EnteredBounds();
+                    if (!GetComponent<Collider>().bounds.Contains(controller.m_playerPlane.transform.position))
+                    {
+                        controller.LeftBounds();
+                    }
+                    else
+                    {
+                        controller.EnteredBounds();
+                    }
                 }
             }
-        }
-
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            
         }
     }
 }

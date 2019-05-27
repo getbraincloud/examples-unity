@@ -1,34 +1,23 @@
 ﻿using UnityEngine;
-using System.Collections;
-using BrainCloudPhotonExample.Connection;
-using Photon.Pun;
-using Photon.Realtime;
+using Gameframework;
 
-namespace BrainCloudPhotonExample.Game
+namespace BrainCloudUNETExample.Game
 {
-    public class FlareController : MonoBehaviour, IPunObservable
-    {
-        private bool m_isActive = false;
-        private float m_lifeTime = 100;
-        private GameObject m_offscreenIndicator;
-        private Player m_player;
-        private GameObject m_playerPlane;
-
-        public void Activate(Player aPlayer)
+    public class FlareController : MonoBehaviour
+    {       
+        public void Activate(string aPlayer)
         {
-            m_lifeTime = GameObject.Find("BrainCloudStats").GetComponent<BrainCloudStats>().m_flareLifetime;
+            m_lifeTime = GConfigManager.GetFloatValue("FlareLifeTime");
             m_isActive = true;
             m_player = aPlayer;
-            foreach (GameObject plane in GameObject.FindGameObjectsWithTag("Plane"))
+            foreach (GameObject plane in GameObject.FindGameObjectsWithTag("PlayerController"))
             {
-                if (plane.GetComponent<PhotonView>().Owner == aPlayer)
                 {
                     m_playerPlane = plane;
                     break;
                 }
             }
 
-            if (m_player == PhotonNetwork.LocalPlayer)
             {
                 transform.GetChild(1).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
                 transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
@@ -60,7 +49,6 @@ namespace BrainCloudPhotonExample.Game
 
         void LateUpdate()
         {
-            if (m_isActive && (int)m_player.CustomProperties["Team"] == (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"])
             {
                 m_offscreenIndicator.transform.position = m_playerPlane.transform.position;
                 Vector3 position = m_offscreenIndicator.transform.position;
@@ -94,11 +82,11 @@ namespace BrainCloudPhotonExample.Game
                 point -= Camera.main.transform.position;
                 m_offscreenIndicator.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(point.y, point.x) * Mathf.Rad2Deg - 90);
 
-                transform.GetChild(2).GetComponent<TextMesh>().text = m_player.CustomProperties["RoomDisplayName"].ToString();
+
                 transform.GetChild(2).position = m_offscreenIndicator.transform.position + new Vector3(0, -0.8f, 0);
                 transform.GetChild(2).eulerAngles = new Vector3(0, 0, 0);
 
-                if (isOffscreen && m_player != PhotonNetwork.LocalPlayer)
+                if (isOffscreen && m_player != BombersNetworkManager.LocalPlayer.ProfileId)
                 {
                     m_offscreenIndicator.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
                     m_offscreenIndicator.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
@@ -111,16 +99,18 @@ namespace BrainCloudPhotonExample.Game
                     transform.GetChild(2).GetComponent<TextMesh>().color = new Color(1, 1, 1, 0);
                 }
             }
-            else
+
             {
                 transform.GetChild(1).gameObject.SetActive(false);
                 transform.GetChild(2).gameObject.SetActive(false);
             }
         }
 
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            
-        }
+
+        private bool m_isActive = false;
+        private float m_lifeTime = 100;
+        private GameObject m_offscreenIndicator;
+        private string m_player;
+        private GameObject m_playerPlane;
     }
 }

@@ -13,9 +13,85 @@ MonoBehaviour:
   m_Name: BrainCloudDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: 
-    LastSentRequest: 
-    LastResponse: 
-    FullLog: 
+    ProfileId: 0f4a22b5-69a3-4c25-b4ac-f245a5b745a3
+    LastSentRequest: "chat CHANNEL_DISCONNECT \n{\r\n    \"channelId\": \"12207:gl:main\"\r\n}"
+    LastResponse: "OnSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"presence\":
+      \r\n                [\r\n                    {\r\n                        \"user\":
+      \r\n                            {\r\n                                \"id\":
+      \"ca38b138-f3e5-4a3d-81b6-249a19183d79\",\r\n                                \"name\":
+      \"Ben\",\r\n                                \"pic\": null\r\n                            },\r\n
+      \                       \"online\": false,\r\n                        \"summaryFriendData\":
+      \r\n                            {\r\n                                \"rank\":
+      1\r\n                            },\r\n                        \"activity\":
+      \r\n                            {}\r\n                    },\r\n                    {\r\n
+      \                       \"user\": \r\n                            {\r\n                                \"id\":
+      \"d3b9125f-91a6-4aef-a7af-d6d98b2549a3\",\r\n                                \"name\":
+      \"stevemrjones\",\r\n                                \"pic\": null\r\n                            },\r\n
+      \                       \"online\": false,\r\n                        \"summaryFriendData\":
+      \r\n                            {\r\n                                \"rank\":
+      1\r\n                            },\r\n                        \"activity\":
+      \r\n                            {}\r\n                    }\r\n                ]\r\n
+      \       },\r\n    \"status\": 200\r\n}"
+    FullLog: 'REQUEST - 2019-05-27 2:40:25 PM
+
+      {"packetId":20,"sessionId":"ugqb25mgod4j0k9qpu5v6tddvr","gameId":"12207","messages":[{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"12207:gl:main"}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-27 2:40:16 PM
+
+      {"packetId":19,"responses":[{"data":{"presence":[{"user":{"id":"ca38b138-f3e5-4a3d-81b6-249a19183d79","name":"Ben","pic":null},"online":false,"summaryFriendData":{"rank":1},"activity":{}},{"user":{"id":"d3b9125f-91a6-4aef-a7af-d6d98b2549a3","name":"stevemrjones","pic":null},"online":false,"summaryFriendData":{"rank":1},"activity":{}}]},"status":200},{"data":null,"status":200},{"data":null,"status":200}]}
+
+
+      REQUEST - 2019-05-27 2:40:16 PM
+
+      {"packetId":19,"sessionId":"ugqb25mgod4j0k9qpu5v6tddvr","gameId":"12207","messages":[{"service":"presence","operation":"GET_PRESENCE_OF_FRIENDS","data":{"platform":"","includeOffline":true}},{"service":"presence","operation":"SET_VISIBILITY","data":{"visible":true}},{"service":"presence","operation":"UPDATE_ACTIVITY","data":{"activity":{"LOCATION":"In
+      Main Menu","STATUS":"Idle","LOBBY_ID":""}}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-27 2:40:16 PM
+
+      {"packetId":18,"responses":[{"data":{"messages":[{"date":1558637173219,"ver":1,"msgId":"798022232688162","from":{"id":"a906c978-12f8-405c-b643-bcfa7490502c","name":"stevemrjones","pic":null},"chId":"12207:gl:main","content":{"text":"Hey
+      Everyione! whats going on!","rich":{"lastConnectionId":"12207:a906c978-12f8-405c-b643-bcfa7490502c:ft8q4dr50fgu82n2bibjcof04t","timeSent":"6:46:13
+      PM","rank":1}}},{"date":1558637211489,"ver":1,"msgId":"798022252282403","from":{"id":"a906c978-12f8-405c-b643-bcfa7490502c","name":"stevemrjones","pic":null},"chId":"12207:gl:main","content":{"text":"Tell
+      me if you are rready to play!","rich":{"lastConnectionId":"12207:a906c978-12f8-405c-b643-bcfa7490502c:bg18i519ilh3p44vihvkm6h0r7","timeSent":"6:46:51
+      PM","rank":1}}},{"date":1558637453569,"ver":1,"msgId":"798022376227364","from":{"id":"a906c978-12f8-405c-b643-bcfa7490502c","name":"stevemrjones","pic":null},"chId":"12207:gl:main","content":{"text":"hello
+      mello","rich":{"lastConnectionId":"12207:a906c978-12f8-405c-b643-bcfa7490502c:goekslb1ubjrr1isi2gk3719hf","timeSent":"6:50:54
+      PM","rank":1}}},{"date":1558639752088,"ver":1,"msgId":"798023553069093","from":{"id":"d3b9125f-91a6-4aef-a7af-d6d98b2549a3","name":"stevemrjones","pic":null},"chId":"12207:gl:main","content":{"text":"Heyo","rich":{"lastConnectionId":"12207:d3b9125f-91a6-4aef-a7af-d6d98b2549a3:a4nlc2rd7kk8hcsktsjsn5572k","timeSent":"7:29:12
+      PM","rank":1}}},{"date":1558640184984,"ver":1,"msgId":"798023774711846","from":{"id":"d3b9125f-91a6-4aef-a7af-d6d98b2549a3","name":"stevemrjones","pic":null},"chId":"12207:gl:main","content":{"text":"helo","rich":{"lastConnectionId":null,"timeSent":"7:36:25
+      PM","rank":0}}},{"date":1558640767899,"ver":1,"msgId":"798024073164327","from":{"id":"ca38b138-f3e5-4a3d-81b6-249a19183d79","name":"Ben","pic":null},"chId":"12207:gl:main","content":{"text":"im
+      ready","rich":{"lastConnectionId":"12207:ca38b138-f3e5-4a3d-81b6-249a19183d79:hl3gkfb8cmdh7qvp9cs8rl9k0a","timeSent":"7:46:07
+      PM","rank":1}}},{"date":1558640792156,"ver":1,"msgId":"798024085583912","from":{"id":"ca38b138-f3e5-4a3d-81b6-249a19183d79","name":"Ben","pic":null},"chId":"12207:gl:main","content":{"text":"all
+      the users restarted levels?","rich":{"lastConnectionId":"12207:ca38b138-f3e5-4a3d-81b6-249a19183d79:hl3gkfb8cmdh7qvp9cs8rl9k0a","timeSent":"7:46:31
+      PM","rank":1}}},{"date":1558697726064,"ver":1,"msgId":"798053235744809","from":{"id":"d3b9125f-91a6-4aef-a7af-d6d98b2549a3","name":"stevemrjones","pic":null},"chId":"12207:gl:main","content":{"text":"What
+      Happened to my messages","rich":{"lastConnectionId":null,"timeSent":"11:35:26
+      AM","rank":0}}},{"date":1558699018194,"ver":1,"msgId":"798053897315370","from":{"id":"0f4a22b5-69a3-4c25-b4ac-f245a5b745a3","name":"stevej","pic":null},"chId":"12207:gl:main","content":{"text":"Hey
+      everyone!","rich":{"lastConnectionId":"12207:0f4a22b5-69a3-4c25-b4ac-f245a5b745a3:f10sh1a84e92ft9p528gm1lduq","timeSent":"11:56:58
+      AM","rank":1}}},{"date":1558707669374,"ver":1,"msgId":"798058326719531","from":{"id":"b730b9ca-917e-4a0c-8f19-510a71f2c042","name":"DemoEvolved","pic":null},"chId":"12207:gl:main","content":{"text":"hi","rich":{"lastConnectionId":"12207:b730b9ca-917e-4a0c-8f19-510a71f2c042:j34ki2kpk1dkh3iq2lpvr4mejq","timeSent":"2:21:08
+      PM","rank":1}}},{"date":1558964231966,"ver":1,"msgId":"798189686766636","from":{"id":"0f4a22b5-69a3-4c25-b4ac-f245a5b745a3","name":"stevej","pic":null},"chId":"12207:gl:main","content":{"text":"Hey!","rich":{"lastConnectionId":"12207:0f4a22b5-69a3-4c25-b4ac-f245a5b745a3:a4bae94voeus786ihtd6capm86","timeSent":"1:37:11
+      PM","rank":1}}},{"date":1558966649760,"ver":1,"msgId":"798190924677165","from":{"id":"b730b9ca-917e-4a0c-8f19-510a71f2c042","name":"DemoEvolved","pic":null},"chId":"12207:gl:main","content":{"text":"hi","rich":{"lastConnectionId":"12207:b730b9ca-917e-4a0c-8f19-510a71f2c042:bfgdghlvehhsav7fsedmtn61fq","timeSent":"2:17:29
+      PM","rank":1}}},{"date":1558980716631,"ver":1,"msgId":"798198126915118","from":{"id":"0f4a22b5-69a3-4c25-b4ac-f245a5b745a3","name":"stevej","pic":null},"chId":"12207:gl:main","content":{"text":"Hey
+      All!","rich":{"lastConnectionId":"12207:0f4a22b5-69a3-4c25-b4ac-f245a5b745a3:etqqc9vample0fmf04kf70f82t","timeSent":"6:11:56
+      PM","rank":1}}},{"date":1558981948963,"ver":1,"msgId":"798198757869103","from":{"id":"0f4a22b5-69a3-4c25-b4ac-f245a5b745a3","name":"stevej","pic":null},"chId":"12207:gl:main","content":{"text":"tests","rich":{"lastConnectionId":null,"timeSent":"6:32:28
+      PM","rank":1}}}]},"status":200},{"data":{"presence":[]},"status":200},{"data":{"statistics":{"planesDestroyed":0,"bombsHit":0,"bombsDropped":0,"doubleFiringRate":0,"gamesPlayed":0,"timesDestroyed":0,"carriersDestroyed":0,"goldenWings":0,"shotsFired":0,"gamesWon":0}},"status":200},{"data":{"abTestingId":82,"lastLogin":1558982371894,"server_time":1558982416499,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1558698986347,"parentProfileId":null,"emailAddress":null,"experienceLevel":1,"countryCode":null,"vcClaimed":0,"currency":{"goldWings":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"0f4a22b5-69a3-4c25-b4ac-f245a5b745a3","amountSpent":0,"previousLogin":1558981991002,"playerName":"stevej","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":14,"xpCapped":false,"entities":[{"createdAt":1558699089312,"data":{"gameName":"stevej''s
+      Room"},"entityType":"gameName","entityId":"7b11a194-dbb6-4fab-9b12-a764ad87be9a","acl":{"other":0},"version":13,"updatedAt":1558982378049},{"createdAt":1558699100855,"data":{"previousMembers":[]},"entityType":"recentlyViewed","entityId":"99b89d19-8420-47c7-897b-63113ffbc55e","acl":{"other":0},"version":7,"updatedAt":1558982397732}],"profileId":"0f4a22b5-69a3-4c25-b4ac-f245a5b745a3","sent_events":[],"statistics":{"planesDestroyed":0,"bombsHit":0,"bombsDropped":0,"doubleFiringRate":0,"gamesPlayed":0,"timesDestroyed":0,"carriersDestroyed":0,"goldenWings":0,"shotsFired":0,"gamesWon":0}},"status":200},{"data":{"xp_levels":[{"level":1,"statusTitle":"Rookie","experience":0,"fbAction":""},{"level":2,"statusTitle":"Pilot","experience":2500,"fbAction":""},{"level":3,"statusTitle":"Pilot
+      First Class","experience":5000,"fbAction":""},{"level":4,"statusTitle":"Staff
+      Sergeant","experience":10000,"fbAction":""},{"level":5,"statusTitle":"Chief
+      Sergeant","experience":15000,"fbAction":""},{"level":6,"statusTitle":"Master
+      Sergeant","experience":25000,"fbAction":""},{"level":7,"statusTitle":"Commander","experience":40000,"fbAction":""},{"level":8,"statusTitle":"Brigadier","experience":65000,"fbAction":""},{"level":9,"statusTitle":"Chief
+      Brigadier","experience":105000,"fbAction":""},{"level":10,"statusTitle":"General","experience":170000,"fbAction":""}]},"status":200},{"data":{"achievements":[{"extraData":null,"googleAchievementId":null,"achievementId":"0","description":"Shoot
+      down 5 airplanes in one match","title":"Quickshot","appleAchievementId":null,"steamEnabled":false,"fbGamePoints":null,"imageUrl":"https://sharedprod.braincloudservers.com/files/portal/g/12207/metadata/achievements/0.png","steamAchievementId":null,"invisibleUntilEarned":false,"fbEnabled":false,"appleEnabled":false,"googleEnabled":null,"id":"0","status":"NOT_AWARDED"},{"extraData":null,"googleAchievementId":null,"achievementId":"1","description":"Sink
+      10 ships","title":"Bombardier","appleAchievementId":null,"steamEnabled":false,"fbGamePoints":null,"imageUrl":"https://sharedprod.braincloudservers.com/files/portal/g/12207/metadata/achievements/1.png","steamAchievementId":null,"invisibleUntilEarned":false,"fbEnabled":false,"appleEnabled":false,"googleEnabled":null,"id":"1","status":"NOT_AWARDED"},{"extraData":null,"googleAchievementId":null,"achievementId":"2","description":"Shoot
+      down 50 airplanes","title":"Sky Ace","appleAchievementId":null,"steamEnabled":false,"fbGamePoints":null,"imageUrl":"https://sharedprod.braincloudservers.com/files/portal/g/12207/metadata/achievements/2.png","steamAchievementId":null,"invisibleUntilEarned":false,"fbEnabled":false,"appleEnabled":false,"googleEnabled":null,"id":"2","status":"NOT_AWARDED"}]},"status":200},{"data":{"response":{"currentLevel":1,"experiencePoints":0,"xpCapped":false,"prevThreshold":0,"nextThreshold":2500,"xpToNext":2500.0},"success":true},"status":200}]}
+
+
+      REQUEST - 2019-05-27 2:40:16 PM
+
+      {"packetId":18,"sessionId":"ugqb25mgod4j0k9qpu5v6tddvr","gameId":"12207","messages":[{"service":"chat","operation":"CHANNEL_CONNECT","data":{"channelId":"12207:gl:main","maxReturn":25}},{"service":"presence","operation":"REGISTER_LISTENERS_FOR_FRIENDS","data":{"platform":"","bidirectional":true}},{"service":"playerStatistics","operation":"READ","data":null},{"service":"playerState","operation":"READ","data":null},{"service":"gamification","operation":"READ_XP_LEVELS","data":null},{"service":"gamification","ope'
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}

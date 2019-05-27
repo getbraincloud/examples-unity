@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
-using BrainCloudPhotonExample.Game.PlayerInput;
-using Photon.Pun;
 
-namespace BrainCloudPhotonExample.Game
+namespace BrainCloudUNETExample.Game
 {
-    public class TargetPointDisplay : MonoBehaviour, IPunObservable
+    public class TargetPointDisplay : MonoBehaviour
     {
         private Color m_color;
         private int m_team;
@@ -18,10 +15,10 @@ namespace BrainCloudPhotonExample.Game
 
         void LateUpdate()
         {
-            if (GameObject.Find("PlayerController").GetComponent<WeaponController>().HasBombs())
+            if (BombersNetworkManager.LocalPlayer != null &&
+                BombersNetworkManager.LocalPlayer.WeaponController.HasBombs())
             {
-                
-                if (PhotonNetwork.LocalPlayer.CustomProperties["Team"] != null && m_team == (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"])
+                if (m_team == BombersNetworkManager.LocalPlayer.m_team)
                 {
                     GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0.0f);
                 }
@@ -34,11 +31,6 @@ namespace BrainCloudPhotonExample.Game
             {
                 GetComponent<SpriteRenderer>().color = new Color(m_color.r, m_color.g, m_color.b, 0.0f);
             }
-        }
-
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            
         }
     }
 }

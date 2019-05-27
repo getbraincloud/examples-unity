@@ -1,118 +1,56 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
-using Photon.Realtime;
+using Gameframework;
 
-namespace BrainCloudPhotonExample.Game
+namespace BrainCloudUNETExample.Game
 {
-    public class BombController : MonoBehaviour, IPunObservable
+    public class BombController : BaseNetworkBehavior
     {
-        public class BombInfo
+        protected override void Start()
         {
-            public Vector3 m_startPosition;
-            public Vector3 m_startDirection;
-            public Player m_shooter;
-            public Vector3 m_startVelocity;
-            public int m_bombID;
-            public bool m_isMaster = false;
-            public GameObject gameObject;
-
-            public BombInfo(Vector3 aStartPos, Vector3 aStartDir, Player aPlayer, Vector3 aSpeed, int aID = 0)
+            _classType = BombersNetworkManager.BOMB_CONTROLLER;
+            if (!IsServer)
             {
-                m_startPosition = aStartPos;
-                m_startDirection = aStartDir;
-                m_shooter = aPlayer;
-                m_startVelocity = aSpeed;
-                m_bombID = aID;
+                // take the collision off
+                gameObject.layer = 0;
             }
+            base.Start();
+        }
 
-            public static byte[] SerializeBombInfo(object aBombInfo)
-            {
-                BombInfo bombInfo = (BombInfo)aBombInfo;
-                byte[] bytes = new byte[sizeof(float) * 9 + sizeof(int) * 2];
-                int index = 0;
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startPosition.x, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startPosition.y, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startPosition.z, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startDirection.x, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startDirection.y, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startDirection.z, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_shooter.ActorNumber, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startVelocity.x, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startVelocity.y, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_startVelocity.z, bytes, ref index);
+        private BombInfo m_bombInfo = null;
+        public BombInfo BombInfo { get { return m_bombInfo; } set { m_bombInfo = value; m_bombInfo.gameObject = this.gameObject; } }
+        public bool m_isActive = true;
 
-                ExitGames.Client.Photon.Protocol.Serialize(bombInfo.m_bombID, bytes, ref index);
-
-                return bytes;
-            }
-
-            public static object DeserializeBombInfo(byte[] bytes)
-            {
-                Vector3 startPos = Vector3.zero;
-                Vector3 direction = Vector3.zero;
-                Player shooter = PhotonNetwork.LocalPlayer;
-                int shooterID = 0;
-                Vector3 speed = Vector3.zero;
-                int id = 0;
-
-                int index = 0;
-                ExitGames.Client.Photon.Protocol.Deserialize(out startPos.x, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out startPos.y, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out startPos.z, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out direction.x, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out direction.y, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out direction.z, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out shooterID, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out speed.x, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out speed.y, bytes, ref index);
-                ExitGames.Client.Photon.Protocol.Deserialize(out speed.z, bytes, ref index);
-
-                ExitGames.Client.Photon.Protocol.Deserialize(out id, bytes, ref index);
-
-                shooter = shooter.Get(shooterID);
-
-                BombInfo bombInfo = new BombInfo(startPos, direction, shooter, speed, id);
-                return bombInfo;
-            }
-
-            public override bool Equals(object obj)
-            {
-                return ((BombInfo)obj).m_bombID == m_bombID;
-            }
-
-            public override int GetHashCode()
-            {
-                return m_bombID.GetHashCode();
-            }
+        void LateUpdate()
+        {
+            transform.rotation = Quaternion.LookRotation(GetComponent<Rigidbody>().velocity.normalized, transform.up);
         }
 
         void OnCollisionEnter(Collision aCollision)
         {
-            if (!m_isActive) return;
-
             m_isActive = false;
 
-            if (m_bombInfo.m_isMaster)
+            if (IsServer)
             {
                 if (aCollision.gameObject.layer == 4)
                 {
-                    GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 0);
+                    BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 0);
                 }
                 else if (aCollision.gameObject.layer == 20) //it hit a rock
                 {
-                    GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 1);
+                    BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 1);
                 }
                 else //it hit a ship
                 {
-                    if (((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
+                    BombersPlayerController shooterController = BombersPlayerController.GetPlayer(BombInfo.m_shooter);
+                    if ((shooterController.m_team == 1 && aCollision.gameObject.layer == 16) || (shooterController.m_team == 2 && aCollision.gameObject.layer == 17))
                     {
-                        GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 2);
+                        BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 2);
                     }
                     else
                     {
-                        List<ShipController.ShipTarget> shipTargets = aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().GetTargets();
+                        ShipController controller = aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>();
+                        List<ShipTarget> shipTargets = controller.GetTargets();
                         for (int i = 0; i < shipTargets.Count; i++)
                         {
                             if ((transform.position - shipTargets[i].m_position.position).magnitude <= m_bombRadius + shipTargets[i].m_radius)
@@ -124,78 +62,101 @@ namespace BrainCloudPhotonExample.Game
                                 else
                                 {
                                     shipTargets[i].m_isAlive = false;
-                                    GameObject.Find("GameManager").GetComponent<GameManager>().HitShipTargetPoint(shipTargets[i], m_bombInfo);
+                                    BombersNetworkManager.LocalPlayer.HitShipTargetPointCommand(shipTargets[i].m_shipID, shipTargets[i].m_index, m_bombInfo.GetJson());
                                 }
 
                                 if (!aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>().IsAlive())
                                 {
-                                    GameObject.Find("GameManager").GetComponent<GameManager>().DestroyedShip(aCollision.transform.parent.parent.parent.gameObject.GetComponent<ShipController>(), m_bombInfo);
+                                    BombersNetworkManager.LocalPlayer.DestroyShipCommand(controller.m_shipID, m_bombInfo.GetJson());
                                     break;
                                 }
                             }
                         }
-                        GameObject.Find("GameManager").GetComponent<GameManager>().DeleteBomb(m_bombInfo, 1);
+                        BombersNetworkManager.LocalPlayer.DeleteBombCommand(this, 1);
                     }
                 }
             }
-            else
-            {
-                if (aCollision.gameObject.layer == 4)
-                {
-                    GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombWaterExplosion"), transform.position, Quaternion.identity);
-                    explosion.GetComponent<AudioSource>().Play();
-                }
-                else if (((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 1 && aCollision.gameObject.layer == 16) || ((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 2 && aCollision.gameObject.layer == 17))
-                {
-                    GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombDud"), transform.position, Quaternion.identity);
-                    explosion.GetComponent<AudioSource>().Play();
-                }
-                else
-                {
-                    GameObject explosion = (GameObject)Instantiate((GameObject)Resources.Load("BombExplosion"), transform.position, Quaternion.identity);
-                    explosion.GetComponent<AudioSource>().Play();
-                }
-            }
-            transform.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
         }
-
-        private BombInfo m_bombInfo;
         private float m_bombRadius = 15f;
-        public bool m_isActive = true;
+    }
 
-        public void SetBombInfo(BombInfo aBombInfo)
+    public class BombInfo
+    {
+        public Vector3 m_startPosition;
+        public Vector3 m_startDirection;
+        public short m_shooter;
+        public Vector3 m_startVelocity;
+        public int m_bombID;
+        public GameObject gameObject;
+        public string m_bombInfoJson;
+
+        public BombInfo(Vector3 aStartPos, Vector3 aStartDir, short aPlayer, Vector3 aSpeed, int aID = 0)
         {
-            m_bombInfo = aBombInfo;
-            m_bombInfo.gameObject = this.gameObject;
-
-            string teamBombPath = "";
-
-            if ((int)m_bombInfo.m_shooter.CustomProperties["Team"] == 1)
-            {
-                teamBombPath = "Bomb01";
-            }
-            else
-            {
-                teamBombPath = "Bomb02";
-            }
-
-            GameObject graphic = (GameObject)Instantiate((GameObject)Resources.Load(teamBombPath), transform.position, transform.rotation);
-            graphic.transform.parent = transform;
+            m_startPosition = aStartPos;
+            m_startDirection = aStartDir;
+            m_shooter = aPlayer;
+            m_startVelocity = aSpeed;
+            m_bombID = aID;
         }
 
-        public BombInfo GetBombInfo()
+        public BombInfo(Dictionary<string, object> info)
         {
-            return m_bombInfo;
+            m_startPosition = Vector3.zero;
+            m_startDirection = Vector3.zero;
+            m_startVelocity = Vector3.zero;
+
+            m_startPosition.x = BaseNetworkBehavior.ConvertToFloat(info, BaseNetworkBehavior.POSITION_X);
+            m_startPosition.y = BaseNetworkBehavior.ConvertToFloat(info, BaseNetworkBehavior.POSITION_Y);
+            m_startPosition.z = BaseNetworkBehavior.ConvertToFloat(info, BaseNetworkBehavior.POSITION_Z);
+
+            m_startDirection.x = BaseNetworkBehavior.ConvertToFloat(info, BaseNetworkBehavior.DIRECTION_X);
+            m_startDirection.y = BaseNetworkBehavior.ConvertToFloat(info, BaseNetworkBehavior.DIRECTION_Y);
+
+            m_startVelocity.x = BaseNetworkBehavior.ConvertToFloat(info, BaseNetworkBehavior.SPEED_X);
+            m_startVelocity.y = BaseNetworkBehavior.ConvertToFloat(info, BaseNetworkBehavior.SPEED_Y);
+
+            m_shooter = System.Convert.ToInt16(info[BaseNetworkBehavior.SHOOTER_ID]);
+            m_bombID = GConfigManager.ReadIntSafely(info, BaseNetworkBehavior.ID);
         }
 
-        void LateUpdate()
+        public static BombInfo GetBombInfo(string in_str)
         {
-            transform.rotation = Quaternion.LookRotation(GetComponent<Rigidbody>().velocity.normalized, transform.up);
+            Dictionary<string, object> info = BaseNetworkBehavior.DeserializeString(in_str, BombersNetworkManager.SPECIAL_INNER_JOIN, BombersNetworkManager.SPECIAL_INNER_SPLIT);
+            return new BombInfo(info);
         }
 
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        public Dictionary<string, object> GetDict()
         {
-            
+            Dictionary<string, object> info = new Dictionary<string, object>();
+            info[BaseNetworkBehavior.POSITION_X] = BaseNetworkBehavior.ConvertToShort(m_startPosition.x);
+            info[BaseNetworkBehavior.POSITION_Y] = BaseNetworkBehavior.ConvertToShort(m_startPosition.y);
+            info[BaseNetworkBehavior.POSITION_Z] = BaseNetworkBehavior.ConvertToShort(m_startPosition.z);
+
+            if (m_startDirection.x != 0) info[BaseNetworkBehavior.DIRECTION_X] = BaseNetworkBehavior.ConvertToShort(m_startDirection.x);
+            if (m_startDirection.y != 0) info[BaseNetworkBehavior.DIRECTION_Y] = BaseNetworkBehavior.ConvertToShort(m_startDirection.y);
+
+            if (m_startVelocity.x != 0) info[BaseNetworkBehavior.SPEED_X] = BaseNetworkBehavior.ConvertToShort(m_startVelocity.x);
+            if (m_startVelocity.y != 0) info[BaseNetworkBehavior.SPEED_Y] = BaseNetworkBehavior.ConvertToShort(m_startVelocity.y);
+
+            info[BaseNetworkBehavior.SHOOTER_ID] = m_shooter;
+            info[BaseNetworkBehavior.ID] = m_bombID;
+            return info;
+        }
+        public string GetJson()
+        {
+            Dictionary<string, object> info = GetDict();
+            string infoStr = BaseNetworkBehavior.SerializeDict(info, BombersNetworkManager.SPECIAL_INNER_JOIN, BombersNetworkManager.SPECIAL_INNER_SPLIT);
+            return infoStr;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ((BombInfo)obj).m_bombID == m_bombID;
+        }
+
+        public override int GetHashCode()
+        {
+            return m_bombID.GetHashCode();
         }
     }
 }
