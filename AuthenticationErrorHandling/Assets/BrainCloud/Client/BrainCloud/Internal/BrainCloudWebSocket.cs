@@ -1,12 +1,11 @@
 ﻿using System;
-
 #if DOT_NET
 using System.Net.WebSockets;
 #elif UNITY_WEBGL && !UNITY_EDITOR
 using AOT;
 using System.Collections.Generic;
 #else
-using WebSocketSharp;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 #endif
 
 public class BrainCloudWebSocket
@@ -17,7 +16,7 @@ public class BrainCloudWebSocket
     private static Dictionary<int, BrainCloudWebSocket> webSocketInstances =
         new Dictionary<int, BrainCloudWebSocket>();
 #else
-    private WebSocket WebSocket;
+    private BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.WebSocket WebSocket;
 #endif
 
     public BrainCloudWebSocket(string url)
@@ -31,9 +30,8 @@ public class BrainCloudWebSocket
 		NativeWebSocket.SetOnClose(NativeSocket_OnClose);
 		webSocketInstances.Add(NativeWebSocket.Id, this);
 #else
-        WebSocket = new WebSocket(url);
+        WebSocket = new BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.WebSocket(url);
         WebSocket.ConnectAsync();
-        WebSocket.AcceptAsync();
         WebSocket.OnOpen += WebSocket_OnOpen;
         WebSocket.OnMessage += WebSocket_OnMessage;
         WebSocket.OnError += WebSocket_OnError;
@@ -70,7 +68,7 @@ public class BrainCloudWebSocket
 		if (webSocketInstances.ContainsKey(id) && webSocketInstances[id].OnOpen != null)
 			webSocketInstances[id].OnOpen(webSocketInstances[id]);
 	}
-
+    
 	[MonoPInvokeCallback(typeof(Action<int>))]
 	public static void NativeSocket_OnMessage(int id) {
     
@@ -99,6 +97,12 @@ public class BrainCloudWebSocket
 #else
     private void WebSocket_OnOpen(object sender, EventArgs e)
     {
+#if DOT_NET
+#elif UNITY_WEBGL && !UNITY_EDITOR
+#else
+        WebSocket.TCPClient.NoDelay = true;
+        WebSocket.TCPClient.Client.NoDelay = true;
+#endif
         if (OnOpen != null)
             OnOpen(this);
     }
@@ -131,6 +135,18 @@ public class BrainCloudWebSocket
         WebSocket.SendAsync(packet, null);
 #endif
     }
+
+    public void Send(byte[] packet)
+    {
+#if DOT_NET
+#elif UNITY_WEBGL && !UNITY_EDITOR
+    	NativeWebSocket.SendAsync(packet);
+#else
+        WebSocket.Send(packet);
+#endif
+    }
+
+
 
     public delegate void OnOpenHandler(BrainCloudWebSocket accepted);
     public delegate void OnMessageHandler(BrainCloudWebSocket sender, byte[] data);

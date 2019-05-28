@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
-using LitJson;
+using BrainCloud.LitJson;
 using UnityEngine.SceneManagement;
 
 public class ConnectScene : MonoBehaviour

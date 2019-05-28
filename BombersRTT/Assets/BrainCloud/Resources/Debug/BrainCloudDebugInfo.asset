@@ -1,0 +1,138 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18fbebac9e48cae4cb55d735591d63e4, type: 3}
+  m_Name: BrainCloudDebugInfo
+  m_EditorClassIdentifier: 
+  DebugInformation:
+    ProfileId: da206471-6906-4e39-9297-3ece8e228430
+    LastSentRequest: "chat CHANNEL_DISCONNECT \n{\r\n    \"channelId\": \"12493:gl:main\"\r\n}"
+    LastResponse: "OnSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"presence\":
+      \r\n                [\r\n                    {\r\n                        \"user\":
+      \r\n                            {\r\n                                \"id\":
+      \"a5cec174-822d-4508-aea2-3feb6dfc0234\",\r\n                                \"name\":
+      \"stevej\",\r\n                                \"pic\": null\r\n                            },\r\n
+      \                       \"online\": false,\r\n                        \"summaryFriendData\":
+      \r\n                            {\r\n                                \"rank\":
+      1\r\n                            },\r\n                        \"activity\":
+      \r\n                            {}\r\n                    }\r\n                ]\r\n
+      \       },\r\n    \"status\": 200\r\n}"
+    FullLog: 'REQUEST - 2019-05-28 10:14:50 AM
+
+      {"packetId":7,"sessionId":"nifepeu5d52ptq71ihad0cqdn","gameId":"12493","messages":[{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"12493:gl:main"}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-28 10:14:19 AM
+
+      {"packetId":6,"responses":[{"data":{"presence":[{"user":{"id":"a5cec174-822d-4508-aea2-3feb6dfc0234","name":"stevej","pic":null},"online":false,"summaryFriendData":{"rank":1},"activity":{}}]},"status":200},{"data":null,"status":200},{"data":null,"status":200}]}
+
+
+      REQUEST - 2019-05-28 10:14:19 AM
+
+      {"packetId":6,"sessionId":"nifepeu5d52ptq71ihad0cqdn","gameId":"12493","messages":[{"service":"presence","operation":"GET_PRESENCE_OF_FRIENDS","data":{"platform":"","includeOffline":true}},{"service":"presence","operation":"SET_VISIBILITY","data":{"visible":true}},{"service":"presence","operation":"UPDATE_ACTIVITY","data":{"activity":{"LOCATION":"In
+      Main Menu","STATUS":"Idle","LOBBY_ID":""}}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-28 10:14:19 AM
+
+      {"packetId":5,"responses":[{"data":{"messages":[{"date":1559049383963,"ver":1,"msgId":"798233284589057","from":{"id":"a5cec174-822d-4508-aea2-3feb6dfc0234","name":"stevej","pic":null},"chId":"12493:gl:main","content":{"text":"Hey
+      Everyone!","rich":{"lastConnectionId":"12493:a5cec174-822d-4508-aea2-3feb6dfc0234:tpunusb7cgk16n1j6ch31p6s2v","timeSent":"1:16:23
+      PM","rank":1}}},{"date":1559052399065,"ver":1,"msgId":"798234828321282","from":{"id":"a5cec174-822d-4508-aea2-3feb6dfc0234","name":"stevej","pic":null},"chId":"12493:gl:main","content":{"text":"hello","rich":{"lastConnectionId":null,"timeSent":"2:06:38
+      PM","rank":1}}},{"date":1559052538392,"ver":1,"msgId":"798234899656707","from":{"id":"da206471-6906-4e39-9297-3ece8e228430","name":"heylo","pic":null},"chId":"12493:gl:main","content":{"text":"tests","rich":{"lastConnectionId":null,"timeSent":"2:08:58
+      PM","rank":1}}}]},"status":200},{"data":{"presence":[]},"status":200}]}
+
+
+      REQUEST - 2019-05-28 10:14:18 AM
+
+      {"packetId":5,"sessionId":"nifepeu5d52ptq71ihad0cqdn","gameId":"12493","messages":[{"service":"chat","operation":"CHANNEL_CONNECT","data":{"channelId":"12493:gl:main","maxReturn":25}},{"service":"presence","operation":"REGISTER_LISTENERS_FOR_FRIENDS","data":{"platform":"","bidirectional":true}}]}
+
+
+      SENDING REQUEST
+
+
+      RTT RECV: {"service":"rtt","operation":"CONNECT","data":{"heartbeatSeconds":30,"cxId":"12493:da206471-6906-4e39-9297-3ece8e228430:nifepeu5d52ptq71ihad0cqdn","evs":"44-8ab42a"}}
+
+
+      RTT SEND: {"service":"rtt","operation":"CONNECT","data":{"appId":"12493","sessionId":"nifepeu5d52ptq71ihad0cqdn","profileId":"da206471-6906-4e39-9297-3ece8e228430","system":{"platform":"WINDOWS","protocol":"ws"},"auth":{"X-APPID":"12493","X-RTT-SECRET":"N@n@n@N@n@n@N@n@n@N@n@n@B@tm@n!"}}}
+
+
+      Connection established.
+
+
+      RESPONSE - 2019-05-28 10:14:18 AM
+
+      {"packetId":4,"responses":[{"data":null,"status":200}]}
+
+
+      REQUEST - 2019-05-28 10:14:18 AM
+
+      {"packetId":4,"sessionId":"nifepeu5d52ptq71ihad0cqdn","gameId":"12493","messages":[{"service":"playerState","operation":"UPDATE_SUMMARY","data":{"summaryFriendData":{"rank":1}}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-28 10:14:18 AM
+
+      {"packetId":3,"responses":[{"data":{"endpoints":[{"protocol":"tcp","port":6670,"host":"evstcp40-21d629e6a49e589f.elb.us-east-1.amazonaws.com","ssl":false},{"protocol":"ws","port":443,"host":"evswebprod.braincloudservers.com","ssl":true}],"auth":{"X-APPID":"12493","X-RTT-SECRET":"N@n@n@N@n@n@N@n@n@N@n@n@B@tm@n!"}},"status":200},{"data":{"statistics":{"planesDestroyed":0,"bombsHit":0,"bombsDropped":0,"doubleFiringRate":0,"gamesPlayed":0,"timesDestroyed":0,"carriersDestroyed":0,"goldenWings":0,"shotsFired":0,"gamesWon":0}},"status":200},{"data":{"abTestingId":54,"lastLogin":1559052856502,"server_time":1559052857924,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1559052496742,"parentProfileId":null,"emailAddress":null,"experienceLevel":1,"countryCode":null,"vcClaimed":0,"currency":{"goldWings":{"consumed":0,"balance":0,"purchased":0,"awarded":0}},"id":"da206471-6906-4e39-9297-3ece8e228430","amountSpent":0,"previousLogin":1559052831123,"playerName":"heylo","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":7,"xpCapped":false,"profileId":"da206471-6906-4e39-9297-3ece8e228430","sent_events":[],"statistics":{"planesDestroyed":0,"bombsHit":0,"bombsDropped":0,"doubleFiringRate":0,"gamesPlayed":0,"timesDestroyed":0,"carriersDestroyed":0,"goldenWings":0,"shotsFired":0,"gamesWon":0}},"status":200},{"data":{"xp_levels":[{"level":1,"statusTitle":"Rookie","experience":0,"fbAction":""},{"level":2,"statusTitle":"Pilot","experience":2500,"fbAction":""},{"level":3,"statusTitle":"Pilot
+      First Class","experience":5000,"fbAction":""},{"level":4,"statusTitle":"Staff
+      Sergeant","experience":10000,"fbAction":""},{"level":5,"statusTitle":"Chief
+      Sergeant","experience":15000,"fbAction":""},{"level":6,"statusTitle":"Master
+      Sergeant","experience":25000,"fbAction":""},{"level":7,"statusTitle":"Commander","experience":40000,"fbAction":""},{"level":8,"statusTitle":"Brigadier","experience":65000,"fbAction":""},{"level":9,"statusTitle":"Chief
+      Brigadier","experience":105000,"fbAction":""},{"level":10,"statusTitle":"General","experience":170000,"fbAction":""}]},"status":200},{"data":{"achievements":[{"extraData":null,"googleAchievementId":null,"achievementId":"0","description":"Shoot
+      down 5 airplanes in one match","title":"Quickshot","appleAchievementId":null,"steamEnabled":false,"fbGamePoints":null,"imageUrl":"https://sharedprod.braincloudservers.com/files/portal/g/12493/metadata/achievements/0.png","steamAchievementId":null,"invisibleUntilEarned":false,"fbEnabled":false,"appleEnabled":false,"googleEnabled":null,"id":"0","status":"NOT_AWARDED"},{"extraData":null,"googleAchievementId":null,"achievementId":"1","description":"Sink
+      10 ships","title":"Bombardier","appleAchievementId":null,"steamEnabled":false,"fbGamePoints":null,"imageUrl":"https://sharedprod.braincloudservers.com/files/portal/g/12493/metadata/achievements/1.png","steamAchievementId":null,"invisibleUntilEarned":false,"fbEnabled":false,"appleEnabled":false,"googleEnabled":null,"id":"1","status":"NOT_AWARDED"},{"extraData":null,"googleAchievementId":null,"achievementId":"2","description":"Shoot
+      down 50 airplanes","title":"Sky Ace","appleAchievementId":null,"steamEnabled":false,"fbGamePoints":null,"imageUrl":"https://sharedprod.braincloudservers.com/files/portal/g/12493/metadata/achievements/2.png","steamAchievementId":null,"invisibleUntilEarned":false,"fbEnabled":false,"appleEnabled":false,"googleEnabled":null,"id":"2","status":"NOT_AWARDED"}]},"status":200},{"data":{"response":{"currentLevel":1,"experiencePoints":0,"xpCapped":false,"prevThreshold":0,"nextThreshold":2500,"xpToNext":2500.0},"success":true},"status":200}]}
+
+
+      REQUEST - 2019-05-28 10:14:17 AM
+
+      {"packetId":3,"sessionId":"nifepeu5d52ptq71ihad0cqdn","gameId":"12493","messages":[{"service":"rttRegistration","operation":"REQUEST_CLIENT_CONNECTION","data":null},{"service":"playerStatistics","operation":"READ","data":null},{"service":"playerState","operation":"READ","data":null},{"service":"gamification","operation":"READ_XP_LEVELS","data":null},{"service":"gamification","operation":"READ_ACHIEVEMENTS","data":{"includeMetaData":true}},{"service":"script","operation":"RUN","data":{"scriptName":"GetXpData"}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-28 10:14:17 AM
+
+      {"packetId":2,"responses":[{"data":{"entityList":[],"entityListCount":0},"status":200}]}
+
+
+      REQUEST - 2019-05-28 10:14:17 AM
+
+      {"packetId":2,"sessionId":"nifepeu5d52ptq71ihad0cqdn","gameId":"12493","messages":[{"service":"globalEntity","operation":"GET_LIST_BY_INDEXED_ID","data":{"entityIndexedId":"playerLevelUp","maxReturn":1}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-28 10:14:17 AM
+
+      {"packetId":1,"responses":[{"data":{"RSConnectionType":{"name":"RSConnectionType","value":"0"},"PlaneAcceleration":{"name":"PlaneAcceleration","value":"190"},"WeakpointDestructionShakeIntensity":{"name":"WeakpointDestructionShakeIntensity","value":"3"},"playAgainTime":{"name":"playAgainTime","value":"20"},"SEND_INTERVAL":{"name":"SEND_INTERVAL","value":"0.15"},"DefaultGameTimeIndex":{"name":"DefaultGameTimeIndex","value":"2"},"MultishotAmount":{"name":"MultishotAmount","value":"8"},"MultishotDelay":{"name":"MultishotDelay","value":"1.85"},"RegionTypes":{"name":"RegionTypes","value":"{\n
+      \t \"0\":\n\t{\n\t\"name\": \"Canada\",\n\t\"lobby\": \"4v4_can\"\n\t },\n\t
+      \"1\":\n\t{\n\t\"name\": \"Sydney\",\n\t\"lobby\": \"4v4_syd\"\n     },\n\t
+      \"2\":\n\t{\n\t\"name\": \"Mumbai\",\n\t\"lobby\": \"4v4_mum\"\n     }, \"3\":\n\t{\n\t\"name\":
+      \"Frankfurt\",\n\t\"lobby\": \"4v4_fra\"\n     }, \"4\":\n\t{\n\t\"name\": \"Tokyo\",\n\t\"lobby\":
+      \"4v4_tok\"\n     }, \"5\":\n\t{\n\t\"name\": \"Ohio\",\n\t\"lobby\": \"4v4_ohi\"\n     },
+      \"6\":\n\t{\n\t\"name\": \"N. California\",\n\t\"lobby\": \"4v4_nca\"\n     },
+      \"7\":\n\t{\n\t\"name\": \"Sao Paulo\",\n\t\"lobby\": \"4v4_sao\"\n     }\n}"},"MSGENCODING":{"name":"MSGENCODING","value":"2"},"MultishotBurstDelay":{"name":"MultishotBurstDelay","value":"0.10"},"MaxBombCapacity":{"name":"MaxBombCapacity","value":"3"},"LinearDeceleration":{"name":"LinearDeceleration","value":"0.41"},"ScreenShakeTime":{"name":"ScreenShakeTime","value":"0.44"},"FireRateDelay":{"name":"FireRateDelay","value":"0.25"},"ShipDestructionShakeIntensity":{"name":"ShipDestructionShakeIntensity","value":"5.65"},"DefaultGameTime":{"name":"DefaultGameTime","value":"480"},"FlareCooldown":{"name":"FlareCooldown","value":"5"},"TurnSpeedModifier":{"name":"TurnSpeedModifier","value":"0.64"},"FlareLifeTime":{"name":"FlareLifeTime","value":"3"},"GameDurations":{"name":"GameDurations","value":"{\n
+      \t \"0\":\n\t{\n\t\"name\": \"3 mins\",\n\t\"duration\": \"180\"\n\t },\n\t
+      \"1\":\n\t{\n\t\"name\": \"4 mins\",\n\t\"duration\": \"240\"\n     },\n\t \"2\":\n\t{\n\t\"name\":
+      \"5 mins\",\n\t\"duration\": \"300\"\n     },\n\t \"3\":\n\t{\n\t\"name\": \"8
+      mins\",\n\t'
+    ConsoleLogOffset: {x: 0, y: 0}
+  DebugScrollPosition: {x: 0, y: 0}

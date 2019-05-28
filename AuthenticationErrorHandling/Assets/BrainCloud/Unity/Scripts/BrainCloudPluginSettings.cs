@@ -4,14 +4,11 @@
 
 using System.IO;
 using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
-
-#endif
 
 namespace BrainCloudUnity
 {
-    namespace BrainCloudPlugin
+    namespace BrainCloudSettingsDLL
     {
         /// <summary>
         /// BrainCloud Plugin Data, for those using the Embedded Editor Login
@@ -19,18 +16,50 @@ namespace BrainCloudUnity
         /// When in the Editor, brainCloud | Select Settings 
         /// </summary>
 
-        [InitializeOnLoad]
-        public class BrainCloudPluginSettings : BaseBrainCloudPluginSettings
+        public class BrainCloudSettings : BaseBrainCloudSettings
         {
-            public static bool IsLegacyPluginEnabled()
+            public static bool IsManualSettingsEnabled()
             {
-                return Instance.PluginState == BrainCloudPluginState.INTRO ||
-                       Instance.PluginState == BrainCloudPluginState.DISABLED;
+                return Instance.SettingsState == BrainCloudSettingsState.INTRO ||
+                       Instance.SettingsState == BrainCloudSettingsState.DISABLED;
             }
 
+            public void OnEnable()
+            {
+                BrainCloudDebugInfo.Instance.ClearSettingsData();
+                BaseBrainCloudSettings.Instance.BrainCloudSettingsUpdated += UpdateSettings;
+            }
+            
+            private void OnDisable()
+            {
+                BaseBrainCloudSettings.Instance.BrainCloudSettingsUpdated -=  UpdateSettings;
+            }
+            
+            private void UpdateSettings()
+            {
+                if (!IsManualSettingsEnabled())
+                {
+                    BrainCloudSettingsManual.Instance.ServerURL = Instance.GetServerUrl;   
+                    BrainCloudSettingsManual.Instance.SecretKey = GetAppSecret();
+                    BrainCloudSettingsManual.Instance.AppId = GetAppId();
+                    BrainCloudSettingsManual.Instance.AppVersion = GetAppVersion();
+
+                    var appIdSecrets = GetAppIdSecrets();
+                    
+                    if(appIdSecrets != null)
+                        BrainCloudSettingsManual.Instance.m_appIdSecrets =
+                            AppIdSecretPair.FromDictionary(GetAppIdSecrets());
+   
+                    EditorUtility.SetDirty(Instance);
+                
+                    EditorUtility.SetDirty(Resources.Load("BrainCloudSettingsManual") as BrainCloudSettingsManual);
+                }
+            }
+
+            
             public static BrainCloudDebugInfo DebugInstance;
 
-            public new static BaseBrainCloudPluginSettings Instance
+            public new static BaseBrainCloudSettings Instance
             {
                 get
                 {
@@ -38,12 +67,12 @@ namespace BrainCloudUnity
                     
                     if (_instance) return _instance;
 
-                    _instance = Resources.Load("BrainCloudPluginSettings") as BrainCloudPluginSettings;
+                    _instance = Resources.Load("BrainCloudSettings") as BrainCloudSettings;
 
                     // If not found, autocreate the asset object.
                     if (_instance == null)
                     {
-                        CreatePluginAsset();
+                        CreateSettingsAsset();
                     }
 
                     DebugInstance = (BrainCloudDebugInfo)BrainCloudDebugInfo.Instance;
@@ -52,9 +81,9 @@ namespace BrainCloudUnity
                 }
             }
 
-            private static void CreatePluginAsset()
+            private static void CreateSettingsAsset()
             {
-                _instance = CreateInstance<BrainCloudPluginSettings>();
+                _instance = CreateInstance<BrainCloudSettings>();
 
                 string properPath = Path.Combine(Application.dataPath, "BrainCloud");
                 if (!Directory.Exists(properPath))
@@ -68,7 +97,7 @@ namespace BrainCloudUnity
                 }
 
 
-                const string fullPath = "Assets/BrainCloud/Resources/BrainCloudPluginSettings.asset";
+                const string fullPath = "Assets/BrainCloud/Resources/BrainCloudSettings.asset";
                 AssetDatabase.CreateAsset(_instance, fullPath);
             }
 
@@ -77,7 +106,7 @@ namespace BrainCloudUnity
             {
                 if (_instance != null)
                 {
-                    _instance.ClearPluginData();
+                    _instance.ClearSettingsData();
                 }
             }
         }

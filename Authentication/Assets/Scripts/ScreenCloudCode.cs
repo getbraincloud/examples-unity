@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using System;
-using LitJson;
+using BrainCloud.LitJson;
 
 public class ScreenCloudCode : BCScreen
 {

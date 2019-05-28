@@ -1,5 +1,6 @@
 ﻿#if !DOT_NET
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -8,76 +9,30 @@ using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using BrainCloudUnity.BrainCloudPlugin;
+using BrainCloudUnity.BrainCloudSettingsDLL;
 #endif
 
 namespace BrainCloudUnity
 {
-#if UNITY_EDITOR
-    [InitializeOnLoad]
-#endif
-
-    
-    public class BrainCloudSettings : ScriptableObject
+    public class BrainCloudSettingsManual : ScriptableObject
     {
-#if UNITY_EDITOR
-        static BrainCloudSettings()
-        {
-            
-        }
-        
 
-        
-        public void OnEnable()
-        {
-            BrainCloudDebugInfo.Instance.ClearPluginData();
+        private static BrainCloudSettingsManual s_instance;
 
-            
-            BaseBrainCloudPluginSettings.Instance.BrainCloudPluginUpdated += UpdatePlugin;
-
-        }
-
-        private void UpdatePlugin()
-        {
-            if (!BrainCloudPluginSettings.IsLegacyPluginEnabled())
-            {
-                Instance.m_dispatchUrl = BrainCloudPluginSettings.Instance.GetServerUrl + "/dispatcherv2";
-                Instance.m_serverURL = BrainCloudPluginSettings.Instance.GetServerUrl;   
-                Instance.m_secretKey = BaseBrainCloudPluginSettings.GetAppSecret();
-                Instance.m_appId = BaseBrainCloudPluginSettings.GetAppId();
-                Instance.m_appVersion = BaseBrainCloudPluginSettings.GetAppVersion();
-
-                var appIdSecrets = BaseBrainCloudPluginSettings.GetAppIdSecrets();
-                    
-                if(appIdSecrets != null)
-                    Instance.m_appIdSecrets =
-                        AppIdSecretPair.FromDictionary(BaseBrainCloudPluginSettings.GetAppIdSecrets());
-   
-                EditorUtility.SetDirty(Instance);
-                
-                EditorUtility.SetDirty(Resources.Load("BrainCloudSettings") as BrainCloudSettings);
-            }
-        }
-
-        private void OnDisable()
-        {
-            BaseBrainCloudPluginSettings.Instance.BrainCloudPluginUpdated -=  UpdatePlugin;
-        }
-#endif
-        
-        private static BrainCloudSettings s_instance;
-
-        public static BrainCloudSettings Instance
+        public static BrainCloudSettingsManual Instance
         {
             get
             {
                 if (s_instance) return s_instance;
 
-                s_instance = Resources.Load("BrainCloudSettings") as BrainCloudSettings;
+                s_instance = Resources.Load("BrainCloudSettingsManual") as BrainCloudSettingsManual;
                 if (s_instance == null)
                 {
-                    // If not found, autocreate the asset object.
-                    s_instance = CreateInstance<BrainCloudSettings>();
+                    
+                       
+                    
+                    // If not found, auto create the asset object.
+                    s_instance = CreateInstance<BrainCloudSettingsManual>();
 
 #if UNITY_EDITOR
                     string properPath = Path.Combine(Application.dataPath, "BrainCloud");
@@ -90,29 +45,18 @@ namespace BrainCloudUnity
                     {
                         AssetDatabase.CreateFolder("Assets/BrainCloud", "Resources");
                     }
-                    string fullPath = "Assets/BrainCloud/Resources/BrainCloudSettings.asset";
+                    
+                    string fullPath = "Assets/BrainCloud/Resources/BrainCloudSettingsManual.asset";
                     AssetDatabase.CreateAsset(s_instance, fullPath);
 #endif
                 }
-                s_instance.name = "BrainCloudSettings";
+                s_instance.name = "BrainCloudSettingsManual";
                 return s_instance;
             }
         }
-
-        [SerializeField] private string m_dispatchUrl = "";
         public string DispatcherURL
         {
-            get
-            {  
-#if UNITY_EDITOR
-                if (BrainCloudPluginSettings.IsLegacyPluginEnabled())
-                {
-                    m_dispatchUrl = m_serverURL + "/dispatcherv2";
-                }
-#endif
-
-                return m_dispatchUrl;
-            }
+            get { return m_serverURL + "/dispatcherv2"; }
         }
 
         public string PortalURL
@@ -122,7 +66,7 @@ namespace BrainCloudUnity
 
         public string ApiDocsURL
         {
-            get { return "http://getbraincloud.com/apidocs"; }
+            get { return "https://getbraincloud.com/apidocs"; }
         }
 
         // Settings
@@ -214,7 +158,7 @@ namespace BrainCloudUnity
             }
         }
 
-        [SerializeField] private AppIdSecretPair[] m_appIdSecrets;
+        [SerializeField] public AppIdSecretPair[] m_appIdSecrets;
 
         public Dictionary<string, string> AppIdSecrets
         {

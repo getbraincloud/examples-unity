@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
-using LitJson;
+using BrainCloud.LitJson;
 using UnityEngine.SceneManagement;
 
 public class ScreenIdentity : BCScreen {

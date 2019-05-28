@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using LitJson;
+using BrainCloud.LitJson;
 using System.Text;
 
 public abstract class BCScreen

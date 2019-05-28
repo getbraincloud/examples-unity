@@ -6,9 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-using System.Net.Sockets;
-using JsonFx.Json;
+using BrainCloud.JsonFx.Json;
 
 namespace BrainCloud.Internal
 {
@@ -34,7 +32,7 @@ namespace BrainCloud.Internal
         /// <param name="in_success"></param>
         /// <param name="in_failure"></param>
         /// <param name="cb_object"></param>
-        public void EnableRTT(eRTTConnectionType in_connectionType = eRTTConnectionType.WEBSOCKET, SuccessCallback in_success = null, FailureCallback in_failure = null, object cb_object = null)
+        public void EnableRTT(RTTConnectionType in_connectionType = RTTConnectionType.WEBSOCKET, SuccessCallback in_success = null, FailureCallback in_failure = null, object cb_object = null)
         {
             if (!m_bIsConnected)
             {
@@ -42,7 +40,7 @@ namespace BrainCloud.Internal
                 m_connectionFailureCallback = in_failure;
                 m_connectedObj = cb_object;
 
-                m_useWebSocket = in_connectionType == eRTTConnectionType.WEBSOCKET;
+                m_currentConnectionType = in_connectionType;
                 m_clientRef.RTTService.RequestClientConnection(rttConnectionServerSuccess, rttConnectionServerError, cb_object);
             }
         }
@@ -52,9 +50,7 @@ namespace BrainCloud.Internal
         /// </summary>
         public void DisableRTT()
         {
-            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "disconnect", "DisableRTT Called"));
-            Update();
-            //disconnect();
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "disconnect", "DisableRTT Called"));
         }
 
         /// <summary>
@@ -70,7 +66,7 @@ namespace BrainCloud.Internal
         /// </summary>
         public void RegisterRTTCallback(ServiceName in_serviceName, RTTCallback in_callback)
         {
-            m_registeredCallbacks[in_serviceName.Value] = in_callback;
+            m_registeredCallbacks[in_serviceName.Value.ToLower()] = in_callback;
         }
 
         /// <summary>
@@ -78,9 +74,10 @@ namespace BrainCloud.Internal
         /// </summary>
         public void DeregisterRTTCallback(ServiceName in_serviceName)
         {
-            if (m_registeredCallbacks.ContainsKey(in_serviceName.Value))
+            string toCheck = in_serviceName.Value.ToLower();
+            if (m_registeredCallbacks.ContainsKey(toCheck))
             {
-                m_registeredCallbacks.Remove(in_serviceName.Value);
+                m_registeredCallbacks.Remove(toCheck);
             }
         }
 
@@ -159,37 +156,13 @@ namespace BrainCloud.Internal
                 if (m_timeSinceLastRequest >= m_heartBeatTime)
                 {
                     m_timeSinceLastRequest = 0;
-                    send(buildHeartbeatRequest());
+                    send(buildHeartbeatRequest(), false);
                 }
             }
             //////
         }
 
         #region private
-        /// <summary>
-        /// 
-        /// </summary>
-        private void connect()
-        {
-            if (!m_bIsConnected)
-            {
-                try
-                {
-                    m_tcpClient = new TcpClient(m_endpoint["host"] as string, (int)m_endpoint["port"]);
-                    // Start an asynchronous read invoking DoRead to avoid lagging the user
-                    // interface.
-                    m_tcpClient.GetStream().BeginRead(m_readBuffer, 0, MAX_PACKETSIZE, new AsyncCallback(DoRead), null);
-                    m_bIsConnected = true;
-                    send(buildConnectionRequest());
-                }
-                catch (Exception e)
-                {
-                    m_clientRef.Log("On client connect exception " + e);
-                    addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "error", e.ToString()));
-                }
-            }
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -206,13 +179,11 @@ namespace BrainCloud.Internal
         /// </summary>
         private void disconnect()
         {
-            if (m_tcpClient != null) m_tcpClient.Close();
             if (m_webSocket != null) m_webSocket.Close();
 
             RTTConnectionID = "";
             RTTEventServer = "";
 
-            m_tcpClient = null;
             m_webSocket = null;
 
             m_bIsConnected = false;
@@ -221,8 +192,8 @@ namespace BrainCloud.Internal
         private string buildConnectionRequest()
         {
             Dictionary<string, object> system = new Dictionary<string, object>();
-            system["platform"] = m_clientRef.ReleasePlatform;
-            system["protocol"] = m_useWebSocket ? "ws" : "tcp";
+            system["platform"] = m_clientRef.ReleasePlatform.ToString();
+            system["protocol"] = "ws";
 
             Dictionary<string, object> jsonData = new Dictionary<string, object>();
             jsonData["appId"] = m_clientRef.AppId;
@@ -253,115 +224,35 @@ namespace BrainCloud.Internal
         /// <summary>
         /// 
         /// </summary>
-        private bool send(string in_message)
+        private bool send(string in_message, bool in_bLogMessage = true)
         {
             bool bMessageSent = false;
+            bool m_useWebSocket = m_currentConnectionType == RTTConnectionType.WEBSOCKET;
             // early return
-            if ((!m_useWebSocket && m_tcpClient == null) ||
-                (m_useWebSocket && m_webSocket == null))
+            if ((m_useWebSocket && m_webSocket == null))
             {
                 return bMessageSent;
             }
 
-            m_timeSinceLastRequest = 0;
             try
             {
-                m_clientRef.Log("RTT SEND: " + in_message);
+                if (in_bLogMessage)
+                    m_clientRef.Log("RTT SEND: " + in_message);
 
-                // TCP 
-                if (!m_useWebSocket)
+                // Web Socket 
+                if (m_useWebSocket)
                 {
-                    // Get a stream object for writing. 			
-                    NetworkStream stream = m_tcpClient.GetStream();
-
-                    // Convert string message to byte array.                 
-                    byte[] clientMessageAsByteArray = Encoding.ASCII.GetBytes(in_message);
-
-                    // Write byte array to tcpConnection stream.                 
-                    stream.Write(clientMessageAsByteArray, 0, clientMessageAsByteArray.Length);
-                    stream.Flush();
-                    bMessageSent = true;
-                }
-                // web socket
-                else
-                {
-                    byte[] data = Encoding.UTF8.GetBytes(in_message);
+                    byte[] data = Encoding.ASCII.GetBytes(in_message);
                     m_webSocket.SendAsync(data);
                 }
             }
-            catch (SocketException socketException)
+            catch (Exception socketException)
             {
                 m_clientRef.Log("send exception: " + socketException);
-                addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "error", socketException.ToString()));
+                addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "error", buildRTTRequestError(socketException.ToString())));
             }
 
             return bMessageSent;
-        }
-
-        private void DoRead(IAsyncResult ar)
-        {
-            int BytesRead;
-            try
-            {
-                // Finish asynchronous read into readBuffer and return number of bytes read.
-                BytesRead = m_tcpClient.GetStream().EndRead(ar);
-                if (BytesRead < 1)
-                {
-                    // if no bytes were read server has close. 
-                    addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "disconnect", "no bytes from server"));
-                    return;
-                }
-                onRecv(Encoding.ASCII.GetString(m_readBuffer, 0, BytesRead - 2));
-                // Start a new asynchronous read into readBuffer.
-                m_tcpClient.GetStream().BeginRead(m_readBuffer, 0, MAX_PACKETSIZE, new AsyncCallback(DoRead), null);
-
-            }
-            catch (Exception e)
-            {
-                addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "disconnect", e.ToString()));
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private void startReceiving()
-        {
-            try
-            {
-                byte[] sizeBuffer = new byte[MAX_PACKETSIZE];
-                int size;
-                byte[] buffer;
-                while (true)
-                {
-                    if (m_tcpClient == null) continue;
-                    if (m_tcpClient.Client.Connected && !m_bIsConnected)
-                    {
-                        m_bIsConnected = true;
-                        send(buildConnectionRequest());
-                    }
-                    // Get a stream object for reading 				
-                    NetworkStream stream = m_tcpClient.GetStream();
-                    if (stream.DataAvailable)
-                    {
-                        // get the message size 
-                        stream.Read(sizeBuffer, 0, MAX_PACKETSIZE);
-                        size = BitConverter.ToInt32(sizeBuffer, 0);
-                        // give the buffer its correct size.
-                        buffer = new byte[size];
-                        stream.Read(buffer, 0, size);
-
-                        string serverMessage = Encoding.ASCII.GetString(buffer);
-                        onRecv(serverMessage);
-                    }
-                    Thread.Sleep(1);
-                }
-            }
-            catch (SocketException socketException)
-            {
-                m_clientRef.Log("Socket exception: " + socketException);
-                addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "error", socketException.ToString()));
-            }
         }
 
         /// <summary>
@@ -400,13 +291,13 @@ namespace BrainCloud.Internal
         private void WebSocket_OnClose(BrainCloudWebSocket sender, int code, string reason)
         {
             m_clientRef.Log("Connection closed: " + reason);
-            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "disconnect", reason));
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "disconnect", reason));
         }
 
         private void Websocket_OnOpen(BrainCloudWebSocket accepted)
         {
             m_clientRef.Log("Connection established.");
-            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "connect", ""));
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "connect", ""));
         }
 
         private void WebSocket_OnMessage(BrainCloudWebSocket sender, byte[] data)
@@ -418,7 +309,7 @@ namespace BrainCloud.Internal
         private void WebSocket_OnError(BrainCloudWebSocket sender, string message)
         {
             m_clientRef.Log("Error: " + message);
-            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "error", message));
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "error", buildRTTRequestError(message)));
         }
 
         /// <summary>
@@ -426,8 +317,6 @@ namespace BrainCloud.Internal
         /// </summary>
         private void onRecv(string in_message)
         {
-            m_timeSinceLastRequest = 0;
-            m_clientRef.Log("RTT RECV: " + in_message);
             Dictionary<string, object> response = (Dictionary<string, object>)JsonReader.Deserialize(in_message);
 
             string service = (string)response["service"];
@@ -456,7 +345,10 @@ namespace BrainCloud.Internal
             }
 
             if (operation != "HEARTBEAT")
+            {
+                m_clientRef.Log("RTT RECV: " + in_message);
                 addRTTCommandResponse(new RTTCommandResponse(service.ToLower(), operation.ToLower(), in_message));
+            }
         }
 
         /// <summary>
@@ -469,7 +361,7 @@ namespace BrainCloud.Internal
             Array endpoints = (Array)jsonData["endpoints"];
             m_rttHeaders = (Dictionary<string, object>)jsonData["auth"];
 
-            if (m_useWebSocket)
+            if (m_currentConnectionType == RTTConnectionType.WEBSOCKET)
             {
                 //   1st choice: websocket + ssl
                 //   2nd: websocket
@@ -481,19 +373,8 @@ namespace BrainCloud.Internal
 
                 connectWebSocket();
             }
-            else
-            {
-                //   1st choice: tcp
-                //   2nd: tcp + ssl (not implemented yet)
-                m_endpoint = getEndpointForType(endpoints, "tcp", false);
-                if (m_endpoint == null)
-                {
-                    m_endpoint = getEndpointForType(endpoints, "tcp", true);
-                }
-
-                connect();
-            }
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -533,7 +414,7 @@ namespace BrainCloud.Internal
             // TODO::
             m_bIsConnected = false;
             m_clientRef.Log("RTT Connection Server Error: \n" + jsonError);
-            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value, "error", jsonError));
+            addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "error", jsonError));
         }
 
         private void addRTTCommandResponse(RTTCommandResponse in_command)
@@ -544,12 +425,19 @@ namespace BrainCloud.Internal
             }
         }
 
-        private TcpClient m_tcpClient;
+        private string buildRTTRequestError(string in_statusMessage)
+        {
+            Dictionary<string, object> json = new Dictionary<string, object>();
+            json["status"] = 403;
+            json["reason_code"] = ReasonCodes.RTT_CLIENT_ERROR;
+            json["status_message"] = in_statusMessage;
+            json["severity"] = "ERROR";
+
+            return JsonWriter.Serialize(json);
+        }
+
         private Dictionary<string, object> m_endpoint = null;
-
-        private byte[] m_readBuffer = new byte[MAX_PACKETSIZE];
-
-        private bool m_useWebSocket = false;
+        private RTTConnectionType m_currentConnectionType = RTTConnectionType.INVALID;
         private bool m_bIsConnected = false;
         private BrainCloudWebSocket m_webSocket = null;
 
@@ -589,11 +477,10 @@ namespace BrainCloud.Internal
 namespace BrainCloud
 {
     #region public enums
-    public enum eRTTConnectionType
+    public enum RTTConnectionType
     {
         INVALID,
         WEBSOCKET,
-        TCP,
 
         MAX
     }

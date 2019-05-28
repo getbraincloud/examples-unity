@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
-using LitJson;
+using BrainCloud.LitJson;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -138,7 +138,7 @@ public class GameController : MonoBehaviour
 	{
 		if (!App.Bc.Client.IsAuthenticated())
 		{
-			Application.LoadLevel("BrainCloudConnect");
+			SceneManager.LoadScene("BrainCloudConnect");
 		}
 		else
 		{
