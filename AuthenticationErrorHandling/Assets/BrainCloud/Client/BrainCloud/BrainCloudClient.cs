@@ -82,7 +82,7 @@ namespace BrainCloud
     /// Success callback for a Room Server response method.
     /// </summary>
     /// <param name="jsonResponse">The JSON response from the server</param>
-    public delegate void RSCallback(string jsonResponse);
+    public delegate void RSDataCallback(byte[] jsonResponse);
 
     /// <summary>
     /// Method called when a file upload has completed.
@@ -103,13 +103,7 @@ namespace BrainCloud
 
     public class BrainCloudClient
     {
-        /// <summary>Enable the usage of the BrainCloudWrapper singleton.</summary>
-        public static bool EnableSingletonMode = false;
-        public const string SingletonUseErrorMessage =
-            "Singleton usage is disabled. If called by mistake, use your own variable that holds an instance of the bcWrapper/bcClient.";
-
-
-        #region Private Data
+       #region Private Data
 
         private string s_defaultServerURL = "https://sharedprod.braincloudservers.com/dispatcherv2";
         private static BrainCloudClient s_instance;
@@ -129,6 +123,7 @@ namespace BrainCloud
 #endif
         private BrainCloudComms _comms;
         private RTTComms _rttComms;
+        private RelayComms _rsComms;
 
         private BrainCloudEntity _entityService;
         private BrainCloudGlobalEntity _globalEntityService;
@@ -168,6 +163,7 @@ namespace BrainCloud
         private BrainCloudLobby _lobbyService;
         private BrainCloudChat _chatService;
         private BrainCloudRTT _rttService;
+        private BrainCloudRelay _rsService;
 
         #endregion Private Data
 
@@ -191,6 +187,7 @@ namespace BrainCloud
         {
             _comms = new BrainCloudComms(this);
             _rttComms = new RTTComms(this);
+            _rsComms = new RelayComms(this);
 
             _entityService = new BrainCloudEntity(this);
 #if !XAMARIN
@@ -239,8 +236,12 @@ namespace BrainCloud
             // RTT 
             _lobbyService = new BrainCloudLobby(this);
             _chatService = new BrainCloudChat(this);
-            _rttService = new BrainCloudRTT(this);
+            _rttService = new BrainCloudRTT(_rttComms, this);
+            _rsService = new BrainCloudRelay(_rsComms);
         }
+
+        //---------------------------------------------------------------
+
         #endregion
 
         #region Properties
@@ -507,6 +508,11 @@ namespace BrainCloud
         public BrainCloudMessaging MessagingService
         {
             get { return _messagingService; }
+        }
+
+        public BrainCloudRelay RelayService
+        {
+            get { return _rsService; }
         }
         #endregion
 
@@ -779,47 +785,21 @@ namespace BrainCloud
                     }
                     break;
 
+                case eBrainCloudUpdateType.RS:
+                    {
+                        if (_rsComms != null) _rsComms.Update();
+                    }
+                    break;
+
                 default:
                 case eBrainCloudUpdateType.ALL:
                     {
                         if (_rttComms != null) _rttComms.Update();
                         if (_comms != null) _comms.Update();
+                        if (_rsComms != null) _rsComms.Update();
                     }
                     break;
             }
-        }
-
-        /// <summary>
-        /// Enables Real Time event for this session.
-        /// Real Time events are disabled by default. Usually events
-        /// need to be polled using GET_EVENTS. By enabling this, events will
-        /// be received instantly when they happen through a TCP connection to an Event Server.
-        ///
-        ///This function will first call requestClientConnection, then connect to the address
-        /// </summary>
-        /// <param name="in_connectionType"></param>
-        /// <param name="in_success"></param>
-        /// <param name="in_failure"></param>
-        /// <param name="cb_object"></param>
-        public void EnableRTT(eRTTConnectionType in_connectionType = eRTTConnectionType.WEBSOCKET, SuccessCallback in_success = null, FailureCallback in_failure = null, object cb_object = null)
-        {
-            _rttComms.EnableRTT(in_connectionType, in_success, in_failure, cb_object);
-        }
-
-        /// <summary>
-        /// Disables Real Time event for this session.
-        /// </summary>
-        public void DisableRTT()
-        {
-            _rttComms.DisableRTT();
-        }
-
-        /// <summary>
-        /// Returns true if RTT is enabled
-        /// </summary>
-        public bool IsRTTEnabled()
-        {
-            return _rttComms.IsRTTEnabled();
         }
 
         /// <summary>
@@ -921,103 +901,6 @@ namespace BrainCloud
             _comms.DeregisterNetworkErrorCallback();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public void RegisterRTTEventCallback(RTTCallback in_callback)
-        {
-            _rttComms.RegisterRTTCallback(ServiceName.Event, in_callback);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DeregisterRTTEventCallback()
-        {
-            _rttComms.DeregisterRTTCallback(ServiceName.Event);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void RegisterRTTChatCallback(RTTCallback in_callback)
-        {
-            _rttComms.RegisterRTTCallback(ServiceName.Chat, in_callback);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DeregisterRTTChatCallback()
-        {
-            _rttComms.DeregisterRTTCallback(ServiceName.Chat);
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void RegisterRTTPresenceCallback(RTTCallback in_callback)
-        {
-            _rttComms.RegisterRTTCallback(ServiceName.Presence, in_callback);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DeregisterRTTPresenceCallback()
-        {
-            _rttComms.DeregisterRTTCallback(ServiceName.Presence);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void RegisterRTTMessagingCallback(RTTCallback in_callback)
-        {
-            _rttComms.RegisterRTTCallback(ServiceName.Messaging, in_callback);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DeregisterRTTMessagingCallback()
-        {
-            _rttComms.DeregisterRTTCallback(ServiceName.Messaging);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void RegisterRTTLobbyCallback(RTTCallback in_callback)
-        {
-            _rttComms.RegisterRTTCallback(ServiceName.Lobby, in_callback);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DeregisterRTTLobbyCallback()
-        {
-            _rttComms.DeregisterRTTCallback(ServiceName.Lobby);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DeregisterAllRTTCallbacks()
-        {
-            _rttComms.DeregisterAllRTTCallbacks();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void SetRTTHeartBeatSeconds(int in_value)
-        {
-            _rttComms.SetRTTHeartBeatSeconds(in_value);
-        }
-
         /// <summary> Enable logging of brainCloud transactions (comms etc)</summary>
         /// <param name="enable">True if logging is to be enabled</param>
         public void EnableLogging(bool enable)
@@ -1043,6 +926,8 @@ namespace BrainCloud
         {
             _comms.ResetCommunication();
             _rttComms.DisableRTT();
+            _rsComms.Disconnect();
+            Update();
             AuthenticationService.ClearSavedProfileID();
         }
 
@@ -1278,7 +1163,7 @@ namespace BrainCloud
         internal void Log(string log)
         {
 #if UNITY_EDITOR
-            BrainCloudUnity.BrainCloudPlugin.ResponseEvent.AppendLog(log);
+            BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.AppendLog(log);
 #endif
 
             if (_loggingEnabled)
@@ -1339,7 +1224,6 @@ namespace BrainCloud
             platform = Platform.FromUnityRuntime();
 #endif
 
-
             _appVersion = appVersion;
             _platform = platform;
 
@@ -1353,50 +1237,5 @@ namespace BrainCloud
 #endif
             }
         }
-
-        #region Deprecated
-        /// <summary>A way to get a Singleton instance of brainCloud.</summary>
-        [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
-        public static BrainCloudClient Get()
-        {
-            if (!EnableSingletonMode)
-#pragma warning disable 162
-            {
-                throw new Exception(SingletonUseErrorMessage);
-            }
-#pragma warning restore 162
-
-
-            // DO NOT USE THIS INTERNALLY WITHIN BRAINCLOUD LIBRARY...
-            // THIS IS JUST A CONVENIENCE FOR APP DEVELOPERS TO STORE A SINGLETON!
-            if (s_instance == null)
-            {
-                s_instance = new BrainCloudClient();
-            }
-            return s_instance;
-        }
-
-        [Obsolete("Use of the *singleton* has been deprecated. We recommend that you create your own *variable* to hold an instance of the brainCloudWrapper. Explanation here: http://getbraincloud.com/apidocs/wrappers-clients-and-inconvenient-singletons/")]
-        public static BrainCloudClient Instance
-        {
-            get
-            {
-                if (!EnableSingletonMode)
-#pragma warning disable 162
-                {
-                    throw new Exception(SingletonUseErrorMessage);
-                }
-#pragma warning restore 162
-
-                // DO NOT USE THIS INTERNALLY WITHIN BRAINCLOUD LIBRARY...
-                // THIS IS JUST A CONVENIENCE FOR APP DEVELOPERS TO STORE A SINGLETON!
-                if (s_instance == null)
-                {
-                    s_instance = new BrainCloudClient();
-                }
-                return s_instance;
-            }
-        }
-        #endregion
     }
 }

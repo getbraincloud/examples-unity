@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using BrainCloud;
-using LitJson;
+using BrainCloud.LitJson;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
