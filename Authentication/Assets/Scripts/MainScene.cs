@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using System.Text;
-using LitJson;
+using BrainCloud.LitJson;
 
 public class MainScene : MonoBehaviour
 {

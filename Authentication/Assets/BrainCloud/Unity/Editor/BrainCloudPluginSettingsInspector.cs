@@ -1,14 +1,13 @@
 ﻿#if !DOT_NET
 
 using UnityEditor;
-using UnityEngine;
 
 namespace BrainCloudUnity
 {
-    namespace BrainCloudPlugin
+    namespace BrainCloudSettingsDLL
     {
-        [CustomEditor(typeof(BrainCloudPluginSettings))]
-        public class BrainCloudPluginSettingsInspector : BaseBrainCloudPluginSettingsInspector {
+        [CustomEditor(typeof(BrainCloudSettings))]
+        public class BrainCloudSettingsInspector : BaseBrainCloudSettingsInspector {
             
         }
     }

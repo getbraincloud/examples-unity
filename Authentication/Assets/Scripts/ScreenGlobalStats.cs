@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using LitJson;
+using BrainCloud.LitJson;
 using System.Collections.Generic;
 
 public class ScreenGlobalStats : BCScreen {
