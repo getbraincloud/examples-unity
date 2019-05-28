@@ -134,12 +134,17 @@ namespace BrainCloud
             double utcOffset = 0;
             try
             {
-                TimeZone localZone = TimeZone.CurrentTimeZone;
+#if NET_4_6
+                TimeZoneInfo localZone = TimeZoneInfo.Local;
+                utcOffset = localZone.BaseUtcOffset.TotalHours;
+#else
                 DateTime baseUTC = new DateTime();
-                // Calculate the local time and UTC offset.
+                TimeZone localZone = TimeZone.CurrentTimeZone;
                 DateTime localTime = localZone.ToLocalTime(baseUTC);
+                // Calculate the local time and UTC offset
                 TimeSpan localOffset = localZone.GetUtcOffset(localTime);
                 utcOffset = localOffset.TotalHours;
+#endif
             }
             catch (Exception)
             {
@@ -178,6 +183,6 @@ namespace BrainCloud
             return (long)((TimeZoneInfo.ConvertTimeToUtc(dateTime) -
                    new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
         }
-        #endregion
+#endregion
     }
 }

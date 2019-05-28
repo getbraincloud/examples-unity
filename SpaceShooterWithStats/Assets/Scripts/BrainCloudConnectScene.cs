@@ -1,7 +1,5 @@
-﻿using System;
-using UnityEngine;
-using System.Collections;
-using LitJson;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BrainCloudConnectScene : MonoBehaviour
 {
@@ -117,7 +115,7 @@ public class BrainCloudConnectScene : MonoBehaviour
     public void OnSuccess_Authenticate(string responseData, object cbObject)
     {
         AppendLog("Authenticate successful!");
-		Application.LoadLevel("Game");
+        SceneManager.LoadScene("Game");
     }
     
     public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
