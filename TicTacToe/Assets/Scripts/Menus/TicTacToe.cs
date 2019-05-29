@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BrainCloud;
-using LitJson;
+using BrainCloud.LitJson;
 using UnityEngine;
 
 #endregion
@@ -115,9 +115,9 @@ public class TicTacToe : GameScene
     private void enableRTT()
     {
         // Only Enable RTT if its not already started
-        if (!App.Bc.Client.IsRTTEnabled())
+        if (!App.Bc.RTTService.IsRTTEnabled())
         {
-            App.Bc.Client.EnableRTT(eRTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+            App.Bc.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
         }
         else
         {
@@ -133,7 +133,7 @@ public class TicTacToe : GameScene
         // match state
         queryMatchState();
 
-        App.Bc.Client.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
+        App.Bc.RTTService.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
     }
 
     // the listener, can parse the json and request just the updated match 

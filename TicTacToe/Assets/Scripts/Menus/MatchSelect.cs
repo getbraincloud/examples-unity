@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using BrainCloud;
-using LitJson;
+using BrainCloud.LitJson;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -44,9 +44,9 @@ public class MatchSelect : GameScene
     private void enableRTT()
     {
         // Only Enable RTT if its not already started
-        if (!App.Bc.Client.IsRTTEnabled())
+        if (!App.Bc.RTTService.IsRTTEnabled())
         {
-            App.Bc.Client.EnableRTT(eRTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+            App.Bc.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
         }
         else
         {
@@ -61,7 +61,7 @@ public class MatchSelect : GameScene
         queryMatchState();
         // LISTEN TO THE ASYNC CALLS, when we get one of these calls, lets just refresh 
         // match state
-        App.Bc.Client.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
+        App.Bc.RTTService.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
     }
 
     // the listener, can parse the json and request just the updated match 

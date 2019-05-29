@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using BrainCloud;
-using LitJson;
+using BrainCloud.LitJson;
 using UnityEngine;
 
 #endregion
