@@ -13,9 +13,49 @@ MonoBehaviour:
   m_Name: BrainCloudDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: 
-    LastSentRequest: 
-    LastResponse: 
-    FullLog: 
+    ProfileId: 228aeb3f-c972-4cc8-8de4-c1022c7898f5
+    LastSentRequest: "playerState READ \nnull"
+    LastResponse: "OnSuccess \n{\r\n    \"data\": \r\n        {\r\n            \"abTestingId\":
+      93,\r\n            \"lastLogin\": 1559160857494,\r\n            \"server_time\":
+      1559160857705,\r\n            \"refundCount\": 0,\r\n            \"timeZoneOffset\":
+      -5,\r\n            \"experiencePoints\": 0,\r\n            \"createdAt\": 1559160857491,\r\n
+      \           \"parentProfileId\": null,\r\n            \"emailAddress\": \"dsds\",\r\n
+      \           \"experienceLevel\": 0,\r\n            \"countryCode\": null,\r\n
+      \           \"vcClaimed\": 0,\r\n            \"currency\": \r\n                {},\r\n
+      \           \"id\": \"228aeb3f-c972-4cc8-8de4-c1022c7898f5\",\r\n            \"amountSpent\":
+      0,\r\n            \"previousLogin\": null,\r\n            \"playerName\": \"\",\r\n
+      \           \"pictureUrl\": null,\r\n            \"incoming_events\": \r\n                [],\r\n
+      \           \"languageCode\": \"en\",\r\n            \"vcPurchased\": 0,\r\n
+      \           \"isTester\": false,\r\n            \"loginCount\": 1,\r\n            \"xpCapped\":
+      false,\r\n            \"profileId\": \"228aeb3f-c972-4cc8-8de4-c1022c7898f5\",\r\n
+      \           \"sent_events\": \r\n                [],\r\n            \"statistics\":
+      \r\n                {}\r\n        },\r\n    \"status\": 200\r\n}"
+    FullLog: 'RESPONSE - 2019-05-29 4:14:18 PM
+
+      {"packetId":1,"responses":[{"data":{"abTestingId":93,"lastLogin":1559160857494,"server_time":1559160857705,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"createdAt":1559160857491,"parentProfileId":null,"emailAddress":"dsds","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"228aeb3f-c972-4cc8-8de4-c1022c7898f5","amountSpent":0,"previousLogin":null,"playerName":"","pictureUrl":null,"incoming_events":[],"languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":1,"xpCapped":false,"profileId":"228aeb3f-c972-4cc8-8de4-c1022c7898f5","sent_events":[],"statistics":{}},"status":200}]}
+
+
+      REQUEST - 2019-05-29 4:14:18 PM
+
+      {"packetId":1,"sessionId":"8s9e9filvtdu6bjgo6n4k5o9qn","gameId":"12500","messages":[{"service":"playerState","operation":"READ","data":null}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-05-29 4:14:18 PM
+
+      {"packetId":0,"responses":[{"data":{"abTestingId":93,"lastLogin":1559160857494,"server_time":1559160857528,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1559160857491,"parentProfileId":null,"emailAddress":"dsds","experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"228aeb3f-c972-4cc8-8de4-c1022c7898f5","amountSpent":0,"previousLogin":null,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"8s9e9filvtdu6bjgo6n4k5o9qn","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":1,"xpCapped":false,"profileId":"228aeb3f-c972-4cc8-8de4-c1022c7898f5","newUser":"true","playerSessionExpiry":1200,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{}},"status":200}]}
+
+
+      REQUEST - 2019-05-29 4:14:18 PM
+
+      {"packetId":0,"sessionId":null,"gameId":"12500","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"dsds","authenticationToken":"dsfs","authenticationType":"Email","forceCreate":true,"profileId":"","anonymousId":"0cad1449-d842-47d9-be89-7f38b695cf95","gameId":"12500","releasePlatform":"WINDOWS","gameVersion":"1.0","clientLibVersion":"4.0.0","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
+
+
+      SENDING REQUEST
+
+
+'
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}

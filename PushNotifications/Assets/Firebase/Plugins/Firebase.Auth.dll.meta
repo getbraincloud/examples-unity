@@ -1,28 +1,31 @@
 fileFormatVersion: 2
-guid: cf36e8bbedf14bc786dfcf542e5c0275
+guid: 275bd6b96a28470986154b9a995e191c
 labels:
 - gvh
-- gvh_version-5.2.1
+- gvh_version-6.0.0
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
   iconMap: {}
   executionOrder: {}
+  defineConstraints: []
   isPreloaded: 0
   isOverridable: 0
+  isExplicitlyReferenced: 0
+  validateReferences: 1
   platformData:
   - first:
       '': OSXIntel
     second:
       enabled: 1
       settings:
-        CPU: AnyCPU
+        CPU: x86
   - first:
       '': OSXIntel64
     second:
       enabled: 1
       settings:
-        CPU: AnyCPU
+        CPU: x86_64
   - first:
       '': Web
     second:

@@ -1,9 +1,9 @@
 fileFormatVersion: 2
-guid: dbe31a86b09548b388bbfbb78d11e724
-time_created: 1480838400
+guid: 5f3feda1a91343759b7eb58a29b492b7
 labels:
 - gvh
-- gvh_v5.2.1
+- gvh_version-6.0.0
+timeCreated: 1480838400
 PluginImporter:
   serializedVersion: 1
   iconMap: {}
@@ -26,27 +26,27 @@ PluginImporter:
     Linux:
       enabled: 0
       settings:
-        CPU: x86
+        CPU: None
     Linux64:
       enabled: 0
       settings:
-        CPU: x86_64
+        CPU: None
     LinuxUniversal:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
     OSXIntel:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
     OSXIntel64:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
     OSXUniversal:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
     Web:
       enabled: 0
       settings: {}
@@ -56,11 +56,11 @@ PluginImporter:
     Win:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
     Win64:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
     WindowsStoreApps:
       enabled: 0
       settings:
@@ -70,3 +70,6 @@ PluginImporter:
       settings:
         CompileFlags:
         FrameworkDependencies:
+  userData:
+  assetBundleName:
+  assetBundleVariant:

@@ -1,6 +1,6 @@
 ﻿#region
 
-using LitJson;
+using BrainCloud.LitJson;
 using UnityEngine;
 
 #endregion

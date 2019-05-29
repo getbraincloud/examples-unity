@@ -13,9 +13,76 @@ MonoBehaviour:
   m_Name: BrainCloudPluginDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: 
-    LastSentRequest: 
-    LastResponse: 
-    FullLog: 
+    ProfileId: bbd52266-5cba-4583-84a5-b64f6ecae369
+    LastSentRequest: "chat CHANNEL_DISCONNECT \n{\r\n    \"channelId\": \"22979:gl:main\"\r\n}"
+    LastResponse: "OnSuccess \nnull"
+    FullLog: 'REQUEST - 2019-04-12 2:34:57 PM
+
+      {"packetId":11,"sessionId":"n0o4frgb2na0qstm41s1vl2skt","gameId":"22979","messages":[{"service":"chat","operation":"CHANNEL_DISCONNECT","data":{"channelId":"22979:gl:main"}}]}
+
+
+      SENDING REQUEST
+
+
+      RTT RECV: {"service":"presence","operation":"INCOMING","data":{"from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"online":false,"summaryFriendData":{"rank":5},"activity":{}}}
+
+
+      RTT RECV: {"service":"presence","operation":"INCOMING","data":{"from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null,"cxs":["22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:nev23pnmv16algim9jadcisv0c"]},"online":true,"summaryFriendData":{"rank":5},"activity":{"LOCATION":"In
+      Main Menu","STATUS":"Idle"}}}
+
+
+      RTT RECV: {"service":"presence","operation":"INCOMING","data":{"from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null,"cxs":["22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:nev23pnmv16algim9jadcisv0c"]},"online":true,"summaryFriendData":{"rank":5},"activity":{"LOCATION":"Playing","STATUS":"Playing"}}}
+
+
+      RTT RECV: {"service":"presence","operation":"INCOMING","data":{"from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null,"cxs":["22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:nev23pnmv16algim9jadcisv0c"]},"online":true,"summaryFriendData":{"rank":5},"activity":{"LOCATION":"Playing","STATUS":"Playing"}}}
+
+
+      RESPONSE - 2019-04-12 2:34:54 PM
+
+      {"packetId":10,"responses":[{"data":{"presence":[{"user":{"id":"b5893516-718f-40c8-9d6d-94766fc30686","name":"jonesy123","pic":null},"online":false,"summaryFriendData":{"rank":1},"activity":{}},{"user":{"id":"61945956-1085-4b41-b03d-c38129f1abaf","name":"stevePCers","pic":null},"online":false,"summaryFriendData":{"rank":1},"activity":{}},{"user":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null,"cxs":["22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:nev23pnmv16algim9jadcisv0c"]},"online":true,"summaryFriendData":{"rank":5},"activity":{"LOCATION":"Playing","STATUS":"Playing"}}]},"status":200},{"data":null,"status":200},{"data":null,"status":200}]}
+
+
+      REQUEST - 2019-04-12 2:34:53 PM
+
+      {"packetId":10,"sessionId":"n0o4frgb2na0qstm41s1vl2skt","gameId":"22979","messages":[{"service":"presence","operation":"GET_PRESENCE_OF_FRIENDS","data":{"platform":"","includeOffline":true}},{"service":"presence","operation":"SET_VISIBILITY","data":{"visible":true}},{"service":"presence","operation":"UPDATE_ACTIVITY","data":{"activity":{"LOCATION":"In
+      Main Menu","STATUS":"Idle"}}}]}
+
+
+      SENDING REQUEST
+
+
+      RESPONSE - 2019-04-12 2:34:53 PM
+
+      {"packetId":9,"responses":[{"data":{"messages":[{"date":1554471540000,"ver":1,"msgId":"795889428480062","from":{"id":"09a9c9e3-bfd2-4a79-8ee0-730d9d695605","name":"Nicholas","pic":null},"chId":"22979:gl:main","content":{"text":"how
+      do i join the lobby","rich":{"lastConnectionId":"22979:09a9c9e3-bfd2-4a79-8ee0-730d9d695605:fo1gpg7kihj288gchj3e0bd1h9","timeSent":"1:38:59
+      PM","rank":4}}},{"date":1554471543880,"ver":1,"msgId":"795889430466623","from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"chId":"22979:gl:main","content":{"text":"quick
+      play","rich":{"lastConnectionId":"22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:rimli217ec11krec9ag9gjb9et","timeSent":"1:39:03
+      PM","rank":3}}},{"date":1554471726115,"ver":1,"msgId":"795889523770944","from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"chId":"22979:gl:main","content":{"text":"lets
+      try again","rich":{"lastConnectionId":"22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:rimli217ec11krec9ag9gjb9et","timeSent":"1:42:06
+      PM","rank":3}}},{"date":1554478960691,"ver":1,"msgId":"795893227873857","from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"chId":"22979:gl:main","content":{"text":"QUICK
+      JOIN IF UR AROUND","rich":{"lastConnectionId":"22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:vev4pg8l20a12mpgdavbimmr56","timeSent":"3:42:40
+      PM","rank":3}}},{"date":1554844661291,"ver":1,"msgId":"796080466581058","from":{"id":"5c3ac559-c943-49c0-a678-3317a9114e5e","name":"MarkMac","pic":null},"chId":"22979:gl:main","content":{"text":"Test","rich":{"lastConnectionId":"22979:5c3ac559-c943-49c0-a678-3317a9114e5e:bms2qepvco5j10d19n08mmn48e","timeSent":"9:17:40
+      PM","rank":2}}},{"date":1554901444941,"ver":1,"msgId":"796109539809859","from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"chId":"22979:gl:main","content":{"text":"in
+      lobby","rich":{"lastConnectionId":"22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:225r4rmphf5df0bfm3bmc7lumb","timeSent":"1:04:04
+      PM","rank":4}}},{"date":1554901599455,"ver":1,"msgId":"796109618921028","from":{"id":"5b397c1c-16db-4c51-af6c-1be13344b9f8","name":"Daivuk","pic":null},"chId":"22979:gl:main","content":{"text":"ok
+      up to date","rich":{"lastConnectionId":"22979:5b397c1c-16db-4c51-af6c-1be13344b9f8:jg3mkuf4a6rns01slokvgef6cm","timeSent":"1:06:39
+      PM","rank":8}}},{"date":1554917671420,"ver":1,"msgId":"796117847767109","from":{"id":"63dcb225-7676-456a-81e5-e1cf624fbc48","name":"PierreWebGL","pic":null},"chId":"22979:gl:main","content":{"text":"test","rich":{"lastConnectionId":"22979:63dcb225-7676-456a-81e5-e1cf624fbc48:vkseh4cm81q6atjk32ba9fuvht","timeSent":"5:34:30
+      PM","rank":1}}},{"date":1554989917217,"ver":1,"msgId":"796154837615174","from":{"id":"b5893516-718f-40c8-9d6d-94766fc30686","name":"jonesy123","pic":null},"chId":"22979:gl:main","content":{"text":"hello","rich":{"lastConnectionId":"22979:b5893516-718f-40c8-9d6d-94766fc30686:gtdm6ps6er70o9pmmh5l0dgjbq","timeSent":"1:38:37
+      PM","rank":1}}},{"date":1554994273013,"ver":1,"msgId":"796157067782727","from":{"id":"b5893516-718f-40c8-9d6d-94766fc30686","name":"jonesy123","pic":null},"chId":"22979:gl:main","content":{"text":"asda","rich":{"lastConnectionId":"22979:b5893516-718f-40c8-9d6d-94766fc30686:ecmtn05ia8149e3s3c3ck8jb3g","timeSent":"2:51:13
+      PM","rank":1}}},{"date":1554995510743,"ver":1,"msgId":"796157701500488","from":{"id":"b5893516-718f-40c8-9d6d-94766fc30686","name":"jonesy123","pic":null},"chId":"22979:gl:main","content":{"text":"asdas","rich":{"lastConnectionId":"22979:b5893516-718f-40c8-9d6d-94766fc30686:u4oedhog9jmamcj6m3pigak2","timeSent":"3:11:50
+      PM","rank":1}}},{"date":1555000894004,"ver":1,"msgId":"796160457730121","from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"chId":"22979:gl:main","content":{"text":"nope","rich":{"lastConnectionId":"22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:6ikldb29gvaaks6kcoiiankjhc","timeSent":"4:41:34
+      PM","rank":4}}},{"date":1555003954704,"ver":1,"msgId":"796162024808522","from":{"id":"b5893516-718f-40c8-9d6d-94766fc30686","name":"jonesy123","pic":null},"chId":"22979:gl:main","content":{"text":"tests","rich":{"lastConnectionId":"22979:b5893516-718f-40c8-9d6d-94766fc30686:g6ae5vo5viehc0eit48ug7vgc4","timeSent":"5:32:34
+      PM","rank":1}}},{"date":1555004183499,"ver":1,"msgId":"796162141951563","from":{"id":"5b397c1c-16db-4c51-af6c-1be13344b9f8","name":"Daivuk","pic":null},"chId":"22979:gl:main","content":{"text":"yo","rich":{"lastConnectionId":"22979:5b397c1c-16db-4c51-af6c-1be13344b9f8:osu8s0eb0s5l97f436bi2k53ta","timeSent":"5:36:23
+      PM","rank":8}}},{"date":1555073275934,"ver":1,"msgId":"796197517278284","from":{"id":"ef1eb560-9350-42df-bf14-5deaac52c3af","name":"111","pic":null},"chId":"22979:gl:main","content":{"text":"123123123","rich":{"lastConnectionId":"","timeSent":"12:47:55
+      PM","rank":1}}},{"date":1555073280481,"ver":1,"msgId":"796197519606349","from":{"id":"ef1eb560-9350-42df-bf14-5deaac52c3af","name":"111","pic":null},"chId":"22979:gl:main","content":{"text":"123123123","rich":{"lastConnectionId":"","timeSent":"12:48:00
+      PM","rank":1}}},{"date":1555073287481,"ver":1,"msgId":"796197523190350","from":{"id":"ef1eb560-9350-42df-bf14-5deaac52c3af","name":"111","pic":null},"chId":"22979:gl:main","content":{"text":"123123","rich":{"lastConnectionId":"","timeSent":"12:48:07
+      PM","rank":1}}},{"date":1555073289847,"ver":1,"msgId":"796197524401743","from":{"id":"ef1eb560-9350-42df-bf14-5deaac52c3af","name":"111","pic":null},"chId":"22979:gl:main","content":{"text":"213","rich":{"lastConnectionId":"","timeSent":"12:48:09
+      PM","rank":1}}},{"date":1555073293304,"ver":1,"msgId":"796197526171728","from":{"id":"ef1eb560-9350-42df-bf14-5deaac52c3af","name":"111","pic":null},"chId":"22979:gl:main","content":{"text":"12312312312","rich":{"lastConnectionId":"","timeSent":"12:48:13
+      PM","rank":1}}},{"date":1555073298379,"ver":1,"msgId":"796197528770129","from":{"id":"ef1eb560-9350-42df-bf14-5deaac52c3af","name":"111","pic":null},"chId":"22979:gl:main","content":{"text":"3333333333333333333333333","rich":{"lastConnectionId":"","timeSent":"12:48:18
+      PM","rank":1}}},{"date":1555073303288,"ver":1,"msgId":"796197531283538","from":{"id":"ef1eb560-9350-42df-bf14-5deaac52c3af","name":"111","pic":null},"chId":"22979:gl:main","content":{"text":"3123123","rich":{"lastConnectionId":"","timeSent":"12:48:23
+      PM","rank":1}}},{"date":1555083850510,"ver":1,"msgId":"796202931461203","from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"chId":"22979:gl:main","content":{"text":"Heyo!","rich":{"lastConnectionId":"22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:tm34hove0u1ibu9jp3pfl7gdb4","timeSent":"3:44:10
+      PM","rank":4}}},{"date":1555084216408,"ver":1,"msgId":"796203118800980","from":{"id":"76dbc48d-7b4e-4ab7-9425-fa3a3743aff1","name":"Clea","pic":null},"chId":"22979:gl:main","content":{"text":"Hi","rich":{"lastConnectionId":"22979:76dbc48d-7b4e-4ab7-9425-fa3a3743aff1:s3cksk6p2hbd7bhng5a6a9lq6p","timeSent":"3:50:15
+      PM","rank":2}}},{"date":1555090552480,"ver":1,"msgId":"796206362869845","from":{"id":"60d53f7b-476f-44c8-a676-b85f564d4bb3","name":"stever","pic":null},"chId":"22979:gl:main","content":{"text":"wassup","rich":{"lastConnectionId":"22979:60d53f7b-476f-44c8-a676-b85f564d4bb3:va8tdfiqu2hu9n2dthm9bs5h95","timeSent":"5:35:52
+      PM","rank":5}}},{"date":1555091561462,"ver":1,"msgId":"796206879468630","from":{"id":"64e59dbc-4d89-'
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}

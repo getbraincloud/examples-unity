@@ -2,6 +2,9 @@
 // brainCloud client source code
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
+#if (UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)
+#define USE_WEB_REQUEST //Comment out to force use of old WWW class on Unity 5.3+
+#endif
 
 using System;
 using System.Collections.Generic;
@@ -15,10 +18,17 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading;
 #else
+#if USE_WEB_REQUEST
+#if UNITY_5_3
+using UnityEngine.Experimental.Networking;
+#else
+using UnityEngine.Networking;
+#endif
+#endif
 using UnityEngine;
 #endif
 
-using JsonFx.Json;
+using BrainCloud.JsonFx.Json;
 
 namespace BrainCloud.Internal
 {
@@ -110,14 +120,14 @@ namespace BrainCloud.Internal
         ///while trying to successfully authenticate before the client 
         ///is disabled.
         ///<summary>
-        private int _identicalFailedAuthAttemptThreshold = 3; 
+        private int _identicalFailedAuthAttemptThreshold = 3;
 
         ///<summary>
         ///The current number of identical failed attempts at authenticating. This 
         ///will reset when a successful authentication is made.
         ///<summary>
         private int _identicalFailedAuthenticationAttempts = 0;
-        
+
         ///<summary>
         ///A blank reference for response data so we don't need to continually allocate new dictionaries when trying to
         ///make the data blank again.
@@ -127,7 +137,7 @@ namespace BrainCloud.Internal
         ///<summary>
         ///An array that stores the most recent response jsons as dictionaries.
         ///<summary>
-        private Dictionary<string, object>[] _recentResponseJsonData = {new Dictionary<string, object>(), new Dictionary<string, object>()};
+        private Dictionary<string, object>[] _recentResponseJsonData = { new Dictionary<string, object>(), new Dictionary<string, object>() };
 
         /// <summary>
         /// When we have too many authentication errors under the same credentials, 
@@ -501,7 +511,7 @@ namespace BrainCloud.Internal
                             }
 
 #if UNITY_EDITOR
-                            BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnNetworkError("NetworkError");
+                            BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnNetworkError("NetworkError");
 #endif
 
                             _networkErrorCallback();
@@ -529,7 +539,7 @@ namespace BrainCloud.Internal
             }
 
             //if the client is currently locked on authentication calls. 
-            if(tooManyAuthenticationAttempts())
+            if (tooManyAuthenticationAttempts())
             {
                 _clientRef.Log("TIMER ON");
                 _clientRef.Log(DateTime.Now.Subtract(_authenticationTimeoutStart).ToString());
@@ -561,7 +571,7 @@ namespace BrainCloud.Internal
                     if (_fileUploadSuccessCallback != null)
                     {
 #if UNITY_EDITOR
-                        BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnEvent(string.Format("{0} {1}", _fileUploads[i].UploadId, _fileUploads[i].Response));
+                        BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnEvent(string.Format("{0} {1}", _fileUploads[i].UploadId, _fileUploads[i].Response));
 #endif
 
                         _fileUploadSuccessCallback(_fileUploads[i].UploadId, _fileUploads[i].Response);
@@ -575,7 +585,7 @@ namespace BrainCloud.Internal
                     if (_fileUploadFailedCallback != null)
                     {
 #if UNITY_EDITOR
-                        BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnFailedResponse(_fileUploads[i].Response);
+                        BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnFailedResponse(_fileUploads[i].Response);
 #endif
 
                         _fileUploadFailedCallback(_fileUploads[i].UploadId, _fileUploads[i].StatusCode, _fileUploads[i].ReasonCode, _fileUploads[i].Response);
@@ -800,6 +810,25 @@ namespace BrainCloud.Internal
             return _identicalFailedAuthenticationAttempts >= _identicalFailedAuthAttemptThreshold;
         }
 
+        //save profileid and sessionId of response
+        void SaveProfileAndSessionIds(Dictionary<string, object> responseData, string data)
+        {
+            // save the session ID
+            string sessionId = GetJsonString(responseData, OperationParam.ServiceMessageSessionId.Value, null);
+            if (sessionId != null)
+            {
+                SessionID = sessionId;
+                _isAuthenticated = true;
+            }
+
+            // save the profile Id
+            string profileId = GetJsonString(responseData, OperationParam.ProfileId.Value, null);
+            if (profileId != null)
+            {
+                _clientRef.AuthenticationService.ProfileId = profileId;
+            }
+        }
+
         /// <summary>
         /// Handles the response bundle and calls registered callbacks.
         /// </summary>
@@ -827,12 +856,14 @@ namespace BrainCloud.Internal
             Dictionary<string, object> response = null;
             IList<Exception> exceptions = new List<Exception>();
 
+            string data = "";      
+            Dictionary<string, object> responseData = null;
             for (int j = 0; j < responseBundle.Length; ++j)
             {
                 response = responseBundle[j];
                 int statusCode = (int)response["status"];
-                string data = "";
-
+                data = "";
+                responseData = null;
                 //
                 // It's important to note here that a user error callback *might* call
                 // ResetCommunications() based on the error being returned.
@@ -860,27 +891,16 @@ namespace BrainCloud.Internal
                 if (statusCode == 200)
                 {
                     ResetKillSwitch();
-
-                    Dictionary<string, object> responseData = null;
+                    string service = sc.GetService();
                     if (response[OperationParam.ServiceMessageData.Value] != null)
                     {
                         responseData = (Dictionary<string, object>)response[OperationParam.ServiceMessageData.Value];
-
                         // send the data back as not formatted
                         data = JsonWriter.Serialize(response);
 
-                        // save the session ID
-                        string sessionId = GetJsonString(responseData, OperationParam.ServiceMessageSessionId.Value, null);
-                        if (sessionId != null)
+                        if (service == ServiceName.Authenticate.Value || service == ServiceName.Identity.Value)
                         {
-                            SessionID = sessionId;
-                            _isAuthenticated = true;
-                        }
-
-                        string profileId = GetJsonString(responseData, OperationParam.ProfileId.Value, null);
-                        if (profileId != null)
-                        {
-                            _clientRef.AuthenticationService.ProfileId = profileId;
+                            SaveProfileAndSessionIds(responseData, data);
                         }
                     }
 
@@ -909,6 +929,7 @@ namespace BrainCloud.Internal
                             _clientRef.AuthenticationService.ClearSavedProfileID();
                             ResetErrorCache();
                         }
+                        //either off of authenticate or identity call, be sure to save the profileId and sessionId
                         else if (operation == ServiceOperation.Authenticate.Value)
                         {
                             ProcessAuthenticate(data);
@@ -947,7 +968,7 @@ namespace BrainCloud.Internal
                             try
                             {
 #if UNITY_EDITOR
-                                BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnSuccess(data);
+                                BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnSuccess(data);
 #endif
 
                                 sc.GetCallback().OnSuccessCallback(data);
@@ -1014,7 +1035,7 @@ namespace BrainCloud.Internal
                                     string rewardsAsJson = JsonWriter.Serialize(apiRewards);
 
 #if UNITY_EDITOR
-                                    BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnReward(rewardsAsJson);
+                                    BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnReward(rewardsAsJson);
 #endif
 
                                     _rewardCallback(rewardsAsJson);
@@ -1035,7 +1056,7 @@ namespace BrainCloud.Internal
                     string errorJson = "";
 
                     //if it was an authentication call 
-                    if(sc.GetOperation() == "AUTHENTICATE")
+                    if (sc.GetOperation() == ServiceOperation.Authenticate.Value)
                     {
                         //swap the recent responses, so you have the newest one, and the one last time you came through.
                         _recentResponseJsonData[1] = _recentResponseJsonData[0];
@@ -1045,16 +1066,16 @@ namespace BrainCloud.Internal
                         //is attempting the exact same authentication call. 
                         bool responsesAreTheSame = true;
                         //if the data has different lengths, they're obviously not the same
-                        if(_recentResponseJsonData[0].Count == _recentResponseJsonData[1].Count)
+                        if (_recentResponseJsonData[0].Count == _recentResponseJsonData[1].Count)
                         {
-                            foreach(var pair in _recentResponseJsonData[0])
+                            foreach (var pair in _recentResponseJsonData[0])
                             {
                                 object value = null;
                                 //if there is ever a time they're not the same value, then they are not the same
-                                if(_recentResponseJsonData[1].TryGetValue(pair.Key, out value))
+                                if (_recentResponseJsonData[1].TryGetValue(pair.Key, out value))
                                 {
                                     //if the values are not the same theyre different
-                                    if(value.ToString() != pair.Value.ToString())
+                                    if (value.ToString() != pair.Value.ToString())
                                     {
                                         responsesAreTheSame = false;
                                         break;
@@ -1066,7 +1087,7 @@ namespace BrainCloud.Internal
                                     responsesAreTheSame = false;
                                     break;
                                 }
-                            } 
+                            }
                         }
                         else
                         {
@@ -1075,10 +1096,10 @@ namespace BrainCloud.Internal
                         }
 
                         //if we haven't already gone above the threshold and are waiting for the timer or a 200 response to reset things
-                        if(!tooManyAuthenticationAttempts())
+                        if (!tooManyAuthenticationAttempts())
                         {
                             //we either increment the amount of identical failed authentication attempts, or reset it because its not identical. 
-                            if(responsesAreTheSame == true)
+                            if (responsesAreTheSame == true)
                             {
                                 _identicalFailedAuthenticationAttempts++;
                             }
@@ -1164,7 +1185,7 @@ namespace BrainCloud.Internal
                         }
 
 #if UNITY_EDITOR
-                        BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnFailedResponse(errorJson);
+                        BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnFailedResponse(errorJson);
 #endif
 
                         _globalErrorCallback(statusCode, reasonCode, errorJson, cbObject);
@@ -1185,7 +1206,7 @@ namespace BrainCloud.Internal
                     eventsJsonObjUnity["events"] = bundleObj.events;
                     string eventsAsJsonUnity = JsonWriter.Serialize(eventsJsonObjUnity);
 
-                    BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnEvent(eventsAsJsonUnity);
+                    BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnEvent(eventsAsJsonUnity);
                 }
                 catch (Exception)
                 {
@@ -1242,16 +1263,16 @@ namespace BrainCloud.Internal
 
             //Authentication check for kill switch. 
             //did the client make an authentication call?
-            if(operation == ServiceOperation.Authenticate.Value)
+            if (operation == ServiceOperation.Authenticate.Value)
             {
                 _clientRef.Log("Failed Authentication Call");
 
                 string num;
                 num = _identicalFailedAuthenticationAttempts.ToString();
                 _clientRef.Log("Current number of identical failed authentications: " + num);
-                
+
                 //have the attempts gone beyond the threshold?
-                if(tooManyAuthenticationAttempts())
+                if (tooManyAuthenticationAttempts())
                 {
                     //we have a problem now, it seems they are contiuously trying to authenticate and sending us too many errors.
                     //we are going to now engage the killswitch and disable the client. This will act differently however. client will not
@@ -1260,7 +1281,7 @@ namespace BrainCloud.Internal
                     _killSwitchEngaged = true;
                     ResetAuthenticationTimer();
                 }
-                
+
             }
         }
 
@@ -1436,17 +1457,17 @@ namespace BrainCloud.Internal
                     }
                     else
                     {
-                        if(tooManyAuthenticationAttempts())
+                        if (tooManyAuthenticationAttempts())
                         {
                             FakeErrorResponse(requestState, StatusCodes.CLIENT_NETWORK_ERROR, ReasonCodes.CLIENT_DISABLED_FAILED_AUTH,
                                 "Client has been disabled due to identical repeat Authentication calls that are throwing errors. Authenticating with the same credentials is disabled for 30 seconds");
-                            requestState = null;   
+                            requestState = null;
                         }
                         else
                         {
                             FakeErrorResponse(requestState, StatusCodes.CLIENT_NETWORK_ERROR, ReasonCodes.CLIENT_DISABLED,
                                 "Client has been disabled due to repeated errors from a single API call");
-                            requestState = null;   
+                            requestState = null;
                         }
                     }
                 }
@@ -1507,10 +1528,10 @@ namespace BrainCloud.Internal
             string sig = CalculateMD5Hash(jsonRequestString + SecretKey);
 
 #if UNITY_EDITOR
-            //Sending Data to the Unity Debug Plugin for ease of developer debugging when in the Editor
+            //Sending Data to the brainCloud Debug Info for ease of developer debugging when in the Unity Editor
             try
             {
-                BrainCloudUnity.BrainCloudPlugin.ResponseEvent.ClearLastSentRequest();
+                BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.ClearLastSentRequest();
                 Dictionary<string, object> requestData =
                     JsonReader.Deserialize<Dictionary<string, object>>(jsonRequestString);
                 Dictionary<string, object>[] messagesDataList = (Dictionary<string, object>[])requestData["messages"];
@@ -1522,7 +1543,7 @@ namespace BrainCloud.Internal
                     var dataList = messagesData["data"];
                     var dataValue = JsonWriter.Serialize(dataList);
 
-                    BrainCloudUnity.BrainCloudPlugin.ResponseEvent.OnSentRequest(
+                    BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnSentRequest(
                         string.Format("{0} {1}", serviceValue, operationValue), dataValue);
                 }
             }
@@ -1554,7 +1575,20 @@ namespace BrainCloud.Internal
                 {
                     formTable["X-APPID"] = AppId;
                 }
+#if USE_WEB_REQUEST
+                UnityWebRequest request  = UnityWebRequest.Post(ServerURL, formTable);
+                request.SetRequestHeader("Content-Type", "application/json; charset=utf-8");
+                request.SetRequestHeader("X-SIG", sig);
+                UploadHandler uh = new UploadHandlerRaw(byteArray);
+                request.uploadHandler = uh;
+                if (AppId != null && AppId.Length > 0)
+                {
+                    request.SetRequestHeader("X-APPID", AppId);
+                }
+                request.SendWebRequest();
+#else
                 WWW request = new WWW(ServerURL, byteArray, formTable);
+#endif
                 requestState.WebRequest = request;
 #else
 
@@ -1628,10 +1662,17 @@ namespace BrainCloud.Internal
             {
                 status = RequestState.eWebRequestStatus.STATUS_ERROR;
             }
+#if USE_WEB_REQUEST
+            else if (_activeRequest.WebRequest.downloadHandler.isDone)
+            {
+                status = RequestState.eWebRequestStatus.STATUS_DONE;
+            }
+#else
             else if (_activeRequest.WebRequest.isDone)
             {
                 status = RequestState.eWebRequestStatus.STATUS_DONE;
             }
+#endif
 #else
             status = _activeRequest.DotNetRequestStatus;
 #endif
@@ -1654,7 +1695,11 @@ namespace BrainCloud.Internal
             }
             else
             {
+#if USE_WEB_REQUEST
+                response = _activeRequest.WebRequest.downloadHandler.text;
+#else
                 response = _activeRequest.WebRequest.text;
+#endif
             }
 #else
             response = _activeRequest.DotNetResponseString;

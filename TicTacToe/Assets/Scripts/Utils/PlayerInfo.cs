@@ -1,7 +1,7 @@
 ﻿#region
 
 using System;
-using LitJson;
+using BrainCloud.LitJson;
 
 #endregion
 
