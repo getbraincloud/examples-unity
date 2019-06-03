@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56a97abc078c945fc95d75a6dd902d96, type: 3}
   m_Name: BrainCloudSettingsManual
   m_EditorClassIdentifier: 
-  m_dispatchUrl: 
   m_serverURL: https://sharedprod.braincloudservers.com
   m_secretKey: 
   m_appId: 
-  m_appVersion: 1.0.0
-  m_appIdSecrets: []
+  m_appVersion: 
+  m_appIdSecrets:
+  - appName: 
+    appId: 
+    appSecret: 
   m_enableLogging: 0

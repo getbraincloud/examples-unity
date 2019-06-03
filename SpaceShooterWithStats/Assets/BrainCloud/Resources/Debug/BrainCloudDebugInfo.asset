@@ -13,51 +13,9 @@ MonoBehaviour:
   m_Name: BrainCloudDebugInfo
   m_EditorClassIdentifier: 
   DebugInformation:
-    ProfileId: cc67a1b0-a434-4ac8-bedf-c7978208e85a
-    LastSentRequest: "playerStatistics UPDATE \n{\r\n    \"statistics\": \r\n        {\r\n
-      \           \"enemyShipsKilled\": 11,\r\n            \"asteroidsDestroyed\":
-      56,\r\n            \"shotsFired\": 148,\r\n            \"gamesPlayed\": 1\r\n
-      \       }\r\n}"
-    LastResponse: "OnEvent \n{\r\n    \"events\": \r\n        []\r\n}"
-    FullLog: 'RESPONSE - 2019-05-28 1:55:55 PM
-
-      {"packetId":2,"responses":[{"data":{"rewardDetails":{},"currency":{},"rewards":{},"statistics":{"asteroidsDestroyed":56,"enemiesKilled":0,"enemyShipsKilled":11,"gamesPlayed":1,"shotsFired":148}},"status":200}],"events":[]}
-
-
-      REQUEST - 2019-05-28 1:55:55 PM
-
-      {"packetId":2,"sessionId":"5avol93l40od0jue5ob35ju86p","gameId":"12186","messages":[{"service":"playerStatistics","operation":"UPDATE","data":{"statistics":{"enemyShipsKilled":11,"asteroidsDestroyed":56,"shotsFired":148,"gamesPlayed":1}}}]}
-
-
-      SENDING REQUEST
-
-
-      RESPONSE - 2019-05-28 1:54:48 PM
-
-      {"packetId":1,"responses":[{"data":{"statistics":{"asteroidsDestroyed":0,"enemiesKilled":0,"enemyShipsKilled":0,"gamesPlayed":0,"shotsFired":0}},"status":200}],"events":[]}
-
-
-      REQUEST - 2019-05-28 1:54:48 PM
-
-      {"packetId":1,"sessionId":"5avol93l40od0jue5ob35ju86p","gameId":"12186","messages":[{"service":"playerStatistics","operation":"READ","data":null}]}
-
-
-      SENDING REQUEST
-
-
-      RESPONSE - 2019-05-28 1:54:48 PM
-
-      {"packetId":0,"responses":[{"data":{"abTestingId":66,"lastLogin":1559066088062,"server_time":1559066088081,"refundCount":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1559066088060,"parentProfileId":null,"emailAddress":null,"experienceLevel":0,"countryCode":null,"vcClaimed":0,"currency":{},"id":"cc67a1b0-a434-4ac8-bedf-c7978208e85a","amountSpent":0,"previousLogin":null,"playerName":"","pictureUrl":null,"incoming_events":[],"sessionId":"5avol93l40od0jue5ob35ju86p","languageCode":"en","vcPurchased":0,"isTester":false,"loginCount":1,"xpCapped":false,"profileId":"cc67a1b0-a434-4ac8-bedf-c7978208e85a","newUser":"true","playerSessionExpiry":1200,"sent_events":[],"maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"asteroidsDestroyed":0,"enemiesKilled":0,"enemyShipsKilled":0,"gamesPlayed":0,"shotsFired":0}},"status":200}]}
-
-
-      REQUEST - 2019-05-28 1:54:47 PM
-
-      {"packetId":0,"sessionId":null,"gameId":"12186","messages":[{"service":"authenticationV2","operation":"AUTHENTICATE","data":{"externalId":"stevej123","authenticationToken":"123123123","authenticationType":"Universal","forceCreate":true,"profileId":"","anonymousId":"463db678-495d-4cac-be4c-767c7d3cca70","gameId":"12186","releasePlatform":"WINDOWS","gameVersion":"1.0","clientLibVersion":"4.0.0","clientLib":"csharp-unity","countryCode":"","languageCode":"en","timeZoneOffset":-5}}]}
-
-
-      SENDING REQUEST
-
-
-'
+    ProfileId: 
+    LastSentRequest: 
+    LastResponse: 
+    FullLog: 
     ConsoleLogOffset: {x: 0, y: 0}
   DebugScrollPosition: {x: 0, y: 0}
