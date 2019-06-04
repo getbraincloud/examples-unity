@@ -117,7 +117,8 @@ namespace BrainCloudUNETExample
         public void ConfirmCreateGame()
         {
             m_inputField.text = m_inputField.text.Trim();
-            GPlayerMgr.Instance.ValidateString(m_inputField.text, OnValidateStringSuccess, OnValidateStringError);
+            
+            OnConfirmCreateGame(m_inputField.text);
         }
 
         public void OpenLayoutDropdown()

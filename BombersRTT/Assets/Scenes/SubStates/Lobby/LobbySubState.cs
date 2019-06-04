@@ -310,7 +310,9 @@ namespace BrainCloudUNETExample
         public void StartGame()
         {
             m_inputField.text = m_inputField.text.Trim();
-            GPlayerMgr.Instance.ValidateString(m_inputField.text, OnValidateStringSuccess, OnValidateStringError);
+            
+            OnStartGame();
+            
         }
 
         public void DisplayGlobalChat(bool in_value)

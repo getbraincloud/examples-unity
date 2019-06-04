@@ -712,21 +712,6 @@ namespace Gameframework
             }
             return toReturn;
         }
-
-        public void ValidateString(string in_string, SuccessCallback success = null, FailureCallback failure = null)
-        {
-            if (in_string.Length < MIN_CHARACTERS_GAME_NAME)
-            {
-                HudHelper.DisplayMessageDialog("DISALLOWED NAME", "THE NAME MUST BE AT LEAST " + MIN_CHARACTERS_GAME_NAME + " CHARACTERS LONG.", "OK");
-                return;
-            }
-            m_validateStringSuccess = success;
-            m_validateStringFailure = failure;
-            GStateManager.Instance.EnableLoadingSpinner(true);
-            Dictionary<string, object> data = new Dictionary<string, object>();
-            data[BrainCloudConsts.JSON_IN_STRING] = in_string;
-            GCore.Wrapper.ScriptService.RunScript("WebPurifyString", JsonWriter.Serialize(data), OnWebPurifyStringSuccess, OnWebPurifyStringError, data);
-        }
         #endregion
 
         #region private
@@ -1089,71 +1074,7 @@ namespace Gameframework
                 GCore.Wrapper.Client.PresenceService.UpdateActivity(JsonWriter.Serialize(activity));
             }
         }
-
-        private void OnWebPurifyStringSuccess(string in_stringData, object in_obj)
-        {
-            GStateManager.Instance.EnableLoadingSpinner(false);
-            GDebug.Log(string.Format("Success | {0}", in_stringData));
-
-            Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(in_stringData);
-            Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage[BrainCloudConsts.JSON_DATA];
-            Dictionary<string, object> jsonResponse = (Dictionary<string, object>)jsonData[BrainCloudConsts.JSON_RESPONSE];
-
-            if ((int)jsonResponse["status"] == 200)
-            {
-                if (jsonResponse.ContainsKey("reason_code") && (int)jsonResponse["reason_code"] == ReasonCodes.NAME_CONTAINS_PROFANITY)
-                {
-                    OnWebPurifyStringError((int)jsonResponse["status"], (int)jsonResponse["reason_code"], "Name contains profanity.", null);
-                }
-                else
-                {
-                    // Name is valid, call the success callback.
-                    string validString = "";
-                    if (jsonResponse.ContainsKey("validString"))
-                        validString = (string)jsonResponse["validString"];
-                    if (m_validateStringSuccess != null)
-                    {
-                        m_validateStringSuccess(validString, null);
-                        m_validateStringSuccess = null;
-                    }
-                }
-            }
-            else if ((int)jsonResponse["status"] == 400 || (int)jsonResponse["status"] == 500)
-            {
-                OnWebPurifyStringError((int)jsonResponse["status"], (int)jsonResponse["reason_code"], (string)jsonResponse["status_message"], null);
-            }
-        }
-
-        private void OnWebPurifyStringError(int statusCode, int reasonCode, string in_stringData, object in_obj)
-        {
-            GStateManager.Instance.EnableLoadingSpinner(false);
-            GDebug.Log(string.Format("Failed | {0}  {1}  {2}", statusCode, reasonCode, in_stringData));
-
-            switch (reasonCode)
-            {
-                case ReasonCodes.NAME_CONTAINS_PROFANITY:
-                    HudHelper.DisplayMessageDialog("DISALLOWED NAME", "THIS NAME IS CONSIDERED INAPPROPRIATE.\n PLEASE ENTER ANOTHER ONE.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_NOT_CONFIGURED:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY NOT CONFIGURED, PLEASE TRY AGAIN.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_EXCEPTION:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY EXCEPTION, PLEASE TRY AGAIN.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_FAILURE:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY FAILURE, PLEASE TRY AGAIN.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_NOT_ENABLED:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY IS NOT ENABLED", "OK");
-                    break;
-            }
-            if (m_validateStringFailure != null)
-            {
-                m_validateStringFailure(0, 0, "", null);
-                m_validateStringFailure = null;
-            }
-        }
-
+        
         public const string LOCATION_MAIN_MENU = "In Main Menu";
         public const string LOCATION_LOBBY = "In Lobby";
         public const string LOCATION_GAME = "Playing";
