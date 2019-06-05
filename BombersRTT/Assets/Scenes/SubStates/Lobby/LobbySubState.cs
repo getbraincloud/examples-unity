@@ -32,16 +32,18 @@ namespace BrainCloudUNETExample
             m_teamRedItems = new List<PlayerData>();
 
             m_currentMemberCount = 0;
-            m_gameName = GameObject.Find("GameName").transform.Find("Text").GetComponent<Text>();
-            m_waitingForPlayers = GameObject.Find("Waiting...").GetComponent<Text>();
-            m_gameQuitButton = GameObject.Find("ButtonQuitGame");
-            m_gameStartButton = GameObject.Find("ButtonStartGame");
-            m_chatGroupLobby = GameObject.Find("ChatGroupLocal");
-            m_chatGroupGlobal = GameObject.Find("ChatGroupGlobal");
+            m_gameName = transform.FindDeepChild("GameName").transform.Find("Text").GetComponent<Text>();
+            m_waitingForPlayers = transform.FindDeepChild("Waiting...").GetComponent<Text>();
+            m_gameQuitButton = transform.FindDeepChild("ButtonQuitGame").gameObject;
+            m_gameStartButton = transform.FindDeepChild("ButtonStartGame").gameObject;
+            m_chatGroupLobby = transform.FindDeepChild("ChatGroupLocal").gameObject;
+            m_chatGroupGlobal = transform.FindDeepChild("ChatGroupGlobal").gameObject;
 
-            m_optionsAndGameGroup = GameObject.Find("OptionsAndGameGroup");
+            m_optionsAndGameGroup = transform.FindDeepChild("OptionsAndGameGroup").gameObject;
+            m_gameButtons = transform.FindDeepChild("GameButtons").gameObject;
+            m_panelLeft = transform.FindDeepChild("PanelLeft").GetComponent<Canvas>();
 
-            m_titleField = GameObject.Find("Title Field");
+            m_titleField = transform.FindDeepChild("Title Field").gameObject;
             m_editButton = m_titleField.transform.Find("EditButton").gameObject;
             m_lobbyGameOptionsHost = m_optionsAndGameGroup.transform.Find("lobbyGameOptionsHost").gameObject;
             m_lobbyGameOptionsTester = m_optionsAndGameGroup.transform.Find("lobbyGameOptionsTester").gameObject;
@@ -51,27 +53,27 @@ namespace BrainCloudUNETExample
             SetupLobbyDisplaySettings();
             SetupTesterSettings();
 
-            m_changeTeamButton = GameObject.Find("ButtonChangeTeam");
+            m_changeTeamButton = transform.FindDeepChild("ButtonChangeTeam").gameObject;
 
-            GameObject tabGlobal = GameObject.Find("TabGlobal");
-            GameObject tabLocal = GameObject.Find("TabLocal");
+            GameObject tabGlobal = transform.FindDeepChild("TabGlobal").gameObject;
+            GameObject tabLocal = transform.FindDeepChild("TabLocal").gameObject;
 
             m_lobbyChatNotification = tabLocal.transform.FindDeepChild("notificationBadge").gameObject;
             m_globalChatNotification = tabGlobal.transform.FindDeepChild("notificationBadge").gameObject;
 
-            populateGlobalChatWithExistingMessages();
-
             GEventManager.StartListening("NEW_GLOBAL_CHAT", onNewGlobalChat);
             GEventManager.StartListening("NEW_LOBBY_CHAT", onNewLobbyChat);
-
-            // start with lobby chat
-            DisplayGlobalChat(false);
 
             GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_LOBBY, GPlayerMgr.STATUS_IDLE, BombersNetworkManager.LobbyInfo.LobbyId);
             m_initialized = true;
 
             _stateInfo = new StateInfo(STATE_NAME, this);
             base.Start();
+
+            populateGlobalChatWithExistingMessages();
+
+            // start with lobby chat
+            DisplayGlobalChat(false);
         }
 
         private void SetupLobbyDisplaySettings()
@@ -176,7 +178,8 @@ namespace BrainCloudUNETExample
 
         void Update()
         {
-            OnWaitingForPlayersWindow();
+            if (!m_panelLeft.enabled)
+                OnWaitingForPlayersWindow();
 
             // Deselect dropdowns after a mouse click 
             if (Input.GetMouseButtonUp(0))
@@ -540,7 +543,13 @@ namespace BrainCloudUNETExample
 
         private void setLaunchingDisplay()
         {
+            m_titleField.SetActive(false);
+            m_optionsAndGameGroup.SetActive(false);
+            m_gameButtons.SetActive(false);
+            m_panelLeft.enabled = true;
+
             m_waitingForPlayers.text = "LAUNCHING...";
+
             m_gameStartButton.GetComponent<Button>().interactable = false;
             m_gameQuitButton.GetComponent<Button>().interactable = false;
             m_changeTeamButton.GetComponent<Button>().interactable = false;
@@ -665,6 +674,8 @@ namespace BrainCloudUNETExample
         private GameObject m_lobbyGameOptionsTester = null;
         private GameObject m_editButton = null;
         private GameObject m_titleField = null;
+        private GameObject m_gameButtons = null;
+        private Canvas m_panelLeft = null;
 
         private GameObject m_changeTeamButton = null;
         private GameObject m_lobbyChatNotification = null;

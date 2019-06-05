@@ -597,7 +597,8 @@ namespace BrainCloudUNETExample.Game
                 return;
             }
 
-            m_gMan.m_shotsFired++;
+            if (!m_playerPlane.IsServerBot && (IsLocalPlayer || _hasAuthority))
+                m_gMan.m_shotsFired++;
 
             CmdSpawnBullet();
         }

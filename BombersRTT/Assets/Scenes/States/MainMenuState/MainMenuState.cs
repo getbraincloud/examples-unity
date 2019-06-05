@@ -49,6 +49,8 @@ namespace BrainCloudUNETExample
         private GameObject StoreButtonBottom = null;
         [SerializeField]
         private GameObject QuitMenu = null;
+        [SerializeField]
+        private GameObject LeftButtonGroup = null;
 
         [SerializeField]
         private Button CustomGameButton = null;
@@ -118,6 +120,11 @@ namespace BrainCloudUNETExample
             StoreButtonTop.SetActive(true);
             StoreButtonBottom.SetActive(false);
 #endif
+
+#if UNITY_WEBGL
+            LeftButtonGroup.SetActive(false);
+#endif
+
             GPlayerMgr.Instance.GetXpData();
         }
 
@@ -165,11 +172,12 @@ namespace BrainCloudUNETExample
         #region Public
         public void Update()
         {
+#if !UNITY_WEBGL
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 QuitMenu.SetActive(true);
             }
-
+#endif
             // Currently joining a game, disable all buttons except chat.
             if (GStateManager.Instance.CurrentSubStateId == JoiningGameSubState.STATE_NAME || GStateManager.Instance.CurrentSubStateId == LobbySubState.STATE_NAME)
             {
@@ -647,7 +655,10 @@ namespace BrainCloudUNETExample
 
             if ((int)jsonResponse["status"] == 200)
             {
-                GPlayerMgr.Instance.PlayerData.PlayerName = m_inputField.text;
+                if (jsonResponse.ContainsKey("reason_code") && (int)jsonResponse["reason_code"] == ReasonCodes.NAME_CONTAINS_PROFANITY)
+                    OnUpdateUserNameError((int)jsonResponse["status"], (int)jsonResponse["reason_code"], "", null);
+                else
+                    GPlayerMgr.Instance.PlayerData.PlayerName = m_inputField.text;
             }
             else if ((int)jsonResponse["status"] == 400 || (int)jsonResponse["status"] == 500)
             {

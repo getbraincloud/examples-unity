@@ -33,6 +33,11 @@ namespace BrainCloudUNETExample
             m_inputField = transform.FindDeepChild("Room Name").GetComponent<InputField>();
             m_inputField.characterLimit = GPlayerMgr.MAX_CHARACTERS_GAME_NAME;
 
+            // update the Max Players default and max values.
+            Slider maxPlayersSlider = transform.FindDeepChild("MaxPlayersSlider").GetComponent<Slider>();
+            maxPlayersSlider.value = GConfigManager.GetIntValue("MaxPlayersDefault") / 2;
+            maxPlayersSlider.maxValue = GConfigManager.GetIntValue("MaxPlayers") / 2;
+
             // updated region selection
             BombersNetworkManager.Instance.SetSelectedRegion(m_regions[m_regionListSelection].Lobby);
 
@@ -159,6 +164,11 @@ namespace BrainCloudUNETExample
         {
             m_inputWasFocused = true;
         }
+
+        public void OnMaxPlayers(float in_slider)
+        {
+            m_roomMaxPlayers = (int)in_slider * 2;
+        }
         #endregion
 
         #region Private
@@ -176,7 +186,6 @@ namespace BrainCloudUNETExample
 
         private void OnConfirmCreateGame(string in_name)
         {
-            m_roomMaxPlayers = int.Parse(this.transform.FindDeepChild("Max Players").GetComponent<InputField>().text.ToString());
             m_roomLevelRangeMax = int.Parse(this.transform.FindDeepChild("Box 2").GetComponent<InputField>().text.ToString());
             m_roomLevelRangeMin = int.Parse(this.transform.FindDeepChild("Box 1").GetComponent<InputField>().text.ToString());
 
