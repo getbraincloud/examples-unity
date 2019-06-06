@@ -527,7 +527,7 @@ namespace Gameframework
         {
             Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(in_json);
             Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage[BrainCloudConsts.JSON_DATA];
-
+            
             m_delayedTransactionId = (string)jsonData[BrainCloudConsts.JSON_TRANSACTION_ID];
         }
 
@@ -600,7 +600,7 @@ namespace Gameframework
                 }
             }
 #endif
-        }
+            }
 
         /// <summary>
         /// Update title, description and price based on the store's data on the product.
@@ -659,13 +659,13 @@ namespace Gameframework
         private bool m_enableDebug = false;
 #endif
         private List<IAPProduct> m_productInventory = new List<IAPProduct>();
-
-#pragma warning disable 649
+        
+#pragma warning disable 414
         private SuccessCallback m_successCallback;
         private FailureCallback m_failureCallback;
 
         private string m_delayedTransactionId = "";
-#pragma warning restore 649
+#pragma warning restore 414
         private bool m_bIsPurchasing = false;
         #endregion
 

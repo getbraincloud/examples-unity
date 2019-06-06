@@ -1120,7 +1120,25 @@ namespace Gameframework
             }
             else if ((int)jsonResponse["status"] == 400 || (int)jsonResponse["status"] == 500)
             {
-                OnWebPurifyStringError((int)jsonResponse["status"], (int)jsonResponse["reason_code"], (string)jsonResponse["status_message"], null);
+                GStateManager.Instance.EnableLoadingSpinner(false);
+                switch ((int)jsonResponse["reason_code"])
+                {
+                    // If WebPurify is not enabled, allow the string to be used anyway.
+                    case ReasonCodes.WEBPURIFY_NOT_ENABLED:
+                    case ReasonCodes.WEBPURIFY_NOT_CONFIGURED:
+                    case ReasonCodes.WEBPURIFY_EXCEPTION:
+                    case ReasonCodes.WEBPURIFY_FAILURE:
+                        string validString = "";
+                        if (jsonResponse.ContainsKey("validString"))
+                            validString = (string)jsonResponse["validString"];
+                        GDebug.Log(string.Format("Failed but forced allowed| {0}  {1}  {2}", (int)jsonResponse["status"], (int)jsonResponse["reason_code"], validString));
+                        if (m_validateStringSuccess != null)
+                        {
+                            m_validateStringSuccess(validString, null);
+                            m_validateStringSuccess = null;
+                        }
+                        break;
+                }
             }
         }
 
@@ -1133,18 +1151,6 @@ namespace Gameframework
             {
                 case ReasonCodes.NAME_CONTAINS_PROFANITY:
                     HudHelper.DisplayMessageDialog("DISALLOWED NAME", "THIS NAME IS CONSIDERED INAPPROPRIATE.\n PLEASE ENTER ANOTHER ONE.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_NOT_CONFIGURED:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY NOT CONFIGURED, PLEASE TRY AGAIN.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_EXCEPTION:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY EXCEPTION, PLEASE TRY AGAIN.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_FAILURE:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY FAILURE, PLEASE TRY AGAIN.", "OK");
-                    break;
-                case ReasonCodes.WEBPURIFY_NOT_ENABLED:
-                    HudHelper.DisplayMessageDialog("WEBPURIFY ERROR", "WEBPURIFY IS NOT ENABLED", "OK");
                     break;
             }
             if (m_validateStringFailure != null)

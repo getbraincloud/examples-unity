@@ -1752,7 +1752,8 @@ namespace BrainCloudUNETExample.Game
 
         public void CmdSpawnBomb(Vector3 aStartPos, Vector3 aDirection, Vector3 aSpeed, short aShooter)
         {
-            m_bombsDropped++;
+            if (aShooter == BombersNetworkManager.LocalPlayer.NetId)
+                m_bombsDropped++;
             int id = GetNextBombID();
             BombInfo aBombInfo = new BombInfo(aStartPos, aDirection, aShooter, aSpeed, id);
             string jsonBomb = aBombInfo.GetJson();
@@ -1809,8 +1810,9 @@ namespace BrainCloudUNETExample.Game
         //[Command]
         public void CmdSpawnBullet(string aBulletInfo)
         {
-            m_shotsFired++;
             BulletInfo bulletInfo = BulletInfo.GetBulletInfo(aBulletInfo);
+            if (bulletInfo.m_shooter == BombersNetworkManager.LocalPlayer.NetId)
+                m_shotsFired++;
             RpcSpawnBullet(bulletInfo);
         }
 

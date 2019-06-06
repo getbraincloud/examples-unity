@@ -86,7 +86,7 @@ namespace BrainCloudUNETExample
         }
 
         private string m_lastSelectedRegionType = "4v4_can";
-        public void SetSelectedRegion( string in_region)
+        public void SetSelectedRegion(string in_region)
         {
             m_lastSelectedRegionType = in_region;
         }
@@ -365,8 +365,13 @@ namespace BrainCloudUNETExample
             {
                 Dictionary<string, object> ports = (Dictionary<string, object>)connectData["ports"];
 
+#if !SMRJ_HACK2
                 int rsConnectionType = GetTesterProtocol();
                 SetTesterCompression();
+#else
+                int rsConnectionType = RS_CONNECTION_OVERRIDE;
+#endif
+
 #if UNITY_WEBGL
                 rsConnectionType = 0;
 #endif
@@ -434,15 +439,21 @@ namespace BrainCloudUNETExample
             }
         }
 
+#if SMRJ_HACK2
+        public static int RS_CONNECTION_OVERRIDE = 2;
+#endif
         public void ConnectToRoomServerService()
         {
             GCore.Wrapper.RTTService.DeregisterAllRTTCallbacks();
             GCore.Wrapper.RTTService.RegisterRTTLobbyCallback(Instance.LobbyCallback);
             GCore.Wrapper.Client.RelayService.RegisterDataCallback(onDataRecv);
             Dictionary<string, object> connectionOptions = new Dictionary<string, object>();
+#if !SMRJ_HACK2
             int rsConnectionType = GetTesterProtocol();
             SetTesterCompression();
-
+#else
+            int rsConnectionType = RS_CONNECTION_OVERRIDE;
+#endif
             connectionOptions["ssl"] = false;
             connectionOptions["host"] = RoomServerInfo.Url;
             connectionOptions["port"] = RoomServerInfo.Port;
@@ -486,6 +497,7 @@ namespace BrainCloudUNETExample
             }
             else
             {
+                GStateManager.Instance.EnableLoadingSpinner(true);
                 GCore.Wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnEnableRTTSuccess, OnEnableRTTFailed);
             }
         }
@@ -999,6 +1011,7 @@ namespace BrainCloudUNETExample
 
         public void OnEnableRTTSuccess(string in_stringData, object in_obj)
         {
+            GStateManager.Instance.EnableLoadingSpinner(false);
             GDebug.Log(string.Format("Success | {0}", in_stringData));
             ConnectToGlobalChat();
             GEventManager.TriggerEvent(GEventManager.ON_RTT_ENABLED);
@@ -1006,7 +1019,8 @@ namespace BrainCloudUNETExample
 
         public void OnEnableRTTFailed(int statusCode, int reasonCode, string in_stringData, object in_obj)
         {
-            HudHelper.DisplayMessageDialog("ERROR", "ARE YOU STILL THERE?", "YES!", onReconnectRTT);
+            GStateManager.Instance.EnableLoadingSpinner(false);
+            HudHelper.DisplayMessageDialog("IDLE TIMEOUT", "ARE YOU STILL THERE?", "YES!", onReconnectRTT);
         }
 
         private void onReconnectRTT()
@@ -1014,6 +1028,7 @@ namespace BrainCloudUNETExample
             if (GStateManager.Instance.CurrentStateId != MainMenuState.STATE_NAME)
                 GStateManager.Instance.ChangeState(MainMenuState.STATE_NAME);
 
+            GStateManager.Instance.EnableLoadingSpinner(true);
             GCore.Wrapper.RTTService.DisableRTT();
             GCore.Wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnEnableRTTSuccess, OnEnableRTTFailed);
         }

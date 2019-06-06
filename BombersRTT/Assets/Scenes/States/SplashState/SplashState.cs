@@ -1,4 +1,5 @@
-﻿#if ENABLE_ASSET_BUNDLES
+﻿//#define SMRJ_HACK
+#if ENABLE_ASSET_BUNDLES
 using AssetBundles;
 #endif
 
@@ -11,8 +12,8 @@ namespace BrainCloudUNETExample
     public class SplashState : BaseState
     {
         public static string STATE_NAME = "splashState";
-        public static string ASSET_BUNDLE_URL = "yourOwnAssetbundles";
-        public static string ASSET_BUNDLE_URL_LIVE = "yourOwnAssetbundlesLive";
+        public static string ASSET_BUNDLE_URL = "http://apps.braincloudservers.com/BrainCloudUNETExample-dev/BrainCloudUNETExample_webgl/Current/StreamingAssets/";
+        public static string ASSET_BUNDLE_URL_LIVE = "http://apps.braincloudservers.com/BrainCloudUNETExample-live/BrainCloudUNETExample_webgl/Current/StreamingAssets/";
 
         #region BaseState
         // Use this for initialization
@@ -52,7 +53,11 @@ namespace BrainCloudUNETExample
             //GSoundMgr.Instance.PlayMusic("commonMusic");
 
 #if ENABLE_ASSET_BUNDLES
-// LIVE URL
+
+#if SMRJ_HACK
+            AssetBundleManager.SetDevelopmentAssetBundleServer();
+#else
+            // LIVE URL
             if (GCore.Wrapper.Client.AppId == "30015")
             {
                 AssetBundleManager.SetSourceAssetBundleURL(ASSET_BUNDLE_URL_LIVE);
@@ -62,6 +67,8 @@ namespace BrainCloudUNETExample
             {
                 AssetBundleManager.SetSourceAssetBundleURL(ASSET_BUNDLE_URL);
             }
+
+#endif
 
 #if UNITY_EDITOR
             if (!AssetBundleManager.SimulateAssetBundleInEditor)
