@@ -47,6 +47,9 @@ http://getbraincloud.com/apidocs/tutorials/unity-tutorials/braincloud-bombers-ex
 
 BombersRTT is a real-time multiplayer game implemented using brainCloud. brainCloud provides the backend services for storing data, as well as the Matchmaking and brainCloud's Relay Multiplayer server.
 
+
+[Demo Link](http://apps.braincloudservers.com/bombersrtt-demo/index.html)
+
 You can find more information on Bombers here:
 
 http://getbraincloud.com/apidocs/tutorials/unity-tutorials/braincloud-bombers-example-game/
