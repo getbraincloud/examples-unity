@@ -78,9 +78,7 @@ BombersRTT is a real-time multiplayer game implemented using brainCloud. brainCl
 
 [Demo Link](http://apps.braincloudservers.com/bombersrtt-demo/index.html)
 
-You can find more information on Bombers here:
-
-https://getbraincloud.com/apidocs/tutorials/unity-tutorials/bombers-rtt-example-game/
+For more information, see this [README.mb](https://github.com/getbraincloud/examples-unity/blob/master/BombersRTT/README.md) file.
 
 **Note** Compiler Flags
 
@@ -104,7 +102,7 @@ http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-tutorial-1-gett
 
 Async multiplayer and cloud code example.
 
-For more information see this [README.mb](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/README.md) file.
+For more information, see this [README.mb](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/README.md) file.
 
 ---
 
