@@ -3,13 +3,15 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using BrainCloud.JsonFx.Json;
-
 namespace BrainCloud.Internal
 {
+
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using BrainCloud.JsonFx.Json;
+
+
     internal sealed class RTTComms
     {
         /// <summary>
@@ -138,6 +140,7 @@ namespace BrainCloud.Internal
                     if (!m_bIsConnected && toProcessResponse.Operation == "connect")
                     {
                         m_bIsConnected = true;
+                        m_lastNowMS = DateTime.Now;
                         send(buildConnectionRequest());
                     }
                 }
@@ -444,7 +447,7 @@ namespace BrainCloud.Internal
         private DateTime m_lastNowMS;
 
         private int m_timeSinceLastRequest = 0;
-        private const int MAX_PACKETSIZE = 1024;// TODO:: based off of some config 
+        private const int MAX_PACKETSIZE = 1024;
         private int m_heartBeatTime = 10 * 1000;
 
         private BrainCloudClient m_clientRef;

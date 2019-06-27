@@ -3,10 +3,11 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using BrainCloud.Internal;
-
 namespace BrainCloud
 {
+
+using BrainCloud.Internal;
+
     public class BrainCloudRTT
     {
         /// <summary>
@@ -81,7 +82,6 @@ namespace BrainCloud
         {
             m_commsLayer.DeregisterRTTCallback(ServiceName.Chat);
         }
-
 
         /// <summary>
         /// 

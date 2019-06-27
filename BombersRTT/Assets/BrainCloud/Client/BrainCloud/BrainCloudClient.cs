@@ -3,6 +3,9 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
+namespace BrainCloud
+{
+
 using System.Collections.Generic;
 using BrainCloud.Internal;
 using BrainCloud.Common;
@@ -19,8 +22,6 @@ using System.Globalization;
 using System;
 #endif
 
-namespace BrainCloud
-{
     #region Enums
     public enum eBrainCloudUpdateType
     {
@@ -106,7 +107,7 @@ namespace BrainCloud
        #region Private Data
 
         private string s_defaultServerURL = "https://sharedprod.braincloudservers.com/dispatcherv2";
-        private static BrainCloudClient s_instance;
+
 
         private string _appVersion = "";
         private Platform _platform;
@@ -182,8 +183,18 @@ namespace BrainCloud
         #endregion
 
         #region Constructors
-
         public BrainCloudClient()
+        {
+            init();
+        }
+
+        public BrainCloudClient(BrainCloudWrapper in_wrapper)
+        {
+            Wrapper = in_wrapper;
+            init();
+        }
+
+        private void init()
         {
             _comms = new BrainCloudComms(this);
             _rttComms = new RTTComms(this);
@@ -239,7 +250,6 @@ namespace BrainCloud
             _rttService = new BrainCloudRTT(_rttComms, this);
             _rsService = new BrainCloudRelay(_rsComms);
         }
-
         //---------------------------------------------------------------
 
         #endregion
@@ -312,6 +322,12 @@ namespace BrainCloud
         #endregion
 
         #region Service Properties
+
+        public BrainCloudWrapper Wrapper
+        {
+            get;
+            set;
+        }
 
         internal BrainCloudComms Comms
         {
@@ -688,6 +704,11 @@ namespace BrainCloud
         public bool IsAuthenticated()
         {
             return Authenticated;
+        }
+
+        public long GetReceivedPacketId()
+        {
+            return _comms.GetReceivedPacketId();
         }
 
         /// <summary>
