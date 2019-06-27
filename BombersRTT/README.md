@@ -2,8 +2,6 @@
 
 Lobby, chat, presence and RTT multiplayer example.
 
-
-
 ---
 
 _Places to get started with Lobbies_
@@ -70,7 +68,7 @@ GCore.Wrapper.Client.PresenceService.UpdateActivity(JsonWriter.Serialize(activit
 
 _Places to get started with multiplayer_
 
-[BombersNetworkManager.cs](https://github.com/getbraincloud/examples-unity/blob/master/BombersRTT/Assets/Scripts/Networking/BombersNetworkManager.cs#L470) | After your lobby is read, start the match by connecting to the relay server.
+[BombersNetworkManager.cs](https://github.com/getbraincloud/examples-unity/blob/master/BombersRTT/Assets/Scripts/Networking/BombersNetworkManager.cs#L470) | After your lobby is ready, start the match by connecting to the relay server.
 
 ```csharp
 GCore.Wrapper.Client.RelayService.Connect(connectionType, connectionOptions, null, onRSConnectError);
