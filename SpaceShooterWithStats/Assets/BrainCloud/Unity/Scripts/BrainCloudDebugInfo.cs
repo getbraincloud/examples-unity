@@ -1,15 +1,22 @@
-﻿#if !DOT_NET
+﻿
+namespace BrainCloudUnity
+{
+    
+
+#if !DOT_NET
 
 #if UNITY_EDITOR
 
-using System.IO;
-using UnityEngine;
-using UnityEditor;
+    using System.IO;
+    using UnityEngine;
+    using UnityEditor;
 
-namespace BrainCloudUnity
-{
+    
+
     namespace BrainCloudSettingsDLL
     {
+        
+        
         /// <inheritdoc />
         /// <summary>
         /// Contains the debug data for the brainCloud Settings - BrainCloudSettings
@@ -81,8 +88,8 @@ namespace BrainCloudUnity
             }
         }
     }
+    
+#endif
+
+#endif
 }
-
-#endif
-
-#endif
