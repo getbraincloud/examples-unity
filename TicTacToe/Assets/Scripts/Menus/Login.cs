@@ -11,7 +11,6 @@ public class Login : GameScene
     public Texture BrainCloudLogo;
     public string Password;
 
-
     public Spinner Spinner;
 
     public string UniversalId;
@@ -20,7 +19,6 @@ public class Login : GameScene
     private void Start()
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
-
     }
 
     private void OnGUI()
@@ -53,7 +51,19 @@ public class Login : GameScene
         GUILayout.FlexibleSpace();
     }
 
-    
+    public void OnConnect()
+    {
+        _isConnecting = true;
+        Spinner.gameObject.SetActive(true);
+
+        // This Authentication is using a UniversalId
+        App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
+            (status, code, error, cbObject) =>
+            {
+                Debug.Log("An Error Occured in Login");
+            });
+    }
+
     // Authenticating Users into brainCloud
     private void LoginUI()
     {
@@ -66,7 +76,7 @@ public class Login : GameScene
         #region Reconnect
         // Use Reconnect for re-authentication. It uses an GUID (anonymousId) to authenticate the user
         // Don't save the Username and Password locally for re-authentication! This is bad practice!
-        if (true && !_isConnecting && PlayerPrefs.GetString(App.WrapperName + "_hasAuthenticated", "false").Equals("true"))
+        if (!_isConnecting && PlayerPrefs.GetString(App.WrapperName + "_hasAuthenticated", "false").Equals("true"))
         {
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
@@ -82,21 +92,12 @@ public class Login : GameScene
                     Spinner.gameObject.SetActive(false);
                 });
 
-
         }
         #endregion
         
         if (GUILayout.Button("Connect as Universal", GUILayout.MinHeight(50), GUILayout.MinWidth(100)))
         {
-            _isConnecting = true;
-            Spinner.gameObject.SetActive(true);
-
-            // This Authentication is using a UniversalId
-            App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
-                (status, code, error, cbObject) =>
-                {
-                    Debug.Log("An Error Occured in Login");   
-                });
+            OnConnect();
         }
     }
 
@@ -106,16 +107,12 @@ public class Login : GameScene
         App.ProfileId = data["profileId"].ToString();
         App.Name = data["playerName"].ToString();
 
-
-
         PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
-
 
         GetPlayerRating();
 
         // brainCloud gives us a newUser value to indicate if this account was just created.
         bool isNewUser = data["newUser"].ToString().Equals("true");
-
 
         if (isNewUser)
         {

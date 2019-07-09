@@ -8,16 +8,32 @@ public class GameScene : MonoBehaviour
 {
     public App App;
     
-    private string editablePlayerName = "";
-    private bool isEditingPlayerName;
+    public void OnEditName()
+    {
+        editablePlayerName = App.Name;
+        isEditingPlayerName = true;
+    }
 
-    
+    public void OnGoToLeaderboardScene()
+    {
+        App.GotoLeaderboardScene(gameObject);
+    }
+
+    public void OnGoToAchievementsScene()
+    {
+        App.GotoAchievementsScene(gameObject);
+    }
+
+    public void OnGoToMatchSelectScene()
+    {
+        App.GotoMatchSelectScene(gameObject);
+    }
+
     protected void OnPlayerInfoWindow(int windowId)
     {
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical();
-
 
         GUILayout.BeginHorizontal();
 
@@ -26,8 +42,7 @@ public class GameScene : MonoBehaviour
             GUILayout.Label(string.Format("PlayerName: {0}", App.Name), GUILayout.MinWidth(200));
             if (GUILayout.Button("Edit", GUILayout.MinWidth(50)))
             {
-                editablePlayerName = App.Name;
-                isEditingPlayerName = true;
+                OnEditName();
             }
         }
         else
@@ -47,33 +62,30 @@ public class GameScene : MonoBehaviour
         GUILayout.EndHorizontal();
 
         GUILayout.Label(string.Format("PlayerRating: {0}", App.PlayerRating), GUILayout.MinWidth(200));
-
         
         GUILayout.FlexibleSpace();
         
         GUILayout.BeginVertical();
         
-        
         if(GetType() != typeof(Leaderboard))
-            if (GUILayout.Button("Leaderboard", GUILayout.MinWidth(50))) App.GotoLeaderboardScene(gameObject);
+            if (GUILayout.Button("Leaderboard", GUILayout.MinWidth(50))) OnGoToLeaderboardScene();
 
         if(GetType() != typeof(Achievements))
-            if (GUILayout.Button("Achievements", GUILayout.MinWidth(50))) App.GotoAchievementsScene(gameObject);
+            if (GUILayout.Button("Achievements", GUILayout.MinWidth(50))) OnGoToAchievementsScene();
         
         if(GetType() != typeof(MatchSelect))
-            if (GUILayout.Button("MatchSelect", GUILayout.MinWidth(50))) App.GotoMatchSelectScene(gameObject);
+            if (GUILayout.Button("MatchSelect", GUILayout.MinWidth(50))) OnGoToMatchSelectScene();
 
-        
         GUILayout.FlexibleSpace();
         
         GUILayout.EndVertical();
 
-
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
-
 
         GUILayout.EndHorizontal();
     }
-    
+
+    private string editablePlayerName = "";
+    private bool isEditingPlayerName;
 }

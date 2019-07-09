@@ -88,30 +88,25 @@ public class Achievements : GameScene
         App.Bc.GamificationService.ReadAchievements(true, OnReadAchievementData);
     }
 
-    private void OnReadAchievementData(string responseData, object cbPostObject)
+    public void OnReadAchievementData(string responseData, object cbPostObject)
     {
         achievements.Clear();
 
         var achievementData = JsonMapper.ToObject(responseData)["data"]["achievements"];
 
-
         foreach (JsonData achievement in achievementData) achievements.Add(new AchievementInfo(achievement));
     }
-
 
     private void OnGUI()
     {
         var verticalMargin = 10;
 
-
         var profileWindowHeight = Screen.height * 0.20f - verticalMargin * 1.3f;
         var selectorWindowHeight = Screen.height * 0.80f - verticalMargin * 1.3f;
-
 
         GUILayout.Window(App.WindowId + 100,
             new Rect(Screen.width / 2 - 150 + App.Offset, verticalMargin, 300, profileWindowHeight),
             OnPlayerInfoWindow, "Profile");
-
 
         GUILayout.Window(App.WindowId,
             new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height - selectorWindowHeight - verticalMargin, 300,
@@ -132,19 +127,22 @@ public class Achievements : GameScene
 
         GUILayout.EndScrollView();
 
-
         if (GUILayout.Button("REFRESH"))
             App.Bc.LeaderboardService.GetGlobalLeaderboardPage("Player_Rating",
                 BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadAchievementData);
 
         if (GUILayout.Button("LOGOUT"))
-            App.Bc.PlayerStateService.Logout((response, cbObject) => { App.GotoLoginScene(gameObject); });
+            App.Bc.PlayerStateService.Logout((response, cbObject) => { OnGotoLoginScene();});
 
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
 
-
         GUILayout.EndHorizontal();
+    }
+
+    public void OnGotoLoginScene()
+    {
+        App.GotoLoginScene(gameObject);
     }
 
     private void DisplayAchievements()
@@ -159,7 +157,6 @@ public class Achievements : GameScene
             else
                 GUILayout.Label(string.Format("[{0}]", achievement.UnlockedText), GUI.skin.button,
                     GUILayout.MinWidth(200));
-
 
             GUILayout.EndHorizontal();
         }
