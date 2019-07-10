@@ -57,6 +57,11 @@ public class Login : GameScene
         }
     }
 
+    public void OnEndEditUserID(string str)
+    {
+        SelectOtherInputField(UniversalId, Password);
+    }
+
     private void SelectOtherInputField(TMP_InputField current, TMP_InputField other)
     {
         current.DeactivateInputField();
@@ -67,9 +72,10 @@ public class Login : GameScene
     private bool ValidateUserName()
     {
         UniversalId.text = UniversalId.text.Trim();
-        if (UniversalId.text.Length < MIN_CHARACTERS)
+        Password.text = Password.text.Trim();
+        if (UniversalId.text.Length < MIN_CHARACTERS || Password.text.Length < MIN_CHARACTERS)
         {
-            InfoBox.text = "The name and password must be at least " + MIN_CHARACTERS + " characters long.";
+            InfoBox.text = "The user ID and password must be at least " + MIN_CHARACTERS + " characters long.";
             return false;
         }
         return true;
