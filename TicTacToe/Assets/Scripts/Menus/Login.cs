@@ -1,78 +1,83 @@
 ﻿#region
 
 using BrainCloud.LitJson;
+using TMPro;
 using UnityEngine;
-
 #endregion
 
 public class Login : GameScene
 {
+    private int MIN_CHARACTERS = 3;
+    private int MAX_CHARACTERS = 23;
     private bool _isConnecting;
     public Texture BrainCloudLogo;
-    public string Password;
-
     public Spinner Spinner;
-
-    public string UniversalId;
+    [SerializeField] public TMP_InputField UniversalId;
+    [SerializeField] public TMP_InputField Password;
+    [SerializeField] public TextMeshProUGUI InfoBox;
+    [SerializeField] public TextMeshProUGUI ErrorMessage;
 
     // Use this for initialization
     private void Start()
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
-    }
-
-    private void OnGUI()
-    {
-        GUILayout.Window(App.WindowId, new Rect(Screen.width / 2 - 125 + App.Offset, Screen.height / 2 - 100, 250, 200),
-            OnWindow,
-            "brainCloud Login");
-    }
-
-    private void OnWindow(int windowId)
-    {
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginVertical();
-
-        GUILayout.Box(BrainCloudLogo);
-        GUILayout.Space(30);
-
-        GUI.enabled = !_isConnecting;
-
+        ErrorMessage.text = "";
+        UniversalId.characterLimit = MAX_CHARACTERS;
+        Password.characterLimit = MAX_CHARACTERS;
         LoginUI();
+    }
 
-        GUI.enabled = true;
-
-        GUILayout.EndVertical();
-        GUILayout.FlexibleSpace();
-
-        GUILayout.EndHorizontal();
-        GUILayout.FlexibleSpace();
+    private void Update()
+    {
+        if (UniversalId.isFocused && Input.GetKeyDown(KeyCode.Tab))
+        {
+            SelectOtherInputField(UniversalId, Password);
+        }
+        else if (Password.isFocused && (Input.GetKeyDown(KeyCode.Tab)))
+        {
+            SelectOtherInputField(Password, UniversalId);
+        }
     }
 
     public void OnConnect()
     {
-        _isConnecting = true;
-        Spinner.gameObject.SetActive(true);
+        if (ValidateUserName())
+        {
+            _isConnecting = true;
+            Spinner.gameObject.SetActive(true);
+            ErrorMessage.text = "";
+            // This Authentication is using a UniversalId
+            App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true, OnAuthentication,
+                (status, code, error, cbObject) =>
+                {
+                    ErrorMessage.text = "Connection error. Please wait a bit and try again.";
+                    Debug.Log(ErrorMessage.text);
+                    Spinner.gameObject.SetActive(false);
+                });
+        }
+    }
 
-        // This Authentication is using a UniversalId
-        App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
-            (status, code, error, cbObject) =>
-            {
-                Debug.Log("An Error Occured in Login");
-            });
+    private void SelectOtherInputField(TMP_InputField current, TMP_InputField other)
+    {
+        current.DeactivateInputField();
+        other.ActivateInputField();
+        other.Select();
+    }
+
+    private bool ValidateUserName()
+    {
+        UniversalId.text = UniversalId.text.Trim();
+        if (UniversalId.text.Length < MIN_CHARACTERS)
+        {
+            InfoBox.text = "The name and password must be at least " + MIN_CHARACTERS + " characters long.";
+            return false;
+        }
+        return true;
     }
 
     // Authenticating Users into brainCloud
     private void LoginUI()
     {
-        GUILayout.Label("UserId");
-        UniversalId = GUILayout.TextField(UniversalId, GUILayout.MinWidth(200));
-
-        GUILayout.Label("Password");
-        Password = GUILayout.PasswordField(Password, '*', GUILayout.MinWidth(100));
-
         #region Reconnect
         // Use Reconnect for re-authentication. It uses an GUID (anonymousId) to authenticate the user
         // Don't save the Username and Password locally for re-authentication! This is bad practice!
@@ -80,7 +85,7 @@ public class Login : GameScene
         {
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
-            
+
             App.Bc.Reconnect(OnAuthentication,
                 (status, code, error, cbObject) =>
                 {
@@ -94,15 +99,10 @@ public class Login : GameScene
 
         }
         #endregion
-        
-        if (GUILayout.Button("Connect as Universal", GUILayout.MinHeight(50), GUILayout.MinWidth(100)))
-        {
-            OnConnect();
-        }
     }
 
     private void OnAuthentication(string response, object cbObject)
-    {   
+    {
         var data = JsonMapper.ToObject(response)["data"];
         App.ProfileId = data["profileId"].ToString();
         App.Name = data["playerName"].ToString();
@@ -123,7 +123,7 @@ public class Login : GameScene
             App.GotoMatchSelectScene(gameObject);
         }
     }
-    
+
     private void GetPlayerRating()
     {
         // We are Going to Read the Match Making to get the Current Player Rating.
@@ -132,16 +132,20 @@ public class Login : GameScene
                 var matchMakingData = JsonMapper.ToObject(jsonResponse)["data"];
                 App.PlayerRating = matchMakingData["playerRating"].ToString();
             },
-            (status, code, error, o) => { Debug.Log("Failed to Get MatchMaking Data"); });
+            (status, code, error, o) =>
+            {
+                ErrorMessage.text = "Failed to Get MatchMaking Data";
+                Debug.Log(ErrorMessage.text);
+            });
     }
 
     private void SetupNewPlayer()
     {
         // If this is a new user, let's set their Name to their universalId
-        App.Name = UniversalId;
+        App.Name = UniversalId.text;
 
         // and also update their name on brainCloud
-        App.Bc.PlayerStateService.UpdateUserName(UniversalId,
+        App.Bc.PlayerStateService.UpdateUserName(UniversalId.text,
             (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
-    }    
+    }
 }
