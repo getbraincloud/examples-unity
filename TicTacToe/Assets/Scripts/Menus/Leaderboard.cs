@@ -79,7 +79,7 @@ public class Leaderboard : GameScene
             BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadLeaderboardData);
     }
 
-    private void OnReadLeaderboardData(string responseData, object cbPostObject)
+    public void OnReadLeaderboardData(string responseData, object cbPostObject)
     {
         scores.Clear();
         
@@ -129,13 +129,18 @@ public class Leaderboard : GameScene
                 BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadLeaderboardData);
 
         if (GUILayout.Button("LOGOUT"))
-            App.Bc.PlayerStateService.Logout((response, cbObject) => { App.GotoLoginScene(gameObject); });
+            App.Bc.PlayerStateService.Logout((response, cbObject) => { OnGotoLoginScene(); });
 
         GUILayout.EndVertical();
         GUILayout.FlexibleSpace();
 
 
         GUILayout.EndHorizontal();
+    }
+
+    public void OnGotoLoginScene()
+    {
+        App.GotoLoginScene(gameObject);
     }
 
     private void DisplayScores()
