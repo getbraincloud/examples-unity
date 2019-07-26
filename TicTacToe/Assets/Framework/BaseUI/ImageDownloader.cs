@@ -48,7 +48,8 @@ namespace Gameframework
                 www.downloadHandler = new DownloadHandlerTexture();
                 yield return www.SendWebRequest();
                 RawImage.texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
-                success(in_url);
+                if (success != null)
+                    success(in_url);
             }
         }
 
