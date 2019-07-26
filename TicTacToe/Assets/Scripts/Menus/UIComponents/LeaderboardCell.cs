@@ -57,6 +57,5 @@ public class LeaderboardCell : GameScene
     private PlayerInfo m_pPlayerData = null;
     private MatchSelect.MatchInfo m_pMatchData = null;
     private MatchSelect m_pMatchSelect = null;
-    private Button m_pButton = null;
     #endregion
 }
