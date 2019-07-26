@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7438709868654170685}
   - component: {fileID: 3272085472934580101}
+  - component: {fileID: 2729408637512648288}
   - component: {fileID: 5338052919192855561}
   m_Layer: 5
   m_Name: AchievementCellWin10
@@ -45,6 +46,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4867958476186985806}
   m_CullTransparentMesh: 0
+--- !u!114 &2729408637512648288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4867958476186985806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eccc0b4c4f5c7ba48a484f952d7877e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  App: {fileID: 0}
+  UserName: {fileID: 0}
+  SkillRating: {fileID: 0}
+  UserNameBG: {fileID: 0}
+  AchievementsTab: {fileID: 0}
+  LeaderboardTab: {fileID: 0}
+  MyGamesTab: {fileID: 0}
+  MatchSelectObj: {fileID: 0}
+  AchievementsObj: {fileID: 0}
+  LeaderboardObj: {fileID: 0}
+  AchievementValue: {fileID: 0}
+  AchievementName: {fileID: 0}
 --- !u!114 &5338052919192855561
 MonoBehaviour:
   m_ObjectHideFlags: 0

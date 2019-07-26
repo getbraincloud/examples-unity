@@ -12,6 +12,20 @@ public class GameScene : MonoBehaviour
     [SerializeField] public TextMeshProUGUI SkillRating;
     [SerializeField] public Image UserNameBG;
 
+    [SerializeField]
+    private GameObject AchievementsTab = null;
+    [SerializeField]
+    private GameObject LeaderboardTab = null;
+    [SerializeField]
+    private GameObject MyGamesTab = null;
+
+    [SerializeField]
+    public MatchSelect MatchSelectObj = null;
+    [SerializeField]
+    public Achievements AchievementsObj = null;
+    [SerializeField]
+    public Leaderboard LeaderboardObj = null;
+
     private void Update()
     {
         if (SkillRating != null)
@@ -28,17 +42,24 @@ public class GameScene : MonoBehaviour
 
     public void OnGoToLeaderboardScene()
     {
-        App.GotoLeaderboardScene(gameObject);
+        AchievementsTab.gameObject.SetActive(false);
+        LeaderboardTab.gameObject.SetActive(true);
+        MyGamesTab.gameObject.SetActive(false);
     }
 
     public void OnGoToAchievementsScene()
     {
-        App.GotoAchievementsScene(gameObject);
+        AchievementsTab.gameObject.SetActive(true);
+        LeaderboardTab.gameObject.SetActive(false);
+        MyGamesTab.gameObject.SetActive(false);
+        AchievementsObj.OnUpdateUI();
     }
 
     public void OnGoToMatchSelectScene()
     {
-        App.GotoMatchSelectScene(gameObject);
+        AchievementsTab.gameObject.SetActive(false);
+        LeaderboardTab.gameObject.SetActive(false);
+        MyGamesTab.gameObject.SetActive(true);
     }
 
     public void OnEndEditName(string str)
