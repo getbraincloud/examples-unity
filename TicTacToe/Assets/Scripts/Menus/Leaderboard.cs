@@ -74,7 +74,7 @@ public class Leaderboard : GameScene
     private RectTransform LeaderboardScrollView = null;
 
     [SerializeField]
-    private Spinner Spinner;
+    private Spinner Spinner = null;
 
     private void Start()
     {

@@ -17,9 +17,6 @@ public class MatchSelect : ResourcesManager
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
 
     private Vector2 _scrollPos;
-    private eState _state = eState.LOADING;
-
-    private string autoJoinText = "Auto Join";
 
     private bool isLookingForMatch = false;
 
@@ -30,7 +27,7 @@ public class MatchSelect : ResourcesManager
     [SerializeField]
     public TextMeshProUGUI MyGames;
     [SerializeField]
-    private Spinner Spinner;
+    private Spinner Spinner = null;
 
     // Use this for initialization
     private void Start()
@@ -140,7 +137,6 @@ public class MatchSelect : ResourcesManager
             completedMatches.Add(match);
         }
 
-        _state = eState.GAME_PICKER;
         OnPopulateMatches();
     }
 
@@ -163,7 +159,6 @@ public class MatchSelect : ResourcesManager
 
     public void OnCancelButton()
     {
-        _state = eState.GAME_PICKER;
         CancelButton.gameObject.SetActive(false);
         RemoveAllCellsInView(m_itemCell);
         OnPopulateMatches();
@@ -174,7 +169,6 @@ public class MatchSelect : ResourcesManager
         if (match != null)
         {
             App.CurrentMatch = match;
-            _state = eState.LOADING;
 
             // Query more detail state about the match
             App.Bc.AsyncMatchService
@@ -195,7 +189,6 @@ public class MatchSelect : ResourcesManager
         if (isLookingForMatch)
         {
             isLookingForMatch = false;
-            autoJoinText = "Auto Join";
 
             var MATCH_STATE = "MATCH_STATE";
             var CANCEL_LOOKING = "CANCEL_LOOKING";
@@ -261,7 +254,6 @@ public class MatchSelect : ResourcesManager
 
     private void OnPickOpponent(PlayerInfo matchedProfile)
     {
-        _state = eState.STARTING_MATCH;
         var yourTurnFirst = Random.Range(0, 100) < 50;
 
         // Setup our summary data. This is what we see when we query
@@ -328,11 +320,8 @@ public class MatchSelect : ResourcesManager
             {
                 // No match found. Handle this result
                 Debug.Log(data["data"]["response"].ToString());
-                _state = eState.GAME_PICKER;
 
                 isLookingForMatch = true;
-                autoJoinText = "Cancel Looking for Match";
-
                 return;
             }
         }
@@ -354,13 +343,11 @@ public class MatchSelect : ResourcesManager
         Debug.Log(a);
         Debug.Log(b);
         Debug.Log(responseData);
-        _state = eState.GAME_PICKER; // Just go back to game selection
     }
 
     private void EnterMatch(MatchInfo match)
     {
         App.CurrentMatch = match;
-        _state = eState.LOADING;
 
         // Query more detail state about the match
         App.Bc.AsyncMatchService
@@ -464,13 +451,5 @@ public class MatchSelect : ResourcesManager
                 matchedProfile = playerInfo;
             }
         }
-    }
-
-    private enum eState
-    {
-        LOADING,
-        GAME_PICKER,
-        NEW_GAME,
-        STARTING_MATCH
     }
 }

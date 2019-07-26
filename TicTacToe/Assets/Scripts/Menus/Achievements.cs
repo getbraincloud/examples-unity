@@ -85,7 +85,7 @@ public class Achievements : ResourcesManager
     private RectTransform AchievementsScrollView = null;
 
     [SerializeField]
-    private Spinner Spinner;
+    private Spinner Spinner = null;
 
     private void Start()
     {
