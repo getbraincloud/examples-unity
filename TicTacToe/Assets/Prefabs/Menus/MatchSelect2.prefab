@@ -30,7 +30,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4226336209375790}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &20969857205678906
 Camera:
@@ -130,9 +130,16 @@ MonoBehaviour:
   UserName: {fileID: 6778459870893159058}
   SkillRating: {fileID: 3552500119615102584}
   UserNameBG: {fileID: 4711876448966472717}
+  AchievementsTab: {fileID: 2747196540851608362}
+  LeaderboardTab: {fileID: 5815801655319582148}
+  MyGamesTab: {fileID: 1810535703535846571}
+  MatchSelectObj: {fileID: 114137673407882326}
+  AchievementsObj: {fileID: 2030931550496291945}
+  LeaderboardObj: {fileID: 1831323275343306921}
   MyGamesScrollView: {fileID: 7126455639929682975}
   CancelButton: {fileID: 8423204544149094735}
-  MyGames: {fileID: 0}
+  MyGames: {fileID: 302731611989389067}
+  Spinner: {fileID: 4946404279473433982}
 --- !u!1 &1708571160960586
 GameObject:
   m_ObjectHideFlags: 0
@@ -161,6 +168,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4625273669067996}
+  - {fileID: 2466190218157494072}
+  - {fileID: 918682751266546867}
   - {fileID: 4132194854553344}
   - {fileID: 1802899633862665444}
   - {fileID: 5346186439998508566}
@@ -286,7 +295,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 4802127575138836860}
   m_Direction: 2
   m_Value: 1.0000002
-  m_Size: 0.6045694
+  m_Size: 0.50127345
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -696,7 +705,7 @@ RectTransform:
   - {fileID: 5591393659366816670}
   - {fileID: 4249165453322546230}
   m_Father: {fileID: 4226336209375790}
-  m_RootOrder: 2
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -3139,7 +3148,7 @@ Transform:
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children: []
   m_Father: {fileID: 4226336209375790}
-  m_RootOrder: 3
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5165367595162286300
 MeshFilter:
@@ -5187,6 +5196,61 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+--- !u!1 &4841441649725857125
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2466190218157494072}
+  - component: {fileID: 2030931550496291945}
+  m_Layer: 0
+  m_Name: Achievements_Logic
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2466190218157494072
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4841441649725857125}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4226336209375790}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2030931550496291945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4841441649725857125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 439235800e3c4dad9473a8879a29b5b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  App: {fileID: 0}
+  UserName: {fileID: 0}
+  SkillRating: {fileID: 0}
+  UserNameBG: {fileID: 0}
+  AchievementsTab: {fileID: 2747196540851608362}
+  LeaderboardTab: {fileID: 5815801655319582148}
+  MyGamesTab: {fileID: 1810535703535846571}
+  MatchSelectObj: {fileID: 114137673407882326}
+  AchievementsObj: {fileID: 2030931550496291945}
+  LeaderboardObj: {fileID: 1831323275343306921}
+  AchievementsScrollView: {fileID: 1053876161431899095}
+  Spinner: {fileID: 4946404279473433982}
 --- !u!1 &4878078442311096293
 GameObject:
   m_ObjectHideFlags: 0
@@ -7392,6 +7456,61 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+--- !u!1 &7126448643346645999
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 918682751266546867}
+  - component: {fileID: 1831323275343306921}
+  m_Layer: 0
+  m_Name: Leaderboard_Logic
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &918682751266546867
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7126448643346645999}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4226336209375790}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1831323275343306921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7126448643346645999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dfbf565b7a347edbcda007258bb3768, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  App: {fileID: 0}
+  UserName: {fileID: 0}
+  SkillRating: {fileID: 0}
+  UserNameBG: {fileID: 0}
+  AchievementsTab: {fileID: 2747196540851608362}
+  LeaderboardTab: {fileID: 5815801655319582148}
+  MyGamesTab: {fileID: 1810535703535846571}
+  MatchSelectObj: {fileID: 114137673407882326}
+  AchievementsObj: {fileID: 2030931550496291945}
+  LeaderboardObj: {fileID: 1831323275343306921}
+  LeaderboardScrollView: {fileID: 6853871530618830941}
+  Spinner: {fileID: 4946404279473433982}
 --- !u!1 &7384761550088633822
 GameObject:
   m_ObjectHideFlags: 0

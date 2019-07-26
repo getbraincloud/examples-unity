@@ -29,6 +29,8 @@ public class MatchSelect : ResourcesManager
     private Button CancelButton = null;
     [SerializeField]
     public TextMeshProUGUI MyGames;
+    [SerializeField]
+    private Spinner Spinner;
 
     // Use this for initialization
     private void Start()
@@ -83,6 +85,7 @@ public class MatchSelect : ResourcesManager
 
     private void queryMatchState()
     {
+        Spinner.gameObject.SetActive(true);
         App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
     }
 
@@ -143,6 +146,7 @@ public class MatchSelect : ResourcesManager
 
     private void OnPopulateMatches()
     {
+        Spinner.gameObject.SetActive(false);
         MyGames.text = "My Games";
         RemoveAllCellsInView(m_itemCell);
         PopulateMatchesScrollView(matches, m_itemCell, MyGamesScrollView);
@@ -151,6 +155,7 @@ public class MatchSelect : ResourcesManager
 
     public void OnNewGameButton(int WindowId)
     {
+        Spinner.gameObject.SetActive(false);
         MyGames.text = "Pick Opponent";
         CancelButton.gameObject.SetActive(true);
         PopulatePlayersScrollView(matchedProfiles, m_itemCell, MyGamesScrollView);

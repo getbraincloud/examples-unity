@@ -76,16 +76,26 @@ using UnityEngine;
 ]
  */
 
-public class Achievements : GameScene
+public class Achievements : ResourcesManager
 {
     private readonly List<AchievementInfo> achievements = new List<AchievementInfo>();
     private Vector2 _scrollPos;
 
+    [SerializeField]
+    private RectTransform AchievementsScrollView = null;
+
+    [SerializeField]
+    private Spinner Spinner;
+
     private void Start()
     {
+        App = MatchSelectObj.App;
+
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
         App.Bc.GamificationService.ReadAchievements(true, OnReadAchievementData);
+
+        m_itemCell = new List<AchievementCell>();
     }
 
     public void OnReadAchievementData(string responseData, object cbPostObject)
@@ -94,50 +104,13 @@ public class Achievements : GameScene
 
         var achievementData = JsonMapper.ToObject(responseData)["data"]["achievements"];
 
-        foreach (JsonData achievement in achievementData) achievements.Add(new AchievementInfo(achievement));
+        foreach (JsonData achievement in achievementData)
+            achievements.Add(new AchievementInfo(achievement));
     }
 
-    private void OnGUI()
+    public void OnUpdateUI()
     {
-        var verticalMargin = 10;
-
-        var profileWindowHeight = Screen.height * 0.20f - verticalMargin * 1.3f;
-        var selectorWindowHeight = Screen.height * 0.80f - verticalMargin * 1.3f;
-
-        GUILayout.Window(App.WindowId + 100,
-            new Rect(Screen.width / 2 - 150 + App.Offset, verticalMargin, 300, profileWindowHeight),
-            OnPlayerInfoWindow, "Profile");
-
-        GUILayout.Window(App.WindowId,
-            new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height - selectorWindowHeight - verticalMargin, 300,
-                selectorWindowHeight),
-            OnPickGameWindow, "Pick Game");
-    }
-
-    private void OnPickGameWindow(int windowId)
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginVertical();
-
-        _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
-
-        GUILayout.Space(10);
-        DisplayAchievements();
-
-        GUILayout.EndScrollView();
-
-        if (GUILayout.Button("REFRESH"))
-            App.Bc.LeaderboardService.GetGlobalLeaderboardPage("Player_Rating",
-                BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadAchievementData);
-
-        if (GUILayout.Button("LOGOUT"))
-            App.Bc.PlayerStateService.Logout((response, cbObject) => { OnGotoLoginScene();});
-
-        GUILayout.EndVertical();
-        GUILayout.FlexibleSpace();
-
-        GUILayout.EndHorizontal();
+        PopulateScrollView(achievements, m_itemCell, AchievementsScrollView);
     }
 
     public void OnGotoLoginScene()
@@ -145,34 +118,66 @@ public class Achievements : GameScene
         App.GotoLoginScene(gameObject);
     }
 
-    private void DisplayAchievements()
+    private void PopulateScrollView(List<AchievementInfo> in_itemItems, List<AchievementCell> in_itemCell, RectTransform in_scrollView)
     {
-        foreach (var achievement in achievements)
+        RemoveAllCellsInView(in_itemCell);
+        if (in_itemItems.Count == 0)
         {
-            GUILayout.Space(10);
-            GUILayout.BeginHorizontal();
+            return;
+        }
 
-            if (achievement.Status.Equals("NOT_AWARDED"))
-                GUILayout.Label(string.Format("{0}", achievement.UnlockText));
-            else
-                GUILayout.Label(string.Format("[{0}]", achievement.UnlockedText), GUI.skin.button,
-                    GUILayout.MinWidth(200));
+        if (in_scrollView != null)
+        {
+            foreach (var achievement in in_itemItems)
+            {
+                AchievementCell newItem = CreateAchievementCell(in_scrollView, "Prefabs/AchievementCell");
+                newItem.Init(achievement, this);
+                newItem.transform.localPosition = Vector3.zero;
+                in_itemCell.Add(newItem);
 
-            GUILayout.EndHorizontal();
+                if (achievement.Status.Equals("NOT_AWARDED"))
+                    newItem.SetAchievementName(achievement.UnlockText);
+                else
+                    newItem.SetAchievementName(achievement.UnlockedText);
+            }
         }
     }
+
+    private AchievementCell CreateAchievementCell(Transform in_parent = null, string in_cellName = "")
+    {
+        AchievementCell toReturn = null;
+        toReturn = CreateResourceAtPath(in_cellName, in_parent.transform).GetComponent<AchievementCell>();
+        toReturn.transform.SetParent(in_parent);
+        toReturn.transform.localScale = Vector3.one;
+        return toReturn;
+    }
+
+    private void RemoveAllCellsInView(List<AchievementCell> in_itemCell)
+    {
+        AchievementCell item;
+        for (int i = 0; i < in_itemCell.Count; ++i)
+        {
+            item = in_itemCell[i];
+            Destroy(item.gameObject);
+        }
+        in_itemCell.Clear();
+    }
+
+    private List<AchievementCell> m_itemCell = null;
 
     public class AchievementInfo
     {
         public string Status;
         public string UnlockedText;
         public string UnlockText;
+        public string ImageURL;
 
         public AchievementInfo(JsonData jsonData)
         {
             UnlockText = jsonData["extraData"]["TODO"].ToString();
             UnlockedText = jsonData["extraData"]["DONE"].ToString();
             Status = jsonData["status"].ToString();
+            ImageURL = jsonData["imageUrl"].ToString();
         }
     }
 }
