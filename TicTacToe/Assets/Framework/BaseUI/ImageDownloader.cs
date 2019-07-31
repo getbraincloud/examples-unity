@@ -45,6 +45,7 @@ namespace Gameframework
         {
             using (UnityWebRequest www = new UnityWebRequest(in_url))
             {
+                www.SetRequestHeader("Access-Control-Allow-Origin", "*");
                 www.downloadHandler = new DownloadHandlerTexture();
                 yield return www.SendWebRequest();
                 RawImage.texture = ((DownloadHandlerTexture)www.downloadHandler).texture;

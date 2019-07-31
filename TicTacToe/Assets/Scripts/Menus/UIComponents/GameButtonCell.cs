@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameButtonCell : GameScene
+public class GameButtonCell : MonoBehaviour
 {
     public const string DEFAULT_NAME = "DEFAULT NAME";
 
@@ -33,10 +33,10 @@ public class GameButtonCell : GameScene
         }
         if (m_pMatchData != null)
         {
-            this.GetComponent<Button>().interactable = m_pMatchData.yourTurn;
+            this.GetComponent<Button>().interactable = m_pMatchData.yourTurn || m_pMatchData.complete;
             OpponentName.text = m_pMatchData.matchedProfile.PlayerName;
             Status.gameObject.SetActive(true);
-            Status.text = m_pMatchData.yourTurn ? "(Your Turn)" : "(Opponent's Turn)";
+            Status.text = m_pMatchData.complete ? "(COMPLETE)" : m_pMatchData.yourTurn ? "(Your Turn)" : "(Opponent's Turn)";
         }
     }
 

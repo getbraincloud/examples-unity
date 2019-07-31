@@ -90,7 +90,7 @@ public class MatchSelect : ResourcesManager
     {
         // TODO! Bring up a user dialog to inform of poor connection
         // for now, try to auto connect 
-        Invoke("enableRTT", 5.0f);
+        if (this != null) Invoke("enableRTT", 5.0f);
     }
 
     private void OnFindPlayers(string responseData, object cbPostObject)
@@ -99,7 +99,6 @@ public class MatchSelect : ResourcesManager
 
         // Construct our matched players list using response data
         var matchesData = JsonMapper.ToObject(responseData)["data"]["matchesFound"];
-
         foreach (JsonData match in matchesData) matchedProfiles.Add(new PlayerInfo(match));
 
         // After, fetch our game list from Braincloud
@@ -378,10 +377,12 @@ public class MatchSelect : ResourcesManager
         Debug.LogError("Failed to Read Match");
     }
 
+    private static Color OPP_COLOR = new Color32(0xFF, 0xFF, 0x49, 0xFF);
     private GameButtonCell CreateItemCell(Transform in_parent = null, bool in_even = false)
     {
         GameButtonCell toReturn = null;
-        toReturn = (CreateResourceAtPath(in_even ? "Prefabs/GameButtonCell1A" : "Prefabs/GameButtonCell1B", in_parent.transform)).GetComponent<GameButtonCell>();
+        bool isSecondDisplay = MyGames.color == OPP_COLOR ? true : false;
+        toReturn = (CreateResourceAtPath(in_even ? "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" :"1") + "A" : "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" : "1") + "B", in_parent.transform)).GetComponent<GameButtonCell>();
         toReturn.transform.SetParent(in_parent);
         toReturn.transform.localScale = Vector3.one;
         return toReturn;
@@ -411,6 +412,7 @@ public class MatchSelect : ResourcesManager
         public int version;
         public string yourToken;
         public bool yourTurn;
+        public bool complete;
 
         public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {
@@ -418,6 +420,7 @@ public class MatchSelect : ResourcesManager
             ownerId = (string)jsonMatch["ownerId"];
             matchId = (string)jsonMatch["matchId"];
             yourTurn = (string)jsonMatch["status"]["currentPlayer"] == matchSelect.App.ProfileId;
+            complete = (string)jsonMatch["status"]["status"] == "COMPLETE";
 
             this.matchSelect = matchSelect;
 

@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Collections.Generic;
-using BrainCloud;
 using BrainCloud.LitJson;
 using UnityEngine;
 
@@ -167,6 +166,7 @@ public class Achievements : ResourcesManager
 
     public class AchievementInfo
     {
+        public const string HOSTED_WEB_ROOT = "http://apps.braincloudservers.com/tictactoe-internal";
         public string Status;
         public string UnlockedText;
         public string UnlockText;
@@ -177,7 +177,11 @@ public class Achievements : ResourcesManager
             UnlockText = jsonData["extraData"]["TODO"].ToString();
             UnlockedText = jsonData["extraData"]["DONE"].ToString();
             Status = jsonData["status"].ToString();
+#if UNITY_WEBGL
+            ImageURL = HOSTED_WEB_ROOT + jsonData["extraData"]["webRelativeURL"].ToString();
+#else
             ImageURL = jsonData["imageUrl"].ToString();
+#endif
         }
     }
 }
