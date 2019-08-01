@@ -3,9 +3,6 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-namespace BrainCloud
-{
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +14,8 @@ using UnityEngine.SocialPlatforms;
 using UnityEngine;
 #endif
 
+namespace BrainCloud
+{
     public class BrainCloudGamification
     {
         private BrainCloudClient _client;

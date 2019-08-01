@@ -3,9 +3,6 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-namespace BrainCloud
-{
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +11,8 @@ using System.Net;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.Internal;
 
+namespace BrainCloud
+{
     public class BrainCloudS3Handling
     {
         private BrainCloudClient _client;

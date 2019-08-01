@@ -1,14 +1,15 @@
 ﻿#region
+
+using System;
 using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.LitJson;
 using UnityEngine;
-using UnityEngine.UI;
 using Random = UnityEngine.Random;
-using TMPro;
+
 #endregion
 
-public class MatchSelect : ResourcesManager
+public class MatchSelect : GameScene
 {
     private const int RANGE_DELTA = 500;
     private const int NUMBER_OF_MATCHES = 10;
@@ -17,17 +18,12 @@ public class MatchSelect : ResourcesManager
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
 
     private Vector2 _scrollPos;
+    private eState _state = eState.LOADING;
+
+    private string autoJoinText = "Auto Join";
 
     private bool isLookingForMatch = false;
 
-    [SerializeField]
-    private RectTransform MyGamesScrollView = null;
-    [SerializeField]
-    private Button CancelButton = null;
-    [SerializeField]
-    public TextMeshProUGUI MyGames;
-    [SerializeField]
-    private Spinner Spinner = null;
 
     // Use this for initialization
     private void Start()
@@ -41,12 +37,7 @@ public class MatchSelect : ResourcesManager
             Debug.Log("MatchMaking enabled failed");
         });
 
-        m_itemCell = new List<GameButtonCell>();
-        CancelButton.gameObject.SetActive(false);
         enableRTT();
-
-        if (UserName != null)
-            UserName.text = App.Name;
     }
 
     // Enable RTT
@@ -82,7 +73,6 @@ public class MatchSelect : ResourcesManager
 
     private void queryMatchState()
     {
-        Spinner.gameObject.SetActive(true);
         App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
     }
 
@@ -90,7 +80,7 @@ public class MatchSelect : ResourcesManager
     {
         // TODO! Bring up a user dialog to inform of poor connection
         // for now, try to auto connect 
-        if (this != null) Invoke("enableRTT", 5.0f);
+        Invoke("enableRTT", 5.0f);
     }
 
     private void OnFindPlayers(string responseData, object cbPostObject)
@@ -99,6 +89,7 @@ public class MatchSelect : ResourcesManager
 
         // Construct our matched players list using response data
         var matchesData = JsonMapper.ToObject(responseData)["data"]["matchesFound"];
+
         foreach (JsonData match in matchesData) matchedProfiles.Add(new PlayerInfo(match));
 
         // After, fetch our game list from Braincloud
@@ -136,123 +127,198 @@ public class MatchSelect : ResourcesManager
             completedMatches.Add(match);
         }
 
-        OnPopulateMatches();
+        _state = eState.GAME_PICKER;
     }
 
-    private void OnPopulateMatches()
+    private void OnGUI()
     {
-        Spinner.gameObject.SetActive(false);
-        MyGames.text = "My Games";
-        RemoveAllCellsInView(m_itemCell);
-        PopulateMatchesScrollView(matches, m_itemCell, MyGamesScrollView);
-        PopulateMatchesScrollView(completedMatches, m_itemCell, MyGamesScrollView);
-    }
+        var verticalMargin = 10;
 
-    public void OnNewGameButton(int WindowId)
-    {
-        Spinner.gameObject.SetActive(false);
-        MyGames.text = "Pick Opponent";
-        CancelButton.gameObject.SetActive(true);
-        PopulatePlayersScrollView(matchedProfiles, m_itemCell, MyGamesScrollView);
-    }
 
-    public void OnCancelButton()
-    {
-        CancelButton.gameObject.SetActive(false);
-        RemoveAllCellsInView(m_itemCell);
-        OnPopulateMatches();
-    }
+        var profileWindowHeight = Screen.height * 0.20f - verticalMargin * 1.3f;
+        var selectorWindowHeight = Screen.height * 0.80f - verticalMargin * 1.3f;
 
-    public void OnMatchSelected(MatchInfo match)
-    {
-        if (match != null)
+
+        GUILayout.Window(App.WindowId + 100,
+            new Rect(Screen.width / 2 - 150 + App.Offset, verticalMargin, 300, profileWindowHeight),
+            OnPlayerInfoWindow, "Profile");
+
+        switch (_state)
         {
-            App.CurrentMatch = match;
+            case eState.LOADING:
+            case eState.STARTING_MATCH:
+            {
+                GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height));
+                GUILayout.FlexibleSpace();
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
 
-            // Query more detail state about the match
-            App.Bc.AsyncMatchService
-                .ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
+                GUILayout.Label("Loading...");
+
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+                GUILayout.FlexibleSpace();
+                GUILayout.EndArea();
+                break;
+            }
+            case eState.GAME_PICKER:
+            {
+                GUILayout.Window(App.WindowId,
+                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height - selectorWindowHeight - verticalMargin,
+                        300, selectorWindowHeight),
+                    OnPickGameWindow, "Pick Game");
+                break;
+            }
+            case eState.NEW_GAME:
+            {
+                GUILayout.Window(App.WindowId,
+                    new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height - selectorWindowHeight - verticalMargin,
+                        300, selectorWindowHeight),
+                    OnNewGameWindow, "Pick Opponent");
+                break;
+            }
         }
     }
 
-    public void OnPlayerSelected(PlayerInfo profile)
+    private void OnPickGameWindow(int windowId)
     {
-        if (profile != null)
-        {
-            OnPickOpponent(profile);
-        }
-    }
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical();
 
-    public void OnQuickPlay()
-    {
+        _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
+
+        if (GUILayout.Button("+ New Game", GUILayout.MinHeight(50), GUILayout.MaxWidth(250))) _state = eState.NEW_GAME;
+        foreach (var match in matches)
+        {
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            GUI.enabled = match.yourTurn;
+            if (GUILayout.Button(
+                match.matchedProfile.PlayerName + "\n" + (match.yourTurn ? "(Your Turn)" : "(Their Turn)"),
+                GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
+                EnterMatch(match);
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.Space(10);
+        foreach (var match in completedMatches)
+        {
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            if(match.matchedProfile != null)
+                if (GUILayout.Button(match.matchedProfile.PlayerName + "\n(Completed)", GUILayout.MinHeight(50),
+                    GUILayout.MaxWidth(200))) EnterMatch(match);
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.EndScrollView();
+
         if (isLookingForMatch)
         {
-            isLookingForMatch = false;
-
-            var MATCH_STATE = "MATCH_STATE";
-            var CANCEL_LOOKING = "CANCEL_LOOKING";
-
-            var attributesJson = new JsonData();
-            attributesJson[MATCH_STATE] = CANCEL_LOOKING;
-
-            App.Bc.PlayerStateService.UpdateAttributes(attributesJson.ToJson(), false);
+            GUILayout.Label(
+                "No open games.\nAccount will be auto match with\nnext player using auto join.\n\nCome back later and refresh",
+                GUILayout.MinHeight(100), GUILayout.MaxWidth(250));
         }
-        else
+        
+        if (GUILayout.Button(autoJoinText, GUILayout.MaxWidth(250)))
         {
-            var scriptDataJson = new JsonData();
-            scriptDataJson["rankRangeDelta"] = RANGE_DELTA;
-            scriptDataJson["pushNotificationMessage"] = null;
 
-            App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
+            if (isLookingForMatch)
+            {
+                isLookingForMatch = false;
+                autoJoinText = "Auto Join";
+                
+                var MATCH_STATE = "MATCH_STATE";
+                var CANCEL_LOOKING= "CANCEL_LOOKING";
+                
+                var attributesJson = new JsonData();
+                attributesJson[MATCH_STATE] = CANCEL_LOOKING;
+                
+                App.Bc.PlayerStateService.UpdateAttributes(attributesJson.ToJson(), false);
+            }
+            else
+            {
+                var scriptDataJson = new JsonData();
+                scriptDataJson["rankRangeDelta"] = RANGE_DELTA;
+                scriptDataJson["pushNotificationMessage"] = null;
+
+            
+
+                App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
+            }
+            
         }
+
+        if (GUILayout.Button("REFRESH"))
+        {
+            App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
+
+            App.Bc.PlayerStateService.GetAttributes((responseData, cbObject) =>
+            {
+                var data = JsonMapper.ToObject(responseData)["data"];
+
+                try
+                {
+                    if (data["attributes"]["MATCH_STATE"].ToString().Equals("FOUND_MATCH"))
+                    {
+                        isLookingForMatch = false;
+                        autoJoinText = "MatchFound";
+
+                    }
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            });
+
+        }
+
+        if (GUILayout.Button("LOGOUT"))
+        {
+            App.Bc.PlayerStateService.Logout((response, cbObject) => { App.GotoLoginScene(gameObject); });
+            PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "false");
+        }
+
+        GUILayout.EndVertical();
+        GUILayout.FlexibleSpace();
+
+
+        GUILayout.EndHorizontal();
     }
 
-    private void PopulateMatchesScrollView(List<MatchInfo> in_itemItems, List<GameButtonCell> in_itemCell, RectTransform in_scrollView)
+    private void OnNewGameWindow(int windowId)
     {
-        if (in_itemItems.Count == 0)
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical();
+
+        _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
+
+        if (GUILayout.Button("<- Cancel", GUILayout.MinHeight(32), GUILayout.MaxWidth(75)))
+            _state = eState.GAME_PICKER;
+
+        foreach (var profile in matchedProfiles)
         {
-            return;
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(string.Format("{0} ({1})", profile.PlayerName, profile.PlayerRating),
+                GUILayout.MinHeight(50), GUILayout.MaxWidth(200)))
+                OnPickOpponent(profile);
+            GUILayout.EndHorizontal();
         }
 
-        if (in_scrollView != null)
-        {
-            int i = 0;
-            //            foreach (var profile in in_itemItems)
-            foreach (var match in in_itemItems)
-            {
-                GameButtonCell newItem = CreateItemCell(in_scrollView, (i % 2) == 0);
-                newItem.Init(match, this);
-                newItem.transform.localPosition = Vector3.zero;
-                in_itemCell.Add(newItem);
-                i++;
-            }
-        }
-    }
+        GUILayout.EndScrollView();
 
-    private void PopulatePlayersScrollView(List<PlayerInfo> in_itemItems, List<GameButtonCell> in_itemCell, RectTransform in_scrollView)
-    {
-        RemoveAllCellsInView(in_itemCell);
-        if (in_itemItems.Count == 0)
-        {
-            return;
-        }
-
-        if (in_scrollView != null)
-        {
-            int i = 0;
-            foreach (var profile in in_itemItems)
-            {
-                GameButtonCell newItem = CreateItemCell(in_scrollView, (i % 2) == 0);
-                newItem.Init(profile, this);
-                newItem.transform.localPosition = Vector3.zero;
-                in_itemCell.Add(newItem);
-                i++;
-            }
-        }
+        GUILayout.EndVertical();
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
     }
 
     private void OnPickOpponent(PlayerInfo matchedProfile)
     {
+        _state = eState.STARTING_MATCH;
         var yourTurnFirst = Random.Range(0, 100) < 50;
 
         // Setup our summary data. This is what we see when we query
@@ -313,21 +379,27 @@ public class MatchSelect : ResourcesManager
         {
             if (data["data"]["response"].IsObject && data["data"]["response"].Keys.Contains("data"))
             {
-                match = new MatchInfo(data["data"]["response"]["data"], this);
+                match = new MatchInfo(data["data"]["response"]["data"], this);    
             }
             else
             {
                 // No match found. Handle this result
                 Debug.Log(data["data"]["response"].ToString());
+                _state = eState.GAME_PICKER;
 
                 isLookingForMatch = true;
+                autoJoinText = "Cancel Looking for Match";
+
                 return;
             }
+            
         }
         else
         {
-            match = new MatchInfo(data["data"], this);
+            match = new MatchInfo(data["data"], this);   
         }
+
+            
 
         // Go to the game if it's your turn
         if (match.yourTurn)
@@ -342,11 +414,13 @@ public class MatchSelect : ResourcesManager
         Debug.Log(a);
         Debug.Log(b);
         Debug.Log(responseData);
+        _state = eState.GAME_PICKER; // Just go back to game selection
     }
 
     private void EnterMatch(MatchInfo match)
     {
         App.CurrentMatch = match;
+        _state = eState.LOADING;
 
         // Query more detail state about the match
         App.Bc.AsyncMatchService
@@ -358,14 +432,15 @@ public class MatchSelect : ResourcesManager
         var match = cbPostObject as MatchInfo;
         var data = JsonMapper.ToObject(responseData)["data"];
 
+
         // Setup a couple stuff into our TicTacToe scene
-        App.BoardState = (string)data["matchState"]["board"];
+        App.BoardState = (string) data["matchState"]["board"];
         App.PlayerInfoX = match.playerXInfo;
         App.PlayerInfoO = match.playerOInfo;
         App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
         App.OwnerId = match.ownerId;
         App.MatchId = match.matchId;
-        App.MatchVersion = (ulong)match.version;
+        App.MatchVersion = (ulong) match.version;
 
         // Load the Tic Tac Toe scene
 
@@ -376,30 +451,6 @@ public class MatchSelect : ResourcesManager
     {
         Debug.LogError("Failed to Read Match");
     }
-
-    private static Color OPP_COLOR = new Color32(0xFF, 0xFF, 0x49, 0xFF);
-    private GameButtonCell CreateItemCell(Transform in_parent = null, bool in_even = false)
-    {
-        GameButtonCell toReturn = null;
-        bool isSecondDisplay = MyGames.color == OPP_COLOR ? true : false;
-        toReturn = (CreateResourceAtPath(in_even ? "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" :"1") + "A" : "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" : "1") + "B", in_parent.transform)).GetComponent<GameButtonCell>();
-        toReturn.transform.SetParent(in_parent);
-        toReturn.transform.localScale = Vector3.one;
-        return toReturn;
-    }
-
-    private void RemoveAllCellsInView(List<GameButtonCell> in_itemCell)
-    {
-        GameButtonCell item;
-        for (int i = 0; i < in_itemCell.Count; ++i)
-        {
-            item = in_itemCell[i];
-            Destroy(item.gameObject);
-        }
-        in_itemCell.Clear();
-    }
-
-    private List<GameButtonCell> m_itemCell = null;
 
     public class MatchInfo
     {
@@ -412,47 +463,63 @@ public class MatchSelect : ResourcesManager
         public int version;
         public string yourToken;
         public bool yourTurn;
-        public bool complete;
 
         public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {
-            version = (int)jsonMatch["version"];
-            ownerId = (string)jsonMatch["ownerId"];
-            matchId = (string)jsonMatch["matchId"];
-            yourTurn = (string)jsonMatch["status"]["currentPlayer"] == matchSelect.App.ProfileId;
-            complete = (string)jsonMatch["status"]["status"] == "COMPLETE";
+            version = (int) jsonMatch["version"];
+            ownerId = (string) jsonMatch["ownerId"];
+            matchId = (string) jsonMatch["matchId"];
+            yourTurn = (string) jsonMatch["status"]["currentPlayer"] == matchSelect.App.ProfileId;
 
             this.matchSelect = matchSelect;
 
+            
             // Load player info
-            LoadPlayerInfo(jsonMatch, 0);
-            LoadPlayerInfo(jsonMatch, 1);
+            LoadPlayerInfo(jsonMatch["summary"]["players"][0]);
+            LoadPlayerInfo(jsonMatch["summary"]["players"][1]);
         }
 
-        private void LoadPlayerInfo(JsonData jsonMatch, int index)
+        private void LoadPlayerInfo(JsonData playerData)
         {
-            JsonData playerData = jsonMatch["players"][index];
-            JsonData playerSummaryData = jsonMatch["summary"]["players"][index];
-
-            var token = (string)playerSummaryData["token"];
+            var token = (string) playerData["token"];
             PlayerInfo playerInfo = new PlayerInfo();
             if (token == "X") playerInfo = playerXInfo;
             else playerInfo = playerOInfo;
 
-            if ((string)playerSummaryData["profileId"] == matchSelect.App.ProfileId)
+            if ((string) playerData["profileId"] == matchSelect.App.ProfileId)
             {
                 playerInfo.PlayerName = matchSelect.App.Name;
                 playerInfo.PlayerRating = matchSelect.App.PlayerRating;
                 playerInfo.ProfileId = matchSelect.App.ProfileId;
+                
+                //playerInfo.picUrl = FacebookLogin.PlayerPicUrl;				
                 yourToken = token;
             }
             else
             {
-                playerInfo.PlayerName = (string)playerData["playerName"];
-                playerInfo.ProfileId = (string)playerSummaryData["profileId"];
-                playerInfo.PlayerRating = "1000";
-                matchedProfile = playerInfo;
+                if (matchSelect.matchedProfiles.Count > 0)
+                {
+
+                    foreach (var profile in matchSelect.matchedProfiles)
+                        if (profile.ProfileId == (string) playerData["profileId"])
+                        {
+                            matchedProfile = profile;
+                            break;
+                        }
+
+                    playerInfo.PlayerName = matchedProfile.PlayerName;
+                    playerInfo.ProfileId = matchedProfile.ProfileId;
+                    playerInfo.PlayerRating = matchedProfile.PlayerRating;
+                }
             }
         }
+    }
+
+    private enum eState
+    {
+        LOADING,
+        GAME_PICKER,
+        NEW_GAME,
+        STARTING_MATCH
     }
 }

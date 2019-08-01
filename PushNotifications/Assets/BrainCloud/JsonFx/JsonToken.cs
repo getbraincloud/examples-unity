@@ -28,6 +28,8 @@
 \*---------------------------------------------------------------------------------*/
 #endregion License
 
+using System;
+
 namespace BrainCloud
 {
     namespace JsonFx.Json

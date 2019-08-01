@@ -2,16 +2,13 @@
 // brainCloud client source code
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
-
-#if ((UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)) || UNITY_2018_3_OR_NEWER
+#if (UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)
 #define USE_WEB_REQUEST //Comment out to force use of old WWW class on Unity 5.3+
 #endif
 
-namespace BrainCloud.Internal
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 #if (DOT_NET || DISABLE_SSL_CHECK)
 using System.Net;
@@ -25,15 +22,16 @@ using System.Threading;
 #if UNITY_5_3
 using UnityEngine.Experimental.Networking;
 #else
-    using UnityEngine.Networking;
+using UnityEngine.Networking;
 #endif
 #endif
-    using UnityEngine;
+using UnityEngine;
 #endif
 
-    using BrainCloud.JsonFx.Json;
+using BrainCloud.JsonFx.Json;
 
-
+namespace BrainCloud.Internal
+{
     #region Processed Server Call Class
     public class ServerCallProcessed
     {
@@ -152,9 +150,6 @@ using UnityEngine.Experimental.Networking;
         /// </summary>
         private DateTime _authenticationTimeoutStart;
 
-        /// a checker to see what the packet Id we are receiving is 
-        private long receivedPacketIdChecker = 0;
-
         /// <summary>
         /// Debug value to introduce packet loss for testing retries etc.
         /// </summary>
@@ -202,11 +197,6 @@ using UnityEngine.Experimental.Networking;
             {
                 return _isAuthenticated;
             }
-        }
-
-        public long GetReceivedPacketId()
-        {
-            return receivedPacketIdChecker;
         }
 
         internal void setAuthenticated()
@@ -685,6 +675,7 @@ using UnityEngine.Experimental.Networking;
             HandleResponseBundle(jsonError);
         }
 
+
         /// <summary>
         /// Shuts down the communications layer.
         /// Make sure to only call this from the main thread!
@@ -854,7 +845,6 @@ using UnityEngine.Experimental.Networking;
 
             JsonResponseBundleV2 bundleObj = JsonReader.Deserialize<JsonResponseBundleV2>(jsonData);
             long receivedPacketId = (long)bundleObj.packetId;
-            receivedPacketIdChecker = receivedPacketId;
             // if the receivedPacketId is NO_PACKET_EXPECTED (-1), its a serious error, which cannot be retried
             // errors for whcih NO_PACKET_EXPECTED are:
             // json parsing error, missing packet id, app secret changed via the portal
@@ -869,7 +859,7 @@ using UnityEngine.Experimental.Networking;
             Dictionary<string, object> response = null;
             IList<Exception> exceptions = new List<Exception>();
 
-            string data = "";
+            string data = "";      
             Dictionary<string, object> responseData = null;
             for (int j = 0; j < responseBundle.Length; ++j)
             {
@@ -1328,6 +1318,7 @@ using UnityEngine.Experimental.Networking;
                 {
                     if (_serviceCallsWaiting.Count > 0)
                     {
+
                         int numMessagesWaiting = _serviceCallsWaiting.Count;
 
                         //put auth first
@@ -1588,7 +1579,7 @@ using UnityEngine.Experimental.Networking;
                     formTable["X-APPID"] = AppId;
                 }
 #if USE_WEB_REQUEST
-                UnityWebRequest request = UnityWebRequest.Post(ServerURL, formTable);
+                UnityWebRequest request  = UnityWebRequest.Post(ServerURL, formTable);
                 request.SetRequestHeader("Content-Type", "application/json; charset=utf-8");
                 request.SetRequestHeader("X-SIG", sig);
                 UploadHandler uh = new UploadHandlerRaw(byteArray);

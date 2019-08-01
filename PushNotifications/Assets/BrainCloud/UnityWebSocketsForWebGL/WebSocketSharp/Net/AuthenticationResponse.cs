@@ -30,16 +30,14 @@
  */
 #endregion
 
-
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
-{
-
 using System;
 using System.Collections.Specialized;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
+{
   internal class AuthenticationResponse : AuthenticationBase
   {
     #region Private Fields

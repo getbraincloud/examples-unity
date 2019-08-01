@@ -26,13 +26,11 @@
  */
 #endregion
 
-
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
-{
-
 using System;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net.WebSockets;
 
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
+{
   /// <summary>
   /// Exposes the access to the information in a WebSocket session.
   /// </summary>

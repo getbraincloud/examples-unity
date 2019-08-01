@@ -1,11 +1,9 @@
-﻿namespace BrainCloudUnity.HUD
-{
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 
-
+namespace BrainCloudUnity.HUD
+{
 	public class HUDPlayer : IHUDElement
 	{
 		SortedDictionary<string, string> m_attributes = new SortedDictionary<string, string>();

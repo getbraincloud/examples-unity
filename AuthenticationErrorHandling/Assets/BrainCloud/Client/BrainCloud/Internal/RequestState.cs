@@ -2,15 +2,12 @@
 // brainCloud client source code
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
-
-#if ((UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)) || UNITY_2018_3_OR_NEWER
+#if (UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)
 #define USE_WEB_REQUEST //Comment out to force use of old WWW class on Unity 5.3+
 #endif
 
-namespace BrainCloud.Internal
-{
-    using System;
-    using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
 
 #if (DOT_NET)
@@ -23,13 +20,14 @@ using System.Threading.Tasks;
 #if UNITY_5_3
 using UnityEngine.Experimental.Networking;
 #else
-    using UnityEngine.Networking;
+using UnityEngine.Networking;
 #endif
 #endif
-    using UnityEngine;
+using UnityEngine;
 #endif
 
-
+namespace BrainCloud.Internal
+{
     // This class stores the request state of the request.
     public class RequestState
     {

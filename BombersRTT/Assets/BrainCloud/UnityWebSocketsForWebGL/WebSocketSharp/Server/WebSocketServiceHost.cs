@@ -33,13 +33,11 @@
  */
 #endregion
 
-
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
-{
-
 using System;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net.WebSockets;
 
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
+{
   /// <summary>
   /// Exposes the methods and properties used to access the information in
   /// a WebSocket service provided by the <see cref="WebSocketServer"/> or

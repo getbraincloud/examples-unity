@@ -8,8 +8,6 @@
  **/
 #endregion
 
-namespace BrainCloud
-{
 
 using System;
 using System.Collections;
@@ -18,6 +16,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 
+namespace BrainCloud
+{
     namespace LitJson
     {
         internal struct PropertyMetadata

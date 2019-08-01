@@ -1,10 +1,9 @@
-﻿namespace BrainCloudUnity.HUD
-{
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 
+namespace BrainCloudUnity.HUD
+{
     public class HUDLeaderboard : IHUDElement
     {
         class LBEntry

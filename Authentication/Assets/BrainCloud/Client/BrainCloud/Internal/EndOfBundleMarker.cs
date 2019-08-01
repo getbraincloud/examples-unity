@@ -5,6 +5,8 @@
 // Class serves as an internal end of message bundle marker
 //----------------------------------------------------
 
+using System.Collections;
+
 namespace BrainCloud.Internal
 {
     internal class EndOfBundleMarker : ServerCall

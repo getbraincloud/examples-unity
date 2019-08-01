@@ -40,9 +40,6 @@
  */
 #endregion
 
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
-{
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -52,6 +49,8 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text;
 
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
+{
     /// <summary>
     /// Provides a collection of the HTTP headers associated with a request or response.
     /// </summary>
