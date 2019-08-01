@@ -3,17 +3,19 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using BrainCloud.JsonFx.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace BrainCloud.Internal
 {
+    using JsonFx.Json;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Threading.Tasks;
+
+    
     internal sealed class RelayComms
     {
         #region public consts
@@ -185,6 +187,7 @@ namespace BrainCloud.Internal
 
                     if (!isConnected && toProcessResponse.Operation == "connect")
                     {
+                        m_lastNowMS = DateTime.Now;
                         send(buildConnectionRequest(), true, true, 0);
                     }
 
