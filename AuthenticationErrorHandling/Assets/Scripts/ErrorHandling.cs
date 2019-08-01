@@ -41,6 +41,23 @@ public abstract class ErrorHandling
 
                 return true;
             }
+            case ReasonCodes.USER_SESSION_LOGGED_OUT:
+                {
+                    // User session has expired by the same login being used on another device 
+                    // They will need to authenticate
+
+                    // The amount of session allowed can be adjusted on the 'Core App Info - Advanced Settings' page
+
+                    if (parentDialog != null)
+                    {
+                        Object.Destroy(parentDialog);
+                    }
+
+                    ErrorDialog.DisplayErrorDialog("You have logged in with another device. Please switch to that device, or log in again",
+                        response);
+
+                    return true;
+                }
             case ReasonCodes.PLATFORM_NOT_SUPPORTED:
             {
                 // User is using an unsupported platform 
