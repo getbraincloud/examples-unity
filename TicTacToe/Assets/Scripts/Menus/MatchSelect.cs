@@ -43,7 +43,9 @@ public class MatchSelect : ResourcesManager
 
         m_itemCell = new List<GameButtonCell>();
         CancelButton.gameObject.SetActive(false);
-        enableRTT();
+        
+        //enableRTT();
+        queryMatchState();
 
         if (UserName != null)
             UserName.text = App.Name;
@@ -90,7 +92,7 @@ public class MatchSelect : ResourcesManager
     {
         // TODO! Bring up a user dialog to inform of poor connection
         // for now, try to auto connect 
-        if (this != null) Invoke("enableRTT", 5.0f);
+        if (this != null && this.gameObject != null) Invoke("enableRTT", 5.0f);
     }
 
     private void OnFindPlayers(string responseData, object cbPostObject)
@@ -141,11 +143,14 @@ public class MatchSelect : ResourcesManager
 
     private void OnPopulateMatches()
     {
-        Spinner.gameObject.SetActive(false);
-        MyGames.text = "My Games";
-        RemoveAllCellsInView(m_itemCell);
-        PopulateMatchesScrollView(matches, m_itemCell, MyGamesScrollView);
-        PopulateMatchesScrollView(completedMatches, m_itemCell, MyGamesScrollView);
+        if (this != null)
+        {
+            Spinner.gameObject.SetActive(false);
+            MyGames.text = "My Games";
+            RemoveAllCellsInView(m_itemCell);
+            PopulateMatchesScrollView(matches, m_itemCell, MyGamesScrollView);
+            PopulateMatchesScrollView(completedMatches, m_itemCell, MyGamesScrollView);
+        }
     }
 
     public void OnNewGameButton(int WindowId)
@@ -368,7 +373,6 @@ public class MatchSelect : ResourcesManager
         App.MatchVersion = (ulong)match.version;
 
         // Load the Tic Tac Toe scene
-
         App.GotoTicTacToeScene(gameObject);
     }
 
@@ -412,7 +416,7 @@ public class MatchSelect : ResourcesManager
         public int version;
         public string yourToken;
         public bool yourTurn;
-        public bool complete;
+        public bool complete = false;
 
         public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {

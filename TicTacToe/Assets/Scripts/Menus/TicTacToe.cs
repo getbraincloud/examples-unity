@@ -33,7 +33,7 @@ public class TicTacToe : GameScene
 
         // Read the state and assembly the board
         BuildBoardFromState(App.BoardState);
-        
+
         // also updates _winner status
         updateHud();
         if (_winner != 0)
@@ -43,7 +43,8 @@ public class TicTacToe : GameScene
                 .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
         }
         // Read match history
-        enableRTT();
+        //enableRTT();
+        queryMatchState();
     }
 
     public void onReturnToMainMenu()
@@ -58,13 +59,16 @@ public class TicTacToe : GameScene
 
         enableDuringGameDisplay(_winner == 0);
 
-        Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform};
+        Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform };
 
         if (DuringGameDisplay.activeInHierarchy)
         {
             TextMeshProUGUI status = toCheckDisplay[0].Find("StatusOverlay").Find("StatusText").GetComponent<TextMeshProUGUI>();
             // update the during Game Display
-            status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" : App.WhosTurn.PlayerName + "'s Turn";
+            status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" : 
+                                            (App.WhosTurn == App.PlayerInfoX && App.CurrentMatch.yourToken == "X" ||
+                                             App.WhosTurn == App.PlayerInfoO && App.CurrentMatch.yourToken == "O") ? "Your Turn" : 
+                                             App.WhosTurn.PlayerName + "'s Turn";
         }
         else
         {
@@ -117,7 +121,7 @@ public class TicTacToe : GameScene
                 playerONameOutline.text = playerOName.text;
             }
         }
-            
+
     }
     // Enable RTT
     private void enableRTT()
@@ -176,7 +180,8 @@ public class TicTacToe : GameScene
                     App.MatchId = match.matchId;
 
                     // Load the Tic Tac Toe scene
-                    App.GotoTicTacToeScene(gameObject);
+                    if (this != null && this.gameObject != null)
+                        App.GotoTicTacToeScene(gameObject);
                 }
             });
     }
@@ -191,12 +196,11 @@ public class TicTacToe : GameScene
     private void OnReadMatchHistory(string responseData, object cbPostObject)
     {
         var turns = JsonMapper.ToObject(responseData)["data"]["turns"];
-
         _history = new List<string>();
         for (var i = 0; i < turns.Count; ++i)
         {
             var turn = turns[i];
-            var turnState = (string) turn["matchState"]["board"];
+            var turnState = (string)turn["matchState"]["board"];
             _history.Add(turnState);
         }
     }
@@ -342,7 +346,7 @@ public class TicTacToe : GameScene
                 _replayTurnIndex += in_value;
             else
             {
-                _replayTurnIndex = (_history.Count - 1 )+ (_replayTurnIndex + in_value);
+                _replayTurnIndex = (_history.Count - 1) + (_replayTurnIndex + in_value);
             }
         }
 

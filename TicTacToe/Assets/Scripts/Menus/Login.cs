@@ -41,7 +41,7 @@ public class Login : GameScene
 
     public void OnConnect()
     {
-        if (ValidateUserName())
+        if (ValidateUserName() && !_isConnecting)
         {
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
@@ -124,7 +124,7 @@ public class Login : GameScene
         {
             SetupNewPlayer();
         }
-        else
+        else if (gameObject != null)
         {
             App.GotoMatchSelectScene(gameObject);
         }
