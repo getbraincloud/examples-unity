@@ -57,6 +57,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   OpponentName: {fileID: 2322773040571976586}
   Status: {fileID: 4728479376560036123}
+  CloseButton: {fileID: 763409863967212272}
 --- !u!222 &3897455666290521785
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -259,7 +260,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3879292091031434747}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7421672166122811101}
+        m_MethodName: OnAbandonMatchButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &3879292091031434747
