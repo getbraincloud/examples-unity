@@ -43,7 +43,7 @@ public class MatchSelect : ResourcesManager
 
         m_itemCell = new List<GameButtonCell>();
         CancelButton.gameObject.SetActive(false);
-        
+
         //enableRTT();
         queryMatchState();
 
@@ -118,7 +118,8 @@ public class MatchSelect : ResourcesManager
             var jsonMatch = jsonMatches[i];
 
             var match = new MatchInfo(jsonMatch, this);
-            matches.Add(match);
+            if (!match.expired)
+                matches.Add(match);
         }
 
         // Now, find completed matches so the user can go see the history
@@ -386,7 +387,7 @@ public class MatchSelect : ResourcesManager
     {
         GameButtonCell toReturn = null;
         bool isSecondDisplay = MyGames.color == OPP_COLOR ? true : false;
-        toReturn = (CreateResourceAtPath(in_even ? "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" :"1") + "A" : "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" : "1") + "B", in_parent.transform)).GetComponent<GameButtonCell>();
+        toReturn = (CreateResourceAtPath(in_even ? "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" : "1") + "A" : "Prefabs/GameButtonCell" + (isSecondDisplay ? "2" : "1") + "B", in_parent.transform)).GetComponent<GameButtonCell>();
         toReturn.transform.SetParent(in_parent);
         toReturn.transform.localScale = Vector3.one;
         return toReturn;
@@ -417,6 +418,7 @@ public class MatchSelect : ResourcesManager
         public string yourToken;
         public bool yourTurn;
         public bool complete = false;
+        public bool expired = false;
 
         public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {
@@ -425,6 +427,7 @@ public class MatchSelect : ResourcesManager
             matchId = (string)jsonMatch["matchId"];
             yourTurn = (string)jsonMatch["status"]["currentPlayer"] == matchSelect.App.ProfileId;
             complete = (string)jsonMatch["status"]["status"] == "COMPLETE";
+            expired = (string)jsonMatch["status"]["status"] == "EXPIRED";
 
             this.matchSelect = matchSelect;
 

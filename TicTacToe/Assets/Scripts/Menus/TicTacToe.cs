@@ -65,9 +65,9 @@ public class TicTacToe : GameScene
         {
             TextMeshProUGUI status = toCheckDisplay[0].Find("StatusOverlay").Find("StatusText").GetComponent<TextMeshProUGUI>();
             // update the during Game Display
-            status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" : 
+            status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" :
                                             (App.WhosTurn == App.PlayerInfoX && App.CurrentMatch.yourToken == "X" ||
-                                             App.WhosTurn == App.PlayerInfoO && App.CurrentMatch.yourToken == "O") ? "Your Turn" : 
+                                             App.WhosTurn == App.PlayerInfoO && App.CurrentMatch.yourToken == "O") ? "Your Turn" :
                                              App.WhosTurn.PlayerName + "'s Turn";
         }
         else
@@ -352,7 +352,7 @@ public class TicTacToe : GameScene
 
         if (_replayTurnIndex <= 0) _replayTurnIndex = 1;
 
-        AfterGameDisplay.transform.Find("TurnCycleButton").Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = "Turn " + (_replayTurnIndex);
+        AfterGameDisplay.transform.Find("TurnCycleButton").Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = "TURN " + (_replayTurnIndex);
         BuildBoardFromState(_history[_replayTurnIndex]);
     }
 
