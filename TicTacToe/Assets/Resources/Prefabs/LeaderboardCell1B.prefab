@@ -75,8 +75,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4283039743
-  m_fontColor: {r: 1, g: 1, b: 0.28627452, a: 1}
+    rgba: 4294683451
+  m_fontColor: {r: 0.23137255, g: 0.67058825, b: 0.9843137, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -168,6 +168,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8922384567291019501}
   - component: {fileID: 7325262199985949093}
+  - component: {fileID: 39100818997360739}
   - component: {fileID: 6499350166845683028}
   m_Layer: 5
   m_Name: LeaderboardCell1B
@@ -205,6 +206,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5249755340916209845}
   m_CullTransparentMesh: 0
+--- !u!114 &39100818997360739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5249755340916209845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 979c8a671a682fc46bc91cda9bd7e80b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Rank: {fileID: 9062865567349441287}
+  Name: {fileID: 3326912999208192737}
 --- !u!114 &6499350166845683028
 MonoBehaviour:
   m_ObjectHideFlags: 0
