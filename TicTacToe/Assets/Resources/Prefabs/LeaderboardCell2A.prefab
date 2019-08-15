@@ -326,6 +326,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4962515270623480063}
   - component: {fileID: 6494915045547010614}
+  - component: {fileID: 8656405347337704633}
   - component: {fileID: 2652841729970810800}
   m_Layer: 5
   m_Name: LeaderboardCell2A
@@ -363,6 +364,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6287586640309575818}
   m_CullTransparentMesh: 0
+--- !u!114 &8656405347337704633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6287586640309575818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 979c8a671a682fc46bc91cda9bd7e80b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Rank: {fileID: 3522922898237936953}
+  Name: {fileID: 348030736938706278}
 --- !u!114 &2652841729970810800
 MonoBehaviour:
   m_ObjectHideFlags: 0

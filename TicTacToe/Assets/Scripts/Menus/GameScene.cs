@@ -45,6 +45,7 @@ public class GameScene : MonoBehaviour
         AchievementsTab.gameObject.SetActive(false);
         LeaderboardTab.gameObject.SetActive(true);
         MyGamesTab.gameObject.SetActive(false);
+        LeaderboardObj.OnUpdateUI();
     }
 
     public void OnGoToAchievementsScene()
