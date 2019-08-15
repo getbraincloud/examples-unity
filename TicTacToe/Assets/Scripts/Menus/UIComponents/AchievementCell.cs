@@ -5,6 +5,8 @@ using Gameframework;
 public class AchievementCell : ImageDownloader
 {
     [SerializeField] public TextMeshProUGUI AchievementName;
+    [SerializeField] private CanvasGroup CanvasGrp = null;
+
 
     #region public
     public virtual void Init(Achievements.AchievementInfo in_pData, Achievements in_pAchievements)
@@ -16,9 +18,10 @@ public class AchievementCell : ImageDownloader
         DownloadImage(in_pData.ImageURL, false, ImageDownloaded);
     }
 
-    public void SetAchievementName(string in_str)
+    public void SetAchievementName(string in_str, bool in_achieved)
     {
         AchievementName.text = in_str;
+        CanvasGrp.alpha = in_achieved ? 1.0f : 0.5f;
     }
     #endregion
 

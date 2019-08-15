@@ -135,9 +135,9 @@ public class Achievements : ResourcesManager
                 in_itemCell.Add(newItem);
 
                 if (achievement.Status.Equals("NOT_AWARDED"))
-                    newItem.SetAchievementName(achievement.UnlockText);
+                    newItem.SetAchievementName(achievement.UnlockText, false);
                 else
-                    newItem.SetAchievementName(achievement.UnlockedText);
+                    newItem.SetAchievementName(achievement.UnlockedText, true);
             }
         }
     }
