@@ -16,12 +16,14 @@ public class Login : GameScene
     [SerializeField] public TMP_InputField Password;
     [SerializeField] public TextMeshProUGUI InfoBox;
     [SerializeField] public TextMeshProUGUI ErrorMessage;
+    [SerializeField] public GameObject ErrorMessageBox;
 
     // Use this for initialization
     private void Start()
     {
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
         ErrorMessage.text = "";
+        ErrorMessageBox.SetActive(false);
         UniversalId.characterLimit = MAX_CHARACTERS;
         Password.characterLimit = MAX_CHARACTERS;
         LoginUI();
@@ -46,10 +48,12 @@ public class Login : GameScene
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
             ErrorMessage.text = "";
+            ErrorMessageBox.SetActive(false);
             // This Authentication is using a UniversalId
             App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true, OnAuthentication,
                 (status, code, error, cbObject) =>
                 {
+                    ErrorMessageBox.SetActive(true);
                     ErrorMessage.text = "Connection error. Please wait a bit and try again.";
                     Debug.Log(ErrorMessage.text);
                     Spinner.gameObject.SetActive(false);
@@ -140,6 +144,7 @@ public class Login : GameScene
             },
             (status, code, error, o) =>
             {
+                ErrorMessageBox.SetActive(true);
                 ErrorMessage.text = "Failed to Get MatchMaking Data";
                 Debug.Log(ErrorMessage.text);
             });
