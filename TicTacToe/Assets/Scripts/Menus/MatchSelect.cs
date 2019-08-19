@@ -156,6 +156,7 @@ public class MatchSelect : ResourcesManager
 
     public void OnNewGameButton(int WindowId)
     {
+        OnGoToMatchSelectScene();
         Spinner.gameObject.SetActive(false);
         MyGames.text = "Pick Opponent";
         CancelButton.gameObject.SetActive(true);
