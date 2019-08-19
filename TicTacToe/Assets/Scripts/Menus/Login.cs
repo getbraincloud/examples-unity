@@ -53,6 +53,7 @@ public class Login : GameScene
             App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true, OnAuthentication,
                 (status, code, error, cbObject) =>
                 {
+                    _isConnecting = false;
                     ErrorMessageBox.SetActive(true);
                     ErrorMessage.text = "Connection error. Please wait a bit and try again.";
                     Debug.Log(ErrorMessage.text);
@@ -113,6 +114,7 @@ public class Login : GameScene
 
     private void OnAuthentication(string response, object cbObject)
     {
+        Spinner.gameObject.SetActive(false);
         var data = JsonMapper.ToObject(response)["data"];
         App.ProfileId = data["profileId"].ToString();
         App.Name = data["playerName"].ToString();
