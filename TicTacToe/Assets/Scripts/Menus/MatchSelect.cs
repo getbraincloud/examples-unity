@@ -44,8 +44,7 @@ public class MatchSelect : ResourcesManager
         m_itemCell = new List<GameButtonCell>();
         CancelButton.gameObject.SetActive(false);
 
-        //enableRTT();
-        queryMatchState();
+        enableRTT();
 
         if (UserName != null)
             UserName.text = App.Name;

@@ -16,6 +16,7 @@ public class TicTacToe : GameScene
     public GameObject PlayerX;
     public GameObject DuringGameDisplay;
     public GameObject AfterGameDisplay;
+    public GameObject PlayAgainButton;
     #endregion
 
     private void Start()
@@ -43,8 +44,7 @@ public class TicTacToe : GameScene
                 .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
         }
         // Read match history
-        //enableRTT();
-        queryMatchState();
+        enableRTT();
     }
 
     public void onReturnToMainMenu()
@@ -238,7 +238,12 @@ public class TicTacToe : GameScene
             null,
             null,
             null,
-            OnTurnSubmitted, (status, code, error, cbObject) => { Debug.Log(status); Debug.Log(code); Debug.Log(error.ToString()); });
+            OnTurnSubmitted, (status, code, error, cbObject) =>
+            {
+                Debug.Log(status);
+                Debug.Log(code);
+                Debug.Log(error.ToString());
+            });
 
         if (App.WhosTurn == App.PlayerInfoX)
             App.WhosTurn = App.PlayerInfoO;
@@ -310,6 +315,8 @@ public class TicTacToe : GameScene
     {
         DuringGameDisplay.SetActive(in_enable);
         AfterGameDisplay.SetActive(!in_enable);
+        PlayAgainButton.SetActive(!in_enable);
+
     }
     private void OnTurnSubmitted(string responseData, object cbPostObject)
     {
@@ -392,6 +399,12 @@ public class TicTacToe : GameScene
 
         // Go back to game select scene
         App.GotoMatchSelectScene(gameObject);
+    }
+
+    public void onPlayAgain()
+    {
+        PlayAgainButton.SetActive(false);
+        // TODO
     }
 
     #region private variables 
