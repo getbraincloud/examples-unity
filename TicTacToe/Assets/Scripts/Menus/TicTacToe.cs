@@ -52,6 +52,11 @@ public class TicTacToe : GameScene
         App.GotoMatchSelectScene(gameObject);
     }
 
+    public static string Truncate(string value, int maxChars)
+    {
+        return value.Length <= maxChars ? value : value.Substring(0, maxChars) + (char)0x2026; // Ellipsis char
+    }
+
     private void updateHud(bool updateNames = true)
     {
         // Check we if are not seeing a done match
@@ -68,7 +73,7 @@ public class TicTacToe : GameScene
             status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" :
                                             (App.WhosTurn == App.PlayerInfoX && App.CurrentMatch.yourToken == "X" ||
                                              App.WhosTurn == App.PlayerInfoO && App.CurrentMatch.yourToken == "O") ? "Your Turn" :
-                                             App.WhosTurn.PlayerName + "'s Turn";
+                                             Truncate(App.WhosTurn.PlayerName, 10) + "'s Turn";
         }
         else
         {
@@ -83,20 +88,20 @@ public class TicTacToe : GameScene
             {
                 if (_winner == 1)
                 {
-                    status.text = App.PlayerInfoX.PlayerName + " Wins!";
+                    status.text = Truncate(App.PlayerInfoX.PlayerName, 10) + " Wins!";
                     WinnerInfo = App.PlayerInfoX;
                     LoserInfo = App.PlayerInfoO;
                 }
                 else
                 {
-                    status.text = App.PlayerInfoO.PlayerName + " Wins!";
+                    status.text = Truncate(App.PlayerInfoO.PlayerName, 10) + " Wins!";
                     WinnerInfo = App.PlayerInfoO;
                     LoserInfo = App.PlayerInfoX;
                 }
             }
             else
             {
-                status.text = App.WhosTurn.PlayerName + " Turn";
+                status.text = Truncate(App.WhosTurn.PlayerName, 10) + " Turn";
             }
 
             statusOutline.text = status.text;
@@ -112,17 +117,18 @@ public class TicTacToe : GameScene
                 playerVsOpp = toCheckDisplay[i].Find("PlayerVSOpponent");
                 playerXName = playerVsOpp.Find("PlayerName").GetComponent<TextMeshProUGUI>();
                 playerXNameOutline = playerVsOpp.Find("PlayerNameOutline").GetComponent<TextMeshProUGUI>();
-                playerXName.text = App.PlayerInfoX.PlayerName;
+                playerXName.text = Truncate(App.PlayerInfoX.PlayerName, 10);
                 playerXNameOutline.text = playerXName.text;
 
                 playerOName = playerVsOpp.Find("OpponentName").GetComponent<TextMeshProUGUI>();
                 playerONameOutline = playerVsOpp.Find("OpponentNameOutline").GetComponent<TextMeshProUGUI>();
-                playerOName.text = App.PlayerInfoO.PlayerName;
+                playerOName.text = Truncate(App.PlayerInfoO.PlayerName, 10);
                 playerONameOutline.text = playerOName.text;
             }
         }
 
     }
+
     // Enable RTT
     private void enableRTT()
     {
