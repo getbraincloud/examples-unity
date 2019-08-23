@@ -11,7 +11,7 @@ using TMPro;
 public class MatchSelect : ResourcesManager
 {
     private const int RANGE_DELTA = 500;
-    private const int NUMBER_OF_MATCHES = 10;
+    private const int NUMBER_OF_MATCHES = 20;
     private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
     private readonly List<PlayerInfo> matchedProfiles = new List<PlayerInfo>();
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
