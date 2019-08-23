@@ -37,7 +37,7 @@ public class GameScene : MonoBehaviour
         editablePlayerName = App.Name;
         isEditingPlayerName = true;
         UserName.interactable = true;
-        UserNameBG.gameObject.SetActive(true);
+        UserName.Select();
     }
 
     public void OnGoToLeaderboardScene()
