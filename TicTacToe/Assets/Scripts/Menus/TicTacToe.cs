@@ -19,6 +19,8 @@ public class TicTacToe : GameScene
     public GameObject PlayAgainButton;
     #endregion
 
+    private const int MAX_CHARS = 10;
+
     private void Start()
     {
         _winner = 0;
@@ -37,13 +39,6 @@ public class TicTacToe : GameScene
 
         // also updates _winner status
         updateHud();
-        if (_winner != 0)
-        {
-            _turnPlayed = true;
-            App.Bc.AsyncMatchService
-                .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
-        }
-        // Read match history
         enableRTT();
     }
 
@@ -62,6 +57,14 @@ public class TicTacToe : GameScene
         // Check we if are not seeing a done match
         _winner = CheckForWinner();
 
+        // Read match history
+        if (_history == null && _winner != 0)
+        {
+            _turnPlayed = true;
+            App.Bc.AsyncMatchService
+                .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
+        }
+
         enableDuringGameDisplay(_winner == 0);
 
         Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform };
@@ -73,7 +76,7 @@ public class TicTacToe : GameScene
             status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" :
                                             (App.WhosTurn == App.PlayerInfoX && App.CurrentMatch.yourToken == "X" ||
                                              App.WhosTurn == App.PlayerInfoO && App.CurrentMatch.yourToken == "O") ? "Your Turn" :
-                                             Truncate(App.WhosTurn.PlayerName, 10) + "'s Turn";
+                                             Truncate(App.WhosTurn.PlayerName, MAX_CHARS) + "'s Turn";
         }
         else
         {
@@ -88,20 +91,20 @@ public class TicTacToe : GameScene
             {
                 if (_winner == 1)
                 {
-                    status.text = Truncate(App.PlayerInfoX.PlayerName, 10) + " Wins!";
+                    status.text = Truncate(App.PlayerInfoX.PlayerName, MAX_CHARS) + " Wins!";
                     WinnerInfo = App.PlayerInfoX;
                     LoserInfo = App.PlayerInfoO;
                 }
                 else
                 {
-                    status.text = Truncate(App.PlayerInfoO.PlayerName, 10) + " Wins!";
+                    status.text = Truncate(App.PlayerInfoO.PlayerName, MAX_CHARS) + " Wins!";
                     WinnerInfo = App.PlayerInfoO;
                     LoserInfo = App.PlayerInfoX;
                 }
             }
             else
             {
-                status.text = Truncate(App.WhosTurn.PlayerName, 10) + " Turn";
+                status.text = Truncate(App.WhosTurn.PlayerName, MAX_CHARS) + " Turn";
             }
 
             statusOutline.text = status.text;
@@ -117,12 +120,12 @@ public class TicTacToe : GameScene
                 playerVsOpp = toCheckDisplay[i].Find("PlayerVSOpponent");
                 playerXName = playerVsOpp.Find("PlayerName").GetComponent<TextMeshProUGUI>();
                 playerXNameOutline = playerVsOpp.Find("PlayerNameOutline").GetComponent<TextMeshProUGUI>();
-                playerXName.text = Truncate(App.PlayerInfoX.PlayerName, 10);
+                playerXName.text = Truncate(App.PlayerInfoX.PlayerName, MAX_CHARS);
                 playerXNameOutline.text = playerXName.text;
 
                 playerOName = playerVsOpp.Find("OpponentName").GetComponent<TextMeshProUGUI>();
                 playerONameOutline = playerVsOpp.Find("OpponentNameOutline").GetComponent<TextMeshProUGUI>();
-                playerOName.text = Truncate(App.PlayerInfoO.PlayerName, 10);
+                playerOName.text = Truncate(App.PlayerInfoO.PlayerName, MAX_CHARS);
                 playerONameOutline.text = playerOName.text;
             }
         }
@@ -339,6 +342,7 @@ public class TicTacToe : GameScene
     {
         AfterGameDisplay.transform.Find("TurnCycleButton").gameObject.SetActive(true);
         _replayTurnIndex = 1;
+        AfterGameDisplay.transform.Find("TurnCycleButton").Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = "TURN " + (_replayTurnIndex);
         BuildBoardFromState(_history[_replayTurnIndex]);
     }
 
