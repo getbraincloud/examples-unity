@@ -28,6 +28,9 @@ public class MatchSelect : ResourcesManager
     public TextMeshProUGUI MyGames;
     [SerializeField]
     private Spinner Spinner = null;
+    [SerializeField]
+    public TextMeshProUGUI QuickPlayText;
+
 
     // Use this for initialization
     private void Start()
@@ -145,6 +148,7 @@ public class MatchSelect : ResourcesManager
     {
         if (this != null)
         {
+            QuickPlayText.text = "QUICKPLAY";
             Spinner.gameObject.SetActive(false);
             MyGames.text = "My Games";
             RemoveAllCellsInView(m_itemCell);
@@ -201,6 +205,8 @@ public class MatchSelect : ResourcesManager
             var attributesJson = new JsonData();
             attributesJson[MATCH_STATE] = CANCEL_LOOKING;
 
+            QuickPlayText.text = "QUICKPLAY";
+
             App.Bc.PlayerStateService.UpdateAttributes(attributesJson.ToJson(), false);
         }
         else
@@ -208,6 +214,8 @@ public class MatchSelect : ResourcesManager
             var scriptDataJson = new JsonData();
             scriptDataJson["rankRangeDelta"] = RANGE_DELTA;
             scriptDataJson["pushNotificationMessage"] = null;
+
+            QuickPlayText.text = "Looking\nfor match...";
 
             App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
         }
