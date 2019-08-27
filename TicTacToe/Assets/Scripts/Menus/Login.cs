@@ -91,12 +91,16 @@ public class Login : GameScene
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
 
+            //TODO
             // This Authentication is using a UniversalId
-            App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
-                (status, code, error, cbObject) =>
-                {
-                    Debug.Log("An Error Occured in Login");   
-                });
+            //App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
+            //    (status, code, error, cbObject) =>
+            //    {
+            //        Debug.Log("An Error Occured in Login");   
+            //    });
+
+            App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication, FailureCallback);
+   
         }
     }
 
@@ -126,7 +130,55 @@ public class Login : GameScene
             App.GotoMatchSelectScene(gameObject);
         }
     }
-    
+
+    public void FailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+    {
+        //TODO
+        //switch (reasonCode)
+        //{
+        //    case ReasonCodes.MISSING_IDENTITY_ERROR:
+        //        {  // Identity does not exist (and client has orphaned profileId)
+
+        //            // Reset profileId and re-authenticate
+        //            _bc.ResetStoredProfileId();
+        //            _bc.AuthenticateUniversal(userId, password, true);
+        //            break;
+        //        }
+        //    case ReasonCodes.SWITCHING_PROFILES:
+        //        {  // Identity belongs to a different profile
+
+        //            // [Optional] Prompt user to confirm that they wish to switch accounts?
+
+        //            // Reset profileId and re-authenticate
+        //            _bc.ResetStoredProfileId();
+        //            _bc.AuthenticateUniversal(userId, password, forceCreate);
+        //            break;
+        //        }
+        //    case ReasonCodes.MISSING_PROFILE_ERROR:
+        //        {  // Identity does not exist
+
+        //            // The account doesn't exist - create it now.
+        //            _bc.AuthenticateUniversal(userId, password, true);
+        //            break;
+        //        }
+        //    case ReasonCodes.TOKEN_DOES_NOT_MATCH_USER:
+        //        {  // Wrong password
+
+        //            // Display a dialog telling the user that the password provided was invalid,
+        //            // and invite them to re-enter the password.
+        //            // ...
+        //            break;
+        //        }
+        //    default:
+        //        { // Uncaught reasonCode
+
+        //            // Log the error for debugging later
+        //            // ...
+        //            break;
+        //        }
+        //}
+    }
+
     private void GetPlayerRating()
     {
         // We are Going to Read the Match Making to get the Current Player Rating.

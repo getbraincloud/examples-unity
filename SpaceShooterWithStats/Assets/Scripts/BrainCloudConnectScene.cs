@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using BrainCloud;
 
 public class BrainCloudConnectScene : MonoBehaviour
 {
@@ -78,8 +79,8 @@ public class BrainCloudConnectScene : MonoBehaviour
 
 				App.Bc.AuthenticateUniversal(m_username, m_password, true, OnSuccess_Authenticate, OnError_Authenticate);
 
-				///////////////////////////////////////////////////////////////////
-			}
+                ///////////////////////////////////////////////////////////////////
+            }
 		}
 
 		GUILayout.EndHorizontal ();
@@ -121,5 +122,21 @@ public class BrainCloudConnectScene : MonoBehaviour
     public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
 		AppendLog("Authenticate failed: " + statusMessage);
+        switch (reasonCode)
+        {
+            case ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT:
+                {
+                    Debug.Log("can't connect to the server. Try again later.");
+                    return;
+                }
+            case ReasonCodes.TOKEN_DOES_NOT_MATCH_USER:
+                {
+                    Debug.Log("Wrong Password or Username");
+                    return;
+                }
+        }
+
+        //There are many potential error cases, include those that apply to your app. a lits can be found in API References and ReasonCodes.cs
     }
+
 }

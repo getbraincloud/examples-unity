@@ -7,6 +7,7 @@ public class DestroyByContact : MonoBehaviour
 	public GameObject playerExplosion;
 	public int scoreValue;
 	private GameController gameController;
+    private bool isDestroyed=false;
 
 	void Start ()
 	{
@@ -33,14 +34,18 @@ public class DestroyByContact : MonoBehaviour
 		if (explosion != null)
 		{
 			Instantiate(explosion, transform.position, transform.rotation);
-		}
+        }
+        if(!isDestroyed)
+        {
+            gameController.AddScore(scoreValue);
+            isDestroyed = true;
+        }
 
-		gameController.AddScore(scoreValue);
 
-		if (other.tag == "Player")
+        if (other.tag == "Player")
 		{
 			Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
-			gameController.GameOver();
+            gameController.GameOver();
 		}
 
 		if (gameObject.name.StartsWith("Enemy Ship"))

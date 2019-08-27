@@ -47,7 +47,8 @@ public class App : MonoBehaviour
         DontDestroyOnLoad(this); // on an Object that won't be destroyed on Scene Changes
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
-        Bc.Init(); // Required: Initialize the Wrapper.
+        //TODO
+        Bc.InitWithApps(); // Required: Initialize the Wrapper.
         Bc.Client.EnableLogging(true);
 
         // Now that brainCloud is setup. Let's go to the Login Scene

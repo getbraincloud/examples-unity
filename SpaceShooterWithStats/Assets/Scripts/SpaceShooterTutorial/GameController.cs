@@ -54,7 +54,7 @@ public class GameController : MonoBehaviour
 		{
 			brainCloudStatusText.text = "Sync'd with brainCloud";
 		}
-	}
+    }
 	
 	private void StatsFailure_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
 	{
@@ -155,6 +155,8 @@ public class GameController : MonoBehaviour
 			if (Input.GetMouseButtonDown(0))
 			{
 				StartRound();
+                    //TODO
+                    //Set True here?
 			}
 			break;
 		case eGameState.GAME_STATE_PLAYING:
@@ -237,7 +239,7 @@ public class GameController : MonoBehaviour
 		m_startupTime = startWait;
 
 		SpawnPlayer();
-	}
+    }
 
 	void StartWave()
 	{
@@ -249,7 +251,7 @@ public class GameController : MonoBehaviour
 	
 	void SpawnPlayer()
 	{
-		GameObject.Instantiate (player, Vector3.zero, Quaternion.identity);
+         GameObject.Instantiate (player, Vector3.zero, Quaternion.identity);
 	}
 
 	void SpawnHazard()
@@ -314,8 +316,9 @@ public class GameController : MonoBehaviour
 		shotsFiredText.text = "Shots Fired: " + m_statShotsFired;
 		shotsFiredText.gameObject.SetActive(true);
 
-		m_accuracy = (m_statShotsFired == 0) ? 0 : (m_statEnemiesKilled + m_statAsteroidsDestroyed) / (double) m_statShotsFired * 100.0d;
-		accuracyText.text = String.Format("Accuracy: {0:0.00}%", m_accuracy);
+        m_accuracy = (m_statShotsFired == 0) ? 0 : (m_statEnemiesKilled + m_statAsteroidsDestroyed) / (double) m_statShotsFired * 100.0d;
+        
+        accuracyText.text = String.Format("Accuracy: {0:0.00}%", m_accuracy);
 		accuracyText.gameObject.SetActive(true);
 
 		gamesPlayedText.text = "Games Played: " + m_statGamesPlayed;
