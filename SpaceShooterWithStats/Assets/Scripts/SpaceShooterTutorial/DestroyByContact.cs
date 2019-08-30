@@ -36,6 +36,7 @@ public class DestroyByContact : MonoBehaviour
 		}
 
 		gameController.AddScore(scoreValue);
+        other.enabled = false;
 
 		if (other.tag == "Player")
 		{

@@ -3,6 +3,7 @@ using System;
 using BrainCloud.LitJson;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -80,19 +81,19 @@ public class GameController : MonoBehaviour
 	public float gameOverWait;
 
 	// Screen text objects
-	public GUIText scoreText;
-	public GUIText restartText;
-	public GUIText gameOverText;
-	public GUIText clickToStartText;
-	public GUIText brainCloudStatusText;
-	public GUIText enemiesKilledText;
-	public GUIText asteroidsDestroyedText;
-	public GUIText accuracyText;
-	public GUIText shotsFiredText;
-	public GUIText gamesPlayedText;
+    public Text scoreText;
+    public Text restartText;
+    public Text gameOverText;
+    public Text clickToStartText;
+    public Text brainCloudStatusText;
+    public Text enemiesKilledText;
+    public Text asteroidsDestroyedText;
+    public Text accuracyText;
+    public Text shotsFiredText;
+    public Text gamesPlayedText;
 
-	// States
-	private enum eGameState
+    // States
+    private enum eGameState
 	{
 		GAME_STATE_START_SCREEN,
 		GAME_STATE_PLAYING,
