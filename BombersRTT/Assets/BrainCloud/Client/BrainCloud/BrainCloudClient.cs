@@ -6,17 +6,17 @@
 namespace BrainCloud
 {
 
-using System.Collections.Generic;
-using BrainCloud.Internal;
-using BrainCloud.Common;
+    using System.Collections.Generic;
+    using BrainCloud.Internal;
+    using BrainCloud.Common;
 #if !XAMARIN
-using BrainCloud.Entity;
-using System;
+    using BrainCloud.Entity;
+    using System;
 #endif
 
 #if !(DOT_NET)
-using UnityEngine;
-using UnityEngine.Assertions;
+    using UnityEngine;
+    using UnityEngine.Assertions;
 #else
 using System.Globalization;
 using System;
@@ -104,7 +104,7 @@ using System;
 
     public class BrainCloudClient
     {
-       #region Private Data
+        #region Private Data
 
         private string s_defaultServerURL = "https://sharedprod.braincloudservers.com/dispatcherv2";
 
@@ -136,6 +136,8 @@ using System;
         private BrainCloudPlayerStatistics _playerStatisticsService;
         private BrainCloudGlobalStatistics _globalStatisticsService;
         private BrainCloudIdentity _identityService;
+        private BrainCloudItemCatalog _itemCatalogService;
+        private BrainCloudUserInventoryManagement _userInventoryManagementService;
         private BrainCloudScript _scriptService;
         private BrainCloudMatchMaking _matchMakingService;
         private BrainCloudOneWayMatch _oneWayMatchService;
@@ -216,6 +218,8 @@ using System;
             _globalStatisticsService = new BrainCloudGlobalStatistics(this);
 
             _identityService = new BrainCloudIdentity(this);
+            _itemCatalogService = new BrainCloudItemCatalog(this);
+            _userInventoryManagementService = new BrainCloudUserInventoryManagement(this);
             _scriptService = new BrainCloudScript(this);
             _matchMakingService = new BrainCloudMatchMaking(this);
             _oneWayMatchService = new BrainCloudOneWayMatch(this);
@@ -389,6 +393,16 @@ using System;
         public BrainCloudIdentity IdentityService
         {
             get { return _identityService; }
+        }
+
+        public BrainCloudItemCatalog ItemCatalogService
+        {
+            get { return _itemCatalogService; }
+        }
+
+        public BrainCloudUserInventoryManagement UserInventoryManagementService
+        {
+            get { return _userInventoryManagementService; }
         }
 
         public BrainCloudScript ScriptService
@@ -579,6 +593,15 @@ using System;
         public BrainCloudIdentity GetIdentityService()
         {
             return IdentityService;
+        }
+
+        public BrainCloudItemCatalog GetItemCatalogService()
+        {
+            return ItemCatalogService;
+        }
+        public BrainCloudUserInventoryManagement GetUserInventoryManagementService()
+        {
+            return UserInventoryManagementService;
         }
 
         public BrainCloudScript GetScriptService()
@@ -1181,9 +1204,11 @@ using System;
         }
 
         /// <summary>Method writes log if logging is enabled</summary>
+        /// 
+        [System.Diagnostics.Conditional("BC_DEBUG_LOG_ENABLED")]
         internal void Log(string log)
         {
-#if UNITY_EDITOR
+#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
             BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.AppendLog(log);
 #endif
             if (_loggingEnabled)
