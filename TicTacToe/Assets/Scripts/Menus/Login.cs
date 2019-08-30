@@ -92,14 +92,6 @@ public class Login : GameScene
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
 
-            //TODO
-            // This Authentication is using a UniversalId
-            //App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication,
-            //    (status, code, error, cbObject) =>
-            //    {
-            //        Debug.Log("An Error Occured in Login");   
-            //    });
-
             App.Bc.AuthenticateUniversal(UniversalId, Password, true, OnAuthentication, FailureCallback);
    
         }
@@ -135,7 +127,6 @@ public class Login : GameScene
     public void FailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
         Debug.Log("An Error Occured in Login");
-        //TODO
         switch (reasonCode)
         {
             case ReasonCodes.MISSING_IDENTITY_ERROR:
@@ -154,7 +145,6 @@ public class Login : GameScene
                     // Reset profileId and re-authenticate
                     App.Bc.ResetStoredProfileId();
                     App.Bc.AuthenticateUniversal(UniversalId, Password, true);
-                    //ask jon
                     break;
                 }
             case ReasonCodes.MISSING_PROFILE_ERROR:

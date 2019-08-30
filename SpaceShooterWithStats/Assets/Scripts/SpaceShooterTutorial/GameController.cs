@@ -155,8 +155,6 @@ public class GameController : MonoBehaviour
 			if (Input.GetMouseButtonDown(0))
 			{
 				StartRound();
-                    //TODO
-                    //Set True here?
 			}
 			break;
 		case eGameState.GAME_STATE_PLAYING:
