@@ -1,6 +1,7 @@
 ﻿#region
 
 using UnityEngine;
+using System.Collections.Generic;
 
 #endregion
 
@@ -24,7 +25,13 @@ public class App : MonoBehaviour
     public string PlayerRating;
     public string ProfileId;
 
-    
+    string serverUrl = "https://internal.braincloudservers.com/dispatcherv2";//slightly changed
+    string secret = "e21cd163-394a-48c9-aa9c-0f58305e9dcf";
+    string appId = "22907";
+    Dictionary<string, string> secretMap = new Dictionary<string, string>();
+    string version = "1.0.0";
+
+
     // All Game Scenes
     [SerializeField] public GameObject Achievements;
     [SerializeField] public GameObject Leaderboard;
@@ -47,8 +54,8 @@ public class App : MonoBehaviour
         DontDestroyOnLoad(this); // on an Object that won't be destroyed on Scene Changes
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
-        //TODO
-        Bc.InitWithApps(); // Required: Initialize the Wrapper.
+        secretMap.Add(appId, secret);
+        Bc.InitWithApps(serverUrl, appId, secretMap, version);
         Bc.Client.EnableLogging(true);
 
         // Now that brainCloud is setup. Let's go to the Login Scene
