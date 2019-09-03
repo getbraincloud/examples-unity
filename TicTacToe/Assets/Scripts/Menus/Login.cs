@@ -162,3 +162,5 @@ public class Login : GameScene
             (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
     }
 }
+
+//todo switchcase for error handling

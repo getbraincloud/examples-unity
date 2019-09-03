@@ -1,6 +1,8 @@
 ﻿#region
 
 using UnityEngine;
+using BrainCloudUnity;
+using System.Collections.Generic;
 
 #endregion
 
@@ -43,8 +45,11 @@ public class App : MonoBehaviour
         Bc = gameObject.AddComponent<BrainCloudWrapper>(); // Create the brainCloud Wrapper
         DontDestroyOnLoad(this); // on an Object that won't be destroyed on Scene Changes
 
+        Dictionary<string, string> apps = new Dictionary<string, string>();
+        apps[BrainCloudSettingsManual.Instance.GameId] = BrainCloudSettingsManual.Instance.SecretKey;
+
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
-        Bc.Init(); // Required: Initialize the Wrapper.
+        Bc.InitWithApps(BrainCloudSettingsManual.Instance.DispatcherURL, BrainCloudSettingsManual.Instance.GameId, apps, BrainCloudSettingsManual.Instance.GameVersion); // Required: Initialize the Wrapper.
         //Bc.Client.EnableLogging(true);
 
         // Now that brainCloud is setup. Let's go to the Login Scene

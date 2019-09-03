@@ -77,9 +77,6 @@ public class Leaderboard : ResourcesManager
     [SerializeField]
     private TextMeshProUGUI MyScores = null;
 
-    [SerializeField]
-    private Spinner Spinner = null;
-
     private void Start()
     {
         App = MatchSelectObj.App;
