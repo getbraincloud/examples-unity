@@ -26,4 +26,5 @@ public class App : MonoBehaviour
     }
 }
 
-//Facebook.dll errors upon opening unity is a known on going bug in Unity but does not interfere with this code base. You can follow information regarding this bug here https://issuetracker.unity3d.com/issues/facebook-editor-throw-errors-related-to-sdk-after-facebook-support-installation
+//Facebook.dll errors upon opening unity is a known on going bug in Unity but does not interfere with this code base. 
+//You can follow information regarding this bug here https://issuetracker.unity3d.com/issues/facebook-editor-throw-errors-related-to-sdk-after-facebook-support-installation
