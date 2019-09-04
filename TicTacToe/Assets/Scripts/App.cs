@@ -12,7 +12,7 @@ public class App : MonoBehaviour
 
     // Setup a couple stuff into our TicTacToe scene
     public string BoardState = "#########";
-    
+
     public string MatchId;
     public ulong MatchVersion;
     public string OwnerId;
@@ -33,7 +33,7 @@ public class App : MonoBehaviour
     [SerializeField] public GameObject TicTacToeO;
 
     // Variables for handling local multiplayer
-    [SerializeField] public int Offset;   
+    [SerializeField] public int Offset;
     [SerializeField] public Rect ViewportRect;
     [SerializeField] public int WindowId;
     [SerializeField] public string WrapperName;
@@ -60,20 +60,20 @@ public class App : MonoBehaviour
 
     //private void Update()
     //{
-        // If you aren't attaching brainCloud as a Component to a gameObject,
-        // you must manually update it with this call.
-        // _bc.Update();
-        // 
-        // Given we are using a game Object. Leave _bc.Update commented out.
+    // If you aren't attaching brainCloud as a Component to a gameObject,
+    // you must manually update it with this call.
+    // _bc.Update();
+    // 
+    // Given we are using a game Object. Leave _bc.Update commented out.
     //}
-    
+
     // Scene Swapping Logic
     public void GotoLoginScene(GameObject previousScene)
     {
         var newScene = Instantiate(Login);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
         GameScene[] scenes = newScene.GetComponentsInChildren<GameScene>();
-        foreach(GameScene scene in scenes)
+        foreach (GameScene scene in scenes)
         {
             scene.App = this;
         }
@@ -118,7 +118,7 @@ public class App : MonoBehaviour
 
     public void GotoTicTacToeScene(GameObject previousScene)
     {
-        var newScene = Instantiate(CurrentMatch.yourToken == "X" ? TicTacToeX: TicTacToeO);
+        var newScene = Instantiate(CurrentMatch.yourToken == "X" ? TicTacToeX : TicTacToeO);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
         GameScene[] scenes = newScene.GetComponentsInChildren<GameScene>();
         foreach (GameScene scene in scenes)

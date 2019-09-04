@@ -3,6 +3,7 @@
 using BrainCloud.LitJson;
 using TMPro;
 using UnityEngine;
+using BrainCloud;
 #endregion
 
 public class Login : GameScene
@@ -50,15 +51,7 @@ public class Login : GameScene
             ErrorMessage.text = "";
             ErrorMessageBox.SetActive(false);
             // This Authentication is using a UniversalId
-            App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true, OnAuthentication,
-                (status, code, error, cbObject) =>
-                {
-                    _isConnecting = false;
-                    ErrorMessageBox.SetActive(true);
-                    ErrorMessage.text = "Connection error. Please wait a bit and try again.";
-                    Debug.Log(ErrorMessage.text);
-                    Spinner.gameObject.SetActive(false);
-                });
+            App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true, OnAuthentication, FailureCallback);
         }
     }
 
@@ -136,6 +129,53 @@ public class Login : GameScene
         }
     }
 
+    public void FailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+    {
+        Debug.Log("An Error Occured in Login");
+        switch (reasonCode)
+        {
+            case ReasonCodes.MISSING_IDENTITY_ERROR:
+                {  // Identity does not exist (and client has orphaned profileId)
+
+                    // Reset profileId and re-authenticate
+                    App.Bc.ResetStoredProfileId();
+                    App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true);
+                    break;
+                }
+            case ReasonCodes.SWITCHING_PROFILES:
+                {  // Identity belongs to a different profile
+
+                    // [Optional] Prompt user to confirm that they wish to switch accounts?
+
+                    // Reset profileId and re-authenticate
+                    App.Bc.ResetStoredProfileId();
+                    App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true);
+                    break;
+                }
+            case ReasonCodes.MISSING_PROFILE_ERROR:
+                {  // Identity does not exist
+
+                    // The account doesn't exist - create it now.
+                    App.Bc.AuthenticateUniversal(UniversalId.text, Password.text, true);
+                    break;
+                }
+            case ReasonCodes.TOKEN_DOES_NOT_MATCH_USER:
+                {  // Wrong password
+
+                    // Display a dialog telling the user that the password provided was invalid,
+                    // and invite them to re-enter the password.
+                    // ...
+                    break;
+                }
+            default:
+                { // Uncaught reasonCode
+
+                    // Log the error for debugging later
+                    // ...
+                    break;
+                }
+        }
+    }
     private void GetPlayerRating()
     {
         // We are Going to Read the Match Making to get the Current Player Rating.
@@ -162,5 +202,3 @@ public class Login : GameScene
             (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
     }
 }
-
-//todo switchcase for error handling
