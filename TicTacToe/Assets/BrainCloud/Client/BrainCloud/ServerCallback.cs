@@ -3,10 +3,9 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
-
 namespace BrainCloud
 {
+    using System;
 //[Serializable]
     public class ServerCallback
     {
@@ -31,7 +30,7 @@ namespace BrainCloud
         {
             if ( m_fnSuccessCallback != null )
             {
-#if UNITY_EDITOR
+#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
                 BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnSuccess(jsonResponse);
 #endif
                 m_fnSuccessCallback(jsonResponse, m_cbObject);
@@ -42,10 +41,10 @@ namespace BrainCloud
         {
             if ( m_fnFailureCallback != null )
             {
-#if UNITY_EDITOR
+#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
                 BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnFailedResponse(statusMessage);
 #endif
-                        
+
                 m_fnFailureCallback(statusCode, reasonCode, statusMessage, m_cbObject);
             }
         }

@@ -3,7 +3,6 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Entity;
@@ -86,7 +85,6 @@ public class BrainCloudWrapper
 
     private WrapperData _wrapperData = new WrapperData();
 
-
     //Getting this error? - "An object reference is required for the non-static field, method, or property 'BrainCloudWrapper.Client'"
     //Switch to BrainCloudWrapper.GetBC();
     public BrainCloudClient Client { get; private set; }
@@ -102,6 +100,12 @@ public class BrainCloudWrapper
         RelayService.Disconnect();
         Client.Update();
     }
+#if !DOT_NET
+    private void OnDestroy()
+    {
+        StopAllCoroutines();
+    }
+#endif
 
     /// <summary>
     /// Name of this wrapper instance. Used for data loading
@@ -160,6 +164,16 @@ public class BrainCloudWrapper
     public BrainCloudIdentity IdentityService
     {
         get { return Client.IdentityService; }
+    }
+
+    public BrainCloudItemCatalog ItemCatalogService
+    {
+        get { return Client.ItemCatalogService; }
+    }
+
+    public BrainCloudUserItems UserItemsService
+    {
+        get { return Client.UserItemsService; }
     }
 
     public BrainCloudScript ScriptService
@@ -230,6 +244,10 @@ public class BrainCloudWrapper
     public BrainCloudTournament TournamentService
     {
         get { return Client.TournamentService; }
+    }
+    public BrainCloudCustomEntity CustomEntityService
+    {
+        get { return Client.CustomEntityService; }
     }
 
     public BrainCloudPushNotification PushNotificationService
@@ -307,7 +325,7 @@ public class BrainCloudWrapper
     /// </summary>
     public BrainCloudWrapper()
     {
-        Client = new BrainCloudClient();
+        Client = new BrainCloudClient(this);
     }
 
     /// <summary>
@@ -317,6 +335,7 @@ public class BrainCloudWrapper
     private BrainCloudWrapper(BrainCloudClient client)
     {
         Client = client;
+        Client.Wrapper = this;
     }
 
     /// <summary>
@@ -326,21 +345,25 @@ public class BrainCloudWrapper
     /// <param name="wrapperName">string value used to differentiate saved wrapper data</param>
     public BrainCloudWrapper(string wrapperName)
     {
-        Client = new BrainCloudClient();
+        Client = new BrainCloudClient(this);
         WrapperName = wrapperName;
     }
 
-    public void Update()
+    public void RunCallbacks()
     {
         if (Client != null)
         {
-            // MonoBehavior runs every update Tick
             // for further control please review eBrainCloudUpdateType
             // from the direct Client Updates
             Client.Update();
         }
     }
 
+    // MonoBehavior runs every update Tick
+    public void Update()
+    {
+        RunCallbacks();
+    }
 
 #if !DOT_NET
     /// <summary>
@@ -1498,7 +1521,7 @@ public class BrainCloudWrapper
             }
         }
 
-#if UNITY_EDITOR
+#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
         BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnAuthenticateSuccess(json);
 #endif
     }
@@ -1521,7 +1544,7 @@ public class BrainCloudWrapper
             }
         }
 
-#if UNITY_EDITOR
+#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
         BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnAuthenticateFailed(string.Format("statusCode[{0}] reasonCode[{1}] errorJson[{2}]", statusCode, reasonCode, errorJson));
 #endif
     }

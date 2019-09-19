@@ -6,9 +6,7 @@ using UnityEngine;
 
 public class App : MonoBehaviour
 {
-    
     public BrainCloudWrapper Bc;
-
 
     // Setup a couple stuff into our TicTacToe scene
     public string BoardState = "#########";
@@ -24,20 +22,19 @@ public class App : MonoBehaviour
     public string PlayerRating;
     public string ProfileId;
 
-    
     // All Game Scenes
     [SerializeField] public GameObject Achievements;
     [SerializeField] public GameObject Leaderboard;
     [SerializeField] public GameObject Login;
     [SerializeField] public GameObject MatchSelect;
-    [SerializeField] public GameObject TicTacToe;
+    [SerializeField] public GameObject TicTacToeX;
+    [SerializeField] public GameObject TicTacToeO;
 
     // Variables for handling local multiplayer
     [SerializeField] public int Offset;   
     [SerializeField] public Rect ViewportRect;
     [SerializeField] public int WindowId;
     [SerializeField] public string WrapperName;
-
 
     private void Start()
     {
@@ -48,32 +45,33 @@ public class App : MonoBehaviour
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
         Bc.Init(); // Required: Initialize the Wrapper.
-        Bc.Client.EnableLogging(true);
+        //Bc.Client.EnableLogging(true);
 
         // Now that brainCloud is setup. Let's go to the Login Scene
-
         var loginObject = Instantiate(Login);
         loginObject.GetComponentInChildren<GameScene>().App = this;
         loginObject.transform.parent = playerOneObject.transform;
     }
 
-    private void Update()
-    {
+    //private void Update()
+    //{
         // If you aren't attaching brainCloud as a Component to a gameObject,
         // you must manually update it with this call.
         // _bc.Update();
         // 
         // Given we are using a game Object. Leave _bc.Update commented out.
-    }
-    
-    
+    //}
     
     // Scene Swapping Logic
     public void GotoLoginScene(GameObject previousScene)
     {
         var newScene = Instantiate(Login);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
-        newScene.GetComponentInChildren<GameScene>().App = this;
+        GameScene[] scenes = newScene.GetComponentsInChildren<GameScene>();
+        foreach(GameScene scene in scenes)
+        {
+            scene.App = this;
+        }
         Destroy(previousScene.transform.parent.gameObject);
     }
 
@@ -81,7 +79,11 @@ public class App : MonoBehaviour
     {
         var newScene = Instantiate(MatchSelect);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
-        newScene.GetComponentInChildren<GameScene>().App = this;
+        GameScene[] scenes = newScene.GetComponentsInChildren<GameScene>();
+        foreach (GameScene scene in scenes)
+        {
+            scene.App = this;
+        }
         Destroy(previousScene.transform.parent.gameObject);
     }
 
@@ -89,7 +91,11 @@ public class App : MonoBehaviour
     {
         var newScene = Instantiate(Leaderboard);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
-        newScene.GetComponentInChildren<GameScene>().App = this;
+        GameScene[] scenes = newScene.GetComponentsInChildren<GameScene>();
+        foreach (GameScene scene in scenes)
+        {
+            scene.App = this;
+        }
         Destroy(previousScene.transform.parent.gameObject);
     }
 
@@ -97,15 +103,23 @@ public class App : MonoBehaviour
     {
         var newScene = Instantiate(Achievements);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
-        newScene.GetComponentInChildren<GameScene>().App = this;
+        GameScene[] scenes = newScene.GetComponentsInChildren<GameScene>();
+        foreach (GameScene scene in scenes)
+        {
+            scene.App = this;
+        }
         Destroy(previousScene.transform.parent.gameObject);
     }
 
     public void GotoTicTacToeScene(GameObject previousScene)
     {
-        var newScene = Instantiate(TicTacToe);
+        var newScene = Instantiate(CurrentMatch.yourToken == "X" ? TicTacToeX: TicTacToeO);
         newScene.transform.parent = previousScene.transform.parent.transform.parent;
-        newScene.GetComponentInChildren<GameScene>().App = this;
+        GameScene[] scenes = newScene.GetComponentsInChildren<GameScene>();
+        foreach (GameScene scene in scenes)
+        {
+            scene.App = this;
+        }
         Destroy(previousScene.transform.parent.gameObject);
     }
 }

@@ -3,10 +3,11 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using BrainCloud.Internal;
-
 namespace BrainCloud
 {
+
+using BrainCloud.Internal;
+
     public class BrainCloudRTT
     {
         /// <summary>
@@ -82,7 +83,6 @@ namespace BrainCloud
             m_commsLayer.DeregisterRTTCallback(ServiceName.Chat);
         }
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -137,6 +137,22 @@ namespace BrainCloud
         public void RegisterRTTAsyncMatchCallback(RTTCallback in_callback)
         {
             m_commsLayer.RegisterRTTCallback(ServiceName.AsyncMatch, in_callback);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RegisterRTTBlockchainRefresh(RTTCallback in_callback)
+        {
+            m_commsLayer.RegisterRTTCallback(ServiceName.UserItems, in_callback);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterRTTBlockchainRefresh()
+        {
+            m_commsLayer.DeregisterRTTCallback(ServiceName.UserItems);
         }
 
         /// <summary>

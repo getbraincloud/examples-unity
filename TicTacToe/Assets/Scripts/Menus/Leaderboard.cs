@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.LitJson;
 using UnityEngine;
+using TMPro;
 
 #endregion
 
@@ -65,89 +66,99 @@ using UnityEngine;
 }
  */
 
-public class Leaderboard : GameScene
+public class Leaderboard : ResourcesManager
 {
     private readonly List<PlayerInfo> scores = new List<PlayerInfo>();
     private Vector2 _scrollPos;
 
+    [SerializeField]
+    private RectTransform LeaderboardScrollView = null;
+
+    [SerializeField]
+    private TextMeshProUGUI MyScores = null;
+
+    [SerializeField]
+    private Spinner Spinner = null;
+
     private void Start()
     {
+        App = MatchSelectObj.App;
         gameObject.transform.parent.gameObject.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
         // Get the Player_Rating leaderboard that would have have created on the brainCloud Dashboard
         App.Bc.LeaderboardService.GetGlobalLeaderboardPage("Player_Rating",
             BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadLeaderboardData);
+
+        m_itemCell = new List<LeaderboardCell>();
     }
 
-    private void OnReadLeaderboardData(string responseData, object cbPostObject)
+    public void OnReadLeaderboardData(string responseData, object cbPostObject)
     {
         scores.Clear();
-        
+
         var leaderboardData = JsonMapper.ToObject(responseData)["data"]["leaderboard"];
 
-        foreach (JsonData score in leaderboardData) scores.Add(new PlayerInfo(score));
+        foreach (JsonData score in leaderboardData)
+            scores.Add(new PlayerInfo(score));
     }
 
-
-    private void OnGUI()
+    public void OnUpdateUI()
     {
-        var verticalMargin = 10;
-
-
-        var profileWindowHeight = Screen.height * 0.20f - verticalMargin * 1.3f;
-        var selectorWindowHeight = Screen.height * 0.80f - verticalMargin * 1.3f;
-
-
-        GUILayout.Window(App.WindowId + 100,
-            new Rect(Screen.width / 2 - 150 + App.Offset, verticalMargin, 300, profileWindowHeight),
-            OnPlayerInfoWindow, "Profile");
-
-
-        GUILayout.Window(App.WindowId,
-            new Rect(Screen.width / 2 - 150 + App.Offset, Screen.height - selectorWindowHeight - verticalMargin, 300,
-                selectorWindowHeight),
-            OnPickGameWindow, "Pick Game");
+        PopulateScrollView(scores, m_itemCell, LeaderboardScrollView);
     }
 
-    private void OnPickGameWindow(int windowId)
+    public void OnGotoLoginScene()
     {
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginVertical();
-
-        _scrollPos = GUILayout.BeginScrollView(_scrollPos, false, false);
-
-        GUILayout.Space(10);
-        
-        DisplayScores();
-
-        GUILayout.EndScrollView();
-
-
-        if (GUILayout.Button("REFRESH"))
-            App.Bc.LeaderboardService.GetGlobalLeaderboardPage("Player_Rating",
-                BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 10, OnReadLeaderboardData);
-
-        if (GUILayout.Button("LOGOUT"))
-            App.Bc.PlayerStateService.Logout((response, cbObject) => { App.GotoLoginScene(gameObject); });
-
-        GUILayout.EndVertical();
-        GUILayout.FlexibleSpace();
-
-
-        GUILayout.EndHorizontal();
+        App.GotoLoginScene(gameObject);
     }
 
-    private void DisplayScores()
+    private void PopulateScrollView(List<PlayerInfo> in_itemItems, List<LeaderboardCell> in_itemCell, RectTransform in_scrollView)
     {
-        // We are displaying the leaderboard scores taken from the GetGlobalLeaderboardPage call
-        foreach (var score in scores)
+        RemoveAllCellsInView(in_itemCell);
+        if (in_itemItems.Count == 0)
         {
-            GUILayout.Space(10);
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(string.Format("{0}.  {1} ({2})", score.Rank, score.PlayerName, score.Score));
+            return;
+        }
 
-            GUILayout.EndHorizontal();
+        if (in_scrollView != null)
+        {
+            int i = 0;
+
+            foreach (var leaderboardItem in in_itemItems)
+            {
+                LeaderboardCell newItem = CreateLeaderboardCell(in_scrollView, (i % 2) == 0);
+
+                newItem.Init(leaderboardItem, i + 1);
+                newItem.transform.localPosition = Vector3.zero;
+                in_itemCell.Add(newItem);
+                i++;
+            }
         }
     }
+
+    private static Color OPP_COLOR = new Color32(0xFF, 0xFF, 0x49, 0xFF);
+
+    private LeaderboardCell CreateLeaderboardCell(Transform in_parent = null, bool in_even = false)
+    {
+        bool isSecondDisplay = MyScores.color == OPP_COLOR ? true : false;
+        LeaderboardCell toReturn = null;
+        toReturn = (CreateResourceAtPath(in_even ? "Prefabs/LeaderboardCell" + (isSecondDisplay ? "2" : "1") + "A" : "Prefabs/LeaderboardCell" + (isSecondDisplay ? "2" : "1") + "B", in_parent.transform)).GetComponent<LeaderboardCell>();
+
+        toReturn.transform.SetParent(in_parent);
+        toReturn.transform.localScale = Vector3.one;
+        return toReturn;
+    }
+
+    private void RemoveAllCellsInView(List<LeaderboardCell> in_itemCell)
+    {
+        LeaderboardCell item;
+        for (int i = 0; i < in_itemCell.Count; ++i)
+        {
+            item = in_itemCell[i];
+            Destroy(item.gameObject);
+        }
+        in_itemCell.Clear();
+    }
+
+    private List<LeaderboardCell> m_itemCell = null;
 }

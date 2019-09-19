@@ -1,68 +1,25 @@
 ﻿#region
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BrainCloud;
 using BrainCloud.LitJson;
 using UnityEngine;
+using TMPro;
 
 #endregion
 
 public class TicTacToe : GameScene
 {
-    
-    #region Variables
-    private readonly int[] _grid = new int[9];
-
-    private readonly Vector3[] _tokenPositions =
-    {
-        new Vector3(-2.1f, 12, 2.1f),
-        new Vector3(0, 12, 2.1f),
-        new Vector3(2.1f, 12, 2.1f),
-        new Vector3(-2.1f, 12, 0),
-        new Vector3(0, 12, 0),
-        new Vector3(2.1f, 12, 0),
-        new Vector3(-2.1f, 12, -2.1f),
-        new Vector3(0, 12, -2.1f),
-        new Vector3(2.1f, 12, -2.1f)
-    };
-
-    private readonly int[,] _winningCond =
-    {
-        //List of possible winning conditions
-        {0, 1, 2},
-        {3, 4, 5},
-        {6, 7, 8},
-        {0, 3, 6},
-        {1, 4, 7},
-        {2, 5, 8},
-        {0, 4, 8},
-        {2, 4, 6}
-    };
-
-    public List<GameObject> GridObjList;
-    private List<string> _history;
-    private bool _isHistoryMatch;
-
+    #region Public Variables
     public GameObject PlayerO;
-    public TextMesh PlayerTurnText;
-
     public GameObject PlayerX;
-    private bool _turnPlayed;
-    private bool _turnSubmitted;
-
-    private int _winner;
-
-    public PlayerInfo WinnerInfo;
-    public PlayerInfo LoserInfo;
-
-    private bool hasNoNewTurn;
-
-    public TextMesh PlayerXName;
-    public TextMesh PlayerOName;
-    
+    public GameObject DuringGameDisplay;
+    public GameObject AfterGameDisplay;
+    public GameObject PlayAgainButton;
     #endregion
+
+    private const int MAX_CHARS = 10;
 
     private void Start()
     {
@@ -77,38 +34,102 @@ public class TicTacToe : GameScene
 
         parent.GetComponentInChildren<Camera>().rect = App.ViewportRect;
 
-
         // Read the state and assembly the board
         BuildBoardFromState(App.BoardState);
 
+        // also updates _winner status
+        updateHud();
+        enableRTT();
+    }
+
+    public void onReturnToMainMenu()
+    {
+        App.GotoMatchSelectScene(gameObject);
+    }
+
+    public static string Truncate(string value, int maxChars)
+    {
+        return value.Length <= maxChars ? value : value.Substring(0, maxChars) + (char)0x2026; // Ellipsis char
+    }
+
+    private void updateHud(bool updateNames = true)
+    {
         // Check we if are not seeing a done match
         _winner = CheckForWinner();
 
-        // Setup HUD with player pics and names
-        
-
-        PlayerXName.text = App.PlayerInfoX.PlayerName;
-        PlayerOName.text = App.PlayerInfoO.PlayerName;
-        PlayerTurnText.text = "Your Turn";
-
-        _turnPlayed = false;
-
-        _winner = CheckForWinner();
-        if (_winner != 0)
+        // Read match history
+        if (_history == null && _winner != 0)
         {
-            _isHistoryMatch = true;
             _turnPlayed = true;
-
-            if (_winner == -1)
-                PlayerTurnText.text = "Match Tied";
-            else
-                PlayerTurnText.text = "Match Completed";
-
             App.Bc.AsyncMatchService
                 .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
         }
-        // Read match history
-        enableRTT();
+
+        enableDuringGameDisplay(_winner == 0);
+
+        Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform };
+
+        if (DuringGameDisplay.activeInHierarchy)
+        {
+            TextMeshProUGUI status = toCheckDisplay[0].Find("StatusOverlay").Find("StatusText").GetComponent<TextMeshProUGUI>();
+            // update the during Game Display
+            status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" :
+                                            (App.WhosTurn == App.PlayerInfoX && App.CurrentMatch.yourToken == "X" ||
+                                             App.WhosTurn == App.PlayerInfoO && App.CurrentMatch.yourToken == "O") ? "Your Turn" :
+                                             Truncate(App.WhosTurn.PlayerName, MAX_CHARS) + "'s Turn";
+        }
+        else
+        {
+            Transform statusOverlay = toCheckDisplay[1].Find("StatusOverlay");
+            TextMeshProUGUI status = statusOverlay.Find("StatusText").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI statusOutline = statusOverlay.Find("StatusTextOutline").GetComponent<TextMeshProUGUI>();
+            if (_winner < 0)
+            {
+                status.text = "Game Tied!";
+            }
+            else if (_winner > 0)
+            {
+                if (_winner == 1)
+                {
+                    status.text = Truncate(App.PlayerInfoX.PlayerName, MAX_CHARS) + " Wins!";
+                    WinnerInfo = App.PlayerInfoX;
+                    LoserInfo = App.PlayerInfoO;
+                }
+                else
+                {
+                    status.text = Truncate(App.PlayerInfoO.PlayerName, MAX_CHARS) + " Wins!";
+                    WinnerInfo = App.PlayerInfoO;
+                    LoserInfo = App.PlayerInfoX;
+                }
+            }
+            else
+            {
+                status.text = Truncate(App.WhosTurn.PlayerName, MAX_CHARS) + " Turn";
+            }
+
+            statusOutline.text = status.text;
+        }
+
+        if (updateNames)
+        {
+            Transform playerVsOpp;
+            TextMeshProUGUI playerXName, playerXNameOutline, playerOName, playerONameOutline;
+            // update the names
+            for (int i = 0; i < toCheckDisplay.Length; ++i)
+            {
+                playerVsOpp = toCheckDisplay[i].Find("PlayerVSOpponent");
+                playerXName = playerVsOpp.Find("PlayerName").GetComponent<TextMeshProUGUI>();
+                playerXNameOutline = playerVsOpp.Find("PlayerNameOutline").GetComponent<TextMeshProUGUI>();
+                playerXName.text = Truncate(App.PlayerInfoX.PlayerName, MAX_CHARS);
+                playerXNameOutline.text = playerXName.text;
+
+                playerOName = playerVsOpp.Find("OpponentName").GetComponent<TextMeshProUGUI>();
+                playerONameOutline = playerVsOpp.Find("OpponentNameOutline").GetComponent<TextMeshProUGUI>();
+                playerOName.text = Truncate(App.PlayerInfoO.PlayerName, MAX_CHARS);
+                playerONameOutline.text = playerOName.text;
+            }
+        }
+
     }
 
     // Enable RTT
@@ -153,14 +174,9 @@ public class TicTacToe : GameScene
                 var match = App.CurrentMatch;
                 var data = JsonMapper.ToObject(response)["data"];
 
-
                 int newVersion = int.Parse(data["version"].ToString());
 
-                if (App.MatchVersion + 1 >= (ulong)newVersion)
-                {
-                    hasNoNewTurn = true;
-                }
-                else
+                if (App.MatchVersion + 1 < (ulong)newVersion)
                 {
                     App.MatchVersion = (ulong)newVersion;
 
@@ -173,9 +189,8 @@ public class TicTacToe : GameScene
                     App.MatchId = match.matchId;
 
                     // Load the Tic Tac Toe scene
-
-                    App.GotoTicTacToeScene(gameObject);
-
+                    if (this != null && this.gameObject != null)
+                        App.GotoTicTacToeScene(gameObject);
                 }
             });
     }
@@ -190,12 +205,11 @@ public class TicTacToe : GameScene
     private void OnReadMatchHistory(string responseData, object cbPostObject)
     {
         var turns = JsonMapper.ToObject(responseData)["data"]["turns"];
-
         _history = new List<string>();
         for (var i = 0; i < turns.Count; ++i)
         {
             var turn = turns[i];
-            var turnState = (string) turn["matchState"]["board"];
+            var turnState = (string)turn["matchState"]["board"];
             _history.Add(turnState);
         }
     }
@@ -210,6 +224,9 @@ public class TicTacToe : GameScene
 
     public void PlayTurn(int index, PlayerInfo player)
     {
+        if (_turnPlayed) return;
+        _turnPlayed = true;
+
         var token = player == App.PlayerInfoX ? "X" : "O";
         AddToken(index, token);
         // Modify the boardState
@@ -217,38 +234,32 @@ public class TicTacToe : GameScene
         boardStateBuilder[index] = token[0];
         App.BoardState = boardStateBuilder.ToString();
 
-        _turnPlayed = true;
+        // send the info off
+        var boardStateJson = new JsonData();
+        boardStateJson["board"] = App.BoardState;
+
+        App.Bc.AsyncMatchService.SubmitTurn(
+            App.OwnerId,
+            App.MatchId,
+            App.MatchVersion,
+            boardStateJson.ToJson(),
+            "A turn has been played",
+            null,
+            null,
+            null,
+            OnTurnSubmitted, (status, code, error, cbObject) =>
+            {
+                Debug.Log(status);
+                Debug.Log(code);
+                Debug.Log(error.ToString());
+            });
 
         if (App.WhosTurn == App.PlayerInfoX)
             App.WhosTurn = App.PlayerInfoO;
         else
             App.WhosTurn = App.PlayerInfoX;
 
-        _winner = CheckForWinner();
-
-        if (_winner < 0)
-        {
-            PlayerTurnText.text = "Game Tied!";
-        }
-        else if (_winner > 0)
-        {
-            if (_winner == 1)
-            {
-                PlayerTurnText.text = App.PlayerInfoX.PlayerName + " Wins!";
-                WinnerInfo = App.PlayerInfoX;
-                LoserInfo = App.PlayerInfoO;
-            }
-            else
-            {
-                PlayerTurnText.text = App.PlayerInfoO.PlayerName + " Wins!";
-                WinnerInfo = App.PlayerInfoO;
-                LoserInfo = App.PlayerInfoX;
-            }
-        }
-        else
-        {
-            PlayerTurnText.text = App.WhosTurn.PlayerName + " Turn";
-        }
+        updateHud(false);
     }
 
     private void ClearTokens()
@@ -298,58 +309,6 @@ public class TicTacToe : GameScene
         return ourWinner;
     }
 
-    private void OnGUI()
-    {
-        // Display History HUD
-        OnHistoryGUI();
-
-        if (!_turnPlayed) return;
-
-        var btnText = "Submit Turn";
-        if (_winner != 0) btnText = "Complete Game";
-
-        if (_isHistoryMatch)
-        {
-            if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), "Leave"))
-                App.GotoMatchSelectScene(gameObject);
-        }
-
-        if (_turnSubmitted)
-        {
-            if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), "Leave"))
-            {
-                App.GotoMatchSelectScene(gameObject);
-            }
-            if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60 - 45, 140, 30), "Refresh"))
-            {
-                queryMatchState();
-            }
-
-            if (hasNoNewTurn)
-            {
-                GUI.Label(new Rect(Screen.width / 2 - 70 + App.Offset, 60 + 45, 140, 30), "Has no new turn");
-            }
-            
-        }
-        else if (GUI.Button(new Rect(Screen.width / 2 - 70 + App.Offset, 60, 140, 30), btnText))
-        {
-            // Ask the user to submit their turn
-            var boardStateJson = new JsonData();
-            boardStateJson["board"] = App.BoardState;
-
-            App.Bc.AsyncMatchService.SubmitTurn(
-                App.OwnerId,
-                App.MatchId,
-                App.MatchVersion,
-                boardStateJson.ToJson(),
-                "A turn has been played",
-                null,
-                null,
-                null,
-                OnTurnSubmitted, (status, code, error, cbObject) => { Debug.Log(status); Debug.Log(code); Debug.Log(error.ToString()); });
-        }
-    }
-
     private void BuildBoardFromState(string boardState)
     {
         ClearTokens();
@@ -361,58 +320,86 @@ public class TicTacToe : GameScene
         }
     }
 
-    private void OnHistoryGUI()
+    private void enableDuringGameDisplay(bool in_enable)
     {
-        if (_history == null) return;
+        DuringGameDisplay.SetActive(in_enable);
+        AfterGameDisplay.SetActive(!in_enable);
+        PlayAgainButton.SetActive(!in_enable);
 
-        var i = 0;
-        GUI.Label(new Rect(Screen.width / 2 + App.Offset, 130, 70, 30), "History:");
-        foreach (var turnState in _history)
-        {
-            if (GUI.Button(new Rect(Screen.width / 2 + App.Offset, 150 + i * 40, 70, 30), "Turn " + i))
-                BuildBoardFromState(turnState);
-
-            ++i;
-        }
     }
-
     private void OnTurnSubmitted(string responseData, object cbPostObject)
     {
-        
         if (_winner == 0)
         {
-            _turnSubmitted = true;
             return;
         }
 
-        // Otherwise, the game was done. Can send complete turn
-        /*
-         App.Bc.AsyncMatchService.CompleteMatch(
-             App.OwnerId,
-             App.MatchId,
-             OnMatchCompleted);
-          */
+        enableDuringGameDisplay(false);
+    }
 
-        // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
-        var matchResults = new JsonData {["ownerId"] = App.OwnerId, ["matchId"] = App.MatchId};
+    private int _replayTurnIndex = 0;
+    public void onReplay()
+    {
+        AfterGameDisplay.transform.Find("TurnCycleButton").gameObject.SetActive(true);
+        _replayTurnIndex = 1;
+        AfterGameDisplay.transform.Find("TurnCycleButton").Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = "TURN " + (_replayTurnIndex);
+        BuildBoardFromState(_history[_replayTurnIndex]);
+    }
 
-
-        if (_winner < 0)
+    public void onIncrementReplayTurn(int in_value)
+    {
+        if (in_value > 0)
         {
-            matchResults["isTie"] = true;
+            if (_replayTurnIndex + in_value < _history.Count)
+                _replayTurnIndex += in_value;
+            else
+            {
+                _replayTurnIndex = _replayTurnIndex + in_value - _history.Count;
+            }
         }
         else
         {
-            matchResults["isTie"] = false;
-            matchResults["winnerId"] = WinnerInfo.ProfileId;
-            matchResults["loserId"] = LoserInfo.ProfileId;
-            matchResults["winnerRating"] = int.Parse(WinnerInfo.PlayerRating);
-            matchResults["loserRating"] = int.Parse(LoserInfo.PlayerRating);
+            if (_replayTurnIndex + in_value > 0)
+                _replayTurnIndex += in_value;
+            else
+            {
+                _replayTurnIndex = (_history.Count - 1) + (_replayTurnIndex + in_value);
+            }
         }
 
+        if (_replayTurnIndex <= 0) _replayTurnIndex = 1;
 
-        App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
-            (status, code, error, cbObject) => { });
+        AfterGameDisplay.transform.Find("TurnCycleButton").Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = "TURN " + (_replayTurnIndex);
+        BuildBoardFromState(_history[_replayTurnIndex]);
+    }
+
+    public void onCompleteGame()
+    {
+        if (App.CurrentMatch.complete)
+        {
+            App.GotoMatchSelectScene(gameObject);
+        }
+        else
+        {
+            // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
+            var matchResults = new JsonData { ["ownerId"] = App.OwnerId, ["matchId"] = App.MatchId };
+
+            if (_winner < 0)
+            {
+                matchResults["isTie"] = true;
+            }
+            else
+            {
+                matchResults["isTie"] = false;
+                matchResults["winnerId"] = WinnerInfo.ProfileId;
+                matchResults["loserId"] = LoserInfo.ProfileId;
+                matchResults["winnerRating"] = int.Parse(WinnerInfo.PlayerRating);
+                matchResults["loserRating"] = int.Parse(LoserInfo.PlayerRating);
+            }
+
+            App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
+                (status, code, error, cbObject) => { });
+        }
     }
 
     private void OnMatchCompleted(string responseData, object cbPostObject)
@@ -420,8 +407,52 @@ public class TicTacToe : GameScene
         // Get the new PlayerRating
         App.PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
 
-        
         // Go back to game select scene
         App.GotoMatchSelectScene(gameObject);
     }
+
+    public void onPlayAgain()
+    {
+        PlayAgainButton.SetActive(false);
+        // TODO
+    }
+
+    #region private variables 
+    private PlayerInfo WinnerInfo = null;
+    private PlayerInfo LoserInfo = null;
+
+    private List<GameObject> GridObjList = new List<GameObject>();
+    private readonly int[] _grid = new int[9];
+
+    private readonly Vector3[] _tokenPositions =
+    {
+        new Vector3(-2.1f, 12, 2.1f),
+        new Vector3(0, 12, 2.1f),
+        new Vector3(2.1f, 12, 2.1f),
+        new Vector3(-2.1f, 12, 0),
+        new Vector3(0, 12, 0),
+        new Vector3(2.1f, 12, 0),
+        new Vector3(-2.1f, 12, -2.1f),
+        new Vector3(0, 12, -2.1f),
+        new Vector3(2.1f, 12, -2.1f)
+    };
+
+    private readonly int[,] _winningCond =
+    {
+        //List of possible winning conditions
+        {0, 1, 2},
+        {3, 4, 5},
+        {6, 7, 8},
+        {0, 3, 6},
+        {1, 4, 7},
+        {2, 5, 8},
+        {0, 4, 8},
+        {2, 4, 6}
+    };
+
+    private List<string> _history;
+    private bool _turnPlayed = false;
+
+    private int _winner;
+    #endregion
 }
