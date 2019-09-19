@@ -1,0 +1,246 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb4fd16f854e89249a23146eeaf1cd10, type: 3}
+  m_Name: BrainCloudSettings
+  m_EditorClassIdentifier: 
+  SettingsState: 6
+  TeamType: 0
+  WasSelectedTeam: 2
+  WasSelectedApp: 4
+  ClientVersion: 4.2.0
+  ServerUrl: https://sharedprod.braincloudservers.com
+  NewAppName: New App Name
+  AppIdSecrets: []
+  AdminData:
+    TeamList:
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: Select Team
+      TeamId: null
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: Tutorial Inc
+      TeamId: 4dc1a9f7-3baf-45a2-9036-b7d765efb616
+    - AppList:
+      - AppName: Bombers
+        AppId: 12185
+        _appSecret: 7942e564-f6de-4d99-9565-6ee1c1ac51ba
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TicTacToe
+        AppId: 12187
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Space Shooter
+        AppId: 12186
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Bombers-RTT
+        AppId: 12493
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Auth
+        AppId: 12500
+        _appSecret: 2476bbf3-e980-44cf-8fb0-bfcbbed8211b
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AuthErrHandle
+        AppId: 12501
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      AppNameList:
+      - Bombers (12185)
+      - TicTacToe (12187)
+      - Space Shooter (12186)
+      - Bombers-RTT (12493)
+      - Auth (12500)
+      - AuthErrHandle (12501)
+      RenderAppNameList:
+      - Bombers (12185)
+      - TicTacToe (12187)
+      - Space Shooter (12186)
+      - Bombers-RTT (12493)
+      - Auth (12500)
+      - AuthErrHandle (12501)
+      - Create New App ...
+      RenderedAppNameList: []
+      _selectedAppIndex: 4
+      TeamName: brainCloud - EXAMPLE TEMPLATES - Unity
+      TeamId: ef0bb810-e0a5-4eeb-9cb4-d55122b37940
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: brainCloud - SUPER
+      TeamId: cdf9f44f-4b2f-44dd-b86f-8223553e827f
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: brainCloud - CLIENT UNIT
+      TeamId: 742d8800-9d00-4933-bd2d-398aab756fe8
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: BrainCloud
+      TeamId: 888c9860-219f-41cd-9f64-b37e1bb69c49
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: brainCloud Tutorials for Unity
+      TeamId: 13363b65-5cf2-4b5e-937b-05a866795614
+    TeamNameList:
+    - -- Select Team --
+    - Tutorial Inc (250998)
+    - brainCloud - EXAMPLE TEMPLATES - Unity (4860182)
+    - brainCloud - SUPER (250958)
+    - brainCloud - CLIENT UNIT (4502545)
+    - BrainCloud (4557896)
+    - brainCloud Tutorials for Unity (4528926)
+    _selectedTeamIndex: 2
+    AdminFullName: 
+    AdminEmailAddress: 
+    TeamType: 0
+    StartingTeamName: 
+    Email: ryanr@bitheads.com
+    Credentials:
+      AdminId: 2266
+      Token: 4a3b0f83-f4db-49b0-9354-fff1bd9febb7
+  SelectedTemplate: 0
+  CreateWithTemplateEnabled: 0
+  TemplateDataList:
+  - AppName: Bombers
+    AppId: 12185
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  - AppName: TicTacToe
+    AppId: 12187
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  - AppName: Space Shooter
+    AppId: 12186
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  - AppName: Bombers-RTT
+    AppId: 12493
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  TemplateNameList:
+  - Bombers
+  - TicTacToe
+  - Space Shooter
+  - Bombers-RTT
+  AppOptions:
+    GamificationEnabled: 1
+    SupportedPlatforms:
+    - PlatformName: APPLE_TV_OS
+      DisplayName: Apple TV OS
+      IsEnabled: 0
+    - PlatformName: BB
+      DisplayName: BlackBerry
+      IsEnabled: 0
+    - PlatformName: FB
+      DisplayName: Facebook
+      IsEnabled: 0
+    - PlatformName: ANG
+      DisplayName: Android
+      IsEnabled: 0
+    - PlatformName: IOS
+      DisplayName: IOS
+      IsEnabled: 0
+    - PlatformName: LINUX
+      DisplayName: Linux
+      IsEnabled: 1
+    - PlatformName: MAC
+      DisplayName: Mac
+      IsEnabled: 1
+    - PlatformName: PS3
+      DisplayName: PS3
+      IsEnabled: 0
+    - PlatformName: PS4
+      DisplayName: PS4
+      IsEnabled: 0
+    - PlatformName: PS_VITA
+      DisplayName: PS Vita
+      IsEnabled: 0
+    - PlatformName: ROKU
+      DisplayName: Roku
+      IsEnabled: 0
+    - PlatformName: TIZEN
+      DisplayName: Tizen
+      IsEnabled: 0
+    - PlatformName: UNKNOWN
+      DisplayName: Unknown
+      IsEnabled: 0
+    - PlatformName: WATCH_OS
+      DisplayName: Apple Watch
+      IsEnabled: 0
+    - PlatformName: WEB
+      DisplayName: Web
+      IsEnabled: 0
+    - PlatformName: WII
+      DisplayName: Wii
+      IsEnabled: 0
+    - PlatformName: WINP
+      DisplayName: Windows Phone
+      IsEnabled: 0
+    - PlatformName: WINDOWS
+      DisplayName: Windows
+      IsEnabled: 1
+    - PlatformName: XBOX_360
+      DisplayName: Xbox 360
+      IsEnabled: 0
+    - PlatformName: XBOX_ONE
+      DisplayName: Xbox One
+      IsEnabled: 0
+  UseDefaultServerUrl: 1
+  AdvanceSelection: 0
