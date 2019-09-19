@@ -171,9 +171,9 @@ public class BrainCloudWrapper
         get { return Client.ItemCatalogService; }
     }
 
-    public BrainCloudUserInventoryManagement UserInventoryManagementService
+    public BrainCloudUserItems UserItemsService
     {
-        get { return Client.UserInventoryManagementService; }
+        get { return Client.UserItemsService; }
     }
 
     public BrainCloudScript ScriptService
@@ -244,6 +244,10 @@ public class BrainCloudWrapper
     public BrainCloudTournament TournamentService
     {
         get { return Client.TournamentService; }
+    }
+    public BrainCloudCustomEntity CustomEntityService
+    {
+        get { return Client.CustomEntityService; }
     }
 
     public BrainCloudPushNotification PushNotificationService

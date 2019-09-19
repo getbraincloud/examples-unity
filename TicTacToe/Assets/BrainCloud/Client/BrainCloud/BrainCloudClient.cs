@@ -137,7 +137,7 @@ using System;
         private BrainCloudGlobalStatistics _globalStatisticsService;
         private BrainCloudIdentity _identityService;
         private BrainCloudItemCatalog _itemCatalogService;
-        private BrainCloudUserInventoryManagement _userInventoryManagementService;
+        private BrainCloudUserItems _userItemsService;
         private BrainCloudScript _scriptService;
         private BrainCloudMatchMaking _matchMakingService;
         private BrainCloudOneWayMatch _oneWayMatchService;
@@ -150,6 +150,7 @@ using System;
         private BrainCloudAsyncMatch _asyncMatchService;
         private BrainCloudTime _timeService;
         private BrainCloudTournament _tournamentService;
+        private BrainCloudCustomEntity _customEntityService;
         private BrainCloudAuthentication _authenticationService;
         private BrainCloudPushNotification _pushNotificationService;
         private BrainCloudPlayerStatisticsEvent _playerStatisticsEventService;
@@ -219,7 +220,7 @@ using System;
 
             _identityService = new BrainCloudIdentity(this);
             _itemCatalogService = new BrainCloudItemCatalog(this);
-            _userInventoryManagementService = new BrainCloudUserInventoryManagement(this);
+            _userItemsService = new BrainCloudUserItems(this);
             _scriptService = new BrainCloudScript(this);
             _matchMakingService = new BrainCloudMatchMaking(this);
             _oneWayMatchService = new BrainCloudOneWayMatch(this);
@@ -234,6 +235,7 @@ using System;
             _asyncMatchService = new BrainCloudAsyncMatch(this);
             _timeService = new BrainCloudTime(this);
             _tournamentService = new BrainCloudTournament(this);
+            _customEntityService = new BrainCloudCustomEntity(this);
 
             _authenticationService = new BrainCloudAuthentication(this);
             _pushNotificationService = new BrainCloudPushNotification(this);
@@ -400,9 +402,9 @@ using System;
             get { return _itemCatalogService; }
         }
 
-        public BrainCloudUserInventoryManagement UserInventoryManagementService
+        public BrainCloudUserItems UserItemsService
         {
-            get { return _userInventoryManagementService; }
+            get { return _userItemsService; }
         }
 
         public BrainCloudScript ScriptService
@@ -469,7 +471,10 @@ using System;
         {
             get { return _tournamentService; }
         }
-
+        public BrainCloudCustomEntity CustomEntityService
+        {
+            get { return _customEntityService; }
+        }
         public BrainCloudAuthentication AuthenticationService
         {
             get { return _authenticationService; }
@@ -599,9 +604,9 @@ using System;
         {
             return ItemCatalogService;
         }
-        public BrainCloudUserInventoryManagement GetUserInventoryManagementService()
+        public BrainCloudUserItems GetUserItemsService()
         {
-            return UserInventoryManagementService;
+            return UserItemsService;
         }
 
         public BrainCloudScript GetScriptService()
@@ -662,6 +667,10 @@ using System;
         public BrainCloudTournament GetTournamentService()
         {
             return _tournamentService;
+        }
+        public BrainCloudCustomEntity GetCustomEntityService()
+        {
+            return _customEntityService;
         }
 
         public BrainCloudAuthentication GetAuthenticationService()
