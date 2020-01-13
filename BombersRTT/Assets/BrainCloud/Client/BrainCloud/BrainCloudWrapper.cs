@@ -3,7 +3,6 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Entity;
@@ -86,7 +85,6 @@ public class BrainCloudWrapper
 
     private WrapperData _wrapperData = new WrapperData();
 
-
     //Getting this error? - "An object reference is required for the non-static field, method, or property 'BrainCloudWrapper.Client'"
     //Switch to BrainCloudWrapper.GetBC();
     public BrainCloudClient Client { get; private set; }
@@ -102,6 +100,12 @@ public class BrainCloudWrapper
         RelayService.Disconnect();
         Client.Update();
     }
+#if !DOT_NET
+    private void OnDestroy()
+    {
+        StopAllCoroutines();
+    }
+#endif
 
     /// <summary>
     /// Name of this wrapper instance. Used for data loading
@@ -321,7 +325,7 @@ public class BrainCloudWrapper
     /// </summary>
     public BrainCloudWrapper()
     {
-        Client = new BrainCloudClient();
+        Client = new BrainCloudClient(this);
     }
 
     /// <summary>
@@ -331,6 +335,7 @@ public class BrainCloudWrapper
     private BrainCloudWrapper(BrainCloudClient client)
     {
         Client = client;
+        Client.Wrapper = this;
     }
 
     /// <summary>
@@ -340,7 +345,7 @@ public class BrainCloudWrapper
     /// <param name="wrapperName">string value used to differentiate saved wrapper data</param>
     public BrainCloudWrapper(string wrapperName)
     {
-        Client = new BrainCloudClient();
+        Client = new BrainCloudClient(this);
         WrapperName = wrapperName;
     }
 
@@ -483,6 +488,81 @@ public class BrainCloudWrapper
 
         Client.AuthenticationService.AuthenticateAnonymous(
             true, AuthSuccessCallback, AuthFailureCallback, aco);
+    }
+
+    /// <summary>
+    /// Authenticate the user using a Pase userid and authentication token
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="handoffId">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="securityToken">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public void AuthenticateHandoff(
+        string handoffId,
+        string securityToken,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
+        aco._successCallback = success;
+        aco._failureCallback = failure;
+        aco._cbObject = cbObject;
+
+        InitializeIdentity(true);
+        Client.AuthenticationService.AuthenticateHandoff(
+            handoffId, securityToken, AuthSuccessCallback, AuthFailureCallback, aco);
+
+    }
+
+    /// <summary>
+    /// Authenticate user with handoffCode
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="handoffCode">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public void AuthenticateSettopHandoff(
+        string handoffCode,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
+        aco._successCallback = success;
+        aco._failureCallback = failure;
+        aco._cbObject = cbObject;
+
+        InitializeIdentity(true);
+        Client.AuthenticationService.AuthenticateSettopHandoff(
+            handoffCode, AuthSuccessCallback, AuthFailureCallback, aco);
     }
 
     /// <summary>
