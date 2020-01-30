@@ -401,6 +401,7 @@ namespace BrainCloud
         public static readonly OperationParam GroupAttributes = new OperationParam("attributes");
         public static readonly OperationParam GroupName = new OperationParam("name");
         public static readonly OperationParam GroupType = new OperationParam("groupType");
+        public static readonly OperationParam GroupTypes = new OperationParam("groupTypes");
         public static readonly OperationParam GroupEntityType = new OperationParam("entityType");
         public static readonly OperationParam GroupIsOpenGroup = new OperationParam("isOpenGroup");
         public static readonly OperationParam GroupAcl = new OperationParam("acl");
@@ -490,6 +491,16 @@ namespace BrainCloud
         public static readonly OperationParam LobbyConnectionId = new OperationParam("cxId");
         public static readonly OperationParam PingData = new OperationParam("pingData");
 
+        public static readonly OperationParam CompoundAlgos = new OperationParam("algos");
+        public static readonly OperationParam CompoundRanges = new OperationParam("compound-ranges");
+        public static readonly OperationParam LobbyCritera = new OperationParam("criteria");
+        public static readonly OperationParam CriteraPing = new OperationParam("ping");
+        public static readonly OperationParam CriteraRating = new OperationParam("rating");
+        public static readonly OperationParam StrategyRangedPercent = new OperationParam("ranged-percent");
+        public static readonly OperationParam StrategyRangedAbsolute = new OperationParam("ranged-absolute");
+        public static readonly OperationParam StrategyAbsolute = new OperationParam("absolute");
+        public static readonly OperationParam StrategyCompound = new OperationParam("compound");
+        public static readonly OperationParam AlignmentCenter = new OperationParam("center");
         //custom entity
         public static readonly OperationParam CustomEntityServiceEntityType = new OperationParam("entityType");
         public static readonly OperationParam CustomEntityServiceEntityId = new OperationParam("entityId");
