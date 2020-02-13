@@ -3,13 +3,12 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-namespace BrainCloud
-{
-
 using System.Collections.Generic;
 using BrainCloud.Internal;
 using BrainCloud.Common;
 
+namespace BrainCloud
+{
     public class BrainCloudIdentity
     {
         private BrainCloudClient _client;

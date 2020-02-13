@@ -1,11 +1,9 @@
-namespace BrainCloudUnity
-{
-
-
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+namespace BrainCloudUnity
+{
     [System.Serializable]
     public struct AppIdSecretPair
     {

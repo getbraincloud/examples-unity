@@ -3,9 +3,6 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-namespace BrainCloud
-{
-
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.Common;
@@ -15,6 +12,8 @@ using BrainCloud.Internal;
 using System;
 #endif
 
+namespace BrainCloud
+{
     public class BrainCloudPushNotification
     {
         private BrainCloudClient _client;

@@ -36,9 +36,6 @@
  */
 #endregion
 
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
-{
-
 using System;
 using System.Net.Sockets;
 using System.Security.Principal;
@@ -47,6 +44,8 @@ using System.Threading;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net.WebSockets;
 
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Server
+{
   /// <summary>
   /// Provides a WebSocket protocol server.
   /// </summary>

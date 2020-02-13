@@ -1,8 +1,4 @@
-﻿
-namespace BrainCloudUnity
-{
-
-#if !DOT_NET
+﻿#if !DOT_NET
 
 #if UNITY_EDITOR
 
@@ -10,6 +6,8 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
+namespace BrainCloudUnity
+{
     namespace BrainCloudSettingsDLL
     {
         /// <summary>
@@ -114,9 +112,7 @@ using UnityEditor;
             }
         }
     }
-#endif
-#endif
-    
 }
 
-
+#endif
+#endif

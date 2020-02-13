@@ -2,16 +2,13 @@
 // brainCloud client source code
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
-
-#if ((UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)) || UNITY_2018_3_OR_NEWER
+#if (UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)
 #define USE_WEB_REQUEST //Comment out to force use of old WWW class on Unity 5.3+
 #endif
 
-namespace BrainCloud.Internal
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 #if (DOT_NET || DISABLE_SSL_CHECK)
 using System.Net;
@@ -26,15 +23,16 @@ using BrainCloud.ModernHttpClient;
 #if UNITY_5_3
 using UnityEngine.Experimental.Networking;
 #else
-    using UnityEngine.Networking;
+using UnityEngine.Networking;
 #endif
 #endif
-    using UnityEngine;
+using UnityEngine;
 #endif
 
-    using BrainCloud.JsonFx.Json;
+using BrainCloud.JsonFx.Json;
 
-
+namespace BrainCloud.Internal
+{
     #region Processed Server Call Class
     public class ServerCallProcessed
     {
@@ -153,9 +151,6 @@ using UnityEngine.Experimental.Networking;
         /// </summary>
         private DateTime _authenticationTimeoutStart;
 
-        /// a checker to see what the packet Id we are receiving is 
-        private long receivedPacketIdChecker = 0;
-
         /// <summary>
         /// Debug value to introduce packet loss for testing retries etc.
         /// </summary>
@@ -203,11 +198,6 @@ using UnityEngine.Experimental.Networking;
             {
                 return _isAuthenticated;
             }
-        }
-
-        public long GetReceivedPacketId()
-        {
-            return receivedPacketIdChecker;
         }
 
         internal void setAuthenticated()
@@ -685,6 +675,7 @@ using UnityEngine.Experimental.Networking;
             string jsonError = JsonWriter.Serialize(bundleObj);
             HandleResponseBundle(jsonError);
         }
+
 
         /// <summary>
         /// Shuts down the communications layer.
@@ -1598,7 +1589,7 @@ using UnityEngine.Experimental.Networking;
                 Dictionary<string, string> formTable = new Dictionary<string, string>();
 
 #if USE_WEB_REQUEST
-                UnityWebRequest request = UnityWebRequest.Post(ServerURL, formTable);
+                UnityWebRequest request  = UnityWebRequest.Post(ServerURL, formTable);
                 request.SetRequestHeader("Content-Type", "application/json; charset=utf-8");
                 request.SetRequestHeader("X-SIG", sig);
 

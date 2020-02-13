@@ -39,10 +39,6 @@
  */
 #endregion
 
-
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
-{
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -55,6 +51,8 @@ using System.Threading;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net.WebSockets;
 
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
+{
     /// <summary>
     /// Implements the WebSocket interface.
     /// </summary>

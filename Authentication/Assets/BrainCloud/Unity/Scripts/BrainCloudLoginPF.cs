@@ -1,7 +1,4 @@
-﻿
-namespace BrainCloudUnity
-{
-using UnityEngine;
+﻿using UnityEngine;
 using BrainCloudUnity.HUD;
 
 #if UNITY_5_3_OR_NEWER
@@ -12,6 +9,8 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 #endif
 
+namespace BrainCloudUnity
+{
 #if UNITY_EDITOR
     [InitializeOnLoad]
 #endif
