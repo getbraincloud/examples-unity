@@ -1,0 +1,2930 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb4fd16f854e89249a23146eeaf1cd10, type: 3}
+  m_Name: BrainCloudSettings
+  m_EditorClassIdentifier: 
+  SettingsState: 6
+  TeamType: 0
+  WasSelectedTeam: 7
+  WasSelectedApp: 256
+  ClientVersion: 4.3.5
+  ServerUrl: https://internal.braincloudservers.com
+  NewAppName: New App Name
+  AppIdSecrets: []
+  AdminData:
+    TeamList:
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: Select Team
+      TeamId: null
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: playBrains - STUDIO
+      TeamId: 5784b68c-ba9d-4eee-80d7-9b67f4ae5dfc
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: brainCloud - SUPER
+      TeamId: cdf9f44f-4b2f-44dd-b86f-8223553e827f
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: brainCloud - AppStore Tests
+      TeamId: cb2a126f-c90d-4d83-8e7b-fdf851e5ec3e
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: brainCloud - EXAMPLE TEMPLATES - Unity
+      TeamId: f1074e5c-91e3-40b0-8c34-0dee77af2b24
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: brainCloud - CLIENT UNIT
+      TeamId: 5506f57c-185d-4872-a5bf-c71bf1d87e80
+    - AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      _selectedAppIndex: 0
+      TeamName: Team QA Regressions With Billing
+      TeamId: c0ce2a14-7c65-4033-a624-4bbf484700dd
+    - AppList:
+      - AppName: '*123test x'
+        AppId: 22877
+        _appSecret: 1787dd0d-2b94-4213-92d7-88eadf4635a1
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestGoLive
+        AppId: 21542
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Clan
+        AppId: 21781
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test3333
+        AppId: 23045
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aaa
+        AppId: 22199
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test123321
+        AppId: 23047
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test456654
+        AppId: 23048
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: abcTest01
+        AppId: 22510
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Testmnbbnm
+        AppId: 23049
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: abcTest02
+        AppId: 22511
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: abcTest03
+        AppId: 22512
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: test
+        AppId: 22996
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RogerTestDelete
+        AppId: 21788
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: sad asd asd asd
+        AppId: 23282
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: compTest
+        AppId: 22194
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: a b c d
+        AppId: 23283
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: A B X $ $ $
+        AppId: 23284
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test3111
+        AppId: 23043
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test4111
+        AppId: 23044
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: GoogleAuth
+        AppId: 23614
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NewLeaderboardIndexTest
+        AppId: 21676
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: DebugJira2
+        AppId: 21555
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestGroups
+        AppId: 20584
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PaulLeaderboardTest
+        AppId: 21673
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: leaderboardImportFromProdNaveen
+        AppId: 21791
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: hlImport5
+        AppId: 22880
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: longtestapp
+        AppId: 23056
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TNE Test Renamed
+        AppId: 20903
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: hlImport6
+        AppId: 22881
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Ben_Test
+        AppId: 23057
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test_App_Two
+        AppId: 23290
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test2
+        AppId: 23291
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Testqweewq
+        AppId: 23050
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: touramentPid
+        AppId: 22083
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Testasddsa
+        AppId: 23051
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: All Features
+        AppId: 23174
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RicoChanged
+        AppId: 23054
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestImportExport
+        AppId: 20674
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: brainCloudBot
+        AppId: 20671
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestPasswordReset1
+        AppId: 23265
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasTestApp1
+        AppId: 23266
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aaaaaaaaaaaaaaaaaaaaaaaaaaaaapascal
+        AppId: 23388
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: GregEventServer
+        AppId: 22730
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Rico2
+        AppId: 23148
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwfulServerNames
+        AppId: 20678
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AngusChildApp
+        AppId: 22611
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test1
+        AppId: 22975
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: tEmail
+        AppId: 22050
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: naveenSMix
+        AppId: 22051
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PeerViewable
+        AppId: 22052
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: currencyTest
+        AppId: 22173
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestPasswordReset
+        AppId: 23263
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: JessGame
+        AppId: 23384
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestOverDAULimit
+        AppId: 20687
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasrTest33
+        AppId: 22503
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PaulPeerServiceVC
+        AppId: 22866
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Google p12
+        AppId: 20686
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasrTest44
+        AppId: 22504
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PaulPeerChild
+        AppId: 22867
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeApp 2
+        AppId: 21774
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: MarioTestApp
+        AppId: 20684
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: tournamentTestApp
+        AppId: 21771
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasrTest99
+        AppId: 22508
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasrTest88
+        AppId: 22509
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: newEmailTestApp
+        AppId: 23398
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLPokerPiratesDev
+        AppId: 22189
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: 00TEST00
+        AppId: 23399
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeApp8
+        AppId: 22862
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasTest01
+        AppId: 22500
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasrTest11
+        AppId: 22501
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RogerTestImport
+        AppId: 20688
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasrTest22
+        AppId: 22502
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Testing./-Name
+        AppId: 22865
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aaaaaaaaaaPascal2
+        AppId: 23390
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLEggies2
+        AppId: 22181
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasTest55
+        AppId: 23270
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: 000DTEST
+        AppId: 23271
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Rico3
+        AppId: 23273
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLEggies6
+        AppId: 22185
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLEggies7
+        AppId: 22186
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: SteveFBTesting
+        AppId: 20654
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: dashboard-tester-app [defaults-dont-delete]
+        AppId: 22954
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NewTestApp
+        AppId: 20653
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aspect6
+        AppId: 21741
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: BCLD3863Test
+        AppId: 22956
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PaulTestDeleteJun22xxxyyy2
+        AppId: 20651
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aspect5
+        AppId: 21740
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: test2Check
+        AppId: 22837
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PaulRewardsTest
+        AppId: 22033
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Leaderboard Config
+        AppId: 22034
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NewAppLeaderboardIndexesTest
+        AppId: 22156
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PeerTournamentLeaderboardDev
+        AppId: 22035
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: BrainCloudTodo
+        AppId: 20418
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: 2291
+        AppId: 22157
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aspect5
+        AppId: 21748
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLTest2
+        AppId: 22037
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Eggies
+        AppId: 22038
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: import4
+        AppId: 21746
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RyanTest
+        AppId: 22830
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: '**allFeaturesPart2'
+        AppId: 22951
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PaulTestSept7
+        AppId: 21624
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestSoftDelete
+        AppId: 20656
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLTest4
+        AppId: 22039
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: import3
+        AppId: 21745
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Forknife Battle Royale
+        AppId: 22952
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Peter-Jun23
+        AppId: 20655
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: deployTo
+        AppId: 22150
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: deployFrom
+        AppId: 22151
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: ClassCast
+        AppId: 22152
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: tournamentLiveAppParent
+        AppId: 22031
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: BCForm-Test
+        AppId: 22273
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Nc2
+        AppId: 22153
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NaveenLeaderboardImport2
+        AppId: 21754
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Garbage Data - New
+        AppId: 22965
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NaveenLeaderboardDays
+        AppId: 21753
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLEmpty
+        AppId: 22846
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestProducts
+        AppId: 20420
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: asdasdasd
+        AppId: 22726
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: dashboard-tester-app [garbage data]
+        AppId: 22968
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test_App_grey
+        AppId: 22727
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLRandom
+        AppId: 22848
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: one
+        AppId: 22728
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AllStoresPricing
+        AppId: 22849
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: autoClaimCompatibilityCheck
+        AppId: 22167
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: tournamentLiveAppGrandParent
+        AppId: 22046
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: MarioCTFS
+        AppId: 23014
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: GTournamentLeaderboardDev
+        AppId: 22047
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: cctest2
+        AppId: 23499
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Block Party IMPORT
+        AppId: 22048
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: import7
+        AppId: 21758
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLEggiesRevived
+        AppId: 22840
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: schema
+        AppId: 22049
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: import3
+        AppId: 21757
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Garbage Data [1M] 2
+        AppId: 22962
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: import2
+        AppId: 21756
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Test
+        AppId: 22842
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Import1
+        AppId: 21755
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLTest6
+        AppId: 22041
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: '*All Features'
+        AppId: 23130
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: GoW4
+        AppId: 23372
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: zzSteveTestBombers
+        AppId: 22042
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: '@Disha@'
+        AppId: 22813
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLEggies8
+        AppId: 22816
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: app1
+        AppId: 21729
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: postHook
+        AppId: 22253
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLEggiesDeploy
+        AppId: 22495
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NewAppNoEmail
+        AppId: 21728
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: global36
+        AppId: 22255
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: flagTest
+        AppId: 22135
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: "\u043C\u0438\u0440 \u043F\u0435\u0440\u0434\u0435\u0436\u0430 \u0438
+          \u043F\u043B\u0430\u043C\u0435\u043D\u0438"
+        AppId: 22257
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: hlNightlyWOW
+        AppId: 22499
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: app789
+        AppId: 22137
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NotAGame
+        AppId: 22370
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: SlowDeleteTest
+        AppId: 22250
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: DishTest
+        AppId: 22808
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: phwTestImportPeer
+        AppId: 22809
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Disha_ChildSCRATCH
+        AppId: 22822
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: test123
+        AppId: 22823
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Large Amount of Assorted Data
+        AppId: 22949
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: itleLocal
+        AppId: 22264
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aspect4
+        AppId: 21739
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestPasswordResetVerficationTemplate
+        AppId: 23112
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RogerDeploy1
+        AppId: 22145
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aspect3
+        AppId: 21738
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RogerDeploy2
+        AppId: 22146
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aspect2
+        AppId: 21737
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: parent1
+        AppId: 22025
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aspect1
+        AppId: 21736
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: child1
+        AppId: 22026
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aa
+        AppId: 22268
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: app3
+        AppId: 21735
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aq12
+        AppId: 22269
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: App007
+        AppId: 21734
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestTourneyPaul
+        AppId: 22029
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestLB_copy
+        AppId: 22821
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLNew3
+        AppId: 22140
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AdamApp Turbo Edition
+        AppId: 23350
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AutoClaim
+        AppId: 22142
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: holLBwT2
+        AppId: 22021
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: itle
+        AppId: 22263
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: ge
+        AppId: 22239
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HavocLeaderboardTest
+        AppId: 22119
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: 2150test
+        AppId: 22110
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Demo_App
+        AppId: 20618
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: qazwsx
+        AppId: 22594
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NaveenImportTest1
+        AppId: 21706
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Aqwer
+        AppId: 22595
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Import 3.2
+        AppId: 22113
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeApp4
+        AppId: 22234
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: zzSteveCloudCode
+        AppId: 23323
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: GoW4_2
+        AppId: 23446
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: export 3.2
+        AppId: 22116
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: SendGridTest
+        AppId: 21701
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: 2151Test
+        AppId: 23327
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Peter TEMP
+        AppId: 20608
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestMakoBCForms
+        AppId: 22472
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NaveenAppInternal1
+        AppId: 21710
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: DeployAll App
+        AppId: 23219
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AngusTestChild
+        AppId: 21718
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: parent
+        AppId: 22242
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: child
+        AppId: 22243
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: MainApp
+        AppId: 22485
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HolLBwTb
+        AppId: 22002
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: compatibility
+        AppId: 22124
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TournamentLeaderboardDev
+        AppId: 22003
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasPeerApp
+        AppId: 22487
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PTournamentLeaderboardDev
+        AppId: 22004
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestAppOne
+        AppId: 22488
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLImport4
+        AppId: 22126
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: App1
+        AppId: 22368
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Testabc1
+        AppId: 22369
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLNew
+        AppId: 22128
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: NaveenTest5
+        AppId: 21709
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: MoeTestApp1
+        AppId: 20619
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Leaderboard_Dilip
+        AppId: 23330
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RogerTestTeamAdmin
+        AppId: 22217
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: 0000123
+        AppId: 23309
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Deploy5
+        AppId: 21805
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: JohnHFirstApp
+        AppId: 22574
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLDeploy3b
+        AppId: 21803
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AppWithoutPlatform
+        AppId: 22575
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLDeploy2b
+        AppId: 21801
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RickTest
+        AppId: 23546
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestLeaderboardDelete
+        AppId: 20707
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Regression Test 3.2
+        AppId: 22108
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: KevinTest
+        AppId: 22102
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLDeploy9
+        AppId: 21813
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLDeploy8
+        AppId: 21812
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: moeApp
+        AppId: 20602
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: HLDeploy7
+        AppId: 21811
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RogerTestBackup
+        AppId: 22105
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Traccar
+        AppId: 22226
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Deploy7
+        AppId: 21810
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestApp
+        AppId: 10000
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: ImportTest
+        AppId: 22437
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasBillingTest3
+        AppId: 23526
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: 0androidRTT
+        AppId: 23647
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: ImportTest2
+        AppId: 22438
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasBillingTest4
+        AppId: 23527
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: OauthGooglePlay
+        AppId: 23648
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PushMonitor
+        AppId: 20497
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: VasXyz123
+        AppId: 23529
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: MailTest
+        AppId: 23400
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PaulTestAug10
+        AppId: 21108
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestBillingVas
+        AppId: 23523
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: '**UnityRTTTest'
+        AppId: 23644
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestBillingVas1
+        AppId: 23524
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: zzzRyanRTT
+        AppId: 23645
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: ExportTest
+        AppId: 22436
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestBillingVas2
+        AppId: 23525
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: GlobalEntityTest
+        AppId: 20490
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Roger Test Go Live
+        AppId: 22208
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: XamarinTest
+        AppId: 23419
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: ImportTest3
+        AppId: 22441
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RowanTest
+        AppId: 23530
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: RickBCForms
+        AppId: 22321
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: OpenIdGoogle
+        AppId: 23652
+        _appSecret: 45fdc1c0-3ab9-4004-8546-01a40131ad19
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: hlAuditApp2 Test
+        AppId: 22202
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: hlAudit3
+        AppId: 22203
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: oldGoogleAuth
+        AppId: 23655
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: EmailTest
+        AppId: 21688
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: PJ Test12
+        AppId: 20599
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeApp6
+        AppId: 22779
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: ADynamicLeaderboardTest
+        AppId: 21684
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Peter's test app
+        AppId: 20595
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AnotherLeaderboardTest
+        AppId: 21683
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestNotifiications
+        AppId: 20350
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: React-BC
+        AppId: 22099
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: BCLD-3610-01
+        AppId: 22891
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: hlGLNImportExport
+        AppId: 22892
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: SherriGame
+        AppId: 22772
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeApp9
+        AppId: 22895
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: cclivetest1
+        AppId: 23500
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: Awesome App 5
+        AppId: 22535
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: WeatherPeer
+        AppId: 22095
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: WeatherClient
+        AppId: 22096
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TNE-Test Back4
+        AppId: 20905
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: aman_test
+        AppId: 23516
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: hlPatchTestApp
+        AppId: 22428
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: LeaderboardDataExampleData
+        AppId: 22549
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestScriptEditor
+        AppId: 20483
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeParent
+        AppId: 22782
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeChild
+        AppId: 22783
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AwesomeChild2
+        AppId: 23631
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: asd341asd
+        AppId: 23073
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: AnotherLeaderboardTest6-UPD
+        AppId: 21691
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 0
+      - AppName: TestCurrencies
+        AppId: 20691
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: Test App_Ben
+        AppId: 23289
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: 00emailTest
+        AppId: 22994
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: patrick
+        AppId: 20690
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: DebugJira
+        AppId: 21553
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: Ben_Test_app2
+        AppId: 23147
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: '*allFeaturesApp'
+        AppId: 22950
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: _TestLab3d
+        AppId: 22271
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: Abc
+        AppId: 22729
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: AwesomeApp3
+        AppId: 22166
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: 2flag
+        AppId: 22136
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: BCLD3610Test
+        AppId: 22948
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: ABG-Poc
+        AppId: 20644
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: 22030
+        AppId: 22111
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: aaaaaaaa
+        AppId: 22596
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: HLImport2
+        AppId: 21911
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      - AppName: AdminToolsTest1
+        AppId: 23075
+        _appSecret: 
+        AppVersion: 1.0
+        AdditionalAppsCount: 0
+        AppIdSecretPairs: []
+        IsDisabled: 1
+      AppNameList:
+      - '*123test x (22877)'
+      - TestGoLive (21542)
+      - Clan (21781)
+      - Test3333 (23045)
+      - aaa (22199)
+      - Test123321 (23047)
+      - Test456654 (23048)
+      - abcTest01 (22510)
+      - Testmnbbnm (23049)
+      - abcTest02 (22511)
+      - abcTest03 (22512)
+      - test (22996)
+      - RogerTestDelete (21788)
+      - sad asd asd asd (23282)
+      - compTest (22194)
+      - a b c d (23283)
+      - A B X $ $ $ (23284)
+      - Test3111 (23043)
+      - Test4111 (23044)
+      - GoogleAuth (23614)
+      - NewLeaderboardIndexTest (21676)
+      - DebugJira2 (21555)
+      - TestGroups (20584)
+      - PaulLeaderboardTest (21673)
+      - leaderboardImportFromProdNaveen (21791)
+      - hlImport5 (22880)
+      - longtestapp (23056)
+      - TNE Test Renamed (20903)
+      - hlImport6 (22881)
+      - Ben_Test (23057)
+      - Test_App_Two (23290)
+      - Test2 (23291)
+      - Testqweewq (23050)
+      - touramentPid (22083)
+      - Testasddsa (23051)
+      - All Features (23174)
+      - RicoChanged (23054)
+      - TestImportExport (20674)
+      - brainCloudBot (20671)
+      - TestPasswordReset1 (23265)
+      - VasTestApp1 (23266)
+      - aaaaaaaaaaaaaaaaaaaaaaaaaaaaapascal (23388)
+      - GregEventServer (22730)
+      - Rico2 (23148)
+      - AwfulServerNames (20678)
+      - AngusChildApp (22611)
+      - Test1 (22975)
+      - tEmail (22050)
+      - naveenSMix (22051)
+      - PeerViewable (22052)
+      - currencyTest (22173)
+      - TestPasswordReset (23263)
+      - JessGame (23384)
+      - TestOverDAULimit (20687)
+      - VasrTest33 (22503)
+      - PaulPeerServiceVC (22866)
+      - Google p12 (20686)
+      - VasrTest44 (22504)
+      - PaulPeerChild (22867)
+      - AwesomeApp 2 (21774)
+      - MarioTestApp (20684)
+      - tournamentTestApp (21771)
+      - VasrTest99 (22508)
+      - VasrTest88 (22509)
+      - newEmailTestApp (23398)
+      - HLPokerPiratesDev (22189)
+      - 00TEST00 (23399)
+      - AwesomeApp8 (22862)
+      - VasTest01 (22500)
+      - VasrTest11 (22501)
+      - RogerTestImport (20688)
+      - VasrTest22 (22502)
+      - Testing./-Name (22865)
+      - aaaaaaaaaaPascal2 (23390)
+      - HLEggies2 (22181)
+      - VasTest55 (23270)
+      - 000DTEST (23271)
+      - Rico3 (23273)
+      - HLEggies6 (22185)
+      - HLEggies7 (22186)
+      - SteveFBTesting (20654)
+      - dashboard-tester-app [defaults-dont-delete] (22954)
+      - NewTestApp (20653)
+      - aspect6 (21741)
+      - BCLD3863Test (22956)
+      - PaulTestDeleteJun22xxxyyy2 (20651)
+      - aspect5 (21740)
+      - test2Check (22837)
+      - PaulRewardsTest (22033)
+      - Leaderboard Config (22034)
+      - NewAppLeaderboardIndexesTest (22156)
+      - PeerTournamentLeaderboardDev (22035)
+      - BrainCloudTodo (20418)
+      - 2291 (22157)
+      - aspect5 (21748)
+      - HLTest2 (22037)
+      - Eggies (22038)
+      - import4 (21746)
+      - RyanTest (22830)
+      - '**allFeaturesPart2 (22951)'
+      - PaulTestSept7 (21624)
+      - TestSoftDelete (20656)
+      - HLTest4 (22039)
+      - import3 (21745)
+      - Forknife Battle Royale (22952)
+      - Peter-Jun23 (20655)
+      - deployTo (22150)
+      - deployFrom (22151)
+      - ClassCast (22152)
+      - tournamentLiveAppParent (22031)
+      - BCForm-Test (22273)
+      - Nc2 (22153)
+      - NaveenLeaderboardImport2 (21754)
+      - Garbage Data - New (22965)
+      - NaveenLeaderboardDays (21753)
+      - HLEmpty (22846)
+      - TestProducts (20420)
+      - asdasdasd (22726)
+      - dashboard-tester-app [garbage data] (22968)
+      - Test_App_grey (22727)
+      - HLRandom (22848)
+      - one (22728)
+      - AllStoresPricing (22849)
+      - autoClaimCompatibilityCheck (22167)
+      - tournamentLiveAppGrandParent (22046)
+      - MarioCTFS (23014)
+      - GTournamentLeaderboardDev (22047)
+      - cctest2 (23499)
+      - Block Party IMPORT (22048)
+      - import7 (21758)
+      - HLEggiesRevived (22840)
+      - schema (22049)
+      - import3 (21757)
+      - Garbage Data [1M] 2 (22962)
+      - import2 (21756)
+      - Test (22842)
+      - Import1 (21755)
+      - HLTest6 (22041)
+      - '*All Features (23130)'
+      - GoW4 (23372)
+      - zzSteveTestBombers (22042)
+      - '@Disha@ (22813)'
+      - HLEggies8 (22816)
+      - app1 (21729)
+      - postHook (22253)
+      - HLEggiesDeploy (22495)
+      - NewAppNoEmail (21728)
+      - global36 (22255)
+      - flagTest (22135)
+      - "\u043C\u0438\u0440 \u043F\u0435\u0440\u0434\u0435\u0436\u0430 \u0438 \u043F\u043B\u0430\u043C\u0435\u043D\u0438
+        (22257)"
+      - hlNightlyWOW (22499)
+      - app789 (22137)
+      - NotAGame (22370)
+      - SlowDeleteTest (22250)
+      - DishTest (22808)
+      - phwTestImportPeer (22809)
+      - Disha_ChildSCRATCH (22822)
+      - test123 (22823)
+      - Large Amount of Assorted Data (22949)
+      - itleLocal (22264)
+      - aspect4 (21739)
+      - TestPasswordResetVerficationTemplate (23112)
+      - RogerDeploy1 (22145)
+      - aspect3 (21738)
+      - RogerDeploy2 (22146)
+      - aspect2 (21737)
+      - parent1 (22025)
+      - aspect1 (21736)
+      - child1 (22026)
+      - aa (22268)
+      - app3 (21735)
+      - aq12 (22269)
+      - App007 (21734)
+      - TestTourneyPaul (22029)
+      - TestLB_copy (22821)
+      - HLNew3 (22140)
+      - AdamApp Turbo Edition (23350)
+      - AutoClaim (22142)
+      - holLBwT2 (22021)
+      - itle (22263)
+      - ge (22239)
+      - HavocLeaderboardTest (22119)
+      - 2150test (22110)
+      - Demo_App (20618)
+      - qazwsx (22594)
+      - NaveenImportTest1 (21706)
+      - Aqwer (22595)
+      - Import 3.2 (22113)
+      - AwesomeApp4 (22234)
+      - zzSteveCloudCode (23323)
+      - GoW4_2 (23446)
+      - export 3.2 (22116)
+      - SendGridTest (21701)
+      - 2151Test (23327)
+      - Peter TEMP (20608)
+      - TestMakoBCForms (22472)
+      - NaveenAppInternal1 (21710)
+      - DeployAll App (23219)
+      - AngusTestChild (21718)
+      - parent (22242)
+      - child (22243)
+      - MainApp (22485)
+      - HolLBwTb (22002)
+      - compatibility (22124)
+      - TournamentLeaderboardDev (22003)
+      - VasPeerApp (22487)
+      - PTournamentLeaderboardDev (22004)
+      - TestAppOne (22488)
+      - HLImport4 (22126)
+      - App1 (22368)
+      - Testabc1 (22369)
+      - HLNew (22128)
+      - NaveenTest5 (21709)
+      - MoeTestApp1 (20619)
+      - Leaderboard_Dilip (23330)
+      - RogerTestTeamAdmin (22217)
+      - 0000123 (23309)
+      - Deploy5 (21805)
+      - JohnHFirstApp (22574)
+      - HLDeploy3b (21803)
+      - AppWithoutPlatform (22575)
+      - HLDeploy2b (21801)
+      - RickTest (23546)
+      - TestLeaderboardDelete (20707)
+      - Regression Test 3.2 (22108)
+      - KevinTest (22102)
+      - HLDeploy9 (21813)
+      - HLDeploy8 (21812)
+      - moeApp (20602)
+      - HLDeploy7 (21811)
+      - RogerTestBackup (22105)
+      - Traccar (22226)
+      - Deploy7 (21810)
+      - TestApp (10000)
+      - ImportTest (22437)
+      - VasBillingTest3 (23526)
+      - 0androidRTT (23647)
+      - ImportTest2 (22438)
+      - VasBillingTest4 (23527)
+      - OauthGooglePlay (23648)
+      - PushMonitor (20497)
+      - VasXyz123 (23529)
+      - MailTest (23400)
+      - PaulTestAug10 (21108)
+      - TestBillingVas (23523)
+      - '**UnityRTTTest (23644)'
+      - TestBillingVas1 (23524)
+      - zzzRyanRTT (23645)
+      - ExportTest (22436)
+      - TestBillingVas2 (23525)
+      - GlobalEntityTest (20490)
+      - Roger Test Go Live (22208)
+      - XamarinTest (23419)
+      - ImportTest3 (22441)
+      - RowanTest (23530)
+      - RickBCForms (22321)
+      - OpenIdGoogle (23652)
+      - hlAuditApp2 Test (22202)
+      - hlAudit3 (22203)
+      - oldGoogleAuth (23655)
+      - EmailTest (21688)
+      - PJ Test12 (20599)
+      - AwesomeApp6 (22779)
+      - ADynamicLeaderboardTest (21684)
+      - Peter's test app (20595)
+      - AnotherLeaderboardTest (21683)
+      - TestNotifiications (20350)
+      - React-BC (22099)
+      - BCLD-3610-01 (22891)
+      - hlGLNImportExport (22892)
+      - SherriGame (22772)
+      - AwesomeApp9 (22895)
+      - cclivetest1 (23500)
+      - Awesome App 5 (22535)
+      - WeatherPeer (22095)
+      - WeatherClient (22096)
+      - TNE-Test Back4 (20905)
+      - aman_test (23516)
+      - hlPatchTestApp (22428)
+      - LeaderboardDataExampleData (22549)
+      - TestScriptEditor (20483)
+      - AwesomeParent (22782)
+      - AwesomeChild (22783)
+      - AwesomeChild2 (23631)
+      - asd341asd (23073)
+      - AnotherLeaderboardTest6-UPD (21691)
+      - TestCurrencies (20691)
+      - Test App_Ben (23289)
+      - 00emailTest (22994)
+      - patrick (20690)
+      - DebugJira (21553)
+      - Ben_Test_app2 (23147)
+      - '*allFeaturesApp (22950)'
+      - _TestLab3d (22271)
+      - Abc (22729)
+      - AwesomeApp3 (22166)
+      - 2flag (22136)
+      - BCLD3610Test (22948)
+      - ABG-Poc (20644)
+      - 22030 (22111)
+      - aaaaaaaa (22596)
+      - HLImport2 (21911)
+      - AdminToolsTest1 (23075)
+      RenderAppNameList:
+      - '*123test x (22877)'
+      - TestGoLive (21542)
+      - Clan (21781)
+      - Test3333 (23045)
+      - aaa (22199)
+      - Test123321 (23047)
+      - Test456654 (23048)
+      - abcTest01 (22510)
+      - Testmnbbnm (23049)
+      - abcTest02 (22511)
+      - abcTest03 (22512)
+      - test (22996)
+      - RogerTestDelete (21788)
+      - sad asd asd asd (23282)
+      - compTest (22194)
+      - a b c d (23283)
+      - A B X $ $ $ (23284)
+      - Test3111 (23043)
+      - Test4111 (23044)
+      - GoogleAuth (23614)
+      - NewLeaderboardIndexTest (21676)
+      - DebugJira2 (21555)
+      - TestGroups (20584)
+      - PaulLeaderboardTest (21673)
+      - leaderboardImportFromProdNaveen (21791)
+      - hlImport5 (22880)
+      - longtestapp (23056)
+      - TNE Test Renamed (20903)
+      - hlImport6 (22881)
+      - Ben_Test (23057)
+      - Test_App_Two (23290)
+      - Test2 (23291)
+      - Testqweewq (23050)
+      - touramentPid (22083)
+      - Testasddsa (23051)
+      - All Features (23174)
+      - RicoChanged (23054)
+      - TestImportExport (20674)
+      - brainCloudBot (20671)
+      - TestPasswordReset1 (23265)
+      - VasTestApp1 (23266)
+      - aaaaaaaaaaaaaaaaaaaaaaaaaaaaapascal (23388)
+      - GregEventServer (22730)
+      - Rico2 (23148)
+      - AwfulServerNames (20678)
+      - AngusChildApp (22611)
+      - Test1 (22975)
+      - tEmail (22050)
+      - naveenSMix (22051)
+      - PeerViewable (22052)
+      - currencyTest (22173)
+      - TestPasswordReset (23263)
+      - JessGame (23384)
+      - TestOverDAULimit (20687)
+      - VasrTest33 (22503)
+      - PaulPeerServiceVC (22866)
+      - Google p12 (20686)
+      - VasrTest44 (22504)
+      - PaulPeerChild (22867)
+      - AwesomeApp 2 (21774)
+      - MarioTestApp (20684)
+      - tournamentTestApp (21771)
+      - VasrTest99 (22508)
+      - VasrTest88 (22509)
+      - newEmailTestApp (23398)
+      - HLPokerPiratesDev (22189)
+      - 00TEST00 (23399)
+      - AwesomeApp8 (22862)
+      - VasTest01 (22500)
+      - VasrTest11 (22501)
+      - RogerTestImport (20688)
+      - VasrTest22 (22502)
+      - Testing./-Name (22865)
+      - aaaaaaaaaaPascal2 (23390)
+      - HLEggies2 (22181)
+      - VasTest55 (23270)
+      - 000DTEST (23271)
+      - Rico3 (23273)
+      - HLEggies6 (22185)
+      - HLEggies7 (22186)
+      - SteveFBTesting (20654)
+      - dashboard-tester-app [defaults-dont-delete] (22954)
+      - NewTestApp (20653)
+      - aspect6 (21741)
+      - BCLD3863Test (22956)
+      - PaulTestDeleteJun22xxxyyy2 (20651)
+      - aspect5 (21740)
+      - test2Check (22837)
+      - PaulRewardsTest (22033)
+      - Leaderboard Config (22034)
+      - NewAppLeaderboardIndexesTest (22156)
+      - PeerTournamentLeaderboardDev (22035)
+      - BrainCloudTodo (20418)
+      - 2291 (22157)
+      - aspect5 (21748)
+      - HLTest2 (22037)
+      - Eggies (22038)
+      - import4 (21746)
+      - RyanTest (22830)
+      - '**allFeaturesPart2 (22951)'
+      - PaulTestSept7 (21624)
+      - TestSoftDelete (20656)
+      - HLTest4 (22039)
+      - import3 (21745)
+      - Forknife Battle Royale (22952)
+      - Peter-Jun23 (20655)
+      - deployTo (22150)
+      - deployFrom (22151)
+      - ClassCast (22152)
+      - tournamentLiveAppParent (22031)
+      - BCForm-Test (22273)
+      - Nc2 (22153)
+      - NaveenLeaderboardImport2 (21754)
+      - Garbage Data - New (22965)
+      - NaveenLeaderboardDays (21753)
+      - HLEmpty (22846)
+      - TestProducts (20420)
+      - asdasdasd (22726)
+      - dashboard-tester-app [garbage data] (22968)
+      - Test_App_grey (22727)
+      - HLRandom (22848)
+      - one (22728)
+      - AllStoresPricing (22849)
+      - autoClaimCompatibilityCheck (22167)
+      - tournamentLiveAppGrandParent (22046)
+      - MarioCTFS (23014)
+      - GTournamentLeaderboardDev (22047)
+      - cctest2 (23499)
+      - Block Party IMPORT (22048)
+      - import7 (21758)
+      - HLEggiesRevived (22840)
+      - schema (22049)
+      - import3 (21757)
+      - Garbage Data [1M] 2 (22962)
+      - import2 (21756)
+      - Test (22842)
+      - Import1 (21755)
+      - HLTest6 (22041)
+      - '*All Features (23130)'
+      - GoW4 (23372)
+      - zzSteveTestBombers (22042)
+      - '@Disha@ (22813)'
+      - HLEggies8 (22816)
+      - app1 (21729)
+      - postHook (22253)
+      - HLEggiesDeploy (22495)
+      - NewAppNoEmail (21728)
+      - global36 (22255)
+      - flagTest (22135)
+      - "\u043C\u0438\u0440 \u043F\u0435\u0440\u0434\u0435\u0436\u0430 \u0438 \u043F\u043B\u0430\u043C\u0435\u043D\u0438
+        (22257)"
+      - hlNightlyWOW (22499)
+      - app789 (22137)
+      - NotAGame (22370)
+      - SlowDeleteTest (22250)
+      - DishTest (22808)
+      - phwTestImportPeer (22809)
+      - Disha_ChildSCRATCH (22822)
+      - test123 (22823)
+      - Large Amount of Assorted Data (22949)
+      - itleLocal (22264)
+      - aspect4 (21739)
+      - TestPasswordResetVerficationTemplate (23112)
+      - RogerDeploy1 (22145)
+      - aspect3 (21738)
+      - RogerDeploy2 (22146)
+      - aspect2 (21737)
+      - parent1 (22025)
+      - aspect1 (21736)
+      - child1 (22026)
+      - aa (22268)
+      - app3 (21735)
+      - aq12 (22269)
+      - App007 (21734)
+      - TestTourneyPaul (22029)
+      - TestLB_copy (22821)
+      - HLNew3 (22140)
+      - AdamApp Turbo Edition (23350)
+      - AutoClaim (22142)
+      - holLBwT2 (22021)
+      - itle (22263)
+      - ge (22239)
+      - HavocLeaderboardTest (22119)
+      - 2150test (22110)
+      - Demo_App (20618)
+      - qazwsx (22594)
+      - NaveenImportTest1 (21706)
+      - Aqwer (22595)
+      - Import 3.2 (22113)
+      - AwesomeApp4 (22234)
+      - zzSteveCloudCode (23323)
+      - GoW4_2 (23446)
+      - export 3.2 (22116)
+      - SendGridTest (21701)
+      - 2151Test (23327)
+      - Peter TEMP (20608)
+      - TestMakoBCForms (22472)
+      - NaveenAppInternal1 (21710)
+      - DeployAll App (23219)
+      - AngusTestChild (21718)
+      - parent (22242)
+      - child (22243)
+      - MainApp (22485)
+      - HolLBwTb (22002)
+      - compatibility (22124)
+      - TournamentLeaderboardDev (22003)
+      - VasPeerApp (22487)
+      - PTournamentLeaderboardDev (22004)
+      - TestAppOne (22488)
+      - HLImport4 (22126)
+      - App1 (22368)
+      - Testabc1 (22369)
+      - HLNew (22128)
+      - NaveenTest5 (21709)
+      - MoeTestApp1 (20619)
+      - Leaderboard_Dilip (23330)
+      - RogerTestTeamAdmin (22217)
+      - 0000123 (23309)
+      - Deploy5 (21805)
+      - JohnHFirstApp (22574)
+      - HLDeploy3b (21803)
+      - AppWithoutPlatform (22575)
+      - HLDeploy2b (21801)
+      - RickTest (23546)
+      - TestLeaderboardDelete (20707)
+      - Regression Test 3.2 (22108)
+      - KevinTest (22102)
+      - HLDeploy9 (21813)
+      - HLDeploy8 (21812)
+      - moeApp (20602)
+      - HLDeploy7 (21811)
+      - RogerTestBackup (22105)
+      - Traccar (22226)
+      - Deploy7 (21810)
+      - TestApp (10000)
+      - ImportTest (22437)
+      - VasBillingTest3 (23526)
+      - 0androidRTT (23647)
+      - ImportTest2 (22438)
+      - VasBillingTest4 (23527)
+      - OauthGooglePlay (23648)
+      - PushMonitor (20497)
+      - VasXyz123 (23529)
+      - MailTest (23400)
+      - PaulTestAug10 (21108)
+      - TestBillingVas (23523)
+      - '**UnityRTTTest (23644)'
+      - TestBillingVas1 (23524)
+      - zzzRyanRTT (23645)
+      - ExportTest (22436)
+      - TestBillingVas2 (23525)
+      - GlobalEntityTest (20490)
+      - Roger Test Go Live (22208)
+      - XamarinTest (23419)
+      - ImportTest3 (22441)
+      - RowanTest (23530)
+      - RickBCForms (22321)
+      - OpenIdGoogle (23652)
+      - hlAuditApp2 Test (22202)
+      - hlAudit3 (22203)
+      - oldGoogleAuth (23655)
+      - EmailTest (21688)
+      - PJ Test12 (20599)
+      - AwesomeApp6 (22779)
+      - ADynamicLeaderboardTest (21684)
+      - Peter's test app (20595)
+      - AnotherLeaderboardTest (21683)
+      - TestNotifiications (20350)
+      - React-BC (22099)
+      - BCLD-3610-01 (22891)
+      - hlGLNImportExport (22892)
+      - SherriGame (22772)
+      - AwesomeApp9 (22895)
+      - cclivetest1 (23500)
+      - Awesome App 5 (22535)
+      - WeatherPeer (22095)
+      - WeatherClient (22096)
+      - TNE-Test Back4 (20905)
+      - aman_test (23516)
+      - hlPatchTestApp (22428)
+      - LeaderboardDataExampleData (22549)
+      - TestScriptEditor (20483)
+      - AwesomeParent (22782)
+      - AwesomeChild (22783)
+      - AwesomeChild2 (23631)
+      - asd341asd (23073)
+      - AnotherLeaderboardTest6-UPD (21691)
+      - Disabled Apps/TestCurrencies (20691)
+      - Disabled Apps/Test App_Ben (23289)
+      - Disabled Apps/00emailTest (22994)
+      - Disabled Apps/patrick (20690)
+      - Disabled Apps/DebugJira (21553)
+      - Disabled Apps/Ben_Test_app2 (23147)
+      - Disabled Apps/*allFeaturesApp (22950)
+      - Disabled Apps/_TestLab3d (22271)
+      - Disabled Apps/Abc (22729)
+      - Disabled Apps/AwesomeApp3 (22166)
+      - Disabled Apps/2flag (22136)
+      - Disabled Apps/BCLD3610Test (22948)
+      - Disabled Apps/ABG-Poc (20644)
+      - Disabled Apps/22030 (22111)
+      - Disabled Apps/aaaaaaaa (22596)
+      - Disabled Apps/HLImport2 (21911)
+      - Disabled Apps/AdminToolsTest1 (23075)
+      - Create New App ...
+      RenderedAppNameList: []
+      _selectedAppIndex: 256
+      TeamName: brainCloud - SCRATCH
+      TeamId: fc072b84-4aca-4c95-ac46-9f4626f385f1
+    TeamNameList:
+    - -- Select Team --
+    - playBrains - STUDIO (1662006)
+    - brainCloud - SUPER (1662002)
+    - brainCloud - AppStore Tests (4672588)
+    - brainCloud - EXAMPLE TEMPLATES - Unity (4836825)
+    - brainCloud - CLIENT UNIT (1662008)
+    - Team QA Regressions With Billing (3553326)
+    - brainCloud - SCRATCH (1662005)
+    _selectedTeamIndex: 7
+    AdminFullName: 
+    AdminEmailAddress: 
+    TeamType: 0
+    StartingTeamName: 
+    Email: ryanr@bitheads.com
+    Credentials:
+      AdminId: 305
+      Token: 4b8a1ed4-2bfe-49d8-9977-b177b449b96c
+  SelectedTemplate: 0
+  CreateWithTemplateEnabled: 0
+  TemplateDataList:
+  - AppName: Space Shooter
+    AppId: 22901
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  - AppName: Bombers-RTT
+    AppId: 23292
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  - AppName: Bombers
+    AppId: 22915
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  - AppName: TicTacToe
+    AppId: 22907
+    _appSecret: 
+    AppVersion: 1.0
+    AdditionalAppsCount: 0
+    AppIdSecretPairs: []
+    IsDisabled: 0
+  TemplateNameList:
+  - Space Shooter
+  - Bombers-RTT
+  - Bombers
+  - TicTacToe
+  AppOptions:
+    GamificationEnabled: 1
+    SupportedPlatforms:
+    - PlatformName: APPLE_TV_OS
+      DisplayName: Apple TV OS
+      IsEnabled: 0
+    - PlatformName: BB
+      DisplayName: BlackBerry
+      IsEnabled: 0
+    - PlatformName: FB
+      DisplayName: Facebook
+      IsEnabled: 0
+    - PlatformName: ANG
+      DisplayName: Android
+      IsEnabled: 0
+    - PlatformName: IOS
+      DisplayName: IOS
+      IsEnabled: 0
+    - PlatformName: LINUX
+      DisplayName: Linux
+      IsEnabled: 1
+    - PlatformName: MAC
+      DisplayName: Mac
+      IsEnabled: 1
+    - PlatformName: PS3
+      DisplayName: PS3
+      IsEnabled: 0
+    - PlatformName: PS4
+      DisplayName: PS4
+      IsEnabled: 0
+    - PlatformName: PS_VITA
+      DisplayName: PS Vita
+      IsEnabled: 0
+    - PlatformName: ROKU
+      DisplayName: Roku
+      IsEnabled: 0
+    - PlatformName: TIZEN
+      DisplayName: Tizen
+      IsEnabled: 0
+    - PlatformName: UNKNOWN
+      DisplayName: Unknown
+      IsEnabled: 0
+    - PlatformName: WATCH_OS
+      DisplayName: Apple Watch
+      IsEnabled: 0
+    - PlatformName: WEB
+      DisplayName: Web
+      IsEnabled: 0
+    - PlatformName: WII
+      DisplayName: Wii
+      IsEnabled: 0
+    - PlatformName: WINP
+      DisplayName: Windows Phone
+      IsEnabled: 0
+    - PlatformName: WINDOWS
+      DisplayName: Windows
+      IsEnabled: 1
+    - PlatformName: XBOX_360
+      DisplayName: Xbox 360
+      IsEnabled: 0
+    - PlatformName: XBOX_ONE
+      DisplayName: Xbox One
+      IsEnabled: 0
+  UseDefaultServerUrl: 0
+  AdvanceSelection: 0
