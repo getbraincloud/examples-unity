@@ -495,10 +495,10 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Attach
         /// </remarks>
-        /// <param name="googleUserId">
-        /// String representation of google+ userId. Gotten with calls like RequestUserId
+        /// <param name="googleId">
+        /// The google id of the user
         /// </param>
-        /// <param name="serverAuthCode">
+        /// <param name="authenticationToken">
         /// The validated token from the Google SDK
         ///   (that will be further validated when sent to the bC service)
         /// </param>
@@ -512,13 +512,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void AttachGoogleIdentity(
-            string googleUserId,
-            string serverAuthCode,
+            string googleId,
+            string authenticationToken,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            AttachIdentity(googleUserId, serverAuthCode, AuthenticationType.Google, success, failure, cbObject);
+            AttachIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
         }
 
         /// <summary>
@@ -529,10 +529,10 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Merge
         /// </remarks>
-        /// <param name="googleUserId">
-        /// String representation of google+ userId. Gotten with calls like RequestUserId
+        /// <param name="googleId">
+        /// The Google id of the user
         /// </param>
-        /// <param name="serverAuthCode">
+        /// <param name="authenticationToken">
         /// The validated token from the Google SDK
         /// (that will be further validated when sent to the bC service)
         /// </param>
@@ -546,13 +546,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void MergeGoogleIdentity(
-            string googleUserId,
-            string serverAuthCode,
+            string googleId,
+            string authenticationToken,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            MergeIdentity(googleUserId, serverAuthCode, AuthenticationType.Google, success, failure, cbObject);
+            MergeIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
         }
 
         /// <summary>
@@ -562,8 +562,8 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Detach
         /// </remarks>
-        /// <param name="googleUserId">
-        /// String representation of google+ userId. Gotten with calls like RequestUserId
+        /// <param name="googleId">
+        /// The Google id of the user
         /// </param>
         /// <param name="continueAnon">
         /// Proceed even if the profile will revert to anonymous?
@@ -578,13 +578,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void DetachGoogleIdentity(
-            string googleUserId,
+            string googleId,
             bool continueAnon,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            DetachIdentity(googleUserId, AuthenticationType.Google, continueAnon, success, failure, cbObject);
+            DetachIdentity(googleId, AuthenticationType.Google, continueAnon, success, failure, cbObject);
         }
 
             /// <summary>
@@ -594,11 +594,12 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Attach
         /// </remarks>
-        /// <param name="googleUserAccountEmail">
-        /// The email associated with the google user
+        /// <param name="googleId">
+        /// The google id of the user
         /// </param>
-        /// <param name="IdToken">
-        /// The id token of the google account. Can get with calls like requestIdToken
+        /// <param name="authenticationToken">
+        /// The validated token from the Google SDK
+        ///   (that will be further validated when sent to the bC service)
         /// </param>
         /// <param name="success">
         /// The method to call in event of successful login
@@ -609,14 +610,14 @@ using BrainCloud.Common;
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void AttachGoogleOpenIdIdentity(
-            string googleUserAccountEmail,
-            string IdToken,
+        public void AttachGoogleOpenIdentity(
+            string googleId,
+            string authenticationToken,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            AttachIdentity(googleUserAccountEmail, IdToken, AuthenticationType.GoogleOpenId, success, failure, cbObject);
+            AttachIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
         }
 
         /// <summary>
@@ -627,11 +628,12 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Merge
         /// </remarks>
-        /// <param name="googleUserAccountEmail">
-        /// The email associated with the google user
+        /// <param name="googleId">
+        /// The Google id of the user
         /// </param>
-        /// <param name="IdToken">
-        /// The id token of the google account. Can get with calls like requestIdToken
+        /// <param name="authenticationToken">
+        /// The validated token from the Google SDK
+        /// (that will be further validated when sent to the bC service)
         /// </param>
         /// <param name="success">
         /// The method to call in event of successful login
@@ -642,14 +644,14 @@ using BrainCloud.Common;
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void MergeGoogleOpenIdIdentity(
-            string googleUserAccountEmail,
-            string IdToken,
+        public void MergeGoogleOpenIdentity(
+            string googleId,
+            string authenticationToken,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            MergeIdentity(googleUserAccountEmail, IdToken, AuthenticationType.GoogleOpenId, success, failure, cbObject);
+            MergeIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
         }
 
         /// <summary>
@@ -659,8 +661,8 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Detach
         /// </remarks>
-        /// <param name="googleUserAccountEmail">
-        /// The email associated with the google user
+        /// <param name="googleId">
+        /// The Google id of the user
         /// </param>
         /// <param name="continueAnon">
         /// Proceed even if the profile will revert to anonymous?
@@ -674,14 +676,14 @@ using BrainCloud.Common;
         /// <param name="cbObject">
         /// The user object sent to the callback.
         /// </param>
-        public void DetachGoogleOpenIdIdentity(
-            string googleUserAccountEmail,
+        public void DetachGoogleOpenIdentity(
+            string googleId,
             bool continueAnon,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            DetachIdentity(googleUserAccountEmail, AuthenticationType.GoogleOpenId, continueAnon, success, failure, cbObject);
+            DetachIdentity(googleId, AuthenticationType.Google, continueAnon, success, failure, cbObject);
         }
 
                /// <summary>
@@ -691,11 +693,12 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Attach
         /// </remarks>
-        /// <param name="appleUserId">
-        /// This can be the user id OR the email of the user for the account
+        /// <param name="appleId">
+        /// The apple id of the user
         /// </param>
-        /// <param name="identityToken">
-        /// The token confirming the user's identity
+        /// <param name="authenticationToken">
+        /// The validated token from the Apple SDK
+        ///   (that will be further validated when sent to the bC service)
         /// </param>
         /// <param name="success">
         /// The method to call in event of successful login
@@ -707,13 +710,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void AttachAppleIdentity(
-            string appleUserId,
-            string identityToken,
+            string appleId,
+            string authenticationToken,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            AttachIdentity(appleUserId, identityToken, AuthenticationType.Apple, success, failure, cbObject);
+            AttachIdentity(appleId, authenticationToken, AuthenticationType.Apple, success, failure, cbObject);
         }
 
         /// <summary>
@@ -724,11 +727,12 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Merge
         /// </remarks>
-        /// <param name="appleUserId">
-        /// This can be the user id OR the email of the user for the account
+        /// <param name="appleId">
+        /// The Apple id of the user
         /// </param>
-        /// <param name="identityToken">
-        /// The token confirming the user's identity
+        /// <param name="authenticationToken">
+        /// The validated token from the Apple SDK
+        /// (that will be further validated when sent to the bC service)
         /// </param>
         /// <param name="success">
         /// The method to call in event of successful login
@@ -740,13 +744,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void MergeAppleIdentity(
-            string appleUserId,
-            string identityToken,
+            string appleId,
+            string authenticationToken,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            MergeIdentity(appleUserId, identityToken, AuthenticationType.Apple, success, failure, cbObject);
+            MergeIdentity(appleId, authenticationToken, AuthenticationType.Apple, success, failure, cbObject);
         }
 
         /// <summary>
@@ -756,8 +760,8 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Detach
         /// </remarks>
-        /// <param name="appleUserId">
-        /// This can be the user id OR the email of the user for the account
+        /// <param name="appleId">
+        /// The Apple id of the user
         /// </param>
         /// <param name="continueAnon">
         /// Proceed even if the profile will revert to anonymous?
@@ -772,13 +776,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void DetachAppleIdentity(
-            string appleUserId,
+            string appleId,
             bool continueAnon,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            DetachIdentity(appleUserId, AuthenticationType.Apple, continueAnon, success, failure, cbObject);
+            DetachIdentity(appleId, AuthenticationType.Apple, continueAnon, success, failure, cbObject);
         }
 
         /// <summary>
