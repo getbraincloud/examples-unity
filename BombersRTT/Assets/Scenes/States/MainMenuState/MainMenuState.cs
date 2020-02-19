@@ -328,7 +328,7 @@ namespace BrainCloudUNETExample
                                        Vector3.zero, Quaternion.identity, contentTransform);
 
                 tempCell = tempObj.GetComponent<ChatCell>();
-                tempCell.Init(fromData["name"] as string, signalData["message"] as string, profileId, fromData["pic"] as string, "", rank);
+                tempCell.Init(fromData["name"] as string, signalData["message"] as string, profileId, fromData.ContainsKey("pic") ? fromData["pic"] as string : null, "", rank);
 
                 GEventManager.TriggerEvent("NEW_LOBBY_CHAT");
             }
@@ -378,7 +378,7 @@ namespace BrainCloudUNETExample
                                       Vector3.zero, Quaternion.identity, contentTransform);
                 tempCell = tempObj.GetComponent<ChatCell>();
 
-                tempCell.Init(fromData["name"] as string, contentData["text"] as string, profileId, fromData["pic"] as string,
+                    tempCell.Init(fromData["name"] as string, contentData["text"] as string, profileId, fromData.ContainsKey("pic") ? fromData["pic"] as string : null,
                     lastConnectionId,
                     rank,
                     Convert.ToUInt64(jsonData["msgId"]),
@@ -459,7 +459,7 @@ namespace BrainCloudUNETExample
                     {
                         cell.transform.SetParent(null);
                         cell.Init(fromData["name"] as string, contentData["text"] as string,
-                            fromData["id"] as string, fromData["pic"] as string,
+                            fromData["id"] as string, fromData.ContainsKey("pic") ? fromData["pic"] as string : null,
                             lastConnectionId,
                             rank,
                             Convert.ToUInt64(jsonData["msgId"]), (int)jsonData["ver"], in_jsonMessage);
