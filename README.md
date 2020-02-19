@@ -124,6 +124,8 @@ This method of authenticating with google is NOT recommended, and only works for
 
 Example of authenticating with brainCloud using the GoogleOpenId. Inside there is a pdf tutorial describing how to go about setting up a google console app, and successfully connect the app to brainCloud. Instead of a google account specifically, you will be signing in with your googleOpenId. This is more flexible and can be used for IOS and Android devices as well. Setup is explained in the tutorial.
 
+Inside this project folder you will also find a project folder for the same project made on an Apple device. Mostly everything is the same in Unity, but the apple project need to build through Xcode. Refer to the tutorial for further details. 
+
 ## AppleAuthentication
 
 Example of authenticating with brainCloud using an Apple account. Inside there is a pdf tutorial describing the steps you will need to take in order to properly connect your Apple developer's app and braincloud app. This is for IOS only.
