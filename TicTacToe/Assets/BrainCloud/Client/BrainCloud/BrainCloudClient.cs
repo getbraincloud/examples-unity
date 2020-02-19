@@ -29,6 +29,7 @@ using System;
         REST,
         RTT,
         RS,
+        PING,
 
         MAX
     }
@@ -270,6 +271,11 @@ using System;
         public bool Initialized
         {
             get { return _initialized; }
+        }
+
+        public void EnableCompression(bool compress)
+        {
+            _comms.EnableCompression(compress);
         }
 
         /// <summary>Returns the sessionId or empty string if no session present.</summary>
@@ -844,12 +850,19 @@ using System;
                     }
                     break;
 
+                case eBrainCloudUpdateType.PING:
+                    {
+                        if (_lobbyService != null) _lobbyService.Update();
+                    }
+                    break;
+
                 default:
                 case eBrainCloudUpdateType.ALL:
                     {
                         if (_rttComms != null) _rttComms.Update();
                         if (_comms != null) _comms.Update();
                         if (_rsComms != null) _rsComms.Update();
+                        if (_lobbyService != null) _lobbyService.Update();
                     }
                     break;
             }

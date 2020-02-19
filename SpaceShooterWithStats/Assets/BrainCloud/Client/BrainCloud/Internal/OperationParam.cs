@@ -57,6 +57,7 @@ namespace BrainCloud
         public static readonly OperationParam AuthenticateServiceAuthenticateExternalAuthName = new OperationParam("externalAuthName");
         public static readonly OperationParam AuthenticateServiceAuthenticateEmailAddress = new OperationParam("emailAddress");
         public static readonly OperationParam AuthenticateServiceAuthenticateServiceParams = new OperationParam("serviceParams");
+        public static readonly OperationParam AuthenticateServiceAuthenticateTokenTtlInMinutes = new OperationParam("tokenTtlInMinutes");
 
         public static readonly OperationParam AuthenticateServiceAuthenticateLevelName = new OperationParam("levelName");
         public static readonly OperationParam AuthenticateServiceAuthenticatePeerCode = new OperationParam("peerCode");
@@ -188,6 +189,8 @@ namespace BrainCloud
         // Player State Service - Update Summary Params
         public static readonly OperationParam PlayerStateServiceUpdateSummaryFriendData = new OperationParam("summaryFriendData");
         public static readonly OperationParam PlayerStateServiceUpdateNameData = new OperationParam("playerName");
+        public static readonly OperationParam PlayerStateServiceTimeZoneOffset = new OperationParam("timeZoneOffset");
+        public static readonly OperationParam PlayerStateServiceLanguageCode = new OperationParam("languageCode");
 
         // Player State Service - Atributes
         public static readonly OperationParam PlayerStateServiceAttributes = new OperationParam("attributes");
@@ -201,6 +204,7 @@ namespace BrainCloud
 
         // Player State Service - Reset Params
         //public static readonly Operation PlayerStateServiceReset = new Operation("");
+        
 
         // Player Statistics Service - Update Increment Params
         public static readonly OperationParam PlayerStatisticsServiceStats = new OperationParam("statistics");
@@ -401,6 +405,7 @@ namespace BrainCloud
         public static readonly OperationParam GroupAttributes = new OperationParam("attributes");
         public static readonly OperationParam GroupName = new OperationParam("name");
         public static readonly OperationParam GroupType = new OperationParam("groupType");
+        public static readonly OperationParam GroupTypes = new OperationParam("groupTypes");
         public static readonly OperationParam GroupEntityType = new OperationParam("entityType");
         public static readonly OperationParam GroupIsOpenGroup = new OperationParam("isOpenGroup");
         public static readonly OperationParam GroupAcl = new OperationParam("acl");
@@ -408,12 +413,15 @@ namespace BrainCloud
         public static readonly OperationParam GroupOwnerAttributes = new OperationParam("ownerAttributes");
         public static readonly OperationParam GroupDefaultMemberAttributes = new OperationParam("defaultMemberAttributes");
         public static readonly OperationParam GroupIsOwnedByGroupMember = new OperationParam("isOwnedByGroupMember");
+        public static readonly OperationParam GroupSummaryData = new OperationParam("summaryData");
         public static readonly OperationParam GroupEntityId = new OperationParam("entityId");
         public static readonly OperationParam GroupVersion = new OperationParam("version");
         public static readonly OperationParam GroupContext = new OperationParam("context");
         public static readonly OperationParam GroupPageOffset = new OperationParam("pageOffset");
         public static readonly OperationParam GroupAutoJoinStrategy = new OperationParam("autoJoinStrategy");
         public static readonly OperationParam GroupWhere = new OperationParam("where");
+        public static readonly OperationParam GroupMaxReturn = new OperationParam("maxReturn");
+        
 
         //mail
         public static readonly OperationParam Subject = new OperationParam("subject");
@@ -467,6 +475,7 @@ namespace BrainCloud
 
         // lobby
         public static readonly OperationParam LobbyRoomType = new OperationParam("lobbyType");
+        public static readonly OperationParam LobbyTypes = new OperationParam("lobbyTypes");
         public static readonly OperationParam LobbyRating = new OperationParam("rating");
         public static readonly OperationParam LobbyAlgorithm = new OperationParam("algo");
         public static readonly OperationParam LobbyMaxSteps = new OperationParam("maxSteps");
@@ -484,7 +493,18 @@ namespace BrainCloud
         public static readonly OperationParam LobbyToTeamName = new OperationParam("toTeamCode");
         public static readonly OperationParam LobbySignalData = new OperationParam("signalData");
         public static readonly OperationParam LobbyConnectionId = new OperationParam("cxId");
+        public static readonly OperationParam PingData = new OperationParam("pingData");
 
+        public static readonly OperationParam CompoundAlgos = new OperationParam("algos");
+        public static readonly OperationParam CompoundRanges = new OperationParam("compound-ranges");
+        public static readonly OperationParam LobbyCritera = new OperationParam("criteria");
+        public static readonly OperationParam CriteraPing = new OperationParam("ping");
+        public static readonly OperationParam CriteraRating = new OperationParam("rating");
+        public static readonly OperationParam StrategyRangedPercent = new OperationParam("ranged-percent");
+        public static readonly OperationParam StrategyRangedAbsolute = new OperationParam("ranged-absolute");
+        public static readonly OperationParam StrategyAbsolute = new OperationParam("absolute");
+        public static readonly OperationParam StrategyCompound = new OperationParam("compound");
+        public static readonly OperationParam AlignmentCenter = new OperationParam("center");
         //custom entity
         public static readonly OperationParam CustomEntityServiceEntityType = new OperationParam("entityType");
         public static readonly OperationParam CustomEntityServiceEntityId = new OperationParam("entityId");

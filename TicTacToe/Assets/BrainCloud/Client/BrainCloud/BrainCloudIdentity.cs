@@ -495,10 +495,10 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Attach
         /// </remarks>
-        /// <param name="googleId">
-        /// The google id of the user
+        /// <param name="googleUserId">
+        /// String representation of google+ userId. Gotten with calls like RequestUserId
         /// </param>
-        /// <param name="authenticationToken">
+        /// <param name="serverAuthCode">
         /// The validated token from the Google SDK
         ///   (that will be further validated when sent to the bC service)
         /// </param>
@@ -512,13 +512,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void AttachGoogleIdentity(
-            string googleId,
-            string authenticationToken,
+            string googleUserId,
+            string serverAuthCode,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            AttachIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
+            AttachIdentity(googleUserId, serverAuthCode, AuthenticationType.Google, success, failure, cbObject);
         }
 
         /// <summary>
@@ -529,10 +529,10 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Merge
         /// </remarks>
-        /// <param name="googleId">
-        /// The Google id of the user
+        /// <param name="googleUserId">
+        /// String representation of google+ userId. Gotten with calls like RequestUserId
         /// </param>
-        /// <param name="authenticationToken">
+        /// <param name="serverAuthCode">
         /// The validated token from the Google SDK
         /// (that will be further validated when sent to the bC service)
         /// </param>
@@ -546,13 +546,13 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void MergeGoogleIdentity(
-            string googleId,
-            string authenticationToken,
+            string googleUserId,
+            string serverAuthCode,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            MergeIdentity(googleId, authenticationToken, AuthenticationType.Google, success, failure, cbObject);
+            MergeIdentity(googleUserId, serverAuthCode, AuthenticationType.Google, success, failure, cbObject);
         }
 
         /// <summary>
@@ -562,8 +562,8 @@ using BrainCloud.Common;
         /// Service Name - identity
         /// Service Operation - Detach
         /// </remarks>
-        /// <param name="googleId">
-        /// The Google id of the user
+        /// <param name="googleUserId">
+        /// String representation of google+ userId. Gotten with calls like RequestUserId
         /// </param>
         /// <param name="continueAnon">
         /// Proceed even if the profile will revert to anonymous?
@@ -578,13 +578,207 @@ using BrainCloud.Common;
         /// The user object sent to the callback.
         /// </param>
         public void DetachGoogleIdentity(
-            string googleId,
+            string googleUserId,
             bool continueAnon,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
         {
-            DetachIdentity(googleId, AuthenticationType.Google, continueAnon, success, failure, cbObject);
+            DetachIdentity(googleUserId, AuthenticationType.Google, continueAnon, success, failure, cbObject);
+        }
+
+            /// <summary>
+        /// Attach the user's Google credentials to the current profile.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - identity
+        /// Service Operation - Attach
+        /// </remarks>
+        /// <param name="googleUserAccountEmail">
+        /// The email associated with the google user
+        /// </param>
+        /// <param name="IdToken">
+        /// The id token of the google account. Can get with calls like requestIdToken
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void AttachGoogleOpenIdIdentity(
+            string googleUserAccountEmail,
+            string IdToken,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            AttachIdentity(googleUserAccountEmail, IdToken, AuthenticationType.GoogleOpenId, success, failure, cbObject);
+        }
+
+        /// <summary>
+        /// Merge the profile associated with the provided Google credentials with the
+        /// current profile.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - identity
+        /// Service Operation - Merge
+        /// </remarks>
+        /// <param name="googleUserAccountEmail">
+        /// The email associated with the google user
+        /// </param>
+        /// <param name="IdToken">
+        /// The id token of the google account. Can get with calls like requestIdToken
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void MergeGoogleOpenIdIdentity(
+            string googleUserAccountEmail,
+            string IdToken,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            MergeIdentity(googleUserAccountEmail, IdToken, AuthenticationType.GoogleOpenId, success, failure, cbObject);
+        }
+
+        /// <summary>
+        /// Detach the Google identity from this profile.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - identity
+        /// Service Operation - Detach
+        /// </remarks>
+        /// <param name="googleUserAccountEmail">
+        /// The email associated with the google user
+        /// </param>
+        /// <param name="continueAnon">
+        /// Proceed even if the profile will revert to anonymous?
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void DetachGoogleOpenIdIdentity(
+            string googleUserAccountEmail,
+            bool continueAnon,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            DetachIdentity(googleUserAccountEmail, AuthenticationType.GoogleOpenId, continueAnon, success, failure, cbObject);
+        }
+
+               /// <summary>
+        /// Attach the user's Apple credentials to the current profile.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - identity
+        /// Service Operation - Attach
+        /// </remarks>
+        /// <param name="appleUserId">
+        /// This can be the user id OR the email of the user for the account
+        /// </param>
+        /// <param name="identityToken">
+        /// The token confirming the user's identity
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void AttachAppleIdentity(
+            string appleUserId,
+            string identityToken,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            AttachIdentity(appleUserId, identityToken, AuthenticationType.Apple, success, failure, cbObject);
+        }
+
+        /// <summary>
+        /// Merge the profile associated with the provided Apple credentials with the
+        /// current profile.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - identity
+        /// Service Operation - Merge
+        /// </remarks>
+        /// <param name="appleUserId">
+        /// This can be the user id OR the email of the user for the account
+        /// </param>
+        /// <param name="identityToken">
+        /// The token confirming the user's identity
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void MergeAppleIdentity(
+            string appleUserId,
+            string identityToken,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            MergeIdentity(appleUserId, identityToken, AuthenticationType.Apple, success, failure, cbObject);
+        }
+
+        /// <summary>
+        /// Detach the Apple identity from this profile.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - identity
+        /// Service Operation - Detach
+        /// </remarks>
+        /// <param name="appleUserId">
+        /// This can be the user id OR the email of the user for the account
+        /// </param>
+        /// <param name="continueAnon">
+        /// Proceed even if the profile will revert to anonymous?
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user object sent to the callback.
+        /// </param>
+        public void DetachAppleIdentity(
+            string appleUserId,
+            bool continueAnon,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            DetachIdentity(appleUserId, AuthenticationType.Apple, continueAnon, success, failure, cbObject);
         }
 
         /// <summary>

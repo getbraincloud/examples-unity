@@ -45,7 +45,10 @@
  */
 #endregion
 
-using System;
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
+{
+
+    using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -54,8 +57,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
-{
+
   internal sealed class HttpConnection
   {
     #region Private Fields
