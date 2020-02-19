@@ -44,11 +44,13 @@
  */
 #endregion
 
-using System;
-using System.Threading;
-
 namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
 {
+
+
+    using System;
+using System.Threading;
+
   internal class HttpListenerAsyncResult : IAsyncResult
   {
     #region Private Fields

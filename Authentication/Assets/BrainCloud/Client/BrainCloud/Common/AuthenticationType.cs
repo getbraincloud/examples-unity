@@ -17,11 +17,14 @@ namespace BrainCloud.Common
         public static readonly AuthenticationType Facebook = new AuthenticationType("Facebook");
         public static readonly AuthenticationType GameCenter = new AuthenticationType("GameCenter");
         public static readonly AuthenticationType Steam = new AuthenticationType("Steam");
+        public static readonly AuthenticationType Apple = new AuthenticationType("Apple");
         public static readonly AuthenticationType Google = new AuthenticationType("Google");
+        public static readonly AuthenticationType GoogleOpenId = new AuthenticationType("GoogleOpenId");
         public static readonly AuthenticationType Twitter = new AuthenticationType("Twitter");
         public static readonly AuthenticationType Parse = new AuthenticationType("Parse");
-        public static readonly AuthenticationType Handoff = new AuthenticationType("Handoff");
         public static readonly AuthenticationType External = new AuthenticationType("External");
+        public static readonly AuthenticationType Handoff = new AuthenticationType("Handoff");
+        public static readonly AuthenticationType SettopHandoff = new AuthenticationType("SettopHandoff");
         public static readonly AuthenticationType Unknown = new AuthenticationType("UNKNOWN");
 
         private static readonly Dictionary<string, AuthenticationType> _typesForString = new Dictionary<string, AuthenticationType>
@@ -32,11 +35,14 @@ namespace BrainCloud.Common
             { Facebook.value, Facebook },
             { GameCenter.value, GameCenter },
             { Steam.value, Steam },
+            { Apple.value, Apple },
             { Google.value, Google },
+            { GoogleOpenId.value, GoogleOpenId },
             { Twitter.value, Twitter },
             { Parse.value, Parse },
             { Handoff.value, Handoff},
             { External.value, External },
+            {SettopHandoff.value , SettopHandoff},
             { Unknown.value, Unknown }
         };
 

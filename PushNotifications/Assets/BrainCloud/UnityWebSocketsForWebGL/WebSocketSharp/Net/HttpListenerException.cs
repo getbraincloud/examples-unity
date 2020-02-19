@@ -37,12 +37,14 @@
  */
 #endregion
 
-using System;
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
+{
+
+    using System;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
-{
+
   /// <summary>
   /// The exception that is thrown when a <see cref="HttpListener"/> gets an error
   /// processing an HTTP request.

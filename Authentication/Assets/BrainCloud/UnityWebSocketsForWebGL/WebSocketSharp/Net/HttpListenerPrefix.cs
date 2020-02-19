@@ -39,6 +39,7 @@
 #endregion
 
 using System;
+using System.Net;
 
 namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
 {

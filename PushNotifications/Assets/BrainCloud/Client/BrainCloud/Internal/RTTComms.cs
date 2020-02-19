@@ -3,13 +3,15 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using BrainCloud.JsonFx.Json;
-
 namespace BrainCloud.Internal
 {
+
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using BrainCloud.JsonFx.Json;
+
+
     internal sealed class RTTComms
     {
         /// <summary>
@@ -133,13 +135,21 @@ namespace BrainCloud.Internal
                         if (m_connectionFailureCallback != null)
                             m_connectionFailureCallback(400, -1, toProcessResponse.JsonMessage, m_connectedObj);
                     }
+                    else
+                    {
+                        //TODOO
+                       m_clientRef.Log("WARNING no handler registered for RTT callbacks ");
+                    }
 
                     // first time connecting? send the server connection call
                     if (!m_bIsConnected && toProcessResponse.Operation == "connect")
                     {
                         m_bIsConnected = true;
+                        m_lastNowMS = DateTime.Now;
                         send(buildConnectionRequest());
                     }
+
+
                 }
 
                 m_queuedRTTCommands.Clear();
@@ -290,13 +300,13 @@ namespace BrainCloud.Internal
 
         private void WebSocket_OnClose(BrainCloudWebSocket sender, int code, string reason)
         {
-            m_clientRef.Log("Connection closed: " + reason);
+            m_clientRef.Log("RTT: Connection closed: " + reason);
             addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "disconnect", reason));
         }
 
         private void Websocket_OnOpen(BrainCloudWebSocket accepted)
         {
-            m_clientRef.Log("Connection established.");
+            m_clientRef.Log("RTT: Connection established.");
             addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "connect", ""));
         }
 
@@ -308,7 +318,7 @@ namespace BrainCloud.Internal
 
         private void WebSocket_OnError(BrainCloudWebSocket sender, string message)
         {
-            m_clientRef.Log("Error: " + message);
+            m_clientRef.Log("RTT Error: " + message);
             addRTTCommandResponse(new RTTCommandResponse(ServiceName.RTTRegistration.Value.ToLower(), "error", buildRTTRequestError(message)));
         }
 
@@ -444,7 +454,7 @@ namespace BrainCloud.Internal
         private DateTime m_lastNowMS;
 
         private int m_timeSinceLastRequest = 0;
-        private const int MAX_PACKETSIZE = 1024;// TODO:: based off of some config 
+        private const int MAX_PACKETSIZE = 1024;
         private int m_heartBeatTime = 10 * 1000;
 
         private BrainCloudClient m_clientRef;

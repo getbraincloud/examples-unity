@@ -3,14 +3,15 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
+namespace BrainCloud
+{
+
 using System;
 using System.Collections.Generic;
 using System.Text;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.Internal;
 
-namespace BrainCloud
-{
     public class BrainCloudScript
     {
         private BrainCloudClient _client;
@@ -197,6 +198,53 @@ namespace BrainCloud
             ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.CancelScheduledScript, data, callback);
             _client.SendRequest(sc);
         }
+
+        /// <summary>
+        /// get a scheduled cloud code script
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Script
+        /// Service Operation - GET_SCHEDULED_CLOUD_SCRIPTS
+        /// </remarks>
+        /// <param name="startDateUTC"> ID of script job to cancel </param>
+        /// <param name="success"> The success callback. </param>
+        /// <param name="failure"> The failure callback. </param>
+        /// <param name="cbObject"> The user object sent to the callback. </param>
+        public void GetScheduledCloudScripts(
+            DateTime startDateUTC,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.ScriptServiceStartDateUTC.Value] = startDateUTC;
+
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.GetScheduledCloudScripts, data, callback);
+            _client.SendRequest(sc);
+        }
+
+                /// <summary>
+        /// get a scheduled cloud code script
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Script
+        /// Service Operation - GET_RUNNING_OR_QUEUED_CLOUD_SCRIPTS
+        /// </remarks>
+        /// <param name="startDateUTC"> ID of script job to cancel </param>
+        /// <param name="success"> The success callback. </param>
+        /// <param name="failure"> The failure callback. </param>
+        /// <param name="cbObject"> The user object sent to the callback. </param>
+        public void GetRunningOrQueuedCloudScripts(
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Script, ServiceOperation.GetRunningOrQueuedCloudScripts, null, callback);
+            _client.SendRequest(sc);
+        }
+
 
         /// <summary>
         /// Runs a script from the context of a peer

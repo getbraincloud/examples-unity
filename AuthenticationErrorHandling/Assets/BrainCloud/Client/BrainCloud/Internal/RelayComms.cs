@@ -3,17 +3,19 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
-using BrainCloud.JsonFx.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace BrainCloud.Internal
 {
+    using JsonFx.Json;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Threading.Tasks;
+
+    
     internal sealed class RelayComms
     {
         #region public consts
@@ -185,6 +187,7 @@ namespace BrainCloud.Internal
 
                     if (!isConnected && toProcessResponse.Operation == "connect")
                     {
+                        m_lastNowMS = DateTime.Now;
                         send(buildConnectionRequest(), true, true, 0);
                     }
 
@@ -440,8 +443,9 @@ namespace BrainCloud.Internal
             // actually do the send
             try
             {
-                //string recvOpp = Encoding.ASCII.GetString(in_data);
-                //m_clientRef.Log(in_data.Length + "bytes RS " +  (m_connectionType == RelayConnectionType.WEBSOCKET ? "WS" : m_connectionType == RelayConnectionType.TCP ? "TCP" : "UDP") + " SEND msg : " + recvOpp);
+#if BC_DEBUG_RELAY_LOGS_ENABLED
+                m_clientRef.Log("RELAY: " + in_data.Length + "bytes RS " +  (m_connectionType == RelayConnectionType.WEBSOCKET ? "WS" : m_connectionType == RelayConnectionType.TCP ? "TCP" : "UDP") + " SEND msg : " + Encoding.ASCII.GetString(in_data));
+#endif                
                 if (!in_bResend) in_data = appendSizeBytes(in_data);
                 switch (m_connectionType)
                 {
@@ -520,13 +524,13 @@ namespace BrainCloud.Internal
 
         private void WebSocket_OnClose(BrainCloudWebSocket sender, int code, string reason)
         {
-            m_clientRef.Log("Connection closed: " + reason);
+            m_clientRef.Log("Relay: Connection closed: " + reason);
             addRSCommandResponse(new RSCommandResponse(ServiceName.Relay.Value, "disconnect", reason));
         }
 
         private void Websocket_OnOpen(BrainCloudWebSocket accepted)
         {
-            m_clientRef.Log("Connection established.");
+            m_clientRef.Log("Relay: Connection established.");
             // initial connect call, sets connection requests if not connected
             addRSCommandResponse(new RSCommandResponse(ServiceName.Relay.Value, "connect", ""));
         }
@@ -539,7 +543,7 @@ namespace BrainCloud.Internal
 
         private void WebSocket_OnError(BrainCloudWebSocket sender, string message)
         {
-            m_clientRef.Log("Error: " + message);
+            m_clientRef.Log("Relay Error: " + message);
             addRSCommandResponse(new RSCommandResponse(ServiceName.Relay.Value, "error", buildRSRequestError(message)));
         }
 
@@ -604,7 +608,9 @@ namespace BrainCloud.Internal
                                 }
                             }
                         }
-                        //m_clientRef.Log("RS RECV: " + cutOffData.Length + "bytes - " + jsonMessage);
+#if BC_DEBUG_RELAY_LOGS_ENABLED
+                        m_clientRef.Log("Relay RECV: " + cutOffData.Length + "bytes - " + jsonMessage);
+#endif
                         addRSCommandResponse(new RSCommandResponse(ServiceName.Relay.Value, "onrecv", jsonMessage, cutOffData));
                     }
 
@@ -617,7 +623,9 @@ namespace BrainCloud.Internal
                 else if (controlByte == RS2CL_PONG)
                 {
                     Ping = DateTime.Now.Ticks - m_sentPing;
-                    //m_clientRef.Log("LastPing: " + (Ping * 0.0001f).ToString() + "ms");
+#if BC_DEBUG_RELAY_LOGS_ENABLED
+                    m_clientRef.Log("Relay LastPing: " + (Ping * 0.0001f).ToString() + "ms");
+#endif
                 }
             }
 
@@ -705,7 +713,7 @@ namespace BrainCloud.Internal
                         lock (m_orderedReceivedMap)
                         {
                             m_orderedReceivedMap[channel].Add(new KeyValuePair<int, int>(in_incomingNetId, incomingPacketId), new UDPPacket(in_data, channel, incomingPacketId, in_incomingNetId, reliable));
-                            //m_clientRef.Log(" confirmOrderedReceive adding ch:" + channel + " r:" + reliable + " p:" + incomingPacketId + " cp:" + currentPacketId);
+                            //m_clientRef.Log("Relay confirmOrderedReceive adding ch:" + channel + " r:" + reliable + " p:" + incomingPacketId + " cp:" + currentPacketId);
                         }
                     }
 
@@ -820,10 +828,9 @@ namespace BrainCloud.Internal
                     byte[] data = udpClient.EndReceive(result, ref source);
                     Array.Copy(data, SIZE_OF_LENGTH_PREFIX_BYTE_ARRAY, data, 0, data.Length - SIZE_OF_LENGTH_PREFIX_BYTE_ARRAY);
                     onRecv(data, (data.Length - SIZE_OF_LENGTH_PREFIX_BYTE_ARRAY));
-
-                    //string in_message = Encoding.ASCII.GetString(data);
-                    //m_clientRef.Log("RS UDP AFTER RECV: " + (data.Length - SIZE_OF_LENGTH_PREFIX_BYTE_ARRAY) + "bytes - " + in_message);
-
+#if BC_DEBUG_RELAY_LOGS_ENABLED
+                    m_clientRef.Log("RS UDP AFTER RECV: " + (data.Length - SIZE_OF_LENGTH_PREFIX_BYTE_ARRAY) + "bytes - " + Encoding.ASCII.GetString(data));
+#endif
                     // schedule the next receive operation once reading is done:
                     udpClient.BeginReceive(new AsyncCallback(onUDPRecv), udpClient);
                 }
@@ -943,9 +950,9 @@ namespace BrainCloud.Internal
                     addRSCommandResponse(new RSCommandResponse(ServiceName.Relay.Value, "error", buildRSRequestError("Incorrect Bytes Read " + m_tcpBytesRead + " " + m_tcpBytesToRead)));
                     return;
                 }
-
-                //string in_message = Encoding.ASCII.GetString(m_tcpReadBuffer);
-                //m_clientRef.Log("RS TCP RECV: " + m_tcpBytesToRead + "bytes - " + in_message);
+#if BC_DEBUG_RELAY_LOGS_ENABLED
+                m_clientRef.Log("Relay TCP RECV: " + m_tcpBytesToRead + "bytes - " + Encoding.ASCII.GetString(m_tcpReadBuffer));
+#endif
 
                 // Handle the message
                 onRecv(m_tcpReadBuffer, m_tcpBytesToRead);
@@ -1189,13 +1196,13 @@ namespace BrainCloud.Internal
             public int NetId { get; private set; }
             public bool Reliable { get; private set; }
         }
-        #endregion
+#endregion
     }
 }
 
 namespace BrainCloud
 {
-    #region public enums
+#region public enums
     public enum RelayConnectionType
     {
         INVALID,
@@ -1205,5 +1212,5 @@ namespace BrainCloud
 
         MAX
     }
-    #endregion
+#endregion
 }

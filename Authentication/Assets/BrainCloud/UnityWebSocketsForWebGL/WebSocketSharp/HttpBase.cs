@@ -26,7 +26,10 @@
  */
 #endregion
 
-using System;
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
+{
+
+    using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -34,15 +37,14 @@ using System.Text;
 using System.Threading;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net;
 
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
-{
+
   internal abstract class HttpBase
   {
     #region Private Fields
 
     private NameValueCollection _headers;
     private const int           _headersMaxLength = 8192;
-    private System.Version             _version;
+    private Version             _version;
 
     #endregion
 
@@ -60,7 +62,7 @@ namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
 
     #region Protected Constructors
 
-    protected HttpBase (System.Version version, NameValueCollection headers)
+    protected HttpBase (Version version, NameValueCollection headers)
     {
       _version = version;
       _headers = headers;
@@ -91,7 +93,7 @@ namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp
       }
     }
 
-    public System.Version ProtocolVersion {
+    public Version ProtocolVersion {
       get {
         return _version;
       }

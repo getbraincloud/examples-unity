@@ -37,15 +37,18 @@
  */
 #endregion
 
-using System;
+namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
+{
+
+    using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
-{
+
   /// <summary>
   /// Represents an incoming request to a <see cref="HttpListener"/> instance.
   /// </summary>
@@ -67,7 +70,7 @@ namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
     private WebHeaderCollection    _headers;
     private string                 _httpMethod;
     private Stream                 _inputStream;
-    private System.Version                _protocolVersion;
+    private Version                _protocolVersion;
     private NameValueCollection    _queryString;
     private string                 _rawUrl;
     private Guid                   _requestTraceIdentifier;
@@ -372,10 +375,10 @@ namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
     /// Gets the HTTP version specified by the client.
     /// </summary>
     /// <value>
-    /// A <see cref="System.Version"/> that represents the HTTP version specified in
+    /// A <see cref="Version"/> that represents the HTTP version specified in
     /// the request line.
     /// </value>
-    public System.Version ProtocolVersion {
+    public Version ProtocolVersion {
       get {
         return _protocolVersion;
       }
@@ -799,7 +802,7 @@ namespace BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp.Net
         return;
       }
 
-      System.Version ver;
+      Version ver;
       if (!rawVer.Substring (5).TryCreateVersion (out ver)) {
         _context.ErrorMessage = "Invalid request line (version)";
         return;

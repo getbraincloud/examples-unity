@@ -3,6 +3,9 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
+namespace BrainCloud
+{
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,8 +17,6 @@ using UnityEngine.SocialPlatforms;
 using UnityEngine;
 #endif
 
-namespace BrainCloud
-{
     public class BrainCloudGamification
     {
         private BrainCloudClient _client;
@@ -551,7 +552,8 @@ namespace BrainCloud
         }
 
         /// <summary>
-        /// Sets the specified milestones' statuses to LOCKED.
+        /// Deprecated
+        /// Sets the specified milestones' statuses to LOCKED. 
         /// </summary>
         /// <remarks>
         /// Service Name - Gamification
@@ -569,6 +571,7 @@ namespace BrainCloud
         /// <param name="cbObject">
         /// The callback object
         /// </param>
+        [System.Obsolete("this method is no longer supported")]
         public void ResetMilestones(
             IList<string> milestoneIds,
             SuccessCallback success = null,
