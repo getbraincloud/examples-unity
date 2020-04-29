@@ -157,6 +157,7 @@ using System;
         private BrainCloudAsyncMatch _asyncMatchService;
         private BrainCloudTime _timeService;
         private BrainCloudTournament _tournamentService;
+        private BrainCloudGlobalFile _globalFileService;
         private BrainCloudCustomEntity _customEntityService;
         private BrainCloudAuthentication _authenticationService;
         private BrainCloudPushNotification _pushNotificationService;
@@ -242,6 +243,7 @@ using System;
             _asyncMatchService = new BrainCloudAsyncMatch(this);
             _timeService = new BrainCloudTime(this);
             _tournamentService = new BrainCloudTournament(this);
+            _globalFileService = new BrainCloudGlobalFile(this);
             _customEntityService = new BrainCloudCustomEntity(this);
 
             _authenticationService = new BrainCloudAuthentication(this);
@@ -483,10 +485,17 @@ using System;
         {
             get { return _tournamentService; }
         }
+
+        public BrainCloudGlobalFile GlobalFileService
+        {
+            get { return _globalFileService; }
+        }
+
         public BrainCloudCustomEntity CustomEntityService
         {
             get { return _customEntityService; }
         }
+
         public BrainCloudAuthentication AuthenticationService
         {
             get { return _authenticationService; }
@@ -680,6 +689,12 @@ using System;
         {
             return _tournamentService;
         }
+
+        public BrainCloudGlobalFile GetGlobalFileService()
+        {
+            return _globalFileService;
+        }
+
         public BrainCloudCustomEntity GetCustomEntityService()
         {
             return _customEntityService;
@@ -1019,7 +1034,7 @@ using System;
         /// The number of entries in this array determines how many packet
         /// retries will occur.
         ///
-        /// By default, the packet timeout array is {10, 10, 10}
+        /// By default, the packet timeout array is {15, 20, 35, 50}
         ///
         /// Note that this method does not change the timeout for authentication
         /// packets (use SetAuthenticationPacketTimeout method).
