@@ -190,7 +190,7 @@ namespace Gameframework
         protected Vector3 m_rotationVelocity = Vector3.zero;
 
         public float LastSyncedPing { get; private set; }
-        public bool IsLocalPlayer { get { return _netId == GCore.Wrapper.RelayService.NetId; } }
+        public bool IsLocalPlayer { get { return _netId == GCore.Wrapper.RelayService.GetNetIdForProfileId(GCore.Wrapper.Client.AuthenticationService.ProfileId); } }
 
         public bool IsServerBot
         {

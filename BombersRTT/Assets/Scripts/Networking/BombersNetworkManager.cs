@@ -106,7 +106,8 @@ namespace BrainCloudUNETExample
         public void ContinueJoinRoom(string in_newOwner)
         {
             m_continueJoinOwnerId = in_newOwner;
-            GCore.Wrapper.Client.RelayService.DeregisterDataCallback();
+            GCore.Wrapper.Client.RelayService.DeregisterRelayCallback();
+            GCore.Wrapper.Client.RelayService.DeregisterSystemCallback();
             GCore.Wrapper.Client.RelayService.Disconnect();
             StopCoroutine("startingInCountDown");
             GStateManager.Instance.ChangeState(MainMenuState.STATE_NAME);
@@ -162,7 +163,8 @@ namespace BrainCloudUNETExample
         public void DestroyMatch()
         {
             StopCoroutine("startingInCountDown");
-            GCore.Wrapper.Client.RelayService.DeregisterDataCallback();
+            GCore.Wrapper.Client.RelayService.DeregisterRelayCallback();
+            GCore.Wrapper.Client.RelayService.DeregisterSystemCallback();
             GCore.Wrapper.Client.RelayService.Disconnect();
             GStateManager stateMgr = GStateManager.Instance;
             if (stateMgr.CurrentStateId == MainMenuState.STATE_NAME)
@@ -446,19 +448,20 @@ namespace BrainCloudUNETExample
         {
             GCore.Wrapper.RTTService.DeregisterAllRTTCallbacks();
             GCore.Wrapper.RTTService.RegisterRTTLobbyCallback(Instance.LobbyCallback);
-            GCore.Wrapper.Client.RelayService.RegisterDataCallback(onDataRecv);
-            Dictionary<string, object> connectionOptions = new Dictionary<string, object>();
+            GCore.Wrapper.Client.RelayService.RegisterSystemCallback(onSystemRecv);
+            GCore.Wrapper.Client.RelayService.RegisterRelayCallback(onRelayRecv);
+            RelayConnectOptions connectionOptions = new RelayConnectOptions();
 #if !SMRJ_HACK2
             int rsConnectionType = GetTesterProtocol();
             SetTesterCompression();
 #else
             int rsConnectionType = RS_CONNECTION_OVERRIDE;
 #endif
-            connectionOptions["ssl"] = false;
-            connectionOptions["host"] = RoomServerInfo.Url;
-            connectionOptions["port"] = RoomServerInfo.Port;
-            connectionOptions["passcode"] = RoomServerInfo.UserPassCode;
-            connectionOptions["lobbyId"] = RoomServerInfo.LobbyId;
+            connectionOptions.ssl = false;
+            connectionOptions.host = RoomServerInfo.Url;
+            connectionOptions.port = RoomServerInfo.Port;
+            connectionOptions.passcode = RoomServerInfo.UserPassCode;
+            connectionOptions.lobbyId = RoomServerInfo.LobbyId;
 
             RelayConnectionType connectionType = rsConnectionType == 0 ? RelayConnectionType.WEBSOCKET :
                                                rsConnectionType == 1 ? RelayConnectionType.TCP : RelayConnectionType.UDP;
@@ -542,14 +545,7 @@ namespace BrainCloudUNETExample
             {
                 try
                 {
-                    if (in_json[0] == '{')
-                    {
-                        jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(in_json);
-                    }
-                    else
-                    {
-                        jsonMessage = deserializeData(in_data, in_json);
-                    }
+                    jsonMessage = deserializeData(in_data, in_json);
                 }
                 catch (Exception)
                 {
@@ -574,7 +570,149 @@ namespace BrainCloudUNETExample
             return jsonMessage;
         }
 
-        private void onDataRecv(byte[] in_data)
+        private void onSystemRecv(string json)
+        {
+            Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(json);
+
+            if (jsonMessage != null && jsonMessage.ContainsKey(BaseNetworkBehavior.OPERATION))
+            {
+                string operation = (string)jsonMessage[BaseNetworkBehavior.OPERATION];
+                switch (operation)
+                {
+                    // JSON
+                    case "CONNECT":
+                    {
+                        // someone connected!
+                        if (jsonMessage.ContainsKey(BrainCloudConsts.JSON_PROFILE_ID))
+                        {
+                            string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
+                            string ownerId = jsonMessage["ownerId"] as string;
+                            LobbyInfo.OwnerProfileId = ownerId;
+
+                            LobbyMemberInfo memberInfo = LobbyInfo.GetMemberWithProfileId(profileId);
+
+                            if (memberInfo != null)
+                            {
+                                short netId = Convert.ToInt16(jsonMessage["netId"]);
+                                memberInfo.NetId = netId;
+                                if (memberInfo.PlayerController != null) memberInfo.PlayerController.NetId = netId;
+                            }
+
+                            if (profileId == GCore.Wrapper.Client.ProfileId)
+                            {
+                                initGame();
+                            }
+                        }
+                    }
+                    break;
+
+                    // JSON
+                    case "NET_ID":
+                    {
+                        string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
+                        LobbyMemberInfo memberInfo = LobbyInfo.GetMemberWithProfileId(profileId);
+
+                        if (memberInfo != null)
+                        {
+                            short netId = Convert.ToInt16(jsonMessage["netId"]);
+                            memberInfo.NetId = netId;
+                            if (memberInfo.PlayerController != null) memberInfo.PlayerController.NetId = netId;
+                        }
+                    }
+                    break;
+
+                    // JSON
+                    case "DISCONNECT":
+                    {
+                        GameObject gManObj = GameObject.Find("GameManager");
+                        GameManager gMan = gManObj != null ? gManObj.GetComponent<GameManager>() : null;
+                        if (gMan != null && gMan.m_gameState != GameManager.eGameState.GAME_STATE_GAME_OVER)
+                        {
+                            // someone left
+                            if (jsonMessage.ContainsKey(BrainCloudConsts.JSON_PROFILE_ID))
+                            {
+                                string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
+                                LobbyMemberInfo memberInfo = LobbyInfo.RemoveMemberWithProfileId(profileId);
+
+                                // someone was removed, add a new server bot
+                                if (memberInfo != null)
+                                {
+                                    gMan.DisplayDialogMessage(memberInfo.Name + " left the game");
+                                    gMan.RpcDestroyPlayerPlane(memberInfo.NetId, -1);
+                                    Dictionary<string, object> botDict = new Dictionary<string, object>();
+
+                                    botDict["name"] = "serverBot - " + memberInfo.Name;
+                                    botDict["pic"] = "";
+                                    botDict["cxId"] = "";
+                                    botDict["rating"] = 0;
+                                    botDict["isReady"] = true;
+
+                                    LobbyMemberInfo newMember = null;
+                                    botDict["team"] = memberInfo.Team;
+                                    botDict[BrainCloudConsts.JSON_PROFILE_ID] = "serverBot " + memberInfo.Name;
+                                    newMember = new LobbyMemberInfo(botDict);
+                                    newMember.NetId = memberInfo.NetId; // reuse old net id
+                                    LobbyInfo.Members.Add(newMember);
+                                    gMan.RpcSpawnPlayer(newMember.ProfileId);
+                                }
+
+                                bool bLastPlayer = true;
+                                // check if last player or not
+                                foreach (LobbyMemberInfo member in LobbyInfo.Members)
+                                {
+                                    if (member.Name.Contains(GameManager.SERVER_BOT)) continue;
+                                    if (member.ProfileId != GCore.Wrapper.Client.ProfileId)
+                                    {
+                                        bLastPlayer = false;
+                                        break;
+                                    }
+                                }
+                                if (bLastPlayer)
+                                {
+                                    gMan.DisplayDialogMessage("You are the last player in the game.");
+                                }
+                            }
+                        }
+                    }
+                    break;
+
+                    // JSON
+                    case "MIGRATE_OWNER":
+                    {
+                        if (GameObject.Find("GameManager") == null)
+                        {
+                            GCore.Wrapper.Client.RelayService.DeregisterRelayCallback();
+                            GCore.Wrapper.Client.RelayService.DeregisterSystemCallback();
+                            return;
+                        }
+                        // new owner
+                        if (jsonMessage.ContainsKey(BrainCloudConsts.JSON_PROFILE_ID))
+                        {
+                            string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
+                            LobbyInfo.OwnerProfileId = profileId;
+
+                            LobbyMemberInfo memberInfo = LobbyInfo.GetMemberWithProfileId(profileId);
+                            if (memberInfo != null)
+                                GameObject.Find("GameManager").GetComponent<GameManager>().DisplayDialogMessage(memberInfo.Name + " is the new host");
+
+                            // forces a refresh of variables for server bots!
+                            // and show should control them afterwards
+                            foreach (LobbyMemberInfo member in LobbyInfo.Members)
+                            {
+                                if (member.PlayerController != null)
+                                {
+                                    member.PlayerController.ProfileId = member.ProfileId;
+                                    member.PlayerController.NetId = member.NetId;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void onRelayRecv(byte[] in_data)
         {
             Dictionary<string, object> jsonMessage = readRSData(in_data);
 
@@ -587,103 +725,6 @@ namespace BrainCloudUNETExample
                     case BaseNetworkBehavior.TRANSFORM_UPDATE:
                         {
                             readTransformUpdate(jsonMessage);
-                        }
-                        break;
-
-                    // JSON
-                    case "CONNECT":
-                        {
-                            // someone connected!
-                            if (jsonMessage.ContainsKey(BrainCloudConsts.JSON_PROFILE_ID))
-                            {
-                                string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
-                                string ownerId = jsonMessage["ownerId"] as string;
-                                LobbyInfo.OwnerProfileId = ownerId;
-
-                                LobbyMemberInfo memberInfo = LobbyInfo.GetMemberWithProfileId(profileId);
-
-                                if (memberInfo != null)
-                                {
-                                    short netId = Convert.ToInt16(jsonMessage["netId"]);
-                                    memberInfo.NetId = netId;
-                                    if (memberInfo.PlayerController != null) memberInfo.PlayerController.NetId = netId;
-                                }
-
-                                if (profileId == GCore.Wrapper.Client.ProfileId)
-                                {
-                                    initGame();
-                                }
-                            }
-                        }
-                        break;
-
-                    // JSON
-                    case "NET_ID":
-                        {
-                            string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
-                            LobbyMemberInfo memberInfo = LobbyInfo.GetMemberWithProfileId(profileId);
-
-                            if (memberInfo != null)
-                            {
-                                short netId = Convert.ToInt16(jsonMessage["netId"]);
-                                memberInfo.NetId = netId;
-                                if (memberInfo.PlayerController != null) memberInfo.PlayerController.NetId = netId;
-                            }
-                        }
-                        break;
-
-                    // JSON
-                    case "DISCONNECT":
-                        {
-                            GameObject gManObj = GameObject.Find("GameManager");
-                            GameManager gMan = gManObj != null ? gManObj.GetComponent<GameManager>() : null;
-                            if (gMan != null && gMan.m_gameState != GameManager.eGameState.GAME_STATE_GAME_OVER)
-                            {
-                                // someone left
-                                if (jsonMessage.ContainsKey(BrainCloudConsts.JSON_PROFILE_ID))
-                                {
-                                    string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
-                                    LobbyMemberInfo memberInfo = LobbyInfo.RemoveMemberWithProfileId(profileId);
-
-                                    // someone was removed, add a new server bot
-                                    if (memberInfo != null)
-                                    {
-                                        gMan.DisplayDialogMessage(memberInfo.Name + " left the game");
-                                        gMan.RpcDestroyPlayerPlane(memberInfo.NetId, -1);
-                                        Dictionary<string, object> botDict = new Dictionary<string, object>();
-
-                                        botDict["name"] = "serverBot - " + memberInfo.Name;
-                                        botDict["pic"] = "";
-                                        botDict["cxId"] = "";
-                                        botDict["rating"] = 0;
-                                        botDict["isReady"] = true;
-
-                                        LobbyMemberInfo newMember = null;
-                                        botDict["team"] = memberInfo.Team;
-                                        botDict[BrainCloudConsts.JSON_PROFILE_ID] = "serverBot " + memberInfo.Name;
-                                        newMember = new LobbyMemberInfo(botDict);
-                                        newMember.NetId = memberInfo.NetId; // reuse old net id
-                                        LobbyInfo.Members.Add(newMember);
-                                        gMan.RpcSpawnPlayer(newMember.ProfileId);
-                                    }
-
-                                    bool bLastPlayer = true;
-                                    // check if last player or not
-                                    foreach (LobbyMemberInfo member in LobbyInfo.Members)
-                                    {
-                                        if (member.Name.Contains(GameManager.SERVER_BOT)) continue;
-                                        if (member.ProfileId != GCore.Wrapper.Client.ProfileId)
-                                        {
-                                            bLastPlayer = false;
-                                            break;
-                                        }
-                                    }
-                                    if (bLastPlayer)
-                                    {
-                                        gMan.DisplayDialogMessage("You are the last player in the game.");
-                                    }
-                                }
-                            }
                         }
                         break;
 
@@ -708,38 +749,6 @@ namespace BrainCloudUNETExample
                         }
                         break;
 
-                    // JSON
-                    case "MIGRATE_OWNER":
-                        {
-                            if (GameObject.Find("GameManager") == null)
-                            {
-                                GCore.Wrapper.Client.RelayService.DeregisterDataCallback();
-                                return;
-                            }
-                            // new owner
-                            if (jsonMessage.ContainsKey(BrainCloudConsts.JSON_PROFILE_ID))
-                            {
-                                string profileId = jsonMessage[BrainCloudConsts.JSON_PROFILE_ID] as string;
-                                LobbyInfo.OwnerProfileId = profileId;
-
-                                LobbyMemberInfo memberInfo = LobbyInfo.GetMemberWithProfileId(profileId);
-                                if (memberInfo != null)
-                                    GameObject.Find("GameManager").GetComponent<GameManager>().DisplayDialogMessage(memberInfo.Name + " is the new host");
-
-                                // forces a refresh of variables for server bots!
-                                // and show should control them afterwards
-                                foreach (LobbyMemberInfo member in LobbyInfo.Members)
-                                {
-                                    if (member.PlayerController != null)
-                                    {
-                                        member.PlayerController.ProfileId = member.ProfileId;
-                                        member.PlayerController.NetId = member.NetId;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-
                     // serialize properly
                     case BaseNetworkBehavior.ENTITY_START:
                         {
@@ -747,7 +756,8 @@ namespace BrainCloudUNETExample
                             GameManager gMan = gManObj != null ? gManObj.GetComponent<GameManager>() : null;
                             if (gManObj == null)
                             {
-                                GCore.Wrapper.Client.RelayService.DeregisterDataCallback();
+                                GCore.Wrapper.Client.RelayService.DeregisterRelayCallback();
+                                GCore.Wrapper.Client.RelayService.DeregisterSystemCallback();
                                 return;
                             }
 
@@ -856,7 +866,8 @@ namespace BrainCloudUNETExample
 
                             if (gManObj == null)
                             {
-                                GCore.Wrapper.Client.RelayService.DeregisterDataCallback();
+                                GCore.Wrapper.Client.RelayService.DeregisterRelayCallback();
+                                GCore.Wrapper.Client.RelayService.DeregisterSystemCallback();
                                 return;
                             }
 
