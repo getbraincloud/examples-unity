@@ -24,7 +24,6 @@ public class Interface : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //iapService.AddGetPurchaseUpdatesResponseListener(EventHandler);
         iapService.AddPurchaseResponseListener(PurchaseResponseEvent);
         Status = GameObject.Find("Status").GetComponent<Text>();
         BCLogs = GameObject.Find("BCLogs").GetComponent<Text>();
@@ -38,66 +37,11 @@ public class Interface : MonoBehaviour
         
     }
 
-    //private void EventHandler(GetPurchaseUpdatesResponse args)
-    //{
-    //    string requestId = args.RequestId;
-    //    string userId = args.AmazonUserData.UserId;
-    //    string marketplace = args.AmazonUserData.Marketplace;
-    //    List<PurchaseReceipt> receipts = args.Receipts;
-    //    string status = args.Status;
-    //    bool hasMore = args.HasMore;
-
-    //    // for each purchase receipt you can get the following values
-    //    string receiptId = receipts[0].ReceiptId;
-    //    long cancelDate = receipts[0].CancelDate;
-    //    long purchaseDate = receipts[0].PurchaseDate;
-    //    string sku = receipts[0].Sku;
-    //    string productType = receipts[0].ProductType;
-    //}
-
-    private void PurchaseResponseEvent(PurchaseResponse args)
-    {
-        string requestId = args.RequestId;
-        string userId = args.AmazonUserData.UserId;
-        string marketplace = args.AmazonUserData.Marketplace;
-        string receiptId = args.PurchaseReceipt.ReceiptId;
-        long cancelDate = args.PurchaseReceipt.CancelDate;
-        long purchaseDate = args.PurchaseReceipt.PurchaseDate;
-        string sku = args.PurchaseReceipt.Sku;
-        string productType = args.PurchaseReceipt.ProductType;
-        string status = args.Status;
-
-        amazonUserId = userId;
-        amazonReceiptId = receiptId;
-
-        Status.GetComponent<Text>().text = "RESPONSE!";
-        //BCLogs.GetComponent<Text>().text = requestId + "//" + userId + "//" + marketplace + "//" + receiptId + "//" + status;  
-        if (receiptId != null)
-            BCLogs.GetComponent<Text>().text = "receiptId = " + receiptId;
-        else
-            BCLogs.GetComponent<Text>().text = "receiptId NULL";
-
-        if (amazonReceiptId != null)
-            BCLogs.GetComponent<Text>().text += "\namazonReceiptId = " + amazonReceiptId;
-        else
-            BCLogs.GetComponent<Text>().text += "\namazonReceiptId NULL";
-
-        if (userId != null)
-            BCLogs.GetComponent<Text>().text += "\nuserId = " + userId;
-        else
-            BCLogs.GetComponent<Text>().text += "\nuserId NULL";
-
-        if (amazonUserId != null)
-            BCLogs.GetComponent<Text>().text += "\namazonUserId = " + amazonUserId;
-        else
-            BCLogs.GetComponent<Text>().text += "\namazonUserId NULL";
-    }
-
+    //BUTTONS
     public void OnAmazonPurchasePress()
     {
         purchaseRequest = new SkuInput();
         purchaseRequest.Sku = ItemToPurchaseField.GetComponent<InputField>().text;
-        //purchaseRequest.Sku = "test_bitheads_orb1";
         purchaseRequestOutput = iapService.Purchase(purchaseRequest);
     }
 
@@ -124,13 +68,48 @@ public class Interface : MonoBehaviour
             BCLogs.GetComponent<Text>().text += "\namazonUserId NULL";
 
         string data = "{\"receiptId\":\"" + amazonReceiptId + "\",\"userId\":\"" + amazonUserId + "\"}";
-        //string data = "{\"receiptData\":{\"receiptId\":\"" + amazonReceiptId + "\",\"userId\":\"" + amazonUserId + "\"}}";
         Status.GetComponent<Text>().text += "\ndata" + data;
         BCConfig._bc.AppStoreService.VerifyPurchase("amazon", data, OnSuccess_VerifyPurchase, OnError_VerifyPurchase);
     }
 
 
-    //callbacks
+    //CALLBACKS
+    private void PurchaseResponseEvent(PurchaseResponse args)
+    {
+        string requestId = args.RequestId;
+        string userId = args.AmazonUserData.UserId;
+        string marketplace = args.AmazonUserData.Marketplace;
+        string receiptId = args.PurchaseReceipt.ReceiptId;
+        long cancelDate = args.PurchaseReceipt.CancelDate;
+        long purchaseDate = args.PurchaseReceipt.PurchaseDate;
+        string sku = args.PurchaseReceipt.Sku;
+        string productType = args.PurchaseReceipt.ProductType;
+        string status = args.Status;
+
+        amazonUserId = userId;
+        amazonReceiptId = receiptId;
+
+        Status.GetComponent<Text>().text = "RESPONSE!";
+        if (receiptId != null)
+            BCLogs.GetComponent<Text>().text = "receiptId = " + receiptId;
+        else
+            BCLogs.GetComponent<Text>().text = "receiptId NULL";
+
+        if (amazonReceiptId != null)
+            BCLogs.GetComponent<Text>().text += "\namazonReceiptId = " + amazonReceiptId;
+        else
+            BCLogs.GetComponent<Text>().text += "\namazonReceiptId NULL";
+
+        if (userId != null)
+            BCLogs.GetComponent<Text>().text += "\nuserId = " + userId;
+        else
+            BCLogs.GetComponent<Text>().text += "\nuserId NULL";
+
+        if (amazonUserId != null)
+            BCLogs.GetComponent<Text>().text += "\namazonUserId = " + amazonUserId;
+        else
+            BCLogs.GetComponent<Text>().text += "\namazonUserId NULL";
+    }
 
     public void OnSuccess_BCAuthenticate(string responseData, object cbObject)
     {
