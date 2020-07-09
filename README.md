@@ -130,6 +130,10 @@ Inside this project folder you will also find a project folder for the same proj
 
 Example of authenticating with brainCloud using an Apple account. Inside there is a pdf tutorial describing the steps you will need to take in order to properly connect your Apple developer's app and braincloud app. This is for IOS only.
 
+## BCAmazonIAP
+
+Example app demonstrating Amazon In-App Purchases and verification with BrainCloud! Inside there is a pdf tutorial describing the steps you will need to take to get going!
+
 ### Additonal information
 
 This code example is based on the Firebase Unity Quickstart Project
