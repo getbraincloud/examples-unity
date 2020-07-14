@@ -317,7 +317,10 @@ namespace BrainCloud.Internal
             fromShortBE(lastPingShort, out data1, out data2);
 
             byte[] dataArr = { data1, data2 };
-            Send(dataArr, CL2RS_PING);
+            byte target = Convert.ToByte(CL2RS_PING);
+            
+            byte[] destination = appendHeaderData(dataArr, target, false, false, 0);
+            send(destination, false, false, 0);
         }
 
         private byte[] buildConnectionRequest()
@@ -981,7 +984,6 @@ namespace BrainCloud.Internal
                     // get the actual message and fill out the source:
                     byte[] data = udpClient.EndReceive(result, ref source);
                     onRecv(data, data.Length);
-
                     // schedule the next receive operation once reading is done:
                     udpClient.BeginReceive(new AsyncCallback(onUDPRecv), udpClient);
                 }
