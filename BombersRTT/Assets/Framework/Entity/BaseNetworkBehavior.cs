@@ -80,10 +80,10 @@ namespace Gameframework
             if (GCore.Wrapper.Client.RelayService.LastPing != 0.0f) json[LAST_PING] = ConvertToShort(GCore.Wrapper.Client.RelayService.LastPing * 0.0001f);
             UpdateWithTransformData(ref json, in_transform);
 
-            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, true, true);
+            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, true, true);
         }
 
-        static public void SendStringData(string in_data, short to_netId, bool in_reliable = true, bool in_ordered = true, int in_channel = 0)
+        static public void SendStringData(string in_data, ulong to_netId, bool in_reliable = true, bool in_ordered = true, int in_channel = 0)
         {
             byte[] data = Encoding.ASCII.GetBytes(in_data);
             GCore.Wrapper.Client.RelayService.Send(data, to_netId, in_reliable, in_ordered, in_channel);
@@ -102,7 +102,7 @@ namespace Gameframework
             if (GCore.Wrapper.Client.RelayService.LastPing != 0.0f) json[LAST_PING] = ConvertToShort(GCore.Wrapper.Client.RelayService.LastPing * 0.0001f);
             UpdateWithTransformData(ref json, in_transform);
 
-            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, true, true);
+            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, true, true);
         }
 
         public static void SendStart(string in_classtype, int in_netId, Transform in_transform)
@@ -114,7 +114,7 @@ namespace Gameframework
             if (GCore.Wrapper.Client.RelayService.LastPing != 0.0f) json[LAST_PING] = ConvertToShort(GCore.Wrapper.Client.RelayService.LastPing * 0.0001f);
             UpdateWithTransformData(ref json, in_transform);
 
-            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, true, true);
+            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, true, true);
         }
 
         // slowly moving to this 
@@ -133,7 +133,7 @@ namespace Gameframework
             json[NET_ID] = in_netId;
             json[DATA] = in_data;
 
-            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, true, true);
+            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, true, true);
         }
 
         public static void SendDestroy(string in_classtype, short in_netId, int in_data)
@@ -144,7 +144,7 @@ namespace Gameframework
             json[NET_ID] = in_netId;
             json[DATA] = in_data;
 
-            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, true, true);
+            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, true, true);
         }
 
         public static void SendDestroy(string in_classtype, string in_netId, string in_data)
@@ -155,7 +155,7 @@ namespace Gameframework
             json[NET_ID] = in_netId;
             json[DATA] = in_data;
 
-            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, true, true);
+            SendStringData(SerializeDict(json, '=', ';'), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, true, true);
         }
 
         public static void UpdateWithTransformData(ref Dictionary<string, object> ref_dict, Transform in_trans)
@@ -264,11 +264,11 @@ namespace Gameframework
         {
             if (MSG_ENCODED == 2)
             {
-                GCore.Wrapper.Client.RelayService.Send(SerializeDict(in_dict), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                GCore.Wrapper.Client.RelayService.Send(SerializeDict(in_dict), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
             }
             else
             {
-                SendStringData(SerializeDict(in_dict, in_joinChar, in_splitChar), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                SendStringData(SerializeDict(in_dict, in_joinChar, in_splitChar), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
             }
         }
 
