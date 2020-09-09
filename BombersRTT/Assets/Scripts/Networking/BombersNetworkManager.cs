@@ -712,7 +712,7 @@ namespace BrainCloudUNETExample
             }
         }
 
-        private void onRelayRecv(byte[] in_data)
+        private void onRelayRecv(short in_netId, byte[] in_data)
         {
             Dictionary<string, object> jsonMessage = readRSData(in_data);
 
@@ -1070,7 +1070,7 @@ namespace BrainCloudUNETExample
             json[BaseNetworkBehavior.OPERATION] = "joined";
             json[BrainCloudConsts.JSON_PROFILE_ID] = GCore.Wrapper.Client.ProfileId;
 
-            GCore.Wrapper.Client.RelayService.Send(Encoding.ASCII.GetBytes(JsonWriter.Serialize(json)), BrainCloud.Internal.RelayComms.TO_ALL_PLAYERS, true, true, 0);
+            GCore.Wrapper.Client.RelayService.Send(Encoding.ASCII.GetBytes(JsonWriter.Serialize(json)), BrainCloud.BrainCloudRelay.TO_ALL_PLAYERS, true, true, 0);
         }
 
         private void initGame()
