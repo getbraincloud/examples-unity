@@ -12,63 +12,541 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb4fd16f854e89249a23146eeaf1cd10, type: 3}
   m_Name: BrainCloudSettings
   m_EditorClassIdentifier: 
-  SettingsState: 0
-  TeamType: 0
-  WasSelectedTeam: 0
-  WasSelectedApp: 0
-  ClientVersion: 4.5.6
-  ServerUrl: https://sharedprod.braincloudservers.com
-  NewAppName: New App Name
-  AppIdSecrets: []
   AdminData:
-    TeamList: []
-    TeamNameList: []
-    _selectedTeamIndex: 0
-    AdminFullName: 
+    _selectedTeamIndex: 2
     AdminEmailAddress: 
-    TeamType: 0
-    StartingTeamName: 
-    Email: 
+    AdminFullName: 
     Credentials:
-      AdminId: 
-      Token: 
-  SelectedTemplate: 0
+      AdminId: 239
+      Token: 968fb1e0-a7a1-4d03-95c7-231275aa7a56
+    Email: pierrep@bitheads.com
+    StartingTeamName: 
+    TeamList:
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: null
+      TeamName: Select Team
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: b4d7663a-a27e-40af-89f3-c16e42df5b7b
+      TeamName: GLNV2
+    - _selectedAppIndex: 17
+      AppList:
+      - _appSecret: 51c6b4c4-c9c3-4054-8f16-b4461fa70d74
+        AdditionalAppsCount: 0
+        AppId: 12070
+        AppIdSecretPairs: []
+        AppName: New App Name
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12271
+        AppIdSecretPairs: []
+        AppName: Unreal Strategy Game
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12030
+        AppIdSecretPairs: []
+        AppName: Unreal Test - Unused
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11548
+        AppIdSecretPairs: []
+        AppName: S2S Tutorial cloudCode - Unused
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12719
+        AppIdSecretPairs: []
+        AppName: ParentTest
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11980
+        AppIdSecretPairs: []
+        AppName: Flash Game - Unused
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10494
+        AppIdSecretPairs: []
+        AppName: MarmaladeSimpleDemo - Legacy
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12078
+        AppIdSecretPairs: []
+        AppName: Import Test
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11740
+        AppIdSecretPairs: []
+        AppName: ProfileCasino - Unknown
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12037
+        AppIdSecretPairs: []
+        AppName: Warstone - [js]
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10254
+        AppIdSecretPairs: []
+        AppName: brainCloud Bombers UNET - Unity (Legacy DONT DELETE)
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10213
+        AppIdSecretPairs: []
+        AppName: Casino - Unknown
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11742
+        AppIdSecretPairs: []
+        AppName: RapaSlots - Unknown
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11741
+        AppIdSecretPairs: []
+        AppName: EggiesSlots - Unknown
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11425
+        AppIdSecretPairs: []
+        AppName: Java Quiz Game - Unused
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12081
+        AppIdSecretPairs: []
+        AppName: Test
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10228
+        AppIdSecretPairs: []
+        AppName: TicTacToe - Unity  (Legacy DONT DELETE)
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 7014fb94-41e6-49cd-9a77-e50233d40133
+        AdditionalAppsCount: 0
+        AppId: 10068
+        AppIdSecretPairs: []
+        AppName: Authentication - [csharp] (Legacy DONT DELETE)
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12246
+        AppIdSecretPairs: []
+        AppName: TestBombers
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10344
+        AppIdSecretPairs: []
+        AppName: TappyChicken - Unreal
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10223
+        AppIdSecretPairs: []
+        AppName: brainCloud Bombers Photon - Unity  (Legacy DONT DELETE)
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12049
+        AppIdSecretPairs: []
+        AppName: Basic - [swift]
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12126
+        AppIdSecretPairs: []
+        AppName: LootBox - Unused
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12720
+        AppIdSecretPairs: []
+        AppName: ParentTest2
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12092
+        AppIdSecretPairs: []
+        AppName: Basic - [cpp]
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11481
+        AppIdSecretPairs: []
+        AppName: Push Notifications - Unity (Legacy DONT DELETE)
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12052
+        AppIdSecretPairs: []
+        AppName: MatchGame - [java]
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12978
+        AppIdSecretPairs: []
+        AppName: Room Server Example
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12013
+        AppIdSecretPairs: []
+        AppName: BCChat - [js,cpp]
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12333
+        AppIdSecretPairs: []
+        AppName: Raspberr Pi
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12059
+        AppIdSecretPairs: []
+        AppName: Temp Examples - Unused
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12020
+        AppIdSecretPairs: []
+        AppName: Chat Test - Unused
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11295
+        AppIdSecretPairs: []
+        AppName: Error Handling - Unity  (Legacy DONT DELETE)
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12142
+        AppIdSecretPairs: []
+        AppName: WorkSpace for Screenshots
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10129
+        AppIdSecretPairs: []
+        AppName: Acey Deucey [js]
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 10008
+        AppIdSecretPairs: []
+        AppName: Space Shooter - Unity  (Legacy DONT DELETE)
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12944
+        AppIdSecretPairs: []
+        AppName: RelayTestApp
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 11739
+        AppIdSecretPairs: []
+        AppName: CasinoMaster  - Unknown
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 12068
+        AppIdSecretPairs: []
+        AppName: CloudCode Script Library - Internal Resource
+        AppVersion: 1.0
+        IsDisabled: 0
+      AppNameList:
+      - New App Name (12070)
+      - Unreal Strategy Game (12271)
+      - Unreal Test - Unused (12030)
+      - S2S Tutorial cloudCode - Unused (11548)
+      - ParentTest (12719)
+      - Flash Game - Unused (11980)
+      - MarmaladeSimpleDemo - Legacy (10494)
+      - Import Test (12078)
+      - ProfileCasino - Unknown (11740)
+      - Warstone - [js] (12037)
+      - brainCloud Bombers UNET - Unity (Legacy DONT DELETE) (10254)
+      - Casino - Unknown (10213)
+      - RapaSlots - Unknown (11742)
+      - EggiesSlots - Unknown (11741)
+      - Java Quiz Game - Unused (11425)
+      - Test (12081)
+      - TicTacToe - Unity  (Legacy DONT DELETE) (10228)
+      - Authentication - [csharp] (Legacy DONT DELETE) (10068)
+      - TestBombers (12246)
+      - TappyChicken - Unreal (10344)
+      - brainCloud Bombers Photon - Unity  (Legacy DONT DELETE) (10223)
+      - Basic - [swift] (12049)
+      - LootBox - Unused (12126)
+      - ParentTest2 (12720)
+      - Basic - [cpp] (12092)
+      - Push Notifications - Unity (Legacy DONT DELETE) (11481)
+      - MatchGame - [java] (12052)
+      - Room Server Example (12978)
+      - BCChat - [js,cpp] (12013)
+      - Raspberr Pi (12333)
+      - Temp Examples - Unused (12059)
+      - Chat Test - Unused (12020)
+      - Error Handling - Unity  (Legacy DONT DELETE) (11295)
+      - WorkSpace for Screenshots (12142)
+      - Acey Deucey [js] (10129)
+      - Space Shooter - Unity  (Legacy DONT DELETE) (10008)
+      - RelayTestApp (12944)
+      - CasinoMaster  - Unknown (11739)
+      - CloudCode Script Library - Internal Resource (12068)
+      RenderAppNameList:
+      - New App Name (12070)
+      - Unreal Strategy Game (12271)
+      - Unreal Test - Unused (12030)
+      - S2S Tutorial cloudCode - Unused (11548)
+      - ParentTest (12719)
+      - Flash Game - Unused (11980)
+      - MarmaladeSimpleDemo - Legacy (10494)
+      - Import Test (12078)
+      - ProfileCasino - Unknown (11740)
+      - Warstone - [js] (12037)
+      - brainCloud Bombers UNET - Unity (Legacy DONT DELETE) (10254)
+      - Casino - Unknown (10213)
+      - RapaSlots - Unknown (11742)
+      - EggiesSlots - Unknown (11741)
+      - Java Quiz Game - Unused (11425)
+      - Test (12081)
+      - TicTacToe - Unity  (Legacy DONT DELETE) (10228)
+      - Authentication - [csharp] (Legacy DONT DELETE) (10068)
+      - TestBombers (12246)
+      - TappyChicken - Unreal (10344)
+      - brainCloud Bombers Photon - Unity  (Legacy DONT DELETE) (10223)
+      - Basic - [swift] (12049)
+      - LootBox - Unused (12126)
+      - ParentTest2 (12720)
+      - Basic - [cpp] (12092)
+      - Push Notifications - Unity (Legacy DONT DELETE) (11481)
+      - MatchGame - [java] (12052)
+      - Room Server Example (12978)
+      - BCChat - [js,cpp] (12013)
+      - Raspberr Pi (12333)
+      - Temp Examples - Unused (12059)
+      - Chat Test - Unused (12020)
+      - Error Handling - Unity  (Legacy DONT DELETE) (11295)
+      - WorkSpace for Screenshots (12142)
+      - Acey Deucey [js] (10129)
+      - Space Shooter - Unity  (Legacy DONT DELETE) (10008)
+      - RelayTestApp (12944)
+      - CasinoMaster  - Unknown (11739)
+      - CloudCode Script Library - Internal Resource (12068)
+      - Create New App ...
+      RenderedAppNameList: []
+      TeamId: 4dc1a9f7-3baf-45a2-9036-b7d765efb616
+      TeamName: Tutorial Inc
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: e4a31ff2-8827-4c1d-b1ad-fca32464508c
+      TeamName: StatSims
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: a17478d4-8c92-4d6d-8f28-ff8b8fd15f76
+      TeamName: bitHeads - APPS
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: ef0bb810-e0a5-4eeb-9cb4-d55122b37940
+      TeamName: brainCloud - EXAMPLE TEMPLATES - Unity
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: 85b0cb0f-57c9-4cbb-ac28-9c81cbb4defa
+      TeamName: playBrains - STUDIO
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: ba468647-8283-43e1-81c7-9089a03dace0
+      TeamName: Talespin
+    TeamNameList:
+    - -- Select Team --
+    - GLNV2 (4404032)
+    - Tutorial Inc (250998)
+    - StatSims (2391846)
+    - bitHeads - APPS (250960)
+    - brainCloud - EXAMPLE TEMPLATES - Unity (4860182)
+    - playBrains - STUDIO (251030)
+    - Talespin (5650696)
+    TeamType: 0
+  AdvanceSelection: 0
+  AppIdSecrets: []
+  AppOptions:
+    GamificationEnabled: 1
+    SupportedPlatforms:
+    - DisplayName: Apple TV OS
+      IsEnabled: 0
+      PlatformName: APPLE_TV_OS
+    - DisplayName: BlackBerry
+      IsEnabled: 0
+      PlatformName: BB
+    - DisplayName: Facebook
+      IsEnabled: 0
+      PlatformName: FB
+    - DisplayName: Android
+      IsEnabled: 0
+      PlatformName: ANG
+    - DisplayName: IOS
+      IsEnabled: 0
+      PlatformName: IOS
+    - DisplayName: Linux
+      IsEnabled: 1
+      PlatformName: LINUX
+    - DisplayName: Mac
+      IsEnabled: 1
+      PlatformName: MAC
+    - DisplayName: PS3
+      IsEnabled: 0
+      PlatformName: PS3
+    - DisplayName: PS4
+      IsEnabled: 0
+      PlatformName: PS4
+    - DisplayName: PS Vita
+      IsEnabled: 0
+      PlatformName: PS_VITA
+    - DisplayName: Roku
+      IsEnabled: 0
+      PlatformName: ROKU
+    - DisplayName: Tizen
+      IsEnabled: 0
+      PlatformName: TIZEN
+    - DisplayName: Unknown
+      IsEnabled: 0
+      PlatformName: UNKNOWN
+    - DisplayName: Apple Watch
+      IsEnabled: 0
+      PlatformName: WATCH_OS
+    - DisplayName: Web
+      IsEnabled: 0
+      PlatformName: WEB
+    - DisplayName: Wii
+      IsEnabled: 0
+      PlatformName: WII
+    - DisplayName: Windows Phone
+      IsEnabled: 0
+      PlatformName: WINP
+    - DisplayName: Windows
+      IsEnabled: 1
+      PlatformName: WINDOWS
+    - DisplayName: Xbox 360
+      IsEnabled: 0
+      PlatformName: XBOX_360
+    - DisplayName: Xbox One
+      IsEnabled: 0
+      PlatformName: XBOX_ONE
+  ClientVersion: 4.5.6
   CreateWithTemplateEnabled: 0
+  NewAppName: New App Name
+  SelectedTemplate: 0
+  ServerUrl: https://sharedprod.braincloudservers.com
+  SettingsState: 6
+  TeamType: 0
   TemplateDataList:
-  - AppName: Bombers
+  - _appSecret: 
+    AdditionalAppsCount: 0
     AppId: 12185
-    _appSecret: 
-    AppVersion: 1.0
-    AdditionalAppsCount: 0
     AppIdSecretPairs: []
+    AppName: Bombers
+    AppVersion: 1.0
     IsDisabled: 0
-  - AppName: TicTacToe
+  - _appSecret: 
+    AdditionalAppsCount: 0
     AppId: 12187
-    _appSecret: 
-    AppVersion: 1.0
-    AdditionalAppsCount: 0
     AppIdSecretPairs: []
+    AppName: TicTacToe
+    AppVersion: 1.0
     IsDisabled: 0
-  - AppName: Space Shooter
+  - _appSecret: 
+    AdditionalAppsCount: 0
     AppId: 12186
-    _appSecret: 
-    AppVersion: 1.0
-    AdditionalAppsCount: 0
     AppIdSecretPairs: []
+    AppName: Space Shooter
+    AppVersion: 1.0
     IsDisabled: 0
-  - AppName: Bombers-RTT
+  - _appSecret: 
+    AdditionalAppsCount: 0
     AppId: 12493
-    _appSecret: 
-    AppVersion: 1.0
-    AdditionalAppsCount: 0
     AppIdSecretPairs: []
+    AppName: Bombers-RTT
+    AppVersion: 1.0
     IsDisabled: 0
-  - AppName: TestJ
-    AppId: 13229
-    _appSecret: 
-    AppVersion: 1.0
+  - _appSecret: 
     AdditionalAppsCount: 0
+    AppId: 13229
     AppIdSecretPairs: []
+    AppName: TestJ
+    AppVersion: 1.0
     IsDisabled: 0
   TemplateNameList:
   - Bombers
@@ -76,68 +554,6 @@ MonoBehaviour:
   - Space Shooter
   - Bombers-RTT
   - TestJ
-  AppOptions:
-    GamificationEnabled: 1
-    SupportedPlatforms:
-    - PlatformName: APPLE_TV_OS
-      DisplayName: Apple TV OS
-      IsEnabled: 0
-    - PlatformName: BB
-      DisplayName: BlackBerry
-      IsEnabled: 0
-    - PlatformName: FB
-      DisplayName: Facebook
-      IsEnabled: 0
-    - PlatformName: ANG
-      DisplayName: Android
-      IsEnabled: 0
-    - PlatformName: IOS
-      DisplayName: IOS
-      IsEnabled: 0
-    - PlatformName: LINUX
-      DisplayName: Linux
-      IsEnabled: 1
-    - PlatformName: MAC
-      DisplayName: Mac
-      IsEnabled: 1
-    - PlatformName: PS3
-      DisplayName: PS3
-      IsEnabled: 0
-    - PlatformName: PS4
-      DisplayName: PS4
-      IsEnabled: 0
-    - PlatformName: PS_VITA
-      DisplayName: PS Vita
-      IsEnabled: 0
-    - PlatformName: ROKU
-      DisplayName: Roku
-      IsEnabled: 0
-    - PlatformName: TIZEN
-      DisplayName: Tizen
-      IsEnabled: 0
-    - PlatformName: UNKNOWN
-      DisplayName: Unknown
-      IsEnabled: 0
-    - PlatformName: WATCH_OS
-      DisplayName: Apple Watch
-      IsEnabled: 0
-    - PlatformName: WEB
-      DisplayName: Web
-      IsEnabled: 0
-    - PlatformName: WII
-      DisplayName: Wii
-      IsEnabled: 0
-    - PlatformName: WINP
-      DisplayName: Windows Phone
-      IsEnabled: 0
-    - PlatformName: WINDOWS
-      DisplayName: Windows
-      IsEnabled: 1
-    - PlatformName: XBOX_360
-      DisplayName: Xbox 360
-      IsEnabled: 0
-    - PlatformName: XBOX_ONE
-      DisplayName: Xbox One
-      IsEnabled: 0
-  UseDefaultServerUrl: 0
-  AdvanceSelection: 0
+  UseDefaultServerUrl: 1
+  WasSelectedApp: 17
+  WasSelectedTeam: 2
