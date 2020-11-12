@@ -247,8 +247,10 @@ namespace BrainCloudUNETExample
             if (state != null) GStateManager.Instance.PopSubState(state.StateInfo);
         }
 
-        public void OnGlobalChatValueChanged(InputField in_field)
+        public void OnGlobalChatValueChanged(GameObject in_field_go)
         {
+            InputField in_field = in_field_go.GetComponent<InputField>();
+
             if (in_field.isFocused)
             {
                 in_field.placeholder.enabled = false;
@@ -256,8 +258,10 @@ namespace BrainCloudUNETExample
             TextInputMaxIndicator.fillAmount = in_field.text.Length / (float)in_field.characterLimit;
         }
 
-        public void OnGlobalChatEntered(InputField in_field)
+        public void OnGlobalChatEntered(GameObject in_field_go)
         {
+            InputField in_field = in_field_go.GetComponent<InputField>();
+
             in_field.text = in_field.text.Replace("\n", "").Trim();
             bool resetEntry = true;
             if (in_field.text.Length > 0)
@@ -267,7 +271,7 @@ namespace BrainCloudUNETExample
                 jsonData["timeSent"] = DateTime.UtcNow.ToLongTimeString();
                 jsonData[BrainCloudConsts.JSON_RANK] = GPlayerMgr.Instance.PlayerData.PlayerRank;
 
-                // TODO read this in correctly! 
+                // TODO read this in correctly!
                 GCore.Wrapper.ChatService.PostChatMessage(GCore.Wrapper.Client.AppId + ":gl:main", in_field.text,
                     JsonWriter.Serialize(jsonData));
 
@@ -287,9 +291,12 @@ namespace BrainCloudUNETExample
 
         private IEnumerator delayedSelect(InputField in_field)
         {
+            yield return YieldFactory.GetWaitForEndOfFrame();
             in_field.interactable = false;
+
             yield return YieldFactory.GetWaitForSeconds(0.15f);
             in_field.interactable = true;
+
             in_field.Select();
         }
 

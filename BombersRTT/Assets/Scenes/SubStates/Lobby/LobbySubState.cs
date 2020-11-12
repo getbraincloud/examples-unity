@@ -181,7 +181,7 @@ namespace BrainCloudUNETExample
             if (!m_panelLeft.enabled)
                 OnWaitingForPlayersWindow();
 
-            // Deselect dropdowns after a mouse click 
+            // Deselect dropdowns after a mouse click
             if (Input.GetMouseButtonUp(0))
             {
                 EventSystem.current.SetSelectedGameObject(null);
@@ -322,8 +322,10 @@ namespace BrainCloudUNETExample
             StartCoroutine(delayedDisplayGlobalChat(in_value));
         }
 
-        public void OnSendLobbyChatSignal(InputField in_field)
+        public void OnSendLobbyChatSignal(GameObject in_field_go)
         {
+            InputField in_field = in_field_go.GetComponent<InputField>();
+
             bool resetEntry = true;
             if (in_field.text != "")
             {
@@ -347,8 +349,10 @@ namespace BrainCloudUNETExample
             }
         }
 
-        public void OnChatValueChanged(InputField in_field)
+        public void OnChatValueChanged(GameObject in_field_go)
         {
+            InputField in_field = in_field_go.GetComponent<InputField>();
+
             if (in_field.isFocused)
             {
                 in_field.placeholder.enabled = false;
@@ -356,8 +360,10 @@ namespace BrainCloudUNETExample
             in_field.transform.parent.FindDeepChild("FillAmount").GetComponent<Image>().fillAmount = in_field.text.Length / (float)in_field.characterLimit;
         }
 
-        public void OnGlobalChatEntered(InputField in_field)
+        public void OnGlobalChatEntered(GameObject in_field_go)
         {
+            InputField in_field = in_field_go.GetComponent<InputField>();
+
             in_field.text = in_field.text.Replace("\n", "").Trim();
             bool resetEntry = true;
             if (in_field.text.Length > 0)
@@ -367,7 +373,7 @@ namespace BrainCloudUNETExample
                 jsonData["timeSent"] = DateTime.UtcNow.ToLongTimeString();
                 jsonData["rank"] = GPlayerMgr.Instance.PlayerData.PlayerRank;
 
-                // TODO read this in correctly! 
+                // TODO read this in correctly!
                 GCore.Wrapper.ChatService.PostChatMessage(GCore.Wrapper.Client.AppId + ":gl:main", in_field.text, JsonWriter.Serialize(jsonData));
 
 #if UNITY_WEBGL || UNITY_STANDALONE || UNITY_EDITOR
@@ -601,7 +607,9 @@ namespace BrainCloudUNETExample
 
         private IEnumerator delayedSelect(InputField in_field)
         {
+            yield return YieldFactory.GetWaitForEndOfFrame();
             in_field.interactable = false;
+
             yield return YieldFactory.GetWaitForSeconds(0.15f);
             in_field.interactable = true;
             in_field.Select();
