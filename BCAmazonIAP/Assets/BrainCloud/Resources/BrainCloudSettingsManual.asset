@@ -12,12 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56a97abc078c945fc95d75a6dd902d96, type: 3}
   m_Name: BrainCloudSettingsManual
   m_EditorClassIdentifier: 
-  m_serverURL: https://internal.braincloudservers.com
-  m_secretKey: 7edded82-5ead-4b81-9e1c-7df86ada0768
-  m_appId: 23825
-  m_appVersion: 1.0.0
-  m_appIdSecrets:
-  - appName: AmazonIAP
-    appId: 23825
-    appSecret: 7edded82-5ead-4b81-9e1c-7df86ada0768
+  m_serverURL: https://sharedprod.braincloudservers.com
+  m_secretKey: 
+  m_appId: 
+  m_appVersion: 1.0
+  m_appIdSecrets: []
   m_enableLogging: 0

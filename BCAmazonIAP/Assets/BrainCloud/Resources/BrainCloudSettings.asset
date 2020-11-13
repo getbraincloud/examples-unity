@@ -90,14 +90,54 @@ MonoBehaviour:
       IsEnabled: 0
       PlatformName: XBOX_ONE
   ClientVersion: 4.5.6
-  CreateWithTemplateEnabled: 1
+  CreateWithTemplateEnabled: 0
   NewAppName: New App Name
-  SelectedTemplate: 1
+  SelectedTemplate: 0
   ServerUrl: https://sharedprod.braincloudservers.com
-  SettingsState: 7
+  SettingsState: 5
   TeamType: 0
-  TemplateDataList: []
-  TemplateNameList: []
+  TemplateDataList:
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12185
+    AppIdSecretPairs: []
+    AppName: Bombers
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12187
+    AppIdSecretPairs: []
+    AppName: TicTacToe
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12186
+    AppIdSecretPairs: []
+    AppName: Space Shooter
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12493
+    AppIdSecretPairs: []
+    AppName: Bombers-RTT
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 13229
+    AppIdSecretPairs: []
+    AppName: TestJ
+    AppVersion: 1.0
+    IsDisabled: 0
+  TemplateNameList:
+  - Bombers
+  - TicTacToe
+  - Space Shooter
+  - Bombers-RTT
+  - TestJ
   UseDefaultServerUrl: 1
   WasSelectedApp: 0
   WasSelectedTeam: 0
