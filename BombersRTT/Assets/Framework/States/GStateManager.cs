@@ -44,6 +44,8 @@ namespace Gameframework
                 if (!m_bLoadingSubState)
                 {
                     // see if you can handle subbstates
+                    bool shouldPause = m_substatesRequestedToPush.Count > 0 ? m_substatesRequestedToPush[0].bNextShouldPauseState : false;
+                    bool shouldDisable = m_substatesRequestedToPush.Count > 0 ? m_substatesRequestedToPush[0].bNextShouldDisableUI : false;
                     string nextSubStateId = NextSubStateId;
                     StateInfo subStateToExit = GetSubStateToExit();
 
@@ -52,10 +54,10 @@ namespace Gameframework
                             (m_currentSubState != null &&                       // or the current state is not the one we want to go into
                             !ReferenceEquals(m_currentSubState.StateId, nextSubStateId))))
                     {
-                        if (m_bNextShouldPauseState)
+                        if (shouldPause)
                             PauseSubState();
 
-                        EnterNewSubState();
+                        EnterNewSubState(shouldDisable);
                     }
                     else if (subStateToExit != null)
                     {
@@ -193,7 +195,7 @@ namespace Gameframework
             {
                 if (m_sNextSubStateId == UNDEFINED_STATE && m_substatesRequestedToPush.Count > 0)
                 {
-                    m_sNextSubStateId = m_substatesRequestedToPush[0];
+                    m_sNextSubStateId = m_substatesRequestedToPush[0].sName;
                     m_substatesRequestedToPush.RemoveAt(0);
                     return m_sNextSubStateId;
                 }
@@ -245,7 +247,7 @@ namespace Gameframework
 
         // use to push sub states (ie scenes that will be added to main scenes)
         // ie, menus , hud scenes, dialogs
-        public bool PushSubState(string in_nextSubState, bool bShouldPauseState = false)
+        public bool PushSubState(string in_nextSubState, bool bShouldPauseState = false, bool bShouldDisablePreviousStateUI = true)
         {
             bool bToReturn = false;
 
@@ -255,9 +257,7 @@ namespace Gameframework
                 return bToReturn;
             }
 
-            m_substatesRequestedToPush.Add(in_nextSubState);
-            //m_sNextSubStateId = in_nextSubState;
-            m_bNextShouldPauseState = bShouldPauseState;
+            m_substatesRequestedToPush.Add(new PushSubstateData(in_nextSubState, bShouldPauseState, bShouldDisablePreviousStateUI));
             bToReturn = true;
 
             // if we should pause the main state
@@ -623,11 +623,10 @@ namespace Gameframework
             return bToReturn;
         }
 
-        private void EnterNewSubState()
+        private void EnterNewSubState(bool in_bShouldDisable)
         {
-            // Disable previous state UI.
-            // substates dont have the event system 
-            // SetCurrentStateEnabled( false );
+            if (in_bShouldDisable)
+                SetCurrentStateEnabled( false );
 
             // loads it asynchronously
             m_bLoadingSubState = true;
@@ -670,14 +669,25 @@ namespace Gameframework
 #endregion
 
 #region Properties
+        struct PushSubstateData
+        {
+            public PushSubstateData(string name, bool in_pause, bool in_disableUI)
+            {
+                sName = name;
+                bNextShouldPauseState = in_pause;
+                bNextShouldDisableUI = in_disableUI;
+            }
+            public string sName;
+            public bool bNextShouldPauseState;
+            public bool bNextShouldDisableUI;
+        }
         private List<StateInfo> m_gameSubStates = new List<StateInfo>();
         private List<StateInfo> m_gameSubStatesToPop = new List<StateInfo>();
-        private List<string> m_substatesRequestedToPush = new List<string>();   // read from the front
+        private List<PushSubstateData> m_substatesRequestedToPush = new List<PushSubstateData>();   // read from the front
 
         private StateInfo m_currentSubState = null;
         private StateInfo m_currentState = null;
 
-        private bool m_bNextShouldPauseState = false;
         private bool m_bLoading = false;
         private bool m_bLoadingSubState = false;
         private bool m_bClearSubStates = false;

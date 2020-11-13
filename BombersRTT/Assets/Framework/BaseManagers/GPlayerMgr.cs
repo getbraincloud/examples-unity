@@ -1074,7 +1074,7 @@ namespace Gameframework
             GStateManager.Instance.EnableLoadingSpinner(false);
         }
 
-        public void UpdateActivity(string in_location, string in_status, string in_lobbyId, bool in_forceUpdate = false)
+        public void UpdateActivity(string in_location, string in_status, string in_lobbyId, string in_lobbyType, bool in_forceUpdate = false)
         {
             if (in_forceUpdate || !m_currentLocation.Equals(in_location) || !m_currentStatus.Equals(in_status))
             {
@@ -1085,6 +1085,7 @@ namespace Gameframework
                 activity.Add(BrainCloudConsts.JSON_LOCATION, in_location);
                 activity.Add(BrainCloudConsts.JSON_STATUS, in_status);
                 activity.Add(BrainCloudConsts.JSON_LOBBY_ID, in_lobbyId);
+                activity.Add(BrainCloudConsts.JSON_LOBBY_TYPE, in_lobbyType);
 
                 GCore.Wrapper.Client.PresenceService.UpdateActivity(JsonWriter.Serialize(activity));
             }

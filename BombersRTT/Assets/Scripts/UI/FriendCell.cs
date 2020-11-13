@@ -62,13 +62,9 @@ namespace BrainCloudUNETExample
             {
                 if (m_data.Presence.Location != null && m_data.Presence.Location.Contains(GPlayerMgr.LOCATION_LOBBY))
                 {
-                    Dictionary<string, object> playerExtra = new Dictionary<string, object>();
-                    playerExtra.Add("cxId", GCore.Wrapper.Client.RTTConnectionID);
-                    playerExtra.Add(GBomberRTTConfigManager.JSON_GOLD_WINGS, GPlayerMgr.Instance.GetCurrencyBalance(GBomberRTTConfigManager.CURRENCY_GOLD_WINGS) > 0 ? true : false);
-                    GCore.Wrapper.LobbyService.JoinLobby(m_data.Presence.LobbyId, true, playerExtra, "");
+                    string[] list = { m_data.Presence.LobbyType };
+                    GCore.Wrapper.LobbyService.GetRegionsForLobbies(list, getRegionsJoinLobby, null, "");
 
-                    GStateManager.Instance.PushSubState(JoiningGameSubState.STATE_NAME);
-                    GCore.Wrapper.RTTService.RegisterRTTLobbyCallback(BombersNetworkManager.Instance.LobbyCallback);
                 }
                 else
                 {
@@ -79,6 +75,23 @@ namespace BrainCloudUNETExample
         #endregion
 
         #region private
+        private void getRegionsJoinLobby(string in_str, object obj)
+        {
+            GCore.Wrapper.LobbyService.PingRegions(onPingRegionJoinLobby, null, obj);
+        }
+
+        private void onPingRegionJoinLobby(string in_str, object obj)
+        {
+            Dictionary<string, object> playerExtra = new Dictionary<string, object>();
+            playerExtra.Add("cxId", GCore.Wrapper.Client.RTTConnectionID);
+            playerExtra.Add(GBomberRTTConfigManager.JSON_GOLD_WINGS, GPlayerMgr.Instance.GetCurrencyBalance(GBomberRTTConfigManager.CURRENCY_GOLD_WINGS) > 0 ? true : false);
+
+            GCore.Wrapper.LobbyService.JoinLobby(m_data.Presence.LobbyId, true, playerExtra, "");
+
+            GStateManager.Instance.PushSubState(JoiningGameSubState.STATE_NAME);
+            GCore.Wrapper.RTTService.RegisterRTTLobbyCallback(BombersNetworkManager.Instance.LobbyCallback);
+        }
+
         private void updateLobbyInviteDisplay()
         {
             Transform tempTrans = transform.FindDeepChild("InviteButton");

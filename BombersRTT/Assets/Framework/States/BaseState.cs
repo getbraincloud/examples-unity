@@ -2,6 +2,8 @@
 using UnityEngine.EventSystems;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace Gameframework
 {
@@ -12,6 +14,8 @@ namespace Gameframework
         public GStateManager.PauseDelegate OnUIToggleResume;
         public GStateManager.InitializeDelegate OnInitializeDelegate;
         #endregion
+
+        public Selectable FirstSelected = null;
 
         #region Properties
         public BaseStateController Controller { get; set; }
@@ -33,8 +37,16 @@ namespace Gameframework
             base.Start();
             // this supports stuff from the editor right away
             StartCoroutine(spinUntilManagersAreSetup());
+            m_lastSelectedGameObject = FirstSelected;
+            Invoke("ActivateUpdateKeyboardMouseControls", 0.1f);
         }
-
+        protected void OnEnable()
+        {
+            if (m_keyboardCheckRoutine == null && m_checkKeyboardRoutineOnEnable)
+            {
+                m_keyboardCheckRoutine = StartCoroutine(UpdateKeyboardMouseControls());
+            }
+        }
         protected virtual void OnEnter()
         {
             GStateManager stateMgr = GStateManager.Instance;
@@ -48,18 +60,40 @@ namespace Gameframework
         {
             base.OnDestroy();
             OnInitializeDelegate = null;
-            m_eventSystem = null;
             Destroy(this.gameObject);
+            ActivateUpdateKeyboardMouseControlsCoroutine(false);
         }
         #endregion
 
         #region Public Methods
-
         public void SetUIEnabled(bool in_isEnabled)
         {
+            /*
             if (m_eventSystem)
                 m_eventSystem.enabled = in_isEnabled;
+            */
+
+            if (in_isEnabled)
+            {
+                for (int i = 0; i < m_toEnable.Count; ++i)
+                {
+                    if (m_toEnable[i] != null)
+                        m_toEnable[i].enabled = true;
+                }
+                m_toEnable.Clear();
+            }
+            else
+            {
+                List<Selectable> selectables = transform.FindDeepChildren<Selectable>().FindAll(x => x.interactable && x.enabled);
+                for (int i = 0; i < selectables.Count; ++i)
+                {
+                    m_toEnable.Add(selectables[i]);
+                    selectables[i].enabled = false;
+                }
+            }
         }
+
+        private List<Selectable> m_toEnable = new List<Selectable>();
 
         public void OnPauseState()
         {
@@ -72,6 +106,7 @@ namespace Gameframework
             SetUIEnabled(false);
 
             OnPauseStateImpl();
+            ActivateUpdateKeyboardMouseControlsCoroutine(false);
         }
 
         public void OnResumeState(bool wasPause)
@@ -85,9 +120,22 @@ namespace Gameframework
                     OnUIToggleResume();
             }
 
+            if (FirstSelected != null)
+                FirstSelected.Select();
+
             SetUIEnabled(true);
 
             OnResumeStateImpl(wasPause);
+            ActivateUpdateKeyboardMouseControlsCoroutine(true);
+        }
+
+        public void UpdateLastSelected()
+        {
+            if (m_lastSelectedGameObject == null || EventSystem.current.currentSelectedGameObject != m_lastSelectedGameObject.gameObject)
+            {
+                if (EventSystem.current.currentSelectedGameObject != null)
+                    m_lastSelectedGameObject = EventSystem.current.currentSelectedGameObject.GetComponent<Selectable>();
+            }
         }
 
         protected virtual void OnPauseStateImpl() { }
@@ -114,7 +162,9 @@ namespace Gameframework
         private void continueOnEnter()
         {
             _bPaused = false;
-            m_eventSystem = transform.GetComponentInChildren<EventSystem>();
+
+            if (FirstSelected != null)
+                FirstSelected.Select();
 
             SwapViewAndSwapObjects();
 
@@ -129,8 +179,41 @@ namespace Gameframework
             OnEnter();
         }
 
-        private EventSystem m_eventSystem = null;
+        private IEnumerator UpdateKeyboardMouseControls()
+        {
+            while (true)
+            {
+                UpdateLastSelected();
+                if (Input.GetMouseButtonDown(0))
+                {
+                    if (m_lastSelectedGameObject != null)
+                        m_lastSelectedGameObject.Select();
+                    yield return YieldFactory.GetWaitForEndOfFrame();
+                }
+                yield return null;
+            }
+        }
+        private void ActivateUpdateKeyboardMouseControls()
+        {
+            ActivateUpdateKeyboardMouseControlsCoroutine(true);
+        }
+        private void ActivateUpdateKeyboardMouseControlsCoroutine(bool active)
+        {
+            if (m_keyboardCheckRoutine != null)
+                StopCoroutine(m_keyboardCheckRoutine);
+
+            if (active && gameObject.activeInHierarchy)
+            {
+                m_keyboardCheckRoutine = StartCoroutine(UpdateKeyboardMouseControls());
+            }
+            m_checkKeyboardRoutineOnEnable = active;
+        }
+
+        private Selectable m_lastSelectedGameObject;
+        private Coroutine m_keyboardCheckRoutine = null;
+        private bool m_checkKeyboardRoutineOnEnable = false;
         #endregion
+
     }
 
     #region State Info Helper Class

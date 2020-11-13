@@ -123,6 +123,10 @@ namespace Gameframework
                 {
                     in_presenceData.LobbyId = (string)activity[BrainCloudConsts.JSON_LOBBY_ID];
                 }
+                if (activity.ContainsKey(BrainCloudConsts.JSON_LOBBY_TYPE))
+                {
+                    in_presenceData.LobbyType = (string)activity[BrainCloudConsts.JSON_LOBBY_TYPE];
+                }
             }
         }
 
@@ -237,6 +241,7 @@ namespace Gameframework
         public string Location;
         public string Status;
         public string LobbyId;
+        public string LobbyType;
 
         public PresenceData()
         {
@@ -250,6 +255,7 @@ namespace Gameframework
             Location = "";
             Status = "";
             LobbyId = "";
+            LobbyType = "";
         }
     }
 
@@ -283,7 +289,7 @@ namespace Gameframework
             {
                 ExtraData = (Dictionary<string, object>)in_dict["extra"];
             }
-            catch(Exception)
+            catch (Exception)
             {
                 ExtraData = new Dictionary<string, object>();
             }
