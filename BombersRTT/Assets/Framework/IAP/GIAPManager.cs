@@ -527,8 +527,13 @@ namespace Gameframework
         {
             Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(in_json);
             Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage[BrainCloudConsts.JSON_DATA];
-            
-            m_delayedTransactionId = (string)jsonData[BrainCloudConsts.JSON_TRANSACTION_ID];
+
+            if (jsonData.ContainsKey(BrainCloudConsts.JSON_TRANSACTION_ID))
+                m_delayedTransactionId = (string)jsonData[BrainCloudConsts.JSON_TRANSACTION_ID];
+            else if (m_failureCallback != null)
+            {
+                m_failureCallback(202, (int)jsonData["resultCode"], "There was an error starting the purchase.  Please try again soon!", null);
+            }
         }
 
         private void handlePurchase(string storeProductId, SuccessCallback in_success = null, FailureCallback in_failure = null)

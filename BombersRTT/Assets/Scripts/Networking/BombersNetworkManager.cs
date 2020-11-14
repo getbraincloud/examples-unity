@@ -22,7 +22,7 @@ namespace BrainCloudUNETExample
 
         public IEnumerator InitializeGameInfo()
         {
-            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_GAME, GPlayerMgr.STATUS_PLAYING, "");
+            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_GAME, GPlayerMgr.STATUS_PLAYING, "", "");
 
             while (GameObject.Find("GameInfo") == null)
             {
@@ -35,7 +35,7 @@ namespace BrainCloudUNETExample
 
         IEnumerator InitializeGameInfo(Dictionary<string, object> aMatchOptions)
         {
-            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_GAME, GPlayerMgr.STATUS_PLAYING, "");
+            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_GAME, GPlayerMgr.STATUS_PLAYING, "", "");
 
             Dictionary<string, object> matchOptions = aMatchOptions;
             GameObject gameInfo = GameObject.Find("GameInfo");
@@ -59,10 +59,22 @@ namespace BrainCloudUNETExample
 
             CancelFindRequest();
 
+            string[] list = { m_lastSelectedRegionType };
+            GCore.Wrapper.LobbyService.GetRegionsForLobbies(list, getRegionsForLobbiesResponseCreateLobby, null, in_otherCxIds);
+        }
+
+        private void getRegionsForLobbiesResponseCreateLobby(string in_str, object obj)
+        {
+            GCore.Wrapper.LobbyService.PingRegions(onPingRegionsSuccessCreateLobby, null, obj);
+        }
+
+        private void onPingRegionsSuccessCreateLobby(string in_str, object obj)
+        {
+            string[] in_otherCxIds = (string[])obj;
             Dictionary<string, object> playerExtra = new Dictionary<string, object>();
             playerExtra.Add("cxId", GCore.Wrapper.Client.RTTConnectionID);
             playerExtra.Add(GBomberRTTConfigManager.JSON_GOLD_WINGS, GPlayerMgr.Instance.GetCurrencyBalance(GBomberRTTConfigManager.CURRENCY_GOLD_WINGS) > 0 ? true : false);
-            GCore.Wrapper.LobbyService.CreateLobby(m_lastSelectedRegionType, 76, false, playerExtra, "", s_matchOptions, in_otherCxIds);
+            GCore.Wrapper.LobbyService.CreateLobbyWithPingData(m_lastSelectedRegionType, 76, false, playerExtra, "", s_matchOptions, in_otherCxIds);
         }
 
         public void FindLobby(Dictionary<string, object> in_matchOptions, string[] in_otherCxIds = null)
@@ -72,17 +84,72 @@ namespace BrainCloudUNETExample
 
             CancelFindRequest();
 
+            string[] list = { m_lastSelectedRegionType };
+            GCore.Wrapper.LobbyService.GetRegionsForLobbies(list, getRegionsForLobbiesResponseFindOrCreate, null, in_otherCxIds);
+        }
+
+        private void getRegionsForLobbiesResponseFindOrCreate(string in_str, object obj)
+        {
+            GCore.Wrapper.LobbyService.PingRegions(onPingRegionsSuccessFindOrCreate, null, obj);
+        }
+
+        private void onPingRegionsSuccessFindOrCreate(string in_str, object obj)
+        {
+            string[] in_otherCxIds = (string[])obj;
             Dictionary<string, object> playerExtra = new Dictionary<string, object>();
             playerExtra.Add("cxId", GCore.Wrapper.Client.RTTConnectionID);
             playerExtra.Add(GBomberRTTConfigManager.JSON_GOLD_WINGS, GPlayerMgr.Instance.GetCurrencyBalance(GBomberRTTConfigManager.CURRENCY_GOLD_WINGS) > 0 ? true : false);
-            int[] arry = { 10, 20, 80 };
-
+            
             Dictionary<string, object> algo = new Dictionary<string, object>();
-            algo[OperationParam.LobbyStrategy.Value] = "ranged-percent";
-            algo[OperationParam.LobbyAlignment.Value] = "center";
-            algo[OperationParam.LobbyRanges.Value] = arry;
 
-            GCore.Wrapper.LobbyService.FindOrCreateLobby(m_lastSelectedRegionType, 76, 2, algo, s_matchOptions, 1, false, playerExtra, "", s_matchOptions, in_otherCxIds);
+            float[] arry = { 10.0f, 20.5f, 80.0f };
+            float[] arry2 = { 20.0f, 20.5f, 80.0f, 160.0f };
+            float[] arry3 = { 80.0f, 160.0f };
+
+            float[] arry4 = { 250, 400.0f };
+
+            algo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyCompound.Value;
+
+           // make algos
+           List<Dictionary<string, string>> algos = new List<Dictionary<string, string>>();
+           Dictionary<string, string> pingAlgo = new Dictionary<string, string>();
+           Dictionary<string, string> ratingAlgo = new Dictionary<string, string>();
+           pingAlgo[OperationParam.LobbyCritera.Value] = OperationParam.CriteraPing.Value;
+           pingAlgo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyAbsolute.Value;
+           pingAlgo[OperationParam.LobbyAlignment.Value] = OperationParam.StrategyAbsolute.Value;
+
+           ratingAlgo[OperationParam.LobbyCritera.Value] = OperationParam.CriteraRating.Value;
+           ratingAlgo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyRangedPercent.Value;
+           ratingAlgo[OperationParam.LobbyAlignment.Value] = OperationParam.AlignmentCenter.Value;
+
+           algos.Add(pingAlgo);
+           algos.Add(ratingAlgo);
+           algo[OperationParam.CompoundAlgos.Value] = algos.ToArray();
+
+           // create compound ranges
+           Dictionary<int, float[]> compoundRange = new Dictionary<int, float[]>();
+            compoundRange[2000] = arry4;
+            var compoundedRangeData = new List<object[]>();
+           foreach (var item in compoundRange)
+           {
+               object[] newData = { item.Key, item.Value };
+               compoundedRangeData.Add(newData);
+           }
+           algo[OperationParam.CompoundRanges.Value] = compoundedRangeData.ToArray();
+           
+            /*
+                   // ranged percent strategy
+                   algo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyRangedPercent.Value;
+                   algo[OperationParam.LobbyAlignment.Value] =  OperationParam.AlignmentCenter.Value;
+                   algo[OperationParam.LobbyRanges.Value] = arry;
+
+
+                    // ranged-absolute strategy
+                    algo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyRangedAbsolute.Value;
+                    algo[OperationParam.LobbyAlignment.Value] = OperationParam.AlignmentCenter.Value;
+                    algo[OperationParam.LobbyRanges.Value] = arry;
+                    */
+            GCore.Wrapper.LobbyService.FindOrCreateLobbyWithPingData(m_lastSelectedRegionType, 76, 2, algo, s_matchOptions, 1, false, playerExtra, "", s_matchOptions, in_otherCxIds);
         }
 
         private string m_lastSelectedRegionType = "4v4_can";
@@ -229,26 +296,29 @@ namespace BrainCloudUNETExample
                                 signalData.ContainsKey("gameName"))
                             {
                                 LobbySubState baseState = (LobbySubState)GStateManager.Instance.FindSubState(LobbySubState.STATE_NAME);
-                                if (signalData.ContainsKey("compression"))
+                                if (baseState != null)
                                 {
-                                    BaseNetworkBehavior.MSG_ENCODED = (int)signalData["compression"];
-                                    baseState.UpdateCompressionDropdown((int)BaseNetworkBehavior.MSG_ENCODED);
-                                }
-                                if (signalData.ContainsKey("maplayout"))
-                                {
-                                    baseState.UpdateMapLayoutDropdown((int)signalData["maplayout"]);
-                                }
-                                if (signalData.ContainsKey("mapsize"))
-                                {
-                                    baseState.UpdateMapSizeDropdown((int)signalData["mapsize"]);
-                                }
-                                if (signalData.ContainsKey("gametime"))
-                                {
-                                    baseState.UpdateGameTimeDropdown((int)signalData["gametime"]);
-                                }
-                                if (signalData.ContainsKey("gameName"))
-                                {
-                                    baseState.UpdateGameName((string)signalData["gameName"]);
+                                    if (signalData.ContainsKey("compression"))
+                                    {
+                                        BaseNetworkBehavior.MSG_ENCODED = (int)signalData["compression"];
+                                        baseState.UpdateCompressionDropdown((int)BaseNetworkBehavior.MSG_ENCODED);
+                                    }
+                                    if (signalData.ContainsKey("maplayout"))
+                                    {
+                                        baseState.UpdateMapLayoutDropdown((int)signalData["maplayout"]);
+                                    }
+                                    if (signalData.ContainsKey("mapsize"))
+                                    {
+                                        baseState.UpdateMapSizeDropdown((int)signalData["mapsize"]);
+                                    }
+                                    if (signalData.ContainsKey("gametime"))
+                                    {
+                                        baseState.UpdateGameTimeDropdown((int)signalData["gametime"]);
+                                    }
+                                    if (signalData.ContainsKey("gameName"))
+                                    {
+                                        baseState.UpdateGameName((string)signalData["gameName"]);
+                                    }
                                 }
                             }
                             else
@@ -313,6 +383,7 @@ namespace BrainCloudUNETExample
                 case "ROOM_ASSIGNED":
                     {
                         ReadRoomAssignedInfo(jsonData);
+                        GCore.Wrapper.GlobalAppService.ReadProperties(GConfigManager.Instance.OnReadBrainCloudProperties);
                     }
                     break;
                 case "ROOM_READY":
@@ -406,14 +477,18 @@ namespace BrainCloudUNETExample
         public void ReadLobbyInfo(Dictionary<string, object> lobbyData)
         {
             LobbyInfo.LobbyJsonDataRaw = lobbyData;
-            if (lobbyData.ContainsKey("lobbyType")) LobbyInfo.LobbyType = (string)lobbyData["lobbyType"];
             if (lobbyData.ContainsKey("state")) LobbyInfo.State = (string)lobbyData["state"];
             if (lobbyData.ContainsKey("owner")) LobbyInfo.OwnerProfileId = (string)lobbyData["owner"];
 
             if (lobbyData.ContainsKey("rating")) LobbyInfo.Rating = (int)lobbyData["rating"];
             if (lobbyData.ContainsKey("version")) LobbyInfo.Version = (int)lobbyData["version"];
 
-            if (lobbyData.ContainsKey("lobbyTypeDef")) LobbyInfo.LobbyDefinition = (Dictionary<string, object>)lobbyData["lobbyTypeDef"];
+            if (lobbyData.ContainsKey("lobbyTypeDef"))
+            {
+                LobbyInfo.LobbyDefinition = (Dictionary<string, object>)lobbyData["lobbyTypeDef"];
+                if (LobbyInfo.LobbyDefinition.ContainsKey("lobbyTypeId"))
+                    LobbyInfo.LobbyType = (string)LobbyInfo.LobbyDefinition["lobbyTypeId"];
+            }
             if (lobbyData.ContainsKey("settings")) LobbyInfo.Settings = (Dictionary<string, object>)lobbyData["settings"];
 
             // parse array members into list
@@ -806,10 +881,13 @@ namespace BrainCloudUNETExample
 
                                         ShipController controller = ship.GetComponent<ShipController>();
                                         string netId = jsonMessage[BaseNetworkBehavior.NET_ID] as string;
+
                                         int indexOfSpecialVals = netId.IndexOf("***");
+                                        int indexOfSpecialVals2 = netId.IndexOf("^^^");
                                         string carrierType = netId.Substring(0, indexOfSpecialVals);
-                                        int shipId = int.Parse(netId.Substring(indexOfSpecialVals + 3));
-                                        controller.SetShipType((ShipController.eShipType)Enum.Parse(typeof(ShipController.eShipType), carrierType, true), (shipId % 2) + 1, shipId);
+                                        int shipId = int.Parse(netId.Substring(indexOfSpecialVals + 3, 1));
+                                        int team = int.Parse(netId.Substring(indexOfSpecialVals2 + 3));
+                                        controller.SetShipType((ShipController.eShipType)Enum.Parse(typeof(ShipController.eShipType), carrierType, true), team, shipId);
                                     }
                                     else if (classType == BULLET)
                                     {
@@ -1257,7 +1335,7 @@ namespace BrainCloudUNETExample
             DisconnectGlobalChat();
 
             // force whatever is aroudn to be sent out
-            GCore.Wrapper.Update();
+            GCore.Wrapper.Client.Update();
 
             base.OnApplicationQuit();
         }

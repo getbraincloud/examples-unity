@@ -72,6 +72,9 @@ namespace BrainCloudUNETExample
         [SerializeField]
         private Image TextInputMaxIndicator = null;
 
+        [SerializeField]
+        private InputField ChatInputField = null;
+
         #region BaseState
         protected override void Start()
         {
@@ -89,6 +92,8 @@ namespace BrainCloudUNETExample
             m_joinFriendsPanel = GameObject.Find("JoinFriendsPanel");
             m_statText = GameObject.Find("StatText");
             m_statValue = GameObject.Find("StatValue");
+
+            ChatInputField.onEndEdit.AddListener(delegate { OnEndEditHelper(); });
 
             BombersNetworkManager.Instance.ConnectRTT();
 
@@ -134,7 +139,7 @@ namespace BrainCloudUNETExample
             BaseNetworkBehavior.MSG_ENCODED = GConfigManager.GetIntValue("MSGENCODING");
             BaseNetworkBehavior.SEND_INTERVAL = GConfigManager.GetFloatValue("SEND_INTERVAL");
             GCore.Wrapper.RTTService.RegisterRTTPresenceCallback(OnPresenceCallback);
-            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_MAIN_MENU, GPlayerMgr.STATUS_IDLE, "");
+            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_MAIN_MENU, GPlayerMgr.STATUS_IDLE, "", "");
             OnRefreshFriendsList();
         }
 
@@ -150,6 +155,7 @@ namespace BrainCloudUNETExample
                 GEventManager.StopListening(GEventManager.ON_PLAYER_DATA_UPDATED, OnUpdateStats);
                 (BombersNetworkManager.singleton as BombersNetworkManager).DisconnectGlobalChat();
             }
+            ChatInputField.onEndEdit.RemoveListener(delegate { OnEndEditHelper(); });
 
             base.OnDestroy();
         }
@@ -166,7 +172,7 @@ namespace BrainCloudUNETExample
         {
             GFriendsManager.Instance.GetPresenceOfFriends(OnGetPresenceOfFriendsSuccess);
             GCore.Wrapper.Client.PresenceService.SetVisibility(true);
-            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_MAIN_MENU, GPlayerMgr.STATUS_IDLE, "", true);
+            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_MAIN_MENU, GPlayerMgr.STATUS_IDLE, "", "", true);
         }
 
         #region Public
@@ -247,10 +253,14 @@ namespace BrainCloudUNETExample
             if (state != null) GStateManager.Instance.PopSubState(state.StateInfo);
         }
 
-        public void OnGlobalChatValueChanged(GameObject in_field_go)
+        private void OnEndEditHelper()
         {
-            InputField in_field = in_field_go.GetComponent<InputField>();
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                GlobalChatEntered();
+        }
 
+        public void OnGlobalChatValueChanged(InputField in_field)
+        {
             if (in_field.isFocused)
             {
                 in_field.placeholder.enabled = false;
@@ -258,45 +268,40 @@ namespace BrainCloudUNETExample
             TextInputMaxIndicator.fillAmount = in_field.text.Length / (float)in_field.characterLimit;
         }
 
-        public void OnGlobalChatEntered(GameObject in_field_go)
+        public void GlobalChatEntered()
         {
-            InputField in_field = in_field_go.GetComponent<InputField>();
-
-            in_field.text = in_field.text.Replace("\n", "").Trim();
+            ChatInputField.text = ChatInputField.text.Replace("\n", "").Trim();
             bool resetEntry = true;
-            if (in_field.text.Length > 0)
+            if (ChatInputField.text.Length > 0)
             {
                 Dictionary<string, object> jsonData = new Dictionary<string, object>();
                 jsonData[BrainCloudConsts.JSON_LAST_CONNECTION_ID] = GCore.Wrapper.Client.RTTConnectionID;
                 jsonData["timeSent"] = DateTime.UtcNow.ToLongTimeString();
                 jsonData[BrainCloudConsts.JSON_RANK] = GPlayerMgr.Instance.PlayerData.PlayerRank;
 
-                // TODO read this in correctly!
-                GCore.Wrapper.ChatService.PostChatMessage(GCore.Wrapper.Client.AppId + ":gl:main", in_field.text,
+                // TODO read this in correctly! 
+                GCore.Wrapper.ChatService.PostChatMessage(GCore.Wrapper.Client.AppId + ":gl:main", ChatInputField.text,
                     JsonWriter.Serialize(jsonData));
 
 #if UNITY_WEBGL || UNITY_STANDALONE || UNITY_EDITOR
-                in_field.text = "";
+                ChatInputField.text = "";
                 resetEntry = false;
-                StartCoroutine(delayedSelect(in_field));
+                StartCoroutine(delayedSelect(ChatInputField));
 #endif
             }
 
             if (resetEntry)
             {
-                in_field.text = "";
-                in_field.placeholder.enabled = true;
+                ChatInputField.text = "";
+                ChatInputField.placeholder.enabled = true;
             }
         }
 
         private IEnumerator delayedSelect(InputField in_field)
         {
-            yield return YieldFactory.GetWaitForEndOfFrame();
             in_field.interactable = false;
-
             yield return YieldFactory.GetWaitForSeconds(0.15f);
             in_field.interactable = true;
-
             in_field.Select();
         }
 
@@ -385,7 +390,7 @@ namespace BrainCloudUNETExample
                                       Vector3.zero, Quaternion.identity, contentTransform);
                 tempCell = tempObj.GetComponent<ChatCell>();
 
-                    tempCell.Init(fromData["name"] as string, contentData["text"] as string, profileId, fromData.ContainsKey("pic") ? fromData["pic"] as string : null,
+                tempCell.Init(fromData["name"] as string, contentData["text"] as string, profileId, fromData.ContainsKey("pic") ? fromData["pic"] as string : null,
                     lastConnectionId,
                     rank,
                     Convert.ToUInt64(jsonData["msgId"]),
@@ -535,7 +540,7 @@ namespace BrainCloudUNETExample
 
         public void QuickPlay()
         {
-            GStateManager.Instance.PushSubState(CreateGameSubState.STATE_NAME);
+            GStateManager.Instance.PushSubState(CreateGameSubState.STATE_NAME, false, false);
             GStateManager.Instance.OnInitializeDelegate += onQuickPlayInit;
         }
         #endregion

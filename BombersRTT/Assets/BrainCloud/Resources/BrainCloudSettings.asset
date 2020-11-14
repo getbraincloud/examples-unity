@@ -13,104 +13,16 @@ MonoBehaviour:
   m_Name: BrainCloudSettings
   m_EditorClassIdentifier: 
   AdminData:
-    _selectedTeamIndex: 2
+    _selectedTeamIndex: 0
     AdminEmailAddress: 
     AdminFullName: 
     Credentials:
-      AdminId: 3584
-      Token: 9472e244-5011-401f-8329-f0475465dd01
-    Email: michaelc@bitheads.com
+      AdminId: 
+      Token: 
+    Email: 
     StartingTeamName: 
-    TeamList:
-    - _selectedAppIndex: 0
-      AppList: []
-      AppNameList: []
-      RenderAppNameList: []
-      RenderedAppNameList: []
-      TeamId: null
-      TeamName: Select Team
-    - _selectedAppIndex: 0
-      AppList: []
-      AppNameList: []
-      RenderAppNameList: []
-      RenderedAppNameList: []
-      TeamId: 4dc1a9f7-3baf-45a2-9036-b7d765efb616
-      TeamName: Tutorial Inc
-    - _selectedAppIndex: 3
-      AppList:
-      - _appSecret: 7942e564-f6de-4d99-9565-6ee1c1ac51ba
-        AdditionalAppsCount: 0
-        AppId: 12185
-        AppIdSecretPairs: []
-        AppName: Bombers
-        AppVersion: 1.0
-        IsDisabled: 0
-      - _appSecret: 
-        AdditionalAppsCount: 0
-        AppId: 12187
-        AppIdSecretPairs: []
-        AppName: TicTacToe
-        AppVersion: 1.0
-        IsDisabled: 0
-      - _appSecret: 
-        AdditionalAppsCount: 0
-        AppId: 12186
-        AppIdSecretPairs: []
-        AppName: Space Shooter
-        AppVersion: 1.0
-        IsDisabled: 0
-      - _appSecret: e67d5ec3-c53b-4534-9b04-7009680c4e17
-        AdditionalAppsCount: 0
-        AppId: 12493
-        AppIdSecretPairs: []
-        AppName: Bombers-RTT
-        AppVersion: 1.0
-        IsDisabled: 0
-      - _appSecret: 
-        AdditionalAppsCount: 0
-        AppId: 13229
-        AppIdSecretPairs: []
-        AppName: TestJ
-        AppVersion: 1.0
-        IsDisabled: 0
-      - _appSecret: 
-        AdditionalAppsCount: 0
-        AppId: 12500
-        AppIdSecretPairs: []
-        AppName: Auth
-        AppVersion: 1.0
-        IsDisabled: 0
-      - _appSecret: 
-        AdditionalAppsCount: 0
-        AppId: 12501
-        AppIdSecretPairs: []
-        AppName: AuthErrHandle
-        AppVersion: 1.0
-        IsDisabled: 0
-      AppNameList:
-      - Bombers (12185)
-      - TicTacToe (12187)
-      - Space Shooter (12186)
-      - Bombers-RTT (12493)
-      - TestJ (13229)
-      - Auth (12500)
-      - AuthErrHandle (12501)
-      RenderAppNameList:
-      - Bombers (12185)
-      - TicTacToe (12187)
-      - Space Shooter (12186)
-      - Bombers-RTT (12493)
-      - TestJ (13229)
-      - Auth (12500)
-      - AuthErrHandle (12501)
-      - Create New App ...
-      RenderedAppNameList: []
-      TeamId: ef0bb810-e0a5-4eeb-9cb4-d55122b37940
-      TeamName: brainCloud - EXAMPLE TEMPLATES - Unity
-    TeamNameList:
-    - -- Select Team --
-    - Tutorial Inc (250998)
-    - brainCloud - EXAMPLE TEMPLATES - Unity (4860182)
+    TeamList: []
+    TeamNameList: []
     TeamType: 0
   AdvanceSelection: 0
   AppIdSecrets: []
@@ -182,7 +94,7 @@ MonoBehaviour:
   NewAppName: New App Name
   SelectedTemplate: 0
   ServerUrl: https://sharedprod.braincloudservers.com
-  SettingsState: 6
+  SettingsState: 0
   TeamType: 0
   TemplateDataList:
   - _appSecret: 
@@ -227,5 +139,5 @@ MonoBehaviour:
   - Bombers-RTT
   - TestJ
   UseDefaultServerUrl: 1
-  WasSelectedApp: 3
-  WasSelectedTeam: 2
+  WasSelectedApp: 0
+  WasSelectedTeam: 0

@@ -97,10 +97,10 @@ namespace BrainCloudUNETExample
             in_leaderboardCell.Clear();
         }
 
-        private LeaderboardCell CreateLeaderboardCell(Transform in_parent = null)
+        private LeaderboardCell CreateLeaderboardCell(Transform in_parent = null, bool isYou = false)
         {
             LeaderboardCell toReturn = null;
-            toReturn = (GEntityFactory.Instance.CreateResourceAtPath("Prefabs/UI/leaderboardCell", in_parent.transform)).GetComponent<LeaderboardCell>();
+            toReturn = (GEntityFactory.Instance.CreateResourceAtPath(isYou ? "Prefabs/UI/leaderboardCellYou" : "Prefabs/UI/leaderboardCell", in_parent.transform)).GetComponent<LeaderboardCell>();
             toReturn.transform.SetParent(in_parent);
             toReturn.transform.localScale = Vector3.one;
             return toReturn;
@@ -133,7 +133,7 @@ namespace BrainCloudUNETExample
                 List<PlayerData> activeListData = in_leaderboardItems;
                 for (int i = 0; i < activeListData.Count; ++i)
                 {
-                    LeaderboardCell newItem = CreateLeaderboardCell(in_scrollView);
+                    LeaderboardCell newItem = CreateLeaderboardCell(in_scrollView, GCore.Wrapper.Client.ProfileId == activeListData[i].ProfileId);
                     newItem.Init(activeListData[i]);
                     newItem.transform.localPosition = Vector3.zero;
                     in_leaderboardCell.Add(newItem);

@@ -28,6 +28,7 @@ namespace BrainCloudUNETExample.Connection
         public string m_previousGameName = "";
 
         public List<AchievementData> m_achievements;
+        public List<MilestoneData> m_milestones;
 
         public bool m_leaderboardReady = false;
 
@@ -44,6 +45,7 @@ namespace BrainCloudUNETExample.Connection
                 s_instance = this;
 
             m_achievements = new List<AchievementData>();
+            m_milestones = new List<MilestoneData>();
         }
 
         public void GetLeaderboard(string aLeaderboardID, SuccessCallback success = null, FailureCallback failure = null)
@@ -69,11 +71,13 @@ namespace BrainCloudUNETExample.Connection
         {
             public string Name { get; set; }
             public int Value { get; set; }
+            public string Key { get; set; }
 
-            public Stat(string aName, int aValue)
+            public Stat(string aName, int aValue, string aKey)
             {
                 Name = aName;
                 Value = aValue;
+                Key = aKey;
             }
         }
 
@@ -88,6 +92,44 @@ namespace BrainCloudUNETExample.Connection
             GCore.Wrapper.Client.PlayerStateService.ReadUserState(StateSuccess_Callback, StateFailure_Callback, null);
             GCore.Wrapper.Client.GamificationService.ReadXpLevelsMetaData(LevelsSuccess_Callback, LevelsFailure_Callback, null);
             GCore.Wrapper.Client.GamificationService.ReadAchievements(true, AchievementSuccess_Callback, AchievementFailure_Callback, null);
+            GCore.Wrapper.Client.GamificationService.ReadMilestones(true, ReadMilestonesSuccess_Callback, null);
+        }
+
+        public void ReadMilestonesSuccess_Callback(string responseData, object cbObject)
+        {
+            GDebug.Log(string.Format("Success | {0}", responseData));
+
+            Dictionary<string, object> response = (Dictionary<string, object>)BrainCloud.JsonFx.Json.JsonReader.Deserialize(responseData);
+            Dictionary<string, object> data = (Dictionary<string, object>)response[BrainCloudConsts.JSON_DATA];
+
+            if (data.ContainsKey(BrainCloudConsts.JSON_MILESTONES))
+            {
+                object[] milestones = ((object[])data[BrainCloudConsts.JSON_MILESTONES]);
+                if (milestones.Length > 0)
+                {
+                    m_milestones.Clear();
+                    MilestoneData milestoneData = null;
+                    for (int i = 0; i < milestones.Length; ++i)
+                    {
+                        Dictionary<string, object> milestone = (Dictionary<string, object>)milestones[i];
+                        Dictionary<string, object> thresholds = (Dictionary<string, object>)milestone[BrainCloudConsts.JSON_MILESTONES_THRESHOLDS];
+                        Dictionary<string, object> rewards = milestone.ContainsKey(BrainCloudConsts.JSON_MILESTONES_REWARDS) ? 
+                                                            (Dictionary<string, object>)milestone[BrainCloudConsts.JSON_MILESTONES_REWARDS] : null;
+
+                        milestoneData = new MilestoneData(milestone[BrainCloudConsts.JSON_MILESTONES_TITLE].ToString(),
+                                              milestone[BrainCloudConsts.JSON_MILESTONES_ID].ToString(),
+                                              milestone[BrainCloudConsts.JSON_MILESTONES_DESCRIPTION] == null ? "" : milestone[BrainCloudConsts.JSON_MILESTONES_DESCRIPTION].ToString(),
+                                              milestone[BrainCloudConsts.JSON_MILESTONES_STATUS].ToString(),
+                                              milestone[BrainCloudConsts.JSON_MILESTONES_CATEGORY].ToString(),
+                                              milestone[BrainCloudConsts.JSON_MILESTONES_GAMEID].ToString(),
+                                              milestone[BrainCloudConsts.JSON_MILESTONES_QUESTID] == null ? "" : milestone[BrainCloudConsts.JSON_MILESTONES_QUESTID].ToString(),
+                                              milestone[BrainCloudConsts.JSON_MILESTONES_EXTRA_DATA] == null ? "" : milestone[BrainCloudConsts.JSON_MILESTONES_EXTRA_DATA].ToString(),
+                                              thresholds,
+                                              rewards);
+                        m_milestones.Add(milestoneData);
+                    }
+                }
+            }
         }
 
         public void AchievementSuccess_Callback(string responseData, object cbObject)
@@ -353,16 +395,16 @@ namespace BrainCloudUNETExample.Connection
         {
             return new List<Stat>()
         {
-            {new Stat("Rank", m_playerLevel)},
-            {new Stat("Experience", m_playerExperience)},
-            {new Stat("Games Played", m_statGamesPlayed)},
-            {new Stat("Games Won", m_statGamesWon)},
-            {new Stat("Shots Fired", m_statShotsFired)},
-            {new Stat("Bombs Dropped", m_statBombsDropped)},
-            {new Stat("Bombs Hit", m_statBombsHit)},
-            {new Stat("Planes Destroyed", m_statPlanesDestroyed)},
-            {new Stat("Carriers Destroyed", m_statCarriersDestroyed)},
-            {new Stat("Times Destroyed", m_statTimesDestroyed)},
+            {new Stat("Rank", m_playerLevel, "experienceLevel")},
+            {new Stat("Experience", m_playerExperience, "experiencePoints")},
+            {new Stat("Games Played", m_statGamesPlayed, "gamesPlayed")},
+            {new Stat("Games Won", m_statGamesWon, "gamesWon")},
+            {new Stat("Shots Fired", m_statShotsFired, "shotsFired")},
+            {new Stat("Bombs Dropped", m_statBombsDropped, "bombsDropped")},
+            {new Stat("Bombs Hit", m_statBombsHit, "bombsHit")},
+            {new Stat("Planes Destroyed", m_statPlanesDestroyed, "planesDestroyed")},
+            {new Stat("Carriers Destroyed", m_statCarriersDestroyed, "carriersDestroyed")},
+            {new Stat("Times Destroyed", m_statTimesDestroyed, "timesDestroyed")},
         };
         }
     }

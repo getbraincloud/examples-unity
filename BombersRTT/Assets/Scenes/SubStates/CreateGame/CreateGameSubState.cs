@@ -16,6 +16,9 @@ namespace BrainCloudUNETExample
         public static Dictionary<string, object> gmatchOptions = new Dictionary<string, object>();
         public static string STATE_NAME = "createGame";
 
+        [SerializeField]
+        private Button EditNameNavButton = null;
+
         #region BaseState
         protected override void Start()
         {
@@ -97,12 +100,6 @@ namespace BrainCloudUNETExample
                 m_inputWasFocused = false;
             else if (Input.GetKeyDown(KeyCode.Return))
                 ConfirmCreateGame();
-
-            // Deselect dropdowns after a mouse click 
-            if (Input.GetMouseButtonUp(0))
-            {
-                EventSystem.current.SetSelectedGameObject(null);
-            }
         }
         #endregion
 
@@ -117,6 +114,16 @@ namespace BrainCloudUNETExample
         public void LateInit(bool in_bCreateGame = true)
         {
             m_state = in_bCreateGame ? eCreateGameState.NEW_ROOM : eCreateGameState.FIND_ROOM;
+            string str = m_state == eCreateGameState.NEW_ROOM ? "Create Game" : "Find Game";
+            transform.FindDeepChild("CreateButton").FindDeepChild("Text").GetComponent<Text>().text = str;
+            m_textMesh.text = str.ToUpper();
+        }
+
+        public void EditNameNav()
+        {
+            m_inputField.interactable = true;
+            m_inputField.Select();
+            EditNameNavButton.gameObject.SetActive(false);
         }
 
         public void ConfirmCreateGame()
@@ -163,6 +170,9 @@ namespace BrainCloudUNETExample
         public void FinishedEditing()
         {
             m_inputWasFocused = true;
+            EditNameNavButton.gameObject.SetActive(true);
+            EditNameNavButton.Select();
+            m_inputField.interactable = false;
         }
 
         public void OnMaxPlayers(float in_slider)

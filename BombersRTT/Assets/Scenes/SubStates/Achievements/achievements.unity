@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311926, g: 0.38073996, b: 0.35872698, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
@@ -186,7 +186,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000030517578}
+  m_AnchoredPosition: {x: 0, y: -0.000030517578}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &120293285
@@ -660,7 +660,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1204898921}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99999994
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1417,6 +1417,7 @@ MonoBehaviour:
   AutoSwapOnStart: 0
   CurrentResizeDepth: 0
   MaxDepthToResize: 2
+  FirstSelected: {fileID: 2060829499}
   AchievementsScrollView: {fileID: 120293284}
 --- !u!4 &2035091699
 Transform:
@@ -1474,6 +1475,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 114580834118664474, guid: 7178cb32314b7b64b9cd020dee4c2802,
+        type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224352223459412838, guid: 7178cb32314b7b64b9cd020dee4c2802,
         type: 3}
@@ -1595,6 +1601,36 @@ PrefabInstance:
       propertyPath: m_textInfo.wordCount
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6911553470531527784, guid: 7178cb32314b7b64b9cd020dee4c2802,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6911824942741489916, guid: 7178cb32314b7b64b9cd020dee4c2802,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6911824942741489916, guid: 7178cb32314b7b64b9cd020dee4c2802,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6911824942741489916, guid: 7178cb32314b7b64b9cd020dee4c2802,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6911824942741489916, guid: 7178cb32314b7b64b9cd020dee4c2802,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6911824942741489916, guid: 7178cb32314b7b64b9cd020dee4c2802,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6348074542231391943, guid: 7178cb32314b7b64b9cd020dee4c2802,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -1618,6 +1654,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 2060829497}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2060829499 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114580834118664474, guid: 7178cb32314b7b64b9cd020dee4c2802,
+    type: 3}
+  m_PrefabInstance: {fileID: 2060829497}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2140327981
 GameObject:
   m_ObjectHideFlags: 0

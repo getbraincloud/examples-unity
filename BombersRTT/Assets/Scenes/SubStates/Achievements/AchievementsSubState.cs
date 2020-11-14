@@ -20,12 +20,32 @@ namespace BrainCloudUNETExample
 
             m_achievementCell = new List<AchievementCell>();
             m_achievementsItems = BrainCloudStats.Instance.m_achievements;
+            m_milestonesItems = BrainCloudStats.Instance.m_milestones;
 
+            SetThresholds(m_milestonesItems);
             PopulateAchievementScrollView(m_achievementsItems, m_achievementCell, AchievementsScrollView);
         }
         #endregion
 
         #region Private
+        private void SetThresholds(List<MilestoneData> in_milestones)
+        {
+            Dictionary<string, object> statistics;
+            Dictionary<string, object> stats;
+            MilestoneData milestone;
+            for (int i = 0; i < in_milestones.Count; ++i)
+            {
+                milestone = in_milestones[i];
+
+                statistics = (Dictionary<string, object>)milestone.Thresholds[BrainCloudConsts.JSON_PLAYER_STATISTICS];
+                stats = (Dictionary<string, object>)statistics[BrainCloudConsts.JSON_STATISTICS];
+                if (milestone.Rewards != null)
+                {
+                    m_achievementsItems[int.Parse((string)milestone.Rewards[BrainCloudConsts.JSON_ACHIEVEMENT])].SetThresholds(stats);
+                }
+            }
+        }
+
         private void RemoveAllCellsInView(List<AchievementCell> in_leaderboardListItem)
         {
             AchievementCell item;
@@ -69,6 +89,7 @@ namespace BrainCloudUNETExample
 
         private List<AchievementCell> m_achievementCell = null;
         private List<AchievementData> m_achievementsItems = null;
+        private List<MilestoneData> m_milestonesItems = null;
         #endregion
     }
 }

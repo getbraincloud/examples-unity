@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311926, g: 0.38073996, b: 0.35872698, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
@@ -736,6 +736,10 @@ PrefabInstance:
       propertyPath: m_textInfo.pageCount
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1805913778846034, guid: 7178cb32314b7b64b9cd020dee4c2802, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 224457711473736088, guid: 7178cb32314b7b64b9cd020dee4c2802,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -745,10 +749,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.x
       value: 0.0000076293945
-      objectReference: {fileID: 0}
-    - target: {fileID: 1805913778846034, guid: 7178cb32314b7b64b9cd020dee4c2802, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6130345834205252893, guid: 7178cb32314b7b64b9cd020dee4c2802,
         type: 3}
@@ -793,6 +793,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 1321773916}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1321773918 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114580834118664474, guid: 7178cb32314b7b64b9cd020dee4c2802,
+    type: 3}
+  m_PrefabInstance: {fileID: 1321773916}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1411041779
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -806,7 +818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1452044200866202, guid: 3b57fd582c72f2a479264597aca31ef2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224537264005637318, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
@@ -916,32 +928,32 @@ PrefabInstance:
     - target: {fileID: 224743430515969002, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: -39.002174
       objectReference: {fileID: 0}
     - target: {fileID: 224402040932202834, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224402040932202834, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224402040932202834, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 55.498913
       objectReference: {fileID: 0}
     - target: {fileID: 224402040932202834, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -18
       objectReference: {fileID: 0}
     - target: {fileID: 224402040932202834, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 110.997826
       objectReference: {fileID: 0}
     - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
@@ -1429,6 +1441,7 @@ MonoBehaviour:
   AutoSwapOnStart: 0
   CurrentResizeDepth: 0
   MaxDepthToResize: 2
+  FirstSelected: {fileID: 1321773918}
 --- !u!4 &2035091699
 Transform:
   m_ObjectHideFlags: 0

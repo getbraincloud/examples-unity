@@ -27,6 +27,11 @@ namespace Gameframework
         {
             Achieved = in_isAchieved;
         }
+
+        public void SetThresholds(Dictionary<string, object> in_thresholds)
+        {
+            Thresholds = in_thresholds;
+        }
         #endregion
 
         #region Public Accessors
@@ -47,6 +52,10 @@ namespace Gameframework
             get; private set;
         }
         public bool Achieved
+        {
+            get; private set;
+        }
+        public Dictionary<string, object> Thresholds
         {
             get; private set;
         }

@@ -255,6 +255,10 @@ namespace Gameframework
                 {
                     Presence.LobbyId = (string)activity[BrainCloudConsts.JSON_LOBBY_ID];
                 }
+                if (activity.ContainsKey(BrainCloudConsts.JSON_LOBBY_TYPE))
+                {
+                    Presence.LobbyType = (string)activity[BrainCloudConsts.JSON_LOBBY_TYPE];
+                }
             }
         }
 
@@ -305,6 +309,10 @@ namespace Gameframework
                 if (activity.ContainsKey(BrainCloudConsts.JSON_LOBBY_ID))
                 {
                     Presence.LobbyId = (string)activity[BrainCloudConsts.JSON_LOBBY_ID];
+                }
+                if (activity.ContainsKey(BrainCloudConsts.JSON_LOBBY_TYPE))
+                {
+                    Presence.LobbyType = (string)activity[BrainCloudConsts.JSON_LOBBY_TYPE];
                 }
             }
         }

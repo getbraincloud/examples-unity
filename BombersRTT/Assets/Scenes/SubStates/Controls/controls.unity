@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311926, g: 0.38073996, b: 0.35872698, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
@@ -562,6 +562,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 88367232}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &88367234 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
+    type: 3}
+  m_PrefabInstance: {fileID: 88367232}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1392445389, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &263866370
 GameObject:
   m_ObjectHideFlags: 0
@@ -874,7 +886,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -2007,6 +2019,36 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 76011751}
     m_Modifications:
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_textInfo.characterCount
+      value: 19
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_textInfo.wordCount
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_text
+      value: CONTROLS & GAMEPLAY
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_textInfo.spaceCount
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 224491341396612766, guid: a0efb8e45d486e04b8d29b20dab4a63b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2096,36 +2138,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_havePropertiesChanged
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_isInputParsingRequired
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 19
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_text
-      value: CONTROLS & GAMEPLAY
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 114210958522727158, guid: a0efb8e45d486e04b8d29b20dab4a63b,
         type: 3}
@@ -2474,6 +2486,7 @@ MonoBehaviour:
   AutoSwapOnStart: 0
   CurrentResizeDepth: 0
   MaxDepthToResize: 2
+  FirstSelected: {fileID: 88367234}
 --- !u!4 &2035091699
 Transform:
   m_ObjectHideFlags: 0

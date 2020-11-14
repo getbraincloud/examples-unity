@@ -64,9 +64,9 @@ namespace Gameframework
                 m_wrapper.InitWithApps(BrainCloudSettingsManual.Instance.DispatcherURL, BrainCloudSettingsManual.Instance.GameId, gameIdSecretKeyMap, BrainCloudSettingsManual.Instance.GameVersion);
                 go.transform.SetParent(transform);
 
-                #if !DEBUG_LOG_ENABLED
+#if BC_DEBUG_LOG_ENABLED
                 m_wrapper.Client.EnableLogging(true);
-                #endif
+#endif
 
                 StartCoroutine(StartUpMgrs());
             }
