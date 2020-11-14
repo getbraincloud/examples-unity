@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System;
 using BrainCloud.LitJson;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ public class GameController : MonoBehaviour
 	{
 		// Ask brainCloud for statistics
 		App.Bc.PlayerStatisticsService.ReadAllUserStats(StatsSuccess_Callback, StatsFailure_Callback, null);
-		
+
 		brainCloudStatusText.text = "Reading statistics from brainCloud...";
 		brainCloudStatusText.gameObject.SetActive(true);
 	}
@@ -28,7 +29,7 @@ public class GameController : MonoBehaviour
 			{"shotsFired", m_shotsFiredThisRound},
 			{"gamesPlayed", 1}
 		};
-		
+
 		// Send to the cloud
 		App.Bc.PlayerStatisticsService.IncrementUserStats(
 			stats, StatsSuccess_Callback, StatsFailure_Callback, null);
@@ -55,7 +56,7 @@ public class GameController : MonoBehaviour
 			brainCloudStatusText.text = "Sync'd with brainCloud";
 		}
 	}
-	
+
 	private void StatsFailure_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
 	{
 		if (brainCloudStatusText)
@@ -80,16 +81,16 @@ public class GameController : MonoBehaviour
 	public float gameOverWait;
 
 	// Screen text objects
-	public GUIText scoreText;
-	public GUIText restartText;
-	public GUIText gameOverText;
-	public GUIText clickToStartText;
-	public GUIText brainCloudStatusText;
-	public GUIText enemiesKilledText;
-	public GUIText asteroidsDestroyedText;
-	public GUIText accuracyText;
-	public GUIText shotsFiredText;
-	public GUIText gamesPlayedText;
+	public Text scoreText;
+	public Text restartText;
+	public Text gameOverText;
+	public Text clickToStartText;
+	public Text brainCloudStatusText;
+	public Text enemiesKilledText;
+	public Text asteroidsDestroyedText;
+	public Text accuracyText;
+	public Text shotsFiredText;
+	public Text gamesPlayedText;
 
 	// States
 	private enum eGameState
@@ -124,7 +125,7 @@ public class GameController : MonoBehaviour
 	// other game vars
 	private int m_score = 0;
 	private int m_hazardSpawned = 0;
-	
+
 	// calculated on the fly
 	private double m_accuracy = 0;
 
@@ -246,7 +247,7 @@ public class GameController : MonoBehaviour
 		m_playState = ePlayState.PLAY_STATE_WAVE;
 		SpawnHazard();
 	}
-	
+
 	void SpawnPlayer()
 	{
 		GameObject.Instantiate (player, Vector3.zero, Quaternion.identity);
@@ -265,7 +266,7 @@ public class GameController : MonoBehaviour
 		m_score += newScoreValue;
 		UpdateScoreText();
 	}
-	
+
 	void UpdateScoreText()
 	{
 		scoreText.text = "Score: " + m_score;
@@ -299,7 +300,7 @@ public class GameController : MonoBehaviour
 		m_statAsteroidsDestroyed += m_asteroidsDestroyedThisRound;
 		m_statShotsFired += m_shotsFiredThisRound;
 		m_statGamesPlayed += 1;
-		
+
 		ShowStatistics();
 	}
 
@@ -320,5 +321,5 @@ public class GameController : MonoBehaviour
 
 		gamesPlayedText.text = "Games Played: " + m_statGamesPlayed;
 		gamesPlayedText.gameObject.SetActive(true);
-	}	
+	}
 }

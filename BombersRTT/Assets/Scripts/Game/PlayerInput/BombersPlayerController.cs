@@ -234,6 +234,20 @@ namespace BrainCloudUNETExample.Game
                 DeactivatePlane();
             }
 
+            if (IsLocalPlayer)
+            {
+                if (m_leftBounds)
+                {
+                    m_missionText.SetActive(true);
+                    m_missionText.GetComponent<Text>().text = "0:0" + Mathf.CeilToInt(m_leftBoundsTimer);
+                }
+                else
+                {
+                    m_missionText.GetComponent<Text>().text = "";
+                    m_missionText.SetActive(false);
+                }
+            }
+
             if ((m_playerPlane.IsServerBot && !IsServer) && (!IsLocalPlayer || !_hasAuthority))
             {
                 return;
@@ -248,20 +262,6 @@ namespace BrainCloudUNETExample.Game
                     {
                         SuicidePlayer();
                     }
-                }
-            }
-
-            if (!m_playerPlane.IsServerBot)
-            {
-                if (m_leftBounds)
-                {
-                    m_missionText.SetActive(true);
-                    m_missionText.GetComponent<Text>().text = "0:0" + Mathf.CeilToInt(m_leftBoundsTimer);
-                }
-                else
-                {
-                    m_missionText.GetComponent<Text>().text = "";
-                    m_missionText.SetActive(false);
                 }
             }
 

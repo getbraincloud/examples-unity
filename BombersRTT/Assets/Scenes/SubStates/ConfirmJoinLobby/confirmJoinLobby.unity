@@ -119,6 +119,36 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 570387372}
     m_Modifications:
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_textInfo.characterCount
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_textInfo.wordCount
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_text
+      value: JOIN LOBBY?
+      objectReference: {fileID: 0}
+    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
+        type: 3}
+      propertyPath: m_textInfo.spaceCount
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 224491341396612766, guid: a0efb8e45d486e04b8d29b20dab4a63b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -207,36 +237,6 @@ PrefabInstance:
     - target: {fileID: 224491341396612766, guid: a0efb8e45d486e04b8d29b20dab4a63b,
         type: 3}
       propertyPath: m_Pivot.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_havePropertiesChanged
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_isInputParsingRequired
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_text
-      value: JOIN LOBBY?
-      objectReference: {fileID: 0}
-    - target: {fileID: 114386869645337678, guid: a0efb8e45d486e04b8d29b20dab4a63b,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -722,7 +722,7 @@ PrefabInstance:
     - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_Navigation.m_Mode
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
@@ -734,6 +734,16 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2035091698}
+    - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
+        type: 3}
+      propertyPath: m_Navigation.m_SelectOnLeft
+      value: 
+      objectReference: {fileID: 895204502}
+    - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
+        type: 3}
+      propertyPath: m_Navigation.m_SelectOnRight
+      value: 
+      objectReference: {fileID: 895204502}
     - target: {fileID: 114590041371875112, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_Text
@@ -747,6 +757,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 838582194}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &838582196 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
+    type: 3}
+  m_PrefabInstance: {fileID: 838582194}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1392445389, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &895204500
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -896,7 +918,7 @@ PrefabInstance:
     - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_Navigation.m_Mode
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
@@ -908,6 +930,16 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: RefusedJoinGameWithOther
       objectReference: {fileID: 0}
+    - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
+        type: 3}
+      propertyPath: m_Navigation.m_SelectOnLeft
+      value: 
+      objectReference: {fileID: 838582196}
+    - target: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
+        type: 3}
+      propertyPath: m_Navigation.m_SelectOnRight
+      value: 
+      objectReference: {fileID: 838582196}
     - target: {fileID: 114590041371875112, guid: 3b57fd582c72f2a479264597aca31ef2,
         type: 3}
       propertyPath: m_Text
@@ -933,6 +965,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 895204500}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &895204502 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114050433388094656, guid: 3b57fd582c72f2a479264597aca31ef2,
+    type: 3}
+  m_PrefabInstance: {fileID: 895204500}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1392445389, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &935658957
 GameObject:
   m_ObjectHideFlags: 0
@@ -1539,6 +1583,7 @@ MonoBehaviour:
   AutoSwapOnStart: 0
   CurrentResizeDepth: 0
   MaxDepthToResize: 2
+  FirstSelected: {fileID: 838582196}
 --- !u!4 &2035091699
 Transform:
   m_ObjectHideFlags: 0

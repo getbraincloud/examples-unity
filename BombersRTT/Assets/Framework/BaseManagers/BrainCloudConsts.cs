@@ -75,6 +75,21 @@ namespace Gameframework
         public const string JSON_FROM_KEY = "from";
         public const string JSON_CONTENT_KEY = "content";
         public const string JSON_MESSAGES_KEY = "messages";
+        public const string JSON_ACHIEVEMENT = "achievement";
+        public const string JSON_MILESTONES = "milestones";
+        #endregion
+
+        #region Public Milestones Consts
+        public const string JSON_MILESTONES_TITLE = "title";
+        public const string JSON_MILESTONES_STATUS = "status";
+        public const string JSON_MILESTONES_QUESTID = "questId";
+        public const string JSON_MILESTONES_EXTRA_DATA = "extraData";
+        public const string JSON_MILESTONES_THRESHOLDS = "thresholds";
+        public const string JSON_MILESTONES_REWARDS = "rewards";
+        public const string JSON_MILESTONES_ID = "id";
+        public const string JSON_MILESTONES_CATEGORY = "category";
+        public const string JSON_MILESTONES_DESCRIPTION = "description";
+        public const string JSON_MILESTONES_GAMEID = "gameId";
         #endregion
 
         #region Public Player Consts
@@ -117,8 +132,10 @@ namespace Gameframework
         public const string JSON_LAST_CONNECTION_ID = "lastConnectionId";
         public const string JSON_PROFILE_NAME = "profileName";
         public const string JSON_UPGRADE_APP_ID = "upgradeAppId";
+        public const string JSON_PLAYER_STATISTICS = "playerStatistics";
 
         public const string JSON_LOBBY_ID = "LOBBY_ID";
+        public const string JSON_LOBBY_TYPE = "LOBBY_TYPE";
         #endregion
 
         #region Public Currency Consts

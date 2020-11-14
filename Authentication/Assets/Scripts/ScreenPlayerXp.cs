@@ -52,7 +52,7 @@ public class ScreenPlayerXp : BCScreen
         // now grab our currencies
         foreach (string curType in m_currencyTypes)
         {
-            _bc.ProductService.GetCurrency(curType, GetPlayerVC_Success, Failure_Callback);
+            _bc.VirtualCurrencyService.GetCurrency(curType, GetPlayerVC_Success, Failure_Callback);
             m_mainScene.AddLogNoLn("[GetPlayerVC (" + curType +")]... ");
         }
     }
@@ -165,7 +165,7 @@ public class ScreenPlayerXp : BCScreen
                 if (ulong.TryParse(c.award, out valueAsULong))
                 {
 #pragma warning disable 618
-                    _bc.ProductService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+                    _bc.VirtualCurrencyService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
 #pragma warning restore 618
                     m_mainScene.AddLogNoLn("[AwardPlayerVC " + c.currencyType +"]... ");
                 }
@@ -182,7 +182,7 @@ public class ScreenPlayerXp : BCScreen
                 if (ulong.TryParse(c.consume, out valueAsULong))
                 {
 #pragma warning disable 618
-                    _bc.ProductService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+                    _bc.VirtualCurrencyService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
 #pragma warning restore 618
                     m_mainScene.AddLogNoLn("[ConsumePlayerVC " + c.currencyType +"]... ");
                 }
@@ -194,7 +194,7 @@ public class ScreenPlayerXp : BCScreen
         if (GUILayout.Button("Reset All Currencies"))
         {
 #pragma warning disable 618
-            _bc.ProductService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
+            _bc.VirtualCurrencyService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
 #pragma warning restore 618
             m_mainScene.AddLogNoLn("[ResetPlayerVC]... ");
         }

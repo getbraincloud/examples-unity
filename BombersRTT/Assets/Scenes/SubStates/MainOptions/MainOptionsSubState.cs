@@ -23,6 +23,17 @@ namespace BrainCloudUNETExample
         public Toggle ShowToolsToggle = null;
         public InputField emailInputField = null;
 
+        [SerializeField]
+        private Button EditNameNavButton = null;
+        [SerializeField]
+        private Button DoneButton = null;
+        [SerializeField]
+        private Button LogOutButton = null;
+        [SerializeField]
+        private Button ConfirmButton = null;
+        [SerializeField]
+        private Button ViewButton = null;
+
         #region BaseState
         // Use this for initialization
         protected override void Start()
@@ -45,6 +56,7 @@ namespace BrainCloudUNETExample
 #endif
 
             GStateManager.Instance.EnableLoadingSpinner(false);
+            SetupCustomNavigation();
         }
 
         protected override void OnResumeStateImpl(bool wasPaused)
@@ -179,6 +191,20 @@ namespace BrainCloudUNETExample
             text.color = LIGHT_TEXT;
         }
 
+        public void FinishedEditing()
+        {
+            EditNameNavButton.gameObject.SetActive(true);
+            EditNameNavButton.Select();
+            emailInputField.interactable = false;
+        }
+
+        public void EditNameNav()
+        {
+            emailInputField.interactable = true;
+            emailInputField.Select();
+            EditNameNavButton.gameObject.SetActive(false);
+        }
+
         public void OnShowDeveloperTools()
         {
             EmailSection.SetActive(ShowToolsToggle.isOn);
@@ -186,15 +212,48 @@ namespace BrainCloudUNETExample
             data[BrainCloudConsts.JSON_IS_TESTER] = ShowToolsToggle.isOn;
             GCore.Wrapper.ScriptService.RunScript("SetIsTester", JsonWriter.Serialize(data));
             GPlayerMgr.Instance.PlayerData.IsTester = ShowToolsToggle.isOn;
+
+            SetupCustomNavigation();
         }
 
         public void OnConfirmEmailAddress()
         {
-            GCore.Wrapper.PlayerStateService.UpdateContactEmail(emailInputField.text);
+            GCore.Wrapper.PlayerStateService.UpdateContactEmail(emailInputField.text, onUpdateContactEmailSuccess);
         }
         #endregion
 
         #region Private
+        private void onUpdateContactEmailSuccess(string jsonResponse, object cbObject)
+        {
+            GPlayerMgr.Instance.PlayerData.PlayerEmail = emailInputField.text;
+        }
+
+        private void SetupCustomNavigation()
+        {
+            Navigation toggleNav = ShowToolsToggle.navigation;
+            Navigation logoutNav = LogOutButton.navigation;
+            Navigation doneNav = DoneButton.navigation;
+            if (ShowToolsToggle.isOn)
+            {
+                // Set Nav when Dev Tools are visible
+                toggleNav.selectOnDown = EditNameNavButton;
+                logoutNav.selectOnDown = ShowToolsToggle;
+                doneNav.selectOnUp = EditNameNavButton;
+                //doneNav.selectOnLeft = EditNameNavButton;
+            }
+            else
+            {
+                // Set Nav when Dev Tools are hidden
+                toggleNav.selectOnDown = DoneButton;
+                logoutNav.selectOnDown = ShowToolsToggle;
+                doneNav.selectOnUp = ShowToolsToggle;
+                //doneNav.selectOnLeft = ShowToolsToggle;
+            }
+            ShowToolsToggle.navigation = toggleNav;
+            LogOutButton.navigation = logoutNav;
+            DoneButton.navigation = doneNav;
+        }
+
         private void OnFacebookDisconnectPrompt()
         {
             HudHelper.DisplayMessageDialogTwoButton("FACEBOOK",

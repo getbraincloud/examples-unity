@@ -425,7 +425,7 @@ namespace BrainCloudUNETExample.Game
         {
             BombersNetworkManager.singleton.DestroyMatch();
             // force an update
-            GCore.Wrapper.Update();
+            GCore.Wrapper.Client.Update();
         }
 
         //[Command]
@@ -713,12 +713,13 @@ namespace BrainCloudUNETExample.Game
                 {
                     m_greenLogo.SetActive(true);
                     m_redLogo.SetActive(false);
-                    if (BombersNetworkManager.LocalPlayer.m_team == 1)
+                    
+                    if (BombersNetworkManager.LocalPlayer != null && BombersNetworkManager.LocalPlayer.m_team == 1)
                     {
                         m_allyWinText.SetActive(true);
                         m_enemyWinText.SetActive(false);
                     }
-                    else if (BombersNetworkManager.LocalPlayer.m_team == 2)
+                    else if (BombersNetworkManager.LocalPlayer != null && BombersNetworkManager.LocalPlayer.m_team == 2)
                     {
                         m_allyWinText.SetActive(false);
                         m_enemyWinText.SetActive(true);
@@ -729,12 +730,12 @@ namespace BrainCloudUNETExample.Game
                     m_greenLogo.SetActive(false);
                     m_redLogo.SetActive(true);
 
-                    if (BombersNetworkManager.LocalPlayer.m_team == 1)
+                    if (BombersNetworkManager.LocalPlayer != null && BombersNetworkManager.LocalPlayer.m_team == 1)
                     {
                         m_allyWinText.SetActive(false);
                         m_enemyWinText.SetActive(true);
                     }
-                    else if (BombersNetworkManager.LocalPlayer.m_team == 2)
+                    else if (BombersNetworkManager.LocalPlayer != null && BombersNetworkManager.LocalPlayer.m_team == 2)
                     {
                         m_allyWinText.SetActive(true);
                         m_enemyWinText.SetActive(false);
@@ -943,7 +944,7 @@ namespace BrainCloudUNETExample.Game
                                     break;
                             }
 
-                            SendStart(BombersNetworkManager.SHIP, shipController.GetShipType().ToString() + "***" + shipID.ToString(), ship.name.Replace("(Clone)", ""), ship.transform);
+                            SendStart(BombersNetworkManager.SHIP, shipController.GetShipType().ToString() + "***" + shipID.ToString() + "^^^" + ((shipID % 2) + 1).ToString(), ship.name.Replace("(Clone)", ""), ship.transform);
                             //yield return YieldFactory.GetWaitForEndOfFrame();
                             if (shipID % 2 == 1)
                             {
@@ -965,7 +966,7 @@ namespace BrainCloudUNETExample.Game
                             ShipController controller = ship.GetComponent<ShipController>();
 
                             controller.SetShipType(preset.m_ships[i].m_shipType, preset.m_ships[i].m_team, shipID, preset.m_ships[i].m_angle, position, preset.m_ships[i].m_respawnTime, preset.m_ships[i].m_path, preset.m_ships[i].m_pathSpeed);
-                            SendStart(BombersNetworkManager.SHIP, controller.GetShipType().ToString() + "***" + shipID.ToString(), ship.name.Replace("(Clone)", ""), ship.transform);
+                            SendStart(BombersNetworkManager.SHIP, controller.GetShipType().ToString() + "***" + shipID.ToString() + "^^^"+ preset.m_ships[i].m_team.ToString(), ship.name.Replace("(Clone)", ""), ship.transform);
                             // yield return YieldFactory.GetWaitForEndOfFrame();
                             shipID++;
                         }
@@ -1045,7 +1046,6 @@ namespace BrainCloudUNETExample.Game
 
         public void StartGameStart()
         {
-            GCore.Wrapper.GlobalAppService.ReadProperties(GConfigManager.Instance.OnReadBrainCloudProperties);
             StopCoroutine("SpawnGameStart");
             StartCoroutine("SpawnGameStart");
         }
@@ -1209,7 +1209,8 @@ namespace BrainCloudUNETExample.Game
                         m_once = false;
                         m_team1Score = m_gameInfo.GetTeamScore(1);
                         m_team2Score = m_gameInfo.GetTeamScore(2);
-                        BombersNetworkManager.LocalPlayer.EndGame();
+                        if (BombersNetworkManager.LocalPlayer != null)
+                            BombersNetworkManager.LocalPlayer.EndGame();
 
                         StartCoroutine("startingInCountDown");
                         //if (_isServer)
@@ -1315,7 +1316,8 @@ namespace BrainCloudUNETExample.Game
             m_enemyShipSunk.SetActive(false);
             m_redShipLogo.SetActive(false);
             m_greenShipLogo.SetActive(false);
-            BombersNetworkManager.LocalPlayer.DestroyPlayerPlane();
+            if (BombersNetworkManager.LocalPlayer != null)
+                BombersNetworkManager.LocalPlayer.DestroyPlayerPlane();
         }
 
         //[Command]

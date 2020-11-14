@@ -21,6 +21,11 @@ namespace BrainCloudUNETExample
         [SerializeField]
         private RectTransform TeamRedScrollView = null;
 
+        [SerializeField]
+        private InputField LocalChatInputField = null;
+        [SerializeField]
+        private InputField GlobalChatInputField = null;
+
         #region BaseState
         protected override void Start()
         {
@@ -61,10 +66,13 @@ namespace BrainCloudUNETExample
             m_lobbyChatNotification = tabLocal.transform.FindDeepChild("notificationBadge").gameObject;
             m_globalChatNotification = tabGlobal.transform.FindDeepChild("notificationBadge").gameObject;
 
+            LocalChatInputField.onEndEdit.AddListener(delegate { OnEndEditHelperLocal(); });
+            GlobalChatInputField.onEndEdit.AddListener(delegate { OnEndEditHelperGlobal(); });
+
             GEventManager.StartListening("NEW_GLOBAL_CHAT", onNewGlobalChat);
             GEventManager.StartListening("NEW_LOBBY_CHAT", onNewLobbyChat);
 
-            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_LOBBY, GPlayerMgr.STATUS_IDLE, BombersNetworkManager.LobbyInfo.LobbyId);
+            GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_LOBBY, GPlayerMgr.STATUS_IDLE, BombersNetworkManager.LobbyInfo.LobbyId, BombersNetworkManager.LobbyInfo.LobbyType);
             m_initialized = true;
 
             _stateInfo = new StateInfo(STATE_NAME, this);
@@ -74,6 +82,14 @@ namespace BrainCloudUNETExample
 
             // start with lobby chat
             DisplayGlobalChat(false);
+        }
+
+        protected override void OnDestroy()
+        {
+            LocalChatInputField.onEndEdit.RemoveListener(delegate { OnEndEditHelperLocal(); });
+            GlobalChatInputField.onEndEdit.RemoveListener(delegate { OnEndEditHelperGlobal(); });
+
+            base.OnDestroy();
         }
 
         private void SetupLobbyDisplaySettings()
@@ -255,8 +271,11 @@ namespace BrainCloudUNETExample
                 }
 
                 float halfMax = Mathf.Floor((int)BombersNetworkManager.LobbyInfo.Settings["maxPlayers"] / 2.0f);
-                GameObject.Find("GreenPlayers").GetComponent<Text>().text = greenPlayers.Count + "/" + halfMax;
-                GameObject.Find("RedPlayers").GetComponent<Text>().text = redPlayers.Count + "/" + halfMax;
+                GameObject green = GameObject.Find("GreenPlayers");
+                if (green != null) green.GetComponent<Text>().text = greenPlayers.Count + "/" + halfMax;
+
+                GameObject red = GameObject.Find("RedPlayers");
+                if (red != null) red.GetComponent<Text>().text = redPlayers.Count + "/" + halfMax;
 
                 if (GStateManager.Instance.CurrentSubStateId != JoiningGameSubState.STATE_NAME)
                 {
@@ -280,7 +299,6 @@ namespace BrainCloudUNETExample
                     UpdateAllSettings();
                 }
                 m_currentMemberCount = BombersNetworkManager.LobbyInfo.Members.Count;
-
             }
             else
             {
@@ -322,29 +340,35 @@ namespace BrainCloudUNETExample
             StartCoroutine(delayedDisplayGlobalChat(in_value));
         }
 
-        public void OnSendLobbyChatSignal(InputField in_field)
+        public void SendLobbyChatSignal()
         {
             bool resetEntry = true;
-            if (in_field.text != "")
+            if (LocalChatInputField.text != "")
             {
                 Dictionary<string, object> jsonData = new Dictionary<string, object>();
-                jsonData["message"] = in_field.text;
+                jsonData["message"] = LocalChatInputField.text;
                 jsonData["rank"] = GPlayerMgr.Instance.PlayerData.PlayerRank;
 
                 GCore.Wrapper.LobbyService.SendSignal(BombersNetworkManager.LobbyInfo.LobbyId, jsonData);
 #if UNITY_WEBGL || UNITY_STANDALONE || UNITY_EDITOR
-                in_field.text = "";
+                LocalChatInputField.text = "";
                 resetEntry = false;
                 if (GStateManager.Instance.CurrentSubStateId != GStateManager.UNDEFINED_STATE)
-                    StartCoroutine(delayedSelect(in_field));
+                    StartCoroutine(delayedSelect(LocalChatInputField));
 #endif
             }
 
             if (resetEntry)
             {
-                in_field.text = "";
-                in_field.placeholder.enabled = true;
+                LocalChatInputField.text = "";
+                LocalChatInputField.placeholder.enabled = true;
             }
+        }
+
+        private void OnEndEditHelperLocal()
+        {
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                SendLobbyChatSignal();
         }
 
         public void OnChatValueChanged(InputField in_field)
@@ -356,11 +380,11 @@ namespace BrainCloudUNETExample
             in_field.transform.parent.FindDeepChild("FillAmount").GetComponent<Image>().fillAmount = in_field.text.Length / (float)in_field.characterLimit;
         }
 
-        public void OnGlobalChatEntered(InputField in_field)
+        public void GlobalChatEntered()
         {
-            in_field.text = in_field.text.Replace("\n", "").Trim();
+            GlobalChatInputField.text = GlobalChatInputField.text.Replace("\n", "").Trim();
             bool resetEntry = true;
-            if (in_field.text.Length > 0)
+            if (GlobalChatInputField.text.Length > 0)
             {
                 Dictionary<string, object> jsonData = new Dictionary<string, object>();
                 jsonData["lastConnectionId"] = GCore.Wrapper.Client.RTTConnectionID;
@@ -368,20 +392,26 @@ namespace BrainCloudUNETExample
                 jsonData["rank"] = GPlayerMgr.Instance.PlayerData.PlayerRank;
 
                 // TODO read this in correctly! 
-                GCore.Wrapper.ChatService.PostChatMessage(GCore.Wrapper.Client.AppId + ":gl:main", in_field.text, JsonWriter.Serialize(jsonData));
+                GCore.Wrapper.ChatService.PostChatMessage(GCore.Wrapper.Client.AppId + ":gl:main", GlobalChatInputField.text, JsonWriter.Serialize(jsonData));
 
 #if UNITY_WEBGL || UNITY_STANDALONE || UNITY_EDITOR
-                in_field.text = "";
+                GlobalChatInputField.text = "";
                 resetEntry = false;
-                StartCoroutine(delayedSelect(in_field));
+                StartCoroutine(delayedSelect(GlobalChatInputField));
 #endif
             }
 
             if (resetEntry)
             {
-                in_field.text = "";
-                in_field.placeholder.enabled = true;
+                GlobalChatInputField.text = "";
+                GlobalChatInputField.placeholder.enabled = true;
             }
+        }
+
+        private void OnEndEditHelperGlobal()
+        {
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                GlobalChatEntered();
         }
 
         public void OnSelectProtocol(Dropdown aOption)
@@ -558,7 +588,7 @@ namespace BrainCloudUNETExample
                 GStateManager.Instance.FindSubState(JoiningGameSubState.STATE_NAME) == null &&
                 GStateManager.Instance.FindSubState(STATE_NAME) != null)
             {
-                GStateManager.Instance.PushSubState(JoiningGameSubState.STATE_NAME);
+                GStateManager.Instance.PushSubState(JoiningGameSubState.STATE_NAME, false, false);
             }
         }
 

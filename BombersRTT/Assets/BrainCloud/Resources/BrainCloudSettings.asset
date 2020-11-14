@@ -12,92 +12,132 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb4fd16f854e89249a23146eeaf1cd10, type: 3}
   m_Name: BrainCloudSettings
   m_EditorClassIdentifier: 
-  SettingsState: 0
-  TeamType: 0
-  WasSelectedTeam: 0
-  WasSelectedApp: 0
-  ClientVersion: Not Set
-  ServerUrl: https://sharedprod.braincloudservers.com
-  NewAppName: New App Name
-  AppIdSecrets: []
   AdminData:
-    TeamList: []
-    TeamNameList: []
     _selectedTeamIndex: 0
-    AdminFullName: 
     AdminEmailAddress: 
-    TeamType: 0
-    StartingTeamName: 
-    Email: 
+    AdminFullName: 
     Credentials:
       AdminId: 
       Token: 
-  SelectedTemplate: 1
-  CreateWithTemplateEnabled: 1
-  TemplateDataList: []
-  TemplateNameList: []
+    Email: 
+    StartingTeamName: 
+    TeamList: []
+    TeamNameList: []
+    TeamType: 0
+  AdvanceSelection: 0
+  AppIdSecrets: []
   AppOptions:
     GamificationEnabled: 1
     SupportedPlatforms:
-    - PlatformName: APPLE_TV_OS
-      DisplayName: Apple TV OS
+    - DisplayName: Apple TV OS
       IsEnabled: 0
-    - PlatformName: BB
-      DisplayName: BlackBerry
+      PlatformName: APPLE_TV_OS
+    - DisplayName: BlackBerry
       IsEnabled: 0
-    - PlatformName: FB
-      DisplayName: Facebook
+      PlatformName: BB
+    - DisplayName: Facebook
       IsEnabled: 0
-    - PlatformName: ANG
-      DisplayName: Android
+      PlatformName: FB
+    - DisplayName: Android
       IsEnabled: 0
-    - PlatformName: IOS
-      DisplayName: IOS
+      PlatformName: ANG
+    - DisplayName: IOS
       IsEnabled: 0
-    - PlatformName: LINUX
-      DisplayName: Linux
+      PlatformName: IOS
+    - DisplayName: Linux
       IsEnabled: 1
-    - PlatformName: MAC
-      DisplayName: Mac
+      PlatformName: LINUX
+    - DisplayName: Mac
       IsEnabled: 1
-    - PlatformName: PS3
-      DisplayName: PS3
+      PlatformName: MAC
+    - DisplayName: PS3
       IsEnabled: 0
-    - PlatformName: PS4
-      DisplayName: PS4
+      PlatformName: PS3
+    - DisplayName: PS4
       IsEnabled: 0
-    - PlatformName: PS_VITA
-      DisplayName: PS Vita
+      PlatformName: PS4
+    - DisplayName: PS Vita
       IsEnabled: 0
-    - PlatformName: ROKU
-      DisplayName: Roku
+      PlatformName: PS_VITA
+    - DisplayName: Roku
       IsEnabled: 0
-    - PlatformName: TIZEN
-      DisplayName: Tizen
+      PlatformName: ROKU
+    - DisplayName: Tizen
       IsEnabled: 0
-    - PlatformName: UNKNOWN
-      DisplayName: Unknown
+      PlatformName: TIZEN
+    - DisplayName: Unknown
       IsEnabled: 0
-    - PlatformName: WATCH_OS
-      DisplayName: Apple Watch
+      PlatformName: UNKNOWN
+    - DisplayName: Apple Watch
       IsEnabled: 0
-    - PlatformName: WEB
-      DisplayName: Web
+      PlatformName: WATCH_OS
+    - DisplayName: Web
       IsEnabled: 0
-    - PlatformName: WII
-      DisplayName: Wii
+      PlatformName: WEB
+    - DisplayName: Wii
       IsEnabled: 0
-    - PlatformName: WINP
-      DisplayName: Windows Phone
+      PlatformName: WII
+    - DisplayName: Windows Phone
       IsEnabled: 0
-    - PlatformName: WINDOWS
-      DisplayName: Windows
+      PlatformName: WINP
+    - DisplayName: Windows
       IsEnabled: 1
-    - PlatformName: XBOX_360
-      DisplayName: Xbox 360
+      PlatformName: WINDOWS
+    - DisplayName: Xbox 360
       IsEnabled: 0
-    - PlatformName: XBOX_ONE
-      DisplayName: Xbox One
+      PlatformName: XBOX_360
+    - DisplayName: Xbox One
       IsEnabled: 0
+      PlatformName: XBOX_ONE
+  ClientVersion: 4.5.6
+  CreateWithTemplateEnabled: 0
+  NewAppName: New App Name
+  SelectedTemplate: 0
+  ServerUrl: https://sharedprod.braincloudservers.com
+  SettingsState: 0
+  TeamType: 0
+  TemplateDataList:
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12185
+    AppIdSecretPairs: []
+    AppName: Bombers
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12187
+    AppIdSecretPairs: []
+    AppName: TicTacToe
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12186
+    AppIdSecretPairs: []
+    AppName: Space Shooter
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 12493
+    AppIdSecretPairs: []
+    AppName: Bombers-RTT
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 13229
+    AppIdSecretPairs: []
+    AppName: TestJ
+    AppVersion: 1.0
+    IsDisabled: 0
+  TemplateNameList:
+  - Bombers
+  - TicTacToe
+  - Space Shooter
+  - Bombers-RTT
+  - TestJ
   UseDefaultServerUrl: 1
-  AdvanceSelection: 0
+  WasSelectedApp: 0
+  WasSelectedTeam: 0

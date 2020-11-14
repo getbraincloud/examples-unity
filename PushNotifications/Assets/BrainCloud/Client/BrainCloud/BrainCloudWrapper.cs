@@ -136,11 +136,6 @@ public class BrainCloudWrapper
         get { return Client.GlobalAppService; }
     }
 
-    public BrainCloudProduct ProductService
-    {
-        get { return Client.ProductService; }
-    }
-
     public BrainCloudVirtualCurrency VirtualCurrencyService
     {
         get { return Client.VirtualCurrencyService; }
@@ -453,9 +448,6 @@ public class BrainCloudWrapper
     /// </summary>
     public void resetWrapper(bool resetWrapperName = false)
     {
-        ResetStoredAnonymousId();
-        ResetStoredAuthenticationType();
-        ResetStoredProfileId();
         _wrapperData = new WrapperData();
         Client.ResetCommunication(); // just to confirm this is being done on the client when the wrapper is reset. 
         Client.Wrapper = null;

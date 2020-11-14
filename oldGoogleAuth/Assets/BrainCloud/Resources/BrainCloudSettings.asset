@@ -1,0 +1,387 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb4fd16f854e89249a23146eeaf1cd10, type: 3}
+  m_Name: BrainCloudSettings
+  m_EditorClassIdentifier: 
+  AdminData:
+    _selectedTeamIndex: 7
+    AdminEmailAddress: 
+    AdminFullName: 
+    Credentials:
+      AdminId: 11
+      Token: 45ab387c-a2c3-431b-8f54-cbd6fb5fac15
+    Email: pierrep@bitheads.com
+    StartingTeamName: 
+    TeamList:
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: null
+      TeamName: Select Team
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: 5784b68c-ba9d-4eee-80d7-9b67f4ae5dfc
+      TeamName: playBrains - STUDIO
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: 1cb0ce24-5779-4f3b-bcf9-fba0b7ebd140
+      TeamName: bitHeads - APPS
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: 1f6d05ad-9530-4f70-b47d-a4a443464ed4
+      TeamName: brainCloud - PERMISSIONS
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: cdf9f44f-4b2f-44dd-b86f-8223553e827f
+      TeamName: brainCloud - SUPER
+    - _selectedAppIndex: 0
+      AppList:
+      - _appSecret: f1f82f39-a437-4374-8b62-a10cd4abc5d0
+        AdditionalAppsCount: 0
+        AppId: 22899
+        AppIdSecretPairs: []
+        AppName: Basic - Swift
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22910
+        AppIdSecretPairs: []
+        AppName: Bombers Clone
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22911
+        AppIdSecretPairs: []
+        AppName: TicTacToe
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 23109
+        AppIdSecretPairs: []
+        AppName: Raspberr Pi
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22914
+        AppIdSecretPairs: []
+        AppName: New App Name...
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22909
+        AppIdSecretPairs: []
+        AppName: Space Shooter Transfer
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22898
+        AppIdSecretPairs: []
+        AppName: MatchGame - Java
+        AppVersion: 1.0
+        IsDisabled: 0
+      AppNameList:
+      - Basic - Swift (22899)
+      - Bombers Clone (22910)
+      - TicTacToe (22911)
+      - Raspberr Pi (23109)
+      - New App Name... (22914)
+      - Space Shooter Transfer (22909)
+      - MatchGame - Java (22898)
+      RenderAppNameList:
+      - Basic - Swift (22899)
+      - Bombers Clone (22910)
+      - TicTacToe (22911)
+      - Raspberr Pi (23109)
+      - New App Name... (22914)
+      - Space Shooter Transfer (22909)
+      - MatchGame - Java (22898)
+      - Create New App ...
+      RenderedAppNameList: []
+      TeamId: 629e3323-9363-442d-aa2d-294d7ae3a57f
+      TeamName: Tutorial Inc
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: cb2a126f-c90d-4d83-8e7b-fdf851e5ec3e
+      TeamName: brainCloud - AppStore Tests
+    - _selectedAppIndex: 4
+      AppList:
+      - _appSecret: 2411bbb0-abfe-4051-a572-7bf76efabef6
+        AdditionalAppsCount: 0
+        AppId: 23702
+        AppIdSecretPairs: []
+        AppName: AppleAuth
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 23703
+        AppIdSecretPairs: []
+        AppName: iOSGoogleOpenId
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22901
+        AppIdSecretPairs: []
+        AppName: Space Shooter
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22912
+        AppIdSecretPairs: []
+        AppName: Clone
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: db148ef3-99cc-42c8-a827-6a40fe8e3b05
+        AdditionalAppsCount: 0
+        AppId: 23704
+        AppIdSecretPairs: []
+        AppName: oldGoogleAuth
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 23825
+        AppIdSecretPairs: []
+        AppName: AmazonIAP
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 23705
+        AppIdSecretPairs: []
+        AppName: OpenIdGoogle
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22915
+        AppIdSecretPairs: []
+        AppName: Bombers
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 23646
+        AppIdSecretPairs: []
+        AppName: oauth-unity
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 23292
+        AppIdSecretPairs: []
+        AppName: Bombers-RTT
+        AppVersion: 1.0
+        IsDisabled: 0
+      - _appSecret: 
+        AdditionalAppsCount: 0
+        AppId: 22907
+        AppIdSecretPairs: []
+        AppName: TicTacToe
+        AppVersion: 1.0
+        IsDisabled: 0
+      AppNameList:
+      - AppleAuth (23702)
+      - iOSGoogleOpenId (23703)
+      - Space Shooter (22901)
+      - Clone (22912)
+      - oldGoogleAuth (23704)
+      - AmazonIAP (23825)
+      - OpenIdGoogle (23705)
+      - Bombers (22915)
+      - oauth-unity (23646)
+      - Bombers-RTT (23292)
+      - TicTacToe (22907)
+      RenderAppNameList:
+      - AppleAuth (23702)
+      - iOSGoogleOpenId (23703)
+      - Space Shooter (22901)
+      - Clone (22912)
+      - oldGoogleAuth (23704)
+      - AmazonIAP (23825)
+      - OpenIdGoogle (23705)
+      - Bombers (22915)
+      - oauth-unity (23646)
+      - Bombers-RTT (23292)
+      - TicTacToe (22907)
+      - Create New App ...
+      RenderedAppNameList: []
+      TeamId: f1074e5c-91e3-40b0-8c34-0dee77af2b24
+      TeamName: brainCloud - EXAMPLE TEMPLATES - Unity
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: 1bf97dbd-1cf6-49dd-8560-c995c31f826b
+      TeamName: GLNV2 - Internal
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: c0ce2a14-7c65-4033-a624-4bbf484700dd
+      TeamName: Team QA Regressions With Billing
+    - _selectedAppIndex: 0
+      AppList: []
+      AppNameList: []
+      RenderAppNameList: []
+      RenderedAppNameList: []
+      TeamId: fc072b84-4aca-4c95-ac46-9f4626f385f1
+      TeamName: brainCloud - SCRATCH
+    TeamNameList:
+    - -- Select Team --
+    - playBrains - STUDIO (1662006)
+    - bitHeads - APPS (1662239)
+    - brainCloud - PERMISSIONS (1662023)
+    - brainCloud - SUPER (1662002)
+    - Tutorial Inc (4834055)
+    - brainCloud - AppStore Tests (4672588)
+    - brainCloud - EXAMPLE TEMPLATES - Unity (4836825)
+    - GLNV2 - Internal (4430306)
+    - Team QA Regressions With Billing (3553326)
+    - brainCloud - SCRATCH (1662005)
+    TeamType: 0
+  AdvanceSelection: 0
+  AppIdSecrets: []
+  AppOptions:
+    GamificationEnabled: 1
+    SupportedPlatforms:
+    - DisplayName: Apple TV OS
+      IsEnabled: 0
+      PlatformName: APPLE_TV_OS
+    - DisplayName: BlackBerry
+      IsEnabled: 0
+      PlatformName: BB
+    - DisplayName: Facebook
+      IsEnabled: 0
+      PlatformName: FB
+    - DisplayName: Android
+      IsEnabled: 0
+      PlatformName: ANG
+    - DisplayName: IOS
+      IsEnabled: 0
+      PlatformName: IOS
+    - DisplayName: Linux
+      IsEnabled: 1
+      PlatformName: LINUX
+    - DisplayName: Mac
+      IsEnabled: 1
+      PlatformName: MAC
+    - DisplayName: PS3
+      IsEnabled: 0
+      PlatformName: PS3
+    - DisplayName: PS4
+      IsEnabled: 0
+      PlatformName: PS4
+    - DisplayName: PS Vita
+      IsEnabled: 0
+      PlatformName: PS_VITA
+    - DisplayName: Roku
+      IsEnabled: 0
+      PlatformName: ROKU
+    - DisplayName: Tizen
+      IsEnabled: 0
+      PlatformName: TIZEN
+    - DisplayName: Unknown
+      IsEnabled: 0
+      PlatformName: UNKNOWN
+    - DisplayName: Apple Watch
+      IsEnabled: 0
+      PlatformName: WATCH_OS
+    - DisplayName: Web
+      IsEnabled: 0
+      PlatformName: WEB
+    - DisplayName: Wii
+      IsEnabled: 0
+      PlatformName: WII
+    - DisplayName: Windows Phone
+      IsEnabled: 0
+      PlatformName: WINP
+    - DisplayName: Windows
+      IsEnabled: 1
+      PlatformName: WINDOWS
+    - DisplayName: Xbox 360
+      IsEnabled: 0
+      PlatformName: XBOX_360
+    - DisplayName: Xbox One
+      IsEnabled: 0
+      PlatformName: XBOX_ONE
+  ClientVersion: 4.5.6
+  CreateWithTemplateEnabled: 0
+  NewAppName: New App Name
+  SelectedTemplate: 0
+  ServerUrl: https://internal.braincloudservers.com
+  SettingsState: 6
+  TeamType: 0
+  TemplateDataList:
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 22901
+    AppIdSecretPairs: []
+    AppName: Space Shooter
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 22915
+    AppIdSecretPairs: []
+    AppName: Bombers
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 23292
+    AppIdSecretPairs: []
+    AppName: Bombers-RTT
+    AppVersion: 1.0
+    IsDisabled: 0
+  - _appSecret: 
+    AdditionalAppsCount: 0
+    AppId: 22907
+    AppIdSecretPairs: []
+    AppName: TicTacToe
+    AppVersion: 1.0
+    IsDisabled: 0
+  TemplateNameList:
+  - Space Shooter
+  - Bombers
+  - Bombers-RTT
+  - TicTacToe
+  UseDefaultServerUrl: 0
+  WasSelectedApp: 4
+  WasSelectedTeam: 7

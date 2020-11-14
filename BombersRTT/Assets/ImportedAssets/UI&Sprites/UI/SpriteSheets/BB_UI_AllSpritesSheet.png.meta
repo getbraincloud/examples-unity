@@ -1,145 +1,441 @@
 fileFormatVersion: 2
 guid: 6faaf7b8a5ae1da4fa07b6dc4ed00b55
 TextureImporter:
-  fileIDToRecycleName:
-    21300000: BB_UI_4ptFullRoundRect
-    21300002: BB_UI_4ptHalfRoundRect
-    21300004: BB_UI_6ptCircle
-    21300006: BB_UI_8ptFullRoundRect
-    21300008: BB_UI_8ptFullRoundRectOutline
-    21300010: BB_UI_8ptHalfRoundRect
-    21300012: BB_UI_8ptQuarterRoundRect
-    21300014: BB_UI_ButtonBlue
-    21300016: BB_UI_ButtonBlueHighlighted
-    21300018: BB_UI_ButtonBrown
-    21300020: BB_UI_ButtonBrownHighlighted
-    21300022: BB_UI_ButtonBrownHighlightedMore
-    21300024: BB_UI_ButtonBrownRight
-    21300026: BB_UI_ButtonBrownRightHighlighted
-    21300028: BB_UI_ButtonDropdownBrown
-    21300030: BB_UI_ButtonGreen
-    21300032: BB_UI_ButtonGreenHighlighted
-    21300034: BB_UI_ButtonGrey
-    21300036: BB_UI_ButtonNotificationBadge
-    21300038: BB_UI_ButtonPanelShadow
-    21300040: BB_UI_ButtonRed
-    21300042: BB_UI_ButtonRedHighlighted
-    21300044: BB_UI_ButtonSocket
-    21300046: BB_UI_ButtonSocketRight
-    21300048: BB_UI_ButtonSocketShadow
-    21300050: BB_UI_Con_Plane
-    21300052: BB_UI_HeavyFramePanelBlack
-    21300054: BB_UI_HudBombIndicatorPointer
-    21300056: BB_UI_HudDropBombs
-    21300058: BB_UI_HudFireGuns
-    21300060: BB_UI_HudJoystickControlAccelerate
-    21300062: BB_UI_HudJoystickControlLeft
-    21300064: BB_UI_HudJoystickControlPadBase
-    21300066: BB_UI_HudJoystickControlRight
-    21300068: BB_UI_HudJoyStickIndicator
-    21300070: BB_UI_HudMenu
-    21300072: BB_UI_IconAchievements
-    21300074: BB_UI_IconAddFriend
-    21300076: BB_UI_IconBackgroundRound
-    21300078: BB_UI_IconCaretDown
-    21300080: BB_UI_IconCheckmark
-    21300082: BB_UI_IconClock
-    21300084: BB_UI_IconClose
-    21300086: BB_UI_IconEditPencil
-    21300088: BB_UI_IconEmail
-    21300090: BB_UI_IconFriends
-    21300092: BB_UI_IconFriendsHeader
-    21300094: BB_UI_IconGreenLightOff
-    21300096: BB_UI_IconGreenLightOn
-    21300098: BB_UI_IconHudShipAlive
-    21300100: BB_UI_IconHudShipDestroyed
-    21300102: BB_UI_IconJoinFriend
-    21300104: BB_UI_IconLeaderboards
-    21300106: BB_UI_IconLock
-    21300108: BB_UI_IconMore
-    21300110: BB_UI_IconPilot
-    21300112: BB_UI_IconRemoveFriend
-    21300114: BB_UI_IconReticule
-    21300116: BB_UI_IconSearch
-    21300118: BB_UI_IconSend
-    21300120: BB_UI_IconSettings
-    21300122: BB_UI_IconShoppingCart
-    21300124: BB_UI_IconShoppingCartX
-    21300126: BB_UI_IconStats
-    21300128: BB_UI_IconStatsHeader
-    21300130: BB_UI_IconSwap
-    21300132: BB_UI_ImageAchievementBasic
-    21300134: BB_UI_ImageExclamationMark
-    21300136: BB_UI_ImageGameController
-    21300138: BB_UI_ImageKeyboardButton
-    21300140: BB_UI_ImageLine
-    21300142: BB_UI_ImageMobilePhone
-    21300144: BB_UI_ImageMouseButtonLeft
-    21300146: BB_UI_ImageMouseButtonRight
-    21300148: BB_UI_ImageSaleRibbon
-    21300150: BB_UI_InnerPanel
-    21300152: BB_UI_InnerPanelDark
-    21300154: BB_UI_InputPanel
-    21300156: BB_UI_LogoGreen
-    21300158: BB_UI_LogoRed
-    21300160: BB_UI_MainPanel
-    21300162: BB_UI_Message_EnemySunk
-    21300164: BB_UI_Message_Return
-    21300166: BB_UI_Message_YourShip
-    21300168: BB_UI_PanelDividerWithShadows
-    21300170: BB_UI_PanelGlow
-    21300172: BB_UI_PanelHudScore
-    21300174: BB_UI_PanelHudScoreShadow
-    21300176: BB_UI_PanelHudShips
-    21300178: BB_UI_PanelHudShipsShadow
-    21300180: BB_UI_PanelNoTitleBar
-    21300182: BB_UI_PanelXpBar
-    21300184: BB_UI_RaisedPanel
-    21300186: BB_UI_RectOutline
-    21300188: BB_UI_TabButtonBrown
-    21300190: BB_UI_TabButtonBrownHighlighted
-    21300192: BB_UI_TabButtonBrownLeft
-    21300194: BB_UI_TabButtonBrownLeftHighlighted
-    21300196: BB_UI_TabButtonBrownMiddle
-    21300198: BB_UI_TabButtonBrownMiddleHighlighted
-    21300200: BB_UI_TabButtonBrownRight
-    21300202: BB_UI_TabButtonBrownRightHighlighted
-    21300204: BB_UI_TabButtonSocketBottom
-    21300206: BB_UI_TabButtonSocketTop
-    21300208: BB_UI_TitleBarPanel
-    21300210: BB_UI_TitleBarPanelOverlay
-    21300212: BB_UI_TitleBarPanelOverlayStrap
-    21300214: BB_UI_TitleBarStar
-    21300216: ImageCloudUpdateArrows
-    21300218: ImageCloudUpdateCloud
-    21300220: BB_UI_ImageBomber
-    21300222: BB_UI_ImageCloudUpdateArrows
-    21300224: BB_UI_ImageCloudUpdateCloud
-    21300226: BB_UI_ImageLogoGreen
-    21300228: BB_UI_ImageLogoRed
-    21300230: BB_UI_ImageMessageEnemyShipSunk
-    21300232: BB_UI_ImageMessageReturnToMission
-    21300234: BB_UI_ImageMessageYourShipSunk
-    21300236: BB_UI_Gradient_GreyMetal
-    21300238: BB_UI_Pattern_Grid24x24
-    21300240: BB_UI_IconQuit
-    21300242: BB_UI_ButtonDropdownGreen
-    21300244: BB_UI_IconRank1
-    21300246: BB_UI_IconRank2
-    21300248: BB_UI_IconRank3
-    21300250: BB_UI_IconRank4
-    21300252: BB_UI_IconRank5
-    21300254: BB_UI_IconRank6
-    21300256: BB_UI_IconRank7
-    21300258: BB_UI_IconRank8
-    21300260: BB_UI_IconRank9
-    21300262: BB_UI_IconRank10
-    21300264: BB_UI_InputUnderscore
-    21300266: BB_UI_PanelProgressBar
-    21300268: BB_UI_PanelSolidSquare
-    21300270: BB_UI_1ptFullRoundRect
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: BB_UI_4ptFullRoundRect
+  - first:
+      213: 21300002
+    second: BB_UI_4ptHalfRoundRect
+  - first:
+      213: 21300004
+    second: BB_UI_6ptCircle
+  - first:
+      213: 21300006
+    second: BB_UI_8ptFullRoundRect
+  - first:
+      213: 21300008
+    second: BB_UI_8ptFullRoundRectOutline
+  - first:
+      213: 21300010
+    second: BB_UI_8ptHalfRoundRect
+  - first:
+      213: 21300012
+    second: BB_UI_8ptQuarterRoundRect
+  - first:
+      213: 21300014
+    second: BB_UI_ButtonBlue
+  - first:
+      213: 21300016
+    second: BB_UI_ButtonBlueHighlighted
+  - first:
+      213: 21300018
+    second: BB_UI_ButtonBrown
+  - first:
+      213: 21300020
+    second: BB_UI_ButtonBrownHighlighted
+  - first:
+      213: 21300022
+    second: BB_UI_ButtonBrownHighlightedMore
+  - first:
+      213: 21300024
+    second: BB_UI_ButtonBrownRight
+  - first:
+      213: 21300026
+    second: BB_UI_ButtonBrownRightHighlighted
+  - first:
+      213: 21300028
+    second: BB_UI_ButtonDropdownBrown
+  - first:
+      213: 21300030
+    second: BB_UI_ButtonGreen
+  - first:
+      213: 21300032
+    second: BB_UI_ButtonGreenHighlighted
+  - first:
+      213: 21300034
+    second: BB_UI_ButtonGrey
+  - first:
+      213: 21300036
+    second: BB_UI_ButtonNotificationBadge
+  - first:
+      213: 21300038
+    second: BB_UI_ButtonPanelShadow
+  - first:
+      213: 21300040
+    second: BB_UI_ButtonRed
+  - first:
+      213: 21300042
+    second: BB_UI_ButtonRedHighlighted
+  - first:
+      213: 21300044
+    second: BB_UI_ButtonSocket
+  - first:
+      213: 21300046
+    second: BB_UI_ButtonSocketRight
+  - first:
+      213: 21300048
+    second: BB_UI_ButtonSocketShadow
+  - first:
+      213: 21300050
+    second: BB_UI_Con_Plane
+  - first:
+      213: 21300052
+    second: BB_UI_HeavyFramePanelBlack
+  - first:
+      213: 21300054
+    second: BB_UI_HudBombIndicatorPointer
+  - first:
+      213: 21300056
+    second: BB_UI_HudDropBombs
+  - first:
+      213: 21300058
+    second: BB_UI_HudFireGuns
+  - first:
+      213: 21300060
+    second: BB_UI_HudJoystickControlAccelerate
+  - first:
+      213: 21300062
+    second: BB_UI_HudJoystickControlLeft
+  - first:
+      213: 21300064
+    second: BB_UI_HudJoystickControlPadBase
+  - first:
+      213: 21300066
+    second: BB_UI_HudJoystickControlRight
+  - first:
+      213: 21300068
+    second: BB_UI_HudJoyStickIndicator
+  - first:
+      213: 21300070
+    second: BB_UI_HudMenu
+  - first:
+      213: 21300072
+    second: BB_UI_IconAchievements
+  - first:
+      213: 21300074
+    second: BB_UI_IconAddFriend
+  - first:
+      213: 21300076
+    second: BB_UI_IconBackgroundRound
+  - first:
+      213: 21300078
+    second: BB_UI_IconCaretDown
+  - first:
+      213: 21300080
+    second: BB_UI_IconCheckmark
+  - first:
+      213: 21300082
+    second: BB_UI_IconClock
+  - first:
+      213: 21300084
+    second: BB_UI_IconClose
+  - first:
+      213: 21300086
+    second: BB_UI_IconEditPencil
+  - first:
+      213: 21300088
+    second: BB_UI_IconEmail
+  - first:
+      213: 21300090
+    second: BB_UI_IconFriends
+  - first:
+      213: 21300092
+    second: BB_UI_IconFriendsHeader
+  - first:
+      213: 21300094
+    second: BB_UI_IconGreenLightOff
+  - first:
+      213: 21300096
+    second: BB_UI_IconGreenLightOn
+  - first:
+      213: 21300098
+    second: BB_UI_IconHudShipAlive
+  - first:
+      213: 21300100
+    second: BB_UI_IconHudShipDestroyed
+  - first:
+      213: 21300102
+    second: BB_UI_IconJoinFriend
+  - first:
+      213: 21300104
+    second: BB_UI_IconLeaderboards
+  - first:
+      213: 21300106
+    second: BB_UI_IconLock
+  - first:
+      213: 21300108
+    second: BB_UI_IconMore
+  - first:
+      213: 21300110
+    second: BB_UI_IconPilot
+  - first:
+      213: 21300112
+    second: BB_UI_IconRemoveFriend
+  - first:
+      213: 21300114
+    second: BB_UI_IconReticule
+  - first:
+      213: 21300116
+    second: BB_UI_IconSearch
+  - first:
+      213: 21300118
+    second: BB_UI_IconSend
+  - first:
+      213: 21300120
+    second: BB_UI_IconSettings
+  - first:
+      213: 21300122
+    second: BB_UI_IconShoppingCart
+  - first:
+      213: 21300124
+    second: BB_UI_IconShoppingCartX
+  - first:
+      213: 21300126
+    second: BB_UI_IconStats
+  - first:
+      213: 21300128
+    second: BB_UI_IconStatsHeader
+  - first:
+      213: 21300130
+    second: BB_UI_IconSwap
+  - first:
+      213: 21300132
+    second: BB_UI_ImageAchievementBasic
+  - first:
+      213: 21300134
+    second: BB_UI_ImageExclamationMark
+  - first:
+      213: 21300136
+    second: BB_UI_ImageGameController
+  - first:
+      213: 21300138
+    second: BB_UI_ImageKeyboardButton
+  - first:
+      213: 21300140
+    second: BB_UI_ImageLine
+  - first:
+      213: 21300142
+    second: BB_UI_ImageMobilePhone
+  - first:
+      213: 21300144
+    second: BB_UI_ImageMouseButtonLeft
+  - first:
+      213: 21300146
+    second: BB_UI_ImageMouseButtonRight
+  - first:
+      213: 21300148
+    second: BB_UI_ImageSaleRibbon
+  - first:
+      213: 21300150
+    second: BB_UI_InnerPanel
+  - first:
+      213: 21300152
+    second: BB_UI_InnerPanelDark
+  - first:
+      213: 21300154
+    second: BB_UI_InputPanel
+  - first:
+      213: 21300156
+    second: BB_UI_LogoGreen
+  - first:
+      213: 21300158
+    second: BB_UI_LogoRed
+  - first:
+      213: 21300160
+    second: BB_UI_MainPanel
+  - first:
+      213: 21300162
+    second: BB_UI_Message_EnemySunk
+  - first:
+      213: 21300164
+    second: BB_UI_Message_Return
+  - first:
+      213: 21300166
+    second: BB_UI_Message_YourShip
+  - first:
+      213: 21300168
+    second: BB_UI_PanelDividerWithShadows
+  - first:
+      213: 21300170
+    second: BB_UI_PanelGlow
+  - first:
+      213: 21300172
+    second: BB_UI_PanelHudScore
+  - first:
+      213: 21300174
+    second: BB_UI_PanelHudScoreShadow
+  - first:
+      213: 21300176
+    second: BB_UI_PanelHudShips
+  - first:
+      213: 21300178
+    second: BB_UI_PanelHudShipsShadow
+  - first:
+      213: 21300180
+    second: BB_UI_PanelNoTitleBar
+  - first:
+      213: 21300182
+    second: BB_UI_PanelXpBar
+  - first:
+      213: 21300184
+    second: BB_UI_RaisedPanel
+  - first:
+      213: 21300186
+    second: BB_UI_RectOutline
+  - first:
+      213: 21300188
+    second: BB_UI_TabButtonBrown
+  - first:
+      213: 21300190
+    second: BB_UI_TabButtonBrownHighlighted
+  - first:
+      213: 21300192
+    second: BB_UI_TabButtonBrownLeft
+  - first:
+      213: 21300194
+    second: BB_UI_TabButtonBrownLeftHighlighted
+  - first:
+      213: 21300196
+    second: BB_UI_TabButtonBrownMiddle
+  - first:
+      213: 21300198
+    second: BB_UI_TabButtonBrownMiddleHighlighted
+  - first:
+      213: 21300200
+    second: BB_UI_TabButtonBrownRight
+  - first:
+      213: 21300202
+    second: BB_UI_TabButtonBrownRightHighlighted
+  - first:
+      213: 21300204
+    second: BB_UI_TabButtonSocketBottom
+  - first:
+      213: 21300206
+    second: BB_UI_TabButtonSocketTop
+  - first:
+      213: 21300208
+    second: BB_UI_TitleBarPanel
+  - first:
+      213: 21300210
+    second: BB_UI_TitleBarPanelOverlay
+  - first:
+      213: 21300212
+    second: BB_UI_TitleBarPanelOverlayStrap
+  - first:
+      213: 21300214
+    second: BB_UI_TitleBarStar
+  - first:
+      213: 21300216
+    second: ImageCloudUpdateArrows
+  - first:
+      213: 21300218
+    second: ImageCloudUpdateCloud
+  - first:
+      213: 21300220
+    second: BB_UI_ImageBomber
+  - first:
+      213: 21300222
+    second: BB_UI_ImageCloudUpdateArrows
+  - first:
+      213: 21300224
+    second: BB_UI_ImageCloudUpdateCloud
+  - first:
+      213: 21300226
+    second: BB_UI_ImageLogoGreen
+  - first:
+      213: 21300228
+    second: BB_UI_ImageLogoRed
+  - first:
+      213: 21300230
+    second: BB_UI_ImageMessageEnemyShipSunk
+  - first:
+      213: 21300232
+    second: BB_UI_ImageMessageReturnToMission
+  - first:
+      213: 21300234
+    second: BB_UI_ImageMessageYourShipSunk
+  - first:
+      213: 21300236
+    second: BB_UI_Gradient_GreyMetal
+  - first:
+      213: 21300238
+    second: BB_UI_Pattern_Grid24x24
+  - first:
+      213: 21300240
+    second: BB_UI_IconQuit
+  - first:
+      213: 21300242
+    second: BB_UI_ButtonDropdownGreen
+  - first:
+      213: 21300244
+    second: BB_UI_IconRank1
+  - first:
+      213: 21300246
+    second: BB_UI_IconRank2
+  - first:
+      213: 21300248
+    second: BB_UI_IconRank3
+  - first:
+      213: 21300250
+    second: BB_UI_IconRank4
+  - first:
+      213: 21300252
+    second: BB_UI_IconRank5
+  - first:
+      213: 21300254
+    second: BB_UI_IconRank6
+  - first:
+      213: 21300256
+    second: BB_UI_IconRank7
+  - first:
+      213: 21300258
+    second: BB_UI_IconRank8
+  - first:
+      213: 21300260
+    second: BB_UI_IconRank9
+  - first:
+      213: 21300262
+    second: BB_UI_IconRank10
+  - first:
+      213: 21300264
+    second: BB_UI_InputUnderscore
+  - first:
+      213: 21300266
+    second: BB_UI_PanelProgressBar
+  - first:
+      213: 21300268
+    second: BB_UI_PanelSolidSquare
+  - first:
+      213: 21300270
+    second: BB_UI_1ptFullRoundRect
+  - first:
+      213: 21300272
+    second: BB_UI_InputPanelGreen
+  - first:
+      213: 21300274
+    second: BB_UI_TitleBarPanelOverlayHighlighted
+  - first:
+      213: 21300276
+    second: BB_UI_TitleBarPanelOverlayDisabled
+  - first:
+      213: 21300278
+    second: BB_UI_InputPanelHighlighted
+  - first:
+      213: 21300280
+    second: BB_UI_IconAddFriendStatusIcon
+  - first:
+      213: 21300282
+    second: BB_UI_IconFriend
+  - first:
+      213: 21300284
+    second: BB_UI_IconJoinFriendStatusIcon
+  - first:
+      213: 21300286
+    second: BB_UI_IconRemoveFriendStatusIcon
   externalObjects: {}
-  serializedVersion: 9
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -193,8 +489,9 @@ TextureImporter:
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  applyGammaDecoding: 1
   platformSettings:
-  - serializedVersion: 2
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -205,7 +502,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -216,7 +514,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: iPhone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -227,7 +526,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -238,7 +538,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -249,6 +550,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -256,8 +558,8 @@ TextureImporter:
       name: BB_UI_1ptFullRoundRect
       rect:
         serializedVersion: 2
-        x: 712
-        y: 709
+        x: 704
+        y: 791
         width: 18
         height: 18
       alignment: 0
@@ -267,7 +569,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3463899d33697d8479e6d71fb189aa42
+      spriteID: 3225873df6e7f9d4b87db176e9b770ea
+      internalID: 21300270
       vertices: []
       indices: 
       edges: []
@@ -277,7 +580,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 942
-        y: 278
+        y: 512
         width: 72
         height: 72
       alignment: 0
@@ -287,7 +590,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eb9d00fc82df8eb4f8047b4a58f83828
+      spriteID: 8c2f52c5113f0744c977bf28ce1009f4
+      internalID: 21300000
       vertices: []
       indices: 
       edges: []
@@ -296,8 +600,8 @@ TextureImporter:
       name: BB_UI_4ptHalfRoundRect
       rect:
         serializedVersion: 2
-        x: 942
-        y: 202
+        x: 190
+        y: 187
         width: 72
         height: 72
       alignment: 0
@@ -307,7 +611,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9ad4df8db606469419e749a97bfd3a64
+      spriteID: 4fe6e0a14f35a0e4cb61062f8b32bc65
+      internalID: 21300002
       vertices: []
       indices: 
       edges: []
@@ -316,8 +621,8 @@ TextureImporter:
       name: BB_UI_6ptCircle
       rect:
         serializedVersion: 2
-        x: 712
-        y: 687
+        x: 704
+        y: 769
         width: 18
         height: 18
       alignment: 0
@@ -327,7 +632,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c0363f3dce802964abffad4485e65983
+      spriteID: ce963f837ab82214b94218f8fd86a73d
+      internalID: 21300004
       vertices: []
       indices: 
       edges: []
@@ -336,8 +642,8 @@ TextureImporter:
       name: BB_UI_8ptFullRoundRect
       rect:
         serializedVersion: 2
-        x: 96
-        y: 246
+        x: 190
+        y: 111
         width: 72
         height: 72
       alignment: 0
@@ -347,7 +653,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: edfb67fa7ba44a946a0af6f5a649c4ff
+      spriteID: 84c0f4d4c1d0fc9459441f27a774e14c
+      internalID: 21300006
       vertices: []
       indices: 
       edges: []
@@ -356,8 +663,8 @@ TextureImporter:
       name: BB_UI_8ptFullRoundRectOutline
       rect:
         serializedVersion: 2
-        x: 172
-        y: 246
+        x: 2
+        y: 93
         width: 72
         height: 72
       alignment: 0
@@ -367,7 +674,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 65249aa8cd71cfc42a8dbe6ab4847f69
+      spriteID: 6d339ac9d737ca642993cfcd7653f7bb
+      internalID: 21300008
       vertices: []
       indices: 
       edges: []
@@ -376,8 +684,8 @@ TextureImporter:
       name: BB_UI_8ptHalfRoundRect
       rect:
         serializedVersion: 2
-        x: 190
-        y: 325
+        x: 78
+        y: 93
         width: 72
         height: 72
       alignment: 0
@@ -387,7 +695,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2fc92461cdf61374ea934d1ebc4c52ed
+      spriteID: f8f3ea83226228142804f08d75eb9bbe
+      internalID: 21300010
       vertices: []
       indices: 
       edges: []
@@ -396,8 +705,8 @@ TextureImporter:
       name: BB_UI_8ptQuarterRoundRect
       rect:
         serializedVersion: 2
-        x: 190
-        y: 126
+        x: 566
+        y: 294
         width: 72
         height: 72
       alignment: 0
@@ -407,7 +716,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 900e542eba5094b42b2484d2cab6b3fa
+      spriteID: fc3ae9d128d40f947bd1383aea470868
+      internalID: 21300012
       vertices: []
       indices: 
       edges: []
@@ -416,8 +726,8 @@ TextureImporter:
       name: BB_UI_ButtonBlue
       rect:
         serializedVersion: 2
-        x: 618
-        y: 665
+        x: 516
+        y: 747
         width: 90
         height: 90
       alignment: 0
@@ -427,7 +737,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e62ba1511d122bc4ba906288d1488932
+      spriteID: 682cbfb5f5c7eaa45be053d249c6ae4d
+      internalID: 21300014
       vertices: []
       indices: 
       edges: []
@@ -436,8 +747,8 @@ TextureImporter:
       name: BB_UI_ButtonBlueHighlighted
       rect:
         serializedVersion: 2
-        x: 612
-        y: 571
+        x: 610
+        y: 747
         width: 90
         height: 90
       alignment: 0
@@ -447,7 +758,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f9cd67f36aadda84f966f2179347dab2
+      spriteID: ed7621612a0aa8c4ca18d8ab1b5a9d88
+      internalID: 21300016
       vertices: []
       indices: 
       edges: []
@@ -456,8 +768,8 @@ TextureImporter:
       name: BB_UI_ButtonBrown
       rect:
         serializedVersion: 2
-        x: 612
-        y: 477
+        x: 932
+        y: 932
         width: 90
         height: 90
       alignment: 0
@@ -467,7 +779,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ffffeff57a7d3534da4291abb515090e
+      spriteID: 33cfa8247b4aebf4691df88d6565d4f6
+      internalID: 21300018
       vertices: []
       indices: 
       edges: []
@@ -476,8 +789,8 @@ TextureImporter:
       name: BB_UI_ButtonBrownHighlighted
       rect:
         serializedVersion: 2
-        x: 150
-        y: 611
+        x: 2
+        y: 451
         width: 90
         height: 90
       alignment: 0
@@ -487,7 +800,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e2e4d19d18588284eb94d799d1177a76
+      spriteID: a3f6cd2b231640b4592bf12737e04da4
+      internalID: 21300020
       vertices: []
       indices: 
       edges: []
@@ -496,8 +810,8 @@ TextureImporter:
       name: BB_UI_ButtonBrownHighlightedMore
       rect:
         serializedVersion: 2
-        x: 2
-        y: 599
+        x: 96
+        y: 451
         width: 90
         height: 90
       alignment: 0
@@ -507,7 +821,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1f235a157dfec2949976eead12e21460
+      spriteID: 7a4bf953bc101334fb2052ba8793365f
+      internalID: 21300022
       vertices: []
       indices: 
       edges: []
@@ -516,8 +831,8 @@ TextureImporter:
       name: BB_UI_ButtonBrownRight
       rect:
         serializedVersion: 2
-        x: 96
-        y: 517
+        x: 190
+        y: 451
         width: 90
         height: 90
       alignment: 0
@@ -527,7 +842,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 603c9c82d5c9fa344a1e354c07c65bad
+      spriteID: bbaf752182176754699dfb8a4253df82
+      internalID: 21300024
       vertices: []
       indices: 
       edges: []
@@ -536,8 +852,8 @@ TextureImporter:
       name: BB_UI_ButtonBrownRightHighlighted
       rect:
         serializedVersion: 2
-        x: 2
-        y: 505
+        x: 422
+        y: 488
         width: 90
         height: 90
       alignment: 0
@@ -547,7 +863,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 48e67dc403b2b9a4c8cb7f72fdbbb0e3
+      spriteID: 2fb90e9371d9a4b42a01fb86ba119580
+      internalID: 21300026
       vertices: []
       indices: 
       edges: []
@@ -556,8 +873,8 @@ TextureImporter:
       name: BB_UI_ButtonDropdownBrown
       rect:
         serializedVersion: 2
-        x: 190
-        y: 495
+        x: 422
+        y: 394
         width: 90
         height: 90
       alignment: 0
@@ -567,7 +884,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b927dc4d574cac349bf0046734ae04ea
+      spriteID: 7b49a501a49a6464a929f4a69881a253
+      internalID: 21300028
       vertices: []
       indices: 
       edges: []
@@ -576,8 +894,8 @@ TextureImporter:
       name: BB_UI_ButtonDropdownGreen
       rect:
         serializedVersion: 2
-        x: 96
-        y: 423
+        x: 2
+        y: 357
         width: 90
         height: 90
       alignment: 0
@@ -587,7 +905,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fa2bf34fdb6a5464fb580f7496a21874
+      spriteID: 3fbd71dfe6890dc4a84bd70546202977
+      internalID: 21300242
       vertices: []
       indices: 
       edges: []
@@ -596,8 +915,8 @@ TextureImporter:
       name: BB_UI_ButtonGreen
       rect:
         serializedVersion: 2
-        x: 2
-        y: 411
+        x: 96
+        y: 357
         width: 90
         height: 90
       alignment: 0
@@ -607,7 +926,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b6f967971cf78184ba55f96231a16719
+      spriteID: b45333deb8ee4d74e8b522d528fd2573
+      internalID: 21300030
       vertices: []
       indices: 
       edges: []
@@ -616,8 +936,8 @@ TextureImporter:
       name: BB_UI_ButtonGreenHighlighted
       rect:
         serializedVersion: 2
-        x: 706
-        y: 470
+        x: 190
+        y: 357
         width: 90
         height: 90
       alignment: 0
@@ -627,7 +947,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f73185c5d5854364b89368a2d264d0e5
+      spriteID: a68837500034b99409eac44fc0ab4cde
+      internalID: 21300032
       vertices: []
       indices: 
       edges: []
@@ -636,8 +957,8 @@ TextureImporter:
       name: BB_UI_ButtonGrey
       rect:
         serializedVersion: 2
-        x: 876
-        y: 448
+        x: 284
+        y: 364
         width: 90
         height: 90
       alignment: 0
@@ -647,7 +968,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bf61024efa94b874ea3de7d2fa399c8b
+      spriteID: adf32586776c7af4cb998bddb071dd97
+      internalID: 21300034
       vertices: []
       indices: 
       edges: []
@@ -656,8 +978,8 @@ TextureImporter:
       name: BB_UI_ButtonNotificationBadge
       rect:
         serializedVersion: 2
-        x: 248
-        y: 246
+        x: 642
+        y: 294
         width: 72
         height: 72
       alignment: 0
@@ -667,7 +989,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3afc08ce89b6eb942b6f72ead8468e46
+      spriteID: 7b164bf32610aca4a9c3500c9c0d8c40
+      internalID: 21300036
       vertices: []
       indices: 
       edges: []
@@ -676,8 +999,8 @@ TextureImporter:
       name: BB_UI_ButtonRed
       rect:
         serializedVersion: 2
-        x: 876
-        y: 354
+        x: 516
+        y: 370
         width: 90
         height: 90
       alignment: 0
@@ -687,7 +1010,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 93d153397dcac24419fc1ac046db23c6
+      spriteID: 6314ef947e28ef9478271d06213dcdf6
+      internalID: 21300040
       vertices: []
       indices: 
       edges: []
@@ -696,8 +1020,8 @@ TextureImporter:
       name: BB_UI_ButtonRedHighlighted
       rect:
         serializedVersion: 2
-        x: 284
-        y: 469
+        x: 516
+        y: 488
         width: 90
         height: 90
       alignment: 0
@@ -707,7 +1031,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1d304ab3b26c0364da293935520015fb
+      spriteID: 0a84758c0fa769344b7660a680fe0e6f
+      internalID: 21300042
       vertices: []
       indices: 
       edges: []
@@ -716,8 +1041,8 @@ TextureImporter:
       name: BB_UI_ButtonSocket
       rect:
         serializedVersion: 2
-        x: 190
-        y: 401
+        x: 378
+        y: 300
         width: 90
         height: 90
       alignment: 0
@@ -727,7 +1052,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a47c0492c6f44a24695baed1e6514bcd
+      spriteID: 5472af35e376b4b4aa60f641bb450986
+      internalID: 21300044
       vertices: []
       indices: 
       edges: []
@@ -736,8 +1062,8 @@ TextureImporter:
       name: BB_UI_ButtonSocketRight
       rect:
         serializedVersion: 2
-        x: 96
-        y: 329
+        x: 284
+        y: 270
         width: 90
         height: 90
       alignment: 0
@@ -747,7 +1073,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ba4272b359d2ea4baf08151f4fad494
+      spriteID: 0ecc93a91bb23b94ebfb6f3ca91a9e4d
+      internalID: 21300046
       vertices: []
       indices: 
       edges: []
@@ -756,8 +1083,8 @@ TextureImporter:
       name: BB_UI_ButtonSocketShadow
       rect:
         serializedVersion: 2
-        x: 882
-        y: 542
+        x: 818
+        y: 588
         width: 138
         height: 138
       alignment: 0
@@ -767,7 +1094,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c9dd5d82fee8b03409ca78ba39d2cd32
+      spriteID: 1fbbfec5c2cd5f242a5d597b0e5858b1
+      internalID: 21300048
       vertices: []
       indices: 
       edges: []
@@ -776,8 +1104,8 @@ TextureImporter:
       name: BB_UI_HeavyFramePanelBlack
       rect:
         serializedVersion: 2
-        x: 322
-        y: 859
+        x: 488
+        y: 878
         width: 144
         height: 144
       alignment: 0
@@ -787,7 +1115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4beccc0149fff954b9f948e050998977
+      spriteID: f8c2848859df58d4593a0064c6af7341
+      internalID: 21300052
       vertices: []
       indices: 
       edges: []
@@ -796,8 +1125,8 @@ TextureImporter:
       name: BB_UI_IconAchievements
       rect:
         serializedVersion: 2
-        x: 266
-        y: 325
+        x: 718
+        y: 294
         width: 72
         height: 72
       alignment: 0
@@ -807,7 +1136,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fac79dfa9ad8b20488253de615a654e2
+      spriteID: ff72cabea2259834a90651aefe67b687
+      internalID: 21300072
       vertices: []
       indices: 
       edges: []
@@ -816,8 +1146,8 @@ TextureImporter:
       name: BB_UI_IconAddFriend
       rect:
         serializedVersion: 2
-        x: 190
-        y: 50
+        x: 794
+        y: 294
         width: 72
         height: 72
       alignment: 0
@@ -827,7 +1157,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9fcddcc60c7a2cf41b6c47a7b0853a2e
+      spriteID: 4241b6e0939e3374a8e5346e7e3c3f86
+      internalID: 21300074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_IconAddFriendStatusIcon
+      rect:
+        serializedVersion: 2
+        x: 942
+        y: 472
+        width: 42
+        height: 36
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61cf339d3057c1743a9f2ea11ade2e7f
+      internalID: 21300280
       vertices: []
       indices: 
       edges: []
@@ -837,7 +1189,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 2
-        y: 317
+        y: 263
         width: 90
         height: 90
       alignment: 0
@@ -847,7 +1199,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a3be2991352459944b4075c7b2159b4a
+      spriteID: 75dab00371ab8aa418f64df79106ad90
+      internalID: 21300076
       vertices: []
       indices: 
       edges: []
@@ -856,8 +1209,8 @@ TextureImporter:
       name: BB_UI_IconCaretDown
       rect:
         serializedVersion: 2
-        x: 266
-        y: 126
+        x: 870
+        y: 294
         width: 72
         height: 72
       alignment: 0
@@ -867,7 +1220,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6266e82c4d5e7704caaa8465091fc2ec
+      spriteID: 0f11337409544a643ba4ec50349909d1
+      internalID: 21300078
       vertices: []
       indices: 
       edges: []
@@ -876,8 +1230,8 @@ TextureImporter:
       name: BB_UI_IconCheckmark
       rect:
         serializedVersion: 2
-        x: 324
-        y: 246
+        x: 946
+        y: 294
         width: 72
         height: 72
       alignment: 0
@@ -887,7 +1241,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5a7016933c84d2449b82d3a98082500f
+      spriteID: f35030d9194fba24f9466c16376aa18d
+      internalID: 21300080
       vertices: []
       indices: 
       edges: []
@@ -896,8 +1251,8 @@ TextureImporter:
       name: BB_UI_IconClock
       rect:
         serializedVersion: 2
-        x: 266
-        y: 50
+        x: 566
+        y: 218
         width: 72
         height: 72
       alignment: 0
@@ -907,7 +1262,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1a90b14e6c911be4886eb3c724963944
+      spriteID: 95461e6b9505ebb4388726e2beaf3cca
+      internalID: 21300082
       vertices: []
       indices: 
       edges: []
@@ -916,8 +1272,8 @@ TextureImporter:
       name: BB_UI_IconClose
       rect:
         serializedVersion: 2
-        x: 342
-        y: 393
+        x: 472
+        y: 200
         width: 72
         height: 72
       alignment: 0
@@ -927,7 +1283,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 49b9ef088a5b92547a820995bd67d0e9
+      spriteID: f1c300d58553ea34bb29401bae5ec4cd
+      internalID: 21300084
       vertices: []
       indices: 
       edges: []
@@ -936,8 +1293,8 @@ TextureImporter:
       name: BB_UI_IconEditPencil
       rect:
         serializedVersion: 2
-        x: 244
-        y: 589
+        x: 932
+        y: 880
         width: 48
         height: 48
       alignment: 0
@@ -947,7 +1304,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7c338eeb0a556fa40971447a96ffc206
+      spriteID: be00c364ff0565f4d8c50520887ff9fc
+      internalID: 21300086
       vertices: []
       indices: 
       edges: []
@@ -956,8 +1314,8 @@ TextureImporter:
       name: BB_UI_IconEmail
       rect:
         serializedVersion: 2
-        x: 418
-        y: 393
+        x: 378
+        y: 130
         width: 72
         height: 72
       alignment: 0
@@ -967,7 +1325,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5d8553eccdcec4b4997b7c6d399a9cb4
+      spriteID: 7fa69aa97784d5c4b820c8e2d6eee76d
+      internalID: 21300088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_IconFriend
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 678
+        width: 60
+        height: 72
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96452f9bd09a7f54c8d30a171b87d950
+      internalID: 21300282
       vertices: []
       indices: 
       edges: []
@@ -976,8 +1356,8 @@ TextureImporter:
       name: BB_UI_IconFriends
       rect:
         serializedVersion: 2
-        x: 400
-        y: 317
+        x: 266
+        y: 100
         width: 72
         height: 72
       alignment: 0
@@ -987,7 +1367,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 652eb818dea27b1428e5f82b28c0f652
+      spriteID: 9f03e2e4dae5249418228bc4955e435e
+      internalID: 21300090
       vertices: []
       indices: 
       edges: []
@@ -996,8 +1377,8 @@ TextureImporter:
       name: BB_UI_IconFriendsHeader
       rect:
         serializedVersion: 2
-        x: 910
-        y: 917
+        x: 298
+        y: 732
         width: 105
         height: 105
       alignment: 0
@@ -1007,7 +1388,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5fcd1ac138526b94b805a93edbbd2559
+      spriteID: 726442f432b2c3d44b69533a65e7eb47
+      internalID: 21300092
       vertices: []
       indices: 
       edges: []
@@ -1016,8 +1398,8 @@ TextureImporter:
       name: BB_UI_IconHudShipAlive
       rect:
         serializedVersion: 2
-        x: 618
-        y: 883
+        x: 892
+        y: 754
         width: 120
         height: 120
       alignment: 0
@@ -1027,7 +1409,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d4dd43d14fa0f48438d2004d5401c517
+      spriteID: a8dd069a03b982248b320b29f849639c
+      internalID: 21300098
       vertices: []
       indices: 
       edges: []
@@ -1036,8 +1419,8 @@ TextureImporter:
       name: BB_UI_IconHudShipDestroyed
       rect:
         serializedVersion: 2
-        x: 618
-        y: 759
+        x: 818
+        y: 464
         width: 120
         height: 120
       alignment: 0
@@ -1047,7 +1430,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7978357254337f842b9cfd16a6117ebd
+      spriteID: 8b7121c979beb134cb8ca9525f18974a
+      internalID: 21300100
       vertices: []
       indices: 
       edges: []
@@ -1056,8 +1440,8 @@ TextureImporter:
       name: BB_UI_IconJoinFriend
       rect:
         serializedVersion: 2
-        x: 476
-        y: 317
+        x: 154
+        y: 35
         width: 72
         height: 72
       alignment: 0
@@ -1067,7 +1451,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 33273f2570f7e4b4a8292038218a671c
+      spriteID: 54bcb7981e4abd7478f8244e9e759b31
+      internalID: 21300102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_IconJoinFriendStatusIcon
+      rect:
+        serializedVersion: 2
+        x: 306
+        y: 14
+        width: 42
+        height: 36
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43b1758039949f342b73173bb3269a48
+      internalID: 21300284
       vertices: []
       indices: 
       edges: []
@@ -1076,8 +1482,8 @@ TextureImporter:
       name: BB_UI_IconLeaderboards
       rect:
         serializedVersion: 2
-        x: 552
-        y: 307
+        x: 2
+        y: 17
         width: 72
         height: 72
       alignment: 0
@@ -1087,7 +1493,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1d20269fecc2210439a9d5025b3bba04
+      spriteID: 9ae43447f4d6e19408c2fd27cbd25876
+      internalID: 21300104
       vertices: []
       indices: 
       edges: []
@@ -1096,8 +1503,8 @@ TextureImporter:
       name: BB_UI_IconLock
       rect:
         serializedVersion: 2
-        x: 628
-        y: 300
+        x: 78
+        y: 17
         width: 72
         height: 72
       alignment: 0
@@ -1107,7 +1514,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 97cce03b8de65954db4018139165518f
+      spriteID: 588d0d21e42ac0743bdcb2d14dc5847d
+      internalID: 21300106
       vertices: []
       indices: 
       edges: []
@@ -1116,8 +1524,8 @@ TextureImporter:
       name: BB_UI_IconMore
       rect:
         serializedVersion: 2
-        x: 704
-        y: 246
+        x: 642
+        y: 218
         width: 72
         height: 72
       alignment: 0
@@ -1127,7 +1535,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 61ee186c18ca38c44bde9277915e3de1
+      spriteID: a2bb2253ebb50094997550a93ebcd015
+      internalID: 21300108
       vertices: []
       indices: 
       edges: []
@@ -1136,8 +1545,8 @@ TextureImporter:
       name: BB_UI_IconPilot
       rect:
         serializedVersion: 2
-        x: 400
-        y: 241
+        x: 718
+        y: 218
         width: 72
         height: 72
       alignment: 0
@@ -1147,7 +1556,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5d763fb931306694794096676a65a24b
+      spriteID: cbd538ba8517f80468daefc075eeee29
+      internalID: 21300110
       vertices: []
       indices: 
       edges: []
@@ -1156,8 +1566,8 @@ TextureImporter:
       name: BB_UI_IconQuit
       rect:
         serializedVersion: 2
-        x: 476
-        y: 241
+        x: 794
+        y: 218
         width: 72
         height: 72
       alignment: 0
@@ -1167,7 +1577,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 28e2ef08f2709fc46b2b2d95471e5aaa
+      spriteID: fa724d77236055543a3680f4d79c8394
+      internalID: 21300240
       vertices: []
       indices: 
       edges: []
@@ -1176,8 +1587,8 @@ TextureImporter:
       name: BB_UI_IconRank1
       rect:
         serializedVersion: 2
-        x: 552
-        y: 231
+        x: 870
+        y: 218
         width: 72
         height: 72
       alignment: 0
@@ -1187,7 +1598,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6f2894bf351c5cb4cada359823cbd98c
+      spriteID: 4eb003e486ce4b74b8036d37436e9ad7
+      internalID: 21300244
       vertices: []
       indices: 
       edges: []
@@ -1196,8 +1608,8 @@ TextureImporter:
       name: BB_UI_IconRank2
       rect:
         serializedVersion: 2
-        x: 780
-        y: 184
+        x: 548
+        y: 142
         width: 72
         height: 72
       alignment: 0
@@ -1207,7 +1619,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 079104a36a8d96c4a90e63f0ce5cbc56
+      spriteID: d8cd80cbf5e39cc4d8ab1539a9dd19e5
+      internalID: 21300246
       vertices: []
       indices: 
       edges: []
@@ -1216,8 +1629,8 @@ TextureImporter:
       name: BB_UI_IconRank3
       rect:
         serializedVersion: 2
-        x: 704
-        y: 170
+        x: 454
+        y: 124
         width: 72
         height: 72
       alignment: 0
@@ -1227,7 +1640,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04a966fe828a5144288dd7d0fdfadd41
+      spriteID: 6a781c1cf1abca74491dedc2f2d4a535
+      internalID: 21300248
       vertices: []
       indices: 
       edges: []
@@ -1236,8 +1650,8 @@ TextureImporter:
       name: BB_UI_IconRank4
       rect:
         serializedVersion: 2
-        x: 856
-        y: 184
+        x: 342
+        y: 54
         width: 72
         height: 72
       alignment: 0
@@ -1247,7 +1661,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 72d79293ddb30c44f822b381d758a9a0
+      spriteID: bbac52b5030ebcf468b787decbf7438e
+      internalID: 21300250
       vertices: []
       indices: 
       edges: []
@@ -1256,8 +1671,8 @@ TextureImporter:
       name: BB_UI_IconRank5
       rect:
         serializedVersion: 2
-        x: 932
-        y: 126
+        x: 230
+        y: 24
         width: 72
         height: 72
       alignment: 0
@@ -1267,7 +1682,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9a26e3bf3766c9d48a90b186f4cd1cc7
+      spriteID: bb039c2544844f2469a9b92e4017cc67
+      internalID: 21300252
       vertices: []
       indices: 
       edges: []
@@ -1276,8 +1692,8 @@ TextureImporter:
       name: BB_UI_IconRank6
       rect:
         serializedVersion: 2
-        x: 342
-        y: 50
+        x: 624
+        y: 142
         width: 72
         height: 72
       alignment: 0
@@ -1287,7 +1703,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 61d86f63932a5964cbb7fe867a030402
+      spriteID: d714e33de29ab3e42929a93199a3b9e0
+      internalID: 21300254
       vertices: []
       indices: 
       edges: []
@@ -1296,8 +1713,8 @@ TextureImporter:
       name: BB_UI_IconRank7
       rect:
         serializedVersion: 2
-        x: 342
-        y: 148
+        x: 700
+        y: 142
         width: 72
         height: 72
       alignment: 0
@@ -1307,7 +1724,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f7b4fffb6c046344d86e20dc65970ef5
+      spriteID: 2ee8a0423064e3b48b14cfcfd73eefe5
+      internalID: 21300256
       vertices: []
       indices: 
       edges: []
@@ -1316,8 +1734,8 @@ TextureImporter:
       name: BB_UI_IconRank8
       rect:
         serializedVersion: 2
-        x: 418
-        y: 50
+        x: 776
+        y: 142
         width: 72
         height: 72
       alignment: 0
@@ -1327,7 +1745,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e0b6a5421215028479b81fe16c3232e5
+      spriteID: 15c8a9a7cc6b3d0499bb61287afbb687
+      internalID: 21300258
       vertices: []
       indices: 
       edges: []
@@ -1336,8 +1755,8 @@ TextureImporter:
       name: BB_UI_IconRank9
       rect:
         serializedVersion: 2
-        x: 418
-        y: 148
+        x: 852
+        y: 142
         width: 72
         height: 72
       alignment: 0
@@ -1347,7 +1766,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e5c9559d5288b334bbd9b8d70a295ded
+      spriteID: c766707ed44dc1f40b363d8286b81381
+      internalID: 21300260
       vertices: []
       indices: 
       edges: []
@@ -1356,8 +1776,8 @@ TextureImporter:
       name: BB_UI_IconRank10
       rect:
         serializedVersion: 2
-        x: 628
-        y: 224
+        x: 946
+        y: 218
         width: 72
         height: 72
       alignment: 0
@@ -1367,7 +1787,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9b9d2e365e9ad5f4c80ed61e785a70eb
+      spriteID: fd36693795c92044699a50be066b697e
+      internalID: 21300262
       vertices: []
       indices: 
       edges: []
@@ -1376,8 +1797,8 @@ TextureImporter:
       name: BB_UI_IconRemoveFriend
       rect:
         serializedVersion: 2
-        x: 494
-        y: 50
+        x: 928
+        y: 142
         width: 72
         height: 72
       alignment: 0
@@ -1387,7 +1808,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 226e4d754fc417044955feef37944550
+      spriteID: 54ca398b778992447afc1c73922fc9de
+      internalID: 21300112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_IconRemoveFriendStatusIcon
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 14
+        width: 42
+        height: 36
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 237d5b9316b6fed468cd32863af38625
+      internalID: 21300286
       vertices: []
       indices: 
       edges: []
@@ -1396,8 +1839,8 @@ TextureImporter:
       name: BB_UI_IconReticule
       rect:
         serializedVersion: 2
-        x: 890
-        y: 684
+        x: 298
+        y: 458
         width: 120
         height: 120
       alignment: 0
@@ -1407,7 +1850,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a4773e08dc81ec44490c280ed85fe197
+      spriteID: e7b4ba9c96763124294a9d9e12b4a0ca
+      internalID: 21300114
       vertices: []
       indices: 
       edges: []
@@ -1416,8 +1860,8 @@ TextureImporter:
       name: BB_UI_IconSearch
       rect:
         serializedVersion: 2
-        x: 494
-        y: 148
+        x: 530
+        y: 66
         width: 72
         height: 72
       alignment: 0
@@ -1427,7 +1871,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0f57d718b8cba3746a9bee36f8ca0f18
+      spriteID: bc2c9c9808f1dc8458b2cbe1bdeee255
+      internalID: 21300116
       vertices: []
       indices: 
       edges: []
@@ -1436,8 +1881,8 @@ TextureImporter:
       name: BB_UI_IconSend
       rect:
         serializedVersion: 2
-        x: 570
-        y: 50
+        x: 418
+        y: 48
         width: 72
         height: 72
       alignment: 0
@@ -1447,7 +1892,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 42bd3d24a5fcf4342ad0b33980014bbe
+      spriteID: 41c8526a460ab5b4ea61a3b85eabe186
+      internalID: 21300118
       vertices: []
       indices: 
       edges: []
@@ -1456,8 +1902,8 @@ TextureImporter:
       name: BB_UI_IconSettings
       rect:
         serializedVersion: 2
-        x: 570
-        y: 148
+        x: 606
+        y: 66
         width: 72
         height: 72
       alignment: 0
@@ -1467,7 +1913,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c923e56ff49e6da41a9898e465e00533
+      spriteID: 9af43e959da47cc4eb10697039895236
+      internalID: 21300120
       vertices: []
       indices: 
       edges: []
@@ -1476,8 +1923,8 @@ TextureImporter:
       name: BB_UI_IconShoppingCart
       rect:
         serializedVersion: 2
-        x: 646
-        y: 50
+        x: 682
+        y: 66
         width: 72
         height: 72
       alignment: 0
@@ -1487,7 +1934,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d571e7460b1f4e0438b50d1c9847652c
+      spriteID: 095716218a0dc0644a8dd9655515dde2
+      internalID: 21300122
       vertices: []
       indices: 
       edges: []
@@ -1496,8 +1944,8 @@ TextureImporter:
       name: BB_UI_IconStats
       rect:
         serializedVersion: 2
-        x: 722
-        y: 50
+        x: 758
+        y: 66
         width: 72
         height: 72
       alignment: 0
@@ -1507,7 +1955,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7acdabaf4f0a28f4295805be912f0f36
+      spriteID: abab562d25bcf9d4eb1fc4c9e15afac7
+      internalID: 21300126
       vertices: []
       indices: 
       edges: []
@@ -1516,8 +1965,8 @@ TextureImporter:
       name: BB_UI_IconStatsHeader
       rect:
         serializedVersion: 2
-        x: 910
-        y: 808
+        x: 407
+        y: 732
         width: 105
         height: 105
       alignment: 0
@@ -1527,7 +1976,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bab13326e0b0e724aba24eee0aed06ec
+      spriteID: 0c884fb190967144eb6a6eac3a825548
+      internalID: 21300128
       vertices: []
       indices: 
       edges: []
@@ -1536,8 +1986,8 @@ TextureImporter:
       name: BB_UI_IconSwap
       rect:
         serializedVersion: 2
-        x: 798
-        y: 50
+        x: 834
+        y: 66
         width: 72
         height: 72
       alignment: 0
@@ -1547,7 +1997,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ccdff2b359eeefa479eed334af8a3f05
+      spriteID: 2f1065e9a3a33af4bb2cd1f215eb9e65
+      internalID: 21300130
       vertices: []
       indices: 
       edges: []
@@ -1556,8 +2007,8 @@ TextureImporter:
       name: BB_UI_InnerPanel
       rect:
         serializedVersion: 2
-        x: 470
-        y: 859
+        x: 636
+        y: 878
         width: 144
         height: 144
       alignment: 0
@@ -1567,7 +2018,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 61d6258f34832724db81fd53d4e366b5
+      spriteID: 358e3761c6518554990efb0f117afcb6
+      internalID: 21300150
       vertices: []
       indices: 
       edges: []
@@ -1576,8 +2028,8 @@ TextureImporter:
       name: BB_UI_InnerPanelDark
       rect:
         serializedVersion: 2
-        x: 742
-        y: 712
+        x: 744
+        y: 730
         width: 144
         height: 144
       alignment: 0
@@ -1587,7 +2039,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b2cf7e6d787dc3e4791764c70fee73c7
+      spriteID: 68b9059c2837e9443aea2835443e4f3f
+      internalID: 21300152
       vertices: []
       indices: 
       edges: []
@@ -1596,10 +2049,10 @@ TextureImporter:
       name: BB_UI_InputPanel
       rect:
         serializedVersion: 2
-        x: 322
-        y: 711
-        width: 144
-        height: 144
+        x: 96
+        y: 263
+        width: 90
+        height: 90
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 24, y: 24, z: 24, w: 24}
@@ -1607,7 +2060,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7a7e0ef655ca36d4ca6fbd83cc66f887
+      spriteID: 7bf47d4b7e5036b4286d90db41dc6379
+      internalID: 21300154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_InputPanelHighlighted
+      rect:
+        serializedVersion: 2
+        x: 190
+        y: 263
+        width: 90
+        height: 90
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 24, y: 24, z: 24, w: 24}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 675079660e093cc40a2d42a89fa5e00b
+      internalID: 21300278
       vertices: []
       indices: 
       edges: []
@@ -1616,8 +2091,8 @@ TextureImporter:
       name: BB_UI_InputUnderscore
       rect:
         serializedVersion: 2
-        x: 244
-        y: 641
+        x: 960
+        y: 614
         width: 60
         height: 60
       alignment: 0
@@ -1627,7 +2102,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eac84d6b54a786b42b455d620c12fbef
+      spriteID: aa28bbeff842e214089ae52cafb2c90e
+      internalID: 21300264
       vertices: []
       indices: 
       edges: []
@@ -1636,8 +2112,8 @@ TextureImporter:
       name: BB_UI_MainPanel
       rect:
         serializedVersion: 2
-        x: 470
-        y: 711
+        x: 784
+        y: 878
         width: 144
         height: 144
       alignment: 0
@@ -1647,7 +2123,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f3a23d2d81b4b5a4c99446f3d0ebf4cd
+      spriteID: c46c0c7106344b440867a16a8bd2d53a
+      internalID: 21300160
       vertices: []
       indices: 
       edges: []
@@ -1656,8 +2133,8 @@ TextureImporter:
       name: BB_UI_PanelDividerWithShadows
       rect:
         serializedVersion: 2
-        x: 378
-        y: 469
+        x: 610
+        y: 370
         width: 90
         height: 90
       alignment: 0
@@ -1667,7 +2144,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9eeebdfbe8556fa45ba736672562af79
+      spriteID: a53cf17cd4a91a546b2ab6750f0b5c76
+      internalID: 21300168
       vertices: []
       indices: 
       edges: []
@@ -1676,8 +2154,8 @@ TextureImporter:
       name: BB_UI_PanelGlow
       rect:
         serializedVersion: 2
-        x: 168
-        y: 853
+        x: 334
+        y: 872
         width: 150
         height: 150
       alignment: 0
@@ -1687,7 +2165,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 82d08c724ae0efe4ca8a90ca57d1aae9
+      spriteID: 594222fee63aff74d9da307189e62335
+      internalID: 21300170
       vertices: []
       indices: 
       edges: []
@@ -1696,7 +2175,7 @@ TextureImporter:
       name: BB_UI_PanelHudScoreShadow
       rect:
         serializedVersion: 2
-        x: 744
+        x: 2
         y: 860
         width: 162
         height: 162
@@ -1707,7 +2186,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aa9cb070b5ff3714ea5111ac6c7bcba1
+      spriteID: 38b1932ef518b7a469eb2ae1d3d07b1c
+      internalID: 21300174
       vertices: []
       indices: 
       edges: []
@@ -1716,8 +2196,8 @@ TextureImporter:
       name: BB_UI_PanelHudShipsShadow
       rect:
         serializedVersion: 2
-        x: 2
-        y: 841
+        x: 168
+        y: 860
         width: 162
         height: 162
       alignment: 0
@@ -1727,7 +2207,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c7edbb19e38b1ed46b61f33c7ca7bb12
+      spriteID: df792b41c3736874cb98f04e7163a254
+      internalID: 21300178
       vertices: []
       indices: 
       edges: []
@@ -1736,8 +2217,8 @@ TextureImporter:
       name: BB_UI_PanelNoTitleBar
       rect:
         serializedVersion: 2
-        x: 168
-        y: 705
+        x: 2
+        y: 693
         width: 144
         height: 144
       alignment: 0
@@ -1747,7 +2228,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cf3ba96a7b83aa64caab5514c808b9d0
+      spriteID: c8c3c29505a1e2241a417807d260abb7
+      internalID: 21300180
       vertices: []
       indices: 
       edges: []
@@ -1756,8 +2238,8 @@ TextureImporter:
       name: BB_UI_PanelSolidSquare
       rect:
         serializedVersion: 2
-        x: 712
-        y: 731
+        x: 704
+        y: 813
         width: 24
         height: 24
       alignment: 0
@@ -1767,7 +2249,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9677ed6e367d39047abfe7564952c5b6
+      spriteID: c705a076444b5d2409238fe18e10f2d9
+      internalID: 21300268
       vertices: []
       indices: 
       edges: []
@@ -1777,7 +2260,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 2
-        y: 1007
+        y: 841
         width: 738
         height: 15
       alignment: 0
@@ -1787,7 +2270,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aa66a9fbccd00a24b9f00aa8273bb77f
+      spriteID: c258c6a6f2dd6b349b64a22f24f51dc1
+      internalID: 21300182
       vertices: []
       indices: 
       edges: []
@@ -1796,7 +2280,7 @@ TextureImporter:
       name: BB_UI_RaisedPanel
       rect:
         serializedVersion: 2
-        x: 2
+        x: 150
         y: 693
         width: 144
         height: 144
@@ -1807,7 +2291,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f789b3c18cc55854596d6fd4e601e760
+      spriteID: b2a7a91ea766df44fb6a7d7bb5b8949b
+      internalID: 21300184
       vertices: []
       indices: 
       edges: []
@@ -1816,8 +2301,8 @@ TextureImporter:
       name: BB_UI_RectOutline
       rect:
         serializedVersion: 2
-        x: 874
-        y: 50
+        x: 910
+        y: 66
         width: 72
         height: 72
       alignment: 0
@@ -1827,7 +2312,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5d7fefbbd8e07b243ad83e8b54d270c5
+      spriteID: 1c8137a0932a08d419c2d2e1b14c4cc2
+      internalID: 21300186
       vertices: []
       indices: 
       edges: []
@@ -1836,8 +2322,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrown
       rect:
         serializedVersion: 2
-        x: 472
-        y: 469
+        x: 610
+        y: 488
         width: 90
         height: 90
       alignment: 0
@@ -1847,7 +2333,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9a155d69d8955dc408d9fc935cc5f7bd
+      spriteID: c977a4a126e3ee5468a4920fa68fa7b9
+      internalID: 21300188
       vertices: []
       indices: 
       edges: []
@@ -1856,8 +2343,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrownHighlighted
       rect:
         serializedVersion: 2
-        x: 566
-        y: 383
+        x: 704
+        y: 370
         width: 90
         height: 90
       alignment: 0
@@ -1867,7 +2354,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 299f5bf3cc0a31f4898b8b58e44788a6
+      spriteID: 55a8edebff9b2ed42b4ee6b6945c2d1d
+      internalID: 21300190
       vertices: []
       indices: 
       edges: []
@@ -1876,8 +2364,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrownLeft
       rect:
         serializedVersion: 2
-        x: 660
-        y: 376
+        x: 704
+        y: 488
         width: 90
         height: 90
       alignment: 0
@@ -1887,7 +2375,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0e4a9f394de650f448e3adb7456a2775
+      spriteID: 9ddac62795fdbd54295500fd818b7272
+      internalID: 21300192
       vertices: []
       indices: 
       edges: []
@@ -1896,8 +2385,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrownLeftHighlighted
       rect:
         serializedVersion: 2
-        x: 754
-        y: 322
+        x: 798
+        y: 370
         width: 90
         height: 90
       alignment: 0
@@ -1907,7 +2396,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 448ce46156aefdc439274974b99e4ce5
+      spriteID: 238e812775df2fb4282ee9fc307fff02
+      internalID: 21300194
       vertices: []
       indices: 
       edges: []
@@ -1916,8 +2406,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrownMiddle
       rect:
         serializedVersion: 2
-        x: 848
-        y: 260
+        x: 892
+        y: 370
         width: 90
         height: 90
       alignment: 0
@@ -1927,7 +2417,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 20f3abe15db71de40acb0362b1dd6a99
+      spriteID: 45922533cc6658c40b0bd949c37fb9ef
+      internalID: 21300196
       vertices: []
       indices: 
       edges: []
@@ -1936,8 +2427,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrownMiddleHighlighted
       rect:
         serializedVersion: 2
-        x: 2
-        y: 108
+        x: 472
+        y: 276
         width: 90
         height: 90
       alignment: 0
@@ -1947,7 +2438,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 62d64ccf8dc6e584594309a8b1ebdb94
+      spriteID: 0c676cc4f78df2a4fa77c9a5ec130ea7
+      internalID: 21300198
       vertices: []
       indices: 
       edges: []
@@ -1956,8 +2448,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrownRight
       rect:
         serializedVersion: 2
-        x: 2
-        y: 14
+        x: 378
+        y: 206
         width: 90
         height: 90
       alignment: 0
@@ -1967,7 +2459,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a925d431711b47147b686896140a2b07
+      spriteID: 17ef95a35f694a842ac9d5d33639ac5d
+      internalID: 21300200
       vertices: []
       indices: 
       edges: []
@@ -1976,8 +2469,8 @@ TextureImporter:
       name: BB_UI_TabButtonBrownRightHighlighted
       rect:
         serializedVersion: 2
-        x: 2
-        y: 223
+        x: 284
+        y: 176
         width: 90
         height: 90
       alignment: 0
@@ -1987,7 +2480,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 474511f5a2a72234a994b85b1bb11b0f
+      spriteID: a78bf92cdad68eb4182a07d05b32572f
+      internalID: 21300202
       vertices: []
       indices: 
       edges: []
@@ -1996,8 +2490,8 @@ TextureImporter:
       name: BB_UI_TabButtonSocketBottom
       rect:
         serializedVersion: 2
-        x: 96
-        y: 108
+        x: 2
+        y: 169
         width: 90
         height: 90
       alignment: 0
@@ -2007,7 +2501,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e5cfb4beb15898f4c9accf1de4c3ab59
+      spriteID: 9e1244e52669f6e4987c186ce816a838
+      internalID: 21300204
       vertices: []
       indices: 
       edges: []
@@ -2017,7 +2512,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 96
-        y: 14
+        y: 169
         width: 90
         height: 90
       alignment: 0
@@ -2027,7 +2522,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9de9b642957082249a081cdcfd1d2a9e
+      spriteID: 14fae53c1acf8d249979ad9c3127a6dd
+      internalID: 21300206
       vertices: []
       indices: 
       edges: []
@@ -2036,8 +2532,8 @@ TextureImporter:
       name: BB_UI_TitleBarPanel
       rect:
         serializedVersion: 2
-        x: 734
-        y: 564
+        x: 298
+        y: 582
         width: 144
         height: 144
       alignment: 0
@@ -2047,7 +2543,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c4e2b349653d6e04281a9d0cb44f8e77
+      spriteID: 965e3ebc03b4b8c44968746b4b146aec
+      internalID: 21300208
       vertices: []
       indices: 
       edges: []
@@ -2056,8 +2553,8 @@ TextureImporter:
       name: BB_UI_TitleBarPanelOverlay
       rect:
         serializedVersion: 2
-        x: 316
-        y: 563
+        x: 2
+        y: 545
         width: 144
         height: 144
       alignment: 0
@@ -2067,7 +2564,50 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fe7613da68b19db46809ba21fd295f55
+      spriteID: 360d1ac42459d0f41b7cc09b0ab57a8b
+      internalID: 21300210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_TitleBarPanelOverlayDisabled
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 545
+        width: 144
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 36, y: 36, z: 36, w: 36}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 432ee9031319c7d4898ad61442e8c0b5
+      internalID: 21300276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BB_UI_TitleBarPanelOverlayHighlighted
+      rect:
+        serializedVersion: 2
+        x: 446
+        y: 582
+        width: 144
+        height: 144
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 36, y: 36, z: 36, w: 36}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01960ce71ac058d42932c00218b0746b
+      internalID: 21300274
       vertices: []
       indices: 
       edges: []
@@ -2076,8 +2616,8 @@ TextureImporter:
       name: BB_UI_TitleBarPanelOverlayStrap
       rect:
         serializedVersion: 2
-        x: 800
-        y: 416
+        x: 742
+        y: 582
         width: 72
         height: 144
       alignment: 0
@@ -2087,7 +2627,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 849cbc8269bc55043a803cebc12e75fd
+      spriteID: 8051955797e0c684991ffd45cf8f0301
+      internalID: 21300212
       vertices: []
       indices: 
       edges: []
@@ -2096,8 +2637,8 @@ TextureImporter:
       name: BB_UI_TitleBarStar
       rect:
         serializedVersion: 2
-        x: 464
-        y: 563
+        x: 594
+        y: 582
         width: 144
         height: 144
       alignment: 0
@@ -2107,7 +2648,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8951bbfc6c37a794bac4fb7d7d6477a4
+      spriteID: 20b769fd94910af47860eece8700f1a5
+      internalID: 21300214
       vertices: []
       indices: 
       edges: []
@@ -2116,10 +2658,12 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: d71a2de00ca05b94fa5bf8db353b1ad4
+    internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
+    secondaryTextures: []
   spritePackingTag: UI
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
