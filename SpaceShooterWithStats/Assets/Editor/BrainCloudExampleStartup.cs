@@ -1,4 +1,4 @@
-﻿using BrainCloudUnity.BrainCloudSettingsDLL;
+﻿using BrainCloud;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ public class BrainCloudExampleStartup : MonoBehaviour {
 	static BrainCloudExampleStartup()
 	{
 		// Setting the default template id.
-		PlayerPrefs.SetString(BaseBrainCloudSettings.DEFAULT_TEMPLATE_ID_KEY, "12186");
-		PlayerPrefs.SetString(BaseBrainCloudSettings.DEFAULT_TEMPLATE_NAME_KEY, "Space Shooter");
+		PlayerPrefs.SetString("APP_ID", BrainCloud.Plugin.Interface.AppId);
+		PlayerPrefs.SetString("NAME", "Space Shooter");
 	}
 }
