@@ -34,7 +34,8 @@ public class PlayerController : MonoBehaviour
 			nextFire = Time.time + fireRate;
 			Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
 			GetComponent<AudioSource>().Play ();
-
+			App.Bc.SocialLeaderboardService.PostScoreToLeaderboard("testLeaderBoard", 57, "{ \"" + "TESTVALUE" + "\" : " + "40" + "}");
+			//App.Bc.SocialLeaderboardService.PostScoreToLeaderboard("testLeaderBoard", 42, "data TESSSSSSSSSSSSSSSSSSST");
 			gameController.OnShotFired();
 		}
 	}

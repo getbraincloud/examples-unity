@@ -4,6 +4,11 @@ using System;
 using BrainCloud.LitJson;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using System.Text.RegularExpressions;
+using System.Net;
+using System.Collections;
+using BrainCloud.JsonFx.Json;
+
 
 public class GameController : MonoBehaviour
 {
@@ -38,6 +43,49 @@ public class GameController : MonoBehaviour
 		brainCloudStatusText.gameObject.SetActive(true);
 	}
 
+	void addScoreToLeaderBoard(int killed, int asteroids)
+	{
+		int score = ((killed * 10) + asteroids) * 10;
+		//sending to the cloud
+		App.Bc.SocialLeaderboardService.PostScoreToLeaderboard("testLeaderBoard", score, "{ \"" + "Accuracy" + "\" : " + m_accuracy + "}");
+	}
+
+	void ReadLeaderBoard()
+    {
+		App.Bc.SocialLeaderboardService.GetGlobalLeaderboardView("testLeaderBoard", BrainCloud.BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 1, 1, LeaderBoardSuccess_Callback, StatsFailure_Callback);
+	}
+
+	void DisplayLeaderBoard(string data)
+	{
+		//todo
+		//need to clean up and loop through instead
+
+		//3 different text that need to be dissable in disable and rendered true here and placed in unity
+
+		int rank;
+		int score;
+		// Read the json to display nearby leaderboard rankings
+		JsonData jsonData = JsonMapper.ToObject(data);
+		JsonData player1 = jsonData["data"]["leaderboard"][0];
+		rank = int.Parse(player1["rank"].ToString());
+		score = int.Parse(player1["score"].ToString());
+		highPlayerText.gameObject.SetActive(true);
+		highPlayerText.text = "Rank: " + rank + "  " + "Score:" + score;
+		//clickToStartText.text = "Rank: " + rank + "  " + "Score:" + score;
+
+		JsonData player2 = jsonData["data"]["leaderboard"][1];
+		rank = int.Parse(player2["rank"].ToString());
+		score = int.Parse(player2["score"].ToString());
+		midPlayerText.gameObject.SetActive(true);
+		midPlayerText.text = "Rank: " + rank + "  " + "Score:" + score;
+
+		JsonData player3 = jsonData["data"]["leaderboard"][2];
+		rank = int.Parse(player3["rank"].ToString());
+		score = int.Parse(player3["score"].ToString());
+		lowPlayerText.gameObject.SetActive(true);
+		lowPlayerText.text = "Rank: " + rank + "  " + "Score:" + score;
+	}
+
 	private void StatsSuccess_Callback(string responseData, object cbObject)
 	{
 		// Read the json and update our values
@@ -67,6 +115,21 @@ public class GameController : MonoBehaviour
 	}
 	////////////////////////////////////////////
 
+	private void LeaderBoardSuccess_Callback(string responseData, object cbObject)
+	{
+		//todo
+		DisplayLeaderBoard(responseData);
+	}
+
+	private void LeaderBoardFailure_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+	{
+		if (brainCloudStatusText)
+		{
+			brainCloudStatusText.text = "Failed to get leaderboard from brainCloud";
+		}
+		Debug.Log(statusMessage);
+	}
+
 
 	// Prefabs
 	public GameObject player;
@@ -92,6 +155,11 @@ public class GameController : MonoBehaviour
 	public Text shotsFiredText;
 	public Text gamesPlayedText;
 
+	public Text highPlayerText;
+	public Text midPlayerText;
+	public Text lowPlayerText;
+	//todo
+
 	// States
 	private enum eGameState
 	{
@@ -99,7 +167,8 @@ public class GameController : MonoBehaviour
 		GAME_STATE_PLAYING,
 		GAME_STATE_GAME_OVER,
 		GAME_STATE_SCORE_SCREEN,
-		GAME_STATE_WAITING_FOR_BRAINCLOUD
+		GAME_STATE_LEADERBOARD_SCREEN,
+		GAME_STATE_WAITING_FOR_BRAINCLOUD//add one more state? one more screen?
 	}
 	private eGameState m_state = eGameState.GAME_STATE_START_SCREEN;
 	private enum ePlayState
@@ -145,7 +214,8 @@ public class GameController : MonoBehaviour
 		{
 			UpdateScoreText();
 			ReadStatistics();
-		}
+			addScoreToLeaderBoard(m_enemiesKilledThisRound, m_asteroidsDestroyedThisRound);
+		}	
 	}
 
 	void Update ()
@@ -197,13 +267,25 @@ public class GameController : MonoBehaviour
 				scoreText.gameObject.SetActive(false);
 				gameOverText.gameObject.SetActive(false);
 
-				clickToStartText.text = "Click to Restart";
+				clickToStartText.text = "Click to see leaderboard";//"Click to Restart";
 				clickToStartText.gameObject.SetActive(true);
 
 				SaveStatisticsToBrainCloud();
 			}
 			break;
 		case eGameState.GAME_STATE_SCORE_SCREEN:
+			if (Input.GetMouseButtonDown(0))
+			{
+				//todo
+				m_state = eGameState.GAME_STATE_LEADERBOARD_SCREEN;
+				DisableText();
+				clickToStartText.gameObject.SetActive(true);
+				clickToStartText.text = "Click to restart";
+
+				ReadLeaderBoard();
+			}
+			break;
+		case eGameState.GAME_STATE_LEADERBOARD_SCREEN:
 			if (Input.GetMouseButtonDown(0))
 			{
 				StartRound();
@@ -214,14 +296,8 @@ public class GameController : MonoBehaviour
 
 	void StartRound()
 	{
-		enemiesKilledText.gameObject.SetActive(false);
-		asteroidsDestroyedText.gameObject.SetActive(false);
-		shotsFiredText.gameObject.SetActive(false);
-		accuracyText.gameObject.SetActive(false);
-		gamesPlayedText.gameObject.SetActive(false);
-		clickToStartText.gameObject.SetActive(false);
-		brainCloudStatusText.gameObject.SetActive(false);
 		scoreText.gameObject.SetActive(true);
+		DisableText();
 
 		m_enemiesKilledThisRound = 0;
 		m_asteroidsDestroyedThisRound = 0;
@@ -321,5 +397,20 @@ public class GameController : MonoBehaviour
 
 		gamesPlayedText.text = "Games Played: " + m_statGamesPlayed;
 		gamesPlayedText.gameObject.SetActive(true);
+	}
+
+	void DisableText()
+    {
+		enemiesKilledText.gameObject.SetActive(false);
+		asteroidsDestroyedText.gameObject.SetActive(false);
+		shotsFiredText.gameObject.SetActive(false);
+		accuracyText.gameObject.SetActive(false);
+		gamesPlayedText.gameObject.SetActive(false);
+		clickToStartText.gameObject.SetActive(false);
+		brainCloudStatusText.gameObject.SetActive(false);
+
+		highPlayerText.gameObject.SetActive(false);
+		midPlayerText.gameObject.SetActive(false);
+		lowPlayerText.gameObject.SetActive(false);
 	}
 }
