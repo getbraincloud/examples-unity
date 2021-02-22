@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using BrainCloud;
 using System;
-using BrainCloudUnity;
 using System.Text;
 using System.Linq;
 
@@ -59,9 +58,7 @@ namespace Gameframework
                 GameObject go = new GameObject();
                 m_wrapper = go.AddComponent<BrainCloudWrapper>();
                 m_wrapper.WrapperName = "mainWrapper";
-                Dictionary<string, string> gameIdSecretKeyMap = new Dictionary<string, string>();
-                gameIdSecretKeyMap[BrainCloudSettingsManual.Instance.GameId] = BrainCloudSettingsManual.Instance.SecretKey;
-                m_wrapper.InitWithApps(BrainCloudSettingsManual.Instance.DispatcherURL, BrainCloudSettingsManual.Instance.GameId, gameIdSecretKeyMap, BrainCloudSettingsManual.Instance.GameVersion);
+                m_wrapper.InitWithApps();
                 go.transform.SetParent(transform);
 
 #if BC_DEBUG_LOG_ENABLED

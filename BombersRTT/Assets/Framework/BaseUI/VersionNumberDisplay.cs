@@ -1,5 +1,5 @@
 ﻿using UnityEngine.UI;
-using BrainCloudUnity;
+using UnityEngine;
 namespace Gameframework
 {
     public class VersionNumberDisplay : BaseBehaviour
@@ -9,7 +9,7 @@ namespace Gameframework
         // Use this for initialization
         void Start()
         {
-            VersionText.text = BrainCloudSettingsManual.Instance.GameVersion;
+            VersionText.text = Application.version;
 
             DontDestroyOnLoad(gameObject);
         }
