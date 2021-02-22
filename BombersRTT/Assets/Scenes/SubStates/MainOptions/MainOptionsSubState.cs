@@ -2,9 +2,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using BrainCloud;
-using BrainCloudUnity;
 using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
+using BrainCloud.Plugin;
 
 namespace BrainCloudUNETExample
 {
@@ -41,7 +41,7 @@ namespace BrainCloudUNETExample
             _stateInfo = new StateInfo(STATE_NAME, this);
             base.Start();
 
-            VersionText.text = BrainCloudSettingsManual.Instance.GameVersion;
+            VersionText.text = Application.version;
 
             /*
             GlobalVolumeDisplayText.transform.parent.parent.GetComponent<Slider>().value = GSoundMgr.Instance.GlobalVolume;
