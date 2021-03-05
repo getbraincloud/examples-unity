@@ -19,7 +19,6 @@ namespace BrainCloud
     using UnityEngine.Assertions;
 #else
 using System.Globalization;
-using System;
 #endif
 
     #region Enums
@@ -83,8 +82,8 @@ using System;
     /// <summary>
     /// Relay callback.
     /// </summary>
-    /// <param name="jsonResponse">The JSON response from the server</param>
-    public delegate void RelayCallback(byte[] jsonResponse);
+    /// <param name="data">The data send from netId user</param>
+    public delegate void RelayCallback(short netId, byte[] data);
 
     /// <summary>
     /// Relay system callback.
@@ -137,7 +136,6 @@ using System;
         private BrainCloudGlobalEntity _globalEntityService;
         private BrainCloudGlobalApp _globalAppService;
         private BrainCloudPresence _presenceService;
-        private BrainCloudProduct _productService;
         private BrainCloudVirtualCurrency _virtualCurrencyService;
         private BrainCloudAppStore _appStore;
         private BrainCloudPlayerStatistics _playerStatisticsService;
@@ -219,7 +217,6 @@ using System;
 
             _globalAppService = new BrainCloudGlobalApp(this);
             _presenceService = new BrainCloudPresence(this);
-            _productService = new BrainCloudProduct(this);
             _virtualCurrencyService = new BrainCloudVirtualCurrency(this);
             _appStore = new BrainCloudAppStore(this);
 
@@ -263,7 +260,7 @@ using System;
             _lobbyService = new BrainCloudLobby(this);
             _chatService = new BrainCloudChat(this);
             _rttService = new BrainCloudRTT(_rttComms, this);
-            _rsService = new BrainCloudRelay(_rsComms);
+            _rsService = new BrainCloudRelay(_rsComms, this);
         }
         //---------------------------------------------------------------
 
@@ -379,11 +376,6 @@ using System;
         public BrainCloudPresence PresenceService
         {
             get { return _presenceService; }
-        }
-
-        public BrainCloudProduct ProductService
-        {
-            get { return _productService; }
         }
 
         public BrainCloudVirtualCurrency VirtualCurrencyService
@@ -599,11 +591,6 @@ using System;
         public BrainCloudPresence GetPresenceService()
         {
             return PresenceService;
-        }
-
-        public BrainCloudProduct GetProductService()
-        {
-            return ProductService;
         }
 
         public BrainCloudPlayerStatistics GetPlayerStatisticsService()
@@ -995,6 +982,9 @@ using System;
             _loggingEnabled = enable;
         }
 
+        /// <summary> Check if logging of brainCloud transactions is enabled</summary>
+        public bool LoggingEnabled { get { return _loggingEnabled; } }
+
         /// <summary>Allow developers to register their own log handling routine</summary>
         /// <param name="logDelegate">The log delegate</param>
         public void RegisterLogDelegate(LogCallback logDelegate)
@@ -1248,12 +1238,8 @@ using System;
 
         /// <summary>Method writes log if logging is enabled</summary>
         /// 
-        [System.Diagnostics.Conditional("BC_DEBUG_LOG_ENABLED")]
         internal void Log(string log)
         {
-#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
-            BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.AppendLog(log);
-#endif
             if (_loggingEnabled)
             {
                 string formattedLog = DateTime.Now.ToString("HH:mm:ss.fff") + " #BCC " + (log.Length < 14000 ? log : log.Substring(0, 14000) + " << (LOG TRUNCATED)");

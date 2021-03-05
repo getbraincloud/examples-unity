@@ -122,6 +122,7 @@ using System;
         public static readonly ServiceOperation ListAllLeaderboards = new ServiceOperation("LIST_ALL_LEADERBOARDS");
         public static readonly ServiceOperation GetGlobalLeaderboardEntryCount = new ServiceOperation("GET_GLOBAL_LEADERBOARD_ENTRY_COUNT");
         public static readonly ServiceOperation GetPlayerScore = new ServiceOperation("GET_PLAYER_SCORE");
+        public static readonly ServiceOperation GetPlayerScores = new ServiceOperation("GET_PLAYER_SCORES");
         public static readonly ServiceOperation GetPlayerScoresFromLeaderboards = new ServiceOperation("GET_PLAYER_SCORES_FROM_LEADERBOARDS");
         public static readonly ServiceOperation PostScoreToGroupLeaderboard = new ServiceOperation("POST_GROUP_SCORE");
         public static readonly ServiceOperation RemoveGroupScore = new ServiceOperation("REMOVE_GROUP_SCORE");
@@ -447,15 +448,19 @@ using System;
         public static readonly ServiceOperation GetCatalogItemsPageOffset = new ServiceOperation("GET_CATALOG_ITEMS_PAGE_OFFSET");
 
         //CustomEntity
+
+        public static readonly ServiceOperation DeleteEntities = new ServiceOperation("DELETE_ENTITIES");
         public static readonly ServiceOperation CreateCustomEntity = new ServiceOperation("CREATE_ENTITY");
         public static readonly ServiceOperation GetCustomEntityPage = new ServiceOperation("GET_PAGE");
         public static readonly ServiceOperation GetCustomEntityPageOffset = new ServiceOperation("GET_ENTITY_PAGE_OFFSET");
         public static readonly ServiceOperation GetEntityPage = new ServiceOperation("GET_ENTITY_PAGE");
         public static readonly ServiceOperation ReadCustomEntity = new ServiceOperation("READ_ENTITY");
+        public static readonly ServiceOperation IncrementData = new ServiceOperation("INCREMENT_DATA");
         public static readonly ServiceOperation UpdateCustomEntity = new ServiceOperation("UPDATE_ENTITY");
         public static readonly ServiceOperation UpdateCustomEntityFields = new ServiceOperation("UPDATE_ENTITY_FIELDS");
         public static readonly ServiceOperation DeleteCustomEntity = new ServiceOperation("DELETE_ENTITY");
         public static readonly ServiceOperation GetCount = new ServiceOperation("GET_COUNT");
+        public static readonly ServiceOperation UpdateSingletonFields = new ServiceOperation("UPDATE_SINGLETON_FIELDS");
 
         //UserItemsService
 

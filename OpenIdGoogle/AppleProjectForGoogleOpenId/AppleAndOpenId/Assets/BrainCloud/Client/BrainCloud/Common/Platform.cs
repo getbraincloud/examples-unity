@@ -4,6 +4,9 @@
 //----------------------------------------------------
 
 using System.Collections.Generic;
+#if XAMARIN
+    using Xamarin.Essentials;
+#endif
 
 namespace BrainCloud.Common
 {
@@ -14,6 +17,7 @@ namespace BrainCloud.Common
         public static readonly Platform AppleTVOS = new Platform("APPLE_TV_OS");
         public static readonly Platform BlackBerry = new Platform("BB");
         public static readonly Platform Facebook = new Platform("FB");
+        public static readonly Platform Oculus = new Platform("Oculus");
         public static readonly Platform GooglePlayAndroid = new Platform("ANG");
         public static readonly Platform iOS = new Platform("IOS");
         public static readonly Platform Linux = new Platform("LINUX");
@@ -31,12 +35,15 @@ namespace BrainCloud.Common
         public static readonly Platform Windows = new Platform("WINDOWS");
         public static readonly Platform Xbox360 = new Platform("XBOX_360");
         public static readonly Platform XboxOne = new Platform("XBOX_ONE");
+        public static readonly Platform Amazon = new Platform("AMAZON");
 
         private static readonly Dictionary<string, Platform> _platformsForString = new Dictionary<string, Platform>
         {
             { AppleTVOS.value, AppleTVOS },
+            { Amazon.value, Amazon },
             { BlackBerry.value, BlackBerry },
             { Facebook.value, Facebook },
+            { Oculus.value, Oculus },
             { GooglePlayAndroid.value, GooglePlayAndroid },
             { iOS.value, iOS },
             { Linux.value, Linux },
@@ -105,7 +112,15 @@ namespace BrainCloud.Common
 #elif UNITY_TVOS
             return AppleTVOS;
 #elif UNITY_ANDROID
-            return GooglePlayAndroid;
+       string amazonCheck = UnityEngine.SystemInfo.deviceModel;
+        if(amazonCheck.Contains("Amazon"))
+        {
+            return Amazon;
+        }
+        else
+        {
+            return GooglePlayAndroid;
+        }
 #elif UNITY_WP8 || UNITY_WP8_1
             return WindowsPhone;
 #elif UNITY_WSA
@@ -122,6 +137,16 @@ namespace BrainCloud.Common
             return XboxOne;
 #elif UNITY_TIZEN
             return Tizen;
+#elif XAMARIN
+            string checkAmazon = DeviceInfo.Manufacturer;
+            if(checkAmazon.Contains("Amazon"))
+            {
+                return Amazon;
+            }
+            else
+            {
+                return GooglePlayAndroid;
+            }      
 #else
             return Unknown;
 #endif
