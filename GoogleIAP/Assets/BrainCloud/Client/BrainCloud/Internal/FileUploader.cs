@@ -111,9 +111,6 @@ using System.Threading.Tasks;
         {
             _client = client;
 
-#if UNITY_WEBPLAYER || UNITY_WEBGL
-            throw new Exception("File upload API is not supported on Web builds");
-#else
             UploadId = uploadId;
             _localPath = localPath;
             _serverUrl = serverUrl;
@@ -134,20 +131,28 @@ using System.Threading.Tasks;
             TotalBytesToTransfer = info.Length;
 
             Status = FileUploaderStatus.Pending;
-#endif
         }
 
         public void Start()
         {
 #if !UNITY_WEBPLAYER
 #if !DOT_NET
-            byte[] file = File.ReadAllBytes(_localPath);
+            FileInfo info = new FileInfo(_localPath);
+            byte[] file;
+            if (info.Exists)
+            {
+                file = File.ReadAllBytes(_localPath);
+            }
+            else
+            {
+                file = System.Convert.FromBase64String(_localPath);
+            }
             WWWForm postForm = new WWWForm();
             postForm.AddField("sessionId", _sessionId);
 
             if (_peerCode != "") postForm.AddField("peerCode", _peerCode);
             postForm.AddField("uploadId", UploadId);
-            postForm.AddField("fileSize", TotalBytesToTransfer.ToString());
+            postForm.AddField("fileSize", file.Length);
             postForm.AddBinaryData("uploadFile", file, _fileName);
 
 #if USE_WEB_REQUEST
@@ -184,7 +189,10 @@ using System.Threading.Tasks;
             });
 #endif
             Status = FileUploaderStatus.Uploading;
-            _client.Log("Started upload of " + _fileName);
+            if (_client.LoggingEnabled)
+            {
+                _client.Log("Started upload of " + _fileName);
+            }
             _lastTime = DateTime.Now;
 #endif
         }
@@ -207,7 +215,10 @@ using System.Threading.Tasks;
                 Response = await content.ReadAsStringAsync();
                 StatusCode = (int)message.StatusCode;
                 Status = FileUploaderStatus.CompleteSuccess;
-                _client.Log("Uploaded " + _fileName + " in " + _elapsedTime.ToString("0.0##") + " seconds");
+                if (_client.LoggingEnabled)
+                {
+                    _client.Log("Uploaded " + _fileName + " in " + _elapsedTime.ToString("0.0##") + " seconds");
+                }
             }
             catch (WebException wex)
             {
@@ -248,7 +259,11 @@ using System.Threading.Tasks;
             StatusCode = StatusCodes.CLIENT_NETWORK_ERROR;
             ReasonCode = ReasonCodes.CLIENT_UPLOAD_FILE_CANCELLED;
             Response = CreateErrorString(StatusCode, ReasonCode, "Upload of " + _fileName + " cancelled by user");
-            _client.Log("Upload of " + _fileName + " cancelled by user");
+            
+            if (_client.LoggingEnabled)
+            {
+                _client.Log("Upload of " + _fileName + " cancelled by user");
+            }
         }
 
         public void Update()
@@ -307,7 +322,13 @@ using System.Threading.Tasks;
                 JsonErrorMessage resp = null;
 
                 try { resp = JsonReader.Deserialize<JsonErrorMessage>(Response); }
-                catch (JsonDeserializationException e) { _client.Log(e.Message); }
+                catch (JsonDeserializationException e)
+                {
+                    if (_client.LoggingEnabled)
+                    {
+                        _client.Log(e.Message);
+                    }
+                }
 
                 if (resp != null)
                     ReasonCode = resp.reason_code;
@@ -326,7 +347,10 @@ using System.Threading.Tasks;
 #else
                 Response = _request.text;
 #endif
-                _client.Log("Uploaded " + _fileName + " in " + _elapsedTime.ToString("0.0##") + " seconds");
+                if (_client.LoggingEnabled)
+                {
+                    _client.Log("Uploaded " + _fileName + " in " + _elapsedTime.ToString("0.0##") + " seconds");
+                }
             }
 
 #if USE_WEB_REQUEST

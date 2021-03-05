@@ -1,27 +1,10 @@
 {
   "dependencies": {
-    "com.google.android.appbundle": {
-      "version": "1.3.0",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://unityregistry-pa.googleapis.com"
-    },
     "com.google.external-dependency-manager": {
       "version": "1.2.161",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
-      "url": "https://unityregistry-pa.googleapis.com"
-    },
-    "com.google.play.billing": {
-      "version": "3.1.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.google.android.appbundle": "1.3.0",
-        "com.unity.purchasing": "2.1.1"
-      },
       "url": "https://unityregistry-pa.googleapis.com"
     },
     "com.unity.2d.sprite": {
@@ -37,7 +20,7 @@
       "dependencies": {}
     },
     "com.unity.ads": {
-      "version": "3.4.9",
+      "version": "3.5.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -78,7 +61,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.vscode": {
-      "version": "1.2.2",
+      "version": "1.2.3",
       "depth": 0,
       "source": "registry",
       "dependencies": {},

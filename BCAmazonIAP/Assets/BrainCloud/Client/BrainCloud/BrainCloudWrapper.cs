@@ -11,7 +11,6 @@ using BrainCloud.JsonFx.Json;
 
 #if !DOT_NET
 using UnityEngine;
-using BrainCloudUnity;
 #else
 using System.IO;
 using System.IO.IsolatedStorage;
@@ -375,12 +374,12 @@ public class BrainCloudWrapper
     {
         resetWrapper();
         Init(
-            BrainCloudSettingsManual.Instance.DispatcherURL,
-            BrainCloudSettingsManual.Instance.SecretKey,
-            BrainCloudSettingsManual.Instance.AppId,
-            BrainCloudSettingsManual.Instance.GameVersion);
+            BrainCloud.Plugin.Interface.DispatcherURL,
+            BrainCloud.Plugin.Interface.AppSecret,
+            BrainCloud.Plugin.Interface.AppId,
+            BrainCloud.Plugin.Interface.AppVersion);
 
-        Client.EnableLogging(BrainCloudSettingsManual.Instance.EnableLogging);
+        Client.EnableLogging(BrainCloud.Plugin.Interface.EnableLogging);
     }
 
     /// <summary>
@@ -391,12 +390,12 @@ public class BrainCloudWrapper
     {
         resetWrapper();
         InitWithApps(
-            BrainCloudSettingsManual.Instance.DispatcherURL,
-            BrainCloudSettingsManual.Instance.AppId,
-            BrainCloudSettingsManual.Instance.AppIdSecrets,
-            BrainCloudSettingsManual.Instance.GameVersion);
+            BrainCloud.Plugin.Interface.DispatcherURL,
+            BrainCloud.Plugin.Interface.AppId,
+            BrainCloud.Plugin.Interface.AppIdSecrets,
+            BrainCloud.Plugin.Interface.AppVersion);
 
-        Client.EnableLogging(BrainCloudSettingsManual.Instance.EnableLogging);
+        Client.EnableLogging(BrainCloud.Plugin.Interface.EnableLogging);
     }
 #endif
 
@@ -731,6 +730,94 @@ public class BrainCloudWrapper
 
         Client.AuthenticationService.AuthenticateFacebook(
             fbUserId, fbAuthToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
+    }
+
+      /// <summary>
+    /// Authenticate the user with brainCloud using their Facebook Credentials
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="oculusUserId">
+    /// The oculus id of the user
+    /// </param>
+    /// <param name="oculusNonce">
+    /// Validation token from Oculus gotten through the Oculus sdk
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public void AuthenticateOculus(
+        string oculusUserId,
+        string oculusNonce,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
+        aco._successCallback = success;
+        aco._failureCallback = failure;
+        aco._cbObject = cbObject;
+
+        InitializeIdentity();
+
+        Client.AuthenticationService.AuthenticateOculus(
+            oculusUserId, oculusNonce, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
+    }
+
+    /// <summary>
+    /// Authenticate the user using their psn account id and an auth token
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="accountId">
+    /// The user's PSN account id
+    /// </param>
+    /// <param name="authToken">
+    /// The user's PSN auth token
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public void AuthenticatePSN(
+        string accountId,
+        string authToken,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
+        aco._successCallback = success;
+        aco._failureCallback = failure;
+        aco._cbObject = cbObject;
+
+        InitializeIdentity();
+
+        Client.AuthenticationService.AuthenticatePSN(
+            accountId, authToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
     }
 
     /// <summary>
@@ -1183,6 +1270,98 @@ public class BrainCloudWrapper
         SuccessCallback authenticateCallback = (response, o) =>
         {
             AuthenticateFacebook(fbUserId, fbAuthToken, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user with brainCloud using their Facebook Credentials
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="oculusUserId">
+    /// The Oculus id of the user
+    /// </param>
+    /// <param name="oculusNonce">
+    /// Validation token from Oculus gotten through the Oculus sdk
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateOculus(
+        string oculusUserId,
+        string oculusNonce,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) =>
+        {
+            AuthenticateOculus(oculusUserId, oculusNonce, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+
+    }
+
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user with brainCloud using their PSN Credentials
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="psnAccountId">
+    /// The psn account id of the user
+    /// </param>
+    /// <param name="psnAuthToken">
+    /// The validated token from the Playstation SDK (that will be further
+    /// validated when sent to the bC service)
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticatePSN(
+        string psnAccountId,
+        string psnAuthToken,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) =>
+        {
+            AuthenticatePSN(psnAccountId, psnAuthToken, forceCreate, success, failure, cbObject);
         };
 
         SmartSwitchAuthentication(authenticateCallback, failure);
@@ -2003,10 +2182,6 @@ public class BrainCloudWrapper
                 aco._successCallback(json, aco._cbObject);
             }
         }
-
-#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
-        BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnAuthenticateSuccess(json);
-#endif
     }
 
     /// <summary>
@@ -2026,10 +2201,6 @@ public class BrainCloudWrapper
                 aco._failureCallback(statusCode, reasonCode, errorJson, aco._cbObject);
             }
         }
-
-#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
-        BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.OnAuthenticateFailed(string.Format("statusCode[{0}] reasonCode[{1}] errorJson[{2}]", statusCode, reasonCode, errorJson));
-#endif
     }
 
     private void SaveData()

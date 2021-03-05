@@ -136,7 +136,6 @@ using System.Globalization;
         private BrainCloudGlobalEntity _globalEntityService;
         private BrainCloudGlobalApp _globalAppService;
         private BrainCloudPresence _presenceService;
-        private BrainCloudProduct _productService;
         private BrainCloudVirtualCurrency _virtualCurrencyService;
         private BrainCloudAppStore _appStore;
         private BrainCloudPlayerStatistics _playerStatisticsService;
@@ -218,7 +217,6 @@ using System.Globalization;
 
             _globalAppService = new BrainCloudGlobalApp(this);
             _presenceService = new BrainCloudPresence(this);
-            _productService = new BrainCloudProduct(this);
             _virtualCurrencyService = new BrainCloudVirtualCurrency(this);
             _appStore = new BrainCloudAppStore(this);
 
@@ -378,11 +376,6 @@ using System.Globalization;
         public BrainCloudPresence PresenceService
         {
             get { return _presenceService; }
-        }
-
-        public BrainCloudProduct ProductService
-        {
-            get { return _productService; }
         }
 
         public BrainCloudVirtualCurrency VirtualCurrencyService
@@ -598,11 +591,6 @@ using System.Globalization;
         public BrainCloudPresence GetPresenceService()
         {
             return PresenceService;
-        }
-
-        public BrainCloudProduct GetProductService()
-        {
-            return ProductService;
         }
 
         public BrainCloudPlayerStatistics GetPlayerStatisticsService()
@@ -994,6 +982,9 @@ using System.Globalization;
             _loggingEnabled = enable;
         }
 
+        /// <summary> Check if logging of brainCloud transactions is enabled</summary>
+        public bool LoggingEnabled { get { return _loggingEnabled; } }
+
         /// <summary>Allow developers to register their own log handling routine</summary>
         /// <param name="logDelegate">The log delegate</param>
         public void RegisterLogDelegate(LogCallback logDelegate)
@@ -1247,12 +1238,8 @@ using System.Globalization;
 
         /// <summary>Method writes log if logging is enabled</summary>
         /// 
-        [System.Diagnostics.Conditional("BC_DEBUG_LOG_ENABLED")]
         internal void Log(string log)
         {
-#if BC_DEBUG_LOG_ENABLED && UNITY_EDITOR
-            BrainCloudUnity.BrainCloudSettingsDLL.ResponseEvent.AppendLog(log);
-#endif
             if (_loggingEnabled)
             {
                 string formattedLog = DateTime.Now.ToString("HH:mm:ss.fff") + " #BCC " + (log.Length < 14000 ? log : log.Substring(0, 14000) + " << (LOG TRUNCATED)");
