@@ -11,10 +11,10 @@ These examples include Bombers, BombersRTT, SpaceShooterWithState, and TicTacToe
 
 Create a new app using a template of one of these examples.
 
-In Unity select **brainCloud | Select Settings** from the menu.
+In Unity select **brainCloud | Settings** from the menu.
 
 <p align="center">
-  <img  src="./screenshots/step_selectsettings.png?raw=true">
+  <img  src="./screenshots/bcSettings.png?raw=true">
 </p>
 
 In the brainCloud Settings, login to your current account or signup for the first time. _brainCloud is free during development :)_
@@ -23,7 +23,7 @@ With your team selected, select **Create New App ...** and check **Create with t
 Select the template you wish to use. If using the SpaceShooter example, check the SpaceShooter template.
 
 <p align="center">
-  <img  src="./screenshots/step_spaceshootertemplate.png?raw=true">
+  <img  src="./screenshots/bcTemplate.png?raw=true">
 </p>
 
 After creating the new app, you can review the imported data on the brainCloud dashboard. The SpaceShooter example imports stats which can be view on the **Design | Statistics Rules | [User Statistics](https://portal.braincloudservers.com/admin/dashboard?custom=null#/development/stats-player)** page.
@@ -41,6 +41,8 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 ---
 
 ## Authentication
+
+*This app is a code example*
 
 This example demonstrates how to call methods in the following modules:
 
@@ -61,9 +63,12 @@ You can find more information about how to run the example here:
 
 http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-authentication-example/
 
+
 ---
 
 ## AuthenticationErrorHandling
+
+*This app is a code example*
 
 This example demonstrates various error handling cases around authentication.
 Use it to experiment with authentication error states.
@@ -75,6 +80,8 @@ Use it to experiment with authentication error states.
 Note: the BombersRTT example expects your app to have a [brainCloud plus plan enabled](#enabling-hosting-on-the-bombersrtt-example).
 
 BombersRTT is a real-time multiplayer game implemented using brainCloud. brainCloud provides the backend services for storing data, as well as the Matchmaking and brainCloud's Relay Multiplayer server.
+
+Go to the SplashScreen scene and run it to test it out in the editor!
 
 [Demo Link](http://apps.braincloudservers.com/bombersrtt-demo/index.html)
 
@@ -92,6 +99,8 @@ For more information, see this [README.mb](https://github.com/getbraincloud/exam
 
 The Getting Started With Unity video uses the Space Shooter example as a backing project.
 
+Go to the BrainCloudConnect scene and run the app to test it out in the editor!
+
 Find more information, including the video itself here:
 
 http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-tutorial-1-getting-started/
@@ -102,11 +111,13 @@ http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-tutorial-1-gett
 
 Async multiplayer and cloud code example.
 
+Open up the two player scene to see it operate in side-by-side action, or build the one player scene and run two different instances of the game to test it out!
+
 For more information, see this [README.mb](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/README.md) file.
 
 ---
 
-## PushNotifications
+## PushNotifications 
 
 Example of connecting Firebase FCM Notifications to brainCloud.
 
@@ -118,21 +129,34 @@ http://getbraincloud.com/apidocs/portal-usage/push-notification-setup-firebase/
 
 Example of authenticating with brainCloud using a Google account. Inside there is a pdf tutorial describing how to go about setting up a google console app, and using firebase to successfully connect the apps to your brainCloud app!
 
+*This is a code example and reference. This app will NOT work out of the box, because you will need your own google console app and braincloud app integrated and setup. You must follow the tutorial pdf that is provided. Use our code as an example for your own code.*   
+
 This method of authenticating with google is NOT recommended, and only works for Android. We highly recommend you looking into our GoogleOpenId example instead, and setting up your google authentication using the googleOpenId. 
 
 ## GoogleOpenId
 
 Example of authenticating with brainCloud using the GoogleOpenId. Inside there is a pdf tutorial describing how to go about setting up a google console app, and successfully connect the app to brainCloud. Instead of a google account specifically, you will be signing in with your googleOpenId. This is more flexible and can be used for IOS and Android devices as well. Setup is explained in the tutorial.
 
-Inside this project folder you will also find a project folder for the same project made on an Apple device. Mostly everything is the same in Unity, but the apple project need to build through Xcode. Refer to the tutorial for further details. 
+*This is a code example and reference. This app will NOT work out of the box, because you will need your own google console app and braincloud app integrated and setup. You must follow the tutorial pdf that is provided. Use our code as an example for your own code.* 
+
+Inside this project folder you will also find a project folder for the same project made on an Apple device. Mostly everything is the same in Unity, but the apple project needs to build through Xcode. Refer to the tutorial for further details. 
+
+## GoogleIAP
+Example of making a purchase with google, and verifying it with braincloud. Refer to the pdf tutorial for setup
+
+*This is a code example and reference. This app will NOT work out of the box, because you will need your own google developers console app and braincloud app integrated and setup. You must follow the tutorial pdf that is provided. Use our code as an example for your own code.* 
 
 ## AppleAuthentication
 
 Example of authenticating with brainCloud using an Apple account. Inside there is a pdf tutorial describing the steps you will need to take in order to properly connect your Apple developer's app and braincloud app. This is for IOS only.
 
+*This is a code example and reference. This app will NOT work out of the box, because you will need your own ios developers console app and braincloud app integrated and setup. You must follow the tutorial pdf that is provided. Use our code as an example for your own code.* 
+
 ## BCAmazonIAP
 
 Example app demonstrating Amazon In-App Purchases and verification with BrainCloud! Inside there is a pdf tutorial describing the steps you will need to take to get going!
+
+*This is a code example and reference. This app will NOT work out of the box, because you will need your own amazon console app and braincloud app integrated and setup. You must follow the tutorial pdf that is provided. Use our code as an example for your own code.* 
 
 ### Additonal information
 
