@@ -22,22 +22,22 @@ public class Build {
 
 	static void UpdateBrainCloudSettings()
 	{
-		string[] args = Environment.GetCommandLineArgs();
-		foreach (string arg in args)
-		{
-			if (arg.StartsWith("-bcappid="))
-			{
-				BrainCloudSettingsManual.Instance.GameId = arg.Substring(("-bcappid=").Length);
-			}
-			else if (arg.StartsWith ("-bcsecret="))
-			{
-				BrainCloudSettingsManual.Instance.SecretKey = arg.Substring(("-bcsecret=").Length);
-			}
-			else if (arg.StartsWith ("-bcurl="))
-			{
-				BrainCloudSettingsManual.Instance.ServerURL = arg.Substring (("-bcurl=").Length);
-			}
-		}
+		// string[] args = Environment.GetCommandLineArgs();
+		// foreach (string arg in args)
+		// {
+		// 	if (arg.StartsWith("-bcappid="))
+		// 	{
+		// 		BrainCloudSettingsManual.Instance.GameId = arg.Substring(("-bcappid=").Length);
+		// 	}
+		// 	else if (arg.StartsWith ("-bcsecret="))
+		// 	{
+		// 		BrainCloudSettingsManual.Instance.SecretKey = arg.Substring(("-bcsecret=").Length);
+		// 	}
+		// 	else if (arg.StartsWith ("-bcurl="))
+		// 	{
+		// 		BrainCloudSettingsManual.Instance.ServerURL = arg.Substring (("-bcurl=").Length);
+		// 	}
+		// }
 	}
 	
 	/* From the forums: http://forum.unity3d.com/threads/4-6-ios-64-bit-beta.290551/page-9#post-1948394

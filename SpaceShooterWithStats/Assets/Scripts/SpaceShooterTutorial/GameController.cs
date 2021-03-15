@@ -38,6 +38,68 @@ public class GameController : MonoBehaviour
 		brainCloudStatusText.gameObject.SetActive(true);
 	}
 
+	void addScoreToLeaderBoard()
+	{
+		//sending to the cloud
+		App.Bc.SocialLeaderboardService.PostScoreToLeaderboard("Leaderboard", m_score, "{ \"" + "username" + "\" : \"" + PlayerPrefs.GetString("username") + "\"}");
+	}
+
+	void ReadLeaderBoard()
+	{
+		App.Bc.SocialLeaderboardService.GetGlobalLeaderboardView("Leaderboard", BrainCloud.BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 2, 2, LeaderBoardSuccess_Callback, StatsFailure_Callback);
+	}
+
+	void DisplayTopLeaderBoardScores(string data)
+	{
+		//displaying the top 5 scores from users on the leaderboard
+		int rank;
+		int score;
+		string name;
+		// Read the json to display nearby leaderboard rankings
+		JsonData jsonData = JsonMapper.ToObject(data);
+		JsonData[] myPlayer = new JsonData[5];
+
+		for (int i = 0; i < 5; i++)
+		{
+			if (jsonData["data"]["leaderboard"].Count == i)
+				break;
+
+			myPlayer[i] = jsonData["data"]["leaderboard"][i];
+			rank = int.Parse(myPlayer[i]["rank"].ToString());
+			score = int.Parse(myPlayer[i]["score"].ToString());
+			name = myPlayer[i]["data"]["username"].ToString();
+			//name = "test";
+
+			scoreArray[i].gameObject.SetActive(true);
+			scoreArray[i].text = "Rank: " + rank + " Username: " + name + " Score: " + score;
+		}
+	}
+
+	private void DisplayPlayerScores(string response)
+	{
+		//displaying users own personal best 5 scores
+		int score;
+		JsonData jsonData = JsonMapper.ToObject(response);
+		JsonData player = jsonData["data"]["scores"];
+
+		//.size?
+		for (int i = 0; i < 5; i++)
+		{
+			if (player.Count == i)
+				break;
+
+			score = int.Parse(player[i]["score"].ToString());
+			scoreArray[i].gameObject.SetActive(true);
+			scoreArray[i].text = i + 1 + ": " + "Score: " + score;
+		}
+	}
+
+	private void ReadPersonalHighestScores()
+	{
+		//gets the players personal top scores
+		App.Bc.SocialLeaderboardService.GetPlayerScores("Leaderboard", -1, 5, GetPlayerScoresSuccess_Callback, StatsFailure_Callback);
+	}
+
 	private void StatsSuccess_Callback(string responseData, object cbObject)
 	{
 		// Read the json and update our values
@@ -66,6 +128,37 @@ public class GameController : MonoBehaviour
 		Debug.Log (statusMessage);
 	}
 	////////////////////////////////////////////
+	private void Success_Callback(string responseData, object cbObject)
+	{
+		Debug.Log(responseData);
+	}
+
+	//
+	private void Fail_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+	{
+		Debug.Log(statusMessage);
+	}
+	////////////////////////////////////////////
+
+	private void LeaderBoardSuccess_Callback(string responseData, object cbObject)
+	{
+		DisplayTopLeaderBoardScores(responseData);
+	}
+
+	private void GetPlayerScoresSuccess_Callback(string responseData, object cbObject)
+	{
+		DisplayPlayerScores(responseData);
+	}
+
+	private void LeaderBoardFailure_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+	{
+		if (brainCloudStatusText)
+		{
+			brainCloudStatusText.text = "Failed to get leaderboard from brainCloud";
+		}
+		Debug.Log(statusMessage);
+	}
+	////////////////////////////////////////////
 
 
 	// Prefabs
@@ -91,6 +184,7 @@ public class GameController : MonoBehaviour
 	public Text accuracyText;
 	public Text shotsFiredText;
 	public Text gamesPlayedText;
+	public Text[] scoreArray;
 
 	// States
 	private enum eGameState
@@ -99,6 +193,8 @@ public class GameController : MonoBehaviour
 		GAME_STATE_PLAYING,
 		GAME_STATE_GAME_OVER,
 		GAME_STATE_SCORE_SCREEN,
+		GAME_STATE_LEADERBOARD_SCREEN,
+		GAME_STATE_BEST_SCORES_SCREEN,
 		GAME_STATE_WAITING_FOR_BRAINCLOUD
 	}
 	private eGameState m_state = eGameState.GAME_STATE_START_SCREEN;
@@ -197,7 +293,7 @@ public class GameController : MonoBehaviour
 				scoreText.gameObject.SetActive(false);
 				gameOverText.gameObject.SetActive(false);
 
-				clickToStartText.text = "Click to Restart";
+				clickToStartText.text = "Click to see your best scores";
 				clickToStartText.gameObject.SetActive(true);
 
 				SaveStatisticsToBrainCloud();
@@ -206,6 +302,28 @@ public class GameController : MonoBehaviour
 		case eGameState.GAME_STATE_SCORE_SCREEN:
 			if (Input.GetMouseButtonDown(0))
 			{
+				m_state = eGameState.GAME_STATE_BEST_SCORES_SCREEN;
+				DisableText();
+				addScoreToLeaderBoard();
+				clickToStartText.gameObject.SetActive(true);
+				clickToStartText.text = "Click to see leaderboard";
+				ReadPersonalHighestScores();
+			}
+			break;
+		case eGameState.GAME_STATE_BEST_SCORES_SCREEN:
+			if (Input.GetMouseButtonDown(0))
+			{
+				m_state = eGameState.GAME_STATE_LEADERBOARD_SCREEN;
+				DisableText();
+				clickToStartText.gameObject.SetActive(true);					
+				clickToStartText.text = "Click to restart";
+
+				ReadLeaderBoard();
+			}
+			break;
+		case eGameState.GAME_STATE_LEADERBOARD_SCREEN:
+			if (Input.GetMouseButtonDown(0))
+			{	
 				StartRound();
 			}
 			break;
@@ -214,14 +332,8 @@ public class GameController : MonoBehaviour
 
 	void StartRound()
 	{
-		enemiesKilledText.gameObject.SetActive(false);
-		asteroidsDestroyedText.gameObject.SetActive(false);
-		shotsFiredText.gameObject.SetActive(false);
-		accuracyText.gameObject.SetActive(false);
-		gamesPlayedText.gameObject.SetActive(false);
-		clickToStartText.gameObject.SetActive(false);
-		brainCloudStatusText.gameObject.SetActive(false);
 		scoreText.gameObject.SetActive(true);
+		DisableText();
 
 		m_enemiesKilledThisRound = 0;
 		m_asteroidsDestroyedThisRound = 0;
@@ -321,5 +433,21 @@ public class GameController : MonoBehaviour
 
 		gamesPlayedText.text = "Games Played: " + m_statGamesPlayed;
 		gamesPlayedText.gameObject.SetActive(true);
+	}
+
+	void DisableText()
+	{
+		enemiesKilledText.gameObject.SetActive(false);
+		asteroidsDestroyedText.gameObject.SetActive(false);
+		shotsFiredText.gameObject.SetActive(false);
+		accuracyText.gameObject.SetActive(false);
+		gamesPlayedText.gameObject.SetActive(false);
+		clickToStartText.gameObject.SetActive(false);
+		brainCloudStatusText.gameObject.SetActive(false);
+
+		for (int i = 0; i < 5; i++)
+		{
+			scoreArray[i].gameObject.SetActive(false);
+		}
 	}
 }
