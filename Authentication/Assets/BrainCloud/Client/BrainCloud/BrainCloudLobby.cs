@@ -574,7 +574,7 @@ using UnityEngine.Experimental.Networking;
             WWWForm postForm = new WWWForm();
             WWW _request = new WWW(in_target, postForm);
 #endif
-            if (_request.error == null && !_request.isNetworkError)
+            if (_request.error == null && _request.result == UnityWebRequest.Result.ConnectionError)
             {
                 handlePingTimeResponse((DateTime.Now.Ticks - sentPing) / 10000, in_region);
             }
