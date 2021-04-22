@@ -320,7 +320,6 @@ using BrainCloud.JsonFx.Json;
         }
 
         /// <summary>
-
         /// Authenticate the user using their psn account id and an auth token
         /// </summary>
         /// <remarks>

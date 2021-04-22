@@ -207,7 +207,7 @@ namespace Gameframework
 
         public void UpdatePlayerName(string in_name, SuccessCallback in_success = null, FailureCallback in_failure = null)
         {
-            GCore.Wrapper.Client.PlayerStateService.UpdateUserName(in_name, in_success, in_failure);
+            GCore.Wrapper.Client.PlayerStateService.UpdateName(in_name, in_success, in_failure);
             PlayerData.PlayerName = (in_name);
             GEventManager.TriggerEvent(GEventManager.ON_PLAYER_DATA_UPDATED);
         }
