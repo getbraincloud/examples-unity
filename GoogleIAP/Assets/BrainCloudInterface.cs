@@ -64,7 +64,9 @@ public class BrainCloudInterface : MonoBehaviour, IStoreListener //needed for un
 
     public void OnAuthEmail()
     {
-        BCConfig._bc.AuthenticateEmailPassword("ryan.daniel.ruth@gmail.com", "password", true, OnSuccess_AuthenticateEmail, OnError_AuthenticateEmail);
+        //Uncomment this line and replace "email" and "password" to the user values
+        //BCConfig._bc.AuthenticateEmailPassword("email", "password", true, OnSuccess_AuthenticateEmail, OnError_AuthenticateEmail);
+        Debug.Warning("Must set up OnAuthEmail() in BrainCloudInterface.cs and point to information from a UI element (ie. InputField)");
     }
 
     public void OnSuccess_AuthenticateEmail(string responseData, object cbObject)
