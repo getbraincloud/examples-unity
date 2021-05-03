@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,16 +10,74 @@ using UnityEngine.EventSystems;
 /// Recommend Use with: Image Component
 /// </summary>
 
+/*
+ * ToDo
+ * - Need to disable cursor and place a mouse image where the cursor was
+ *  - Need to change color of cursor
+ * - Need to spawn a shockwave where the user clicked
+ * yes
+ */
 public class UserMouseArea : MonoBehaviour
 {
-    public TMPro.TMP_Text testText;
+    public Image NewCursor;
+    public Texture2D CursorTexture;
+    public GameObject Shockwave;
+    public Canvas MatchCanvas;
+
+    private RectTransform _cursorRectTransform;
+    private RectTransform _canvasRectTransform;
+
+    private Vector3 _newPosition;
+    private Color _userColor;
+    private ParticleSystem.MainModule _shockwaveParticle;
+    private GameObject _newShockwave;
+    private void Awake()
+    {
+        
+        _canvasRectTransform = MatchCanvas.GetComponent<RectTransform>();
+        /*_cursorRectTransform = NewCursor.GetComponent<RectTransform>();
+        NewCursor.enabled = false;*/
+    }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        testText.color = IsPointerOverUIElement() ? Color.red : Color.white;
+        if (IsPointerOverUIElement())
+        {
+            if (Cursor.visible)
+            {
+                Cursor.visible = false;
+                NewCursor.enabled = true;    
+            }
+            
+
+            _newPosition = GetMousePosition();
+            NewCursor.transform.localPosition = _newPosition;
+            if (Input.GetMouseButtonDown(0))
+            {
+                //ToDo need to give Shockwave proper coordinates
+                _newShockwave = Instantiate(Shockwave, _newPosition, Quaternion.identity);
+                _shockwaveParticle = _newShockwave.GetComponent<ParticleSystem>().main;
+                _shockwaveParticle.startColor = _userColor;
+            }
+        }
+        else
+        {
+            if (!Cursor.visible)
+            {
+                Cursor.visible = true;
+                NewCursor.enabled = false;
+            }
+            
+        }
     }
-    
+
+    private void OnEnable()
+    {
+        _userColor = GameManager.Instance.ReturnUserColor();
+        NewCursor.color = _userColor;
+    }
+
     ///Returns 'true' if we touched or hovering on this gameObject.
     public bool IsPointerOverUIElement()
     {
@@ -43,5 +102,18 @@ public class UserMouseArea : MonoBehaviour
         List<RaycastResult> raysastResults = new List<RaycastResult>();
         EventSystem.current.RaycastAll( eventData, raysastResults );
         return raysastResults;
+    }
+
+    private Vector3 GetMousePosition()
+    {
+        /*
+        Vector2 offset = new Vector2(_canvasRectTransform.sizeDelta.x / 2f, _canvasRectTransform.sizeDelta.y / 2f);
+        Vector2 viewPort = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+        Vector2 position = new Vector2(_canvasRectTransform.sizeDelta.x * viewPort.x - _cursorRectTransform.rect.width / 2, _canvasRectTransform.sizeDelta.y * viewPort.y + _cursorRectTransform.rect.height / 2 + 10f);
+        */
+        Vector2 mouse = Input.mousePosition;
+        Vector3 position = new Vector3(mouse.x - (Screen.width / 2), mouse.y - (Screen.height / 2));
+        //return position - offset;
+        return position;
     }
 }

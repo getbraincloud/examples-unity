@@ -54,6 +54,7 @@ public class StateManager : MonoBehaviour
                 LoadingState.ConnectStates(LookingForLobbyMessage,true,StatesEnum.Lobby);
                 break;
             case StatesEnum.Lobby:
+                GameManager.Instance.SetUpMatchList();
                 LoadingState.ConnectStates(JoiningMatchMessage,false,StatesEnum.Match);
                 break;
             
