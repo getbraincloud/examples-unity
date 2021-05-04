@@ -45,6 +45,7 @@ public class StateManager : MonoBehaviour
         {
             state.gameObject.SetActive(false);
         }
+        //User is in this state and moving onto the next
         switch (newState)
         {
             case StatesEnum.SignIn:
@@ -57,7 +58,6 @@ public class StateManager : MonoBehaviour
                 GameManager.Instance.SetUpMatchList();
                 LoadingState.ConnectStates(JoiningMatchMessage,false,StatesEnum.Match);
                 break;
-            
         }
     }
     
