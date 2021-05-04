@@ -23,22 +23,14 @@ public class UserMouseArea : MonoBehaviour
     public Texture2D CursorTexture;
     public GameObject Shockwave;
     public Canvas MatchCanvas;
-
-    private RectTransform _cursorRectTransform;
-    private RectTransform _canvasRectTransform;
-
+    
+    
+    private Vector2 _shockwaveOffset=new Vector2(-8.6f,-5.5f);
     private Vector3 _newPosition;
     private Color _userColor;
     private ParticleSystem.MainModule _shockwaveParticle;
     private GameObject _newShockwave;
-    private void Awake()
-    {
-        
-        _canvasRectTransform = MatchCanvas.GetComponent<RectTransform>();
-        /*_cursorRectTransform = NewCursor.GetComponent<RectTransform>();
-        NewCursor.enabled = false;*/
-    }
-
+    
     // Update is called once per frame
     void Update()
     {
@@ -56,6 +48,9 @@ public class UserMouseArea : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 //ToDo need to give Shockwave proper coordinates
+                _newPosition = Camera.main.ScreenToWorldPoint(_newPosition);
+                _newPosition.z = 0;
+                _newPosition -= (Vector3)_shockwaveOffset;
                 _newShockwave = Instantiate(Shockwave, _newPosition, Quaternion.identity);
                 _shockwaveParticle = _newShockwave.GetComponent<ParticleSystem>().main;
                 _shockwaveParticle.startColor = _userColor;
@@ -76,6 +71,11 @@ public class UserMouseArea : MonoBehaviour
     {
         _userColor = GameManager.Instance.ReturnUserColor();
         NewCursor.color = _userColor;
+    }
+
+    private void OnDisable()
+    {
+        NewCursor.enabled = false;
     }
 
     ///Returns 'true' if we touched or hovering on this gameObject.
