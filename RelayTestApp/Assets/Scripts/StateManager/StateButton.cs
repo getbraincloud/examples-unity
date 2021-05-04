@@ -6,7 +6,7 @@ public class StateButton : MonoBehaviour
 {
     public void StateButtonChange()
     {
-        StatesEnum newState = transform.parent.GetComponent<State>().CurrentState;
-        StateManager.Instance.ButtonPressed_ChangeState(newState);
+        GameStatesEnum newGameState = transform.parent.GetComponent<GameState>().currentGameState;
+        StateManager.Instance.ButtonPressed_ChangeState(newGameState);
     }
 }

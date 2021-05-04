@@ -3,13 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+/// <summary>
+/// Responsible for switching states from either button events or loading events
+/// </summary>
 
 public class StateManager : MonoBehaviour
 {
-    public List<State> ListOfStates = new List<State>();
+    public List<GameState> ListOfStates = new List<GameState>();
     
-    public ConnectingState LoadingState;
+    public ConnectingGameState loadingGameState;
     private static StateManager _instance;
     public static StateManager Instance => _instance;
 
@@ -31,41 +33,52 @@ public class StateManager : MonoBehaviour
     
     private void Start()
     {
-        ChangeState(StatesEnum.SignIn);
+        ChangeState(GameStatesEnum.SignIn);
+    }
+
+    public void AbortToSignIn()
+    {
+        loadingGameState.CancelNextState = true;
+        ChangeState(GameStatesEnum.SignIn);
     }
 
     public void LeaveToLoggedIn()
     {
-        ButtonPressed_ChangeState(StatesEnum.SignIn);
+        ChangeState(GameStatesEnum.LoggedIn);
     }
     
-    public void ButtonPressed_ChangeState(StatesEnum newState)
+    public void ButtonPressed_ChangeState(GameStatesEnum newGameState)
     {
-        foreach (State state in ListOfStates)
+        foreach (GameState state in ListOfStates)
         {
             state.gameObject.SetActive(false);
         }
         //User is in this state and moving onto the next
-        switch (newState)
+        switch (newGameState)
         {
-            case StatesEnum.SignIn:
-                LoadingState.ConnectStates(LoggingInMessage,false,StatesEnum.LoggedIn);
+            //Logging In...
+            case GameStatesEnum.SignIn:
+                
+                BrainCloudManager.Instance.Login();
+                loadingGameState.ConnectStates(LoggingInMessage,false,GameStatesEnum.LoggedIn);
                 break;
-            case StatesEnum.LoggedIn:
-                LoadingState.ConnectStates(LookingForLobbyMessage,true,StatesEnum.Lobby);
+            //Looking for Lobby...
+            case GameStatesEnum.LoggedIn:
+                loadingGameState.ConnectStates(LookingForLobbyMessage,true,GameStatesEnum.Lobby);
                 break;
-            case StatesEnum.Lobby:
+            //Setting up Match...
+            case GameStatesEnum.Lobby:
                 GameManager.Instance.SetUpMatchList();
-                LoadingState.ConnectStates(JoiningMatchMessage,false,StatesEnum.Match);
+                loadingGameState.ConnectStates(JoiningMatchMessage,false,GameStatesEnum.Match);
                 break;
         }
     }
     
-    public void ChangeState(StatesEnum newState)
+    public void ChangeState(GameStatesEnum newGameState)
     {
-        foreach (State currentState in ListOfStates)
+        foreach (GameState currentState in ListOfStates)
         {
-            currentState.gameObject.SetActive(currentState.CurrentState == newState);
+            currentState.gameObject.SetActive(currentState.currentGameState == newGameState);
         }
     }
 }

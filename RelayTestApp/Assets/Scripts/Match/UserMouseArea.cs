@@ -79,12 +79,12 @@ public class UserMouseArea : MonoBehaviour
     }
 
     ///Returns 'true' if we touched or hovering on this gameObject.
-    public bool IsPointerOverUIElement()
+    private bool IsPointerOverUIElement()
     {
         return IsPointerOverUIElement(GetEventSystemRaycastResults());
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
-    public bool IsPointerOverUIElement(List<RaycastResult> eventSystemRaysastResults )
+    private bool IsPointerOverUIElement(List<RaycastResult> eventSystemRaysastResults )
     {
         for(int index = 0;  index < eventSystemRaysastResults.Count; index ++)
         {
@@ -104,16 +104,10 @@ public class UserMouseArea : MonoBehaviour
         return raysastResults;
     }
 
-    private Vector3 GetMousePosition()
+    static Vector3 GetMousePosition()
     {
-        /*
-        Vector2 offset = new Vector2(_canvasRectTransform.sizeDelta.x / 2f, _canvasRectTransform.sizeDelta.y / 2f);
-        Vector2 viewPort = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-        Vector2 position = new Vector2(_canvasRectTransform.sizeDelta.x * viewPort.x - _cursorRectTransform.rect.width / 2, _canvasRectTransform.sizeDelta.y * viewPort.y + _cursorRectTransform.rect.height / 2 + 10f);
-        */
         Vector2 mouse = Input.mousePosition;
         Vector3 position = new Vector3(mouse.x - (Screen.width / 2), mouse.y - (Screen.height / 2));
-        //return position - offset;
         return position;
     }
 }
