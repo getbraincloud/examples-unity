@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using BrainCloud;
@@ -12,6 +14,7 @@ public class BrainCloudManager : MonoBehaviour
     private bool m_dead = false;
 
     public static BrainCloudManager Instance;
+
     private void Awake()
     {
         m_bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -25,8 +28,6 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-#region Start Up - Logging In
-
     //Called from Unity Button, attempting to login
     public void Login()
     {
@@ -38,54 +39,66 @@ public class BrainCloudManager : MonoBehaviour
             StateManager.Instance.AbortToSignIn();
             return;
         }
-        else if (password.IsNullOrEmpty())
+        if (password.IsNullOrEmpty())
         {
             GameManager.Instance.ErrorMessage.SetUpPopUpMessage($"Please provide a password");
             StateManager.Instance.AbortToSignIn();
             return;
         }
+        
         InitializeBC();
         // Authenticate with brainCloud
         m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LoggingInError, "Login Failed");
     }
-    // User authenticated, handle the result
-    void HandlePlayerState(string jsonResponse, object cbObject)
-    {
-        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-        var data = response["data"] as Dictionary<string, object>;
-
-        GameManager.Instance.CurrentUserInfo = new UserInfo();
-        GameManager.Instance.CurrentUserInfo.ID = data["profileId"] as string;
-        
-        // If no username is set for this user, ask for it
-        if (!data.ContainsKey("playerName"))
-        {
-            SubmitName(GameManager.Instance.CurrentUserInfo.Username);
-        }
-        else
-        {
-            SubmitName(data["playerName"] as string);
-            OnLoggedIn(jsonResponse, cbObject);
-        }
-    }
-
-    
     private void InitializeBC()
     {
         string url = BrainCloud.Plugin.Interface.DispatcherURL;
         string appId = BrainCloud.Plugin.Interface.AppId;
         string appSecret = BrainCloud.Plugin.Interface.AppSecret;
-        
+
         m_bcWrapper.Init(url, appSecret, appId, "1.0");
 
         m_bcWrapper.Client.EnableLogging(true);
     }
-    
+
+#region BC Callbacks
+
     // User fully logged in. Enable RTT and listen for chat messages
     void OnLoggedIn(string jsonResponse, object cbObject)
     {
-        
+
         Debug.Log("Logged in");
+    }
+    
+    // User authenticated, handle the result
+    void HandlePlayerState(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+        var userInfo = GameManager.Instance.CurrentUserInfo;
+        userInfo = new UserInfo();
+        userInfo.ID = data["profileId"] as string;
+        
+        // If no username is set for this user, ask for it
+        if (!data.ContainsKey("playerName"))
+        {
+            // Update name for display
+            GameManager.Instance.UpdateUsername(userInfo.Username);
+            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
+                "Failed to update username to braincloud");
+        }
+        else
+        {
+            var username = data["playerName"] as string;
+            GameManager.Instance.UpdateUsername(username);
+            m_bcWrapper.PlayerStateService.UpdateName(username, OnLoggedIn, LoggingInError,
+                "Failed to update username to braincloud");
+            //OnLoggedIn(jsonResponse, cbObject);
+        }
+
+        GameManager.Instance.CurrentUserInfo = userInfo;
+        PlayerPrefs.SetString(Settings.PasswordKey,GameManager.Instance.PasswordInputField.text);
+
     }
     
     // Go back to login screen, with an error message
@@ -103,20 +116,255 @@ public class BrainCloudManager : MonoBehaviour
 
         string message = cbObject as string;
         GameManager.Instance.ErrorMessage.SetUpPopUpMessage($"Message: {message} |||| JSON: {jsonError}");
-        
-        StateManager.Instance.AbortToSignIn();
-        Debug.Log($"LOGGED");
-        
-    }
-    
-    // Submit user name to brainCloud to be assosiated with the current user
-    void SubmitName(string username)
-    {
-        // Update name
-        GameManager.Instance.UpdateUsername(username);
-        m_bcWrapper.PlayerStateService.UpdateUserName(username, OnLoggedIn, LoggingInError, "Failed to update username to braincloud");
-    }
-#endregion Start Up - Logging In
 
+        StateManager.Instance.AbortToSignIn();
+
+    }
+
+    private void GameReady(string json,object thing)
+    {
+        StateManager.Instance.isLoading = false;
+    }
+
+#endregion BC Callbacks
     
+#region GameFlow
+
+    public void FindLobby(RelayConnectionType protocol)
+    {
+        StateManager.Instance.protocol = protocol;
+        //Franco:Not sure if this is needed...
+        //State.user.colorIndex = Settings.colorIndex;
+
+        // Show loading screen
+        StateManager.Instance.ChangeState(GameStates.Lobby);
+
+        // Enable RTT
+        m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
+    }
+    // Cleanly close the game. Go back to main menu but don't log 
+    private void CloseGame()
+    {
+        m_bcWrapper.RelayService.DeregisterRelayCallback();
+        m_bcWrapper.RelayService.DeregisterSystemCallback();
+        m_bcWrapper.RelayService.Disconnect();
+        m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
+        m_bcWrapper.RTTService.DisableRTT();
+
+        // Reset state but keep the user around
+        StateManager.Instance.LeaveMatchBackToMenu();
+    }
+    
+    // Ready up and signals RTT service we can start the game
+    public void StartGame()
+    {
+        StateManager.Instance.isReady = true;
+        
+        //
+        var extra = new Dictionary<string, object>();
+        extra["colorIndex"] = GameManager.Instance.CurrentUserInfo.UserGameColor;
+
+        //
+        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, StateManager.Instance.isReady, extra,GameReady);
+    }
+
+#endregion GameFlow
+
+#region RTT functions
+
+    // We received a lobby event through RTT
+    void OnLobbyEvent(string jsonResponse)
+    {
+        
+        
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var jsonData = response["data"] as Dictionary<string, object>;
+
+        // If there is a lobby object present in the message, update our lobby
+        // state with it.
+        if (jsonData.ContainsKey("lobby"))
+        {
+            StateManager.Instance.CurrentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>,
+                jsonData["lobbyId"] as string);
+
+            GameManager.Instance.SetUpMatchList();
+            StateManager.Instance.ChangeState(GameStates.Match);
+        }
+
+        if (response.ContainsKey("operation"))
+        {
+            var operation = response["operation"] as string;
+            Debug.Log($"OPERTATION: {operation}");
+            switch (operation)
+            {
+                case "DISBANDED":
+                {
+                    var reason = jsonData["reason"] as Dictionary<string, object>;
+                    if ((int) reason["code"] == BrainCloud.ReasonCodes.RTT_ROOM_READY)
+                    {
+                        ConnectRelay();
+                    }
+                    else
+                    {
+                        // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
+                        CloseGame();
+                    }
+
+                    break;
+                }
+                case "STARTING":
+                    // Save our picked color index
+                    //Settings.colorIndex = State.user.colorIndex;
+                    //Settings.SaveConfigs();
+
+                    // Go to loading screen
+                    //StateManager.Instance.ButtonPressed_ChangeState(GameStates.Match);
+                    StateManager.Instance.isLoading = false;
+                    break;
+                case "ROOM_READY":
+                    StateManager.Instance.CurrentServer = new Server(jsonData);
+                    break;
+            }
+        }
+    }
+    
+    // Connect to the Relay server and start the game
+    void ConnectRelay()
+    {
+        m_bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
+        m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
+
+        int port = 0;
+        switch (StateManager.Instance.protocol)
+        {
+            case RelayConnectionType.WEBSOCKET:
+                port = StateManager.Instance.CurrentServer.wsPort;
+                break;
+            case RelayConnectionType.TCP:
+                port = StateManager.Instance.CurrentServer.tcpPort;
+                break;
+            case RelayConnectionType.UDP:
+                port = StateManager.Instance.CurrentServer.udpPort;
+                break;
+        }
+
+        Server server = StateManager.Instance.CurrentServer;
+        m_bcWrapper.RelayService.Connect
+        (
+            StateManager.Instance.protocol,
+            new RelayConnectOptions(false, server.host, port, server.passcode, server.lobbyId),
+            OnRelayConnectSuccess, 
+            LoggingInError, "Failed to connect to server"
+        );
+    }
+    void OnRelayConnectSuccess(string jsonResponse, object cbObject)
+    {
+        StateManager.Instance.ChangeState(GameStates.Match);
+        //State.form.UpdateGameViewport();
+    }
+
+    void OnRelayMessage(short netId, byte[] jsonResponse)
+    {
+        var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
+        string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
+        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        foreach (var member in lobby.Members)
+        {
+            if (member.ID == memberProfileId)
+            {
+                var op = json["op"] as string;
+                if (op == "move")
+                {
+                    var data = json["data"] as Dictionary<string, object>;
+
+                    member.IsAlive = true;
+                    member.MousePosition.x = (int)data["x"];
+                    member.MousePosition.y = (int)data["y"];
+                }
+                else if (op == "shockwave")
+                {
+                    //ToDo NEED TO MAKE THIS A PUBLIC FUNCTION? Shockwave needs to be set up
+                    /*var data = json["data"] as Dictionary<string, object>;
+                    
+                    var shockwave = new Shockwave();
+                    shockwave.pos.X = (int)data["x"];
+                    shockwave.pos.Y = (int)data["y"];
+                    shockwave.colorIndex = member.colorIndex;
+                    shockwave.startTime = DateTime.Now;
+                    State.shockwaves.Add(shockwave);*/
+                }
+                break;
+            }
+        }
+    }
+
+    void OnRelaySystemMessage(string jsonResponse)
+    {
+        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        if (json["op"] as string == "DISCONNECT")
+        {
+            var profileId = json["profileId"] as string;
+            Lobby lobby = StateManager.Instance.CurrentLobby;
+            foreach (var member in lobby.Members)
+            {
+                if (member.ID == profileId)
+                {
+                    member.IsAlive = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    // RTT connected. Try to create or join a lobby
+    void OnRTTConnected(string jsonResponse, object cbObject)
+    {
+        
+        // Find lobby
+        var algo = new Dictionary<string, object>();
+        algo["strategy"] = "ranged-absolute";
+        algo["alignment"] = "center";
+        List<int> ranges = new List<int>();
+        ranges.Add(1000);
+        algo["ranges"] = ranges;
+
+        //
+        var extra = new Dictionary<string, object>();
+        extra["colorIndex"] = GameManager.Instance.CurrentUserInfo.UserGameColor;
+
+        //
+        var filters = new Dictionary<string, object>();
+
+        //
+        var settings = new Dictionary<string, object>();
+
+        //
+        m_bcWrapper.LobbyService.FindOrCreateLobby
+        (
+            "CursorPartyV2", // lobby type
+            0, // rating
+            1, // max steps
+            algo, // algorithm
+            filters, // filters
+            0, // Timeout
+            false, // ready
+            extra, // extra
+            "all", // team code
+            settings, // settings
+            null, // other users
+            null, // Success of lobby found will be in the event onLobbyEvent
+            LoggingInError, "Failed to find lobby"
+        );
+    }
+
+    void OnRTTDisconnected(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        if (jsonError == "DisableRTT Called") return; // Ignore
+        LoggingInError(status, reasonCode, jsonError, cbObject);
+    }
+
+    #endregion RTT Functions
 }
+

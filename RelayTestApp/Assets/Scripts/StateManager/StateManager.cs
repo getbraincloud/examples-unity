@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using BrainCloud;
 /// <summary>
 /// Responsible for switching states from either button events or loading events
 /// </summary>
@@ -10,11 +10,21 @@ using UnityEngine;
 public class StateManager : MonoBehaviour
 {
     public List<GameState> ListOfStates = new List<GameState>();
+    public GameStates CurrentGameState;
+    public ConnectingGameState LoadingGameState;
     
-    public ConnectingGameState loadingGameState;
+    
     private static StateManager _instance;
     public static StateManager Instance => _instance;
-
+    
+    //Network info needed
+    public Lobby CurrentLobby;
+    public Server CurrentServer;
+    public UserInfo CurrentUser;
+    public List<GameObject> ShockwavePositions = new List<GameObject>();
+    public RelayConnectionType protocol = RelayConnectionType.WEBSOCKET;
+    public bool isReady;
+    public bool isLoading;
     private const string LoggingInMessage = "Logging in...";
     private const string LookingForLobbyMessage = "Joining Lobby...";
     private const string JoiningMatchMessage = "Joining Match...";
@@ -33,21 +43,34 @@ public class StateManager : MonoBehaviour
     
     private void Start()
     {
-        ChangeState(GameStatesEnum.SignIn);
+        ChangeState(GameStates.SignIn);
     }
 
     public void AbortToSignIn()
     {
-        loadingGameState.CancelNextState = true;
-        ChangeState(GameStatesEnum.SignIn);
+        LoadingGameState.CancelNextState = true;
+        ChangeState(GameStates.SignIn);
     }
 
     public void LeaveToLoggedIn()
     {
-        ChangeState(GameStatesEnum.LoggedIn);
+        ChangeState(GameStates.LoggedIn);
+    }
+
+    public void LeaveMatchBackToMenu()
+    {
+        CurrentLobby = null;
+        CurrentServer = null;
+        foreach (GameObject shockwave in ShockwavePositions)
+        {
+            Destroy(shockwave);
+        }
+        ShockwavePositions = new List<GameObject>();
+        CurrentUser.MousePosition = Vector2.zero;
+        ChangeState(GameStates.SignIn);
     }
     
-    public void ButtonPressed_ChangeState(GameStatesEnum newGameState)
+    public void ButtonPressed_ChangeState(GameStates newGameState)
     {
         foreach (GameState state in ListOfStates)
         {
@@ -57,28 +80,33 @@ public class StateManager : MonoBehaviour
         switch (newGameState)
         {
             //Logging In...
-            case GameStatesEnum.SignIn:
+            case GameStates.SignIn:
                 
                 BrainCloudManager.Instance.Login();
-                loadingGameState.ConnectStates(LoggingInMessage,false,GameStatesEnum.LoggedIn);
+                LoadingGameState.ConnectStates(LoggingInMessage,false,GameStates.LoggedIn);
                 break;
             //Looking for Lobby...
-            case GameStatesEnum.LoggedIn:
-                loadingGameState.ConnectStates(LookingForLobbyMessage,true,GameStatesEnum.Lobby);
+            case GameStates.LoggedIn:
+                BrainCloudManager.Instance.FindLobby(protocol);
+                isLoading = true;
+                LoadingGameState.ConnectStatesWithLoading(LookingForLobbyMessage,true,GameStates.Lobby);
                 break;
             //Setting up Match...
-            case GameStatesEnum.Lobby:
-                GameManager.Instance.SetUpMatchList();
-                loadingGameState.ConnectStates(JoiningMatchMessage,false,GameStatesEnum.Match);
+            case GameStates.Lobby:
+                BrainCloudManager.Instance.StartGame();
+                isLoading = true;
+                LoadingGameState.ConnectStatesWithLoading(JoiningMatchMessage,false,GameStates.Match);
                 break;
         }
     }
     
-    public void ChangeState(GameStatesEnum newGameState)
+    public void ChangeState(GameStates newGameState)
     {
         foreach (GameState currentState in ListOfStates)
         {
             currentState.gameObject.SetActive(currentState.currentGameState == newGameState);
         }
+
+        CurrentGameState = newGameState;
     }
 }

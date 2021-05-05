@@ -4,14 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Holds info needed for the current user
+/// Holds info needed for the current user and other connected users
 /// </summary>
 
 public enum GameColors{Black,Purple,Grey,Orange,Blue,Green,Yellow,Cyan,White}
 
 public class GameManager : MonoBehaviour
 {
-    public UserEntry UserEntryPrefab;
+    public UserEntry UserEntryLobbyPrefab;
+    public UserEntry UserEntryMatchPrefab;
     public GameObject UserEntryLobbyParent;
     public GameObject UserEntryMatchParent;
     public TMP_InputField UsernameInputField;
@@ -19,13 +20,11 @@ public class GameManager : MonoBehaviour
     public TMP_Text LoggedInNameText;
     public DialogueMessage ErrorMessage;
     
-    private GameColors _userColor = GameColors.White;
     private UserEntry _currentUserEntry;
     private UserInfo _currentUserInfo;
-    private List<UserEntry> UserEntries = new List<UserEntry>();
-    private List<UserEntry> MatchEntries = new List<UserEntry>();
     
-
+    //List to reference specifically for listing
+    private List<UserEntry> MatchEntries = new List<UserEntry>();
     
     private static GameManager _instance;
     public static GameManager Instance => _instance;
@@ -45,41 +44,59 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
+        
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
-        _currentUserEntry = Instantiate(UserEntryPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
-        UserEntries.Add(_currentUserEntry);
+        _currentUserEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
+        Settings.LoadSettings();
     }
 
     public void UpdateUsername(string name)
     {
         _currentUserEntry.UsernameText.text = name;
         _currentUserInfo.Username = name;
+        PlayerPrefs.SetString(Settings.UsernameKey,name);
         LoggedInNameText.text = $"Logged in as {name}";
     }
 
     public void ChangeLobbyTextColor(GameColors newColor)
     {
         _currentUserInfo.UserColor = ReturnUserColor(newColor);
+        Settings.SetPlayerPrefColor(newColor);
         _currentUserEntry.UsernameText.color = _currentUserInfo.UserColor;
         _currentUserEntry.UserDotImage.color = _currentUserInfo.UserColor;
+        CheckColorOnUsers();
     }
     /// <summary>
-    /// After list of users is generated for the current match, call this to display the connected users.
-    /// ToDo: Retrieve color from other users and applying the prefab to their color
+    /// After list of users is generated for the current match, call this to display the connected users
     /// </summary>
     public void SetUpMatchList()
     {
-        foreach (UserEntry matchEntry in MatchEntries)
+        if (MatchEntries.Count > 0)
         {
-            Destroy(matchEntry);
+            for(int i = MatchEntries.Count - 1; i > -1; i--)
+            {
+                Destroy(MatchEntries[i].gameObject);
+            }
+            MatchEntries.Clear();    
         }
-        MatchEntries.Clear();   
-        
-        foreach (UserEntry entry in UserEntries)
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        for (int i = 0; i < lobby.Members.Count; i++)
         {
-            var newEntry = Instantiate(entry, Vector3.zero, Quaternion.identity, UserEntryMatchParent.transform);
-            MatchEntries.Add(entry);   
+            var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity,UserEntryMatchParent.transform);
+            newEntry.UsernameText.color = lobby.Members[i].UserColor;
+            MatchEntries.Add(newEntry);
+        }
+        
+    }
+
+    private void CheckColorOnUsers()
+    {
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        for (int i = 0; i < MatchEntries.Count; i++)
+        {
+            var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity,UserEntryMatchParent.transform);
+            newEntry.UsernameText.color = lobby.Members[i].UserColor;
+            newEntry.UserDotImage.color = lobby.Members[i].UserColor;
         }
     }
     /// <summary>
@@ -94,7 +111,7 @@ public class GameManager : MonoBehaviour
             CurrentUserInfo.UserGameColor = newColor;
         }
 
-        switch (_userColor)
+        switch (CurrentUserInfo.UserGameColor)
         {
             case GameColors.Black:
                 return Color.black;
@@ -115,6 +132,30 @@ public class GameManager : MonoBehaviour
         }
         
         return Color.white;
+    }
+
+    public GameColors ReturnUserColor(string colorToReturn)
+    {
+        switch (colorToReturn)
+        {
+            case "Black":
+                return GameColors.Black;
+            case "Purple":
+                return GameColors.Purple;
+            case "Grey":
+                return GameColors.Grey;
+            case "Orange":
+                return GameColors.Orange;
+            case "Blue":
+                return GameColors.Blue;
+            case "Green":
+                return GameColors.Green;
+            case "Yellow":
+                return GameColors.Yellow;
+            case "Cyan":
+                return GameColors.Cyan;
+        }
+        return GameColors.White;
     }
     
 }

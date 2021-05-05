@@ -47,7 +47,6 @@ public class UserMouseArea : MonoBehaviour
             NewCursor.transform.localPosition = _newPosition;
             if (Input.GetMouseButtonDown(0))
             {
-                //ToDo need to give Shockwave proper coordinates
                 _newPosition = Camera.main.ScreenToWorldPoint(_newPosition);
                 _newPosition.z = 0;
                 _newPosition -= (Vector3)_shockwaveOffset;
@@ -104,10 +103,10 @@ public class UserMouseArea : MonoBehaviour
         return raysastResults;
     }
 
-    static Vector3 GetMousePosition()
+    private Vector3 GetMousePosition()
     {
         Vector2 mouse = Input.mousePosition;
-        Vector3 position = new Vector3(mouse.x - (Screen.width / 2), mouse.y - (Screen.height / 2));
+        Vector3 position = new Vector3(mouse.x - (MatchCanvas.pixelRect.width / 2), mouse.y - (MatchCanvas.pixelRect.height / 2));
         return position;
     }
 }
