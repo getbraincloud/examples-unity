@@ -19,40 +19,34 @@ using UnityEngine.EventSystems;
  */
 public class UserMouseArea : MonoBehaviour
 {
-    public Image NewCursor;
-    public Texture2D CursorTexture;
     public GameObject Shockwave;
     public Canvas MatchCanvas;
-    
-    
+
+    [HideInInspector] public Image LocalCursor;   
     private Vector2 _shockwaveOffset=new Vector2(-8.6f,-5.5f);
     private Vector3 _newPosition;
     private Color _userColor;
     private ParticleSystem.MainModule _shockwaveParticle;
     private GameObject _newShockwave;
-    
+
+
     // Update is called once per frame
     void Update()
     {
+        
         if (IsPointerOverUIElement())
         {
             if (Cursor.visible)
             {
                 Cursor.visible = false;
-                NewCursor.enabled = true;    
+                LocalCursor.enabled = true;    
             }
             
-
             _newPosition = GetMousePosition();
-            NewCursor.transform.localPosition = _newPosition;
+            BrainCloudManager.Instance.MouseMoved(_newPosition);
             if (Input.GetMouseButtonDown(0))
             {
-                _newPosition = Camera.main.ScreenToWorldPoint(_newPosition);
-                _newPosition.z = 0;
-                _newPosition -= (Vector3)_shockwaveOffset;
-                _newShockwave = Instantiate(Shockwave, _newPosition, Quaternion.identity);
-                _shockwaveParticle = _newShockwave.GetComponent<ParticleSystem>().main;
-                _shockwaveParticle.startColor = _userColor;
+                SpawnShockwave(_newPosition);
             }
         }
         else
@@ -60,34 +54,49 @@ public class UserMouseArea : MonoBehaviour
             if (!Cursor.visible)
             {
                 Cursor.visible = true;
-                NewCursor.enabled = false;
+                LocalCursor.enabled = false;
             }
-            
+        }
+        UpdateAllCursorsMovement();
+    }
+
+    public void SpawnShockwave(Vector2 _newPosition)
+    {
+        //Sending info to BC
+        BrainCloudManager.Instance.Shockwave(_newPosition);
+        
+        //Get in world position + offset 
+        _newPosition = Camera.main.ScreenToWorldPoint(_newPosition);
+        _newPosition -= _shockwaveOffset;
+        
+        _newShockwave = Instantiate(Shockwave, _newPosition, Quaternion.identity);
+        
+        //Update shockwave list
+        StateManager.Instance.ShockwavePositions.Add(_newShockwave);
+        //Adjusting shockwave color to what user settings are
+        _shockwaveParticle = _newShockwave.GetComponent<ParticleSystem>().main;
+        _shockwaveParticle.startColor = _userColor;
+    }
+    private void UpdateAllCursorsMovement()
+    {
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        var cursorList = GameManager.Instance.CursorList; 
+        for (int i = 0; i < cursorList.Count; i++)
+        {
+            cursorList[i].transform.localPosition = lobby.Members[i].MousePosition;
         }
     }
-
-    private void OnEnable()
-    {
-        _userColor = GameManager.Instance.ReturnUserColor();
-        NewCursor.color = _userColor;
-    }
-
-    private void OnDisable()
-    {
-        NewCursor.enabled = false;
-    }
-
     ///Returns 'true' if we touched or hovering on this gameObject.
     private bool IsPointerOverUIElement()
     {
-        return IsPointerOverUIElement(GetEventSystemRaycastResults());
+        return CheckForRayCastHit(GetEventSystemRaycastResults());
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
-    private bool IsPointerOverUIElement(List<RaycastResult> eventSystemRaysastResults )
+    private bool CheckForRayCastHit(List<RaycastResult> eventSystemRayCastResults )
     {
-        for(int index = 0;  index < eventSystemRaysastResults.Count; index ++)
+        for(int index = 0;  index < eventSystemRayCastResults.Count; index ++)
         {
-            RaycastResult curRaysastResult = eventSystemRaysastResults [index];
+            RaycastResult curRaysastResult = eventSystemRayCastResults [index];
             if (curRaysastResult.gameObject == gameObject)
                 return true;
         }

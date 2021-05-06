@@ -9,8 +9,9 @@ public class DialogueMessage : MonoBehaviour
 
     public void SetUpPopUpMessage(string message)
     {
+        Cursor.visible = true;
+        StateManager.Instance.LoadingGameState.CancelNextState = true;
         Message.text = message;
         gameObject.SetActive(true);
-        Debug.Log("Enabled");
     }
 }

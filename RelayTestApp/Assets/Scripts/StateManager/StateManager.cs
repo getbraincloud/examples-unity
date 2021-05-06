@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using BrainCloud;
 /// <summary>
-/// Responsible for switching states from either button events or loading events
+/// - Responsible for switching states from either button events or loading events
+/// - Holding information like 
 /// </summary>
 
 public class StateManager : MonoBehaviour
@@ -20,7 +21,6 @@ public class StateManager : MonoBehaviour
     //Network info needed
     public Lobby CurrentLobby;
     public Server CurrentServer;
-    public UserInfo CurrentUser;
     public List<GameObject> ShockwavePositions = new List<GameObject>();
     public RelayConnectionType protocol = RelayConnectionType.WEBSOCKET;
     public bool isReady;
@@ -66,18 +66,19 @@ public class StateManager : MonoBehaviour
             Destroy(shockwave);
         }
         ShockwavePositions = new List<GameObject>();
-        CurrentUser.MousePosition = Vector2.zero;
+        GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
         ChangeState(GameStates.SignIn);
     }
     
-    public void ButtonPressed_ChangeState(GameStates newGameState)
+    //Takes in the current Game state to then load into the next game state
+    public void ButtonPressed_ChangeState(GameStates currentGameState)
     {
         foreach (GameState state in ListOfStates)
         {
             state.gameObject.SetActive(false);
         }
         //User is in this state and moving onto the next
-        switch (newGameState)
+        switch (currentGameState)
         {
             //Logging In...
             case GameStates.SignIn:
@@ -87,12 +88,15 @@ public class StateManager : MonoBehaviour
                 break;
             //Looking for Lobby...
             case GameStates.LoggedIn:
+                CurrentGameState = GameStates.Lobby;
                 BrainCloudManager.Instance.FindLobby(protocol);
                 isLoading = true;
                 LoadingGameState.ConnectStatesWithLoading(LookingForLobbyMessage,true,GameStates.Lobby);
                 break;
             //Setting up Match...
             case GameStates.Lobby:
+                CurrentGameState = GameStates.Match;
+                GameManager.Instance.UpdateMatchList();
                 BrainCloudManager.Instance.StartGame();
                 isLoading = true;
                 LoadingGameState.ConnectStatesWithLoading(JoiningMatchMessage,false,GameStates.Match);
@@ -106,7 +110,5 @@ public class StateManager : MonoBehaviour
         {
             currentState.gameObject.SetActive(currentState.currentGameState == newGameState);
         }
-
-        CurrentGameState = newGameState;
     }
 }

@@ -17,6 +17,7 @@ public class ConnectingGameState : GameState
         CancelButton.gameObject.SetActive(cancelButtonEnabled);
         _gameStateToOpen = newGameState;
         gameObject.SetActive(true);
+        Debug.Log($"ConnectingState: {newGameState}");
         StartCoroutine(DelayToOpenState());
     }
 
@@ -42,12 +43,13 @@ public class ConnectingGameState : GameState
         CancelButton.gameObject.SetActive(cancelButtonEnabled);
         _gameStateToOpen = newGameState;
         gameObject.SetActive(true);
+        Debug.Log($"Starting loading: {newGameState}");
         StartCoroutine(WaitForResponse());
     }
 
     IEnumerator WaitForResponse()
     {
-        while (!StateManager.Instance.isLoading)
+        while (StateManager.Instance.isLoading)
         {
             yield return new WaitForFixedUpdate();
         }

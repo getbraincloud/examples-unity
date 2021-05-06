@@ -13,6 +13,8 @@ public static class Settings
     public static string ReliableKey = "Reliable";
 
     public static string OrderedKey = "Ordered";
+
+    public static int SendChannel() => 0; 
     
     //Getters
     public static GameColors GetPlayerPrefColor() => (GameColors)PlayerPrefs.GetInt(GameColorKey);

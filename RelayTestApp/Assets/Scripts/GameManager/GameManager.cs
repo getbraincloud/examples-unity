@@ -4,28 +4,41 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Holds info needed for the current user and other connected users
+/// - Holds info needed for the current user and other connected users
+/// - Handles getting UI element data made by user
+/// - References Prefabs used for listing members in a list
+/// - Handles Error window
+/// 
 /// </summary>
 
 public enum GameColors{Black,Purple,Grey,Orange,Blue,Green,Yellow,Cyan,White}
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Prefabs")]
     public UserEntry UserEntryLobbyPrefab;
     public UserEntry UserEntryMatchPrefab;
+    public UserCursor UserCursorPrefab;
+    [Header("Parent Transforms")]
     public GameObject UserEntryLobbyParent;
     public GameObject UserEntryMatchParent;
+    public GameObject UserCursorParent;
+    [Header("UI References")]
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
     public DialogueMessage ErrorMessage;
+    public UserMouseArea GameArea;  //for updating members list of shockwaves
+    public GameObject StartGameBtn;
     
     private UserEntry _currentUserEntry;
+    
     private UserInfo _currentUserInfo;
+
     
-    //List to reference specifically for listing
-    private List<UserEntry> MatchEntries = new List<UserEntry>();
-    
+    private List<UserEntry> _matchEntries = new List<UserEntry>();
+    private List<UserCursor> _userCursorsList = new List<UserCursor>();
+    public List<UserCursor> CursorList => _userCursorsList;
     private static GameManager _instance;
     public static GameManager Instance => _instance;
     public UserInfo CurrentUserInfo
@@ -47,6 +60,7 @@ public class GameManager : MonoBehaviour
         
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
         _currentUserEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
+        _matchEntries.Add(_currentUserEntry);
         Settings.LoadSettings();
     }
 
@@ -61,44 +75,88 @@ public class GameManager : MonoBehaviour
     public void ChangeLobbyTextColor(GameColors newColor)
     {
         _currentUserInfo.UserColor = ReturnUserColor(newColor);
+        
+        //Apply in game color changes
         Settings.SetPlayerPrefColor(newColor);
-        _currentUserEntry.UsernameText.color = _currentUserInfo.UserColor;
-        _currentUserEntry.UserDotImage.color = _currentUserInfo.UserColor;
-        CheckColorOnUsers();
+        
+        //Send update to BC
+        var extra = new Dictionary<string, object>();
+        extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
+        (
+            StateManager.Instance.CurrentLobby.LobbyID,
+            StateManager.Instance.isReady,
+            extra
+        );
+        
     }
-    /// <summary>
-    /// After list of users is generated for the current match, call this to display the connected users
-    /// </summary>
-    public void SetUpMatchList()
+    public void UpdateLobbyList()
     {
-        if (MatchEntries.Count > 0)
+        if (_matchEntries.Count > 0)
         {
-            for(int i = MatchEntries.Count - 1; i > -1; i--)
+            for(int i = _matchEntries.Count - 1; i > -1; i--)
             {
-                Destroy(MatchEntries[i].gameObject);
+                Destroy(_matchEntries[i].gameObject);
             }
-            MatchEntries.Clear();    
+            _matchEntries.Clear();    
         }
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity,UserEntryMatchParent.transform);
+            var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity,UserEntryLobbyParent.transform);
+            newEntry.UsernameText.text = lobby.Members[i].Username;
             newEntry.UsernameText.color = lobby.Members[i].UserColor;
-            MatchEntries.Add(newEntry);
+            _matchEntries.Add(newEntry);
+        }
+    }
+    
+    /// <summary>
+    /// After list of users is generated for the current match, call this to display the connected users
+    /// </summary>
+    public void UpdateMatchList()
+    {
+        if (_matchEntries.Count > 0)
+        {
+            for(int i = _matchEntries.Count - 1; i > -1; i--)
+            {
+                Destroy(_matchEntries[i].gameObject);
+            }
+            _matchEntries.Clear();    
         }
         
-    }
-
-    private void CheckColorOnUsers()
-    {
         Lobby lobby = StateManager.Instance.CurrentLobby;
-        for (int i = 0; i < MatchEntries.Count; i++)
+        for (int i = 0; i < lobby.Members.Count; i++)
         {
             var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity,UserEntryMatchParent.transform);
+            newEntry.UsernameText.text = lobby.Members[i].Username;
             newEntry.UsernameText.color = lobby.Members[i].UserColor;
-            newEntry.UserDotImage.color = lobby.Members[i].UserColor;
+            _matchEntries.Add(newEntry);
         }
     }
+
+    public void UpdateCursorList()
+    {
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        if (_userCursorsList.Count > 0)
+        {
+            for (int i = _userCursorsList.Count - 1; i > -1; i--)
+            {
+                Destroy(_userCursorsList[i].gameObject);
+            }
+            _userCursorsList.Clear();
+        }
+
+        for (int i = 0; i < lobby.Members.Count; i++)
+        {
+            var newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
+            if (lobby.Members[i].Username == CurrentUserInfo.Username)
+            {
+                GameArea.LocalCursor = newCursor.Cursor;
+            }
+            newCursor.SetUpCursor(lobby.Members[i].UserColor,lobby.Members[i].Username);
+        }
+    }
+    
     /// <summary>
     /// Main returns the current color the user has equipped or changes to new color and returns it
     /// </summary>
@@ -134,28 +192,10 @@ public class GameManager : MonoBehaviour
         return Color.white;
     }
 
-    public GameColors ReturnUserColor(string colorToReturn)
+    public void MemberLeft()
     {
-        switch (colorToReturn)
-        {
-            case "Black":
-                return GameColors.Black;
-            case "Purple":
-                return GameColors.Purple;
-            case "Grey":
-                return GameColors.Grey;
-            case "Orange":
-                return GameColors.Orange;
-            case "Blue":
-                return GameColors.Blue;
-            case "Green":
-                return GameColors.Green;
-            case "Yellow":
-                return GameColors.Yellow;
-            case "Cyan":
-                return GameColors.Cyan;
-        }
-        return GameColors.White;
+        UpdateMatchList();
+        UpdateCursorList();
     }
     
 }

@@ -12,7 +12,7 @@ public class BrainCloudManager : MonoBehaviour
 {
     private BrainCloudWrapper m_bcWrapper;
     private bool m_dead = false;
-
+    public BrainCloudWrapper Wrapper => m_bcWrapper;
     public static BrainCloudManager Instance;
 
     private void Awake()
@@ -50,6 +50,30 @@ public class BrainCloudManager : MonoBehaviour
         // Authenticate with brainCloud
         m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LoggingInError, "Login Failed");
     }
+
+    private void FixedUpdate()
+    {
+        if (m_bcWrapper != null)
+        {
+            m_bcWrapper.Update();
+            if (StateManager.Instance.CurrentGameState == GameStates.Match)
+            {
+                //Update shockwaves
+                //Validate shockwaves
+                
+            }    
+        }
+        
+
+        if (m_dead)
+        {
+            m_dead = false;
+            
+            // We differ destroying BC because we cannot destroy it within a callback
+            UninitializeBC();
+        }
+    }
+
     private void InitializeBC()
     {
         string url = BrainCloud.Plugin.Interface.DispatcherURL;
@@ -60,6 +84,78 @@ public class BrainCloudManager : MonoBehaviour
 
         m_bcWrapper.Client.EnableLogging(true);
     }
+    // Uninitialize brainCloud
+    void UninitializeBC()
+    {
+        if (m_bcWrapper != null)
+        {
+            m_bcWrapper.Client.ShutDown();
+            m_bcWrapper = null;
+        }
+    }
+
+#region Input update
+
+    // User moved mouse in the play area
+        public void MouseMoved(Vector2 pos)
+        {
+            GameManager.Instance.CurrentUserInfo.IsAlive = true;
+            GameManager.Instance.CurrentUserInfo.MousePosition = pos;
+            UserInfo myUser = null;
+            Lobby lobby = StateManager.Instance.CurrentLobby;
+            foreach (var user in lobby.Members)
+            {
+                if (GameManager.Instance.CurrentUserInfo.ID == user.ID)
+                {
+                    //Save it for later !
+                    user.IsAlive = true;
+                    user.MousePosition = pos;
+                    myUser = user;
+                    break;
+                }
+            }
+
+            // Send to other players
+            Dictionary<string, object> jsonData = new Dictionary<string, object>();
+            jsonData["x"] = pos.x;
+            jsonData["y"] = pos.y;
+
+            Dictionary<string, object> json = new Dictionary<string, object>();
+            json["op"] = "move";
+            json["data"] = jsonData;
+
+            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+            m_bcWrapper.RelayService.Send
+                (
+                    data, 
+                    BrainCloudRelay.TO_ALL_PLAYERS, 
+                    Settings.GetPlayerPrefBool(Settings.ReliableKey), 
+                    Settings.GetPlayerPrefBool(Settings.OrderedKey),
+                    Settings.SendChannel()
+                );
+        }
+
+        // User clicked mouse in the play area
+        public void Shockwave(Vector2 pos)
+        {
+            // Send to other players
+            Dictionary<string, object> jsonData = new Dictionary<string, object>();
+            jsonData["x"] = pos.x;
+            jsonData["y"] = pos.y;
+
+            Dictionary<string, object> json = new Dictionary<string, object>();
+            json["op"] = "shockwave";
+            json["data"] = jsonData;
+
+            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+            m_bcWrapper.RelayService.Send(data, BrainCloudRelay.TO_ALL_PLAYERS, 
+                true, // Reliable
+                false, // Unordered
+                Settings.SendChannel());
+
+       }
+
+#endregion Input update
 
 #region BC Callbacks
 
@@ -78,7 +174,7 @@ public class BrainCloudManager : MonoBehaviour
         var userInfo = GameManager.Instance.CurrentUserInfo;
         userInfo = new UserInfo();
         userInfo.ID = data["profileId"] as string;
-        
+        GameManager.Instance.CurrentUserInfo = userInfo;
         // If no username is set for this user, ask for it
         if (!data.ContainsKey("playerName"))
         {
@@ -95,10 +191,7 @@ public class BrainCloudManager : MonoBehaviour
                 "Failed to update username to braincloud");
             //OnLoggedIn(jsonResponse, cbObject);
         }
-
-        GameManager.Instance.CurrentUserInfo = userInfo;
         PlayerPrefs.SetString(Settings.PasswordKey,GameManager.Instance.PasswordInputField.text);
-
     }
     
     // Go back to login screen, with an error message
@@ -120,12 +213,6 @@ public class BrainCloudManager : MonoBehaviour
         StateManager.Instance.AbortToSignIn();
 
     }
-
-    private void GameReady(string json,object thing)
-    {
-        StateManager.Instance.isLoading = false;
-    }
-
 #endregion BC Callbacks
     
 #region GameFlow
@@ -133,11 +220,8 @@ public class BrainCloudManager : MonoBehaviour
     public void FindLobby(RelayConnectionType protocol)
     {
         StateManager.Instance.protocol = protocol;
-        //Franco:Not sure if this is needed...
-        //State.user.colorIndex = Settings.colorIndex;
-
-        // Show loading screen
-        StateManager.Instance.ChangeState(GameStates.Lobby);
+        
+        GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
 
         // Enable RTT
         m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
@@ -163,10 +247,10 @@ public class BrainCloudManager : MonoBehaviour
         
         //
         var extra = new Dictionary<string, object>();
-        extra["colorIndex"] = GameManager.Instance.CurrentUserInfo.UserGameColor;
+        extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
 
         //
-        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, StateManager.Instance.isReady, extra,GameReady);
+        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, StateManager.Instance.isReady, extra);
     }
 
 #endregion GameFlow
@@ -176,8 +260,6 @@ public class BrainCloudManager : MonoBehaviour
     // We received a lobby event through RTT
     void OnLobbyEvent(string jsonResponse)
     {
-        
-        
         var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var jsonData = response["data"] as Dictionary<string, object>;
 
@@ -187,11 +269,13 @@ public class BrainCloudManager : MonoBehaviour
         {
             StateManager.Instance.CurrentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>,
                 jsonData["lobbyId"] as string);
-
-            GameManager.Instance.SetUpMatchList();
-            StateManager.Instance.ChangeState(GameStates.Match);
+            if (StateManager.Instance.CurrentGameState == GameStates.Lobby)
+            {
+                StateManager.Instance.isLoading = false; 
+                GameManager.Instance.UpdateLobbyList();    
+            }
         }
-
+        
         if (response.ContainsKey("operation"))
         {
             var operation = response["operation"] as string;
@@ -201,7 +285,7 @@ public class BrainCloudManager : MonoBehaviour
                 case "DISBANDED":
                 {
                     var reason = jsonData["reason"] as Dictionary<string, object>;
-                    if ((int) reason["code"] == BrainCloud.ReasonCodes.RTT_ROOM_READY)
+                    if ((int) reason["code"] == ReasonCodes.RTT_ROOM_READY)
                     {
                         ConnectRelay();
                     }
@@ -215,15 +299,14 @@ public class BrainCloudManager : MonoBehaviour
                 }
                 case "STARTING":
                     // Save our picked color index
-                    //Settings.colorIndex = State.user.colorIndex;
-                    //Settings.SaveConfigs();
-
-                    // Go to loading screen
-                    //StateManager.Instance.ButtonPressed_ChangeState(GameStates.Match);
-                    StateManager.Instance.isLoading = false;
+                    Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
+                    
                     break;
                 case "ROOM_READY":
                     StateManager.Instance.CurrentServer = new Server(jsonData);
+                    GameManager.Instance.UpdateMatchList();
+                    GameManager.Instance.UpdateCursorList();
+                    StateManager.Instance.isLoading = false;
                     break;
             }
         }
@@ -260,7 +343,9 @@ public class BrainCloudManager : MonoBehaviour
     }
     void OnRelayConnectSuccess(string jsonResponse, object cbObject)
     {
-        StateManager.Instance.ChangeState(GameStates.Match);
+        //StateManager.Instance.ChangeState(GameStates.Match);
+        Debug.Log("Relay Connection Success");
+        GameManager.Instance.UpdateLobbyList();
         //State.form.UpdateGameViewport();
     }
 
@@ -282,18 +367,15 @@ public class BrainCloudManager : MonoBehaviour
                     member.IsAlive = true;
                     member.MousePosition.x = (int)data["x"];
                     member.MousePosition.y = (int)data["y"];
+                    Debug.Log("User Moved");
                 }
                 else if (op == "shockwave")
                 {
-                    //ToDo NEED TO MAKE THIS A PUBLIC FUNCTION? Shockwave needs to be set up
-                    /*var data = json["data"] as Dictionary<string, object>;
-                    
-                    var shockwave = new Shockwave();
-                    shockwave.pos.X = (int)data["x"];
-                    shockwave.pos.Y = (int)data["y"];
-                    shockwave.colorIndex = member.colorIndex;
-                    shockwave.startTime = DateTime.Now;
-                    State.shockwaves.Add(shockwave);*/
+                   
+                    var data = json["data"] as Dictionary<string, object>;
+                    Vector2 position = new Vector2((int) data["x"], (int) data["y"]);
+                    GameManager.Instance.GameArea.SpawnShockwave(position);
+                    Debug.Log("Shockwave summoned");
                 }
                 break;
             }
@@ -312,6 +394,7 @@ public class BrainCloudManager : MonoBehaviour
                 if (member.ID == profileId)
                 {
                     member.IsAlive = false;
+                    GameManager.Instance.MemberLeft();
                     break;
                 }
             }
@@ -321,7 +404,6 @@ public class BrainCloudManager : MonoBehaviour
     // RTT connected. Try to create or join a lobby
     void OnRTTConnected(string jsonResponse, object cbObject)
     {
-        
         // Find lobby
         var algo = new Dictionary<string, object>();
         algo["strategy"] = "ranged-absolute";
@@ -332,7 +414,7 @@ public class BrainCloudManager : MonoBehaviour
 
         //
         var extra = new Dictionary<string, object>();
-        extra["colorIndex"] = GameManager.Instance.CurrentUserInfo.UserGameColor;
+        extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
 
         //
         var filters = new Dictionary<string, object>();
@@ -365,6 +447,6 @@ public class BrainCloudManager : MonoBehaviour
         LoggingInError(status, reasonCode, jsonError, cbObject);
     }
 
-    #endregion RTT Functions
+#endregion RTT Functions
 }
 
