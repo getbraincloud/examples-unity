@@ -12,6 +12,7 @@ using System.Linq;
 using System.Security.Cryptography;
 
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Twitter
 {
@@ -49,7 +50,7 @@ namespace Twitter
 
         public static IEnumerator GetRequestToken(string consumerKey, string consumerSecret, RequestTokenCallback callback)
         {
-            WWW web = WWWRequestToken(consumerKey, consumerSecret);
+            UnityWebRequest web = WWWRequestToken(consumerKey, consumerSecret);
 
             yield return web;
 
@@ -62,8 +63,8 @@ namespace Twitter
             {
                 RequestTokenResponse response = new RequestTokenResponse
                 {
-                    Token = Regex.Match(web.text, @"oauth_token=([^&]+)").Groups[1].Value,
-                    TokenSecret = Regex.Match(web.text, @"oauth_token_secret=([^&]+)").Groups[1].Value,
+                    Token = Regex.Match(web.downloadHandler.text, @"oauth_token=([^&]+)").Groups[1].Value,
+                    TokenSecret = Regex.Match(web.downloadHandler.text, @"oauth_token_secret=([^&]+)").Groups[1].Value,
                 };
 
                 if (!string.IsNullOrEmpty(response.Token) &&
@@ -73,7 +74,7 @@ namespace Twitter
                 }
                 else
                 {
-                    Debug.Log(string.Format("GetRequestToken - failed. response : {0}", web.text));
+                    Debug.Log(string.Format("GetRequestToken - failed. response : {0}", web.downloadHandler.text));
 
                     callback(false, null);
                 }
@@ -87,7 +88,7 @@ namespace Twitter
 
         public static IEnumerator GetAccessToken(string consumerKey, string consumerSecret, string requestToken, string pin, AccessTokenCallback callback)
         {
-            WWW web = WWWAccessToken(consumerKey, consumerSecret, requestToken, pin);
+            UnityWebRequest web = WWWAccessToken(consumerKey, consumerSecret, requestToken, pin);
 
             yield return web;
 
@@ -100,10 +101,10 @@ namespace Twitter
             {
                 AccessTokenResponse response = new AccessTokenResponse
                 {
-                    Token = Regex.Match(web.text, @"oauth_token=([^&]+)").Groups[1].Value,
-                    TokenSecret = Regex.Match(web.text, @"oauth_token_secret=([^&]+)").Groups[1].Value,
-                    UserId = Regex.Match(web.text, @"user_id=([^&]+)").Groups[1].Value,
-                    ScreenName = Regex.Match(web.text, @"screen_name=([^&]+)").Groups[1].Value
+                    Token = Regex.Match(web.downloadHandler.text, @"oauth_token=([^&]+)").Groups[1].Value,
+                    TokenSecret = Regex.Match(web.downloadHandler.text, @"oauth_token_secret=([^&]+)").Groups[1].Value,
+                    UserId = Regex.Match(web.downloadHandler.text, @"user_id=([^&]+)").Groups[1].Value,
+                    ScreenName = Regex.Match(web.downloadHandler.text, @"screen_name=([^&]+)").Groups[1].Value
                 };
 
                 if (!string.IsNullOrEmpty(response.Token) &&
@@ -115,40 +116,44 @@ namespace Twitter
                 }
                 else
                 {
-                    Debug.Log(string.Format("GetAccessToken - failed. response : {0}", web.text));
+                    Debug.Log(string.Format("GetAccessToken - failed. response : {0}", web.downloadHandler.text));
 
                     callback(false, null);
                 }
             }
         }
 
-        private static WWW WWWRequestToken(string consumerKey, string consumerSecret)
+        private static UnityWebRequest WWWRequestToken(string consumerKey, string consumerSecret)
         {
             // Add data to the form to post.
             WWWForm form = new WWWForm();
             form.AddField("oauth_callback", "oob");
-
+            string method = form.data == null ? "GET" : "POST";
+            
             // HTTP header
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             AddDefaultOAuthParams(parameters, consumerKey, consumerSecret);
             parameters.Add("oauth_callback", "oob");
 
-            //var headers = new Hashtable();
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers.Add("Authorization", GetFinalOAuthHeader("POST", RequestTokenURL, parameters));
-            //headers["Authorization"] = GetFinalOAuthHeader("POST", RequestTokenURL, parameters);
-
-            return new WWW(RequestTokenURL, form.data, headers);
+            
+            
+            //Create Unity Web Request
+            UnityWebRequest token = new UnityWebRequest(AccessTokenURL, method)
+            {
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+            foreach (KeyValuePair<string,string> header in headers)
+            {
+                token.SetRequestHeader(header.Key,header.Value);   
+            }
+            return token;
         }
 
-        private static WWW WWWAccessToken(string consumerKey, string consumerSecret, string requestToken, string pin)
+        private static UnityWebRequest WWWAccessToken(string consumerKey, string consumerSecret, string requestToken, string pin)
         {
-            // Need to fill body since Unity doesn't like an empty request body.
-            byte[] dummmy = new byte[1];
-            dummmy[0] = 0;
-
             // HTTP header
-
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             AddDefaultOAuthParams(parameters, consumerKey, consumerSecret);
             parameters.Add("oauth_token", requestToken);
@@ -156,9 +161,17 @@ namespace Twitter
 
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers.Add("Authorization", GetFinalOAuthHeader("POST", AccessTokenURL, parameters));
-            //headers["Authorization"] = GetFinalOAuthHeader("POST", AccessTokenURL, parameters);
-
-            return new WWW(AccessTokenURL, dummmy, headers);
+            
+            //Create Unity Web Request 
+            UnityWebRequest token = new UnityWebRequest(AccessTokenURL, "POST")
+            {
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+            foreach (KeyValuePair<string,string> header in headers)
+            {
+                token.SetRequestHeader(header.Key,header.Value);   
+            }
+            return token;
         }
 
         private static string GetHeaderWithAccessToken(string httpRequestType, string apiURL, string consumerKey, string consumerSecret, AccessTokenResponse response, Dictionary<string, string> parameters)
@@ -199,18 +212,25 @@ namespace Twitter
                 headers.Add("Authorization", GetHeaderWithAccessToken("POST", PostTweetURL, consumerKey, consumerSecret, response, parameters));
                 //var headers = new Hashtable();
                 //headers["Authorization"] = GetHeaderWithAccessToken("POST", PostTweetURL, consumerKey, consumerSecret, response, parameters);
-
-                WWW web = new WWW(PostTweetURL, form.data, headers);
+                string method = form.data == null ? "GET" : "POST";
+                UnityWebRequest web = new UnityWebRequest(PostTweetURL, method)
+                {
+                    downloadHandler = new DownloadHandlerBuffer()
+                };
+                foreach (KeyValuePair<string,string> header in headers)
+                {
+                    web.SetRequestHeader(header.Key,header.Value);   
+                }
                 yield return web;
 
                 if (!string.IsNullOrEmpty(web.error))
                 {
-                    Debug.Log(string.Format("PostTweet - failed. {0}\n{1}", web.error, web.text));
+                    Debug.Log(string.Format("PostTweet - failed. {0}\n{1}", web.error, web.downloadHandler.text));
                     callback(false);
                 }
                 else
                 {
-                    string error = Regex.Match(web.text, @"<error>([^&]+)</error>").Groups[1].Value;
+                    string error = Regex.Match(web.downloadHandler.text, @"<error>([^&]+)</error>").Groups[1].Value;
 
                     if (!string.IsNullOrEmpty(error))
                     {
