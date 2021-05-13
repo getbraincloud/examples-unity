@@ -14,7 +14,7 @@ public class UserInfo
     //Local info needed
     public string ID;
     public string Username;
-    public bool AllowSendTo;
+    public bool AllowSendTo = true;    //if this user should show shockwaves 
     public bool IsAlive;
     
     public GameColors UserGameColor;

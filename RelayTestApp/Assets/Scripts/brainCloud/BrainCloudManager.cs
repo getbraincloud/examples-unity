@@ -84,7 +84,6 @@ public class BrainCloudManager : MonoBehaviour
         if (m_bcWrapper != null)
         {
             m_bcWrapper.Client.ShutDown();
-            m_bcWrapper = null;
         }
     }
 
@@ -135,7 +134,7 @@ public class BrainCloudManager : MonoBehaviour
             // Send to other players
             Dictionary<string, object> jsonData = new Dictionary<string, object>();
             jsonData["x"] = pos.x;
-            jsonData["y"] = pos.y;
+            jsonData["y"] = -pos.y;
 
             Dictionary<string, object> json = new Dictionary<string, object>();
             json["op"] = "shockwave";
@@ -223,7 +222,7 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
     }
     // Cleanly close the game. Go back to main menu but don't log 
-    private void CloseGame()
+    public void CloseGame(bool changeState = false)
     {
         m_bcWrapper.RelayService.DeregisterRelayCallback();
         m_bcWrapper.RelayService.DeregisterSystemCallback();
@@ -231,8 +230,11 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
         m_bcWrapper.RTTService.DisableRTT();
 
-        // Reset state but keep the user around
-        StateManager.Instance.LeaveMatchBackToMenu();
+        if (changeState)
+        {
+            // Reset state but keep the user around
+            StateManager.Instance.LeaveMatchBackToMenu();    
+        }
     }
     
     // Ready up and signals RTT service we can start the game
@@ -284,7 +286,7 @@ public class BrainCloudManager : MonoBehaviour
                     if ((int) reason["code"] != ReasonCodes.RTT_ROOM_READY)
                     {
                         // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                        CloseGame();
+                        CloseGame(true);
                     }
 
                     break;

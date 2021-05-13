@@ -129,6 +129,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AdjustUserShockwaveMask(string username,bool isVisible)
+    {
+        //populate user entries based on members in lobby
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        for (int i = 0; i < lobby.Members.Count; i++)
+        {
+            if (lobby.Members[i].Username.Equals(username))
+            {
+                lobby.Members[i].AllowSendTo = isVisible;
+            }
+            else if (CurrentUserInfo.Username.Equals(username))
+            {
+                CurrentUserInfo.AllowSendTo = isVisible;
+            }
+        }
+    }
+
     public void UpdateCursorList()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
@@ -147,11 +164,11 @@ public class GameManager : MonoBehaviour
             if (lobby.Members[i].Username == CurrentUserInfo.Username)
             {
                 GameArea.LocalUserCursor = newCursor;
+                newCursor.AdjustVisibility(false);
             }
 
             newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
             newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
-            newCursor.AdjustVisibility(false);
             lobby.Members[i].UserCursor = newCursor;
             _userCursorsList.Add(newCursor);
         }
@@ -169,19 +186,19 @@ public class GameManager : MonoBehaviour
             case GameColors.Black:
                 return Color.black;
             case GameColors.Purple:
-                return Color.magenta;
+                return new Color(0.33f,0.25f,0.37f);
             case GameColors.Grey:
-                return Color.grey;
+                return new Color(0.4f,0.4f,0.4f);
             case GameColors.Orange:
                 return new Color(0.85f, 0.4f, 0.04f);
             case GameColors.Blue:
-                return Color.blue;
+                return new Color(0.31f,0.54f,0.84f);
             case GameColors.Green:
-                return Color.green;
+                return new Color(0.39f,0.72f,0.39f);
             case GameColors.Yellow:
-                return Color.yellow;
+                return new Color(0.9f,0.78f,0.43f);
             case GameColors.Cyan:
-                return Color.cyan;
+                return new Color(0.86f,0.96f,1);
         }
         
         return Color.white;

@@ -7,7 +7,7 @@ using BrainCloud;
 /// - Responsible for switching states from either button events or loading events
 /// - Holding information like 
 /// </summary>
-
+public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting}
 public class StateManager : MonoBehaviour
 {
     public List<GameState> ListOfStates = new List<GameState>();
@@ -53,9 +53,10 @@ public class StateManager : MonoBehaviour
         ChangeState(GameStates.SignIn);
     }
 
-    public void LeaveToLoggedIn()
+    public void LeaveToMainMenu()
     {
-        ChangeState(GameStates.LoggedIn);
+        BrainCloudManager.Instance.CloseGame();
+        ChangeState(GameStates.MainMenu);
     }
 
     public void LeaveMatchBackToMenu()
@@ -74,6 +75,7 @@ public class StateManager : MonoBehaviour
         {
             Destroy(cursor);
         }
+        BrainCloudManager.Instance.CloseGame();
         Shockwaves = new List<GameObject>();
         UserCursors = new List<GameObject>();
         GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
@@ -81,24 +83,30 @@ public class StateManager : MonoBehaviour
     }
     
     //Takes in the current Game state to then load into the next game state
-    public void ButtonPressed_ChangeState(GameStates currentGameState)
+    public void ButtonPressed_ChangeState(GameStates newState = GameStates.Connecting)
     {
         foreach (GameState state in ListOfStates)
         {
             state.gameObject.SetActive(false);
         }
 
+        if (newState != GameStates.Connecting)
+        {
+            CurrentGameState = newState;
+        }
+
         isLoading = true;
         //User is in this state and moving onto the next
-        switch (currentGameState)
+        switch (CurrentGameState)
         {
             //Logging In...
             case GameStates.SignIn:
+                CurrentGameState = GameStates.MainMenu;
                 BrainCloudManager.Instance.Login();
-                LoadingGameState.ConnectStatesWithLoading(LoggingInMessage,false,GameStates.LoggedIn);
+                LoadingGameState.ConnectStatesWithLoading(LoggingInMessage,false,GameStates.MainMenu);
                 break;
             //Looking for Lobby...
-            case GameStates.LoggedIn:
+            case GameStates.MainMenu:
                 CurrentGameState = GameStates.Lobby;
                 BrainCloudManager.Instance.FindLobby(protocol);
                 LoadingGameState.ConnectStatesWithLoading(LookingForLobbyMessage,true,GameStates.Lobby);
@@ -118,5 +126,7 @@ public class StateManager : MonoBehaviour
         {
             currentState.gameObject.SetActive(currentState.currentGameState == newGameState);
         }
+
+        CurrentGameState = newGameState;
     }
 }

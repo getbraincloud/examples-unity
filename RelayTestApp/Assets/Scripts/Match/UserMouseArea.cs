@@ -69,20 +69,27 @@ public class UserMouseArea : MonoBehaviour
         
         foreach (var member in lobby.Members)
         {
-            foreach (Vector2 position in member.ShockwavePositions)
+            if (member.AllowSendTo)
             {
-                 SetUpShockwave(position,GameManager.ReturnUserColor(member.UserGameColor));
+                foreach (Vector2 position in member.ShockwavePositions)
+                {
+                    SetUpShockwave(position,GameManager.ReturnUserColor(member.UserGameColor));
+                }   
             }
-
+            
+            //Better safe then sorry
             if (member.ShockwavePositions.Count > 0)
             {
                 member.ShockwavePositions.Clear();    
             }
         }
 
-        foreach (var pos in _localShockwavePositions)
+        if (GameManager.Instance.CurrentUserInfo.AllowSendTo)
         {
-            SetUpShockwave(pos,GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor));
+            foreach (var pos in _localShockwavePositions)
+            {
+                SetUpShockwave(pos,GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor));
+            }   
         }
 
         if (_localShockwavePositions.Count > 0)
