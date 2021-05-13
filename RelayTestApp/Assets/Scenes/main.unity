@@ -205,10 +205,10 @@ RectTransform:
   m_Father: {fileID: 334864972}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &83217797
 GameObject:
@@ -2799,8 +2799,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -373, y: -341}
-  m_SizeDelta: {x: 613.7, y: 481.5}
+  m_AnchoredPosition: {x: -652, y: -473}
+  m_SizeDelta: {x: 800, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &571176152
 MonoBehaviour:
@@ -2814,9 +2814,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cff95181d157204fbf12199c6547041, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NewCursor: {fileID: 0}
   Shockwave: {fileID: 2255982038416346491, guid: f634014d58f42f04ab6c9c0970c266bf, type: 3}
   MatchCanvas: {fileID: 334864976}
+  LocalCursor: {fileID: 0}
+  _shockwaveOffset: {x: -10, y: -5.5}
 --- !u!114 &571176153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2891,7 +2892,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 191, y: -624}
+  m_AnchoredPosition: {x: 98, y: -851}
   m_SizeDelta: {x: 161.4, y: 70.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &594859049
@@ -3175,7 +3176,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1366, y: 768}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
@@ -4045,7 +4046,7 @@ MonoBehaviour:
   - {fileID: 334864975}
   CurrentGameState: 0
   LoadingGameState: {fileID: 438327805}
-  ShockwavePositions: []
+  Shockwaves: []
   protocol: 3
   isReady: 0
   isLoading: 0

@@ -147,7 +147,7 @@ GameObject:
   - component: {fileID: 3580622624380631428}
   - component: {fileID: 6431879316645351770}
   m_Layer: 5
-  m_Name: UserCursor-Image
+  m_Name: UserCursor-TextImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -223,5 +223,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 650d66a406abe0d47bc6415d7049f091, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _usernameText: {fileID: 2042049832416048262}
-  _cursor: {fileID: 3580622624380631428}
+  UsernameText: {fileID: 2042049832416048262}
+  CursorImage: {fileID: 3580622624380631428}

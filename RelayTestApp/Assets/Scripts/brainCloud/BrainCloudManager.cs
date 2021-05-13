@@ -14,7 +14,7 @@ public class BrainCloudManager : MonoBehaviour
     private bool m_dead = false;
     public BrainCloudWrapper Wrapper => m_bcWrapper;
     public static BrainCloudManager Instance;
-
+    
     private void Awake()
     {
         m_bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -53,16 +53,11 @@ public class BrainCloudManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (m_bcWrapper != null)
+        /*if (m_bcWrapper != null)
         {
             m_bcWrapper.Update();
-            if (StateManager.Instance.CurrentGameState == GameStates.Match)
-            {
-                //Update shockwaves
-                //Validate shockwaves
-                
-            }    
         }
+        */
         
 
         if (m_dead)
@@ -97,7 +92,7 @@ public class BrainCloudManager : MonoBehaviour
 #region Input update
 
     // User moved mouse in the play area
-        public void MouseMoved(Vector2 pos)
+        public void LocalMouseMoved(Vector2 pos)
         {
             GameManager.Instance.CurrentUserInfo.IsAlive = true;
             GameManager.Instance.CurrentUserInfo.MousePosition = pos;
@@ -136,7 +131,7 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         // User clicked mouse in the play area
-        public void Shockwave(Vector2 pos)
+        public void LocalShockwave(Vector2 pos)
         {
             // Send to other players
             Dictionary<string, object> jsonData = new Dictionary<string, object>();
@@ -152,7 +147,8 @@ public class BrainCloudManager : MonoBehaviour
                 true, // Reliable
                 false, // Unordered
                 Settings.SendChannel());
-
+            
+            Debug.Log("Sending Shockwave position....");
        }
 
 #endregion Input update
@@ -179,14 +175,14 @@ public class BrainCloudManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            GameManager.Instance.UpdateUsername(userInfo.Username);
+            GameManager.Instance.UpdateLoggedInText(userInfo.Username);
             m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
                 "Failed to update username to braincloud");
         }
         else
         {
             var username = data["playerName"] as string;
-            GameManager.Instance.UpdateUsername(username);
+            GameManager.Instance.UpdateLoggedInText(username);
             m_bcWrapper.PlayerStateService.UpdateName(username, OnLoggedIn, LoggingInError,
                 "Failed to update username to braincloud");
             //OnLoggedIn(jsonResponse, cbObject);
@@ -345,10 +341,10 @@ public class BrainCloudManager : MonoBehaviour
     {
         //StateManager.Instance.ChangeState(GameStates.Match);
         Debug.Log("Relay Connection Success");
-        GameManager.Instance.UpdateLobbyList();
         //State.form.UpdateGameViewport();
     }
-
+    
+    //Getting input from other members
     void OnRelayMessage(short netId, byte[] jsonResponse)
     {
         var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
@@ -367,15 +363,12 @@ public class BrainCloudManager : MonoBehaviour
                     member.IsAlive = true;
                     member.MousePosition.x = (int)data["x"];
                     member.MousePosition.y = (int)data["y"];
-                    Debug.Log("User Moved");
                 }
                 else if (op == "shockwave")
                 {
-                   
                     var data = json["data"] as Dictionary<string, object>;
                     Vector2 position = new Vector2((int) data["x"], (int) data["y"]);
-                    GameManager.Instance.GameArea.SpawnShockwave(position);
-                    Debug.Log("Shockwave summoned");
+                    member.ShockwavePositions.Add(position);
                 }
                 break;
             }

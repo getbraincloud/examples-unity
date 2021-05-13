@@ -22,13 +22,12 @@ public class UserMouseArea : MonoBehaviour
     public GameObject Shockwave;
     public Canvas MatchCanvas;
 
-    [HideInInspector] public Image LocalCursor;   
-    private Vector2 _shockwaveOffset=new Vector2(-8.6f,-5.5f);
+    [HideInInspector] public UserCursor LocalUserCursor;   
+    private Vector2 _shockwaveOffset=new Vector2(-8.7f,-5.35f);
     private Vector3 _newPosition;
-    private Color _userColor;
     private ParticleSystem.MainModule _shockwaveParticle;
     private GameObject _newShockwave;
-
+    private List<Vector2> _localShockwavePositions = new List<Vector2>();
 
     // Update is called once per frame
     void Update()
@@ -39,14 +38,17 @@ public class UserMouseArea : MonoBehaviour
             if (Cursor.visible)
             {
                 Cursor.visible = false;
-                LocalCursor.enabled = true;    
+                LocalUserCursor.AdjustVisibility(true);
             }
             
             _newPosition = GetMousePosition();
-            BrainCloudManager.Instance.MouseMoved(_newPosition);
+            BrainCloudManager.Instance.LocalMouseMoved(_newPosition);
             if (Input.GetMouseButtonDown(0))
             {
-                SpawnShockwave(_newPosition);
+                //Send position of local users input for a shockwave to other users
+                BrainCloudManager.Instance.LocalShockwave(_newPosition);
+                //Save position locally for us to spawn in UpdateAllShockwaves()
+                _localShockwavePositions.Add(_newPosition);
             }
         }
         else
@@ -54,36 +56,61 @@ public class UserMouseArea : MonoBehaviour
             if (!Cursor.visible)
             {
                 Cursor.visible = true;
-                LocalCursor.enabled = false;
+                LocalUserCursor.AdjustVisibility(false);
             }
         }
         UpdateAllCursorsMovement();
+        UpdateAllShockwaves();
     }
 
-    public void SpawnShockwave(Vector2 _newPosition)
+    public void UpdateAllShockwaves()
     {
-        //Sending info to BC
-        BrainCloudManager.Instance.Shockwave(_newPosition);
+        Lobby lobby = StateManager.Instance.CurrentLobby;
         
+        foreach (var member in lobby.Members)
+        {
+            foreach (Vector2 position in member.ShockwavePositions)
+            {
+                 SetUpShockwave(position,GameManager.ReturnUserColor(member.UserGameColor));
+            }
+
+            if (member.ShockwavePositions.Count > 0)
+            {
+                member.ShockwavePositions.Clear();    
+            }
+        }
+
+        foreach (var pos in _localShockwavePositions)
+        {
+            SetUpShockwave(pos,GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor));
+        }
+
+        if (_localShockwavePositions.Count > 0)
+        {
+            _localShockwavePositions.Clear();
+        }
+    }
+
+    private void SetUpShockwave(Vector2 position, Color waveColor)
+    {
         //Get in world position + offset 
-        _newPosition = Camera.main.ScreenToWorldPoint(_newPosition);
-        _newPosition -= _shockwaveOffset;
+        Vector2 newPosition = Camera.main.ScreenToWorldPoint(position);
+        newPosition -= _shockwaveOffset;
         
-        _newShockwave = Instantiate(Shockwave, _newPosition, Quaternion.identity);
+        _newShockwave = Instantiate(Shockwave, newPosition, Quaternion.identity);
         
-        //Update shockwave list
-        StateManager.Instance.ShockwavePositions.Add(_newShockwave);
         //Adjusting shockwave color to what user settings are
         _shockwaveParticle = _newShockwave.GetComponent<ParticleSystem>().main;
-        _shockwaveParticle.startColor = _userColor;
+        _shockwaveParticle.startColor = waveColor;    
+        StateManager.Instance.Shockwaves.Add(_newShockwave);
     }
+    
     private void UpdateAllCursorsMovement()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
-        var cursorList = GameManager.Instance.CursorList; 
-        for (int i = 0; i < cursorList.Count; i++)
+        for (int i = 0; i < lobby.Members.Count; i++)
         {
-            cursorList[i].transform.localPosition = lobby.Members[i].MousePosition;
+            lobby.Members[i].UserCursor.transform.localPosition = lobby.Members[i].MousePosition;
         }
     }
     ///Returns 'true' if we touched or hovering on this gameObject.

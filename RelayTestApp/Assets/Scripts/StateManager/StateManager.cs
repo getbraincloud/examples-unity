@@ -21,7 +21,8 @@ public class StateManager : MonoBehaviour
     //Network info needed
     public Lobby CurrentLobby;
     public Server CurrentServer;
-    public List<GameObject> ShockwavePositions = new List<GameObject>();
+    public List<GameObject> Shockwaves = new List<GameObject>();
+    public List<GameObject> UserCursors = new List<GameObject>();
     public RelayConnectionType protocol = RelayConnectionType.WEBSOCKET;
     public bool isReady;
     public bool isLoading;
@@ -61,11 +62,20 @@ public class StateManager : MonoBehaviour
     {
         CurrentLobby = null;
         CurrentServer = null;
-        foreach (GameObject shockwave in ShockwavePositions)
+        foreach (GameObject shockwave in Shockwaves)
         {
-            Destroy(shockwave);
+            if (shockwave != null)
+            {
+                Destroy(shockwave);    
+            }
         }
-        ShockwavePositions = new List<GameObject>();
+
+        foreach (var cursor in UserCursors)
+        {
+            Destroy(cursor);
+        }
+        Shockwaves = new List<GameObject>();
+        UserCursors = new List<GameObject>();
         GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
         ChangeState(GameStates.SignIn);
     }
@@ -96,7 +106,6 @@ public class StateManager : MonoBehaviour
             //Setting up Match...
             case GameStates.Lobby:
                 CurrentGameState = GameStates.Match;
-                GameManager.Instance.UpdateMatchList();
                 BrainCloudManager.Instance.StartGame();
                 isLoading = true;
                 LoadingGameState.ConnectStatesWithLoading(JoiningMatchMessage,false,GameStates.Match);

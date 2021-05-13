@@ -5,9 +5,9 @@ using UnityEngine;
 public class ColorAssignedButton : MonoBehaviour
 {
     public GameColors ButtonColor;
-
+    
     public void ChangeColor()
     {
-        GameManager.Instance.ChangeLobbyTextColor(ButtonColor);
+        GameManager.Instance.UpdateLocalColorChange(ButtonColor);
     }
 }

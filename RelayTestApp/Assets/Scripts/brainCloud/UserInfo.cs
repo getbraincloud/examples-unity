@@ -18,9 +18,10 @@ public class UserInfo
     public bool IsAlive;
     
     
-    public Color UserColor;
     public GameColors UserGameColor;
     public Vector2 MousePosition;
+    public List<Vector2> ShockwavePositions = new List<Vector2>();
+    public UserCursor UserCursor;
     public UserInfo() { }
 
     public UserInfo(Dictionary<string, object> userJson)
@@ -29,6 +30,6 @@ public class UserInfo
         Username = userJson["name"] as string;
         var extra = userJson["extra"] as Dictionary<string, object>;
         var colorIndex = (int)extra["colorIndex"];
-        UserColor = GameManager.Instance.ReturnUserColor((GameColors)colorIndex);
+        UserGameColor = (GameColors) colorIndex;
     }
 }

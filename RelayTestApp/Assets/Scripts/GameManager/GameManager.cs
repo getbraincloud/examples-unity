@@ -31,13 +31,9 @@ public class GameManager : MonoBehaviour
     public UserMouseArea GameArea;  //for updating members list of shockwaves
     public GameObject StartGameBtn;
     
-    private UserEntry _currentUserEntry;
-    
     private UserInfo _currentUserInfo;
-
-    
     private List<UserEntry> _matchEntries = new List<UserEntry>();
-    private List<UserCursor> _userCursorsList = new List<UserCursor>();
+    private List<UserCursor> _userCursorsList = new List<UserCursor>();     //needed for cleanup
     public List<UserCursor> CursorList => _userCursorsList;
     private static GameManager _instance;
     public static GameManager Instance => _instance;
@@ -59,23 +55,21 @@ public class GameManager : MonoBehaviour
         }
         
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
-        _currentUserEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
-        _matchEntries.Add(_currentUserEntry);
         Settings.LoadSettings();
     }
 
-    public void UpdateUsername(string name)
+    public void UpdateLoggedInText(string name)
     {
-        _currentUserEntry.UsernameText.text = name;
         _currentUserInfo.Username = name;
+        
         PlayerPrefs.SetString(Settings.UsernameKey,name);
         LoggedInNameText.text = $"Logged in as {name}";
     }
-
-    public void ChangeLobbyTextColor(GameColors newColor)
+    
+    //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callbacks
+    public void UpdateLocalColorChange(GameColors newColor)
     {
-        _currentUserInfo.UserColor = ReturnUserColor(newColor);
-        
+        _currentUserInfo.UserGameColor = newColor;
         //Apply in game color changes
         Settings.SetPlayerPrefColor(newColor);
         
@@ -92,28 +86,18 @@ public class GameManager : MonoBehaviour
     }
     public void UpdateLobbyList()
     {
-        if (_matchEntries.Count > 0)
-        {
-            for(int i = _matchEntries.Count - 1; i > -1; i--)
-            {
-                Destroy(_matchEntries[i].gameObject);
-            }
-            _matchEntries.Clear();    
-        }
-        Lobby lobby = StateManager.Instance.CurrentLobby;
-        for (int i = 0; i < lobby.Members.Count; i++)
-        {
-            var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity,UserEntryLobbyParent.transform);
-            newEntry.UsernameText.text = lobby.Members[i].Username;
-            newEntry.UsernameText.color = lobby.Members[i].UserColor;
-            _matchEntries.Add(newEntry);
-        }
+        AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
     }
     
     /// <summary>
     /// After list of users is generated for the current match, call this to display the connected users
     /// </summary>
     public void UpdateMatchList()
+    {
+        AdjustEntryList(UserEntryMatchParent.transform,UserEntryMatchPrefab);
+    }
+
+    private void AdjustEntryList(Transform parent, UserEntry prefab)
     {
         if (_matchEntries.Count > 0)
         {
@@ -124,13 +108,24 @@ public class GameManager : MonoBehaviour
             _matchEntries.Clear();    
         }
         
+        //populate user entries based on members in lobby
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity,UserEntryMatchParent.transform);
-            newEntry.UsernameText.text = lobby.Members[i].Username;
-            newEntry.UsernameText.color = lobby.Members[i].UserColor;
+            var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
+            SetUpUserEntry(lobby.Members[i], newEntry);
             _matchEntries.Add(newEntry);
+        }
+    }
+
+    private void SetUpUserEntry(UserInfo info,UserEntry entry)
+    {
+        entry.UsernameText.text = info.Username;
+        var userColor = ReturnUserColor(info.UserGameColor);
+        entry.UsernameText.color = userColor;
+        if (entry.UserDotImage != null)
+        {
+            entry.UserDotImage.color = userColor;
         }
     }
 
@@ -145,15 +140,20 @@ public class GameManager : MonoBehaviour
             }
             _userCursorsList.Clear();
         }
-
+        Color newColor;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
             var newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
             if (lobby.Members[i].Username == CurrentUserInfo.Username)
             {
-                GameArea.LocalCursor = newCursor.Cursor;
+                GameArea.LocalUserCursor = newCursor;
             }
-            newCursor.SetUpCursor(lobby.Members[i].UserColor,lobby.Members[i].Username);
+
+            newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
+            newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
+            newCursor.AdjustVisibility(false);
+            lobby.Members[i].UserCursor = newCursor;
+            _userCursorsList.Add(newCursor);
         }
     }
     
@@ -162,14 +162,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="newColor"> if the color needs to be changed</param>
     /// <returns></returns>
-    public Color ReturnUserColor(GameColors newColor = GameColors.White)
+    public static Color ReturnUserColor(GameColors newColor = GameColors.White)
     {
-        if (newColor != GameColors.White)
-        {
-            CurrentUserInfo.UserGameColor = newColor;
-        }
-
-        switch (CurrentUserInfo.UserGameColor)
+        switch (newColor)
         {
             case GameColors.Black:
                 return Color.black;
