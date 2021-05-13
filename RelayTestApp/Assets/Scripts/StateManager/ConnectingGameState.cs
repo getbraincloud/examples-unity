@@ -10,29 +10,15 @@ public class ConnectingGameState : GameState
     public Button CancelButton;
     public bool CancelNextState;
     private GameStates _gameStateToOpen;
-    private float _waitTime = 0.75f;
-    public void ConnectStates(string loadingMessage, bool cancelButtonEnabled, GameStates newGameState)
+    //Called from Unity Button within Connecting Canvas
+    public void CancelNextStateButtonPress()
     {
-        LoadingMessage.text = loadingMessage;
-        CancelButton.gameObject.SetActive(cancelButtonEnabled);
-        _gameStateToOpen = newGameState;
-        gameObject.SetActive(true);
-        Debug.Log($"ConnectingState: {newGameState}");
-        StartCoroutine(DelayToOpenState());
-    }
-
-    IEnumerator DelayToOpenState()
-    {
-        yield return new WaitForSeconds(_waitTime);
-        CloseWindow();
+        CancelNextState = true;
     }
 
     private void CloseWindow()
     {
-        if (!CancelNextState)
-        {
-            StateManager.Instance.ChangeState(_gameStateToOpen);    
-        }
+        StateManager.Instance.ChangeState(CancelNextState ? StateManager.Instance.CurrentGameState - 1  : _gameStateToOpen);
         CancelNextState = false;
         gameObject.SetActive(false);
     }
@@ -51,6 +37,10 @@ public class ConnectingGameState : GameState
     {
         while (StateManager.Instance.isLoading)
         {
+            if (CancelNextState)
+            {
+                StateManager.Instance.isLoading = false;
+            }
             yield return new WaitForFixedUpdate();
         }
         CloseWindow();

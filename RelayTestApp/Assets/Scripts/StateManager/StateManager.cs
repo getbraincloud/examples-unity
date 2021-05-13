@@ -87,27 +87,26 @@ public class StateManager : MonoBehaviour
         {
             state.gameObject.SetActive(false);
         }
+
+        isLoading = true;
         //User is in this state and moving onto the next
         switch (currentGameState)
         {
             //Logging In...
             case GameStates.SignIn:
-                
                 BrainCloudManager.Instance.Login();
-                LoadingGameState.ConnectStates(LoggingInMessage,false,GameStates.LoggedIn);
+                LoadingGameState.ConnectStatesWithLoading(LoggingInMessage,false,GameStates.LoggedIn);
                 break;
             //Looking for Lobby...
             case GameStates.LoggedIn:
                 CurrentGameState = GameStates.Lobby;
                 BrainCloudManager.Instance.FindLobby(protocol);
-                isLoading = true;
                 LoadingGameState.ConnectStatesWithLoading(LookingForLobbyMessage,true,GameStates.Lobby);
                 break;
             //Setting up Match...
             case GameStates.Lobby:
                 CurrentGameState = GameStates.Match;
                 BrainCloudManager.Instance.StartGame();
-                isLoading = true;
                 LoadingGameState.ConnectStatesWithLoading(JoiningMatchMessage,false,GameStates.Match);
                 break;
         }

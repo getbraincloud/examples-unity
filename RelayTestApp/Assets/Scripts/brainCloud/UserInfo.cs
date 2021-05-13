@@ -17,7 +17,6 @@ public class UserInfo
     public bool AllowSendTo;
     public bool IsAlive;
     
-    
     public GameColors UserGameColor;
     public Vector2 MousePosition;
     public List<Vector2> ShockwavePositions = new List<Vector2>();

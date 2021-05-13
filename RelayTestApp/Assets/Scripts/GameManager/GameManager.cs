@@ -82,17 +82,17 @@ public class GameManager : MonoBehaviour
             StateManager.Instance.isReady,
             extra
         );
-        
     }
-    public void UpdateLobbyList()
-    {
+    public void UpdateLobbyState()
+    {   
         AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
+        StartGameBtn.SetActive(IsLocalUserHost());
     }
     
     /// <summary>
     /// After list of users is generated for the current match, call this to display the connected users
     /// </summary>
-    public void UpdateMatchList()
+    public void UpdateMatchState()
     {
         AdjustEntryList(UserEntryMatchParent.transform,UserEntryMatchPrefab);
     }
@@ -187,9 +187,15 @@ public class GameManager : MonoBehaviour
         return Color.white;
     }
 
+    public bool IsLocalUserHost()
+    {
+        Lobby currentLobby = StateManager.Instance.CurrentLobby;
+        return currentLobby.OwnerID == CurrentUserInfo.ID;
+    }
+
     public void MemberLeft()
     {
-        UpdateMatchList();
+        UpdateMatchState();
         UpdateCursorList();
     }
     

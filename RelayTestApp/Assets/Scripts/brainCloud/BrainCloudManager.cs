@@ -53,11 +53,10 @@ public class BrainCloudManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        /*if (m_bcWrapper != null)
+        if (m_bcWrapper != null)
         {
             m_bcWrapper.Update();
         }
-        */
         
 
         if (m_dead)
@@ -113,7 +112,7 @@ public class BrainCloudManager : MonoBehaviour
             // Send to other players
             Dictionary<string, object> jsonData = new Dictionary<string, object>();
             jsonData["x"] = pos.x;
-            jsonData["y"] = pos.y;
+            jsonData["y"] = -pos.y;
 
             Dictionary<string, object> json = new Dictionary<string, object>();
             json["op"] = "move";
@@ -148,17 +147,16 @@ public class BrainCloudManager : MonoBehaviour
                 false, // Unordered
                 Settings.SendChannel());
             
-            Debug.Log("Sending Shockwave position....");
        }
 
 #endregion Input update
 
 #region BC Callbacks
 
-    // User fully logged in. Enable RTT and listen for chat messages
+    // User fully logged in. 
     void OnLoggedIn(string jsonResponse, object cbObject)
     {
-
+        
         Debug.Log("Logged in");
     }
     
@@ -188,6 +186,7 @@ public class BrainCloudManager : MonoBehaviour
             //OnLoggedIn(jsonResponse, cbObject);
         }
         PlayerPrefs.SetString(Settings.PasswordKey,GameManager.Instance.PasswordInputField.text);
+        StateManager.Instance.isLoading = false;
     }
     
     // Go back to login screen, with an error message
@@ -218,7 +217,7 @@ public class BrainCloudManager : MonoBehaviour
         StateManager.Instance.protocol = protocol;
         
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
-
+        
         // Enable RTT
         m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
@@ -267,9 +266,10 @@ public class BrainCloudManager : MonoBehaviour
                 jsonData["lobbyId"] as string);
             if (StateManager.Instance.CurrentGameState == GameStates.Lobby)
             {
-                StateManager.Instance.isLoading = false; 
-                GameManager.Instance.UpdateLobbyList();    
+                GameManager.Instance.UpdateLobbyState();
+                StateManager.Instance.isLoading = false;
             }
+            
         }
         
         if (response.ContainsKey("operation"))
@@ -281,11 +281,7 @@ public class BrainCloudManager : MonoBehaviour
                 case "DISBANDED":
                 {
                     var reason = jsonData["reason"] as Dictionary<string, object>;
-                    if ((int) reason["code"] == ReasonCodes.RTT_ROOM_READY)
-                    {
-                        ConnectRelay();
-                    }
-                    else
+                    if ((int) reason["code"] != ReasonCodes.RTT_ROOM_READY)
                     {
                         // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
                         CloseGame();
@@ -296,12 +292,16 @@ public class BrainCloudManager : MonoBehaviour
                 case "STARTING":
                     // Save our picked color index
                     Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
-                    
+                    if (!GameManager.Instance.IsLocalUserHost())
+                    {
+                        StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
+                    }
                     break;
                 case "ROOM_READY":
                     StateManager.Instance.CurrentServer = new Server(jsonData);
-                    GameManager.Instance.UpdateMatchList();
+                    GameManager.Instance.UpdateMatchState();
                     GameManager.Instance.UpdateCursorList();
+                    ConnectRelay();
                     StateManager.Instance.isLoading = false;
                     break;
             }
@@ -351,6 +351,7 @@ public class BrainCloudManager : MonoBehaviour
         string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
         var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
         Lobby lobby = StateManager.Instance.CurrentLobby;
+        var localUser = new UserInfo();
         foreach (var member in lobby.Members)
         {
             if (member.ID == memberProfileId)
@@ -362,7 +363,7 @@ public class BrainCloudManager : MonoBehaviour
 
                     member.IsAlive = true;
                     member.MousePosition.x = (int)data["x"];
-                    member.MousePosition.y = (int)data["y"];
+                    member.MousePosition.y = -(int)data["y"];
                 }
                 else if (op == "shockwave")
                 {
@@ -373,6 +374,8 @@ public class BrainCloudManager : MonoBehaviour
                 break;
             }
         }
+       
+        
     }
 
     void OnRelaySystemMessage(string jsonResponse)
