@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
-using Debug = UnityEngine.Debug;
 
 public class BrainCloudManager : MonoBehaviour
 {
@@ -35,15 +32,13 @@ public class BrainCloudManager : MonoBehaviour
         string username = GameManager.Instance.UsernameInputField.text;
         string password = GameManager.Instance.PasswordInputField.text;
         if (username.IsNullOrEmpty())
-        {
-            GameManager.Instance.ErrorMessage.SetUpPopUpMessage($"Please provide a username");
-            StateManager.Instance.AbortToSignIn();
+        {   
+            StateManager.Instance.AbortToSignIn($"Please provide a username");
             return;
         }
         if (password.IsNullOrEmpty())
         {
-            GameManager.Instance.ErrorMessage.SetUpPopUpMessage($"Please provide a password");
-            StateManager.Instance.AbortToSignIn();
+            StateManager.Instance.AbortToSignIn($"Please provide a password");
             return;
         }
         
@@ -64,7 +59,6 @@ public class BrainCloudManager : MonoBehaviour
         {
             m_dead = false;
             
-            // We differ destroying BC because we cannot destroy it within a callback
             UninitializeBC();
         }
     }
@@ -88,15 +82,15 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-
-
+    
 #region BC Callbacks
 
     // User fully logged in. 
     void OnLoggedIn(string jsonResponse, object cbObject)
     {
-        
-        Debug.Log("Logged in");
+        GameManager.Instance.UpdateMainMenuText();
+        PlayerPrefs.SetString(Settings.PasswordKey,GameManager.Instance.PasswordInputField.text);
+        StateManager.Instance.isLoading = false;
     }
     
     // User authenticated, handle the result
@@ -107,25 +101,22 @@ public class BrainCloudManager : MonoBehaviour
         var userInfo = GameManager.Instance.CurrentUserInfo;
         userInfo = new UserInfo();
         userInfo.ID = data["profileId"] as string;
-        GameManager.Instance.CurrentUserInfo = userInfo;
+        
         // If no username is set for this user, ask for it
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            GameManager.Instance.UpdateLoggedInText(userInfo.Username);
             m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
                 "Failed to update username to braincloud");
         }
         else
         {
-            var username = data["playerName"] as string;
-            GameManager.Instance.UpdateLoggedInText(username);
-            m_bcWrapper.PlayerStateService.UpdateName(username, OnLoggedIn, LoggingInError,
+            userInfo.Username = data["playerName"] as string;
+            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
                 "Failed to update username to braincloud");
-            //OnLoggedIn(jsonResponse, cbObject);
         }
-        PlayerPrefs.SetString(Settings.PasswordKey,GameManager.Instance.PasswordInputField.text);
-        StateManager.Instance.isLoading = false;
+        GameManager.Instance.CurrentUserInfo = userInfo;
+        
     }
     
     // Go back to login screen, with an error message
@@ -142,9 +133,8 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RTTService.DisableRTT();
 
         string message = cbObject as string;
-        GameManager.Instance.ErrorMessage.SetUpPopUpMessage($"Message: {message} |||| JSON: {jsonError}");
 
-        StateManager.Instance.AbortToSignIn();
+        StateManager.Instance.AbortToSignIn($"Message: {message} |||| JSON: {jsonError}");
 
     }
 #endregion BC Callbacks
@@ -182,7 +172,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         StateManager.Instance.isReady = true;
         
-        //
+        //Setting up a update to send to brain cloud about local users color
         var extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
 
@@ -194,64 +184,66 @@ public class BrainCloudManager : MonoBehaviour
 
 #region Input update
 
-    // User moved mouse in the play area
-        public void LocalMouseMoved(Vector2 pos)
+    // Local User moved mouse in the play area
+    public void LocalMouseMoved(Vector2 pos)
+    {
+        GameManager.Instance.CurrentUserInfo.IsAlive = true;
+        GameManager.Instance.CurrentUserInfo.MousePosition = pos;
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        foreach (var user in lobby.Members)
         {
-            GameManager.Instance.CurrentUserInfo.IsAlive = true;
-            GameManager.Instance.CurrentUserInfo.MousePosition = pos;
-            UserInfo myUser = null;
-            Lobby lobby = StateManager.Instance.CurrentLobby;
-            foreach (var user in lobby.Members)
+            if (GameManager.Instance.CurrentUserInfo.ID == user.ID)
             {
-                if (GameManager.Instance.CurrentUserInfo.ID == user.ID)
-                {
-                    //Save it for later !
-                    user.IsAlive = true;
-                    user.MousePosition = pos;
-                    myUser = user;
-                    break;
-                }
+                //Save it for later !
+                user.IsAlive = true;
+                user.MousePosition = pos;
+                break;
             }
-
-            // Send to other players
-            Dictionary<string, object> jsonData = new Dictionary<string, object>();
-            jsonData["x"] = pos.x;
-            jsonData["y"] = -pos.y + _mouseYOffset;
-
-            Dictionary<string, object> json = new Dictionary<string, object>();
-            json["op"] = "move";
-            json["data"] = jsonData;
-
-            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-            m_bcWrapper.RelayService.Send
-                (
-                    data, 
-                    BrainCloudRelay.TO_ALL_PLAYERS, 
-                    Settings.GetPlayerPrefBool(Settings.ReliableKey), 
-                    Settings.GetPlayerPrefBool(Settings.OrderedKey),
-                    Settings.SendChannel()
-                );
         }
 
-        // User clicked mouse in the play area
-        public void LocalShockwave(Vector2 pos)
-        {
-            // Send to other players
-            Dictionary<string, object> jsonData = new Dictionary<string, object>();
-            jsonData["x"] = pos.x;
-            jsonData["y"] = -pos.y;
+        // Send to other players
+        Dictionary<string, object> jsonData = new Dictionary<string, object>();
+        jsonData["x"] = pos.x;
+        jsonData["y"] = -pos.y + _mouseYOffset;
 
-            Dictionary<string, object> json = new Dictionary<string, object>();
-            json["op"] = "shockwave";
-            json["data"] = jsonData;
+        Dictionary<string, object> json = new Dictionary<string, object>();
+        json["op"] = "move";
+        json["data"] = jsonData;
 
-            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-            m_bcWrapper.RelayService.Send(data, BrainCloudRelay.TO_ALL_PLAYERS, 
+        byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+        m_bcWrapper.RelayService.Send
+            (
+                data, 
+                BrainCloudRelay.TO_ALL_PLAYERS, 
+                Settings.GetPlayerPrefBool(Settings.ReliableKey), 
+                Settings.GetPlayerPrefBool(Settings.OrderedKey),
+                Settings.GetChannel()
+            );
+    }
+
+    // Local User summoned a shockwave in the play area
+    public void LocalShockwave(Vector2 pos)
+    {
+        // Send to other players
+        Dictionary<string, object> jsonData = new Dictionary<string, object>();
+        jsonData["x"] = pos.x;
+        jsonData["y"] = -pos.y;
+
+        Dictionary<string, object> json = new Dictionary<string, object>();
+        json["op"] = "shockwave";
+        json["data"] = jsonData;
+
+        byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+        m_bcWrapper.RelayService.Send
+            (
+                data, 
+                BrainCloudRelay.TO_ALL_PLAYERS, 
                 true, // Reliable
                 false, // Unordered
-                Settings.SendChannel());
-            
-       }
+                Settings.GetChannel()
+            );
+        
+   }
 
 #endregion Input update
 
@@ -291,8 +283,8 @@ public class BrainCloudManager : MonoBehaviour
     // We received a lobby event through RTT
     void OnLobbyEvent(string jsonResponse)
     {
-        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-        var jsonData = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
 
         // If there is a lobby object present in the message, update our lobby
         // state with it.
@@ -300,6 +292,7 @@ public class BrainCloudManager : MonoBehaviour
         {
             StateManager.Instance.CurrentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>,
                 jsonData["lobbyId"] as string);
+            //If we're still in lobby, then update the list of users
             if (StateManager.Instance.CurrentGameState == GameStates.Lobby)
             {
                 GameManager.Instance.UpdateLobbyState();
@@ -307,11 +300,10 @@ public class BrainCloudManager : MonoBehaviour
             }
             
         }
-        
+        //Using the key "operation" to determine what state the lobby is in
         if (response.ContainsKey("operation"))
         {
             var operation = response["operation"] as string;
-            Debug.Log($"OPERTATION: {operation}");
             switch (operation)
             {
                 case "DISBANDED":
@@ -369,18 +361,11 @@ public class BrainCloudManager : MonoBehaviour
         (
             StateManager.Instance.protocol,
             new RelayConnectOptions(false, server.host, port, server.passcode, server.lobbyId),
-            OnRelayConnectSuccess, 
-            LoggingInError, "Failed to connect to server"
+            null, 
+            LoggingInError, 
+            "Failed to connect to server"
         );
     }
-    void OnRelayConnectSuccess(string jsonResponse, object cbObject)
-    {
-        //StateManager.Instance.ChangeState(GameStates.Match);
-        Debug.Log("Relay Connection Success");
-        //State.form.UpdateGameViewport();
-    }
-    
-    
 
     void OnRelaySystemMessage(string jsonResponse)
     {

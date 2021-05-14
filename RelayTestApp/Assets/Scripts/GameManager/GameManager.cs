@@ -28,46 +28,28 @@ public class GameManager : MonoBehaviour
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
-    public DialogueMessage ErrorMessage;
-    public GameArea GameArea;  //for updating members list of shockwaves
-    public GameObject StartGameBtn;
+    //for updating members list of shockwaves
+    public GameArea GameArea;  
+    //local user's start button for starting a match
+    public GameObject StartGameBtn; 
     
-    private UserInfo _currentUserInfo;
-    private List<UserEntry> _matchEntries = new List<UserEntry>();
-    private List<UserCursor> _userCursorsList = new List<UserCursor>();     //needed for cleanup
+    private EventSystem _eventSystem;
+    //List references for clean up when game closes
+    private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
+    private readonly List<UserCursor> _userCursorsList = new List<UserCursor>();     
     
+    //Singleton Pattern
     private static GameManager _instance;
     public static GameManager Instance => _instance;
+    
+    //Local User Info
+    private UserInfo _currentUserInfo;
     public UserInfo CurrentUserInfo
     {
         get => _currentUserInfo;
         set => _currentUserInfo = value;
     }
-    EventSystem system;
- 
-    void Start()
-    {
-        system = EventSystem.current;// EventSystemManager.currentSystem;
-     
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            Selectable next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-         
-            if (next != null)
-            {
-             
-                InputField inputfield = next.GetComponent<InputField>();
-                if (inputfield != null)
-                    inputfield.OnPointerClick(new PointerEventData(system));  //if it's an input field, also set the text caret
-             
-                system.SetSelectedGameObject(next.gameObject, new BaseEventData(system));
-            }
-        }
-    }
+    
     private void Awake()
     {
         if (!_instance)
@@ -78,22 +60,46 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        
+        _eventSystem = EventSystem.current;
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
-        Settings.LoadSettings();
+        LoadPlayerSettings();
     }
 
-#region Update Components
-
-    public void UpdateLoggedInText(string name)
+    // Update is called once per frame
+    void Update()
     {
-        _currentUserInfo.Username = name;
-        
-        PlayerPrefs.SetString(Settings.UsernameKey,name);
-        LoggedInNameText.text = $"Logged in as {name}";
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+         
+            if (next != null)
+            {
+                InputField inputfield = next.GetComponent<InputField>();
+                if (inputfield != null)
+                {
+                    //if it's an input field, also set the text caret
+                    inputfield.OnPointerClick(new PointerEventData(_eventSystem));
+                }
+                _eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
+            }
+        }
     }
     
-    //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callbacks
+#region Update Components
+    private void LoadPlayerSettings()
+    {
+        _currentUserInfo = Settings.LoadPlayerInfo();
+        UsernameInputField.text = _currentUserInfo.Username;
+        PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
+    }
+    
+    public void UpdateMainMenuText()
+    {
+        PlayerPrefs.SetString(Settings.UsernameKey, _currentUserInfo.Username);
+        LoggedInNameText.text = $"Logged in as {_currentUserInfo.Username}";
+    }
+    
+    //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callback OnLobbyEvent()
     public void UpdateLocalColorChange(GameColors newColor)
     {
         _currentUserInfo.UserGameColor = newColor;
@@ -101,7 +107,7 @@ public class GameManager : MonoBehaviour
         Settings.SetPlayerPrefColor(newColor);
         
         //Send update to BC
-        var extra = new Dictionary<string, object>();
+        Dictionary<string,object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
         BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
         (
@@ -110,6 +116,7 @@ public class GameManager : MonoBehaviour
             extra
         );
     }
+    
     public void UpdateCursorList()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
@@ -124,7 +131,7 @@ public class GameManager : MonoBehaviour
         Color newColor;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            var newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
+            UserCursor newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
             
             newCursor.AdjustVisibility(false);
             newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
@@ -171,14 +178,11 @@ public class GameManager : MonoBehaviour
             _matchEntries.Add(newEntry);
         }
     }
-
-#endregion Update Components
     
-
     private void SetUpUserEntry(UserInfo info,UserEntry entry)
     {
         entry.UsernameText.text = info.Username;
-        var userColor = ReturnUserColor(info.UserGameColor);
+        Color userColor = ReturnUserColor(info.UserGameColor);
         entry.UsernameText.color = userColor;
         if (entry.UserDotImage != null)
         {
@@ -202,9 +206,16 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+    
+    public void MemberLeft()
+    {
+        UpdateMatchState();
+        UpdateCursorList();
+    }
+#endregion Update Components
+    
+#region Helper Functions
 
-    
-    
     /// <summary>
     /// Main returns the current color the user has equipped or changes to new color and returns it
     /// </summary>
@@ -231,7 +242,7 @@ public class GameManager : MonoBehaviour
             case GameColors.Cyan:
                 return new Color(0.86f,0.96f,1);
         }
-        
+            
         return Color.white;
     }
 
@@ -241,10 +252,6 @@ public class GameManager : MonoBehaviour
         return currentLobby.OwnerID == CurrentUserInfo.ID;
     }
 
-    public void MemberLeft()
-    {
-        UpdateMatchState();
-        UpdateCursorList();
-    }
+#endregion
 }
 

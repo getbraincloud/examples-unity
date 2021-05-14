@@ -1,8 +1,15 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Features:
+/// - Waits until boolean StateManager.Instance.isLoading is set to false to open next game state
+/// - If there's an error, CancelNextState will be turned true and will go back a previous game state
+/// - If User clicks Cancel button, CancelNextState will turn true and will go back a previous state
+///  
+/// </summary>
 
 public class ConnectingGameState : GameState
 {
@@ -29,7 +36,6 @@ public class ConnectingGameState : GameState
         CancelButton.gameObject.SetActive(cancelButtonEnabled);
         _gameStateToOpen = newGameState;
         gameObject.SetActive(true);
-        Debug.Log($"Starting loading: {newGameState}");
         StartCoroutine(WaitForResponse());
     }
 

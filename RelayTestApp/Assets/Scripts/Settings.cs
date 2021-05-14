@@ -1,7 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Features:
+/// - Holding string keys for easy access
+/// - Get/Set local player settings to PlayerPrefs
+/// - Loads in player info
+/// </summary>
 public static class Settings
 {
     public static string GameColorKey = "GameColor";
@@ -14,7 +17,9 @@ public static class Settings
 
     public static string OrderedKey = "Ordered";
 
-    public static int SendChannel() => 0; 
+    public static string ChannelKey = "Channel";
+
+    public static int GetChannel() => PlayerPrefs.GetInt(ChannelKey); 
     
     //Getters
     public static GameColors GetPlayerPrefColor() => (GameColors)PlayerPrefs.GetInt(GameColorKey);
@@ -25,17 +30,11 @@ public static class Settings
     public static void SetPlayerPrefBool(string key, bool value) => PlayerPrefs.SetInt(key, value == false ? 0 : 1);
 
 
-    public static void LoadSettings()
+    public static UserInfo LoadPlayerInfo()
     {
-        
-        var GameInstance = GameManager.Instance;
-        //Initialize local user
-        GameInstance.CurrentUserInfo = new UserInfo();
-        GameInstance.CurrentUserInfo.UserGameColor = GetPlayerPrefColor();
-        var username = PlayerPrefs.GetString(UsernameKey);
-        GameInstance.CurrentUserInfo.Username = username;
-        GameInstance.UsernameInputField.text = username;
-        
-        GameInstance.PasswordInputField.text = PlayerPrefs.GetString(PasswordKey);
+        UserInfo playerInfo = new UserInfo();
+        playerInfo.Username = PlayerPrefs.GetString(UsernameKey);
+        playerInfo.UserGameColor = GetPlayerPrefColor();
+        return playerInfo;
     }
 }

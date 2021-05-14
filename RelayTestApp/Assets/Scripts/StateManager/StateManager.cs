@@ -1,16 +1,17 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using BrainCloud;
+
 /// <summary>
 /// - Responsible for switching states from either button events or loading events
+/// - If there's an error, it will give an error pop up and send you back to Sign In game state.
 /// - Holding information such as
 ///     - What state I'm currently in
 ///     - Transition from State to State
 ///     - Clean up game objects when game is finished
 ///     - Info about Server and Lobby
 /// </summary>
+
 public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting}
 public class StateManager : MonoBehaviour
 {
@@ -18,7 +19,7 @@ public class StateManager : MonoBehaviour
     public List<GameState> ListOfStates = new List<GameState>();
     public GameStates CurrentGameState;
     public ConnectingGameState LoadingGameState;
-    
+    public DialogueMessage ErrorMessage;
     //Network info needed
     public Lobby CurrentLobby;
     public Server CurrentServer;
@@ -57,8 +58,9 @@ public class StateManager : MonoBehaviour
         ChangeState(GameStates.SignIn);
     }
 
-    public void AbortToSignIn()
+    public void AbortToSignIn(string errorMessage)
     {
+        ErrorMessage.SetUpPopUpMessage(errorMessage);
         LoadingGameState.CancelNextState = true;
         ChangeState(GameStates.SignIn);
     }

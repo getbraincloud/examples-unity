@@ -1,13 +1,14 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// Purpose: To detect when the user is hovering over a UI element. This script needs to be attached to the UI object 
-/// Recommend Use with: Image Component
+/// Features:
+/// - How to use brain cloud lobby members to translate for gameplay
+/// - Update game area in runtime for network and local users
+/// - Create shockwave gameobjects from both local and network user inputs
+/// - Update Cursor locations from both local and network users inputs
+/// - Offsets are due to the spacing difference from Node js example found at this link -> http://getbraincloud.com/devdemos/relaytestapp
 /// </summary>
 
 public class GameArea : MonoBehaviour
@@ -29,7 +30,6 @@ public class GameArea : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        
         if (IsPointerOverUIElement())
         {
             if (Cursor.visible)
@@ -77,7 +77,7 @@ public class GameArea : MonoBehaviour
                 }   
             }
             
-            //Better safe than sorry
+            //Clear the list so there's no backlog of input positions
             if (member.ShockwavePositions.Count > 0)
             {
                 member.ShockwavePositions.Clear();    
@@ -91,7 +91,7 @@ public class GameArea : MonoBehaviour
                 SetUpShockwave(pos, GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor),true);
             }   
         }
-
+        //Clear the list so there's no backlog of input positions
         if (_localShockwavePositions.Count > 0)
         {
             _localShockwavePositions.Clear();
