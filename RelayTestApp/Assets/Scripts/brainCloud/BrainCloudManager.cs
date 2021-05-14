@@ -14,7 +14,8 @@ public class BrainCloudManager : MonoBehaviour
     private bool m_dead = false;
     public BrainCloudWrapper Wrapper => m_bcWrapper;
     public static BrainCloudManager Instance;
-    
+    //Offset for the different mouse coordinates from Unity space to Nodejs space
+    private float _mouseYOffset = 321;
     private void Awake()
     {
         m_bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -87,68 +88,7 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-#region Input update
 
-    // User moved mouse in the play area
-        public void LocalMouseMoved(Vector2 pos)
-        {
-            GameManager.Instance.CurrentUserInfo.IsAlive = true;
-            GameManager.Instance.CurrentUserInfo.MousePosition = pos;
-            UserInfo myUser = null;
-            Lobby lobby = StateManager.Instance.CurrentLobby;
-            foreach (var user in lobby.Members)
-            {
-                if (GameManager.Instance.CurrentUserInfo.ID == user.ID)
-                {
-                    //Save it for later !
-                    user.IsAlive = true;
-                    user.MousePosition = pos;
-                    myUser = user;
-                    break;
-                }
-            }
-
-            // Send to other players
-            Dictionary<string, object> jsonData = new Dictionary<string, object>();
-            jsonData["x"] = pos.x;
-            jsonData["y"] = -pos.y;
-
-            Dictionary<string, object> json = new Dictionary<string, object>();
-            json["op"] = "move";
-            json["data"] = jsonData;
-
-            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-            m_bcWrapper.RelayService.Send
-                (
-                    data, 
-                    BrainCloudRelay.TO_ALL_PLAYERS, 
-                    Settings.GetPlayerPrefBool(Settings.ReliableKey), 
-                    Settings.GetPlayerPrefBool(Settings.OrderedKey),
-                    Settings.SendChannel()
-                );
-        }
-
-        // User clicked mouse in the play area
-        public void LocalShockwave(Vector2 pos)
-        {
-            // Send to other players
-            Dictionary<string, object> jsonData = new Dictionary<string, object>();
-            jsonData["x"] = pos.x;
-            jsonData["y"] = -pos.y;
-
-            Dictionary<string, object> json = new Dictionary<string, object>();
-            json["op"] = "shockwave";
-            json["data"] = jsonData;
-
-            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-            m_bcWrapper.RelayService.Send(data, BrainCloudRelay.TO_ALL_PLAYERS, 
-                true, // Reliable
-                false, // Unordered
-                Settings.SendChannel());
-            
-       }
-
-#endregion Input update
 
 #region BC Callbacks
 
@@ -252,7 +192,101 @@ public class BrainCloudManager : MonoBehaviour
 
 #endregion GameFlow
 
+#region Input update
+
+    // User moved mouse in the play area
+        public void LocalMouseMoved(Vector2 pos)
+        {
+            GameManager.Instance.CurrentUserInfo.IsAlive = true;
+            GameManager.Instance.CurrentUserInfo.MousePosition = pos;
+            UserInfo myUser = null;
+            Lobby lobby = StateManager.Instance.CurrentLobby;
+            foreach (var user in lobby.Members)
+            {
+                if (GameManager.Instance.CurrentUserInfo.ID == user.ID)
+                {
+                    //Save it for later !
+                    user.IsAlive = true;
+                    user.MousePosition = pos;
+                    myUser = user;
+                    break;
+                }
+            }
+
+            // Send to other players
+            Dictionary<string, object> jsonData = new Dictionary<string, object>();
+            jsonData["x"] = pos.x;
+            jsonData["y"] = -pos.y + _mouseYOffset;
+
+            Dictionary<string, object> json = new Dictionary<string, object>();
+            json["op"] = "move";
+            json["data"] = jsonData;
+
+            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+            m_bcWrapper.RelayService.Send
+                (
+                    data, 
+                    BrainCloudRelay.TO_ALL_PLAYERS, 
+                    Settings.GetPlayerPrefBool(Settings.ReliableKey), 
+                    Settings.GetPlayerPrefBool(Settings.OrderedKey),
+                    Settings.SendChannel()
+                );
+        }
+
+        // User clicked mouse in the play area
+        public void LocalShockwave(Vector2 pos)
+        {
+            // Send to other players
+            Dictionary<string, object> jsonData = new Dictionary<string, object>();
+            jsonData["x"] = pos.x;
+            jsonData["y"] = -pos.y;
+
+            Dictionary<string, object> json = new Dictionary<string, object>();
+            json["op"] = "shockwave";
+            json["data"] = jsonData;
+
+            byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+            m_bcWrapper.RelayService.Send(data, BrainCloudRelay.TO_ALL_PLAYERS, 
+                true, // Reliable
+                false, // Unordered
+                Settings.SendChannel());
+            
+       }
+
+#endregion Input update
+
 #region RTT functions
+
+    //Getting input from other members
+    void OnRelayMessage(short netId, byte[] jsonResponse)
+    {
+        var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
+        string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
+        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        foreach (var member in lobby.Members)
+        {
+            if (member.ID == memberProfileId)
+            {
+                var op = json["op"] as string;
+                if (op == "move")
+                {
+                    var data = json["data"] as Dictionary<string, object>;
+
+                    member.IsAlive = true;
+                    member.MousePosition.x = (int)data["x"];
+                    member.MousePosition.y = -(int)data["y"] + _mouseYOffset;
+                }
+                else if (op == "shockwave")
+                {
+                    var data = json["data"] as Dictionary<string, object>;
+                    Vector2 position = new Vector2((int) data["x"], -(int) data["y"]);
+                    member.ShockwavePositions.Add(position);
+                }
+                break;
+            }
+        }
+    }
 
     // We received a lobby event through RTT
     void OnLobbyEvent(string jsonResponse)
@@ -346,39 +380,7 @@ public class BrainCloudManager : MonoBehaviour
         //State.form.UpdateGameViewport();
     }
     
-    //Getting input from other members
-    void OnRelayMessage(short netId, byte[] jsonResponse)
-    {
-        var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
-        string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
-        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
-        Lobby lobby = StateManager.Instance.CurrentLobby;
-        var localUser = new UserInfo();
-        foreach (var member in lobby.Members)
-        {
-            if (member.ID == memberProfileId)
-            {
-                var op = json["op"] as string;
-                if (op == "move")
-                {
-                    var data = json["data"] as Dictionary<string, object>;
-
-                    member.IsAlive = true;
-                    member.MousePosition.x = (int)data["x"];
-                    member.MousePosition.y = -(int)data["y"];
-                }
-                else if (op == "shockwave")
-                {
-                    var data = json["data"] as Dictionary<string, object>;
-                    Vector2 position = new Vector2((int) data["x"], (int) data["y"]);
-                    member.ShockwavePositions.Add(position);
-                }
-                break;
-            }
-        }
-       
-        
-    }
+    
 
     void OnRelaySystemMessage(string jsonResponse)
     {

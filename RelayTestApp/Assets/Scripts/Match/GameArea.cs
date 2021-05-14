@@ -10,27 +10,24 @@ using UnityEngine.EventSystems;
 /// Recommend Use with: Image Component
 /// </summary>
 
-/*
- * ToDo
- * - Need to disable cursor and place a mouse image where the cursor was
- *  - Need to change color of cursor
- * - Need to spawn a shockwave where the user clicked
- * yes
- */
-public class UserMouseArea : MonoBehaviour
+public class GameArea : MonoBehaviour
 {
     public GameObject Shockwave;
     public Canvas MatchCanvas;
-
-    [HideInInspector] public UserCursor LocalUserCursor;   
-    private Vector2 _shockwaveOffset=new Vector2(-8.7f,-5.35f);
-    private Vector3 _newPosition;
+      
+    [HideInInspector] public UserCursor LocalUserCursor;
+    //Offsets specific for when spawning a shockwave to local user
+    private Vector2 _localShockwaveOffset=new Vector2(-8.7f,-5.35f);
+    private Vector2 _networkShockwaveOffset =new Vector2(-8.65f,-8.24f);
+    //local to network is for shockwave input specifically
+    private float _localToNetworkOffset = -310f;
+    private Vector2 _newPosition;
     private ParticleSystem.MainModule _shockwaveParticle;
     private GameObject _newShockwave;
     private List<Vector2> _localShockwavePositions = new List<Vector2>();
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         
         if (IsPointerOverUIElement())
@@ -45,10 +42,13 @@ public class UserMouseArea : MonoBehaviour
             BrainCloudManager.Instance.LocalMouseMoved(_newPosition);
             if (Input.GetMouseButtonDown(0))
             {
-                //Send position of local users input for a shockwave to other users
-                BrainCloudManager.Instance.LocalShockwave(_newPosition);
                 //Save position locally for us to spawn in UpdateAllShockwaves()
                 _localShockwavePositions.Add(_newPosition);
+                
+                //Position coordinates are different for the nodejs example so I offset it to the right view
+                _newPosition.y += _localToNetworkOffset;
+                //Send position of local users input for a shockwave to other users
+                BrainCloudManager.Instance.LocalShockwave(_newPosition);
             }
         }
         else
@@ -63,7 +63,7 @@ public class UserMouseArea : MonoBehaviour
         UpdateAllShockwaves();
     }
 
-    public void UpdateAllShockwaves()
+    private void UpdateAllShockwaves()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
         
@@ -73,11 +73,11 @@ public class UserMouseArea : MonoBehaviour
             {
                 foreach (Vector2 position in member.ShockwavePositions)
                 {
-                    SetUpShockwave(position,GameManager.ReturnUserColor(member.UserGameColor));
+                    SetUpShockwave(position, GameManager.ReturnUserColor(member.UserGameColor), false);
                 }   
             }
             
-            //Better safe then sorry
+            //Better safe than sorry
             if (member.ShockwavePositions.Count > 0)
             {
                 member.ShockwavePositions.Clear();    
@@ -88,7 +88,7 @@ public class UserMouseArea : MonoBehaviour
         {
             foreach (var pos in _localShockwavePositions)
             {
-                SetUpShockwave(pos,GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor));
+                SetUpShockwave(pos, GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor),true);
             }   
         }
 
@@ -98,11 +98,11 @@ public class UserMouseArea : MonoBehaviour
         }
     }
 
-    private void SetUpShockwave(Vector2 position, Color waveColor)
+    private void SetUpShockwave(Vector2 position, Color waveColor, bool isUserLocal)
     {
         //Get in world position + offset 
         Vector2 newPosition = Camera.main.ScreenToWorldPoint(position);
-        newPosition -= _shockwaveOffset;
+        newPosition -= isUserLocal ? _localShockwaveOffset : _networkShockwaveOffset;
         
         _newShockwave = Instantiate(Shockwave, newPosition, Quaternion.identity);
         
@@ -117,6 +117,10 @@ public class UserMouseArea : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
+            if (!lobby.Members[i].UserCursor.CursorImage.enabled && lobby.Members[i].IsAlive)
+            {
+                lobby.Members[i].UserCursor.AdjustVisibility(true);
+            }
             lobby.Members[i].UserCursor.transform.localPosition = lobby.Members[i].MousePosition;
         }
     }

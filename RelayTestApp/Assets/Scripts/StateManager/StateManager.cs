@@ -5,30 +5,40 @@ using UnityEngine;
 using BrainCloud;
 /// <summary>
 /// - Responsible for switching states from either button events or loading events
-/// - Holding information like 
+/// - Holding information such as
+///     - What state I'm currently in
+///     - Transition from State to State
+///     - Clean up game objects when game is finished
+///     - Info about Server and Lobby
 /// </summary>
 public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting}
 public class StateManager : MonoBehaviour
 {
+    //Game States
     public List<GameState> ListOfStates = new List<GameState>();
     public GameStates CurrentGameState;
     public ConnectingGameState LoadingGameState;
     
-    
-    private static StateManager _instance;
-    public static StateManager Instance => _instance;
-    
     //Network info needed
     public Lobby CurrentLobby;
     public Server CurrentServer;
-    public List<GameObject> Shockwaves = new List<GameObject>();
-    public List<GameObject> UserCursors = new List<GameObject>();
     public RelayConnectionType protocol = RelayConnectionType.WEBSOCKET;
+    
+    //Specific for loading and waiting
     public bool isReady;
     public bool isLoading;
+    
+    //Used to clean up objects when game is finished
+    public List<GameObject> Shockwaves = new List<GameObject>();
+    
+    //Messages for loading screen
     private const string LoggingInMessage = "Logging in...";
     private const string LookingForLobbyMessage = "Joining Lobby...";
     private const string JoiningMatchMessage = "Joining Match...";
+    
+    //Singleton
+    private static StateManager _instance;
+    public static StateManager Instance => _instance;
     
     protected virtual void Awake()
     {
@@ -70,14 +80,10 @@ public class StateManager : MonoBehaviour
                 Destroy(shockwave);    
             }
         }
-
-        foreach (var cursor in UserCursors)
-        {
-            Destroy(cursor);
-        }
+        //ToDo Clean up user cursors
         BrainCloudManager.Instance.CloseGame();
         Shockwaves = new List<GameObject>();
-        UserCursors = new List<GameObject>();
+        
         GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
         ChangeState(GameStates.SignIn);
     }

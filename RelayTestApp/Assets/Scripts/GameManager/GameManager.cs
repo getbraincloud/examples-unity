@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
@@ -28,13 +29,13 @@ public class GameManager : MonoBehaviour
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
     public DialogueMessage ErrorMessage;
-    public UserMouseArea GameArea;  //for updating members list of shockwaves
+    public GameArea GameArea;  //for updating members list of shockwaves
     public GameObject StartGameBtn;
     
     private UserInfo _currentUserInfo;
     private List<UserEntry> _matchEntries = new List<UserEntry>();
     private List<UserCursor> _userCursorsList = new List<UserCursor>();     //needed for cleanup
-    public List<UserCursor> CursorList => _userCursorsList;
+    
     private static GameManager _instance;
     public static GameManager Instance => _instance;
     public UserInfo CurrentUserInfo
@@ -42,7 +43,31 @@ public class GameManager : MonoBehaviour
         get => _currentUserInfo;
         set => _currentUserInfo = value;
     }
-
+    EventSystem system;
+ 
+    void Start()
+    {
+        system = EventSystem.current;// EventSystemManager.currentSystem;
+     
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            Selectable next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+         
+            if (next != null)
+            {
+             
+                InputField inputfield = next.GetComponent<InputField>();
+                if (inputfield != null)
+                    inputfield.OnPointerClick(new PointerEventData(system));  //if it's an input field, also set the text caret
+             
+                system.SetSelectedGameObject(next.gameObject, new BaseEventData(system));
+            }
+        }
+    }
     private void Awake()
     {
         if (!_instance)
@@ -57,6 +82,8 @@ public class GameManager : MonoBehaviour
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
         Settings.LoadSettings();
     }
+
+#region Update Components
 
     public void UpdateLoggedInText(string name)
     {
@@ -82,6 +109,33 @@ public class GameManager : MonoBehaviour
             StateManager.Instance.isReady,
             extra
         );
+    }
+    public void UpdateCursorList()
+    {
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        if (_userCursorsList.Count > 0)
+        {
+            for (int i = _userCursorsList.Count - 1; i > -1; i--)
+            {
+                Destroy(_userCursorsList[i].gameObject);
+            }
+            _userCursorsList.Clear();
+        }
+        Color newColor;
+        for (int i = 0; i < lobby.Members.Count; i++)
+        {
+            var newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
+            
+            newCursor.AdjustVisibility(false);
+            newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
+            newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
+            lobby.Members[i].UserCursor = newCursor;
+            _userCursorsList.Add(newCursor);
+            if (lobby.Members[i].Username == CurrentUserInfo.Username)
+            {
+                GameArea.LocalUserCursor = newCursor;
+            }
+        }
     }
     public void UpdateLobbyState()
     {   
@@ -118,6 +172,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+#endregion Update Components
+    
+
     private void SetUpUserEntry(UserInfo info,UserEntry entry)
     {
         entry.UsernameText.text = info.Username;
@@ -146,33 +203,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void UpdateCursorList()
-    {
-        Lobby lobby = StateManager.Instance.CurrentLobby;
-        if (_userCursorsList.Count > 0)
-        {
-            for (int i = _userCursorsList.Count - 1; i > -1; i--)
-            {
-                Destroy(_userCursorsList[i].gameObject);
-            }
-            _userCursorsList.Clear();
-        }
-        Color newColor;
-        for (int i = 0; i < lobby.Members.Count; i++)
-        {
-            var newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
-            if (lobby.Members[i].Username == CurrentUserInfo.Username)
-            {
-                GameArea.LocalUserCursor = newCursor;
-                newCursor.AdjustVisibility(false);
-            }
-
-            newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
-            newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
-            lobby.Members[i].UserCursor = newCursor;
-            _userCursorsList.Add(newCursor);
-        }
-    }
+    
     
     /// <summary>
     /// Main returns the current color the user has equipped or changes to new color and returns it
@@ -215,6 +246,5 @@ public class GameManager : MonoBehaviour
         UpdateMatchState();
         UpdateCursorList();
     }
-    
 }
 
