@@ -2205,6 +2205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c1d2c9bcbbbd7b4eb4da0b4fb906883, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LeavingGame: 0
 --- !u!114 &363795622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3155,7 +3156,7 @@ GameObject:
   - component: {fileID: 594859050}
   - component: {fileID: 594859049}
   m_Layer: 5
-  m_Name: LeaveToLoggedIn - Button
+  m_Name: LeaveToMainMenu - Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4719,7 +4720,7 @@ MonoBehaviour:
   - {fileID: 334864975}
   CurrentGameState: 0
   LoadingGameState: {fileID: 438327805}
-  ErrorMessage: {fileID: 0}
+  ErrorMessage: {fileID: 2126129040}
   protocol: 3
   isReady: 0
   isLoading: 0
@@ -4941,7 +4942,7 @@ GameObject:
   - component: {fileID: 923297180}
   - component: {fileID: 923297179}
   m_Layer: 5
-  m_Name: LeaveToLoggedIn - Button
+  m_Name: LeaveToMainMenu - Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

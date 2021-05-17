@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using BrainCloud.JsonFx.Json;
@@ -9,6 +10,7 @@ public class BrainCloudManager : MonoBehaviour
 {
     private BrainCloudWrapper m_bcWrapper;
     private bool m_dead = false;
+    public bool LeavingGame;
     public BrainCloudWrapper Wrapper => m_bcWrapper;
     public static BrainCloudManager Instance;
     //Offset for the different mouse coordinates from Unity space to Nodejs space
@@ -42,6 +44,7 @@ public class BrainCloudManager : MonoBehaviour
             return;
         }
         
+        GameManager.Instance.CurrentUserInfo.Username = username;
         InitializeBC();
         // Authenticate with brainCloud
         m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LoggingInError, "Login Failed");
@@ -49,7 +52,7 @@ public class BrainCloudManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (m_bcWrapper != null)
+        if (m_bcWrapper != null && !LeavingGame)
         {
             m_bcWrapper.Update();
         }
@@ -68,7 +71,6 @@ public class BrainCloudManager : MonoBehaviour
         string url = BrainCloud.Plugin.Interface.DispatcherURL;
         string appId = BrainCloud.Plugin.Interface.AppId;
         string appSecret = BrainCloud.Plugin.Interface.AppSecret;
-
         m_bcWrapper.Init(url, appSecret, appId, "1.0");
 
         m_bcWrapper.Client.EnableLogging(true);
@@ -98,20 +100,24 @@ public class BrainCloudManager : MonoBehaviour
     {
         var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var data = response["data"] as Dictionary<string, object>;
+        var tempUsername = GameManager.Instance.CurrentUserInfo.Username;
         var userInfo = GameManager.Instance.CurrentUserInfo;
         userInfo = new UserInfo();
         userInfo.ID = data["profileId"] as string;
-        
         // If no username is set for this user, ask for it
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
+            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, LoggingInError,
                 "Failed to update username to braincloud");
         }
         else
         {
             userInfo.Username = data["playerName"] as string;
+            if (userInfo.Username.IsNullOrEmpty())
+            {
+                userInfo.Username = tempUsername;
+            }
             m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
                 "Failed to update username to braincloud");
         }
@@ -157,12 +163,12 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RelayService.DeregisterRelayCallback();
         m_bcWrapper.RelayService.DeregisterSystemCallback();
         m_bcWrapper.RelayService.Disconnect();
+        
         m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
         m_bcWrapper.RTTService.DisableRTT();
 
         if (changeState)
         {
-            // Reset state but keep the user around
             StateManager.Instance.LeaveMatchBackToMenu();    
         }
     }

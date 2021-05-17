@@ -212,6 +212,17 @@ public class GameManager : MonoBehaviour
         UpdateMatchState();
         UpdateCursorList();
     }
+
+    public void EmptyCursorList()
+    {
+        if (_userCursorsList.Count <= 0) return;
+        
+        for (int i = _userCursorsList.Count - 1; i > -1; i--)
+        {
+            Destroy(_userCursorsList[i].gameObject);
+        }
+        _userCursorsList.Clear();
+    }
 #endregion Update Components
     
 #region Helper Functions

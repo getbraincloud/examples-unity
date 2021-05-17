@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using BrainCloud;
@@ -67,14 +68,33 @@ public class StateManager : MonoBehaviour
 
     public void LeaveToMainMenu()
     {
+        StartCoroutine(DelayToDisconnect());
+    }
+
+    IEnumerator DelayToDisconnect()
+    {
+        BrainCloudManager.Instance.LeavingGame = true;
+        yield return new WaitForSeconds(0.2f);
+        
         BrainCloudManager.Instance.CloseGame();
         ChangeState(GameStates.MainMenu);
+        ResetData();
+        yield return new WaitForFixedUpdate();
+        BrainCloudManager.Instance.LeavingGame = false;
     }
 
     public void LeaveMatchBackToMenu()
     {
+        ResetData();
+        ChangeState(GameStates.SignIn);
+    }
+
+    private void ResetData()
+    {
         CurrentLobby = null;
         CurrentServer = null;
+        isReady = false;
+        
         foreach (GameObject shockwave in Shockwaves)
         {
             if (shockwave != null)
@@ -82,12 +102,10 @@ public class StateManager : MonoBehaviour
                 Destroy(shockwave);    
             }
         }
-        //ToDo Clean up user cursors
-        BrainCloudManager.Instance.CloseGame();
         Shockwaves = new List<GameObject>();
-        
+        GameManager.Instance.EmptyCursorList();
+        GameManager.Instance.CurrentUserInfo.IsAlive = false;
         GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
-        ChangeState(GameStates.SignIn);
     }
     
     //Takes in the current Game state to then load into the next game state
