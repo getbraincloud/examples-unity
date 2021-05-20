@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +5,6 @@ using UnityEngine;
 /// Holds all the information needed from a User
 /// </summary>
 
-[Serializable]
 public class UserInfo
 {
     //Used to know if local user is hosting

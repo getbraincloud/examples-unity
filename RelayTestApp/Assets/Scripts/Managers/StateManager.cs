@@ -34,9 +34,9 @@ public class StateManager : MonoBehaviour
     public List<GameObject> Shockwaves = new List<GameObject>();
     
     //Messages for loading screen
-    private const string LoggingInMessage = "Logging in...";
-    private const string LookingForLobbyMessage = "Joining Lobby...";
-    private const string JoiningMatchMessage = "Joining Match...";
+    private const string LOGGING_IN_MESSAGE = "Logging in...";
+    private const string LOOKING_FOR_LOBBY_MESSAGE = "Joining Lobby...";
+    private const string JOINING_MATCH_MESSAGE = "Joining Match...";
     
     //Singleton
     private static StateManager _instance;
@@ -129,19 +129,19 @@ public class StateManager : MonoBehaviour
             case GameStates.SignIn:
                 CurrentGameState = GameStates.MainMenu;
                 BrainCloudManager.Instance.Login();
-                LoadingGameState.ConnectStatesWithLoading(LoggingInMessage,false,GameStates.MainMenu);
+                LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE,false,GameStates.MainMenu);
                 break;
             //Looking for Lobby...
             case GameStates.MainMenu:
                 CurrentGameState = GameStates.Lobby;
                 BrainCloudManager.Instance.FindLobby(protocol);
-                LoadingGameState.ConnectStatesWithLoading(LookingForLobbyMessage,true,GameStates.Lobby);
+                LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE,true,GameStates.Lobby);
                 break;
             //Setting up Match...
             case GameStates.Lobby:
                 CurrentGameState = GameStates.Match;
                 BrainCloudManager.Instance.StartGame();
-                LoadingGameState.ConnectStatesWithLoading(JoiningMatchMessage,false,GameStates.Match);
+                LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
                 break;
         }
     }
@@ -150,7 +150,7 @@ public class StateManager : MonoBehaviour
     {
         foreach (GameState currentState in ListOfStates)
         {
-            currentState.gameObject.SetActive(currentState.currentGameState == newGameState);
+            currentState.gameObject.SetActive(currentState.CurrentGameState == newGameState);
         }
 
         CurrentGameState = newGameState;

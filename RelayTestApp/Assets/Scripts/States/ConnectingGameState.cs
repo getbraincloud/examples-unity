@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Features:
 /// - Waits until boolean StateManager.Instance.isLoading is set to false to open next game state
 /// - If there's an error, CancelNextState will be turned true and will go back a previous game state
 /// - If User clicks Cancel button, CancelNextState will turn true and will go back a previous state
@@ -22,14 +21,12 @@ public class ConnectingGameState : GameState
     {
         CancelNextState = true;
     }
-
     private void CloseWindow()
     {
         StateManager.Instance.ChangeState(CancelNextState ? StateManager.Instance.CurrentGameState - 1  : _gameStateToOpen);
         CancelNextState = false;
         gameObject.SetActive(false);
     }
-
     public void ConnectStatesWithLoading(string loadingMessage, bool cancelButtonEnabled, GameStates newGameState)
     {
         LoadingMessage.text = loadingMessage;
@@ -38,7 +35,6 @@ public class ConnectingGameState : GameState
         gameObject.SetActive(true);
         StartCoroutine(WaitForResponse());
     }
-
     IEnumerator WaitForResponse()
     {
         while (StateManager.Instance.isLoading)

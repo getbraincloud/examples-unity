@@ -1,10 +1,14 @@
-using System.Collections;
+
 using System.Collections.Generic;
 using System.Text;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
+
+/// <summary>
+/// Example of how to communicate game logic to brain cloud functions
+/// </summary>
 
 public class BrainCloudManager : MonoBehaviour
 {
@@ -68,10 +72,7 @@ public class BrainCloudManager : MonoBehaviour
 
     private void InitializeBC()
     {
-        string url = BrainCloud.Plugin.Interface.DispatcherURL;
-        string appId = BrainCloud.Plugin.Interface.AppId;
-        string appSecret = BrainCloud.Plugin.Interface.AppSecret;
-        m_bcWrapper.Init(url, appSecret, appId, "1.0");
+        m_bcWrapper.Init();
 
         m_bcWrapper.Client.EnableLogging(true);
     }
@@ -122,7 +123,6 @@ public class BrainCloudManager : MonoBehaviour
                 "Failed to update username to braincloud");
         }
         GameManager.Instance.CurrentUserInfo = userInfo;
-        
     }
     
     // Go back to login screen, with an error message
@@ -206,12 +206,11 @@ public class BrainCloudManager : MonoBehaviour
                 break;
             }
         }
-
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
         jsonData["y"] = -pos.y + _mouseYOffset;
-
+        //Set up JSON to send
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "move";
         json["data"] = jsonData;
@@ -248,7 +247,6 @@ public class BrainCloudManager : MonoBehaviour
                 false, // Unordered
                 Settings.GetChannel()
             );
-        
    }
 
 #endregion Input update
@@ -304,8 +302,8 @@ public class BrainCloudManager : MonoBehaviour
                 GameManager.Instance.UpdateLobbyState();
                 StateManager.Instance.isLoading = false;
             }
-            
         }
+        
         //Using the key "operation" to determine what state the lobby is in
         if (response.ContainsKey("operation"))
         {
@@ -320,7 +318,6 @@ public class BrainCloudManager : MonoBehaviour
                         // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
                         CloseGame(true);
                     }
-
                     break;
                 }
                 case "STARTING":
@@ -352,13 +349,13 @@ public class BrainCloudManager : MonoBehaviour
         switch (StateManager.Instance.protocol)
         {
             case RelayConnectionType.WEBSOCKET:
-                port = StateManager.Instance.CurrentServer.wsPort;
+                port = StateManager.Instance.CurrentServer.WsPort;
                 break;
             case RelayConnectionType.TCP:
-                port = StateManager.Instance.CurrentServer.tcpPort;
+                port = StateManager.Instance.CurrentServer.TcpPort;
                 break;
             case RelayConnectionType.UDP:
-                port = StateManager.Instance.CurrentServer.udpPort;
+                port = StateManager.Instance.CurrentServer.UdpPort;
                 break;
         }
 
@@ -366,7 +363,7 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RelayService.Connect
         (
             StateManager.Instance.protocol,
-            new RelayConnectOptions(false, server.host, port, server.passcode, server.lobbyId),
+            new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
             null, 
             LoggingInError, 
             "Failed to connect to server"

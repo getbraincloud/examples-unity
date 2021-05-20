@@ -26,7 +26,6 @@ public class DropdownMenuCallback : MonoBehaviour
             case DropdownMenus.Socket:
                 StateManager.Instance.protocol = (RelayConnectionType)_dropdown.value + 1;
                 break;
-        }
-        
+        }   
     }
 }

@@ -120,14 +120,7 @@ public class GameManager : MonoBehaviour
     public void UpdateCursorList()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
-        if (_userCursorsList.Count > 0)
-        {
-            for (int i = _userCursorsList.Count - 1; i > -1; i--)
-            {
-                Destroy(_userCursorsList[i].gameObject);
-            }
-            _userCursorsList.Clear();
-        }
+        EmptyCursorList();
         Color newColor;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
@@ -162,9 +155,9 @@ public class GameManager : MonoBehaviour
     {
         if (_matchEntries.Count > 0)
         {
-            for(int i = _matchEntries.Count - 1; i > -1; i--)
+            foreach (UserEntry matchEntry in _matchEntries)
             {
-                Destroy(_matchEntries[i].gameObject);
+                Destroy(matchEntry.gameObject);   
             }
             _matchEntries.Clear();    
         }
@@ -200,10 +193,10 @@ public class GameManager : MonoBehaviour
             {
                 lobby.Members[i].AllowSendTo = isVisible;
             }
-            else if (CurrentUserInfo.Username.Equals(username))
-            {
-                CurrentUserInfo.AllowSendTo = isVisible;
-            }
+        }
+        if (CurrentUserInfo.Username.Equals(username))
+        {
+            CurrentUserInfo.AllowSendTo = isVisible;
         }
     }
     
@@ -216,10 +209,10 @@ public class GameManager : MonoBehaviour
     public void EmptyCursorList()
     {
         if (_userCursorsList.Count <= 0) return;
-        
-        for (int i = _userCursorsList.Count - 1; i > -1; i--)
+
+        foreach (UserCursor userCursor in _userCursorsList)
         {
-            Destroy(_userCursorsList[i].gameObject);
+            Destroy(userCursor.gameObject);   
         }
         _userCursorsList.Clear();
     }
