@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using BrainCloud.JsonFx.Json;
@@ -58,7 +59,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         if (m_bcWrapper != null && !LeavingGame)
         {
-            m_bcWrapper.Update();
+            //m_bcWrapper.Update();
         }
         
 
@@ -270,13 +271,15 @@ public class BrainCloudManager : MonoBehaviour
                     var data = json["data"] as Dictionary<string, object>;
 
                     member.IsAlive = true;
-                    member.MousePosition.x = (int)data["x"];
-                    member.MousePosition.y = -(int)data["y"] + _mouseYOffset;
+                    member.MousePosition.x = Convert.ToSingle(data["x"]);
+                    member.MousePosition.y = -Convert.ToSingle(data["y"]) + _mouseYOffset;
                 }
                 else if (op == "shockwave")
                 {
                     var data = json["data"] as Dictionary<string, object>;
-                    Vector2 position = new Vector2((int) data["x"], -(int) data["y"]);
+                    Vector2 position; 
+                    position.x = Convert.ToSingle(data["x"]);
+                    position.y = -Convert.ToSingle(data["y"]);
                     member.ShockwavePositions.Add(position);
                 }
                 break;
