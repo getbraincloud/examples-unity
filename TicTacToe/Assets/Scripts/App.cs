@@ -89,13 +89,19 @@ public class App : MonoBehaviour
             //Enable ask to play again screen
             if (!IsAskingToRematch && AskedToRematch)
             {
-                _localTicTacToe.AskToRematchScreen.SetActive(true);    
+                if (_localTicTacToe)
+                {
+                    _localTicTacToe.AskToRematchScreen.SetActive(true);    
+                }
             }
             //Disable wait screen for asking user to rematch
             else if (IsAskingToRematch)
             {
-                _localTicTacToe.PleaseWaitScreen.SetActive(false);
-                GotoMatchSelectScene(_localTicTacToe.gameObject);
+                if (_localTicTacToe)
+                {
+                    _localTicTacToe.PleaseWaitScreen.SetActive(false);
+                    GotoMatchSelectScene(_localTicTacToe.gameObject);    
+                }
             }
         }
     }
