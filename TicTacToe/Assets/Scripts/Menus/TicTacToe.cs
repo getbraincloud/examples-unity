@@ -17,8 +17,11 @@ public class TicTacToe : GameScene
     public GameObject DuringGameDisplay;
     public GameObject AfterGameDisplay;
     public GameObject PlayAgainButton;
+    public GameObject AskToRematchScreen;
+    public GameObject PleaseWaitScreen;
     #endregion
-
+    //Used to know if this object is alive in scene
+    private bool _isActive;
     private const int MAX_CHARS = 10;
 
     private void Start()
@@ -33,13 +36,21 @@ public class TicTacToe : GameScene
         for (var i = 0; i < _tokenPositions.Length; i++) _tokenPositions[i].x += App.Offset;
 
         parent.GetComponentInChildren<Camera>().rect = App.ViewportRect;
-
+        
         // Read the state and assembly the board
         BuildBoardFromState(App.BoardState);
-
+        
+        _isActive = true;
+        PleaseWaitScreen.SetActive(false);
+        AskToRematchScreen.SetActive(false);
         // also updates _winner status
         updateHud();
         enableRTT();
+    }
+
+    private void OnDestroy()
+    {
+        _isActive = false;
     }
 
     public void onReturnToMainMenu()
@@ -62,13 +73,18 @@ public class TicTacToe : GameScene
         {
             _turnPlayed = true;
             App.Bc.AsyncMatchService
-                .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory, null, null);
+                .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory);
         }
 
         enableDuringGameDisplay(_winner == 0);
 
         Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform };
-
+        //Game is finished
+        if (_winner != 0)
+        {
+            App.IsAskingToRematch = false;
+            App.AskedToRematch = false;
+        }
         if (DuringGameDisplay.activeInHierarchy)
         {
             TextMeshProUGUI status = toCheckDisplay[0].Find("StatusOverlay").Find("StatusText").GetComponent<TextMeshProUGUI>();
@@ -106,7 +122,6 @@ public class TicTacToe : GameScene
             {
                 status.text = Truncate(App.WhosTurn.PlayerName, MAX_CHARS) + " Turn";
             }
-
             statusOutline.text = status.text;
         }
 
@@ -129,9 +144,8 @@ public class TicTacToe : GameScene
                 playerONameOutline.text = playerOName.text;
             }
         }
-
     }
-
+    
     // Enable RTT
     private void enableRTT()
     {
@@ -139,6 +153,7 @@ public class TicTacToe : GameScene
         if (!App.Bc.RTTService.IsRTTEnabled())
         {
             App.Bc.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+            App.Bc.RTTService.RegisterRTTEventCallback(App.RTTEventCallback);
         }
         else
         {
@@ -146,7 +161,7 @@ public class TicTacToe : GameScene
             onRTTEnabled("", null);
         }
     }
-
+    
     // rtt enabled, ensure we now request the updated match state
     private void onRTTEnabled(string responseData, object cbPostObject)
     {
@@ -407,16 +422,52 @@ public class TicTacToe : GameScene
         // Get the new PlayerRating
         App.PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
 
-        // Go back to game select scene
-        App.GotoMatchSelectScene(gameObject);
+        if (_isActive)
+        {
+            // Go back to game select scene
+            App.GotoMatchSelectScene(gameObject);   
+        }
     }
-
+    
+    //Called from Unity Button
     public void onPlayAgain()
     {
         PlayAgainButton.SetActive(false);
-        // TODO
+        var jsonData = new JsonData();
+        jsonData["isReady"] = true;
+        //Send event to opponent to prompt them to play again
+        App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+        App.IsAskingToRematch = true;
+        //Pop up window saying "Waiting for response..."
+        PleaseWaitScreen.SetActive(true);
     }
 
+    //Called from Unity Button
+    public void AcceptRematch()
+    {
+        AskToRematchScreen.SetActive(false);
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = true;
+        //Event to send to opponent to disable PleaseWaitScreen
+        App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+        // Reset Match
+        onCompleteGame();
+        App.GotoMatchSelectScene(gameObject);
+        App.MyMatchSelect.OnPickOpponent(App.CurrentMatch.matchedProfile);
+    }
+    
+    //Called from Unity Button
+    public void DeclineRematch()
+    {
+        AskToRematchScreen.SetActive(false);
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = false;
+        //Event to send to opponent to disable PleaseWaitScreen
+        App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+    }
+    
     #region private variables 
     private PlayerInfo WinnerInfo = null;
     private PlayerInfo LoserInfo = null;

@@ -60,6 +60,7 @@ public class MatchSelect : ResourcesManager
         if (!App.Bc.RTTService.IsRTTEnabled())
         {
             App.Bc.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+            App.Bc.RTTService.RegisterRTTEventCallback(App.RTTEventCallback);
         }
         else
         {
@@ -265,7 +266,7 @@ public class MatchSelect : ResourcesManager
         }
     }
 
-    private void OnPickOpponent(PlayerInfo matchedProfile)
+    public void OnPickOpponent(PlayerInfo matchedProfile)
     {
         var yourTurnFirst = Random.Range(0, 100) < 50;
 
