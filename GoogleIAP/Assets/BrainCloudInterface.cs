@@ -65,8 +65,8 @@ public class BrainCloudInterface : MonoBehaviour, IStoreListener //needed for un
     public void OnAuthEmail()
     {
         //Uncomment this line and replace "email" and "password" to the user values
-        //BCConfig._bc.AuthenticateEmailPassword("email", "password", true, OnSuccess_AuthenticateEmail, OnError_AuthenticateEmail);
-        Debug.Warning("Must set up OnAuthEmail() in BrainCloudInterface.cs and point to information from a UI element (ie. InputField)");
+        BCConfig._bc.AuthenticateEmailPassword("email", "password", true, OnSuccess_AuthenticateEmail, OnError_AuthenticateEmail);
+        //Debug.LogWarning("Must set up OnAuthEmail() in BrainCloudInterface.cs and point to information from a UI element (ie. InputField)");
     }
 
     public void OnSuccess_AuthenticateEmail(string responseData, object cbObject)
@@ -91,8 +91,7 @@ public class BrainCloudInterface : MonoBehaviour, IStoreListener //needed for un
         }
 
         // Create a builder, first passing in a suite of Unity provided stores.
-        var configurationBuilder = ConfigurationBuilder.Instance(Google.Play.Billing.GooglePlayStoreModule.Instance()); //For Google purchasing specifically
-        //var configurationBuilder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+        var configurationBuilder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 
         // Add a product to sell / restore by way of its identifier, associating the general identifier
         // with its store-specific identifiers.
