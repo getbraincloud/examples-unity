@@ -123,7 +123,6 @@ public class GameController : MonoBehaviour
 	{
 		if (brainCloudStatusText)
 		{
-			brainCloudStatusText.gameObject.SetActive(true);
 			brainCloudStatusText.text = "Failed to increment stats on brainCloud";
 		}
 		Debug.Log (statusMessage);

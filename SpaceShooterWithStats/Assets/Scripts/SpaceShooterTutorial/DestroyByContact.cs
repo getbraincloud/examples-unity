@@ -23,12 +23,13 @@ public class DestroyByContact : MonoBehaviour
 
 	void OnTriggerEnter (Collider other)
 	{
-		
-		if (other.CompareTag("Boundary"))
+		Debug.Log ("DestroyByContact.OnTriggerEnter() this.tag:" + this.tag + " other.tag:" + other.tag);
+
+		if (other.tag == "Boundary" || other.tag == "Enemy" || other.tag == "Powerup1" || other.tag == "Powerup2")
 		{
 			return;
 		}
-		
+
 		if (explosion != null)
 		{
 			Instantiate(explosion, transform.position, transform.rotation);
@@ -36,17 +37,17 @@ public class DestroyByContact : MonoBehaviour
 
 		gameController.AddScore(scoreValue);
 
-		if (other.CompareTag("Player"))
+		if (other.tag == "Player")
 		{
 			Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
 			gameController.GameOver();
 		}
 
-		if (gameObject.CompareTag("Enemy"))
+		if (gameObject.name.StartsWith("Enemy Ship"))
 		{
 			gameController.OnEnemyKilled();
 		}
-		else if (gameObject.CompareTag("Asteroid"))
+		else if (gameObject.name.StartsWith ("Asteroid"))
 		{
 			gameController.OnAsteroidDestroyed();
 		}
