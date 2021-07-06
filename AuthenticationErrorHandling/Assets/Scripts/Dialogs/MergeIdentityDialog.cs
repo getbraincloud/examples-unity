@@ -69,7 +69,7 @@ public class MergeIdentityDialog : Dialog
 
         GoogleIdentity.RefreshGoogleIdentity(identity =>
         {
-            BrainCloudWrapper.Client.IdentityService.MergeGoogleIdentity(identity.GoogleId, identity.GoogleToken,
+            App.Bc.Client.IdentityService.MergeGoogleIdentity(identity.GoogleId, identity.GoogleToken,
                 dialog.OnSuccess_MergeIdentity, dialog.OnError_MergeIdentity);
         });
 

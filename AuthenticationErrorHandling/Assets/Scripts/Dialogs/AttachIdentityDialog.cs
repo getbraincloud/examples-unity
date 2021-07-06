@@ -61,7 +61,7 @@ public class AttachIdentityDialog : Dialog
 
         GoogleIdentity.RefreshGoogleIdentity(identity =>
         {
-            BrainCloudWrapper.Client.IdentityService.AttachGoogleIdentity(identity.GoogleId, identity.GoogleToken, 
+            App.Bc.Client.IdentityService.AttachGoogleIdentity(identity.GoogleId, identity.GoogleToken, 
                 dialog.OnSuccess_AttachIndentity, dialog.OnError_AttachIdentity);
         });
 
