@@ -73,7 +73,7 @@ public class AuthenticateDialog : Dialog
 
         GoogleIdentity.RefreshGoogleIdentity(identity =>
         {
-            BrainCloudWrapper.Instance.AuthenticateGoogle(identity.GoogleId, identity.GoogleToken, forceCreate,
+            App.Bc.AuthenticateGoogle(identity.GoogleId, identity.GoogleToken, forceCreate,
                 dialog.OnSuccess_Authenticate, dialog.OnError_Authenticate);
         });
 
