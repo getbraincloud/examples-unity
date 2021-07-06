@@ -13,7 +13,8 @@
 //  See the License for the specific language governing permissions and
 //    limitations under the License.
 // </copyright>
-#if (UNITY_ANDROID || (UNITY_IPHONE && !NO_GPGS))
+
+#if UNITY_ANDROID
 
 namespace GooglePlayGames.Editor
 {
@@ -25,11 +26,21 @@ namespace GooglePlayGames.Editor
         private string mNearbyServiceId = string.Empty;
 
         [MenuItem("Window/Google Play Games/Setup/Nearby Connections setup...", false, 3)]
-        public static void MenuItemFileGPGSAndroidSetup()
+        public static void MenuItemNearbySetup()
         {
             EditorWindow window = EditorWindow.GetWindow(
                 typeof(NearbyConnectionUI), true, GPGSStrings.NearbyConnections.Title);
             window.minSize = new Vector2(400, 200);
+        }
+
+        [MenuItem("Window/Google Play Games/Setup/Nearby Connections setup...", true)]
+        public static bool EnableNearbyMenuItem()
+        {
+#if UNITY_ANDROID
+            return true;
+#else
+            return false;
+#endif
         }
 
         public void OnEnable()
@@ -49,7 +60,7 @@ namespace GooglePlayGames.Editor
             GUILayout.Space(10);
             GUILayout.Label(GPGSStrings.Setup.NearbyServiceBlurb);
             mNearbyServiceId = EditorGUILayout.TextField(GPGSStrings.Setup.NearbyServiceId,
-                mNearbyServiceId,GUILayout.Width(350));
+                mNearbyServiceId, GUILayout.Width(350));
 
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal();
@@ -59,6 +70,7 @@ namespace GooglePlayGames.Editor
             {
                 DoSetup();
             }
+
             if (GUILayout.Button("Cancel", GUILayout.Width(100)))
             {
                 this.Close();
@@ -88,12 +100,26 @@ namespace GooglePlayGames.Editor
             // check for valid app id
             if (!GPGSUtil.LooksLikeValidServiceId(nearbyServiceId))
             {
-                GPGSUtil.Alert(GPGSStrings.Setup.ServiceIdError);
-                return false;
+                if (EditorUtility.DisplayDialog(
+                    "Remove Nearby connection permissions?  ",
+                    "The service Id is invalid.  It must follow package naming rules.  " +
+                    "Do you want to remove the AndroidManifest entries for Nearby connections?",
+                    "Yes",
+                    "No"))
+                {
+                    GPGSProjectSettings.Instance.Set(GPGSUtil.SERVICEIDKEY, null);
+                    GPGSProjectSettings.Instance.Save();
+                }
+                else
+                {
+                    return false;
+                }
             }
-
-            GPGSProjectSettings.Instance.Set(GPGSUtil.SERVICEIDKEY, nearbyServiceId);
-            GPGSProjectSettings.Instance.Save();
+            else
+            {
+                GPGSProjectSettings.Instance.Set(GPGSUtil.SERVICEIDKEY, nearbyServiceId);
+                GPGSProjectSettings.Instance.Save();
+            }
 
             if (androidBuild)
             {
@@ -113,14 +139,13 @@ namespace GooglePlayGames.Editor
                 Google.VersionHandler.Enabled = true;
                 AssetDatabase.Refresh();
 
-                GPGSDependencies.RegisterDependencies();
-
                 Google.VersionHandler.InvokeStaticMethod(
                     Google.VersionHandler.FindClass(
-                   "Google.JarResolver",
-                   "GooglePlayServices.PlayServicesResolver"),
-                   "MenuResolve", null);
+                        "Google.JarResolver",
+                        "GooglePlayServices.PlayServicesResolver"),
+                    "MenuResolve", null);
             }
+
             return true;
         }
     }

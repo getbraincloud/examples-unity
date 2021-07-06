@@ -31,17 +31,18 @@ namespace GooglePlayGames.Editor
         public class PostInstall
         {
             public const string Title = "Google Play Games Plugin for Unity";
+
             public const string Text = "The Google Play Games Plugin for Unity version $VERSION " +
-                                       "is now ready to use. If this is a new installation or of you have " +
+                                       "is now ready to use. If this is a new installation or if you have " +
                                        "just upgraded from a previous version, please click the 'Google Play Games' " +
-                                       "menu and select 'Android Setup' and/or 'iOS Setup' to set up your " +
-                                       "project to build for the corresponding platforms.";
+                                       "menu and select 'Android Setup' to set up your project.";
         }
 
         public class Setup
         {
             public const string AppIdTitle = "Google Play Games Application ID";
             public const string AppId = "Application ID";
+
             public const string AppIdBlurb = "Enter your application ID below. This is the numeric\n" +
                                              "identifier provided by the Developer Console (for example, 123456789012).";
 
@@ -50,44 +51,24 @@ namespace GooglePlayGames.Editor
 
             public const string WebClientIdTitle = "Web App Client ID (Optional)";
             public const string ClientId = "Client ID";
+
             public const string ClientIdError = "The Client ID does not appear to be valid. " +
                                                 "It should end in .apps.googleusercontent.com.";
+
             public const string AppIdMismatch = "Web app client ID not associated with this game!";
 
             public const string NearbyServiceId = "Nearby Connection Service ID";
+
             public const string NearbyServiceBlurb = "Enter the service id that identifies the " +
                                                      "nearby connections service scope";
 
-            public const string ServiceIdError = "Invalid service ID.  The service id should follow " +
-                                                 "namespace naming rules.";
-
             public const string SetupButton = "Setup";
-        }
-
-        public class IOSSetup
-        {
-            public const string Title = "Google Play Games - iOS Setup";
-            public const string Blurb = "To configure Google Play Games for iOS in this project,\n" +
-                                        "please enter the information below and click on the Setup button.";
-
-            public const string ClientIdTitle = "iOS App Client ID";
-            public const string ClientId = "Client ID";
-            public const string ClientIdBlurb = "Enter your oauth2 client ID below. To obtain this\n" +
-                                                "ID, generate an iOS linked app in Developer Console. Example:\n" +
-                                                "123456789012-jafwiawoijjfe.apps.googleusercontent.com";
-
-            public const string BundleIdTitle = "Bundle Identifier";
-            public const string BundleId = "Bundle ID";
-            public const string BundleIdBlurb = "Enter your application's bundle identifier below.\n" +
-                                                "(for example, com.example.lorem.ipsum).";
-
-            public const string BundleIdError = "The bundle ID does not appear to be valid.";
-            public const string SetupComplete = "Setup complete. Ready for iOS build.";
         }
 
         public class NearbyConnections
         {
             public const string Title = "Google Play Games - Nearby Connections Setup";
+
             public const string Blurb = "To configure Nearby Connections in this project,\n" +
                                         "please enter the information below and click on the Setup button.";
 
@@ -97,16 +78,19 @@ namespace GooglePlayGames.Editor
         public class AndroidSetup
         {
             public const string Title = "Google Play Games - Android Configuration";
+
             public const string Blurb = "To configure Google Play Games in this project,\n" +
                                         "go to the Play Game console, then enter the information below and click on the Setup button.";
 
-            public const string WebClientIdBlurb = "The web app client ID is needed to access the user's ID token and " +
+            public const string WebClientIdBlurb =
+                "The web app client ID is needed to access the user's ID token and " +
                 "call other APIs onbehalf of the user." +
                 "  It is not required for Game Services.  Enter your oauth2 client ID below.\nTo obtain this " +
                 "ID, generate a web linked app in Developer Console. Example:\n" +
                 "123456789012-abcdefghijklm.apps.googleusercontent.com";
 
             public const string PkgName = "Package name";
+
             public const string PkgNameBlurb = "Enter your application's package name below.\n" +
                                                "(for example, com.example.lorem.ipsum).";
 
@@ -114,15 +98,18 @@ namespace GooglePlayGames.Editor
                                                    "Enter a valid Android package name (for example, com.example.lorem.ipsum).";
 
             public const string SdkNotFound = "Android SDK Not found";
+
             public const string SdkNotFoundBlurb = "The Android SDK path was not found. " +
                                                    "Please configure it in the Unity preferences window (under External Tools).";
 
             public const string LibProjNotFound = "Google Play Services Library Project Not Found";
+
             public const string LibProjNotFoundBlurb = "Google Play Services library project " +
                                                        "could not be found your SDK installation. Make sure it is installed (open " +
                                                        "the SDK manager and go to Extras, and select Google Play Services).";
 
             public const string SupportJarNotFound = "Android Support Library v4 Not Found";
+
             public const string SupportJarNotFoundBlurb = "Android Support Library v4 " +
                                                           "could not be found your SDK installation. Make sure it is installed (open " +
                                                           "the SDK manager and go to Extras, and select 'Android Support Library').";
@@ -147,23 +134,8 @@ namespace GooglePlayGames.Editor
             public const string PlayGamesServicesApiURL =
                 "https://developers.google.com/games/services";
 
-            public const string GooglePlusSdkTitle = "Google+ SDK Download";
-            public const string GooglePlusSdkBlurb = "You will be taken to the download site for " +
-                                                     "the Google+ for iOS SDK. This is only necessary for iOS builds. Once you are " +
-                                                     "on that page, download the item named 'Google+ iOS SDK'.";
-
-            public const string GooglePlusSdkUrl =
-                "https://developers.google.com/+/downloads/";
-
-            public const string GooglePlayGamesSdkTitle = "Google Play Games C++ SDK Download";
-            public const string GooglePlayGamesSdkBlurb = "You will be taken to the download site for " +
-                                                          "the Google Play Games C++ SDK. This is only necessary for iOS builds. " +
-                                                          "Once you are on that page, download the item named 'Play Games C++ SDK Version X.Y.Z'.";
-
-            public const string GooglePlayGamesUrl =
-                "https://developers.google.com/games/services/downloads/";
-
             public const string GooglePlayGamesAndroidSdkTitle = "Google Play Games Android SDK Download";
+
             public const string GooglePlayGamesAndroidSdkBlurb = "The Google Play Games SDK for " +
                                                                  "Android must be downloaded via the Android SDK Manager. Do you wish to " +
                                                                  "start the SDK manager now?";
@@ -180,12 +152,14 @@ namespace GooglePlayGames.Editor
         }
 
         public const string AboutTitle = "Google Play Games Plugin for Unity";
+
         public const string AboutText = "Copyright (C) 2014 Google Inc.\n\nThis is an open-source " +
                                         "plugin that allows cross-platform integration with Google Play games services. " +
                                         "For more information, visit the official site on Github:\n\n" +
                                         "https://github.com/playgameservices/play-games-plugin-for-unity\n\nPlugin version: ";
 
         public const string LicenseTitle = "Google Play Games Plugin for Unity";
+
         public const string LicenseText = "Copyright (C) 2014 Google Inc. All Rights Reserved.\n\n" +
                                           "Licensed under the Apache License, Version 2.0 (the \"License\"); " +
                                           "you may not use this file except in compliance with the License. " +

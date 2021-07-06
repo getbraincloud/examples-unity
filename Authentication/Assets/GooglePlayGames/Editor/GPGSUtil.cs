@@ -46,12 +46,6 @@ namespace GooglePlayGames.Editor
         public const string WEBCLIENTIDKEY = "and.ClientId";
 
         /// <summary>Property key for project settings.</summary>
-        public const string IOSCLIENTIDKEY = "ios.ClientId";
-
-        /// <summary>Property key for project settings.</summary>
-        public const string IOSBUNDLEIDKEY = "ios.BundleId";
-
-        /// <summary>Property key for project settings.</summary>
         public const string ANDROIDRESOURCEKEY = "and.ResourceData";
 
         /// <summary>Property key for project settings.</summary>
@@ -59,12 +53,6 @@ namespace GooglePlayGames.Editor
 
         /// <summary>Property key for project settings.</summary>
         public const string ANDROIDBUNDLEIDKEY = "and.BundleId";
-
-        /// <summary>Property key for project settings.</summary>
-        public const string IOSRESOURCEKEY = "ios.ResourceData";
-
-        /// <summary>Property key for project settings.</summary>
-        public const string IOSSETUPDONEKEY = "ios.SetupDone";
 
         /// <summary>Property key for plugin version.</summary>
         public const string PLUGINVERSIONKEY = "proj.pluginVersion";
@@ -78,6 +66,10 @@ namespace GooglePlayGames.Editor
         /// <summary>Constant for token replacement</summary>
         private const string SERVICEIDPLACEHOLDER = "__NEARBY_SERVICE_ID__";
 
+        private const string SERVICEID_ELEMENT_PLACEHOLDER = "__NEARBY_SERVICE_ELEMENT__";
+
+        private const string NEARBY_PERMISSIONS_PLACEHOLDER = "__NEARBY_PERMISSIONS__";
+
         /// <summary>Constant for token replacement</summary>
         private const string APPIDPLACEHOLDER = "__APP_ID__";
 
@@ -86,12 +78,6 @@ namespace GooglePlayGames.Editor
 
         /// <summary>Constant for token replacement</summary>
         private const string WEBCLIENTIDPLACEHOLDER = "__WEB_CLIENTID__";
-
-        /// <summary>Constant for token replacement</summary>
-        private const string IOSCLIENTIDPLACEHOLDER = "__IOS_CLIENTID__";
-
-        /// <summary>Constant for token replacement</summary>
-        private const string IOSBUNDLEIDPLACEHOLDER = "__BUNDLEID__";
 
         /// <summary>Constant for token replacement</summary>
         private const string PLUGINVERSIONPLACEHOLDER = "__PLUGIN_VERSION__";
@@ -112,9 +98,87 @@ namespace GooglePlayGames.Editor
         private const string CONSTANTSPLACEHOLDER = "__Constant_Properties__";
 
         /// <summary>
+        /// The game info file path, relative to the plugin root directory.  This is a generated file.
+        /// </summary>
+        private const string GameInfoRelativePath = "GameInfo.cs";
+
+        /// <summary>
+        /// The manifest path, relative to the plugin root directory.
+        /// </summary>
+        /// <remarks>The Games SDK requires additional metadata in the AndroidManifest.xml
+        ///     file. </remarks>
+        private const string ManifestRelativePath =
+            "Plugins/Android/GooglePlayGamesManifest.plugin/AndroidManifest.xml";
+
+        private const string RootFolderName = "GooglePlayGames";
+
+        /// <summary>
+        /// The root path of the Google Play Games plugin
+        /// </summary>
+        public static string RootPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(mRootPath))
+                {
+                    string[] dirs = Directory.GetDirectories("Assets", RootFolderName, SearchOption.AllDirectories);
+                    switch (dirs.Length)
+                    {
+                        case 0:
+                            Alert("Plugin error: GooglePlayGames folder was renamed");
+                            throw new Exception("GooglePlayGames folder was renamed");
+
+                        case 1:
+                            mRootPath = SlashesToPlatformSeparator(dirs[0]);
+                            break;
+
+                        default:
+                            for (int i = 0; i < dirs.Length; i++)
+                            {
+                                if (File.Exists(SlashesToPlatformSeparator(Path.Combine(dirs[i], GameInfoRelativePath)))
+                                )
+                                {
+                                    mRootPath = SlashesToPlatformSeparator(dirs[i]);
+                                    break;
+                                }
+                            }
+
+                            if (string.IsNullOrEmpty(mRootPath))
+                            {
+                                Alert("Plugin error: GooglePlayGames folder was renamed");
+                                throw new Exception("GooglePlayGames folder was renamed");
+                            }
+
+                            break;
+                    }
+                }
+
+                return mRootPath;
+            }
+        }
+
+        /// <summary>
         /// The game info file path.  This is a generated file.
         /// </summary>
-        private const string GameInfoPath = "Assets/GooglePlayGames/GameInfo.cs";
+        private static string GameInfoPath
+        {
+            get { return SlashesToPlatformSeparator(Path.Combine(RootPath, GameInfoRelativePath)); }
+        }
+
+        /// <summary>
+        /// The manifest path.
+        /// </summary>
+        /// <remarks>The Games SDK requires additional metadata in the AndroidManifest.xml
+        ///     file. </remarks>
+        private static string ManifestPath
+        {
+            get { return SlashesToPlatformSeparator(Path.Combine(RootPath, ManifestRelativePath)); }
+        }
+
+        /// <summary>
+        /// The root path of the Google Play Games plugin
+        /// </summary>
+        private static string mRootPath = "";
 
         /// <summary>
         /// The map of replacements for filling in code templates.  The
@@ -124,13 +188,15 @@ namespace GooglePlayGames.Editor
         private static Dictionary<string, string> replacements =
             new Dictionary<string, string>()
             {
-                { SERVICEIDPLACEHOLDER, SERVICEIDKEY },
-                { APPIDPLACEHOLDER, APPIDKEY },
-                { CLASSNAMEPLACEHOLDER, CLASSNAMEKEY },
-                { WEBCLIENTIDPLACEHOLDER, WEBCLIENTIDKEY },
-                { IOSCLIENTIDPLACEHOLDER, IOSCLIENTIDKEY },
-                { IOSBUNDLEIDPLACEHOLDER, IOSBUNDLEIDKEY },
-                { PLUGINVERSIONPLACEHOLDER, PLUGINVERSIONKEY}
+                // Put this element placeholder first, since it has embedded placeholder
+                {SERVICEID_ELEMENT_PLACEHOLDER, SERVICEID_ELEMENT_PLACEHOLDER},
+                {SERVICEIDPLACEHOLDER, SERVICEIDKEY},
+                {APPIDPLACEHOLDER, APPIDKEY},
+                {CLASSNAMEPLACEHOLDER, CLASSNAMEKEY},
+                {WEBCLIENTIDPLACEHOLDER, WEBCLIENTIDKEY},
+                {PLUGINVERSIONPLACEHOLDER, PLUGINVERSIONKEY},
+                // Causes the placeholder to be replaced with overridden value at runtime.
+                {NEARBY_PERMISSIONS_PLACEHOLDER, NEARBY_PERMISSIONS_PLACEHOLDER}
             };
 
         /// <summary>
@@ -170,7 +236,8 @@ namespace GooglePlayGames.Editor
         /// <param name="name">Name of the template in the editor directory.</param>
         public static string ReadEditorTemplate(string name)
         {
-            return ReadFile(SlashesToPlatformSeparator("Assets/GooglePlayGames/Editor/" + name + ".txt"));
+            return ReadFile(
+                Path.Combine(RootPath, string.Format("Editor{0}{1}.txt", Path.DirectorySeparatorChar, name)));
         }
 
         /// <summary>
@@ -181,6 +248,8 @@ namespace GooglePlayGames.Editor
         public static void WriteFile(string file, string body)
         {
             file = SlashesToPlatformSeparator(file);
+            DirectoryInfo dir = Directory.GetParent(file);
+            dir.Create();
             using (var wr = new StreamWriter(file, false))
             {
                 wr.Write(body);
@@ -265,7 +334,7 @@ namespace GooglePlayGames.Editor
                 throw new Exception("cannot be empty");
             }
 
-            string[] parts = s.Split(new char[] { '.' });
+            string[] parts = s.Split(new char[] {'.'});
             foreach (string p in parts)
             {
                 char[] bytes = p.ToCharArray();
@@ -296,7 +365,7 @@ namespace GooglePlayGames.Editor
         public static bool IsSetupDone()
         {
             bool doneSetup = true;
-            #if UNITY_ANDROID
+#if UNITY_ANDROID
             doneSetup = GPGSProjectSettings.Instance.GetBool(ANDROIDSETUPDONEKEY, false);
             // check gameinfo
             if (File.Exists(GameInfoPath))
@@ -305,7 +374,7 @@ namespace GooglePlayGames.Editor
                 if (contents.Contains(APPIDPLACEHOLDER))
                 {
                     Debug.Log("GameInfo not initialized with AppId.  " +
-                        "Run Window > Google Play Games > Setup > Android Setup...");
+                              "Run Window > Google Play Games > Setup > Android Setup...");
                     return false;
                 }
             }
@@ -314,26 +383,7 @@ namespace GooglePlayGames.Editor
                 Debug.Log("GameInfo.cs does not exist.  Run Window > Google Play Games > Setup > Android Setup...");
                 return false;
             }
-            #elif (UNITY_IPHONE && !NO_GPGS)
-            doneSetup = GPGSProjectSettings.Instance.GetBool(IOSSETUPDONEKEY, false);
-            // check gameinfo
-            if (File.Exists(GameInfoPath))
-            {
-                string contents = ReadFile(GameInfoPath);
-                if (contents.Contains(IOSCLIENTIDPLACEHOLDER))
-                {
-                    Debug.Log("GameInfo not initialized with Client Id.  " +
-                        "Run Window > Google Play Games > Setup > iOS Setup...");
-                    return false;
-                }
-            }
-            else
-            {
-                Debug.Log("GameInfo.cs does not exist.  Run Window > Google Play Games > Setup > iOS Setup...");
-                return false;
-            }
-
-            #endif
+#endif
 
             return doneSetup;
         }
@@ -395,6 +445,22 @@ namespace GooglePlayGames.Editor
         public static string GetAndroidSdkPath()
         {
             string sdkPath = EditorPrefs.GetString("AndroidSdkRoot");
+#if UNITY_2019 || UNITY_2020
+            // Unity 2019.x added installation of the Android SDK in the AndroidPlayer directory
+            // so fallback to searching for it there.
+            if (string.IsNullOrEmpty(sdkPath) || EditorPrefs.GetBool("SdkUseEmbedded"))
+            {
+                string androidPlayerDir = BuildPipeline.GetPlaybackEngineDirectory(BuildTarget.Android, BuildOptions.None);
+                if (!string.IsNullOrEmpty(androidPlayerDir))
+                {
+                    string androidPlayerSdkDir = Path.Combine(androidPlayerDir, "SDK");
+                    if (Directory.Exists(androidPlayerSdkDir))
+                    {
+                        sdkPath = androidPlayerSdkDir;
+                    }
+                }
+            }
+#endif
             if (sdkPath != null && (sdkPath.EndsWith("/") || sdkPath.EndsWith("\\")))
             {
                 sdkPath = sdkPath.Substring(0, sdkPath.Length - 1);
@@ -433,7 +499,6 @@ namespace GooglePlayGames.Editor
 #else
             return 0;
 #endif
-
         }
 
         /// <summary>
@@ -442,8 +507,7 @@ namespace GooglePlayGames.Editor
         /// <returns><c>true</c>, if the file exists <c>false</c> otherwise.</returns>
         public static bool AndroidManifestExists()
         {
-            string destFilename = GPGSUtil.SlashesToPlatformSeparator(
-                                      "Assets/Plugins/Android/MainLibProj/AndroidManifest.xml");
+            string destFilename = ManifestPath;
 
             return File.Exists(destFilename);
         }
@@ -453,14 +517,33 @@ namespace GooglePlayGames.Editor
         /// </summary>
         public static void GenerateAndroidManifest()
         {
-            string destFilename = GPGSUtil.SlashesToPlatformSeparator(
-                                      "Assets/Plugins/Android/MainLibProj/AndroidManifest.xml");
+            string destFilename = ManifestPath;
 
             // Generate AndroidManifest.xml
             string manifestBody = GPGSUtil.ReadEditorTemplate("template-AndroidManifest");
 
             Dictionary<string, string> overrideValues =
                 new Dictionary<string, string>();
+
+            if (!string.IsNullOrEmpty(GPGSProjectSettings.Instance.Get(SERVICEIDKEY)))
+            {
+                overrideValues[NEARBY_PERMISSIONS_PLACEHOLDER] =
+                    "        <!-- Required for Nearby Connections -->\n" +
+                    "        <uses-permission android:name=\"android.permission.BLUETOOTH\" />\n" +
+                    "        <uses-permission android:name=\"android.permission.BLUETOOTH_ADMIN\" />\n" +
+                    "        <uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\" />\n" +
+                    "        <uses-permission android:name=\"android.permission.CHANGE_WIFI_STATE\" />\n" +
+                    "        <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" />\n";
+                overrideValues[SERVICEID_ELEMENT_PLACEHOLDER] =
+                    "             <!-- Required for Nearby Connections API -->\n" +
+                    "             <meta-data android:name=\"com.google.android.gms.nearby.connection.SERVICE_ID\"\n" +
+                    "                  android:value=\"__NEARBY_SERVICE_ID__\" />\n";
+            }
+            else
+            {
+                overrideValues[NEARBY_PERMISSIONS_PLACEHOLDER] = "";
+                overrideValues[SERVICEID_ELEMENT_PLACEHOLDER] = "";
+            }
 
             foreach (KeyValuePair<string, string> ent in replacements)
             {
@@ -505,9 +588,9 @@ namespace GooglePlayGames.Editor
             EnsureDirExists(dirName);
             foreach (DictionaryEntry ent in resourceKeys)
             {
-                string key = MakeIdentifier((string)ent.Key);
+                string key = MakeIdentifier((string) ent.Key);
                 constantsValues += "        public const string " +
-                key + " = \"" + ent.Value + "\"; // <GPGSID>\n";
+                                   key + " = \"" + ent.Value + "\"; // <GPGSID>\n";
             }
 
             string fileBody = GPGSUtil.ReadEditorTemplate("template-Constants");
@@ -554,6 +637,84 @@ namespace GooglePlayGames.Editor
             }
 
             GPGSUtil.WriteFile(GameInfoPath, fileBody);
+        }
+
+        /// <summary>
+        /// Checks the dependencies file and fixes repository paths
+        /// if they are incorrect (for example if the user moved plugin
+        /// into some subdirectory). This is a generated file containing
+        /// the list of dependencies that are needed for the plugin to work.
+        /// </summary>
+        public static void CheckAndFixDependencies()
+        {
+            string depPath =
+                SlashesToPlatformSeparator(Path.Combine(GPGSUtil.RootPath,
+                    "Editor/GooglePlayGamesPluginDependencies.xml"));
+
+            XmlDocument doc = new XmlDocument();
+            doc.Load(depPath);
+
+            XmlNodeList repos = doc.SelectNodes("//androidPackage[contains(@spec,'com.google.games')]//repository");
+            foreach (XmlNode repo in repos)
+            {
+                if (!Directory.Exists(repo.InnerText))
+                {
+                    int pos = repo.InnerText.IndexOf(RootFolderName);
+                    if (pos != -1)
+                    {
+                        repo.InnerText =
+                            Path.Combine(RootPath, repo.InnerText.Substring(pos + RootFolderName.Length + 1))
+                                .Replace("\\", "/");
+                    }
+                }
+            }
+
+            doc.Save(depPath);
+        }
+
+        /// <summary>
+        /// Checks the file containing the list of versioned assets and fixes
+        /// paths to them if they are incorrect (for example if the user moved
+        /// plugin into some subdirectory). This is a generated file.
+        /// </summary>
+        public static void CheckAndFixVersionedAssestsPaths()
+        {
+            string[] foundPaths =
+                Directory.GetFiles(RootPath, "GooglePlayGamesPlugin_v*.txt", SearchOption.AllDirectories);
+
+            if (foundPaths.Length == 1)
+            {
+                string tmpFilePath = Path.GetTempFileName();
+
+                StreamWriter writer = new StreamWriter(tmpFilePath);
+                using (StreamReader reader = new StreamReader(foundPaths[0]))
+                {
+                    string assetPath;
+                    while ((assetPath = reader.ReadLine()) != null)
+                    {
+                        int pos = assetPath.IndexOf(RootFolderName);
+                        if (pos != -1)
+                        {
+                            assetPath = Path.Combine(RootPath, assetPath.Substring(pos + RootFolderName.Length + 1))
+                                .Replace("\\", "/");
+                        }
+
+                        writer.WriteLine(assetPath);
+                    }
+                }
+
+                writer.Flush();
+                writer.Close();
+
+                try
+                {
+                    File.Copy(tmpFilePath, foundPaths[0], true);
+                }
+                finally
+                {
+                    File.Delete(tmpFilePath);
+                }
+            }
         }
 
         /// <summary>
@@ -606,7 +767,7 @@ namespace GooglePlayGames.Editor
                 if (inResource && reader.Name == "integer")
                 {
                     if ("google_play_services_version".Equals(
-                            reader.GetAttribute("name")))
+                        reader.GetAttribute("name")))
                     {
                         reader.Read();
                         Debug.Log("Read version string: " + reader.Value);
@@ -619,4 +780,5 @@ namespace GooglePlayGames.Editor
             return version;
         }
     }
+
 }

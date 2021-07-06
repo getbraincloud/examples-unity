@@ -88,7 +88,7 @@ namespace GooglePlayGames.OurUtils
         {
             if (instance != null)
             {
-                RunOnGameThread(()=>instance.StartCoroutine(action));
+                RunOnGameThread(() => instance.StartCoroutine(action));
             }
         }
 
@@ -111,12 +111,13 @@ namespace GooglePlayGames.OurUtils
             }
         }
 
-         public void Update()
+        public void Update()
         {
             if (sIsDummy || sQueueEmpty)
             {
                 return;
             }
+
             // first copy the shared queue into a local queue
             localQueue.Clear();
             lock (sQueue)
@@ -146,8 +147,8 @@ namespace GooglePlayGames.OurUtils
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception in OnApplicationFocus:" +
-                        e.Message + "\n" + e.StackTrace);
+                    Logger.e("Exception in OnApplicationFocus:" +
+                                   e.Message + "\n" + e.StackTrace);
                 }
             }
         }
@@ -162,8 +163,8 @@ namespace GooglePlayGames.OurUtils
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception in OnApplicationPause:" +
-                        e.Message + "\n" + e.StackTrace);
+                    Logger.e("Exception in OnApplicationPause:" +
+                                   e.Message + "\n" + e.StackTrace);
                 }
             }
         }

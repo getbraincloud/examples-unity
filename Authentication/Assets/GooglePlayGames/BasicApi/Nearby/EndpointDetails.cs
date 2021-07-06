@@ -21,48 +21,29 @@ namespace GooglePlayGames.BasicApi.Nearby
     public struct EndpointDetails
     {
         private readonly string mEndpointId;
-        private readonly string mDeviceId;
         private readonly string mName;
         private readonly string mServiceId;
 
-        public EndpointDetails(string endpointId, string deviceId, string name, string serviceId)
+        public EndpointDetails(string endpointId, string name, string serviceId)
         {
             this.mEndpointId = Misc.CheckNotNull(endpointId);
-            this.mDeviceId = Misc.CheckNotNull(deviceId);
             this.mName = Misc.CheckNotNull(name);
             this.mServiceId = Misc.CheckNotNull(serviceId);
         }
 
         public string EndpointId
         {
-            get
-            {
-                return mEndpointId;
-            }
-        }
-
-        public string DeviceId
-        {
-            get
-            {
-                return mDeviceId;
-            }
+            get { return mEndpointId; }
         }
 
         public string Name
         {
-            get
-            {
-                return mName;
-            }
+            get { return mName; }
         }
 
         public string ServiceId
         {
-            get
-            {
-                return mServiceId;
-            }
+            get { return mServiceId; }
         }
     }
 }
