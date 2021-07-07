@@ -67,7 +67,7 @@ public class TicTacToe : GameScene
     {
         // Check we if are not seeing a done match
         _winner = CheckForWinner();
-
+        App.Winner = _winner;
         // Read match history
         if (_history == null && _winner != 0)
         {
@@ -108,14 +108,14 @@ public class TicTacToe : GameScene
                 if (_winner == 1)
                 {
                     status.text = Truncate(App.PlayerInfoX.PlayerName, MAX_CHARS) + " Wins!";
-                    WinnerInfo = App.PlayerInfoX;
-                    LoserInfo = App.PlayerInfoO;
+                    App.WinnerInfo = App.PlayerInfoX;
+                    App.LoserInfo = App.PlayerInfoO;
                 }
                 else
                 {
                     status.text = Truncate(App.PlayerInfoO.PlayerName, MAX_CHARS) + " Wins!";
-                    WinnerInfo = App.PlayerInfoO;
-                    LoserInfo = App.PlayerInfoX;
+                    App.WinnerInfo = App.PlayerInfoO;
+                    App.LoserInfo = App.PlayerInfoX;
                 }
             }
             else
@@ -406,10 +406,10 @@ public class TicTacToe : GameScene
             else
             {
                 matchResults["isTie"] = false;
-                matchResults["winnerId"] = WinnerInfo.ProfileId;
-                matchResults["loserId"] = LoserInfo.ProfileId;
-                matchResults["winnerRating"] = int.Parse(WinnerInfo.PlayerRating);
-                matchResults["loserRating"] = int.Parse(LoserInfo.PlayerRating);
+                matchResults["winnerId"] = App.WinnerInfo.ProfileId;
+                matchResults["loserId"] = App.LoserInfo.ProfileId;
+                matchResults["winnerRating"] = int.Parse(App.WinnerInfo.PlayerRating);
+                matchResults["loserRating"] = int.Parse(App.LoserInfo.PlayerRating);
             }
 
             App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
@@ -435,6 +435,9 @@ public class TicTacToe : GameScene
         PlayAgainButton.SetActive(false);
         var jsonData = new JsonData();
         jsonData["isReady"] = true;
+        jsonData["opponentProfileID"] = App.ProfileId;
+        jsonData["opponentName"] = App.Name;
+        jsonData["opponentRating"] = App.PlayerRating;
         //Send event to opponent to prompt them to play again
         App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
         App.IsAskingToRematch = true;
@@ -469,8 +472,6 @@ public class TicTacToe : GameScene
     }
     
     #region private variables 
-    private PlayerInfo WinnerInfo = null;
-    private PlayerInfo LoserInfo = null;
 
     private List<GameObject> GridObjList = new List<GameObject>();
     private readonly int[] _grid = new int[9];

@@ -30,7 +30,7 @@ public class MatchSelect : ResourcesManager
     private Spinner Spinner = null;
     [SerializeField]
     public TextMeshProUGUI QuickPlayText;
-
+    public GameObject AskToRematchScreen;
 
     // Use this for initialization
     private void Start()
@@ -46,9 +46,8 @@ public class MatchSelect : ResourcesManager
 
         m_itemCell = new List<GameButtonCell>();
         CancelButton.gameObject.SetActive(false);
-
         enableRTT();
-
+        AskToRematchScreen.SetActive(false);
         if (UserName != null)
             UserName.text = App.Name;
     }
@@ -412,6 +411,32 @@ public class MatchSelect : ResourcesManager
         }
         in_itemCell.Clear();
     }
+    
+    //Called from Unity Button
+    public void AcceptRematch()
+    {
+        AskToRematchScreen.SetActive(false);
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = true;
+        //Event to send to opponent to disable PleaseWaitScreen
+        App.Bc.EventService.SendEvent(App.OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
+        // Reset Match
+        App.OnCompleteGame();
+        App.GotoMatchSelectScene(gameObject);
+        App.MyMatchSelect.OnPickOpponent(App.OpponentInfo);
+    }
+    
+    //Called from Unity Button
+    public void DeclineRematch()
+    {
+        AskToRematchScreen.SetActive(false);
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = false;
+        //Event to send to opponent to disable PleaseWaitScreen
+        App.Bc.EventService.SendEvent(App.OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
+    }
 
     private List<GameButtonCell> m_itemCell = null;
 
@@ -428,7 +453,7 @@ public class MatchSelect : ResourcesManager
         public bool yourTurn;
         public bool complete = false;
         public bool expired = false;
-
+        
         public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {
             version = (int)jsonMatch["version"];
