@@ -1,8 +1,9 @@
 ﻿#region
 
 using System.Collections.Generic;
-using BrainCloud.JsonFx.Json;
+using BrainCloud.LitJson;
 using UnityEngine;
+using JsonReader = BrainCloud.JsonFx.Json.JsonReader;
 
 #endregion
 
@@ -19,11 +20,12 @@ public class App : MonoBehaviour
     public MatchSelect.MatchInfo CurrentMatch;
     public PlayerInfo PlayerInfoO = new PlayerInfo();
     public PlayerInfo PlayerInfoX = new PlayerInfo();
+    
     public PlayerInfo WhosTurn;
     public string Name;
     public string PlayerRating;
     public string ProfileId;
-
+    
     public bool AskedToRematch;
     // All Game Scenes
     [SerializeField] public GameObject Achievements;
@@ -38,15 +40,21 @@ public class App : MonoBehaviour
     [SerializeField] public Rect ViewportRect;
     [SerializeField] public int WindowId;
     [SerializeField] public string WrapperName;
+    
+    public PlayerInfo OpponentInfo;
+    public bool IsAskingToRematch;
+    public int Winner;
+    public PlayerInfo WinnerInfo = null;
+    public PlayerInfo LoserInfo = null;
     private TicTacToe _localTicTacToe;
     private MatchSelect _localMatchSelect;
-
+    
     public MatchSelect MyMatchSelect
     {
         get => _localMatchSelect;
         set => _localMatchSelect = value;
     }
-    public bool IsAskingToRematch;
+    
     private void Start()
     {
         var playerOneObject = new GameObject(WrapperName);
@@ -84,14 +92,25 @@ public class App : MonoBehaviour
             var eventData = data["eventData"] as Dictionary<string,object>;
             AskedToRematch = (bool)eventData["isReady"];
             string eventID = (string)data["evId"];
-            Bc.EventService.DeleteIncomingEvent(eventID);
-
+            
             //Enable ask to play again screen
             if (!IsAskingToRematch && AskedToRematch)
             {
+                if (eventData.Count > 1)
+                {
+                    //Set Up opponent reference that wants to rematch
+                    OpponentInfo = new PlayerInfo();
+                    OpponentInfo.ProfileId = (string)eventData["opponentProfileID"];
+                    OpponentInfo.PlayerName = (string)eventData["opponentName"];
+                    OpponentInfo.PlayerRating = (string)eventData["opponentRating"];    
+                }
                 if (_localTicTacToe)
                 {
                     _localTicTacToe.AskToRematchScreen.SetActive(true);    
+                }
+                else if (_localMatchSelect)
+                {
+                    _localMatchSelect.AskToRematchScreen.SetActive(true);
                 }
             }
             //Disable wait screen for asking user to rematch
@@ -103,6 +122,8 @@ public class App : MonoBehaviour
                     GotoMatchSelectScene(_localTicTacToe.gameObject);    
                 }
             }
+            
+            Bc.EventService.DeleteIncomingEvent(eventID);
         }
     }
 
@@ -169,5 +190,39 @@ public class App : MonoBehaviour
             scene.App = this;
         }
         Destroy(previousScene.transform.parent.gameObject);
+    }
+
+    public void OnCompleteGame()
+    {
+        // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
+        var matchResults = new JsonData { ["ownerId"] = OwnerId, ["matchId"] = MatchId };
+
+        if (Winner < 0)
+        {
+            matchResults["isTie"] = true;
+        }
+        else
+        {
+            matchResults["isTie"] = false;
+            matchResults["winnerId"] = WinnerInfo.ProfileId;
+            matchResults["loserId"] = LoserInfo.ProfileId;
+            matchResults["winnerRating"] = int.Parse(WinnerInfo.PlayerRating);
+            matchResults["loserRating"] = int.Parse(LoserInfo.PlayerRating);
+        }
+
+        Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
+            (status, code, error, cbObject) => { });
+    }
+    
+    private void OnMatchCompleted(string responseData, object cbPostObject)
+    {
+        // Get the new PlayerRating
+        PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
+
+        if (_localTicTacToe)
+        {
+            // Go back to game select scene
+            GotoMatchSelectScene(_localTicTacToe.gameObject);   
+        }
     }
 }
