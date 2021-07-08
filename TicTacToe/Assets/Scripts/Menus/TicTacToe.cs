@@ -18,7 +18,6 @@ public class TicTacToe : GameScene
     public GameObject AfterGameDisplay;
     public GameObject PlayAgainButton;
     public GameObject AskToRematchScreen;
-    public GameObject PleaseWaitScreen;
     #endregion
     //Used to know if this object is alive in scene
     private bool _isActive;
@@ -41,7 +40,6 @@ public class TicTacToe : GameScene
         BuildBoardFromState(App.BoardState);
         
         _isActive = true;
-        PleaseWaitScreen.SetActive(false);
         AskToRematchScreen.SetActive(false);
         // also updates _winner status
         updateHud();
@@ -202,7 +200,29 @@ public class TicTacToe : GameScene
                     App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
                     App.OwnerId = match.ownerId;
                     App.MatchId = match.matchId;
-
+                    
+                    //Checking if game is completed to assign winner and loser info
+                    BuildBoardFromState(App.BoardState);
+                    App.Winner = CheckForWinner();
+                    if (App.Winner != 0)
+                    {
+                        Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform };
+                        Transform statusOverlay = toCheckDisplay[1].Find("StatusOverlay");
+                        TextMeshProUGUI status = statusOverlay.Find("StatusText").GetComponent<TextMeshProUGUI>();
+                        if (App.Winner == 1)
+                        {
+                            status.text = Truncate(App.PlayerInfoX.PlayerName, MAX_CHARS) + " Wins!";
+                            App.WinnerInfo = App.PlayerInfoX;
+                            App.LoserInfo = App.PlayerInfoO;
+                        }
+                        else
+                        {
+                            status.text = Truncate(App.PlayerInfoO.PlayerName, MAX_CHARS) + " Wins!";
+                            App.WinnerInfo = App.PlayerInfoO;
+                            App.LoserInfo = App.PlayerInfoX;
+                        }
+                    }
+                    
                     // Load the Tic Tac Toe scene
                     if (this != null && this.gameObject != null)
                         App.GotoTicTacToeScene(gameObject);
@@ -441,8 +461,6 @@ public class TicTacToe : GameScene
         //Send event to opponent to prompt them to play again
         App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
         App.IsAskingToRematch = true;
-        //Pop up window saying "Waiting for response..."
-        PleaseWaitScreen.SetActive(true);
     }
 
     //Called from Unity Button

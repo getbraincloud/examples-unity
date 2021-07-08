@@ -52,7 +52,6 @@ public class App : MonoBehaviour
     public MatchSelect MyMatchSelect
     {
         get => _localMatchSelect;
-        set => _localMatchSelect = value;
     }
     
     private void Start()
@@ -67,9 +66,8 @@ public class App : MonoBehaviour
         //Bc.Client.EnableLogging(true);
 
         // Now that brainCloud is setup. Let's go to the Login Scene
-        var loginObject = Instantiate(Login);
+        var loginObject = Instantiate(Login, playerOneObject.transform);
         loginObject.GetComponentInChildren<GameScene>().App = this;
-        loginObject.transform.parent = playerOneObject.transform;
     }
 
     //private void Update()
@@ -99,10 +97,12 @@ public class App : MonoBehaviour
                 if (eventData.Count > 1)
                 {
                     //Set Up opponent reference that wants to rematch
-                    OpponentInfo = new PlayerInfo();
-                    OpponentInfo.ProfileId = (string)eventData["opponentProfileID"];
-                    OpponentInfo.PlayerName = (string)eventData["opponentName"];
-                    OpponentInfo.PlayerRating = (string)eventData["opponentRating"];    
+                    OpponentInfo = new PlayerInfo
+                    {
+                        ProfileId = (string)eventData["opponentProfileID"],
+                        PlayerName = (string)eventData["opponentName"],
+                        PlayerRating = (string)eventData["opponentRating"],
+                    };
                 }
                 if (_localTicTacToe)
                 {
@@ -113,16 +113,13 @@ public class App : MonoBehaviour
                     _localMatchSelect.AskToRematchScreen.SetActive(true);
                 }
             }
-            //Disable wait screen for asking user to rematch
-            else if (IsAskingToRematch)
+            else if (AskedToRematch)
             {
                 if (_localTicTacToe)
                 {
-                    _localTicTacToe.PleaseWaitScreen.SetActive(false);
-                    GotoMatchSelectScene(_localTicTacToe.gameObject);    
+                    GotoMatchSelectScene(_localTicTacToe.gameObject);
                 }
             }
-            
             Bc.EventService.DeleteIncomingEvent(eventID);
         }
     }
