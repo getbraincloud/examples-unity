@@ -38,7 +38,7 @@ public class GameButtonCell : MonoBehaviour
         }
         if (m_pMatchData != null)
         {
-            this.GetComponent<Button>().interactable = m_pMatchData.yourTurn || m_pMatchData.complete;
+            GetComponent<Button>().interactable = m_pMatchData.yourTurn || m_pMatchData.complete;
             OpponentName.text = m_pMatchData.matchedProfile.PlayerName;
             Status.gameObject.SetActive(true);
             Status.text = m_pMatchData.complete ? "(COMPLETE)" : m_pMatchData.expired ? "(ABANDONNED)" : m_pMatchData.yourTurn ? "(Your Turn)" : "(Opponent's Turn)";
@@ -84,5 +84,10 @@ public class GameButtonCell : MonoBehaviour
     private PlayerInfo m_pPlayerData = null;
     private MatchSelect.MatchInfo m_pMatchData = null;
     private MatchSelect m_pMatchSelect = null;
+
+    public MatchSelect.MatchInfo MatchInfo
+    {
+        get => m_pMatchData;
+    }
     #endregion
 }

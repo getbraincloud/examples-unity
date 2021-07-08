@@ -15,11 +15,11 @@ public class MatchSelect : ResourcesManager
     private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
     private readonly List<PlayerInfo> matchedProfiles = new List<PlayerInfo>();
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
-
+    private readonly int[] _grid = new int[9];
     private Vector2 _scrollPos;
 
     private bool isLookingForMatch = false;
-
+    private int index;
     [SerializeField]
     private RectTransform MyGamesScrollView = null;
     [SerializeField]
@@ -32,6 +32,19 @@ public class MatchSelect : ResourcesManager
     public TextMeshProUGUI QuickPlayText;
     public GameObject AskToRematchScreen;
 
+    
+    private readonly int[,] _winningCond =
+    {
+        //List of possible winning conditions
+        {0, 1, 2},
+        {3, 4, 5},
+        {6, 7, 8},
+        {0, 3, 6},
+        {1, 4, 7},
+        {2, 5, 8},
+        {0, 4, 8},
+        {2, 4, 6}
+    };
     // Use this for initialization
     private void Start()
     {
@@ -111,6 +124,7 @@ public class MatchSelect : ResourcesManager
 
     private void OnFindMatches(string responseData, object cbPostObject)
     {
+        
         matches.Clear();
 
         // Construct our game list using response data
@@ -152,8 +166,8 @@ public class MatchSelect : ResourcesManager
             Spinner.gameObject.SetActive(false);
             MyGames.text = "My Games";
             RemoveAllCellsInView(m_itemCell);
-            PopulateMatchesScrollView(matches, m_itemCell, MyGamesScrollView);
-            PopulateMatchesScrollView(completedMatches, m_itemCell, MyGamesScrollView);
+            PopulateMatchesScrollView(matches);
+            PopulateMatchesScrollView(completedMatches);
         }
     }
 
@@ -163,7 +177,7 @@ public class MatchSelect : ResourcesManager
         Spinner.gameObject.SetActive(false);
         MyGames.text = "Pick Opponent";
         CancelButton.gameObject.SetActive(true);
-        PopulatePlayersScrollView(matchedProfiles, m_itemCell, MyGamesScrollView);
+        PopulatePlayersScrollView(matchedProfiles);
     }
 
     public void OnCancelButton()
@@ -220,46 +234,76 @@ public class MatchSelect : ResourcesManager
             App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
         }
     }
-
-    private void PopulateMatchesScrollView(List<MatchInfo> in_itemItems, List<GameButtonCell> in_itemCell, RectTransform in_scrollView)
+    //Populates matches in progress
+    private void PopulateMatchesScrollView(List<MatchInfo> in_itemItems)
     {
         if (in_itemItems.Count == 0)
         {
             return;
         }
 
-        if (in_scrollView != null)
+        if (MyGamesScrollView != null)
         {
-            int i = 0;
-            //            foreach (var profile in in_itemItems)
+            index = 0;
             foreach (var match in in_itemItems)
             {
-                GameButtonCell newItem = CreateItemCell(in_scrollView, (i % 2) == 0);
-                newItem.Init(match, this);
-                newItem.transform.localPosition = Vector3.zero;
-                in_itemCell.Add(newItem);
-                i++;
+                App.Bc.AsyncMatchService.ReadMatch(match.ownerId, match.matchId, AddNewCell, null, match);
+            }
+        }
+    }
+    
+    private void AddNewCell(string jsonResponse, object cbObject)
+    {
+        var match = cbObject as MatchInfo;
+        var data = JsonMapper.ToObject(jsonResponse)["data"];
+        
+        //Determining if game is completed
+        string board = (string)data["matchState"]["board"];
+        BuildBoardFromState(board);
+        match.complete = IsGameCompleted();
+        
+        //Create game button cell
+        GameButtonCell newItem = CreateItemCell(MyGamesScrollView, (index % 2) == 0);
+        newItem.Init(match, this);
+        newItem.transform.localPosition = Vector3.zero;
+        index = index < matches.Count ? index++ : 0;
+        m_itemCell.Add(newItem);
+        
+        //Ensuring no duplicated game button cells are created 
+        var tempList = new List<GameButtonCell>();
+        for (int i = m_itemCell.Count - 1; i > -1; i--)
+        {
+            if (tempList.Count == 0)
+            {
+                tempList.Add(m_itemCell[i]);
+                continue;
+            }
+            if (tempList[i].MatchInfo.matchId == m_itemCell[i].MatchInfo.matchId)
+            {
+                Destroy(m_itemCell[i].gameObject);
+                m_itemCell.Remove(m_itemCell[i]);
             }
         }
     }
 
-    private void PopulatePlayersScrollView(List<PlayerInfo> in_itemItems, List<GameButtonCell> in_itemCell, RectTransform in_scrollView)
+    //Populates players to pick from for a new match
+    private void PopulatePlayersScrollView(List<PlayerInfo> in_itemItems)
     {
-        RemoveAllCellsInView(in_itemCell);
+        RemoveAllCellsInView(m_itemCell);
         if (in_itemItems.Count == 0)
         {
             return;
         }
 
-        if (in_scrollView != null)
+        if (MyGamesScrollView != null)
         {
             int i = 0;
             foreach (var profile in in_itemItems)
             {
-                GameButtonCell newItem = CreateItemCell(in_scrollView, (i % 2) == 0);
+                GameButtonCell newItem = CreateItemCell(MyGamesScrollView, (i % 2) == 0);
                 newItem.Init(profile, this);
                 newItem.transform.localPosition = Vector3.zero;
-                in_itemCell.Add(newItem);
+                m_itemCell.Add(newItem);
                 i++;
             }
         }
@@ -491,9 +535,54 @@ public class MatchSelect : ResourcesManager
             {
                 playerInfo.PlayerName = (string)playerData["playerName"];
                 playerInfo.ProfileId = (string)playerSummaryData["profileId"];
-                playerInfo.PlayerRating = "1000";
+                playerInfo.PlayerRating = "1200";
                 matchedProfile = playerInfo;
             }
         }
+    }
+
+    private void BuildBoardFromState(string board)
+    {
+        //Clear logical grid
+        for (var i = 0; i < _grid.Length; i++)
+        {
+            _grid[i] = 0;
+        }
+        //Populate grid based on 'board' parameter
+        var j = 0;
+        foreach (char boardSlot in board)
+        {
+            if (boardSlot != '#')
+            {
+                AddToken(j,boardSlot.ToString());
+            }
+            ++j;
+        }
+    }
+
+    private void AddToken(int index, string token)
+    {
+        _grid[index] = token == "X" ? 1 : 2;
+    }
+
+    private bool IsGameCompleted()
+    {
+        bool gameCompleted = false;
+        for (int i = 0; i < 8; i++)
+        {
+            int a = _winningCond[i, 0], b = _winningCond[i, 1], c = _winningCond[i, 2];
+            int b1 = _grid[a], b2 = _grid[b], b3 = _grid[c];
+
+            if (b1 == 0 || b2 == 0 || b3 == 0)
+            {
+                continue;
+            }
+            if (b1 == b2 && b2 == b3)
+            {
+                gameCompleted = true;
+                break;
+            }
+        }
+        return gameCompleted;
     }
 }
