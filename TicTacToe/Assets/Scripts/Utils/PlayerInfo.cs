@@ -8,7 +8,6 @@ using BrainCloud.LitJson;
 public class PlayerInfo
 {
     public string PlayerName = "";
-    public string PlayerRating = "";
     public string ProfileId = "";
     public string Rank = "";
     public string Score = "";
@@ -28,8 +27,6 @@ public class PlayerInfo
         if (ProfileId.Equals("")) ProfileId = SafeGet(jsonData, "profileId");
 
         Rank = SafeGet(jsonData, "rank");
-
-        PlayerRating = SafeGet(jsonData, "playerRating");
     }
 
     public PlayerInfo()

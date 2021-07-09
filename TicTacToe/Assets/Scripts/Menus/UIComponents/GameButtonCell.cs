@@ -33,7 +33,7 @@ public class GameButtonCell : MonoBehaviour
     {
         if (m_pPlayerData != null)
         {
-            OpponentName.text = m_pPlayerData.PlayerName + " (" + m_pPlayerData.PlayerRating + ")";
+            OpponentName.text = m_pPlayerData.PlayerName;
             Status.gameObject.SetActive(false);
         }
         if (m_pMatchData != null)
@@ -72,9 +72,6 @@ public class GameButtonCell : MonoBehaviour
 
     private void OnAbandonMatchSuccess(string responseData, object cbPostObject)
     {
-        // Get the new PlayerRating
-        m_pMatchSelect.App.PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
-
         // Go back to game select scene
         m_pMatchSelect.App.GotoMatchSelectScene(m_pMatchSelect.gameObject);
     }

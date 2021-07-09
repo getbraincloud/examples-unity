@@ -31,7 +31,8 @@ public class MatchSelect : ResourcesManager
     [SerializeField]
     public TextMeshProUGUI QuickPlayText;
     public GameObject AskToRematchScreen;
-
+    public GameObject ErrorMessageScreen;
+    public TMP_Text ErrorMessageText;
     
     private readonly int[,] _winningCond =
     {
@@ -60,6 +61,7 @@ public class MatchSelect : ResourcesManager
         m_itemCell = new List<GameButtonCell>();
         CancelButton.gameObject.SetActive(false);
         enableRTT();
+        ErrorMessageScreen.SetActive(false);
         AskToRematchScreen.SetActive(false);
         if (UserName != null)
             UserName.text = App.Name;
@@ -400,6 +402,9 @@ public class MatchSelect : ResourcesManager
         Debug.Log(a);
         Debug.Log(b);
         Debug.Log(responseData);
+
+        ErrorMessageText.text = "Failed to create Async Match"; 
+        ErrorMessageScreen.SetActive(true);
     }
 
     private void EnterMatch(MatchInfo match)
@@ -432,6 +437,8 @@ public class MatchSelect : ResourcesManager
     private void OnReadMatchFailed(int a, int b, string responseData, object cbPostObject)
     {
         Debug.LogError("Failed to Read Match");
+        ErrorMessageText.text = "Match is closed";
+        ErrorMessageScreen.SetActive(true);
     }
 
     private static Color OPP_COLOR = new Color32(0xFF, 0xFF, 0x49, 0xFF);
@@ -527,7 +534,6 @@ public class MatchSelect : ResourcesManager
             if ((string)playerSummaryData["profileId"] == matchSelect.App.ProfileId)
             {
                 playerInfo.PlayerName = matchSelect.App.Name;
-                playerInfo.PlayerRating = matchSelect.App.PlayerRating;
                 playerInfo.ProfileId = matchSelect.App.ProfileId;
                 yourToken = token;
             }
@@ -535,7 +541,6 @@ public class MatchSelect : ResourcesManager
             {
                 playerInfo.PlayerName = (string)playerData["playerName"];
                 playerInfo.ProfileId = (string)playerSummaryData["profileId"];
-                playerInfo.PlayerRating = "1200";
                 matchedProfile = playerInfo;
             }
         }

@@ -410,38 +410,26 @@ public class TicTacToe : GameScene
 
     public void onCompleteGame()
     {
-        if (App.CurrentMatch.complete)
+        // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
+        var matchResults = new JsonData { ["ownerId"] = App.OwnerId, ["matchId"] = App.MatchId };
+
+        if (_winner < 0)
         {
-            App.GotoMatchSelectScene(gameObject);
+            matchResults["isTie"] = true;
         }
         else
         {
-            // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
-            var matchResults = new JsonData { ["ownerId"] = App.OwnerId, ["matchId"] = App.MatchId };
-
-            if (_winner < 0)
-            {
-                matchResults["isTie"] = true;
-            }
-            else
-            {
-                matchResults["isTie"] = false;
-                matchResults["winnerId"] = App.WinnerInfo.ProfileId;
-                matchResults["loserId"] = App.LoserInfo.ProfileId;
-                matchResults["winnerRating"] = int.Parse(App.WinnerInfo.PlayerRating);
-                matchResults["loserRating"] = int.Parse(App.LoserInfo.PlayerRating);
-            }
-
-            App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
-                (status, code, error, cbObject) => { });
+            matchResults["isTie"] = false;
+            matchResults["winnerId"] = App.WinnerInfo.ProfileId;
+            matchResults["loserId"] = App.LoserInfo.ProfileId;
         }
+
+        App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
+            (status, code, error, cbObject) => { });
     }
 
     private void OnMatchCompleted(string responseData, object cbPostObject)
     {
-        // Get the new PlayerRating
-        App.PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
-
         if (_isActive)
         {
             // Go back to game select scene
@@ -457,7 +445,6 @@ public class TicTacToe : GameScene
         jsonData["isReady"] = true;
         jsonData["opponentProfileID"] = App.ProfileId;
         jsonData["opponentName"] = App.Name;
-        jsonData["opponentRating"] = App.PlayerRating;
         //Send event to opponent to prompt them to play again
         App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
         App.IsAskingToRematch = true;
