@@ -17,7 +17,7 @@ public class MatchSelect : ResourcesManager
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
     private readonly int[] _grid = new int[9];
     private Vector2 _scrollPos;
-
+    private GameButtonCell _selectedCell;
     private bool isLookingForMatch = false;
     private int index;
     [SerializeField]
@@ -189,12 +189,12 @@ public class MatchSelect : ResourcesManager
         OnPopulateMatches();
     }
 
-    public void OnMatchSelected(MatchInfo match)
+    public void OnMatchSelected(MatchInfo match,GameButtonCell cell)
     {
         if (match != null)
         {
             App.CurrentMatch = match;
-
+            _selectedCell = cell;
             // Query more detail state about the match
             App.Bc.AsyncMatchService
                 .ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
@@ -403,7 +403,7 @@ public class MatchSelect : ResourcesManager
         Debug.Log(b);
         Debug.Log(responseData);
 
-        ErrorMessageText.text = "Failed to create Async Match"; 
+        ErrorMessageText.text = "Failed to create a match"; 
         ErrorMessageScreen.SetActive(true);
     }
 
@@ -436,9 +436,12 @@ public class MatchSelect : ResourcesManager
 
     private void OnReadMatchFailed(int a, int b, string responseData, object cbPostObject)
     {
-        Debug.LogError("Failed to Read Match");
+        //If reading a match fails then it might mean the other user has closed the match
+        //In response to this, set up a message for the player and remove the selection cell
         ErrorMessageText.text = "Match is closed";
         ErrorMessageScreen.SetActive(true);
+        m_itemCell.Remove(_selectedCell);
+        Destroy(_selectedCell.gameObject);
     }
 
     private static Color OPP_COLOR = new Color32(0xFF, 0xFF, 0x49, 0xFF);
@@ -577,12 +580,19 @@ public class MatchSelect : ResourcesManager
         {
             int a = _winningCond[i, 0], b = _winningCond[i, 1], c = _winningCond[i, 2];
             int b1 = _grid[a], b2 = _grid[b], b3 = _grid[c];
-
+            //Checking if this row has been filled
             if (b1 == 0 || b2 == 0 || b3 == 0)
             {
                 continue;
             }
+            //We have a winner
             if (b1 == b2 && b2 == b3)
+            {
+                gameCompleted = true;
+                break;
+            }
+            //Game is Tied
+            if (i == 7)
             {
                 gameCompleted = true;
                 break;

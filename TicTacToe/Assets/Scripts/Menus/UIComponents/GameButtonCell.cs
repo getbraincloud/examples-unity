@@ -49,7 +49,7 @@ public class GameButtonCell : MonoBehaviour
     {
         if (m_pMatchData != null)
         {
-            m_pMatchSelect.OnMatchSelected(m_pMatchData);
+            m_pMatchSelect.OnMatchSelected(m_pMatchData, this);
         }
         if (m_pPlayerData != null)
         {
