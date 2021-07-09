@@ -9,7 +9,6 @@ public class GameScene : MonoBehaviour
     public App App;
 
     [SerializeField] public TMP_InputField UserName;
-    [SerializeField] public TextMeshProUGUI SkillRating;
     [SerializeField] public Image UserNameBG;
 
     [SerializeField]
@@ -27,12 +26,6 @@ public class GameScene : MonoBehaviour
     public Leaderboard LeaderboardObj = null;
 
     private bool isEditingPlayerName;
-    
-    private void Update()
-    {
-        if (SkillRating != null)
-            SkillRating.text = "Skill Rating: " + App.PlayerRating;
-    }
 
     public void OnEditName()
     {

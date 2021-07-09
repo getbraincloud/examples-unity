@@ -121,8 +121,6 @@ public class Login : GameScene
 
         PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
 
-        GetPlayerRating();
-
         // brainCloud gives us a newUser value to indicate if this account was just created.
         bool isNewUser = data["newUser"].ToString().Equals("true");
 
@@ -134,22 +132,6 @@ public class Login : GameScene
         {
             App.GotoMatchSelectScene(gameObject);
         }
-    }
-
-    private void GetPlayerRating()
-    {
-        // We are Going to Read the Match Making to get the Current Player Rating.
-        App.Bc.MatchMakingService.Read((jsonResponse, o) =>
-            {
-                var matchMakingData = JsonMapper.ToObject(jsonResponse)["data"];
-                App.PlayerRating = matchMakingData["playerRating"].ToString();
-            },
-            (status, code, error, o) =>
-            {
-                ErrorMessageBox.SetActive(true);
-                ErrorMessage.text = "Failed to Get MatchMaking Data";
-                Debug.Log(ErrorMessage.text);
-            });
     }
 
     private void SetupNewPlayer()

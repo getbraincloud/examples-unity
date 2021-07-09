@@ -23,7 +23,6 @@ public class App : MonoBehaviour
     
     public PlayerInfo WhosTurn;
     public string Name;
-    public string PlayerRating;
     public string ProfileId;
     
     public bool AskedToRematch;
@@ -64,7 +63,7 @@ public class App : MonoBehaviour
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
         Bc.Init(); // Required: Initialize the Wrapper.
         //Bc.Client.EnableLogging(true);
-
+        
         // Now that brainCloud is setup. Let's go to the Login Scene
         var loginObject = Instantiate(Login, playerOneObject.transform);
         loginObject.GetComponentInChildren<GameScene>().App = this;
@@ -91,7 +90,7 @@ public class App : MonoBehaviour
             AskedToRematch = (bool)eventData["isReady"];
             string eventID = (string)data["evId"];
             
-            //Enable ask to play again screen
+            //Enable play again screen to the asked user
             if (!IsAskingToRematch && AskedToRematch)
             {
                 if (eventData.Count > 1)
@@ -101,7 +100,6 @@ public class App : MonoBehaviour
                     {
                         ProfileId = (string)eventData["opponentProfileID"],
                         PlayerName = (string)eventData["opponentName"],
-                        PlayerRating = (string)eventData["opponentRating"],
                     };
                 }
                 if (_localTicTacToe)
@@ -203,8 +201,6 @@ public class App : MonoBehaviour
             matchResults["isTie"] = false;
             matchResults["winnerId"] = WinnerInfo.ProfileId;
             matchResults["loserId"] = LoserInfo.ProfileId;
-            matchResults["winnerRating"] = int.Parse(WinnerInfo.PlayerRating);
-            matchResults["loserRating"] = int.Parse(LoserInfo.PlayerRating);
         }
 
         Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
@@ -213,9 +209,6 @@ public class App : MonoBehaviour
     
     private void OnMatchCompleted(string responseData, object cbPostObject)
     {
-        // Get the new PlayerRating
-        PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
-
         if (_localTicTacToe)
         {
             // Go back to game select scene
