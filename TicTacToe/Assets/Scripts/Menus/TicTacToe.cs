@@ -25,7 +25,7 @@ public class TicTacToe : GameScene
 
     private void Start()
     {
-        _winner = 0;
+        App.Winner = 0;
 
         var parent = gameObject.transform.parent.gameObject;
 
@@ -64,21 +64,21 @@ public class TicTacToe : GameScene
     private void updateHud(bool updateNames = true)
     {
         // Check we if are not seeing a done match
-        _winner = BoardUtility.CheckForWinner();
-        App.Winner = _winner;
+        App.Winner = BoardUtility.CheckForWinner();
+        
         // Read match history
-        if (_history == null && _winner != 0)
+        if (_history == null && App.Winner != 0)
         {
             _turnPlayed = true;
             App.Bc.AsyncMatchService
                 .ReadMatchHistory(App.OwnerId, App.MatchId, OnReadMatchHistory);
         }
 
-        enableDuringGameDisplay(_winner == 0);
+        enableDuringGameDisplay(App.Winner == 0);
 
         Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform };
         //Game is finished
-        if (_winner != 0)
+        if (App.Winner != 0)
         {
             App.IsAskingToRematch = false;
             App.AskedToRematch = false;
@@ -87,7 +87,7 @@ public class TicTacToe : GameScene
         {
             TextMeshProUGUI status = toCheckDisplay[0].Find("StatusOverlay").Find("StatusText").GetComponent<TextMeshProUGUI>();
             // update the during Game Display
-            status.text = _winner != 0 ? _winner == -1 ? "Match Tied" : "Match Completed" :
+            status.text = App.Winner != 0 ? App.Winner == -1 ? "Match Tied" : "Match Completed" :
                                             (App.WhosTurn == App.PlayerInfoX && App.CurrentMatch.yourToken == "X" ||
                                              App.WhosTurn == App.PlayerInfoO && App.CurrentMatch.yourToken == "O") ? "Your Turn" :
                                              Truncate(App.WhosTurn.PlayerName, MAX_CHARS) + "'s Turn";
@@ -97,13 +97,13 @@ public class TicTacToe : GameScene
             Transform statusOverlay = toCheckDisplay[1].Find("StatusOverlay");
             TextMeshProUGUI status = statusOverlay.Find("StatusText").GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI statusOutline = statusOverlay.Find("StatusTextOutline").GetComponent<TextMeshProUGUI>();
-            if (_winner < 0)
+            if (App.Winner < 0)
             {
                 status.text = "Game Tied!";
             }
-            else if (_winner > 0)
+            else if (App.Winner > 0)
             {
-                if (_winner == 1)
+                if (App.Winner == 1)
                 {
                     status.text = Truncate(App.PlayerInfoX.PlayerName, MAX_CHARS) + " Wins!";
                     App.WinnerInfo = App.PlayerInfoX;
@@ -313,9 +313,7 @@ public class TicTacToe : GameScene
         if (BoardUtility.Grid[index] == 0) return true;
         return false;
     }
-
     
-
     private void BuildBoardFromState(string boardState)
     {
         ClearTokens();
@@ -336,7 +334,7 @@ public class TicTacToe : GameScene
     }
     private void OnTurnSubmitted(string responseData, object cbPostObject)
     {
-        if (_winner == 0)
+        if (App.Winner == 0)
         {
             return;
         }
@@ -393,6 +391,8 @@ public class TicTacToe : GameScene
         jsonData["isReady"] = true;
         jsonData["opponentProfileID"] = App.ProfileId;
         jsonData["opponentName"] = App.Name;
+        jsonData["matchID"] = App.MatchId;
+        jsonData["ownerID"] = App.OwnerId;
         //Send event to opponent to prompt them to play again
         App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
         App.IsAskingToRematch = true;
@@ -401,7 +401,7 @@ public class TicTacToe : GameScene
     //Called from Unity Button
     public void AcceptRematch()
     {
-        App.AcceptRematch();
+        App.AcceptRematch(gameObject);
     }
     
     //Called from Unity Button
@@ -429,7 +429,5 @@ public class TicTacToe : GameScene
 
     private List<string> _history;
     private bool _turnPlayed = false;
-
-    private int _winner;
     #endregion
 }

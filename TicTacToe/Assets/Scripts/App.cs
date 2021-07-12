@@ -101,6 +101,8 @@ public class App : MonoBehaviour
                         ProfileId = (string)eventData["opponentProfileID"],
                         PlayerName = (string)eventData["opponentName"],
                     };
+                    MatchId = (string)eventData["matchID"];
+                    OwnerId = (string)eventData["ownerID"];
                 }
                 if (_localTicTacToe)
                 {
@@ -216,16 +218,25 @@ public class App : MonoBehaviour
         }
     }
 
-    public void AcceptRematch()
+    public void AcceptRematch(GameObject previousScene)
     {
         // Send Event back to opponent that its accepted
         var jsonData = new JsonData();
         jsonData["isReady"] = true;
         //Event to send to opponent to disable PleaseWaitScreen
         Bc.EventService.SendEvent(OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
+
+        //Making sure player info is ready to be sent for OnCompleteGame()
+        if (WinnerInfo == null || LoserInfo == null)
+        {
+            Winner = BoardUtility.CheckForWinner();
+            WinnerInfo = Winner == 1 ? PlayerInfoX : PlayerInfoO;
+            LoserInfo = Winner == 1 ? PlayerInfoO : PlayerInfoX;
+        }
+        
         // Reset Match
         OnCompleteGame();
-        GotoMatchSelectScene(gameObject);
+        GotoMatchSelectScene(previousScene);
         MyMatchSelect.OnPickOpponent(OpponentInfo);
     }
 
