@@ -55,7 +55,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   App: {fileID: 0}
   UserName: {fileID: 0}
-  SkillRating: {fileID: 0}
   UserNameBG: {fileID: 0}
   AchievementsTab: {fileID: 0}
   LeaderboardTab: {fileID: 0}
@@ -3087,6 +3086,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: TicTacToe, Assembly-CSharp
         m_MethodName: DeclineRematch
         m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1164542615600761372}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -7135,6 +7146,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: TicTacToe, Assembly-CSharp
         m_MethodName: AcceptRematch
         m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1164542615600761372}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

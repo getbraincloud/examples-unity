@@ -64,7 +64,7 @@ public class TicTacToe : GameScene
     private void updateHud(bool updateNames = true)
     {
         // Check we if are not seeing a done match
-        _winner = CheckForWinner();
+        _winner = BoardUtility.CheckForWinner();
         App.Winner = _winner;
         // Read match history
         if (_history == null && _winner != 0)
@@ -203,7 +203,7 @@ public class TicTacToe : GameScene
                     
                     //Checking if game is completed to assign winner and loser info
                     BuildBoardFromState(App.BoardState);
-                    App.Winner = CheckForWinner();
+                    App.Winner = BoardUtility.CheckForWinner();
                     if (App.Winner != 0)
                     {
                         Transform[] toCheckDisplay = { DuringGameDisplay.transform, AfterGameDisplay.transform };
@@ -254,7 +254,7 @@ public class TicTacToe : GameScene
         GridObjList.Add(Instantiate(token == "X" ? PlayerX : PlayerO, _tokenPositions[index],
             Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f))));
         GridObjList.Last().transform.parent = gameObject.transform;
-        _grid[index] = token == "X" ? 1 : 2;
+        BoardUtility.Grid[index] = token == "X" ? 1 : 2;
     }
 
     public void PlayTurn(int index, PlayerInfo player)
@@ -300,7 +300,7 @@ public class TicTacToe : GameScene
     private void ClearTokens()
     {
         //Clear logical grid
-        for (var i = 0; i < _grid.Length; i++) _grid[i] = 0;
+        for (var i = 0; i < BoardUtility.Grid.Length; i++) BoardUtility.Grid[i] = 0;
 
         //Clear instanciated game objects
         foreach (var obj in GridObjList) Destroy(obj);
@@ -310,39 +310,11 @@ public class TicTacToe : GameScene
     public bool AvailableSlot(int index)
     {
         if (_turnPlayed) return false;
-        if (_grid[index] == 0) return true;
+        if (BoardUtility.Grid[index] == 0) return true;
         return false;
     }
 
-    // Checks if we have a winner yet.
-    // Returns -1 = Game Tied, 0 = No winner yet, 1 = Player1 won, 2 = Player2 won
-    private int CheckForWinner()
-    {
-        var ourWinner = 0;
-        var gameEnded = true;
-
-        for (var i = 0; i < 8; i++)
-        {
-            int a = _winningCond[i, 0], b = _winningCond[i, 1], c = _winningCond[i, 2];
-            int b1 = _grid[a], b2 = _grid[b], b3 = _grid[c];
-
-            if (b1 == 0 || b2 == 0 || b3 == 0)
-            {
-                gameEnded = false;
-                continue;
-            }
-
-            if (b1 == b2 && b2 == b3)
-            {
-                ourWinner = b1;
-                break;
-            }
-        }
-
-        if (gameEnded && ourWinner == 0) ourWinner = -1;
-
-        return ourWinner;
-    }
+    
 
     private void BuildBoardFromState(string boardState)
     {
@@ -410,31 +382,7 @@ public class TicTacToe : GameScene
 
     public void onCompleteGame()
     {
-        // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
-        var matchResults = new JsonData { ["ownerId"] = App.OwnerId, ["matchId"] = App.MatchId };
-
-        if (_winner < 0)
-        {
-            matchResults["isTie"] = true;
-        }
-        else
-        {
-            matchResults["isTie"] = false;
-            matchResults["winnerId"] = App.WinnerInfo.ProfileId;
-            matchResults["loserId"] = App.LoserInfo.ProfileId;
-        }
-
-        App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
-            (status, code, error, cbObject) => { });
-    }
-
-    private void OnMatchCompleted(string responseData, object cbPostObject)
-    {
-        if (_isActive)
-        {
-            // Go back to game select scene
-            App.GotoMatchSelectScene(gameObject);   
-        }
+        App.OnCompleteGame();
     }
     
     //Called from Unity Button
@@ -453,34 +401,19 @@ public class TicTacToe : GameScene
     //Called from Unity Button
     public void AcceptRematch()
     {
-        AskToRematchScreen.SetActive(false);
-        // Send Event back to opponent that its accepted
-        var jsonData = new JsonData();
-        jsonData["isReady"] = true;
-        //Event to send to opponent to disable PleaseWaitScreen
-        App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
-        // Reset Match
-        onCompleteGame();
-        App.GotoMatchSelectScene(gameObject);
-        App.MyMatchSelect.OnPickOpponent(App.CurrentMatch.matchedProfile);
+        App.AcceptRematch();
     }
     
     //Called from Unity Button
     public void DeclineRematch()
     {
-        AskToRematchScreen.SetActive(false);
-        // Send Event back to opponent that its accepted
-        var jsonData = new JsonData();
-        jsonData["isReady"] = false;
-        //Event to send to opponent to disable PleaseWaitScreen
-        App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+        App.DeclineMatch();
     }
     
     #region private variables 
 
     private List<GameObject> GridObjList = new List<GameObject>();
-    private readonly int[] _grid = new int[9];
-
+    
     private readonly Vector3[] _tokenPositions =
     {
         new Vector3(-2.1f, 12, 2.1f),
@@ -492,19 +425,6 @@ public class TicTacToe : GameScene
         new Vector3(-2.1f, 12, -2.1f),
         new Vector3(0, 12, -2.1f),
         new Vector3(2.1f, 12, -2.1f)
-    };
-
-    private readonly int[,] _winningCond =
-    {
-        //List of possible winning conditions
-        {0, 1, 2},
-        {3, 4, 5},
-        {6, 7, 8},
-        {0, 3, 6},
-        {1, 4, 7},
-        {2, 5, 8},
-        {0, 4, 8},
-        {2, 4, 6}
     };
 
     private List<string> _history;
