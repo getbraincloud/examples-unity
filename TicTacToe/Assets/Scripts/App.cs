@@ -207,12 +207,34 @@ public class App : MonoBehaviour
             (status, code, error, cbObject) => { });
     }
     
-    private void OnMatchCompleted(string responseData, object cbPostObject)
+    public void OnMatchCompleted(string responseData, object cbPostObject)
     {
         if (_localTicTacToe)
         {
             // Go back to game select scene
             GotoMatchSelectScene(_localTicTacToe.gameObject);   
         }
+    }
+
+    public void AcceptRematch()
+    {
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = true;
+        //Event to send to opponent to disable PleaseWaitScreen
+        Bc.EventService.SendEvent(OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
+        // Reset Match
+        OnCompleteGame();
+        GotoMatchSelectScene(gameObject);
+        MyMatchSelect.OnPickOpponent(OpponentInfo);
+    }
+
+    public void DeclineMatch()
+    {
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = false;
+        //Event to send to opponent to disable PleaseWaitScreen
+        Bc.EventService.SendEvent(CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
     }
 }

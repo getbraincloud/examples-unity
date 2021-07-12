@@ -15,7 +15,7 @@ public class MatchSelect : ResourcesManager
     private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
     private readonly List<PlayerInfo> matchedProfiles = new List<PlayerInfo>();
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
-    private readonly int[] _grid = new int[9];
+    
     private Vector2 _scrollPos;
     private GameButtonCell _selectedCell;
     private bool isLookingForMatch = false;
@@ -34,18 +34,8 @@ public class MatchSelect : ResourcesManager
     public GameObject ErrorMessageScreen;
     public TMP_Text ErrorMessageText;
     
-    private readonly int[,] _winningCond =
-    {
-        //List of possible winning conditions
-        {0, 1, 2},
-        {3, 4, 5},
-        {6, 7, 8},
-        {0, 3, 6},
-        {1, 4, 7},
-        {2, 5, 8},
-        {0, 4, 8},
-        {2, 4, 6}
-    };
+    
+    
     // Use this for initialization
     private void Start()
     {
@@ -261,8 +251,8 @@ public class MatchSelect : ResourcesManager
         
         //Determining if game is completed
         string board = (string)data["matchState"]["board"];
-        BuildBoardFromState(board);
-        match.complete = IsGameCompleted();
+        BoardUtility.BuildBoardFromState(board);
+        match.complete = BoardUtility.IsGameCompleted();
         
         //Create game button cell
         GameButtonCell newItem = CreateItemCell(MyGamesScrollView, (index % 2) == 0);
@@ -469,27 +459,13 @@ public class MatchSelect : ResourcesManager
     //Called from Unity Button
     public void AcceptRematch()
     {
-        AskToRematchScreen.SetActive(false);
-        // Send Event back to opponent that its accepted
-        var jsonData = new JsonData();
-        jsonData["isReady"] = true;
-        //Event to send to opponent to disable PleaseWaitScreen
-        App.Bc.EventService.SendEvent(App.OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
-        // Reset Match
-        App.OnCompleteGame();
-        App.GotoMatchSelectScene(gameObject);
-        App.MyMatchSelect.OnPickOpponent(App.OpponentInfo);
+        App.AcceptRematch();
     }
     
     //Called from Unity Button
     public void DeclineRematch()
     {
-        AskToRematchScreen.SetActive(false);
-        // Send Event back to opponent that its accepted
-        var jsonData = new JsonData();
-        jsonData["isReady"] = false;
-        //Event to send to opponent to disable PleaseWaitScreen
-        App.Bc.EventService.SendEvent(App.OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
+        App.DeclineMatch();
     }
 
     private List<GameButtonCell> m_itemCell = null;
@@ -547,57 +523,5 @@ public class MatchSelect : ResourcesManager
                 matchedProfile = playerInfo;
             }
         }
-    }
-
-    private void BuildBoardFromState(string board)
-    {
-        //Clear logical grid
-        for (var i = 0; i < _grid.Length; i++)
-        {
-            _grid[i] = 0;
-        }
-        //Populate grid based on 'board' parameter
-        var j = 0;
-        foreach (char boardSlot in board)
-        {
-            if (boardSlot != '#')
-            {
-                AddToken(j,boardSlot.ToString());
-            }
-            ++j;
-        }
-    }
-
-    private void AddToken(int index, string token)
-    {
-        _grid[index] = token == "X" ? 1 : 2;
-    }
-
-    private bool IsGameCompleted()
-    {
-        bool gameCompleted = false;
-        for (int i = 0; i < 8; i++)
-        {
-            int a = _winningCond[i, 0], b = _winningCond[i, 1], c = _winningCond[i, 2];
-            int b1 = _grid[a], b2 = _grid[b], b3 = _grid[c];
-            //Checking if this row has been filled
-            if (b1 == 0 || b2 == 0 || b3 == 0)
-            {
-                continue;
-            }
-            //We have a winner
-            if (b1 == b2 && b2 == b3)
-            {
-                gameCompleted = true;
-                break;
-            }
-            //Game is Tied
-            if (i == 7)
-            {
-                gameCompleted = true;
-                break;
-            }
-        }
-        return gameCompleted;
     }
 }
