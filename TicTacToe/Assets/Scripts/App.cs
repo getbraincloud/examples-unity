@@ -24,7 +24,6 @@ public class App : MonoBehaviour
     public PlayerInfo WhosTurn;
     public string Name;
     public string ProfileId;
-    
     public bool AskedToRematch;
     // All Game Scenes
     [SerializeField] public GameObject Achievements;
@@ -48,11 +47,6 @@ public class App : MonoBehaviour
     private TicTacToe _localTicTacToe;
     private MatchSelect _localMatchSelect;
     
-    public MatchSelect MyMatchSelect
-    {
-        get => _localMatchSelect;
-    }
-    
     private void Start()
     {
         var playerOneObject = new GameObject(WrapperName);
@@ -62,7 +56,6 @@ public class App : MonoBehaviour
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
         Bc.Init(); // Required: Initialize the Wrapper.
-        //Bc.Client.EnableLogging(true);
         
         // Now that brainCloud is setup. Let's go to the Login Scene
         var loginObject = Instantiate(Login, playerOneObject.transform);
@@ -209,7 +202,7 @@ public class App : MonoBehaviour
             (status, code, error, cbObject) => { });
     }
     
-    public void OnMatchCompleted(string responseData, object cbPostObject)
+    private void OnMatchCompleted(string responseData, object cbPostObject)
     {
         if (_localTicTacToe)
         {
@@ -233,11 +226,10 @@ public class App : MonoBehaviour
             WinnerInfo = Winner == 1 ? PlayerInfoX : PlayerInfoO;
             LoserInfo = Winner == 1 ? PlayerInfoO : PlayerInfoX;
         }
-        
         // Reset Match
         OnCompleteGame();
         GotoMatchSelectScene(previousScene);
-        MyMatchSelect.OnPickOpponent(OpponentInfo);
+        _localMatchSelect.OnPickOpponent(OpponentInfo);
     }
 
     public void DeclineMatch()

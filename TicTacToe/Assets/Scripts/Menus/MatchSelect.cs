@@ -33,9 +33,7 @@ public class MatchSelect : ResourcesManager
     public GameObject AskToRematchScreen;
     public GameObject ErrorMessageScreen;
     public TMP_Text ErrorMessageText;
-    
-    
-    
+    public GameObject RetryRTTButton;
     // Use this for initialization
     private void Start()
     {
@@ -47,18 +45,21 @@ public class MatchSelect : ResourcesManager
         {
             Debug.Log("MatchMaking enabled failed");
         });
-
-        m_itemCell = new List<GameButtonCell>();
-        CancelButton.gameObject.SetActive(false);
         enableRTT();
+        m_itemCell = new List<GameButtonCell>();
+        
+        //Disable UI Elements
+        CancelButton.gameObject.SetActive(false);
+        RetryRTTButton.SetActive(false);
         ErrorMessageScreen.SetActive(false);
         AskToRematchScreen.SetActive(false);
+        
         if (UserName != null)
             UserName.text = App.Name;
     }
 
     // Enable RTT
-    private void enableRTT()
+    public void enableRTT()
     {
         // Only Enable RTT if its not already started
         if (!App.Bc.RTTService.IsRTTEnabled())
@@ -81,6 +82,15 @@ public class MatchSelect : ResourcesManager
         // match state
         App.Bc.RTTService.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
     }
+    
+    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
+    {
+        //Failure to connect to RTT so we display a dialog window to inform the user
+        //A button will be on the dialog that will direct them to enableRTT()
+        ErrorMessageText.text = "Error: Poor Connection. \n Try Again ?";
+        RetryRTTButton.SetActive(true);
+        ErrorMessageScreen.SetActive(true);
+    }
 
     // the listener, can parse the json and request just the updated match 
     // in this example, just re-request it all
@@ -93,13 +103,6 @@ public class MatchSelect : ResourcesManager
     {
         Spinner.gameObject.SetActive(true);
         App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
-    }
-
-    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
-    {
-        // TODO! Bring up a user dialog to inform of poor connection
-        // for now, try to auto connect 
-        if (this != null && this.gameObject != null) Invoke("enableRTT", 5.0f);
     }
 
     private void OnFindPlayers(string responseData, object cbPostObject)
@@ -116,7 +119,6 @@ public class MatchSelect : ResourcesManager
 
     private void OnFindMatches(string responseData, object cbPostObject)
     {
-        
         matches.Clear();
 
         // Construct our game list using response data
@@ -393,8 +395,8 @@ public class MatchSelect : ResourcesManager
         Debug.Log(a);
         Debug.Log(b);
         Debug.Log(responseData);
-
         ErrorMessageText.text = "Failed to create a match"; 
+        RetryRTTButton.SetActive(false);
         ErrorMessageScreen.SetActive(true);
     }
 

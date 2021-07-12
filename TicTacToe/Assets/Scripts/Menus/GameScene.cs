@@ -25,11 +25,8 @@ public class GameScene : MonoBehaviour
     [SerializeField]
     public Leaderboard LeaderboardObj = null;
 
-    private bool isEditingPlayerName;
-
     public void OnEditName()
     {
-        isEditingPlayerName = true;
         UserName.interactable = true;
         UserName.Select();
     }
@@ -61,9 +58,8 @@ public class GameScene : MonoBehaviour
     {
         UserName.text = UserName.text.Trim();
         App.Name = UserName.text;
-        isEditingPlayerName = false;
 
-        App.Bc.PlayerStateService.UpdateUserName(App.Name,
+        App.Bc.PlayerStateService.UpdateName(App.Name,
             (response, cbObject) => { },
             (status, code, error, cbObject) => { Debug.Log("Failed to change Player Name"); });
     }

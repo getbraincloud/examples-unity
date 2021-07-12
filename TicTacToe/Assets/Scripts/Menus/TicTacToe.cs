@@ -18,6 +18,8 @@ public class TicTacToe : GameScene
     public GameObject AfterGameDisplay;
     public GameObject PlayAgainButton;
     public GameObject AskToRematchScreen;
+    public GameObject ErrorMessageScreen;
+    public TMP_Text ErrorMessageText;
     #endregion
     //Used to know if this object is alive in scene
     private bool _isActive;
@@ -40,6 +42,7 @@ public class TicTacToe : GameScene
         BuildBoardFromState(App.BoardState);
         
         _isActive = true;
+        ErrorMessageScreen.SetActive(false);
         AskToRematchScreen.SetActive(false);
         // also updates _winner status
         updateHud();
@@ -144,8 +147,8 @@ public class TicTacToe : GameScene
         }
     }
     
-    // Enable RTT
-    private void enableRTT()
+    // Enable RTT 
+    public void enableRTT()
     {
         // Only Enable RTT if its not already started
         if (!App.Bc.RTTService.IsRTTEnabled())
@@ -168,6 +171,14 @@ public class TicTacToe : GameScene
         queryMatchState();
 
         App.Bc.RTTService.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
+    }
+    
+    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
+    {
+        //Failure to connect to RTT so we display a dialog window to inform the user
+        //A button will be on the dialog that will direct them to enableRTT()
+        ErrorMessageText.text = "Error: Poor Connection. \n Try Again ?";
+        ErrorMessageScreen.SetActive(true);
     }
 
     // the listener, can parse the json and request just the updated match 
@@ -228,13 +239,6 @@ public class TicTacToe : GameScene
                         App.GotoTicTacToeScene(gameObject);
                 }
             });
-    }
-
-    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
-    {
-        // TODO! Bring up a user dialog to inform of poor connection
-        // for now, try to auto connect 
-        Invoke("enableRTT", 5.0f);
     }
 
     private void OnReadMatchHistory(string responseData, object cbPostObject)
@@ -380,7 +384,10 @@ public class TicTacToe : GameScene
 
     public void onCompleteGame()
     {
-        App.OnCompleteGame();
+        if (_isActive)
+        {
+            App.OnCompleteGame();    
+        }
     }
     
     //Called from Unity Button

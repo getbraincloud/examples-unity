@@ -83,9 +83,6 @@ public class Achievements : ResourcesManager
     [SerializeField]
     private RectTransform AchievementsScrollView = null;
 
-    [SerializeField]
-    private Spinner Spinner = null;
-
     private void Start()
     {
         App = MatchSelectObj.App;
