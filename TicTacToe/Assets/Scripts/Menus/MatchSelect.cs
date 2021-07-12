@@ -251,8 +251,9 @@ public class MatchSelect : ResourcesManager
         
         //Determining if game is completed
         string board = (string)data["matchState"]["board"];
-        BoardUtility.BuildBoardFromState(board);
-        match.complete = BoardUtility.IsGameCompleted();
+        match.complete = BoardUtility.IsGameCompleted(board);
+        App.PlayerInfoO = match.playerOInfo;
+        App.PlayerInfoX = match.playerXInfo;
         
         //Create game button cell
         GameButtonCell newItem = CreateItemCell(MyGamesScrollView, (index % 2) == 0);
@@ -459,7 +460,7 @@ public class MatchSelect : ResourcesManager
     //Called from Unity Button
     public void AcceptRematch()
     {
-        App.AcceptRematch();
+        App.AcceptRematch(gameObject);
     }
     
     //Called from Unity Button
