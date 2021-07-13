@@ -1,5 +1,5 @@
 ﻿#region
-
+using System;
 using System.Collections.Generic;
 using BrainCloud.LitJson;
 using UnityEngine;
@@ -80,44 +80,52 @@ public class App : MonoBehaviour
         if (data.ContainsKey("eventData"))
         {
             var eventData = data["eventData"] as Dictionary<string,object>;
-            AskedToRematch = (bool)eventData["isReady"];
-            string eventID = (string)data["evId"];
+            if (eventData.ContainsKey("isReady"))
+            {
+                AskedToRematch = (bool)eventData["isReady"];
             
-            //Enable play again screen to the asked user
-            if (!IsAskingToRematch && AskedToRematch)
-            {
-                if (eventData.Count > 1)
+                //Enable play again screen to the asked user
+                if (!IsAskingToRematch && AskedToRematch)
                 {
-                    //Set Up opponent reference that wants to rematch
-                    OpponentInfo = new PlayerInfo
+                    if (eventData.Count > 1)
                     {
-                        ProfileId = (string)eventData["opponentProfileID"],
-                        PlayerName = (string)eventData["opponentName"],
-                    };
-                    MatchId = (string)eventData["matchID"];
-                    OwnerId = (string)eventData["ownerID"];
+                        //Set Up opponent reference that wants to rematch
+                        OpponentInfo = new PlayerInfo
+                        {
+                            ProfileId = (string)eventData["opponentProfileID"],
+                            PlayerName = (string)eventData["opponentName"],
+                        };
+                        MatchId = (string)eventData["matchID"];
+                        OwnerId = (string)eventData["ownerID"];
+                    }
+                    if (_localTicTacToe)
+                    {
+                        _localTicTacToe.AskToRematchScreen.SetActive(true);    
+                    }
+                    else if (_localMatchSelect)
+                    {
+                        _localMatchSelect.AskToRematchScreen.SetActive(true);
+                    }
                 }
-                if (_localTicTacToe)
+                else if (AskedToRematch)
                 {
-                    _localTicTacToe.AskToRematchScreen.SetActive(true);    
-                }
-                else if (_localMatchSelect)
-                {
-                    _localMatchSelect.AskToRematchScreen.SetActive(true);
-                }
+                    if (_localTicTacToe)
+                    {
+                        GotoMatchSelectScene(_localTicTacToe.gameObject);
+                    }
+                }    
             }
-            else if (AskedToRematch)
+            else if (eventData.ContainsKey("gameConcluded"))
             {
-                if (_localTicTacToe)
-                {
-                    GotoMatchSelectScene(_localTicTacToe.gameObject);
-                }
+                CurrentMatch.scoreSubmitted = true;
             }
+            
+            string eventID = (string)data["evId"];
             Bc.EventService.DeleteIncomingEvent(eventID);
         }
     }
 
-    // Scene Swapping Logic
+    // ****************Scene Swapping Logic*********************
     public void GotoLoginScene(GameObject previousScene)
     {
         var newScene = Instantiate(Login);
@@ -181,7 +189,8 @@ public class App : MonoBehaviour
         }
         Destroy(previousScene.transform.parent.gameObject);
     }
-
+    
+    //************Match Handling**********************
     public void OnCompleteGame()
     {
         // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
@@ -197,9 +206,7 @@ public class App : MonoBehaviour
             matchResults["winnerId"] = WinnerInfo.ProfileId;
             matchResults["loserId"] = LoserInfo.ProfileId;
         }
-
-        Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted,
-            (status, code, error, cbObject) => { });
+        Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted, FailureCallback);
     }
     
     private void OnMatchCompleted(string responseData, object cbPostObject)
@@ -239,5 +246,55 @@ public class App : MonoBehaviour
         jsonData["isReady"] = false;
         //Event to send to opponent to disable PleaseWaitScreen
         Bc.EventService.SendEvent(CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+    }
+    
+    // ***********Leaderboards Submission*****************
+    // Both players will be updated to the leaderboard from the winner user
+    public void PostToLeaderboard()
+    {
+        //Making fake scores for demonstration purposes
+        WinnerInfo.Score = "1210";
+        LoserInfo.Score = "1190";
+        //Converting scores to send
+        long winnerScore = Convert.ToInt64(WinnerInfo.Score);
+        long loserScore = Convert.ToInt64(LoserInfo.Score);
+        //Post new score
+        Bc.LeaderboardService.PostScoreToLeaderboard("Player_Rating", winnerScore, "", OnLeaderboardSubmission, FailureCallback);
+        Bc.LeaderboardService.PostScoreToLeaderboard("Player_Rating", loserScore, "", OnLeaderboardSubmission, FailureCallback);
+    }
+
+    private void OnLeaderboardSubmission(string responseData, object cbPostObject)
+    {
+        Debug.Log($"RESPONSE : {responseData}");
+    }
+    
+    // **************Achievements**********************
+    public void CheckAchievements()
+    {
+        Bc.PlayerStatisticsService.ReadAllUserStats(IncrementStat, FailureCallback);
+    }
+    private void IncrementStat(string responseData, object cbPostObject)
+    {
+        Debug.Log($"STATS: {responseData}");
+        var jsonData = JsonReader.Deserialize<Dictionary<string, object>>(responseData);
+        var data = jsonData["data"] as Dictionary<string, object>;
+        var statistics = data["statistics"] as Dictionary<string, object>;
+        var numberOfWins = (int)statistics["WON_RANKED_MATCH"];
+        numberOfWins++;
+
+        var dataToSend = new Dictionary<string, object>();
+        dataToSend["WON_RANKED_MATCH"] = numberOfWins.ToString();
+
+        Bc.PlayerStatisticsService.IncrementUserStats(dataToSend, IncrementStatSuccess);
+    }
+
+    private void IncrementStatSuccess(string responseData, object cbPostObject)
+    {
+        Debug.Log($"Stat Incremented");
+    }
+    
+    private void FailureCallback(int status, int code, string error, object cbObject)
+    {
+        Debug.Log($"FAILURE RESPONSE: {error}");
     }
 }

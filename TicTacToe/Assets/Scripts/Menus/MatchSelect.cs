@@ -85,6 +85,7 @@ public class MatchSelect : ResourcesManager
     
     private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
     {
+        if (gameObject == null) return;
         //Failure to connect to RTT so we display a dialog window to inform the user
         //A button will be on the dialog that will direct them to enableRTT()
         ErrorMessageText.text = "Error: Poor Connection. \n Try Again ?";
@@ -254,6 +255,10 @@ public class MatchSelect : ResourcesManager
         //Determining if game is completed
         string board = (string)data["matchState"]["board"];
         match.complete = BoardUtility.IsGameCompleted(board);
+        if (match.complete)
+        {
+            match.scoreSubmitted = true;
+        }
         App.PlayerInfoO = match.playerOInfo;
         App.PlayerInfoX = match.playerXInfo;
         
