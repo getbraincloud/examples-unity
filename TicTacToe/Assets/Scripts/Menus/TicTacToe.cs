@@ -118,6 +118,23 @@ public class TicTacToe : GameScene
                     App.WinnerInfo = App.PlayerInfoO;
                     App.LoserInfo = App.PlayerInfoX;
                 }
+                if (!App.CurrentMatch.scoreSubmitted)
+                {
+                    if (App.WinnerInfo.ProfileId == App.ProfileId)
+                    {
+                        App.CheckAchievements();
+                        App.PostToLeaderboard();
+                    }
+                    App.CurrentMatch.scoreSubmitted = true;
+                    var jsonData = new JsonData();
+                    jsonData["scoreSubmitted"] = true;
+                    jsonData["opponentProfileID"] = App.ProfileId;
+                    jsonData["opponentName"] = App.Name;
+                    jsonData["matchID"] = App.MatchId;
+                    jsonData["ownerID"] = App.OwnerId;
+                    //Send event to opponent to prompt them to play again
+                    App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId, "gameConcluded", jsonData.ToJson());
+                }
             }
             else
             {
