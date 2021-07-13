@@ -15,11 +15,11 @@ public class MatchSelect : ResourcesManager
     private readonly List<MatchInfo> completedMatches = new List<MatchInfo>();
     private readonly List<PlayerInfo> matchedProfiles = new List<PlayerInfo>();
     private readonly List<MatchInfo> matches = new List<MatchInfo>();
-
+    
     private Vector2 _scrollPos;
-
+    private GameButtonCell _selectedCell;
     private bool isLookingForMatch = false;
-
+    private int index;
     [SerializeField]
     private RectTransform MyGamesScrollView = null;
     [SerializeField]
@@ -30,8 +30,10 @@ public class MatchSelect : ResourcesManager
     private Spinner Spinner = null;
     [SerializeField]
     public TextMeshProUGUI QuickPlayText;
-
-
+    public GameObject AskToRematchScreen;
+    public GameObject ErrorMessageScreen;
+    public TMP_Text ErrorMessageText;
+    public GameObject RetryRTTButton;
     // Use this for initialization
     private void Start()
     {
@@ -43,18 +45,21 @@ public class MatchSelect : ResourcesManager
         {
             Debug.Log("MatchMaking enabled failed");
         });
-
-        m_itemCell = new List<GameButtonCell>();
-        CancelButton.gameObject.SetActive(false);
-
         enableRTT();
-
+        m_itemCell = new List<GameButtonCell>();
+        
+        //Disable UI Elements
+        CancelButton.gameObject.SetActive(false);
+        RetryRTTButton.SetActive(false);
+        ErrorMessageScreen.SetActive(false);
+        AskToRematchScreen.SetActive(false);
+        
         if (UserName != null)
             UserName.text = App.Name;
     }
 
     // Enable RTT
-    private void enableRTT()
+    public void enableRTT()
     {
         // Only Enable RTT if its not already started
         if (!App.Bc.RTTService.IsRTTEnabled())
@@ -77,6 +82,16 @@ public class MatchSelect : ResourcesManager
         // match state
         App.Bc.RTTService.RegisterRTTAsyncMatchCallback(queryMatchStateRTT);
     }
+    
+    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
+    {
+        if (gameObject == null) return;
+        //Failure to connect to RTT so we display a dialog window to inform the user
+        //A button will be on the dialog that will direct them to enableRTT()
+        ErrorMessageText.text = "Error: Poor Connection. \n Try Again ?";
+        RetryRTTButton.SetActive(true);
+        ErrorMessageScreen.SetActive(true);
+    }
 
     // the listener, can parse the json and request just the updated match 
     // in this example, just re-request it all
@@ -89,13 +104,6 @@ public class MatchSelect : ResourcesManager
     {
         Spinner.gameObject.SetActive(true);
         App.Bc.MatchMakingService.FindPlayers(RANGE_DELTA, NUMBER_OF_MATCHES, OnFindPlayers);
-    }
-
-    private void onRTTFailure(int status, int reasonCode, string responseData, object cbPostObject)
-    {
-        // TODO! Bring up a user dialog to inform of poor connection
-        // for now, try to auto connect 
-        if (this != null && this.gameObject != null) Invoke("enableRTT", 5.0f);
     }
 
     private void OnFindPlayers(string responseData, object cbPostObject)
@@ -153,8 +161,8 @@ public class MatchSelect : ResourcesManager
             Spinner.gameObject.SetActive(false);
             MyGames.text = "My Games";
             RemoveAllCellsInView(m_itemCell);
-            PopulateMatchesScrollView(matches, m_itemCell, MyGamesScrollView);
-            PopulateMatchesScrollView(completedMatches, m_itemCell, MyGamesScrollView);
+            PopulateMatchesScrollView(matches);
+            PopulateMatchesScrollView(completedMatches);
         }
     }
 
@@ -164,7 +172,7 @@ public class MatchSelect : ResourcesManager
         Spinner.gameObject.SetActive(false);
         MyGames.text = "Pick Opponent";
         CancelButton.gameObject.SetActive(true);
-        PopulatePlayersScrollView(matchedProfiles, m_itemCell, MyGamesScrollView);
+        PopulatePlayersScrollView(matchedProfiles);
     }
 
     public void OnCancelButton()
@@ -174,12 +182,12 @@ public class MatchSelect : ResourcesManager
         OnPopulateMatches();
     }
 
-    public void OnMatchSelected(MatchInfo match)
+    public void OnMatchSelected(MatchInfo match,GameButtonCell cell)
     {
         if (match != null)
         {
             App.CurrentMatch = match;
-
+            _selectedCell = cell;
             // Query more detail state about the match
             App.Bc.AsyncMatchService
                 .ReadMatch(match.ownerId, match.matchId, OnReadMatch, OnReadMatchFailed, match);
@@ -221,46 +229,81 @@ public class MatchSelect : ResourcesManager
             App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
         }
     }
-
-    private void PopulateMatchesScrollView(List<MatchInfo> in_itemItems, List<GameButtonCell> in_itemCell, RectTransform in_scrollView)
+    //Populates matches in progress
+    private void PopulateMatchesScrollView(List<MatchInfo> in_itemItems)
     {
         if (in_itemItems.Count == 0)
         {
             return;
         }
 
-        if (in_scrollView != null)
+        if (MyGamesScrollView != null)
         {
-            int i = 0;
-            //            foreach (var profile in in_itemItems)
+            index = 0;
             foreach (var match in in_itemItems)
             {
-                GameButtonCell newItem = CreateItemCell(in_scrollView, (i % 2) == 0);
-                newItem.Init(match, this);
-                newItem.transform.localPosition = Vector3.zero;
-                in_itemCell.Add(newItem);
-                i++;
+                App.Bc.AsyncMatchService.ReadMatch(match.ownerId, match.matchId, AddNewCell, null, match);
+            }
+        }
+    }
+    
+    private void AddNewCell(string jsonResponse, object cbObject)
+    {
+        var match = cbObject as MatchInfo;
+        var data = JsonMapper.ToObject(jsonResponse)["data"];
+        
+        //Determining if game is completed
+        string board = (string)data["matchState"]["board"];
+        match.complete = BoardUtility.IsGameCompleted(board);
+        if (match.complete)
+        {
+            match.scoreSubmitted = true;
+        }
+        App.PlayerInfoO = match.playerOInfo;
+        App.PlayerInfoX = match.playerXInfo;
+        
+        //Create game button cell
+        GameButtonCell newItem = CreateItemCell(MyGamesScrollView, (index % 2) == 0);
+        newItem.Init(match, this);
+        newItem.transform.localPosition = Vector3.zero;
+        index = index < matches.Count ? index++ : 0;
+        m_itemCell.Add(newItem);
+        
+        //Ensuring no duplicated game button cells are created 
+        var tempList = new List<GameButtonCell>();
+        for (int i = m_itemCell.Count - 1; i > -1; i--)
+        {
+            if (tempList.Count == 0)
+            {
+                tempList.Add(m_itemCell[i]);
+                continue;
+            }
+            if (tempList[i].MatchInfo.matchId == m_itemCell[i].MatchInfo.matchId)
+            {
+                Destroy(m_itemCell[i].gameObject);
+                m_itemCell.Remove(m_itemCell[i]);
             }
         }
     }
 
-    private void PopulatePlayersScrollView(List<PlayerInfo> in_itemItems, List<GameButtonCell> in_itemCell, RectTransform in_scrollView)
+    //Populates players to pick from for a new match
+    private void PopulatePlayersScrollView(List<PlayerInfo> in_itemItems)
     {
-        RemoveAllCellsInView(in_itemCell);
+        RemoveAllCellsInView(m_itemCell);
         if (in_itemItems.Count == 0)
         {
             return;
         }
 
-        if (in_scrollView != null)
+        if (MyGamesScrollView != null)
         {
             int i = 0;
             foreach (var profile in in_itemItems)
             {
-                GameButtonCell newItem = CreateItemCell(in_scrollView, (i % 2) == 0);
+                GameButtonCell newItem = CreateItemCell(MyGamesScrollView, (i % 2) == 0);
                 newItem.Init(profile, this);
                 newItem.transform.localPosition = Vector3.zero;
-                in_itemCell.Add(newItem);
+                m_itemCell.Add(newItem);
                 i++;
             }
         }
@@ -357,6 +400,9 @@ public class MatchSelect : ResourcesManager
         Debug.Log(a);
         Debug.Log(b);
         Debug.Log(responseData);
+        ErrorMessageText.text = "Failed to create a match"; 
+        RetryRTTButton.SetActive(false);
+        ErrorMessageScreen.SetActive(true);
     }
 
     private void EnterMatch(MatchInfo match)
@@ -388,7 +434,12 @@ public class MatchSelect : ResourcesManager
 
     private void OnReadMatchFailed(int a, int b, string responseData, object cbPostObject)
     {
-        Debug.LogError("Failed to Read Match");
+        //If reading a match fails then it might mean the other user has closed the match
+        //In response to this, set up a message for the player and remove the selection cell
+        ErrorMessageText.text = "Match is closed";
+        ErrorMessageScreen.SetActive(true);
+        m_itemCell.Remove(_selectedCell);
+        Destroy(_selectedCell.gameObject);
     }
 
     private static Color OPP_COLOR = new Color32(0xFF, 0xFF, 0x49, 0xFF);
@@ -412,6 +463,18 @@ public class MatchSelect : ResourcesManager
         }
         in_itemCell.Clear();
     }
+    
+    //Called from Unity Button
+    public void AcceptRematch()
+    {
+        App.AcceptRematch(gameObject);
+    }
+    
+    //Called from Unity Button
+    public void DeclineRematch()
+    {
+        App.DeclineMatch();
+    }
 
     private List<GameButtonCell> m_itemCell = null;
 
@@ -428,7 +491,7 @@ public class MatchSelect : ResourcesManager
         public bool yourTurn;
         public bool complete = false;
         public bool expired = false;
-
+        
         public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {
             version = (int)jsonMatch["version"];
@@ -458,7 +521,6 @@ public class MatchSelect : ResourcesManager
             if ((string)playerSummaryData["profileId"] == matchSelect.App.ProfileId)
             {
                 playerInfo.PlayerName = matchSelect.App.Name;
-                playerInfo.PlayerRating = matchSelect.App.PlayerRating;
                 playerInfo.ProfileId = matchSelect.App.ProfileId;
                 yourToken = token;
             }
@@ -466,7 +528,6 @@ public class MatchSelect : ResourcesManager
             {
                 playerInfo.PlayerName = (string)playerData["playerName"];
                 playerInfo.ProfileId = (string)playerSummaryData["profileId"];
-                playerInfo.PlayerRating = "1000";
                 matchedProfile = playerInfo;
             }
         }

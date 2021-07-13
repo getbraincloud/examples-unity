@@ -33,12 +33,12 @@ public class GameButtonCell : MonoBehaviour
     {
         if (m_pPlayerData != null)
         {
-            OpponentName.text = m_pPlayerData.PlayerName + " (" + m_pPlayerData.PlayerRating + ")";
+            OpponentName.text = m_pPlayerData.PlayerName;
             Status.gameObject.SetActive(false);
         }
         if (m_pMatchData != null)
         {
-            this.GetComponent<Button>().interactable = m_pMatchData.yourTurn || m_pMatchData.complete;
+            GetComponent<Button>().interactable = m_pMatchData.yourTurn || m_pMatchData.complete;
             OpponentName.text = m_pMatchData.matchedProfile.PlayerName;
             Status.gameObject.SetActive(true);
             Status.text = m_pMatchData.complete ? "(COMPLETE)" : m_pMatchData.expired ? "(ABANDONNED)" : m_pMatchData.yourTurn ? "(Your Turn)" : "(Opponent's Turn)";
@@ -49,7 +49,7 @@ public class GameButtonCell : MonoBehaviour
     {
         if (m_pMatchData != null)
         {
-            m_pMatchSelect.OnMatchSelected(m_pMatchData);
+            m_pMatchSelect.OnMatchSelected(m_pMatchData, this);
         }
         if (m_pPlayerData != null)
         {
@@ -72,9 +72,6 @@ public class GameButtonCell : MonoBehaviour
 
     private void OnAbandonMatchSuccess(string responseData, object cbPostObject)
     {
-        // Get the new PlayerRating
-        m_pMatchSelect.App.PlayerRating = JsonMapper.ToObject(responseData)["data"]["response"]["data"]["playerRating"].ToString();
-
         // Go back to game select scene
         m_pMatchSelect.App.GotoMatchSelectScene(m_pMatchSelect.gameObject);
     }
@@ -84,5 +81,10 @@ public class GameButtonCell : MonoBehaviour
     private PlayerInfo m_pPlayerData = null;
     private MatchSelect.MatchInfo m_pMatchData = null;
     private MatchSelect m_pMatchSelect = null;
+
+    public MatchSelect.MatchInfo MatchInfo
+    {
+        get => m_pMatchData;
+    }
     #endregion
 }
