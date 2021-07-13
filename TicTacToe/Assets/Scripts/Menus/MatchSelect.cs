@@ -491,7 +491,7 @@ public class MatchSelect : ResourcesManager
         public bool yourTurn;
         public bool complete = false;
         public bool expired = false;
-        
+        public bool scoreSubmitted = false;
         public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
         {
             version = (int)jsonMatch["version"];
