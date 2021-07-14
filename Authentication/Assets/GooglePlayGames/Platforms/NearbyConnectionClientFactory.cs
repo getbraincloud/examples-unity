@@ -15,19 +15,17 @@
 // </copyright>
 
 // Android only feature
-#if (UNITY_ANDROID)
 
+#if (UNITY_ANDROID)
 namespace GooglePlayGames
 {
     using UnityEngine;
     using System;
     using GooglePlayGames.OurUtils;
     using GooglePlayGames.BasicApi.Nearby;
-    using S = GooglePlayGames.Native.Cwrapper.NearbyConnectionsStatus;
 
     public static class NearbyConnectionClientFactory
     {
-
         public static void Create(Action<INearbyConnectionClient> callback)
         {
             if (Application.isEditor)
@@ -35,33 +33,9 @@ namespace GooglePlayGames
                 GooglePlayGames.OurUtils.Logger.d("Creating INearbyConnection in editor, using DummyClient.");
                 callback.Invoke(new GooglePlayGames.BasicApi.Nearby.DummyNearbyConnectionClient());
             }
-#if (UNITY_ANDROID)
-            GooglePlayGames.OurUtils.Logger.d("Creating real INearbyConnectionClient");
-            GooglePlayGames.Native.NativeNearbyConnectionClientFactory.Create(callback);
-#elif (UNITY_IPHONE && !NO_GPGS)
-            GooglePlayGames.OurUtils.Logger.e("Nearby connections not supported in iOS... Using Dummy client");
-            callback.Invoke(new GooglePlayGames.BasicApi.Nearby.DummyNearbyConnectionClient());
-#else
-            GooglePlayGames.OurUtils.Logger.e("Cannot create IPlayGamesClient for unknown platform, returning DummyClient");
-            return new GooglePlayGames.BasicApi.DummyClient();
-#endif
-        }
 
-        private static InitializationStatus ToStatus(S.InitializationStatus status)
-        {
-            switch (status)
-            {
-                case S.InitializationStatus.VALID:
-                    return InitializationStatus.Success;
-                case S.InitializationStatus.ERROR_INTERNAL:
-                    return InitializationStatus.InternalError;
-                case S.InitializationStatus.ERROR_VERSION_UPDATE_REQUIRED:
-                    return InitializationStatus.VersionUpdateRequired;
-                default:
-                    GooglePlayGames.OurUtils.Logger.w("Unknown initialization status: " + status);
-                    return InitializationStatus.InternalError;
-            }
+            callback.Invoke(new GooglePlayGames.Android.AndroidNearbyConnectionClient());
         }
     }
 }
-#endif
+#endif //UNITY_ANDROID

@@ -47,7 +47,13 @@ public class ConnectScene : MonoBehaviour
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
-        
+        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
+            .RequestIdToken()
+            .RequestEmail()
+            .RequestServerAuthCode(false)
+            .Build();
+                
+        PlayGamesPlatform.InitializeInstance (config);
         //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
     }
    
@@ -186,13 +192,6 @@ public class ConnectScene : MonoBehaviour
                 #if UNITY_ANDROID
                 m_authStatus += "\n\nInfo: If the authentication popup appears but nothing occurs after, it probably means the app isn't fully set up. Please follow the instruction here:\nhttp://getbraincloud.com/apidocs/portal-usage/authentication-google/ \n\n";
                 
-                
-                PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
-                    .RequestIdToken()
-                    .RequestServerAuthCode(false)
-                    .Build();
-                
-                PlayGamesPlatform.InitializeInstance (config);
                 PlayGamesPlatform.Activate().Authenticate((bool success) => {
 
                     if (success)

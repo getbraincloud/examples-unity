@@ -6,21 +6,19 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16" />
+     __NEARBY_PERMISSIONS__
 
     <application>
 
-     <!-- Required for Nearby Connections API -->
-        <meta-data android:name="com.google.android.gms.nearby.connection.SERVICE_ID"
-            android:value="__NEARBY_SERVICE_ID__" />
+     __NEARBY_SERVICE_ELEMENT__
 
-        <!-- the space in these forces it to be interpreted as a string vs. int -->
+        <!-- The space in these forces it to be interpreted as a string vs. int -->
         <meta-data android:name="com.google.android.gms.games.APP_ID"
-            android:value="\ __APP_ID__" />
+            android:value="\u003__APP_ID__" />
+
+        <!-- Keep track of which plugin is being used -->
         <meta-data android:name="com.google.android.gms.games.unityVersion"
-            android:value="\ __PLUGIN_VERSION__" />
-        <meta-data android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+            android:value="\u003__PLUGIN_VERSION__" />
 
         <activity android:name="com.google.games.bridge.NativeBridgeActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />

@@ -61,12 +61,13 @@ namespace GooglePlayGames.Editor
         public static void MenuItemFileGPGSAndroidSetup()
         {
             EditorWindow window = EditorWindow.GetWindow(
-                                      typeof(GPGSAndroidSetupUI), true, GPGSStrings.AndroidSetup.Title);
+                typeof(GPGSAndroidSetupUI), true, GPGSStrings.AndroidSetup.Title);
             window.minSize = new Vector2(500, 400);
         }
 
         [MenuItem("Window/Google Play Games/Setup/Android setup...", true)]
-        public static bool EnableAndroidMenuItem() {
+        public static bool EnableAndroidMenuItem()
+        {
 #if UNITY_ANDROID
             return true;
 #else
@@ -110,19 +111,20 @@ namespace GooglePlayGames.Editor
                 // check the bundle id and set it if needed.
                 CheckBundleId();
 
+                GPGSUtil.CheckAndFixDependencies();
+                GPGSUtil.CheckAndFixVersionedAssestsPaths();
+                AssetDatabase.Refresh();
 
                 Google.VersionHandler.VerboseLoggingEnabled = true;
                 Google.VersionHandler.UpdateVersionedAssets(forceUpdate: true);
                 Google.VersionHandler.Enabled = true;
                 AssetDatabase.Refresh();
 
-                GPGSDependencies.RegisterDependencies();
-
                 Google.VersionHandler.InvokeStaticMethod(
                     Google.VersionHandler.FindClass(
-                   "Google.JarResolver",
-                   "GooglePlayServices.PlayServicesResolver"),
-                   "MenuResolve", null);
+                        "Google.JarResolver",
+                        "GooglePlayServices.PlayServicesResolver"),
+                    "MenuResolve", null);
 
                 return PerformSetup(
                     clientId,
@@ -167,7 +169,8 @@ namespace GooglePlayGames.Editor
                 return false;
             }
 
-            if (nearbySvcId != null) {
+            if (nearbySvcId != null)
+            {
 #if UNITY_ANDROID
                 if (!NearbyConnectionUI.PerformSetup(nearbySvcId, true))
                 {
@@ -249,12 +252,12 @@ namespace GooglePlayGames.Editor
             mConstantDirectory = EditorGUILayout.TextField(
                 "Directory to save constants",
                 mConstantDirectory,
-                GUILayout.Width(480));
+                GUILayout.MinWidth(480));
 
             mClassName = EditorGUILayout.TextField(
                 "Constants class name",
                 mClassName,
-                GUILayout.Width(480));
+                GUILayout.MinWidth(480));
 
             GUILayout.Label("Resources Definition", EditorStyles.boldLabel);
             GUILayout.Label("Paste in the Android Resources from the Play Console");
@@ -263,7 +266,7 @@ namespace GooglePlayGames.Editor
             scroll = GUILayout.BeginScrollView(scroll);
             mConfigData = EditorGUILayout.TextArea(
                 mConfigData,
-                GUILayout.Width(475),
+                GUILayout.MinWidth(475),
                 GUILayout.Height(Screen.height));
             GUILayout.EndScrollView();
             GUILayout.Space(10);
@@ -275,7 +278,7 @@ namespace GooglePlayGames.Editor
             mWebClientId = EditorGUILayout.TextField(
                 GPGSStrings.Setup.ClientId,
                 mWebClientId,
-                GUILayout.Width(450));
+                GUILayout.MinWidth(450));
 
             GUILayout.Space(10);
 
