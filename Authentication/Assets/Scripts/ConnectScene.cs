@@ -1,10 +1,22 @@
-﻿using System;
-using UnityEngine;
-using System.Collections;
+﻿using UnityEngine;
+using System.Collections.Generic;
+
+#if UNITY_ANDROID
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
-using BrainCloud.LitJson;
-using UnityEngine.SceneManagement;
+#endif
+
+#if UNITY_WEBGL
+using Facebook.Unity;
+#endif
+
+class FacebookUser
+{
+    public string id;
+    public string first_name;
+    public string last_name;
+    public string email;
+}
 
 public class ConnectScene : MonoBehaviour
 {
@@ -19,16 +31,16 @@ public class ConnectScene : MonoBehaviour
     enum eAuthTypes {
         EMAIL,
         UNIVERSAL,
-        //TWITTER,
         ANONYMOUS,
-        GOOGLE
+        GOOGLE,
+        FACEBOOK
     };
     string[] m_authTypes = {
         "Email",
         "Universal",
-        //"Twitter",
         "Anonymous",
-        "Google (Android Devices)"
+        "Google (Android Devices)",
+        "Facebook"
     };
     string m_universalUserId = "";
     string m_universalPwd = "";
@@ -36,17 +48,14 @@ public class ConnectScene : MonoBehaviour
     string m_emailPwd = "";
     string m_googleId = "";
     string m_serverAuthCode = "";
-
+    private FacebookUser _localFacebookUser = new FacebookUser();
     public static string CONSUMER_KEY = "";
     public static string CONSUMER_SECRET = "";
-    Twitter.RequestTokenResponse m_RequestTokenResponse;
-    //Twitter.AccessTokenResponse m_AccessTokenResponse;
-    //string m_facebookUserId = "";
-    //string m_facebookAuthToken = "";
-
+    
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
+#if UNITY_ANDROID
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
             .RequestIdToken()
             .RequestEmail()
@@ -54,7 +63,7 @@ public class ConnectScene : MonoBehaviour
             .Build();
                 
         PlayGamesPlatform.InitializeInstance (config);
-        //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
+#endif        
     }
    
     void OnGUI()
@@ -127,39 +136,6 @@ public class ConnectScene : MonoBehaviour
                     m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
-        /*else if (m_selectedAuth == (int) eAuthTypes.TWITTER)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.BeginVertical();
-            if (GUILayout.Button("Get PIN"))
-            {
-                StartCoroutine(Twitter.API.GetRequestToken(CONSUMER_KEY, CONSUMER_SECRET,
-                                                               new Twitter.RequestTokenCallback(this.OnSuccess_GetPIN)));
-            }
-            GUILayout.EndVertical();
-            GUILayout.BeginVertical();
-            GUILayout.Label("PIN:");
-            m_emailId = GUILayout.TextField(m_emailId, GUILayout.MinWidth(200));
-            //m_emailPwd = GUILayout.PasswordField(m_emailPwd, '*', GUILayout.MinWidth(200));
-            GUILayout.EndVertical();
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("Enter PIN", GUILayout.ExpandWidth(false)))
-            {
-                m_authStatus = "Attempting to authenticate";
-
-                // clear out any previous profile or anonymous ids
-                _bc.ResetStoredProfileId();
-                _bc.ResetStoredAnonymousId();
-                StartCoroutine(Twitter.API.GetAccessToken(CONSUMER_KEY, CONSUMER_SECRET, m_RequestTokenResponse.Token, m_emailId,
-                               new Twitter.AccessTokenCallback(this.OnSuccess_AuthenticateTwitter)));
-                //_bc.AuthenticationService.AuthenticateTwitter()
-
-                //_bc.AuthenticateEmailPassword(
-                   // m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
-            }
-        }*/
         else if (m_selectedAuth == (int) eAuthTypes.ANONYMOUS)
         {
             GUILayout.Label("Profile Id: " + _bc.GetStoredProfileId());
@@ -189,7 +165,7 @@ public class ConnectScene : MonoBehaviour
             
             if (GUILayout.Button("Google Signin", GUILayout.ExpandWidth(false)))
             {
-                #if UNITY_ANDROID
+#if UNITY_ANDROID
                 m_authStatus += "\n\nInfo: If the authentication popup appears but nothing occurs after, it probably means the app isn't fully set up. Please follow the instruction here:\nhttp://getbraincloud.com/apidocs/portal-usage/authentication-google/ \n\n";
                 
                 PlayGamesPlatform.Activate().Authenticate((bool success) => {
@@ -207,15 +183,10 @@ public class ConnectScene : MonoBehaviour
                         m_authStatus += "Note: this can only be tested on an Android Device\n\n";
                     }
                 });
-    
-                #else
-                
+#else
                 m_authStatus += "\n\nGoogle Login will only work on an Android Device. Please build to a test device\n\n";
-                
-                
-                #endif
+#endif
             }
-
 
             GUILayout.Label("Profile Id: " + _bc.GetStoredProfileId());
             GUILayout.Label("Anonymous Id: " + _bc.GetStoredAnonymousId());
@@ -236,6 +207,42 @@ public class ConnectScene : MonoBehaviour
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
+        else if (m_selectedAuth == (int)eAuthTypes.FACEBOOK)
+        {
+#if UNITY_WEBGL || UNITY_STANDALONE_WIN
+            GUILayout.Label("Token Id: " + AccessToken.CurrentAccessToken.TokenString);
+            GUILayout.Label("User Id: " + _localFacebookUser.id);
+            GUILayout.Label("First Name: " + _localFacebookUser.first_name);
+            GUILayout.BeginHorizontal();
+            
+            if (GUILayout.Button("Initialize", GUILayout.ExpandWidth(false)))
+            {
+                if (!FB.IsInitialized)
+                {
+                    FB.Init(InitCallback,HideUnity);
+                }
+                else
+                {
+                    FB.ActivateApp();
+                }
+            }
+            
+            if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
+            {
+                m_authStatus = "Attempting to authenticate";
+                var perms = new List<string>()
+                {
+                    "public_profile",
+                    "email"
+                };
+                FB.LogInWithReadPermissions(perms,AuthCallback);
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+#else
+            m_authStatus = "Facebook login is only available on WebGL & Windows Standalone";
+#endif
+        }
 
         m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
         GUILayout.TextArea(m_authStatus, GUILayout.ExpandHeight(true));
@@ -249,61 +256,9 @@ public class ConnectScene : MonoBehaviour
         }
         GUILayout.EndHorizontal();
 
-        //GUILayout.FlexibleSpace();
-        //GUILayout.Box("Stored Information");
-
         GUILayout.EndArea();
     }
-    
-    IEnumerator GetGoogleAccountDetailsWithDelay()
-    {
-        yield return new WaitForSeconds(2);
-        
-      //  m_googleId = PlayGamesPlatform.Instance.GetIdToken();
-      //  m_serverAuthCode = PlayGamesPlatform.Instance.GetServerAuthCode();
-    }
-    
-    public void OnSuccess_GetPIN(bool success, Twitter.RequestTokenResponse response)
-    {
-        if (success)
-        {
-            string log = "OnRequestTokenCallback - succeeded";
-            log += "\n    Token : " + response.Token;
-            log += "\n    TokenSecret : " + response.TokenSecret;
-            print(log);
 
-            m_RequestTokenResponse = response;
-
-            Twitter.API.OpenAuthorizationPage(response.Token);
-        }
-        else
-        {
-            print("OnRequestTokenCallback - failed.");
-        }
-    }
-
-
-    /*
-    void OnSuccess_AuthenticateTwitter(bool success, Twitter.AccessTokenResponse response)
-    {
-        if (success)
-        {
-            string log = "OnAccessTokenCallback - succeeded";
-            log += "\n    UserId : " + response.UserId;
-            log += "\n    ScreenName : " + response.ScreenName;
-            log += "\n    Token : " + response.Token;
-            log += "\n    TokenSecret : " + response.TokenSecret;
-            print(log);
-
-            m_AccessTokenResponse = response;
-
-            _bc.AuthenticationService.AuthenticateTwitter(response.UserId, response.Token, response.TokenSecret, true, OnSuccess_Authenticate, OnError_Authenticate);
-        }
-        else
-        {
-            print("OnAccessTokenCallback - failed.");
-        }
-    }*/
     public void OnSuccess_Authenticate(string responseData, object cbObject)
     {
         m_authStatus = "Authenticate successful!";
@@ -315,5 +270,54 @@ public class ConnectScene : MonoBehaviour
     {
         m_authStatus = "Authenticate failed: " + statusMessage;
         Debug.LogError("OnError_Authenticate: " + statusMessage);
+    }
+    //***************Facebook Specific Functions***************************
+    private void InitCallback()
+    {
+        m_authStatus = "Facebook Initialized!!";
+    }
+
+    private void HideUnity(bool isGameShown)
+    {
+        m_authStatus = $"Game show status : {isGameShown}";
+
+    }
+    private void AuthCallback(ILoginResult result)
+    {
+        if (FB.IsLoggedIn)
+        {
+            m_authStatus = "Facebook Login Successful";
+            var token = AccessToken.CurrentAccessToken;
+            GetInfo();
+            //Authenticate user to braincloud
+            _bc.AuthenticateFacebook(token.UserId, token.TokenString, true, OnSuccess_FacebookAuthenticate, OnError_Authenticate);
+            foreach (string perm in token.Permissions)
+            {
+                Debug.Log("IsLoggedIn: perm: "+perm);
+            }
+        }
+        else
+        {
+            m_authStatus = "User cancelled login";
+            Debug.Log("User cancelled login");
+        }
+    }
+    private void OnSuccess_FacebookAuthenticate(string responseData, object cbObject)
+    {
+        m_authStatus += "\n Braincloud Authenticated! \n";
+        m_authStatus += responseData;
+    }
+    
+    private void GetInfo()
+    {
+        //Use the graph explorer to find what you need for the query parameter in here --> https://developers.facebook.com/tools/explorer/
+        FB.API("/me?fields=id,first_name,last_name,email", HttpMethod.GET, result =>
+        {
+            if(result.Error != null)
+            {
+                Debug.Log("Result error");
+            }
+            _localFacebookUser = BrainCloud.JsonFx.Json.JsonReader.Deserialize<FacebookUser>(result.RawResult);
+        });
     }
 }
