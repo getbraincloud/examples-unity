@@ -60,7 +60,7 @@ public class DetachIdentityDialog : Dialog
 
         GoogleIdentity.RefreshGoogleIdentity(identity =>
         {
-            BrainCloudWrapper.Client.IdentityService.DetachGoogleIdentity(identity.GoogleId, contiuneAsAnonymous,
+            App.Bc.Client.IdentityService.DetachGoogleIdentity(identity.GoogleId, contiuneAsAnonymous,
                 dialog.OnSuccess_DetachIdentity, dialog.OnError_DetachIdentity);
         });
 
