@@ -11,7 +11,8 @@ public class Lobby
     public Lobby(Dictionary<string, object> lobbyJson, string in_lobbyId)
     {
         LobbyID = in_lobbyId;
-        OwnerID = lobbyJson["owner"] as string;
+        OwnerID = lobbyJson["ownerCxId"] as string;
+        //OwnerID = OwnerID.Trim(Br)
         var jsonMembers = lobbyJson["members"] as Dictionary<string, object>[];
         for (int i = 0; i < jsonMembers.Length; ++i)
         {

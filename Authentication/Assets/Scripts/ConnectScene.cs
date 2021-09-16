@@ -55,6 +55,7 @@ public class ConnectScene : MonoBehaviour
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
+
 #if UNITY_ANDROID
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
             .RequestIdToken()
@@ -63,7 +64,10 @@ public class ConnectScene : MonoBehaviour
             .Build();
                 
         PlayGamesPlatform.InitializeInstance (config);
-#endif        
+
+#endif
+        //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
+
     }
    
     void OnGUI()
