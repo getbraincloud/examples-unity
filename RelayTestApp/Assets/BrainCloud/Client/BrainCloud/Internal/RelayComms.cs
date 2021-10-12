@@ -344,9 +344,6 @@ namespace BrainCloud.Internal
                             if (m_connectionFailureCallback != null)
                             {
                                 eventsCopy.Clear();
-                                // ToDo: Need to investigate a better solution when leaving a game and not to get this event error.
-                                //Flag is here to ensure there's no error popup for leaving a game.
-                                if (BrainCloudManager.Instance.LeavingGame) return;
                                 lock (m_events)
                                 {
                                     m_events.Clear();

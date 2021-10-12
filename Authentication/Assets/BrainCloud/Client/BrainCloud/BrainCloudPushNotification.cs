@@ -12,6 +12,9 @@ using BrainCloud.JsonFx.Json;
 using BrainCloud.Common;
 using BrainCloud.Internal;
 
+#if !(DOT_NET)
+using System;
+#endif
 
     public class BrainCloudPushNotification
     {
