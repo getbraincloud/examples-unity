@@ -48,16 +48,12 @@ public class ScreenShot : MonoBehaviour
 
         // Encode texture into PNG
         byte[] bytes = tex.EncodeToPNG();
-        
-        //from here you have in in memory and can write to disk, or in this case upload it from memory
-        //encoding to string to use the UploadFileFromMemory API call
-        encodedText = System.Convert.ToBase64String(bytes);
- 
+
         //name of the file
        fileName = "ScreenShot.png";
 
         //upload From Memory
-        App.Bc.FileService.UploadFileFromMemory("", fileName, true, true, encodedText, OnFileUploadSuccess, OnFileUploadError);
+        App.Bc.FileService.UploadFileFromMemory("", fileName, true, true, bytes, OnFileUploadSuccess, OnFileUploadError);
     }
     #endregion
 
