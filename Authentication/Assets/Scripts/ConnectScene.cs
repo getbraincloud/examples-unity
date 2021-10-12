@@ -63,7 +63,9 @@ public class ConnectScene : MonoBehaviour
             .Build();
                 
         PlayGamesPlatform.InitializeInstance (config);
-#endif        
+#endif
+        //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
+
     }
    
     void OnGUI()
