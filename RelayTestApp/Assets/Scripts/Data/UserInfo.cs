@@ -24,9 +24,10 @@ public class UserInfo
     //Class to handle each user's cursor
     public UserCursor UserCursor;
     public UserInfo() { }
-
+    public string cxId;
     public UserInfo(Dictionary<string, object> userJson)
     {
+        cxId = userJson["cxId"] as string;
         ID = userJson["profileId"] as string;
         Username = userJson["name"] as string;
         Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
