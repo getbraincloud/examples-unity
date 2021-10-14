@@ -1,8 +1,9 @@
 ﻿#region
-
+using System;
 using System.Collections.Generic;
-using BrainCloud.JsonFx.Json;
+using BrainCloud.LitJson;
 using UnityEngine;
+using JsonReader = BrainCloud.JsonFx.Json.JsonReader;
 
 #endregion
 
@@ -19,11 +20,10 @@ public class App : MonoBehaviour
     public MatchSelect.MatchInfo CurrentMatch;
     public PlayerInfo PlayerInfoO = new PlayerInfo();
     public PlayerInfo PlayerInfoX = new PlayerInfo();
+    
     public PlayerInfo WhosTurn;
     public string Name;
-    public string PlayerRating;
     public string ProfileId;
-
     public bool AskedToRematch;
     // All Game Scenes
     [SerializeField] public GameObject Achievements;
@@ -38,15 +38,15 @@ public class App : MonoBehaviour
     [SerializeField] public Rect ViewportRect;
     [SerializeField] public int WindowId;
     [SerializeField] public string WrapperName;
+    
+    public PlayerInfo OpponentInfo;
+    public bool IsAskingToRematch;
+    public int Winner;
+    public PlayerInfo WinnerInfo = null;
+    public PlayerInfo LoserInfo = null;
     private TicTacToe _localTicTacToe;
     private MatchSelect _localMatchSelect;
-
-    public MatchSelect MyMatchSelect
-    {
-        get => _localMatchSelect;
-        set => _localMatchSelect = value;
-    }
-    public bool IsAskingToRematch;
+    
     private void Start()
     {
         var playerOneObject = new GameObject(WrapperName);
@@ -56,12 +56,10 @@ public class App : MonoBehaviour
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
         Bc.Init(); // Required: Initialize the Wrapper.
-        //Bc.Client.EnableLogging(true);
-
+        
         // Now that brainCloud is setup. Let's go to the Login Scene
-        var loginObject = Instantiate(Login);
+        var loginObject = Instantiate(Login, playerOneObject.transform);
         loginObject.GetComponentInChildren<GameScene>().App = this;
-        loginObject.transform.parent = playerOneObject.transform;
     }
 
     //private void Update()
@@ -82,31 +80,52 @@ public class App : MonoBehaviour
         if (data.ContainsKey("eventData"))
         {
             var eventData = data["eventData"] as Dictionary<string,object>;
-            AskedToRematch = (bool)eventData["isReady"];
+            if (eventData.ContainsKey("isReady"))
+            {
+                AskedToRematch = (bool)eventData["isReady"];
+            
+                //Enable play again screen to the asked user
+                if (!IsAskingToRematch && AskedToRematch)
+                {
+                    if (eventData.Count > 1)
+                    {
+                        //Set Up opponent reference that wants to rematch
+                        OpponentInfo = new PlayerInfo
+                        {
+                            ProfileId = (string)eventData["opponentProfileID"],
+                            PlayerName = (string)eventData["opponentName"],
+                        };
+                        MatchId = (string)eventData["matchID"];
+                        OwnerId = (string)eventData["ownerID"];
+                    }
+                    if (_localTicTacToe)
+                    {
+                        _localTicTacToe.AskToRematchScreen.SetActive(true);    
+                    }
+                    else if (_localMatchSelect)
+                    {
+                        _localMatchSelect.AskToRematchScreen.SetActive(true);
+                    }
+                }
+                else if (AskedToRematch)
+                {
+                    if (_localTicTacToe)
+                    {
+                        GotoMatchSelectScene(_localTicTacToe.gameObject);
+                    }
+                }    
+            }
+            else if (eventData.ContainsKey("gameConcluded"))
+            {
+                CurrentMatch.scoreSubmitted = true;
+            }
+            
             string eventID = (string)data["evId"];
             Bc.EventService.DeleteIncomingEvent(eventID);
-
-            //Enable ask to play again screen
-            if (!IsAskingToRematch && AskedToRematch)
-            {
-                if (_localTicTacToe)
-                {
-                    _localTicTacToe.AskToRematchScreen.SetActive(true);    
-                }
-            }
-            //Disable wait screen for asking user to rematch
-            else if (IsAskingToRematch)
-            {
-                if (_localTicTacToe)
-                {
-                    _localTicTacToe.PleaseWaitScreen.SetActive(false);
-                    GotoMatchSelectScene(_localTicTacToe.gameObject);    
-                }
-            }
         }
     }
 
-    // Scene Swapping Logic
+    // ****************Scene Swapping Logic*********************
     public void GotoLoginScene(GameObject previousScene)
     {
         var newScene = Instantiate(Login);
@@ -169,5 +188,113 @@ public class App : MonoBehaviour
             scene.App = this;
         }
         Destroy(previousScene.transform.parent.gameObject);
+    }
+    
+    //************Match Handling**********************
+    public void OnCompleteGame()
+    {
+        // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
+        var matchResults = new JsonData { ["ownerId"] = OwnerId, ["matchId"] = MatchId };
+
+        if (Winner < 0)
+        {
+            matchResults["isTie"] = true;
+        }
+        else
+        {
+            matchResults["isTie"] = false;
+            matchResults["winnerId"] = WinnerInfo.ProfileId;
+            matchResults["loserId"] = LoserInfo.ProfileId;
+        }
+        Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted, FailureCallback);
+    }
+    
+    private void OnMatchCompleted(string responseData, object cbPostObject)
+    {
+        if (_localTicTacToe)
+        {
+            // Go back to game select scene
+            GotoMatchSelectScene(_localTicTacToe.gameObject);   
+        }
+    }
+
+    public void AcceptRematch(GameObject previousScene)
+    {
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = true;
+        //Event to send to opponent to disable PleaseWaitScreen
+        Bc.EventService.SendEvent(OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
+
+        //Making sure player info is ready to be sent for OnCompleteGame()
+        if (WinnerInfo == null || LoserInfo == null)
+        {
+            Winner = BoardUtility.CheckForWinner();
+            WinnerInfo = Winner == 1 ? PlayerInfoX : PlayerInfoO;
+            LoserInfo = Winner == 1 ? PlayerInfoO : PlayerInfoX;
+        }
+        // Reset Match
+        OnCompleteGame();
+        GotoMatchSelectScene(previousScene);
+        _localMatchSelect.OnPickOpponent(OpponentInfo);
+    }
+
+    public void DeclineMatch()
+    {
+        // Send Event back to opponent that its accepted
+        var jsonData = new JsonData();
+        jsonData["isReady"] = false;
+        //Event to send to opponent to disable PleaseWaitScreen
+        Bc.EventService.SendEvent(CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+    }
+    
+    // ***********Leaderboards Submission*****************
+    // Both players will be updated to the leaderboard from the winner user
+    public void PostToLeaderboard()
+    {
+        //Making fake scores for demonstration purposes
+        WinnerInfo.Score = "1210";
+        LoserInfo.Score = "1190";
+        //Converting scores to send
+        long winnerScore = Convert.ToInt64(WinnerInfo.Score);
+        long loserScore = Convert.ToInt64(LoserInfo.Score);
+        //Post new score
+        Bc.LeaderboardService.PostScoreToLeaderboard("Player_Rating", winnerScore, "", OnLeaderboardSubmission, FailureCallback);
+        Bc.LeaderboardService.PostScoreToLeaderboard("Player_Rating", loserScore, "", OnLeaderboardSubmission, FailureCallback);
+    }
+
+    private void OnLeaderboardSubmission(string responseData, object cbPostObject)
+    {
+        Debug.Log($"RESPONSE : {responseData}");
+    }
+    
+    // **************Achievements**********************
+    public void CheckAchievements()
+    {
+        Bc.PlayerStatisticsService.ReadAllUserStats(IncrementStat, FailureCallback);
+    }
+    private void IncrementStat(string responseData, object cbPostObject)
+    {
+        Debug.Log($"STATS: {responseData}");
+        var jsonData = JsonReader.Deserialize<Dictionary<string, object>>(responseData);
+        var data = jsonData["data"] as Dictionary<string, object>;
+        var statistics = data["statistics"] as Dictionary<string, object>;
+        var numberOfWins = (int)statistics["WON_RANKED_MATCH"];
+        numberOfWins++;
+
+        var dataToSend = new Dictionary<string, object>();
+        dataToSend["WON_RANKED_MATCH"] = numberOfWins.ToString();
+
+        Bc.PlayerStatisticsService.IncrementUserStats(dataToSend, IncrementStatSuccess);
+    }
+
+    private void IncrementStatSuccess(string responseData, object cbPostObject)
+    {
+        Debug.Log($"Stat Incremented");
+    }
+    
+    private void FailureCallback(int status, int code, string error, object cbObject)
+    {
+        Debug.Log($"FAILURE RESPONSE: {error}");
     }
 }

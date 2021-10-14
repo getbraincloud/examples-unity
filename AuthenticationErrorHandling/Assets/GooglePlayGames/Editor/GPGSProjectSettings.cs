@@ -20,7 +20,12 @@ namespace GooglePlayGames.Editor
 {
     using System.Collections.Generic;
     using System.IO;
+#if UNITY_2017_3_OR_NEWER
+    using UnityEngine.Networking;
+#else
     using UnityEngine;
+
+#endif
 
     public class GPGSProjectSettings
     {
@@ -45,18 +50,17 @@ namespace GooglePlayGames.Editor
 
         private GPGSProjectSettings()
         {
-            string ds = Path.DirectorySeparatorChar.ToString();
-            mFile = "ProjectSettings/GooglePlayGameSettings.txt".Replace("/", ds);
+            mFile = GPGSUtil.SlashesToPlatformSeparator("ProjectSettings/GooglePlayGameSettings.txt");
 
             StreamReader rd = null;
 
             // read the settings file, this list is all the locations it can be in order of precedence.
             string[] fileLocations =
-                {
-                    mFile,
-                    "Assets/GooglePlayGames/Editor/projsettings.txt".Replace("/", ds),
-                    "Assets/Editor/projsettings.txt".Replace("/", ds)
-                };
+            {
+                mFile,
+                GPGSUtil.SlashesToPlatformSeparator(Path.Combine(GPGSUtil.RootPath, "Editor/projsettings.txt")),
+                GPGSUtil.SlashesToPlatformSeparator("Assets/Editor/projsettings.txt")
+            };
 
             foreach (string f in fileLocations)
             {
@@ -79,7 +83,7 @@ namespace GooglePlayGames.Editor
                     }
 
                     line = line.Trim();
-                    string[] p = line.Split(new char[] { '=' }, 2);
+                    string[] p = line.Split(new char[] {'='}, 2);
                     if (p.Length >= 2)
                     {
                         mDict[p[0].Trim()] = p[1].Trim();
@@ -98,7 +102,11 @@ namespace GooglePlayGames.Editor
             }
             else if (mDict.ContainsKey(key))
             {
+#if UNITY_2017_3_OR_NEWER
+                return UnityWebRequest.UnEscapeURL(mDict[key]);
+#else
                 return WWW.UnEscapeURL(mDict[key]);
+#endif
             }
             else
             {
@@ -110,8 +118,11 @@ namespace GooglePlayGames.Editor
         {
             if (mDict.ContainsKey(key))
             {
-                string val = WWW.UnEscapeURL(mDict[key]);
-                return val;
+#if UNITY_2017_3_OR_NEWER
+                return UnityWebRequest.UnEscapeURL(mDict[key]);
+#else
+                return WWW.UnEscapeURL(mDict[key]);
+#endif
             }
             else
             {
@@ -136,7 +147,11 @@ namespace GooglePlayGames.Editor
 
         public void Set(string key, string val)
         {
+#if UNITY_2017_3_OR_NEWER
+            string escaped = UnityWebRequest.EscapeURL(val);
+#else
             string escaped = WWW.EscapeURL(val);
+#endif
             mDict[key] = escaped;
             mDirty = true;
         }
@@ -174,7 +189,7 @@ namespace GooglePlayGames.Editor
             mDirty = false;
         }
 
-        public static void Reload ()
+        public static void Reload()
         {
             sInstance = new GPGSProjectSettings();
         }

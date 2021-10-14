@@ -34,7 +34,7 @@ public class User
             {
                 // Perform any logic needed for new users
                 App.Bc.Client
-                    .PlayerStateService.UpdateUserName(m_userData.m_screenName, OnSuccess_UpdatePlayerName,
+                    .PlayerStateService.UpdateName(m_userData.m_screenName, OnSuccess_UpdatePlayerName,
                         OnFailed_UpdatePlayerName);
                 ErrorHandlingApp.getInstance().m_user.m_userData.m_screenName = "";
 

@@ -11,7 +11,8 @@ public class Lobby
     public Lobby(Dictionary<string, object> lobbyJson, string in_lobbyId)
     {
         LobbyID = in_lobbyId;
-        OwnerID = lobbyJson["owner"] as string;
+        OwnerID = FormatOwnerID(lobbyJson["ownerCxId"] as string);
+        
         var jsonMembers = lobbyJson["members"] as Dictionary<string, object>[];
         for (int i = 0; i < jsonMembers.Length; ++i)
         {
@@ -20,5 +21,11 @@ public class Lobby
             if (user.ID == GameManager.Instance.CurrentUserInfo.ID) user.AllowSendTo = false;
             Members.Add(user);
         }
+    }
+
+    private string FormatOwnerID(string id)
+    {
+        string[] splits = id.Split(':');
+        return splits[1];
     }
 }
