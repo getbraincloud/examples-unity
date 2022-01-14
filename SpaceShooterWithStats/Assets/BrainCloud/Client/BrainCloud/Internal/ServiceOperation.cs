@@ -101,6 +101,7 @@ using System;
         public static readonly ServiceOperation ListFriends = new ServiceOperation("LIST_FRIENDS");
         public static readonly ServiceOperation GetMySocialInfo = new ServiceOperation("GET_MY_SOCIAL_INFO");
         public static readonly ServiceOperation AddFriends = new ServiceOperation("ADD_FRIENDS");
+        public static readonly ServiceOperation AddFriendsFromPlatform = new ServiceOperation("ADD_FRIENDS_FROM_PLATFORM");
         public static readonly ServiceOperation RemoveFriends = new ServiceOperation("REMOVE_FRIENDS");
         public static readonly ServiceOperation GetUsersOnlineStatus = new ServiceOperation("GET_USERS_ONLINE_STATUS");
         public static readonly ServiceOperation GetSocialLeaderboard = new ServiceOperation("GET_SOCIAL_LEADERBOARD");
@@ -155,11 +156,15 @@ using System;
         public static readonly ServiceOperation GetPeerVC = new ServiceOperation("GET_PEER_VC");
         public static readonly ServiceOperation StartPurchase = new ServiceOperation("START_PURCHASE");
         public static readonly ServiceOperation FinalizePurchase = new ServiceOperation("FINALIZE_PURCHASE");
+        public static readonly ServiceOperation RefreshPromotions = new ServiceOperation("REFRESH_PROMOTIONS");
 
         public static readonly ServiceOperation Send = new ServiceOperation("SEND");
         public static readonly ServiceOperation UpdateEventData = new ServiceOperation("UPDATE_EVENT_DATA");
         public static readonly ServiceOperation DeleteSent = new ServiceOperation("DELETE_SENT");
         public static readonly ServiceOperation DeleteIncoming = new ServiceOperation("DELETE_INCOMING");
+        public static readonly ServiceOperation DeleteIncomingEvents = new ServiceOperation("DELETE_INCOMING_EVENTS");
+        public static readonly ServiceOperation DeleteIncomingEventsOlderThan = new ServiceOperation("DELETE_INCOMING_EVENTS_OLDER_THAN");
+        public static readonly ServiceOperation DeleteIncomingEventsByTypeOlderThan = new ServiceOperation("DELETE_INCOMING_EVENTS_BY_TYPE_OLDER_THAN");
         public static readonly ServiceOperation GetEvents = new ServiceOperation("GET_EVENTS");
 
         public static readonly ServiceOperation UpdateIncrement = new ServiceOperation("UPDATE_INCREMENT");
@@ -289,6 +294,8 @@ using System;
         public static readonly ServiceOperation GooglePlayConfirmPurchase = new ServiceOperation("CONFIRM_GOOGLEPLAY_PURCHASE");
 
         public static readonly ServiceOperation ReadProperties = new ServiceOperation("READ_PROPERTIES");
+        public static readonly ServiceOperation ReadSelectedProperties = new ServiceOperation("READ_SELECTED_PROPERTIES");
+        public static readonly ServiceOperation ReadPropertiesInCategories = new ServiceOperation("READ_PROPERTIES_IN_CATEGORIES");
 
         public static readonly ServiceOperation GetUpdatedFiles = new ServiceOperation("GET_UPDATED_FILES");
         public static readonly ServiceOperation GetFileList = new ServiceOperation("GET_FILE_LIST");
@@ -442,6 +449,9 @@ using System;
         public static readonly ServiceOperation RemoveMember = new ServiceOperation("REMOVE_MEMBER");
         public static readonly ServiceOperation CancelFindRequest = new ServiceOperation("CANCEL_FIND_REQUEST");
         public static readonly ServiceOperation GetRegionsForLobbies = new ServiceOperation("GET_REGIONS_FOR_LOBBIES");
+        public static readonly ServiceOperation GetLobbyInstances = new ServiceOperation("GET_LOBBY_INSTANCES");
+        public static readonly ServiceOperation GetLobbyInstancesWithPingData = new ServiceOperation("GET_LOBBY_INSTANCES_WITH_PING_DATA");
+
         
         //ItemCatalog
         public static readonly ServiceOperation GetCatalogItemDefinition = new ServiceOperation("GET_CATALOG_ITEM_DEFINITION");

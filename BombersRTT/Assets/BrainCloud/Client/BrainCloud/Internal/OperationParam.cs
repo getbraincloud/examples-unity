@@ -70,6 +70,7 @@ namespace BrainCloud
         public static readonly OperationParam AuthenticateServiceAuthenticateAnonymousId = new OperationParam("anonymousId");
         public static readonly OperationParam AuthenticateServiceAuthenticateProfileId = new OperationParam("profileId");
         public static readonly OperationParam AuthenticateServiceAuthenticateForceCreate = new OperationParam("forceCreate");
+        public static readonly OperationParam AuthenticateServiceAuthenticateCompressResponses = new OperationParam("compressResponses");
         public static readonly OperationParam AuthenticateServicePlayerSessionExpiry = new OperationParam("playerSessionExpiry");
 
         // Authenticate Service - Authenticate Params
@@ -123,7 +124,10 @@ namespace BrainCloud
         public static readonly OperationParam EventServiceUpdateEventDataEventId = new OperationParam("eventId");
         public static readonly OperationParam EventServiceUpdateEventDataData = new OperationParam("eventData");
         public static readonly OperationParam EvId = new OperationParam("evId");
-
+        public static readonly OperationParam EventServiceEvIds  = new OperationParam("evIds");
+        public static readonly OperationParam EventServiceDateMillis  = new OperationParam("dateMillis");
+        public static readonly OperationParam EventServiceEventType   = new OperationParam("eventType");
+        
         // Event Service - Delete Incoming Params
         public static readonly OperationParam EventServiceDeleteIncomingEventId = new OperationParam("eventId");
         public static readonly OperationParam EventServiceDeleteIncomingFromId = new OperationParam("fromId");
@@ -137,6 +141,7 @@ namespace BrainCloud
         // Friend Service - Params
         public static readonly OperationParam FriendServiceEntityId = new OperationParam("entityId");
         public static readonly OperationParam FriendServiceExternalId = new OperationParam("externalId");
+        public static readonly OperationParam FriendServiceExternalIds = new OperationParam("externalIds");
         public static readonly OperationParam FriendServiceProfileId = new OperationParam("profileId");
         public static readonly OperationParam FriendServiceFriendId = new OperationParam("friendId");
         public static readonly OperationParam FriendServiceAuthenticationType = new OperationParam("authenticationType");
@@ -146,6 +151,7 @@ namespace BrainCloud
         public static readonly OperationParam FriendServiceIncludeSummaryData = new OperationParam("includeSummaryData");
         public static readonly OperationParam FriendServiceFriendPlatform = new OperationParam("friendPlatform");
         public static readonly OperationParam FriendServiceProfileIds = new OperationParam("profileIds");
+        public static readonly OperationParam FriendServiceMode = new OperationParam("mode");
 
         // Friend Service operations
         //public static readonly Operation FriendServiceReadFriends = new Operation("READ_FRIENDS");
@@ -499,10 +505,12 @@ namespace BrainCloud
         public static readonly OperationParam LobbySignalData = new OperationParam("signalData");
         public static readonly OperationParam LobbyConnectionId = new OperationParam("cxId");
         public static readonly OperationParam PingData = new OperationParam("pingData");
+        public static readonly OperationParam LobbyMinRating = new OperationParam("minRating");
+        public static readonly OperationParam LobbyMaxRating = new OperationParam("maxRating");
 
         public static readonly OperationParam CompoundAlgos = new OperationParam("algos");
         public static readonly OperationParam CompoundRanges = new OperationParam("compound-ranges");
-        public static readonly OperationParam LobbyCritera = new OperationParam("criteria");
+        public static readonly OperationParam LobbyCritera = new OperationParam("criteriaJson");
         public static readonly OperationParam CriteraPing = new OperationParam("ping");
         public static readonly OperationParam CriteraRating = new OperationParam("rating");
         public static readonly OperationParam StrategyRangedPercent = new OperationParam("ranged-percent");
@@ -548,6 +556,10 @@ namespace BrainCloud
         public static readonly OperationParam UserItemsServiceShopId = new OperationParam("shopId");
         public static readonly OperationParam UserItemsServiceNewItemData = new OperationParam("newItemData");
 
+        //global app
+        public static readonly OperationParam GlobalAppPropertyNames = new OperationParam("propertyNames");
+        public static readonly OperationParam GlobalAppCategories = new OperationParam("categories");
+        
         private OperationParam(string value)
         {
             Value = value;
