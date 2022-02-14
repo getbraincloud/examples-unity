@@ -1330,12 +1330,12 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 32
+    m_FontSize: 40
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 3
     m_MaxSize: 40
-    m_Alignment: 0
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 0
     m_HorizontalOverflow: 1
@@ -1533,7 +1533,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 40
-    m_Alignment: 0
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -2086,7 +2086,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1261015251}
         m_TargetAssemblyTypeName: 
-        m_MethodName: EnablleRTT
+        m_MethodName: EnableRTT
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

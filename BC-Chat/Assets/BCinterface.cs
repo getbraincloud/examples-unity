@@ -1,16 +1,24 @@
 ﻿using System.Collections.Generic;
+using BrainCloud.Internal;
 using UnityEngine;
 using UnityEngine.UI;
 using BrainCloud.JsonFx.Json;
+
+/*
+ * Guide for setting up braincloud chat: http://help.getbraincloud.com/en/articles/3272685-design-messaging-chat-channels
+ */
 
 public class BCinterface : MonoBehaviour
 {
     private BrainCloudWrapper _bc;
 
-    Text bcreturn;
-    InputField username;
-    InputField password;
-    InputField channelid;
+    private Text bcreturn;
+    private InputField username;
+    private InputField password;
+    private InputField channelid;
+    private InputField titleMessage;
+    private InputField message;
+    
     
     // Start is called before the first frame update
     void Start()
@@ -19,6 +27,8 @@ public class BCinterface : MonoBehaviour
         username = GameObject.Find("username").GetComponent<InputField>();
         password = GameObject.Find("password").GetComponent<InputField>();
         channelid = GameObject.Find("channelid").GetComponent<InputField>();
+        titleMessage = GameObject.Find("titleField").GetComponent<InputField>();
+        message = GameObject.Find("messageField").GetComponent<InputField>();
     }
 
     private void Awake()
@@ -56,10 +66,35 @@ public class BCinterface : MonoBehaviour
     }
 
     //click enableRTT Button
-    public void EnablleRTT()
+    public void EnableRTT()
     {
         _bc.RTTService.EnableRTT(BrainCloud.RTTConnectionType.WEBSOCKET, peercSuccess_BCcall, peercError_BCcall);
         _bc.RTTService.RegisterRTTChatCallback(rttSuccess_BCcall);
+    }
+    
+    //Called from post message button 
+    public void PostMessage()
+    {
+        Dictionary<string, object> messageData = new Dictionary<string, object>
+        {
+            {
+                "channelId", channelid.text
+            }
+        };
+        Dictionary<string, object> messageContent = new Dictionary<string, object>
+        {
+            {
+                "text", "This is an example message"
+            }
+        };
+
+        Dictionary<string, object> messageCustom = new Dictionary<string, object>();
+        messageCustom.Add(titleMessage.text, message.text);
+        messageContent.Add("custom", messageCustom);
+        
+        messageData.Add("content", messageContent);
+        string json = DictionaryToString(messageData);
+        _bc.ChatService.PostChatMessage(channelid.text, json);
     }
 
     public void rttSuccess_BCcall(string responseData)
@@ -129,4 +164,14 @@ public class BCinterface : MonoBehaviour
         Debug.Log(display);
         bcreturn.GetComponent<Text>().text = "success \n " + display;
     }
+    
+    public string DictionaryToString(Dictionary < string, object > dictionary) 
+    {  
+        string dictionaryString = "{";  
+        foreach(KeyValuePair < string, object > keyValues in dictionary) 
+        {  
+            dictionaryString += keyValues.Key + " : " + keyValues.Value + ", ";  
+        }  
+        return dictionaryString.TrimEnd(',', ' ') + "}";  
+    } 
 }
