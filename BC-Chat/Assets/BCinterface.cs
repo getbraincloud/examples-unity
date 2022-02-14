@@ -5,26 +5,21 @@ using BrainCloud.JsonFx.Json;
 
 public class BCinterface : MonoBehaviour
 {
-    public BrainCloudWrapper _bc;
+    private BrainCloudWrapper _bc;
 
     Text bcreturn;
     InputField username;
     InputField password;
     InputField channelid;
-
-    //private Camera mainCamera;
+    
     // Start is called before the first frame update
     void Start()
     {
-        bcreturn = GameObject.Find("bcreturn").GetComponent<Text>();
+        bcreturn = GameObject.Find("brainCloudResponse-Text").GetComponent<Text>();
         username = GameObject.Find("username").GetComponent<InputField>();
         password = GameObject.Find("password").GetComponent<InputField>();
         channelid = GameObject.Find("channelid").GetComponent<InputField>();
     }
-
-    // Update is called once per frame
-    void Update()
-    { }
 
     private void Awake()
     {
@@ -51,11 +46,9 @@ public class BCinterface : MonoBehaviour
         bcreturn.GetComponent<Text>().text = "authenticate fail \n " + statusMessage;
     }
 
-
-    //click connnect channel Button
+    //click connect channel Button
     public void ConnectChannel()
     {
-
         string channelId = channelid.GetComponent<InputField>().text;
         int maxReturn = 25;
 
@@ -80,16 +73,12 @@ public class BCinterface : MonoBehaviour
         foreach (KeyValuePair<string, object> message in jsonData)
         {
             display += message.Key + " : " + JsonWriter.Serialize(message.Value) + "\r\n";
-
         }
 
         Debug.Log(display);
 
         bcreturn.GetComponent<Text>().text = "success \n " + display;
-
-        //bcreturn.GetComponent<Text>().text = "registerRTTPresence success \n " + responseData;
     }
-
 
     //click disableRTT Button
     public void DisablleRTT()
@@ -100,12 +89,12 @@ public class BCinterface : MonoBehaviour
 
     public void peercSuccess_BCcall(string responseData, object cbObject)
     {
-        Debug.Log("bc chat success call back "+responseData);
+        Debug.Log("bc chat success call back " + responseData);
 
         Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(responseData);
         Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
 
-        string display="";
+        string display = "";
         foreach (KeyValuePair<string, object> message in jsonData)
         {
             display += message.Key +" : "+ JsonWriter.Serialize(message.Value) + "\r\n";
@@ -113,7 +102,6 @@ public class BCinterface : MonoBehaviour
         }
 
         Debug.Log(display);
-
         bcreturn.GetComponent<Text>().text = "success \n " + display;
     }
 
@@ -136,7 +124,6 @@ public class BCinterface : MonoBehaviour
             {
                 display += item.Key + " : " + JsonWriter.Serialize(item.Value) + "\r\n";
             }
-            
         }
 
         Debug.Log(display);
