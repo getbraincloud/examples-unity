@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BrainCloud.Internal;
 using UnityEngine;
 using UnityEngine.UI;
 using BrainCloud.JsonFx.Json;
+using UnityEngine.EventSystems;
 
 /*
  * Guide for setting up braincloud chat: http://help.getbraincloud.com/en/articles/3272685-design-messaging-chat-channels
@@ -11,76 +11,83 @@ using BrainCloud.JsonFx.Json;
 public class BCinterface : MonoBehaviour
 {
     private BrainCloudWrapper _bc;
-
-    private Text bcreturn;
-    private InputField username;
-    private InputField password;
-    private InputField channelid;
-    private InputField titleMessage;
-    private InputField message;
+    private Text _bcResponseText;
+    private InputField _username;
+    private InputField _password;
+    private InputField _channelCode;
+    private InputField _titleMessage;
+    private InputField _message;
+    private EventSystem _eventSystem;
     
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        bcreturn = GameObject.Find("brainCloudResponse-Text").GetComponent<Text>();
-        username = GameObject.Find("username").GetComponent<InputField>();
-        password = GameObject.Find("password").GetComponent<InputField>();
-        channelid = GameObject.Find("channelid").GetComponent<InputField>();
-        titleMessage = GameObject.Find("titleField").GetComponent<InputField>();
-        message = GameObject.Find("messageField").GetComponent<InputField>();
-    }
-
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
         _bc = gameObject.AddComponent<BrainCloudWrapper>();
-        _bc.WrapperName = gameObject.name;
+        _bc.WrapperName = name;
         _bc.Init();
+        _eventSystem = EventSystem.current;
+    }
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+        _bcResponseText = GameObject.Find("brainCloudResponse-Text").GetComponent<Text>();
+        _username = GameObject.Find("username").GetComponent<InputField>();
+        _password = GameObject.Find("password").GetComponent<InputField>();
+        _channelCode = GameObject.Find("channelid").GetComponent<InputField>();
+        _titleMessage = GameObject.Find("title").GetComponent<InputField>();
+        _message = GameObject.Find("message").GetComponent<InputField>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+         
+            if (next)
+            {
+                InputField inputfield = next.GetComponent<InputField>();
+                if (inputfield)
+                {
+                    //if it's an input field, also set the text caret
+                    inputfield.OnPointerClick(new PointerEventData(_eventSystem));
+                }
+                _eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
+            }
+        }
     }
 
     //click authentication button
     public void AuthenticateBC()
     {
-        _bc.AuthenticateUniversal(username.GetComponent<InputField>().text, password.GetComponent<InputField>().text, true, authSuccess_BCcall, authError_BCcall);
+        _bc.AuthenticateUniversal
+            (
+                _username.text,
+                _password.text,
+                true,
+                AuthSuccessCallback,
+                AuthErrorCallback
+            );
     }
-
-    public void authSuccess_BCcall(string responseData, object cbObject)
-    {
-        Debug.Log("bc auth success----" + responseData);
-        bcreturn.GetComponent<Text>().text = "authenticate success \n " + responseData;
-    }
-
-    public void authError_BCcall(int statusCode, int reasonCode, string statusMessage, object cbObject)
-    {
-        bcreturn.GetComponent<Text>().text = "authenticate fail \n " + statusMessage;
-    }
-
-    //click connect channel Button
-    public void ConnectChannel()
-    {
-        string channelId = channelid.GetComponent<InputField>().text;
-        int maxReturn = 25;
-
-        _bc.ChatService.ChannelConnect(channelId, maxReturn, channelSuccess_BCcall, peercError_BCcall);
-    }
-
+    
     //click enableRTT Button
     public void EnableRTT()
     {
-        _bc.RTTService.EnableRTT(BrainCloud.RTTConnectionType.WEBSOCKET, peercSuccess_BCcall, peercError_BCcall);
-        _bc.RTTService.RegisterRTTChatCallback(rttSuccess_BCcall);
+        _bc.RTTService.EnableRTT(BrainCloud.RTTConnectionType.WEBSOCKET, EnableRTTSuccessCallback, EnableRTTErrorCallback);
+        _bc.RTTService.RegisterRTTChatCallback(RTTCallback);
     }
     
-    //Called from post message button 
+    //click disableRTT Button
+    public void DisablleRTT()
+    {
+        _bc.RTTService.DisableRTT();
+        _bcResponseText.text = "BC RTT disabled";
+    }
+    
+    //click post message button 
     public void PostMessage()
     {
-        Dictionary<string, object> messageData = new Dictionary<string, object>
-        {
-            {
-                "channelId", channelid.text
-            }
-        };
         Dictionary<string, object> messageContent = new Dictionary<string, object>
         {
             {
@@ -88,16 +95,45 @@ public class BCinterface : MonoBehaviour
             }
         };
 
-        Dictionary<string, object> messageCustom = new Dictionary<string, object>();
-        messageCustom.Add(titleMessage.text, message.text);
-        messageContent.Add("custom", messageCustom);
+        Dictionary<string, object> messageCustom = new Dictionary<string, object>
+        {
+            {
+                "title", _titleMessage.text
+            },
+            {
+                "message", _message.text
+            }
+        };
         
-        messageData.Add("content", messageContent);
-        string json = DictionaryToString(messageData);
-        _bc.ChatService.PostChatMessage(channelid.text, json);
+        messageContent.Add("custom", messageCustom);
+
+        string json = JsonWriter.Serialize(messageContent);
+        string channelId = _bc.Client.AppId + ":gl:" + _channelCode.text; 
+        Debug.Log($"JSON: {json}");
+        _bc.ChatService.PostChatMessage(channelId, json, true, PostMessageSuccessCallback, PostMessageErrorCallback);
+    }
+    
+    //click connect channel Button
+    public void ConnectChannel()
+    {
+        string channelId = _bc.Client.AppId + ":gl:" + _channelCode.text;
+        int maxReturn = 25;
+
+        _bc.ChatService.ChannelConnect(channelId, maxReturn, ChannelSuccessCallback, EnableRTTErrorCallback);
+    }
+    
+    private void AuthSuccessCallback(string responseData, object cbObject)
+    {
+        Debug.Log("bc auth success----" + responseData);
+        _bcResponseText.text = "authenticate success \n " + responseData;
     }
 
-    public void rttSuccess_BCcall(string responseData)
+    private void AuthErrorCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+    {
+        _bcResponseText.text = "authenticate fail \n " + statusMessage;
+    }
+
+    private void RTTCallback(string responseData)
     {
         Debug.Log("bc RTT register chat success call back");
 
@@ -112,17 +148,29 @@ public class BCinterface : MonoBehaviour
 
         Debug.Log(display);
 
-        bcreturn.GetComponent<Text>().text = "success \n " + display;
+        _bcResponseText.text = "success \n " + display;
     }
 
-    //click disableRTT Button
-    public void DisablleRTT()
+    private void PostMessageSuccessCallback(string jsonResponse, object cbObject)
     {
-        _bc.RTTService.DisableRTT();
-        bcreturn.GetComponent<Text>().text = "BC RTT disabled";
+        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
+        Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
+        
+        string response = "Post message successful ! \n Response: ";
+        foreach (KeyValuePair<string,object> keyValuePair in jsonData)
+        {
+            response += keyValuePair.Key + " : " + JsonWriter.Serialize(keyValuePair.Value) + "\r\n";
+        }
+        Debug.Log($"Post Message Response: {response}");
+        _bcResponseText.text = response;
     }
 
-    public void peercSuccess_BCcall(string responseData, object cbObject)
+    private void PostMessageErrorCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+    {
+        _bcResponseText.text = "Post Message Failed: " + statusMessage;
+    }
+
+    private void EnableRTTSuccessCallback(string responseData, object cbObject)
     {
         Debug.Log("bc chat success call back " + responseData);
 
@@ -137,16 +185,16 @@ public class BCinterface : MonoBehaviour
         }
 
         Debug.Log(display);
-        bcreturn.GetComponent<Text>().text = "success \n " + display;
+        _bcResponseText.text = "success \n " + display;
     }
 
-    public void peercError_BCcall(int statusCode, int reasonCode, string statusMessage, object cbObject)
+    private void EnableRTTErrorCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
         Debug.Log(string.Format("[chat Failed] {0}  {1}  {2}", statusCode, reasonCode, statusMessage));
-        bcreturn.GetComponent<Text>().text = "fail \n " + statusMessage;
+        _bcResponseText.text = "fail \n " + statusMessage;
     }
 
-    public void channelSuccess_BCcall(string responseData, object cbObject)
+    private void ChannelSuccessCallback(string responseData, object cbObject)
     {
         Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(responseData);
         Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
@@ -162,16 +210,6 @@ public class BCinterface : MonoBehaviour
         }
 
         Debug.Log(display);
-        bcreturn.GetComponent<Text>().text = "success \n " + display;
+        _bcResponseText.text = "success \n " + display;
     }
-    
-    public string DictionaryToString(Dictionary < string, object > dictionary) 
-    {  
-        string dictionaryString = "{";  
-        foreach(KeyValuePair < string, object > keyValues in dictionary) 
-        {  
-            dictionaryString += keyValues.Key + " : " + keyValues.Value + ", ";  
-        }  
-        return dictionaryString.TrimEnd(',', ' ') + "}";  
-    } 
 }
