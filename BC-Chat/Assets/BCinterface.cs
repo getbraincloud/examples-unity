@@ -12,6 +12,7 @@ public class BCinterface : MonoBehaviour
 {
     private BrainCloudWrapper _bc;
     private Text _bcResponseText;
+    private Text _versionText;
     private InputField _username;
     private InputField _password;
     private InputField _channelCode;
@@ -31,12 +32,15 @@ public class BCinterface : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _bcResponseText = GameObject.Find("brainCloudResponse-Text").GetComponent<Text>();
         _username = GameObject.Find("username").GetComponent<InputField>();
         _password = GameObject.Find("password").GetComponent<InputField>();
         _channelCode = GameObject.Find("channelid").GetComponent<InputField>();
         _titleMessage = GameObject.Find("title").GetComponent<InputField>();
         _message = GameObject.Find("message").GetComponent<InputField>();
+        
+        _bcResponseText = GameObject.Find("brainCloudResponse-Text").GetComponent<Text>();
+        _versionText = GameObject.Find("Version - Text").GetComponent<Text>();
+        _versionText.text = $"Version: {_bc.Client.BrainCloudClientVersion}";
     }
 
     private void Update()
@@ -215,8 +219,13 @@ public class BCinterface : MonoBehaviour
     {
         Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(responseData);
         Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
-        Dictionary<string, object>[] messages = (Dictionary<string, object>[])jsonData["messages"];
 
+        if (!(jsonData["messages"] is Dictionary<string, object>[] messages))
+        {
+            SetResponseText("No messages available to display, try Posting a Message", Color.white);
+            return;
+        }
+        
         string display = "";
         foreach (Dictionary<string, object> message in messages)
         {
