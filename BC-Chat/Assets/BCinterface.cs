@@ -61,6 +61,12 @@ public class BCinterface : MonoBehaviour
     //click authentication button
     public void AuthenticateBC()
     {
+        if (_username.text.Equals("") || _password.text.Equals(""))
+        {
+            SetResponseText("Both User Name and Password fields need to be filled", Color.red);
+            return;
+        }
+        
         _bc.AuthenticateUniversal
             (
                 _username.text,
@@ -74,27 +80,50 @@ public class BCinterface : MonoBehaviour
     //click enableRTT Button
     public void EnableRTT()
     {
+        if (!_bc.Client.Authenticated)
+        {
+            SetResponseText("Authenticate first before Enabling RTT", Color.red);
+            return;
+        }
+        if (_bc.RTTService.IsRTTEnabled())
+        {
+            SetResponseText("RTT is enabled..", Color.red);
+            return;
+        }
         _bc.RTTService.EnableRTT(BrainCloud.RTTConnectionType.WEBSOCKET, EnableRTTSuccessCallback, EnableRTTErrorCallback);
         _bc.RTTService.RegisterRTTChatCallback(RTTCallback);
     }
     
     //click disableRTT Button
-    public void DisablleRTT()
+    public void DisableRTT()
     {
+        if (!_bc.RTTService.IsRTTEnabled())
+        {
+            SetResponseText("RTT is not enabled..", Color.red);
+            return;
+        }
         _bc.RTTService.DisableRTT();
-        _bcResponseText.text = "BC RTT disabled";
+        SetResponseText("Disabling RTT...", Color.white);
     }
     
     //click post message button 
     public void PostMessage()
     {
+        //Check to ensure everything is set up to post message to brainCloud
+        if (!CanButtonExecute()) return;
+        if (_titleMessage.text.Equals("") || _message.text.Equals(""))
+        {
+            SetResponseText("Need to fill both 'Title of message' and 'Message' fields", Color.red);
+            return;
+        }
+        
+        //Creating a message json for PostChatMessage call
         Dictionary<string, object> messageContent = new Dictionary<string, object>
         {
             {
                 "text", "This is an example message"
             }
         };
-
         Dictionary<string, object> messageCustom = new Dictionary<string, object>
         {
             {
@@ -104,18 +133,19 @@ public class BCinterface : MonoBehaviour
                 "message", _message.text
             }
         };
-        
         messageContent.Add("custom", messageCustom);
-
         string json = JsonWriter.Serialize(messageContent);
-        string channelId = _bc.Client.AppId + ":gl:" + _channelCode.text; 
-        Debug.Log($"JSON: {json}");
+        
+        // Creating our channelId to send to brainCloud. Note: gl = global channel
+        string channelId = _bc.Client.AppId + ":gl:" + _channelCode.text;
         _bc.ChatService.PostChatMessage(channelId, json, true, PostMessageSuccessCallback, PostMessageErrorCallback);
     }
     
     //click connect channel Button
     public void ConnectChannel()
     {
+        if (!CanButtonExecute()) return;
+        
         string channelId = _bc.Client.AppId + ":gl:" + _channelCode.text;
         int maxReturn = 25;
 
@@ -124,13 +154,12 @@ public class BCinterface : MonoBehaviour
     
     private void AuthSuccessCallback(string responseData, object cbObject)
     {
-        Debug.Log("bc auth success----" + responseData);
-        _bcResponseText.text = "authenticate success \n " + responseData;
+        SetResponseText("Authenticate Successful \n " + responseData, Color.white);
     }
 
     private void AuthErrorCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        _bcResponseText.text = "authenticate fail \n " + statusMessage;
+        SetResponseText("Authenticate Failed \n " + statusMessage, Color.red);
     }
 
     private void RTTCallback(string responseData)
@@ -146,28 +175,17 @@ public class BCinterface : MonoBehaviour
             display += message.Key + " : " + JsonWriter.Serialize(message.Value) + "\r\n";
         }
 
-        Debug.Log(display);
-
-        _bcResponseText.text = "success \n " + display;
+        SetResponseText("RTT callback response \n " + display, Color.white);
     }
 
     private void PostMessageSuccessCallback(string jsonResponse, object cbObject)
     {
-        Dictionary<string, object> jsonMessage = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
-        Dictionary<string, object> jsonData = (Dictionary<string, object>)jsonMessage["data"];
-        
-        string response = "Post message successful ! \n Response: ";
-        foreach (KeyValuePair<string,object> keyValuePair in jsonData)
-        {
-            response += keyValuePair.Key + " : " + JsonWriter.Serialize(keyValuePair.Value) + "\r\n";
-        }
-        Debug.Log($"Post Message Response: {response}");
-        _bcResponseText.text = response;
+        SetResponseText("Post Message Successful !", Color.white);
     }
 
     private void PostMessageErrorCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        _bcResponseText.text = "Post Message Failed: " + statusMessage;
+        SetResponseText("Post Message Failed: " + statusMessage, Color.red);
     }
 
     private void EnableRTTSuccessCallback(string responseData, object cbObject)
@@ -184,14 +202,13 @@ public class BCinterface : MonoBehaviour
             
         }
 
-        Debug.Log(display);
-        _bcResponseText.text = "success \n " + display;
+        SetResponseText("Successfully Enabled RTT \n " + display, Color.white);
     }
 
     private void EnableRTTErrorCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
         Debug.Log(string.Format("[chat Failed] {0}  {1}  {2}", statusCode, reasonCode, statusMessage));
-        _bcResponseText.text = "fail \n " + statusMessage;
+        SetResponseText("Failed to Enable RTT \n " + statusMessage, Color.red);
     }
 
     private void ChannelSuccessCallback(string responseData, object cbObject)
@@ -208,8 +225,34 @@ public class BCinterface : MonoBehaviour
                 display += item.Key + " : " + JsonWriter.Serialize(item.Value) + "\r\n";
             }
         }
+        
+        SetResponseText("Channel Successfully Connected \n " + display, Color.white);
+    }
 
-        Debug.Log(display);
-        _bcResponseText.text = "success \n " + display;
+    private void SetResponseText(string message, Color textColor)
+    {
+        Debug.Log(message);
+        _bcResponseText.color = textColor;
+        _bcResponseText.text = message;
+    }
+
+    private bool CanButtonExecute()
+    {
+        if (!_bc.Client.Authenticated)
+        {
+            SetResponseText("Need to be Authenticated before this action", Color.red);
+            return false;
+        }
+        if (!_bc.RTTService.IsRTTEnabled())
+        {
+            SetResponseText("Need to Enable RTT", Color.red);
+            return false;
+        }
+        if (_channelCode.text.Equals(""))
+        {
+            SetResponseText("Global Channel Code needs to be filled", Color.red);
+            return false;
+        }
+        return true;
     }
 }
