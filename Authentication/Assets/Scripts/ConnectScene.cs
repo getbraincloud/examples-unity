@@ -12,7 +12,7 @@ using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 #endif
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL || UNITY_STANDALONE_WIN
 using Facebook.Unity;
 #endif
 
@@ -329,7 +329,7 @@ public class ConnectScene : MonoBehaviour
         m_authStatus = $"Game show status : {isGameShown}";
 
     }
-#if UNITY_WEBGL
+#if UNITY_WEBGL || UNITY_STANDALONE_WIN
     private void AuthCallback(ILoginResult result)
     {
         if (FB.IsLoggedIn)
