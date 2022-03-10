@@ -18,6 +18,7 @@ public class Interface : MonoBehaviour
     InputField ItemToPurchaseField;
     InputField emailField;
     string password = "testpassword";
+    private string _defaultSKU = "test_bitheads_orb1";
     Text Status;
     Text BCLogs;
 
@@ -40,8 +41,17 @@ public class Interface : MonoBehaviour
     //BUTTONS
     public void OnAmazonPurchasePress()
     {
+        Status.GetComponent<Text>().text = "Processing Purchase....";
         purchaseRequest = new SkuInput();
-        purchaseRequest.Sku = ItemToPurchaseField.GetComponent<InputField>().text;
+        if (ItemToPurchaseField.GetComponent<InputField>().text.Length == 0)
+        {
+            purchaseRequest.Sku = _defaultSKU;
+        }
+        else
+        {
+            purchaseRequest.Sku = ItemToPurchaseField.GetComponent<InputField>().text;
+        }
+        
         purchaseRequestOutput = iapService.Purchase(purchaseRequest);
     }
 

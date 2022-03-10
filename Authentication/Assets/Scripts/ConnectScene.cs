@@ -1,12 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
+
+#if UNITY_WSA
+using Microsoft.Xbox.Services;
+using Microsoft.Xbox.Services.Client;
+#endif
 
 #if UNITY_ANDROID
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 #endif
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL || UNITY_STANDALONE_WIN
 using Facebook.Unity;
 #endif
 
@@ -33,7 +39,8 @@ public class ConnectScene : MonoBehaviour
         UNIVERSAL,
         ANONYMOUS,
         GOOGLE,
-        FACEBOOK
+        FACEBOOK,
+        XBOXLIVE
     };
     string[] m_authTypes = {
         "Email",
@@ -52,10 +59,14 @@ public class ConnectScene : MonoBehaviour
     public static string CONSUMER_KEY = "";
     public static string CONSUMER_SECRET = "";
     
+    private bool signedIn;
+    private int playerNumber;
+#if UNITY_WSA
+    private XboxLiveUser _xboxLiveUser;
+#endif
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
-
 #if UNITY_ANDROID
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
             .RequestIdToken()
@@ -64,8 +75,21 @@ public class ConnectScene : MonoBehaviour
             .Build();
                 
         PlayGamesPlatform.InitializeInstance (config);
-
 #endif
+        
+#if UNITY_WSA
+        _xboxLiveUser = new XboxLiveUser();
+        try
+        {
+            SignInManager.Instance.OnPlayerSignOut(playerNumber, OnPlayerSignOut);
+            SignInManager.Instance.OnPlayerSignIn(playerNumber, OnPlayerSignIn);
+        }
+        catch (Exception ex)
+        {
+            Debug.Log(ex.Message);
+        }
+#endif
+        
         //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
 
     }
@@ -247,6 +271,25 @@ public class ConnectScene : MonoBehaviour
             m_authStatus = "Facebook login is only available on WebGL & Windows Standalone";
 #endif
         }
+        else if (m_selectedAuth == (int)eAuthTypes.XBOXLIVE)
+        {
+#if UNITY_WSA
+            if (_xboxLiveUser.IsSignedIn)
+            {
+                GUILayout.Label("Player Number: " + playerNumber);
+                GUILayout.Label("Gamer Tag: " + _xboxLiveUser.Gamertag);
+                GUILayout.Label("User ID: " + _xboxLiveUser.XboxUserId);
+                GUILayout.BeginHorizontal();
+            }
+            
+            if(GUILayout.Button("Sign In",GUILayout.ExpandWidth(false)))
+            {
+                StartCoroutine(SignInManager.Instance.SignInPlayer(playerNumber));
+            }
+#else
+            m_authStatus = "Xbox Live login is only available on Universal Windows Platform";
+#endif
+        }
 
         m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
         GUILayout.TextArea(m_authStatus, GUILayout.ExpandHeight(true));
@@ -286,6 +329,7 @@ public class ConnectScene : MonoBehaviour
         m_authStatus = $"Game show status : {isGameShown}";
 
     }
+#if UNITY_WEBGL || UNITY_STANDALONE_WIN
     private void AuthCallback(ILoginResult result)
     {
         if (FB.IsLoggedIn)
@@ -323,5 +367,50 @@ public class ConnectScene : MonoBehaviour
             }
             _localFacebookUser = BrainCloud.JsonFx.Json.JsonReader.Deserialize<FacebookUser>(result.RawResult);
         });
+    }
+#endif
+    
+#if UNITY_WSA
+    private void OnPlayerSignIn(XboxLiveUser xboxLiveUserParam, XboxLiveAuthStatus authStatus, string errorMessage)
+    {
+        if(authStatus == XboxLiveAuthStatus.Succeeded)
+        {
+            _xboxLiveUser = xboxLiveUserParam; //store the xboxLiveUser SignedIn
+            signedIn = true;
+        }
+        else
+        {
+            if (XboxLiveServicesSettings.Instance.DebugLogsOn)
+            {
+                Debug.LogError(errorMessage); //Log the error message in case of unsuccessful call.
+            }
+        }
+    }
+
+    private void OnPlayerSignOut(XboxLiveUser xboxLiveUserParam, XboxLiveAuthStatus authStatus, string errorMessage)
+    {
+        if (authStatus == XboxLiveAuthStatus.Succeeded)
+        {
+            _xboxLiveUser = null;
+            signedIn = false;
+        }
+        else
+        {
+            if (XboxLiveServicesSettings.Instance.DebugLogsOn)
+            {
+                Debug.LogError(errorMessage);
+            }
+        }
+    }
+#endif
+
+    private void OnDestroy()
+    {
+#if UNITY_WSA
+        if (SignInManager.Instance == null) return;
+        
+        SignInManager.Instance.RemoveCallbackFromPlayer(playerNumber, OnPlayerSignOut);
+        SignInManager.Instance.RemoveCallbackFromPlayer(playerNumber, OnPlayerSignIn);
+#endif
     }
 }
