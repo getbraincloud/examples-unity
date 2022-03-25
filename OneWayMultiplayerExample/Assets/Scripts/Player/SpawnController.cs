@@ -10,7 +10,7 @@ public class SpawnController : MonoBehaviour
     public SpawnData SpawnData;
     public float OffsetY;
     
-    private GameObject _objectToSpawn;
+    private BaseTroop _objectToSpawn;
 
     private float _cooldown = 1;
     private float _timer;
@@ -29,7 +29,7 @@ public class SpawnController : MonoBehaviour
         {
             RaycastHit rayInfo;
             var hit = Physics.Raycast(Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)), out rayInfo);
-            Debug.Log($"We hit: {rayInfo.collider.tag}");
+            
             if (hit &&
                 !EventSystem.current.IsPointerOverGameObject() &&
                 rayInfo.collider.tag.Equals(_targetTag))
@@ -38,7 +38,8 @@ public class SpawnController : MonoBehaviour
                 _objectToSpawn = SpawnData.GetTroop(_troopSelected);
                 Vector3 spawnPoint = rayInfo.point;
                 spawnPoint.y += OffsetY;
-                Instantiate(_objectToSpawn, spawnPoint, Quaternion.identity);    
+                var troop = Instantiate(_objectToSpawn, spawnPoint, Quaternion.identity);
+                troop.AssignToTeam(0);
             }
         }
     }

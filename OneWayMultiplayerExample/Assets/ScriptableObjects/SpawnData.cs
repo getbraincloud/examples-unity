@@ -7,7 +7,7 @@ using UnityEngine;
 public struct SpawnParameters
 {
     public TroopTypes TroopType;
-    public GameObject TroopToSpawn;
+    public BaseTroop TroopToSpawn;
 }
 
 [CreateAssetMenu(fileName = "SpawnData", menuName = "ScriptableObjects/SpawnData", order = 1)]
@@ -15,7 +15,7 @@ public class SpawnData : ScriptableObject
 {
     public List<SpawnParameters> SpawnParametersList = new List<SpawnParameters>();
 
-    public GameObject GetTroop(TroopTypes typeToGet)
+    public BaseTroop GetTroop(TroopTypes typeToGet)
     {
         foreach (SpawnParameters spawnParameters in SpawnParametersList)
         {
