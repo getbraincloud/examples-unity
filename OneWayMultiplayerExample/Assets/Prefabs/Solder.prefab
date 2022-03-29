@@ -58,8 +58,9 @@ MonoBehaviour:
   StartingHealth: 100
   DetectionRadius: 50
   MoveSpeed: 10
-  RotationSpeed: 5
+  RotationSpeed: 100
   AcceptanceRangeToTarget: 2
+  CurrentState: 0
 --- !u!33 &1450905314783072881
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -132,8 +133,8 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
+  m_AngularDrag: 0
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0

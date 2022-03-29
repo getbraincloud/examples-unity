@@ -46,7 +46,7 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
     void Start()
     {
         _health = StartingHealth;
-        FindTarget();
+        StartCoroutine(DelayToSearchForTarget());
     }
 
     void FixedUpdate()
@@ -71,18 +71,11 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
         }
         
         _distanceToTarget = (_target.transform.position - transform.position).magnitude;
-        if (!_rotationComplete)
-        {
-            _rotationComplete = IsFacingObject();
-        }
-        //Rotate To Target
-        if (!_rotationComplete)
-        {
-            CurrentState = TroopStates.Rotate;
-            RotateToTarget();
-        }
+        
+        RotateToTarget();
+        
         //Move to Target
-        else if(_distanceToTarget > AcceptanceRangeToTarget)
+        if(_distanceToTarget > AcceptanceRangeToTarget && IsFacingObject())
         {
             CurrentState = TroopStates.Move;
             MoveTroop();
@@ -90,6 +83,7 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
         //Attack !!!!!!!!!!!!!
         else
         {
+            _rigidbodyComp.velocity=Vector3.zero;
             CurrentState = TroopStates.Attack;
             PerformAction();
         }
@@ -106,8 +100,7 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
     //give direction to move enemy towards
     private void MoveTroop()
     {
-        Vector2 direction = (_target.transform.position - transform.position).normalized;
-        _rigidbodyComp.AddForce(direction * MoveSpeed);
+        _rigidbodyComp.AddForce(transform.forward * MoveSpeed);
         if(_rigidbodyComp.velocity.magnitude>MoveSpeed)
         {
             _rigidbodyComp.velocity = _rigidbodyComp.velocity.normalized * MoveSpeed;
@@ -119,12 +112,13 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
     private void RotateToTarget()
     {
         //rotate enemy
-        Vector2 direction = (_target.transform.position - transform.position).normalized;
-        _angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        _currQuat = Quaternion.AngleAxis(_angle, Vector3.forward);
-        transform.rotation = Quaternion.Lerp(transform.rotation, _currQuat, Time.deltaTime * RotationSpeed);
+        Vector3 direction = (_target.transform.position - transform.position).normalized;
+        _currQuat = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, _currQuat, RotationSpeed * Time.deltaTime);
     }
     
+    
+    //Try to make this a slottable action so this function never has to be overridden
     public virtual void PerformAction() { }
 
     //0 = invader(local player), 1 = defender(network player)
@@ -167,9 +161,7 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
         Destroy(gameObject);
     }
     
-    //ToDo: Need to iterate on this function to include determining if a troop is on our team or not.
-    //Dont do this with buildings bc they dont need a team ID but troops do. 
-    protected void FindTarget()
+    private void FindTarget()
     {
         Collider[] hitColliders = new Collider[10];
         int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, DetectionRadius, hitColliders, _activeMask);
@@ -178,7 +170,7 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
         float distance = 0;
         for (int i = 0; i < numOfColliders; i++)
         {
-            distance = Vector2.Distance(transform.position, hitColliders[i].transform.position);
+            distance = Vector3.Distance(transform.position, hitColliders[i].gameObject.transform.position);
             if (distance < shortestDistance)
             {
                 shortestDistance = distance;
