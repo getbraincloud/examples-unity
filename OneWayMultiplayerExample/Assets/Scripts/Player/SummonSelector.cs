@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class SummonSelector : MonoBehaviour
 {
-    public TroopTypes TroopTypeSelection;
+    [FormerlySerializedAs("TroopTypeSelection")] public EnemyTypes EnemyTypeSelection;
     private SpawnController _spawnController;
 
     private void Awake()
@@ -11,5 +12,5 @@ public class SummonSelector : MonoBehaviour
     }
     
     //Called from unity button
-    public void OnTroopSelection() => _spawnController.TroopChange(TroopTypeSelection);
+    public void OnTroopSelection() => _spawnController.TroopChange(EnemyTypeSelection);
 }

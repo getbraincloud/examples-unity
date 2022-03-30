@@ -5,47 +5,61 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 public enum TroopStates {Idle, Rotate, Move, Attack}
+public enum EnemyTypes {Grunt, Solder, Archer}
 
-public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
+public class BaseTroop : MonoBehaviour, IDamageable<int>
 {
+    public EnemyTypes EnemyType;
     public LayerMask InvaderMask;
     public LayerMask DefenderMask;
     public GameObject DeathFX;
-    public float StartingHealth = 100;
+    public int StartingHealth = 100;
     public float DetectionRadius = 50;
     public float MoveSpeed = 10;
     public float RotationSpeed = 5;
     public float AcceptanceRangeToTarget = 2;
-
+    
     public TroopStates CurrentState = TroopStates.Idle;
     
     private LayerMask _activeMask;
-    protected GameObject _target;
-    private float _health;
+    private GameObject _target;
+    private int _health;
     private bool _isDead;
-    private bool _rotationComplete;
+    private bool _isAttacking;
     
-    protected float _delayBeforeDestroy = 2;
-    protected float _delaySearchTarget = 2;
+    private float _delayBeforeDestroy = 2;
+    private float _delaySearchTarget = 2;
 
     private float _distanceToTarget;
+
+    private Animator _animator;
+    private string attackParameter = "isAttacking";
     
-    private float _angle;
     private Quaternion _currQuat;
     private Rigidbody _rigidbodyComp;
+    private MeleeWeapon _meleeWeapon;
+    private HealthBar _healthBarRef;
     private Coroutine _targetSearchCoroutine;
     
-    public float Health { get => _health; set => _health = value; }
+    public int Health { get => _health; set => _health = value; }
 
     private void Awake()
     {
         _rigidbodyComp = GetComponent<Rigidbody>();
+        _animator = GetComponent<Animator>();
+        _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
+        _healthBarRef = GetComponentInChildren<HealthBar>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
         _health = StartingHealth;
+        if (_healthBarRef)
+        {
+            _healthBarRef.SetMaxHealth(_health);    
+        }
+        
         StartCoroutine(DelayToSearchForTarget());
     }
 
@@ -61,10 +75,10 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
 
         if (!_target)
         {
-            _rotationComplete = false;
-            
             if (_targetSearchCoroutine == null)
             {
+                _animator.SetBool(attackParameter, false);
+                _isAttacking = false;
                 FindTarget();
             }
             return;
@@ -77,13 +91,19 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
         //Move to Target
         if(_distanceToTarget > AcceptanceRangeToTarget && IsFacingObject())
         {
+            if (_isAttacking)
+            {
+                _animator.SetBool(attackParameter, false);
+                _isAttacking = false;
+            }
+            
             CurrentState = TroopStates.Move;
             MoveTroop();
         }
         //Attack !!!!!!!!!!!!!
-        else
+        else if(_distanceToTarget < AcceptanceRangeToTarget)
         {
-            _rigidbodyComp.velocity=Vector3.zero;
+            _rigidbodyComp.velocity = Vector3.zero;
             CurrentState = TroopStates.Attack;
             PerformAction();
         }
@@ -117,9 +137,34 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
         transform.rotation = Quaternion.RotateTowards(transform.rotation, _currQuat, RotationSpeed * Time.deltaTime);
     }
     
-    
     //Try to make this a slottable action so this function never has to be overridden
-    public virtual void PerformAction() { }
+    private void PerformAction()
+    {
+        switch (EnemyType)
+        {
+            case EnemyTypes.Grunt:
+            case EnemyTypes.Solder:
+                MeleeTarget();
+                break;
+            case EnemyTypes.Archer:
+                ShootTarget();
+                break;
+        }
+    }
+
+    private void MeleeTarget()
+    {
+        if (_isAttacking) return;
+        _isAttacking = true;
+        _animator.SetBool(attackParameter, true);
+    }
+
+    private void ShootTarget()
+    {
+        if (_isAttacking) return;
+        _isAttacking = true;
+        
+    }
 
     //0 = invader(local player), 1 = defender(network player)
     public void AssignToTeam(int teamID)
@@ -128,12 +173,17 @@ public class BaseTroop : MonoBehaviour, IPrimaryAction, IDamageable<float>
         //TroopManager.Instance.ActiveTroopsList.Add(gameObject.GetInstanceID(), teamID);
 
         _activeMask = teamID == 0 ? InvaderMask : DefenderMask;
+
+        if (_meleeWeapon)
+        {
+            _meleeWeapon.gameObject.layer = teamID == 0 ? 6 : 7; 
+        }
         
         //6 = Invader Layer, 7 = Defender Layer
         gameObject.layer = teamID == 0 ? 6 : 7;
     }
     
-    public void Damage(float damageTaken)
+    public void Damage(int damageTaken)
     {
         if (_health <= 0) return;
 

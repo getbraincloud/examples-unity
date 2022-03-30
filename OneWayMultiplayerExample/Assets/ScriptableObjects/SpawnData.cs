@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 public struct SpawnParameters
 {
-    public TroopTypes TroopType;
+    public EnemyTypes TroopType;
     public BaseTroop TroopToSpawn;
 }
 
@@ -15,7 +15,7 @@ public class SpawnData : ScriptableObject
 {
     public List<SpawnParameters> SpawnParametersList = new List<SpawnParameters>();
 
-    public BaseTroop GetTroop(TroopTypes typeToGet)
+    public BaseTroop GetTroop(EnemyTypes typeToGet)
     {
         foreach (SpawnParameters spawnParameters in SpawnParametersList)
         {

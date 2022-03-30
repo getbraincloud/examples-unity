@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public enum TroopTypes{Grunt, GruntSolder, GruntMarader}
 
 public class SpawnController : MonoBehaviour
 {
@@ -15,7 +14,7 @@ public class SpawnController : MonoBehaviour
     private float _cooldown = 1;
     private float _timer;
 
-    private TroopTypes _troopSelected = TroopTypes.Grunt;
+    private EnemyTypes _troopSelected = EnemyTypes.Grunt;
 
     private const string _targetTag = "Target";
     
@@ -44,6 +43,6 @@ public class SpawnController : MonoBehaviour
         }
     }
 
-    public void TroopChange(TroopTypes troopChangedTo) => _troopSelected = troopChangedTo;
+    public void TroopChange(EnemyTypes troopChangedTo) => _troopSelected = troopChangedTo;
 
 }
