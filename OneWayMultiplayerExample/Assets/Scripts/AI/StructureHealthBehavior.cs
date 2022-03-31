@@ -43,6 +43,11 @@ public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
         StartCoroutine(DelayToDestroy());
     }
 
+    public void LaunchObject(Vector3 direction)
+    {
+        //do nothing cause this is a structure
+    }
+
     IEnumerator DelayToDestroy()
     {
         yield return new WaitForSeconds(_delayBeforeDestruction);

@@ -18,28 +18,37 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     public float MoveSpeed = 10;
     public float RotationSpeed = 5;
     public float AcceptanceRangeToTarget = 2;
+    public GameObject HomeWayPoint;
     
     public TroopStates CurrentState = TroopStates.Idle;
     
     private LayerMask _activeMask;
     private GameObject _target;
     private int _health;
+    public int _hitBackForce = 10;
+    
     private bool _isDead;
     private bool _isAttacking;
+    private bool _isSearching = false;
+    private bool _isKnockedBack;
+    private bool _targetIsHostile;
     
     private float _delayBeforeDestroy = 2;
     private float _delaySearchTarget = 2;
+    private float _delayBeforeResume = 1;
 
     private float _distanceToTarget;
 
     private Animator _animator;
     private string attackParameter = "isAttacking";
-    
+
+    private GameObject _homeLocationRef;
     private Quaternion _currQuat;
     private Rigidbody _rigidbodyComp;
     private MeleeWeapon _meleeWeapon;
     private HealthBar _healthBarRef;
     private Coroutine _targetSearchCoroutine;
+    private Coroutine _stunCoroutine;
     
     public int Health { get => _health; set => _health = value; }
 
@@ -59,8 +68,8 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         {
             _healthBarRef.SetMaxHealth(_health);    
         }
-        
-        StartCoroutine(DelayToSearchForTarget());
+        _homeLocationRef = Instantiate(HomeWayPoint, transform.position, Quaternion.identity);
+        FindTarget();
     }
 
     void FixedUpdate()
@@ -73,10 +82,13 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
          * - If there isn't _target, return and look for a target.(Might need to flag this so its not constantly looking)
          */
 
+        if (_isDead) return;
+
         if (!_target)
         {
-            if (_targetSearchCoroutine == null)
+            if (!_isSearching)
             {
+                _isSearching = true;
                 _animator.SetBool(attackParameter, false);
                 _isAttacking = false;
                 FindTarget();
@@ -89,7 +101,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         RotateToTarget();
         
         //Move to Target
-        if(_distanceToTarget > AcceptanceRangeToTarget && IsFacingObject())
+        if(_distanceToTarget > AcceptanceRangeToTarget && IsFacingObject() && !_isKnockedBack)
         {
             if (_isAttacking)
             {
@@ -101,7 +113,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
             MoveTroop();
         }
         //Attack !!!!!!!!!!!!!
-        else if(_distanceToTarget < AcceptanceRangeToTarget)
+        else if(_distanceToTarget < AcceptanceRangeToTarget && _targetIsHostile)
         {
             _rigidbodyComp.velocity = Vector3.zero;
             CurrentState = TroopStates.Attack;
@@ -113,7 +125,6 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         Vector3 dirFromAtoB = (_target.transform.position - transform.position).normalized;
         float dotProduct = Vector3.Dot(dirFromAtoB, transform.forward);
-
         return dotProduct > 0.9f;
     }
     
@@ -121,7 +132,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     private void MoveTroop()
     {
         _rigidbodyComp.AddForce(transform.forward * MoveSpeed);
-        if(_rigidbodyComp.velocity.magnitude>MoveSpeed)
+        if(_rigidbodyComp.velocity.magnitude > MoveSpeed)
         {
             _rigidbodyComp.velocity = _rigidbodyComp.velocity.normalized * MoveSpeed;
         }
@@ -133,6 +144,8 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         //rotate enemy
         Vector3 direction = (_target.transform.position - transform.position).normalized;
+        if (direction == Vector3.zero) return;
+        
         _currQuat = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, _currQuat, RotationSpeed * Time.deltaTime);
     }
@@ -163,7 +176,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         if (_isAttacking) return;
         _isAttacking = true;
-        
+        //do pew pew pew stuff here
     }
 
     //0 = invader(local player), 1 = defender(network player)
@@ -172,7 +185,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         //ToDo: Is troop manager really needed ?
         //TroopManager.Instance.ActiveTroopsList.Add(gameObject.GetInstanceID(), teamID);
 
-        _activeMask = teamID == 0 ? InvaderMask : DefenderMask;
+        _activeMask = teamID == 0 ? DefenderMask : InvaderMask;
 
         if (_meleeWeapon)
         {
@@ -188,6 +201,12 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         if (_health <= 0) return;
 
         _health -= damageTaken;
+
+        if (_healthBarRef)
+        {
+            _healthBarRef.SetHealth(_health);
+        }
+        
         if (_health <= 0)
         {
             Dead();
@@ -199,6 +218,26 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         if (_isDead) return;
         _isDead = true;
         StartCoroutine(DelayToDeath());
+    }
+
+    public void LaunchObject(Vector3 direction)
+    {
+        if (_isKnockedBack)
+        {
+            StopCoroutine(_stunCoroutine);
+        }
+        _isKnockedBack = true;
+        _rigidbodyComp.AddForce(direction * _hitBackForce);
+        _stunCoroutine = StartCoroutine(DelayToResumeMovement());
+    }
+    
+    //meant for stun effect
+    IEnumerator DelayToResumeMovement()
+    {
+        yield return new WaitForSeconds(_delayBeforeResume);
+        _rigidbodyComp.velocity = Vector3.zero;
+        _stunCoroutine = null;
+        _isKnockedBack = false;
     }
 
     private IEnumerator DelayToDeath()
@@ -213,6 +252,8 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     
     private void FindTarget()
     {
+        _targetSearchCoroutine = null;
+        _target = null;
         Collider[] hitColliders = new Collider[10];
         int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, DetectionRadius, hitColliders, _activeMask);
         float shortestDistance = Mathf.Infinity;
@@ -225,13 +266,21 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
             {
                 shortestDistance = distance;
                 _target = hitColliders[i].gameObject;
+                _targetIsHostile = true;
             }
         }
         
         //Start a coroutine if there isn't a target to look for it again in x seconds
         if (!_target)
         {
+            _rigidbodyComp.velocity = Vector3.zero;
+            _target = _homeLocationRef;
+            _targetIsHostile = false;
             _targetSearchCoroutine = StartCoroutine(DelayToSearchForTarget());
+        }
+        else
+        {
+            _isSearching = false;
         }
     }
 
