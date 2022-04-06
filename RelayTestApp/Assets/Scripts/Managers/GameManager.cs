@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
+    public Button ReconnectButton;
     //for updating members list of shockwaves
     public GameArea GameArea;  
     //local user's start button for starting a match
@@ -60,6 +61,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        ReconnectButton.gameObject.SetActive(false);
         _eventSystem = EventSystem.current;
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
         LoadPlayerSettings();
