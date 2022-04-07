@@ -128,6 +128,14 @@ public class StateManager : MonoBehaviour
             //Logging In...
             case GameStates.SignIn:
                 CurrentGameState = GameStates.MainMenu;
+                if (CurrentLobby != null && CurrentLobby.LobbyID.Length > 0)
+                {
+                    GameManager.Instance.ReconnectButton.gameObject.SetActive(true);
+                }
+                else
+                {
+                    GameManager.Instance.ReconnectButton.gameObject.SetActive(false);
+                }
                 BrainCloudManager.Instance.Login();
                 LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE,false,GameStates.MainMenu);
                 break;
@@ -145,6 +153,21 @@ public class StateManager : MonoBehaviour
                 break;
         }
     }
+
+    public void ReconnectToGame()
+    {
+        foreach (GameState state in ListOfStates)
+        {
+            state.gameObject.SetActive(false);
+        }
+        
+        CurrentGameState = GameStates.Match;
+        isLoading = true;
+        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
+
+        BrainCloudManager.Instance.ReconnectUser();
+    }
+
     
     public void ChangeState(GameStates newGameState)
     {

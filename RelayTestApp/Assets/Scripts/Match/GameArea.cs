@@ -117,6 +117,10 @@ public class GameArea : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
+            if (!lobby.Members[i].UserCursor)
+            {
+                GameManager.Instance.UpdateCursorList();
+            }
             if (!lobby.Members[i].UserCursor.CursorImage.enabled && lobby.Members[i].IsAlive)
             {
                 lobby.Members[i].UserCursor.AdjustVisibility(true);

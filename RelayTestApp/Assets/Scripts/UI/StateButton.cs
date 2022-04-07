@@ -6,4 +6,6 @@ public class StateButton : MonoBehaviour
 {
     //Called from Unity Button
     public void StateButtonChange() => StateManager.Instance.ButtonPressed_ChangeState();
+
+    public void Reconnect() => StateManager.Instance.ReconnectToGame();
 }
