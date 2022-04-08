@@ -5,16 +5,15 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 public enum TroopStates {Idle, Rotate, Move, Attack}
-public enum EnemyTypes {Grunt, Solder, Archer}
+public enum EnemyTypes {Grunt, Solder, Shooter}
 
 public class BaseTroop : MonoBehaviour, IDamageable<int>
 {
     public EnemyTypes EnemyType;
-    public LayerMask InvaderMask;
-    public LayerMask DefenderMask;
+    
     public GameObject DeathFX;
     public int StartingHealth = 100;
-    public float DetectionRadius = 50;
+    
     public float MoveSpeed = 10;
     public float RotationSpeed = 5;
     public float AcceptanceRangeToTarget = 2;
@@ -22,7 +21,10 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     
     public TroopStates CurrentState = TroopStates.Idle;
     
-    private LayerMask _activeMask;
+    public LayerMask _activeMask;
+    
+    public LayerMask InvaderMask ;
+    public LayerMask DefenderMask ;
     private GameObject _target;
     private int _health;
     public int _hitBackForce = 10;
@@ -36,7 +38,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     private float _delayBeforeDestroy = 2;
     private float _delaySearchTarget = 2;
     private float _delayBeforeResume = 1;
-
+    private float _detectionRadius = 100;
     private float _distanceToTarget;
 
     private Animator _animator;
@@ -49,6 +51,10 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     private HealthBar _healthBarRef;
     private Coroutine _targetSearchCoroutine;
     private Coroutine _stunCoroutine;
+
+    private ShootProjectiles _shootScript;
+
+    private const string _nonTargetTag = "NonTarget";
     
     public int Health { get => _health; set => _health = value; }
 
@@ -58,6 +64,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         _animator = GetComponent<Animator>();
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
         _healthBarRef = GetComponentInChildren<HealthBar>();
+        _shootScript = GetComponent<ShootProjectiles>();
     }
 
     // Start is called before the first frame update
@@ -101,7 +108,9 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         RotateToTarget();
         
         //Move to Target
-        if(_distanceToTarget > AcceptanceRangeToTarget && IsFacingObject() && !_isKnockedBack)
+        if(_distanceToTarget > AcceptanceRangeToTarget &&
+           IsFacingObject() &&
+           !_isKnockedBack)
         {
             if (_isAttacking)
             {
@@ -132,6 +141,9 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     private void MoveTroop()
     {
         _rigidbodyComp.AddForce(transform.forward * MoveSpeed);
+        var vel = _rigidbodyComp.velocity;
+        vel.y = 0;
+        _rigidbodyComp.velocity = vel;
         if(_rigidbodyComp.velocity.magnitude > MoveSpeed)
         {
             _rigidbodyComp.velocity = _rigidbodyComp.velocity.normalized * MoveSpeed;
@@ -144,6 +156,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         //rotate enemy
         Vector3 direction = (_target.transform.position - transform.position).normalized;
+        direction.x = 0;
         if (direction == Vector3.zero) return;
         
         _currQuat = Quaternion.LookRotation(direction);
@@ -159,8 +172,8 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
             case EnemyTypes.Solder:
                 MeleeTarget();
                 break;
-            case EnemyTypes.Archer:
-                ShootTarget();
+            case EnemyTypes.Shooter:
+                StartShootingAnimation();
                 break;
         }
     }
@@ -172,11 +185,20 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         _animator.SetBool(attackParameter, true);
     }
 
-    private void ShootTarget()
+    private void StartShootingAnimation()
     {
-        if (_isAttacking) return;
-        _isAttacking = true;
-        //do pew pew pew stuff here
+        _animator.SetBool(attackParameter, true);
+    }
+    
+    //This function is triggered through an Animation Event
+    public void ShootTarget()
+    {
+        /*if (_isAttacking) return;
+        _isAttacking = true;*/
+        if (_shootScript)
+        {
+            _shootScript.SpawnProjectile(gameObject.layer, _target);
+        }
     }
 
     //0 = invader(local player), 1 = defender(network player)
@@ -255,18 +277,21 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         _targetSearchCoroutine = null;
         _target = null;
         Collider[] hitColliders = new Collider[10];
-        int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, DetectionRadius, hitColliders, _activeMask);
+        int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, _detectionRadius, hitColliders, _activeMask);
         float shortestDistance = Mathf.Infinity;
         
         float distance = 0;
         for (int i = 0; i < numOfColliders; i++)
         {
-            distance = Vector3.Distance(transform.position, hitColliders[i].gameObject.transform.position);
-            if (distance < shortestDistance)
+            if (!hitColliders[i].tag.Contains(_nonTargetTag))
             {
-                shortestDistance = distance;
-                _target = hitColliders[i].gameObject;
-                _targetIsHostile = true;
+                distance = Vector3.Distance(transform.position, hitColliders[i].gameObject.transform.position);
+                if (distance < shortestDistance)
+                {
+                    shortestDistance = distance;
+                    _target = hitColliders[i].gameObject;
+                    _targetIsHostile = true;
+                }   
             }
         }
         

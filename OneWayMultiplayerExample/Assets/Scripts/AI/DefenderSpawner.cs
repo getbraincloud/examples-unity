@@ -21,7 +21,7 @@ public class DefenderSpawner : MonoBehaviour
         {
             var spawnPoint = SpawnPoints[i].transform.position;
             spawnPoint.y = OffsetY;
-            troop = Instantiate(TroopList[i], SpawnPoints[i].transform.position, Quaternion.identity);
+            troop = Instantiate(TroopList[i], SpawnPoints[i].transform.position, SpawnPoints[i].transform.rotation);
             troop.AssignToTeam(1);
             
         }
