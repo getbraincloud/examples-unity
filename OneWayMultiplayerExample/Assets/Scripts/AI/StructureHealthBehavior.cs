@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,8 +11,8 @@ public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
     private HealthBar _healthBar;
     private int _currentHealth;
     private float _delayBeforeDestruction = 1;
-    
-    void Awake()
+
+    private void Start()
     {
         _currentHealth = StartingHealth;
         _healthBar = GetComponentInChildren<HealthBar>();

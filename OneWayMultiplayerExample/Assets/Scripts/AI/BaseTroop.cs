@@ -156,7 +156,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         //rotate enemy
         Vector3 direction = (_target.transform.position - transform.position).normalized;
-        direction.x = 0;
+        //direction.x = 0;
         if (direction == Vector3.zero) return;
         
         _currQuat = Quaternion.LookRotation(direction);
@@ -248,6 +248,13 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         {
             StopCoroutine(_stunCoroutine);
         }
+
+        if (_isAttacking)
+        {
+            _isAttacking = false;
+            _animator.SetBool(attackParameter, false);
+        }
+        
         _isKnockedBack = true;
         _rigidbodyComp.AddForce(direction * _hitBackForce);
         _stunCoroutine = StartCoroutine(DelayToResumeMovement());
