@@ -7,6 +7,7 @@ public class ProjectileMovement : MonoBehaviour
 {
     public float Speed;
     public int DamageAmount;
+    public float LifeTimeDuration = 5;
     public GameObject ExplosionFX;
     private Rigidbody _rigidbody;
     
@@ -18,6 +19,7 @@ public class ProjectileMovement : MonoBehaviour
     private void OnEnable()
     {
         _rigidbody.velocity = transform.forward * Speed;
+        Destroy(gameObject, LifeTimeDuration);
     }
     
     private void OnTriggerEnter(Collider other)

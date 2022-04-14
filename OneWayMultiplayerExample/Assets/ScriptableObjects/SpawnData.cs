@@ -7,6 +7,7 @@ using UnityEngine;
 public struct SpawnParameters
 {
     public EnemyTypes TroopType;
+    public int SpawnLimit;
     public BaseTroop TroopToSpawn;
 }
 
@@ -14,6 +15,19 @@ public struct SpawnParameters
 public class SpawnData : ScriptableObject
 {
     public List<SpawnParameters> SpawnParametersList = new List<SpawnParameters>();
+
+    public int ReturnSpawnLimit(EnemyTypes typeToLimit)
+    {
+        foreach (SpawnParameters spawnParameters in SpawnParametersList)
+        {
+            if (spawnParameters.TroopType == typeToLimit)
+            {
+                return spawnParameters.SpawnLimit;
+            }
+        }
+        Debug.LogWarning($"Troop Type doesn't exist in spawn data!! Trying to spawn: {typeToLimit.ToString()}");
+        return 1;
+    }
 
     public BaseTroop GetTroop(EnemyTypes typeToGet)
     {
