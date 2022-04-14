@@ -61,8 +61,6 @@ public class SpawnController : MonoBehaviour
         }
     }
 
-    //ToDo: Need to implement a cap for each troop to be spawned in a round. Then replenish that amount after round is finish so spawning can continue
-    
     // Update is called once per frame
     void Update()
     {

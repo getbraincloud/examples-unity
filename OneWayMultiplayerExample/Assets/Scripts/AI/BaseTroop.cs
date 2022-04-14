@@ -28,6 +28,8 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     private GameObject _target;
     private int _health;
     public int _hitBackForce = 10;
+    //Checks every 10 frames for a new target
+    private int _searchTargetInterval = 10;
     
     private bool _isDead;
     private bool _isAttacking;
@@ -101,6 +103,11 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
                 FindTarget();
             }
             return;
+        }
+        //Check every "x" frames, x = _searchTargetInterval
+        if (Time.frameCount % _searchTargetInterval == 0)
+        {
+            FindTarget();
         }
         
         _distanceToTarget = (_target.transform.position - transform.position).magnitude;
@@ -233,6 +240,13 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         {
             Dead();
         }
+    }
+
+    public void IncomingAttacker(BaseTroop in_attacker)
+    {
+        if (_target == in_attacker.gameObject) return;
+        
+        _target = in_attacker.gameObject;
     }
 
     public void Dead()
