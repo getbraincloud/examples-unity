@@ -1,31 +1,35 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+
 public class GameManager : MonoBehaviour
 {
-    public float RoundDuration;
-    public Image ClockFillImage;
-    
-    // Start is called before the first frame update
-    void Start()
+    //Local User Info
+    private UserInfo _currentUserInfo;
+    public UserInfo CurrentUserInfo
     {
-        ClockFillImage.fillAmount = 1;
-        StartCoroutine(Timer(RoundDuration));
+        get => _currentUserInfo;
+        set => _currentUserInfo = value;
     }
+    //Singleton Pattern
+    private static GameManager _instance;
+    public static GameManager Instance => _instance;
 
-    public IEnumerator Timer(float duration)
+    private void Awake()
     {
-        float startTime = Time.time;
-        float time = duration;
-        float value = 1;
-
-        while (Time.time - startTime < duration)
+        DontDestroyOnLoad(gameObject);
+        if (!_instance)
         {
-            time -= Time.deltaTime;
-            value = time / duration;
-            ClockFillImage.fillAmount = value;
-            yield return new WaitForFixedUpdate();
+            _instance = this;
         }
+        else
+        {
+            Destroy(gameObject);
+        }
+
+        _currentUserInfo = new UserInfo();
     }
 }

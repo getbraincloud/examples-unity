@@ -1,0 +1,140 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public enum MenuStates {SignIn,MainMenu,Lobby,Game,Connecting}
+
+public class MenuManager : MonoBehaviour
+{
+    [Header("Menu States")]
+    public List<MenuState> MenuStatesList = new List<MenuState>();
+    public MenuStates CurrentMenuState;
+    public LoadingMenuState LoadingMenuState;
+    public ErrorMessage ErrorMessageState;
+    public bool IsLoading;
+
+    [Header("UI Fields")] 
+    public TMP_Text LoggedInNameText;
+    public TMP_InputField UsernameInputField;
+    public TMP_InputField PasswordInputField;
+    
+    private EventSystem _eventSystem;
+
+    private const string LOGGING_IN_MESSAGE = "Logging in...";
+    private const string LOOKING_FOR_PLAYERS_MESSAGE = "Looking for players...";
+    private const string JOINING_MATCH_MESSAGE = "Joining Match...";
+
+    private static MenuManager _instance;
+    public static MenuManager Instance => _instance;
+
+
+    private void Awake()
+    {
+        if (!_instance)
+        {
+            _instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        _eventSystem = EventSystem.current;
+    }
+
+    private void Start()
+    {
+        ChangeState(MenuStates.SignIn);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+         
+            if (next != null)
+            {
+                InputField inputfield = next.GetComponent<InputField>();
+                if (inputfield != null)
+                {
+                    //if it's an input field, also set the text caret
+                    inputfield.OnPointerClick(new PointerEventData(_eventSystem));
+                }
+                _eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
+            }
+        }
+    }
+
+    public void ButtonPressChangeState(MenuStates newMenuState = MenuStates.Connecting)
+    {
+        foreach (MenuState currentState in MenuStatesList)
+        {
+            currentState.gameObject.SetActive(false);
+        }
+
+        if (newMenuState != global::MenuStates.Connecting)
+        {
+            CurrentMenuState = newMenuState;
+        }
+        IsLoading = true;
+        
+        //User is in this state and moving onto the next
+        switch (CurrentMenuState)
+        {
+            //Logging In...
+            case MenuStates.SignIn:
+                CurrentMenuState = MenuStates.MainMenu;
+                BrainCloudManager.Instance.Login();
+                LoadingMenuState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE, false, MenuStates.MainMenu);
+                break;
+            //Looking for players...
+            case MenuStates.MainMenu:
+                CurrentMenuState = MenuStates.Lobby;
+                //ToDo: Braincloud find players
+                LoadingMenuState.ConnectStatesWithLoading(LOOKING_FOR_PLAYERS_MESSAGE, true, MenuStates.Lobby);
+                break;
+            //Loading up game to start invading...
+            case MenuStates.Lobby:
+                CurrentMenuState = MenuStates.Game;
+                //ToDo: Braincloud get player info to load game with
+                //ToDo: Loading transition for scene to scene. 
+                break;
+        }
+
+        StartCoroutine(FakeLoading());
+    }
+
+    public void UpdateMainMenu()
+    {
+        string username = GameManager.Instance.CurrentUserInfo.Username;
+        PlayerPrefs.SetString(Settings.UsernameKey, username);
+        LoggedInNameText.text = $"Logged in as {username}";
+    }
+    
+    public void AbortToSignIn(string errorMessage)
+    {
+        ErrorMessageState.SetUpPopUpMessage(errorMessage);
+        LoadingMenuState.CancelNextState = true;
+        ChangeState(MenuStates.SignIn);
+    }
+
+    IEnumerator FakeLoading()
+    {
+        yield return new WaitForSeconds(2);
+        IsLoading = false;
+    }
+
+    public void ChangeState(MenuStates newMenuState)
+    {
+        foreach (MenuState currentState in MenuStatesList)
+        {
+            currentState.gameObject.SetActive(currentState.AssignedGameState == newMenuState);
+        }
+
+        CurrentMenuState = newMenuState;
+    }
+}
