@@ -1,9 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+
+public enum InvaderRanks{Easy,Medium,Pillager}
+public enum DefenderRanks{Easy,Medium,ForValhalla}
 
 public class GameManager : MonoBehaviour
 {
@@ -29,7 +33,18 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        
+        _currentUserInfo = Settings.LoadPlayerInfo();
+    }
 
-        _currentUserInfo = new UserInfo();
+    public bool IsEntityIdValid()
+    {
+        return !_currentUserInfo.EntityId.IsNullOrEmpty();
+    }
+
+    public void UpdateEntityId(string in_id)
+    {
+        _currentUserInfo.EntityId = in_id;
+        Settings.SaveEntityId(in_id);
     }
 }

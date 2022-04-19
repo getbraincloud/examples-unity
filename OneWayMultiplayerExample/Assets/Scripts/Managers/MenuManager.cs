@@ -21,6 +21,11 @@ public class MenuManager : MonoBehaviour
     public TMP_Text LoggedInNameText;
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
+
+    [Header("UI References")] 
+    public List<float> SelectionList = new List<float>();
+    public RectTransform InvaderButtonBorder;
+    public RectTransform DefenderButtonBorder; 
     
     private EventSystem _eventSystem;
 
@@ -96,6 +101,7 @@ public class MenuManager : MonoBehaviour
                 CurrentMenuState = MenuStates.Lobby;
                 //ToDo: Braincloud find players
                 LoadingMenuState.ConnectStatesWithLoading(LOOKING_FOR_PLAYERS_MESSAGE, true, MenuStates.Lobby);
+                StartCoroutine(FakeLoading());
                 break;
             //Loading up game to start invading...
             case MenuStates.Lobby:
@@ -104,8 +110,7 @@ public class MenuManager : MonoBehaviour
                 //ToDo: Loading transition for scene to scene. 
                 break;
         }
-
-        StartCoroutine(FakeLoading());
+        
     }
 
     public void UpdateMainMenu()
@@ -113,6 +118,16 @@ public class MenuManager : MonoBehaviour
         string username = GameManager.Instance.CurrentUserInfo.Username;
         PlayerPrefs.SetString(Settings.UsernameKey, username);
         LoggedInNameText.text = $"Logged in as {username}";
+        
+        int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
+        Vector2 posI = DefenderButtonBorder.anchoredPosition; 
+        posI.x = SelectionList[defenderIndex];
+        DefenderButtonBorder.anchoredPosition = posI;
+        
+        int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+        Vector2 posD = InvaderButtonBorder.anchoredPosition; 
+        posD.x = SelectionList[invaderIndex];
+        InvaderButtonBorder.anchoredPosition = posD;
     }
     
     public void AbortToSignIn(string errorMessage)
@@ -122,6 +137,7 @@ public class MenuManager : MonoBehaviour
         ChangeState(MenuStates.SignIn);
     }
 
+    //ToDo: Delete this once loading isn't faked
     IEnumerator FakeLoading()
     {
         yield return new WaitForSeconds(2);

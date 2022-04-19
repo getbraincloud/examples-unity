@@ -12,6 +12,12 @@ public class UserInfo
     public bool AllowSendTo = true;     
     //Is this user still connected
     public bool IsAlive;
+
+    public InvaderRanks InvaderSelected = 0;
+
+    public DefenderRanks DefendersSelected = 0;
+
+    public string EntityId;
     public UserInfo() { }
     public string cxId;
     public UserInfo(Dictionary<string, object> userJson)

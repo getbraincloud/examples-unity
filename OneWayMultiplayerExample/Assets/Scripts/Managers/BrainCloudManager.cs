@@ -62,7 +62,7 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.CurrentUserInfo.Username = username;
         InitializeBC();
         // Authenticate with brainCloud
-        m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LoggingInError, "Login Failed");
+        m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, OnLoggingInError, "Login Failed");
     }
     
     // User authenticated, handle the result
@@ -82,7 +82,7 @@ public class BrainCloudManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, LoggingInError,
+            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, OnLoggingInError,
                 "Failed to update username to braincloud");
         }
         else
@@ -92,24 +92,18 @@ public class BrainCloudManager : MonoBehaviour
             {
                 userInfo.Username = tempUsername;
             }
-            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
+            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, OnLoggingInError,
                 "Failed to update username to braincloud");
         }
         GameManager.Instance.CurrentUserInfo = userInfo;
     }
     
     // Go back to login screen, with an error message
-    void LoggingInError(int status, int reasonCode, string jsonError, object cbObject)
+    void OnLoggingInError(int status, int reasonCode, string jsonError, object cbObject)
     {
         if (m_dead) return;
 
         m_dead = true;
-
-        m_bcWrapper.RelayService.DeregisterRelayCallback();
-        m_bcWrapper.RelayService.DeregisterSystemCallback();
-        m_bcWrapper.RelayService.Disconnect();
-        m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
-        m_bcWrapper.RTTService.DisableRTT();
 
         string message = cbObject as string;
 
@@ -120,8 +114,56 @@ public class BrainCloudManager : MonoBehaviour
     // User fully logged in. 
     void OnLoggedIn(string jsonResponse, object cbObject)
     {
-        MenuManager.Instance.UpdateMainMenu();
+        //ToDo: need to check if this is a brand new user to determine to read the saved data
         PlayerPrefs.SetString(Settings.PasswordKey, MenuManager.Instance.PasswordInputField.text);
+        
+        if (GameManager.Instance.IsEntityIdValid())
+        {
+            m_bcWrapper.EntityService.GetEntity
+                (
+                    GameManager.Instance.CurrentUserInfo.EntityId,
+                    OnValidEntityResponse,
+                    OnLoggingInError
+                );
+        }
+        else
+        {
+            Dictionary<string, object> entityInfo = new Dictionary<string, object>();
+            entityInfo.Add("defenderSelection", 0);
+            entityInfo.Add("invaderSelection", 0);
+            Dictionary<string, object> jsonData = new Dictionary<string, object>();
+            jsonData.Add("data",entityInfo);
+            string data = JsonWriter.Serialize(jsonData);
+
+
+            m_bcWrapper.EntityService.CreateEntity
+                (
+                    "vikings",
+                    data,
+                    "",
+                    OnCreatedEntityResponse,
+                    OnLoggingInError
+                );
+        }
+    }
+
+    void OnCreatedEntityResponse(string jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
+        string entityId = jsonData["entityId"] as string;
+        GameManager.Instance.UpdateEntityId(entityId);
+        
         MenuManager.Instance.IsLoading = false;
+        MenuManager.Instance.UpdateMainMenu();
+    }
+
+    void OnValidEntityResponse(string jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        
+        
+        MenuManager.Instance.IsLoading = false;
+        MenuManager.Instance.UpdateMainMenu();
     }
 }
