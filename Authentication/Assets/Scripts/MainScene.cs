@@ -11,6 +11,12 @@ public class MainScene : MonoBehaviour
     public BCConfig BCConfig;
 
     private BrainCloudWrapper _bc;
+    private EntityInterface _entityInterface;
+
+    public EntityInterface EntityInterface
+    {
+        get => _entityInterface;
+    }
     
     static int MIN_LEFT_SIDE_WIDTH = 350;
     Vector2 m_scrollPosition;
@@ -46,7 +52,8 @@ public class MainScene : MonoBehaviour
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
-        
+        _entityInterface = GetComponent<EntityInterface>();
+        _entityInterface.Wrapper = _bc;
         MoveToScreen(m_bcFunc);
     }
     // Update is called once per frame
@@ -169,6 +176,12 @@ public class MainScene : MonoBehaviour
         m_log += log;
         m_log += "\n";
         m_scrollPosition = new Vector2(m_scrollPosition.x, Mathf.Infinity);
+    }
+
+    public void RealLogging(string in_log)
+    {
+        m_log = in_log;
+        Debug.Log($"My Log: {in_log}");
     }
 
     public void AddLogNoLn(string log)
