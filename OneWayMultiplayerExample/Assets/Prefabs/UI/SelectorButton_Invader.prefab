@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 8551765673883928994}
   - component: {fileID: 2617215463248011437}
   - component: {fileID: 8656079036249233529}
-  - component: {fileID: 5112178496355169102}
+  - component: {fileID: 9218490787575090122}
   m_Layer: 5
   m_Name: SelectorButton_Invader
   m_TagString: Untagged
@@ -258,7 +258,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5112178496355169102}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: SummonSelector, Assembly-CSharp
         m_MethodName: OnTroopSelection
         m_Mode: 1
@@ -270,7 +270,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &5112178496355169102
+--- !u!114 &9218490787575090122
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -279,8 +279,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 6938097985844859078}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e27a545f8ff1b154881f45c6ec4742c4, type: 3}
+  m_Script: {fileID: 11500000, guid: 003e8e343a05853419d25570dbba77f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnemyTypeSelection: 1
-  SpawnLimitText: {fileID: 0}
+  ArmyRank: 0
+  ArmyType: 0

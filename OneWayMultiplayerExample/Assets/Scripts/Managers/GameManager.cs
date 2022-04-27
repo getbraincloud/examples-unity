@@ -6,8 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public enum InvaderRanks{Easy,Medium,Pillager}
-public enum DefenderRanks{Easy,Medium,ForValhalla}
+public enum ArmyDivisionRank{Easy,Medium,Hard}
+public enum ArmyType {Invader,Defense}
 
 public class GameManager : MonoBehaviour
 {
@@ -35,6 +35,8 @@ public class GameManager : MonoBehaviour
         }
         
         _currentUserInfo = Settings.LoadPlayerInfo();
+        MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
+        MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
     }
 
     public bool IsEntityIdValid()
@@ -46,5 +48,11 @@ public class GameManager : MonoBehaviour
     {
         _currentUserInfo.EntityId = in_id;
         Settings.SaveEntityId(in_id);
+    }
+
+    public void UpdateArmySelection(int in_defenderSelection, int in_invaderSelection)
+    {
+        _currentUserInfo.InvaderSelected = (ArmyDivisionRank) in_invaderSelection;
+        _currentUserInfo.DefendersSelected = (ArmyDivisionRank) in_defenderSelection;
     }
 }

@@ -13,9 +13,9 @@ public class UserInfo
     //Is this user still connected
     public bool IsAlive;
 
-    public InvaderRanks InvaderSelected = 0;
+    public ArmyDivisionRank InvaderSelected = 0;
 
-    public DefenderRanks DefendersSelected = 0;
+    public ArmyDivisionRank DefendersSelected = 0;
 
     public string EntityId;
     public UserInfo() { }

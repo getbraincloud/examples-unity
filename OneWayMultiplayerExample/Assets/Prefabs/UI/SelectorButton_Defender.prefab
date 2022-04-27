@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 3391102273899958019}
   - component: {fileID: 4768791187070136637}
   - component: {fileID: 6513390815320146359}
-  - component: {fileID: 6150984185397490121}
+  - component: {fileID: 6598827156634109990}
   m_Layer: 5
   m_Name: SelectorButton_Defender
   m_TagString: Untagged
@@ -258,9 +258,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6150984185397490121}
-        m_TargetAssemblyTypeName: SummonSelector, Assembly-CSharp
-        m_MethodName: OnTroopSelection
+      - m_Target: {fileID: 6598827156634109990}
+        m_TargetAssemblyTypeName: ArmySelectionButton, Assembly-CSharp
+        m_MethodName: OnArmySelected
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -270,7 +270,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &6150984185397490121
+--- !u!114 &6598827156634109990
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -279,8 +279,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 3832472844222237755}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e27a545f8ff1b154881f45c6ec4742c4, type: 3}
+  m_Script: {fileID: 11500000, guid: 003e8e343a05853419d25570dbba77f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnemyTypeSelection: 1
-  SpawnLimitText: {fileID: 0}
+  ArmyRank: 0
+  ArmyType: 0

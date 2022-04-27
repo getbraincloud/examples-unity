@@ -18,6 +18,17 @@ public static class Settings
         return playerInfo;
     }
 
-    public static void SaveEntityId(string in_id) => PlayerPrefs.SetString(EntityIdKey, in_id);
-    
+    public static void SaveEntityId(string in_id) 
+    {
+        PlayerPrefs.SetString(EntityIdKey, in_id);
+        PlayerPrefs.Save();
+    }
+
+    public static void SaveLogin(string in_username, string in_password)
+    {
+        PlayerPrefs.SetString(UsernameKey, in_username);
+        PlayerPrefs.SetString(PasswordKey, in_password);
+        GameManager.Instance.CurrentUserInfo.Username = in_username;
+        PlayerPrefs.Save();
+    }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
@@ -43,6 +44,11 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        UninitializeBC();
+    }
+
     //Called from Unity Button, attempting to login
     public void Login()
     {
@@ -59,10 +65,59 @@ public class BrainCloudManager : MonoBehaviour
             return;
         }
         
-        GameManager.Instance.CurrentUserInfo.Username = username;
+        Settings.SaveLogin(username, password);
         InitializeBC();
         // Authenticate with brainCloud
         m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, OnLoggingInError, "Login Failed");
+    }
+
+    public void SignOut()
+    {
+        m_bcWrapper.PlayerStateService.Logout();
+    }
+
+    public void UpdateEntity()
+    {
+        m_bcWrapper.EntityService.UpdateEntity
+            (
+                GameManager.Instance.CurrentUserInfo.EntityId,
+                "viking",
+                CreateJsonEntityData(false),
+                CreateACLJson(),
+                -1
+            );
+    }
+
+    public void LookForPlayers()
+    {
+        m_bcWrapper.MatchMakingService.EnableMatchMaking(OnEnableMatchMaking, OnFoundPlayersError);
+        //m_bcWrapper.EntityService.GetEntitiesByType("vikings", OnFoundPlayers, OnFoundPlayersError);
+    }
+
+    void OnEnableMatchMaking(string jsonResponse, object cbObject)
+    {
+        m_bcWrapper.MatchMakingService.FindPlayers(1000, 10, OnFoundPlayers, OnFoundPlayersError);
+    }
+
+    public void SetPlayerRating()
+    {
+        m_bcWrapper.MatchMakingService.SetPlayerRating(10);
+    }
+
+    void OnFoundPlayers(string jsonResponse, object cbObject)
+    {
+        //m_bcWrapper.EntityService.GetSharedEntitiesForProfileId("a20735cb-62fa-43f3-956f-690c152755e9", OnFoundEntity, OnFoundPlayersError);
+
+    }
+
+    void OnFoundPlayersError(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        
+    }
+
+    void OnFoundEntity(string jsonResponse, object cbObject)
+    {
+        
     }
     
     // User authenticated, handle the result
@@ -95,7 +150,6 @@ public class BrainCloudManager : MonoBehaviour
             m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, OnLoggingInError,
                 "Failed to update username to braincloud");
         }
-        GameManager.Instance.CurrentUserInfo = userInfo;
     }
     
     // Go back to login screen, with an error message
@@ -115,7 +169,6 @@ public class BrainCloudManager : MonoBehaviour
     void OnLoggedIn(string jsonResponse, object cbObject)
     {
         //ToDo: need to check if this is a brand new user to determine to read the saved data
-        PlayerPrefs.SetString(Settings.PasswordKey, MenuManager.Instance.PasswordInputField.text);
         
         if (GameManager.Instance.IsEntityIdValid())
         {
@@ -128,19 +181,11 @@ public class BrainCloudManager : MonoBehaviour
         }
         else
         {
-            Dictionary<string, object> entityInfo = new Dictionary<string, object>();
-            entityInfo.Add("defenderSelection", 0);
-            entityInfo.Add("invaderSelection", 0);
-            Dictionary<string, object> jsonData = new Dictionary<string, object>();
-            jsonData.Add("data",entityInfo);
-            string data = JsonWriter.Serialize(jsonData);
-
-
             m_bcWrapper.EntityService.CreateEntity
                 (
                     "vikings",
-                    data,
-                    "",
+                    CreateJsonEntityData(true),
+                    CreateACLJson(),
                     OnCreatedEntityResponse,
                     OnLoggingInError
                 );
@@ -153,17 +198,62 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
         string entityId = jsonData["entityId"] as string;
         GameManager.Instance.UpdateEntityId(entityId);
-        
+        GameManager.Instance.UpdateArmySelection(0, 0);
         MenuManager.Instance.IsLoading = false;
         MenuManager.Instance.UpdateMainMenu();
+        
+        
     }
 
     void OnValidEntityResponse(string jsonResponse, object cbObject)
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data1 = response["data"] as Dictionary<string,object>;
         
+        //Read operation came back with data being null meaning we dont have an entity to read.
+        if (data1 == null)
+        {
+            Settings.SaveEntityId("");
+            //ToDo: need a plan to recover entity...
+            return;
+        }
         
-        MenuManager.Instance.IsLoading = false;
+        Dictionary<string, object> data2 = data1["data"] as Dictionary<string,object>;
+        Dictionary<string, object> entityData = data2["data"] as Dictionary<string,object>;
+        int defenderSelection = (int) entityData["defenderSelection"];
+        int invaderSelection = (int) entityData["invaderSelection"];
+        GameManager.Instance.UpdateArmySelection(defenderSelection, invaderSelection);
         MenuManager.Instance.UpdateMainMenu();
+        MenuManager.Instance.IsLoading = false;
+    }
+
+    string CreateJsonEntityData(bool isDataNew)
+    {
+        Dictionary<string, object> entityInfo = new Dictionary<string, object>();
+        if (isDataNew)
+        {
+            entityInfo.Add("defenderSelection", 0);
+            entityInfo.Add("invaderSelection", 0);    
+        }
+        else
+        {
+            UserInfo user = GameManager.Instance.CurrentUserInfo;
+            entityInfo.Add("defenderSelection",(int) user.DefendersSelected);
+            entityInfo.Add("invaderSelection",(int) user.InvaderSelected);
+        }
+        
+        Dictionary<string, object> jsonData = new Dictionary<string, object>();
+        jsonData.Add("data",entityInfo);
+        string value = JsonWriter.Serialize(jsonData);
+
+        return value;
+    }
+
+    string CreateACLJson()
+    {
+        Dictionary<string, object> aclInfo = new Dictionary<string, object>();
+        aclInfo.Add("other", 2);
+        string value = JsonWriter.Serialize(aclInfo);
+        return value;
     }
 }

@@ -81,7 +81,7 @@ public class MenuManager : MonoBehaviour
             currentState.gameObject.SetActive(false);
         }
 
-        if (newMenuState != global::MenuStates.Connecting)
+        if (newMenuState != MenuStates.Connecting)
         {
             CurrentMenuState = newMenuState;
         }
@@ -99,7 +99,7 @@ public class MenuManager : MonoBehaviour
             //Looking for players...
             case MenuStates.MainMenu:
                 CurrentMenuState = MenuStates.Lobby;
-                //ToDo: Braincloud find players
+                BrainCloudManager.Instance.LookForPlayers();
                 LoadingMenuState.ConnectStatesWithLoading(LOOKING_FOR_PLAYERS_MESSAGE, true, MenuStates.Lobby);
                 StartCoroutine(FakeLoading());
                 break;
@@ -129,6 +129,24 @@ public class MenuManager : MonoBehaviour
         posD.x = SelectionList[invaderIndex];
         InvaderButtonBorder.anchoredPosition = posD;
     }
+
+    public void UpdateButtonSelectorPosition(ArmyType in_type)
+    {
+        if (in_type == ArmyType.Invader)
+        {
+            int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+            Vector2 posD = InvaderButtonBorder.anchoredPosition; 
+            posD.x = SelectionList[invaderIndex];
+            InvaderButtonBorder.anchoredPosition = posD;    
+        }
+        else
+        {
+            int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
+            Vector2 posI = DefenderButtonBorder.anchoredPosition; 
+            posI.x = SelectionList[defenderIndex];
+            DefenderButtonBorder.anchoredPosition = posI;    
+        }
+    }
     
     public void AbortToSignIn(string errorMessage)
     {
@@ -152,5 +170,11 @@ public class MenuManager : MonoBehaviour
         }
 
         CurrentMenuState = newMenuState;
+    }
+
+    public void SignOutPressed()
+    {
+        BrainCloudManager.Instance.SignOut();
+        ChangeState(MenuStates.SignIn);
     }
 }
