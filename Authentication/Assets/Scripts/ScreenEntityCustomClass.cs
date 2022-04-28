@@ -47,19 +47,20 @@ public class ScreenEntityCustomClass : BCScreen
     }
 
 
-    private Player m_player;
+    //private Player m_player;
     
     public ScreenEntityCustomClass(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        _bc.EntityFactory.RegisterEntityClass<Player>(Player.ENTITY_TYPE);
+        //_bc.EntityFactory.RegisterEntityClass<Player>(Player.ENTITY_TYPE);
 
-        _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
-
+        //_bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
+        m_mainScene.CustomEntityInterface.ReadCustomEntity();
+        m_mainScene.RealLogging("[ReadPlayerState]... ");
     }
 
+    /*
     private void ReadPlayerStateSuccess(string json, object cb)
     {
         m_mainScene.AddLog("SUCCESS");
@@ -76,9 +77,16 @@ public class ScreenEntityCustomClass : BCScreen
             }
         }
     }
+    */
 
     public override void OnScreenGUI()
     {
+        CustomEntityInstance m_player = null;
+        if (m_mainScene.CustomEntityInterface.PlayerAssigned)
+        {
+            m_player = m_mainScene.CustomEntityInterface.CustomPlayer;    
+        }
+        
         GUILayout.BeginVertical();
 
         int minLabelWidth = 60;
@@ -100,8 +108,9 @@ public class ScreenEntityCustomClass : BCScreen
         GUILayout.Label("Name", GUILayout.Width(minLabelWidth));
         if (m_player != null)
         {
-            m_player.Name = GUILayout.TextField((string)m_player.Name);
-        } else
+            m_player.FirstName = GUILayout.TextField(m_player.FirstName);
+        } 
+        else
         {
             GUILayout.Box("---");
         }
@@ -109,16 +118,12 @@ public class ScreenEntityCustomClass : BCScreen
 
         // entity property 'age'
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Age", GUILayout.Width(minLabelWidth));
+        GUILayout.Label("Position", GUILayout.Width(minLabelWidth));
         if (m_player != null)
         {
-            string ageStr = GUILayout.TextField(((int)m_player.Age).ToString());
-            int ageInt = 0;
-            if (int.TryParse(ageStr, out ageInt))
-            {
-                m_player.Age = ageInt;
-            }
-        } else
+            m_player.Position = GUILayout.TextField(m_player.Position);
+        } 
+        else
         {
             GUILayout.Box("---");
         }
@@ -130,9 +135,8 @@ public class ScreenEntityCustomClass : BCScreen
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Create Entity"))
             {
-                m_player = new Player(ConnectScene._bc.EntityService);
-                m_player.Name = "Johnny Philharmonica";
-                m_player.Age = 49;
+                m_mainScene.CustomEntityInterface.CreateCustomEntity();
+                m_mainScene.RealLogging("Creating Entity....");
             }
         }
         if (m_player != null)
@@ -140,14 +144,14 @@ public class ScreenEntityCustomClass : BCScreen
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Save Entity"))
             {
-                m_mainScene.AddLogNoLn("[Entity.StoreAsync()]... ");
-                m_player.StoreAsync(Success_Callback, Failure_Callback);
+                m_mainScene.EntityInterface.UpdateEntity();
+                m_mainScene.RealLogging("Updating Entity...");
             }
             if (GUILayout.Button("Delete Entity"))
             {
-                m_player.DeleteAsync(Success_Callback, Failure_Callback);
+                m_mainScene.EntityInterface.DeleteEntity();
                 m_player = null;
-                m_mainScene.AddLogNoLn("[Entity.DeleteEntity]... ");
+                m_mainScene.RealLogging("Deleting Entity...");
             }
         }
         GUILayout.EndHorizontal();

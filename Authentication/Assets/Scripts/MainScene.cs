@@ -12,10 +12,16 @@ public class MainScene : MonoBehaviour
 
     private BrainCloudWrapper _bc;
     private EntityInterface _entityInterface;
-
     public EntityInterface EntityInterface
     {
         get => _entityInterface;
+    }
+    
+    private CustomEntityInterface _customEntityInterface;
+
+    public CustomEntityInterface CustomEntityInterface
+    {
+        get => _customEntityInterface;
     }
     
     static int MIN_LEFT_SIDE_WIDTH = 350;
@@ -52,8 +58,12 @@ public class MainScene : MonoBehaviour
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
+        
         _entityInterface = GetComponent<EntityInterface>();
         _entityInterface.Wrapper = _bc;
+        _customEntityInterface = GetComponent<CustomEntityInterface>();
+        _customEntityInterface.Wrapper = _bc;
+        
         MoveToScreen(m_bcFunc);
     }
     // Update is called once per frame

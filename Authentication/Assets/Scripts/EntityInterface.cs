@@ -52,22 +52,19 @@ public class EntityInterface : MonoBehaviour
 {
     [SerializeField]
     private EntityInstance _player = null;
-    
-    private BrainCloudWrapper _bcWrapper;
-
-    private readonly string PLAYER_ENTITY_TYPE = "player";
-
-    public bool PlayerAssigned;
-    public BrainCloudWrapper Wrapper
-    {
-        set => _bcWrapper = value;
-    }
-
     public EntityInstance Player
     {
         get => _player;
     }
-
+    private BrainCloudWrapper _bcWrapper;
+    public BrainCloudWrapper Wrapper
+    {
+        set => _bcWrapper = value;
+    }
+    
+    private readonly string PLAYER_ENTITY_TYPE = "player";
+    public bool PlayerAssigned;
+    
     public void ReadEntity()
     {
         _bcWrapper.PlayerStateService.ReadUserState(OnReadSuccess, OnFailureCallback);
@@ -86,7 +83,6 @@ public class EntityInterface : MonoBehaviour
             return;
         }
         
-        _player = new EntityInstance();
         PlayerAssigned = true;
         
         var listOfEntities = data["entities"] as Dictionary<string, object>[];
@@ -94,10 +90,12 @@ public class EntityInterface : MonoBehaviour
         {
             Dictionary<string, object> entity = listOfEntities[i];
             string listType = entity["entityType"] as string;
+            
             if (listType == PLAYER_ENTITY_TYPE)
             {
                 var data1 = entity["data"] as Dictionary<string, object>;
                 var entityData = data1["data"] as Dictionary<string, object>;
+                _player = new EntityInstance();
                 _player.Name = entityData["name"] as string;
                 _player.Age = entityData["age"] as string;
 
