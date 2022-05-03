@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 275754338}
   - component: {fileID: 275754343}
   - component: {fileID: 275754340}
+  - component: {fileID: 275754344}
   m_Layer: 0
   m_Name: Main
   m_TagString: MainCamera
@@ -249,6 +250,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BCConfig: {fileID: 560769782}
+--- !u!114 &275754344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 275754337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ebe07bf237c9454bb207086ba7812f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _customPlayer:
+    FirstName: Johnny
+    LastName: Bravo
+    Position: forward
+    Goals: 0
+    Assists: 0
+    TimeToLive: 0
+    IsOwned: 0
+    EntityId: 
+    OwnerId: 
+    EntityType: athletes
+    Version: -1
+  PlayerAssigned: 0
 --- !u!1 &560769781
 GameObject:
   m_ObjectHideFlags: 0

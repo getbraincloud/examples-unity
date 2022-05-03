@@ -9,16 +9,18 @@ using Unity.UNetWeaver;
 using UnityEngine;
 
 /*
- * Entity Interface class demonstrates how to handle requests and responses from braincloud
+ * Entity Interface class demonstrates how to handle JSON requests and responses from braincloud
+ * when handling User Entities.
+ * This includes:
  *
- * How to create entity
- *   Then store that id
+ *  - How to create entity
+ *  - How to read entity with ID received from a JSON response
+ *  - How to update entity 
+ *  - How to delete entity
  *
- * How to read entity with stored id
- *
- * How to update entity
- *
- * how to delete entity
+ * For more info:
+ * https://getbraincloud.com/apidocs/portal-usage/user-monitoring/user-entities/
+ * https://getbraincloud.com/apidocs/cloud-code-central/cloud-code-tutorials/cloud-code-tutorial3-working-with-entities/
  */
 
 [Serializable]
@@ -29,6 +31,11 @@ public class EntityInstance
     
     public string EntityId;
     public string EntityType;
+    /*
+     * 0 = private to the owner
+     * 1 = readable by all users, but only writeable by the owner
+     * 2 = writable by all users
+     */
     public ACL Acl;
     //-1 tells the server to create the latest version
     public int Version = -1;
@@ -36,7 +43,7 @@ public class EntityInstance
     public DateTime CreatedAt;
     public DateTime UpdatedAt;
 
-    private readonly string DEFAULT_NAME = "Johnny Philharmonica";
+    private readonly string DEFAULT_NAME = "Johnny Bravo";
     private readonly string DEFAULT_AGE = "49";
     private readonly string DEFAULT_TYPE = "player";
     
@@ -73,7 +80,6 @@ public class EntityInterface : MonoBehaviour
     private void OnReadSuccess(string json, object cb)
     {
         _player = null;
-        Debug.Log($"Read Success: {json}");
         Dictionary<string, object> jsonObj = JsonReader.Deserialize(json) as Dictionary<string, object>;
         Dictionary<string, object> data = jsonObj["data"] as Dictionary<string, object>;
 
@@ -167,7 +173,7 @@ public class EntityInterface : MonoBehaviour
 
     private void OnUpdateEntity(string json, object cbObject)
     {
-        Debug.Log($"On Update Response: {json}");
+        Debug.Log($"Entity is updated !");
     }
 
     public void DeleteEntity()
@@ -186,12 +192,7 @@ public class EntityInterface : MonoBehaviour
 
     private void OnDeleteEntity(string json, object cbObject)
     {
-        Debug.Log($"On Delete Entity: {json}");
-    }
-
-    private void OnSuccessCallback(string json, object cbObject)
-    {
-        Debug.Log("GREAT SUCCESSS");
+        Debug.Log($"Entity is deleted !");
     }
 
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
@@ -200,11 +201,6 @@ public class EntityInterface : MonoBehaviour
         Debug.Log($"Failure codes: status code: {statusCode}, reason code: {reasonCode}");
     }
 
-    public string ToJsonString(Dictionary<string,object> in_data)
-    {
-        return JsonWriter.Serialize(in_data);
-    }
-    
     string CreateJsonEntityData()
     {
         Dictionary<string, object> entityInfo = new Dictionary<string, object>();
@@ -221,6 +217,11 @@ public class EntityInterface : MonoBehaviour
     string CreateACLJson()
     {
         Dictionary<string, object> aclInfo = new Dictionary<string, object>();
+        /*
+         * 0 = private to the owner
+         * 1 = readable by all users, but only writeable by the owner
+         * 2 = writable by all users
+         */
         aclInfo.Add("other", 2);
         string value = JsonWriter.Serialize(aclInfo);
         return value;

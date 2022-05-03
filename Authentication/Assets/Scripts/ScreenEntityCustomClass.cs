@@ -46,38 +46,13 @@ public class ScreenEntityCustomClass : BCScreen
         }
     }
 
-
-    //private Player m_player;
-    
     public ScreenEntityCustomClass(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        //_bc.EntityFactory.RegisterEntityClass<Player>(Player.ENTITY_TYPE);
-
-        //_bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.CustomEntityInterface.ReadCustomEntity();
         m_mainScene.RealLogging("[ReadPlayerState]... ");
     }
-
-    /*
-    private void ReadPlayerStateSuccess(string json, object cb)
-    {
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
-
-        // look for the player entity
-        IList<BCUserEntity> entities = _bc.EntityFactory.NewUserEntitiesFromReadPlayerState(json);
-        foreach (BCUserEntity e in entities)
-        {
-            if (e.EntityType == Player.ENTITY_TYPE)
-            {
-                m_player = (Player)e;
-            }
-        }
-    }
-    */
 
     public override void OnScreenGUI()
     {
@@ -144,12 +119,12 @@ public class ScreenEntityCustomClass : BCScreen
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Save Entity"))
             {
-                m_mainScene.EntityInterface.UpdateEntity();
+                m_mainScene.CustomEntityInterface.UpdateCustomEntity();
                 m_mainScene.RealLogging("Updating Entity...");
             }
             if (GUILayout.Button("Delete Entity"))
             {
-                m_mainScene.EntityInterface.DeleteEntity();
+                m_mainScene.CustomEntityInterface.DeleteCustomEntity();
                 m_player = null;
                 m_mainScene.RealLogging("Deleting Entity...");
             }
