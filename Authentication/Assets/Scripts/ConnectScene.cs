@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 #if UNITY_WSA
 using Microsoft.Xbox.Services;
@@ -61,6 +62,21 @@ public class ConnectScene : MonoBehaviour
     
     private bool signedIn;
     private int playerNumber;
+
+    //AnthonyTODO: Additions for UI Rework
+    //Revealing in editor for debugging purposes
+    [SerializeField] eAuthTypes currentAuthType;
+
+    //Setting these in editor for simplicity
+    [SerializeField] Text profileIdText;
+    [SerializeField] Text passwordText;
+    [SerializeField] InputField profileIdField;
+    [SerializeField] InputField passwordField;
+
+    //Revealing to editor for debugging purposes
+    [SerializeField] string inputProfileId;
+    [SerializeField] string inputPassword; 
+
 #if UNITY_WSA
     private XboxLiveUser _xboxLiveUser;
 #endif
@@ -93,12 +109,117 @@ public class ConnectScene : MonoBehaviour
         //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
 
     }
-   
+
+    //AnthonyTODO: UI Related Methods
+
+    public void OnAuthTypeChange(int val)
+    {
+        currentAuthType = (eAuthTypes)val;
+
+        switch(currentAuthType)
+        {
+            case eAuthTypes.EMAIL:
+                profileIdText.text = "Email:";
+                passwordText.text = "Password:";
+                break;
+            case eAuthTypes.UNIVERSAL:
+                profileIdText.text = "User ID:";
+                passwordText.text = "Password:";
+                break;
+            case eAuthTypes.ANONYMOUS:
+                profileIdText.text = "Profile ID:";
+                passwordText.text = "Anonymous ID:"; 
+                break;
+            case eAuthTypes.GOOGLE:
+                profileIdText.text = "Profile ID:";
+                passwordText.text = "Anonymous ID:";
+                break;
+            case eAuthTypes.FACEBOOK:
+                profileIdText.text = "Profile ID:";
+                passwordText.text = "Anonymous ID:"; 
+                break;
+            case eAuthTypes.XBOXLIVE:
+                profileIdText.text = "Profile ID:";
+                passwordText.text = "Anonymous ID:";
+                break;
+        }
+    }
+
+    public void OnProfileIdEndEdit(string input)
+    {
+        inputProfileId = input;
+    }
+
+    public void OnPasswordEndEdit(string input)
+    {
+        inputPassword = input; 
+    }
+
+    public void OnAuthenticate()
+    {
+        switch(currentAuthType)
+        {
+            case eAuthTypes.EMAIL:
+                AuthenticateEmail();
+                break;
+            case eAuthTypes.UNIVERSAL:
+                AuthenticateUniversal();
+                break;
+            case eAuthTypes.ANONYMOUS:
+                AuthenticateAnonymous();
+                break;
+            case eAuthTypes.GOOGLE:
+                AuthenticateGoogle();
+                break;
+            case eAuthTypes.FACEBOOK:
+                AuthenticateFacebook();
+                break;
+            case eAuthTypes.XBOXLIVE:
+                break; 
+        }
+    }
+
+    void AuthenticateEmail()
+    {
+        m_emailId = inputProfileId;
+        m_emailPwd = inputPassword;
+
+        _bc.ResetStoredProfileId();
+        _bc.ResetStoredAnonymousId();
+        _bc.AuthenticateEmailPassword(m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
+    }
+
+    void AuthenticateUniversal()
+    {
+        m_universalUserId = inputProfileId;
+        m_universalPwd = inputPassword; 
+
+        _bc.ResetStoredProfileId();
+        _bc.ResetStoredAnonymousId();
+        _bc.AuthenticateUniversal(m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
+    }
+
+    void AuthenticateAnonymous()
+    {
+        _bc.AuthenticateAnonymous(OnSuccess_Authenticate, OnError_Authenticate);
+    }
+
+    void AuthenticateGoogle()
+    {
+        //AnthonyTODO: Figure out how to get Google Authentication working. Requires building to android device.
+    }
+
+    void AuthenticateFacebook()
+    {
+        //AnthonyTODO: Waiting on Facebook fix?
+    }
+
+    //THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE.   
     void OnGUI()
     {
         float tw = Screen.width / 14.0f;
         float th = Screen.height / 7.0f;
-        Rect dialog = new Rect(tw, th, Screen.width - tw*2, Screen.height - th*2);
+        Rect dialog = new Rect(tw, th, Screen.width - tw * 2, Screen.height - th * 2);
         float offsetX = 30;
         float offsetY = 30;
         Rect innerDialog = new Rect(dialog.x + offsetX, dialog.y + offsetY, dialog.width - (offsetX * 2), dialog.height - (offsetY * 2));
@@ -113,8 +234,8 @@ public class ConnectScene : MonoBehaviour
         m_selectedAuth = GUILayout.SelectionGrid(m_selectedAuth, m_authTypes, 4);
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
-        
-        if (m_selectedAuth == (int) eAuthTypes.EMAIL)
+
+        if (m_selectedAuth == (int)eAuthTypes.EMAIL)
         {
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
@@ -139,7 +260,7 @@ public class ConnectScene : MonoBehaviour
                     m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
-        else if (m_selectedAuth == (int) eAuthTypes.UNIVERSAL)
+        else if (m_selectedAuth == (int)eAuthTypes.UNIVERSAL)
         {
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
@@ -152,7 +273,7 @@ public class ConnectScene : MonoBehaviour
             GUILayout.EndVertical();
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-             
+
             if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
             {
                 m_authStatus = "Attempting to authenticate";
@@ -164,7 +285,7 @@ public class ConnectScene : MonoBehaviour
                     m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
             }
         }
-        else if (m_selectedAuth == (int) eAuthTypes.ANONYMOUS)
+        else if (m_selectedAuth == (int)eAuthTypes.ANONYMOUS)
         {
             GUILayout.Label("Profile Id: " + _bc.GetStoredProfileId());
             GUILayout.Label("Anonymous Id: " + _bc.GetStoredAnonymousId());
@@ -185,12 +306,12 @@ public class ConnectScene : MonoBehaviour
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
-        else if (m_selectedAuth == (int) eAuthTypes.GOOGLE)
+        else if (m_selectedAuth == (int)eAuthTypes.GOOGLE)
         {
             GUILayout.Label("Google Id: " + m_googleId);
             GUILayout.Label("Server Auth Code: " + m_serverAuthCode);
-            
-            
+
+
             if (GUILayout.Button("Google Signin", GUILayout.ExpandWidth(false)))
             {
 #if UNITY_ANDROID
@@ -242,19 +363,19 @@ public class ConnectScene : MonoBehaviour
             GUILayout.Label("User Id: " + _localFacebookUser.id);
             GUILayout.Label("First Name: " + _localFacebookUser.first_name);
             GUILayout.BeginHorizontal();
-            
+
             if (GUILayout.Button("Initialize", GUILayout.ExpandWidth(false)))
             {
                 if (!FB.IsInitialized)
                 {
-                    FB.Init(InitCallback,HideUnity);
+                    FB.Init(InitCallback, HideUnity);
                 }
                 else
                 {
                     FB.ActivateApp();
                 }
             }
-            
+
             if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
             {
                 m_authStatus = "Attempting to authenticate";
@@ -263,7 +384,7 @@ public class ConnectScene : MonoBehaviour
                     "public_profile",
                     "email"
                 };
-                FB.LogInWithReadPermissions(perms,AuthCallback);
+                FB.LogInWithReadPermissions(perms, AuthCallback);
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
