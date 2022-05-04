@@ -68,10 +68,18 @@ public class ConnectScene : MonoBehaviour
     [SerializeField] eAuthTypes currentAuthType;
 
     //Setting these in editor for simplicity
+    [SerializeField] Text statusText;
     [SerializeField] Text profileIdText;
     [SerializeField] Text passwordText;
     [SerializeField] InputField profileIdField;
     [SerializeField] InputField passwordField;
+    [SerializeField] Button resetProfileIdButton;
+    [SerializeField] Button resetAnonIdButton;
+    [SerializeField] Text storedProfileIdText;
+    [SerializeField] Text storedAnonymousIdText;
+    [SerializeField] Text googleIdText;
+    [SerializeField] Text serverAuthCodeText;
+    [SerializeField] Button googleSignInButton; 
 
     //Revealing to editor for debugging purposes
     [SerializeField] string inputProfileId;
@@ -83,6 +91,7 @@ public class ConnectScene : MonoBehaviour
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
+        ChangeAuthType(eAuthTypes.EMAIL);
 #if UNITY_ANDROID
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
             .RequestIdToken()
@@ -116,32 +125,76 @@ public class ConnectScene : MonoBehaviour
     {
         currentAuthType = (eAuthTypes)val;
 
-        switch(currentAuthType)
+        ChangeAuthType(currentAuthType);
+    }
+
+    void ChangeAuthType(eAuthTypes authType)
+    {
+        switch(authType)
         {
             case eAuthTypes.EMAIL:
-                profileIdText.text = "Email:";
-                passwordText.text = "Password:";
+                SetScreen("Email", "Password", true);
                 break;
             case eAuthTypes.UNIVERSAL:
-                profileIdText.text = "User ID:";
-                passwordText.text = "Password:";
+                SetScreen("User ID", "Password", true);
                 break;
             case eAuthTypes.ANONYMOUS:
-                profileIdText.text = "Profile ID:";
-                passwordText.text = "Anonymous ID:"; 
+                SetScreen("Profile ID", "Anonymous", false);
                 break;
             case eAuthTypes.GOOGLE:
-                profileIdText.text = "Profile ID:";
-                passwordText.text = "Anonymous ID:";
+                SetScreen("Profile ID", "Anonymous", false, true);
                 break;
             case eAuthTypes.FACEBOOK:
-                profileIdText.text = "Profile ID:";
-                passwordText.text = "Anonymous ID:"; 
+                SetScreen("Profile ID", "Anonymous", false);
                 break;
             case eAuthTypes.XBOXLIVE:
-                profileIdText.text = "Profile ID:";
-                passwordText.text = "Anonymous ID:";
+                SetScreen("Profile ID", "Anonymous", false);
                 break;
+        }
+    }
+
+    void SetScreen(string profileIdInfo, string passwordInfo, bool bHasInput, bool bIsGooogleLogin = false)
+    {
+        profileIdText.text = profileIdInfo + ":";
+        passwordText.text = passwordInfo + ":"; 
+
+        if(bIsGooogleLogin)
+        {
+            bHasInput = false;
+            googleIdText.gameObject.SetActive(true);
+            serverAuthCodeText.gameObject.SetActive(true);
+            googleSignInButton.gameObject.SetActive(true);
+        }
+        else
+        {
+            googleIdText.gameObject.SetActive(false);
+            serverAuthCodeText.gameObject.SetActive(false);
+            googleSignInButton.gameObject.SetActive(false);
+        }
+
+        if(bHasInput)
+        {
+            profileIdField.gameObject.SetActive(true);
+            passwordField.gameObject.SetActive(true);
+            passwordField.contentType = InputField.ContentType.Password;
+            resetProfileIdButton.gameObject.SetActive(false);
+            resetAnonIdButton.gameObject.SetActive(false);
+            storedProfileIdText.gameObject.SetActive(false);
+            storedAnonymousIdText.gameObject.SetActive(false);
+            googleIdText.gameObject.SetActive(false);
+            serverAuthCodeText.gameObject.SetActive(false);
+            googleSignInButton.gameObject.SetActive(false); 
+        }
+        else
+        {
+            profileIdField.gameObject.SetActive(false);
+            passwordField.gameObject.SetActive(false);
+            resetProfileIdButton.gameObject.SetActive(true);
+            resetAnonIdButton.gameObject.SetActive(true);
+            storedProfileIdText.gameObject.SetActive(true);
+            storedAnonymousIdText.gameObject.SetActive(true);
+            storedProfileIdText.text = _bc.GetStoredProfileId();
+            storedAnonymousIdText.text = _bc.GetStoredAnonymousId();
         }
     }
 
@@ -157,6 +210,9 @@ public class ConnectScene : MonoBehaviour
 
     public void OnAuthenticate()
     {
+        statusText.fontSize = 14;
+        statusText.text = "Attempting to Authenticate...";
+
         switch(currentAuthType)
         {
             case eAuthTypes.EMAIL:
@@ -207,6 +263,7 @@ public class ConnectScene : MonoBehaviour
     void AuthenticateGoogle()
     {
         //AnthonyTODO: Figure out how to get Google Authentication working. Requires building to android device.
+        _bc.AuthenticateGoogle(m_googleId, m_serverAuthCode, true, OnSuccess_Authenticate, OnError_Authenticate);
     }
 
     void AuthenticateFacebook()
@@ -214,7 +271,46 @@ public class ConnectScene : MonoBehaviour
         //AnthonyTODO: Waiting on Facebook fix?
     }
 
-    //THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE.   
+    public void OnResetProfileID()
+    {
+        _bc.ResetStoredProfileId();
+        storedProfileIdText.text = _bc.GetStoredProfileId(); 
+    }
+
+    public void OnResetAnonymousID()
+    {
+        _bc.ResetStoredAnonymousId();
+        storedAnonymousIdText.text = _bc.GetStoredAnonymousId();
+    }
+
+    public void OnGoogleSignIn()
+    {
+#if UNITY_ANDROID
+                m_authStatus += "\n\nInfo: If the authentication popup appears but nothing occurs after, it probably means the app isn't fully set up. Please follow the instruction here:\nhttp://getbraincloud.com/apidocs/portal-usage/authentication-google/ \n\n";
+                
+                PlayGamesPlatform.Activate().Authenticate((bool success) => {
+
+                    if (success)
+                    {
+                        m_googleId = PlayGamesPlatform.Instance.GetUserId();
+                        m_serverAuthCode = PlayGamesPlatform.Instance.GetServerAuthCode();
+
+                        m_authStatus += "\nGoogle Auth Success. Now click \"Authenticate\"\n\n";
+                    }
+                    else
+                    {
+                        m_authStatus += "\nGoogle Auth Failed. See documentation: https://github.com/playgameservices/play-games-plugin-for-unity\n";
+                        m_authStatus += "Note: this can only be tested on an Android Device\n\n";
+                    }
+                });
+#else
+        m_authStatus += "\n\nGoogle Login will only work on an Android Device. Please build to a test device\n\n";
+#endif
+    }
+
+    //THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE. 
+    #region OnGuiSystem
+/*
     void OnGUI()
     {
         float tw = Screen.width / 14.0f;
@@ -426,6 +522,8 @@ public class ConnectScene : MonoBehaviour
 
         GUILayout.EndArea();
     }
+*/    
+#endregion OnGuiSystem
 
     public void OnSuccess_Authenticate(string responseData, object cbObject)
     {
