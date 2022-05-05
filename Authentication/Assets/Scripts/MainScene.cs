@@ -29,7 +29,14 @@ public class MainScene : MonoBehaviour
     string m_log = "";
     BCScreen m_screen = null;
 
-    enum BrainCloudFunction : int
+    //AnthonyTODO: Members I'm adding
+    BrainCloudInterface bcInterface; 
+    DataManager dataManager; 
+    List<BCScreen> bcScreens; 
+
+
+
+    public enum eBCFunctionType : int
     {
         FN_ENTITY = 0,
         FN_ENTITY_CUSTOM_CLASS,
@@ -52,54 +59,83 @@ public class MainScene : MonoBehaviour
 		"Identity"
 
     };
-    BrainCloudFunction m_bcFunc = BrainCloudFunction.FN_ENTITY;
+    eBCFunctionType currentBCFunction = eBCFunctionType.FN_ENTITY;
 
     // Use this for initialization
     void Start()
     {
         _bc = BCConfig.GetBrainCloud();
+
+        bcInterface = BrainCloudInterface.instance;
+        dataManager = DataManager.instance; 
         
         _entityInterface = GetComponent<EntityInterface>();
         _entityInterface.Wrapper = _bc;
         _customEntityInterface = GetComponent<CustomEntityInterface>();
         _customEntityInterface.Wrapper = _bc;
+
+        bcScreens = new List<BCScreen>(FindObjectsOfType<BCScreen>());
+        bcScreens.Sort((BCScreen screen1, BCScreen screen2) => screen1.transform.GetSiblingIndex().CompareTo(screen2.transform.GetSiblingIndex()));
+
+        for(int i = 0; i < bcScreens.Count; i++)
+        {
+            bcScreens[i].SetFunctionType((eBCFunctionType)i);
+        }
         
-        MoveToScreen(m_bcFunc);
+        MoveToScreen(currentBCFunction);
     }
     // Update is called once per frame
     void Update()
     {
     }
 
-    private void MoveToScreen(BrainCloudFunction in_fn)
+    public void OnSelectBCFunction(int val)
     {
-        switch (in_fn)
+        currentBCFunction = (eBCFunctionType)val; 
+        MoveToScreen(currentBCFunction);
+    }
+
+    private void MoveToScreen(eBCFunctionType in_fn)
+    {
+        foreach(BCScreen screen in bcScreens)
         {
-            case BrainCloudFunction.FN_ENTITY:
-                m_screen = new ScreenEntity(_bc);
-                break;
-            case BrainCloudFunction.FN_ENTITY_CUSTOM_CLASS:
-                m_screen = new ScreenEntityCustomClass(_bc);
-                break;
-            case BrainCloudFunction.FN_PLAYER_XP_CURRENCY:
-                m_screen = new ScreenPlayerXp(_bc);
-                break;
-            case BrainCloudFunction.FN_PLAYER_STATS:
-                m_screen = new ScreenPlayerStats(_bc);
-                break;
-            case BrainCloudFunction.FN_GLOBAL_STATS:
-                m_screen = new ScreenGlobalStats(_bc);
-                break;
-            case BrainCloudFunction.FN_CLOUD_CODE:
-                m_screen = new ScreenCloudCode(_bc);
-                break;
-			case BrainCloudFunction.FN_IDENTITY:
-				m_screen = new ScreenIdentity(_bc);
-				break;
+            if(screen.GetFunctionType() == in_fn)
+            {
+                screen.gameObject.SetActive(true); 
+            }
+            else
+            {
+                screen.gameObject.SetActive(false); 
+            }
         }
-        m_bcFunc = in_fn;
-        m_screen.SetMainScene(this);
-        m_screen.Activate();
+
+        //switch (in_fn)
+        //{
+        //    case eBCFunctionType.FN_ENTITY:
+        //        m_screen = new ScreenEntity(_bc);
+        //        break;
+        //    case eBCFunctionType.FN_ENTITY_CUSTOM_CLASS:
+        //        m_screen = new ScreenEntityCustomClass(_bc);
+        //        break;
+        //    case eBCFunctionType.FN_PLAYER_XP_CURRENCY:
+        //        m_screen = new ScreenPlayerXp(_bc);
+        //        break;
+        //    case eBCFunctionType.FN_PLAYER_STATS:
+        //        m_screen = new ScreenPlayerStats(_bc);
+        //        break;
+        //    case eBCFunctionType.FN_GLOBAL_STATS:
+        //        m_screen = new ScreenGlobalStats(_bc);
+        //        break;
+        //    case eBCFunctionType.FN_CLOUD_CODE:
+        //        m_screen = new ScreenCloudCode(_bc);
+        //        break;
+        //    case eBCFunctionType.FN_IDENTITY:
+        //        m_screen = new ScreenIdentity(_bc);
+        //        break;
+        //}
+        //currentBCFunction = in_fn;
+        //m_screen.SetMainScene(this);
+        //m_screen.Activate();
     }
 
     
@@ -113,11 +149,11 @@ public class MainScene : MonoBehaviour
     {
         GUILayout.BeginHorizontal();
         GUILayout.Box("Select a BrainCloud Function:");
-        BrainCloudFunction fn = (BrainCloudFunction)GUILayout.Toolbar((int)m_bcFunc, m_bcFuncLabels);
+        eBCFunctionType fn = (eBCFunctionType)GUILayout.Toolbar((int)currentBCFunction, m_bcFuncLabels);
         GUILayout.EndHorizontal();
 
         // if user selected another screen, move to it
-        if (fn != m_bcFunc)
+        if (fn != currentBCFunction)
         {
             MoveToScreen(fn);
         }
@@ -151,35 +187,35 @@ public class MainScene : MonoBehaviour
         GUILayout.EndHorizontal();
     }
 
-    public void OnGUI()
-    {
-        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
+    //public void OnGUI()
+    //{
+    //    GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
 
-        OnGUITopButtons();
-        
-        GUILayout.BeginHorizontal();
-        
-        GUILayout.BeginVertical();
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(MIN_LEFT_SIDE_WIDTH);
-        GUILayout.EndHorizontal();
-        if (m_screen != null)
-        {
-            m_screen.OnScreenGUI();
-        }
-        GUILayout.EndVertical();
-        
-        GUILayout.Space(25);
-        
-        GUILayout.BeginVertical();
-        OnGUILog();
-        GUILayout.EndVertical();
-        
-        GUILayout.EndHorizontal();
+    //    OnGUITopButtons();
+
+    //    GUILayout.BeginHorizontal();
+
+    //    GUILayout.BeginVertical();
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.Space(MIN_LEFT_SIDE_WIDTH);
+    //    GUILayout.EndHorizontal();
+    //    if (m_screen != null)
+    //    {
+    //        m_screen.OnScreenGUI();
+    //    }
+    //    GUILayout.EndVertical();
+
+    //    GUILayout.Space(25);
+
+    //    GUILayout.BeginVertical();
+    //    OnGUILog();
+    //    GUILayout.EndVertical();
+
+    //    GUILayout.EndHorizontal();
 
 
-        OnGUIBottom();
-    }
+    //    OnGUIBottom();
+    //}
 
     public void AddLog(string log)
     {
