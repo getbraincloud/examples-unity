@@ -31,7 +31,7 @@ public class ScreenIdentity : BCScreen {
 		GUILayout.BeginHorizontal();
         if (GUILayout.Button("Login with Twitter"))
         {
-            GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetRequestToken(ConnectScene.CONSUMER_KEY, ConnectScene.CONSUMER_SECRET,
+            GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetRequestToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET,
                                                               new Twitter.RequestTokenCallback(this.OnSuccess_GetTwitterPIN)));
             //StartCoroutine(Twitter.API.GetRequestToken(CONSUMER_KEY, CONSUMER_SECRET,
            //                                                    new Twitter.RequestTokenCallback(this.OnSuccess_GetPIN)));
@@ -44,13 +44,13 @@ public class ScreenIdentity : BCScreen {
         if (GUILayout.Button("Attach New Twitter"))
         {
             m_mainScene.AddLog("Attaching new twitter account...");
-            GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(ConnectScene.CONSUMER_KEY, ConnectScene.CONSUMER_SECRET, m_RequestTokenResponse.Token, m_twitterPin,
+            GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET, m_RequestTokenResponse.Token, m_twitterPin,
                                new Twitter.AccessTokenCallback(this.OnSuccess_AttachTwitter)));
         }
         if (GUILayout.Button("Merge Existing Twitter"))
         {
             m_mainScene.AddLog("Merging existing twitter account...");
-            GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(ConnectScene.CONSUMER_KEY, ConnectScene.CONSUMER_SECRET, m_RequestTokenResponse.Token, m_twitterPin,
+            GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET, m_RequestTokenResponse.Token, m_twitterPin,
                                new Twitter.AccessTokenCallback(this.OnSuccess_AuthenticateTwitter)));
         }
         GUILayout.EndVertical();

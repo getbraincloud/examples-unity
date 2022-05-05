@@ -3,30 +3,13 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-#if UNITY_WSA
-using Microsoft.Xbox.Services;
-using Microsoft.Xbox.Services.Client;
-#endif
-
-#if UNITY_ANDROID
-using GooglePlayGames;
-using GooglePlayGames.BasicApi;
-#endif
-
-#if UNITY_WEBGL || UNITY_STANDALONE_WIN
-using Facebook.Unity;
-#endif
-
-class FacebookUser
-{
-    public string id;
-    public string first_name;
-    public string last_name;
-    public string email;
-}
 
 public class ConnectScene : MonoBehaviour
 {
+    //AnthonyTODO: Adding the new singletons
+    BrainCloudInterface bcInterface;
+    DataManager dataManager; 
+
     public GameObject MainScene;
     public BCConfig BCConfig;
     
@@ -50,15 +33,6 @@ public class ConnectScene : MonoBehaviour
         "Google (Android Devices)",
         "Facebook"
     };
-    string m_universalUserId = "";
-    string m_universalPwd = "";
-    string m_emailId = "";
-    string m_emailPwd = "";
-    string m_googleId = "";
-    string m_serverAuthCode = "";
-    private FacebookUser _localFacebookUser = new FacebookUser();
-    public static string CONSUMER_KEY = "";
-    public static string CONSUMER_SECRET = "";
     
     private bool signedIn;
     private int playerNumber;
@@ -85,46 +59,18 @@ public class ConnectScene : MonoBehaviour
     [SerializeField] string inputProfileId;
     [SerializeField] string inputPassword; 
 
-#if UNITY_WSA
-    private XboxLiveUser _xboxLiveUser;
-#endif
+
     void Start()
     {
-        _bc = BCConfig.GetBrainCloud();
+        dataManager = DataManager.instance;
+        bcInterface = BrainCloudInterface.instance; 
+
         ChangeAuthType(eAuthTypes.EMAIL);
-#if UNITY_ANDROID
-        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
-            .RequestIdToken()
-            .RequestEmail()
-            .RequestServerAuthCode(false)
-            .Build();
-                
-        PlayGamesPlatform.InitializeInstance (config);
-#endif
-        
-#if UNITY_WSA
-        _xboxLiveUser = new XboxLiveUser();
-        try
-        {
-            SignInManager.Instance.OnPlayerSignOut(playerNumber, OnPlayerSignOut);
-            SignInManager.Instance.OnPlayerSignIn(playerNumber, OnPlayerSignIn);
-        }
-        catch (Exception ex)
-        {
-            Debug.Log(ex.Message);
-        }
-#endif
-        
-        //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
-
     }
-
-    //AnthonyTODO: UI Related Methods
 
     public void OnAuthTypeChange(int val)
     {
         currentAuthType = (eAuthTypes)val;
-
         ChangeAuthType(currentAuthType);
     }
 
@@ -193,8 +139,8 @@ public class ConnectScene : MonoBehaviour
             resetAnonIdButton.gameObject.SetActive(true);
             storedProfileIdText.gameObject.SetActive(true);
             storedAnonymousIdText.gameObject.SetActive(true);
-            storedProfileIdText.text = _bc.GetStoredProfileId();
-            storedAnonymousIdText.text = _bc.GetStoredAnonymousId();
+            storedProfileIdText.text = bcInterface.GetStoredProfileID();
+            storedAnonymousIdText.text = bcInterface.GetStoredAnonymousID();
         }
     }
 
@@ -216,96 +162,40 @@ public class ConnectScene : MonoBehaviour
         switch(currentAuthType)
         {
             case eAuthTypes.EMAIL:
-                AuthenticateEmail();
+                dataManager.SetEmailandPass(inputProfileId, inputPassword); 
+                bcInterface.AuthenticateEmail();
                 break;
             case eAuthTypes.UNIVERSAL:
-                AuthenticateUniversal();
+                dataManager.SetUniversalIDandPass(inputProfileId, inputPassword);
+                bcInterface.AuthenticateUniversal();
                 break;
             case eAuthTypes.ANONYMOUS:
-                AuthenticateAnonymous();
+                bcInterface.AuthenticateAnonymous();
                 break;
             case eAuthTypes.GOOGLE:
-                AuthenticateGoogle();
+                bcInterface.AuthenticateGoogle();
                 break;
             case eAuthTypes.FACEBOOK:
-                AuthenticateFacebook();
+                bcInterface.AuthenticateFacebook();
                 break;
             case eAuthTypes.XBOXLIVE:
                 break; 
         }
     }
 
-    void AuthenticateEmail()
-    {
-        m_emailId = inputProfileId;
-        m_emailPwd = inputPassword;
-
-        _bc.ResetStoredProfileId();
-        _bc.ResetStoredAnonymousId();
-        _bc.AuthenticateEmailPassword(m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
-    }
-
-    void AuthenticateUniversal()
-    {
-        m_universalUserId = inputProfileId;
-        m_universalPwd = inputPassword; 
-
-        _bc.ResetStoredProfileId();
-        _bc.ResetStoredAnonymousId();
-        _bc.AuthenticateUniversal(m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
-    }
-
-    void AuthenticateAnonymous()
-    {
-        _bc.AuthenticateAnonymous(OnSuccess_Authenticate, OnError_Authenticate);
-    }
-
-    void AuthenticateGoogle()
-    {
-        //AnthonyTODO: Figure out how to get Google Authentication working. Requires building to android device.
-        _bc.AuthenticateGoogle(m_googleId, m_serverAuthCode, true, OnSuccess_Authenticate, OnError_Authenticate);
-    }
-
-    void AuthenticateFacebook()
-    {
-        //AnthonyTODO: Waiting on Facebook fix?
-    }
-
     public void OnResetProfileID()
     {
-        _bc.ResetStoredProfileId();
-        storedProfileIdText.text = _bc.GetStoredProfileId(); 
+        storedProfileIdText.text = bcInterface.ResetProfileID(); 
     }
 
     public void OnResetAnonymousID()
     {
-        _bc.ResetStoredAnonymousId();
-        storedAnonymousIdText.text = _bc.GetStoredAnonymousId();
+        storedAnonymousIdText.text = bcInterface.ResetAnonymousID();
     }
 
     public void OnGoogleSignIn()
     {
-#if UNITY_ANDROID
-                m_authStatus += "\n\nInfo: If the authentication popup appears but nothing occurs after, it probably means the app isn't fully set up. Please follow the instruction here:\nhttp://getbraincloud.com/apidocs/portal-usage/authentication-google/ \n\n";
-                
-                PlayGamesPlatform.Activate().Authenticate((bool success) => {
-
-                    if (success)
-                    {
-                        m_googleId = PlayGamesPlatform.Instance.GetUserId();
-                        m_serverAuthCode = PlayGamesPlatform.Instance.GetServerAuthCode();
-
-                        m_authStatus += "\nGoogle Auth Success. Now click \"Authenticate\"\n\n";
-                    }
-                    else
-                    {
-                        m_authStatus += "\nGoogle Auth Failed. See documentation: https://github.com/playgameservices/play-games-plugin-for-unity\n";
-                        m_authStatus += "Note: this can only be tested on an Android Device\n\n";
-                    }
-                });
-#else
-        m_authStatus += "\n\nGoogle Login will only work on an Android Device. Please build to a test device\n\n";
-#endif
+        bcInterface.GoogleSignIn();
     }
 
     //THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE. 
@@ -524,112 +414,4 @@ public class ConnectScene : MonoBehaviour
     }
 */    
 #endregion OnGuiSystem
-
-    public void OnSuccess_Authenticate(string responseData, object cbObject)
-    {
-        m_authStatus = "Authenticate successful!";
-        gameObject.SetActive(false);
-        MainScene.SetActive(true);
-    }
-    
-	public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
-    {
-        m_authStatus = "Authenticate failed: " + statusMessage;
-        Debug.LogError("OnError_Authenticate: " + statusMessage);
-    }
-    //***************Facebook Specific Functions***************************
-    private void InitCallback()
-    {
-        m_authStatus = "Facebook Initialized!!";
-    }
-
-    private void HideUnity(bool isGameShown)
-    {
-        m_authStatus = $"Game show status : {isGameShown}";
-
-    }
-#if UNITY_WEBGL || UNITY_STANDALONE_WIN
-    private void AuthCallback(ILoginResult result)
-    {
-        if (FB.IsLoggedIn)
-        {
-            m_authStatus = "Facebook Login Successful";
-            var token = AccessToken.CurrentAccessToken;
-            GetInfo();
-            //Authenticate user to braincloud
-            _bc.AuthenticateFacebook(token.UserId, token.TokenString, true, OnSuccess_FacebookAuthenticate, OnError_Authenticate);
-            foreach (string perm in token.Permissions)
-            {
-                Debug.Log("IsLoggedIn: perm: "+perm);
-            }
-        }
-        else
-        {
-            m_authStatus = "User cancelled login";
-            Debug.Log("User cancelled login");
-        }
-    }
-    private void OnSuccess_FacebookAuthenticate(string responseData, object cbObject)
-    {
-        m_authStatus += "\n Braincloud Authenticated! \n";
-        m_authStatus += responseData;
-    }
-    
-    private void GetInfo()
-    {
-        //Use the graph explorer to find what you need for the query parameter in here --> https://developers.facebook.com/tools/explorer/
-        FB.API("/me?fields=id,first_name,last_name,email", HttpMethod.GET, result =>
-        {
-            if(result.Error != null)
-            {
-                Debug.Log("Result error");
-            }
-            _localFacebookUser = BrainCloud.JsonFx.Json.JsonReader.Deserialize<FacebookUser>(result.RawResult);
-        });
-    }
-#endif
-    
-#if UNITY_WSA
-    private void OnPlayerSignIn(XboxLiveUser xboxLiveUserParam, XboxLiveAuthStatus authStatus, string errorMessage)
-    {
-        if(authStatus == XboxLiveAuthStatus.Succeeded)
-        {
-            _xboxLiveUser = xboxLiveUserParam; //store the xboxLiveUser SignedIn
-            signedIn = true;
-        }
-        else
-        {
-            if (XboxLiveServicesSettings.Instance.DebugLogsOn)
-            {
-                Debug.LogError(errorMessage); //Log the error message in case of unsuccessful call.
-            }
-        }
-    }
-
-    private void OnPlayerSignOut(XboxLiveUser xboxLiveUserParam, XboxLiveAuthStatus authStatus, string errorMessage)
-    {
-        if (authStatus == XboxLiveAuthStatus.Succeeded)
-        {
-            _xboxLiveUser = null;
-            signedIn = false;
-        }
-        else
-        {
-            if (XboxLiveServicesSettings.Instance.DebugLogsOn)
-            {
-                Debug.LogError(errorMessage);
-            }
-        }
-    }
-#endif
-
-    private void OnDestroy()
-    {
-#if UNITY_WSA
-        if (SignInManager.Instance == null) return;
-        
-        SignInManager.Instance.RemoveCallbackFromPlayer(playerNumber, OnPlayerSignOut);
-        SignInManager.Instance.RemoveCallbackFromPlayer(playerNumber, OnPlayerSignIn);
-#endif
-    }
 }
