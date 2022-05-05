@@ -13,7 +13,7 @@ public class BrainCloudManager : MonoBehaviour
     public bool LeavingGame;
     public BrainCloudWrapper Wrapper => m_bcWrapper;
     public static BrainCloudManager Instance;
-    
+    private bool _isNewPlayer = false;
     private void Awake()
     {
         m_bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -52,6 +52,7 @@ public class BrainCloudManager : MonoBehaviour
     //Called from Unity Button, attempting to login
     public void Login()
     {
+        _isNewPlayer = false;
         string username = MenuManager.Instance.UsernameInputField.text;
         string password = MenuManager.Instance.PasswordInputField.text;
         if (username.IsNullOrEmpty())
@@ -64,11 +65,17 @@ public class BrainCloudManager : MonoBehaviour
             MenuManager.Instance.AbortToSignIn($"Please provide a password");
             return;
         }
+
+        if (!username.Equals(GameManager.Instance.CurrentUserInfo.Username))
+        {
+            _isNewPlayer = true;
+            Debug.Log("hit");
+        }
         
         Settings.SaveLogin(username, password);
         InitializeBC();
         // Authenticate with brainCloud
-        m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, OnLoggingInError, "Login Failed");
+        m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, OnFailureCallback, "Login Failed");
     }
 
     public void SignOut()
@@ -79,13 +86,13 @@ public class BrainCloudManager : MonoBehaviour
     public void UpdateEntity()
     {
         m_bcWrapper.EntityService.UpdateEntity
-            (
-                GameManager.Instance.CurrentUserInfo.EntityId,
-                "viking",
-                CreateJsonEntityData(false),
-                CreateACLJson(),
-                -1
-            );
+        (
+            GameManager.Instance.CurrentUserInfo.EntityId,
+            "vikings",
+            CreateJsonEntityData(false),
+            CreateACLJson(),
+            -1
+        );
     }
 
     public void LookForPlayers()
@@ -137,7 +144,7 @@ public class BrainCloudManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, OnLoggingInError,
+            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, OnFailureCallback,
                 "Failed to update username to braincloud");
         }
         else
@@ -147,13 +154,13 @@ public class BrainCloudManager : MonoBehaviour
             {
                 userInfo.Username = tempUsername;
             }
-            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, OnLoggingInError,
+            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, OnFailureCallback,
                 "Failed to update username to braincloud");
         }
     }
     
     // Go back to login screen, with an error message
-    void OnLoggingInError(int status, int reasonCode, string jsonError, object cbObject)
+    void OnFailureCallback(int status, int reasonCode, string jsonError, object cbObject)
     {
         if (m_dead) return;
 
@@ -168,63 +175,89 @@ public class BrainCloudManager : MonoBehaviour
     // User fully logged in. 
     void OnLoggedIn(string jsonResponse, object cbObject)
     {
-        //ToDo: need to check if this is a brand new user to determine to read the saved data
-        
-        if (GameManager.Instance.IsEntityIdValid())
+        //Check if this is a new login, if so then check if this user has entities
+        if (!_isNewPlayer)
         {
-            m_bcWrapper.EntityService.GetEntity
+            if (GameManager.Instance.IsEntityIdValid())
+            {
+                m_bcWrapper.EntityService.GetEntity
                 (
                     GameManager.Instance.CurrentUserInfo.EntityId,
                     OnValidEntityResponse,
-                    OnLoggingInError
-                );
+                    OnFailureCallback
+                );    
+            }
+        }
+        else
+        {
+            m_bcWrapper.EntityService.GetEntitiesByType
+            (
+                "vikings",
+                OnReadEntitiesResponse,
+                OnFailureCallback
+            );
+        }
+    }
+    
+    void OnValidEntityResponse(string jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data1 = response["data"] as Dictionary<string,object>;
+        Dictionary<string, object> data2 = data1["data"] as Dictionary<string,object>;
+        Dictionary<string, object> entityData = data2["data"] as Dictionary<string,object>;
+        
+        int defenderSelection = (int) entityData["defenderSelection"];
+        int invaderSelection = (int) entityData["invaderSelection"];
+        
+        GameManager.Instance.UpdateArmySelection(defenderSelection, invaderSelection);
+        MenuManager.Instance.UpdateMainMenu();
+        MenuManager.Instance.IsLoading = false;
+    }
+
+    void OnReadEntitiesResponse(string jsonResponse, object cbObject)
+    {
+        //Read in the entities, if list is empty than create a new entity.
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+
+        var entities = data["entities"] as Dictionary<string, object>[];
+        
+        if (entities != null && entities.Length > 0)
+        {
+            Dictionary<string, object> data2 = entities[0]["data"] as Dictionary<string, object>;
+            Dictionary<string, object> entityData = data2["data"] as Dictionary<string, object>;
+            
+            int defenderSelection = (int) entityData["defenderSelection"];
+            int invaderSelection = (int) entityData["invaderSelection"];
+        
+            GameManager.Instance.UpdateArmySelection(defenderSelection, invaderSelection);
+            MenuManager.Instance.UpdateMainMenu();
+            MenuManager.Instance.IsLoading = false;
         }
         else
         {
             m_bcWrapper.EntityService.CreateEntity
-                (
-                    "vikings",
-                    CreateJsonEntityData(true),
-                    CreateACLJson(),
-                    OnCreatedEntityResponse,
-                    OnLoggingInError
-                );
+            (
+                "vikings",
+                CreateJsonEntityData(true),
+                CreateACLJson(),
+                OnCreatedEntityResponse,
+                OnFailureCallback
+            );
         }
     }
-
+    
+    
     void OnCreatedEntityResponse(string jsonResponse, object cbObject)
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
         string entityId = jsonData["entityId"] as string;
+        
         GameManager.Instance.UpdateEntityId(entityId);
         GameManager.Instance.UpdateArmySelection(0, 0);
         MenuManager.Instance.IsLoading = false;
         MenuManager.Instance.UpdateMainMenu();
-        
-        
-    }
-
-    void OnValidEntityResponse(string jsonResponse, object cbObject)
-    {
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data1 = response["data"] as Dictionary<string,object>;
-        
-        //Read operation came back with data being null meaning we dont have an entity to read.
-        if (data1 == null)
-        {
-            Settings.SaveEntityId("");
-            //ToDo: need a plan to recover entity...
-            return;
-        }
-        
-        Dictionary<string, object> data2 = data1["data"] as Dictionary<string,object>;
-        Dictionary<string, object> entityData = data2["data"] as Dictionary<string,object>;
-        int defenderSelection = (int) entityData["defenderSelection"];
-        int invaderSelection = (int) entityData["invaderSelection"];
-        GameManager.Instance.UpdateArmySelection(defenderSelection, invaderSelection);
-        MenuManager.Instance.UpdateMainMenu();
-        MenuManager.Instance.IsLoading = false;
     }
 
     string CreateJsonEntityData(bool isDataNew)
