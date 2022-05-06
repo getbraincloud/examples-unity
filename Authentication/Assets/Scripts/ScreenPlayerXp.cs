@@ -22,19 +22,27 @@ public class ScreenPlayerXp : BCScreen
         public string award = "0";
         public string consume = "0";
     }
-    IDictionary<string, Currency> m_currencies = new Dictionary<string, Currency>();
+    IDictionary<string, Currency> m_currencies;
 
-    private string[] m_currencyTypes =
-    {
-        "gems",
-        "gold",
-        "gems"
-    };
+    //private string[] m_currencyTypes =
+    //{
+    //    "gems",
+    //    "gold",
+    //    "gems"
+    //};
+
+    private List<string> m_currencyTypes; 
 
     public ScreenPlayerXp(BrainCloudWrapper bc) : base(bc) { }
 
-    public override void Activate()
+    public override void Activate(BrainCloudWrapper bc)
     {
+        _bc = bc;
+        m_currencies = new Dictionary<string, Currency>();
+        m_currencyTypes = new List<string>();
+        m_currencyTypes.Add("gems");
+        m_currencyTypes.Add("gold");
+        m_currencyTypes.Add("gems");
         _bc.PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }

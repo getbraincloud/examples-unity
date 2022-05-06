@@ -130,6 +130,22 @@ public class BrainCloudInterface : MonoBehaviour
         return _bc.GetStoredProfileId();
     }
 
+    //Find out what the difference between this and the stored profile id is.
+    public string GetAuthenticatedProfileID()
+    {
+        return _bc.Client.AuthenticationService.ProfileId; 
+    }
+
+    public string GetAppID()
+    {
+        return _bc.Client.AppId;
+    }
+
+    public string GetAppVersion()
+    {
+        return _bc.Client.AppVersion; 
+    }
+
     public string ResetProfileID()
     {
         _bc.ResetStoredProfileId();

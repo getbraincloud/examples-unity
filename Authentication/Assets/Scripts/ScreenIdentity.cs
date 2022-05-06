@@ -20,8 +20,9 @@ public class ScreenIdentity : BCScreen {
     
     public ScreenIdentity(BrainCloudWrapper bc) : base(bc) { }
     
-    public override void Activate()
+    public override void Activate(BrainCloudWrapper bc)
     {
+        _bc = bc;
     }
 
 	public override void OnScreenGUI()

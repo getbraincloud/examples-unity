@@ -15,8 +15,9 @@ public class ScreenGlobalStats : BCScreen {
     
     public ScreenGlobalStats(BrainCloudWrapper bc) : base(bc) { }
 
-    public override void Activate()
+    public override void Activate(BrainCloudWrapper bc)
     {
+        _bc = bc; 
         _bc.GlobalStatisticsService.ReadAllGlobalStats(ReadAllGlobalStatsSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadAllGlobalStats]... ");
     }

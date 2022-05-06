@@ -17,8 +17,9 @@ public class ScreenPlayerStats : BCScreen
     
     public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
     
-    public override void Activate()
+    public override void Activate(BrainCloudWrapper bc)
     {
+        _bc = bc;
         _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }

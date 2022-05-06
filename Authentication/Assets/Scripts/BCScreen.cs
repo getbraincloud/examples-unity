@@ -3,6 +3,7 @@ using System.Collections;
 using BrainCloud.LitJson;
 using System.Text;
 
+
 public abstract class BCScreen : MonoBehaviour
 {
     protected BrainCloudWrapper _bc;
@@ -31,7 +32,7 @@ public abstract class BCScreen : MonoBehaviour
         return bcFuncType; 
     }
         
-    public abstract void Activate();
+    public abstract void Activate(BrainCloudWrapper bc);
     public abstract void OnScreenGUI();
     
     

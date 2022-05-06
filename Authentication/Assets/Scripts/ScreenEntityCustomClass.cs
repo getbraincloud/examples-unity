@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.Entity;
+using UnityEngine.UI; 
 
 public class ScreenEntityCustomClass : BCScreen
 {
@@ -14,49 +15,142 @@ public class ScreenEntityCustomClass : BCScreen
         }
     }
 
-    public class Player : BCUserEntity
-    {
-        public static string ENTITY_TYPE = "player";
+    #region Old custom entity class
+    //public class Player : BCUserEntity
+    //{
+    //    public static string ENTITY_TYPE = "player";
 
-        public Player(BrainCloudEntity in_bcEntityService) : base(in_bcEntityService)
-        {
-            // set up some defaults
-            m_entityType = "player";
-            Name = "";
-            Age = 0;
-            Hobbies = new List<Hobby>();
-        }
+    //    public Player(BrainCloudEntity in_bcEntityService) : base(in_bcEntityService)
+    //    {
+    //        // set up some defaults
+    //        m_entityType = "player";
+    //        Name = "";
+    //        Age = 0;
+    //        Hobbies = new List<Hobby>();
+    //    }
 
-        public string Name
-        {
-            get { return (string) this ["name"]; }
-            set { this ["name"] = value; }
-        }
+    //    public string Name
+    //    {
+    //        get { return (string) this ["name"]; }
+    //        set { this ["name"] = value; }
+    //    }
 
-        public int Age
-        {
-            get { return (int) this ["age"]; }
-            set { this ["age"] = value; }
-        }
+    //    public int Age
+    //    {
+    //        get { return (int) this ["age"]; }
+    //        set { this ["age"] = value; }
+    //    }
 
-        public IList<Hobby> Hobbies
-        {
-            get { return this.Get<IList<Hobby>>("hobbies"); }
-            set { this["hobbies"] = value; }
-        }
-    }
+    //    public IList<Hobby> Hobbies
+    //    {
+    //        get { return this.Get<IList<Hobby>>("hobbies"); }
+    //        set { this["hobbies"] = value; }
+    //    }
+    //}
+    #endregion
+
+    //AnthonyTODO: members I'm adding.
+    CustomEntityInstance m_player = null;
+    //UI elements 
+    [SerializeField] Text entityIDText;
+    [SerializeField] Text entityTypeText;
+    [SerializeField] InputField firstNameInput;
+    [SerializeField] InputField positionInput;
 
     public ScreenEntityCustomClass(BrainCloudWrapper bc) : base(bc) { }
 
-    public override void Activate()
+    public override void Activate(BrainCloudWrapper bc)
     {
+        _bc = bc; 
         m_mainScene.CustomEntityInterface.ReadCustomEntity();
         m_mainScene.RealLogging("[ReadPlayerState]... ");
+
+        if (m_mainScene.CustomEntityInterface.PlayerAssigned)
+        {
+            m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
+        }
+
+        DisplayEntityInfo();
     }
 
+    void DisplayEntityID()
+    {
+        entityIDText.text = (m_player != null ? m_player.EntityId : "---");
+    }
+
+    void DisplayEntityType()
+    {
+        entityTypeText.text = (m_player != null ? m_player.EntityType : "---");
+    }
+
+    void DisplayEntityFirstName()
+    {
+        firstNameInput.text = (m_player != null ? m_player.FirstName : "---");
+    }
+
+    void DisplayEntityPosition()
+    {
+        positionInput.text = (m_player != null ? m_player.Position : "---");
+    }
+
+    void DisplayEntityInfo()
+    {
+        DisplayEntityID();
+        DisplayEntityType();
+        DisplayEntityFirstName();
+        DisplayEntityPosition();
+    }
+
+    public void OnCreateEntity()
+    {
+        if (m_player == null)
+        {
+            m_mainScene.CustomEntityInterface.CreateCustomEntity();
+            DisplayEntityFirstName();
+            DisplayEntityPosition();
+            m_mainScene.RealLogging("Creating Entity....");
+            Debug.Log("Creating Entity...");
+        }
+    }
+
+    public void OnSaveEntity()
+    {
+        if (m_player != null)
+        {
+            m_mainScene.CustomEntityInterface.UpdateCustomEntity();
+            m_mainScene.RealLogging("Updating Entity...");
+            Debug.Log("Updating Entity...");
+        }
+    }
+
+    public void OnDeleteEntity()
+    {
+        if(m_player != null)
+        {
+            m_mainScene.CustomEntityInterface.DeleteCustomEntity();
+            m_player = null;
+            m_mainScene.RealLogging("Deleting Entity...");
+            Debug.Log("Deleting Entity...");
+        }
+    }
+
+    public void OnEntityFirstNameEndEdit(string name)
+    {
+        //entityName = name;
+        if (m_player != null)
+            m_player.FirstName = name;
+    }
+
+    public void OnEntityPositionEndEdit(string position)
+    {
+        if (m_player != null)
+            m_player.Position = position; 
+    }
+
+    #region OnGuiLogic
     public override void OnScreenGUI()
     {
-        CustomEntityInstance m_player = null;
+        //CustomEntityInstance m_player = null;
         if (m_mainScene.CustomEntityInterface.PlayerAssigned)
         {
             m_player = m_mainScene.CustomEntityInterface.CustomPlayer;    
@@ -133,4 +227,5 @@ public class ScreenEntityCustomClass : BCScreen
 
         GUILayout.EndVertical();
     }
+    #endregion
 }

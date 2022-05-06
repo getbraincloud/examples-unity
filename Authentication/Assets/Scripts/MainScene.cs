@@ -5,6 +5,7 @@ using BrainCloud;
 using BrainCloud.Common;
 using System.Text;
 using BrainCloud.LitJson;
+using UnityEngine.UI;
 
 public class MainScene : MonoBehaviour
 {
@@ -32,8 +33,10 @@ public class MainScene : MonoBehaviour
     //AnthonyTODO: Members I'm adding
     BrainCloudInterface bcInterface; 
     DataManager dataManager; 
-    List<BCScreen> bcScreens; 
+    List<BCScreen> bcScreens;
 
+    //AnthonyTODO: UI Elements
+    [SerializeField] Text appDataText; 
 
 
     public enum eBCFunctionType : int
@@ -83,10 +86,7 @@ public class MainScene : MonoBehaviour
         }
         
         MoveToScreen(currentBCFunction);
-    }
-    // Update is called once per frame
-    void Update()
-    {
+        SetGameData();
     }
 
     public void OnSelectBCFunction(int val)
@@ -101,7 +101,9 @@ public class MainScene : MonoBehaviour
         {
             if(screen.GetFunctionType() == in_fn)
             {
-                screen.gameObject.SetActive(true); 
+                screen.gameObject.SetActive(true);
+                screen.SetMainScene(this);
+                screen.Activate(_bc);
             }
             else
             {
@@ -109,6 +111,7 @@ public class MainScene : MonoBehaviour
             }
         }
 
+        #region Old scene switching code
         //switch (in_fn)
         //{
         //    case eBCFunctionType.FN_ENTITY:
@@ -136,14 +139,25 @@ public class MainScene : MonoBehaviour
         //currentBCFunction = in_fn;
         //m_screen.SetMainScene(this);
         //m_screen.Activate();
+        #endregion
     }
 
+    void SetGameData()
+    {
+        string appID = bcInterface.GetAppID();
+        string gameVersion = bcInterface.GetAppVersion();
+        string profileID = bcInterface.GetAuthenticatedProfileID();
+
+        appDataText.text = "AppID:" + appID + "  AppVersion:" + gameVersion + "  ProfileID:" + profileID;
+    }
     
+    //Deprecated Authentication code
     public void TwitterCoroutine(IEnumerator coroutine)
     {
         StartCoroutine(coroutine);
     }
 
+    #region onGui Toolbar for screen selection
     // lays out the top toolbar + player info
     void OnGUITopButtons()
     {
@@ -158,27 +172,14 @@ public class MainScene : MonoBehaviour
             MoveToScreen(fn);
         }
     }
+    #endregion
 
-    // lays out the right hand pane for the log
-    void OnGUILog()
-    {
-        m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-        GUILayout.TextArea(m_log);
-        GUILayout.EndScrollView();
-        
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Clear Log", GUILayout.Height(25), GUILayout.Width(100)))
-        {
-            m_log = "";
-        }
-        GUILayout.EndHorizontal();
-        
-        //GUILayout.Space(20);
-    }
 
+
+    #region onGUI Game Data
     void OnGUIBottom()
     {
+        //AnthonyTODO: create a method in bcinterface that get this info and set the game info text to this.
         GUILayout.BeginHorizontal();
         GUILayout.Box("Game Id: " + _bc.Client.AppId);
         GUILayout.Box("Game Version: " + _bc.Client.AppVersion);
@@ -186,7 +187,9 @@ public class MainScene : MonoBehaviour
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
     }
+    #endregion
 
+    #region Old OnGui method
     //public void OnGUI()
     //{
     //    GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
@@ -216,6 +219,26 @@ public class MainScene : MonoBehaviour
 
     //    OnGUIBottom();
     //}
+    #endregion
+
+    #region onGUI log stuff
+    // lays out the right hand pane for the log
+    void OnGUILog()
+    {
+        m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+        GUILayout.TextArea(m_log);
+        GUILayout.EndScrollView();
+        
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button("Clear Log", GUILayout.Height(25), GUILayout.Width(100)))
+        {
+            m_log = "";
+        }
+        GUILayout.EndHorizontal();
+        
+        //GUILayout.Space(20);
+    }
 
     public void AddLog(string log)
     {
@@ -244,4 +267,5 @@ public class MainScene : MonoBehaviour
         JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
         AddLog(sb.ToString());
     }
+    #endregion
 }
