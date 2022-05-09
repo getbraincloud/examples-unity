@@ -136,12 +136,7 @@ public class EntityInterface : MonoBehaviour
         
         var data = JsonReader.Deserialize(json) as Dictionary<string, object>;
         var data1 = data["data"] as Dictionary<string, object>;
-        var data2 = data1["data"] as Dictionary<string, object>;
-        var entityData = data2["data"] as Dictionary<string, object>;
         
-        _player.Name = entityData["name"] as string;
-        _player.Age = entityData["age"] as string;
-
         _player.EntityId = data1["entityId"] as string;
         _player.EntityType = PLAYER_ENTITY_TYPE;
         _player.Version = (int) data1["version"];
