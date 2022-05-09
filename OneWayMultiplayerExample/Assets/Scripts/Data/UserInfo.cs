@@ -12,6 +12,9 @@ public class UserInfo
     public bool AllowSendTo = true;     
     //Is this user still connected
     public bool IsAlive;
+    public int Rating = 0;
+    public int MatchesPlayed = 0;
+    public int ShieldTime = 0;
 
     public ArmyDivisionRank InvaderSelected = 0;
 

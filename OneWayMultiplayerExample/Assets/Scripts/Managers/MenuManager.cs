@@ -19,6 +19,9 @@ public class MenuManager : MonoBehaviour
 
     [Header("UI Fields")] 
     public TMP_Text LoggedInNameText;
+    public TMP_Text RatingText;
+    public TMP_Text MatchesPlayedText;
+    public TMP_Text ShieldTimerText;
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
 
@@ -117,7 +120,7 @@ public class MenuManager : MonoBehaviour
     {
         string username = GameManager.Instance.CurrentUserInfo.Username;
         PlayerPrefs.SetString(Settings.UsernameKey, username);
-        LoggedInNameText.text = $"Logged in as {username}";
+        LoggedInNameText.text = $"User: {username}";
         
         int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
         Vector2 posI = DefenderButtonBorder.anchoredPosition; 
@@ -128,6 +131,14 @@ public class MenuManager : MonoBehaviour
         Vector2 posD = InvaderButtonBorder.anchoredPosition; 
         posD.x = SelectionList[invaderIndex];
         InvaderButtonBorder.anchoredPosition = posD;
+    }
+
+    public void UpdateMatchMakingInfo()
+    {
+        UserInfo user = GameManager.Instance.CurrentUserInfo;
+        RatingText.text = $"Rating: {user.Rating}";
+        MatchesPlayedText.text = $"Matches Played: {user.MatchesPlayed}";
+        ShieldTimerText.text = $"Shield Timer: {user.ShieldTime}";
     }
 
     public void UpdateButtonSelectorPosition(ArmyType in_type)
