@@ -177,6 +177,9 @@ public class CustomEntityInterface : MonoBehaviour
         
         _customPlayer.CreatedAt = Util.BcTimeToDateTime((long) data["createdAt"]);
         _customPlayer.UpdatedAt = Util.BcTimeToDateTime((long) data["updatedAt"]);
+
+        //Invoking custom entity success event for Screen Enitity custom class
+        GameEvents.instance.CreateCustomEntitySuccess(); 
     }
 
     public void UpdateCustomEntity()
@@ -223,6 +226,9 @@ public class CustomEntityInterface : MonoBehaviour
     private void OnDeleteSuccess(string json, object cbObject)
     {
         Debug.Log($"Custom Entity is deleted !");
+
+        //Invoking Delete custom entity for Screen entity custom class.
+        GameEvents.instance.DeleteCustomEntitySuccess();
     }
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)

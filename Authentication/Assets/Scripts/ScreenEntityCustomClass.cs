@@ -56,21 +56,24 @@ public class ScreenEntityCustomClass : BCScreen
     [SerializeField] Text entityTypeText;
     [SerializeField] InputField firstNameInput;
     [SerializeField] InputField positionInput;
+    [SerializeField] Button createEntityButton;
+    [SerializeField] Button saveEntityButton;
+    [SerializeField] Button deleteEntityButton; 
 
     public ScreenEntityCustomClass(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate(BrainCloudWrapper bc)
     {
+        GameEvents.instance.onCreateCustomEntitySuccess += OnCreateEntitySuccess;
+        GameEvents.instance.onDeleteCustomEntitySuccess += OnDeleteCustomEntitySuccess;
+
         _bc = bc; 
         m_mainScene.CustomEntityInterface.ReadCustomEntity();
         m_mainScene.RealLogging("[ReadPlayerState]... ");
 
-        if (m_mainScene.CustomEntityInterface.PlayerAssigned)
-        {
-            m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
-        }
-
+        //m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
         DisplayEntityInfo();
+        SetActiveButtons(true); 
     }
 
     void DisplayEntityID()
@@ -106,11 +109,19 @@ public class ScreenEntityCustomClass : BCScreen
         if (m_player == null)
         {
             m_mainScene.CustomEntityInterface.CreateCustomEntity();
-            DisplayEntityFirstName();
-            DisplayEntityPosition();
             m_mainScene.RealLogging("Creating Entity....");
             Debug.Log("Creating Entity...");
         }
+    }
+
+    //Event subscribed to onCreateCustomEntitySuccess
+    private void OnCreateEntitySuccess()
+    {
+        m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
+
+        DisplayEntityInfo();
+
+        SetActiveButtons(false);
     }
 
     public void OnSaveEntity()
@@ -134,6 +145,14 @@ public class ScreenEntityCustomClass : BCScreen
         }
     }
 
+    //Event subscribed to onDeleteCustomEntitySuccess
+    private void OnDeleteCustomEntitySuccess()
+    {
+        DisplayEntityInfo();
+
+        SetActiveButtons(true); 
+    }
+
     public void OnEntityFirstNameEndEdit(string name)
     {
         //entityName = name;
@@ -145,6 +164,13 @@ public class ScreenEntityCustomClass : BCScreen
     {
         if (m_player != null)
             m_player.Position = position; 
+    }
+
+    private void SetActiveButtons(bool isActive)
+    {
+        createEntityButton.gameObject.SetActive(isActive);
+        saveEntityButton.gameObject.SetActive(!isActive);
+        deleteEntityButton.gameObject.SetActive(!isActive);
     }
 
     #region OnGuiLogic

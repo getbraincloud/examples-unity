@@ -198,7 +198,7 @@ public class ConnectScene : MonoBehaviour
         bcInterface.GoogleSignIn();
     }
 
-    //THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE. 
+    //AnthonyTODO: THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE. 
     #region OnGuiSystem
 /*
     void OnGUI()
