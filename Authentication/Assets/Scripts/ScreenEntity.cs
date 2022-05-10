@@ -23,23 +23,32 @@ public class ScreenEntity : BCScreen
     [SerializeField] Text entityIDText;
     [SerializeField] Text entityTypeText;
     [SerializeField] InputField nameInput;
-    [SerializeField] InputField ageInput; 
+    [SerializeField] InputField ageInput;
+    [SerializeField] Button createEntityButton;
+    [SerializeField] Button saveEntityButton;
+    [SerializeField] Button deleteEntityButton; 
 
     public override void Activate(BrainCloudWrapper bc)
     {
+        GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
+        GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess; 
+
         _bc = bc; 
         //_bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
         m_mainScene.EntityInterface.ReadEntity();
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
 
         //AnthonyTODO: Test if it makes sense to assign player here when we first switch to this screen. 
-        m_player = null;
-        if (m_mainScene.EntityInterface.PlayerAssigned)
-        {
-            m_player = m_mainScene.EntityInterface.Player;
-        }
+        //m_player = null;
+        //if (m_mainScene.EntityInterface.PlayerAssigned)
+        //{
+        //    m_player = m_mainScene.EntityInterface.Player;
+        //}
 
-        DisplayEntityInfo(); 
+        DisplayEntityInfo();
+        
+        SetActiveButtons(m_player == null ? true : false); 
+       
     }
 
     void DisplayEntityID()
@@ -78,6 +87,15 @@ public class ScreenEntity : BCScreen
         Debug.Log("Creating Entity...");
     }
 
+    private void OnCreateEntitySuccess()
+    {
+        m_player = m_mainScene.EntityInterface.Player;
+
+        DisplayEntityInfo();
+        SetActiveButtons(false); 
+
+    }
+
     public void OnSaveEntity()
     {
         m_mainScene.EntityInterface.UpdateEntity();
@@ -93,6 +111,12 @@ public class ScreenEntity : BCScreen
         //AnthonyTODO: Figure out logging.
         //m_mainScene.RealLogging("Deleting Entity...");
         Debug.Log("Deleting Entity...");
+    }
+
+    private void OnDeleteEntitySuccess()
+    {
+        DisplayEntityInfo();
+        SetActiveButtons(true); 
     }
 
     public void OnEntityNameEndEdit(string name)
@@ -115,6 +139,24 @@ public class ScreenEntity : BCScreen
                 Debug.Log("Entity Age -- You must enter a number in this field");
             }
         }
+    }
+
+    void SetActiveButtons(bool isActive)
+    {
+        createEntityButton.gameObject.SetActive(isActive);
+        saveEntityButton.gameObject.SetActive(!isActive);
+        deleteEntityButton.gameObject.SetActive(!isActive);
+    }
+
+    private void OnDisable()
+    {
+        if(m_player != null) //AnthonyTODO: Temporary solution to EntityInterface _player null bug
+        {
+            OnDeleteEntity(); 
+        }
+
+        GameEvents.instance.onCreateUserEntitySuccess -= OnCreateEntitySuccess;
+        GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
     }
 
     public override void OnScreenGUI()

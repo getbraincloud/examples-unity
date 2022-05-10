@@ -13,14 +13,19 @@ public class ScreenPlayerStats : BCScreen
         public long value;
         public string increment = "0";
     }
-    IDictionary<string, PlayerStatistic> m_stats = new Dictionary<string, PlayerStatistic>();
+    IDictionary<string, PlayerStatistic> m_stats;
+
+    //AnthonyTODO: Add an array or list of player stat prefabs. 
+    GameObject playerStatPrefab; 
     
     public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
     
     public override void Activate(BrainCloudWrapper bc)
     {
         _bc = bc;
+        m_stats = new Dictionary<string, PlayerStatistic>();
         _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
+
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
     
@@ -37,6 +42,11 @@ public class ScreenPlayerStats : BCScreen
         {
             foreach (string key in dStats.Keys)
             {
+                //AnthonyTODO: In this foreach loop we will instantiate a new Playerstat Prefab for every playerstat key. 
+                //AnthonyTODO: We will then assign each button with an OnClick Listener using an Increment method we'll create that takes in one argument (string playerStatName)
+                //AnthonyTODO: m_YourButton.onClick.AddListener(delegate {Increment(stat.name); }); OR m_YourButton.onClick.AddListener(() => Increment(stat.name)); 
+                //AnthonyTODO: Refer to https://docs.unity3d.com/2019.1/Documentation/ScriptReference/UI.Button-onClick.html
+
                 PlayerStatistic stat = new PlayerStatistic();
                 stat.name = (string) key;
                 JsonData value = (JsonData) dStats[key];
@@ -47,6 +57,13 @@ public class ScreenPlayerStats : BCScreen
                 m_stats[stat.name] = stat;
             }
         }
+    }
+
+    void IncrementStat(string playerStatName)
+    {
+        string jsonData = "{ \"" + playerStatName + "\" : 1 }";
+
+        _bc.PlayerStatisticsService.IncrementUserStats(jsonData, Success_Callback, Failure_Callback);
     }
     
     public override void OnScreenGUI()

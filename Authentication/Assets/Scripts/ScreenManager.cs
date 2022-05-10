@@ -24,7 +24,7 @@ public class ScreenManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-         
+
             if (next != null)
             {
                 InputField inputfield = next.GetComponent<InputField>();

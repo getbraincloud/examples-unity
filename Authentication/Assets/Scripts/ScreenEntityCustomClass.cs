@@ -64,7 +64,7 @@ public class ScreenEntityCustomClass : BCScreen
 
     public override void Activate(BrainCloudWrapper bc)
     {
-        GameEvents.instance.onCreateCustomEntitySuccess += OnCreateEntitySuccess;
+        GameEvents.instance.onCreateCustomEntitySuccess += OnCreateCustomEntitySuccess;
         GameEvents.instance.onDeleteCustomEntitySuccess += OnDeleteCustomEntitySuccess;
 
         _bc = bc; 
@@ -73,7 +73,8 @@ public class ScreenEntityCustomClass : BCScreen
 
         //m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
         DisplayEntityInfo();
-        SetActiveButtons(true); 
+
+        SetActiveButtons(m_player == null ? true : false); 
     }
 
     void DisplayEntityID()
@@ -115,7 +116,7 @@ public class ScreenEntityCustomClass : BCScreen
     }
 
     //Event subscribed to onCreateCustomEntitySuccess
-    private void OnCreateEntitySuccess()
+    private void OnCreateCustomEntitySuccess()
     {
         m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
 
@@ -171,6 +172,18 @@ public class ScreenEntityCustomClass : BCScreen
         createEntityButton.gameObject.SetActive(isActive);
         saveEntityButton.gameObject.SetActive(!isActive);
         deleteEntityButton.gameObject.SetActive(!isActive);
+    }
+
+    private void OnDisable()
+    {
+        //AnthonyTODO: Figure out why _player in Entity interface gets deleted but the same issue doesn't happen here.
+        //if (m_player != null)
+        //{
+        //    OnDeleteEntity();
+        //}
+
+        GameEvents.instance.onCreateUserEntitySuccess -= OnCreateCustomEntitySuccess;
+        GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteCustomEntitySuccess;
     }
 
     #region OnGuiLogic

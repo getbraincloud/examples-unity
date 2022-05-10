@@ -60,7 +60,6 @@ public class BrainCloudInterface : MonoBehaviour
         instance = this; 
 
         _bc = BCConfig.GetBrainCloud();
-        dataManager = DataManager.instance;
         screenManager = ScreenManager.instance; 
 
 #if UNITY_ANDROID
@@ -92,8 +91,8 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void AuthenticateEmail()
     {
-        m_emailId = dataManager.GetEmailID();
-        m_emailPwd = dataManager.GetEmailPassword(); 
+        m_emailId = DataManager.instance.GetEmailID();
+        m_emailPwd = DataManager.instance.GetEmailPassword(); 
 
         _bc.ResetStoredProfileId();
         _bc.ResetStoredAnonymousId();

@@ -4,12 +4,23 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.LitJson;
+using UnityEngine.UI; 
 
 public class ScreenPlayerXp : BCScreen
 {
     int m_playerXp = 0;
     int m_playerLevel = 0;
     string m_incrementXp = "0";
+    string m_currencyToAward = "0";
+    string m_currencyToConsume = "0";
+
+    //AnthonyTODO: UI Elements
+    [SerializeField] Text playerXPText;
+    [SerializeField] Text playerLevelText;
+    [SerializeField] Text currencyBalanceText;
+    [SerializeField] Text currencyConsumedText;
+    [SerializeField] Text currencyAwardedText;
+    [SerializeField] Text currencyPurchasedText; 
 
     private class Currency
     {
@@ -47,6 +58,95 @@ public class ScreenPlayerXp : BCScreen
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
 
+    public void OnIncrementXP()
+    {
+        int valueAsInt = 0;
+
+        if (int.TryParse(m_incrementXp, out valueAsInt))
+        {
+            _bc.PlayerStatisticsService.IncrementExperiencePoints(valueAsInt, IncrementXp_Success, Failure_Callback);
+            m_mainScene.AddLogNoLn("[IncrementXp]... ");
+        }
+    }
+
+    public void OnIncrementXPEndEdit(string xpToIncrement)
+    {
+        int valueAsInt = 0;
+
+        if (int.TryParse(xpToIncrement, out valueAsInt))
+        {
+            m_incrementXp = xpToIncrement;
+        }
+        else
+        {
+            Debug.Log("Value entered must be a number!"); 
+        }
+    }
+
+    public void OnAwardCurrencyFieldEndEdit(string currency)
+    {
+        ulong valueAsUlong = 0; 
+
+        if(ulong.TryParse(currency, out valueAsUlong))
+        {
+            m_currencyToAward = currency; 
+        }
+        else
+        {
+            Debug.Log("Value entered must be a number!"); 
+        }
+    }
+
+    public void OnConsumeCurrencyFieldEndEdit(string currency)
+    {
+        ulong valueAsUlong = 0; 
+
+        if(ulong.TryParse(currency, out valueAsUlong))
+        {
+            m_currencyToConsume = currency; 
+        }
+        else
+        {
+            Debug.Log("Value entered must be a number!");
+        }
+    }
+
+    public void OnAwardCurrency()
+    {
+        string scriptName = "AwardCurrency";
+        string jsonScriptData = "{\"vcID\": \"gems\", \"vcAmount\": " + m_currencyToAward + "}";
+
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log(string.Format("Success | {0}", response)); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
+
+        _bc.ScriptService.RunScript(scriptName, jsonScriptData, successCallback, failureCallback);
+        _bc.VirtualCurrencyService.GetCurrency("gems", GetPlayerVC_Success, Failure_Callback);
+    }
+
+    public void OnConsumeCurrency()
+    {
+        string scriptName = "ConsumeCurrency";
+        string jsonScriptData = "{\"vcID\": \"gems\", \"vcAmount\": " + m_currencyToConsume + "}";
+
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log(string.Format("Success | {0}", response)); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
+
+        _bc.ScriptService.RunScript(scriptName, jsonScriptData, successCallback, failureCallback);
+        _bc.VirtualCurrencyService.GetCurrency("gems", GetPlayerVC_Success, Failure_Callback);
+    }
+
+    public void OnResetCurrency()
+    {
+        string scriptName = "ResetCurrency";
+        string jsonScriptData = "{}";
+
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log(string.Format("Success | {0}", response)); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
+
+        _bc.ScriptService.RunScript(scriptName, jsonScriptData, successCallback, failureCallback);
+        _bc.VirtualCurrencyService.GetCurrency("gems", GetPlayerVC_Success, Failure_Callback);
+    }
+
     private void ReadPlayerState_Success(string json, object cb)
     {
         m_mainScene.AddLog("SUCCESS");
@@ -57,12 +157,18 @@ public class ScreenPlayerXp : BCScreen
         m_playerLevel = (int) jObj["data"]["experienceLevel"];
         m_playerXp = (int) jObj["data"]["experiencePoints"];
 
-        // now grab our currencies
-        foreach (string curType in m_currencyTypes)
-        {
-            _bc.VirtualCurrencyService.GetCurrency(curType, GetPlayerVC_Success, Failure_Callback);
-            m_mainScene.AddLogNoLn("[GetPlayerVC (" + curType +")]... ");
-        }
+        //AnthonyTODO: adding UI stuff
+        playerLevelText.text = m_playerLevel.ToString();
+        playerXPText.text = m_playerXp.ToString();
+
+        _bc.VirtualCurrencyService.GetCurrency("gems", GetPlayerVC_Success, Failure_Callback);
+
+        //// now grab our currencies
+        //foreach (string curType in m_currencyTypes)
+        //{
+        //    _bc.VirtualCurrencyService.GetCurrency(curType, GetPlayerVC_Success, Failure_Callback);
+        //    m_mainScene.AddLogNoLn("[GetPlayerVC (" + curType +")]... ");
+        //}
     }
 
     private void GetPlayerVC_Success(string json, object cb)
@@ -105,6 +211,16 @@ public class ScreenPlayerXp : BCScreen
             c.balance = (int) jCurMap[key]["balance"];
             c.consumed = (int) jCurMap[key]["consumed"];
             c.awarded = (int) jCurMap[key]["awarded"];
+
+            int purchasedAsInt = (int)jCurMap[key]["purchased"];
+            int balanceAsInt = (int)jCurMap[key]["balance"];
+            int consumeddAsInt = (int)jCurMap[key]["consumed"];
+            int awardedAsInt = (int)jCurMap[key]["awarded"];
+
+            currencyPurchasedText.text = purchasedAsInt.ToString();
+            currencyBalanceText.text = balanceAsInt.ToString();
+            currencyConsumedText.text = consumeddAsInt.ToString();
+            currencyAwardedText.text = awardedAsInt.ToString(); 
         }
     }
 
@@ -218,6 +334,9 @@ public class ScreenPlayerXp : BCScreen
         JsonData jObj = JsonMapper.ToObject(json);
         m_playerLevel = (int) jObj["data"]["experienceLevel"];
         m_playerXp = (int) jObj["data"]["experiencePoints"];
+
+        playerLevelText.text = m_playerLevel.ToString();
+        playerXPText.text = m_playerXp.ToString(); 
 
         // rewards?
     }

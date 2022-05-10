@@ -12,6 +12,26 @@ public class GameEvents : MonoBehaviour
         instance = this; 
     }
 
+    //User Entity Events
+    public event Action onCreateUserEntitySuccess;
+    public void CreateUserEntitySuccess()
+    {
+        if(onCreateUserEntitySuccess != null)
+        {
+            onCreateUserEntitySuccess(); 
+        }
+    }
+
+    public event Action onDeleteUserEntitySuccess; 
+    public void DeleteUserEntitySuccess()
+    {
+        if(onDeleteUserEntitySuccess != null)
+        {
+            onDeleteUserEntitySuccess(); 
+        }
+    }
+
+    //Custom Entity Events
     public event Action onCreateCustomEntitySuccess; 
     public void CreateCustomEntitySuccess()
     {
@@ -30,5 +50,4 @@ public class GameEvents : MonoBehaviour
             onDeleteCustomEntitySuccess(); 
         }
     }
-
 }

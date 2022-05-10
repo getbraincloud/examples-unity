@@ -8,6 +8,7 @@ public class DataManager : MonoBehaviour
 {
     public static DataManager instance;
 
+    //Authentication Data
     string m_profileId = "";
     string m_anonymousId = ""; 
     string m_universalUserId = "";
@@ -16,6 +17,11 @@ public class DataManager : MonoBehaviour
     string m_emailPwd = "";
     string m_googleId = "";
     string m_serverAuthCode = "";
+
+    //PlayerXP Data
+    int m_playerLevel; 
+    int m_playerXP; 
+
 
     void Start()
     {

@@ -144,6 +144,8 @@ public class EntityInterface : MonoBehaviour
         _player.UpdatedAt = Util.BcTimeToDateTime((long) data1["updatedAt"]);
         
         UpdateEntity();
+
+        GameEvents.instance.CreateUserEntitySuccess(); 
     }
 
     public void UpdateEntity()
@@ -182,12 +184,16 @@ public class EntityInterface : MonoBehaviour
             OnDeleteEntity,
             OnFailureCallback
         );
+
         _player = null;
+        
     }
 
     private void OnDeleteEntity(string json, object cbObject)
     {
         Debug.Log($"Entity is deleted !");
+
+        GameEvents.instance.DeleteUserEntitySuccess(); 
     }
 
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
