@@ -18,6 +18,14 @@ public class GameManager : MonoBehaviour
         get => _currentUserInfo;
         set => _currentUserInfo = value;
     }
+
+    private UserInfo _opponentUserInfo;
+    public UserInfo OpponentUserInfo
+    {
+        get => _opponentUserInfo;
+        set => _opponentUserInfo = value;
+    }
+    
     //Singleton Pattern
     private static GameManager _instance;
     public static GameManager Instance => _instance;
@@ -50,7 +58,7 @@ public class GameManager : MonoBehaviour
         Settings.SaveEntityId(in_id);
     }
 
-    public void UpdateArmySelection(int in_defenderSelection, int in_invaderSelection)
+    public void UpdateLocalArmySelection(int in_defenderSelection, int in_invaderSelection)
     {
         _currentUserInfo.InvaderSelected = (ArmyDivisionRank) in_invaderSelection;
         _currentUserInfo.DefendersSelected = (ArmyDivisionRank) in_defenderSelection;

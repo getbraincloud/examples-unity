@@ -26,16 +26,21 @@ public class MenuManager : MonoBehaviour
     public TMP_InputField PasswordInputField;
 
     [Header("UI References")] 
+    //ToDo: Dont make this public and save the data
     public List<float> SelectionList = new List<float>();
     public RectTransform InvaderButtonBorder;
-    public RectTransform DefenderButtonBorder; 
-    
+    public RectTransform DefenderButtonBorder;
+    public PlayerCardLobby PlayerCardRef;
+    public GameObject LobbyListParent;
+
+    private UserInfo _opponent;
+    private List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
     private EventSystem _eventSystem;
 
     private const string LOGGING_IN_MESSAGE = "Logging in...";
     private const string LOOKING_FOR_PLAYERS_MESSAGE = "Looking for players...";
     private const string JOINING_MATCH_MESSAGE = "Joining Match...";
-
+    
     private static MenuManager _instance;
     public static MenuManager Instance => _instance;
 
@@ -104,7 +109,7 @@ public class MenuManager : MonoBehaviour
                 CurrentMenuState = MenuStates.Lobby;
                 BrainCloudManager.Instance.LookForPlayers();
                 LoadingMenuState.ConnectStatesWithLoading(LOOKING_FOR_PLAYERS_MESSAGE, true, MenuStates.Lobby);
-                StartCoroutine(FakeLoading());
+                
                 break;
             //Loading up game to start invading...
             case MenuStates.Lobby:
@@ -113,7 +118,34 @@ public class MenuManager : MonoBehaviour
                 //ToDo: Loading transition for scene to scene. 
                 break;
         }
+    }
+
+    public void UpdateLobbyList(List<UserInfo> in_listOfPlayers)
+    {
+        if (_listOfPlayers.Count > 0)
+        {
+            for (int i = _listOfPlayers.Count-1; i < 0; i--)
+            {
+                Destroy(_listOfPlayers[i].gameObject);
+            }    
+        }
         
+
+        for (int i = 0; i < in_listOfPlayers.Count; i++)
+        {
+            PlayerCardLobby user = Instantiate(PlayerCardRef, LobbyListParent.transform);
+            //Apply relevant user data to text
+            user.PlayerNameText.text = in_listOfPlayers[i].Username;
+            user.PlayerRatingText.text = in_listOfPlayers[i].Rating.ToString();
+            user.PlayerDifficulty.text = in_listOfPlayers[i].DefendersSelected.ToString();
+
+            //Save Data for later
+            user.UserInfo = in_listOfPlayers[i];
+            
+            _listOfPlayers.Add(user);
+        }
+
+        IsLoading = false;
     }
 
     public void UpdateMainMenu()

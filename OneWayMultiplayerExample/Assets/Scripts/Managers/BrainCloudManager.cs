@@ -16,6 +16,8 @@ public class BrainCloudManager : MonoBehaviour
     public static BrainCloudManager Instance;
     private bool _isNewPlayer = false;
     public int _defaultRating = 1000;
+    public long _findPlayersRange;
+    public long _numberOfMatches;
     private void Awake()
     {
         _bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -71,7 +73,6 @@ public class BrainCloudManager : MonoBehaviour
         if (!username.Equals(GameManager.Instance.CurrentUserInfo.Username))
         {
             _isNewPlayer = true;
-            Debug.Log("hit");
         }
         
         Settings.SaveLogin(username, password);
@@ -105,7 +106,13 @@ public class BrainCloudManager : MonoBehaviour
 
     void OnEnableMatchMaking(string jsonResponse, object cbObject)
     {
-        _bcWrapper.MatchMakingService.FindPlayers(2000, 10, OnFoundPlayers, OnFoundPlayersError);
+        _bcWrapper.MatchMakingService.FindPlayers
+        (
+            _findPlayersRange,
+            _numberOfMatches,
+            OnFoundPlayers,
+            OnFoundPlayersError
+        );
     }
 
     public void SetDefaultPlayerRating()
@@ -117,25 +124,35 @@ public class BrainCloudManager : MonoBehaviour
 
     void OnFoundPlayers(string jsonResponse, object cbObject)
     {
-        //m_bcWrapper.EntityService.GetSharedEntitiesForProfileId("a20735cb-62fa-43f3-956f-690c152755e9", OnFoundEntity, OnFoundPlayersError);
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data1 = response["data"] as Dictionary<string,object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string,object>;
         
-        if (data1 == null)
+        if (data == null)
         {
-            Debug.LogWarning("This entityId doesn't exist for this user");
+            Debug.LogWarning("Something went wrong, data is null");
             return;
         }
+
+        Dictionary<string, object>[] matchesFound = data["matchesFound"] as Dictionary<string, object>[];
+        List<UserInfo> users = new List<UserInfo>();
+        for (int i = 0; i < matchesFound.Length; i++)
+        {
+            var newUser = new UserInfo();
+
+            newUser.Username = matchesFound[i]["playerName"] as string;
+            newUser.Rating = (int) matchesFound[i]["playerRating"];
+            newUser.ProfileId = matchesFound[i]["playerId"] as string;
+            
+            users.Add(newUser);
+        }
+        
+        MenuManager.Instance.UpdateLobbyList(users);
     }
 
     void OnFoundPlayersError(int status, int reasonCode, string jsonError, object cbObject)
     {
-        
-    }
-
-    void OnFoundEntity(string jsonResponse, object cbObject)
-    {
-        
+        //ToDo: Create a seperate subscreen condition here to hide the lobby screen and show in text "no players found"
+        //Or enable a text that says that with the list empty. 
     }
     
     // User authenticated, handle the result
@@ -148,10 +165,10 @@ public class BrainCloudManager : MonoBehaviour
         
         userInfo = new UserInfo
         {
-            ID = data["profileId"] as string
+            ProfileId = data["profileId"] as string
         };
         
-        // If no username is set for this user, ask for it
+        // If no username is set for this user, then update the name
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
@@ -160,13 +177,18 @@ public class BrainCloudManager : MonoBehaviour
         }
         else
         {
+            //Checking if playerName field has a real value to read in, if so we move on to checking the user entity
             userInfo.Username = data["playerName"] as string;
             if (userInfo.Username.IsNullOrEmpty())
             {
                 userInfo.Username = tempUsername;
+                _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, OnFailureCallback,
+                    "Failed to update username to braincloud");
             }
-            _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, OnFailureCallback,
-                "Failed to update username to braincloud");
+            else
+            {
+                OnLoggedIn(null, null);
+            }
         }
     }
     
@@ -213,10 +235,10 @@ public class BrainCloudManager : MonoBehaviour
     void OnValidEntityResponse(string jsonResponse, object cbObject)
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data1 = response["data"] as Dictionary<string,object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string,object>;
         
         //Attempted to read entity but got no data
-        if (data1 == null)
+        if (data == null)
         {
             Debug.LogWarning("Invalid entity from response");
             //Attempt to get entities of the type we want
@@ -228,13 +250,12 @@ public class BrainCloudManager : MonoBehaviour
             );
             return;
         }
-        Dictionary<string, object> data2 = data1["data"] as Dictionary<string,object>;
-        Dictionary<string, object> entityData = data2["data"] as Dictionary<string,object>;
+        Dictionary<string, object> entityData = data["data"] as Dictionary<string,object>;
         
         int defenderSelection = (int) entityData["defenderSelection"];
         int invaderSelection = (int) entityData["invaderSelection"];
         
-        GameManager.Instance.UpdateArmySelection(defenderSelection, invaderSelection);
+        GameManager.Instance.UpdateLocalArmySelection(defenderSelection, invaderSelection);
         MenuManager.Instance.UpdateMainMenu();
         GetUserRating();
     }
@@ -256,7 +277,7 @@ public class BrainCloudManager : MonoBehaviour
             string entityId = entities[0]["entityId"] as string;
             
             Settings.SaveEntityId(entityId);
-            GameManager.Instance.UpdateArmySelection(defenderSelection, invaderSelection);
+            GameManager.Instance.UpdateLocalArmySelection(defenderSelection, invaderSelection);
             MenuManager.Instance.UpdateMainMenu();
         }
         else
@@ -299,16 +320,48 @@ public class BrainCloudManager : MonoBehaviour
         string entityId = jsonData["entityId"] as string;
         
         GameManager.Instance.UpdateEntityId(entityId);
-        GameManager.Instance.UpdateArmySelection(0, 0);
+        GameManager.Instance.UpdateLocalArmySelection(0, 0);
         MenuManager.Instance.IsLoading = false;
         MenuManager.Instance.UpdateMainMenu();
         SetDefaultPlayerRating();
     }
 
-    string CreateJsonEntityData(bool isDataNew)
+    public void ReadLobbyUserSelected(string in_userId)
+    {
+        _bcWrapper.EntityService.GetSharedEntitiesForProfileId(in_userId, OnReadLobbyUserSelected, OnFailureCallback);
+    }
+
+    private void OnReadLobbyUserSelected(string jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
+        
+        var entities = jsonData["entities"] as Dictionary<string, object>[];
+
+        if (entities == null || entities.Length == 0)
+        {
+            Debug.LogWarning("This user has no user entities set up");
+            return;
+        }
+        var entityData = entities[0]["data"] as Dictionary<string, object>;
+
+        if (entityData == null || !entityData.ContainsKey("defenderSelection"))
+        {
+            Debug.LogWarning("This user has no user entities set up");
+            return;
+        }
+        
+        //Get what defender set is selected
+        GameManager.Instance.OpponentUserInfo.DefendersSelected = (ArmyDivisionRank)entityData["defenderSelection"];
+        GameManager.Instance.OpponentUserInfo.EntityId = entities[0]["entityId"] as string;
+        
+        //Load game...
+    }
+
+    string CreateJsonEntityData(bool in_isDataNew)
     {
         Dictionary<string, object> entityInfo = new Dictionary<string, object>();
-        if (isDataNew)
+        if (in_isDataNew)
         {
             entityInfo.Add("defenderSelection", 0);
             entityInfo.Add("invaderSelection", 0);    
@@ -320,10 +373,7 @@ public class BrainCloudManager : MonoBehaviour
             entityInfo.Add("invaderSelection",(int) user.InvaderSelected);
         }
         
-        Dictionary<string, object> jsonData = new Dictionary<string, object>();
-        jsonData.Add("data",entityInfo);
-        string value = JsonWriter.Serialize(jsonData);
-
+        string value = JsonWriter.Serialize(entityInfo);
         return value;
     }
 
