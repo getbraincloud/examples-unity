@@ -5,6 +5,7 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public enum ArmyDivisionRank{Easy,Medium,Hard}
 public enum ArmyType {Invader,Defense}
@@ -62,5 +63,10 @@ public class GameManager : MonoBehaviour
     {
         _currentUserInfo.InvaderSelected = (ArmyDivisionRank) in_invaderSelection;
         _currentUserInfo.DefendersSelected = (ArmyDivisionRank) in_defenderSelection;
+    }
+
+    public void LoadToGame()
+    {
+        SceneManager.LoadScene("Game");
     }
 }

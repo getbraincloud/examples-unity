@@ -14,7 +14,8 @@ public class MenuManager : MonoBehaviour
     public List<MenuState> MenuStatesList = new List<MenuState>();
     public MenuStates CurrentMenuState;
     public LoadingMenuState LoadingMenuState;
-    public ErrorMessage ErrorMessageState;
+    public PopUpMessage errorPopUpMessageState;
+    public PopUpMessage confirmPopUpMessageState;
     public bool IsLoading;
 
     [Header("UI Fields")] 
@@ -130,7 +131,6 @@ public class MenuManager : MonoBehaviour
             }    
         }
         
-
         for (int i = 0; i < in_listOfPlayers.Count; i++)
         {
             PlayerCardLobby user = Instantiate(PlayerCardRef, LobbyListParent.transform);
@@ -193,16 +193,9 @@ public class MenuManager : MonoBehaviour
     
     public void AbortToSignIn(string errorMessage)
     {
-        ErrorMessageState.SetUpPopUpMessage(errorMessage);
+        errorPopUpMessageState.SetUpPopUpMessage(errorMessage);
         LoadingMenuState.CancelNextState = true;
         ChangeState(MenuStates.SignIn);
-    }
-
-    //ToDo: Delete this once loading isn't faked
-    IEnumerator FakeLoading()
-    {
-        yield return new WaitForSeconds(2);
-        IsLoading = false;
     }
 
     public void ChangeState(MenuStates newMenuState)

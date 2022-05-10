@@ -355,7 +355,8 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.OpponentUserInfo.DefendersSelected = (ArmyDivisionRank)entityData["defenderSelection"];
         GameManager.Instance.OpponentUserInfo.EntityId = entities[0]["entityId"] as string;
         
-        //Load game...
+        //Set up pop up window for confirmation to invade user
+        MenuManager.Instance.confirmPopUpMessageState.SetUpConfirmationForMatch();
     }
 
     string CreateJsonEntityData(bool in_isDataNew)
