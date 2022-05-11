@@ -6,10 +6,6 @@ using UnityEngine.UI;
 
 public class ConnectScene : MonoBehaviour
 {
-    //AnthonyTODO: Adding the new singletons
-    BrainCloudInterface bcInterface;
-    DataManager dataManager; 
-
     public GameObject MainScene;
     public BCConfig BCConfig;
     
@@ -62,9 +58,6 @@ public class ConnectScene : MonoBehaviour
 
     void Start()
     {
-        dataManager = DataManager.instance;
-        bcInterface = BrainCloudInterface.instance; 
-
         ChangeAuthType(eAuthTypes.EMAIL);
     }
 
@@ -139,8 +132,8 @@ public class ConnectScene : MonoBehaviour
             resetAnonIdButton.gameObject.SetActive(true);
             storedProfileIdText.gameObject.SetActive(true);
             storedAnonymousIdText.gameObject.SetActive(true);
-            storedProfileIdText.text = bcInterface.GetStoredProfileID();
-            storedAnonymousIdText.text = bcInterface.GetStoredAnonymousID();
+            storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
+            storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
         }
     }
 
@@ -162,21 +155,21 @@ public class ConnectScene : MonoBehaviour
         switch(currentAuthType)
         {
             case eAuthTypes.EMAIL:
-                dataManager.SetEmailandPass(inputProfileId, inputPassword); 
-                bcInterface.AuthenticateEmail();
+                DataManager.instance.SetEmailandPass(inputProfileId, inputPassword); 
+                BrainCloudInterface.instance.AuthenticateEmail();
                 break;
             case eAuthTypes.UNIVERSAL:
-                dataManager.SetUniversalIDandPass(inputProfileId, inputPassword);
-                bcInterface.AuthenticateUniversal();
+                DataManager.instance.SetUniversalIDandPass(inputProfileId, inputPassword);
+                BrainCloudInterface.instance.AuthenticateUniversal();
                 break;
             case eAuthTypes.ANONYMOUS:
-                bcInterface.AuthenticateAnonymous();
+                BrainCloudInterface.instance.AuthenticateAnonymous();
                 break;
             case eAuthTypes.GOOGLE:
-                bcInterface.AuthenticateGoogle();
+                BrainCloudInterface.instance.AuthenticateGoogle();
                 break;
             case eAuthTypes.FACEBOOK:
-                bcInterface.AuthenticateFacebook();
+                BrainCloudInterface.instance.AuthenticateFacebook();
                 break;
             case eAuthTypes.XBOXLIVE:
                 break; 
@@ -185,17 +178,17 @@ public class ConnectScene : MonoBehaviour
 
     public void OnResetProfileID()
     {
-        storedProfileIdText.text = bcInterface.ResetProfileID(); 
+        storedProfileIdText.text = BrainCloudInterface.instance.ResetProfileID(); 
     }
 
     public void OnResetAnonymousID()
     {
-        storedAnonymousIdText.text = bcInterface.ResetAnonymousID();
+        storedAnonymousIdText.text = BrainCloudInterface.instance.ResetAnonymousID();
     }
 
     public void OnGoogleSignIn()
     {
-        bcInterface.GoogleSignIn();
+        BrainCloudInterface.instance.GoogleSignIn();
     }
 
     //AnthonyTODO: THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE. 
