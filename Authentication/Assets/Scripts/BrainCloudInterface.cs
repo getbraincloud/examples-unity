@@ -28,16 +28,13 @@ public class BrainCloudInterface : MonoBehaviour
 {
     public static BrainCloudInterface instance;
 
-    DataManager dataManager;
-    ScreenManager screenManager; 
-
-    public BCConfig BCConfig;
+    /*public*/ BCConfig bCConfig;
 
     public static BrainCloudWrapper _bc;
 
     string m_authStatus = "Welcome to brainCloud!";
 
-    //Not sure if we'll need this
+    //AnthonyTODO: Not sure if we'll need this
     string m_universalUserId = "";
     string m_universalPwd = "";
     string m_emailId = "";
@@ -57,10 +54,14 @@ public class BrainCloudInterface : MonoBehaviour
 
     void Start()
     {
-        instance = this; 
+        instance = this;
 
-        _bc = BCConfig.GetBrainCloud();
-        screenManager = ScreenManager.instance; 
+        bCConfig = FindObjectOfType<BCConfig>(); 
+
+        if(bCConfig != null)
+        {
+            _bc = bCConfig.GetBrainCloud();
+        }
 
 #if UNITY_ANDROID
         PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
@@ -101,8 +102,8 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void AuthenticateUniversal()
     {
-        m_universalUserId = dataManager.GetUniversalUserID();
-        m_universalPwd = dataManager.GetUniversalUserPassword();
+        m_universalUserId = DataManager.instance.GetUniversalUserID();
+        m_universalPwd = DataManager.instance.GetUniversalUserPassword();
 
         _bc.ResetStoredProfileId();
         _bc.ResetStoredAnonymousId();
@@ -169,7 +170,7 @@ public class BrainCloudInterface : MonoBehaviour
         m_authStatus = "Authenticate successful!";
         Debug.Log(m_authStatus);
 
-        screenManager.ActivateMainScreen();
+        ScreenManager.instance.ActivateMainScreen();
     }
 
     public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
