@@ -77,9 +77,57 @@ public class EntityInterface : MonoBehaviour
         _bcWrapper.PlayerStateService.ReadUserState(OnReadSuccess, OnFailureCallback);
     }
 
+    public void GetPage()
+    {
+        //string context = "{\"pagination\":{\"rowsPerPage\":50,\"pageNumber\":1},\"searchCriteria\":{\"entityType\":\"player\"},\"sortCriteria\":{\"createdAt\":1,\"updatedAt\":-1}}";
+        string context = CreateGetPageContext();
+
+        _bcWrapper.EntityService.GetPage(context, OnGetPageSuccess, OnFailureCallback);
+    }
+
+    //AnthonyTODO: this is the new success method that will replace on Read success. This works and returns all expected data into the _player member.
+    private void OnGetPageSuccess(string response, object cbObject)
+    {
+        Debug.Log("Success");
+
+        Dictionary<string, object> responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
+        Dictionary<string, object> dataObj = responseObj["data"] as Dictionary<string, object>;
+        Dictionary<string, object> resultsObj = dataObj["results"] as Dictionary<string, object>;
+        var itemsObj = resultsObj["items"] as Dictionary<string, object>[];
+        
+        for(int i = 0; i < itemsObj.Length; i++)
+        {
+            _player = new EntityInstance();
+
+            Dictionary<string, object> itemIndexObj = itemsObj[i];
+
+            _player.EntityId = itemIndexObj["entityId"] as string;
+            _player.EntityType = itemIndexObj["entityType"] as string;
+            _player.Version = (int) itemIndexObj["version"];
+            _player.CreatedAt = Util.BcTimeToDateTime((long) itemIndexObj["createdAt"]);
+            _player.UpdatedAt = Util.BcTimeToDateTime((long) itemIndexObj["updatedAt"]);
+
+            Dictionary<string, object> entityDataObj = itemIndexObj["data"] as Dictionary<string, object>;
+
+            _player.Name = entityDataObj["name"] as string;
+            _player.Age = entityDataObj["age"] as string;
+        }
+    }
+
+    public void GetEntitiesByType()
+    {
+        _bcWrapper.EntityService.GetEntitiesByType(PLAYER_ENTITY_TYPE, OnGetEntitiesByTypeSuccess, OnFailureCallback);
+    }
+
+    private void OnGetEntitiesByTypeSuccess(string response, object cbObject)
+    {
+        Debug.Log(string.Format("Success | {0}", response));
+    }
+
     private void OnReadSuccess(string json, object cb)
     {
-        _player = null;
+        //FrancoTODO: look into why I null this.
+        //_player = null;
         Dictionary<string, object> jsonObj = JsonReader.Deserialize(json) as Dictionary<string, object>;
         Dictionary<string, object> data = jsonObj["data"] as Dictionary<string, object>;
 
@@ -88,8 +136,6 @@ public class EntityInterface : MonoBehaviour
             Debug.LogWarning($"No entities were read in, this is a new user.");
             return;
         }
-        
-        PlayerAssigned = true;
         
         var listOfEntities = data["entities"] as Dictionary<string, object>[];
         for (int i = 0; i < listOfEntities.Length; i++)
@@ -202,17 +248,38 @@ public class EntityInterface : MonoBehaviour
         Debug.Log($"Failure codes: status code: {statusCode}, reason code: {reasonCode}");
     }
 
-    string CreateJsonEntityData()
+    public string CreateJsonEntityData()
     {
         Dictionary<string, object> entityInfo = new Dictionary<string, object>();
         entityInfo.Add("name", _player.Name);
         entityInfo.Add("age", _player.Age);
         
-        Dictionary<string, object> jsonData = new Dictionary<string, object>();
-        jsonData.Add("data",entityInfo);
-        string value = JsonWriter.Serialize(jsonData);
+        string value = JsonWriter.Serialize(entityInfo);
 
         return value;
+    }
+
+    public string CreateGetPageContext()
+    {
+        Dictionary<string, object> pagination = new Dictionary<string, object>();
+        pagination.Add("rowsPerPage", 50);
+        pagination.Add("pageNumber", 1);
+
+        Dictionary<string, object> searchCriteria = new Dictionary<string, object>();
+        searchCriteria.Add("entityType", "player");
+
+        Dictionary<string, object> sortCriteria = new Dictionary<string, object>();
+        sortCriteria.Add("createdAt", 1);
+        sortCriteria.Add("updatedAt", -1);
+
+        Dictionary<string, object> context = new Dictionary<string, object>();
+        context.Add("pagination", pagination);
+        context.Add("searchCriteria", searchCriteria);
+        context.Add("sortCriteria", sortCriteria);
+
+        string contextJson = JsonWriter.Serialize(context);
+
+        return contextJson;
     }
 
     string CreateACLJson()

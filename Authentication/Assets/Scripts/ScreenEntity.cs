@@ -33,9 +33,21 @@ public class ScreenEntity : BCScreen
         GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess; 
 
-        _bc = bc; 
+        _bc = bc;
         //_bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
+
+        //AnthonyTODO: Remove current read entity logic and replace it with the GetPage logic
+        //AnthonyTODO: We'll call GetPage here rather than ReadEntity
+        //AnthonyTODO: GetPage will return whether or not there is a player entity attached to the current logged in user.
+        //AnthonyTODO: if there is, we will display it on the entity page and give the user the option of updating it (save) or deleting it.
+
+        //AnthonyTODO: Remove this when I'm finished testing for CreateGetPageContext()
+        m_mainScene.EntityInterface.CreateJsonEntityData();
+        m_mainScene.EntityInterface.CreateGetPageContext();
+        
         m_mainScene.EntityInterface.ReadEntity();
+        m_mainScene.EntityInterface.GetEntitiesByType();
+        m_mainScene.EntityInterface.GetPage(); 
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
 
         //AnthonyTODO: Test if it makes sense to assign player here when we first switch to this screen. 
@@ -148,12 +160,20 @@ public class ScreenEntity : BCScreen
         deleteEntityButton.gameObject.SetActive(!isActive);
     }
 
+    //private void OnEnable() 
+    //{
+    //    m_mainScene.EntityInterface.ReadEntity();
+
+    //    GameEvents.instance.onCreateUserEntitySuccess -= OnCreateEntitySuccess;
+    //    GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
+    //}
+
     private void OnDisable()
     {
-        if(m_player != null) //AnthonyTODO: Temporary solution to EntityInterface _player null bug
-        {
-            OnDeleteEntity(); 
-        }
+        //if(m_player != null) //AnthonyTODO: Temporary solution to EntityInterface _player null bug
+        //{
+        //    OnDeleteEntity(); 
+        //}
 
         GameEvents.instance.onCreateUserEntitySuccess -= OnCreateEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;

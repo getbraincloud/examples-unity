@@ -65,7 +65,7 @@ public class MainScene : MonoBehaviour
     eBCFunctionType currentBCFunction = eBCFunctionType.FN_ENTITY;
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         _bc = BCConfig.GetBrainCloud();
 

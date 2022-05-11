@@ -282,7 +282,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 14667574}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 240cc5ccb30979a43bf19247b2abffe9, type: 3}
+  m_Script: {fileID: 11500000, guid: da10bfeb5bb5421449928ef02ee4eb4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &14667576
@@ -4725,7 +4725,19 @@ MonoBehaviour:
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1548854668}
+        m_TargetAssemblyTypeName: ScreenEntity, Assembly-CSharp
+        m_MethodName: OnEntityAgeEndEdit
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -13188,7 +13200,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 84fd421d5d190d341afea5ef7cc80bfe, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 049b3bbe53711684ca5002ac408dcc1a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -14304,7 +14316,19 @@ MonoBehaviour:
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1548854668}
+        m_TargetAssemblyTypeName: ScreenEntity, Assembly-CSharp
+        m_MethodName: OnEntityNameEndEdit
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -15252,7 +15276,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1620453522}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 485b6d95666752849addbff0b2e3ab9a, type: 3}
+  m_Script: {fileID: 11500000, guid: 114aa6649a335404894cc22799efa2a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ConnectScreen: {fileID: 1221787281}
@@ -15505,7 +15529,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1670765060}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c19f48155eb926145986312fd30a986d, type: 3}
+  m_Script: {fileID: 11500000, guid: 97f88370a298e5c4d9078d72638dae22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1670765062
@@ -15804,7 +15828,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1701526357}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f34968b240eba8b4886c38f128f0438e, type: 3}
+  m_Script: {fileID: 11500000, guid: 0eff593a35e7f9848abc5f89d475bfee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1701526359
