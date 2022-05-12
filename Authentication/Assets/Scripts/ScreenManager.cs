@@ -11,6 +11,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] GameObject ConnectScreen;
     [SerializeField] GameObject MainScreen;
     private EventSystem _eventSystem;
+
     void Start()
     {
         instance = this;
@@ -18,7 +19,6 @@ public class ScreenManager : MonoBehaviour
         DontDestroyOnLoad(this); 
     }
     
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))

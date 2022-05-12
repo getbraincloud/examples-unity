@@ -16,15 +16,27 @@ public class ScreenPlayerStats : BCScreen
     IDictionary<string, PlayerStatistic> m_stats;
 
     //AnthonyTODO: Add an array or list of player stat prefabs. 
-    GameObject playerStatPrefab; 
+    //GameObject playerStatPrefab; 
+    [SerializeField] PlayerStat playerStatPrefab;
+    [SerializeField] Transform prefabParent;
+    List<PlayerStat> playerStats;
+    IDictionary<string, PlayerStat> m_playerStats; 
     
     public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
     
     public override void Activate(BrainCloudWrapper bc)
     {
+        GameEvents.instance.onIncrementPlayerStat += IncrementStat;
+
         _bc = bc;
         m_stats = new Dictionary<string, PlayerStatistic>();
+        m_playerStats = new Dictionary<string, PlayerStat>();
         _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
+
+        if(playerStats == null)
+        {
+            playerStats = new List<PlayerStat>();
+        }
 
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
@@ -38,6 +50,9 @@ public class ScreenPlayerStats : BCScreen
         JsonData jObj = JsonMapper.ToObject(json);
         JsonData jStats = jObj["data"]["statistics"];
         IDictionary dStats = jStats as IDictionary;
+
+        float ypos = 0f; 
+
         if (dStats != null)
         {
             foreach (string key in dStats.Keys)
@@ -47,25 +62,73 @@ public class ScreenPlayerStats : BCScreen
                 //AnthonyTODO: m_YourButton.onClick.AddListener(delegate {Increment(stat.name); }); OR m_YourButton.onClick.AddListener(() => Increment(stat.name)); 
                 //AnthonyTODO: Refer to https://docs.unity3d.com/2019.1/Documentation/ScriptReference/UI.Button-onClick.html
 
+                PlayerStat newStat = Instantiate(playerStatPrefab, prefabParent);
+
+                newStat.SetStatName((string)key);
+
+                m_playerStats[newStat.GetStatName()] = newStat;
+
+                JsonData value = (JsonData)dStats[key];
+
+                newStat.SetStatValue(value.IsInt ? (int)value : (long)value);
+
+                playerStats.Add(newStat);
+
+
                 PlayerStatistic stat = new PlayerStatistic();
                 stat.name = (string) key;
-                JsonData value = (JsonData) dStats[key];
+                //JsonData value = (JsonData) dStats[key];
                 
                 // silly that LitJson can't upcast an int to a long...
-                stat.value = value.IsInt ? (int) value : (long) value;
+                //stat.value = value.IsInt ? (int) value : (long) value;
                 
                 m_stats[stat.name] = stat;
             }
         }
     }
 
-    void IncrementStat(string playerStatName)
+    public void IncrementStat(string playerStatName)
     {
         string jsonData = "{ \"" + playerStatName + "\" : 1 }";
 
         _bc.PlayerStatisticsService.IncrementUserStats(jsonData, Success_Callback, Failure_Callback);
     }
     
+    
+    public override void Success_Callback(string json, object cbObject)
+    {
+        base.Success_Callback(json, cbObject);
+        
+        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
+        JsonData jObj = JsonMapper.ToObject(json);
+        JsonData jStats = jObj["data"]["statistics"];
+        IDictionary dStats = jStats as IDictionary;
+        if (dStats != null)
+        {
+            foreach (string key in dStats.Keys)
+            {
+                JsonData value = (JsonData) dStats[key];
+                long valueAsLong = value.IsInt ? (int) value : (long) value;
+                //m_stats[key].value = valueAsLong;
+                m_playerStats[key].SetStatValue(valueAsLong);
+            }
+        }
+    }
+
+    private void OnDisable()
+    {
+        if(m_playerStats != null)
+        {
+            foreach(PlayerStat statObj in m_playerStats.Values)
+            {
+                Destroy(statObj.gameObject);
+            }
+        }
+
+        GameEvents.instance.onIncrementPlayerStat -= IncrementStat;
+    }
+
+    #region Stuff to Remove
     public override void OnScreenGUI()
     {
         int minLeftWidth = 120;
@@ -106,24 +169,5 @@ public class ScreenPlayerStats : BCScreen
             GUILayout.EndHorizontal();
         }
     }
-    
-    public override void Success_Callback(string json, object cbObject)
-    {
-        base.Success_Callback(json, cbObject);
-        
-        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
-        {
-            foreach (string key in dStats.Keys)
-            {
-                JsonData value = (JsonData) dStats[key];
-                long valueAsLong = value.IsInt ? (int) value : (long) value;
-                m_stats[key].value = valueAsLong;
-            }
-        }
-    }
-    
+    #endregion
 }

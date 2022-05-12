@@ -8,16 +8,13 @@ using UnityEngine.UI;
 public class ScreenEntity : BCScreen
 {
     private static string ENTITY_TYPE_PLAYER = "player";
-    //private BCUserEntity m_player;
     
     public ScreenEntity(BrainCloudWrapper bc) : base(bc) { }
 
-    //AnthonyTODO: adding this outside of onGui scope.
     EntityInstance m_player;
 
     string entityName = "";
     int entityAge = 0; 
-
 
     //UI elements 
     [SerializeField] Text entityIDText;
@@ -31,36 +28,13 @@ public class ScreenEntity : BCScreen
     public override void Activate(BrainCloudWrapper bc)
     {
         GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
-        GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess; 
+        GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
+        GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
 
         _bc = bc;
-        //_bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
-
-        //AnthonyTODO: Remove current read entity logic and replace it with the GetPage logic
-        //AnthonyTODO: We'll call GetPage here rather than ReadEntity
-        //AnthonyTODO: GetPage will return whether or not there is a player entity attached to the current logged in user.
-        //AnthonyTODO: if there is, we will display it on the entity page and give the user the option of updating it (save) or deleting it.
-
-        //AnthonyTODO: Remove this when I'm finished testing for CreateGetPageContext()
-        m_mainScene.EntityInterface.CreateJsonEntityData();
-        m_mainScene.EntityInterface.CreateGetPageContext();
         
-        m_mainScene.EntityInterface.ReadEntity();
-        m_mainScene.EntityInterface.GetEntitiesByType();
         m_mainScene.EntityInterface.GetPage(); 
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
-
-        //AnthonyTODO: Test if it makes sense to assign player here when we first switch to this screen. 
-        //m_player = null;
-        //if (m_mainScene.EntityInterface.PlayerAssigned)
-        //{
-        //    m_player = m_mainScene.EntityInterface.Player;
-        //}
-
-        DisplayEntityInfo();
-        
-        SetActiveButtons(m_player == null ? true : false); 
-       
     }
 
     void DisplayEntityID()
@@ -91,27 +65,25 @@ public class ScreenEntity : BCScreen
         DisplayEntityAge(); 
     }
 
+    void SetActiveButtons(bool isActive)
+    {
+        createEntityButton.gameObject.SetActive(isActive);
+        saveEntityButton.gameObject.SetActive(!isActive);
+        deleteEntityButton.gameObject.SetActive(!isActive);
+    }
+
+
+    //*************** UI Event Subscribed Methods ***************
     public void OnCreateEntity()
     {
         m_mainScene.EntityInterface.CreateEntity();
-        //AnthonyTODO: Figure out Logging.
         //m_mainScene.RealLogging("Creating Entity....");
         Debug.Log("Creating Entity...");
-    }
-
-    private void OnCreateEntitySuccess()
-    {
-        m_player = m_mainScene.EntityInterface.Player;
-
-        DisplayEntityInfo();
-        SetActiveButtons(false); 
-
     }
 
     public void OnSaveEntity()
     {
         m_mainScene.EntityInterface.UpdateEntity();
-        //AnthonyTODO: Figure out logging.
         //m_mainScene.RealLogging("Updating Entity...");
         Debug.Log("Updating Entity..."); 
     }
@@ -120,15 +92,8 @@ public class ScreenEntity : BCScreen
     {
         m_mainScene.EntityInterface.DeleteEntity();
         m_player = null;
-        //AnthonyTODO: Figure out logging.
         //m_mainScene.RealLogging("Deleting Entity...");
         Debug.Log("Deleting Entity...");
-    }
-
-    private void OnDeleteEntitySuccess()
-    {
-        DisplayEntityInfo();
-        SetActiveButtons(true); 
     }
 
     public void OnEntityNameEndEdit(string name)
@@ -140,45 +105,54 @@ public class ScreenEntity : BCScreen
 
     public void OnEntityAgeEndEdit(string age)
     {
-        if(m_player != null)
+        if (m_player == null)
+            return;
+
+        if(!int.TryParse(age, out entityAge))
         {
-            if(int.TryParse(age, out entityAge))
-            {
-                m_player.Age = entityAge.ToString(); 
-            }
-            else
-            {
-                Debug.Log("Entity Age -- You must enter a number in this field");
-            }
+            Debug.LogWarning("Entity Age -- You must enter a number in this field");
+            return;
         }
+
+        m_player.Age = entityAge.ToString();
     }
 
-    void SetActiveButtons(bool isActive)
+
+    //*************** Game Event Subscribed Methods ***************
+    private void OnCreateEntitySuccess()
     {
-        createEntityButton.gameObject.SetActive(isActive);
-        saveEntityButton.gameObject.SetActive(!isActive);
-        deleteEntityButton.gameObject.SetActive(!isActive);
+        m_player = m_mainScene.EntityInterface.Player;
+
+        DisplayEntityInfo();
+        SetActiveButtons(false); 
+
     }
 
-    //private void OnEnable() 
-    //{
-    //    m_mainScene.EntityInterface.ReadEntity();
+    private void OnDeleteEntitySuccess()
+    {
+        DisplayEntityInfo();
+        SetActiveButtons(true); 
+    }
 
-    //    GameEvents.instance.onCreateUserEntitySuccess -= OnCreateEntitySuccess;
-    //    GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
-    //}
+    private void OnGetUserEntityPageSuccess()
+    {
+        m_player = m_mainScene.EntityInterface.Player;
+        DisplayEntityInfo();
+
+        bool bsetActive = m_player == null ? true : false;
+
+        SetActiveButtons(bsetActive);
+    }
 
     private void OnDisable()
     {
-        //if(m_player != null) //AnthonyTODO: Temporary solution to EntityInterface _player null bug
-        //{
-        //    OnDeleteEntity(); 
-        //}
-
         GameEvents.instance.onCreateUserEntitySuccess -= OnCreateEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
+        GameEvents.instance.onGetUserEntityPageSuccess -= OnGetUserEntityPageSuccess; 
     }
 
+
+    #region Stuff to Remove
     public override void OnScreenGUI()
     {
         //AnthonyTODO: Moved this to Activate. Not sure if that's where it should go.
@@ -264,4 +238,5 @@ public class ScreenEntity : BCScreen
         
         GUILayout.EndVertical();
     }
+    #endregion
 }

@@ -64,7 +64,7 @@ public class MainScene : MonoBehaviour
     };
     eBCFunctionType currentBCFunction = eBCFunctionType.FN_ENTITY;
 
-    // Use this for initialization
+    
     void Awake()
     {
         _bc = BCConfig.GetBrainCloud();
@@ -87,12 +87,6 @@ public class MainScene : MonoBehaviour
         
         MoveToScreen(currentBCFunction);
         SetGameData();
-    }
-
-    public void OnSelectBCFunction(int val)
-    {
-        currentBCFunction = (eBCFunctionType)val; 
-        MoveToScreen(currentBCFunction);
     }
 
     private void MoveToScreen(eBCFunctionType in_fn)
@@ -150,78 +144,17 @@ public class MainScene : MonoBehaviour
 
         appDataText.text = "AppID:" + appID + "  AppVersion:" + gameVersion + "  ProfileID:" + profileID;
     }
+
     
-    //Deprecated Authentication code
-    public void TwitterCoroutine(IEnumerator coroutine)
+    //*************** UI Event Methods ***************
+    public void OnSelectBCFunction(int val)
     {
-        StartCoroutine(coroutine);
+        currentBCFunction = (eBCFunctionType)val; 
+        MoveToScreen(currentBCFunction);
     }
+    
 
-    #region onGui Toolbar for screen selection
-    // lays out the top toolbar + player info
-    void OnGUITopButtons()
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.Box("Select a BrainCloud Function:");
-        eBCFunctionType fn = (eBCFunctionType)GUILayout.Toolbar((int)currentBCFunction, m_bcFuncLabels);
-        GUILayout.EndHorizontal();
-
-        // if user selected another screen, move to it
-        if (fn != currentBCFunction)
-        {
-            MoveToScreen(fn);
-        }
-    }
-    #endregion
-
-
-
-    #region onGUI Game Data
-    void OnGUIBottom()
-    {
-        //AnthonyTODO: create a method in bcinterface that get this info and set the game info text to this.
-        GUILayout.BeginHorizontal();
-        GUILayout.Box("Game Id: " + _bc.Client.AppId);
-        GUILayout.Box("Game Version: " + _bc.Client.AppVersion);
-        GUILayout.Box("Profile Id: " + _bc.Client.AuthenticationService.ProfileId);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-    }
-    #endregion
-
-    #region Old OnGui method
-    //public void OnGUI()
-    //{
-    //    GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
-
-    //    OnGUITopButtons();
-
-    //    GUILayout.BeginHorizontal();
-
-    //    GUILayout.BeginVertical();
-    //    GUILayout.BeginHorizontal();
-    //    GUILayout.Space(MIN_LEFT_SIDE_WIDTH);
-    //    GUILayout.EndHorizontal();
-    //    if (m_screen != null)
-    //    {
-    //        m_screen.OnScreenGUI();
-    //    }
-    //    GUILayout.EndVertical();
-
-    //    GUILayout.Space(25);
-
-    //    GUILayout.BeginVertical();
-    //    OnGUILog();
-    //    GUILayout.EndVertical();
-
-    //    GUILayout.EndHorizontal();
-
-
-    //    OnGUIBottom();
-    //}
-    #endregion
-
-    #region onGUI log stuff
+    #region Logging Logic
     // lays out the right hand pane for the log
     void OnGUILog()
     {
@@ -268,4 +201,67 @@ public class MainScene : MonoBehaviour
         AddLog(sb.ToString());
     }
     #endregion
+
+    #region Stuff To Remove
+    // lays out the top toolbar + player info
+    void OnGUITopButtons()
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.Box("Select a BrainCloud Function:");
+        eBCFunctionType fn = (eBCFunctionType)GUILayout.Toolbar((int)currentBCFunction, m_bcFuncLabels);
+        GUILayout.EndHorizontal();
+
+        // if user selected another screen, move to it
+        if (fn != currentBCFunction)
+        {
+            MoveToScreen(fn);
+        }
+    }
+
+    void OnGUIBottom()
+    {
+        //AnthonyTODO: create a method in bcinterface that get this info and set the game info text to this.
+        GUILayout.BeginHorizontal();
+        GUILayout.Box("Game Id: " + _bc.Client.AppId);
+        GUILayout.Box("Game Version: " + _bc.Client.AppVersion);
+        GUILayout.Box("Profile Id: " + _bc.Client.AuthenticationService.ProfileId);
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+    }
+
+    //public void OnGUI()
+    //{
+    //    GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
+
+    //    OnGUITopButtons();
+
+    //    GUILayout.BeginHorizontal();
+
+    //    GUILayout.BeginVertical();
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.Space(MIN_LEFT_SIDE_WIDTH);
+    //    GUILayout.EndHorizontal();
+    //    if (m_screen != null)
+    //    {
+    //        m_screen.OnScreenGUI();
+    //    }
+    //    GUILayout.EndVertical();
+
+    //    GUILayout.Space(25);
+
+    //    GUILayout.BeginVertical();
+    //    OnGUILog();
+    //    GUILayout.EndVertical();
+
+    //    GUILayout.EndHorizontal();
+
+
+    //    OnGUIBottom();
+    //}
+    #endregion
+    public void TwitterCoroutine(IEnumerator coroutine)
+    {
+        StartCoroutine(coroutine);
+    }
+
 }

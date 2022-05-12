@@ -22,6 +22,7 @@ public class ConnectScene : MonoBehaviour
         FACEBOOK,
         XBOXLIVE
     };
+
     string[] m_authTypes = {
         "Email",
         "Universal",
@@ -33,11 +34,12 @@ public class ConnectScene : MonoBehaviour
     private bool signedIn;
     private int playerNumber;
 
-    //AnthonyTODO: Additions for UI Rework
-    //Revealing in editor for debugging purposes
-    [SerializeField] eAuthTypes currentAuthType;
+    eAuthTypes currentAuthType;
 
-    //Setting these in editor for simplicity
+    string inputProfileId;
+    string inputPassword; 
+
+    //UI elements set in editor.
     [SerializeField] Text statusText;
     [SerializeField] Text profileIdText;
     [SerializeField] Text passwordText;
@@ -51,20 +53,11 @@ public class ConnectScene : MonoBehaviour
     [SerializeField] Text serverAuthCodeText;
     [SerializeField] Button googleSignInButton; 
 
-    //Revealing to editor for debugging purposes
-    [SerializeField] string inputProfileId;
-    [SerializeField] string inputPassword; 
 
 
     void Start()
     {
         ChangeAuthType(eAuthTypes.EMAIL);
-    }
-
-    public void OnAuthTypeChange(int val)
-    {
-        currentAuthType = (eAuthTypes)val;
-        ChangeAuthType(currentAuthType);
     }
 
     void ChangeAuthType(eAuthTypes authType)
@@ -137,6 +130,15 @@ public class ConnectScene : MonoBehaviour
         }
     }
 
+
+    //*************** UI Event Methods ***************
+
+    public void OnAuthTypeChange(int val)
+    {
+        currentAuthType = (eAuthTypes)val;
+        ChangeAuthType(currentAuthType);
+    }
+
     public void OnProfileIdEndEdit(string input)
     {
         inputProfileId = input;
@@ -191,8 +193,8 @@ public class ConnectScene : MonoBehaviour
         BrainCloudInterface.instance.GoogleSignIn();
     }
 
-    //AnthonyTODO: THIS IS THE ENTIRE OLD SYSTEM FOR AUTHENTICATION. USE THIS AS REFERENCE. 
-    #region OnGuiSystem
+ 
+    #region Stuff To Remove
 /*
     void OnGUI()
     {
@@ -406,5 +408,5 @@ public class ConnectScene : MonoBehaviour
         GUILayout.EndArea();
     }
 */    
-#endregion OnGuiSystem
+#endregion
 }

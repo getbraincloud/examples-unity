@@ -130,7 +130,7 @@ public class BrainCloudInterface : MonoBehaviour
         return _bc.GetStoredProfileId();
     }
 
-    //Find out what the difference between this and the stored profile id is.
+    //AnthonyTODO: Find out what the difference between this and the stored profile id is.
     public string GetAuthenticatedProfileID()
     {
         return _bc.Client.AuthenticationService.ProfileId; 
@@ -182,7 +182,7 @@ public class BrainCloudInterface : MonoBehaviour
 
 
 
-    //AnthonyTODO: this will exist here until I decide where to put it.
+    //AnthonyTODO: this will exist here until I figure out where to put it.
     //*******************Google Sign In Stuff*********************
     public void GoogleSignIn()
     {
@@ -209,7 +209,7 @@ public class BrainCloudInterface : MonoBehaviour
 #endif
     }
 
-    //AnthonyTODO: This will exist here temporarily until I can decide where it should go.
+    //AnthonyTODO: This will exist here temporarily until I Figure out where it should go.
     //***************Facebook Specific Functions***************************
     private void InitCallback()
     {

@@ -12,7 +12,7 @@ public class GameEvents : MonoBehaviour
         instance = this; 
     }
 
-    //User Entity Events
+    //*************** User Entity Events ***************
     public event Action onCreateUserEntitySuccess;
     public void CreateUserEntitySuccess()
     {
@@ -21,6 +21,7 @@ public class GameEvents : MonoBehaviour
             onCreateUserEntitySuccess(); 
         }
     }
+
 
     public event Action onDeleteUserEntitySuccess; 
     public void DeleteUserEntitySuccess()
@@ -31,7 +32,18 @@ public class GameEvents : MonoBehaviour
         }
     }
 
-    //Custom Entity Events
+
+    public event Action onGetUserEntityPageSuccess;
+    public void GetUserEntityPageSuccess()
+    {
+        if(onGetUserEntityPageSuccess != null)
+        {
+            onGetUserEntityPageSuccess();
+        }
+    }
+
+
+    //*************** Custom Entity Events ***************
     public event Action onCreateCustomEntitySuccess; 
     public void CreateCustomEntitySuccess()
     {
@@ -50,4 +62,17 @@ public class GameEvents : MonoBehaviour
             onDeleteCustomEntitySuccess(); 
         }
     }
+
+
+    //*************** Player Stat Events ***************
+
+    public event Action<string> onIncrementPlayerStat;
+    public void IncrementPlayerStat(string statName)
+    {
+        if(onIncrementPlayerStat != null)
+        {
+            onIncrementPlayerStat(statName);
+        }
+    }
+
 }

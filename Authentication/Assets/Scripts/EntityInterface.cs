@@ -59,43 +59,143 @@ public class EntityInterface : MonoBehaviour
 {
     [SerializeField]
     private EntityInstance _player = null;
+
     public EntityInstance Player
     {
         get => _player;
     }
+
     private BrainCloudWrapper _bcWrapper;
+
     public BrainCloudWrapper Wrapper
     {
         set => _bcWrapper = value;
     }
     
     private readonly string PLAYER_ENTITY_TYPE = "player";
-    public bool PlayerAssigned;
-    
-    public void ReadEntity()
-    {
-        _bcWrapper.PlayerStateService.ReadUserState(OnReadSuccess, OnFailureCallback);
-    }
 
     public void GetPage()
     {
-        //string context = "{\"pagination\":{\"rowsPerPage\":50,\"pageNumber\":1},\"searchCriteria\":{\"entityType\":\"player\"},\"sortCriteria\":{\"createdAt\":1,\"updatedAt\":-1}}";
         string context = CreateGetPageContext();
-
         _bcWrapper.EntityService.GetPage(context, OnGetPageSuccess, OnFailureCallback);
     }
+    
+    public void CreateEntity()
+    {
+        //Clear current entity player
+        _player = new EntityInstance();
+        
+        _bcWrapper.EntityService.CreateEntity
+        (
+            _player.EntityType,
+            CreateJsonEntityData(),
+            CreateACLJson(),
+            OnCreateEntitySuccess,
+            OnFailureCallback
+        );
+    }
 
-    //AnthonyTODO: this is the new success method that will replace on Read success. This works and returns all expected data into the _player member.
+    public void UpdateEntity()
+    {
+        if (_player.EntityId.IsNullOrEmpty())
+        {
+            Debug.LogWarning($"Entity ID is blank...");
+            return;
+        }
+        
+        _bcWrapper.EntityService.UpdateEntity
+        (
+            _player.EntityId,
+            _player.EntityType,
+            CreateJsonEntityData(),
+            CreateACLJson(),
+            -1,
+            OnUpdateEntitySuccess,
+            OnFailureCallback
+        );
+    }
+
+    public void DeleteEntity()
+    {
+        _bcWrapper.EntityService.DeleteEntity
+        (
+            _player.EntityId,
+            -1,
+            OnDeleteEntitySuccess,
+            OnFailureCallback
+        );
+
+        _player = null;
+    }
+    public string CreateGetPageContext()
+    {
+        Dictionary<string, object> pagination = new Dictionary<string, object>();
+        pagination.Add("rowsPerPage", 50);
+        pagination.Add("pageNumber", 1);
+
+        Dictionary<string, object> searchCriteria = new Dictionary<string, object>();
+        searchCriteria.Add("entityType", "player");
+
+        Dictionary<string, object> sortCriteria = new Dictionary<string, object>();
+        sortCriteria.Add("createdAt", 1);
+        sortCriteria.Add("updatedAt", -1);
+
+        Dictionary<string, object> context = new Dictionary<string, object>();
+        context.Add("pagination", pagination);
+        context.Add("searchCriteria", searchCriteria);
+        context.Add("sortCriteria", sortCriteria);
+
+        string contextJson = JsonWriter.Serialize(context);
+
+        return contextJson;
+    }
+
+    public string CreateJsonEntityData()
+    {
+        Dictionary<string, object> entityInfo = new Dictionary<string, object>();
+        entityInfo.Add("name", _player.Name);
+        entityInfo.Add("age", _player.Age);
+        
+        string value = JsonWriter.Serialize(entityInfo);
+
+        return value;
+    }
+
+    string CreateACLJson()
+    {
+        Dictionary<string, object> aclInfo = new Dictionary<string, object>();
+        /*
+         * 0 = private to the owner
+         * 1 = readable by all users, but only writeable by the owner
+         * 2 = writable by all users
+         */
+        aclInfo.Add("other", 2);
+        string value = JsonWriter.Serialize(aclInfo);
+        return value;
+    }
+
+
+    //*************** Success Callbacks ***************
+
     private void OnGetPageSuccess(string response, object cbObject)
     {
         Debug.Log("Success");
+
+        _player = null;
 
         Dictionary<string, object> responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         Dictionary<string, object> dataObj = responseObj["data"] as Dictionary<string, object>;
         Dictionary<string, object> resultsObj = dataObj["results"] as Dictionary<string, object>;
         var itemsObj = resultsObj["items"] as Dictionary<string, object>[];
-        
-        for(int i = 0; i < itemsObj.Length; i++)
+
+        if (itemsObj == null)
+        {
+            Debug.LogWarning("No entities were found for this user.");
+            GameEvents.instance.GetUserEntityPageSuccess();
+            return;
+        }
+
+        for (int i = 0; i < itemsObj.Length; i++)
         {
             _player = new EntityInstance();
 
@@ -103,27 +203,63 @@ public class EntityInterface : MonoBehaviour
 
             _player.EntityId = itemIndexObj["entityId"] as string;
             _player.EntityType = itemIndexObj["entityType"] as string;
-            _player.Version = (int) itemIndexObj["version"];
-            _player.CreatedAt = Util.BcTimeToDateTime((long) itemIndexObj["createdAt"]);
-            _player.UpdatedAt = Util.BcTimeToDateTime((long) itemIndexObj["updatedAt"]);
+            _player.Version = (int)itemIndexObj["version"];
+            _player.CreatedAt = Util.BcTimeToDateTime((long)itemIndexObj["createdAt"]);
+            _player.UpdatedAt = Util.BcTimeToDateTime((long)itemIndexObj["updatedAt"]);
 
             Dictionary<string, object> entityDataObj = itemIndexObj["data"] as Dictionary<string, object>;
 
             _player.Name = entityDataObj["name"] as string;
             _player.Age = entityDataObj["age"] as string;
         }
+
+        GameEvents.instance.GetUserEntityPageSuccess();
     }
 
-    public void GetEntitiesByType()
+    private void OnCreateEntitySuccess(string json, object cbObject)
     {
-        _bcWrapper.EntityService.GetEntitiesByType(PLAYER_ENTITY_TYPE, OnGetEntitiesByTypeSuccess, OnFailureCallback);
+        Debug.Log($"Success callback {json}");
+        
+        var data = JsonReader.Deserialize(json) as Dictionary<string, object>;
+        var data1 = data["data"] as Dictionary<string, object>;
+        
+        _player.EntityId = data1["entityId"] as string;
+        _player.EntityType = PLAYER_ENTITY_TYPE;
+        _player.Version = (int) data1["version"];
+        _player.CreatedAt = Util.BcTimeToDateTime((long) data1["createdAt"]);
+        _player.UpdatedAt = Util.BcTimeToDateTime((long) data1["updatedAt"]);
+        
+        UpdateEntity();
+
+        GameEvents.instance.CreateUserEntitySuccess(); 
     }
 
-    private void OnGetEntitiesByTypeSuccess(string response, object cbObject)
+    private void OnUpdateEntitySuccess(string json, object cbObject)
     {
-        Debug.Log(string.Format("Success | {0}", response));
+        Debug.Log($"Entity is updated !");
     }
 
+    private void OnDeleteEntitySuccess(string json, object cbObject)
+    {
+        Debug.Log($"Entity is deleted !");
+
+        GameEvents.instance.DeleteUserEntitySuccess(); 
+    }
+
+
+    //*************** Failure Callbacks ***************
+    private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
+    {
+        Debug.Log($"Failure Callback: {statusMessage}");
+        Debug.Log($"Failure codes: status code: {statusCode}, reason code: {reasonCode}");
+    }
+
+
+    #region Stuff to Remove
+    public void ReadEntity()
+    {
+        _bcWrapper.PlayerStateService.ReadUserState(OnReadSuccess, OnFailureCallback);
+    }
     private void OnReadSuccess(string json, object cb)
     {
         //FrancoTODO: look into why I null this.
@@ -159,139 +295,14 @@ public class EntityInterface : MonoBehaviour
             }
         }
     }
-
-    public void CreateEntity()
+    public void GetEntitiesByType()
     {
-        //Clear current entity player
-        _player = new EntityInstance();
-        
-        _bcWrapper.EntityService.CreateEntity
-        (
-            _player.EntityType,
-            CreateJsonEntityData(),
-            CreateACLJson(),
-            OnCreateEntitySuccess,
-            OnFailureCallback
-        );
+        _bcWrapper.EntityService.GetEntitiesByType(PLAYER_ENTITY_TYPE, OnGetEntitiesByTypeSuccess, OnFailureCallback);
     }
-
-    private void OnCreateEntitySuccess(string json, object cbObject)
+    private void OnGetEntitiesByTypeSuccess(string response, object cbObject)
     {
-        PlayerAssigned = true;
-        Debug.Log($"Success callback {json}");
-        
-        var data = JsonReader.Deserialize(json) as Dictionary<string, object>;
-        var data1 = data["data"] as Dictionary<string, object>;
-        
-        _player.EntityId = data1["entityId"] as string;
-        _player.EntityType = PLAYER_ENTITY_TYPE;
-        _player.Version = (int) data1["version"];
-        _player.CreatedAt = Util.BcTimeToDateTime((long) data1["createdAt"]);
-        _player.UpdatedAt = Util.BcTimeToDateTime((long) data1["updatedAt"]);
-        
-        UpdateEntity();
-
-        GameEvents.instance.CreateUserEntitySuccess(); 
+        Debug.Log(string.Format("Success | {0}", response));
     }
+    #endregion
 
-    public void UpdateEntity()
-    {
-        if (_player.EntityId.IsNullOrEmpty())
-        {
-            Debug.LogWarning($"Entity ID is blank...");
-            return;
-        }
-        
-        _bcWrapper.EntityService.UpdateEntity
-        (
-            _player.EntityId,
-            _player.EntityType,
-            CreateJsonEntityData(),
-            CreateACLJson(),
-            -1,
-            OnUpdateEntity,
-            OnFailureCallback
-        );
-    }
-
-    private void OnUpdateEntity(string json, object cbObject)
-    {
-        Debug.Log($"Entity is updated !");
-    }
-
-    public void DeleteEntity()
-    {
-        PlayerAssigned = false;
-        
-        _bcWrapper.EntityService.DeleteEntity
-        (
-            _player.EntityId,
-            -1,
-            OnDeleteEntity,
-            OnFailureCallback
-        );
-
-        _player = null;
-        
-    }
-
-    private void OnDeleteEntity(string json, object cbObject)
-    {
-        Debug.Log($"Entity is deleted !");
-
-        GameEvents.instance.DeleteUserEntitySuccess(); 
-    }
-
-    private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
-    {
-        Debug.Log($"Failure Callback: {statusMessage}");
-        Debug.Log($"Failure codes: status code: {statusCode}, reason code: {reasonCode}");
-    }
-
-    public string CreateJsonEntityData()
-    {
-        Dictionary<string, object> entityInfo = new Dictionary<string, object>();
-        entityInfo.Add("name", _player.Name);
-        entityInfo.Add("age", _player.Age);
-        
-        string value = JsonWriter.Serialize(entityInfo);
-
-        return value;
-    }
-
-    public string CreateGetPageContext()
-    {
-        Dictionary<string, object> pagination = new Dictionary<string, object>();
-        pagination.Add("rowsPerPage", 50);
-        pagination.Add("pageNumber", 1);
-
-        Dictionary<string, object> searchCriteria = new Dictionary<string, object>();
-        searchCriteria.Add("entityType", "player");
-
-        Dictionary<string, object> sortCriteria = new Dictionary<string, object>();
-        sortCriteria.Add("createdAt", 1);
-        sortCriteria.Add("updatedAt", -1);
-
-        Dictionary<string, object> context = new Dictionary<string, object>();
-        context.Add("pagination", pagination);
-        context.Add("searchCriteria", searchCriteria);
-        context.Add("sortCriteria", sortCriteria);
-
-        string contextJson = JsonWriter.Serialize(context);
-
-        return contextJson;
-    }
-
-    string CreateACLJson()
-    {
-        Dictionary<string, object> aclInfo = new Dictionary<string, object>();
-        /*
-         * 0 = private to the owner
-         * 1 = readable by all users, but only writeable by the owner
-         * 2 = writable by all users
-         */
-        aclInfo.Add("other", 2);
-        string value = JsonWriter.Serialize(aclInfo);
-        return value;
-    }
 }

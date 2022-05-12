@@ -14,7 +14,7 @@ public class ScreenPlayerXp : BCScreen
     string m_currencyToAward = "0";
     string m_currencyToConsume = "0";
 
-    //AnthonyTODO: UI Elements
+    //UI Elements
     [SerializeField] Text playerXPText;
     [SerializeField] Text playerLevelText;
     [SerializeField] Text currencyBalanceText;
@@ -58,6 +58,8 @@ public class ScreenPlayerXp : BCScreen
         m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
 
+
+    //*************** UI Event Methods ***************
     public void OnIncrementXP()
     {
         int valueAsInt = 0;
@@ -147,6 +149,8 @@ public class ScreenPlayerXp : BCScreen
         _bc.VirtualCurrencyService.GetCurrency("gems", GetPlayerVC_Success, Failure_Callback);
     }
 
+
+    //*************** Success Callbacks ***************
     private void ReadPlayerState_Success(string json, object cb)
     {
         m_mainScene.AddLog("SUCCESS");
@@ -224,6 +228,30 @@ public class ScreenPlayerXp : BCScreen
         }
     }
 
+    public void IncrementXp_Success(string json, object cbObject)
+    {
+        base.Success_Callback(json, cbObject);
+
+        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
+        JsonData jObj = JsonMapper.ToObject(json);
+        m_playerLevel = (int) jObj["data"]["experienceLevel"];
+        m_playerXp = (int) jObj["data"]["experiencePoints"];
+
+        playerLevelText.text = m_playerLevel.ToString();
+        playerXPText.text = m_playerXp.ToString(); 
+
+        // rewards?
+    }
+
+    public void ResetPlayerVC_Success(string json, object cbObject)
+    {
+        m_currencies.Clear();
+
+        _bc.PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
+        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
+    }
+
+    #region Stuff To Remove
     public override void OnScreenGUI()
     {
         int minLeftWidth = 120;
@@ -325,27 +353,5 @@ public class ScreenPlayerXp : BCScreen
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
     }
-
-    public void IncrementXp_Success(string json, object cbObject)
-    {
-        base.Success_Callback(json, cbObject);
-
-        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
-        JsonData jObj = JsonMapper.ToObject(json);
-        m_playerLevel = (int) jObj["data"]["experienceLevel"];
-        m_playerXp = (int) jObj["data"]["experiencePoints"];
-
-        playerLevelText.text = m_playerLevel.ToString();
-        playerXPText.text = m_playerXp.ToString(); 
-
-        // rewards?
-    }
-
-    public void ResetPlayerVC_Success(string json, object cbObject)
-    {
-        m_currencies.Clear();
-
-        _bc.PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
-    }
+    #endregion
 }
