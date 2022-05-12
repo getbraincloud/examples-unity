@@ -137,7 +137,6 @@ public class MenuManager : MonoBehaviour
             //Apply relevant user data to text
             user.PlayerNameText.text = in_listOfPlayers[i].Username;
             user.PlayerRatingText.text = in_listOfPlayers[i].Rating.ToString();
-            user.PlayerDifficulty.text = in_listOfPlayers[i].DefendersSelected.ToString();
 
             //Save Data for later
             user.UserInfo = in_listOfPlayers[i];

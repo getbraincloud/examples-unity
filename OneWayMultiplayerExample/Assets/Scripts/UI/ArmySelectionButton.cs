@@ -12,6 +12,7 @@ public class ArmySelectionButton : MonoBehaviour
         if (ArmyType == ArmyType.Invader)
         {
             GameManager.Instance.CurrentUserInfo.InvaderSelected = ArmyRank;
+            GameManager.Instance.InvaderSpawnData.AssignSpawnList(ArmyRank);
         }
         else
         {

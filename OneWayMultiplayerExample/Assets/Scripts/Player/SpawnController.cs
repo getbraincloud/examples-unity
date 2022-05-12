@@ -36,11 +36,11 @@ public class SpawnController : MonoBehaviour
     {
         //Get our troop data that we can summon
         troopSelectorList = FindObjectsOfType<SummonSelector>().ToList();
-        for (int i = 0; i < SpawnData.SpawnParametersList.Count; i++)
+        for (int i = 0; i < SpawnData.SpawnList.Count; i++)
         {
             troopList.Add(new TroopTracker());
-            troopList[i].SpawnLimit = SpawnData.SpawnParametersList[i].SpawnLimit;
-            troopList[i].TroopType = SpawnData.SpawnParametersList[i].TroopType;
+            troopList[i].SpawnLimit = SpawnData.SpawnList[i].SpawnLimit;
+            troopList[i].TroopType = SpawnData.SpawnList[i].TroopType;
         }
         
         //Applying the troop data to UI elements

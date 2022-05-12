@@ -7,11 +7,14 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
-public enum ArmyDivisionRank{Easy,Medium,Hard}
+public enum ArmyDivisionRank{Easy,Medium,Hard,None}
 public enum ArmyType {Invader,Defense}
 
 public class GameManager : MonoBehaviour
 {
+    public SpawnData DefenderSpawnData;
+    public SpawnData InvaderSpawnData;
+    
     //Local User Info
     private UserInfo _currentUserInfo;
     public UserInfo CurrentUserInfo
@@ -44,6 +47,7 @@ public class GameManager : MonoBehaviour
         }
         
         _currentUserInfo = Settings.LoadPlayerInfo();
+        InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
         MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
         MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
     }
@@ -63,6 +67,20 @@ public class GameManager : MonoBehaviour
     {
         _currentUserInfo.InvaderSelected = (ArmyDivisionRank) in_invaderSelection;
         _currentUserInfo.DefendersSelected = (ArmyDivisionRank) in_defenderSelection;
+        InvaderSpawnData.Rank = (ArmyDivisionRank) in_invaderSelection;
+    }
+
+    public void UpdateOpponentInfo(ArmyDivisionRank in_rank, string in_entityId)
+    {
+        UpdateEntityId(in_entityId);
+        _opponentUserInfo.DefendersSelected = in_rank;
+        DefenderSpawnData.AssignSpawnList(in_rank);
+    }
+
+    public void UpdateFromReadResponse(string in_entityId, int in_defenderSelection, int in_invaderSelection)
+    {
+        UpdateEntityId(in_entityId);
+        UpdateLocalArmySelection(in_defenderSelection, in_invaderSelection);
     }
 
     public void LoadToGame()

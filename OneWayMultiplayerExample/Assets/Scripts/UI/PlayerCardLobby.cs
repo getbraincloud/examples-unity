@@ -8,7 +8,6 @@ public class PlayerCardLobby : MonoBehaviour
 {
     public TMP_Text PlayerNameText;
     public TMP_Text PlayerRatingText;
-    public TMP_Text PlayerDifficulty;
 
     public UserInfo UserInfo;
 

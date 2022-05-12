@@ -2,28 +2,50 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class DefenderSpawner : MonoBehaviour
 {
-    public GameObject[] SpawnPoints;
-    public BaseTroop[] TroopList;
-    public float OffsetY;
-    
+    public Transform[] SpawnPoints;
+    public SpawnData DefenderSpawnData;
+    private int _spawnPointIndex;
+    private bool _addOffset;
+    private int _offsetRange = 6;
     private void Awake()
     {
-        if (SpawnPoints.Length != TroopList.Length)
+        BaseTroop troopToSpawn;
+        //Spawn in troops based on spawner data
+        foreach (SpawnInfo spawnInfo in DefenderSpawnData.SpawnList)
         {
-            Debug.LogWarning("Need to match Troop List and Spawn Points in DefenderSpawner");
-        }
-        
-        BaseTroop troop;
-        for (int i = 0; i < SpawnPoints.Length; i++)
-        {
-            var spawnPoint = SpawnPoints[i].transform.position;
-            spawnPoint.y = OffsetY;
-            troop = Instantiate(TroopList[i], SpawnPoints[i].transform.position, SpawnPoints[i].transform.rotation);
-            troop.AssignToTeam(1);
-            
+            troopToSpawn = DefenderSpawnData.GetTroop(spawnInfo.TroopType);
+            for (int i = 0; i < spawnInfo.SpawnLimit; i++)
+            {
+                var spawnPoint = SpawnPoints[_spawnPointIndex].position; 
+                if (_addOffset)
+                {
+                    float x = spawnPoint.x + _offsetRange;
+                    float z = spawnPoint.z + _offsetRange;
+                    
+                    var newSpawnPoint = new Vector3(x,0, z);
+                    spawnPoint = newSpawnPoint;
+                }
+                
+                Instantiate(troopToSpawn, spawnPoint, Quaternion.identity);
+                
+                _spawnPointIndex++;
+                if (_spawnPointIndex >= SpawnPoints.Length)
+                {
+                    _spawnPointIndex = 0;
+                    if (_addOffset)
+                    {
+                        _offsetRange += _offsetRange;
+                    }
+                    else
+                    {
+                        _addOffset = true;    
+                    }
+                }
+            }
         }
     }
 }

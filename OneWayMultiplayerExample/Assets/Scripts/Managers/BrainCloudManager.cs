@@ -94,7 +94,9 @@ public class BrainCloudManager : MonoBehaviour
             "vikings",
             CreateJsonEntityData(false),
             CreateACLJson(),
-            -1
+            -1,
+            null,
+            OnFailureCallback
         );
     }
 
@@ -276,8 +278,7 @@ public class BrainCloudManager : MonoBehaviour
             int invaderSelection = (int) entityData["invaderSelection"];
             string entityId = entities[0]["entityId"] as string;
             
-            Settings.SaveEntityId(entityId);
-            GameManager.Instance.UpdateLocalArmySelection(defenderSelection, invaderSelection);
+            GameManager.Instance.UpdateFromReadResponse(entityId, defenderSelection, invaderSelection);
             MenuManager.Instance.UpdateMainMenu();
         }
         else
@@ -352,8 +353,11 @@ public class BrainCloudManager : MonoBehaviour
         }
         
         //Get what defender set is selected
-        GameManager.Instance.OpponentUserInfo.DefendersSelected = (ArmyDivisionRank)entityData["defenderSelection"];
-        GameManager.Instance.OpponentUserInfo.EntityId = entities[0]["entityId"] as string;
+        GameManager.Instance.UpdateOpponentInfo
+        (
+            (ArmyDivisionRank) entityData["defenderSelection"],
+            entities[0]["entityId"] as string
+        );
         
         //Set up pop up window for confirmation to invade user
         MenuManager.Instance.confirmPopUpMessageState.SetUpConfirmationForMatch();
