@@ -33,9 +33,12 @@ public abstract class BCScreen : MonoBehaviour
     }
         
     public abstract void Activate(BrainCloudWrapper bc);
-    public abstract void OnScreenGUI();
-    
-    
+
+    public virtual /*abstract*/ void OnScreenGUI() //AnthonyTODO: Replacing Abstract with Virtual for now. Will eventually remove the entire method...
+    {
+
+    }
+        
     public virtual void Success_Callback(string json, object cbObject)
     {
         m_mainScene.AddLog("SUCCESS");

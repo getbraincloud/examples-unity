@@ -75,4 +75,14 @@ public class GameEvents : MonoBehaviour
         }
     }
 
+    //*************** Global Stat Events ***************
+
+    public event Action<string> onIncrementGlobalStat;
+    public void IncrementGlobalStat(string statName)
+    {
+        if(onIncrementGlobalStat != null)
+        {
+            onIncrementGlobalStat(statName);
+        }
+    }
 }
