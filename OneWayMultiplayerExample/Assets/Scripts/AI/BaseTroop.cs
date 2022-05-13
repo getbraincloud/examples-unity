@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.AI;
 
 public enum TroopStates {Idle, Rotate, Move, Attack}
 public enum EnemyTypes {Grunt, Solder, Shooter}
@@ -27,7 +25,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     public LayerMask DefenderMask ;
     private GameObject _target;
     private int _health;
-    public int _hitBackForce = 10;
+    public int _hitBackForce = 5;
     //Checks every 10 frames for a new target
     private int _searchTargetInterval = 10;
     
@@ -37,9 +35,8 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     private bool _isKnockedBack;
     private bool _targetIsHostile;
     
-    private float _delayBeforeDestroy = 2;
-    private float _delaySearchTarget = 2;
-    private float _delayBeforeResume = 1;
+    private float _delayBeforeDestroy = 0.75f;
+    private float _delayBeforeResume = 0.5f;
     private float _detectionRadius = 100;
     private float _distanceToTarget;
 
@@ -51,10 +48,10 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     private Rigidbody _rigidbodyComp;
     private MeleeWeapon _meleeWeapon;
     private HealthBar _healthBarRef;
-    private Coroutine _targetSearchCoroutine;
     private Coroutine _stunCoroutine;
 
     private ShootProjectiles _shootScript;
+    private NavMeshAgent _navMeshAgent;
 
     private const string _nonTargetTag = "NonTarget";
     
@@ -67,6 +64,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
         _healthBarRef = GetComponentInChildren<HealthBar>();
         _shootScript = GetComponent<ShootProjectiles>();
+        _navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
     // Start is called before the first frame update
@@ -111,12 +109,14 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         }
         
         _distanceToTarget = (_target.transform.position - transform.position).magnitude;
-        
-        RotateToTarget();
+        /* 
+        if (_distanceToTarget > 5 && !IsFacingObject())
+        {
+            RotateToTarget();    
+        }*/
         
         //Move to Target
         if(_distanceToTarget > AcceptanceRangeToTarget &&
-           IsFacingObject() &&
            !_isKnockedBack)
         {
             if (_isAttacking)
@@ -124,16 +124,19 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
                 _animator.SetBool(attackParameter, false);
                 _isAttacking = false;
             }
-            
+            _navMeshAgent.isStopped = false;
             CurrentState = TroopStates.Move;
             MoveTroop();
         }
         //Attack !!!!!!!!!!!!!
         else if(_distanceToTarget < AcceptanceRangeToTarget && _targetIsHostile)
         {
-            _rigidbodyComp.velocity = Vector3.zero;
+            //_rigidbodyComp.velocity = Vector3.zero;
             CurrentState = TroopStates.Attack;
+            _navMeshAgent.isStopped = true;
+            RotateToTarget();
             PerformAction();
+            
         }
     }
 
@@ -144,17 +147,18 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         return dotProduct > 0.9f;
     }
     
-    //give direction to move enemy towards
+    //give direction to move troop towards
     private void MoveTroop()
     {
-        _rigidbodyComp.AddForce(transform.forward * MoveSpeed);
+        /*_rigidbodyComp.AddForce(transform.forward * MoveSpeed);
         var vel = _rigidbodyComp.velocity;
         vel.y = 0;
         _rigidbodyComp.velocity = vel;
         if(_rigidbodyComp.velocity.magnitude > MoveSpeed)
         {
             _rigidbodyComp.velocity = _rigidbodyComp.velocity.normalized * MoveSpeed;
-        }
+        }*/
+        _navMeshAgent.destination = _target.transform.position;
     }
     
     //give a positive direction if you want to face the target and 
@@ -163,7 +167,6 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         //rotate enemy
         Vector3 direction = (_target.transform.position - transform.position).normalized;
-        //direction.x = 0;
         if (direction == Vector3.zero) return;
         
         _currQuat = Quaternion.LookRotation(direction);
@@ -253,6 +256,12 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         if (_isDead) return;
         _isDead = true;
+        _navMeshAgent.isStopped = true;
+        _navMeshAgent.speed = 0;
+        _navMeshAgent.destination = transform.position;
+        _animator.SetBool(attackParameter, false);
+        _rigidbodyComp.velocity = Vector3.zero;
+        _isAttacking = false;
         StartCoroutine(DelayToDeath());
     }
 
@@ -270,6 +279,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         }
         
         _isKnockedBack = true;
+        _navMeshAgent.isStopped = true;
         _rigidbodyComp.AddForce(direction * _hitBackForce);
         _stunCoroutine = StartCoroutine(DelayToResumeMovement());
     }
@@ -281,6 +291,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         _rigidbodyComp.velocity = Vector3.zero;
         _stunCoroutine = null;
         _isKnockedBack = false;
+        _navMeshAgent.isStopped = false;
     }
 
     private IEnumerator DelayToDeath()
@@ -295,7 +306,6 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     
     private void FindTarget()
     {
-        _targetSearchCoroutine = null;
         _target = null;
         Collider[] hitColliders = new Collider[10];
         int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, _detectionRadius, hitColliders, _activeMask);
@@ -319,20 +329,13 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         //Start a coroutine if there isn't a target to look for it again in x seconds
         if (!_target)
         {
-            _rigidbodyComp.velocity = Vector3.zero;
+            //_rigidbodyComp.velocity = Vector3.zero;
             _target = _homeLocationRef;
             _targetIsHostile = false;
-            _targetSearchCoroutine = StartCoroutine(DelayToSearchForTarget());
         }
         else
         {
             _isSearching = false;
         }
-    }
-
-    IEnumerator DelayToSearchForTarget()
-    {
-        yield return new WaitForSeconds(_delaySearchTarget);
-        FindTarget();
     }
 }

@@ -10,7 +10,8 @@ public class DefenderSpawner : MonoBehaviour
     public SpawnData DefenderSpawnData;
     private int _spawnPointIndex;
     private bool _addOffset;
-    private int _offsetRange = 6;
+    private int _offsetRangeZ = 6;
+    private int _offsetRangeX = 6;
     private void Awake()
     {
         BaseTroop troopToSpawn;
@@ -23,22 +24,23 @@ public class DefenderSpawner : MonoBehaviour
                 var spawnPoint = SpawnPoints[_spawnPointIndex].position; 
                 if (_addOffset)
                 {
-                    float x = spawnPoint.x + _offsetRange;
-                    float z = spawnPoint.z + _offsetRange;
+                    float x = spawnPoint.x + _offsetRangeX;
+                    float z = spawnPoint.z + _offsetRangeZ;
                     
-                    var newSpawnPoint = new Vector3(x,0, z);
+                    var newSpawnPoint = new Vector3(x,1, z);
                     spawnPoint = newSpawnPoint;
                 }
                 
-                Instantiate(troopToSpawn, spawnPoint, Quaternion.identity);
-                
+                BaseTroop troop = Instantiate(troopToSpawn, spawnPoint, Quaternion.identity);
+                troop.AssignToTeam(1);
                 _spawnPointIndex++;
                 if (_spawnPointIndex >= SpawnPoints.Length)
                 {
                     _spawnPointIndex = 0;
                     if (_addOffset)
                     {
-                        _offsetRange += _offsetRange;
+                        _offsetRangeX -= _offsetRangeX * 2;
+                        _offsetRangeZ += _offsetRangeZ;
                     }
                     else
                     {
