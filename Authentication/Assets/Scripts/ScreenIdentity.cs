@@ -25,6 +25,73 @@ public class ScreenIdentity : BCScreen {
         _bc = bc;
     }
 
+    public void OnLoginTwitterClick()
+    {
+        GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetRequestToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET,
+                                                                  new Twitter.RequestTokenCallback(this.OnSuccess_GetTwitterPIN)));
+    }
+
+    public void OnAttachTwitterClick()
+    {
+        GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET,
+                                                                  m_RequestTokenResponse.Token, m_twitterPin, new Twitter.AccessTokenCallback(this.OnSuccess_AttachTwitter)));
+    }
+
+    public void OnMergeTwitterClick()
+    {
+        GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET, 
+                                                                  m_RequestTokenResponse.Token, m_twitterPin, new Twitter.AccessTokenCallback(this.OnSuccess_AuthenticateTwitter)));
+    }
+
+    public void OnTwitterPinEndEdit(string pin)
+    {
+        m_twitterPin = pin; 
+    }
+
+    public void OnEmailEndEdit(string email)
+    {
+        m_email = email; 
+    }
+
+    public void OnEmailPassEndEdit(string pass)
+    {
+        m_emailPass = pass; 
+    }
+
+    public void OnAttachEmailClick()
+    {
+        m_mainScene.AddLog("Attaching new email account...");
+        _bc.IdentityService.AttachEmailIdentity(m_email, m_emailPass, Attach_Success, Attach_Fail);
+    }
+
+    public void OnMergeEmailClick()
+    {
+        m_mainScene.AddLog("Merging existing email account...");
+        _bc.IdentityService.MergeEmailIdentity(m_email, m_emailPass, Attach_Success, Attach_Fail);
+    }
+
+    public void OnUsernameEndEdit(string username)
+    {
+        m_username = username; 
+    }
+
+    public void OnPasswordEndEdit(string pass)
+    {
+        m_password = pass;
+    }
+
+    public void OnAttachUniversalClick()
+    {
+        m_mainScene.AddLog("Attaching new universal account...");
+        _bc.IdentityService.AttachUniversalIdentity(m_username, m_password, Attach_Success, Attach_Fail);
+    }
+
+    public void OnMergeUniversalClick()
+    {
+        m_mainScene.AddLog("Merging existing universal account...");
+        _bc.IdentityService.MergeUniversalIdentity(m_username, m_password, Attach_Success, Attach_Fail);
+    }
+
 	public override void OnScreenGUI()
 	{
 		GUILayout.BeginVertical();
