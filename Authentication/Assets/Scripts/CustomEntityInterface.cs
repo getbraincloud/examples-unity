@@ -135,6 +135,8 @@ public class CustomEntityInterface : MonoBehaviour
                 _customPlayer.Assists = (int) entityData["assists"];
             }
         }
+
+        TextLogger.instance.AddLogJson(json, "GET CUSTOM ENTITY PAGE");
     }
     
     public void CreateCustomEntity()
@@ -179,7 +181,8 @@ public class CustomEntityInterface : MonoBehaviour
         _customPlayer.UpdatedAt = Util.BcTimeToDateTime((long) data["updatedAt"]);
 
         //Invoking custom entity success event for Screen Enitity custom class
-        GameEvents.instance.CreateCustomEntitySuccess(); 
+        GameEvents.instance.CreateCustomEntitySuccess();
+        TextLogger.instance.AddLogJson(json, "CREATE CUSTOM ENTITY");
     }
 
     public void UpdateCustomEntity()
@@ -206,6 +209,7 @@ public class CustomEntityInterface : MonoBehaviour
     private void OnUpdateSuccess(string json, object cbObject)
     {
         Debug.Log($"Custom Entity is updated !");
+        TextLogger.instance.AddLogJson(json, "UPDATE CUSTOM ENTITY");
     }
 
     public void DeleteCustomEntity()
@@ -229,6 +233,7 @@ public class CustomEntityInterface : MonoBehaviour
 
         //Invoking Delete custom entity for Screen entity custom class.
         GameEvents.instance.DeleteCustomEntitySuccess();
+        TextLogger.instance.AddLogJson(json, "DELETE CUSTOM ENTITY");
     }
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
