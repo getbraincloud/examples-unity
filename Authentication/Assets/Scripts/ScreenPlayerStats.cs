@@ -11,87 +11,60 @@ public class ScreenPlayerStats : BCScreen
     [SerializeField] PlayerStat playerStatPrefab;
     [SerializeField] Transform pStatPrefabParent;
 
-    IDictionary<string, PlayerStat> m_playerStats; 
+    Dictionary<string, PlayerStat> m_playerStats; 
     
     public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
-    
-    public override void Activate(BrainCloudWrapper bc)
-    {
-        GameEvents.instance.onIncrementPlayerStat += IncrementStat;
 
-        _bc = bc;
-        m_playerStats = new Dictionary<string, PlayerStat>();
-        _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
+    private void Start()
+    {
+        GameEvents.instance.onIncrementUserStat += IncrementUserStats;
+        GameEvents.instance.onInstantiatePlayerStats += InstantiatePlayerStats;
     }
 
-    public void IncrementStat(string playerStatName)
+    public override void Activate(BrainCloudWrapper bc)
     {
-        string jsonData = "{ \"" + playerStatName + "\" : 1 }";
+        _bc = bc;
+        m_playerStats = new Dictionary<string, PlayerStat>();
+        
+        BrainCloudInterface.instance.ReadUserState(this);
+    }
 
-        _bc.PlayerStatisticsService.IncrementUserStats(jsonData, Success_Callback, Failure_Callback);
+    public void IncrementUserStats()
+    {
+        foreach (string key in DataManager.instance.PlayerStats.Keys)
+        {
+            m_playerStats[key].SetStatValue(DataManager.instance.PlayerStats[key]);
+        }
+    }
+
+    public void InstantiatePlayerStats()
+    {
+        DataManager dataManager = DataManager.instance; 
+
+        foreach (string key in dataManager.PlayerStats.Keys)
+        {
+            PlayerStat newStat = Instantiate(playerStatPrefab, pStatPrefabParent);
+            newStat.SetStatName(key);
+            m_playerStats[newStat.GetStatName()] = newStat;
+            newStat.SetStatValue(dataManager.PlayerStats[key]);
+        }
     }
 
     private void OnDisable()
     {
         if (m_playerStats != null)
         {
-            foreach (PlayerStat statObj in m_playerStats.Values)
+            foreach (string key in m_playerStats.Keys)
             {
-                Destroy(statObj.gameObject);
+                Destroy(m_playerStats[key].gameObject);
             }
+
+            m_playerStats.Clear();
+            m_playerStats = null; 
         }
 
-        GameEvents.instance.onIncrementPlayerStat -= IncrementStat;
+        //GameEvents.instance.onIncrementUserStat -= IncrementUserStats;
     }
-  
-
-    //*************** Success Callbacks ***************
-
-    private void ReadPlayerStateSuccess(string json, object cb)
-    {
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
-
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-
-        if (dStats != null)
-        {
-            foreach (string key in dStats.Keys)
-            {
-                PlayerStat newStat = Instantiate(playerStatPrefab, pStatPrefabParent);
-                newStat.SetStatName((string)key);
-                m_playerStats[newStat.GetStatName()] = newStat;
-
-                JsonData value = (JsonData)dStats[key];
-                newStat.SetStatValue(value.IsInt ? (int)value : (long)value); //LitJson can't upcast an int to a long.
-            }
-        }
-    }
-
-    public override void Success_Callback(string json, object cbObject)
-    {
-        base.Success_Callback(json, cbObject);
-        
-        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
-        {
-            foreach (string key in dStats.Keys)
-            {
-                JsonData value = (JsonData) dStats[key];
-                long valueAsLong = value.IsInt ? (int) value : (long) value;
-                m_playerStats[key].SetStatValue(valueAsLong);
-            }
-        }
-    }
-
-    
 
     #region Stuff to Remove
     //public override void OnScreenGUI()

@@ -22,7 +22,6 @@ public class GameEvents : MonoBehaviour
         }
     }
 
-
     public event Action onDeleteUserEntitySuccess; 
     public void DeleteUserEntitySuccess()
     {
@@ -31,7 +30,6 @@ public class GameEvents : MonoBehaviour
             onDeleteUserEntitySuccess(); 
         }
     }
-
 
     public event Action onGetUserEntityPageSuccess;
     public void GetUserEntityPageSuccess()
@@ -53,7 +51,6 @@ public class GameEvents : MonoBehaviour
         }
     }
 
-
     public event Action onDeleteCustomEntitySuccess;
     public void DeleteCustomEntitySuccess()
     {
@@ -64,14 +61,46 @@ public class GameEvents : MonoBehaviour
     }
 
 
+    //*************** XP Events ***************
+    public event Action OnUpdateLevelAndXP;
+    public void UpdateLevelAndXP()
+    {
+        if(OnUpdateLevelAndXP != null)
+        {
+            OnUpdateLevelAndXP();
+        }
+    }
+
+
+    //*************** Virtual Currency Events ***************
+
+    public event Action onGetVirtualCurrency;
+    public void GetVirtualCurrency()
+    {
+        if(onGetVirtualCurrency != null)
+        {
+            onGetVirtualCurrency();
+        }
+    }
+
+
     //*************** Player Stat Events ***************
 
-    public event Action<string> onIncrementPlayerStat;
-    public void IncrementPlayerStat(string statName)
+    public event Action/*<string>*/ onIncrementUserStat;
+    public void IncrementUserStat(/*string statName*/)
     {
-        if(onIncrementPlayerStat != null)
+        if(onIncrementUserStat != null)
         {
-            onIncrementPlayerStat(statName);
+            onIncrementUserStat(/*statName*/);
+        }
+    }
+
+    public event Action onInstantiatePlayerStats;
+    public void InstantiatePlayerStats()
+    {
+        if(onInstantiatePlayerStats != null)
+        {
+            onInstantiatePlayerStats(); 
         }
     }
 

@@ -157,11 +157,15 @@ public class ConnectScene : MonoBehaviour
         switch(currentAuthType)
         {
             case eAuthTypes.EMAIL:
-                DataManager.instance.SetEmailandPass(inputProfileId, inputPassword); 
+                //DataManager.instance.SetEmailandPass(inputProfileId, inputPassword);
+                DataManager.instance.EmailID = inputProfileId;
+                DataManager.instance.EmailPass = inputPassword;
                 BrainCloudInterface.instance.AuthenticateEmail();
                 break;
             case eAuthTypes.UNIVERSAL:
-                DataManager.instance.SetUniversalIDandPass(inputProfileId, inputPassword);
+                //DataManager.instance.SetUniversalIDandPass(inputProfileId, inputPassword);
+                DataManager.instance.UniversalUserID = inputProfileId;
+                DataManager.instance.UniversalPass = inputPassword;
                 BrainCloudInterface.instance.AuthenticateUniversal();
                 break;
             case eAuthTypes.ANONYMOUS:
@@ -180,12 +184,12 @@ public class ConnectScene : MonoBehaviour
 
     public void OnResetProfileID()
     {
-        storedProfileIdText.text = BrainCloudInterface.instance.ResetProfileID(); 
+        storedProfileIdText.text = BrainCloudInterface.instance.ResetStoredProfileID(); 
     }
 
     public void OnResetAnonymousID()
     {
-        storedAnonymousIdText.text = BrainCloudInterface.instance.ResetAnonymousID();
+        storedAnonymousIdText.text = BrainCloudInterface.instance.ResetStoredAnonymousID();
     }
 
     public void OnGoogleSignIn()

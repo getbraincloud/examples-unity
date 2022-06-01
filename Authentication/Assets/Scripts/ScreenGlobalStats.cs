@@ -13,14 +13,17 @@ public class ScreenGlobalStats : BCScreen
 
     public ScreenGlobalStats(BrainCloudWrapper bc) : base(bc) { }
 
-    public override void Activate(BrainCloudWrapper bc)
+    private void Start()
     {
         GameEvents.instance.onIncrementGlobalStat += IncrementGlobalStat; 
+    }
 
+    public override void Activate(BrainCloudWrapper bc)
+    {
         _bc = bc; 
         m_globalStats = new Dictionary<string, GlobalStat>();
         _bc.GlobalStatisticsService.ReadAllGlobalStats(ReadAllGlobalStatsSuccess, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadAllGlobalStats]... ");
+        //m_mainScene.AddLogNoLn("[ReadAllGlobalStats]... ");
     }
 
     public void IncrementGlobalStat(string globalStatName)
@@ -47,9 +50,9 @@ public class ScreenGlobalStats : BCScreen
     //*************** Success Callbacks ***************
     private void ReadAllGlobalStatsSuccess(string json, object cb)
     {
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
+        //m_mainScene.AddLog("SUCCESS");
+        //m_mainScene.AddLogJson(json);
+        //m_mainScene.AddLog("");
 
         JsonData jObj = JsonMapper.ToObject(json);
         JsonData jStats = jObj["data"]["statistics"];

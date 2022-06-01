@@ -23,18 +23,21 @@ public class ScreenEntity : BCScreen
     [SerializeField] InputField ageInput;
     [SerializeField] Button createEntityButton;
     [SerializeField] Button saveEntityButton;
-    [SerializeField] Button deleteEntityButton; 
+    [SerializeField] Button deleteEntityButton;
 
-    public override void Activate(BrainCloudWrapper bc)
+    private void Start()
     {
         GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
         GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
+    }
 
+    public override void Activate(BrainCloudWrapper bc)
+    {
         _bc = bc;
         
         m_mainScene.EntityInterface.GetPage(); 
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
+        //m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
     }
 
     void DisplayEntityID()
@@ -153,90 +156,90 @@ public class ScreenEntity : BCScreen
 
 
     #region Stuff to Remove
-    public override void OnScreenGUI()
-    {
-        //AnthonyTODO: Moved this to Activate. Not sure if that's where it should go.
-        //EntityInstance m_player = null;
-        //if (m_mainScene.EntityInterface.PlayerAssigned)
-        //{
-        //    m_player = m_mainScene.EntityInterface.Player;    
-        //}
+    //public override void OnScreenGUI()
+    //{
+    //    //AnthonyTODO: Moved this to Activate. Not sure if that's where it should go.
+    //    //EntityInstance m_player = null;
+    //    //if (m_mainScene.EntityInterface.PlayerAssigned)
+    //    //{
+    //    //    m_player = m_mainScene.EntityInterface.Player;    
+    //    //}
         
-        GUILayout.BeginVertical();
-        //GUILayout.Box("Player Entity");
+    //    GUILayout.BeginVertical();
+    //    //GUILayout.Box("Player Entity");
         
-        int minLabelWidth = 60;
+    //    int minLabelWidth = 60;
         
-        // entity id
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Id", GUILayout.Width(minLabelWidth));
-        GUILayout.Box(m_player != null ? m_player.EntityId : "---");
-        GUILayout.EndHorizontal();
+    //    // entity id
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.Label("Id", GUILayout.Width(minLabelWidth));
+    //    GUILayout.Box(m_player != null ? m_player.EntityId : "---");
+    //    GUILayout.EndHorizontal();
         
-        // entity type
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Type", GUILayout.Width(minLabelWidth));
-        GUILayout.Box(m_player != null ? m_player.EntityType : "---");
-        GUILayout.EndHorizontal();
+    //    // entity type
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.Label("Type", GUILayout.Width(minLabelWidth));
+    //    GUILayout.Box(m_player != null ? m_player.EntityType : "---");
+    //    GUILayout.EndHorizontal();
         
-        // entity property 'name'
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Name", GUILayout.Width(minLabelWidth));
-        if (m_player != null)
-        {
-            m_player.Name = GUILayout.TextField(m_player.Name);
-        } 
-        else
-        {
-            GUILayout.Box("---");
-        }
-        GUILayout.EndHorizontal();
+    //    // entity property 'name'
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.Label("Name", GUILayout.Width(minLabelWidth));
+    //    if (m_player != null)
+    //    {
+    //        m_player.Name = GUILayout.TextField(m_player.Name);
+    //    } 
+    //    else
+    //    {
+    //        GUILayout.Box("---");
+    //    }
+    //    GUILayout.EndHorizontal();
         
-        // entity property 'age'
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Age", GUILayout.Width(minLabelWidth));
-        if (m_player != null)
-        {
-            string ageStr = GUILayout.TextField(m_player.Age);
-            int ageInt = 0;
-            if (int.TryParse(ageStr, out ageInt))
-            {
-                m_player.Age = ageInt.ToString();
-            }
-        } else
-        {
-            GUILayout.Box("---");
-        }
-        GUILayout.EndHorizontal();
+    //    // entity property 'age'
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.Label("Age", GUILayout.Width(minLabelWidth));
+    //    if (m_player != null)
+    //    {
+    //        string ageStr = GUILayout.TextField(m_player.Age);
+    //        int ageInt = 0;
+    //        if (int.TryParse(ageStr, out ageInt))
+    //        {
+    //            m_player.Age = ageInt.ToString();
+    //        }
+    //    } else
+    //    {
+    //        GUILayout.Box("---");
+    //    }
+    //    GUILayout.EndHorizontal();
         
-        GUILayout.BeginHorizontal();
-        if (m_player == null)
-        {
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Create Entity"))
-            {
-                m_mainScene.EntityInterface.CreateEntity();
-                m_mainScene.RealLogging("Creating Entity....");
-            }
-        }
-        if (m_player != null)
-        {
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Save Entity"))
-            {
-                m_mainScene.EntityInterface.UpdateEntity();
-                m_mainScene.RealLogging("Updating Entity...");
-            }
-            if (GUILayout.Button("Delete Entity"))
-            {
-                m_mainScene.EntityInterface.DeleteEntity();
-                m_player = null;
-                m_mainScene.RealLogging("Deleting Entity...");
-            }
-        }
-        GUILayout.EndHorizontal();
+    //    GUILayout.BeginHorizontal();
+    //    if (m_player == null)
+    //    {
+    //        GUILayout.FlexibleSpace();
+    //        if (GUILayout.Button("Create Entity"))
+    //        {
+    //            m_mainScene.EntityInterface.CreateEntity();
+    //            m_mainScene.RealLogging("Creating Entity....");
+    //        }
+    //    }
+    //    if (m_player != null)
+    //    {
+    //        GUILayout.FlexibleSpace();
+    //        if (GUILayout.Button("Save Entity"))
+    //        {
+    //            m_mainScene.EntityInterface.UpdateEntity();
+    //            m_mainScene.RealLogging("Updating Entity...");
+    //        }
+    //        if (GUILayout.Button("Delete Entity"))
+    //        {
+    //            m_mainScene.EntityInterface.DeleteEntity();
+    //            m_player = null;
+    //            m_mainScene.RealLogging("Deleting Entity...");
+    //        }
+    //    }
+    //    GUILayout.EndHorizontal();
         
-        GUILayout.EndVertical();
-    }
+    //    GUILayout.EndVertical();
+    //}
     #endregion
 }

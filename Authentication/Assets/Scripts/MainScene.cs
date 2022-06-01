@@ -9,10 +9,17 @@ using UnityEngine.UI;
 
 public class MainScene : MonoBehaviour
 {
-    public BCConfig BCConfig;
+    [SerializeField] Text appDataText;
+    [SerializeField] Dropdown funcDropdown;
 
+    public BCConfig BCConfig;
     private BrainCloudWrapper _bc;
     private EntityInterface _entityInterface;
+    List<BCScreen> bcScreens;
+    Dictionary<eBCFunctionType, BCScreen> bcScreenDict;
+    BCScreen currentlyActiveScreen = null;
+    bool bHasAuthenticatedOnce = false;
+
     public EntityInterface EntityInterface
     {
         get => _entityInterface;
@@ -24,20 +31,6 @@ public class MainScene : MonoBehaviour
     {
         get => _customEntityInterface;
     }
-    
-    static int MIN_LEFT_SIDE_WIDTH = 350;
-    Vector2 m_scrollPosition;
-    string m_log = "";
-    BCScreen m_screen = null;
-
-    //AnthonyTODO: Members I'm adding
-    BrainCloudInterface bcInterface; 
-    DataManager dataManager; 
-    List<BCScreen> bcScreens;
-
-    //AnthonyTODO: UI Elements
-    [SerializeField] Text appDataText; 
-
 
     public enum eBCFunctionType : int
     {
@@ -47,7 +40,8 @@ public class MainScene : MonoBehaviour
         FN_PLAYER_STATS,
         FN_GLOBAL_STATS,
         FN_CLOUD_CODE,
-		FN_IDENTITY
+		FN_IDENTITY, 
+        FN_LOGOUT // This should be last.
         //etc
     }
 
@@ -59,53 +53,93 @@ public class MainScene : MonoBehaviour
         "Player Stats",
         "Global Stats",
         "Cloud Code",
-		"Identity"
-
+		"Identity", 
+        "Logout" // This should be last.
     };
-    eBCFunctionType currentBCFunction = eBCFunctionType.FN_ENTITY;
-
     
+
     void Awake()
     {
         _bc = BCConfig.GetBrainCloud();
 
-        bcInterface = BrainCloudInterface.instance;
-        dataManager = DataManager.instance; 
-        
-        _entityInterface = GetComponent<EntityInterface>();
+        if(_entityInterface == null)
+        {
+            _entityInterface = GetComponent<EntityInterface>();
+        }
+
+        if(_customEntityInterface == null)
+        {
+            _customEntityInterface = GetComponent<CustomEntityInterface>();
+        }
+
         _entityInterface.Wrapper = _bc;
-        _customEntityInterface = GetComponent<CustomEntityInterface>();
         _customEntityInterface.Wrapper = _bc;
 
-        bcScreens = new List<BCScreen>(FindObjectsOfType<BCScreen>());
-        bcScreens.Sort((BCScreen screen1, BCScreen screen2) => screen1.transform.GetSiblingIndex().CompareTo(screen2.transform.GetSiblingIndex()));
-
-        for(int i = 0; i < bcScreens.Count; i++)
+        //Find all Braincloud function screens under MainScreen and sort them based on position in scene hierarchy.
+        if (bcScreens == null)
         {
-            bcScreens[i].SetFunctionType((eBCFunctionType)i);
+            bcScreens = new List<BCScreen>(FindObjectsOfType<BCScreen>(true));
+            bcScreens.Sort((BCScreen screen1, BCScreen screen2) => screen1.transform.GetSiblingIndex().CompareTo(screen2.transform.GetSiblingIndex()));
         }
-        
-        MoveToScreen(currentBCFunction);
-        SetGameData();
+
+        //Setting Dictionary of braincloud function screens based on sorted list.
+        if(bcScreenDict == null)
+        {
+            bcScreenDict = new Dictionary<eBCFunctionType, BCScreen>();
+            for (int i = 0; i < bcScreens.Count; i++)
+            {
+                bcScreens[i].SetFunctionType((eBCFunctionType)i);
+                bcScreenDict.Add(bcScreens[i].GetFunctionType(), bcScreens[i]);
+            }
+        }
     }
 
     private void MoveToScreen(eBCFunctionType in_fn)
     {
-        foreach(BCScreen screen in bcScreens)
+        if(currentlyActiveScreen != null)
         {
-            if(screen.GetFunctionType() == in_fn)
-            {
-                screen.gameObject.SetActive(true);
-                screen.SetMainScene(this);
-                screen.Activate(_bc);
-            }
-            else
-            {
-                screen.gameObject.SetActive(false); 
-            }
+            currentlyActiveScreen.gameObject.SetActive(false);
+            currentlyActiveScreen = null; 
+        }
+
+        if (in_fn == eBCFunctionType.FN_LOGOUT)
+        {
+            BrainCloudInterface.instance.Logout();
+            return;
+        }
+
+        bcScreenDict.TryGetValue(in_fn, out currentlyActiveScreen);
+
+        if(currentlyActiveScreen != null)
+        {
+            currentlyActiveScreen.gameObject.SetActive(true);
+            currentlyActiveScreen.SetMainScene(this);
+            currentlyActiveScreen.Activate(_bc);
         }
 
         #region Old scene switching code
+        //First Iteration for moving screens
+        //foreach(BCScreen screen in bcScreens)
+        //{
+        //    if(screen.GetFunctionType() == in_fn)
+        //    {
+        //        screen.gameObject.SetActive(true);
+        //        screen.SetMainScene(this);
+        //        screen.Activate(_bc);
+        //    }
+        //    else
+        //    {
+        //        screen.gameObject.SetActive(false); 
+        //    }
+        //}
+
+        //if(in_fn == eBCFunctionType.FN_LOGOUT)
+        //{
+        //    BrainCloudInterface.instance.Logout();
+        //    return;
+        //}
+
+
         //switch (in_fn)
         //{
         //    case eBCFunctionType.FN_ENTITY:
@@ -138,85 +172,101 @@ public class MainScene : MonoBehaviour
 
     void SetGameData()
     {
-        string appID = bcInterface.GetAppID();
-        string gameVersion = bcInterface.GetAppVersion();
-        string profileID = bcInterface.GetAuthenticatedProfileID();
+        string appID = BrainCloudInterface.instance.GetAppID();
+        string gameVersion = BrainCloudInterface.instance.GetAppVersion();
+        string profileID = BrainCloudInterface.instance.GetAuthenticatedProfileID();
 
         appDataText.text = "AppID:" + appID + "  AppVersion:" + gameVersion + "  ProfileID:" + profileID;
     }
 
-    
-    //*************** UI Event Methods ***************
+    private void OnEnable()
+    {
+        //Preventing duplicate text logs on subsequent logins.
+        if(!bHasAuthenticatedOnce)
+        {
+            MoveToScreen(eBCFunctionType.FN_ENTITY);
+           bHasAuthenticatedOnce = true;
+        }
+        else
+        {
+            //Calling this invokes OnSelectBCFunction() if not already set to 0.
+            funcDropdown.value = 0; 
+        }
+
+        SetGameData();
+    }
+
+
+    //*************** UI Methods ***************
     public void OnSelectBCFunction(int val)
     {
-        currentBCFunction = (eBCFunctionType)val; 
-        MoveToScreen(currentBCFunction);
+        MoveToScreen((eBCFunctionType)val);
     }
-    
+
 
     #region Logging Logic
     // lays out the right hand pane for the log
-    void OnGUILog()
-    {
-        m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-        GUILayout.TextArea(m_log);
-        GUILayout.EndScrollView();
+    //void OnGUILog()
+    //{
+    //    m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+    //    GUILayout.TextArea(m_log);
+    //    GUILayout.EndScrollView();
         
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Clear Log", GUILayout.Height(25), GUILayout.Width(100)))
-        {
-            m_log = "";
-        }
-        GUILayout.EndHorizontal();
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.FlexibleSpace();
+    //    if (GUILayout.Button("Clear Log", GUILayout.Height(25), GUILayout.Width(100)))
+    //    {
+    //        m_log = "";
+    //    }
+    //    GUILayout.EndHorizontal();
         
-        //GUILayout.Space(20);
-    }
+    //    //GUILayout.Space(20);
+    //}
 
-    public void AddLog(string log)
-    {
-        m_log += log;
-        m_log += "\n";
-        m_scrollPosition = new Vector2(m_scrollPosition.x, Mathf.Infinity);
-    }
+    //public void AddLog(string log)
+    //{
+    //    m_log += log;
+    //    m_log += "\n";
+    //    m_scrollPosition = new Vector2(m_scrollPosition.x, Mathf.Infinity);
+    //}
 
-    public void RealLogging(string in_log)
-    {
-        m_log = in_log;
-        Debug.Log($"My Log: {in_log}");
-    }
+    //public void RealLogging(string in_log)
+    //{
+    //    m_log = in_log;
+    //    Debug.Log($"My Log: {in_log}");
+    //}
 
-    public void AddLogNoLn(string log)
-    {
-        m_log += log;
-        m_scrollPosition = new Vector2(m_scrollPosition.x, Mathf.Infinity);
-    }
+    //public void AddLogNoLn(string log)
+    //{
+    //    m_log += log;
+    //    m_scrollPosition = new Vector2(m_scrollPosition.x, Mathf.Infinity);
+    //}
 
-    public void AddLogJson(string json)
-    {
-        StringBuilder sb = new StringBuilder();
-        JsonWriter writer = new JsonWriter(sb);
-        writer.PrettyPrint = true;
-        JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
-        AddLog(sb.ToString());
-    }
+    //public void AddLogJson(string json)
+    //{
+    //    StringBuilder sb = new StringBuilder();
+    //    JsonWriter writer = new JsonWriter(sb);
+    //    writer.PrettyPrint = true;
+    //    JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
+    //    AddLog(sb.ToString());
+    //}
     #endregion
 
     #region Stuff To Remove
     // lays out the top toolbar + player info
-    void OnGUITopButtons()
-    {
-        GUILayout.BeginHorizontal();
-        GUILayout.Box("Select a BrainCloud Function:");
-        eBCFunctionType fn = (eBCFunctionType)GUILayout.Toolbar((int)currentBCFunction, m_bcFuncLabels);
-        GUILayout.EndHorizontal();
+    //void OnGUITopButtons()
+    //{
+    //    GUILayout.BeginHorizontal();
+    //    GUILayout.Box("Select a BrainCloud Function:");
+    //    eBCFunctionType fn = (eBCFunctionType)GUILayout.Toolbar((int)currentBCFunction, m_bcFuncLabels);
+    //    GUILayout.EndHorizontal();
 
-        // if user selected another screen, move to it
-        if (fn != currentBCFunction)
-        {
-            MoveToScreen(fn);
-        }
-    }
+    //    // if user selected another screen, move to it
+    //    if (fn != currentBCFunction)
+    //    {
+    //        MoveToScreen(fn);
+    //    }
+    //}
 
     void OnGUIBottom()
     {

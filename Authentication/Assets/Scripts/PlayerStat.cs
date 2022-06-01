@@ -20,6 +20,11 @@ public class PlayerStat : MonoBehaviour
         statNameText.text = playerStatName;
     }
 
+    public void SetStatNameText()
+    {
+        statNameText.text = playerStatName;
+    }
+
     public string GetStatName()
     {
         return playerStatName; 
@@ -31,6 +36,11 @@ public class PlayerStat : MonoBehaviour
         statValueText.text = playerStatValue.ToString();
     }
 
+    public void SetStatValueText()
+    {
+        statValueText.text = playerStatValue.ToString();
+    }
+
     public long GetStatValue()
     {
         return playerStatValue; 
@@ -38,6 +48,7 @@ public class PlayerStat : MonoBehaviour
 
     public void OnIncrementStat()
     {
-        GameEvents.instance.IncrementPlayerStat(playerStatName);
+        //GameEvents.instance.IncrementPlayerStat(playerStatName);
+        BrainCloudInterface.instance.IncrementUserStats(playerStatName);
     }
 }

@@ -13,7 +13,7 @@ public class TextLogger : MonoBehaviour
     [SerializeField] Button clearLogButton; 
 
     Text newlog;
-    bool bContestSizeSet = false;
+    bool bContentSizeSet = false;
 
     public static TextLogger instance; 
 
@@ -24,12 +24,13 @@ public class TextLogger : MonoBehaviour
 
     private void Update()
     {
-        if(newlog != null && bContestSizeSet == false)
+        //Setting the size of the TextLogger content on first frame to ensure first log doesn't get cut off or lock you out of scrolling
+        if(newlog != null && bContentSizeSet == false)
         {
-            if (newlog.gameObject.GetComponent<RectTransform>().sizeDelta != new Vector2(0.0f, 0.0f) && bContestSizeSet == false)
+            if (newlog.gameObject.GetComponent<RectTransform>().sizeDelta != new Vector2(0.0f, 0.0f) && bContentSizeSet == false)
             {
                 logTextParent.sizeDelta = newlog.gameObject.GetComponent<RectTransform>().sizeDelta;
-                bContestSizeSet = true;
+                bContentSizeSet = true;
             }
         }
     }
@@ -54,7 +55,7 @@ public class TextLogger : MonoBehaviour
             Destroy(log.gameObject);
         }
 
-        bContestSizeSet = false;
+        bContentSizeSet = false;
         newlog = null;
     }
 }

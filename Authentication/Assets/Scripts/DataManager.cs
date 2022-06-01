@@ -9,76 +9,49 @@ public class DataManager : MonoBehaviour
     public static DataManager instance;
 
     //Authentication Data
-    string m_profileId = "";
-    string m_anonymousId = ""; 
-    string m_universalUserId = "";
-    string m_universalPwd = "";
-    string m_emailId = "";
-    string m_emailPwd = "";
-    string m_googleId = "";
-    string m_serverAuthCode = "";
+    public string ProfileID { get; set; }
+    public string AnonymousID { get; set; }
+    public string UniversalUserID { get; set; }
+    public string UniversalPass { get; set; }
+    public string EmailID { get; set; }
+    public string EmailPass { get; set; }
+    public string GoogleID { get; set; }
+    public string ServerAuthCode { get; set; }
 
     //PlayerXP Data
-    int m_playerLevel; 
-    int m_playerXP; 
+    public int PlayerLevel { get; set; }
+    public int PlayerXP { get; set; }
+
+    //Currency Data
+    public class Currency
+    {
+        public string currencyType;
+        public int purchased;
+        public int balance;
+        public int consumed;
+        public int awarded;
+
+        public string award = "0";
+        public string consume = "0";
+    }
+    public IDictionary<string, Currency> Currencies { get; set; }
+
+    //Player Stat Data
+    public class PlayerStatData
+    {
+        public string statName;
+        public long statValue; 
+    }
+    public Dictionary<string, long> PlayerStats { get; set; }
 
 
     void Start()
     {
         instance = this;
 
+        Currencies = new Dictionary<string, Currency>();
+        PlayerStats = new Dictionary<string, long>();
+
         DontDestroyOnLoad(this); 
-    }
-
-    public void SetProfileID()
-    {
-        //AnthonyTODO: this will probably just call GetAnonymousID from bcinterface and store it. Not sure if that's even necessary...
-    }
-
-    public void SetAnonymousID()
-    {
-        //AnthonyTODO: this will probably just call GetAnonymousID from bcinterface and store it. Not sure if that's even necessary...
-    }
-
-    public void SetEmailandPass(string email, string pass)
-    {
-        m_emailId = email;
-        m_emailPwd = pass; 
-    }
-
-    public string GetEmailID()
-    {
-        return m_emailId;
-    }
-
-    public string GetEmailPassword()
-    {
-        return m_emailPwd; 
-    }
-
-    public void SetUniversalIDandPass(string id, string pass)
-    {
-        m_universalUserId = id;
-        m_universalPwd = pass; 
-    }
-
-    public string GetUniversalUserID()
-    {
-        return m_universalUserId;
-    }
-
-    public string GetUniversalUserPassword()
-    {
-        return m_universalPwd; 
-    }
-
-    public void SetGoogleID()
-    {
-
-    }
-
-    public void SetServerAuthCode()
-    {
-
     }
 }

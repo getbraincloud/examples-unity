@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using BrainCloud;
+using BrainCloud.LitJson;
 
 #if UNITY_WSA
 using Microsoft.Xbox.Services;
@@ -90,10 +92,11 @@ public class BrainCloudInterface : MonoBehaviour
         //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
     }
 
+    //*************** Authenticate Methods ***************
     public void AuthenticateEmail()
     {
-        m_emailId = DataManager.instance.GetEmailID();
-        m_emailPwd = DataManager.instance.GetEmailPassword(); 
+        m_emailId = DataManager.instance.EmailID;
+        m_emailPwd = DataManager.instance.EmailPass; 
 
         _bc.ResetStoredProfileId();
         _bc.ResetStoredAnonymousId();
@@ -102,8 +105,8 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void AuthenticateUniversal()
     {
-        m_universalUserId = DataManager.instance.GetUniversalUserID();
-        m_universalPwd = DataManager.instance.GetUniversalUserPassword();
+        m_universalUserId = DataManager.instance.UniversalUserID;
+        m_universalPwd = DataManager.instance.UniversalPass;
 
         _bc.ResetStoredProfileId();
         _bc.ResetStoredAnonymousId();
@@ -123,46 +126,7 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void AuthenticateFacebook()
     {
-        //AnthonyTODO: Waiting on Facebook fix?
-    }
-    public string GetStoredProfileID()
-    {
-        return _bc.GetStoredProfileId();
-    }
-
-    //AnthonyTODO: Find out what the difference between this and the stored profile id is.
-    public string GetAuthenticatedProfileID()
-    {
-        return _bc.Client.AuthenticationService.ProfileId; 
-    }
-
-    public string GetAppID()
-    {
-        return _bc.Client.AppId;
-    }
-
-    public string GetAppVersion()
-    {
-        return _bc.Client.AppVersion; 
-    }
-
-    public string ResetProfileID()
-    {
-        _bc.ResetStoredProfileId();
-
-        return GetStoredProfileID(); 
-    }
-
-    public string GetStoredAnonymousID()
-    {
-        return _bc.GetStoredAnonymousId();
-    }
-
-    public string ResetAnonymousID()
-    {
-        _bc.ResetStoredAnonymousId();
-
-        return GetStoredAnonymousID(); 
+        //AnthonyTODO: Requires Facebook fix
     }
 
     public void OnSuccess_Authenticate(string responseData, object cbObject)
@@ -178,6 +142,206 @@ public class BrainCloudInterface : MonoBehaviour
         m_authStatus = "Authenticate failed: " + statusMessage;
         Debug.LogError("OnError_Authenticate: " + statusMessage);
     }
+
+    public string GetStoredProfileID()
+    {
+        return _bc.GetStoredProfileId();
+    }
+
+    public string ResetStoredProfileID()
+    {
+        _bc.ResetStoredProfileId();
+
+        return GetStoredProfileID(); 
+    }
+
+    public string GetAuthenticatedProfileID()
+    {
+        return _bc.Client.AuthenticationService.ProfileId; 
+    }
+
+    public string GetAppID()
+    {
+        return _bc.Client.AppId;
+    }
+
+    public string GetAppVersion()
+    {
+        return _bc.Client.AppVersion; 
+    }
+
+    public string GetStoredAnonymousID()
+    {
+        return _bc.GetStoredAnonymousId();
+    }
+
+    public string ResetStoredAnonymousID()
+    {
+        _bc.ResetStoredAnonymousId();
+
+        return GetStoredAnonymousID(); 
+    }
+
+    //*************** PlayerStateService Methods ***************
+    public void Logout()
+    {
+        SuccessCallback successCallback = (response, cbObject) => { ScreenManager.instance.ActivateConnectScreen(); };
+
+        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+
+        _bc.PlayerStateService.Logout(successCallback, failureCallback);
+    }
+
+    public void ReadUserState(object cb)
+    { 
+        _bc.PlayerStateService.ReadUserState(OnReadUserState_Success, OnReadUserState_Failure, cb);
+    }
+
+    public void OnReadUserState_Success(string response, object cbObject)
+    {
+        if (cbObject.GetType() == typeof(ScreenPlayerXp))
+        {
+            JsonData jObj = JsonMapper.ToObject(response);
+            DataManager.instance.PlayerLevel = (int)jObj["data"]["experienceLevel"];
+            DataManager.instance.PlayerXP = (int)jObj["data"]["experiencePoints"];
+
+            GameEvents.instance.UpdateLevelAndXP();
+        }
+
+        if (cbObject.GetType() == typeof(ScreenPlayerStats))
+        {
+            JsonData jObj = JsonMapper.ToObject(response);
+            JsonData jStats = jObj["data"]["statistics"];
+            IDictionary dStats = jStats as IDictionary;
+
+            if (dStats != null)
+            {
+                foreach (string key in dStats.Keys)
+                {
+                    JsonData value = (JsonData)dStats[key];
+                    long valAsLong = value.IsInt ? (int)value : (long)value; //LitJson can't upcast an int to a long.
+
+                    DataManager.instance.PlayerStats[key] = valAsLong;
+                }
+
+                GameEvents.instance.InstantiatePlayerStats();
+            }
+        }
+    }
+
+    public void OnReadUserState_Failure(int status, int code, string error, object cbObject)
+    {
+
+    }
+
+    //*************** PlayerStatisticsService Methods ***************
+    public void IncrementExperiencePoints(int incrementAmount)
+    {
+        SuccessCallback successCallback = (response, cbObject) =>
+        {
+            JsonData jObj = JsonMapper.ToObject(response);
+            DataManager.instance.PlayerLevel = (int)jObj["data"]["experienceLevel"];
+            DataManager.instance.PlayerXP = (int)jObj["data"]["experiencePoints"];
+
+            GameEvents.instance.UpdateLevelAndXP();
+        };
+
+        FailureCallback failureCallback = (status, code, error, cbObject) =>
+        {
+
+        };
+
+        _bc.PlayerStatisticsService.IncrementExperiencePoints(incrementAmount, successCallback, failureCallback);
+    }
+
+    public void IncrementUserStats(string userStat)
+    {
+        SuccessCallback successCallback = (response, cbObject) => {
+
+            JsonData jObj = JsonMapper.ToObject(response);
+            JsonData jStats = jObj["data"]["statistics"];
+            IDictionary dStats = jStats as IDictionary;
+            if (dStats != null)
+            {
+                foreach (string key in dStats.Keys)
+                {
+                    JsonData value = (JsonData)dStats[key];
+                    long valueAsLong = value.IsInt ? (int)value : (long)value;
+                    //m_playerStats[key].SetStatValue(valueAsLong);
+                    DataManager.instance.PlayerStats[key] = valueAsLong;
+                }
+            }
+
+            GameEvents.instance.IncrementUserStat();
+        };
+
+        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+
+        string jsonData = "{ \"" + userStat + "\" : 1 }";
+
+        _bc.PlayerStatisticsService.IncrementUserStats(jsonData, successCallback, failureCallback);
+    }
+
+    //*************** VirtualCurrencyService Methods ***************
+    public void GetVirtualCurrency(string currency)
+    {
+        SuccessCallback successCallback = (response, cbObject) =>
+        {
+            JsonData jObj = JsonMapper.ToObject(response);
+            JsonData jCurMap = jObj["data"]["currencyMap"];
+            IDictionary dCurMap = jCurMap as IDictionary;
+
+            foreach (string key in dCurMap.Keys)
+            {
+                DataManager.Currency c = null;
+                if (DataManager.instance.Currencies.ContainsKey(key))
+                {
+                    c = DataManager.instance.Currencies[key];
+                }
+                else
+                {
+                    c = new DataManager.Currency();
+                    DataManager.instance.Currencies[key] = c;
+                }
+                c.currencyType = key;
+                c.purchased = (int)jCurMap[key]["purchased"];
+                c.balance = (int)jCurMap[key]["balance"];
+                c.consumed = (int)jCurMap[key]["consumed"];
+                c.awarded = (int)jCurMap[key]["awarded"];
+            }
+
+            GameEvents.instance.GetVirtualCurrency();
+        };
+
+        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+
+        _bc.VirtualCurrencyService.GetCurrency(currency, successCallback, failureCallback);
+    }
+
+
+    //*************** ScriptService Methods ***************
+    public void RunCloudCodeScript(string scriptname, string scriptdata)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log(string.Format("Success | {0}", response)); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
+
+        _bc.ScriptService.RunScript(scriptname, scriptdata, successCallback, failureCallback);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
