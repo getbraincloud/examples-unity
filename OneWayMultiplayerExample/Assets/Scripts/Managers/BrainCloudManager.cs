@@ -103,7 +103,6 @@ public class BrainCloudManager : MonoBehaviour
     public void LookForPlayers()
     {
         _bcWrapper.MatchMakingService.EnableMatchMaking(OnEnableMatchMaking, OnFoundPlayersError);
-        //m_bcWrapper.EntityService.GetEntitiesByType("vikings", OnFoundPlayers, OnFoundPlayersError);
     }
 
     void OnEnableMatchMaking(string jsonResponse, object cbObject)

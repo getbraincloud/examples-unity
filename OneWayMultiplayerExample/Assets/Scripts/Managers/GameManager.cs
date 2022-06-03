@@ -68,6 +68,7 @@ public class GameManager : MonoBehaviour
         _currentUserInfo.InvaderSelected = (ArmyDivisionRank) in_invaderSelection;
         _currentUserInfo.DefendersSelected = (ArmyDivisionRank) in_defenderSelection;
         InvaderSpawnData.Rank = (ArmyDivisionRank) in_invaderSelection;
+        InvaderSpawnData.AssignSpawnList(InvaderSpawnData.Rank);
     }
 
     public void UpdateOpponentInfo(ArmyDivisionRank in_rank, string in_entityId)

@@ -7,7 +7,10 @@ using Random = UnityEngine.Random;
 public class DefenderSpawner : MonoBehaviour
 {
     public Transform[] SpawnPoints;
+    public Transform StructureSpawnPoint;
     public SpawnData DefenderSpawnData;
+    //0 = Easy, 1 = Medium, 2 = Large
+    public GameObject[] Sets;
     private int _spawnPointIndex;
     private bool _addOffset;
     private int _offsetRangeZ = 6;
@@ -15,6 +18,7 @@ public class DefenderSpawner : MonoBehaviour
     private void Awake()
     {
         BaseTroop troopToSpawn;
+        Instantiate(Sets[(int) DefenderSpawnData.Rank], StructureSpawnPoint.position, Quaternion.identity, StructureSpawnPoint);
         //Spawn in troops based on spawner data
         foreach (SpawnInfo spawnInfo in DefenderSpawnData.SpawnList)
         {

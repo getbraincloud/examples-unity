@@ -13,8 +13,6 @@ public class PlayerCardLobby : MonoBehaviour
 
     public void PlayerSelected()
     {
-        //ToDo: Grab info from player and start game? 
-
         if (UserInfo.ProfileId.IsNullOrEmpty())
         {
             Debug.LogWarning("UserId is empty for this player");

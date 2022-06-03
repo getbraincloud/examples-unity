@@ -27,8 +27,7 @@ public class MenuManager : MonoBehaviour
     public TMP_InputField PasswordInputField;
 
     [Header("UI References")] 
-    //ToDo: Dont make this public and save the data
-    public List<float> SelectionList = new List<float>();
+    
     public RectTransform InvaderButtonBorder;
     public RectTransform DefenderButtonBorder;
     public PlayerCardLobby PlayerCardRef;
@@ -37,7 +36,7 @@ public class MenuManager : MonoBehaviour
     private UserInfo _opponent;
     private List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
     private EventSystem _eventSystem;
-
+    private readonly List<float> _selectionXPlacement = new List<float> {-169,-3.7f, 160};
     private const string LOGGING_IN_MESSAGE = "Logging in...";
     private const string LOOKING_FOR_PLAYERS_MESSAGE = "Looking for players...";
     private const string JOINING_MATCH_MESSAGE = "Joining Match...";
@@ -110,13 +109,6 @@ public class MenuManager : MonoBehaviour
                 CurrentMenuState = MenuStates.Lobby;
                 BrainCloudManager.Instance.LookForPlayers();
                 LoadingMenuState.ConnectStatesWithLoading(LOOKING_FOR_PLAYERS_MESSAGE, true, MenuStates.Lobby);
-                
-                break;
-            //Loading up game to start invading...
-            case MenuStates.Lobby:
-                CurrentMenuState = MenuStates.Game;
-                //ToDo: Braincloud get player info to load game with
-                //ToDo: Loading transition for scene to scene. 
                 break;
         }
     }
@@ -155,12 +147,12 @@ public class MenuManager : MonoBehaviour
         
         int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
         Vector2 posI = DefenderButtonBorder.anchoredPosition; 
-        posI.x = SelectionList[defenderIndex];
+        posI.x = _selectionXPlacement[defenderIndex];
         DefenderButtonBorder.anchoredPosition = posI;
         
         int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
         Vector2 posD = InvaderButtonBorder.anchoredPosition; 
-        posD.x = SelectionList[invaderIndex];
+        posD.x = _selectionXPlacement[invaderIndex];
         InvaderButtonBorder.anchoredPosition = posD;
     }
 
@@ -178,14 +170,14 @@ public class MenuManager : MonoBehaviour
         {
             int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
             Vector2 posD = InvaderButtonBorder.anchoredPosition; 
-            posD.x = SelectionList[invaderIndex];
+            posD.x = _selectionXPlacement[invaderIndex];
             InvaderButtonBorder.anchoredPosition = posD;    
         }
         else
         {
             int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
             Vector2 posI = DefenderButtonBorder.anchoredPosition; 
-            posI.x = SelectionList[defenderIndex];
+            posI.x = _selectionXPlacement[defenderIndex];
             DefenderButtonBorder.anchoredPosition = posI;    
         }
     }
