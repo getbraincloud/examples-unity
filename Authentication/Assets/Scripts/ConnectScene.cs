@@ -71,11 +71,14 @@ public class ConnectScene : MonoBehaviour
 
     private void OnEnable()
     {
+        statusText.fontSize = 39;
+        statusText.text = "Welcome to brainCloud";
+
         if (BrainCloudInterface.instance == null)
             return;
         
         storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
-        storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID(); 
+        storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
         
     }
 
