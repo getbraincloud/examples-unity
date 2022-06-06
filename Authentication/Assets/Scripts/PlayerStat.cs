@@ -48,7 +48,6 @@ public class PlayerStat : MonoBehaviour
 
     public void OnIncrementStat()
     {
-        //GameEvents.instance.IncrementPlayerStat(playerStatName);
         BrainCloudInterface.instance.IncrementUserStats(playerStatName);
     }
 }

@@ -13,27 +13,44 @@ public class ScreenGlobalStats : BCScreen
 
     public ScreenGlobalStats(BrainCloudWrapper bc) : base(bc) { }
 
-    private void Start()
-    {
-        GameEvents.instance.onIncrementGlobalStat += IncrementGlobalStat; 
-    }
-
     public override void Activate(BrainCloudWrapper bc)
     {
+        GameEvents.instance.onIncrementGlobalStat += IncrementGlobalStat;
+        GameEvents.instance.onInstantiateGlobalStats += InstantiateGlobalStats; 
+
         _bc = bc; 
         m_globalStats = new Dictionary<string, GlobalStat>();
-        _bc.GlobalStatisticsService.ReadAllGlobalStats(ReadAllGlobalStatsSuccess, Failure_Callback);
-        //m_mainScene.AddLogNoLn("[ReadAllGlobalStats]... ");
+        BrainCloudInterface.instance.ReadAllGlobalStats();
+    }
+
+    public void InstantiateGlobalStats()
+    {
+        DataManager dataManager = DataManager.instance; 
+
+        foreach(string key in dataManager.GlobalStats.Keys)
+        {
+            GlobalStat newStat = Instantiate(globalStatPrefab, gStatPefabParent);
+
+            if(newStat != null)
+            {
+                m_globalStats[key] = newStat;
+                m_globalStats[key].SetStatName(key);
+                m_globalStats[key].SetStatValue(dataManager.GlobalStats[key]);
+            }
+        }
     }
 
     public void IncrementGlobalStat(string globalStatName)
     {
-        string jsonData = "{ \"" + globalStatName + "\" : 1 }";
+        if (!m_globalStats.ContainsKey(globalStatName))
+            return;
 
-        _bc.GlobalStatisticsService.IncrementGlobalStats(jsonData, Success_Callback, Failure_Callback);
+        DataManager dataManager = DataManager.instance;
+
+        m_globalStats[globalStatName].SetStatValue(dataManager.GlobalStats[globalStatName]);
     }
 
-    void OnDisable()
+    protected override void OnDisable()
     {
         if(m_globalStats != null)
         {
@@ -41,95 +58,12 @@ public class ScreenGlobalStats : BCScreen
             {
                 Destroy(stat.gameObject);
             }
+
+            m_globalStats.Clear();
+            m_globalStats = null;
         }
 
         GameEvents.instance.onIncrementGlobalStat -= IncrementGlobalStat;
+        GameEvents.instance.onInstantiateGlobalStats -= InstantiateGlobalStats;
     }
-
-
-    //*************** Success Callbacks ***************
-    private void ReadAllGlobalStatsSuccess(string json, object cb)
-    {
-        //m_mainScene.AddLog("SUCCESS");
-        //m_mainScene.AddLogJson(json);
-        //m_mainScene.AddLog("");
-
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
-        {
-            foreach (string key in dStats.Keys)
-            {
-                GlobalStat newStat = Instantiate(globalStatPrefab, gStatPefabParent);
-                newStat.SetStatName((string)key);
-                m_globalStats[newStat.GetStatName()] = newStat;
-
-                JsonData value = (JsonData)dStats[key];
-                newStat.SetStatValue(value.IsInt ? (int)value : (long)value); //LitJson can't upcast an int to a long.
-            }
-        }
-    }
-    
-    public override void Success_Callback(string json, object cbObject)
-    {
-        base.Success_Callback(json, cbObject);
-        
-        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
-        {
-            foreach (string key in dStats.Keys)
-            {
-                JsonData value = (JsonData) dStats[key];
-                long valueAsLong = value.IsInt ? (int) value : (long) value;
-                m_globalStats[key].SetStatValue(valueAsLong);
-            }
-        }
-    }
-
-    #region Stuff To Remove
-    //public override void OnScreenGUI()
-    //{
-    //    int minLeftWidth = 120;
-        
-    //    GUILayout.BeginHorizontal();
-    //    GUILayout.Box("Global Stat Name", GUILayout.MinWidth(minLeftWidth));
-    //    GUILayout.Box("Global Stat Value");
-    //    GUILayout.EndHorizontal();
-        
-    //    foreach (GlobalStatistic ps in m_stats.Values)
-    //    {
-    //        GUILayout.BeginVertical();
-    //        GUILayout.Space(5);
-    //        GUILayout.EndVertical();
-            
-    //        GUILayout.BeginHorizontal();
-    //        GUILayout.Label(ps.name, GUILayout.MinWidth(minLeftWidth));
-    //        GUILayout.Box(ps.value.ToString());
-    //        GUILayout.EndHorizontal();
-            
-    //        // increment
-    //        GUILayout.BeginHorizontal();
-    //        GUILayout.Space(minLeftWidth);
-    //        ps.increment = GUILayout.TextField(ps.increment, GUILayout.ExpandWidth(true));
-    //        if (GUILayout.Button("Increment"))
-    //        {
-    //            long valueAsLong = 0;
-    //            double valueAsDouble = 0;
-    //            if (long.TryParse(ps.increment, out valueAsLong)
-    //                || double.TryParse(ps.increment, out valueAsDouble))
-    //            {
-    //                _bc.GlobalStatisticsService.IncrementGlobalStats(
-    //                    "{ '" + ps.name +"':" + ps.increment +"}",
-    //                    Success_Callback, Failure_Callback);
-    //                m_mainScene.AddLogNoLn("[IncrementStat]... ");
-    //            }
-    //        }
-    //        GUILayout.EndHorizontal();
-    //    }
-    //}
-    #endregion
 }

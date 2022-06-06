@@ -38,6 +38,8 @@ public abstract class BCScreen : MonoBehaviour
     {
 
     }
+
+    protected abstract void OnDisable();
         
     public virtual void Success_Callback(string json, object cbObject)
     {

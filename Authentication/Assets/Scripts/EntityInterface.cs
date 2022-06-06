@@ -214,7 +214,6 @@ public class EntityInterface : MonoBehaviour
         }
 
         GameEvents.instance.GetUserEntityPageSuccess();
-        TextLogger.instance.AddLogJson(response, "GET PAGE");
     }
 
     private void OnCreateEntitySuccess(string json, object cbObject)
@@ -233,13 +232,11 @@ public class EntityInterface : MonoBehaviour
         UpdateEntity();
 
         GameEvents.instance.CreateUserEntitySuccess();
-        TextLogger.instance.AddLogJson(json, "CREATE ENTITY"); 
     }
 
     private void OnUpdateEntitySuccess(string json, object cbObject)
     {
         Debug.Log($"Entity is updated !");
-        TextLogger.instance.AddLogJson(json, "UPDATE ENTITY");
     }
 
     private void OnDeleteEntitySuccess(string json, object cbObject)
@@ -247,7 +244,6 @@ public class EntityInterface : MonoBehaviour
         Debug.Log($"Entity is deleted !");
 
         GameEvents.instance.DeleteUserEntitySuccess();
-        TextLogger.instance.AddLogJson(json, "DELETE ENTITY");
     }
 
 

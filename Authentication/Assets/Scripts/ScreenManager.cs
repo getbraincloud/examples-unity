@@ -40,12 +40,16 @@ public class ScreenManager : MonoBehaviour
 
     public void ActivateConnectScreen()
     {
+        DataManager.instance.ResetData(); 
+
         MainScreen.SetActive(false);
         ConnectScreen.SetActive(true); 
     }
 
     public void ActivateMainScreen()
     {
+        DataManager.instance.InitData();
+
         ConnectScreen.SetActive(false);
         MainScreen.SetActive(true); 
     }

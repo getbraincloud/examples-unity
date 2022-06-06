@@ -15,7 +15,12 @@ public class TextLogger : MonoBehaviour
     Text newlog;
     bool bContentSizeSet = false;
 
-    public static TextLogger instance; 
+    public static TextLogger instance;
+
+    private void Start()
+    {
+        BrainCloudInterface._bc.Client.RegisterLogDelegate(OnLogCallback);
+    }
 
     void Awake()
     {
@@ -35,6 +40,28 @@ public class TextLogger : MonoBehaviour
         }
     }
 
+    public void OnLogCallback(string log)
+    {
+        bool hasNewLine = log.Contains("\n"); 
+
+        if(!hasNewLine)
+        {
+            newlog = Instantiate(logText, logTextParent);
+            newlog.text = log + "\n";
+            return;
+        }
+
+        int newLineIndex = log.IndexOf("\n");
+
+        string serverStatus = log.Substring(0, newLineIndex);
+
+        newlog = Instantiate(logText, logTextParent);
+        newlog.text = serverStatus; 
+        
+        string json = log.Substring(log.LastIndexOf("\n") + 1);
+        AddLogJson(json); 
+    }
+
     public void AddLogJson(string json, string requestName = "")
     {
         StringBuilder sb = new StringBuilder();
@@ -43,7 +70,7 @@ public class TextLogger : MonoBehaviour
         JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
 
         newlog = Instantiate(logText, logTextParent);
-        newlog.text = requestName + " RESPONSE:" + sb.ToString() + "\n";
+        newlog.text = sb.ToString() + "\n";
     }
 
     public void OnClearLogClick()

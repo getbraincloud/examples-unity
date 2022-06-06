@@ -15,26 +15,25 @@ public class ScreenPlayerStats : BCScreen
     
     public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
 
-    private void Start()
+    public override void Activate(BrainCloudWrapper bc)
     {
         GameEvents.instance.onIncrementUserStat += IncrementUserStats;
         GameEvents.instance.onInstantiatePlayerStats += InstantiatePlayerStats;
-    }
 
-    public override void Activate(BrainCloudWrapper bc)
-    {
         _bc = bc;
         m_playerStats = new Dictionary<string, PlayerStat>();
         
         BrainCloudInterface.instance.ReadUserState(this);
     }
 
-    public void IncrementUserStats()
+    public void IncrementUserStats(string statName)
     {
-        foreach (string key in DataManager.instance.PlayerStats.Keys)
-        {
-            m_playerStats[key].SetStatValue(DataManager.instance.PlayerStats[key]);
-        }
+        if (!m_playerStats.ContainsKey(statName))
+            return;
+
+        DataManager dataManager = DataManager.instance;
+
+        m_playerStats[statName].SetStatValue(dataManager.PlayerStats[statName]);
     }
 
     public void InstantiatePlayerStats()
@@ -50,7 +49,7 @@ public class ScreenPlayerStats : BCScreen
         }
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
         if (m_playerStats != null)
         {
@@ -63,49 +62,7 @@ public class ScreenPlayerStats : BCScreen
             m_playerStats = null; 
         }
 
-        //GameEvents.instance.onIncrementUserStat -= IncrementUserStats;
+        GameEvents.instance.onIncrementUserStat -= IncrementUserStats;
+        GameEvents.instance.onInstantiatePlayerStats -= InstantiatePlayerStats;
     }
-
-    #region Stuff to Remove
-    //public override void OnScreenGUI()
-    //{
-    //    int minLeftWidth = 120;
-        
-    //    GUILayout.BeginHorizontal();
-    //    GUILayout.Box("Player Stat Name", GUILayout.MinWidth(minLeftWidth));
-    //    GUILayout.Box("Player Stat Value");
-    //    GUILayout.EndHorizontal();
-        
-    //    foreach (PlayerStatistic ps in m_stats.Values)
-    //    {
-    //        GUILayout.BeginVertical();
-    //        GUILayout.Space(5);
-    //        GUILayout.EndVertical();
-            
-    //        GUILayout.BeginHorizontal();
-    //        GUILayout.Label(ps.name, GUILayout.MinWidth(minLeftWidth));
-    //        GUILayout.Box(ps.value.ToString());
-    //        GUILayout.EndHorizontal();
-            
-    //        // increment
-    //        GUILayout.BeginHorizontal();
-    //        GUILayout.Space(minLeftWidth);
-    //        ps.increment = GUILayout.TextField(ps.increment, GUILayout.ExpandWidth(true));
-    //        if (GUILayout.Button("Increment"))
-    //        {
-    //            long valueAsLong = 0;
-    //            double valueAsDouble = 0;
-    //            if (long.TryParse(ps.increment, out valueAsLong)
-    //                || double.TryParse(ps.increment, out valueAsDouble))
-    //            {
-    //            	_bc.PlayerStatisticsService.IncrementUserStats(
-    //           	    	"{ '" + ps.name +"':" + ps.increment +"}",
-    //                	Success_Callback, Failure_Callback);
-    //           		m_mainScene.AddLogNoLn("[IncrementStat]... ");
-    //            }
-    //        }
-    //        GUILayout.EndHorizontal();
-    //    }
-    //}
-    #endregion
 }

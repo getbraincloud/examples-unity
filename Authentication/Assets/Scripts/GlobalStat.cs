@@ -38,6 +38,6 @@ public class GlobalStat : MonoBehaviour
 
     public void OnIncrementStat()
     {
-        GameEvents.instance.IncrementGlobalStat(globalStatName);
+        BrainCloudInterface.instance.IncrementGlobalStats(globalStatName);
     }
 }

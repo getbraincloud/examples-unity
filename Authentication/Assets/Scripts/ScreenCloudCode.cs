@@ -15,14 +15,9 @@ public class ScreenCloudCode : BCScreen
     private string m_cloudCodeData = "";
     private string m_exampleJSONPlaceholder = ""; 
 
-    private static string[] m_cloudScriptNames;
+    private static string[] m_cloudScriptNames { get; set; }
 
     public ScreenCloudCode(BrainCloudWrapper bc) : base(bc) { }
-
-    private void Start()
-    {
-        
-    }
 
     private void Awake()
     {
@@ -75,91 +70,11 @@ public class ScreenCloudCode : BCScreen
 
     public void OnRunScriptClick()
     {
-        _bc.ScriptService.RunScript(m_cloudCodeScript, m_cloudCodeData, OnRunScriptSuccess, OnRunScriptFailure);
+        BrainCloudInterface.instance.RunCloudCodeScript(m_cloudCodeScript, m_cloudCodeData);
     }
 
-    public void OnRunScriptSuccess(string jsonResponse, object cbObject)
+    protected override void OnDisable()
     {
-        //Debug.LogWarning(m_cloudCodeScript + " Script ran successfully");
-    }
 
-    public void OnRunScriptFailure(int status, int reasonCode, string jsonErrorm, object cbObject)
-    {
-        Debug.LogError(m_cloudCodeScript + " Script failed to run.");
-    }
-
-    //public override void OnScreenGUI()
-    //{
-    //    GUILayout.BeginVertical();
-    //    GUILayout.BeginHorizontal();
-    //    GUILayout.Label("CloudCode Templates");
-    //    GUILayout.FlexibleSpace();
-    //    if (GUILayout.Button("HelloWorld"))
-    //    {
-    //        m_cloudCodeScript = "HelloWorld";
-    //        m_cloudCodeData = "{}";
-    //    }
-    //    if (GUILayout.Button("GlobalStats"))
-    //    {
-    //        m_cloudCodeScript = "GlobalStats";
-    //        m_cloudCodeData = "{}";
-    //    }
-    //    GUILayout.EndHorizontal();
-    //    GUILayout.EndVertical();
-
-    //    GUILayout.BeginVertical();
-    //    GUILayout.BeginHorizontal();
-    //    GUILayout.Label("CloudCode Script");
-    //    m_cloudCodeScript = GUILayout.TextField(m_cloudCodeScript);
-    //    GUILayout.EndHorizontal();
-    //    GUILayout.EndVertical();
-
-    //    GUILayout.BeginVertical();
-    //    GUILayout.BeginHorizontal();
-    //    GUILayout.Label("CloudCode JSON");
-    //    GUILayout.FlexibleSpace();
-    //    GUILayout.EndHorizontal();
-    //    GUILayout.EndVertical();
-
-    //    GUILayout.BeginVertical();
-    //    m_cloudCodeData = GUILayout.TextArea(m_cloudCodeData, GUILayout.MinHeight(150));
-    //    GUILayout.EndVertical();
-
-    //    GUILayout.BeginVertical();
-    //    GUILayout.Space(20);
-    //    GUILayout.EndVertical();
-
-    //    GUILayout.BeginVertical();
-    //    GUILayout.BeginHorizontal();
-    //    GUILayout.FlexibleSpace();
-    //    if (GUILayout.Button("Run Cloud Code"))
-    //    {
-    //        //m_mainScene.AddLogNoLn("[RunScript]...");
-    //        try
-    //        {
-    //            if (m_cloudCodeData.Length > 0)
-    //            {
-    //                JsonMapper.ToObject(m_cloudCodeData);
-    //            }
-    //        }
-    //        catch(Exception e)
-    //        {
-    //            // log and rethrow
-    //            //m_mainScene.AddLog("FAILED TO PARSE JSON: " + e.ToString());
-    //            //m_mainScene.AddLog("");
-    //            throw;
-    //        }
-
-    //        _bc.ScriptService.RunScript(m_cloudCodeScript, m_cloudCodeData, CloudCode_Success, Failure_Callback);
-    //    }
-    //    GUILayout.EndHorizontal();
-    //    GUILayout.EndVertical();
-    //}
-
-    private void CloudCode_Success(string json, object cb)
-    {
-        //m_mainScene.AddLog("SUCCESS");
-        //m_mainScene.AddLogJson(json);
-        //m_mainScene.AddLog("");
     }
 }

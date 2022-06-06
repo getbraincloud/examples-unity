@@ -64,12 +64,14 @@ public class ScreenEntityCustomClass : BCScreen
 
     private void Start()
     {
-        GameEvents.instance.onCreateCustomEntitySuccess += OnCreateCustomEntitySuccess;
-        GameEvents.instance.onDeleteCustomEntitySuccess += OnDeleteCustomEntitySuccess;
+        
     }
 
     public override void Activate(BrainCloudWrapper bc)
     {
+        GameEvents.instance.onCreateCustomEntitySuccess += OnCreateCustomEntitySuccess;
+        GameEvents.instance.onDeleteCustomEntitySuccess += OnDeleteCustomEntitySuccess;
+
         _bc = bc; 
         m_mainScene.CustomEntityInterface.ReadCustomEntity();
         //m_mainScene.RealLogging("[ReadPlayerState]... ");
@@ -177,7 +179,7 @@ public class ScreenEntityCustomClass : BCScreen
         deleteEntityButton.gameObject.SetActive(!isActive);
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
         //AnthonyTODO: Figure out why _player in Entity interface gets deleted but the same issue doesn't happen here.
         //if (m_player != null)

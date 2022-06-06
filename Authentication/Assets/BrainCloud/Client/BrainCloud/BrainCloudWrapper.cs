@@ -1218,8 +1218,10 @@ public class BrainCloudWrapper
         aco._successCallback = success;
         aco._failureCallback = failure;
         aco._cbObject = cbObject;
-        
-        InitializeIdentity();
+
+        bool isAnonymous = authenticationType == AuthenticationType.Anonymous;
+        InitializeIdentity(isAnonymous);
+        ids.externalId = isAnonymous ? GetStoredAnonymousId() : ids.externalId;
 
         Client.AuthenticationService.AuthenticateAdvanced(
             authenticationType, ids, forceCreate, extraJson, AuthSuccessCallback, AuthFailureCallback, aco);

@@ -27,13 +27,15 @@ public class ScreenEntity : BCScreen
 
     private void Start()
     {
-        GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
-        GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
-        GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
+        
     }
 
     public override void Activate(BrainCloudWrapper bc)
     {
+        GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
+        GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
+        GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
+
         _bc = bc;
         
         m_mainScene.EntityInterface.GetPage(); 
@@ -147,11 +149,11 @@ public class ScreenEntity : BCScreen
         SetActiveButtons(bsetActive);
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
         GameEvents.instance.onCreateUserEntitySuccess -= OnCreateEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
-        GameEvents.instance.onGetUserEntityPageSuccess -= OnGetUserEntityPageSuccess; 
+        GameEvents.instance.onGetUserEntityPageSuccess -= OnGetUserEntityPageSuccess;
     }
 
 

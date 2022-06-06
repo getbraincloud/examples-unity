@@ -28,12 +28,14 @@ public class ScreenPlayerXp : BCScreen
 
     private void Start()
     {
-        GameEvents.instance.OnUpdateLevelAndXP += UpdateLevelAndXP;
-        GameEvents.instance.onGetVirtualCurrency += GetVirtualCurrency;
+        
     }
 
     public override void Activate(BrainCloudWrapper bc)
     {
+        GameEvents.instance.OnUpdateLevelAndXP += UpdateLevelAndXP;
+        GameEvents.instance.onGetVirtualCurrency += GetVirtualCurrency;
+
         _bc = bc;
 
         m_currencyTypes = new List<string>();
@@ -142,108 +144,114 @@ public class ScreenPlayerXp : BCScreen
         BrainCloudInterface.instance.GetVirtualCurrency("gems");
     }
 
+    protected override void OnDisable()
+    {
+        GameEvents.instance.OnUpdateLevelAndXP -= UpdateLevelAndXP;
+        GameEvents.instance.onGetVirtualCurrency -= GetVirtualCurrency;
+    }
+
 
     #region Stuff To Remove
-//    public override void OnScreenGUI()
-//    {
-//        int minLeftWidth = 120;
+    //    public override void OnScreenGUI()
+    //    {
+    //        int minLeftWidth = 120;
 
-//        // player level
-//        GUILayout.BeginHorizontal();
-//        GUILayout.Box("Player Level", GUILayout.MinWidth(minLeftWidth));
-//        GUILayout.Box(m_playerLevel.ToString());
-//        GUILayout.EndHorizontal();
+    //        // player level
+    //        GUILayout.BeginHorizontal();
+    //        GUILayout.Box("Player Level", GUILayout.MinWidth(minLeftWidth));
+    //        GUILayout.Box(m_playerLevel.ToString());
+    //        GUILayout.EndHorizontal();
 
-//        // player xp
-//        GUILayout.BeginHorizontal();
-//        GUILayout.Box("Player Xp", GUILayout.MinWidth(minLeftWidth));
-//        GUILayout.Box(m_playerXp.ToString());
-//        GUILayout.EndHorizontal();
+    //        // player xp
+    //        GUILayout.BeginHorizontal();
+    //        GUILayout.Box("Player Xp", GUILayout.MinWidth(minLeftWidth));
+    //        GUILayout.Box(m_playerXp.ToString());
+    //        GUILayout.EndHorizontal();
 
-//        // increment xp
-//        GUILayout.BeginHorizontal();
-//        GUILayout.Space(minLeftWidth);
-//        m_incrementXp = GUILayout.TextField(m_incrementXp, GUILayout.ExpandWidth(true));
-//        if (GUILayout.Button("IncrementXp"))
-//        {
-//            int valueAsInt = 0;
-//            if (int.TryParse(m_incrementXp, out valueAsInt))
-//            {
-//                _bc.PlayerStatisticsService.IncrementExperiencePoints(valueAsInt, IncrementXp_Success, Failure_Callback);
-//                m_mainScene.AddLogNoLn("[IncrementXp]... ");
-//            }
-//        }
-//        GUILayout.EndHorizontal();
+    //        // increment xp
+    //        GUILayout.BeginHorizontal();
+    //        GUILayout.Space(minLeftWidth);
+    //        m_incrementXp = GUILayout.TextField(m_incrementXp, GUILayout.ExpandWidth(true));
+    //        if (GUILayout.Button("IncrementXp"))
+    //        {
+    //            int valueAsInt = 0;
+    //            if (int.TryParse(m_incrementXp, out valueAsInt))
+    //            {
+    //                _bc.PlayerStatisticsService.IncrementExperiencePoints(valueAsInt, IncrementXp_Success, Failure_Callback);
+    //                m_mainScene.AddLogNoLn("[IncrementXp]... ");
+    //            }
+    //        }
+    //        GUILayout.EndHorizontal();
 
-//        foreach (Currency c in m_currencies.Values)
-//        {
-//            // currency values
-//            GUILayout.BeginHorizontal();
-//            GUILayout.Box("Currency " + c.currencyType , GUILayout.MinWidth(minLeftWidth));
-//            GUILayout.FlexibleSpace();
-//            GUILayout.EndHorizontal();
+    //        foreach (Currency c in m_currencies.Values)
+    //        {
+    //            // currency values
+    //            GUILayout.BeginHorizontal();
+    //            GUILayout.Box("Currency " + c.currencyType , GUILayout.MinWidth(minLeftWidth));
+    //            GUILayout.FlexibleSpace();
+    //            GUILayout.EndHorizontal();
 
-//            GUILayout.BeginHorizontal();
-//            GUILayout.Box("Balance", GUILayout.MinWidth(minLeftWidth));
-//            GUILayout.Box(c.balance.ToString());
+    //            GUILayout.BeginHorizontal();
+    //            GUILayout.Box("Balance", GUILayout.MinWidth(minLeftWidth));
+    //            GUILayout.Box(c.balance.ToString());
 
-//            GUILayout.Box("Awarded", GUILayout.MinWidth(minLeftWidth));
-//            GUILayout.Box(c.awarded.ToString());
-//            GUILayout.EndHorizontal();
+    //            GUILayout.Box("Awarded", GUILayout.MinWidth(minLeftWidth));
+    //            GUILayout.Box(c.awarded.ToString());
+    //            GUILayout.EndHorizontal();
 
-//            GUILayout.BeginHorizontal();
-//            GUILayout.Box("Consumed", GUILayout.MinWidth(minLeftWidth));
-//            GUILayout.Box(c.consumed.ToString());
+    //            GUILayout.BeginHorizontal();
+    //            GUILayout.Box("Consumed", GUILayout.MinWidth(minLeftWidth));
+    //            GUILayout.Box(c.consumed.ToString());
 
-//            GUILayout.Box("Purchased", GUILayout.MinWidth(minLeftWidth));
-//            GUILayout.Box(c.purchased.ToString());
-//            GUILayout.EndHorizontal();
+    //            GUILayout.Box("Purchased", GUILayout.MinWidth(minLeftWidth));
+    //            GUILayout.Box(c.purchased.ToString());
+    //            GUILayout.EndHorizontal();
 
-//            // award currency
-//            GUILayout.BeginHorizontal();
-//            GUILayout.Space(minLeftWidth);
-//            c.award = GUILayout.TextField(c.award, GUILayout.ExpandWidth(true));
-//            if (GUILayout.Button("Award"))
-//            {
-//                ulong valueAsULong = 0;
-//                if (ulong.TryParse(c.award, out valueAsULong))
-//                {
-//#pragma warning disable 618
-//                    _bc.VirtualCurrencyService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
-//#pragma warning restore 618
-//                    m_mainScene.AddLogNoLn("[AwardPlayerVC " + c.currencyType +"]... ");
-//                }
-//            }
-//            GUILayout.EndHorizontal();
+    //            // award currency
+    //            GUILayout.BeginHorizontal();
+    //            GUILayout.Space(minLeftWidth);
+    //            c.award = GUILayout.TextField(c.award, GUILayout.ExpandWidth(true));
+    //            if (GUILayout.Button("Award"))
+    //            {
+    //                ulong valueAsULong = 0;
+    //                if (ulong.TryParse(c.award, out valueAsULong))
+    //                {
+    //#pragma warning disable 618
+    //                    _bc.VirtualCurrencyService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+    //#pragma warning restore 618
+    //                    m_mainScene.AddLogNoLn("[AwardPlayerVC " + c.currencyType +"]... ");
+    //                }
+    //            }
+    //            GUILayout.EndHorizontal();
 
-//            // consume currency
-//            GUILayout.BeginHorizontal();
-//            GUILayout.Space(minLeftWidth);
-//            c.consume = GUILayout.TextField(c.consume, GUILayout.ExpandWidth(true));
-//            if (GUILayout.Button("Consume"))
-//            {
-//                ulong valueAsULong = 0;
-//                if (ulong.TryParse(c.consume, out valueAsULong))
-//                {
-//#pragma warning disable 618
-//                    _bc.VirtualCurrencyService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
-//#pragma warning restore 618
-//                    m_mainScene.AddLogNoLn("[ConsumePlayerVC " + c.currencyType +"]... ");
-//                }
-//            }
-//            GUILayout.EndHorizontal();
-//        }
+    //            // consume currency
+    //            GUILayout.BeginHorizontal();
+    //            GUILayout.Space(minLeftWidth);
+    //            c.consume = GUILayout.TextField(c.consume, GUILayout.ExpandWidth(true));
+    //            if (GUILayout.Button("Consume"))
+    //            {
+    //                ulong valueAsULong = 0;
+    //                if (ulong.TryParse(c.consume, out valueAsULong))
+    //                {
+    //#pragma warning disable 618
+    //                    _bc.VirtualCurrencyService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
+    //#pragma warning restore 618
+    //                    m_mainScene.AddLogNoLn("[ConsumePlayerVC " + c.currencyType +"]... ");
+    //                }
+    //            }
+    //            GUILayout.EndHorizontal();
+    //        }
 
-//        GUILayout.BeginHorizontal();
-//        if (GUILayout.Button("Reset All Currencies"))
-//        {
-//#pragma warning disable 618
-//            _bc.VirtualCurrencyService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
-//#pragma warning restore 618
-//            m_mainScene.AddLogNoLn("[ResetPlayerVC]... ");
-//        }
-//        GUILayout.FlexibleSpace();
-//        GUILayout.EndHorizontal();
-//    }
+    //        GUILayout.BeginHorizontal();
+    //        if (GUILayout.Button("Reset All Currencies"))
+    //        {
+    //#pragma warning disable 618
+    //            _bc.VirtualCurrencyService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
+    //#pragma warning restore 618
+    //            m_mainScene.AddLogNoLn("[ResetPlayerVC]... ");
+    //        }
+    //        GUILayout.FlexibleSpace();
+    //        GUILayout.EndHorizontal();
+    //    }
     #endregion
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using BrainCloud;
 using BrainCloud.LitJson;
+using BrainCloud.Common;
 
 #if UNITY_WSA
 using Microsoft.Xbox.Services;
@@ -118,6 +119,20 @@ public class BrainCloudInterface : MonoBehaviour
         _bc.AuthenticateAnonymous(OnSuccess_Authenticate, OnError_Authenticate);
     }
 
+    public void AuthenticateAdvanced(AuthenticationType authType, BrainCloud.AuthenticationIds ids, Dictionary<string, object> extraJson)
+    {
+        SuccessCallback successCallback = (response, cbObject) => {
+            Debug.LogWarning("SUCCESSFUL ADVANCED AUTHENTICATION!");
+            ScreenManager.instance.ActivateMainScreen();
+        };
+
+        FailureCallback failureCallback = (status, code, error, cbObject) => {
+            Debug.LogWarning("ADVANCED AUTHENTICATION FAILED!");
+        };
+
+        _bc.AuthenticateAdvanced(authType, ids, true, extraJson, successCallback, failureCallback);
+    }
+
     public void AuthenticateGoogle()
     {
         //AnthonyTODO: Figure out how to get Google Authentication working. Requires building to android device.
@@ -185,7 +200,11 @@ public class BrainCloudInterface : MonoBehaviour
     //*************** PlayerStateService Methods ***************
     public void Logout()
     {
-        SuccessCallback successCallback = (response, cbObject) => { ScreenManager.instance.ActivateConnectScreen(); };
+        SuccessCallback successCallback = (response, cbObject) => {
+
+            ScreenManager.instance.ActivateConnectScreen(); 
+
+        };
 
         FailureCallback failureCallback = (status, code, error, cbObject) => { };
 
@@ -261,18 +280,22 @@ public class BrainCloudInterface : MonoBehaviour
             JsonData jObj = JsonMapper.ToObject(response);
             JsonData jStats = jObj["data"]["statistics"];
             IDictionary dStats = jStats as IDictionary;
-            if (dStats != null)
-            {
-                foreach (string key in dStats.Keys)
-                {
-                    JsonData value = (JsonData)dStats[key];
-                    long valueAsLong = value.IsInt ? (int)value : (long)value;
-                    //m_playerStats[key].SetStatValue(valueAsLong);
-                    DataManager.instance.PlayerStats[key] = valueAsLong;
-                }
-            }
 
-            GameEvents.instance.IncrementUserStat();
+            if (dStats == null)
+                return;
+
+            if (!dStats.Contains(userStat))
+                return;
+
+            if (!DataManager.instance.PlayerStats.ContainsKey(userStat))
+                return;
+
+            JsonData value = (JsonData)dStats[userStat];
+            long valueAsLong = value.IsInt ? (int)value : (long)value;
+
+            DataManager.instance.PlayerStats[userStat] = valueAsLong;
+
+            GameEvents.instance.IncrementUserStat(userStat);
         };
 
         FailureCallback failureCallback = (status, code, error, cbObject) => { };
@@ -280,6 +303,65 @@ public class BrainCloudInterface : MonoBehaviour
         string jsonData = "{ \"" + userStat + "\" : 1 }";
 
         _bc.PlayerStatisticsService.IncrementUserStats(jsonData, successCallback, failureCallback);
+    }
+
+    //*************** GlobalStatisticsService Methods ***************
+    public void ReadAllGlobalStats()
+    {
+        SuccessCallback successCallback = (response, cbObject) => {
+
+            JsonData jObj = JsonMapper.ToObject(response);
+            JsonData jStats = jObj["data"]["statistics"];
+            IDictionary dStats = jStats as IDictionary;
+            if (dStats != null)
+            {
+                foreach (string key in dStats.Keys)
+                {
+                    JsonData value = (JsonData)dStats[key];
+                    DataManager.instance.GlobalStats[key] = value.IsInt ? (int)value : (long)value;
+                }
+
+                GameEvents.instance.InstantiateGlobalStats(); 
+            }
+        };
+
+        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+
+        _bc.GlobalStatisticsService.ReadAllGlobalStats(successCallback, failureCallback);
+    }
+
+    public void IncrementGlobalStats(string globalStatName)
+    {
+        SuccessCallback successCallback = (response, cbObject) => {
+
+            DataManager dataManager = DataManager.instance; 
+
+            JsonData jObj = JsonMapper.ToObject(response);
+            JsonData jStats = jObj["data"]["statistics"];
+            IDictionary dStats = jStats as IDictionary;
+            
+            if(dStats == null)
+                return;
+            
+            if(!dStats.Contains(globalStatName))
+                return;
+
+            if (!dataManager.GlobalStats.ContainsKey(globalStatName))
+                return;
+
+            JsonData value = (JsonData)dStats[globalStatName];
+
+            long valueAsLong = value.IsInt ? (int)value : (long)value;
+            dataManager.GlobalStats[globalStatName] = valueAsLong;
+
+            GameEvents.instance.IncrementGlobalStat(globalStatName);
+        };
+
+        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+        
+        string jsonData = "{ \"" + globalStatName + "\" : 1 }";
+
+        _bc.GlobalStatisticsService.IncrementGlobalStats(jsonData, successCallback, failureCallback);
     }
 
     //*************** VirtualCurrencyService Methods ***************
@@ -328,25 +410,59 @@ public class BrainCloudInterface : MonoBehaviour
         _bc.ScriptService.RunScript(scriptname, scriptdata, successCallback, failureCallback);
     }
 
+    //*************** IdentityService Methods ***************
+
+    public void AttachEmailIdentity(string email, string password)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully attached email."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to attach email."); };
+
+        _bc.IdentityService.AttachEmailIdentity(email, password, successCallback, failureCallback);
+    }
+
+    public void MergeEmailIdentity(string email, string password)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged email."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to merge email"); };
+
+        _bc.IdentityService.MergeEmailIdentity(email, password, successCallback, failureCallback);
+    }
+
+    public void AttachUniversalIdentity(string username, string password)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully attached universal identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to attach universal identity."); };
+
+        _bc.IdentityService.AttachUniversalIdentity(username, password, successCallback, failureCallback);
+    }
+
+    public void MergeUniversalIdentity(string username, string password)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged universal identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to merge universal identity."); };
+
+        _bc.IdentityService.MergeUniversalIdentity(username, password, successCallback, failureCallback);
+    }
+
+    public void AttachTwitterIdentity(string userId, string token, string tokenSecret)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully attached twitter identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to attach twitter identity."); };
+
+        _bc.IdentityService.AttachTwitterIdentity(userId, token, tokenSecret, successCallback, failureCallback);
+    }
+
+    public void MergeTwitterIdentity(string userId, string token, string tokenSecret)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged twitter identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to merge twitter identity."); };
+
+        _bc.IdentityService.MergeTwitterIdentity(userId, token, tokenSecret, successCallback, failureCallback);
+    }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //AnthonyTODO: this will exist here until I figure out where to put it.
     //*******************Google Sign In Stuff*********************
     public void GoogleSignIn()
     {

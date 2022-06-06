@@ -37,21 +37,48 @@ public class DataManager : MonoBehaviour
     public IDictionary<string, Currency> Currencies { get; set; }
 
     //Player Stat Data
-    public class PlayerStatData
-    {
-        public string statName;
-        public long statValue; 
-    }
     public Dictionary<string, long> PlayerStats { get; set; }
+
+    //Global Stat Data
+    public Dictionary<string, long> GlobalStats { get; set; }
 
 
     void Start()
     {
         instance = this;
 
-        Currencies = new Dictionary<string, Currency>();
-        PlayerStats = new Dictionary<string, long>();
+        //InitData(); 
 
         DontDestroyOnLoad(this); 
+    }
+
+    public void InitData()
+    {
+        Currencies = new Dictionary<string, Currency>();
+        PlayerStats = new Dictionary<string, long>();
+        GlobalStats = new Dictionary<string, long>();
+    }
+
+    public void ResetData()
+    {
+        ProfileID = "";
+        AnonymousID = "";
+        UniversalUserID = "";
+        UniversalPass = "";
+        EmailID = "";
+        EmailPass = "";
+        GoogleID = "";
+        ServerAuthCode = "";
+        PlayerLevel = 0;
+        PlayerXP = 0;
+
+        Currencies.Clear();
+        Currencies = null;
+
+        PlayerStats.Clear();
+        PlayerStats = null;
+
+        GlobalStats.Clear();
+        GlobalStats = null;
     }
 }

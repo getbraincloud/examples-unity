@@ -86,12 +86,12 @@ public class GameEvents : MonoBehaviour
 
     //*************** Player Stat Events ***************
 
-    public event Action/*<string>*/ onIncrementUserStat;
-    public void IncrementUserStat(/*string statName*/)
+    public event Action<string> onIncrementUserStat;
+    public void IncrementUserStat(string statName)
     {
         if(onIncrementUserStat != null)
         {
-            onIncrementUserStat(/*statName*/);
+            onIncrementUserStat(statName);
         }
     }
 
@@ -104,6 +104,7 @@ public class GameEvents : MonoBehaviour
         }
     }
 
+
     //*************** Global Stat Events ***************
 
     public event Action<string> onIncrementGlobalStat;
@@ -112,6 +113,15 @@ public class GameEvents : MonoBehaviour
         if(onIncrementGlobalStat != null)
         {
             onIncrementGlobalStat(statName);
+        }
+    }
+
+    public event Action onInstantiateGlobalStats; 
+    public void InstantiateGlobalStats()
+    {
+        if(onInstantiateGlobalStats != null)
+        {
+            onInstantiateGlobalStats(); 
         }
     }
 }

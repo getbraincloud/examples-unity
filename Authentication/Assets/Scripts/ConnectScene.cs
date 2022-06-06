@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
-
+using BrainCloud.Common;
 
 public class ConnectScene : MonoBehaviour
 {
@@ -34,10 +34,15 @@ public class ConnectScene : MonoBehaviour
     private bool signedIn;
     private int playerNumber;
 
+    bool useAdvancedAuthentication = false;
+    AuthenticationType selectedAdvancedAuthType;
+
     eAuthTypes currentAuthType;
 
     string inputProfileId;
-    string inputPassword; 
+    string inputPassword;
+    string inputEntityName;
+    string inputEntityAge; 
 
     //UI elements set in editor.
     [SerializeField] Text statusText;
@@ -45,6 +50,12 @@ public class ConnectScene : MonoBehaviour
     [SerializeField] Text passwordText;
     [SerializeField] InputField profileIdField;
     [SerializeField] InputField passwordField;
+    [SerializeField] InputField entityNameField;
+    [SerializeField] InputField entityAgeField;
+    [SerializeField] Text entityNameText;
+    [SerializeField] Text entityAgeText;
+    [SerializeField] Text advAuthInfoText;
+    [SerializeField] Toggle advAuthToggle; 
     [SerializeField] Button resetProfileIdButton;
     [SerializeField] Button resetAnonIdButton;
     [SerializeField] Text storedProfileIdText;
@@ -53,11 +64,19 @@ public class ConnectScene : MonoBehaviour
     [SerializeField] Text serverAuthCodeText;
     [SerializeField] Button googleSignInButton; 
 
-
-
     void Start()
     {
         ChangeAuthType(eAuthTypes.EMAIL);
+    }
+
+    private void OnEnable()
+    {
+        if (BrainCloudInterface.instance == null)
+            return;
+        
+        storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
+        storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID(); 
+        
     }
 
     void ChangeAuthType(eAuthTypes authType)
@@ -65,22 +84,33 @@ public class ConnectScene : MonoBehaviour
         switch(authType)
         {
             case eAuthTypes.EMAIL:
+                selectedAdvancedAuthType = AuthenticationType.Email;
                 SetScreen("Email", "Password", true);
+                advAuthToggle.interactable = true;
                 break;
             case eAuthTypes.UNIVERSAL:
+                selectedAdvancedAuthType = AuthenticationType.Universal;
                 SetScreen("User ID", "Password", true);
+                advAuthToggle.interactable = true;
                 break;
             case eAuthTypes.ANONYMOUS:
+                selectedAdvancedAuthType = AuthenticationType.Anonymous;
                 SetScreen("Profile ID", "Anonymous", false);
+                advAuthToggle.interactable = true;
                 break;
             case eAuthTypes.GOOGLE:
+                selectedAdvancedAuthType = AuthenticationType.Google;
                 SetScreen("Profile ID", "Anonymous", false, true);
+                advAuthToggle.interactable = false;
                 break;
             case eAuthTypes.FACEBOOK:
+                selectedAdvancedAuthType = AuthenticationType.Facebook;
                 SetScreen("Profile ID", "Anonymous", false);
+                advAuthToggle.interactable = false;
                 break;
             case eAuthTypes.XBOXLIVE:
                 SetScreen("Profile ID", "Anonymous", false);
+                advAuthToggle.interactable = false;
                 break;
         }
     }
@@ -88,7 +118,9 @@ public class ConnectScene : MonoBehaviour
     void SetScreen(string profileIdInfo, string passwordInfo, bool bHasInput, bool bIsGooogleLogin = false)
     {
         profileIdText.text = profileIdInfo + ":";
-        passwordText.text = passwordInfo + ":"; 
+        passwordText.text = passwordInfo + ":";
+
+        ActivateAdvancedAuthFields(); 
 
         if(bIsGooogleLogin)
         {
@@ -96,6 +128,7 @@ public class ConnectScene : MonoBehaviour
             googleIdText.gameObject.SetActive(true);
             serverAuthCodeText.gameObject.SetActive(true);
             googleSignInButton.gameObject.SetActive(true);
+            advAuthToggle.isOn = false; 
         }
         else
         {
@@ -149,21 +182,71 @@ public class ConnectScene : MonoBehaviour
         inputPassword = input; 
     }
 
+    public void OnEntityNameEndEdit(string input)
+    {
+        inputEntityName = input; 
+    }
+
+    public void OnEntityAgeEndEdit(string input)
+    {
+        inputEntityAge = input; 
+    }
+
+    public void OnAdvancedAuthToggle(bool isToggled)
+    {
+        useAdvancedAuthentication = isToggled;
+        ActivateAdvancedAuthFields();
+    }
+
+    void ActivateAdvancedAuthFields()
+    {
+        entityNameField.gameObject.SetActive(useAdvancedAuthentication);
+        entityAgeField.gameObject.SetActive(useAdvancedAuthentication);
+        entityNameText.gameObject.SetActive(useAdvancedAuthentication);
+        entityAgeText.gameObject.SetActive(useAdvancedAuthentication);
+        advAuthInfoText.gameObject.SetActive(useAdvancedAuthentication);
+    }
+
     public void OnAuthenticate()
     {
         statusText.fontSize = 14;
         statusText.text = "Attempting to Authenticate...";
 
+        if(useAdvancedAuthentication)
+        {
+            BrainCloud.AuthenticationIds ids;
+            Dictionary<string, object> extraJson = new Dictionary<string, object>();
+            extraJson["name"] = inputEntityName;
+            extraJson["age"] = inputEntityAge;
+
+            if(selectedAdvancedAuthType == AuthenticationType.Anonymous)
+            {
+                ids.externalId = BrainCloudInterface.instance.GetStoredAnonymousID();
+                ids.authenticationToken = "";
+                ids.authenticationSubType = "";
+
+                BrainCloudInterface.instance.AuthenticateAdvanced(selectedAdvancedAuthType, ids, extraJson);
+            }
+            else
+            {
+                ids.externalId = inputProfileId;
+                ids.authenticationToken = inputPassword;
+                ids.authenticationSubType = "";
+
+                BrainCloudInterface.instance.AuthenticateAdvanced(selectedAdvancedAuthType, ids, extraJson);
+            }
+
+            return;
+        }
+
         switch(currentAuthType)
         {
             case eAuthTypes.EMAIL:
-                //DataManager.instance.SetEmailandPass(inputProfileId, inputPassword);
                 DataManager.instance.EmailID = inputProfileId;
                 DataManager.instance.EmailPass = inputPassword;
                 BrainCloudInterface.instance.AuthenticateEmail();
                 break;
             case eAuthTypes.UNIVERSAL:
-                //DataManager.instance.SetUniversalIDandPass(inputProfileId, inputPassword);
                 DataManager.instance.UniversalUserID = inputProfileId;
                 DataManager.instance.UniversalPass = inputPassword;
                 BrainCloudInterface.instance.AuthenticateUniversal();
@@ -197,220 +280,4 @@ public class ConnectScene : MonoBehaviour
         BrainCloudInterface.instance.GoogleSignIn();
     }
 
- 
-    #region Stuff To Remove
-/*
-    void OnGUI()
-    {
-        float tw = Screen.width / 14.0f;
-        float th = Screen.height / 7.0f;
-        Rect dialog = new Rect(tw, th, Screen.width - tw * 2, Screen.height - th * 2);
-        float offsetX = 30;
-        float offsetY = 30;
-        Rect innerDialog = new Rect(dialog.x + offsetX, dialog.y + offsetY, dialog.width - (offsetX * 2), dialog.height - (offsetY * 2));
-
-        GUI.Box(dialog, "Unity Example");
-        GUILayout.BeginArea(innerDialog);
-
-        GUILayout.Box("Choose Authentication Type");
-
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        m_selectedAuth = GUILayout.SelectionGrid(m_selectedAuth, m_authTypes, 4);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-
-        if (m_selectedAuth == (int)eAuthTypes.EMAIL)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.BeginVertical();
-            GUILayout.Label("Email:");
-            GUILayout.Label("Password:");
-            GUILayout.EndVertical();
-            GUILayout.BeginVertical();
-            m_emailId = GUILayout.TextField(m_emailId, GUILayout.MinWidth(200));
-            m_emailPwd = GUILayout.PasswordField(m_emailPwd, '*', GUILayout.MinWidth(200));
-            GUILayout.EndVertical();
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
-            {
-                m_authStatus = "Attempting to authenticate";
-
-                // clear out any previous profile or anonymous ids
-                _bc.ResetStoredProfileId();
-                _bc.ResetStoredAnonymousId();
-                _bc.AuthenticateEmailPassword(
-                    m_emailId, m_emailPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
-            }
-        }
-        else if (m_selectedAuth == (int)eAuthTypes.UNIVERSAL)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.BeginVertical();
-            GUILayout.Label("User Id:");
-            GUILayout.Label("Password:");
-            GUILayout.EndVertical();
-            GUILayout.BeginVertical();
-            m_universalUserId = GUILayout.TextField(m_universalUserId, GUILayout.MinWidth(200));
-            m_universalPwd = GUILayout.PasswordField(m_universalPwd, '*', GUILayout.MinWidth(200));
-            GUILayout.EndVertical();
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
-            {
-                m_authStatus = "Attempting to authenticate";
-
-                // clear out any previous profile or anonymous ids
-                _bc.ResetStoredProfileId();
-                _bc.ResetStoredAnonymousId();
-                _bc.AuthenticateUniversal(
-                    m_universalUserId, m_universalPwd, true, OnSuccess_Authenticate, OnError_Authenticate);
-            }
-        }
-        else if (m_selectedAuth == (int)eAuthTypes.ANONYMOUS)
-        {
-            GUILayout.Label("Profile Id: " + _bc.GetStoredProfileId());
-            GUILayout.Label("Anonymous Id: " + _bc.GetStoredAnonymousId());
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
-            {
-                m_authStatus = "Attempting to authenticate";
-                _bc.AuthenticateAnonymous(OnSuccess_Authenticate, OnError_Authenticate);
-            }
-            if (GUILayout.Button("Reset Profile Id", GUILayout.ExpandWidth(false)))
-            {
-                _bc.ResetStoredProfileId();
-            }
-            if (GUILayout.Button("Reset Anonymous Id", GUILayout.ExpandWidth(false)))
-            {
-                _bc.ResetStoredAnonymousId();
-            }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-        }
-        else if (m_selectedAuth == (int)eAuthTypes.GOOGLE)
-        {
-            GUILayout.Label("Google Id: " + m_googleId);
-            GUILayout.Label("Server Auth Code: " + m_serverAuthCode);
-
-
-            if (GUILayout.Button("Google Signin", GUILayout.ExpandWidth(false)))
-            {
-#if UNITY_ANDROID
-                m_authStatus += "\n\nInfo: If the authentication popup appears but nothing occurs after, it probably means the app isn't fully set up. Please follow the instruction here:\nhttp://getbraincloud.com/apidocs/portal-usage/authentication-google/ \n\n";
-                
-                PlayGamesPlatform.Activate().Authenticate((bool success) => {
-
-                    if (success)
-                    {
-                        m_googleId = PlayGamesPlatform.Instance.GetUserId();
-                        m_serverAuthCode = PlayGamesPlatform.Instance.GetServerAuthCode();
-
-                        m_authStatus += "\nGoogle Auth Success. Now click \"Authenticate\"\n\n";
-                    }
-                    else
-                    {
-                        m_authStatus += "\nGoogle Auth Failed. See documentation: https://github.com/playgameservices/play-games-plugin-for-unity\n";
-                        m_authStatus += "Note: this can only be tested on an Android Device\n\n";
-                    }
-                });
-#else
-                m_authStatus += "\n\nGoogle Login will only work on an Android Device. Please build to a test device\n\n";
-#endif
-            }
-
-            GUILayout.Label("Profile Id: " + _bc.GetStoredProfileId());
-            GUILayout.Label("Anonymous Id: " + _bc.GetStoredAnonymousId());
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
-            {
-                m_authStatus = "Attempting to authenticate";
-                _bc.AuthenticateGoogle(m_googleId, m_serverAuthCode, true, OnSuccess_Authenticate, OnError_Authenticate);
-            }
-            if (GUILayout.Button("Reset Profile Id", GUILayout.ExpandWidth(false)))
-            {
-                _bc.ResetStoredProfileId();
-            }
-            if (GUILayout.Button("Reset Anonymous Id", GUILayout.ExpandWidth(false)))
-            {
-                _bc.ResetStoredAnonymousId();
-            }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-        }
-        else if (m_selectedAuth == (int)eAuthTypes.FACEBOOK)
-        {
-#if UNITY_WEBGL || UNITY_STANDALONE_WIN
-            GUILayout.Label("Token Id: " + AccessToken.CurrentAccessToken.TokenString);
-            GUILayout.Label("User Id: " + _localFacebookUser.id);
-            GUILayout.Label("First Name: " + _localFacebookUser.first_name);
-            GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Initialize", GUILayout.ExpandWidth(false)))
-            {
-                if (!FB.IsInitialized)
-                {
-                    FB.Init(InitCallback, HideUnity);
-                }
-                else
-                {
-                    FB.ActivateApp();
-                }
-            }
-
-            if (GUILayout.Button("Authenticate", GUILayout.ExpandWidth(false)))
-            {
-                m_authStatus = "Attempting to authenticate";
-                var perms = new List<string>()
-                {
-                    "public_profile",
-                    "email"
-                };
-                FB.LogInWithReadPermissions(perms, AuthCallback);
-            }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-#else
-            m_authStatus = "Facebook login is only available on WebGL & Windows Standalone";
-#endif
-        }
-        else if (m_selectedAuth == (int)eAuthTypes.XBOXLIVE)
-        {
-#if UNITY_WSA
-            if (_xboxLiveUser.IsSignedIn)
-            {
-                GUILayout.Label("Player Number: " + playerNumber);
-                GUILayout.Label("Gamer Tag: " + _xboxLiveUser.Gamertag);
-                GUILayout.Label("User ID: " + _xboxLiveUser.XboxUserId);
-                GUILayout.BeginHorizontal();
-            }
-            
-            if(GUILayout.Button("Sign In",GUILayout.ExpandWidth(false)))
-            {
-                StartCoroutine(SignInManager.Instance.SignInPlayer(playerNumber));
-            }
-#else
-            m_authStatus = "Xbox Live login is only available on Universal Windows Platform";
-#endif
-        }
-
-        m_scrollPosition = GUILayout.BeginScrollView(m_scrollPosition, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-        GUILayout.TextArea(m_authStatus, GUILayout.ExpandHeight(true));
-        GUILayout.EndScrollView();
-
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        if (GUILayout.Button("Clear Log", GUILayout.Height(25), GUILayout.Width(100)))
-        {
-            m_authStatus = "";
-        }
-        GUILayout.EndHorizontal();
-
-        GUILayout.EndArea();
-    }
-*/    
-#endregion
 }
