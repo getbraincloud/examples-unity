@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -19,8 +18,7 @@ public class SpawnController : MonoBehaviour
     public SpawnData SpawnData;
     public float OffsetY;
     
-    private BaseTroop _objectToSpawn;
-
+    private TroopAI _objectToSpawn;
     private List<SummonSelector> troopSelectorList = new List<SummonSelector>();
     [SerializeField]
     private List<TroopTracker> troopList = new List<TroopTracker>();
@@ -34,12 +32,14 @@ public class SpawnController : MonoBehaviour
 
     private void Awake()
     {
+        GameManager.Instance.InvaderTroopCount = 0;
         //Get our troop data that we can summon
         troopSelectorList = FindObjectsOfType<SummonSelector>().ToList();
         for (int i = 0; i < SpawnData.SpawnList.Count; i++)
         {
             troopList.Add(new TroopTracker());
             troopList[i].SpawnLimit = SpawnData.SpawnList[i].SpawnLimit;
+            GameManager.Instance.InvaderTroopCount += troopList[i].SpawnLimit;
             troopList[i].TroopType = SpawnData.SpawnList[i].TroopType;
         }
         
@@ -59,7 +59,7 @@ public class SpawnController : MonoBehaviour
                 _troopSelected = troopList[i];
             }
         }
-    }
+    }   
 
     // Update is called once per frame
     void Update()
@@ -85,6 +85,7 @@ public class SpawnController : MonoBehaviour
                 troop.AssignToTeam(0);
                 _troopSelected.SpawnedTroops++;
                 _troopSelected.SummonSelector.UpdateSpawnNumber(_troopSelected.SpawnLimit - _troopSelected.SpawnedTroops);
+                
             }
         }
     }
@@ -100,5 +101,4 @@ public class SpawnController : MonoBehaviour
             }
         }
     }
-
 }

@@ -17,8 +17,8 @@ public class DefenderSpawner : MonoBehaviour
     private int _offsetRangeX = 6;
     private void Awake()
     {
-        BaseTroop troopToSpawn;
-        Instantiate(Sets[(int) DefenderSpawnData.Rank], StructureSpawnPoint.position, Quaternion.identity, StructureSpawnPoint);
+        TroopAI troopToSpawn;
+        GameManager.Instance.DefenderTroopCount = 0;
         //Spawn in troops based on spawner data
         foreach (SpawnInfo spawnInfo in DefenderSpawnData.SpawnList)
         {
@@ -35,9 +35,10 @@ public class DefenderSpawner : MonoBehaviour
                     spawnPoint = newSpawnPoint;
                 }
                 
-                BaseTroop troop = Instantiate(troopToSpawn, spawnPoint, Quaternion.identity);
+                TroopAI troop = Instantiate(troopToSpawn, spawnPoint, Quaternion.identity);
                 troop.AssignToTeam(1);
                 _spawnPointIndex++;
+                GameManager.Instance.DefenderTroopCount++;
                 if (_spawnPointIndex >= SpawnPoints.Length)
                 {
                     _spawnPointIndex = 0;
@@ -53,5 +54,11 @@ public class DefenderSpawner : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void Start()
+    {
+        GameObject structureSet = Instantiate(Sets[(int) DefenderSpawnData.Rank], StructureSpawnPoint.position, Quaternion.identity, StructureSpawnPoint);
+        GameManager.Instance.SetUpGameValues(structureSet.transform);
     }
 }

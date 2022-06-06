@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using UnityEngine.SceneManagement;
 
 public enum ArmyDivisionRank{Easy,Medium,Hard,None}
@@ -15,6 +11,29 @@ public class GameManager : MonoBehaviour
     public SpawnData DefenderSpawnData;
     public SpawnData InvaderSpawnData;
     
+    private bool _isGameActive;
+    private GameSessionManager _sessionManagerRef;
+    private GameOverScreen _gameOverScreenRef;
+    private int _startingDefenderCount;
+    private int _startingInvaderCount;
+    private int _defenderTroopCount;
+    public int DefenderTroopCount
+    {
+        get => _defenderTroopCount;
+        set => _defenderTroopCount = value;
+    }
+
+    private int _invaderTroopCount;
+
+    public int InvaderTroopCount
+    {
+        get => _invaderTroopCount;
+        set => _invaderTroopCount = value;
+    }
+    
+    //Transform parent of structure sets for defender user
+    private Transform _defenderStructParent;
+
     //Local User Info
     private UserInfo _currentUserInfo;
     public UserInfo CurrentUserInfo
@@ -30,13 +49,11 @@ public class GameManager : MonoBehaviour
         set => _opponentUserInfo = value;
     }
     
-    //Singleton Pattern
     private static GameManager _instance;
     public static GameManager Instance => _instance;
 
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
         if (!_instance)
         {
             _instance = this;
@@ -45,7 +62,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        
+        DontDestroyOnLoad(gameObject);
         _currentUserInfo = Settings.LoadPlayerInfo();
         InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
         MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
@@ -87,5 +104,57 @@ public class GameManager : MonoBehaviour
     public void LoadToGame()
     {
         SceneManager.LoadScene("Game");
+    }
+
+    public void SetUpGameValues(Transform in_defenderParent)
+    {
+        _defenderStructParent = in_defenderParent;
+        _sessionManagerRef = FindObjectOfType<GameSessionManager>();
+        _gameOverScreenRef = FindObjectOfType<GameOverScreen>();
+        _isGameActive = true;
+    }
+
+    public void GameOver(bool in_didInvaderWin, bool in_didTimeExpire = false)
+    {
+        if (!_isGameActive) return;
+        _isGameActive = false;
+        
+        //Fill in defender winning stuff here
+        var slayCount = _startingDefenderCount - _defenderTroopCount;
+        var counterAttackCount = _startingInvaderCount - _invaderTroopCount;
+
+        _gameOverScreenRef.InvadersDefeatedText.text = $"Number of slayed troops: {slayCount}";
+        _gameOverScreenRef.DefendersDefeatedText.text = $"Number of defeated troop: {counterAttackCount}";
+        
+        //Figure out who won
+        if (in_didTimeExpire)
+        {
+            _gameOverScreenRef.WinStatusText.text = "Game Over /n Time Expired";
+        }
+        else if(in_didInvaderWin)
+        {
+            _gameOverScreenRef.WinStatusText.text = "You Win !";
+        }
+        else
+        {
+            _gameOverScreenRef.WinStatusText.text = "Game Over /n Troops Defeated";
+        }
+        
+        //Do Game over things
+        _sessionManagerRef.StopTimer();
+        
+        FindObjectOfType<SpawnController>().enabled = false;
+        
+        _gameOverScreenRef.gameObject.SetActive(true);
+    }
+
+    public void CheckIfGameOver()
+    {
+        if (!_isGameActive) return;
+        if (_defenderStructParent.childCount == 0 ||
+            _invaderTroopCount == 0)
+        {
+            GameOver(_invaderTroopCount == 0);
+        }
     }
 }

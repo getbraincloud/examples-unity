@@ -14,7 +14,7 @@ public struct SpawnInfo
 public struct TroopInfo
 {
     public EnemyTypes TroopType;
-    public BaseTroop TroopPrefab;
+    public TroopAI TroopPrefab;
 }
 
 [CreateAssetMenu(fileName = "SpawnData", menuName = "ScriptableObjects/SpawnData", order = 1)]
@@ -71,7 +71,7 @@ public class SpawnData : ScriptableObject
         return 1;
     }
 
-    public BaseTroop GetTroop(EnemyTypes typeToGet)
+    public TroopAI GetTroop(EnemyTypes typeToGet)
     {
         foreach (TroopInfo spawnParameters in TroopInfo)
         {

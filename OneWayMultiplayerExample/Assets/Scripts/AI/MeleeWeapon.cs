@@ -7,11 +7,11 @@ public class MeleeWeapon : MonoBehaviour
 {
     public int DamageAmount;
     private readonly string TroopTag = "Troop";
-    private BaseTroop _myTroop;
+    private TroopAI _myTroop;
 
     private void Awake()
     {
-        _myTroop = transform.parent.GetComponent<BaseTroop>();
+        _myTroop = transform.parent.GetComponent<TroopAI>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -27,7 +27,7 @@ public class MeleeWeapon : MonoBehaviour
 
         if (other.tag.Equals(TroopTag))
         {
-            var troop = other.GetComponent<BaseTroop>();
+            var troop = other.GetComponent<TroopAI>();
             troop.IncomingAttacker(_myTroop);
         }
 

@@ -5,7 +5,7 @@ using UnityEngine.AI;
 public enum TroopStates {Idle, Rotate, Move, Attack}
 public enum EnemyTypes {Grunt, Solder, Shooter}
 
-public class BaseTroop : MonoBehaviour, IDamageable<int>
+public class TroopAI : MonoBehaviour, IDamageable<int>
 {
     public EnemyTypes EnemyType;
     
@@ -28,7 +28,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     public int _hitBackForce = 5;
     //Checks every 10 frames for a new target
     private int _searchTargetInterval = 10;
-    
+    private int _teamId;
     private bool _isDead;
     private bool _isAttacking;
     private bool _isSearching = false;
@@ -109,12 +109,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         }
         
         _distanceToTarget = (_target.transform.position - transform.position).magnitude;
-        /* 
-        if (_distanceToTarget > 5 && !IsFacingObject())
-        {
-            RotateToTarget();    
-        }*/
-        
+
         //Move to Target
         if(_distanceToTarget > AcceptanceRangeToTarget &&
            !_isKnockedBack)
@@ -131,12 +126,10 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         //Attack !!!!!!!!!!!!!
         else if(_distanceToTarget < AcceptanceRangeToTarget && _targetIsHostile)
         {
-            //_rigidbodyComp.velocity = Vector3.zero;
             CurrentState = TroopStates.Attack;
             _navMeshAgent.isStopped = true;
             RotateToTarget();
             PerformAction();
-            
         }
     }
 
@@ -150,14 +143,6 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     //give direction to move troop towards
     private void MoveTroop()
     {
-        /*_rigidbodyComp.AddForce(transform.forward * MoveSpeed);
-        var vel = _rigidbodyComp.velocity;
-        vel.y = 0;
-        _rigidbodyComp.velocity = vel;
-        if(_rigidbodyComp.velocity.magnitude > MoveSpeed)
-        {
-            _rigidbodyComp.velocity = _rigidbodyComp.velocity.normalized * MoveSpeed;
-        }*/
         _navMeshAgent.destination = _target.transform.position;
     }
     
@@ -205,27 +190,27 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
     {
         /*if (_isAttacking) return;
         _isAttacking = true;*/
-        if (_shootScript)
+        if (_shootScript && gameObject && _target)
         {
             _shootScript.SpawnProjectile(gameObject.layer, _target);
         }
     }
 
     //0 = invader(local player), 1 = defender(network player)
-    public void AssignToTeam(int teamID)
+    public void AssignToTeam(int in_teamID)
     {
         //ToDo: Is troop manager really needed ?
         //TroopManager.Instance.ActiveTroopsList.Add(gameObject.GetInstanceID(), teamID);
-
-        _activeMask = teamID == 0 ? DefenderMask : InvaderMask;
+        _teamId = in_teamID;
+        _activeMask = in_teamID == 0 ? DefenderMask : InvaderMask;
 
         if (_meleeWeapon)
         {
-            _meleeWeapon.gameObject.layer = teamID == 0 ? 6 : 7; 
+            _meleeWeapon.gameObject.layer = in_teamID == 0 ? 6 : 7; 
         }
         
         //6 = Invader Layer, 7 = Defender Layer
-        gameObject.layer = teamID == 0 ? 6 : 7;
+        gameObject.layer = in_teamID == 0 ? 6 : 7;
     }
     
     public void Damage(int damageTaken)
@@ -245,7 +230,7 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         }
     }
 
-    public void IncomingAttacker(BaseTroop in_attacker)
+    public void IncomingAttacker(TroopAI in_attacker)
     {
         if (_target == in_attacker.gameObject) return;
         
@@ -262,7 +247,29 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         _animator.SetBool(attackParameter, false);
         _rigidbodyComp.velocity = Vector3.zero;
         _isAttacking = false;
+        Destroy(_homeLocationRef);
         StartCoroutine(DelayToDeath());
+    }
+    
+    private IEnumerator DelayToDeath()
+    {
+        yield return new WaitForSeconds(_delayBeforeDestroy);
+        if (DeathFX)
+        {
+            Instantiate(DeathFX, transform.position, Quaternion.identity);    
+        }
+        Destroy(gameObject);
+        //Check if troop is an invader or defender
+        if (_teamId == 0)
+        {
+            //Invader
+            GameManager.Instance.InvaderTroopCount--;
+        }
+        else
+        {
+            //Defender
+            GameManager.Instance.DefenderTroopCount--;
+        }
     }
 
     public void LaunchObject(Vector3 direction)
@@ -294,16 +301,6 @@ public class BaseTroop : MonoBehaviour, IDamageable<int>
         _navMeshAgent.isStopped = false;
     }
 
-    private IEnumerator DelayToDeath()
-    {
-        yield return new WaitForSeconds(_delayBeforeDestroy);
-        if (DeathFX)
-        {
-            Instantiate(DeathFX, transform.position, Quaternion.identity);    
-        }
-        Destroy(gameObject);
-    }
-    
     private void FindTarget()
     {
         _target = null;
