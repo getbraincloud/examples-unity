@@ -112,6 +112,8 @@ public class GameManager : MonoBehaviour
         _sessionManagerRef = FindObjectOfType<GameSessionManager>();
         _gameOverScreenRef = FindObjectOfType<GameOverScreen>();
         _isGameActive = true;
+        _startingDefenderCount = _defenderTroopCount;
+        _startingInvaderCount = _invaderTroopCount;
     }
 
     public void GameOver(bool in_didInvaderWin, bool in_didTimeExpire = false)

@@ -25,7 +25,7 @@ public class GameSessionManager : MonoBehaviour
     {
         if (time > 0.0f)
         {
-            GameOverScreen.TimerText.text = $"Time Remaining: {time}";
+            GameOverScreen.TimerText.text = $"Time Remaining: {(int)time} seconds";
         }
         else
         {

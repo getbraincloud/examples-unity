@@ -21,8 +21,9 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     
     public LayerMask _activeMask;
     
-    public LayerMask InvaderMask ;
-    public LayerMask DefenderMask ;
+    public LayerMask InvaderMask;
+    public LayerMask DefenderMask;
+    
     private GameObject _target;
     private int _health;
     public int _hitBackForce = 5;
@@ -199,18 +200,31 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     //0 = invader(local player), 1 = defender(network player)
     public void AssignToTeam(int in_teamID)
     {
-        //ToDo: Is troop manager really needed ?
-        //TroopManager.Instance.ActiveTroopsList.Add(gameObject.GetInstanceID(), teamID);
         _teamId = in_teamID;
-        _activeMask = in_teamID == 0 ? DefenderMask : InvaderMask;
-
-        if (_meleeWeapon)
+        if (in_teamID == 0)
         {
-            _meleeWeapon.gameObject.layer = in_teamID == 0 ? 6 : 7; 
+            //Invaders
+            _activeMask = DefenderMask;
+            if (_meleeWeapon)
+            {
+                _meleeWeapon.gameObject.layer = 6; 
+            }
+            //6 = Invader Layer, 7 = Defender Layer
+            gameObject.layer = 6;
+            _healthBarRef.AssignTeamColor(Color.blue);
         }
-        
-        //6 = Invader Layer, 7 = Defender Layer
-        gameObject.layer = in_teamID == 0 ? 6 : 7;
+        else
+        {
+            //Defenders
+            _activeMask = InvaderMask;
+            if (_meleeWeapon)
+            {
+                _meleeWeapon.gameObject.layer = 7; 
+            }
+            //6 = Invader Layer, 7 = Defender Layer
+            gameObject.layer = 7;
+            _healthBarRef.AssignTeamColor(Color.red);
+        }
     }
     
     public void Damage(int damageTaken)

@@ -31,6 +31,11 @@ public class BrainCloudManager : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
     }
+
+    public bool IsSessionValid()
+    {
+        return _bcWrapper.Client.Authenticated;
+    }
     
     private void InitializeBC()
     {

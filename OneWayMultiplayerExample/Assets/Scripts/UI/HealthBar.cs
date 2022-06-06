@@ -1,12 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour
 {
-    public Gradient Gradient;
     public Image FillImage;
     public Image BorderImage;
     public Image HeartImage;
@@ -16,6 +12,11 @@ public class HealthBar : MonoBehaviour
         _slider = GetComponent<Slider>();
         
         AdjustImageBeingActive(false);
+    }
+
+    public void AssignTeamColor(Color in_teamColor)
+    {
+        FillImage.color = in_teamColor;
     }
 
     private void AdjustImageBeingActive(bool isActive)
@@ -29,8 +30,6 @@ public class HealthBar : MonoBehaviour
     {
         _slider.maxValue = newMaxValue; 
         _slider.value = newMaxValue;
-
-        FillImage.color = Gradient.Evaluate(1f);
     }
 
     public void SetHealth(int newValue)
@@ -41,7 +40,6 @@ public class HealthBar : MonoBehaviour
         }
         
         _slider.value = newValue;
-        FillImage.color = Gradient.Evaluate(_slider.normalizedValue);
     }
 
 }

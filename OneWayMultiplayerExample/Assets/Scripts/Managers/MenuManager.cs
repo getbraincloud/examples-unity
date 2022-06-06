@@ -60,7 +60,17 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
-        ChangeState(MenuStates.SignIn);
+        if (BrainCloudManager.Instance.IsSessionValid())
+        {
+            UpdateMatchMakingInfo();
+            UpdateMainMenu();
+            ChangeState(MenuStates.MainMenu);
+        }
+        else
+        {
+            ChangeState(MenuStates.SignIn);    
+        }
+        
     }
 
     private void Update()
