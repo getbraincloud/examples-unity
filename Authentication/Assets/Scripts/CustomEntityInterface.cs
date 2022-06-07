@@ -79,9 +79,7 @@ public class CustomEntityInterface : MonoBehaviour
         set => _bcWrapper = value;
     }
     
-    public bool PlayerAssigned;
     private readonly string CUSTOM_PLAYER_ENTITY_TYPE = "athletes";
-    
     
     public void ReadCustomEntity()
     {
@@ -109,8 +107,6 @@ public class CustomEntityInterface : MonoBehaviour
             return;
         }
         
-        PlayerAssigned = true;
-        
         for (int i = 0; i < results.Length; i++)
         {
             Dictionary<string, object> entity = results[i];
@@ -135,6 +131,8 @@ public class CustomEntityInterface : MonoBehaviour
                 _customPlayer.Assists = (int) entityData["assists"];
             }
         }
+
+        GameEvents.instance.GetCustomEntityPageSuccess(); 
     }
     
     public void CreateCustomEntity()
@@ -154,8 +152,6 @@ public class CustomEntityInterface : MonoBehaviour
 
     private void OnCreateSuccess(string json, object cbObject)
     {
-        PlayerAssigned = true;
-        
         var jsonObj = JsonReader.Deserialize(json) as Dictionary<string, object>;
         var data = jsonObj["data"] as Dictionary<string, object>;
 
@@ -178,7 +174,6 @@ public class CustomEntityInterface : MonoBehaviour
         _customPlayer.CreatedAt = Util.BcTimeToDateTime((long) data["createdAt"]);
         _customPlayer.UpdatedAt = Util.BcTimeToDateTime((long) data["updatedAt"]);
 
-        //Invoking custom entity success event for Screen Enitity custom class
         GameEvents.instance.CreateCustomEntitySuccess();
     }
 
@@ -210,8 +205,6 @@ public class CustomEntityInterface : MonoBehaviour
 
     public void DeleteCustomEntity()
     {
-        PlayerAssigned = false;
-
         _bcWrapper.CustomEntityService.DeleteEntity
         (
             CUSTOM_PLAYER_ENTITY_TYPE,
@@ -227,7 +220,6 @@ public class CustomEntityInterface : MonoBehaviour
     {
         Debug.Log($"Custom Entity is deleted !");
 
-        //Invoking Delete custom entity for Screen entity custom class.
         GameEvents.instance.DeleteCustomEntitySuccess();
     }
     

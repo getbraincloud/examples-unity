@@ -171,9 +171,7 @@ public class ConnectScene : MonoBehaviour
         }
     }
 
-
     //*************** UI Event Methods ***************
-
     public void OnAuthTypeChange(int val)
     {
         currentAuthType = (eAuthTypes)val;

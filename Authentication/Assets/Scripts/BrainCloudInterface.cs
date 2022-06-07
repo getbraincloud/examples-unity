@@ -27,17 +27,19 @@ class FacebookUser
     public string email;
 }
 
+//BrainCloudInterface is designed to interface between screen UI and all Braincloud functionality accessible from BrainCloudWrapper.
+//This class exists as a way to demonstrate how brainCloud methods are called and how to utilize their respective success and failure callbacks. 
+
 public class BrainCloudInterface : MonoBehaviour
 {
     public static BrainCloudInterface instance;
 
-    /*public*/ BCConfig bCConfig;
+    BCConfig bCConfig;
 
     public static BrainCloudWrapper _bc;
 
     string m_authStatus = "Welcome to brainCloud!";
 
-    //AnthonyTODO: Not sure if we'll need this
     string m_universalUserId = "";
     string m_universalPwd = "";
     string m_emailId = "";
@@ -121,27 +123,21 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void AuthenticateAdvanced(AuthenticationType authType, BrainCloud.AuthenticationIds ids, Dictionary<string, object> extraJson)
     {
-        SuccessCallback successCallback = (response, cbObject) => {
-            Debug.LogWarning("SUCCESSFUL ADVANCED AUTHENTICATION!");
-            ScreenManager.instance.ActivateMainScreen();
-        };
+        SuccessCallback successCallback = (response, cbObject) => { ScreenManager.instance.ActivateMainScreen(); };
 
-        FailureCallback failureCallback = (status, code, error, cbObject) => {
-            Debug.LogWarning("ADVANCED AUTHENTICATION FAILED!");
-        };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.AuthenticateAdvanced(authType, ids, true, extraJson, successCallback, failureCallback);
     }
 
     public void AuthenticateGoogle()
     {
-        //AnthonyTODO: Figure out how to get Google Authentication working. Requires building to android device.
         _bc.AuthenticateGoogle(m_googleId, m_serverAuthCode, true, OnSuccess_Authenticate, OnError_Authenticate);
     }
 
     public void AuthenticateFacebook()
     {
-        //AnthonyTODO: Requires Facebook fix
+        
     }
 
     public void OnSuccess_Authenticate(string responseData, object cbObject)
@@ -154,8 +150,7 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        m_authStatus = "Authenticate failed: " + statusMessage;
-        Debug.LogError("OnError_Authenticate: " + statusMessage);
+        Debug.Log(string.Format("Failed | {0}  {1}  {2}", statusCode, reasonCode, statusMessage));
     }
 
     public string GetStoredProfileID()
@@ -206,7 +201,7 @@ public class BrainCloudInterface : MonoBehaviour
 
         };
 
-        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.PlayerStateService.Logout(successCallback, failureCallback);
     }
@@ -250,7 +245,7 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void OnReadUserState_Failure(int status, int code, string error, object cbObject)
     {
-
+        Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error));
     }
 
     //*************** PlayerStatisticsService Methods ***************
@@ -265,10 +260,7 @@ public class BrainCloudInterface : MonoBehaviour
             GameEvents.instance.UpdateLevelAndXP();
         };
 
-        FailureCallback failureCallback = (status, code, error, cbObject) =>
-        {
-
-        };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.PlayerStatisticsService.IncrementExperiencePoints(incrementAmount, successCallback, failureCallback);
     }
@@ -298,7 +290,7 @@ public class BrainCloudInterface : MonoBehaviour
             GameEvents.instance.IncrementUserStat(userStat);
         };
 
-        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         string jsonData = "{ \"" + userStat + "\" : 1 }";
 
@@ -325,7 +317,7 @@ public class BrainCloudInterface : MonoBehaviour
             }
         };
 
-        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.GlobalStatisticsService.ReadAllGlobalStats(successCallback, failureCallback);
     }
@@ -357,8 +349,8 @@ public class BrainCloudInterface : MonoBehaviour
             GameEvents.instance.IncrementGlobalStat(globalStatName);
         };
 
-        FailureCallback failureCallback = (status, code, error, cbObject) => { };
-        
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
+
         string jsonData = "{ \"" + globalStatName + "\" : 1 }";
 
         _bc.GlobalStatisticsService.IncrementGlobalStats(jsonData, successCallback, failureCallback);
@@ -395,11 +387,10 @@ public class BrainCloudInterface : MonoBehaviour
             GameEvents.instance.GetVirtualCurrency();
         };
 
-        FailureCallback failureCallback = (status, code, error, cbObject) => { };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.VirtualCurrencyService.GetCurrency(currency, successCallback, failureCallback);
     }
-
 
     //*************** ScriptService Methods ***************
     public void RunCloudCodeScript(string scriptname, string scriptdata)
@@ -411,11 +402,10 @@ public class BrainCloudInterface : MonoBehaviour
     }
 
     //*************** IdentityService Methods ***************
-
     public void AttachEmailIdentity(string email, string password)
     {
         SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully attached email."); };
-        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to attach email."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.IdentityService.AttachEmailIdentity(email, password, successCallback, failureCallback);
     }
@@ -423,7 +413,7 @@ public class BrainCloudInterface : MonoBehaviour
     public void MergeEmailIdentity(string email, string password)
     {
         SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged email."); };
-        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to merge email"); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.IdentityService.MergeEmailIdentity(email, password, successCallback, failureCallback);
     }
@@ -431,7 +421,7 @@ public class BrainCloudInterface : MonoBehaviour
     public void AttachUniversalIdentity(string username, string password)
     {
         SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully attached universal identity."); };
-        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to attach universal identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.IdentityService.AttachUniversalIdentity(username, password, successCallback, failureCallback);
     }
@@ -439,7 +429,7 @@ public class BrainCloudInterface : MonoBehaviour
     public void MergeUniversalIdentity(string username, string password)
     {
         SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged universal identity."); };
-        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to merge universal identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.IdentityService.MergeUniversalIdentity(username, password, successCallback, failureCallback);
     }
@@ -447,7 +437,7 @@ public class BrainCloudInterface : MonoBehaviour
     public void AttachTwitterIdentity(string userId, string token, string tokenSecret)
     {
         SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully attached twitter identity."); };
-        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to attach twitter identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.IdentityService.AttachTwitterIdentity(userId, token, tokenSecret, successCallback, failureCallback);
     }
@@ -455,13 +445,10 @@ public class BrainCloudInterface : MonoBehaviour
     public void MergeTwitterIdentity(string userId, string token, string tokenSecret)
     {
         SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged twitter identity."); };
-        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log("Failed to merge twitter identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
 
         _bc.IdentityService.MergeTwitterIdentity(userId, token, tokenSecret, successCallback, failureCallback);
     }
-
-
-
 
     //*******************Google Sign In Stuff*********************
     public void GoogleSignIn()

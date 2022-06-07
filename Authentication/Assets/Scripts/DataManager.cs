@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//This is a data storage class for all IDS, statistics, level, experience and currencies
+//Braincloud Interface stores data from successful server responses here
+//Screen classes access data required to display on UI from here. 
 
-//This class will act as data storage for all IDS and potentially entities and other data related info specific to a user.
 public class DataManager : MonoBehaviour
 {
     public static DataManager instance;
@@ -46,8 +48,6 @@ public class DataManager : MonoBehaviour
     void Start()
     {
         instance = this;
-
-        //InitData(); 
 
         DontDestroyOnLoad(this); 
     }

@@ -40,6 +40,7 @@ public class TextLogger : MonoBehaviour
         }
     }
 
+    //Method Subscribed to LogDelegate from BrainCloudClient
     public void OnLogCallback(string log)
     {
         bool hasNewLine = log.Contains("\n"); 

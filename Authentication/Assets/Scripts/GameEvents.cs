@@ -40,7 +40,6 @@ public class GameEvents : MonoBehaviour
         }
     }
 
-
     //*************** Custom Entity Events ***************
     public event Action onCreateCustomEntitySuccess; 
     public void CreateCustomEntitySuccess()
@@ -60,6 +59,14 @@ public class GameEvents : MonoBehaviour
         }
     }
 
+    public event Action onGetCustomEntityPageSuccess; 
+    public void GetCustomEntityPageSuccess()
+    {
+        if( onGetCustomEntityPageSuccess != null)
+        {
+            onGetCustomEntityPageSuccess(); 
+        }
+    }
 
     //*************** XP Events ***************
     public event Action OnUpdateLevelAndXP;
@@ -71,7 +78,6 @@ public class GameEvents : MonoBehaviour
         }
     }
 
-
     //*************** Virtual Currency Events ***************
 
     public event Action onGetVirtualCurrency;
@@ -82,7 +88,6 @@ public class GameEvents : MonoBehaviour
             onGetVirtualCurrency();
         }
     }
-
 
     //*************** Player Stat Events ***************
 
@@ -103,7 +108,6 @@ public class GameEvents : MonoBehaviour
             onInstantiatePlayerStats(); 
         }
     }
-
 
     //*************** Global Stat Events ***************
 
