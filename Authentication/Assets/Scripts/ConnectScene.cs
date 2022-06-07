@@ -42,7 +42,10 @@ public class ConnectScene : MonoBehaviour
     string inputProfileId;
     string inputPassword;
     string inputEntityName;
-    string inputEntityAge; 
+    string inputEntityAge;
+
+    int statusTextInitSize;
+    const int STATUS_SHRINK_SIZE = 8; 
 
     //UI elements set in editor.
     [SerializeField] Text statusText;
@@ -67,11 +70,13 @@ public class ConnectScene : MonoBehaviour
     void Start()
     {
         ChangeAuthType(eAuthTypes.EMAIL);
+
+        statusTextInitSize = statusText.fontSize; 
     }
 
     private void OnEnable()
     {
-        statusText.fontSize = 39;
+        statusText.fontSize = statusTextInitSize;
         statusText.text = "Welcome to brainCloud";
 
         if (BrainCloudInterface.instance == null)
@@ -212,7 +217,7 @@ public class ConnectScene : MonoBehaviour
 
     public void OnAuthenticate()
     {
-        statusText.fontSize = 14;
+        statusText.fontSize = STATUS_SHRINK_SIZE;
         statusText.text = "Attempting to Authenticate...";
 
         if(useAdvancedAuthentication)
