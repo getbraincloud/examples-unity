@@ -30,7 +30,7 @@ public class SpawnController : MonoBehaviour
 
     private const string _targetTag = "Target";
 
-    private void Awake()
+    private void Start()
     {
         GameManager.Instance.InvaderTroopCount = 0;
         //Get our troop data that we can summon
@@ -59,7 +59,7 @@ public class SpawnController : MonoBehaviour
                 _troopSelected = troopList[i];
             }
         }
-    }   
+    }
 
     // Update is called once per frame
     void Update()
@@ -85,7 +85,7 @@ public class SpawnController : MonoBehaviour
                 troop.AssignToTeam(0);
                 _troopSelected.SpawnedTroops++;
                 _troopSelected.SummonSelector.UpdateSpawnNumber(_troopSelected.SpawnLimit - _troopSelected.SpawnedTroops);
-                
+                BrainCloudManager.Instance.RecordTroopSpawn(spawnPoint, troop);
             }
         }
     }

@@ -18,6 +18,10 @@ public class BrainCloudManager : MonoBehaviour
     public int _defaultRating = 1000;
     public long _findPlayersRange;
     public long _numberOfMatches;
+
+    private string _playbackStreamId;
+    private long _incrementRatingAmount = 100;
+    private long _decrementRatingAmount = 50;
     private void Awake()
     {
         _bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -365,6 +369,94 @@ public class BrainCloudManager : MonoBehaviour
         
         //Set up pop up window for confirmation to invade user
         MenuManager.Instance.confirmPopUpMessageState.SetUpConfirmationForMatch();
+    }
+
+    public void GameCompleted(bool in_didPlayerWin)
+    {
+        if (in_didPlayerWin)
+        {
+            _bcWrapper.MatchMakingService.IncrementPlayerRating(_incrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
+        }
+        else
+        {
+            _bcWrapper.MatchMakingService.DecrementPlayerRating(_decrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
+        }
+        _bcWrapper.PlaybackStreamService.EndStream(_playbackStreamId);
+        _bcWrapper.OneWayMatchService.CompleteMatch(_playbackStreamId);
+    }
+
+    private void OnAdjustPlayerRating(string jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+
+        if (data == null) return;
+        GameManager.Instance.CurrentUserInfo.Rating = (int) data["playerRating"];
+    }
+
+    public void RecordTroopSpawn(Vector3 in_spawnPoint, TroopAI in_troop)
+    {
+        string eventData = CreateJsonSpawnEventData(in_spawnPoint, in_troop);
+        string summaryData = CreateSummaryData();
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, OnRecordSuccess, OnFailureCallback);
+    }
+
+    private void OnRecordSuccess(string in_jsonResponse, object cbObject)
+    {
+        //We did it.
+    }
+
+    public void StartMatch()
+    {
+        var opponentId = GameManager.Instance.OpponentUserInfo.ProfileId;
+        _bcWrapper.OneWayMatchService.StartMatch(opponentId, 1000, OnStartMatchSuccess, OnFailureCallback);
+        _bcWrapper.PlaybackStreamService.StartStream(opponentId,true, null, OnFailureCallback);
+    }
+
+    private void OnStartMatchSuccess(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+
+        if (data == null)
+        {
+            Debug.LogError("Response object doesn't have data. Something went wrong");
+            return;
+        }
+        
+        _playbackStreamId = data["playbackStreamId"] as string;
+        GameManager.Instance.LoadToGame();
+    }
+
+    public void ReadStream()
+    {
+        _bcWrapper.PlaybackStreamService.ReadStream(_playbackStreamId, OnReadStreamSuccess, OnFailureCallback);
+    }
+
+    private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
+    {
+        //We did it
+    }
+
+    string CreateSummaryData()
+    {
+        int total = GameManager.Instance.RemainingStructures();
+        Dictionary<string, object> summaryData = new Dictionary<string, object>();
+        summaryData.Add("total", total);
+        string value = JsonWriter.Serialize(summaryData);
+        return value;
+    }
+
+    string CreateJsonSpawnEventData(Vector3 in_spawnPoint, TroopAI in_troop)
+    {
+        Dictionary<string, object> eventData = new Dictionary<string, object>();
+        eventData.Add("eventType", "spawn");
+        eventData.Add("spawnPointX", in_spawnPoint.x);
+        eventData.Add("spawnPointY", in_spawnPoint.y);
+        eventData.Add("spawnPointZ", in_spawnPoint.z);
+        eventData.Add("troopType", in_troop.EnemyType.ToString());
+        string value = JsonWriter.Serialize(eventData);
+        return value;
     }
 
     string CreateJsonEntityData(bool in_isDataNew)

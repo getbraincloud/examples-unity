@@ -17,6 +17,11 @@ public class DefenderSpawner : MonoBehaviour
     private int _offsetRangeX = 6;
     private void Awake()
     {
+        
+    }
+
+    private void Start()
+    {
         TroopAI troopToSpawn;
         GameManager.Instance.DefenderTroopCount = 0;
         //Spawn in troops based on spawner data
@@ -54,10 +59,6 @@ public class DefenderSpawner : MonoBehaviour
                 }
             }
         }
-    }
-
-    private void Start()
-    {
         GameObject structureSet = Instantiate(Sets[(int) DefenderSpawnData.Rank], StructureSpawnPoint.position, Quaternion.identity, StructureSpawnPoint);
         GameManager.Instance.SetUpGameValues(structureSet.transform);
     }

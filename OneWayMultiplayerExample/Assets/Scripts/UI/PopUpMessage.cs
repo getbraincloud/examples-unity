@@ -24,6 +24,6 @@ public class PopUpMessage : MonoBehaviour
 
     public void AcceptGame()
     {
-        GameManager.Instance.LoadToGame();
+        BrainCloudManager.Instance.StartMatch();
     }
 }

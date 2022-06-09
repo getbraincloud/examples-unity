@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
 {
     public SpawnData DefenderSpawnData;
     public SpawnData InvaderSpawnData;
+    public bool DebugGameMode;
     
     private bool _isGameActive;
     private GameSessionManager _sessionManagerRef;
@@ -65,8 +66,16 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         _currentUserInfo = Settings.LoadPlayerInfo();
         InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
-        MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
-        MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
+        if (!DebugGameMode)
+        {
+            MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
+            MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);   
+        }
+        else
+        {
+            DefenderSpawnData.AssignSpawnList(ArmyDivisionRank.Easy);
+            InvaderSpawnData.AssignSpawnList(ArmyDivisionRank.Hard);
+        }
     }
 
     public bool IsEntityIdValid()
@@ -131,7 +140,7 @@ public class GameManager : MonoBehaviour
         //Figure out who won
         if (in_didTimeExpire)
         {
-            _gameOverScreenRef.WinStatusText.text = "Game Over /n Time Expired";
+            _gameOverScreenRef.WinStatusText.text = "Time Expired";
         }
         else if(in_didInvaderWin)
         {
@@ -139,8 +148,10 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            _gameOverScreenRef.WinStatusText.text = "Game Over /n Troops Defeated";
+            _gameOverScreenRef.WinStatusText.text = "Your troops are defeated";
         }
+        
+        BrainCloudManager.Instance.GameCompleted(in_didInvaderWin);
         
         //Do Game over things
         _sessionManagerRef.StopTimer();
@@ -156,7 +167,9 @@ public class GameManager : MonoBehaviour
         if (_defenderStructParent.childCount == 0 ||
             _invaderTroopCount == 0)
         {
-            GameOver(_invaderTroopCount == 0);
+            GameOver(_invaderTroopCount > 0);
         }
     }
+
+    public int RemainingStructures() => _defenderStructParent.childCount;
 }
