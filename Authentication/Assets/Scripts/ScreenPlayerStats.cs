@@ -12,18 +12,27 @@ public class ScreenPlayerStats : BCScreen
     [SerializeField] Transform pStatPrefabParent;
 
     Dictionary<string, PlayerStat> m_playerStats; 
-    
-    public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
 
-    public override void Activate(BrainCloudWrapper bc)
+    public override void Activate()
     {
         GameEvents.instance.onIncrementUserStat += IncrementUserStats;
         GameEvents.instance.onInstantiatePlayerStats += InstantiatePlayerStats;
 
-        _bc = bc;
         m_playerStats = new Dictionary<string, PlayerStat>();
         
         BrainCloudInterface.instance.ReadUserState(this);
+
+        if (helpMessage == null)
+        {
+            helpMessage =   "The player stats screen displays all pre-defined statistics rules from the \"User Statistics\" page under the \"Statistics Rules\" tab in the brainCloud portal.\n\n" +
+                            "Player stats are user scoped and are only accessible to the user they belong to.\n\n" +
+                            "Pressing the increment button next to each player stat will increment that stat by 1.\n\n";
+        }
+
+        if (helpURL == null)
+        {
+            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-playerstats";
+        }
     }
 
     public void IncrementUserStats(string statName)

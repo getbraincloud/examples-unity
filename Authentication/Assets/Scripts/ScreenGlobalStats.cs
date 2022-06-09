@@ -11,16 +11,26 @@ public class ScreenGlobalStats : BCScreen
     [SerializeField] GlobalStat globalStatPrefab; 
     [SerializeField] Transform gStatPefabParent;
 
-    public ScreenGlobalStats(BrainCloudWrapper bc) : base(bc) { }
-
-    public override void Activate(BrainCloudWrapper bc)
+    public override void Activate()
     {
         GameEvents.instance.onIncrementGlobalStat += IncrementGlobalStat;
         GameEvents.instance.onInstantiateGlobalStats += InstantiateGlobalStats; 
 
-        _bc = bc; 
         m_globalStats = new Dictionary<string, GlobalStat>();
         BrainCloudInterface.instance.ReadAllGlobalStats();
+
+        if (helpMessage == null)
+        {
+            helpMessage = "The global stats screen will display all global stats defined within the \"Global Statistics\" page under the \"Statistics Rules\" tab of the brainCloud portal.\n\n" +
+                          "Pressing the increment button next to each global stat will increment that stat by 1.\n\n" +
+                          "Global stats are accessible by any user and can be monitored on the Global Statistics page under the Global Monitoring " +
+                          "tab in the brainCloud Portal.";
+        }
+
+        if (helpURL == null)
+        {
+            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-globalstats";
+        }
     }
 
     public void InstantiateGlobalStats()

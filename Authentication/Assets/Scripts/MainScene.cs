@@ -9,8 +9,14 @@ using UnityEngine.UI;
 
 public class MainScene : MonoBehaviour
 {
+    public static MainScene instance { get; private set; } 
+
     [SerializeField] Text appDataText;
     [SerializeField] Dropdown funcDropdown;
+    [SerializeField] Button logoutButton;
+    [SerializeField] GameObject helpPanelObject;
+    [SerializeField] Button helpButton;
+    [SerializeField] Text helpText; 
 
     public BCConfig BCConfig;
     private BrainCloudWrapper _bc;
@@ -19,6 +25,8 @@ public class MainScene : MonoBehaviour
     Dictionary<eBCFunctionType, BCScreen> bcScreenDict;
     BCScreen currentlyActiveScreen = null;
     bool bHasAuthenticatedOnce = false;
+
+    HelpPanel helpPanel; 
 
     public EntityInterface EntityInterface
     {
@@ -40,8 +48,7 @@ public class MainScene : MonoBehaviour
         FN_PLAYER_STATS,
         FN_GLOBAL_STATS,
         FN_CLOUD_CODE,
-		FN_IDENTITY, 
-        FN_LOGOUT // This should be last.
+		FN_IDENTITY 
         //etc
     }
 
@@ -53,12 +60,13 @@ public class MainScene : MonoBehaviour
         "Player Stats",
         "Global Stats",
         "Cloud Code",
-		"Identity", 
-        "Logout" // This should be last.
+		"Identity" 
     };
-    
+
     void Awake()
     {
+        instance = this;
+
         _bc = BCConfig.GetBrainCloud();
 
         if(_entityInterface == null)
@@ -91,6 +99,8 @@ public class MainScene : MonoBehaviour
                 bcScreenDict.Add(bcScreens[i].GetFunctionType(), bcScreens[i]);
             }
         }
+
+        helpPanel = helpPanelObject.GetComponent<HelpPanel>(); 
     }
 
     private void MoveToScreen(eBCFunctionType in_fn)
@@ -101,20 +111,27 @@ public class MainScene : MonoBehaviour
             currentlyActiveScreen = null; 
         }
 
-        if (in_fn == eBCFunctionType.FN_LOGOUT)
-        {
-            BrainCloudInterface.instance.Logout();
-            return;
-        }
-
         bcScreenDict.TryGetValue(in_fn, out currentlyActiveScreen);
 
         if(currentlyActiveScreen != null)
         {
             currentlyActiveScreen.gameObject.SetActive(true);
-            currentlyActiveScreen.SetMainScene(this);
-            currentlyActiveScreen.Activate(_bc);
+            currentlyActiveScreen.Activate();
+
+            string screenname = currentlyActiveScreen.gameObject.name;
+            string helpmessage = currentlyActiveScreen.helpMessage;
+            string url = currentlyActiveScreen.helpURL;
+
+            //helpText.text = currentlyActiveScreen.gameObject.name + " Help: \n \n" +
+            //                currentlyActiveScreen.helpMessage;
+
+            helpPanel.SetHelpPanel(screenname, helpmessage, url); 
         }
+    }
+
+    public void OnURLClick()
+    {
+        Application.OpenURL(currentlyActiveScreen.helpURL);
     }
 
     void SetGameData()
@@ -126,27 +143,55 @@ public class MainScene : MonoBehaviour
         appDataText.text = "AppID:" + appID + "  AppVersion:" + gameVersion + "  ProfileID:" + profileID;
     }
 
+    void SetHelpPanelActive(bool isActive)
+    {
+        helpPanelObject.SetActive(isActive);
+        helpButton.enabled = !isActive;
+    }
+
     private void OnEnable()
     {
-        //Preventing duplicate text logs on subsequent logins.
-        if(!bHasAuthenticatedOnce)
+        if(funcDropdown.value == 0)
         {
             MoveToScreen(eBCFunctionType.FN_ENTITY);
-           bHasAuthenticatedOnce = true;
         }
         else
         {
             //Calling this invokes OnSelectBCFunction() if not already set to 0.
-            funcDropdown.value = 0; 
+            funcDropdown.value = 0;
         }
 
         SetGameData();
+        SetHelpPanelActive(false);
     }
 
     //*************** UI Methods ***************
     public void OnSelectBCFunction(int val)
     {
         MoveToScreen((eBCFunctionType)val);
+    }
+
+    public void OnLogoutClick()
+    {
+        BrainCloudInterface.instance.Logout();
+    }
+
+    public void OnHelpClick()
+    {
+        Debug.Log("Help Button Clicked on " + currentlyActiveScreen);
+
+        if(!helpPanelObject.activeSelf)
+        {
+            SetHelpPanelActive(true);
+        }
+    }
+
+    public void OnExitHelpClick()
+    {
+        if (helpPanelObject.activeSelf)
+        {
+            SetHelpPanelActive(false);
+        }
     }
 
     public void TwitterCoroutine(IEnumerator coroutine)

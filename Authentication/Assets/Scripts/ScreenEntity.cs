@@ -9,7 +9,7 @@ public class ScreenEntity : BCScreen
 {
     private static string ENTITY_TYPE_PLAYER = "player";
     
-    public ScreenEntity(BrainCloudWrapper bc) : base(bc) { }
+    //public ScreenEntity(BrainCloudWrapper bc) : base(bc) { }
 
     EntityInstance m_player;
 
@@ -25,15 +25,26 @@ public class ScreenEntity : BCScreen
     [SerializeField] Button saveEntityButton;
     [SerializeField] Button deleteEntityButton;
 
-    public override void Activate(BrainCloudWrapper bc)
+    public override void Activate()
     {
         GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
         GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
 
-        _bc = bc;
-        
-        m_mainScene.EntityInterface.GetPage(); 
+        if(helpMessage == null)
+        {
+            helpMessage = "The entity screen demonstrates how a user entity can be created via the brainCloud client.\n\n" +
+                          "By pressing Create, a default user entity is created for the user. " +
+                          "Pressing Delete will delete the user entity while Save updates the user entity of the user.\n\n" +
+                          "This entity can be monitored on the \"User Entites\" page under the \"User Monitoring\" tab in the brainCloud portal.";
+        }
+
+        if(helpURL == null)
+        {
+            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-entity";
+        }
+
+        MainScene.instance.EntityInterface.GetPage(); 
     }
 
     void DisplayEntityID()
@@ -48,12 +59,12 @@ public class ScreenEntity : BCScreen
 
     void DisplayEntityName()
     {
-        nameInput.text = (m_player != null ? m_player.Name : "---");
+        nameInput.text = (m_player != null ? m_player.Name : "");
     }
 
     void DisplayEntityAge()
     {
-        ageInput.text = (m_player != null ? m_player.Age : "---");
+        ageInput.text = (m_player != null ? m_player.Age : "");
     }
 
     void DisplayEntityInfo()
@@ -74,19 +85,19 @@ public class ScreenEntity : BCScreen
     //*************** UI Event Subscribed Methods ***************
     public void OnCreateEntity()
     {
-        m_mainScene.EntityInterface.CreateEntity();
+        MainScene.instance.EntityInterface.CreateEntity();
         Debug.Log("Creating Entity...");
     }
 
     public void OnSaveEntity()
     {
-        m_mainScene.EntityInterface.UpdateEntity();
+        MainScene.instance.EntityInterface.UpdateEntity();
         Debug.Log("Updating Entity..."); 
     }
 
     public void OnDeleteEntity()
     {
-        m_mainScene.EntityInterface.DeleteEntity();
+        MainScene.instance.EntityInterface.DeleteEntity();
         m_player = null;
         Debug.Log("Deleting Entity...");
     }
@@ -105,6 +116,7 @@ public class ScreenEntity : BCScreen
 
         if(!int.TryParse(age, out entityAge))
         {
+            TextLogger.instance.AddLog("Entity Age -- You must enter a number in this field");
             Debug.LogWarning("Entity Age -- You must enter a number in this field");
             return;
         }
@@ -115,7 +127,7 @@ public class ScreenEntity : BCScreen
     //*************** Game Event Subscribed Methods ***************
     private void OnCreateEntitySuccess()
     {
-        m_player = m_mainScene.EntityInterface.Player;
+        m_player = MainScene.instance.EntityInterface.Player;
 
         DisplayEntityInfo();
         SetActiveButtons(false); 
@@ -130,7 +142,7 @@ public class ScreenEntity : BCScreen
 
     private void OnGetUserEntityPageSuccess()
     {
-        m_player = m_mainScene.EntityInterface.Player;
+        m_player = MainScene.instance.EntityInterface.Player;
         DisplayEntityInfo();
 
         bool bsetActive = m_player == null ? true : false;
@@ -144,4 +156,6 @@ public class ScreenEntity : BCScreen
         GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
         GameEvents.instance.onGetUserEntityPageSuccess -= OnGetUserEntityPageSuccess;
     }
+
+       
 }

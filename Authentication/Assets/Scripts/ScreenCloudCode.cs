@@ -9,7 +9,8 @@ using UnityEngine.UI;
 public class ScreenCloudCode : BCScreen
 {
     [SerializeField] Text cloudScriptText;
-    [SerializeField] Text placeholderJsonExample; 
+    [SerializeField] InputField exampleJsonText; 
+    [SerializeField] Text placeholderJsonText; 
 
     private string m_cloudCodeScript = "";
     private string m_cloudCodeData = "";
@@ -17,17 +18,23 @@ public class ScreenCloudCode : BCScreen
 
     private static string[] m_cloudScriptNames { get; set; }
 
-    public ScreenCloudCode(BrainCloudWrapper bc) : base(bc) { }
-
     private void Awake()
     {
         m_cloudScriptNames = new string[] { "HelloWorld", "IncrementGlobalStat", "IncrementPlayerStat" };
         OnTemplateChanged(0);
-    }
 
-    public override void Activate(BrainCloudWrapper bc)
-    {
-        _bc = bc;
+        if (helpMessage == null)
+        {
+            helpMessage =   "The cloud code screen allows you to choose from three possible cloud code script templates that must be created on the \"Scripts\" page under " +
+                            "the \"Cloud Code\" tab in the brainCloud portal.\n\n" +
+                            "After selecting the script you would like to run, provide the necessary parameters in JSON format in the Cloud Code Json input field. " +
+                            "Finally press the \"Run Script\" button and your results will appear in the log window on the right side of the screen.";
+        }
+
+        if (helpURL == null)
+        {
+            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-script";
+        }
     }
 
     public void OnTemplateChanged(int index)
@@ -38,26 +45,39 @@ public class ScreenCloudCode : BCScreen
         switch(m_cloudCodeScript)
         {
             case "HelloWorld":
-                placeholderJsonExample.text = "Example Parameters...\n{\"name\" : \"your_name\", \n\"age\" : your_age}";
+                placeholderJsonText.text = "Example Parameters...\n{\"name\" : \"your_name\", \n\"age\" : your_age}";
+                m_cloudCodeData = "{\"name\" : \"Tony\", \n\"age\" : 62}";
+                exampleJsonText.text = m_cloudCodeData;
                 break;
             case "IncrementGlobalStat":
-                placeholderJsonExample.text = "Example Parameters...\n{\"globalStat\" : \"PLAYER_COUNT\", \n\"incrementAmount\" : 1}";
+                placeholderJsonText.text = "Example Parameters...\n{\"globalStat\" : \"PLAYER_COUNT\", \n\"incrementAmount\" : 1}";
+                m_cloudCodeData = "{\"globalStat\" : \"PLAYER_COUNT\", \n\"incrementAmount\" : 1}";
+                exampleJsonText.text = m_cloudCodeData;
                 break;
             case "IncrementPlayerStat":
-                placeholderJsonExample.text = "Example Parameters...\n{\"playerStat\" : \"experiencePoints\", \n\"incrementAmount\" : 1}";
+                placeholderJsonText.text = "Example Parameters...\n{\"playerStat\" : \"experiencePoints\", \n\"incrementAmount\" : 1}";
+                m_cloudCodeData = "{\"playerStat\" : \"experiencePoints\", \n\"incrementAmount\" : 1}";
+                exampleJsonText.text = m_cloudCodeData;
                 break;
         }
+
+        CanParseJson(m_cloudCodeData);
     }
 
     public void OnParamEndEdit(string param)
     {
         m_cloudCodeData = param;
 
+        CanParseJson(m_cloudCodeData);
+    }
+
+    public void CanParseJson(string input)
+    {
         try
         {
-            if (m_cloudCodeData.Length > 0)
+            if (input.Length > 0)
             {
-                JsonMapper.ToObject(m_cloudCodeData);
+                JsonMapper.ToObject(input);
             }
         }
         catch (Exception e)
@@ -71,10 +91,5 @@ public class ScreenCloudCode : BCScreen
     public void OnRunScriptClick()
     {
         BrainCloudInterface.instance.RunCloudCodeScript(m_cloudCodeScript, m_cloudCodeData);
-    }
-
-    protected override void OnDisable()
-    {
-
     }
 }

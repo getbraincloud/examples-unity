@@ -117,15 +117,18 @@ public class EntityInterface : MonoBehaviour
 
     public void DeleteEntity()
     {
-        _bcWrapper.EntityService.DeleteEntity
-        (
-            _player.EntityId,
-            -1,
-            OnDeleteEntitySuccess,
-            OnFailureCallback
-        );
+        if(_player != null)
+        {
+            _bcWrapper.EntityService.DeleteEntity
+            (
+                _player.EntityId,
+                -1,
+                OnDeleteEntitySuccess,
+                OnFailureCallback
+            );
 
-        _player = null;
+            _player = null;
+        }
     }
     public string CreateGetPageContext()
     {

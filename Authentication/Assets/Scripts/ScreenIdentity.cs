@@ -17,12 +17,19 @@ public class ScreenIdentity : BCScreen {
     string m_password = "";
     
     Twitter.RequestTokenResponse m_RequestTokenResponse;
-    
-    public ScreenIdentity(BrainCloudWrapper bc) : base(bc) { }
 
-    public override void Activate(BrainCloudWrapper bc)
+    void Awake()
     {
-        _bc = bc;
+        if (helpMessage == null)
+        {
+            helpMessage =   "The identity screen allows a user to attach or merge either an Email or Universal ID to an existing user.\n\n" +
+                            "Universal identities and emails attached to users can be viewed on the User Summary page under the User Monitoring tab."; 
+        }
+
+        if (helpURL == null)
+        {
+            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-identity";
+        }
     }
 
     public void OnLoginTwitterClick()
@@ -123,10 +130,5 @@ public class ScreenIdentity : BCScreen {
         {
             Debug.Log("OnAccessTokenCallback - failed.");
         }
-    }
-
-    protected override void OnDisable()
-    {
-        
     }
 }

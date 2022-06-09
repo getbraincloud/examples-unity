@@ -74,6 +74,12 @@ public class TextLogger : MonoBehaviour
         newlog.text = sb.ToString() + "\n";
     }
 
+    public void AddLog(string log)
+    {
+        newlog = Instantiate(logText, logTextParent);
+        newlog.text = log + "\n";
+    }
+
     public void OnClearLogClick()
     {
         Text[] logs = logTextParent.gameObject.GetComponentsInChildren<Text>();

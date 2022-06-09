@@ -26,21 +26,31 @@ public class ScreenEntityCustomClass : BCScreen
     [SerializeField] Button saveEntityButton;
     [SerializeField] Button deleteEntityButton; 
 
-    public ScreenEntityCustomClass(BrainCloudWrapper bc) : base(bc) { }
-
-    public override void Activate(BrainCloudWrapper bc)
+    public override void Activate()
     {
         GameEvents.instance.onCreateCustomEntitySuccess += OnCreateCustomEntitySuccess;
         GameEvents.instance.onDeleteCustomEntitySuccess += OnDeleteCustomEntitySuccess;
         GameEvents.instance.onGetCustomEntityPageSuccess += OnGetCustomEntityPageSuccess;
 
-        _bc = bc; 
-
-        m_mainScene.CustomEntityInterface.ReadCustomEntity();
+        MainScene.instance.CustomEntityInterface.ReadCustomEntity();
 
         DisplayEntityInfo();
 
         SetActiveButtons(m_player == null ? true : false);
+
+        if (helpMessage == null)
+        {
+            helpMessage = "Custom Entities are a premium feature available to Plus Plan customers. Additional usage fees apply.\n\n" + 
+                          "The custom entity screen demonstrates how a custom entity can be created via the brainCloud client.\n\n" +
+                          "By pressing Create, a default custom entity is created for the user. " +
+                          "Pressing Delete will delete the custom entity while Save updates the custom entity of the user.\n\n" +
+                          "This custom entity can be monitored on the \"Custom Entities\" page under the \"User Monitoring\" tab in the brainCloud Portal.";
+        }
+
+        if (helpURL == null)
+        {
+            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-customentity";
+        }
     }
 
     void DisplayEntityID()
@@ -55,12 +65,12 @@ public class ScreenEntityCustomClass : BCScreen
 
     void DisplayEntityFirstName()
     {
-        firstNameInput.text = (m_player != null ? m_player.FirstName : "---");
+        firstNameInput.text = (m_player != null ? m_player.FirstName : "");
     }
 
     void DisplayEntityPosition()
     {
-        positionInput.text = (m_player != null ? m_player.Position : "---");
+        positionInput.text = (m_player != null ? m_player.Position : "");
     }
 
     void DisplayEntityInfo()
@@ -83,7 +93,7 @@ public class ScreenEntityCustomClass : BCScreen
     {
         if (m_player == null)
         {
-            m_mainScene.CustomEntityInterface.CreateCustomEntity();
+            MainScene.instance.CustomEntityInterface.CreateCustomEntity();
             
             Debug.Log("Creating Entity...");
         }
@@ -93,7 +103,7 @@ public class ScreenEntityCustomClass : BCScreen
     {
         if (m_player != null)
         {
-            m_mainScene.CustomEntityInterface.UpdateCustomEntity();
+            MainScene.instance.CustomEntityInterface.UpdateCustomEntity();
 
             Debug.Log("Updating Entity...");
         }
@@ -103,7 +113,7 @@ public class ScreenEntityCustomClass : BCScreen
     {
         if (m_player != null)
         {
-            m_mainScene.CustomEntityInterface.DeleteCustomEntity();
+            MainScene.instance.CustomEntityInterface.DeleteCustomEntity();
             m_player = null;
 
             Debug.Log("Deleting Entity...");
@@ -125,7 +135,7 @@ public class ScreenEntityCustomClass : BCScreen
     //*************** Game Events Subscribed Methods ***************
     private void OnCreateCustomEntitySuccess()
     {
-        m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
+        m_player = MainScene.instance.CustomEntityInterface.CustomPlayer;
 
         DisplayEntityInfo();
 
@@ -141,7 +151,7 @@ public class ScreenEntityCustomClass : BCScreen
 
     private void OnGetCustomEntityPageSuccess()
     {
-        m_player = m_mainScene.CustomEntityInterface.CustomPlayer;
+        m_player = MainScene.instance.CustomEntityInterface.CustomPlayer;
         DisplayEntityInfo();
 
         bool bsetActive = m_player == null ? true : false;

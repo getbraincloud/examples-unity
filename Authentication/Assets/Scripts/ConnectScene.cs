@@ -45,7 +45,10 @@ public class ConnectScene : MonoBehaviour
     string inputEntityAge;
 
     int statusTextInitSize;
-    const int STATUS_SHRINK_SIZE = 8; 
+    const int STATUS_SHRINK_SIZE = 8;
+
+    const string GOOGLE_AUTH_INFO = "Only for Android";
+    const string FACEBOOK_AUTH_INFO = "Only for WEBGL"; 
 
     //UI elements set in editor.
     [SerializeField] Text statusText;
@@ -58,7 +61,8 @@ public class ConnectScene : MonoBehaviour
     [SerializeField] Text entityNameText;
     [SerializeField] Text entityAgeText;
     [SerializeField] Text advAuthInfoText;
-    [SerializeField] Toggle advAuthToggle; 
+    [SerializeField] Toggle advAuthToggle;
+    [SerializeField] Text extraAuthInfoText; 
     [SerializeField] Button resetProfileIdButton;
     [SerializeField] Button resetAnonIdButton;
     [SerializeField] Text storedProfileIdText;
@@ -93,81 +97,96 @@ public class ConnectScene : MonoBehaviour
         {
             case eAuthTypes.EMAIL:
                 selectedAdvancedAuthType = AuthenticationType.Email;
-                SetScreen("Email", "Password", true);
+                SetScreen("Email", "Password", authType);
                 advAuthToggle.interactable = true;
                 break;
             case eAuthTypes.UNIVERSAL:
                 selectedAdvancedAuthType = AuthenticationType.Universal;
-                SetScreen("User ID", "Password", true);
+                SetScreen("User ID", "Password", authType);
                 advAuthToggle.interactable = true;
                 break;
             case eAuthTypes.ANONYMOUS:
                 selectedAdvancedAuthType = AuthenticationType.Anonymous;
-                SetScreen("Profile ID", "Anonymous", false);
+                SetScreen("Profile ID", "Anonymous", authType);
                 advAuthToggle.interactable = true;
                 break;
             case eAuthTypes.GOOGLE:
                 selectedAdvancedAuthType = AuthenticationType.Google;
-                SetScreen("Profile ID", "Anonymous", false, true);
+                SetScreen("Profile ID", "Anonymous", authType);
                 advAuthToggle.interactable = false;
                 break;
             case eAuthTypes.FACEBOOK:
                 selectedAdvancedAuthType = AuthenticationType.Facebook;
-                SetScreen("Profile ID", "Anonymous", false);
+                SetScreen("Profile ID", "Anonymous", authType);
                 advAuthToggle.interactable = false;
                 break;
             case eAuthTypes.XBOXLIVE:
-                SetScreen("Profile ID", "Anonymous", false);
+                SetScreen("Profile ID", "Anonymous", authType);
                 advAuthToggle.interactable = false;
                 break;
         }
     }
 
-    void SetScreen(string profileIdInfo, string passwordInfo, bool bHasInput, bool bIsGooogleLogin = false)
+    void SetScreen(string profileIdInfo, string passwordInfo, eAuthTypes authType)
     {
         profileIdText.text = profileIdInfo + ":";
         passwordText.text = passwordInfo + ":";
 
-        ActivateAdvancedAuthFields(); 
+        ActivateAdvancedAuthFields();
 
-        if(bIsGooogleLogin)
-        {
-            bHasInput = false;
-            googleIdText.gameObject.SetActive(true);
-            serverAuthCodeText.gameObject.SetActive(true);
-            googleSignInButton.gameObject.SetActive(true);
-            advAuthToggle.isOn = false; 
-        }
-        else
-        {
-            googleIdText.gameObject.SetActive(false);
-            serverAuthCodeText.gameObject.SetActive(false);
-            googleSignInButton.gameObject.SetActive(false);
-        }
+        //Deactivating non-constant elements first to make method simpler.
+        profileIdField.gameObject.SetActive(false);
+        passwordField.gameObject.SetActive(false);
+        passwordField.contentType = InputField.ContentType.Password;
+        resetProfileIdButton.gameObject.SetActive(false);
+        resetAnonIdButton.gameObject.SetActive(false);
+        storedProfileIdText.gameObject.SetActive(false);
+        storedAnonymousIdText.gameObject.SetActive(false);
+        googleIdText.gameObject.SetActive(false);
+        serverAuthCodeText.gameObject.SetActive(false);
+        googleSignInButton.gameObject.SetActive(false);
+        extraAuthInfoText.text = "";
 
-        if(bHasInput)
+        switch (authType)
         {
-            profileIdField.gameObject.SetActive(true);
-            passwordField.gameObject.SetActive(true);
-            passwordField.contentType = InputField.ContentType.Password;
-            resetProfileIdButton.gameObject.SetActive(false);
-            resetAnonIdButton.gameObject.SetActive(false);
-            storedProfileIdText.gameObject.SetActive(false);
-            storedAnonymousIdText.gameObject.SetActive(false);
-            googleIdText.gameObject.SetActive(false);
-            serverAuthCodeText.gameObject.SetActive(false);
-            googleSignInButton.gameObject.SetActive(false); 
-        }
-        else
-        {
-            profileIdField.gameObject.SetActive(false);
-            passwordField.gameObject.SetActive(false);
-            resetProfileIdButton.gameObject.SetActive(true);
-            resetAnonIdButton.gameObject.SetActive(true);
-            storedProfileIdText.gameObject.SetActive(true);
-            storedAnonymousIdText.gameObject.SetActive(true);
-            storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
-            storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
+            case eAuthTypes.EMAIL:
+                profileIdField.gameObject.SetActive(true);
+                passwordField.gameObject.SetActive(true);
+                break;
+            case eAuthTypes.UNIVERSAL:
+                profileIdField.gameObject.SetActive(true);
+                passwordField.gameObject.SetActive(true);
+                break;
+            case eAuthTypes.ANONYMOUS:
+                resetProfileIdButton.gameObject.SetActive(true);
+                resetAnonIdButton.gameObject.SetActive(true);
+                storedProfileIdText.gameObject.SetActive(true);
+                storedAnonymousIdText.gameObject.SetActive(true);
+                storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
+                storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
+                break;
+            case eAuthTypes.GOOGLE:
+                resetProfileIdButton.gameObject.SetActive(true);
+                resetAnonIdButton.gameObject.SetActive(true);
+                storedProfileIdText.gameObject.SetActive(true);
+                storedAnonymousIdText.gameObject.SetActive(true);
+                storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
+                storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
+                googleIdText.gameObject.SetActive(true);
+                serverAuthCodeText.gameObject.SetActive(true);
+                googleSignInButton.gameObject.SetActive(true);
+                advAuthToggle.isOn = false;
+                extraAuthInfoText.text = GOOGLE_AUTH_INFO;
+                break;
+            case eAuthTypes.FACEBOOK:
+                resetProfileIdButton.gameObject.SetActive(true);
+                resetAnonIdButton.gameObject.SetActive(true);
+                storedProfileIdText.gameObject.SetActive(true);
+                storedAnonymousIdText.gameObject.SetActive(true);
+                storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
+                storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
+                extraAuthInfoText.text = FACEBOOK_AUTH_INFO;
+                break;
         }
     }
 
