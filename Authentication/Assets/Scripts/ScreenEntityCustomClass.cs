@@ -7,14 +7,6 @@ using UnityEngine.UI;
 
 public class ScreenEntityCustomClass : BCScreen
 {
-    public class Hobby
-    {
-        public string Name
-        {
-            get { return ""; }
-        }
-    }
-
     CustomEntityInstance m_player = null;
 
     bool bAttemptedFetchEntity = false;
