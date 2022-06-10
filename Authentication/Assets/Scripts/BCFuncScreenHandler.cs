@@ -112,11 +112,6 @@ public class BCFuncScreenHandler : MonoBehaviour
         }
     }
 
-    public void OnURLClick()
-    {
-        Application.OpenURL(currentlyActiveScreen.HelpURL);
-    }
-
     void SetGameData()
     {
         string appID = BrainCloudInterface.instance.GetAppID();
@@ -129,7 +124,6 @@ public class BCFuncScreenHandler : MonoBehaviour
     void SetHelpPanelActive(bool isActive)
     {
         helpPanelObject.SetActive(isActive);
-        helpButton.enabled = !isActive;
     }
 
     private void OnEnable()
@@ -163,10 +157,7 @@ public class BCFuncScreenHandler : MonoBehaviour
     {
         Debug.Log("Help Button Clicked on " + currentlyActiveScreen);
 
-        if(!helpPanelObject.activeSelf)
-        {
-            SetHelpPanelActive(true);
-        }
+        SetHelpPanelActive(!helpPanelObject.activeSelf);
     }
 
     public void OnExitHelpClick()

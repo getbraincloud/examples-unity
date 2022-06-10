@@ -35,6 +35,8 @@ public class ScreenEntity : BCScreen
         {
             HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-entity";
         }
+
+        SetFieldsInteractable(false);
     }
 
     public override void Activate()
@@ -42,8 +44,6 @@ public class ScreenEntity : BCScreen
         GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
         GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
-
-        
 
         BCFuncScreenHandler.instance.EntityInterface.GetPage(); 
     }
@@ -81,6 +81,12 @@ public class ScreenEntity : BCScreen
         createEntityButton.SetActive(isActive);
         saveEntityButton.SetActive(!isActive);
         deleteEntityButton.SetActive(!isActive);
+    }
+
+    void SetFieldsInteractable(bool isInteractable)
+    {
+        nameInput.interactable = isInteractable;
+        ageInput.interactable = isInteractable; 
     }
 
     //*************** UI Event Subscribed Methods ***************
@@ -130,14 +136,18 @@ public class ScreenEntity : BCScreen
     {
         m_player = BCFuncScreenHandler.instance.EntityInterface.Player;
 
+        SetFieldsInteractable(true);
+
         DisplayEntityInfo();
         SetActiveButtons(false); 
-
     }
 
     private void OnDeleteEntitySuccess()
     {
         DisplayEntityInfo();
+
+        SetFieldsInteractable(false);
+
         SetActiveButtons(true); 
     }
 
@@ -147,6 +157,8 @@ public class ScreenEntity : BCScreen
         DisplayEntityInfo();
 
         bool bsetActive = m_player == null ? true : false;
+
+        SetFieldsInteractable(!bsetActive);
 
         SetActiveButtons(bsetActive);
     }

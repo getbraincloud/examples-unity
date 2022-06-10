@@ -36,6 +36,8 @@ public class ScreenEntityCustomClass : BCScreen
         {
             HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-customentity";
         }
+
+        SetFieldsInteractable(false);
     }
 
     public override void Activate()
@@ -93,6 +95,12 @@ public class ScreenEntityCustomClass : BCScreen
             createEntityButton.GetComponent<Button>().interactable = true;
     }
 
+    void SetFieldsInteractable(bool isInteractable)
+    {
+        firstNameInput.interactable = isInteractable;
+        positionInput.interactable = isInteractable;
+    }
+
     //*************** UI Subscribed Methods ***************
     public void OnFetchEntity()
     {
@@ -143,6 +151,8 @@ public class ScreenEntityCustomClass : BCScreen
 
         DisplayEntityInfo();
 
+        SetFieldsInteractable(true);
+
         SetActiveButtons(false);
     }
 
@@ -150,15 +160,21 @@ public class ScreenEntityCustomClass : BCScreen
     {
         DisplayEntityInfo();
 
+        SetFieldsInteractable(false); 
+
         SetActiveButtons(true);
     }
 
     private void OnGetCustomEntityPageSuccess()
     {
         m_player = BCFuncScreenHandler.instance.CustomEntityInterface.CustomPlayer;
+
         DisplayEntityInfo();
 
         bool bsetActive = m_player == null ? true : false;
+
+        SetFieldsInteractable(!bsetActive); 
+
         bAttemptedFetchEntity = true;
 
         SetActiveButtons(bsetActive); 
