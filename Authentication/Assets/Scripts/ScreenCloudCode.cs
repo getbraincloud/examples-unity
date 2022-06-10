@@ -14,7 +14,6 @@ public class ScreenCloudCode : BCScreen
 
     private string m_cloudCodeScript = "";
     private string m_cloudCodeData = "";
-    private string m_exampleJSONPlaceholder = ""; 
 
     private static string[] m_cloudScriptNames { get; set; }
 
@@ -23,17 +22,17 @@ public class ScreenCloudCode : BCScreen
         m_cloudScriptNames = new string[] { "HelloWorld", "IncrementGlobalStat", "IncrementPlayerStat" };
         OnTemplateChanged(0);
 
-        if (helpMessage == null)
+        if (HelpMessage == null)
         {
-            helpMessage =   "The cloud code screen allows you to choose from three possible cloud code script templates that must be created on the \"Scripts\" page under " +
+            HelpMessage =   "The cloud code screen allows you to choose from three possible cloud code script templates that must be created on the \"Scripts\" page under " +
                             "the \"Cloud Code\" tab in the brainCloud portal.\n\n" +
                             "After selecting the script you would like to run, provide the necessary parameters in JSON format in the Cloud Code Json input field. " +
                             "Finally press the \"Run Script\" button and your results will appear in the log window on the right side of the screen.";
         }
 
-        if (helpURL == null)
+        if (HelpURL == null)
         {
-            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-script";
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-script";
         }
     }
 
@@ -84,6 +83,7 @@ public class ScreenCloudCode : BCScreen
         {
             // log and rethrow
             Debug.LogError("FAILED TO PARSE JSON: " + e.ToString());
+            TextLogger.instance.AddLog("Failed to Parse JSON " + e.ToString());
             throw;
         }
     }

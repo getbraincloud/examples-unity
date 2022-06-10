@@ -179,7 +179,6 @@ public class EntityInterface : MonoBehaviour
 
 
     //*************** Success Callbacks ***************
-
     private void OnGetPageSuccess(string response, object cbObject)
     {
         Debug.Log("Success");
@@ -256,56 +255,4 @@ public class EntityInterface : MonoBehaviour
         Debug.Log($"Failure Callback: {statusMessage}");
         Debug.Log($"Failure codes: status code: {statusCode}, reason code: {reasonCode}");
     }
-
-
-    #region Stuff to Remove
-    public void ReadEntity()
-    {
-        _bcWrapper.PlayerStateService.ReadUserState(OnReadSuccess, OnFailureCallback);
-    }
-    private void OnReadSuccess(string json, object cb)
-    {
-        //FrancoTODO: look into why I null this.
-        //_player = null;
-        Dictionary<string, object> jsonObj = JsonReader.Deserialize(json) as Dictionary<string, object>;
-        Dictionary<string, object> data = jsonObj["data"] as Dictionary<string, object>;
-
-        if (!data.ContainsKey("entities"))
-        {
-            Debug.LogWarning($"No entities were read in, this is a new user.");
-            return;
-        }
-        
-        var listOfEntities = data["entities"] as Dictionary<string, object>[];
-        for (int i = 0; i < listOfEntities.Length; i++)
-        {
-            Dictionary<string, object> entity = listOfEntities[i];
-            string listType = entity["entityType"] as string;
-            
-            if (listType == PLAYER_ENTITY_TYPE)
-            {
-                var data1 = entity["data"] as Dictionary<string, object>;
-                var entityData = data1["data"] as Dictionary<string, object>;
-                _player = new EntityInstance();
-                _player.Name = entityData["name"] as string;
-                _player.Age = entityData["age"] as string;
-
-                _player.EntityId = entity["entityId"] as string;
-                _player.EntityType = PLAYER_ENTITY_TYPE;
-                _player.Version = (int) entity["version"];
-                _player.CreatedAt = Util.BcTimeToDateTime((long) entity["createdAt"]);
-                _player.UpdatedAt = Util.BcTimeToDateTime((long) entity["updatedAt"]);
-            }
-        }
-    }
-    public void GetEntitiesByType()
-    {
-        _bcWrapper.EntityService.GetEntitiesByType(PLAYER_ENTITY_TYPE, OnGetEntitiesByTypeSuccess, OnFailureCallback);
-    }
-    private void OnGetEntitiesByTypeSuccess(string response, object cbObject)
-    {
-        Debug.Log(string.Format("Success | {0}", response));
-    }
-    #endregion
-
 }

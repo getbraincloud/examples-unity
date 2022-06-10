@@ -9,8 +9,6 @@ public class TextLogger : MonoBehaviour
 {
     [SerializeField] Text logText;
     [SerializeField] RectTransform logTextParent;
-    [SerializeField] ContentSizeFitter sizeFitter;
-    [SerializeField] Button clearLogButton; 
 
     Text newlog;
     bool bContentSizeSet = false;
@@ -63,15 +61,19 @@ public class TextLogger : MonoBehaviour
         AddLogJson(json); 
     }
 
-    public void AddLogJson(string json, string requestName = "")
+    public void AddLogJson(string json)
     {
-        StringBuilder sb = new StringBuilder();
-        JsonWriter writer = new JsonWriter(sb);
-        writer.PrettyPrint = true;
-        JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
+        if(json.StartsWith("{") && json.EndsWith("}"))
+        {
+            StringBuilder sb = new StringBuilder();
+            JsonWriter writer = new JsonWriter(sb);
+            writer.PrettyPrint = true;
+        
+            JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
 
-        newlog = Instantiate(logText, logTextParent);
-        newlog.text = sb.ToString() + "\n";
+            newlog = Instantiate(logText, logTextParent);
+            newlog.text = sb.ToString() + "\n";
+        }
     }
 
     public void AddLog(string log)

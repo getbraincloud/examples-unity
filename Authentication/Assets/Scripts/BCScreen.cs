@@ -8,17 +8,17 @@ public abstract class BCScreen : MonoBehaviour
 {
     protected BrainCloudWrapper _bc;
 
-    protected MainScene.eBCFunctionType bcFuncType; 
+    protected BCFuncScreenHandler.eBCFunctionType bcFuncType; 
 
-    public string helpMessage { get; protected set; }
-    public string helpURL { get; protected set; }
+    public string HelpMessage { get; protected set; }
+    public string HelpURL { get; protected set; }
 
-    public void SetFunctionType(MainScene.eBCFunctionType type)
+    public void SetFunctionType(BCFuncScreenHandler.eBCFunctionType type)
     {
         bcFuncType = type; 
     }
 
-    public MainScene.eBCFunctionType GetFunctionType()
+    public BCFuncScreenHandler.eBCFunctionType GetFunctionType()
     {
         return bcFuncType; 
     }

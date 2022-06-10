@@ -4,16 +4,13 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using BrainCloud.Common;
 
-public class ConnectScene : MonoBehaviour
+public class AuthenticateHandler : MonoBehaviour
 {
     public GameObject MainScene;
     public BCConfig BCConfig;
     
     public static BrainCloudWrapper _bc;
     
-    Vector2 m_scrollPosition;
-    string m_authStatus = "Welcome to brainCloud!";
-    int m_selectedAuth = 0;
     enum eAuthTypes {
         EMAIL,
         UNIVERSAL,
@@ -23,24 +20,13 @@ public class ConnectScene : MonoBehaviour
         XBOXLIVE
     };
 
-    string[] m_authTypes = {
-        "Email",
-        "Universal",
-        "Anonymous",
-        "Google (Android Devices)",
-        "Facebook"
-    };
-    
-    private bool signedIn;
-    private int playerNumber;
-
     bool useAdvancedAuthentication = false;
     AuthenticationType selectedAdvancedAuthType;
 
     eAuthTypes currentAuthType;
 
-    string inputProfileId;
-    string inputPassword;
+    string inputProfileId = "";
+    string inputPassword = "";
     string inputEntityName;
     string inputEntityAge;
 
@@ -54,22 +40,22 @@ public class ConnectScene : MonoBehaviour
     [SerializeField] Text statusText;
     [SerializeField] Text profileIdText;
     [SerializeField] Text passwordText;
-    [SerializeField] InputField profileIdField;
-    [SerializeField] InputField passwordField;
-    [SerializeField] InputField entityNameField;
-    [SerializeField] InputField entityAgeField;
-    [SerializeField] Text entityNameText;
-    [SerializeField] Text entityAgeText;
-    [SerializeField] Text advAuthInfoText;
+    [SerializeField] GameObject profileIdFieldObject;
+    [SerializeField] GameObject passwordFieldObject;
+    [SerializeField] GameObject entityNameField;
+    [SerializeField] GameObject entityAgeField;
+    [SerializeField] GameObject entityNameText;
+    [SerializeField] GameObject entityAgeText;
+    [SerializeField] GameObject advAuthInfoText;
     [SerializeField] Toggle advAuthToggle;
     [SerializeField] Text extraAuthInfoText; 
-    [SerializeField] Button resetProfileIdButton;
-    [SerializeField] Button resetAnonIdButton;
+    [SerializeField] GameObject resetProfileIdButton;
+    [SerializeField] GameObject resetAnonIdButton;
     [SerializeField] Text storedProfileIdText;
     [SerializeField] Text storedAnonymousIdText;
-    [SerializeField] Text googleIdText;
-    [SerializeField] Text serverAuthCodeText;
-    [SerializeField] Button googleSignInButton; 
+    [SerializeField] GameObject googleIdText;
+    [SerializeField] GameObject serverAuthCodeText;
+    [SerializeField] GameObject googleSignInButton; 
 
     void Start()
     {
@@ -135,52 +121,51 @@ public class ConnectScene : MonoBehaviour
         ActivateAdvancedAuthFields();
 
         //Deactivating non-constant elements first to make method simpler.
-        profileIdField.gameObject.SetActive(false);
-        passwordField.gameObject.SetActive(false);
-        passwordField.contentType = InputField.ContentType.Password;
-        resetProfileIdButton.gameObject.SetActive(false);
-        resetAnonIdButton.gameObject.SetActive(false);
+        profileIdFieldObject.SetActive(false);
+        passwordFieldObject.gameObject.SetActive(false);
+        resetProfileIdButton.SetActive(false);
+        resetAnonIdButton.SetActive(false);
         storedProfileIdText.gameObject.SetActive(false);
         storedAnonymousIdText.gameObject.SetActive(false);
-        googleIdText.gameObject.SetActive(false);
-        serverAuthCodeText.gameObject.SetActive(false);
-        googleSignInButton.gameObject.SetActive(false);
+        googleIdText.SetActive(false);
+        serverAuthCodeText.SetActive(false);
+        googleSignInButton.SetActive(false);
         extraAuthInfoText.text = "";
 
         switch (authType)
         {
             case eAuthTypes.EMAIL:
-                profileIdField.gameObject.SetActive(true);
-                passwordField.gameObject.SetActive(true);
+                profileIdFieldObject.SetActive(true);
+                passwordFieldObject.gameObject.SetActive(true);
                 break;
             case eAuthTypes.UNIVERSAL:
-                profileIdField.gameObject.SetActive(true);
-                passwordField.gameObject.SetActive(true);
+                profileIdFieldObject.SetActive(true);
+                passwordFieldObject.gameObject.SetActive(true);
                 break;
             case eAuthTypes.ANONYMOUS:
-                resetProfileIdButton.gameObject.SetActive(true);
-                resetAnonIdButton.gameObject.SetActive(true);
+                resetProfileIdButton.SetActive(true);
+                resetAnonIdButton.SetActive(true);
                 storedProfileIdText.gameObject.SetActive(true);
                 storedAnonymousIdText.gameObject.SetActive(true);
                 storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
                 storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
                 break;
             case eAuthTypes.GOOGLE:
-                resetProfileIdButton.gameObject.SetActive(true);
-                resetAnonIdButton.gameObject.SetActive(true);
+                resetProfileIdButton.SetActive(true);
+                resetAnonIdButton.SetActive(true);
                 storedProfileIdText.gameObject.SetActive(true);
                 storedAnonymousIdText.gameObject.SetActive(true);
                 storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
                 storedAnonymousIdText.text = BrainCloudInterface.instance.GetStoredAnonymousID();
-                googleIdText.gameObject.SetActive(true);
-                serverAuthCodeText.gameObject.SetActive(true);
-                googleSignInButton.gameObject.SetActive(true);
+                googleIdText.SetActive(true);
+                serverAuthCodeText.SetActive(true);
+                googleSignInButton.SetActive(true);
                 advAuthToggle.isOn = false;
                 extraAuthInfoText.text = GOOGLE_AUTH_INFO;
                 break;
             case eAuthTypes.FACEBOOK:
-                resetProfileIdButton.gameObject.SetActive(true);
-                resetAnonIdButton.gameObject.SetActive(true);
+                resetProfileIdButton.SetActive(true);
+                resetAnonIdButton.SetActive(true);
                 storedProfileIdText.gameObject.SetActive(true);
                 storedAnonymousIdText.gameObject.SetActive(true);
                 storedProfileIdText.text = BrainCloudInterface.instance.GetStoredProfileID();
@@ -225,15 +210,20 @@ public class ConnectScene : MonoBehaviour
 
     void ActivateAdvancedAuthFields()
     {
-        entityNameField.gameObject.SetActive(useAdvancedAuthentication);
-        entityAgeField.gameObject.SetActive(useAdvancedAuthentication);
-        entityNameText.gameObject.SetActive(useAdvancedAuthentication);
-        entityAgeText.gameObject.SetActive(useAdvancedAuthentication);
-        advAuthInfoText.gameObject.SetActive(useAdvancedAuthentication);
+        entityNameField.SetActive(useAdvancedAuthentication);
+        entityAgeField.SetActive(useAdvancedAuthentication);
+        entityNameText.SetActive(useAdvancedAuthentication);
+        entityAgeText.SetActive(useAdvancedAuthentication);
+        advAuthInfoText.SetActive(useAdvancedAuthentication);
     }
 
     public void OnAuthenticate()
     {
+        if((inputProfileId == "" || inputPassword == "") && currentAuthType != eAuthTypes.ANONYMOUS)
+        {
+            return;
+        }
+
         statusText.fontSize = STATUS_SHRINK_SIZE;
         statusText.text = "Attempting to Authenticate...";
 

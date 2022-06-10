@@ -104,6 +104,7 @@ public class CustomEntityInterface : MonoBehaviour
         if (results == null || results.Length == 0)
         {
             Debug.LogWarning("No entities found that is owned by this user");
+            GameEvents.instance.GetCustomEntityPageSuccess();
             return;
         }
         
@@ -265,9 +266,6 @@ public class CustomEntityInterface : MonoBehaviour
         pagination.Add("rowsPerPage", 50);
         pagination.Add("pageNumber", 1);
         
-        Dictionary<string, object> searchCriteria = new Dictionary<string, object>();
-        searchCriteria.Add("data.position", "forward");
-        
         Dictionary<string, object> sortCriteria = new Dictionary<string, object>();
 
         Dictionary<string, object> optionCriteria = new Dictionary<string, object>();
@@ -275,7 +273,6 @@ public class CustomEntityInterface : MonoBehaviour
 
         Dictionary<string, object> contextInfo = new Dictionary<string, object>();
         contextInfo.Add("pagination", pagination);
-        contextInfo.Add("searchCriteria", searchCriteria);
         contextInfo.Add("sortCriteria", sortCriteria);
         contextInfo.Add("options", optionCriteria);
 

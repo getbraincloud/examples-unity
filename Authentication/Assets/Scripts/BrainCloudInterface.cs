@@ -377,11 +377,11 @@ public class BrainCloudInterface : MonoBehaviour
                     c = new DataManager.Currency();
                     DataManager.instance.Currencies[key] = c;
                 }
-                c.currencyType = key;
-                c.purchased = (int)jCurMap[key]["purchased"];
-                c.balance = (int)jCurMap[key]["balance"];
-                c.consumed = (int)jCurMap[key]["consumed"];
-                c.awarded = (int)jCurMap[key]["awarded"];
+                c.CurrencyType = key;
+                c.Purchased = (int)jCurMap[key]["purchased"];
+                c.Balance = (int)jCurMap[key]["balance"];
+                c.Consumed = (int)jCurMap[key]["consumed"];
+                c.Awarded = (int)jCurMap[key]["awarded"];
             }
 
             GameEvents.instance.GetVirtualCurrency();

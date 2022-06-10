@@ -7,10 +7,6 @@ using UnityEngine.UI;
 
 public class ScreenEntity : BCScreen
 {
-    private static string ENTITY_TYPE_PLAYER = "player";
-    
-    //public ScreenEntity(BrainCloudWrapper bc) : base(bc) { }
-
     EntityInstance m_player;
 
     string entityName = "";
@@ -21,9 +17,25 @@ public class ScreenEntity : BCScreen
     [SerializeField] Text entityTypeText;
     [SerializeField] InputField nameInput;
     [SerializeField] InputField ageInput;
-    [SerializeField] Button createEntityButton;
-    [SerializeField] Button saveEntityButton;
-    [SerializeField] Button deleteEntityButton;
+    [SerializeField] GameObject createEntityButton;
+    [SerializeField] GameObject saveEntityButton;
+    [SerializeField] GameObject deleteEntityButton;
+
+    private void Awake()
+    {
+        if (HelpMessage == null)
+        {
+            HelpMessage = "The entity screen demonstrates how a user entity can be created via the brainCloud client.\n\n" +
+                          "By pressing Create, a default user entity is created for the user. " +
+                          "Pressing Delete will delete the user entity while Save updates the user entity of the user.\n\n" +
+                          "This entity can be monitored on the \"User Entites\" page under the \"User Monitoring\" tab in the brainCloud portal.";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-entity";
+        }
+    }
 
     public override void Activate()
     {
@@ -31,20 +43,9 @@ public class ScreenEntity : BCScreen
         GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
         GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
 
-        if(helpMessage == null)
-        {
-            helpMessage = "The entity screen demonstrates how a user entity can be created via the brainCloud client.\n\n" +
-                          "By pressing Create, a default user entity is created for the user. " +
-                          "Pressing Delete will delete the user entity while Save updates the user entity of the user.\n\n" +
-                          "This entity can be monitored on the \"User Entites\" page under the \"User Monitoring\" tab in the brainCloud portal.";
-        }
+        
 
-        if(helpURL == null)
-        {
-            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-entity";
-        }
-
-        MainScene.instance.EntityInterface.GetPage(); 
+        BCFuncScreenHandler.instance.EntityInterface.GetPage(); 
     }
 
     void DisplayEntityID()
@@ -77,27 +78,27 @@ public class ScreenEntity : BCScreen
 
     void SetActiveButtons(bool isActive)
     {
-        createEntityButton.gameObject.SetActive(isActive);
-        saveEntityButton.gameObject.SetActive(!isActive);
-        deleteEntityButton.gameObject.SetActive(!isActive);
+        createEntityButton.SetActive(isActive);
+        saveEntityButton.SetActive(!isActive);
+        deleteEntityButton.SetActive(!isActive);
     }
 
     //*************** UI Event Subscribed Methods ***************
     public void OnCreateEntity()
     {
-        MainScene.instance.EntityInterface.CreateEntity();
+        BCFuncScreenHandler.instance.EntityInterface.CreateEntity();
         Debug.Log("Creating Entity...");
     }
 
     public void OnSaveEntity()
     {
-        MainScene.instance.EntityInterface.UpdateEntity();
+        BCFuncScreenHandler.instance.EntityInterface.UpdateEntity();
         Debug.Log("Updating Entity..."); 
     }
 
     public void OnDeleteEntity()
     {
-        MainScene.instance.EntityInterface.DeleteEntity();
+        BCFuncScreenHandler.instance.EntityInterface.DeleteEntity();
         m_player = null;
         Debug.Log("Deleting Entity...");
     }
@@ -127,7 +128,7 @@ public class ScreenEntity : BCScreen
     //*************** Game Event Subscribed Methods ***************
     private void OnCreateEntitySuccess()
     {
-        m_player = MainScene.instance.EntityInterface.Player;
+        m_player = BCFuncScreenHandler.instance.EntityInterface.Player;
 
         DisplayEntityInfo();
         SetActiveButtons(false); 
@@ -142,7 +143,7 @@ public class ScreenEntity : BCScreen
 
     private void OnGetUserEntityPageSuccess()
     {
-        m_player = MainScene.instance.EntityInterface.Player;
+        m_player = BCFuncScreenHandler.instance.EntityInterface.Player;
         DisplayEntityInfo();
 
         bool bsetActive = m_player == null ? true : false;
@@ -156,6 +157,4 @@ public class ScreenEntity : BCScreen
         GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
         GameEvents.instance.onGetUserEntityPageSuccess -= OnGetUserEntityPageSuccess;
     }
-
-       
 }

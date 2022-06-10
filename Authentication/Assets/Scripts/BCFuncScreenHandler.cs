@@ -7,16 +7,14 @@ using System.Text;
 using BrainCloud.LitJson;
 using UnityEngine.UI;
 
-public class MainScene : MonoBehaviour
+public class BCFuncScreenHandler : MonoBehaviour
 {
-    public static MainScene instance { get; private set; } 
+    public static BCFuncScreenHandler instance { get; private set; } 
 
     [SerializeField] Text appDataText;
     [SerializeField] Dropdown funcDropdown;
-    [SerializeField] Button logoutButton;
     [SerializeField] GameObject helpPanelObject;
     [SerializeField] Button helpButton;
-    [SerializeField] Text helpText; 
 
     public BCConfig BCConfig;
     private BrainCloudWrapper _bc;
@@ -24,7 +22,6 @@ public class MainScene : MonoBehaviour
     List<BCScreen> bcScreens;
     Dictionary<eBCFunctionType, BCScreen> bcScreenDict;
     BCScreen currentlyActiveScreen = null;
-    bool bHasAuthenticatedOnce = false;
 
     HelpPanel helpPanel; 
 
@@ -51,17 +48,6 @@ public class MainScene : MonoBehaviour
 		FN_IDENTITY 
         //etc
     }
-
-    string[] m_bcFuncLabels =
-    {
-        "Entity",
-        "Entity Custom",
-        "XP/Currency",
-        "Player Stats",
-        "Global Stats",
-        "Cloud Code",
-		"Identity" 
-    };
 
     void Awake()
     {
@@ -119,11 +105,8 @@ public class MainScene : MonoBehaviour
             currentlyActiveScreen.Activate();
 
             string screenname = currentlyActiveScreen.gameObject.name;
-            string helpmessage = currentlyActiveScreen.helpMessage;
-            string url = currentlyActiveScreen.helpURL;
-
-            //helpText.text = currentlyActiveScreen.gameObject.name + " Help: \n \n" +
-            //                currentlyActiveScreen.helpMessage;
+            string helpmessage = currentlyActiveScreen.HelpMessage;
+            string url = currentlyActiveScreen.HelpURL;
 
             helpPanel.SetHelpPanel(screenname, helpmessage, url); 
         }
@@ -131,7 +114,7 @@ public class MainScene : MonoBehaviour
 
     public void OnURLClick()
     {
-        Application.OpenURL(currentlyActiveScreen.helpURL);
+        Application.OpenURL(currentlyActiveScreen.HelpURL);
     }
 
     void SetGameData()

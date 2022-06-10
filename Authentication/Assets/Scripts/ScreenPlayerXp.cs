@@ -8,8 +8,6 @@ using UnityEngine.UI;
 
 public class ScreenPlayerXp : BCScreen
 {
-    int m_playerXp = 0;
-    int m_playerLevel = 0;
     string m_incrementXp = "0";
     string m_currencyToAward = "0";
     string m_currencyToConsume = "0";
@@ -22,7 +20,26 @@ public class ScreenPlayerXp : BCScreen
     [SerializeField] Text currencyAwardedText;
     [SerializeField] Text currencyPurchasedText; 
 
-    private List<string> m_currencyTypes; 
+    private List<string> m_currencyTypes;
+
+    private void Awake()
+    {
+        if (HelpMessage == null)
+        {
+            HelpMessage =   "The XP portion of the XP/Currency screen allows you to increase the player level by incrementing player XP by a provided amount. " +
+                            "XP levels are also capable of interacting with specified user statistics. " +
+                            "Player levels are defined under the \"XP Levels\" page within the \"Gamification\" tab of the portal. " +
+                            "XP and player level can be monitored through the \"User Summary\" page of the \"User Monitoring\" tab.\n\n" +
+                            "The virtual currency portion of the XP/Currency screen retreives a virtual currency called \"gems\". " +
+                            "Gems must be defined on the \"Virtual Currencies\" page under the \"Marketplace\" tab. " +
+                            "User's virtual currency balance can be monitored on the \"Virtual Currency\" Page of \"User Monitoring.\"";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-virtualcurrency";
+        }
+    }
 
     public override void Activate()
     {
@@ -36,22 +53,6 @@ public class ScreenPlayerXp : BCScreen
 
         BrainCloudInterface.instance.ReadUserState(this);
         BrainCloudInterface.instance.GetVirtualCurrency("gems");
-
-        if (helpMessage == null)
-        {
-            helpMessage =   "The XP portion of the XP/Currency screen allows you to increase the player level by incrementing player XP by a provided amount. " +
-                            "XP levels are also capable of interacting with specified user statistics. " +
-                            "Player levels are defined under the \"XP Levels\" page within the \"Gamification\" tab of the portal. " +
-                            "XP and player level can be monitored through the \"User Summary\" page of the \"User Monitoring\" tab.\n\n" +
-                            "The virtual currency portion of the XP/Currency screen retreives a virtual currency called \"gems\". " +
-                            "Gems must be defined on the \"Virtual Currencies\" page under the \"Marketplace\" tab. " +
-                            "User's virtual currency balance can be monitored on the \"Virtual Currency\" Page of \"User Monitoring.\"";
-        }
-
-        if (helpURL == null)
-        {
-            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-virtualcurrency";
-        }
     }
 
     //*************** Game Event Subscribed Methods ***************
@@ -65,10 +66,17 @@ public class ScreenPlayerXp : BCScreen
     {
         DataManager dataManager = DataManager.instance;
 
-        currencyPurchasedText.text = dataManager.Currencies["gems"].purchased.ToString();
-        currencyBalanceText.text = dataManager.Currencies["gems"].balance.ToString();
-        currencyConsumedText.text = dataManager.Currencies["gems"].consumed.ToString();
-        currencyAwardedText.text = dataManager.Currencies["gems"].awarded.ToString();
+        if(dataManager.Currencies.ContainsKey("gems"))
+        {
+            currencyPurchasedText.text = dataManager.Currencies["gems"].Purchased.ToString();
+            currencyBalanceText.text = dataManager.Currencies["gems"].Balance.ToString();
+            currencyConsumedText.text = dataManager.Currencies["gems"].Consumed.ToString();
+            currencyAwardedText.text = dataManager.Currencies["gems"].Awarded.ToString();
+            return;
+        }
+
+        TextLogger.instance.AddLog("Ensure that \"gems\" was created in Virtual Currencies under the Marketplace tab.");
+        Debug.LogWarning("Ensure that \"gems\" was created in Virtual Currencies under the Marketplace tab.");
     }
 
     //*************** UI Subscribed Methods ***************

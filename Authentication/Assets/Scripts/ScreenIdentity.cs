@@ -18,35 +18,35 @@ public class ScreenIdentity : BCScreen {
     
     Twitter.RequestTokenResponse m_RequestTokenResponse;
 
-    void Awake()
+    private void Awake()
     {
-        if (helpMessage == null)
+        if (HelpMessage == null)
         {
-            helpMessage =   "The identity screen allows a user to attach or merge either an Email or Universal ID to an existing user.\n\n" +
+            HelpMessage =   "The identity screen allows a user to attach or merge either an Email or Universal ID to an existing user.\n\n" +
                             "Universal identities and emails attached to users can be viewed on the User Summary page under the User Monitoring tab."; 
         }
 
-        if (helpURL == null)
+        if (HelpURL == null)
         {
-            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-identity";
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-identity";
         }
     }
 
     public void OnLoginTwitterClick()
     {
-        GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetRequestToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET,
+        GameObject.FindObjectOfType<BCFuncScreenHandler>().TwitterCoroutine(Twitter.API.GetRequestToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET,
                                                                   new Twitter.RequestTokenCallback(this.OnSuccess_GetTwitterPIN)));
     }
 
     public void OnAttachTwitterClick()
     {
-        GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET,
+        GameObject.FindObjectOfType<BCFuncScreenHandler>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET,
                                                                   m_RequestTokenResponse.Token, m_twitterPin, new Twitter.AccessTokenCallback(this.OnSuccess_AttachTwitter)));
     }
 
     public void OnMergeTwitterClick()
     {
-        GameObject.FindObjectOfType<MainScene>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET, 
+        GameObject.FindObjectOfType<BCFuncScreenHandler>().TwitterCoroutine(Twitter.API.GetAccessToken(BrainCloudInterface.CONSUMER_KEY, BrainCloudInterface.CONSUMER_SECRET, 
                                                                   m_RequestTokenResponse.Token, m_twitterPin, new Twitter.AccessTokenCallback(this.OnSuccess_AuthenticateTwitter)));
     }
 

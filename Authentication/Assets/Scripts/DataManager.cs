@@ -27,15 +27,13 @@ public class DataManager : MonoBehaviour
     //Currency Data
     public class Currency
     {
-        public string currencyType;
-        public int purchased;
-        public int balance;
-        public int consumed;
-        public int awarded;
-
-        public string award = "0";
-        public string consume = "0";
+        public string CurrencyType { get; set; } 
+        public int Purchased { get; set; }
+        public int Balance { get; set; }
+        public int Consumed { get; set; }
+        public int Awarded { get; set; }
     }
+
     public IDictionary<string, Currency> Currencies { get; set; }
 
     //Player Stat Data
@@ -43,7 +41,6 @@ public class DataManager : MonoBehaviour
 
     //Global Stat Data
     public Dictionary<string, long> GlobalStats { get; set; }
-
 
     void Start()
     {

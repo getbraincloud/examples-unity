@@ -17,14 +17,34 @@ public class ScreenEntityCustomClass : BCScreen
 
     CustomEntityInstance m_player = null;
 
+    bool bAttemptedFetchEntity = false;
+
     //UI elements 
     [SerializeField] Text entityIDText;
     [SerializeField] Text entityTypeText;
     [SerializeField] InputField firstNameInput;
     [SerializeField] InputField positionInput;
-    [SerializeField] Button createEntityButton;
-    [SerializeField] Button saveEntityButton;
-    [SerializeField] Button deleteEntityButton; 
+    [SerializeField] GameObject fetchEntityButton; 
+    [SerializeField] GameObject createEntityButton;
+    [SerializeField] GameObject saveEntityButton;
+    [SerializeField] GameObject deleteEntityButton;
+
+    private void Awake()
+    {
+        if (HelpMessage == null)
+        {
+            HelpMessage = "<b>" + "Custom Entities are a premium feature available to Plus Plan customers. Additional usage fees apply.\n\n" + "</b>" +
+                          "The custom entity screen demonstrates how a custom entity can be created via the brainCloud client.\n\n" +
+                          "By pressing Create, a default custom entity is created for the user. " +
+                          "Pressing Delete will delete the custom entity while Save updates the custom entity of the user.\n\n" +
+                          "This custom entity can be monitored on the \"Custom Entities\" page under the \"User Monitoring\" tab in the brainCloud Portal.";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-customentity";
+        }
+    }
 
     public override void Activate()
     {
@@ -32,25 +52,9 @@ public class ScreenEntityCustomClass : BCScreen
         GameEvents.instance.onDeleteCustomEntitySuccess += OnDeleteCustomEntitySuccess;
         GameEvents.instance.onGetCustomEntityPageSuccess += OnGetCustomEntityPageSuccess;
 
-        MainScene.instance.CustomEntityInterface.ReadCustomEntity();
-
         DisplayEntityInfo();
 
         SetActiveButtons(m_player == null ? true : false);
-
-        if (helpMessage == null)
-        {
-            helpMessage = "Custom Entities are a premium feature available to Plus Plan customers. Additional usage fees apply.\n\n" + 
-                          "The custom entity screen demonstrates how a custom entity can be created via the brainCloud client.\n\n" +
-                          "By pressing Create, a default custom entity is created for the user. " +
-                          "Pressing Delete will delete the custom entity while Save updates the custom entity of the user.\n\n" +
-                          "This custom entity can be monitored on the \"Custom Entities\" page under the \"User Monitoring\" tab in the brainCloud Portal.";
-        }
-
-        if (helpURL == null)
-        {
-            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-customentity";
-        }
     }
 
     void DisplayEntityID()
@@ -83,19 +87,31 @@ public class ScreenEntityCustomClass : BCScreen
 
     private void SetActiveButtons(bool isActive)
     {
-        createEntityButton.gameObject.SetActive(isActive);
-        saveEntityButton.gameObject.SetActive(!isActive);
-        deleteEntityButton.gameObject.SetActive(!isActive);
+        fetchEntityButton.SetActive(isActive); 
+        createEntityButton.SetActive(isActive);
+        saveEntityButton.SetActive(!isActive);
+        deleteEntityButton.SetActive(!isActive);
+
+        if (!createEntityButton.activeSelf)
+            return;
+
+        if (!bAttemptedFetchEntity)
+            createEntityButton.GetComponent<Button>().interactable = false;
+        else
+            createEntityButton.GetComponent<Button>().interactable = true;
     }
 
     //*************** UI Subscribed Methods ***************
+    public void OnFetchEntity()
+    {
+        BCFuncScreenHandler.instance.CustomEntityInterface.ReadCustomEntity();
+    }
+    
     public void OnCreateEntity()
     {
         if (m_player == null)
         {
-            MainScene.instance.CustomEntityInterface.CreateCustomEntity();
-            
-            Debug.Log("Creating Entity...");
+            BCFuncScreenHandler.instance.CustomEntityInterface.CreateCustomEntity();
         }
     }
 
@@ -103,9 +119,7 @@ public class ScreenEntityCustomClass : BCScreen
     {
         if (m_player != null)
         {
-            MainScene.instance.CustomEntityInterface.UpdateCustomEntity();
-
-            Debug.Log("Updating Entity...");
+            BCFuncScreenHandler.instance.CustomEntityInterface.UpdateCustomEntity();
         }
     }
 
@@ -113,10 +127,8 @@ public class ScreenEntityCustomClass : BCScreen
     {
         if (m_player != null)
         {
-            MainScene.instance.CustomEntityInterface.DeleteCustomEntity();
+            BCFuncScreenHandler.instance.CustomEntityInterface.DeleteCustomEntity();
             m_player = null;
-
-            Debug.Log("Deleting Entity...");
         }
     }
 
@@ -135,7 +147,7 @@ public class ScreenEntityCustomClass : BCScreen
     //*************** Game Events Subscribed Methods ***************
     private void OnCreateCustomEntitySuccess()
     {
-        m_player = MainScene.instance.CustomEntityInterface.CustomPlayer;
+        m_player = BCFuncScreenHandler.instance.CustomEntityInterface.CustomPlayer;
 
         DisplayEntityInfo();
 
@@ -151,16 +163,22 @@ public class ScreenEntityCustomClass : BCScreen
 
     private void OnGetCustomEntityPageSuccess()
     {
-        m_player = MainScene.instance.CustomEntityInterface.CustomPlayer;
+        m_player = BCFuncScreenHandler.instance.CustomEntityInterface.CustomPlayer;
         DisplayEntityInfo();
 
         bool bsetActive = m_player == null ? true : false;
+        bAttemptedFetchEntity = true;
 
         SetActiveButtons(bsetActive); 
     }
 
     protected override void OnDisable()
     {
+        bAttemptedFetchEntity = false;
+        SetActiveButtons(true);
+        m_player = null;
+        DisplayEntityInfo(); 
+
         GameEvents.instance.onCreateUserEntitySuccess -= OnCreateCustomEntitySuccess;
         GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteCustomEntitySuccess;
         GameEvents.instance.onGetCustomEntityPageSuccess -= OnGetCustomEntityPageSuccess; 

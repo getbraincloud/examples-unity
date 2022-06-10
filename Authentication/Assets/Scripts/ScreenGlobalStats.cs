@@ -11,6 +11,22 @@ public class ScreenGlobalStats : BCScreen
     [SerializeField] GlobalStat globalStatPrefab; 
     [SerializeField] Transform gStatPefabParent;
 
+    private void Awake()
+    {
+        if (HelpMessage == null)
+        {
+            HelpMessage = "The global stats screen will display all global stats defined within the \"Global Statistics\" page under the \"Statistics Rules\" tab of the brainCloud portal.\n\n" +
+                          "Pressing the increment button next to each global stat will increment that stat by 1.\n\n" +
+                          "Global stats are accessible by any user and can be monitored on the Global Statistics page under the Global Monitoring " +
+                          "tab in the brainCloud Portal.";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-globalstats";
+        }
+    }
+
     public override void Activate()
     {
         GameEvents.instance.onIncrementGlobalStat += IncrementGlobalStat;
@@ -19,17 +35,17 @@ public class ScreenGlobalStats : BCScreen
         m_globalStats = new Dictionary<string, GlobalStat>();
         BrainCloudInterface.instance.ReadAllGlobalStats();
 
-        if (helpMessage == null)
+        if (HelpMessage == null)
         {
-            helpMessage = "The global stats screen will display all global stats defined within the \"Global Statistics\" page under the \"Statistics Rules\" tab of the brainCloud portal.\n\n" +
+            HelpMessage = "The global stats screen will display all global stats defined within the \"Global Statistics\" page under the \"Statistics Rules\" tab of the brainCloud portal.\n\n" +
                           "Pressing the increment button next to each global stat will increment that stat by 1.\n\n" +
                           "Global stats are accessible by any user and can be monitored on the Global Statistics page under the Global Monitoring " +
                           "tab in the brainCloud Portal.";
         }
 
-        if (helpURL == null)
+        if (HelpURL == null)
         {
-            helpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-globalstats";
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-globalstats";
         }
     }
 

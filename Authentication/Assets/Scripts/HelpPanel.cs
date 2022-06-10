@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class HelpPanel : MonoBehaviour
 {
-    public string helpTitle { get; set; }
-    public string helpMessage { get; set; }
-    public string apiURL { get; set; }
+    public string HelpTitle { get; set; }
+    public string HelpMessage { get; set; }
+    public string ApiURL { get; set; }
 
     [SerializeField] Button exitButton;
     [SerializeField] Button apiURLButton; 
@@ -16,12 +16,12 @@ public class HelpPanel : MonoBehaviour
 
     public void SetHelpPanel(string title, string message, string url)
     {
-        helpTitle = title;
-        helpMessage = message;
-        apiURL = url;
+        HelpTitle = title;
+        HelpMessage = message;
+        ApiURL = url;
 
-        helpTitleText.text = helpTitle;
-        helpMessageText.text = helpMessage; 
+        helpTitleText.text = HelpTitle;
+        helpMessageText.text = HelpMessage; 
     }
 
     public void OnExitClick()
@@ -31,6 +31,6 @@ public class HelpPanel : MonoBehaviour
 
     public void OnAPIClick()
     {
-        Application.OpenURL(apiURL); 
+        Application.OpenURL(ApiURL); 
     }
 }

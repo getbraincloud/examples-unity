@@ -12,7 +12,6 @@ public class PlayerStat : MonoBehaviour
     //UI Elements
     [SerializeField] Text statNameText;
     [SerializeField] Text statValueText;
-    [SerializeField] Button incrementButton;
 
     public void SetStatName(string name)
     {
