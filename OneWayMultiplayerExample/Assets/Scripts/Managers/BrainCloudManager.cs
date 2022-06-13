@@ -425,6 +425,7 @@ public class BrainCloudManager : MonoBehaviour
         }
         
         _playbackStreamId = data["playbackStreamId"] as string;
+        PlayerPrefs.SetString("PlaybackKey", _playbackStreamId);
         GameManager.Instance.LoadToGame();
     }
 
@@ -436,6 +437,7 @@ public class BrainCloudManager : MonoBehaviour
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
         //We did it
+        GameManager.Instance.SessionManager.LoadPlayback(in_jsonResponse);
     }
 
     string CreateSummaryData()
@@ -450,11 +452,12 @@ public class BrainCloudManager : MonoBehaviour
     string CreateJsonSpawnEventData(Vector3 in_spawnPoint, TroopAI in_troop)
     {
         Dictionary<string, object> eventData = new Dictionary<string, object>();
-        eventData.Add("eventType", "spawn");
+        eventData.Add("eventId", (int)EventId.Spawn);
+        eventData.Add("frameId", GameManager.Instance.SessionManager.FrameID);
         eventData.Add("spawnPointX", in_spawnPoint.x);
         eventData.Add("spawnPointY", in_spawnPoint.y);
         eventData.Add("spawnPointZ", in_spawnPoint.z);
-        eventData.Add("troopType", in_troop.EnemyType.ToString());
+        eventData.Add("troopType", (int)in_troop.EnemyType);
         string value = JsonWriter.Serialize(eventData);
         return value;
     }

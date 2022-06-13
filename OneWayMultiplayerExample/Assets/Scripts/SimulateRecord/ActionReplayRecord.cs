@@ -1,11 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+public enum EventId {Spawn, Attack, Destroy}
 
 public class ActionReplayRecord
 {
     public Vector3 position;
+    public Quaternion rotation;
     public EnemyTypes troopType;
     public TroopStates currentState;
-    public float health;
+    public EventId eventId;
+    public int frameId;
 }

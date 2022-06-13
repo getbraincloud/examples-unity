@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using BrainCloud.JsonFx.Json;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,10 +12,21 @@ public class GameManager : MonoBehaviour
 {
     public SpawnData DefenderSpawnData;
     public SpawnData InvaderSpawnData;
-    public bool DebugGameMode;
-    
+
+    public bool IsInPlaybackMode;
     private bool _isGameActive;
     private GameSessionManager _sessionManagerRef;
+    public GameSessionManager SessionManager
+    {
+        get => _sessionManagerRef;
+    }
+    
+    private List<ActionReplayRecord> _replayRecords = new List<ActionReplayRecord>();
+    public List<ActionReplayRecord> ReplayRecords
+    {
+        get => _replayRecords;
+    }
+    
     private GameOverScreen _gameOverScreenRef;
     private int _startingDefenderCount;
     private int _startingInvaderCount;
@@ -66,16 +79,8 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         _currentUserInfo = Settings.LoadPlayerInfo();
         InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
-        if (!DebugGameMode)
-        {
-            MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
-            MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);   
-        }
-        else
-        {
-            DefenderSpawnData.AssignSpawnList(ArmyDivisionRank.Easy);
-            InvaderSpawnData.AssignSpawnList(ArmyDivisionRank.Hard);
-        }
+        MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
+        MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
     }
 
     public bool IsEntityIdValid()
@@ -169,6 +174,52 @@ public class GameManager : MonoBehaviour
         {
             GameOver(_invaderTroopCount > 0);
         }
+    }
+    
+    public void LoadPlayback(string in_jsonResponse)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        if (data == null)
+        {
+            Debug.LogWarning("No playback was retrieved");
+            return;
+        }
+        Dictionary<string, object>[] events = data["events"] as Dictionary<string, object>[];
+        if (events == null || events.Length == 0)
+        {
+            Debug.LogWarning("No events found in playback");
+            return;
+        }
+        
+        for (int i = 0; i < events.Length; i++)
+        {
+            ActionReplayRecord record = new ActionReplayRecord();
+            record.position.x = (float) (double) events[i]["spawnPointX"];
+            record.position.y = (float) (double) events[i]["spawnPointY"];
+            record.position.z = (float) (double) events[i]["spawnPointZ"];
+
+            record.eventId = (EventId) (int) events[i]["eventId"];
+            record.troopType = (EnemyTypes) (int) events[i]["troopType"];
+            record.frameId = (int) events[i]["frameId"];
+            _replayRecords.Add(record);
+        }
+
+
+        var troopsToDestroy = FindObjectsOfType<TroopAI>();
+        foreach (var troopAI in troopsToDestroy)
+        {
+            Destroy(troopAI.gameObject);
+        }
+
+        var _defenderSpawner = FindObjectOfType<DefenderSpawner>();
+        if (_defenderSpawner)
+        {
+            //Set up defenders
+            _defenderSpawner.SpawnDefenderSetup();    
+        }
+
+        Debug.Log("Stuff is loaded");
     }
 
     public int RemainingStructures() => _defenderStructParent.childCount;

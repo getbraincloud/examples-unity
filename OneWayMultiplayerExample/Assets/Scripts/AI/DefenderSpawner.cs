@@ -15,12 +15,13 @@ public class DefenderSpawner : MonoBehaviour
     private bool _addOffset;
     private int _offsetRangeZ = 6;
     private int _offsetRangeX = 6;
-    private void Awake()
-    {
-        
-    }
 
     private void Start()
+    {
+        SpawnDefenderSetup();
+    }
+
+    public void SpawnDefenderSetup()
     {
         TroopAI troopToSpawn;
         GameManager.Instance.DefenderTroopCount = 0;

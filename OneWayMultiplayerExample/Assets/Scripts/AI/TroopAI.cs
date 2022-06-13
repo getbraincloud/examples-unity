@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public enum TroopStates {Idle, Rotate, Move, Attack}
-public enum EnemyTypes {Grunt, Solder, Shooter}
+public enum EnemyTypes {Grunt, Solder, Shooter, Bullet}
 
 public class TroopAI : MonoBehaviour, IDamageable<int>
 {
@@ -62,6 +62,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     {
         _rigidbodyComp = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
+        
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
         _healthBarRef = GetComponentInChildren<HealthBar>();
         _shootScript = GetComponent<ShootProjectiles>();
