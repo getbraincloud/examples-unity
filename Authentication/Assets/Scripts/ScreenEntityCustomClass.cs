@@ -3,134 +3,192 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.Entity;
+using UnityEngine.UI; 
 
 public class ScreenEntityCustomClass : BCScreen
 {
-    public class Hobby
+    CustomEntityInstance m_player = null;
+
+    bool bAttemptedFetchEntity = false;
+
+    //UI elements 
+    [SerializeField] Text entityIDText;
+    [SerializeField] Text entityTypeText;
+    [SerializeField] InputField firstNameInput;
+    [SerializeField] InputField positionInput;
+    [SerializeField] GameObject fetchEntityButton; 
+    [SerializeField] GameObject createEntityButton;
+    [SerializeField] GameObject saveEntityButton;
+    [SerializeField] GameObject deleteEntityButton;
+
+    private void Awake()
     {
-        public string Name
+        if (HelpMessage == null)
         {
-            get { return ""; }
+            HelpMessage = "<b>" + "Custom Entities are a premium feature available to Plus Plan customers. Additional usage fees apply.\n\n" + "</b>" +
+                          "The custom entity screen demonstrates how a custom entity can be created via the brainCloud client.\n\n" +
+                          "By pressing Create, a default custom entity is created for the user. " +
+                          "Pressing Delete will delete the custom entity while Save updates the custom entity of the user.\n\n" +
+                          "This custom entity can be monitored on the \"Custom Entities\" page under the \"User Monitoring\" tab in the brainCloud Portal.";
         }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-customentity";
+        }
+
+        SetFieldsInteractable(false);
     }
-
-    public class Player : BCUserEntity
-    {
-        public static string ENTITY_TYPE = "player";
-
-        public Player(BrainCloudEntity in_bcEntityService) : base(in_bcEntityService)
-        {
-            // set up some defaults
-            m_entityType = "player";
-            Name = "";
-            Age = 0;
-            Hobbies = new List<Hobby>();
-        }
-
-        public string Name
-        {
-            get { return (string) this ["name"]; }
-            set { this ["name"] = value; }
-        }
-
-        public int Age
-        {
-            get { return (int) this ["age"]; }
-            set { this ["age"] = value; }
-        }
-
-        public IList<Hobby> Hobbies
-        {
-            get { return this.Get<IList<Hobby>>("hobbies"); }
-            set { this["hobbies"] = value; }
-        }
-    }
-
-    public ScreenEntityCustomClass(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        m_mainScene.CustomEntityInterface.ReadCustomEntity();
-        m_mainScene.RealLogging("[ReadPlayerState]... ");
+        GameEvents.instance.onCreateCustomEntitySuccess += OnCreateCustomEntitySuccess;
+        GameEvents.instance.onDeleteCustomEntitySuccess += OnDeleteCustomEntitySuccess;
+        GameEvents.instance.onGetCustomEntityPageSuccess += OnGetCustomEntityPageSuccess;
+
+        DisplayEntityInfo();
+
+        SetActiveButtons(m_player == null ? true : false);
     }
 
-    public override void OnScreenGUI()
+    void DisplayEntityID()
     {
-        CustomEntityInstance m_player = null;
-        if (m_mainScene.CustomEntityInterface.PlayerAssigned)
-        {
-            m_player = m_mainScene.CustomEntityInterface.CustomPlayer;    
-        }
-        
-        GUILayout.BeginVertical();
+        entityIDText.text = (m_player != null ? m_player.EntityId : "---");
+    }
 
-        int minLabelWidth = 60;
+    void DisplayEntityType()
+    {
+        entityTypeText.text = (m_player != null ? m_player.EntityType : "---");
+    }
 
-        // entity id
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Id", GUILayout.Width(minLabelWidth));
-        GUILayout.Box(m_player != null ? m_player.EntityId : "---");
-        GUILayout.EndHorizontal();
+    void DisplayEntityFirstName()
+    {
+        firstNameInput.text = (m_player != null ? m_player.FirstName : "");
+    }
 
-        // entity type
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Type", GUILayout.Width(minLabelWidth));
-        GUILayout.Box(m_player != null ? m_player.EntityType : "---");
-        GUILayout.EndHorizontal();
+    void DisplayEntityPosition()
+    {
+        positionInput.text = (m_player != null ? m_player.Position : "");
+    }
 
-        // entity property 'name'
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Name", GUILayout.Width(minLabelWidth));
-        if (m_player != null)
-        {
-            m_player.FirstName = GUILayout.TextField(m_player.FirstName);
-        } 
+    void DisplayEntityInfo()
+    {
+        DisplayEntityID();
+        DisplayEntityType();
+        DisplayEntityFirstName();
+        DisplayEntityPosition();
+    }
+
+    private void SetActiveButtons(bool isActive)
+    {
+        fetchEntityButton.SetActive(isActive); 
+        createEntityButton.SetActive(isActive);
+        saveEntityButton.SetActive(!isActive);
+        deleteEntityButton.SetActive(!isActive);
+
+        if (!createEntityButton.activeSelf)
+            return;
+
+        if (!bAttemptedFetchEntity)
+            createEntityButton.GetComponent<Button>().interactable = false;
         else
-        {
-            GUILayout.Box("---");
-        }
-        GUILayout.EndHorizontal();
+            createEntityButton.GetComponent<Button>().interactable = true;
+    }
 
-        // entity property 'age'
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Position", GUILayout.Width(minLabelWidth));
-        if (m_player != null)
-        {
-            m_player.Position = GUILayout.TextField(m_player.Position);
-        } 
-        else
-        {
-            GUILayout.Box("---");
-        }
-        GUILayout.EndHorizontal();
+    void SetFieldsInteractable(bool isInteractable)
+    {
+        firstNameInput.interactable = isInteractable;
+        positionInput.interactable = isInteractable;
+    }
 
-        GUILayout.BeginHorizontal();
+    //*************** UI Subscribed Methods ***************
+    public void OnFetchEntity()
+    {
+        BCFuncScreenHandler.instance.CustomEntityInterface.ReadCustomEntity();
+    }
+    
+    public void OnCreateEntity()
+    {
         if (m_player == null)
         {
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Create Entity"))
-            {
-                m_mainScene.CustomEntityInterface.CreateCustomEntity();
-                m_mainScene.RealLogging("Creating Entity....");
-            }
+            BCFuncScreenHandler.instance.CustomEntityInterface.CreateCustomEntity();
         }
+    }
+
+    public void OnSaveEntity()
+    {
         if (m_player != null)
         {
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Save Entity"))
-            {
-                m_mainScene.CustomEntityInterface.UpdateCustomEntity();
-                m_mainScene.RealLogging("Updating Entity...");
-            }
-            if (GUILayout.Button("Delete Entity"))
-            {
-                m_mainScene.CustomEntityInterface.DeleteCustomEntity();
-                m_player = null;
-                m_mainScene.RealLogging("Deleting Entity...");
-            }
+            BCFuncScreenHandler.instance.CustomEntityInterface.UpdateCustomEntity();
         }
-        GUILayout.EndHorizontal();
+    }
 
-        GUILayout.EndVertical();
+    public void OnDeleteEntity()
+    {
+        if (m_player != null)
+        {
+            BCFuncScreenHandler.instance.CustomEntityInterface.DeleteCustomEntity();
+            m_player = null;
+        }
+    }
+
+    public void OnEntityFirstNameEndEdit(string name)
+    {
+        if (m_player != null)
+            m_player.FirstName = name;
+    }
+
+    public void OnEntityPositionEndEdit(string position)
+    {
+        if (m_player != null)
+            m_player.Position = position;
+    }
+
+    //*************** Game Events Subscribed Methods ***************
+    private void OnCreateCustomEntitySuccess()
+    {
+        m_player = BCFuncScreenHandler.instance.CustomEntityInterface.CustomPlayer;
+
+        DisplayEntityInfo();
+
+        SetFieldsInteractable(true);
+
+        SetActiveButtons(false);
+    }
+
+    private void OnDeleteCustomEntitySuccess()
+    {
+        DisplayEntityInfo();
+
+        SetFieldsInteractable(false); 
+
+        SetActiveButtons(true);
+    }
+
+    private void OnGetCustomEntityPageSuccess()
+    {
+        m_player = BCFuncScreenHandler.instance.CustomEntityInterface.CustomPlayer;
+
+        DisplayEntityInfo();
+
+        bool bsetActive = m_player == null ? true : false;
+
+        SetFieldsInteractable(!bsetActive); 
+
+        bAttemptedFetchEntity = true;
+
+        SetActiveButtons(bsetActive); 
+    }
+
+    protected override void OnDisable()
+    {
+        bAttemptedFetchEntity = false;
+        SetActiveButtons(true);
+        m_player = null;
+        DisplayEntityInfo(); 
+
+        GameEvents.instance.onCreateUserEntitySuccess -= OnCreateCustomEntitySuccess;
+        GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteCustomEntitySuccess;
+        GameEvents.instance.onGetCustomEntityPageSuccess -= OnGetCustomEntityPageSuccess; 
     }
 }
