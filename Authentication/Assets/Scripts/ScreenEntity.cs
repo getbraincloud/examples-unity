@@ -98,6 +98,15 @@ public class ScreenEntity : BCScreen
 
     public void OnSaveEntity()
     {
+        entityName = nameInput.text;
+        entityAge = int.Parse(ageInput.text);
+
+        if(m_player != null)
+        {
+            m_player.Name = entityName;
+            m_player.Age = entityAge.ToString();
+        }
+
         BCFuncScreenHandler.instance.EntityInterface.UpdateEntity();
         Debug.Log("Updating Entity..."); 
     }
@@ -107,28 +116,6 @@ public class ScreenEntity : BCScreen
         BCFuncScreenHandler.instance.EntityInterface.DeleteEntity();
         m_player = null;
         Debug.Log("Deleting Entity...");
-    }
-
-    public void OnEntityNameEndEdit(string name)
-    {
-        entityName = name;
-        if(m_player != null)
-            m_player.Name = entityName;  
-    }
-
-    public void OnEntityAgeEndEdit(string age)
-    {
-        if (m_player == null)
-            return;
-
-        if(!int.TryParse(age, out entityAge))
-        {
-            TextLogger.instance.AddLog("Entity Age -- You must enter a number in this field");
-            Debug.LogWarning("Entity Age -- You must enter a number in this field");
-            return;
-        }
-
-        m_player.Age = entityAge.ToString();
     }
 
     //*************** Game Event Subscribed Methods ***************

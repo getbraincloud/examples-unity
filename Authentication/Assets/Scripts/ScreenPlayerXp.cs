@@ -13,6 +13,9 @@ public class ScreenPlayerXp : BCScreen
     string m_currencyToConsume = "0";
 
     //UI Elements
+    [SerializeField] InputField xpField;
+    [SerializeField] InputField awardField;
+    [SerializeField] InputField consumeField;
     [SerializeField] Text playerXPText;
     [SerializeField] Text playerLevelText;
     [SerializeField] Text currencyBalanceText;
@@ -82,57 +85,21 @@ public class ScreenPlayerXp : BCScreen
     //*************** UI Subscribed Methods ***************
     public void OnIncrementXP()
     {
+        m_incrementXp = xpField.text; 
+
         int valueAsInt = 0;
 
         if (int.TryParse(m_incrementXp, out valueAsInt))
         {
             BrainCloudInterface.instance.IncrementExperiencePoints(valueAsInt);
-        }
-    }
-    public void OnIncrementXPEndEdit(string xpToIncrement)
-    {
-        int valueAsInt = 0;
-
-        if (int.TryParse(xpToIncrement, out valueAsInt))
-        {
-            m_incrementXp = xpToIncrement;
-        }
-        else
-        {
-            Debug.Log("Value entered must be a number!"); 
-        }
-    }
-
-    public void OnAwardCurrencyFieldEndEdit(string currency)
-    {
-        ulong valueAsUlong = 0; 
-
-        if(ulong.TryParse(currency, out valueAsUlong))
-        {
-            m_currencyToAward = currency; 
-        }
-        else
-        {
-            Debug.Log("Value entered must be a number!"); 
-        }
-    }
-
-    public void OnConsumeCurrencyFieldEndEdit(string currency)
-    {
-        ulong valueAsUlong = 0; 
-
-        if(ulong.TryParse(currency, out valueAsUlong))
-        {
-            m_currencyToConsume = currency; 
-        }
-        else
-        {
-            Debug.Log("Value entered must be a number!");
+            BrainCloudInterface.instance.GetVirtualCurrency("gems"); 
         }
     }
 
     public void OnAwardCurrency()
     {
+        m_currencyToAward = awardField.text; 
+
         string scriptName = "AwardCurrency";
         string jsonScriptData = "{\"vcID\": \"gems\", \"vcAmount\": " + m_currencyToAward + "}";
         BrainCloudInterface.instance.RunCloudCodeScript(scriptName, jsonScriptData);
@@ -142,6 +109,8 @@ public class ScreenPlayerXp : BCScreen
 
     public void OnConsumeCurrency()
     {
+        m_currencyToConsume = consumeField.text;
+
         string scriptName = "ConsumeCurrency";
         string jsonScriptData = "{\"vcID\": \"gems\", \"vcAmount\": " + m_currencyToConsume + "}";
         BrainCloudInterface.instance.RunCloudCodeScript(scriptName, jsonScriptData);

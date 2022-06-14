@@ -34,7 +34,7 @@ public class AuthenticateHandler : MonoBehaviour
     const int STATUS_SHRINK_SIZE = 8;
 
     const string GOOGLE_AUTH_INFO = "Only for Android";
-    const string FACEBOOK_AUTH_INFO = "Only for WEBGL"; 
+    const string FACEBOOK_AUTH_INFO = "Only for WEBGL";
 
     //UI elements set in editor.
     [SerializeField] Text statusText;
@@ -182,26 +182,6 @@ public class AuthenticateHandler : MonoBehaviour
         ChangeAuthType(currentAuthType);
     }
 
-    public void OnProfileIdEndEdit(string input)
-    {
-        inputProfileId = input;
-    }
-
-    public void OnPasswordEndEdit(string input)
-    {
-        inputPassword = input; 
-    }
-
-    public void OnEntityNameEndEdit(string input)
-    {
-        inputEntityName = input; 
-    }
-
-    public void OnEntityAgeEndEdit(string input)
-    {
-        inputEntityAge = input; 
-    }
-
     public void OnAdvancedAuthToggle(bool isToggled)
     {
         useAdvancedAuthentication = isToggled;
@@ -219,6 +199,9 @@ public class AuthenticateHandler : MonoBehaviour
 
     public void OnAuthenticate()
     {
+        inputProfileId = profileIdFieldObject.GetComponent<InputField>().text;
+        inputPassword = passwordFieldObject.GetComponent<InputField>().text; 
+
         if((inputProfileId == "" || inputPassword == "") && currentAuthType != eAuthTypes.ANONYMOUS)
         {
             return;
@@ -229,6 +212,9 @@ public class AuthenticateHandler : MonoBehaviour
 
         if(useAdvancedAuthentication)
         {
+            inputEntityName = entityNameField.GetComponent<InputField>().text;
+            inputEntityAge = entityAgeField.GetComponent<InputField>().text;
+
             BrainCloud.AuthenticationIds ids;
             Dictionary<string, object> extraJson = new Dictionary<string, object>();
             extraJson["name"] = inputEntityName;
@@ -294,5 +280,4 @@ public class AuthenticateHandler : MonoBehaviour
     {
         BrainCloudInterface.instance.GoogleSignIn();
     }
-
 }

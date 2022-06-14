@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class ScreenCloudCode : BCScreen
 {
     [SerializeField] Text cloudScriptText;
-    [SerializeField] InputField exampleJsonText; 
+    [SerializeField] InputField exampleJsonInput; 
     [SerializeField] Text placeholderJsonText; 
 
     private string m_cloudCodeScript = "";
@@ -46,26 +46,19 @@ public class ScreenCloudCode : BCScreen
             case "HelloWorld":
                 placeholderJsonText.text = "Example Parameters...\n{\"name\" : \"your_name\", \n\"age\" : your_age}";
                 m_cloudCodeData = "{\"name\" : \"Tony\", \n\"age\" : 62}";
-                exampleJsonText.text = m_cloudCodeData;
+                exampleJsonInput.text = m_cloudCodeData;
                 break;
             case "IncrementGlobalStat":
                 placeholderJsonText.text = "Example Parameters...\n{\"globalStat\" : \"PLAYER_COUNT\", \n\"incrementAmount\" : 1}";
                 m_cloudCodeData = "{\"globalStat\" : \"PLAYER_COUNT\", \n\"incrementAmount\" : 1}";
-                exampleJsonText.text = m_cloudCodeData;
+                exampleJsonInput.text = m_cloudCodeData;
                 break;
             case "IncrementPlayerStat":
                 placeholderJsonText.text = "Example Parameters...\n{\"playerStat\" : \"experiencePoints\", \n\"incrementAmount\" : 1}";
                 m_cloudCodeData = "{\"playerStat\" : \"experiencePoints\", \n\"incrementAmount\" : 1}";
-                exampleJsonText.text = m_cloudCodeData;
+                exampleJsonInput.text = m_cloudCodeData;
                 break;
         }
-
-        CanParseJson(m_cloudCodeData);
-    }
-
-    public void OnParamEndEdit(string param)
-    {
-        m_cloudCodeData = param;
 
         CanParseJson(m_cloudCodeData);
     }
@@ -90,6 +83,10 @@ public class ScreenCloudCode : BCScreen
 
     public void OnRunScriptClick()
     {
+        m_cloudCodeData = exampleJsonInput.text;
+
+        CanParseJson(m_cloudCodeData);
+
         BrainCloudInterface.instance.RunCloudCodeScript(m_cloudCodeScript, m_cloudCodeData);
     }
 }

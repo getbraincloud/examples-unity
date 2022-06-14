@@ -5,6 +5,7 @@ using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.LitJson;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ScreenIdentity : BCScreen {
 	
@@ -17,6 +18,11 @@ public class ScreenIdentity : BCScreen {
     string m_password = "";
     
     Twitter.RequestTokenResponse m_RequestTokenResponse;
+
+    [SerializeField] InputField emailField;
+    [SerializeField] InputField emailPassField;
+    [SerializeField] InputField universalField;
+    [SerializeField] InputField universalPassField;
 
     private void Awake()
     {
@@ -55,43 +61,35 @@ public class ScreenIdentity : BCScreen {
         m_twitterPin = pin; 
     }
 
-    public void OnEmailEndEdit(string email)
-    {
-        m_email = email; 
-    }
-
-    public void OnEmailPassEndEdit(string pass)
-    {
-        m_emailPass = pass; 
-    }
-
     public void OnAttachEmailClick()
     {
+        m_email = emailField.text;
+        m_emailPass = emailPassField.text;
+
         BrainCloudInterface.instance.AttachEmailIdentity(m_email, m_emailPass);
     }
 
     public void OnMergeEmailClick()
     {
-        BrainCloudInterface.instance.MergeEmailIdentity(m_email, m_password);
-    }
+        m_email = emailField.text;
+        m_emailPass = emailPassField.text;
 
-    public void OnUsernameEndEdit(string username)
-    {
-        m_username = username; 
-    }
-
-    public void OnPasswordEndEdit(string pass)
-    {
-        m_password = pass;
+        BrainCloudInterface.instance.MergeEmailIdentity(m_email, m_emailPass);
     }
 
     public void OnAttachUniversalClick()
     {
+        m_username = universalField.text;
+        m_password = universalPassField.text;
+
         BrainCloudInterface.instance.AttachUniversalIdentity(m_username, m_password);
     }
 
     public void OnMergeUniversalClick()
     {
+        m_username = universalField.text;
+        m_password = universalPassField.text;
+
         BrainCloudInterface.instance.MergeUniversalIdentity(m_username, m_password); 
     }
 

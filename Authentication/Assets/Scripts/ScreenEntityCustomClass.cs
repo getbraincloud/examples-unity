@@ -119,6 +119,9 @@ public class ScreenEntityCustomClass : BCScreen
     {
         if (m_player != null)
         {
+            m_player.FirstName = firstNameInput.text;
+            m_player.Position = positionInput.text; 
+
             BCFuncScreenHandler.instance.CustomEntityInterface.UpdateCustomEntity();
         }
     }
@@ -130,18 +133,6 @@ public class ScreenEntityCustomClass : BCScreen
             BCFuncScreenHandler.instance.CustomEntityInterface.DeleteCustomEntity();
             m_player = null;
         }
-    }
-
-    public void OnEntityFirstNameEndEdit(string name)
-    {
-        if (m_player != null)
-            m_player.FirstName = name;
-    }
-
-    public void OnEntityPositionEndEdit(string position)
-    {
-        if (m_player != null)
-            m_player.Position = position;
     }
 
     //*************** Game Events Subscribed Methods ***************
