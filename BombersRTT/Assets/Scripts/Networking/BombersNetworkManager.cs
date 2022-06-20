@@ -116,11 +116,13 @@ namespace BrainCloudUNETExample
            Dictionary<string, string> ratingAlgo = new Dictionary<string, string>();
            pingAlgo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyAbsolute.Value;
            pingAlgo[OperationParam.LobbyAlignment.Value] = OperationParam.StrategyAbsolute.Value;
+           pingAlgo[OperationParam.UserItemsServiceCriteria.Value] = OperationParam.CriteraPing.Value;
 
            ratingAlgo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyRangedPercent.Value;
            ratingAlgo[OperationParam.LobbyAlignment.Value] = OperationParam.AlignmentCenter.Value;
+           ratingAlgo[OperationParam.UserItemsServiceCriteria.Value] = OperationParam.CriteraRating.Value;
 
-           algos.Add(pingAlgo);
+            algos.Add(pingAlgo);
            algos.Add(ratingAlgo);
            algo[OperationParam.CompoundAlgos.Value] = algos.ToArray();
 
