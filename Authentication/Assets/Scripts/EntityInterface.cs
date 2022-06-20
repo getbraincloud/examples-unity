@@ -5,7 +5,6 @@ using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
-using Unity.UNetWeaver;
 using UnityEngine;
 
 /*
