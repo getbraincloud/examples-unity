@@ -12,6 +12,16 @@ public class GameEvents : MonoBehaviour
         instance = this; 
     }
 
+    //*************** General Events ****************
+    public event Action onPostInitBCWrapper;
+    public void PostInitBCWrapper()
+    {
+        if(onPostInitBCWrapper != null)
+        {
+            onPostInitBCWrapper(); 
+        }
+    }
+
     //*************** User Entity Events ***************
     public event Action onCreateUserEntitySuccess;
     public void CreateUserEntitySuccess()

@@ -95,6 +95,11 @@ public class BrainCloudInterface : MonoBehaviour
         //m_AccessTokenResponse = new Twitter.AccessTokenResponse();
     }
 
+    public string GetClientVersion()
+    {
+        return _bc.Client.BrainCloudClientVersion; 
+    }
+
     //*************** Authenticate Methods ***************
     public void AuthenticateEmail()
     {
