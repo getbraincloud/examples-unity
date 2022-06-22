@@ -3,106 +3,93 @@ using System.Collections;
 using BrainCloud.LitJson;
 using System.Collections.Generic;
 
-public class ScreenGlobalStats : BCScreen {
+public class ScreenGlobalStats : BCScreen 
+{
 
-    protected class GlobalStatistic
+    Dictionary<string, GlobalStat> m_globalStats;
+
+    [SerializeField] GlobalStat globalStatPrefab; 
+    [SerializeField] Transform gStatPefabParent;
+
+    private void Awake()
     {
-        public string name;
-        public long value;
-        public string increment = "0";
+        if (HelpMessage == null)
+        {
+            HelpMessage = "The global stats screen will display all global stats defined within the \"Global Statistics\" page under the \"Statistics Rules\" tab of the brainCloud portal.\n\n" +
+                          "Pressing the increment button next to each global stat will increment that stat by 1.\n\n" +
+                          "Global stats are accessible by any user and can be monitored on the Global Statistics page under the Global Monitoring " +
+                          "tab in the brainCloud Portal.";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-globalstats";
+        }
     }
-    IDictionary<string, GlobalStatistic> m_stats = new Dictionary<string, GlobalStatistic>();
-    
-    public ScreenGlobalStats(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        _bc.GlobalStatisticsService.ReadAllGlobalStats(ReadAllGlobalStatsSuccess, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadAllGlobalStats]... ");
-    }
-    
-    private void ReadAllGlobalStatsSuccess(string json, object cb)
-    {
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
+        GameEvents.instance.onIncrementGlobalStat += IncrementGlobalStat;
+        GameEvents.instance.onInstantiateGlobalStats += InstantiateGlobalStats; 
 
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
+        m_globalStats = new Dictionary<string, GlobalStat>();
+        BrainCloudInterface.instance.ReadAllGlobalStats();
+
+        if (HelpMessage == null)
         {
-            foreach (string key in dStats.Keys)
+            HelpMessage = "The global stats screen will display all global stats defined within the \"Global Statistics\" page under the \"Statistics Rules\" tab of the brainCloud portal.\n\n" +
+                          "Pressing the increment button next to each global stat will increment that stat by 1.\n\n" +
+                          "Global stats are accessible by any user and can be monitored on the Global Statistics page under the Global Monitoring " +
+                          "tab in the brainCloud Portal.";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-globalstats";
+        }
+    }
+
+    public void InstantiateGlobalStats()
+    {
+        DataManager dataManager = DataManager.instance; 
+
+        foreach(string key in dataManager.GlobalStats.Keys)
+        {
+            GlobalStat newStat = Instantiate(globalStatPrefab, gStatPefabParent);
+
+            if(newStat != null)
             {
-                GlobalStatistic stat = new GlobalStatistic();
-                stat.name = (string) key;
-                JsonData value = (JsonData) dStats[key];
-                
-                // silly that LitJson can't upcast an int to a long...
-                stat.value = value.IsInt ? (int) value : (long) value;
-                
-                m_stats[stat.name] = stat;
+                m_globalStats[key] = newStat;
+                m_globalStats[key].SetStatName(key);
+                m_globalStats[key].SetStatValue(dataManager.GlobalStats[key]);
             }
         }
     }
-    
-    public override void OnScreenGUI()
+
+    public void IncrementGlobalStat(string globalStatName)
     {
-        int minLeftWidth = 120;
-        
-        GUILayout.BeginHorizontal();
-        GUILayout.Box("Global Stat Name", GUILayout.MinWidth(minLeftWidth));
-        GUILayout.Box("Global Stat Value");
-        GUILayout.EndHorizontal();
-        
-        foreach (GlobalStatistic ps in m_stats.Values)
-        {
-            GUILayout.BeginVertical();
-            GUILayout.Space(5);
-            GUILayout.EndVertical();
-            
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(ps.name, GUILayout.MinWidth(minLeftWidth));
-            GUILayout.Box(ps.value.ToString());
-            GUILayout.EndHorizontal();
-            
-            // increment
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(minLeftWidth);
-            ps.increment = GUILayout.TextField(ps.increment, GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("Increment"))
-            {
-                long valueAsLong = 0;
-                double valueAsDouble = 0;
-                if (long.TryParse(ps.increment, out valueAsLong)
-                    || double.TryParse(ps.increment, out valueAsDouble))
-                {
-                    _bc.GlobalStatisticsService.IncrementGlobalStats(
-                        "{ '" + ps.name +"':" + ps.increment +"}",
-                        Success_Callback, Failure_Callback);
-                    m_mainScene.AddLogNoLn("[IncrementStat]... ");
-                }
-            }
-            GUILayout.EndHorizontal();
-        }
+        if (!m_globalStats.ContainsKey(globalStatName))
+            return;
+
+        DataManager dataManager = DataManager.instance;
+
+        m_globalStats[globalStatName].SetStatValue(dataManager.GlobalStats[globalStatName]);
     }
-    
-    public override void Success_Callback(string json, object cbObject)
+
+    protected override void OnDisable()
     {
-        base.Success_Callback(json, cbObject);
-        
-        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
+        if(m_globalStats != null)
         {
-            foreach (string key in dStats.Keys)
+            foreach (GlobalStat stat in m_globalStats.Values)
             {
-                JsonData value = (JsonData) dStats[key];
-                long valueAsLong = value.IsInt ? (int) value : (long) value;
-                m_stats[key].value = valueAsLong;
+                Destroy(stat.gameObject);
             }
+
+            m_globalStats.Clear();
+            m_globalStats = null;
         }
+
+        GameEvents.instance.onIncrementGlobalStat -= IncrementGlobalStat;
+        GameEvents.instance.onInstantiateGlobalStats -= InstantiateGlobalStats;
     }
 }

@@ -4,221 +4,132 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.LitJson;
+using UnityEngine.UI; 
 
 public class ScreenPlayerXp : BCScreen
 {
-    int m_playerXp = 0;
-    int m_playerLevel = 0;
     string m_incrementXp = "0";
+    string m_currencyToAward = "0";
+    string m_currencyToConsume = "0";
 
-    private class Currency
+    //UI Elements
+    [SerializeField] InputField xpField;
+    [SerializeField] InputField awardField;
+    [SerializeField] InputField consumeField;
+    [SerializeField] Text playerXPText;
+    [SerializeField] Text playerLevelText;
+    [SerializeField] Text currencyBalanceText;
+    [SerializeField] Text currencyConsumedText;
+    [SerializeField] Text currencyAwardedText;
+    [SerializeField] Text currencyPurchasedText; 
+
+    private List<string> m_currencyTypes;
+
+    private void Awake()
     {
-        public string currencyType;
-        public int purchased;
-        public int balance;
-        public int consumed;
-        public int awarded;
+        if (HelpMessage == null)
+        {
+            HelpMessage =   "The XP portion of the XP/Currency screen allows you to increase the player level by incrementing player XP by a provided amount. " +
+                            "XP levels are also capable of interacting with specified user statistics. " +
+                            "Player levels are defined under the \"XP Levels\" page within the \"Gamification\" tab of the portal. " +
+                            "XP and player level can be monitored through the \"User Summary\" page of the \"User Monitoring\" tab.\n\n" +
+                            "The virtual currency portion of the XP/Currency screen retreives a virtual currency called \"gems\". " +
+                            "Gems must be defined on the \"Virtual Currencies\" page under the \"Marketplace\" tab. " +
+                            "User's virtual currency balance can be monitored on the \"Virtual Currency\" Page of \"User Monitoring.\"";
+        }
 
-        public string award = "0";
-        public string consume = "0";
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-virtualcurrency";
+        }
     }
-    IDictionary<string, Currency> m_currencies = new Dictionary<string, Currency>();
-
-    private string[] m_currencyTypes =
-    {
-        "gems",
-        "gold",
-        "gems"
-    };
-
-    public ScreenPlayerXp(BrainCloudWrapper bc) : base(bc) { }
 
     public override void Activate()
     {
-        _bc.PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
+        GameEvents.instance.OnUpdateLevelAndXP += UpdateLevelAndXP;
+        GameEvents.instance.onGetVirtualCurrency += GetVirtualCurrency;
+
+        m_currencyTypes = new List<string>();
+        m_currencyTypes.Add("gems");
+        m_currencyTypes.Add("gold");
+        m_currencyTypes.Add("gems");
+
+        BrainCloudInterface.instance.ReadUserState(this);
+        BrainCloudInterface.instance.GetVirtualCurrency("gems");
     }
 
-    private void ReadPlayerState_Success(string json, object cb)
+    //*************** Game Event Subscribed Methods ***************
+    void UpdateLevelAndXP()
     {
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
+        playerLevelText.text = DataManager.instance.PlayerLevel.ToString();
+        playerXPText.text = DataManager.instance.PlayerXP.ToString();
+    }
 
-        JsonData jObj = JsonMapper.ToObject(json);
-        m_playerLevel = (int) jObj["data"]["experienceLevel"];
-        m_playerXp = (int) jObj["data"]["experiencePoints"];
+    void GetVirtualCurrency()
+    {
+        DataManager dataManager = DataManager.instance;
 
-        // now grab our currencies
-        foreach (string curType in m_currencyTypes)
+        if(dataManager.Currencies.ContainsKey("gems"))
         {
-            _bc.VirtualCurrencyService.GetCurrency(curType, GetPlayerVC_Success, Failure_Callback);
-            m_mainScene.AddLogNoLn("[GetPlayerVC (" + curType +")]... ");
+            currencyPurchasedText.text = dataManager.Currencies["gems"].Purchased.ToString();
+            currencyBalanceText.text = dataManager.Currencies["gems"].Balance.ToString();
+            currencyConsumedText.text = dataManager.Currencies["gems"].Consumed.ToString();
+            currencyAwardedText.text = dataManager.Currencies["gems"].Awarded.ToString();
+            return;
+        }
+
+        TextLogger.instance.AddLog("Ensure that \"gems\" was created in Virtual Currencies under the Marketplace tab.");
+        Debug.LogWarning("Ensure that \"gems\" was created in Virtual Currencies under the Marketplace tab.");
+    }
+
+    //*************** UI Subscribed Methods ***************
+    public void OnIncrementXP()
+    {
+        m_incrementXp = xpField.text; 
+
+        int valueAsInt = 0;
+
+        if (int.TryParse(m_incrementXp, out valueAsInt))
+        {
+            BrainCloudInterface.instance.IncrementExperiencePoints(valueAsInt);
+            BrainCloudInterface.instance.GetVirtualCurrency("gems"); 
         }
     }
 
-    private void GetPlayerVC_Success(string json, object cb)
+    public void OnAwardCurrency()
     {
-        /*
-        "data"   : {
-            "updatedAt" : 1392919197588,
-            "currencyMap" : {
-                "gold" : {
-                    "purchased" : 0,
-                    "balance"   : 10,
-                    "consumed"  : 0,
-                    "awarded"   : 10
-                }
-            }
-        */
+        m_currencyToAward = awardField.text; 
 
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
+        string scriptName = "AwardCurrency";
+        string jsonScriptData = "{\"vcID\": \"gems\", \"vcAmount\": " + m_currencyToAward + "}";
+        BrainCloudInterface.instance.RunCloudCodeScript(scriptName, jsonScriptData);
 
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jCurMap = jObj ["data"] ["currencyMap"];
-        System.Collections.IDictionary dCurMap = jCurMap as System.Collections.IDictionary;
-
-        foreach (string key in dCurMap.Keys)
-        {
-            Currency c = null;
-            if (m_currencies.ContainsKey(key))
-            {
-                c = m_currencies[key];
-            }
-            else
-            {
-                c = new Currency();
-                m_currencies[key] = c;
-            }
-            c.currencyType = key;
-            c.purchased = (int) jCurMap[key]["purchased"];
-            c.balance = (int) jCurMap[key]["balance"];
-            c.consumed = (int) jCurMap[key]["consumed"];
-            c.awarded = (int) jCurMap[key]["awarded"];
-        }
+        BrainCloudInterface.instance.GetVirtualCurrency("gems");
     }
 
-    public override void OnScreenGUI()
+    public void OnConsumeCurrency()
     {
-        int minLeftWidth = 120;
+        m_currencyToConsume = consumeField.text;
 
-        // player level
-        GUILayout.BeginHorizontal();
-        GUILayout.Box("Player Level", GUILayout.MinWidth(minLeftWidth));
-        GUILayout.Box(m_playerLevel.ToString());
-        GUILayout.EndHorizontal();
+        string scriptName = "ConsumeCurrency";
+        string jsonScriptData = "{\"vcID\": \"gems\", \"vcAmount\": " + m_currencyToConsume + "}";
+        BrainCloudInterface.instance.RunCloudCodeScript(scriptName, jsonScriptData);
 
-        // player xp
-        GUILayout.BeginHorizontal();
-        GUILayout.Box("Player Xp", GUILayout.MinWidth(minLeftWidth));
-        GUILayout.Box(m_playerXp.ToString());
-        GUILayout.EndHorizontal();
-
-        // increment xp
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(minLeftWidth);
-        m_incrementXp = GUILayout.TextField(m_incrementXp, GUILayout.ExpandWidth(true));
-        if (GUILayout.Button("IncrementXp"))
-        {
-            int valueAsInt = 0;
-            if (int.TryParse(m_incrementXp, out valueAsInt))
-            {
-                _bc.PlayerStatisticsService.IncrementExperiencePoints(valueAsInt, IncrementXp_Success, Failure_Callback);
-                m_mainScene.AddLogNoLn("[IncrementXp]... ");
-            }
-        }
-        GUILayout.EndHorizontal();
-
-        foreach (Currency c in m_currencies.Values)
-        {
-            // currency values
-            GUILayout.BeginHorizontal();
-            GUILayout.Box("Currency " + c.currencyType , GUILayout.MinWidth(minLeftWidth));
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Box("Balance", GUILayout.MinWidth(minLeftWidth));
-            GUILayout.Box(c.balance.ToString());
-
-            GUILayout.Box("Awarded", GUILayout.MinWidth(minLeftWidth));
-            GUILayout.Box(c.awarded.ToString());
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Box("Consumed", GUILayout.MinWidth(minLeftWidth));
-            GUILayout.Box(c.consumed.ToString());
-
-            GUILayout.Box("Purchased", GUILayout.MinWidth(minLeftWidth));
-            GUILayout.Box(c.purchased.ToString());
-            GUILayout.EndHorizontal();
-
-            // award currency
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(minLeftWidth);
-            c.award = GUILayout.TextField(c.award, GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("Award"))
-            {
-                ulong valueAsULong = 0;
-                if (ulong.TryParse(c.award, out valueAsULong))
-                {
-#pragma warning disable 618
-                    _bc.VirtualCurrencyService.AwardCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
-#pragma warning restore 618
-                    m_mainScene.AddLogNoLn("[AwardPlayerVC " + c.currencyType +"]... ");
-                }
-            }
-            GUILayout.EndHorizontal();
-
-            // consume currency
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(minLeftWidth);
-            c.consume = GUILayout.TextField(c.consume, GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("Consume"))
-            {
-                ulong valueAsULong = 0;
-                if (ulong.TryParse(c.consume, out valueAsULong))
-                {
-#pragma warning disable 618
-                    _bc.VirtualCurrencyService.ConsumeCurrency(c.currencyType, valueAsULong, GetPlayerVC_Success, Failure_Callback);
-#pragma warning restore 618
-                    m_mainScene.AddLogNoLn("[ConsumePlayerVC " + c.currencyType +"]... ");
-                }
-            }
-            GUILayout.EndHorizontal();
-        }
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Reset All Currencies"))
-        {
-#pragma warning disable 618
-            _bc.VirtualCurrencyService.ResetCurrency(ResetPlayerVC_Success, Failure_Callback);
-#pragma warning restore 618
-            m_mainScene.AddLogNoLn("[ResetPlayerVC]... ");
-        }
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
+        BrainCloudInterface.instance.GetVirtualCurrency("gems");
     }
 
-    public void IncrementXp_Success(string json, object cbObject)
+    public void OnResetCurrency()
     {
-        base.Success_Callback(json, cbObject);
+        string scriptName = "ResetCurrency";
+        string jsonScriptData = "{}";
+        BrainCloudInterface.instance.RunCloudCodeScript(scriptName, jsonScriptData);
 
-        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
-        JsonData jObj = JsonMapper.ToObject(json);
-        m_playerLevel = (int) jObj["data"]["experienceLevel"];
-        m_playerXp = (int) jObj["data"]["experiencePoints"];
-
-        // rewards?
+        BrainCloudInterface.instance.GetVirtualCurrency("gems");
     }
 
-    public void ResetPlayerVC_Success(string json, object cbObject)
+    protected override void OnDisable()
     {
-        m_currencies.Clear();
-
-        _bc.PlayerStateService.ReadUserState(ReadPlayerState_Success, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
+        GameEvents.instance.OnUpdateLevelAndXP -= UpdateLevelAndXP;
+        GameEvents.instance.onGetVirtualCurrency -= GetVirtualCurrency;
     }
 }

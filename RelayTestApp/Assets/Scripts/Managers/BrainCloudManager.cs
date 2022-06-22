@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using BrainCloud.JsonFx.Json;
@@ -52,16 +53,11 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.CurrentUserInfo.Username = username;
         InitializeBC();
         // Authenticate with brainCloud
-        m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LoggingInError, "Login Failed");
+        m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LogErrorThenPopUpWindow, "Login Failed");
     }
 
     private void FixedUpdate()
     {
-        if (m_bcWrapper != null && !LeavingGame)
-        {
-            //m_bcWrapper.Update();
-        }
-        
 
         if (m_dead)
         {
@@ -71,7 +67,7 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-    private void InitializeBC()
+    public void InitializeBC()
     {
         m_bcWrapper.Init();
 
@@ -110,7 +106,7 @@ public class BrainCloudManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, LoggingInError,
+            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         else
@@ -120,27 +116,27 @@ public class BrainCloudManager : MonoBehaviour
             {
                 userInfo.Username = tempUsername;
             }
-            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LoggingInError,
+            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         GameManager.Instance.CurrentUserInfo = userInfo;
     }
     
     // Go back to login screen, with an error message
-    void LoggingInError(int status, int reasonCode, string jsonError, object cbObject)
+    void LogErrorThenPopUpWindow(int status, int reasonCode, string jsonError, object cbObject)
     {
         if (m_dead) return;
 
         m_dead = true;
-
+        m_bcWrapper.RTTService.DeregisterRTTLobbyCallback();
         m_bcWrapper.RelayService.DeregisterRelayCallback();
         m_bcWrapper.RelayService.DeregisterSystemCallback();
-        m_bcWrapper.RelayService.Disconnect();
         m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
         m_bcWrapper.RTTService.DisableRTT();
-
+        m_bcWrapper.Client.ResetCommunication();
         string message = cbObject as string;
-
+        Debug.Log($"JSON ERROR: {jsonError}");
+        Debug.Log($"MESSAGE: {message}");
         StateManager.Instance.AbortToSignIn($"Message: {message} |||| JSON: {jsonError}");
 
     }
@@ -158,6 +154,7 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
     }
+    
     // Cleanly close the game. Go back to main menu but don't log 
     public void CloseGame(bool changeState = false)
     {
@@ -185,6 +182,33 @@ public class BrainCloudManager : MonoBehaviour
 
         //
         m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, StateManager.Instance.isReady, extra);
+    }
+    
+
+    public void ReconnectUser()
+    {
+        GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
+        //Continue doing reconnection stuff.....
+        m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, RTTReconnect, OnRTTDisconnected);
+        m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+    }
+
+    private void RTTReconnect(string jsonResponse, object cbObject)
+    {
+        //Sending what users current color is
+        var extra = new Dictionary<string, object>();
+        extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
+        
+        m_bcWrapper.LobbyService.JoinLobby
+        (
+            StateManager.Instance.CurrentLobby.LobbyID,
+            true,
+            extra,
+            "all",
+            null,
+            null,
+            LogErrorThenPopUpWindow
+        );
     }
 
 #endregion GameFlow
@@ -255,7 +279,7 @@ public class BrainCloudManager : MonoBehaviour
 #region RTT functions
 
     //Getting input from other members
-    void OnRelayMessage(short netId, byte[] jsonResponse)
+    public void OnRelayMessage(short netId, byte[] jsonResponse)
     {
         var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
         string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
@@ -333,6 +357,7 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case "ROOM_READY":
                     StateManager.Instance.CurrentServer = new Server(jsonData);
+                    Debug.Log($"JSON LOBBY DATA: {jsonResponse}");
                     GameManager.Instance.UpdateMatchState();
                     GameManager.Instance.UpdateCursorList();
                     ConnectRelay();
@@ -343,7 +368,7 @@ public class BrainCloudManager : MonoBehaviour
     }
     
     // Connect to the Relay server and start the game
-    void ConnectRelay()
+    public void ConnectRelay()
     {
         m_bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
         m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
@@ -368,7 +393,7 @@ public class BrainCloudManager : MonoBehaviour
             StateManager.Instance.protocol,
             new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
             null, 
-            LoggingInError, 
+            LogErrorThenPopUpWindow, 
             "Failed to connect to server"
         );
     }
@@ -428,14 +453,14 @@ public class BrainCloudManager : MonoBehaviour
             settings, // settings
             null, // other users
             null, // Success of lobby found will be in the event onLobbyEvent
-            LoggingInError, "Failed to find lobby"
+            LogErrorThenPopUpWindow, "Failed to find lobby"
         );
     }
 
     void OnRTTDisconnected(int status, int reasonCode, string jsonError, object cbObject)
     {
         if (jsonError == "DisableRTT Called") return; // Ignore
-        LoggingInError(status, reasonCode, jsonError, cbObject);
+        LogErrorThenPopUpWindow(status, reasonCode, jsonError, cbObject);
     }
 
 #endregion RTT Functions

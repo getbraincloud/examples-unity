@@ -9,7 +9,7 @@ namespace Gameframework
         // Use this for initialization
         void Start()
         {
-            VersionText.text = Application.version;
+            VersionText.text = $"v: {BrainCloud.Version.GetVersion()}";
 
             DontDestroyOnLoad(gameObject);
         }
