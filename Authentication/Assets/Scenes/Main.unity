@@ -6193,11 +6193,11 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Email
+    - m_Text: Anonymous
       m_Image: {fileID: 0}
     - m_Text: Universal
       m_Image: {fileID: 0}
-    - m_Text: Anonymous
+    - m_Text: Email
       m_Image: {fileID: 0}
     - m_Text: Google
       m_Image: {fileID: 0}
@@ -8682,7 +8682,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Email
+  m_Text: Anonymous
 --- !u!222 &792970019
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -13074,6 +13074,7 @@ MonoBehaviour:
   googleIdText: {fileID: 2136195672}
   serverAuthCodeText: {fileID: 808267966}
   googleSignInButton: {fileID: 821933693}
+  authDropdown: {fileID: 616783176}
 --- !u!81 &1221787283
 AudioListener:
   m_ObjectHideFlags: 0

@@ -1,20 +1,22 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using BrainCloud.Common;
+using BrainCloud.JsonFx.Json;
 
 public class AuthenticateHandler : MonoBehaviour
 {
     public GameObject MainScene;
     public BCConfig BCConfig;
-    
+
     public static BrainCloudWrapper _bc;
-    
+
     enum eAuthTypes {
-        EMAIL,
-        UNIVERSAL,
         ANONYMOUS,
+        UNIVERSAL,
+        EMAIL,
         GOOGLE,
         FACEBOOK,
         XBOXLIVE
@@ -23,7 +25,7 @@ public class AuthenticateHandler : MonoBehaviour
     bool useAdvancedAuthentication = false;
     AuthenticationType selectedAdvancedAuthType;
 
-    eAuthTypes currentAuthType;
+    eAuthTypes currentAuthType = eAuthTypes.ANONYMOUS;
 
     string inputProfileId = "";
     string inputPassword = "";
@@ -48,20 +50,91 @@ public class AuthenticateHandler : MonoBehaviour
     [SerializeField] GameObject entityAgeText;
     [SerializeField] GameObject advAuthInfoText;
     [SerializeField] Toggle advAuthToggle;
-    [SerializeField] Text extraAuthInfoText; 
+    [SerializeField] Text extraAuthInfoText;
     [SerializeField] GameObject resetProfileIdButton;
     [SerializeField] GameObject resetAnonIdButton;
     [SerializeField] Text storedProfileIdText;
     [SerializeField] Text storedAnonymousIdText;
     [SerializeField] GameObject googleIdText;
     [SerializeField] GameObject serverAuthCodeText;
-    [SerializeField] GameObject googleSignInButton; 
+    [SerializeField] GameObject googleSignInButton;
+    [SerializeField] Dropdown authDropdown;
+
+    //Save Data fields
+    private const string SAVE_FILE_NAME = "AuthTypeSaveData.json";
+    private string path = "";
+
+    class UserData {
+
+        public string profileId = "";
+        public string anonId = "";
+        public eAuthTypes lastAuthType;
+
+        public UserData(eAuthTypes authType) { lastAuthType = authType; } 
+
+    }
+
+    //Save Data Helpers
+    private void SetPath()
+    {
+        path = Application.dataPath + Path.AltDirectorySeparatorChar + SAVE_FILE_NAME;
+
+        //Uncomment line below if persistent save path is preferred.
+        //path = Application.persistentDataPath + Path.AltDirectorySeparatorChar + PATH_TO_SAVE; 
+    }
+
+    public void SaveAuthData()
+    {
+        string savePath = path;
+
+        UserData data = new UserData(currentAuthType); 
+
+        string json = JsonUtility.ToJson(data); 
+        Debug.Log("Saving authentication data to " + savePath);
+
+        using StreamWriter writer = new StreamWriter(savePath);
+        writer.Write(json); 
+    }
+
+    public void LoadAuthData()
+    {
+        try
+        {
+            using StreamReader reader = new StreamReader(path);
+            string json = reader.ReadToEnd();
+
+            UserData data = JsonUtility.FromJson<UserData>(json);
+
+            if (data != null)
+            {
+                currentAuthType = data.lastAuthType;
+
+                Debug.Log("Loading data from " + path); 
+            }
+        }
+        catch
+        {
+            Debug.Log( SAVE_FILE_NAME + " Could not be found at " + path + "\nAuth Save data will be created on your next authentication."); 
+        }
+    }
 
     void Start()
     {
-        ChangeAuthType(eAuthTypes.EMAIL);
+        SetPath(); 
+        LoadAuthData();
 
-        statusTextInitSize = statusText.fontSize; 
+        if(currentAuthType == 0)
+        {
+            ChangeAuthType(currentAuthType);
+        }
+        else
+        {
+            authDropdown.value = (int) currentAuthType; 
+        }
+
+        statusTextInitSize = statusText.fontSize;
+
+        SetPath(); 
     }
 
     private void OnEnable()
@@ -199,6 +272,8 @@ public class AuthenticateHandler : MonoBehaviour
 
     public void OnAuthenticate()
     {
+        SaveAuthData();
+
         inputProfileId = profileIdFieldObject.GetComponent<InputField>().text;
         inputPassword = passwordFieldObject.GetComponent<InputField>().text; 
 
