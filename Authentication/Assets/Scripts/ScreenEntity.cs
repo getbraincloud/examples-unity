@@ -25,7 +25,7 @@ public class ScreenEntity : BCScreen
     {
         if (HelpMessage == null)
         {
-            HelpMessage = "The entity screen demonstrates how a user entity can be created via the brainCloud client.\n\n" +
+            HelpMessage = "The user entity screen demonstrates how a user entity can be created via the brainCloud client.\n\n" +
                           "By pressing Create, a default user entity is created for the user. " +
                           "Pressing Delete will delete the user entity while Save updates the user entity of the user.\n\n" +
                           "This entity can be monitored on the \"User Entites\" page under the \"User Monitoring\" tab in the brainCloud portal.";

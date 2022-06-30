@@ -22,8 +22,10 @@ public class AuthenticateHandler : MonoBehaviour
         XBOXLIVE
     };
 
-    bool useAdvancedAuthentication = false;
+    bool buseAdvancedAuthentication = false;
     AuthenticationType selectedAdvancedAuthType;
+
+    bool brememberMe = false;
 
     eAuthTypes currentAuthType = eAuthTypes.ANONYMOUS;
 
@@ -50,6 +52,7 @@ public class AuthenticateHandler : MonoBehaviour
     [SerializeField] GameObject entityAgeText;
     [SerializeField] GameObject advAuthInfoText;
     [SerializeField] Toggle advAuthToggle;
+    [SerializeField] Toggle rememberMeToggle; 
     [SerializeField] Text extraAuthInfoText;
     [SerializeField] GameObject resetProfileIdButton;
     [SerializeField] GameObject resetAnonIdButton;
@@ -68,6 +71,8 @@ public class AuthenticateHandler : MonoBehaviour
 
         public string profileId = "";
         public string anonId = "";
+        public string pass = "";
+        public bool brememberMe; 
         public eAuthTypes lastAuthType;
 
         public UserData(eAuthTypes authType) { lastAuthType = authType; } 
@@ -87,7 +92,14 @@ public class AuthenticateHandler : MonoBehaviour
     {
         string savePath = path;
 
-        UserData data = new UserData(currentAuthType); 
+        UserData data = new UserData(currentAuthType);
+
+        if(brememberMe == true)
+        {
+            data.brememberMe = rememberMeToggle;
+            data.profileId = profileIdFieldObject.GetComponent<InputField>().text;
+            data.pass = passwordFieldObject.GetComponent<InputField>().text; 
+        }
 
         string json = JsonUtility.ToJson(data); 
         Debug.Log("Saving authentication data to " + savePath);
@@ -108,6 +120,14 @@ public class AuthenticateHandler : MonoBehaviour
             if (data != null)
             {
                 currentAuthType = data.lastAuthType;
+                brememberMe = data.brememberMe; 
+
+                if(data.brememberMe == true)
+                {
+                    rememberMeToggle.isOn = true;
+                    profileIdFieldObject.GetComponent<InputField>().text = data.profileId;
+                    passwordFieldObject.GetComponent<InputField>().text = data.pass; 
+                }
 
                 Debug.Log("Loading data from " + path); 
             }
@@ -204,16 +224,19 @@ public class AuthenticateHandler : MonoBehaviour
         serverAuthCodeText.SetActive(false);
         googleSignInButton.SetActive(false);
         extraAuthInfoText.text = "";
+        rememberMeToggle.gameObject.SetActive(false);
 
         switch (authType)
         {
             case eAuthTypes.EMAIL:
                 profileIdFieldObject.SetActive(true);
                 passwordFieldObject.gameObject.SetActive(true);
+                rememberMeToggle.gameObject.SetActive(true);
                 break;
             case eAuthTypes.UNIVERSAL:
                 profileIdFieldObject.SetActive(true);
                 passwordFieldObject.gameObject.SetActive(true);
+                rememberMeToggle.gameObject.SetActive(true);
                 break;
             case eAuthTypes.ANONYMOUS:
                 resetProfileIdButton.SetActive(true);
@@ -257,17 +280,22 @@ public class AuthenticateHandler : MonoBehaviour
 
     public void OnAdvancedAuthToggle(bool isToggled)
     {
-        useAdvancedAuthentication = isToggled;
+        buseAdvancedAuthentication = isToggled;
         ActivateAdvancedAuthFields();
+    }
+
+    public void OnRememberMeToggle(bool isToggled)
+    {
+        brememberMe = isToggled; 
     }
 
     void ActivateAdvancedAuthFields()
     {
-        entityNameField.SetActive(useAdvancedAuthentication);
-        entityAgeField.SetActive(useAdvancedAuthentication);
-        entityNameText.SetActive(useAdvancedAuthentication);
-        entityAgeText.SetActive(useAdvancedAuthentication);
-        advAuthInfoText.SetActive(useAdvancedAuthentication);
+        entityNameField.SetActive(buseAdvancedAuthentication);
+        entityAgeField.SetActive(buseAdvancedAuthentication);
+        entityNameText.SetActive(buseAdvancedAuthentication);
+        entityAgeText.SetActive(buseAdvancedAuthentication);
+        advAuthInfoText.SetActive(buseAdvancedAuthentication);
     }
 
     public void OnAuthenticate()
@@ -285,7 +313,7 @@ public class AuthenticateHandler : MonoBehaviour
         statusText.fontSize = STATUS_SHRINK_SIZE;
         statusText.text = "Attempting to Authenticate...";
 
-        if(useAdvancedAuthentication)
+        if(buseAdvancedAuthentication)
         {
             inputEntityName = entityNameField.GetComponent<InputField>().text;
             inputEntityAge = entityAgeField.GetComponent<InputField>().text;
