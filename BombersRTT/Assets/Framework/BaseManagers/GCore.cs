@@ -73,7 +73,7 @@ namespace Gameframework
         {
             IsFreshLaunch = true;
             GPlayerMgr.Instance.ResetBrainCloudAuth();
-            GStateManager.Instance.PopAllSubStatesTo(""); // clear all substates
+            GStateManager.Instance.ClearAllSubStates(); // clear all substates
         }
         #endregion
 
@@ -99,9 +99,13 @@ namespace Gameframework
             GStateManager.Instance.EnableLoadingSpinner(false);
             switch (reasonCode)
             {
+                case ReasonCodes.NO_SESSION:
+                    {
+                        if (IsFreshLaunch) break; // Prevent race condition where popup can appear and causes a softlock
+                        goto case ReasonCodes.PLAYER_SESSION_LOGGED_OUT;
+                    }
                 case ReasonCodes.UNABLE_TO_VALIDATE_PLAYER:
                 case ReasonCodes.PLAYER_SESSION_EXPIRED:
-                case ReasonCodes.NO_SESSION:
                 case ReasonCodes.PLAYER_SESSION_LOGGED_OUT:
                     {
                         HudHelper.DisplayMessageDialog("SESSION EXPIRED", "YOUR SESSION HAS EXPIRED. RE-AUTHENTICATING...", "OK", OnSessionExpiredDialogClose);

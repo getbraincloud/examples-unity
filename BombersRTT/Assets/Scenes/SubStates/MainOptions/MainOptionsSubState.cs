@@ -347,6 +347,8 @@ namespace BrainCloudUNETExample
 
         private void onPlayerLoggedOut(string in_str, object obj)
         {
+            GCore.IsFreshLaunch = true;
+
             HudHelper.DisplayMessageDialog("LOGGED OUT", "YOU HAVE BEEN LOGGED OUT.",
                 "OK", onLoggedOut);
         }
