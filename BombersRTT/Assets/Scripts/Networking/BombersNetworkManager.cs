@@ -1,6 +1,4 @@
-﻿
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -1108,8 +1106,6 @@ namespace BrainCloudUNETExample
 
         public void OnEnableRTTFailed(int statusCode, int reasonCode, string in_stringData, object in_obj)
         {
-            if(GCore.IsFreshLaunch) return; // Race condition where this can be called, interrupting the logout process
-
             GStateManager.Instance.EnableLoadingSpinner(false);
             HudHelper.DisplayMessageDialog("IDLE TIMEOUT", "ARE YOU STILL THERE?", "YES!", onReconnectRTT);
         }

@@ -517,7 +517,7 @@ using UnityEngine.Experimental.Networking;
                         ResetIdleTimer();
                         HandleResponseBundle(GetWebRequestResponse(_activeRequest));
                         DisposeUploadHandler();
-                        _activeRequest = null;        
+                        _activeRequest = null;
                     }
                     //HttpStatusCode.ServiceUnavailable
                     else if (_activeRequest.WebRequest.responseCode == 503)

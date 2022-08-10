@@ -101,7 +101,7 @@ namespace Gameframework
             {
                 case ReasonCodes.NO_SESSION:
                     {
-                        if (IsFreshLaunch) break; // Prevent race condition where popup can appear and causes a softlock
+                        if (IsFreshLaunch) break; // Prevent race condition where this popup can appear and causes a softlock
                         goto case ReasonCodes.PLAYER_SESSION_LOGGED_OUT;
                     }
                 case ReasonCodes.UNABLE_TO_VALIDATE_PLAYER:
