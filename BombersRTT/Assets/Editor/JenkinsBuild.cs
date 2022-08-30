@@ -16,6 +16,7 @@ public class JenkinsBuild {
     public static void BuildWebGL()
     {
         var args = FindArgs();
+        args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.appName;
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.None);
     }
@@ -107,6 +108,11 @@ public class JenkinsBuild {
     private class Args
     {
         public string appName = $"BombersRTT_Internal_v{BrainCloud.Version.GetVersion()}";
-        public string targetDir = "~/Desktop/BombersRTT_WebGL_Internal";
+        public string targetDir = "BombersRTT_WebGL_Internal";
+
+        public void GetEnviroVariables()
+        {
+            targetDir = System.Environment.GetEnvironmentVariable("targetDirectory");
+        }
     }
 }
