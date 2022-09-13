@@ -174,7 +174,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 82.5, y: -82.5}
-  m_SizeDelta: {x: 165, y: 165}
+  m_SizeDelta: {x: 160, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8551765673883928994
 CanvasRenderer:
@@ -258,9 +258,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SummonSelector, Assembly-CSharp
-        m_MethodName: OnTroopSelection
+      - m_Target: {fileID: 9218490787575090122}
+        m_TargetAssemblyTypeName: ArmySelectionButton, Assembly-CSharp
+        m_MethodName: OnArmySelected
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -279,7 +279,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6938097985844859078}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 003e8e343a05853419d25570dbba77f3, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f6dee632e0d16741a56b10cb7cb7889, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ArmyRank: 0

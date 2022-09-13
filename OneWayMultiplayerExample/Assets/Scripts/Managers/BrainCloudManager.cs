@@ -437,7 +437,7 @@ public class BrainCloudManager : MonoBehaviour
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
         //We did it
-        GameManager.Instance.SessionManager.LoadPlayback(in_jsonResponse);
+        //GameManager.Instance.SessionManager.LoadPlayback(in_jsonResponse);
     }
 
     string CreateSummaryData()

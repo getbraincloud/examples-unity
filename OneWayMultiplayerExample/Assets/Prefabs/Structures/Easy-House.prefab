@@ -59,7 +59,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6a56674a7735e4f4d9748ebfe63b58d6, type: 2}
+  - {fileID: 2100000, guid: 696e62c2da9722349bc10840a5b1d715, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -140,7 +140,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 714cf91e9411ab642b30b9dcc0b767c3, type: 2}
+  - {fileID: 2100000, guid: 5a2654f42865c384891faa1658ea01a7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -221,7 +221,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 714cf91e9411ab642b30b9dcc0b767c3, type: 2}
+  - {fileID: 2100000, guid: 5a2654f42865c384891faa1658ea01a7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -313,8 +313,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5904163088892923123}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -948.7192, y: -557.24036, z: 69.03161}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 5904163087932721092}
   - {fileID: 5770477317269674236}
@@ -346,11 +346,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 5904163088892923123}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23123b5ead17cb340a8ed8322f19cc54, type: 3}
+  m_Script: {fileID: 11500000, guid: 27dc0b81238f2d140adaae83aa51d743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DeathFX: {fileID: 1890581295539120, guid: 0e1c7fb597c927a41893518fb7dc7472, type: 3}
-  StartingHealth: 150
+  DeathFX: {fileID: 0}
+  StartingHealth: 100
 --- !u!1 &8748289228987498153
 GameObject:
   m_ObjectHideFlags: 0
@@ -361,7 +361,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8748289228987498152}
   - component: {fileID: 8748289228987498151}
-  - component: {fileID: 5503144455529022340}
+  - component: {fileID: 8153221146289179587}
   m_Layer: 5
   m_Name: HealthBar
   m_TagString: Untagged
@@ -438,11 +438,11 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 100
   m_WholeNumbers: 0
-  m_Value: 35.1
+  m_Value: 100
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &5503144455529022340
+--- !u!114 &8153221146289179587
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -451,38 +451,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8748289228987498153}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d80b4dc1dd57cd8499ca61006772612f, type: 3}
+  m_Script: {fileID: 11500000, guid: b85f76136dbae3444a49564c886522fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gradient:
-    serializedVersion: 2
-    key0: {r: 1, g: 0, b: 0, a: 1}
-    key1: {r: 0.990566, g: 0.8907016, b: 0, a: 1}
-    key2: {r: 0, g: 1, b: 0.1997869, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 21588
-    ctime1: 45296
-    ctime2: 65535
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 1
-    m_NumColorKeys: 3
-    m_NumAlphaKeys: 2
   FillImage: {fileID: 8748289230298195389}
   BorderImage: {fileID: 8748289230520049760}
   HeartImage: {fileID: 8748289229624680038}
@@ -551,7 +522,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 641fa03d2c88fbe4d82de9173304947f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8e7bfadbf9484f845ace6b6251763af8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -573,7 +544,7 @@ GameObject:
   - component: {fileID: 8748289229715625478}
   - component: {fileID: 8748289229715625479}
   - component: {fileID: 8748289229715625480}
-  - component: {fileID: 3743068982731927961}
+  - component: {fileID: 5807818501213626031}
   m_Layer: 5
   m_Name: HealthBar-Canvas
   m_TagString: Untagged
@@ -662,7 +633,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &3743068982731927961
+--- !u!114 &5807818501213626031
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -671,7 +642,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8748289229715625481}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ad428fe3913d3344b137c120b1da228, type: 3}
+  m_Script: {fileID: 11500000, guid: fd0093595046468499546a072ca47de0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8748289230298195391
@@ -708,8 +679,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0.7050171, y: 0}
+  m_SizeDelta: {x: -22.850052, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8748289230298195388
 CanvasRenderer:
@@ -739,8 +710,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -814,7 +785,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 860b70939dda20a4ab7e2df31de6875d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ceb9df3b0888d4f4b9d4958c8d6c2bc8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
