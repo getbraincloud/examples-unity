@@ -3,6 +3,7 @@
 // Copyright 2016 bitHeads, inc.
 //----------------------------------------------------
 
+
 namespace BrainCloud
 {
 
@@ -11,6 +12,8 @@ using System.Collections.Generic;
 using BrainCloud.Internal;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
+
+
 
     public class BrainCloudAuthentication
     {
@@ -86,7 +89,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(AnonymousId, "", AuthenticationType.Anonymous,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -165,7 +168,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(email, password, AuthenticationType.Email,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -204,7 +207,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(userId, password, AuthenticationType.Universal,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -242,7 +245,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(externalId, authenticationToken, AuthenticationType.Facebook,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -280,7 +283,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(externalId, authenticationToken, AuthenticationType.FacebookLimited,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -317,7 +320,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(oculusId, oculusNonce, AuthenticationType.Oculus,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -354,7 +357,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(accountId, authToken, AuthenticationType.PlaystationNetwork,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -387,7 +390,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(gameCenterId, "", AuthenticationType.GameCenter,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -424,7 +427,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(userId, sessionticket, AuthenticationType.Steam,
-                              null, forceCreate, success, failure, cbObject);
+                              null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -461,7 +464,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(appleUserId, identityToken, AuthenticationType.Apple,
-                null, forceCreate, success, failure, cbObject);
+                null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -498,7 +501,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(googleUserId, serverAuthCode, AuthenticationType.Google,
-                null, forceCreate, success, failure, cbObject);
+                null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -535,7 +538,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(googleUserAccountEmail, IdToken, AuthenticationType.GoogleOpenId,
-                null, forceCreate, success, failure, cbObject);
+                null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -576,7 +579,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(userId, token + ":" + secret, AuthenticationType.Twitter,
-                null, forceCreate, success, failure, cbObject);
+                null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -613,7 +616,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(userId, token, AuthenticationType.Parse,
-                null, forceCreate, success, failure, cbObject);
+                null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -642,7 +645,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(handoffCode, "", AuthenticationType.SettopHandoff,
-                null, false, success, failure, cbObject);
+                null, false, null, success, failure, cbObject);
         }
 
         
@@ -675,7 +678,7 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(handoffId, securityToken, AuthenticationType.Handoff,
-                null, false, success, failure, cbObject);
+                null, false, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -717,7 +720,123 @@ using BrainCloud.JsonFx.Json;
             object cbObject = null)
         {
             Authenticate(userId, token, AuthenticationType.External,
-                externalAuthName, forceCreate, success, failure, cbObject);
+                externalAuthName, forceCreate, null, success, failure, cbObject);
+        }
+        
+        /// <summary>
+        /// A generic Authenticate method that translates to the same as calling a specific one, except it takes an extraJson
+        /// that will be passed along to pre-post hooks.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Authenticate
+        /// Service Operation - Authenticate
+        /// </remarks>
+        /// <param name="authenticationType">
+        ///  Universal, Email, Facebook, etc
+        /// </param>
+        /// <param name="ids">
+        /// Auth IDs structure
+        /// </param>
+        /// /// <param name="forceCreate">
+        /// Should a new profile be created for this user if the account does not exist?
+        /// </param>
+        /// /// <param name="extraJson">
+        /// Additional to piggyback along with the call, to be picked up by pre- or post- hooks. Leave an empty Dictionary for no extraJson.
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user supplied callback object
+        /// </param>
+        public void AuthenticateAdvanced(
+            AuthenticationType authenticationType,
+            AuthenticationIds ids,
+            bool forceCreate,
+            Dictionary<string, object> extraJson,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Authenticate(ids.externalId, ids.authenticationToken, authenticationType, 
+                ids.authenticationSubType, forceCreate, extraJson, success, failure, cbObject);
+        }
+        
+        /// <summary>
+        /// Authenticate the user for Ultra.
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Authenticate
+        /// Service Operation - Authenticate
+        /// </remarks>
+        /// <param name="ultraUsername">
+        /// It's what the user uses to log into the Ultra endpoint initially
+        /// </param>
+        /// <param name="ultraIdToken">
+        /// The "id_token" taken from Ultra's JWT.
+        /// </param>
+        /// /// <param name="forceCreate">
+        /// Should a new profile be created for this user if the account does not exist?
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user supplied callback object
+        /// </param>
+        public void AuthenticateUltra(
+            string ultraUsername,
+            string ultraIdToken,
+            bool forceCreate,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Authenticate(ultraUsername, ultraIdToken, AuthenticationType.Ultra, 
+                null, forceCreate, null, success, failure, cbObject);
+        }
+        
+        /// <summary>
+        /// Authenticate the user using their Nintendo account id and an auth token
+        /// </summary>
+        /// <remarks>
+        /// Service Name - Authenticate
+        /// Service Operation - Authenticate
+        /// </remarks>
+        /// <param name="accountId">
+        /// The user's Nintendo account id
+        /// </param>
+        /// <param name="authToken">
+        /// The user's Nintendo auth token
+        /// </param>
+        /// <param name="forceCreate">
+        /// Should a new profile be created for this user if the account does not exist?
+        /// </param>
+        /// <param name="success">
+        /// The method to call in event of successful login
+        /// </param>
+        /// <param name="failure">
+        /// The method to call in the event of an error during authentication
+        /// </param>
+        /// <param name="cbObject">
+        /// The user supplied callback object
+        /// </param>
+        public void AuthenticateNintendo(
+            string accountId,
+            string authToken,
+            bool forceCreate,
+            SuccessCallback success = null,
+            FailureCallback failure = null,
+            object cbObject = null)
+        {
+            Authenticate(accountId, authToken, AuthenticationType.Nintendo, 
+                null, forceCreate, null, success, failure, cbObject);
         }
 
         /// <summary>
@@ -1068,6 +1187,7 @@ using BrainCloud.JsonFx.Json;
             AuthenticationType authenticationType,
             string externalAuthName,
             bool forceCreate,
+            Dictionary<string, object> extraJson,
             SuccessCallback success = null,
             FailureCallback failure = null,
             object cbObject = null)
@@ -1100,13 +1220,24 @@ using BrainCloud.JsonFx.Json;
             {
                 data[OperationParam.AuthenticateServiceAuthenticateExternalAuthName.Value] = externalAuthName;
             }
+
+            if (extraJson != null)
+            {
+                data[OperationParam.AuthenticateServiceAuthenticateExtraJson.Value] = extraJson;    
+            }
+            
             data[OperationParam.AuthenticateServiceAuthenticateCountryCode.Value] = countryCode;
             data[OperationParam.AuthenticateServiceAuthenticateLanguageCode.Value] = languageCode;
             data[OperationParam.AuthenticateServiceAuthenticateTimeZoneOffset.Value] = utcOffset;
 
             ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
             ServerCall sc = new ServerCall(ServiceName.Authenticate, ServiceOperation.Authenticate, data, callback);
-            _client.SendRequest(sc);
+            if (_client.Comms.IsAuthenticateRequestInProgress())
+            {
+                _client.Comms.AddCallbackToAuthenticateRequest(callback);
+                return;
+            }
+           _client.SendRequest(sc);
         }
     }
 }

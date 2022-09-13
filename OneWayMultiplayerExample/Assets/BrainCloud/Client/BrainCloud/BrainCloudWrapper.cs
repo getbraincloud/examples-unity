@@ -5,6 +5,7 @@
 
 using System.Collections.Generic;
 using BrainCloud;
+using BrainCloud.Common;
 using BrainCloud.Entity;
 using BrainCloud.Internal;
 using BrainCloud.JsonFx.Json;
@@ -502,12 +503,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity(true);
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject, true);
 
         Client.AuthenticationService.AuthenticateAnonymous(
             true, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -542,12 +538,8 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity(true);
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject, true);
+        
         Client.AuthenticationService.AuthenticateHandoff(
             handoffId, securityToken, AuthSuccessCallback, AuthFailureCallback, aco);
 
@@ -578,12 +570,8 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity(true);
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject, true);
+        
         Client.AuthenticationService.AuthenticateSettopHandoff(
             handoffCode, AuthSuccessCallback, AuthFailureCallback, aco);
     }
@@ -627,12 +615,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateEmailPassword(
             email, password, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -676,12 +659,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateExternal(
             userid, token, externalAuthName, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -721,12 +699,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateFacebook(
             fbUserId, fbAuthToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -766,12 +739,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateFacebookLimited(
             fbLimitedUserId, fbAuthToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -810,12 +778,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateOculus(
             oculusUserId, oculusNonce, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -854,12 +817,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticatePlaystationNetwork(
             accountId, authToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -894,13 +852,8 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
-
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
+        
         Client.AuthenticationService.AuthenticateGameCenter(
             gameCenterId, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
     }
@@ -938,12 +891,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateApple(
             appleUserId, identityToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -982,12 +930,7 @@ public class BrainCloudWrapper
     FailureCallback failure = null,
     object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateGoogle(
             googleUserId, serverAuthCode, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -1026,12 +969,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateGoogleOpenId(
             googleUserAccountEmail, IdToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -1070,12 +1008,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateSteam(
             userid, sessionticket, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -1118,12 +1051,7 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateTwitter(
             userid, token, secret, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
@@ -1164,15 +1092,136 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        aco._successCallback = success;
-        aco._failureCallback = failure;
-        aco._cbObject = cbObject;
-
-        InitializeIdentity();
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
 
         Client.AuthenticationService.AuthenticateUniversal(
             username, password, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
+    }
+    
+    /// <summary>
+    /// A generic Authenticate method that translates to the same as calling a specific one, except it takes an extraJson
+    /// that will be passed along to pre-post hooks.
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="authenticationType">
+    ///  Universal, Email, Facebook, etc
+    /// </param>
+    /// <param name="ids">
+    /// Auth IDs structure
+    /// </param>
+    /// /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// /// <param name="extraJson">
+    /// Additional to piggyback along with the call, to be picked up by pre- or post- hooks. Leave empty string for no extraJson.
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public void AuthenticateAdvanced(
+        AuthenticationType authenticationType,
+        AuthenticationIds ids,
+        bool forceCreate,
+        Dictionary<string, object> extraJson,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        bool isAnonymous = authenticationType == AuthenticationType.Anonymous;
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject, isAnonymous);
+        
+        ids.externalId = isAnonymous ? GetStoredAnonymousId() : ids.externalId;
+        ids.authenticationToken = isAnonymous ? "" : ids.authenticationToken;
+
+        Client.AuthenticationService.AuthenticateAdvanced(
+            authenticationType, ids, forceCreate, extraJson, AuthSuccessCallback, AuthFailureCallback, aco);
+    }
+    
+    /// <summary>
+    /// Authenticate the user for Ultra.
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="ultraUsername">
+    /// It's what the user uses to log into the Ultra endpoint initially
+    /// </param>
+    /// <param name="ultraIdToken">
+    /// The "id_token" taken from Ultra's JWT.
+    /// </param>
+    /// /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public void AuthenticateUltra(
+        string ultraUsername,
+        string ultraIdToken,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
+
+        Client.AuthenticationService.AuthenticateUltra(
+            ultraUsername, ultraIdToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
+    }
+    
+    /// <summary>
+    /// Authenticate the user using their Nintendo account id and an auth token
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="accountId">
+    /// The user's Nintendo account id
+    /// </param>
+    /// <param name="authToken">
+    /// The user's Nintendo auth token
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public void AuthenticateNintendo(
+        string accountId,
+        string authToken,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject);
+
+        Client.AuthenticationService.AuthenticateNintendo(
+            accountId, authToken, forceCreate, AuthSuccessCallback, AuthFailureCallback, aco);
     }
 
     /// <summary>
@@ -1776,6 +1825,148 @@ public class BrainCloudWrapper
         SmartSwitchAuthentication(authenticateCallback, failure);
     }
 
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean design flow from anonymous to signed profiles
+    ///
+    /// A generic Authenticate method that translates to the same as calling a specific one, except it takes an extraJson
+    /// that will be passed along to pre- or post- hooks.
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="authenticationType">
+    /// Universal, Email, Facebook, etc
+    /// </param>
+    /// <param name="ids">
+    /// Auth IDs structure
+    /// </param>
+    /// /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// /// <param name="extraJson">
+    /// Additional to piggyback along with the call, to be picked up by pre- or post- hooks. Leave empty string for no extraJson.
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateAdvanced(
+        AuthenticationType authenticationType,
+        AuthenticationIds ids,
+        bool forceCreate,
+        Dictionary<string, object> extraJson,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) =>
+        {
+            AuthenticateAdvanced(authenticationType,ids,forceCreate,extraJson,success,failure,cbObject);
+        };
+        
+        SmartSwitchAuthentication(authenticateCallback,failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user for Ultra.
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="ultraUsername">
+    /// It's what the user uses to log into the Ultra endpoint initially
+    /// </param>
+    /// <param name="ultraIdToken">
+    /// The "id_token" taken from Ultra's JWT.
+    /// </param>
+    /// /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateUltra(
+        string ultraUsername,
+        string ultraIdToken,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) =>
+        {
+            AuthenticateUltra(ultraUsername, ultraIdToken, forceCreate, success, failure, cbObject);
+        };
+        
+        SmartSwitchAuthentication(authenticateCallback,failure);
+    }
+    
+    /// <summary>
+    /// Smart Switch Authenticate will logout of the current profile, and switch to the new authentication type.
+    /// In event the current session was previously an anonymous account, the smart switch will delete that profile.
+    /// Use this function to keep a clean designflow from anonymous to signed profiles
+    /// 
+    /// Authenticate the user with brainCloud using their Nintendo Credentials
+    /// </summary>
+    /// <remarks>
+    /// Service Name - Authenticate
+    /// Service Operation - Authenticate
+    /// </remarks>
+    /// <param name="nintendoAccountId">
+    /// The Nintendo account id of the user
+    /// </param>
+    /// <param name="nintendoAuthToken">
+    /// The validated token from the Nintendo SDK (that will be further
+    /// validated when sent to the bC service)
+    /// </param>
+    /// <param name="forceCreate">
+    /// Should a new profile be created for this user if the account does not exist?
+    /// </param>
+    /// <param name="success">
+    /// The method to call in event of successful login
+    /// </param>
+    /// <param name="failure">
+    /// The method to call in the event of an error during authentication
+    /// </param>
+    /// <param name="cbObject">
+    /// The user supplied callback object
+    /// </param>
+    public virtual void SmartSwitchAuthenticateNintendo(
+        string nintendoAccountId,
+        string nintendoAuthToken,
+        bool forceCreate,
+        SuccessCallback success = null,
+        FailureCallback failure = null,
+        object cbObject = null)
+    {
+        SuccessCallback authenticateCallback = (response, o) =>
+        {
+            AuthenticateNintendo(nintendoAccountId, nintendoAuthToken, forceCreate, success, failure, cbObject);
+        };
+
+        SmartSwitchAuthentication(authenticateCallback, failure);
+    }
+
     private void SmartSwitchAuthentication(SuccessCallback authenticateCallback, FailureCallback failureCallback)
     {
         var getIdentitiesCallback = GetIdentitiesCallback(authenticateCallback, failureCallback);
@@ -1834,7 +2025,10 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        AuthenticateAnonymous(success, failure, cbObject);
+        WrapperAuthCallbackObject aco = MakeWrapperAuthCallback(success, failure, cbObject, true);
+        
+        Client.AuthenticationService.AuthenticateAnonymous(
+            false, AuthSuccessCallback, AuthFailureCallback, aco);
     }
 
     /// <summary>
@@ -1895,11 +2089,6 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        //WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        //aco._successCallback = success;
-        //aco._failureCallback = failure;
-        //aco.cbObject = cbObject;
-
         Client.AuthenticationService.ResetEmailPassword(externalId, success, failure);
     }
 
@@ -2033,11 +2222,6 @@ public class BrainCloudWrapper
         FailureCallback failure = null,
         object cbObject = null)
     {
-        //WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
-        //aco._successCallback = success;
-        //aco._failureCallback = failure;
-        //aco.cbObject = cbObject;
-
         Client.AuthenticationService.ResetUniversalIdPassword(externalId, success, failure);
     }
 
@@ -2348,6 +2532,18 @@ public class BrainCloudWrapper
         _wrapperData.AnonymousId = PlayerPrefs.GetString(prefix + PREFS_ANONYMOUS_ID);
         _wrapperData.AuthenticationType = PlayerPrefs.GetString(prefix + PREFS_AUTHENTICATION_TYPE);
 #endif
+    }
+
+    private WrapperAuthCallbackObject MakeWrapperAuthCallback(SuccessCallback successCallback,
+        FailureCallback failureCallback, object cbObject = null, bool isAnonymousAuth = false)
+    {
+        WrapperAuthCallbackObject aco = new WrapperAuthCallbackObject();
+        aco._successCallback = successCallback;
+        aco._failureCallback = failureCallback;
+        aco._cbObject = cbObject;
+
+        InitializeIdentity(isAnonymousAuth);
+        return aco;
     }
 
     private class WrapperData
