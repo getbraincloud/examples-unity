@@ -196,7 +196,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         }
     }
 
-    //0 = invader(local player), 1 = defender(network player)
+    /// <param name="in_teamID">0 = invader(local player), 1 = defender(network player)</param>
     public void AssignToTeam(int in_teamID)
     {
         _teamId = in_teamID;

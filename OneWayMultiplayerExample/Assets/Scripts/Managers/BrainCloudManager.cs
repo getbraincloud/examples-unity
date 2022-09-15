@@ -444,8 +444,31 @@ public class BrainCloudManager : MonoBehaviour
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
-        //We did it
-        //GameManager.Instance.SessionManager.LoadPlayback(in_jsonResponse);
+        //Extracting events from response...
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object>[] events = data["events"] as Dictionary<string, object>[];
+        if (events == null || events.Length == 0)
+        {
+            Debug.LogWarning("No events were retrieved...");
+            return;
+        }
+        for (int i = 0; i < events.Length; i++)
+        {
+            ActionReplayRecord record = new ActionReplayRecord();
+            record.eventId = (EventId) events[i]["eventId"];
+            record.frameId = (int) events[i]["frameId"];
+            record.troopType = (EnemyTypes) events[i]["troopType"];
+
+            double pointX = (double) events[i]["spawnPointX"];
+            double pointY = (double) events[i]["spawnPointY"];
+            double pointZ = (double) events[i]["spawnPointZ"];
+            record.position.x = (float) pointX;
+            record.position.y = (float) pointY;
+            record.position.z = (float) pointZ;
+            
+            GameManager.Instance.ReplayRecords.Add(record);
+        }
     }
 
     string CreateSummaryData()

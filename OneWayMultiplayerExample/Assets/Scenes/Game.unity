@@ -1881,6 +1881,10 @@ PrefabInstance:
       propertyPath: m_text
       value: Shooter
       objectReference: {fileID: 0}
+    - target: {fileID: 6083361996445713210, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
+      propertyPath: EnemyTypeSelection
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8275216547862225074, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_Name
       value: SummonSelectorButton (1)
@@ -3383,6 +3387,10 @@ PrefabInstance:
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6083361996445713210, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
+      propertyPath: EnemyTypeSelection
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8275216547862225074, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_Name

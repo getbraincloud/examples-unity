@@ -37,14 +37,7 @@ public class GameSessionManager : MonoBehaviour
         _defenderSpawner = FindObjectOfType<DefenderSpawner>();
         _invaderSpawnData = FindObjectOfType<SpawnController>().SpawnData;
 
-        if (GameManager.Instance.IsInPlaybackMode)
-        {
-            StartStream();
-        }
-        else
-        {
-            StartCoroutine(Timer(RoundDuration));    
-        }
+        StartCoroutine(Timer(RoundDuration));  
     }
 
     private void FixedUpdate()
@@ -100,7 +93,11 @@ public class GameSessionManager : MonoBehaviour
     //
     public void StartStream()
     {
+        GameManager.Instance.PrepareGameForPlayback();
+        GameOverScreen.gameObject.SetActive(false);
         //Start Stream
+        StartCoroutine(Timer(RoundDuration));
+        _frameId = 0;
         _replayCoroutine = StartCoroutine(StartPlayBack());
     }
 
@@ -108,7 +105,7 @@ public class GameSessionManager : MonoBehaviour
     {
         int replayIndex = 0;
         var _actionReplayRecords = GameManager.Instance.ReplayRecords;
-        while (replayIndex <= _actionReplayRecords.Count)
+        while (replayIndex < _actionReplayRecords.Count)
         {
             if (_frameId == _actionReplayRecords[replayIndex].frameId)
             {
@@ -117,7 +114,8 @@ public class GameSessionManager : MonoBehaviour
                 {
                     case EventId.Spawn:
                         TroopAI prefab = _invaderSpawnData.GetTroop(_actionReplayRecords[replayIndex].troopType);
-                        Instantiate(prefab, _actionReplayRecords[replayIndex].position, Quaternion.identity);
+                        TroopAI newSpawn = Instantiate(prefab, _actionReplayRecords[replayIndex].position, Quaternion.identity);
+                        newSpawn.AssignToTeam(0);
                         Debug.Log("Spawning...");
                         break;
                 }

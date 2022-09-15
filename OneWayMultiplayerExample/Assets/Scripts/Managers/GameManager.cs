@@ -179,36 +179,9 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    public void LoadPlayback(string in_jsonResponse)
+    public void PrepareGameForPlayback()
     {
-        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
-        if (data == null)
-        {
-            Debug.LogWarning("No playback was retrieved");
-            return;
-        }
-        Dictionary<string, object>[] events = data["events"] as Dictionary<string, object>[];
-        if (events == null || events.Length == 0)
-        {
-            Debug.LogWarning("No events found in playback");
-            return;
-        }
-        
-        for (int i = 0; i < events.Length; i++)
-        {
-            ActionReplayRecord record = new ActionReplayRecord();
-            record.position.x = (float) (double) events[i]["spawnPointX"];
-            record.position.y = (float) (double) events[i]["spawnPointY"];
-            record.position.z = (float) (double) events[i]["spawnPointZ"];
-
-            record.eventId = (EventId) (int) events[i]["eventId"];
-            record.troopType = (EnemyTypes) (int) events[i]["troopType"];
-            record.frameId = (int) events[i]["frameId"];
-            _replayRecords.Add(record);
-        }
-
-
+        _isGameActive = true;
         var troopsToDestroy = FindObjectsOfType<TroopAI>();
         foreach (var troopAI in troopsToDestroy)
         {
@@ -221,8 +194,6 @@ public class GameManager : MonoBehaviour
             //Set up defenders
             _defenderSpawner.SpawnDefenderSetup();    
         }
-
-        Debug.Log("Stuff is loaded");
     }
 
     public int RemainingStructures() => _defenderStructParent.childCount;
