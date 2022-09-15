@@ -107,7 +107,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4579519968140355209}
   m_LocalRotation: {x: 0, y: 0, z: 0.953717, w: 0.30070582}
-  m_LocalPosition: {x: -0.18, y: 1, z: 0}
+  m_LocalPosition: {x: -0.2, y: 1.03, z: 0}
   m_LocalScale: {x: 0.14612782, y: 1.5, z: 1}
   m_Children: []
   m_Father: {fileID: 5904163088892923119}
@@ -188,7 +188,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5875743049618647177}
   m_LocalRotation: {x: -0, y: -0, z: -0.9540357, w: 0.29969308}
-  m_LocalPosition: {x: 0.18, y: 1, z: 0}
+  m_LocalPosition: {x: 0.19, y: 1.02, z: 0}
   m_LocalScale: {x: 0.14612782, y: 1.5, z: 1}
   m_Children: []
   m_Father: {fileID: 5904163088892923119}
@@ -312,9 +312,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5904163088892923123}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_Children:
   - {fileID: 5904163087932721092}
   - {fileID: 5770477317269674236}
@@ -350,7 +350,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DeathFX: {fileID: 0}
-  StartingHealth: 100
+  StartingHealth: 150
 --- !u!1 &8748289228987498153
 GameObject:
   m_ObjectHideFlags: 0

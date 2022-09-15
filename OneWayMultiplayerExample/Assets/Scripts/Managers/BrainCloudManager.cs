@@ -145,6 +145,14 @@ public class BrainCloudManager : MonoBehaviour
 
         Dictionary<string, object>[] matchesFound = data["matchesFound"] as Dictionary<string, object>[];
         List<UserInfo> users = new List<UserInfo>();
+
+        if (matchesFound == null || matchesFound.Length == 0)
+        {
+            Debug.LogWarning("No Players Found.");
+            
+            return;
+        }
+        
         for (int i = 0; i < matchesFound.Length; i++)
         {
             var newUser = new UserInfo();

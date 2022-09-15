@@ -5,7 +5,7 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum ArmyDivisionRank{Easy,Medium,Hard,None}
+public enum ArmyDivisionRank{Easy,Medium,Hard,None,Test}
 public enum ArmyType {Invader,Defense}
 
 public class GameManager : MonoBehaviour
@@ -79,8 +79,11 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         _currentUserInfo = Settings.LoadPlayerInfo();
         InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
-        MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
-        MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
+        if(MenuManager.Instance != null)
+        {
+            MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
+            MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
+        }
     }
 
     public bool IsEntityIdValid()

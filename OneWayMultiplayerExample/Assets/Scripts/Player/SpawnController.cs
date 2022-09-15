@@ -85,7 +85,10 @@ public class SpawnController : MonoBehaviour
                 troop.AssignToTeam(0);
                 _troopSelected.SpawnedTroops++;
                 _troopSelected.SummonSelector.UpdateSpawnNumber(_troopSelected.SpawnLimit - _troopSelected.SpawnedTroops);
-                BrainCloudManager.Instance.RecordTroopSpawn(spawnPoint, troop);
+                if (BrainCloudManager.Instance != null)
+                {
+                    BrainCloudManager.Instance.RecordTroopSpawn(spawnPoint, troop);    
+                }
             }
         }
     }

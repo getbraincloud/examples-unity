@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public enum TroopStates {Idle, Rotate, Move, Attack}
-public enum EnemyTypes {Grunt, Solder, Shooter, Bullet}
+public enum EnemyTypes {Grunt, Soldier, Shooter, Bullet}
 
 public class TroopAI : MonoBehaviour, IDamageable<int>
 {
@@ -166,7 +166,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         switch (EnemyType)
         {
             case EnemyTypes.Grunt:
-            case EnemyTypes.Solder:
+            case EnemyTypes.Soldier:
                 MeleeTarget();
                 break;
             case EnemyTypes.Shooter:
@@ -190,8 +190,6 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     //This function is triggered through an Animation Event
     public void ShootTarget()
     {
-        /*if (_isAttacking) return;
-        _isAttacking = true;*/
         if (_shootScript && gameObject && _target)
         {
             _shootScript.SpawnProjectile(gameObject.layer, _target);
@@ -247,8 +245,6 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
 
     public void IncomingAttacker(TroopAI in_attacker)
     {
-        if (_target == in_attacker.gameObject) return;
-        
         _target = in_attacker.gameObject;
     }
 

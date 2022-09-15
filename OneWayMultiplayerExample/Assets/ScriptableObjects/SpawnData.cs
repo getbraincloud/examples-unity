@@ -40,6 +40,7 @@ public class SpawnData : ScriptableObject
     public List<SpawnInfo> EasyParameterList = new List<SpawnInfo>();
     public List<SpawnInfo> MediumParameterList = new List<SpawnInfo>();
     public List<SpawnInfo> HardParameterList = new List<SpawnInfo>();
+    public List<SpawnInfo> TestParameterList = new List<SpawnInfo>();
     
     public void AssignSpawnList(ArmyDivisionRank in_rank)
     {
@@ -54,6 +55,9 @@ public class SpawnData : ScriptableObject
                 break;
             case ArmyDivisionRank.Hard:
                 _spawnParametersList = HardParameterList;
+                break;
+            case ArmyDivisionRank.Test:
+                _spawnParametersList = TestParameterList;
                 break;
         }
     }

@@ -15,9 +15,16 @@ public class DefenderSpawner : MonoBehaviour
     private bool _addOffset;
     private int _offsetRangeZ = 6;
     private int _offsetRangeX = 6;
+    public bool TestingMode;
 
     private void Start()
     {
+        if (BrainCloudManager.Instance == null)
+        {
+            TestingMode = true;
+            DefenderSpawnData.Rank = ArmyDivisionRank.Medium;
+            DefenderSpawnData.SpawnList = DefenderSpawnData.TestParameterList;
+        }
         SpawnDefenderSetup();
     }
 

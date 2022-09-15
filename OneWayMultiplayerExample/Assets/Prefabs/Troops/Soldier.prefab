@@ -57,18 +57,18 @@ MonoBehaviour:
   StartingHealth: 100
   MoveSpeed: 10
   RotationSpeed: 5
-  AcceptanceRangeToTarget: 2
-  HomeWayPoint: {fileID: 0}
+  AcceptanceRangeToTarget: 5
+  HomeWayPoint: {fileID: 6144503929093526724, guid: f910241f26002044b96972a3e2d58dc9, type: 3}
   CurrentState: 0
   _activeMask:
     serializedVersion: 2
     m_Bits: 0
   InvaderMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   DefenderMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
   _hitBackForce: 5
 --- !u!33 &1450905314783072881
 MeshFilter:
@@ -142,7 +142,7 @@ Animator:
   m_GameObject: {fileID: 2592795237069217226}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 48d9c25c27690eb40837883d1506b7ef, type: 2}
+  m_Controller: {fileID: 9100000, guid: da7cb65459a701041a7fc19afa767821, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -299,6 +299,10 @@ PrefabInstance:
     - target: {fileID: 5504083520922089787, guid: be1197b60832bd444aec93b1415faa0a, type: 3}
       propertyPath: m_RootOrder
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5504083520922089787, guid: be1197b60832bd444aec93b1415faa0a, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 5504083520922089787, guid: be1197b60832bd444aec93b1415faa0a, type: 3}
       propertyPath: m_LocalPosition.x
