@@ -109,7 +109,6 @@ public class GameSessionManager : MonoBehaviour
         {
             if (_frameId == _actionReplayRecords[replayIndex].frameId)
             {
-                replayIndex++;
                 switch (_actionReplayRecords[replayIndex].eventId)
                 {
                     case EventId.Spawn:
@@ -119,6 +118,7 @@ public class GameSessionManager : MonoBehaviour
                         Debug.Log("Spawning...");
                         break;
                 }
+                replayIndex++;
             }
 
             yield return new WaitForFixedUpdate();

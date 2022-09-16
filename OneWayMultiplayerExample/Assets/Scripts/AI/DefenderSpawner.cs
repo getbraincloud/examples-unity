@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class DefenderSpawner : MonoBehaviour
 {
@@ -31,6 +27,8 @@ public class DefenderSpawner : MonoBehaviour
     public void SpawnDefenderSetup()
     {
         TroopAI troopToSpawn;
+        _addOffset = false;
+        _spawnPointIndex = 0;
         GameManager.Instance.DefenderTroopCount = 0;
         //Spawn in troops based on spawner data
         foreach (SpawnInfo spawnInfo in DefenderSpawnData.SpawnList)
