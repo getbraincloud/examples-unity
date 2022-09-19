@@ -48,6 +48,16 @@ public class DefenderSpawner : MonoBehaviour
                 
                 TroopAI troop = Instantiate(troopToSpawn, spawnPoint, Quaternion.identity);
                 troop.AssignToTeam(1);
+                if (GameManager.Instance.IsInPlaybackMode)
+                {
+                    //Assign the ID
+                    troop.TroopID = GameManager.Instance.SessionManager.DefenderIDs[i];
+                }
+                else
+                {
+                    //Get the ID then Add it to the list and troop
+                    troop.TroopID = GameManager.Instance.SessionManager.DefenderIDs[i] = troop.GetInstanceID();
+                }
                 _spawnPointIndex++;
                 GameManager.Instance.DefenderTroopCount++;
                 if (_spawnPointIndex >= SpawnPoints.Length)

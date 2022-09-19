@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: -5712078135057712850}
   - component: {fileID: 9066059116042051321}
   - component: {fileID: 271463519689347992}
+  - component: {fileID: 1033738017713838794}
   m_Layer: 0
   m_Name: Shooter
   m_TagString: Troop
@@ -220,6 +221,21 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1033738017713838794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2592795237069217226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da55bbbc0c133704e9e66158beec84d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Bullet: {fileID: 5537242349010238175, guid: 7068645568857c64c988a86b7b78cfde, type: 3}
+  SpawnPoints:
+  - {fileID: 2029747012128529162}
 --- !u!1 &3481882288859579936
 GameObject:
   m_ObjectHideFlags: 0

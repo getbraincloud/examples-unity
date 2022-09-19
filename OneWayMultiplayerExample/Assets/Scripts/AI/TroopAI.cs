@@ -23,7 +23,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     
     public LayerMask InvaderMask;
     public LayerMask DefenderMask;
-    
+    public int TroopID;
     private GameObject _target;
     private int _health;
     public int _hitBackForce = 5;

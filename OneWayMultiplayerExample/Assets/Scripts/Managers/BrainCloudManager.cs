@@ -149,7 +149,7 @@ public class BrainCloudManager : MonoBehaviour
         if (matchesFound == null || matchesFound.Length == 0)
         {
             Debug.LogWarning("No Players Found.");
-            
+            MenuManager.Instance.errorPopUpMessageState.SetUpPopUpMessage("No Players Found");
             return;
         }
         
@@ -389,8 +389,10 @@ public class BrainCloudManager : MonoBehaviour
         {
             _bcWrapper.MatchMakingService.DecrementPlayerRating(_decrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
         }
-        _bcWrapper.PlaybackStreamService.EndStream(_playbackStreamId);
-        _bcWrapper.OneWayMatchService.CompleteMatch(_playbackStreamId);
+
+        string eventData = CreateJsonIdsEventData();
+        string summaryData = CreateSummaryData();
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, OnRecordSuccess, OnFailureCallback);
     }
 
     private void OnAdjustPlayerRating(string jsonResponse, object cbObject)
@@ -406,12 +408,14 @@ public class BrainCloudManager : MonoBehaviour
     {
         string eventData = CreateJsonSpawnEventData(in_spawnPoint, in_troop);
         string summaryData = CreateSummaryData();
-        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, OnRecordSuccess, OnFailureCallback);
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
     }
 
     private void OnRecordSuccess(string in_jsonResponse, object cbObject)
     {
-        //We did it.
+        //this only runs after sending a record of all ID's
+        _bcWrapper.PlaybackStreamService.EndStream(_playbackStreamId);
+        _bcWrapper.OneWayMatchService.CompleteMatch(_playbackStreamId);
     }
 
     public void StartMatch()
@@ -459,15 +463,26 @@ public class BrainCloudManager : MonoBehaviour
             record.eventId = (EventId) events[i]["eventId"];
             record.frameId = (int) events[i]["frameId"];
             record.troopType = (EnemyTypes) events[i]["troopType"];
-
+            if (events[i].ContainsKey("troopID"))
+            {
+                record.troopID = (int) events[i]["troopID"];
+            }
+            
             double pointX = (double) events[i]["spawnPointX"];
             double pointY = (double) events[i]["spawnPointY"];
             double pointZ = (double) events[i]["spawnPointZ"];
             record.position.x = (float) pointX;
             record.position.y = (float) pointY;
             record.position.z = (float) pointZ;
-            
-            GameManager.Instance.ReplayRecords.Add(record);
+
+            if (record.eventId == EventId.Ids)
+            {
+                GameManager.Instance.SessionManager.ReadIDs(in_jsonResponse);
+            }
+            else
+            {
+                GameManager.Instance.ReplayRecords.Add(record);    
+            }
         }
     }
 
@@ -489,6 +504,42 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("spawnPointY", in_spawnPoint.y);
         eventData.Add("spawnPointZ", in_spawnPoint.z);
         eventData.Add("troopType", (int)in_troop.EnemyType);
+        string value = JsonWriter.Serialize(eventData);
+        return value;
+    }
+
+    string CreateJsonTargetEventData()
+    {
+        Dictionary<string, object> eventData = new Dictionary<string, object>();
+        eventData.Add("eventId", (int)EventId.Target);
+        eventData.Add("frameId", GameManager.Instance.SessionManager.FrameID);
+        
+        
+        string value = JsonWriter.Serialize(eventData);
+        return value;
+    }
+
+    string CreateJsonIdsEventData()
+    {
+        Dictionary<string, object> eventData = new Dictionary<string, object>();
+        eventData.Add("eventId", (int)EventId.Ids);
+        
+        Dictionary<string, object> invadersList = new Dictionary<string, object>();
+        List<int> invadersIDs = GameManager.Instance.SessionManager.InvaderIDs;
+        for (int i = 0; i < invadersIDs.Count; i++)
+        {
+            invadersList.Add(i.ToString(), invadersIDs[i]);
+        }
+        eventData.Add("invadersList", invadersList);
+
+        Dictionary<string, object> defendersList = new Dictionary<string, object>();
+        List<int> defendersIDs = GameManager.Instance.SessionManager.DefenderIDs;
+        for (int i = 0; i < defendersIDs.Count; i++)
+        {
+            defendersList.Add(i.ToString(), defendersIDs[i]);
+        }
+        eventData.Add("defendersList", defendersList);
+        
         string value = JsonWriter.Serialize(eventData);
         return value;
     }

@@ -27,6 +27,13 @@ public class SpawnController : MonoBehaviour
 
     private float _cooldown = 1;
     private float _timer;
+    
+    private int _spawnCount;
+
+    public int SpawnCount
+    {
+        set => _spawnCount = value;
+    }
 
     private const string _targetTag = "Target";
 
@@ -83,6 +90,18 @@ public class SpawnController : MonoBehaviour
                 spawnPoint.y += OffsetY;
                 var troop = Instantiate(_objectToSpawn, spawnPoint, Quaternion.identity);
                 troop.AssignToTeam(0);
+                if (GameManager.Instance.IsInPlaybackMode)
+                {
+                    //Assign the ID
+                    troop.TroopID = GameManager.Instance.SessionManager.InvaderIDs[_spawnCount];
+                }
+                else
+                {
+                    //Get the ID then Add it to the list and troop
+                    troop.TroopID = GameManager.Instance.SessionManager.DefenderIDs[_spawnCount] = troop.GetInstanceID();
+                }
+
+                _spawnCount++;
                 _troopSelected.SpawnedTroops++;
                 _troopSelected.SummonSelector.UpdateSpawnNumber(_troopSelected.SpawnLimit - _troopSelected.SpawnedTroops);
                 if (BrainCloudManager.Instance != null)

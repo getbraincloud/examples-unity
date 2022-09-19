@@ -181,6 +181,7 @@ public class GameManager : MonoBehaviour
     
     public void PrepareGameForPlayback()
     {
+        IsInPlaybackMode = true;
         _isGameActive = true;
         var troopsToDestroy = FindObjectsOfType<TroopAI>();
         foreach (var troopAI in troopsToDestroy)
