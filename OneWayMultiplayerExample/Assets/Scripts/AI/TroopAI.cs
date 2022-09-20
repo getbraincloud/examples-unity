@@ -16,7 +16,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     public float RotationSpeed = 5;
     public float AcceptanceRangeToTarget = 2;
     public GameObject HomeWayPoint;
-    
+    public bool IsInPlaybackMode;
     public TroopStates CurrentState = TroopStates.Idle;
     
     public LayerMask _activeMask;
@@ -57,7 +57,11 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     private const string _nonTargetTag = "NonTarget";
     
     public int Health { get => _health; set => _health = value; }
-
+    public GameObject Target { set => _target = value; }
+    /// <summary>
+    /// 0 = invader(local player), 1 = defender(network player)
+    /// </summary>
+    public int TeamID { get => _teamId; }
     private void Awake()
     {
         _rigidbodyComp = GetComponent<Rigidbody>();
@@ -93,7 +97,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
 
         if (_isDead) return;
 
-        if (!_target)
+        if (!_target && !IsInPlaybackMode)
         {
             if (!_isSearching)
             {
@@ -105,7 +109,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
             return;
         }
         //Check every "x" frames, x = _searchTargetInterval
-        if (Time.frameCount % _searchTargetInterval == 0)
+        if (Time.frameCount % _searchTargetInterval == 0 && !IsInPlaybackMode)
         {
             FindTarget();
         }
@@ -345,5 +349,18 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         {
             _isSearching = false;
         }
+        
+        //Send target info as event for playback
+        int targetID;
+        if (_target.tag.Contains("Troop"))
+        {
+            targetID = _target.GetComponent<TroopAI>().TroopID;
+        }
+        else
+        {
+            targetID = _target.GetComponent<StructureHealthBehavior>().StructureID;
+        }
+        
+        BrainCloudManager.Instance.RecordTargetSwitch(TroopID, targetID);
     }
 }

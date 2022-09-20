@@ -1,13 +1,14 @@
 using UnityEngine;
 
-public enum EventId {Spawn, Attack, Target, Destroy, Ids}
+public enum EventId {Spawn, Target, Destroy, Ids}
 
 public class ActionReplayRecord
 {
     public Vector3 position;
-    public int targetID;
     public EnemyTypes troopType;
+    public EventId eventID;
+    public int teamID;
     public int troopID;
-    public EventId eventId;
-    public int frameId;
+    public int targetID;
+    public int frameID;
 }

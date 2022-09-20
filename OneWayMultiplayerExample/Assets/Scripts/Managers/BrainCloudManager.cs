@@ -411,6 +411,13 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
     }
 
+    public void RecordTargetSwitch(int in_troopID, int in_targetID)
+    {
+        string eventData = CreateJsonTargetEventData(in_troopID, in_targetID);
+        string summaryData = CreateSummaryData();
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
+    }
+
     private void OnRecordSuccess(string in_jsonResponse, object cbObject)
     {
         //this only runs after sending a record of all ID's
@@ -460,12 +467,17 @@ public class BrainCloudManager : MonoBehaviour
         for (int i = 0; i < events.Length; i++)
         {
             ActionReplayRecord record = new ActionReplayRecord();
-            record.eventId = (EventId) events[i]["eventId"];
-            record.frameId = (int) events[i]["frameId"];
+            record.eventID = (EventId) events[i]["eventId"];
+            record.frameID = (int) events[i]["frameId"];
             record.troopType = (EnemyTypes) events[i]["troopType"];
             if (events[i].ContainsKey("troopID"))
             {
                 record.troopID = (int) events[i]["troopID"];
+            }
+
+            if (events[i].ContainsKey("targetID"))
+            {
+                record.targetID = (int) events[i]["targetID"];
             }
             
             double pointX = (double) events[i]["spawnPointX"];
@@ -475,9 +487,9 @@ public class BrainCloudManager : MonoBehaviour
             record.position.y = (float) pointY;
             record.position.z = (float) pointZ;
 
-            if (record.eventId == EventId.Ids)
+            if (record.eventID == EventId.Ids)
             {
-                GameManager.Instance.SessionManager.ReadIDs(in_jsonResponse);
+                PlaybackStreamManager.Instance.ReadIDs(in_jsonResponse);
             }
             else
             {
@@ -508,13 +520,13 @@ public class BrainCloudManager : MonoBehaviour
         return value;
     }
 
-    string CreateJsonTargetEventData()
+    string CreateJsonTargetEventData(int in_troopID, int in_targetID)
     {
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Target);
         eventData.Add("frameId", GameManager.Instance.SessionManager.FrameID);
-        
-        
+        eventData.Add("troopID", in_troopID);
+        eventData.Add("targetID", in_targetID);
         string value = JsonWriter.Serialize(eventData);
         return value;
     }
@@ -525,7 +537,7 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("eventId", (int)EventId.Ids);
         
         Dictionary<string, object> invadersList = new Dictionary<string, object>();
-        List<int> invadersIDs = GameManager.Instance.SessionManager.InvaderIDs;
+        List<int> invadersIDs = PlaybackStreamManager.Instance.InvaderIDs;
         for (int i = 0; i < invadersIDs.Count; i++)
         {
             invadersList.Add(i.ToString(), invadersIDs[i]);
@@ -533,7 +545,7 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("invadersList", invadersList);
 
         Dictionary<string, object> defendersList = new Dictionary<string, object>();
-        List<int> defendersIDs = GameManager.Instance.SessionManager.DefenderIDs;
+        List<int> defendersIDs = PlaybackStreamManager.Instance.DefenderIDs;
         for (int i = 0; i < defendersIDs.Count; i++)
         {
             defendersList.Add(i.ToString(), defendersIDs[i]);

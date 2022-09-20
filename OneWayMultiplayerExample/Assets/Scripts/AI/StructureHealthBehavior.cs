@@ -7,7 +7,7 @@ public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
 {
     public GameObject DeathFX;
     public int StartingHealth = 100;
-
+    public int StructureID;
     private HealthBar _healthBar;
     private int _currentHealth;
     private float _delayBeforeDestruction = 1;

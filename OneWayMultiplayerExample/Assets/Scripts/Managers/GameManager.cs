@@ -126,6 +126,14 @@ public class GameManager : MonoBehaviour
     public void SetUpGameValues(Transform in_defenderParent)
     {
         _defenderStructParent = in_defenderParent;
+        for (int i = 0; i < _defenderStructParent.childCount-1; i++)
+        {
+            GameObject structure = _defenderStructParent.GetChild(i).gameObject;
+            StructureHealthBehavior healthScript = structure.GetComponent<StructureHealthBehavior>(); 
+            healthScript.StructureID = i;
+            PlaybackStreamManager.Instance.StructuresList.Add(healthScript);
+        }
+        
         _sessionManagerRef = FindObjectOfType<GameSessionManager>();
         _gameOverScreenRef = FindObjectOfType<GameOverScreen>();
         _isGameActive = true;
