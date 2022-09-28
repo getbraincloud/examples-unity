@@ -316,7 +316,7 @@ public class GameController : MonoBehaviour
 			{
 				m_state = eGameState.GAME_STATE_LEADERBOARD_SCREEN;
 				DisableText();
-				clickToStartText.gameObject.SetActive(true);					
+				clickToStartText.gameObject.SetActive(true);
 				clickToStartText.text = "Click to restart";
 
 				ReadLeaderBoard();
@@ -438,6 +438,7 @@ public class GameController : MonoBehaviour
 
 	void DisableText()
 	{
+		gameOverText.gameObject.SetActive(false);
 		enemiesKilledText.gameObject.SetActive(false);
 		asteroidsDestroyedText.gameObject.SetActive(false);
 		shotsFiredText.gameObject.SetActive(false);
