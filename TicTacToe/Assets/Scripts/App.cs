@@ -214,7 +214,7 @@ public class App : MonoBehaviour
         if (_localTicTacToe)
         {
             // Go back to game select scene
-            GotoMatchSelectScene(_localTicTacToe.gameObject);   
+            GotoMatchSelectScene(_localTicTacToe.gameObject);
         }
     }
 
