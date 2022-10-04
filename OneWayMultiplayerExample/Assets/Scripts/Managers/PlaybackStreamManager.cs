@@ -9,9 +9,9 @@ public class PlaybackStreamManager : MonoBehaviour
 
     public static PlaybackStreamManager Instance => _instance;
 
-    public List<TroopAI> InvadersList = new List<TroopAI>();
-    public List<TroopAI> DefendersList = new List<TroopAI>();
-    public List<StructureHealthBehavior> StructuresList = new List<StructureHealthBehavior>();
+    public List<BaseHealthBehavior> InvadersList = new List<BaseHealthBehavior>();
+    public List<BaseHealthBehavior> DefendersList = new List<BaseHealthBehavior>();
+    public List<BaseHealthBehavior> StructuresList = new List<BaseHealthBehavior>();
     private Coroutine _replayCoroutine;
     
     private SpawnData _invaderSpawnData;
@@ -23,12 +23,7 @@ public class PlaybackStreamManager : MonoBehaviour
     private float _value;
     private int _frameId;
     private bool _replayMode;
-    
-    public int FrameID
-    {
-        get => _frameId;
-    }
-    
+
     void Awake()
     {
         if (!_instance)
@@ -83,7 +78,7 @@ public class PlaybackStreamManager : MonoBehaviour
                         TroopAI troop = Instantiate(prefab, _actionReplayRecords[replayIndex].position, Quaternion.identity);
                         troop.IsInPlaybackMode = true;
                         troop.TargetIsHostile = true;
-                        troop.TroopID = _actionReplayRecords[replayIndex].entityID;
+                        troop.EntityID = _actionReplayRecords[replayIndex].entityID;
                         troop.AssignToTeam(0);
                         InvadersList.Add(troop);
                         break;
@@ -107,7 +102,7 @@ public class PlaybackStreamManager : MonoBehaviour
 
     private void AssignTarget(ActionReplayRecord in_record)
     {
-        GameObject target = null;
+        BaseHealthBehavior target = null;
         //Determine if target is a troop or structure
         // Troops will have a big negative number whereas structures will have an ID from 0-10
         //Troops
@@ -117,48 +112,18 @@ public class PlaybackStreamManager : MonoBehaviour
             //Invader
             if (in_record.targetTeamID == 0)
             {
-                for (int i = 0; i < InvadersList.Count; i++)
-                {
-                    if (InvadersList[i].TroopID == in_record.targetID)
-                    {
-                        if (InvadersList[i])
-                        {
-                            target = InvadersList[i].gameObject;
-                            break;
-                        }
-                    }
-                }
+                target = GetTargetFromList(InvadersList, in_record);
             }
             //Defender
             else
             {
-                for (int i = 0; i < DefendersList.Count; i++)
-                {
-                    if (DefendersList[i].TroopID == in_record.targetID)
-                    {
-                        if (DefendersList[i])
-                        {
-                            target = DefendersList[i].gameObject;
-                            break;
-                        }
-                    }
-                }
+                target = GetTargetFromList(DefendersList, in_record);
             }
         }
         //Structures
         else
         {
-            for (int i = 0; i < StructuresList.Count; i++)
-            {
-                if (StructuresList[i].StructureID == in_record.targetID)
-                {
-                    if (StructuresList[i])
-                    {
-                        target = StructuresList[i].gameObject;
-                        break;    
-                    }
-                }
-            }
+            target = GetTargetFromList(StructuresList, in_record);
         }
 
         if (target == null)
@@ -171,33 +136,21 @@ public class PlaybackStreamManager : MonoBehaviour
         //Invader
         if (in_record.teamID == 0)
         {
-            for (int i = 0; i < InvadersList.Count; i++)
-            {
-                if (InvadersList[i].TroopID == in_record.entityID)
-                {
-                    troop = InvadersList[i];
-                }
-            }
+            troop = (TroopAI) GetObjectFromList(InvadersList, in_record);
         }
         //Defender
         else
         {
-            for (int i = 0; i < DefendersList.Count; i++)
-            {
-                if (DefendersList[i].TroopID == in_record.entityID)
-                {
-                    troop = DefendersList[i];
-                }
-            }
+            troop =  (TroopAI) GetObjectFromList(DefendersList, in_record);
         }
 
-        if (troop != null)
+        if (troop != null && target != null)
         {
-            troop.Target = target;    
+            troop.Target = target.gameObject;    
         }
         else
         {
-            Debug.LogWarning("Troop couldn't be found....");
+            Debug.LogWarning("Troop or target couldn't be found....");
         }
     }
 
@@ -206,57 +159,72 @@ public class PlaybackStreamManager : MonoBehaviour
         //Trooper
         if (in_record.targetID < -1)
         {
+            BaseHealthBehavior troop = null;
             //Invaders
             if (in_record.teamID == 0)
             {
-                for (int i = 0; i < InvadersList.Count; i++)
-                {
-                    if (InvadersList[i].TroopID == in_record.entityID)
-                    {
-                        var person = InvadersList[i];
-                        if (person)
-                        {
-                            InvadersList.Remove(person);
-                            Destroy(person);
-                            break;
-                        }
-                    }
-                }
+                troop = GetObjectFromList(InvadersList, in_record);
             }
             //Defenders
             else
             {
-                for (int i = 0; i < DefendersList.Count; i++)
-                {
-                    if (DefendersList[i].TroopID == in_record.entityID)
-                    {
-                        var person = DefendersList[i];
-                        if (person)
-                        {
-                            DefendersList.Remove(person);
-                            Destroy(person);
-                            break;
-                        }
-                    }
-                }
+                troop = GetObjectFromList(DefendersList, in_record);
+            }
+            
+            if (troop)
+            {
+                DefendersList.Remove(troop);
+                Destroy(troop.gameObject);
             }
         }
         //Structures
         else
         {
-            for (int i = 0; i < StructuresList.Count; i++)
+            var house = GetObjectFromList(StructuresList, in_record);
+            if (house)
             {
-                if (StructuresList[i].StructureID == in_record.entityID)
+                StructuresList.Remove(house);
+                Destroy(house.gameObject);
+            }
+        }
+    }
+
+    private BaseHealthBehavior GetObjectFromList(List<BaseHealthBehavior> in_listToSearch, ActionReplayRecord in_record)
+    {
+        BaseHealthBehavior value = null;
+        for (int i = 0; i < in_listToSearch.Count; i++)
+        {
+            if (in_listToSearch[i].EntityID == in_record.entityID)
+            {
+                if (in_listToSearch[i] != null)
                 {
-                    var house = StructuresList[i];
-                    if (house)
-                    {
-                        StructuresList.Remove(house);
-                        Destroy(house);
-                        break;
-                    }
+                    value = in_listToSearch[i];
+                    break;
                 }
             }
         }
+        return value;
+    }
+
+    private BaseHealthBehavior GetTargetFromList(List<BaseHealthBehavior> in_listToSearch, ActionReplayRecord in_record)
+    {
+        BaseHealthBehavior value = null;
+        for (int i = 0; i < in_listToSearch.Count; i++)
+        {
+            if (in_listToSearch[i].EntityID == in_record.targetID)
+            {
+                if (in_listToSearch[i] != null)
+                {
+                    value = in_listToSearch[i];
+                    
+                }
+                else
+                {
+                    Debug.LogWarning("Target is missing from list");
+                }
+                break;
+            }
+        }
+        return value;
     }
 }

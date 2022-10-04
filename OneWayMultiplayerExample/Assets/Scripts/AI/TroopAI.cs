@@ -3,33 +3,32 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public enum TroopStates {Idle, Rotate, Move, Attack}
-public enum EnemyTypes {Grunt, Soldier, Shooter, Bullet}
+public enum EnemyTypes {Grunt, Soldier, Shooter, House}
 
-public class TroopAI : MonoBehaviour, IDamageable<int>
+public class TroopAI : BaseHealthBehavior
 {
     public EnemyTypes EnemyType;
-    
-    public GameObject DeathFX;
-    public int StartingHealth = 100;
-    
+
     public float MoveSpeed = 10;
     public float RotationSpeed = 5;
     public float AcceptanceRangeToTarget = 2;
     public GameObject HomeWayPoint;
     public bool IsInPlaybackMode;
     public TroopStates CurrentState = TroopStates.Idle;
-    
+    /// <summary>
+    /// 0 = invader(local player), 1 = defender(network player)
+    /// </summary>
+    public int TeamID;
     public LayerMask _activeMask;
     
     public LayerMask InvaderMask;
     public LayerMask DefenderMask;
-    public int TroopID;
     private GameObject _target;
-    private int _health;
+    
     public int _hitBackForce = 5;
     //Checks every 10 frames for a new target
     private int _searchTargetInterval = 10;
-    private int _teamId;
+
     private bool _isDead;
     private bool _isAttacking;
     private bool _isSearching = false;
@@ -48,7 +47,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     private Quaternion _currQuat;
     private Rigidbody _rigidbodyComp;
     private MeleeWeapon _meleeWeapon;
-    private HealthBar _healthBarRef;
+    
     private Coroutine _stunCoroutine;
 
     private ShootProjectiles _shootScript;
@@ -56,19 +55,18 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
 
     private const string _nonTargetTag = "NonTarget";
     
-    public int Health { get => _health; set => _health = value; }
     public GameObject Target { set => _target = value; }
-    /// <summary>
-    /// 0 = invader(local player), 1 = defender(network player)
-    /// </summary>
-    public int TeamID { get => _teamId; }
+
+    
+    
+    
     private void Awake()
     {
         _rigidbodyComp = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
         
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
-        _healthBarRef = GetComponentInChildren<HealthBar>();
+        _healthBar = GetComponentInChildren<HealthBar>();
         _shootScript = GetComponent<ShootProjectiles>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
     }
@@ -76,10 +74,10 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     // Start is called before the first frame update
     void Start()
     {
-        _health = StartingHealth;
-        if (_healthBarRef)
+        _currentHealth = StartingHealth;
+        if (_healthBar)
         {
-            _healthBarRef.SetMaxHealth(_health);    
+            _healthBar.SetMaxHealth(_currentHealth);    
         }
 
         _homeLocation = transform.position;
@@ -236,7 +234,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     /// <param name="in_teamID">0 = invader(local player), 1 = defender(network player)</param>
     public void AssignToTeam(int in_teamID)
     {
-        _teamId = in_teamID;
+        TeamID = in_teamID;
         if (in_teamID == 0)
         {
             //Invaders
@@ -247,7 +245,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
             }
             //6 = Invader Layer, 7 = Defender Layer
             gameObject.layer = 6;
-            _healthBarRef.AssignTeamColor(Color.blue);
+            _healthBar.AssignTeamColor(Color.blue);
         }
         else
         {
@@ -259,24 +257,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
             }
             //6 = Invader Layer, 7 = Defender Layer
             gameObject.layer = 7;
-            _healthBarRef.AssignTeamColor(Color.red);
-        }
-    }
-    
-    public void Damage(int damageTaken)
-    {
-        if (_health <= 0) return;
-
-        _health -= damageTaken;
-
-        if (_healthBarRef)
-        {
-            _healthBarRef.SetHealth(_health);
-        }
-        
-        if (_health <= 0)
-        {
-            Dead();
+            _healthBar.AssignTeamColor(Color.red);
         }
     }
 
@@ -285,7 +266,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         _target = in_attacker.gameObject;
     }
 
-    public void Dead()
+    public override void Dead()
     {
         if (_isDead) return;
         _isDead = true;
@@ -309,12 +290,12 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
 
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            BrainCloudManager.Instance.RecordTargetDestroyed(TroopID, _teamId);    
+            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);    
         }
         
         Destroy(gameObject);
         //Check if troop is an invader or defender
-        if (_teamId == 0)
+        if (TeamID == 0)
         {
             //Invader
             GameManager.Instance.InvaderTroopCount--;
@@ -326,7 +307,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         }
     }
 
-    public void LaunchObject(Vector3 direction)
+    public override void LaunchObject(Vector3 direction)
     {
         if (_isKnockedBack)
         {
@@ -392,12 +373,13 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
             {
                 TroopAI targetTroop = null;
                 targetTroop = _target.GetComponent<TroopAI>();
-                targetID = targetTroop.TroopID;
+                targetID = targetTroop.EntityID;
                 targetTeamID = targetTroop.TeamID;
             }
-            else if(!_target.tag.Contains("NonTarget"))
+            else
             {
-                targetID = _target.GetComponent<StructureHealthBehavior>().StructureID;
+                targetID = _target.GetComponent<BaseHealthBehavior>().EntityID;
+                targetTeamID = -1;
             }
 
             if (BrainCloudManager.Instance)

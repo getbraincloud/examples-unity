@@ -3,15 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
+public class BaseHealthBehavior : MonoBehaviour
 {
     public GameObject DeathFX;
     public int StartingHealth = 100;
-    public int StructureID;
-    private HealthBar _healthBar;
-    private int _currentHealth;
-    private float _delayBeforeDestruction = 1;
+    public int EntityID;
+    protected HealthBar _healthBar;
+    protected int _currentHealth;
+    protected float _delayBeforeDestruction = 1;
 
+    public int Health { get => _currentHealth; set => _currentHealth = value; }
     private void Start()
     {
         _currentHealth = StartingHealth;
@@ -22,7 +23,7 @@ public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
         }
     }
 
-    public void Damage(int damageTaken)
+    public  void Damage(int damageTaken)
     {
         if (_currentHealth <= 0) return;
 
@@ -39,12 +40,12 @@ public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
         }
     }
 
-    public void Dead()
+    public virtual void Dead()
     {
         StartCoroutine(DelayToDestroy());
     }
 
-    public void LaunchObject(Vector3 direction)
+    public virtual void LaunchObject(Vector3 direction)
     {
         //do nothing cause this is a structure
     }
@@ -59,7 +60,7 @@ public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
 
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            BrainCloudManager.Instance.RecordTargetDestroyed(StructureID, -1);    
+            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, -1);    
         }
         
         Destroy(gameObject);

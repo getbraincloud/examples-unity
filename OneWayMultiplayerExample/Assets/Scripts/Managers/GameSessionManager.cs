@@ -23,7 +23,7 @@ public class GameSessionManager : MonoBehaviour
     
     public int FrameID
     {
-        get => _frameId - 10;
+        get => _frameId;
     }
     // Start is called before the first frame update
     void Start()

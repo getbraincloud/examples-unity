@@ -85,8 +85,8 @@ public class SpawnController : MonoBehaviour
                 troop.AssignToTeam(0);
                 
                 //Get the ID then Add it to the list and troop
-                troop.TroopID = troop.GetInstanceID();
-                GameManager.Instance.InvaderIDs.Add(troop.TroopID);
+                troop.EntityID = troop.GetInstanceID();
+                GameManager.Instance.InvaderIDs.Add(troop.EntityID);
                 _troopSelected.SpawnedTroops++;
                 _troopSelected.SummonSelector.UpdateSpawnNumber(_troopSelected.SpawnLimit - _troopSelected.SpawnedTroops);
                 if (BrainCloudManager.Instance != null)

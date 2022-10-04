@@ -148,11 +148,11 @@ public class GameManager : MonoBehaviour
     {
         _defenderStructParent = in_defenderParent;
         PlaybackStreamManager.Instance.StructuresList.Clear();
-        for (int i = 0; i < _defenderStructParent.childCount-1; i++)
+        for (int i = 0; i < _defenderStructParent.childCount; i++)
         {
             GameObject structure = _defenderStructParent.GetChild(i).gameObject;
-            StructureHealthBehavior healthScript = structure.GetComponent<StructureHealthBehavior>(); 
-            healthScript.StructureID = i;
+            BaseHealthBehavior healthScript = structure.GetComponent<BaseHealthBehavior>(); 
+            healthScript.EntityID = i;
             PlaybackStreamManager.Instance.StructuresList.Add(healthScript);
         }
         

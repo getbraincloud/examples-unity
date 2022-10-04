@@ -594,7 +594,7 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("spawnPointY", in_spawnPoint.y);
         eventData.Add("spawnPointZ", in_spawnPoint.z);
         eventData.Add("troopType", (int)in_troop.EnemyType);
-        eventData.Add("troopID", in_troop.TroopID);
+        eventData.Add("troopID", in_troop.EntityID);
         string value = JsonWriter.Serialize(eventData);
         return value;
     }
@@ -604,7 +604,7 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Target);
         eventData.Add("frameId", GameManager.Instance.SessionManager.FrameID);
-        eventData.Add("troopID", in_troop.TroopID);
+        eventData.Add("troopID", in_troop.EntityID);
         eventData.Add("teamID", in_troop.TeamID);
         eventData.Add("targetTeamID", in_targetTeamID);
         eventData.Add("targetID", in_targetID);

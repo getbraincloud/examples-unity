@@ -55,15 +55,15 @@ public class DefenderSpawner : MonoBehaviour
                 if (GameManager.Instance.IsInPlaybackMode)
                 {
                     //Assign the ID
-                    troop.TroopID = GameManager.Instance.DefenderIDs[i];
+                    troop.EntityID = GameManager.Instance.DefenderIDs[i];
                     troop.IsInPlaybackMode = true;
                     PlaybackStreamManager.Instance.DefendersList.Add(troop);
                 }
                 else
                 {
                     //Get the ID then Add it to the list and troop
-                    troop.TroopID = troop.GetInstanceID();
-                    GameManager.Instance.DefenderIDs.Add(troop.TroopID);
+                    troop.EntityID = troop.GetInstanceID();
+                    GameManager.Instance.DefenderIDs.Add(troop.EntityID);
                 }
                 _spawnPointIndex++;
                 GameManager.Instance.DefenderTroopCount++;
