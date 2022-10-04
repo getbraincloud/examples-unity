@@ -5,6 +5,7 @@ using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BrainCloudManager : MonoBehaviour
 {
@@ -383,16 +384,18 @@ public class BrainCloudManager : MonoBehaviour
     {
         if (in_didPlayerWin)
         {
-            _bcWrapper.MatchMakingService.IncrementPlayerRating(_incrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
+            //_bcWrapper.MatchMakingService.IncrementPlayerRating(_incrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
         }
         else
         {
-            _bcWrapper.MatchMakingService.DecrementPlayerRating(_decrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
+            //_bcWrapper.MatchMakingService.DecrementPlayerRating(_decrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
         }
 
         string eventData = CreateJsonIdsEventData();
         string summaryData = CreateSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, OnRecordSuccess, OnFailureCallback);
+        RecordDefenderSelected((int)GameManager.Instance.DefenderSpawnData.Rank);
+        PlayerPrefs.SetString("PlaybackKey", _playbackStreamId);
     }
 
     private void OnAdjustPlayerRating(string jsonResponse, object cbObject)
@@ -411,13 +414,31 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
     }
 
-    public void RecordTargetSwitch(int in_troopID, int in_targetID)
+    public void RecordTargetSwitch(TroopAI in_troop, int in_targetID, int in_targetTeamID)
     {
-        string eventData = CreateJsonTargetEventData(in_troopID, in_targetID);
+        string eventData = CreateJsonTargetEventData(in_troop, in_targetID, in_targetTeamID);
         string summaryData = CreateSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
     }
 
+    public void RecordTargetDestroyed(int in_entityID, int in_teamID)
+    {
+        string eventData = CreateJsonDestroyEventData(in_entityID, in_teamID);
+        string summaryData = CreateSummaryData();
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
+    }
+
+    public void RecordDefenderSelected(int in_defenderRank)
+    {
+        Dictionary<string, object> eventData = new Dictionary<string, object>();
+        eventData.Add("eventId", (int)EventId.Defender);
+        eventData.Add("defenderRank", in_defenderRank);
+        string value = JsonWriter.Serialize(eventData);
+        string summaryData = CreateSummaryData();
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, value, summaryData, null, OnFailureCallback);
+    }
+
+    //Game flow for this callback, Game Completed -> Get All Ids -> Send record request -> OnRecordSuccess
     private void OnRecordSuccess(string in_jsonResponse, object cbObject)
     {
         //this only runs after sending a record of all ID's
@@ -444,12 +465,15 @@ public class BrainCloudManager : MonoBehaviour
         }
         
         _playbackStreamId = data["playbackStreamId"] as string;
-        PlayerPrefs.SetString("PlaybackKey", _playbackStreamId);
         GameManager.Instance.LoadToGame();
     }
 
     public void ReadStream()
     {
+        if (_playbackStreamId.IsNullOrEmpty())
+        {
+            LoadID();
+        }
         _bcWrapper.PlaybackStreamService.ReadStream(_playbackStreamId, OnReadStreamSuccess, OnFailureCallback);
     }
 
@@ -468,34 +492,88 @@ public class BrainCloudManager : MonoBehaviour
         {
             ActionReplayRecord record = new ActionReplayRecord();
             record.eventID = (EventId) events[i]["eventId"];
-            record.frameID = (int) events[i]["frameId"];
-            record.troopType = (EnemyTypes) events[i]["troopType"];
+            
+            if (events[i].ContainsKey("frameId"))
+            {
+                record.frameID = (int) events[i]["frameId"];    
+            }
+
+            if (events[i].ContainsKey("troopType"))
+            {
+                record.troopType = (EnemyTypes) events[i]["troopType"];    
+            }
+            
             if (events[i].ContainsKey("troopID"))
             {
-                record.troopID = (int) events[i]["troopID"];
+                record.entityID = (int) events[i]["troopID"];
+            }
+
+            if (events[i].ContainsKey("targetTeamID"))
+            {
+                record.targetTeamID = (int) events[i]["targetTeamID"];
             }
 
             if (events[i].ContainsKey("targetID"))
             {
                 record.targetID = (int) events[i]["targetID"];
             }
-            
-            double pointX = (double) events[i]["spawnPointX"];
-            double pointY = (double) events[i]["spawnPointY"];
-            double pointZ = (double) events[i]["spawnPointZ"];
-            record.position.x = (float) pointX;
-            record.position.y = (float) pointY;
-            record.position.z = (float) pointZ;
+
+            if (events[i].ContainsKey("teamID"))
+            {
+                record.teamID = (int) events[i]["teamID"];
+            }
+
+            if (events[i].ContainsKey("spawnPointX"))
+            {
+                double pointX = (double) events[i]["spawnPointX"];
+                double pointY = (double) events[i]["spawnPointY"];
+                double pointZ = (double) events[i]["spawnPointZ"];
+                record.position.x = (float) pointX;
+                record.position.y = (float) pointY;
+                record.position.z = (float) pointZ;    
+            }
 
             if (record.eventID == EventId.Ids)
             {
-                PlaybackStreamManager.Instance.ReadIDs(in_jsonResponse);
+                GameManager.Instance.ReadIDs(events[i]);
+            }
+            else if (record.eventID == EventId.Defender)
+            {
+                //defenderRank
+                GameManager.Instance.DefenderSpawnData.Rank = (ArmyDivisionRank) events[i]["defenderRank"];
+                Debug.Log("Defender Assigned");
             }
             else
             {
                 GameManager.Instance.ReplayRecords.Add(record);    
             }
         }
+
+        if (SceneManager.GetActiveScene().name.Contains("Game"))
+        {
+            //Loading things while in game
+            PlaybackStreamManager.Instance.StartStream();
+        }
+        else
+        {
+            //Loading things while in menu
+            GameManager.Instance.LoadToPlaybackScene();
+        }
+    }
+
+    public void LoadID()
+    {
+        _playbackStreamId = PlayerPrefs.GetString("PlaybackKey");
+        if (_playbackStreamId.IsNullOrEmpty())
+        {
+            Debug.LogWarning("There's no playback ID locally saved, complete a game to do a playback.");
+        }
+    }
+
+    public void ReplayStream()
+    {
+        LoadID();
+        ReadStream();
     }
 
     string CreateSummaryData()
@@ -516,17 +594,31 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("spawnPointY", in_spawnPoint.y);
         eventData.Add("spawnPointZ", in_spawnPoint.z);
         eventData.Add("troopType", (int)in_troop.EnemyType);
+        eventData.Add("troopID", in_troop.TroopID);
         string value = JsonWriter.Serialize(eventData);
         return value;
     }
 
-    string CreateJsonTargetEventData(int in_troopID, int in_targetID)
+    string CreateJsonTargetEventData(TroopAI in_troop, int in_targetID, int in_targetTeamID)
     {
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Target);
         eventData.Add("frameId", GameManager.Instance.SessionManager.FrameID);
-        eventData.Add("troopID", in_troopID);
+        eventData.Add("troopID", in_troop.TroopID);
+        eventData.Add("teamID", in_troop.TeamID);
+        eventData.Add("targetTeamID", in_targetTeamID);
         eventData.Add("targetID", in_targetID);
+        string value = JsonWriter.Serialize(eventData);
+        return value;
+    }
+
+    string CreateJsonDestroyEventData(int in_entityID, int in_teamID)
+    {
+        Dictionary<string, object> eventData = new Dictionary<string, object>();
+        eventData.Add("eventId", (int)EventId.Destroy);
+        eventData.Add("frameId", GameManager.Instance.SessionManager.FrameID);
+        eventData.Add("entityId", in_entityID);
+        eventData.Add("teamID", in_teamID);
         string value = JsonWriter.Serialize(eventData);
         return value;
     }
@@ -537,7 +629,7 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("eventId", (int)EventId.Ids);
         
         Dictionary<string, object> invadersList = new Dictionary<string, object>();
-        List<int> invadersIDs = PlaybackStreamManager.Instance.InvaderIDs;
+        List<int> invadersIDs = GameManager.Instance.InvaderIDs;
         for (int i = 0; i < invadersIDs.Count; i++)
         {
             invadersList.Add(i.ToString(), invadersIDs[i]);
@@ -545,7 +637,7 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("invadersList", invadersList);
 
         Dictionary<string, object> defendersList = new Dictionary<string, object>();
-        List<int> defendersIDs = PlaybackStreamManager.Instance.DefenderIDs;
+        List<int> defendersIDs = GameManager.Instance.DefenderIDs;
         for (int i = 0; i < defendersIDs.Count; i++)
         {
             defendersList.Add(i.ToString(), defendersIDs[i]);

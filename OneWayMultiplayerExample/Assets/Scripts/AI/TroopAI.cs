@@ -34,7 +34,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     private bool _isAttacking;
     private bool _isSearching = false;
     private bool _isKnockedBack;
-    private bool _targetIsHostile;
+    public bool TargetIsHostile;
     
     private float _delayBeforeDestroy = 0.75f;
     private float _delayBeforeResume = 0.5f;
@@ -44,7 +44,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     private Animator _animator;
     private string attackParameter = "isAttacking";
 
-    private GameObject _homeLocationRef;
+    private Vector3 _homeLocation;
     private Quaternion _currQuat;
     private Rigidbody _rigidbodyComp;
     private MeleeWeapon _meleeWeapon;
@@ -81,8 +81,12 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         {
             _healthBarRef.SetMaxHealth(_health);    
         }
-        _homeLocationRef = Instantiate(HomeWayPoint, transform.position, Quaternion.identity);
-        FindTarget();
+
+        _homeLocation = transform.position;
+        if (!IsInPlaybackMode)
+        {
+            FindTarget();
+        }
     }
 
     void FixedUpdate()
@@ -106,19 +110,33 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
                 _isAttacking = false;
                 FindTarget();
             }
-            return;
+            //return;
         }
         //Check every "x" frames, x = _searchTargetInterval
         if (Time.frameCount % _searchTargetInterval == 0 && !IsInPlaybackMode)
         {
             FindTarget();
         }
-        
-        _distanceToTarget = (_target.transform.position - transform.position).magnitude;
+
+        if (_target != null)
+        {
+            if (!TargetIsHostile)
+            {
+                TargetIsHostile = true;
+            }
+            _distanceToTarget = (_target.transform.position - transform.position).magnitude;    
+        }
+        else
+        {
+            if (TargetIsHostile)
+            {
+                TargetIsHostile = false;
+            }
+            _distanceToTarget = (_homeLocation - transform.position).magnitude;
+        }
 
         //Move to Target
-        if(_distanceToTarget > AcceptanceRangeToTarget &&
-           !_isKnockedBack)
+        if(_distanceToTarget > AcceptanceRangeToTarget)
         {
             if (_isAttacking)
             {
@@ -130,7 +148,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
             MoveTroop();
         }
         //Attack !!!!!!!!!!!!!
-        else if(_distanceToTarget < AcceptanceRangeToTarget && _targetIsHostile)
+        else if(_distanceToTarget < AcceptanceRangeToTarget && TargetIsHostile)
         {
             CurrentState = TroopStates.Attack;
             _navMeshAgent.isStopped = true;
@@ -149,7 +167,14 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     //give direction to move troop towards
     private void MoveTroop()
     {
-        _navMeshAgent.destination = _target.transform.position;
+        if (_target != null)
+        {
+            _navMeshAgent.destination = _target.transform.position;    
+        }
+        else
+        {
+            _navMeshAgent.destination = _homeLocation;
+        }
     }
     
     //give a positive direction if you want to face the target and 
@@ -157,7 +182,15 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
     private void RotateToTarget()
     {
         //rotate enemy
-        Vector3 direction = (_target.transform.position - transform.position).normalized;
+        Vector3 direction = Vector3.zero;
+        if (_target != null)
+        {
+            direction = (_target.transform.position - transform.position).normalized;
+        }
+        else
+        {
+            direction  = (_homeLocation - transform.position).normalized;
+        }
         if (direction == Vector3.zero) return;
         
         _currQuat = Quaternion.LookRotation(direction);
@@ -262,7 +295,7 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         _animator.SetBool(attackParameter, false);
         _rigidbodyComp.velocity = Vector3.zero;
         _isAttacking = false;
-        Destroy(_homeLocationRef);
+        _homeLocation = Vector3.zero;
         StartCoroutine(DelayToDeath());
     }
     
@@ -273,6 +306,12 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
         {
             Instantiate(DeathFX, transform.position, Quaternion.identity);    
         }
+
+        if (!GameManager.Instance.IsInPlaybackMode)
+        {
+            BrainCloudManager.Instance.RecordTargetDestroyed(TroopID, _teamId);    
+        }
+        
         Destroy(gameObject);
         //Check if troop is an invader or defender
         if (_teamId == 0)
@@ -318,11 +357,16 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
 
     private void FindTarget()
     {
+        //Reset values
+        GameObject previousTarget = _target;
+        TargetIsHostile = false;
         _target = null;
+        
+        //Search for a target nearby
         Collider[] hitColliders = new Collider[10];
         int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, _detectionRadius, hitColliders, _activeMask);
         float shortestDistance = Mathf.Infinity;
-        
+        //Determine which collider is closest to our troop
         float distance = 0;
         for (int i = 0; i < numOfColliders; i++)
         {
@@ -333,34 +377,33 @@ public class TroopAI : MonoBehaviour, IDamageable<int>
                 {
                     shortestDistance = distance;
                     _target = hitColliders[i].gameObject;
-                    _targetIsHostile = true;
+                    TargetIsHostile = true;
                 }   
             }
         }
-        
-        //Start a coroutine if there isn't a target to look for it again in x seconds
-        if (!_target)
-        {
-            //_rigidbodyComp.velocity = Vector3.zero;
-            _target = _homeLocationRef;
-            _targetIsHostile = false;
-        }
-        else
+        //Validate its not a repeated target being set, record target switch for playback stream along with the ID.
+        if (_target != null && previousTarget != _target)
         {
             _isSearching = false;
+            //Send target info as event for playback
+            int targetID = -1;
+            int targetTeamID = -1;
+            if (_target.tag.Contains("Troop"))
+            {
+                TroopAI targetTroop = null;
+                targetTroop = _target.GetComponent<TroopAI>();
+                targetID = targetTroop.TroopID;
+                targetTeamID = targetTroop.TeamID;
+            }
+            else if(!_target.tag.Contains("NonTarget"))
+            {
+                targetID = _target.GetComponent<StructureHealthBehavior>().StructureID;
+            }
+
+            if (BrainCloudManager.Instance)
+            {
+                BrainCloudManager.Instance.RecordTargetSwitch(this, targetID, targetTeamID);
+            }
         }
-        
-        //Send target info as event for playback
-        int targetID;
-        if (_target.tag.Contains("Troop"))
-        {
-            targetID = _target.GetComponent<TroopAI>().TroopID;
-        }
-        else
-        {
-            targetID = _target.GetComponent<StructureHealthBehavior>().StructureID;
-        }
-        
-        BrainCloudManager.Instance.RecordTargetSwitch(TroopID, targetID);
     }
 }

@@ -21,7 +21,11 @@ public class DefenderSpawner : MonoBehaviour
             DefenderSpawnData.Rank = ArmyDivisionRank.Medium;
             DefenderSpawnData.SpawnList = DefenderSpawnData.TestParameterList;
         }
-        SpawnDefenderSetup();
+
+        if (!GameManager.Instance.IsInPlaybackMode)
+        {
+            SpawnDefenderSetup();    
+        }
     }
 
     public void SpawnDefenderSetup()
@@ -51,7 +55,7 @@ public class DefenderSpawner : MonoBehaviour
                 if (GameManager.Instance.IsInPlaybackMode)
                 {
                     //Assign the ID
-                    troop.TroopID = PlaybackStreamManager.Instance.DefenderIDs[i];
+                    troop.TroopID = GameManager.Instance.DefenderIDs[i];
                     troop.IsInPlaybackMode = true;
                     PlaybackStreamManager.Instance.DefendersList.Add(troop);
                 }
@@ -59,7 +63,7 @@ public class DefenderSpawner : MonoBehaviour
                 {
                     //Get the ID then Add it to the list and troop
                     troop.TroopID = troop.GetInstanceID();
-                    PlaybackStreamManager.Instance.DefenderIDs.Add(troop.TroopID);
+                    GameManager.Instance.DefenderIDs.Add(troop.TroopID);
                 }
                 _spawnPointIndex++;
                 GameManager.Instance.DefenderTroopCount++;

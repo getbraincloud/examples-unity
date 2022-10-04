@@ -27,13 +27,6 @@ public class SpawnController : MonoBehaviour
 
     private float _cooldown = 1;
     private float _timer;
-    
-    private int _spawnCount;
-
-    public int SpawnCount
-    {
-        set => _spawnCount = value;
-    }
 
     private const string _targetTag = "Target";
 
@@ -92,8 +85,8 @@ public class SpawnController : MonoBehaviour
                 troop.AssignToTeam(0);
                 
                 //Get the ID then Add it to the list and troop
-                troop.TroopID = PlaybackStreamManager.Instance.InvaderIDs[_spawnCount] = troop.GetInstanceID();
-                _spawnCount++;
+                troop.TroopID = troop.GetInstanceID();
+                GameManager.Instance.InvaderIDs.Add(troop.TroopID);
                 _troopSelected.SpawnedTroops++;
                 _troopSelected.SummonSelector.UpdateSpawnNumber(_troopSelected.SpawnLimit - _troopSelected.SpawnedTroops);
                 if (BrainCloudManager.Instance != null)

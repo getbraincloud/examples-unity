@@ -23,14 +23,17 @@ public class GameSessionManager : MonoBehaviour
     
     public int FrameID
     {
-        get => _frameId;
+        get => _frameId - 10;
     }
     // Start is called before the first frame update
     void Start()
     {
-        GameOverScreen.gameObject.SetActive(false);
-        ClockFillImage.fillAmount = 1;
-        StartCoroutine(Timer(RoundDuration));  
+        if (!GameManager.Instance.IsInPlaybackMode)
+        {
+            GameOverScreen.gameObject.SetActive(false);
+            ClockFillImage.fillAmount = 1;
+            StartCoroutine(Timer(RoundDuration)); 
+        }
     }
 
     private void FixedUpdate()
@@ -58,6 +61,7 @@ public class GameSessionManager : MonoBehaviour
     //Called from Game over screen -> button
     public void LoadToMenu()
     {
+        GameManager.Instance.IsInPlaybackMode = false;
         SceneManager.LoadScene("MainMenu");
     }
 

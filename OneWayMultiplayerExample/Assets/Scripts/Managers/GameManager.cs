@@ -65,6 +65,21 @@ public class GameManager : MonoBehaviour
     
     private static GameManager _instance;
     public static GameManager Instance => _instance;
+    
+    //Data to send for playback
+    private List<int> _defenderIDs = new List<int>();
+    public List<int> DefenderIDs
+    {
+        get => _defenderIDs;
+        set => _defenderIDs = value;
+    }
+    private List<int> _invaderIDs = new List<int>();
+
+    public List<int> InvaderIDs
+    {
+        get => _invaderIDs;
+        set => _invaderIDs = value;
+    }
 
     private void Awake()
     {
@@ -123,9 +138,16 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("Game");
     }
 
+    public void LoadToPlaybackScene()
+    {
+        IsInPlaybackMode = true;
+        SceneManager.LoadScene("Game");
+    }
+
     public void SetUpGameValues(Transform in_defenderParent)
     {
         _defenderStructParent = in_defenderParent;
+        PlaybackStreamManager.Instance.StructuresList.Clear();
         for (int i = 0; i < _defenderStructParent.childCount-1; i++)
         {
             GameObject structure = _defenderStructParent.GetChild(i).gameObject;
@@ -202,6 +224,24 @@ public class GameManager : MonoBehaviour
         {
             //Set up defenders
             _defenderSpawner.SpawnDefenderSetup();    
+        }
+    }
+    
+    public void ReadIDs(Dictionary<string, object> events)
+    {
+        _invaderIDs.Clear();
+        _defenderIDs.Clear();
+        
+        Dictionary<string, object> invadersList = events["invadersList"] as Dictionary<string, object>;
+        for (int i = 0; i < invadersList.Count; i++)
+        {
+            _invaderIDs.Add((int) invadersList[i.ToString()]);    
+        }
+        
+        Dictionary<string, object> defendersList = events["defendersList"] as Dictionary<string, object>;
+        for (int i = 0; i < defendersList.Count; i++)
+        {
+            _defenderIDs.Add((int) defendersList[i.ToString()]);
         }
     }
 

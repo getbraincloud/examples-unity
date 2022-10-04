@@ -56,6 +56,12 @@ public class StructureHealthBehavior : MonoBehaviour, IDamageable<int>
         {
             Instantiate(DeathFX, transform.position, Quaternion.identity);
         }
+
+        if (!GameManager.Instance.IsInPlaybackMode)
+        {
+            BrainCloudManager.Instance.RecordTargetDestroyed(StructureID, -1);    
+        }
+        
         Destroy(gameObject);
     }
 }
