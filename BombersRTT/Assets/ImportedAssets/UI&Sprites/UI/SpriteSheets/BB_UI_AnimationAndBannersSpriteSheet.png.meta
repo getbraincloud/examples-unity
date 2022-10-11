@@ -108,7 +108,7 @@ TextureImporter:
       213: 21300068
     second: bb_ui_twoplanesloadingspinner_0016
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -128,6 +128,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -136,9 +138,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -159,10 +161,14 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
   applyGammaDecoding: 1
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -214,6 +220,18 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 1
   - serializedVersion: 3
     buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: Server
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -972,6 +990,42 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      BB_UI_BombLoadingSpinner_0010: 21300020
+      bb_ui_twoplanesloadingspinner_0016: 21300068
+      BB_UI_BombLoadingSpinner_0002: 21300004
+      BB_UI_GameLogo: 21300034
+      BB_UI_ImageLoadingSpinnerBackground: 21300036
+      BB_UI_BombLoadingSpinner_0013: 21300026
+      bb_ui_twoplanesloadingspinner_0013: 21300062
+      BB_UI_BombLoadingSpinner_0012: 21300024
+      BB_UI_BombLoadingSpinner_0016: 21300032
+      bb_ui_twoplanesloadingspinner_0001: 21300038
+      bb_ui_twoplanesloadingspinner_0008: 21300052
+      BB_ApplicationConfigDialogBanner: 21300000
+      BB_UI_BombLoadingSpinner_0015: 21300030
+      bb_ui_twoplanesloadingspinner_0006: 21300048
+      BB_UI_BombLoadingSpinner_0004: 21300008
+      BB_UI_BombLoadingSpinner_0006: 21300012
+      bb_ui_twoplanesloadingspinner_0002: 21300040
+      bb_ui_twoplanesloadingspinner_0007: 21300050
+      bb_ui_twoplanesloadingspinner_0010: 21300056
+      bb_ui_twoplanesloadingspinner_0012: 21300060
+      bb_ui_twoplanesloadingspinner_0003: 21300042
+      BB_UI_BombLoadingSpinner_0009: 21300018
+      BB_UI_BombLoadingSpinner_0011: 21300022
+      BB_UI_BombLoadingSpinner_0005: 21300010
+      bb_ui_twoplanesloadingspinner_0009: 21300054
+      BB_UI_BombLoadingSpinner_0008: 21300016
+      BB_UI_BombLoadingSpinner_0014: 21300028
+      bb_ui_twoplanesloadingspinner_0005: 21300046
+      bb_ui_twoplanesloadingspinner_0004: 21300044
+      bb_ui_twoplanesloadingspinner_0015: 21300066
+      BB_UI_BombLoadingSpinner_0007: 21300014
+      bb_ui_twoplanesloadingspinner_0011: 21300058
+      BB_UI_BombLoadingSpinner_0001: 21300002
+      BB_UI_BombLoadingSpinner_0003: 21300006
+      bb_ui_twoplanesloadingspinner_0014: 21300064
   spritePackingTag: UI
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
