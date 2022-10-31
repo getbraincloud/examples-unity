@@ -50,7 +50,7 @@ using UnityEngine.Experimental.Networking;
         /// <summary>
         ///Compress bundles sent from the client to the server for faster sending of large bundles.
         /// </summary>
-        public bool SupportsCompression {get; private set;} = false;
+        public bool SupportsCompression {get; private set;} = true;
         
         public void EnableCompression(bool compress)
         {
@@ -351,6 +351,22 @@ using UnityEngine.Experimental.Networking;
         {
             _cacheMessagesOnNetworkError = enabled;
         }
+        
+        //Json Serialization
+        private JsonWriterSettings _writerSettings = new JsonWriterSettings(); //Used to adjust settings such as maxdepth while serializing. A new JsonWriterSettings does not need to be created everytime we serialize.
+        private StringBuilder _stringBuilderOutput; //String builder necessary for writing serialized json to a string. Unity complains when this is instantiated at compilation.
+        private static int _maxDepth = 25; //Set to the default maxDepth within JsonFx sdk.
+        private string JSON_ERROR_MESSAGE = "You have exceeded the max json depth, increase the MaxDepth using the MaxDepth variable in BrainCloudClient.cs";
+        
+        public int MaxDepth
+        {
+            get => _maxDepth;
+            set
+            {
+                _maxDepth = value;
+                _writerSettings.MaxDepth = _maxDepth;
+            }
+        }
 
         /// <summary>
         /// This flag is set when _cacheMessagesOnNetworkError is true
@@ -517,10 +533,12 @@ using UnityEngine.Experimental.Networking;
                         ResetIdleTimer();
                         HandleResponseBundle(GetWebRequestResponse(_activeRequest));
                         DisposeUploadHandler();
-                        _activeRequest = null;
+                        _activeRequest = null;        
                     }
                     //HttpStatusCode.ServiceUnavailable
-                    else if (_activeRequest.WebRequest.responseCode == 503)
+                    else if (_activeRequest.WebRequest.responseCode == 503 ||
+                             _activeRequest.WebRequest.responseCode == 502 ||
+                             _activeRequest.WebRequest.responseCode == 504)
                     {
                         //Packet in progress
                         _clientRef.Log("Packet in progress");
@@ -725,7 +743,7 @@ using UnityEngine.Experimental.Networking;
             {
                 bundleObj.responses[i] = new JsonErrorMessage(status, reasonCode, statusMessage);
             }
-            string jsonError = JsonWriter.Serialize(bundleObj);
+            string jsonError = _clientRef.SerializeJson(bundleObj);
             HandleResponseBundle(jsonError);
         }
 
@@ -905,7 +923,7 @@ using UnityEngine.Experimental.Networking;
                 _clientRef.Log(String.Format("{0} - {1}\n{2}", "RESPONSE", DateTime.Now, jsonData));
             }
 
-            JsonResponseBundleV2 bundleObj = DeserializeJson(jsonData);
+            JsonResponseBundleV2 bundleObj = DeserializeJsonBundle(jsonData);
             if (bundleObj == null)
             {
                 _cachedReasonCode = ReasonCodes.JSON_PARSING_ERROR;
@@ -917,8 +935,11 @@ using UnityEngine.Experimental.Networking;
                     if (_serviceCallsInProgress.Count > 0)
                     {
                         var serverCall = _serviceCallsInProgress[0];
-                        serverCall.GetCallback().OnErrorCallback(_cachedStatusCode,_cachedReasonCode,_cachedStatusMessage);
-                        _serviceCallsInProgress.RemoveAt(0);
+                        if (serverCall?.GetCallback() != null)
+                        {
+                            serverCall.GetCallback().OnErrorCallback(_cachedStatusCode,_cachedReasonCode,_cachedStatusMessage);
+                            _serviceCallsInProgress.RemoveAt(0);    
+                        }
                     }
                 }
                 _clientRef.Log(_cachedStatusMessage);
@@ -1003,7 +1024,7 @@ using UnityEngine.Experimental.Networking;
                     {
                         responseData = (Dictionary<string, object>)response[OperationParam.ServiceMessageData.Value];
                         // send the data back as not formatted
-                        data = JsonWriter.Serialize(response);
+                        data = SerializeJson(response);
 
                         if (service == ServiceName.Authenticate.Value || service == ServiceName.Identity.Value)
                         {
@@ -1014,7 +1035,7 @@ using UnityEngine.Experimental.Networking;
                     }
                     else
                     {
-                        data = JsonWriter.Serialize(response);
+                        data = SerializeJson(response);
                     }
 
                     // now try to execute the callback
@@ -1153,7 +1174,7 @@ using UnityEngine.Experimental.Networking;
                                     rewardList.Add(theReward);
                                     apiRewards["apiRewards"] = rewardList;
 
-                                    string rewardsAsJson = JsonWriter.Serialize(apiRewards);
+                                    string rewardsAsJson = _clientRef.SerializeJson(apiRewards);
 
                                     _rewardCallback(rewardsAsJson);
                                 }
@@ -1207,7 +1228,7 @@ using UnityEngine.Experimental.Networking;
                     }
                     else
                     {
-                        errorJson = JsonWriter.Serialize(response);
+                        errorJson = SerializeJson(response);
                     }
 
                     if (reasonCode == ReasonCodes.PLAYER_SESSION_EXPIRED
@@ -1288,7 +1309,7 @@ using UnityEngine.Experimental.Networking;
             {
                 Dictionary<string, Dictionary<string, object>[]> eventsJsonObj = new Dictionary<string, Dictionary<string, object>[]>();
                 eventsJsonObj["events"] = bundleObj.events;
-                string eventsAsJson = JsonWriter.Serialize(eventsJsonObj);
+                string eventsAsJson = _clientRef.SerializeJson(eventsJsonObj);
                 try
                 {
                     _eventCallback(eventsAsJson);
@@ -1495,7 +1516,7 @@ using UnityEngine.Experimental.Networking;
                         Dictionary<string, object> message = new Dictionary<string, object>();
                         message[OperationParam.ServiceMessageService.Value] = scIndex.Service;
                         message[OperationParam.ServiceMessageOperation.Value] = scIndex.Operation;
-                        message[OperationParam.ServiceMessageData.Value] = scIndex.GetJsonData();
+                        message[OperationParam.ServiceMessageData.Value] = scIndex.GetJsonData(); 
 
                         messageList.Add(message);
 
@@ -1576,7 +1597,7 @@ using UnityEngine.Experimental.Networking;
             }
             packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
 
-            string jsonRequestString = JsonWriter.Serialize(packet);
+            string jsonRequestString = SerializeJson(packet);
 
             if (_clientRef.LoggingEnabled)
             {
@@ -1588,6 +1609,58 @@ using UnityEngine.Experimental.Networking;
             TriggerCommsError(statusCode, reasonCode, statusMessage);
             DisposeUploadHandler();
             _activeRequest = null;
+        }
+
+        internal string SerializeJson(object payload)
+        {
+            //Unity doesn't like when we create a new StringBuilder outside of this method.
+            _stringBuilderOutput = new StringBuilder();
+            using (JsonWriter writer = new JsonWriter(_stringBuilderOutput, _writerSettings))
+            {
+                try
+                {
+                    writer.Write(payload);
+                }
+                catch (JsonSerializationException exception)
+                {
+                    //Contains will fail if one input is off, so I had to break it up like this for more consistency
+                    //IE: The maxiumum depth of 24 was exceeded. Check for cycles in object graph.
+                    if (exception.Message.Contains("The maxiumum depth") && 
+                        exception.Message.Contains("exceeded"))
+                    {
+                        lock (_serviceCallsInProgress)
+                        {
+                            if(_serviceCallsInProgress.Count > 0)
+                            {
+                                for (int i = _serviceCallsInProgress.Count - 1; i < 0; --i)
+                                {
+                                    var serviceCall = _serviceCallsInProgress[i];
+                                    if (serviceCall?.GetCallback() != null)
+                                    {
+                                        serviceCall.GetCallback().OnErrorCallback(900, ReasonCodes.JSON_REQUEST_MAXDEPTH_EXCEEDS_LIMIT, JSON_ERROR_MESSAGE);
+                                        _serviceCallsInProgress.RemoveAt(i);
+                                    }    
+                                }
+                            
+                            }
+                        }
+                    }
+                    _clientRef.Log("JSON Exception: " + exception.Message);
+                }
+            }
+
+            return _stringBuilderOutput.ToString();
+        }
+
+        internal Dictionary<string, object> DeserializeJson(string jsonData)
+        {
+            JsonResponseBundleV2 responseBundle = DeserializeJsonBundle(jsonData);
+            if (responseBundle?.responses == null || 
+                responseBundle.responses.Length == 0)
+            {
+                return null;
+            }
+            return responseBundle.responses[0];
         }
 
         /// <summary>
@@ -1613,12 +1686,12 @@ using UnityEngine.Experimental.Networking;
                 packet[OperationParam.ServiceMessageGameId.Value] = AppId;
             }
             packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
-
-            string jsonRequestString = JsonWriter.Serialize(packet);
+            
+            string jsonRequestString = SerializeJson(packet);
             string sig = CalculateMD5Hash(jsonRequestString + SecretKey);
 
             byte[] byteArray = Encoding.UTF8.GetBytes(jsonRequestString);
-
+            
             requestState.Signature = sig;
             
             bool compressMessage = SupportsCompression &&                               // compression enabled
@@ -1837,17 +1910,7 @@ using UnityEngine.Experimental.Networking;
                 response = _activeRequest.WebRequest.error;
             }
 
-            //Uncompressed response
-            if(_activeRequest.WebRequest.GetRequestHeader("Content-Encoding") != "gzip")
-            {
-                response = _activeRequest.WebRequest.downloadHandler.text;
-            }
-            //Compressed response
-            else
-            {
-                var decompressedByteArray = Decompress(_activeRequest.WebRequest.downloadHandler.data);
-                response = Encoding.UTF8.GetString(decompressedByteArray, 0, decompressedByteArray.Length);
-            }
+            response = _activeRequest.WebRequest.downloadHandler.text;
             
             if (response.Contains("Security violation 47") ||
                 response.StartsWith("<"))
@@ -1973,7 +2036,7 @@ using UnityEngine.Experimental.Networking;
         /// </summary>
         /// <param name="jsonData"></param>
         /// <returns></returns>
-        private JsonResponseBundleV2 DeserializeJson(string jsonData)
+        private JsonResponseBundleV2 DeserializeJsonBundle(string jsonData)
         {
             if (string.IsNullOrWhiteSpace(jsonData))
             {
@@ -2000,11 +2063,35 @@ using UnityEngine.Experimental.Networking;
                 }
                 catch (Exception ex) //some other exception
                 {
-                    Console.WriteLine(ex.ToString());
+                    //Contains will fail if one input is off, so I had to break it up like this for more consistency
+                    //IE: The maxiumum depth of 24 was exceeded. Check for cycles in object graph.
+                    if (ex.Message.Contains("The maxiumum depth") &&
+                        ex.Message.Contains("exceeded"))
+                    {
+                        lock (_serviceCallsInProgress)
+                        {
+                            if(_serviceCallsInProgress.Count > 0)
+                            {
+                                for (int i = _serviceCallsInProgress.Count - 1; i < 0; --i)
+                                {
+                                    var serviceCall = _serviceCallsInProgress[i];
+                                    if (serviceCall?.GetCallback() != null)
+                                    {
+                                        serviceCall.GetCallback().OnErrorCallback(900, ReasonCodes.JSON_RESPONSE_MAXDEPTH_EXCEEDS_LIMIT, JSON_ERROR_MESSAGE);
+                                        _serviceCallsInProgress.RemoveAt(i);
+                                    }    
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ResendMessage(_activeRequest);    
+                    }
+                    _clientRef.Log(ex.Message);
                     return null;
                 }
             }
-            
             return null;
         }
 
