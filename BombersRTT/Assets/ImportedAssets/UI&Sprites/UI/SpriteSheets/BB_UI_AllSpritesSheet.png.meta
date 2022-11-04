@@ -435,7 +435,7 @@ TextureImporter:
       213: 21300286
     second: BB_UI_IconRemoveFriendStatusIcon
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -455,6 +455,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -463,9 +465,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -486,10 +488,14 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
   applyGammaDecoding: 1
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -541,6 +547,18 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 1
   - serializedVersion: 3
     buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: Server
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -2664,6 +2682,107 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      BB_UI_IconRank9: 21300260
+      BB_UI_8ptHalfRoundRect: 21300010
+      BB_UI_InputPanel: 21300154
+      BB_UI_ButtonSocket: 21300044
+      BB_UI_RaisedPanel: 21300184
+      BB_UI_IconFriend: 21300282
+      BB_UI_IconRank6: 21300254
+      BB_UI_IconRemoveFriend: 21300112
+      BB_UI_InnerPanel: 21300150
+      BB_UI_IconHudShipDestroyed: 21300100
+      BB_UI_RectOutline: 21300186
+      BB_UI_IconRank5: 21300252
+      BB_UI_ButtonRedHighlighted: 21300042
+      BB_UI_IconJoinFriendStatusIcon: 21300284
+      BB_UI_IconRank3: 21300248
+      BB_UI_TitleBarPanel: 21300208
+      BB_UI_ButtonRed: 21300040
+      BB_UI_IconMore: 21300108
+      BB_UI_TabButtonBrownLeft: 21300192
+      BB_UI_IconLeaderboards: 21300104
+      BB_UI_IconAchievements: 21300072
+      BB_UI_1ptFullRoundRect: 21300270
+      BB_UI_TitleBarPanelOverlay: 21300210
+      BB_UI_IconSend: 21300118
+      BB_UI_ButtonBrown: 21300018
+      BB_UI_ButtonGrey: 21300034
+      BB_UI_ButtonGreenHighlighted: 21300032
+      BB_UI_PanelNoTitleBar: 21300180
+      BB_UI_TabButtonBrownRight: 21300200
+      BB_UI_InputPanelHighlighted: 21300278
+      BB_UI_IconEditPencil: 21300086
+      BB_UI_IconLock: 21300106
+      BB_UI_ButtonBlueHighlighted: 21300016
+      BB_UI_IconSearch: 21300116
+      BB_UI_IconReticule: 21300114
+      BB_UI_IconSettings: 21300120
+      BB_UI_PanelDividerWithShadows: 21300168
+      BB_UI_IconStatsHeader: 21300128
+      BB_UI_PanelXpBar: 21300182
+      BB_UI_InputUnderscore: 21300264
+      BB_UI_ButtonDropdownGreen: 21300242
+      BB_UI_IconAddFriend: 21300074
+      BB_UI_TabButtonBrownLeftHighlighted: 21300194
+      BB_UI_ButtonSocketRight: 21300046
+      BB_UI_ButtonBrownRightHighlighted: 21300026
+      BB_UI_ButtonBrownHighlighted: 21300020
+      BB_UI_InnerPanelDark: 21300152
+      BB_UI_IconFriends: 21300090
+      BB_UI_TabButtonBrownMiddle: 21300196
+      BB_UI_ButtonBrownHighlightedMore: 21300022
+      BB_UI_4ptHalfRoundRect: 21300002
+      BB_UI_8ptFullRoundRect: 21300006
+      BB_UI_PanelHudShipsShadow: 21300178
+      BB_UI_TabButtonBrown: 21300188
+      BB_UI_TitleBarPanelOverlayDisabled: 21300276
+      BB_UI_IconRank1: 21300244
+      BB_UI_ButtonSocketShadow: 21300048
+      BB_UI_HeavyFramePanelBlack: 21300052
+      BB_UI_TabButtonBrownRightHighlighted: 21300202
+      BB_UI_IconCheckmark: 21300080
+      BB_UI_6ptCircle: 21300004
+      BB_UI_IconRank4: 21300250
+      BB_UI_IconPilot: 21300110
+      BB_UI_IconShoppingCart: 21300122
+      BB_UI_PanelHudScoreShadow: 21300174
+      BB_UI_IconSwap: 21300130
+      BB_UI_IconHudShipAlive: 21300098
+      BB_UI_IconStats: 21300126
+      BB_UI_PanelGlow: 21300170
+      BB_UI_PanelSolidSquare: 21300268
+      BB_UI_IconQuit: 21300240
+      BB_UI_IconRank2: 21300246
+      BB_UI_TitleBarStar: 21300214
+      BB_UI_MainPanel: 21300160
+      BB_UI_IconBackgroundRound: 21300076
+      BB_UI_IconCaretDown: 21300078
+      BB_UI_IconFriendsHeader: 21300092
+      BB_UI_IconRank7: 21300256
+      BB_UI_TabButtonSocketBottom: 21300204
+      BB_UI_ButtonBlue: 21300014
+      BB_UI_ButtonNotificationBadge: 21300036
+      BB_UI_IconRemoveFriendStatusIcon: 21300286
+      BB_UI_IconAddFriendStatusIcon: 21300280
+      BB_UI_IconJoinFriend: 21300102
+      BB_UI_8ptFullRoundRectOutline: 21300008
+      BB_UI_IconEmail: 21300088
+      BB_UI_IconRank10: 21300262
+      BB_UI_ButtonDropdownBrown: 21300028
+      BB_UI_ButtonBrownRight: 21300024
+      BB_UI_TabButtonBrownMiddleHighlighted: 21300198
+      BB_UI_IconRank8: 21300258
+      BB_UI_TabButtonBrownHighlighted: 21300190
+      BB_UI_IconClock: 21300082
+      BB_UI_ButtonGreen: 21300030
+      BB_UI_IconClose: 21300084
+      BB_UI_TitleBarPanelOverlayHighlighted: 21300274
+      BB_UI_8ptQuarterRoundRect: 21300012
+      BB_UI_TabButtonSocketTop: 21300206
+      BB_UI_TitleBarPanelOverlayStrap: 21300212
+      BB_UI_4ptFullRoundRect: 21300000
   spritePackingTag: UI
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
