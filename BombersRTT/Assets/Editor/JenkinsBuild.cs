@@ -10,15 +10,34 @@ public class JenkinsBuild {
   
     static string[] EnabledScenes = FindEnabledEditorScenes();
   
-    // ------------------------------------------------------------------------
     // called from Jenkins
-    // ------------------------------------------------------------------------
     public static void BuildWebGL()
     {
         var args = FindArgs();
         args.GetEnviroVariables();
+        args.targetDir = "BombersRTT_Ultra_WebGL";
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.None);
+    }
+    
+    // called from Jenkins
+    public static void BuildWindowStandalone()
+    {
+        var args = FindArgs();
+        args.GetEnviroVariables();
+        args.targetDir = "BombersRTT_Ultra_WindowsStandalone";
+        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows, BuildOptions.None);
+    }
+    
+    // called from Jenkins
+    public static void BuildMacOS()
+    {
+        var args = FindArgs();
+        args.GetEnviroVariables();
+        args.targetDir = "BombersRTT_Ultra_MacOS";
+        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.iOS, BuildTarget.StandaloneOSX, BuildOptions.None);
     }
     
     private static Args FindArgs()
@@ -59,10 +78,7 @@ public class JenkinsBuild {
  
         return returnValue;
     }
- 
- 
-    // ------------------------------------------------------------------------
-    // ------------------------------------------------------------------------
+    
     private static string[] FindEnabledEditorScenes(){
   
         List<string> EditorScenes = new List<string>();
@@ -108,7 +124,7 @@ public class JenkinsBuild {
     private class Args
     {
         public string appName;
-        public string targetDir = "BombersRTT_WebGL_Internal";
+        public string targetDir;
         public string buildNumber;
 
         public string GetBuildFolderName()
