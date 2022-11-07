@@ -1,0 +1,39 @@
+#if UNITY_STANDALONE_OSX
+
+using UnityEngine;
+using UnityEditor;
+using UnityEditor.Callbacks;
+using System.IO;
+using System;
+
+namespace Gameframework
+{
+    public class MacOSPostBuild
+    {
+        [PostProcessBuild(100)]
+        public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
+        {
+            switch(target)
+            {
+                case BuildTarget.StandaloneOSX:
+                    try
+                    {
+                        UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(Path.Combine(pathToBuiltProject, "Contents/PlugIns/unitypurchasing.bundle"));
+                        UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(pathToBuiltProject);
+
+                        Debug.Log("MacOS Bundles & App Signed.");
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                    }
+                    return;
+                default:
+                    Debug.LogError("MacOSPostBuild should only be able to be run on Standalone OSX!");
+                    return;
+            }
+        }
+    }
+}
+
+#endif
