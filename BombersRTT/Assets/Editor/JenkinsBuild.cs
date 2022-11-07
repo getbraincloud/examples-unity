@@ -15,7 +15,7 @@ public class JenkinsBuild {
     {
         var args = FindArgs();
         args.GetEnviroVariables();
-        args.targetDir = "BombersRTT_Ultra_WebGL";
+        args.targetDir = "C:/Users/buildmaster/Documents/BombersRTT_Ultra_WebGL";
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.None);
     }
@@ -25,7 +25,7 @@ public class JenkinsBuild {
     {
         var args = FindArgs();
         args.GetEnviroVariables();
-        args.targetDir = "BombersRTT_Ultra_WindowsStandalone";
+        args.targetDir = "C:/Users/buildmaster/Documents/BombersRTT_Ultra_WindowsStandalone";
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows, BuildOptions.None);
     }
@@ -130,7 +130,7 @@ public class JenkinsBuild {
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
-            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}_buildNumber.{buildNumber}";
+            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}_buildNumber.{buildNumber}.exe";
         }
         
         public void GetEnviroVariables()
