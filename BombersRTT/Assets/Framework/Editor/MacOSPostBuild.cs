@@ -13,12 +13,20 @@ namespace Gameframework
         [PostProcessBuild(100)]
         public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
         {
-            switch(target)
+            switch (target)
             {
                 case BuildTarget.StandaloneOSX:
                     try
                     {
-                        UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(Path.Combine(pathToBuiltProject, "Contents/PlugIns/unitypurchasing.bundle"));
+                        string[] bundles = Directory.GetDirectories(Path.Combine(pathToBuiltProject, "Contents", "PlugIns"), "*.bundle");
+
+                        foreach (string bundle in bundles)
+                        {
+                            UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(bundle);
+
+                            Debug.Log($"Found Bundle: {bundle}");
+                        }
+
                         UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(pathToBuiltProject);
 
                         Debug.Log("MacOS Bundles & App Signed.");
