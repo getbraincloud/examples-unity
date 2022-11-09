@@ -18,6 +18,18 @@ namespace BrainCloudUNETExample
         public static BombersPlayerController LocalPlayer { get { return m_localPlayer; } set { m_localPlayer = value; if (value != null) { m_localPlayer.ProfileId = GCore.Wrapper.Client.ProfileId; } } }
         private static BombersPlayerController m_localPlayer;
 
+        private readonly string LobbyStrategy = "strategy";
+        private readonly string StrategyAbsolute = "absolute";
+        private readonly string StrategyCompound = "compound";
+        private readonly string LobbyAlignment = "alignment";
+        private readonly string UserItemsServiceCriteria = "criteria";
+        private readonly string CriteriaPing = "ping";
+        private readonly string StrategyRangedPercent = "ranged-percent";
+        private readonly string AlignmentCenter = "center";
+        private readonly string CriteraRating = "rating";
+        private readonly string CompoundAlgos = "algos";
+        private readonly string CompoundRanges = "compound-ranges";
+
         public IEnumerator InitializeGameInfo()
         {
             GPlayerMgr.Instance.UpdateActivity(GPlayerMgr.LOCATION_GAME, GPlayerMgr.STATUS_PLAYING, "", "");
@@ -106,23 +118,23 @@ namespace BrainCloudUNETExample
 
             float[] arry4 = { 250, 400.0f };
 
-            algo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyCompound.Value;
+            algo[LobbyStrategy] = StrategyCompound;
 
            // make algos
            List<Dictionary<string, string>> algos = new List<Dictionary<string, string>>();
            Dictionary<string, string> pingAlgo = new Dictionary<string, string>();
            Dictionary<string, string> ratingAlgo = new Dictionary<string, string>();
-           pingAlgo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyAbsolute.Value;
-           pingAlgo[OperationParam.LobbyAlignment.Value] = OperationParam.StrategyAbsolute.Value;
-           pingAlgo[OperationParam.UserItemsServiceCriteria.Value] = OperationParam.CriteraPing.Value;
+           pingAlgo[LobbyStrategy] = StrategyAbsolute;
+           pingAlgo[LobbyAlignment] = StrategyAbsolute;
+           pingAlgo[UserItemsServiceCriteria] = CriteriaPing;
 
-           ratingAlgo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyRangedPercent.Value;
-           ratingAlgo[OperationParam.LobbyAlignment.Value] = OperationParam.AlignmentCenter.Value;
-           ratingAlgo[OperationParam.UserItemsServiceCriteria.Value] = OperationParam.CriteraRating.Value;
+           ratingAlgo[LobbyStrategy] = StrategyRangedPercent;
+           ratingAlgo[LobbyAlignment] = AlignmentCenter;
+           ratingAlgo[UserItemsServiceCriteria] = CriteraRating;
 
             algos.Add(pingAlgo);
            algos.Add(ratingAlgo);
-           algo[OperationParam.CompoundAlgos.Value] = algos.ToArray();
+           algo[CompoundAlgos] = algos.ToArray();
 
            // create compound ranges
            Dictionary<int, float[]> compoundRange = new Dictionary<int, float[]>();
@@ -133,7 +145,7 @@ namespace BrainCloudUNETExample
                object[] newData = { item.Key, item.Value };
                compoundedRangeData.Add(newData);
            }
-           algo[OperationParam.CompoundRanges.Value] = compoundedRangeData.ToArray();
+           algo[CompoundRanges] = compoundedRangeData.ToArray();
            
             /*
                    // ranged percent strategy
