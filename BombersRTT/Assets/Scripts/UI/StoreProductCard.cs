@@ -1,5 +1,6 @@
 ﻿using Gameframework;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -8,11 +9,11 @@ namespace BrainCloudUNETExample
 {
     public class StoreProductCard : BaseBehaviour
     {
-        public Text Title = null;
-        public Text Label = null;
-        public Text ValueCost = null;
-        public Text TimerDisplayLabel = null;
-        public Text Description = null;
+        public TextMeshProUGUI Title = null;
+        public TextMeshProUGUI Label = null;
+        public TextMeshProUGUI ValueCost = null;
+        public TextMeshProUGUI TimerDisplayLabel = null;
+        public TextMeshProUGUI Description = null;
         public Button BuyButton = null;
         public Image UpperImage = null;
         public Image TitleIcon = null;
@@ -21,9 +22,9 @@ namespace BrainCloudUNETExample
 
         // sale container
         public GameObject SaleContainer = null;
-        public Text SalePercentage = null;
-        public Text RegularPrice = null;
-        public Text SalePrice = null;
+        public TextMeshProUGUI SalePercentage = null;
+        public TextMeshProUGUI RegularPrice = null;
+        public TextMeshProUGUI SalePrice = null;
 
         public GameObject TicketsNonSale = null;
         public GameObject TicketSale = null;

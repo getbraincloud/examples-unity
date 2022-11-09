@@ -1,13 +1,14 @@
 ﻿using Gameframework;
-using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BrainCloud;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using BrainCloudUNETExample.Connection;
+using TMPro;
 
 namespace BrainCloudUNETExample
 {
@@ -22,9 +23,9 @@ namespace BrainCloudUNETExample
         private RectTransform TeamRedScrollView = null;
 
         [SerializeField]
-        private InputField LocalChatInputField = null;
+        private TMP_InputField LocalChatInputField = null;
         [SerializeField]
-        private InputField GlobalChatInputField = null;
+        private TMP_InputField GlobalChatInputField = null;
 
         #region BaseState
         protected override void Start()
@@ -37,8 +38,8 @@ namespace BrainCloudUNETExample
             m_teamRedItems = new List<PlayerData>();
 
             m_currentMemberCount = 0;
-            m_gameName = transform.FindDeepChild("GameName").transform.Find("Text").GetComponent<Text>();
-            m_waitingForPlayers = transform.FindDeepChild("Waiting...").GetComponent<Text>();
+            m_gameName = transform.FindDeepChild("GameName").transform.GetComponentInChildren<TextMeshProUGUI>();
+            m_waitingForPlayers = transform.FindDeepChild("Waiting...").GetComponent<TextMeshProUGUI>();
             m_gameQuitButton = transform.FindDeepChild("ButtonQuitGame").gameObject;
             m_gameStartButton = transform.FindDeepChild("ButtonStartGame").gameObject;
             m_chatGroupLobby = transform.FindDeepChild("ChatGroupLocal").gameObject;
@@ -52,8 +53,8 @@ namespace BrainCloudUNETExample
             m_editButton = m_titleField.transform.Find("EditButton").gameObject;
             m_lobbyGameOptionsHost = m_optionsAndGameGroup.transform.Find("lobbyGameOptionsHost").gameObject;
             m_lobbyGameOptionsTester = m_optionsAndGameGroup.transform.Find("lobbyGameOptionsTester").gameObject;
-            m_protocolDropdown = m_lobbyGameOptionsTester.transform.Find("dropdownButton1").GetComponent<Dropdown>();
-            m_compressionDropdown = m_lobbyGameOptionsTester.transform.Find("dropdownButton2").GetComponent<Dropdown>();
+            m_protocolDropdown = m_lobbyGameOptionsTester.transform.Find("dropdownButton1").GetComponent<TMP_Dropdown>();
+            m_compressionDropdown = m_lobbyGameOptionsTester.transform.Find("dropdownButton2").GetComponent<TMP_Dropdown>();
 
             SetupLobbyDisplaySettings();
             SetupTesterSettings();
@@ -94,15 +95,15 @@ namespace BrainCloudUNETExample
 
         private void SetupLobbyDisplaySettings()
         {
-            m_presetDropDownButton = m_lobbyGameOptionsHost.transform.Find("dropdownButton1").GetComponent<Dropdown>();
-            m_sizeDropDownButton = m_lobbyGameOptionsHost.transform.Find("dropdownButton2").GetComponent<Dropdown>();
-            m_gameDurationDropDownButton = m_lobbyGameOptionsHost.transform.Find("dropdownButton3").GetComponent<Dropdown>();
+            m_presetDropDownButton = m_lobbyGameOptionsHost.transform.Find("dropdownButton1").GetComponent<TMP_Dropdown>();
+            m_sizeDropDownButton = m_lobbyGameOptionsHost.transform.Find("dropdownButton2").GetComponent<TMP_Dropdown>();
+            m_gameDurationDropDownButton = m_lobbyGameOptionsHost.transform.Find("dropdownButton3").GetComponent<TMP_Dropdown>();
 
             m_mapPresets = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_presets;
             m_mapSizes = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_mapSizes;
             m_gameDurations = GameObject.Find("MapPresets").GetComponent<MapPresets>().GameDurations;
 
-            m_inputField = GameObject.Find("GameName").GetComponent<InputField>();
+            m_inputField = GameObject.Find("GameName").GetComponent<TMP_InputField>();
             m_inputField.characterLimit = GPlayerMgr.MAX_CHARACTERS_GAME_NAME;
             m_inputField.interactable = false;
 
@@ -194,7 +195,7 @@ namespace BrainCloudUNETExample
 
         void Update()
         {
-            if (!m_panelLeft.enabled)
+            if (m_panelLeft != null && !m_panelLeft.enabled)
                 OnWaitingForPlayersWindow();
 
             // Deselect dropdowns after a mouse click 
@@ -272,10 +273,10 @@ namespace BrainCloudUNETExample
 
                 float halfMax = Mathf.Floor((int)BombersNetworkManager.LobbyInfo.Settings["maxPlayers"] / 2.0f);
                 GameObject green = GameObject.Find("GreenPlayers");
-                if (green != null) green.GetComponent<Text>().text = greenPlayers.Count + "/" + halfMax;
+                if (green != null) green.GetComponent<TextMeshProUGUI>().text = greenPlayers.Count + "/" + halfMax;
 
                 GameObject red = GameObject.Find("RedPlayers");
-                if (red != null) red.GetComponent<Text>().text = redPlayers.Count + "/" + halfMax;
+                if (red != null) red.GetComponent<TextMeshProUGUI>().text = redPlayers.Count + "/" + halfMax;
 
                 if (GStateManager.Instance.CurrentSubStateId != JoiningGameSubState.STATE_NAME)
                 {
@@ -371,7 +372,7 @@ namespace BrainCloudUNETExample
                 SendLobbyChatSignal();
         }
 
-        public void OnChatValueChanged(InputField in_field)
+        public void OnChatValueChanged(TMP_InputField in_field)
         {
             if (in_field.isFocused)
             {
@@ -414,12 +415,12 @@ namespace BrainCloudUNETExample
                 GlobalChatEntered();
         }
 
-        public void OnSelectProtocol(Dropdown aOption)
+        public void OnSelectProtocol(TMP_Dropdown aOption)
         {
             m_protocolListSelection = aOption.value;
         }
 
-        public void OnSelectCompression(Dropdown aOption)
+        public void OnSelectCompression(TMP_Dropdown aOption)
         {
             m_compressionListSelection = aOption.value;
 
@@ -443,7 +444,7 @@ namespace BrainCloudUNETExample
             m_compressionDropdown.value = in_compression;
         }
 
-        public void SelectLayoutOption(Dropdown aOption)
+        public void SelectLayoutOption(TMP_Dropdown aOption)
         {
             m_layoutListSelection = aOption.value;
 
@@ -462,7 +463,7 @@ namespace BrainCloudUNETExample
             m_presetDropDownButton.value = in_value;
         }
 
-        public void SelectSizeOption(Dropdown aOption)
+        public void SelectSizeOption(TMP_Dropdown aOption)
         {
             m_sizeListSelection = aOption.value;
 
@@ -481,7 +482,7 @@ namespace BrainCloudUNETExample
             m_sizeDropDownButton.value = in_value;
         }
 
-        public void SelectGameTime(Dropdown aOption)
+        public void SelectGameTime(TMP_Dropdown aOption)
         {
             m_gameDurationListSelection = aOption.value;
 
@@ -629,7 +630,7 @@ namespace BrainCloudUNETExample
 
         Color notSelected = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 
-        private IEnumerator delayedSelect(InputField in_field)
+        private IEnumerator delayedSelect(TMP_InputField in_field)
         {
             in_field.interactable = false;
             yield return YieldFactory.GetWaitForSeconds(0.15f);
@@ -693,8 +694,8 @@ namespace BrainCloudUNETExample
                 }
             }
         }
-        private Text m_gameName = null;
-        private Text m_waitingForPlayers = null;
+        private TextMeshProUGUI m_gameName = null;
+        private TextMeshProUGUI m_waitingForPlayers = null;
         private GameObject m_gameQuitButton = null;
         private GameObject m_gameStartButton = null;
         private GameObject m_chatGroupLobby = null;
@@ -711,14 +712,14 @@ namespace BrainCloudUNETExample
         private GameObject m_lobbyChatNotification = null;
         private GameObject m_globalChatNotification = null;
 
-        private Dropdown m_presetDropDownButton = null;
-        private Dropdown m_sizeDropDownButton = null;
-        private Dropdown m_gameDurationDropDownButton = null;
+        private TMP_Dropdown m_presetDropDownButton = null;
+        private TMP_Dropdown m_sizeDropDownButton = null;
+        private TMP_Dropdown m_gameDurationDropDownButton = null;
 
-        private Dropdown m_protocolDropdown = null;
-        private Dropdown m_compressionDropdown = null;
+        private TMP_Dropdown m_protocolDropdown = null;
+        private TMP_Dropdown m_compressionDropdown = null;
 
-        private InputField m_inputField = null;
+        private TMP_InputField m_inputField = null;
 
         private List<MapPresets.Preset> m_mapPresets;
         private List<MapPresets.MapSize> m_mapSizes;

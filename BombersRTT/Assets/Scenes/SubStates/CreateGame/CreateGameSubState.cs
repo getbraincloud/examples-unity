@@ -1,13 +1,9 @@
-﻿using BrainCloud;
-using BrainCloudUNETExample.Connection;
+﻿using BrainCloudUNETExample.Connection;
 using Gameframework;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using TMPro;
-using System;
-using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace BrainCloudUNETExample
 {
@@ -22,18 +18,17 @@ namespace BrainCloudUNETExample
         #region BaseState
         protected override void Start()
         {
-
-            Dropdown presetDropDownButton = GameObject.Find("PresetDropDownButton").GetComponent<Dropdown>();
-            Dropdown sizeDropDownButton = GameObject.Find("SizeDropDownButton").GetComponent<Dropdown>();
-            Dropdown gameDurationDropDownButton = GameObject.Find("TimeDropDownButton").GetComponent<Dropdown>();
-            Dropdown regionDurationDropDownButton = GameObject.Find("RegionDropDownButton").GetComponent<Dropdown>();
+            TMP_Dropdown presetDropDownButton = GameObject.Find("PresetDropDownButton").GetComponent<TMP_Dropdown>();
+            TMP_Dropdown sizeDropDownButton = GameObject.Find("SizeDropDownButton").GetComponent<TMP_Dropdown>();
+            TMP_Dropdown gameDurationDropDownButton = GameObject.Find("TimeDropDownButton").GetComponent<TMP_Dropdown>();
+            TMP_Dropdown regionDurationDropDownButton = GameObject.Find("RegionDropDownButton").GetComponent<TMP_Dropdown>();
 
             m_mapPresets = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_presets;
             m_mapSizes = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_mapSizes;
             m_gameDurations = GameObject.Find("MapPresets").GetComponent<MapPresets>().GameDurations;
             m_regions = GameObject.Find("MapPresets").GetComponent<MapPresets>().Regions;
             m_textMesh = transform.FindDeepChild("TitleBarText").GetComponent<TextMeshProUGUI>();
-            m_inputField = transform.FindDeepChild("Room Name").GetComponent<InputField>();
+            m_inputField = transform.FindDeepChild("Room Name").GetComponent<TMP_InputField>();
             m_inputField.characterLimit = GPlayerMgr.MAX_CHARACTERS_GAME_NAME;
 
             // update the Max Players default and max values.
@@ -45,7 +40,7 @@ namespace BrainCloudUNETExample
             BombersNetworkManager.Instance.SetSelectedRegion(m_regions[m_regionListSelection].Lobby);
 
             string str = m_state == eCreateGameState.NEW_ROOM ? "Create Game" : "Find Game";
-            transform.FindDeepChild("CreateButton").FindDeepChild("Text").GetComponent<Text>().text = str;
+            transform.FindDeepChild("CreateButton").FindDeepChild("Text").GetComponent<TextMeshProUGUI>().text = str;
             m_textMesh.text = str.ToUpper();
 
             List<string> items = new List<string>();
@@ -87,7 +82,7 @@ namespace BrainCloudUNETExample
 
             OnNewRoomWindow();
 
-            transform.FindDeepChild("Room Name").GetComponent<InputField>().text = GPlayerMgr.Instance.PlayerData.PlayerName + "'s Room";
+            transform.FindDeepChild("Room Name").GetComponent<TMP_InputField>().text = GPlayerMgr.Instance.PlayerData.PlayerName + "'s Room";
 
             _stateInfo = new StateInfo(STATE_NAME, this);
             base.Start();
@@ -115,7 +110,7 @@ namespace BrainCloudUNETExample
         {
             m_state = in_bCreateGame ? eCreateGameState.NEW_ROOM : eCreateGameState.FIND_ROOM;
             string str = m_state == eCreateGameState.NEW_ROOM ? "Create Game" : "Find Game";
-            transform.FindDeepChild("CreateButton").FindDeepChild("Text").GetComponent<Text>().text = str;
+            transform.FindDeepChild("CreateButton").FindDeepChild("Text").GetComponent<TextMeshProUGUI>().text = str;
             m_textMesh.text = str.ToUpper();
         }
 
@@ -142,26 +137,26 @@ namespace BrainCloudUNETExample
             OnNewRoomWindow();
         }
 
-        public void SelectLayoutOption(Dropdown aOption)
+        public void SelectLayoutOption(TMP_Dropdown aOption)
         {
             m_layoutListSelection = aOption.value;
 
             OnNewRoomWindow();
         }
 
-        public void SelectSizeOption(Dropdown aOption)
+        public void SelectSizeOption(TMP_Dropdown aOption)
         {
             m_sizeListSelection = aOption.value;
 
             OnNewRoomWindow();
         }
 
-        public void SelectGameTime(Dropdown aOption)
+        public void SelectGameTime(TMP_Dropdown aOption)
         {
             m_gameDurationListSelection = aOption.value;
         }
 
-        public void SelectRegion(Dropdown aOption)
+        public void SelectRegion(TMP_Dropdown aOption)
         {
             m_regionListSelection = aOption.value;
             BombersNetworkManager.Instance.SetSelectedRegion(m_regions[m_regionListSelection].Lobby);
@@ -196,8 +191,8 @@ namespace BrainCloudUNETExample
 
         private void OnConfirmCreateGame(string in_name)
         {
-            m_roomLevelRangeMax = int.Parse(this.transform.FindDeepChild("Box 2").GetComponent<InputField>().text.ToString());
-            m_roomLevelRangeMin = int.Parse(this.transform.FindDeepChild("Box 1").GetComponent<InputField>().text.ToString());
+            m_roomLevelRangeMax = int.Parse(this.transform.FindDeepChild("Box 2").GetComponent<TMP_InputField>().text.ToString());
+            m_roomLevelRangeMin = int.Parse(this.transform.FindDeepChild("Box 1").GetComponent<TMP_InputField>().text.ToString());
 
             var matchAttributes = new Dictionary<string, object>() { { "minLevel", m_roomLevelRangeMin }, { "maxLevel", m_roomLevelRangeMax } };
 
@@ -206,10 +201,10 @@ namespace BrainCloudUNETExample
 
         private void OnNewRoomWindow()
         {
-            Dropdown presetDropDownButton = GameObject.Find("PresetDropDownButton").GetComponent<Dropdown>();
-            Dropdown sizeDropDownButton = GameObject.Find("SizeDropDownButton").GetComponent<Dropdown>();
-            Dropdown timeDropDownButton = GameObject.Find("TimeDropDownButton").GetComponent<Dropdown>();
-            Dropdown regionDropDownButton = GameObject.Find("RegionDropDownButton").GetComponent<Dropdown>();
+            TMP_Dropdown presetDropDownButton = GameObject.Find("PresetDropDownButton").GetComponent<TMP_Dropdown>();
+            TMP_Dropdown sizeDropDownButton = GameObject.Find("SizeDropDownButton").GetComponent<TMP_Dropdown>();
+            TMP_Dropdown timeDropDownButton = GameObject.Find("TimeDropDownButton").GetComponent<TMP_Dropdown>();
+            TMP_Dropdown regionDropDownButton = GameObject.Find("RegionDropDownButton").GetComponent<TMP_Dropdown>();
 
             presetDropDownButton.captionText.text = m_mapPresets[m_layoutListSelection].m_name;
             presetDropDownButton.value = m_layoutListSelection;
@@ -364,7 +359,7 @@ namespace BrainCloudUNETExample
         private int m_regionListSelection = 0;
 
         private bool m_inputWasFocused = false;
-        private InputField m_inputField = null;
+        private TMP_InputField m_inputField = null;
         private List<MapPresets.Preset> m_mapPresets;
         private List<MapPresets.MapSize> m_mapSizes;
         private List<MapPresets.GameDuration> m_gameDurations;
