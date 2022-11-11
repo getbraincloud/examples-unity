@@ -463,7 +463,14 @@ namespace BrainCloudUNETExample
                     //web socket 
                     case 0:
                         {
-                            RoomServerInfo.Port = (int)ports["ws"];
+                            if (!ports.ContainsKey("ws"))
+                            {
+                                RoomServerInfo.Port = (int)ports["gamelift"];
+                            }
+                            else
+                            {
+                                RoomServerInfo.Port = (int)ports["ws"];
+                            }
                         }
                         break;
 

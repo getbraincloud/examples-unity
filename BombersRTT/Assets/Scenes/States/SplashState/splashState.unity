@@ -99,7 +99,7 @@ LightmapSettings:
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 112000000, guid: 150030ae8dcd51f4a8a690111feaaec2,
     type: 2}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: 871e48fbf2071584eb297cb056560351,
+  m_LightingSettings: {fileID: 4890085278179872738, guid: fec549922b365b244b5f8f4fa902b5c5,
     type: 2}
 --- !u!196 &5
 NavMeshSettings:
@@ -151,7 +151,7 @@ PrefabInstance:
     - target: {fileID: 224377722985065738, guid: 6cecd4940a608ab42b51cbde03eec253,
         type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 224377722985065738, guid: 6cecd4940a608ab42b51cbde03eec253,
         type: 3}
@@ -615,6 +615,50 @@ Transform:
   m_Father: {fileID: 1508349852}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1400725836
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1400725838}
+  - component: {fileID: 1400725837}
+  m_Layer: 0
+  m_Name: UltraManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1400725837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400725836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be7eff9bb1d8bbf4c920105cd9b47e45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1400725838
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400725836}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1459911916
 GameObject:
   m_ObjectHideFlags: 0
@@ -645,7 +689,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1459911918
 MonoBehaviour:
@@ -713,7 +757,7 @@ Transform:
   - {fileID: 906585044}
   - {fileID: 836808671}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1715489109
 GameObject:
@@ -986,7 +1030,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2045401112
 GameObject:
@@ -5669,7 +5713,7 @@ Transform:
   m_Father: {fileID: 906585044}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 35, y: 0, z: 0}
---- !u!1001 &8515551396193919489
+--- !u!1001 &2050557221
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -5679,22 +5723,22 @@ PrefabInstance:
     - target: {fileID: 8515551395780631054, guid: 9d74e08c98ccd394086a7dbe7d0d0bce,
         type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8515551395780631054, guid: 9d74e08c98ccd394086a7dbe7d0d0bce,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 604.8384
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8515551395780631054, guid: 9d74e08c98ccd394086a7dbe7d0d0bce,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 354.45096
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8515551395780631054, guid: 9d74e08c98ccd394086a7dbe7d0d0bce,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.5235498
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8515551395780631054, guid: 9d74e08c98ccd394086a7dbe7d0d0bce,
         type: 3}
