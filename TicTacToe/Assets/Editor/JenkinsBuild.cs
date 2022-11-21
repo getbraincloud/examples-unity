@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using UnityEditor.Build.Reporting;
+using System.IO;
   
 // ------------------------------------------------------------------------
 // https://docs.unity3d.com/Manual/CommandLineArguments.html
@@ -13,9 +14,9 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildWebGL()
     {
+        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
-        args.targetDir = "/BombersRTT_Ultra_WebGL/";
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.None);
     }
@@ -23,9 +24,9 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildWindowStandalone()
     {
+        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
-        //args.targetDir = "UltraBombers_WindowStandalone/BombersRTT_Ultra_WindowsStandalone/";
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows, BuildOptions.None);
     }
@@ -33,11 +34,36 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildMacOS()
     {
+        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
-        args.targetDir = "BombersRTT_Ultra_MacOS";
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
-        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.iOS, BuildTarget.StandaloneOSX, BuildOptions.None);
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX, BuildOptions.None);
+    }
+    
+    private static void SetRemoteBuildSettings()
+    {
+        string appId = GetArg("-appId");
+        string appSecret = GetArg("-appSecret");
+        string appAuthUrl = GetArg("-url");
+
+        if(!string.IsNullOrEmpty(appId) && !string.IsNullOrEmpty(appSecret))
+        {
+            string path = "Assets/Resources/BCSettings.txt";
+            StreamWriter writer = new StreamWriter(path, true);
+
+            writer.WriteLine(appAuthUrl);
+            writer.WriteLine(appId);
+            writer.WriteLine(appSecret);
+            writer.Close();
+
+            AssetDatabase.ImportAsset(path);
+
+            TextAsset bcsettings = Resources.Load<TextAsset>("BCSettings");
+
+
+            Debug.Log($"Successfully set the appID and appSecret to: {bcsettings}");
+        }
     }
     
     private static Args FindArgs()
@@ -77,6 +103,19 @@ public class JenkinsBuild {
             System.Console.WriteLine("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod JenkinsBuild.BuildWindows64 <app name> <output dir>");
  
         return returnValue;
+    }
+    
+    private static string GetArg(string name)
+    {
+        var args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == name && args.Length > i + 1)
+            {
+                return args[i + 1];
+            }
+        }
+        return null;
     }
     
     private static string[] FindEnabledEditorScenes(){
@@ -130,13 +169,12 @@ public class JenkinsBuild {
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
-            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}_buildNumber.{buildNumber}.exe";
+            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
         }
         
         public void GetEnviroVariables()
         {
             targetDir = System.Environment.GetEnvironmentVariable("targetDirectory");
-            buildNumber = System.Environment.GetEnvironmentVariable("BUILD_NUMBER");
         }
     }
 }
