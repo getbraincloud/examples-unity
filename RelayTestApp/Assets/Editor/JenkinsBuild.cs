@@ -169,7 +169,13 @@ public class JenkinsBuild {
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
+#if UNITY_STANDALONE_WIN
             return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+#elif UNITY_STANDALONE_OSX
+            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+#else
+            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+#endif
         }
         
         public void GetEnviroVariables()
