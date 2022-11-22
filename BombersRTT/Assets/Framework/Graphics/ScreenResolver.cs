@@ -13,6 +13,8 @@ namespace Gameframework
 {
     public class ScreenResolver : BaseBehaviour
     {
+        [SerializeField] private bool LaunchFullScreen = false;
+
 #if UNITY_EDITOR || !UNITY_STANDALONE
         private void Awake()
         {
@@ -51,8 +53,6 @@ namespace Gameframework
         };
         #endregion
 
-        [SerializeField] private bool LaunchFullScreen = false;
-
         private bool isFullScreen = false;
         private Resolution windowedConfig;
         private Resolution fullscreenConfig;
@@ -65,7 +65,7 @@ namespace Gameframework
             int screenHeight = Screen.currentResolution.height;
             foreach (int resolution in ResolutionList)
             {
-                int compare = resolution - screenHeight;
+                int compare = screenHeight - resolution;
                 if (compare >= 0)
                 {
                     windowed = resolution < screenHeight ? resolution : windowed;
