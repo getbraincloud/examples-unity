@@ -14,7 +14,6 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildWebGL()
     {
-        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
@@ -24,7 +23,6 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildWindowStandalone()
     {
-        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
@@ -34,13 +32,22 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildMacOS()
     {
-        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX, BuildOptions.None);
     }
+
+    // called from Jenkins
+    public static void BuildAndroid()
+    {
+        var args = FindArgs();
+        args.GetEnviroVariables();
+        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
+    }
     
+    //WIP, doesn't work on Mac but works fine in Windows..
     private static void SetRemoteBuildSettings()
     {
         string appId = GetArg("-appId");
