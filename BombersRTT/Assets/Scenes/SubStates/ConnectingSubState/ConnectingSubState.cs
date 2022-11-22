@@ -344,14 +344,14 @@ namespace BrainCloudUNETExample
 
             if (m_defaultAuthType == AuthenticationType.Universal)
             {
-                UsernameBox.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>().text = "Enter Username";
-                UsernameBox.transform.Find("Icon").GetComponent<Image>().sprite = IconPilot;
+                UsernameBox.placeholder.GetComponent<TextMeshProUGUI>().text = "Enter Username";
+                UsernameBox.transform.parent.Find("Icon").GetComponent<Image>().sprite = IconPilot;
                 UsernameBox.contentType = TMP_InputField.ContentType.Alphanumeric;
             }
             else if (m_defaultAuthType == AuthenticationType.Email)
             {
-                UsernameBox.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>().text = "Enter Email";
-                UsernameBox.transform.Find("Icon").GetComponent<Image>().sprite = IconEmail;
+                UsernameBox.placeholder.GetComponent<TextMeshProUGUI>().text = "Enter Email";
+                UsernameBox.transform.parent.Find("Icon").GetComponent<Image>().sprite = IconEmail;
                 UsernameBox.contentType = TMP_InputField.ContentType.EmailAddress;
             }
             // Add support for other Authentication types here
