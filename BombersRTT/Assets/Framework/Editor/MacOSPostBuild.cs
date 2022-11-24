@@ -1,3 +1,6 @@
+// MACOS STANDALONE ONLY
+// This will run after a MacOS build is made and will sign the app & bundles within so it does not appear as "damaged" for users.
+
 #if UNITY_STANDALONE_OSX
 
 using UnityEngine;

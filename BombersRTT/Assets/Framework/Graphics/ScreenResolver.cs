@@ -1,7 +1,7 @@
 /*
  * This will scale the screen to the appropriate resolution based on the monitor the app is running on.
- * App is Windowed by default and will use an appropriate resolution that doesn't match or is greater than the monitor's resolution.
- * When Fullscreened (Alt + Enter), the app will use one of the matching supported resolutions, or the closest one that isn't greater than the monitor's resolution.
+ * App is Windowed by default and will use an appropriate resolution that neither matches nor is greater than the monitor's resolution.
+ * When Fullscreened (Alt + Enter), the app will use one of the matching supported resolutions or the closest one that is not greater than the monitor's resolution.
  *
  * Supported resolutions: 7680x4320 (8K), 5120x2880 (5K), 3840x2160 (4K), 2560x1440 (QHD), 1920x1080 (FHD), 1280x720 (HD), 800x600 (Standard, Default)
  */
@@ -11,9 +11,11 @@ using UnityEngine;
 
 namespace Gameframework
 {
-    public class ScreenResolver : BaseBehaviour
+    public class ScreenResolver : MonoBehaviour
     {
+#pragma warning disable CS0414 // Ignore field is assigned but its value is never used
         [SerializeField] private bool LaunchFullScreen = false;
+#pragma warning restore CS0414
 
 #if UNITY_EDITOR || !UNITY_STANDALONE
         private void Awake()
