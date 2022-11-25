@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -27,10 +28,18 @@ public class LogErrors : MonoBehaviour
         //Saves the file
 		sr.Close();
         //Writes to file
-		StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), append);
-        sw.WriteLine(addition);
-        //Save the file
-		sw.Close();
+        try
+        {
+            StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), append);
+            sw.WriteLine(addition);
+            //Save the file
+            sw.Close();
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            throw;
+        }
     }
 
     private void WriteAllErrors()
@@ -38,13 +47,22 @@ public class LogErrors : MonoBehaviour
         FileStream sr = File.Open(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
         //Saves the file
         sr.Close();
-        //Writes to file
-        StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), false);
-        foreach(string _str in _errors) {
-            sw.WriteLine(_str);
+        try
+        {
+            //Writes to file
+            StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), false);
+            foreach(string _str in _errors) 
+            {
+                sw.WriteLine(_str);
+            }
+            //Save the file
+            sw.Close();
         }
-        //Save the file
-        sw.Close();
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            throw;
+        }
     }
 
     private void OnApplicationQuit()
