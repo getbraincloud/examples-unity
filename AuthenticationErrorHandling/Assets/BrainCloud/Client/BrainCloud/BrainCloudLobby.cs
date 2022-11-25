@@ -383,7 +383,48 @@ using UnityEngine.Experimental.Networking;
             ServerCall sc = new ServerCall(ServiceName.Lobby, ServiceOperation.GetRegionsForLobbies, data, callback);
             m_clientRef.SendRequest(sc);
         }
+        
+        /**
+         * Gets a map keyed by rating of the visible lobby instances matching the given type and rating range.
+         * any ping data provided in the criteriaJson will be ignored.
+         *
+         * Service Name - Lobby
+         * Service Operation - GetLobbyInstances
+         *
+         * @param lobbyType The type of lobby to look for.
+         * @param criteriaJson A JSON object used to describe filter criteria.
+         */
+        public void GetLobbyInstances(string in_lobbyType, Dictionary<string, object> criteriaJson, SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.LobbyRoomType.Value] = in_lobbyType;
+            data[OperationParam.LobbyCritera.Value] = criteriaJson;
 
+            ServerCallback callback = BrainCloudClient.CreateServerCallback(success, failure, cbObject);
+            ServerCall sc = new ServerCall(ServiceName.Lobby, ServiceOperation.GetLobbyInstances, data, callback);
+            m_clientRef.SendRequest(sc);
+        }
+        
+        /**
+         * Gets a map keyed by rating of the visible lobby instances matching the given type and rating range.
+         * Only lobby instances in the regions that satisfy the ping portion of the criteriaJson (based on the values provided in pingData) will be returned.
+         *
+         * Service Name - Lobby
+         * Service Operation - GetLobbyInstancesWithPingData
+         *
+         * @param lobbyType The type of lobby to look for.
+         * @param criteriaJson A JSON object used to describe filter criteria.
+         */
+        public void GetLobbyInstancesWithPingData(string in_lobbyType, Dictionary<string,object> criteriaJson,
+            SuccessCallback success = null, FailureCallback failure = null, object cbObject = null)
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>();
+            data[OperationParam.LobbyRoomType.Value] = in_lobbyType;
+            data[OperationParam.LobbyCritera.Value] = criteriaJson;
+            
+            attachPingDataAndSend(data, ServiceOperation.GetLobbyInstancesWithPingData, success, failure, cbObject);
+        }
+        
         /// <summary>
         /// Retrieves associated PingData averages to be used with all associated <>WithPingData APIs.
         /// Call anytime after GetRegionsForLobbies before proceeding. 
@@ -450,7 +491,7 @@ using UnityEngine.Experimental.Networking;
                 }
                 else if (m_regionPingData.Count == PingData.Count && m_pingRegionSuccessCallback != null)
                 {
-                    string pingStr = JsonWriter.Serialize(PingData);
+                    string pingStr = m_clientRef.SerializeJson(PingData);
                     
                     if (m_clientRef.LoggingEnabled)
                     {
@@ -496,7 +537,7 @@ using UnityEngine.Experimental.Networking;
                 failure.callback = in_failure;
                 failure.status = 400;
                 failure.reasonCode = reasonCode;
-                failure.jsonError = JsonWriter.Serialize(jsonError);
+                failure.jsonError = m_clientRef.SerializeJson(jsonError);
                 failure.cbObject = cbObject;
                 m_failureQueue.Add(failure);
             }

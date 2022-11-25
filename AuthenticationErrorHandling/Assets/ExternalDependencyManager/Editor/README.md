@@ -26,7 +26,7 @@ This causes the following problems:
      Unity project can be complex and a burden on a Unity plugin maintainer.
    * The process of resolving conflicting dependencies on platform specific
      libraries is pushed to the developer attempting to use a Unity plugin.
-     The developer trying to use you plugin is very likely to give up when
+     The developer trying to use your plugin is very likely to give up when
      faced with Android or iOS specific build errors.
    * The process of resolving conflicting Unity plugins (due to shared Unity
      plugin components) is pushed to the developer attempting to use your Unity
@@ -432,7 +432,7 @@ For example, to add the AdMob pod, version 7.0 or greater with bitcode enabled:
 <dependencies>
   <iosPods>
     <iosPod name="Google-Mobile-Ads-SDK" version="~> 7.0" bitcodeEnabled="true"
-            minTargetSdk="6.0" />
+            minTargetSdk="6.0" addToAllTargets="false" />
   </iosPods>
 </dependencies>
 ```

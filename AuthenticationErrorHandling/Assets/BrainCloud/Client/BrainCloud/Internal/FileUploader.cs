@@ -49,7 +49,7 @@ using System.Threading.Tasks;
 
         public long BytesTransferred { get { return (long)(TotalBytesToTransfer * Progress); } }
 
-        public long TotalBytesToTransfer { get; private set; }
+        public long TotalBytesToTransfer { get; set; }
 
         public FileUploaderStatus Status { get; private set; }
 
@@ -68,12 +68,17 @@ using System.Threading.Tasks;
 #pragma warning disable 649
         private BrainCloudClient _client;
         private string _sessionId;
-        private string _localPath;
+        private string _guidLocalPath;
         private string _serverUrl;
         private string _fileName;
         private string _peerCode;
         private long _timeoutThreshold = 50;
         private int _timeout = 120;
+        public string FileName
+        {
+            get => _fileName;
+            set => _fileName = value;
+        }
 #pragma warning restore 649
 
         //transfer rate
@@ -101,7 +106,7 @@ using System.Threading.Tasks;
 
         public FileUploader(
             string uploadId,
-            string localPath,
+            string guidLocalPath,
             string serverUrl,
             string sessionId,
             int timeout,
@@ -112,24 +117,13 @@ using System.Threading.Tasks;
             _client = client;
 
             UploadId = uploadId;
-            _localPath = localPath;
+            _guidLocalPath = guidLocalPath;
             _serverUrl = serverUrl;
             _sessionId = sessionId;
             _peerCode = peerCode;
 
             _timeout = timeout;
             _timeoutThreshold = timeoutThreshold;
-
-            if (!File.Exists(localPath))
-            {
-                ThrowError(ReasonCodes.CLIENT_UPLOAD_FILE_UNKNOWN, "File at" + localPath + " does not exist");
-                return;
-            }
-
-            FileInfo info = new FileInfo(localPath);
-            _fileName = info.Name;
-            TotalBytesToTransfer = info.Length;
-
             Status = FileUploaderStatus.Pending;
         }
 
@@ -137,16 +131,7 @@ using System.Threading.Tasks;
         {
 #if !UNITY_WEBPLAYER
 #if !DOT_NET
-            FileInfo info = new FileInfo(_localPath);
-            byte[] file;
-            if (info.Exists)
-            {
-                file = File.ReadAllBytes(_localPath);
-            }
-            else
-            {
-                file = System.Convert.FromBase64String(_localPath);
-            }
+            byte[] file = _client.FileService.FileStorage[_guidLocalPath];
             WWWForm postForm = new WWWForm();
             postForm.AddField("sessionId", _sessionId);
 
@@ -155,12 +140,12 @@ using System.Threading.Tasks;
             postForm.AddField("fileSize", file.Length);
             postForm.AddBinaryData("uploadFile", file, _fileName);
 
-#if USE_WEB_REQUEST
+    #if USE_WEB_REQUEST
             _request = UnityWebRequest.Post(_serverUrl, postForm);
             _request.SendWebRequest();
-#else
+    #else
             _request = new WWW(_serverUrl, postForm);
-#endif
+    #endif
 #else
             var requestMessage = new HttpRequestMessage()
             {
@@ -169,8 +154,14 @@ using System.Threading.Tasks;
             };
 
             var requestContent = new MultipartFormDataContent();
-
-            ProgressStream fileStream = new ProgressStream(new FileStream(_localPath, FileMode.Open, FileAccess.Read, FileShare.Read));
+            byte[] fileData = _client.FileService.FileStorage[_guidLocalPath];
+            _client.FileService.FileStorage.Remove(_guidLocalPath);
+            if (fileData == null)
+            {
+                ThrowError(ReasonCodes.FILE_DOES_NOT_EXIST,"Local path is wrong or file doesn't exist");
+                return;
+            }
+            ProgressStream fileStream = new ProgressStream(new MemoryStream(fileData));
             fileStream.BytesRead += BytesReadCallback;
 
             requestContent.Add(new StringContent(_sessionId), "sessionId");
@@ -178,9 +169,8 @@ using System.Threading.Tasks;
             requestContent.Add(new StringContent(UploadId), "uploadId");
             requestContent.Add(new StringContent(TotalBytesToTransfer.ToString()), "fileSize");
             requestContent.Add(new StreamContent(fileStream), "uploadFile", _fileName);
-
+            
             requestMessage.Content = requestContent;
-
             _cancelToken = new CancellationTokenSource();
             Task<HttpResponseMessage> httpRequest = HttpClient.SendAsync(requestMessage, _cancelToken.Token);
             httpRequest.ContinueWith(async (t) =>
@@ -307,7 +297,7 @@ using System.Threading.Tasks;
             if (StatusCode != StatusCodes.OK)
             {
                 Status = FileUploaderStatus.CompleteFailed;
-
+                _client.FileService.FileStorage.Remove(_guidLocalPath);
                 if (_request.error != null)
                 {
                     ReasonCode = ReasonCodes.CLIENT_UPLOAD_FILE_UNKNOWN;
@@ -341,7 +331,7 @@ using System.Threading.Tasks;
             else
             {
                 Status = FileUploaderStatus.CompleteSuccess;
-
+                _client.FileService.FileStorage.Remove(_guidLocalPath);
 #if USE_WEB_REQUEST
                 Response = _request.downloadHandler.text;
 #else
