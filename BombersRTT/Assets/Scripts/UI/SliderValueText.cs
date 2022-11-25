@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class SliderValueText : MonoBehaviour
@@ -8,9 +9,11 @@ public class SliderValueText : MonoBehaviour
 
     private void Start()
     {
-        m_sliderText = GetComponent<Text>();
+        m_sliderText = GetComponent<TextMeshProUGUI>();
 
         GetComponentInParent<Slider>().onValueChanged.AddListener(HandleValueChanged);
+
+        HandleValueChanged(GetComponentInParent<Slider>().value);
     }
 
     private void HandleValueChanged(float value)
@@ -19,5 +22,5 @@ public class SliderValueText : MonoBehaviour
     }
 
     private string m_formatText = "{0}";    //The text shown will be formatted using this string. {0} is replaced with the actual value
-    private Text m_sliderText;
+    private TextMeshProUGUI m_sliderText;
 }

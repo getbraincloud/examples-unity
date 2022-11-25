@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using System;
+using TMPro;
 
 namespace Gameframework
 {
@@ -26,7 +26,7 @@ namespace Gameframework
 
         public GameObject Canvas = null;
         public Image DownloadingAnimImage = null;
-        public Text LoadingText = null;
+        public TextMeshProUGUI LoadingText = null;
 
         #region Public
         // Public methods.

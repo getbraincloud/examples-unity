@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace BrainCloudUNETExample
 {
@@ -10,7 +11,7 @@ namespace BrainCloudUNETExample
     {
         public static string STATE_NAME = "friends";
 
-        public InputField searchInputField = null;
+        public TMP_InputField searchInputField = null;
 
         public RectTransform FriendsScrollView = null;
 
@@ -18,7 +19,7 @@ namespace BrainCloudUNETExample
         public ScrollRect SearchResultsScrollRect = null;
 
         [SerializeField]
-        private Text NoFriendsAdded = null;
+        private TextMeshProUGUI NoFriendsAdded = null;
         [SerializeField]
         private Animator NoSearchResults = null;
 
@@ -85,7 +86,7 @@ namespace BrainCloudUNETExample
         #region Public
         public void InputFieldChanged()
         {
-            Text text = searchInputField.GetComponentInChildren<Text>();
+            TextMeshProUGUI text = searchInputField.textComponent.GetComponent<TextMeshProUGUI>();
             text.color = LIGHT_TEXT;
         }
 
@@ -238,7 +239,7 @@ namespace BrainCloudUNETExample
             if (recentlyViewed.Count > 0)
             {
                 // find the entity for recently viewed, 
-                Text newField = GEntityFactory.Instance.CreateObject(m_titleText, Vector3.zero, Quaternion.identity, SearchResultsScrollView.transform).GetComponent<Text>();
+                TextMeshProUGUI newField = GEntityFactory.Instance.CreateObject(m_titleText, Vector3.zero, Quaternion.identity, SearchResultsScrollView.transform).GetComponent<TextMeshProUGUI>();
                 newField.text = "    RECENTLY VIEWED";
 
                 // put them all on

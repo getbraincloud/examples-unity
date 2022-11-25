@@ -1,9 +1,10 @@
 ﻿using BrainCloudUNETExample.Connection;
 using Gameframework;
+using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using System;
 
 namespace BrainCloudUNETExample
 {
@@ -71,7 +72,7 @@ namespace BrainCloudUNETExample
 
         private void OnRefreshLeaderboardView()
         {
-            ScoreText.GetComponent<Text>().text = m_currentLeaderboardID == JSON_KDR ? "KILLS" : "TARGETS HIT";
+            ScoreText.GetComponent<TextMeshProUGUI>().text = m_currentLeaderboardID == JSON_KDR ? "KILLS" : "TARGETS HIT";
 
             if (BrainCloudStats.Instance.m_leaderboardData != null)
             {

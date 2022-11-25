@@ -1,24 +1,26 @@
 ﻿using Gameframework;
 using BrainCloud;
 using BrainCloud.Common;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace BrainCloudUNETExample
 {
     public class ConnectingSubState : BaseSubState
     {
         public static string STATE_NAME = "connectingSubState";
 
-        public InputField UsernameBox = null;
-        public InputField PasswordBox = null;
+        public TMP_InputField UsernameBox = null;
+        public TMP_InputField PasswordBox = null;
 
         public Sprite IconEmail = null;
         public Sprite IconPilot = null;
 
         public GameObject ButtonGroup = null;
         public GameObject ButtonGroupWithCancel = null;
-        public Text InstructionText = null;
-        public Text LoginButtonText = null;
+        public TextMeshProUGUI InstructionText = null;
+        public TextMeshProUGUI LoginButtonText = null;
 
         [SerializeField]
         private GameObject Panel = null;
@@ -169,7 +171,7 @@ namespace BrainCloudUNETExample
             if (m_lastAuthType == AuthenticationType.Universal)
             {
                 GPlayerMgr.Instance.PlayerData.UniversalId = UsernameBox.text;
-                GCore.Wrapper.Client.PlayerStateService.UpdateUserName(UsernameBox.text);
+                GCore.Wrapper.Client.PlayerStateService.UpdateName(UsernameBox.text);
             }
             GCore.Instance.ProcessRetryQueue();
             onCompleteConnectingSubState();
@@ -342,22 +344,25 @@ namespace BrainCloudUNETExample
 
             if (m_defaultAuthType == AuthenticationType.Universal)
             {
-                UsernameBox.transform.Find("Placeholder").GetComponent<Text>().text = "Enter Username";
-                UsernameBox.transform.Find("Icon").GetComponent<Image>().sprite = IconPilot;
-                UsernameBox.contentType = InputField.ContentType.Alphanumeric;
+                UsernameBox.placeholder.GetComponent<TextMeshProUGUI>().text = "Enter Username";
+                UsernameBox.transform.parent.Find("Icon").GetComponent<Image>().sprite = IconPilot;
+                UsernameBox.contentType = TMP_InputField.ContentType.Alphanumeric;
             }
             else if (m_defaultAuthType == AuthenticationType.Email)
             {
-                UsernameBox.transform.Find("Placeholder").GetComponent<Text>().text = "Enter Email";
-                UsernameBox.transform.Find("Icon").GetComponent<Image>().sprite = IconEmail;
-                UsernameBox.contentType = InputField.ContentType.EmailAddress;
+                UsernameBox.placeholder.GetComponent<TextMeshProUGUI>().text = "Enter Email";
+                UsernameBox.transform.parent.Find("Icon").GetComponent<Image>().sprite = IconEmail;
+                UsernameBox.contentType = TMP_InputField.ContentType.EmailAddress;
             }
             // Add support for other Authentication types here
         }
         #endregion
+
+#pragma warning disable IDE0044, IDE0051, IDE0052 // Remove unused private members
         private int MIN_CHARACTERS = 3;
         private int MAX_CHARACTERS = 25;
         private AuthenticationType m_lastAuthType = AuthenticationType.Anonymous;
         private AuthenticationType m_defaultAuthType = AuthenticationType.Universal;
+#pragma warning restore IDE0044, IDE0051, IDE0052 // Remove unused private members
     }
 }

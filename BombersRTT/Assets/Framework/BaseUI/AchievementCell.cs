@@ -3,30 +3,29 @@ using Gameframework;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 namespace BrainCloudUNETExample
 {
     public class AchievementCell : ImageDownloader
     {
         #region private Properties
-#pragma warning disable 649
         [SerializeField]
-        private Text Name;
+        private TextMeshProUGUI Name = null;
         [SerializeField]
-        private Text Description;
+        private TextMeshProUGUI Description = null;
         [SerializeField]
-        private GameObject Check;
+        private GameObject Check = null;
         [SerializeField]
-        private GameObject CheckBoxFrame;
+        private GameObject CheckBoxFrame = null;
         [SerializeField]
-        private CanvasGroup CanvasGroup;
+        private CanvasGroup CanvasGroup = null;
         [SerializeField]
-        private Image ProgressImg;
+        private Image ProgressImg = null;
         [SerializeField]
-        private Text Progress;
+        private TextMeshProUGUI Progress = null;
         [SerializeField]
-        private GameObject ProgressGroup;
-#pragma warning restore 649
+        private GameObject ProgressGroup = null;
         #endregion
 
         #region public
@@ -96,6 +95,7 @@ namespace BrainCloudUNETExample
             }
         }
         #endregion
+
         #region private
         private AchievementData m_pData = null;
         #endregion

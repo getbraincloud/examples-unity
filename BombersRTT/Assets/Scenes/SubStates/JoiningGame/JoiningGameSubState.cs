@@ -1,6 +1,6 @@
 ﻿using Gameframework;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace BrainCloudUNETExample
 {
@@ -8,14 +8,12 @@ namespace BrainCloudUNETExample
     {
         public static string STATE_NAME = "joiningGame";
 
-#pragma warning disable 649
         [SerializeField]
-        private Text m_mainLabel;
+        private TextMeshProUGUI m_mainLabel = null;
         [SerializeField]
-        private Text m_timerLabel;
+        private TextMeshProUGUI m_timerLabel = null;
         [SerializeField]
-        private GameObject m_closeButton;
-#pragma warning restore 649
+        private GameObject m_closeButton = null;
         #region BaseState
         protected override void Start()
         {

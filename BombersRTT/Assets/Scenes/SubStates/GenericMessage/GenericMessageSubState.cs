@@ -1,22 +1,21 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 namespace Gameframework
 {
     public class GenericMessageSubState : BaseSubState
     {
         public static string STATE_NAME = "genericMessageSubState";
-        public Text Title = null;
-        public Text Message = null;
-        public Text TxtButton = null;
-        public TextMeshProUGUI TMTitle;
-        public TextMeshProUGUI TMMessage;
+
+        public TextMeshProUGUI TitleText = null;
+        public TextMeshProUGUI MessageText = null;
 
         public Button FirstButton = null;
+        public TextMeshProUGUI FirstButtonText = null;
         public Button SecondButton = null;
-        public Text SecondText = null;
+        public TextMeshProUGUI SecondButtonText = null;
 
         public Button CloseButton = null;
         public GameObject Btn2Coins = null;
@@ -66,9 +65,9 @@ namespace Gameframework
         public void LateInit(string in_title, string in_message, OnDialogAction in_leftDialogAction, string in_leftTxtButton, OnDialogAction in_rightDialogAction, string in_rightTxtButton, bool in_showCloseButton, OnDialogAction in_closeDialog)
         {
             InfoBox.SetActive(false);
-            TMTitle.text = in_title;
-            Message.text = in_message;
-            TxtButton.text = in_leftTxtButton;
+            TitleText.text = in_title;
+            MessageText.text = in_message;
+            FirstButtonText.text = in_leftTxtButton;
             m_dialogAction = in_leftDialogAction;
 
             m_closeDialogAction = in_closeDialog;
@@ -80,7 +79,7 @@ namespace Gameframework
             {
                 SecondButton.gameObject.SetActive(true);
                 m_secondDialogAction = in_rightDialogAction;
-                SecondText.text = in_rightTxtButton;
+                SecondButtonText.text = in_rightTxtButton;
             }
             else
             {
@@ -90,7 +89,7 @@ namespace Gameframework
 
         public void SetInfoBox(string in_infoBoxTxt)
         {
-            InfoBox.GetComponentInChildren<Text>().text = in_infoBoxTxt;
+            InfoBox.GetComponentInChildren<TextMeshProUGUI>().text = in_infoBoxTxt;
             InfoBox.SetActive(true);
         }
 

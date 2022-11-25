@@ -62,7 +62,7 @@ namespace Gameframework
             UnityEvent thisEvent = null;
             if (Instance.eventDictionary.TryGetValue(eventName, out thisEvent))
             {
-                thisEvent.Invoke();
+                thisEvent?.Invoke();
             }
         }
     }

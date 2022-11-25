@@ -1,4 +1,5 @@
 ﻿using Gameframework;
+
 namespace BrainCloudUNETExample
 {
     public class FriendsListItem : FriendCell
