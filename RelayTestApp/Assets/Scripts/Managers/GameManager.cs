@@ -32,8 +32,8 @@ public class GameManager : MonoBehaviour
     //for updating members list of shockwaves
     public GameArea GameArea;  
     //local user's start button for starting a match
-    public GameObject StartGameBtn; 
-    
+    public GameObject StartGameBtn;
+    public TMP_Text LobbyLocalUserText;
     private EventSystem _eventSystem;
     //List references for clean up when game closes
     private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
@@ -168,10 +168,16 @@ public class GameManager : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
-            SetUpUserEntry(lobby.Members[i], newEntry);
-            _matchEntries.Add(newEntry);
+            if (!lobby.Members[i].Username.Contains(_currentUserInfo.Username))
+            {
+                var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
+                SetUpUserEntry(lobby.Members[i], newEntry);
+                _matchEntries.Add(newEntry);    
+            }
         }
+
+        LobbyLocalUserText.text = _currentUserInfo.Username;
+        LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor); 
     }
     
     private void SetUpUserEntry(UserInfo info,UserEntry entry)

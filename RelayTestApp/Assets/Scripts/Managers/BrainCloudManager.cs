@@ -146,7 +146,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void FindLobby(RelayConnectionType protocol)
     {
-        StateManager.Instance.protocol = protocol;
+        StateManager.Instance.PROTOCOL = protocol;
         
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         
@@ -234,7 +234,7 @@ public class BrainCloudManager : MonoBehaviour
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
-        jsonData["y"] = -pos.y + _mouseYOffset;
+        jsonData["y"] = -pos.y;// + _mouseYOffset;
         //Set up JSON to send
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "move";
@@ -242,13 +242,13 @@ public class BrainCloudManager : MonoBehaviour
 
         byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
         m_bcWrapper.RelayService.Send
-            (
-                data, 
-                BrainCloudRelay.TO_ALL_PLAYERS, 
-                Settings.GetPlayerPrefBool(Settings.ReliableKey), 
-                Settings.GetPlayerPrefBool(Settings.OrderedKey),
-                Settings.GetChannel()
-            );
+        (
+            data, 
+            BrainCloudRelay.TO_ALL_PLAYERS, 
+            Settings.GetPlayerPrefBool(Settings.ReliableKey), 
+            Settings.GetPlayerPrefBool(Settings.OrderedKey),
+            Settings.GetChannel()
+        );
     }
 
     // Local User summoned a shockwave in the play area
@@ -265,13 +265,13 @@ public class BrainCloudManager : MonoBehaviour
 
         byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
         m_bcWrapper.RelayService.Send
-            (
-                data, 
-                BrainCloudRelay.TO_ALL_PLAYERS, 
-                true, // Reliable
-                false, // Unordered
-                Settings.GetChannel()
-            );
+        (
+            data, 
+            BrainCloudRelay.TO_ALL_PLAYERS, 
+            true, // Reliable
+            false, // Unordered
+            Settings.GetChannel()
+        );
    }
 
 #endregion Input update
@@ -296,7 +296,7 @@ public class BrainCloudManager : MonoBehaviour
 
                     member.IsAlive = true;
                     member.MousePosition.x = Convert.ToSingle(data["x"]);
-                    member.MousePosition.y = -Convert.ToSingle(data["y"]) + _mouseYOffset;
+                    member.MousePosition.y = -Convert.ToSingle(data["y"]); // + _mouseYOffset;
                 }
                 else if (op == "shockwave")
                 {
@@ -357,7 +357,6 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case "ROOM_READY":
                     StateManager.Instance.CurrentServer = new Server(jsonData);
-                    Debug.Log($"JSON LOBBY DATA: {jsonResponse}");
                     GameManager.Instance.UpdateMatchState();
                     GameManager.Instance.UpdateCursorList();
                     ConnectRelay();
@@ -374,7 +373,7 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
-        switch (StateManager.Instance.protocol)
+        switch (StateManager.Instance.PROTOCOL)
         {
             case RelayConnectionType.WEBSOCKET:
                 port = StateManager.Instance.CurrentServer.WsPort;
@@ -390,7 +389,7 @@ public class BrainCloudManager : MonoBehaviour
         Server server = StateManager.Instance.CurrentServer;
         m_bcWrapper.RelayService.Connect
         (
-            StateManager.Instance.protocol,
+            StateManager.Instance.PROTOCOL,
             new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
             null, 
             LogErrorThenPopUpWindow, 
@@ -403,16 +402,20 @@ public class BrainCloudManager : MonoBehaviour
         var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         if (json["op"] as string == "DISCONNECT")
         {
-            var profileId = json["profileId"] as string;
-            Lobby lobby = StateManager.Instance.CurrentLobby;
-            foreach (var member in lobby.Members)
+            if (json.ContainsKey("cxId"))
             {
-                if (member.ID == profileId)
+                var profileId = json["cxId"] as string;
+                profileId = profileId.Substring(6);
+                Lobby lobby = StateManager.Instance.CurrentLobby;
+                foreach (var member in lobby.Members)
                 {
-                    member.IsAlive = false;
-                    GameManager.Instance.MemberLeft();
-                    break;
-                }
+                    if (member.ID == profileId)
+                    {
+                        member.IsAlive = false;
+                        GameManager.Instance.MemberLeft();
+                        break;
+                    }
+                }    
             }
         }
     }
