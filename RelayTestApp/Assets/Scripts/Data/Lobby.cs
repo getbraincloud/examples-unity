@@ -14,6 +14,10 @@ public class Lobby
         OwnerID = FormatOwnerID(lobbyJson["ownerCxId"] as string);
         
         var jsonMembers = lobbyJson["members"] as Dictionary<string, object>[];
+        if (jsonMembers == null)
+        {
+            return;
+        }
         for (int i = 0; i < jsonMembers.Length; ++i)
         {
             Dictionary<string,object> jsonMember = jsonMembers[i];

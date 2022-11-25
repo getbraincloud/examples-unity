@@ -146,7 +146,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void FindLobby(RelayConnectionType protocol)
     {
-        StateManager.Instance.protocol = protocol;
+        StateManager.Instance.PROTOCOL = protocol;
         
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         
@@ -234,7 +234,7 @@ public class BrainCloudManager : MonoBehaviour
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
-        jsonData["y"] = -pos.y + _mouseYOffset;
+        jsonData["y"] = -pos.y;// + _mouseYOffset;
         //Set up JSON to send
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "move";
@@ -285,6 +285,7 @@ public class BrainCloudManager : MonoBehaviour
         string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
         var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
         Lobby lobby = StateManager.Instance.CurrentLobby;
+        Debug.Log("Relay Callback");
         foreach (var member in lobby.Members)
         {
             if (member.ID == memberProfileId)
@@ -292,6 +293,7 @@ public class BrainCloudManager : MonoBehaviour
                 var op = json["op"] as string;
                 if (op == "move")
                 {
+                    Debug.Log("Received Move Input");
                     var data = json["data"] as Dictionary<string, object>;
 
                     member.IsAlive = true;
@@ -300,6 +302,7 @@ public class BrainCloudManager : MonoBehaviour
                 }
                 else if (op == "shockwave")
                 {
+                    Debug.Log("Received Shockwave Input");
                     var data = json["data"] as Dictionary<string, object>;
                     Vector2 position; 
                     position.x = Convert.ToSingle(data["x"]);
@@ -357,7 +360,6 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case "ROOM_READY":
                     StateManager.Instance.CurrentServer = new Server(jsonData);
-                    Debug.Log($"JSON LOBBY DATA: {jsonResponse}");
                     GameManager.Instance.UpdateMatchState();
                     GameManager.Instance.UpdateCursorList();
                     ConnectRelay();
@@ -374,7 +376,8 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
-        switch (StateManager.Instance.protocol)
+        Debug.LogWarning($"<color=red> Using Protocol {StateManager.Instance.PROTOCOL} </color>");
+        switch (StateManager.Instance.PROTOCOL)
         {
             case RelayConnectionType.WEBSOCKET:
                 port = StateManager.Instance.CurrentServer.WsPort;
@@ -388,9 +391,10 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         Server server = StateManager.Instance.CurrentServer;
+        Debug.LogWarning("<color=red> Attempting to connect to relay.. </color>");
         m_bcWrapper.RelayService.Connect
         (
-            StateManager.Instance.protocol,
+            StateManager.Instance.PROTOCOL,
             new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
             null, 
             LogErrorThenPopUpWindow, 
