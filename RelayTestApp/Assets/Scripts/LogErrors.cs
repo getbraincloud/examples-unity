@@ -7,7 +7,7 @@ public class LogErrors : MonoBehaviour
 {
     private string currentError;
     private List<string> _errors = new List<string>();
-
+    private bool fileOpen = false;
     internal void Awake() {
         DontDestroyOnLoad(gameObject);
         Application.logMessageReceived+=HandleLog;
@@ -22,47 +22,64 @@ public class LogErrors : MonoBehaviour
     }
     
     //Append enables the overwrite on the file you're writing to
-    public void Write(bool append, string addition) {
+    public void Write(bool append, string addition) 
+    {
+        if (fileOpen) return;   
         //Creates the file
-        FileStream sr = File.Open(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        //Saves the file
-		sr.Close();
-        //Writes to file
-        try
+        using (FileStream sr = File.Open(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"),
+                   FileMode.OpenOrCreate, FileAccess.ReadWrite))
         {
-            StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), append);
-            sw.WriteLine(addition);
-            //Save the file
-            sw.Close();
+            fileOpen = true;
+            //Saves the file
+            sr.Close();
+            //Writes to file
+            try
+            {
+                StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), append);
+                sw.WriteLine(addition);
+                //Save the file
+                sw.Close();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                throw;
+            }            
         }
-        catch (Exception e)
-        {
-            Debug.Log(e);
-            throw;
-        }
+
+        fileOpen = false;
     }
 
     private void WriteAllErrors()
     {
-        FileStream sr = File.Open(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        //Saves the file
-        sr.Close();
-        try
+        if (fileOpen) return;
+        //Creates the file
+        using (FileStream sr = File.Open(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"),
+                   FileMode.OpenOrCreate, FileAccess.ReadWrite))
         {
+            fileOpen = true;
+            //Saves the file
+            sr.Close();
             //Writes to file
-            StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), false);
-            foreach(string _str in _errors) 
+            try
             {
-                sw.WriteLine(_str);
+                //Writes to file
+                StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), false);
+                foreach(string _str in _errors) 
+                {
+                    sw.WriteLine(_str);
+                }
+                //Save the file
+                sw.Close();
             }
-            //Save the file
-            sw.Close();
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                throw;
+            }            
         }
-        catch (Exception e)
-        {
-            Debug.Log(e);
-            throw;
-        }
+
+        fileOpen = false;
     }
 
     private void OnApplicationQuit()

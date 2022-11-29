@@ -168,12 +168,9 @@ public class GameManager : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            if (!lobby.Members[i].Username.Contains(_currentUserInfo.Username))
-            {
-                var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
-                SetUpUserEntry(lobby.Members[i], newEntry);
-                _matchEntries.Add(newEntry);    
-            }
+            var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
+            SetUpUserEntry(lobby.Members[i], newEntry);
+            _matchEntries.Add(newEntry);    
         }
 
         LobbyLocalUserText.text = _currentUserInfo.Username;

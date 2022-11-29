@@ -1079,6 +1079,10 @@ namespace BrainCloud.Internal
 
         private void tcpFinishWrite(IAsyncResult result)
         {
+            if (result.IsCompleted)
+            {
+                return;
+            }
             try
             {
                 m_tcpStream.EndWrite(result);
