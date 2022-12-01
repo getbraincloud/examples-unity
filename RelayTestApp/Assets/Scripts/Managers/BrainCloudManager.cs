@@ -2,11 +2,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
+
+public enum RelayCompressionTypes {JsonString, KeyValuePairString, DataStreamByte }
 
 /// <summary>
 /// Example of how to communicate game logic to brain cloud functions
@@ -21,6 +24,7 @@ public class BrainCloudManager : MonoBehaviour
     public static BrainCloudManager Instance;
     //Offset for the different mouse coordinates from Unity space to Nodejs space
     private float _mouseYOffset = 321;
+    internal RelayCompressionTypes _relayCompressionType { get; set; }
     private void Awake()
     {
         m_bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -146,8 +150,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void FindLobby(RelayConnectionType protocol)
     {
-        StateManager.Instance.PROTOCOL = protocol;
-        
+        StateManager.Instance._protocol = protocol;
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         
         // Enable RTT
@@ -240,11 +243,9 @@ public class BrainCloudManager : MonoBehaviour
         json["op"] = "move";
         json["data"] = jsonData;
 
-        byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-        m_bcWrapper.RelayService.Send
+        SendWithSpecificCompression
         (
-            data, 
-            BrainCloudRelay.TO_ALL_PLAYERS, 
+            json,
             Settings.GetPlayerPrefBool(Settings.ReliableKey), 
             Settings.GetPlayerPrefBool(Settings.OrderedKey),
             Settings.GetChannel()
@@ -262,17 +263,39 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "shockwave";
         json["data"] = jsonData;
-
-        byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-        m_bcWrapper.RelayService.Send
+        
+        SendWithSpecificCompression
         (
-            data, 
-            BrainCloudRelay.TO_ALL_PLAYERS, 
-            true, // Reliable
-            false, // Unordered
+            json,
+            true,
+            false,
             Settings.GetChannel()
         );
-   }
+    }
+    
+    private void SendWithSpecificCompression(Dictionary<string, object> in_dict, bool in_reliable = true, bool in_ordered = true, int in_channel = 0, char in_joinChar = '=', char in_splitChar = ';')
+    {
+        string jsonData;
+        byte[] jsonBytes = {0x0};
+        switch (_relayCompressionType)
+        {
+            case RelayCompressionTypes.JsonString:
+                jsonData = JsonWriter.Serialize(in_dict);
+                jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                break;
+            case RelayCompressionTypes.KeyValuePairString:
+                jsonData = SerializeDict(in_dict, in_joinChar, in_splitChar); 
+                jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                break;
+            case RelayCompressionTypes.DataStreamByte:
+                jsonBytes = SerializeDict(in_dict);
+                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                break;
+        }
+    }
+    
 
 #endregion Input update
 
@@ -373,7 +396,7 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
-        switch (StateManager.Instance.PROTOCOL)
+        switch (StateManager.Instance._protocol)
         {
             case RelayConnectionType.WEBSOCKET:
                 port = StateManager.Instance.CurrentServer.WsPort;
@@ -389,7 +412,7 @@ public class BrainCloudManager : MonoBehaviour
         Server server = StateManager.Instance.CurrentServer;
         m_bcWrapper.RelayService.Connect
         (
-            StateManager.Instance.PROTOCOL,
+            StateManager.Instance._protocol,
             new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
             null, 
             LogErrorThenPopUpWindow, 
@@ -467,5 +490,65 @@ public class BrainCloudManager : MonoBehaviour
     }
 
 #endregion RTT Functions
+
+
+    private string SerializeDict(Dictionary<string, object> in_dict, char in_joinChar = '=', char in_splitChar = ';')
+    {
+        string toString = "";
+
+        if (_relayCompressionType == 0)
+        {
+            toString = JsonWriter.Serialize(in_dict);
+        }
+        else
+        {
+            foreach (string key in in_dict.Keys)
+            {
+                if (in_dict[key] != null)
+                    toString += key + in_joinChar + in_dict[key] + in_splitChar;
+            }
+        }
+
+        return toString;
+    }
+
+    private static byte[] EMPTY_ARRAY = new byte[0];
+    private byte[] SerializeDict(Dictionary<string, object> in_dict)
+    {
+        if (_relayCompressionType == RelayCompressionTypes.DataStreamByte)
+        {
+            try
+            {
+                byte[] toReturn = StructureToByteArray(in_dict);
+                return toReturn;
+            }
+            catch (Exception)
+            {
+                return EMPTY_ARRAY;
+            }
+        }
+        return EMPTY_ARRAY;
+    }
+    
+    private byte[] StructureToByteArray<T>(T str)
+    {
+        int size = Marshal.SizeOf(str);
+        byte[] arr = new byte[size];
+        GCHandle h = default(GCHandle);
+        try
+        {
+            h = GCHandle.Alloc(arr, GCHandleType.Pinned);
+            Marshal.StructureToPtr<T>(str, h.AddrOfPinnedObject(), false);
+        }
+        finally
+        {
+            if (h.IsAllocated)
+            {
+                h.Free();
+            }
+        }
+
+        return arr;
+    }
 }
 
