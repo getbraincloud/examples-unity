@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public TMP_Text LobbyLocalUserText;
+    public TMP_Dropdown CompressionDropdown;
     private EventSystem _eventSystem;
     //List references for clean up when game closes
     private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
@@ -111,6 +112,27 @@ public class GameManager : MonoBehaviour
         //Send update to BC
         Dictionary<string,object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        if (IsLocalUserHost())
+        {
+            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+        }
+        BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
+        (
+            StateManager.Instance.CurrentLobby.LobbyID,
+            StateManager.Instance.isReady,
+            extra
+        );
+    }
+
+    public void SendUpdateRelayCompressionType()
+    {
+        //Send update to BC
+        Dictionary<string,object> extra = new Dictionary<string, object>();
+        extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        if (IsLocalUserHost())
+        {
+            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+        }
         BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
         (
             StateManager.Instance.CurrentLobby.LobbyID,
@@ -143,6 +165,7 @@ public class GameManager : MonoBehaviour
     {   
         AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
         StartGameBtn.SetActive(IsLocalUserHost());
+        CompressionDropdown.interactable = IsLocalUserHost();
     }
     
     /// <summary>

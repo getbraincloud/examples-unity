@@ -28,7 +28,8 @@ public class DropdownMenuCallback : MonoBehaviour
                 StateManager.Instance._protocol = (RelayConnectionType)_dropdown.value + 1;
                 break;
             case DropdownMenus.Compression:
-                BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)_dropdown.value + 1;
+                BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)_dropdown.value;
+                GameManager.Instance.SendUpdateRelayCompressionType();
                 break;
         }   
     }

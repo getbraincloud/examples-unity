@@ -237,7 +237,7 @@ public class BrainCloudManager : MonoBehaviour
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
-        jsonData["y"] = -pos.y;// + _mouseYOffset;
+        jsonData["y"] = -pos.y;
         //Set up JSON to send
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "move";
@@ -305,8 +305,8 @@ public class BrainCloudManager : MonoBehaviour
     public void OnRelayMessage(short netId, byte[] jsonResponse)
     {
         var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
-        string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
-        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
+        
+        var json = DeserializeString(jsonResponse);
         Lobby lobby = StateManager.Instance.CurrentLobby;
         foreach (var member in lobby.Members)
         {
@@ -315,18 +315,15 @@ public class BrainCloudManager : MonoBehaviour
                 var op = json["op"] as string;
                 if (op == "move")
                 {
-                    var data = json["data"] as Dictionary<string, object>;
-
                     member.IsAlive = true;
-                    member.MousePosition.x = Convert.ToSingle(data["x"]);
-                    member.MousePosition.y = -Convert.ToSingle(data["y"]); // + _mouseYOffset;
+                    member.MousePosition.x = Convert.ToSingle(json["x"]);
+                    member.MousePosition.y = -Convert.ToSingle(json["y"]); // + _mouseYOffset;
                 }
                 else if (op == "shockwave")
                 {
-                    var data = json["data"] as Dictionary<string, object>;
                     Vector2 position; 
-                    position.x = Convert.ToSingle(data["x"]);
-                    position.y = -Convert.ToSingle(data["y"]);
+                    position.x = Convert.ToSingle(json["x"]);
+                    position.y = -Convert.ToSingle(json["y"]);
                     member.ShockwavePositions.Add(position);
                 }
                 break;
@@ -491,43 +488,100 @@ public class BrainCloudManager : MonoBehaviour
 
 #endregion RTT Functions
 
+    private Dictionary<string, object> DeserializeString(byte[] in_data, char in_joinChar = '=', char in_splitChar = ';')
+    {
+        Dictionary<string, object> toDict = new Dictionary<string, object>();
+        string jsonMessage = Encoding.ASCII.GetString(in_data);
+        if (jsonMessage == "") return toDict;
+
+        switch (_relayCompressionType)
+        {
+            case RelayCompressionTypes.JsonString:
+                try
+                {
+                    toDict = (Dictionary<string, object>)JsonReader.Deserialize(jsonMessage);
+                }
+                catch (Exception)
+                {
+                    Debug.LogWarning("COULD NOT SERIALIZE " + jsonMessage);
+                }
+                break;
+            case RelayCompressionTypes.DataStreamByte:
+                RelayInfo info = ByteArrayToStructure<RelayInfo>(in_data);
+                toDict.Add("op", info.Operation);
+                toDict.Add("x", info.PositionX);
+                toDict.Add("y", info.PositionY);
+                break;
+            case RelayCompressionTypes.KeyValuePairString:
+                string[] splitItems = jsonMessage.Split(in_splitChar);
+                int indexOf = -1;
+                foreach (string item in splitItems)
+                {
+                    indexOf = item.IndexOf(in_joinChar);
+                    if (indexOf >= 0)
+                    {
+                        toDict[item.Substring(0, indexOf)] = item.Substring(indexOf + 1);
+                    }
+                }
+                break;
+        }
+        return toDict;
+    }
 
     private string SerializeDict(Dictionary<string, object> in_dict, char in_joinChar = '=', char in_splitChar = ';')
     {
         string toString = "";
-
-        if (_relayCompressionType == 0)
+        string toSubString = "";
+        foreach (string key in in_dict.Keys)
         {
-            toString = JsonWriter.Serialize(in_dict);
-        }
-        else
-        {
-            foreach (string key in in_dict.Keys)
+            if (in_dict[key] != null)
             {
-                if (in_dict[key] != null)
-                    toString += key + in_joinChar + in_dict[key] + in_splitChar;
+                Dictionary<string, object> data = in_dict[key] as Dictionary<string, object>;
+                if (data != null)
+                {
+                    foreach (string dataKey in data.Keys)
+                    {
+                        toSubString += dataKey + in_joinChar + data[dataKey] + in_splitChar;
+                    }
+                }
+                else
+                {
+                    toString += key + in_joinChar + in_dict[key] + in_splitChar;    
+                }
             }
         }
-
-        return toString;
+        return toString + toSubString;
     }
 
     private static byte[] EMPTY_ARRAY = new byte[0];
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct RelayInfo
+    {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+        public string Operation;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+        public float PositionX;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+        public float PositionY;
+    }
+    
     private byte[] SerializeDict(Dictionary<string, object> in_dict)
     {
-        if (_relayCompressionType == RelayCompressionTypes.DataStreamByte)
+        RelayInfo relayInfo;
+        relayInfo.Operation = in_dict["op"] as string;
+        Dictionary<string, object> data = in_dict["data"] as Dictionary<string, object>;
+        relayInfo.PositionX = (float) data["x"];
+        relayInfo.PositionY = (float) data["y"];
+        try
         {
-            try
-            {
-                byte[] toReturn = StructureToByteArray(in_dict);
-                return toReturn;
-            }
-            catch (Exception)
-            {
-                return EMPTY_ARRAY;
-            }
+            byte[] toReturn = StructureToByteArray(relayInfo);
+            return toReturn;
         }
-        return EMPTY_ARRAY;
+        catch (Exception)
+        {
+            return EMPTY_ARRAY;
+        }
     }
     
     private byte[] StructureToByteArray<T>(T str)
@@ -550,5 +604,27 @@ public class BrainCloudManager : MonoBehaviour
 
         return arr;
     }
+    
+    public static T ByteArrayToStructure<T>(byte[] arr) where T : struct
+    {
+        T str = default(T);
+        if (arr.Length != Marshal.SizeOf(str))
+        {
+            throw new InvalidOperationException("WRONG SIZE STRUCTURE COPY");
+        }
+        GCHandle h = default(GCHandle);
+        try
+        {
+            h = GCHandle.Alloc(arr, GCHandleType.Pinned);
+            str = Marshal.PtrToStructure<T>(h.AddrOfPinnedObject());
+        }
+        finally
+        {
+            if (h.IsAllocated)
+            {
+                h.Free();
+            }
+        }
+        return str;
+    }
 }
-
