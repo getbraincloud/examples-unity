@@ -25,8 +25,10 @@ public class BrainCloudManager : MonoBehaviour
     //Offset for the different mouse coordinates from Unity space to Nodejs space
     private float _mouseYOffset = 321;
     internal RelayCompressionTypes _relayCompressionType { get; set; }
+    private LogErrors _logger;
     private void Awake()
     {
+        _logger = FindObjectOfType<LogErrors>();
         m_bcWrapper = GetComponent<BrainCloudWrapper>();
         if (!Instance)
         {
@@ -282,15 +284,19 @@ public class BrainCloudManager : MonoBehaviour
             case RelayCompressionTypes.JsonString:
                 jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                _logger.WriteGameplayInput(jsonData, jsonBytes);
                 m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
             case RelayCompressionTypes.KeyValuePairString:
                 jsonData = SerializeDict(in_dict, in_joinChar, in_splitChar); 
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                _logger.WriteGameplayInput(jsonData, jsonBytes);
                 m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
             case RelayCompressionTypes.DataStreamByte:
+                jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = SerializeDict(in_dict);
+                _logger.WriteGameplayInput(jsonData, jsonBytes);
                 m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
         }
