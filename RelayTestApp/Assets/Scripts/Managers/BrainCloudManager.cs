@@ -310,24 +310,55 @@ public class BrainCloudManager : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         foreach (var member in lobby.Members)
         {
-            if (member.ID == memberProfileId)
+            switch (_relayCompressionType)
             {
-                var op = json["op"] as string;
-                if (op == "move")
-                {
-                    member.IsAlive = true;
-                    member.MousePosition.x = Convert.ToSingle(json["x"]);
-                    member.MousePosition.y = -Convert.ToSingle(json["y"]); // + _mouseYOffset;
-                }
-                else if (op == "shockwave")
-                {
-                    Vector2 position; 
-                    position.x = Convert.ToSingle(json["x"]);
-                    position.y = -Convert.ToSingle(json["y"]);
-                    member.ShockwavePositions.Add(position);
-                }
-                break;
+                case RelayCompressionTypes.JsonString:
+                    if (member.ID == memberProfileId)
+                    {
+                        var data = json["data"] as Dictionary<string, object>;
+                        if (data == null)
+                        {
+                            Debug.LogWarning("On Relay Message is null !");
+                            break;
+                        }
+                        var op = json["op"] as string;
+                        if (op == "move")
+                        {
+                            member.IsAlive = true;
+                            member.MousePosition.x = Convert.ToSingle(data["x"]);
+                            member.MousePosition.y = -Convert.ToSingle(data["y"]); // + _mouseYOffset;
+                        }
+                        else if (op == "shockwave")
+                        {
+                            Vector2 position; 
+                            position.x = Convert.ToSingle(data["x"]);
+                            position.y = -Convert.ToSingle(data["y"]);
+                            member.ShockwavePositions.Add(position);
+                        }
+                    }
+                    break;
+                case RelayCompressionTypes.DataStreamByte:
+                case RelayCompressionTypes.KeyValuePairString:
+                    if (member.ID == memberProfileId)
+                    {
+                        var op = json["op"] as string;
+                        if (op == "move")
+                        {
+                            member.IsAlive = true;
+                            member.MousePosition.x = Convert.ToSingle(json["x"]);
+                            member.MousePosition.y = -Convert.ToSingle(json["y"]); // + _mouseYOffset;
+                        }
+                        else if (op == "shockwave")
+                        {
+                            Vector2 position; 
+                            position.x = Convert.ToSingle(json["x"]);
+                            position.y = -Convert.ToSingle(json["y"]);
+                            member.ShockwavePositions.Add(position);
+                        }
+                    }
+                    break;
             }
+            
         }
     }
 
@@ -380,7 +411,10 @@ public class BrainCloudManager : MonoBehaviour
                     GameManager.Instance.UpdateMatchState();
                     GameManager.Instance.UpdateCursorList();
                     ConnectRelay();
-                    StateManager.Instance.isLoading = false;
+                    if (StateManager.Instance._protocol == RelayConnectionType.WEBSOCKET)
+                    {
+                        StateManager.Instance.isLoading = false;    
+                    }
                     break;
             }
         }
@@ -389,6 +423,8 @@ public class BrainCloudManager : MonoBehaviour
     // Connect to the Relay server and start the game
     public void ConnectRelay()
     {
+        m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
+        m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         m_bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
         m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
@@ -437,6 +473,10 @@ public class BrainCloudManager : MonoBehaviour
                     }
                 }    
             }
+        }
+        else if (json["op"] as string == "CONNECT")
+        {
+            StateManager.Instance.isLoading = false;
         }
     }
 

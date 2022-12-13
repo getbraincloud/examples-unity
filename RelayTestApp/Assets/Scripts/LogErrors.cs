@@ -18,7 +18,7 @@ public class LogErrors : MonoBehaviour
     private void HandleLog(string logstring, string stackTrace, LogType type) 
     {
         _errors.Add("ENTRY: " + logstring+" STACK: "+stackTrace);
-        Write(true,currentError);
+        Write(true, logstring);
     }
     
     //Append enables the overwrite on the file you're writing to
@@ -54,7 +54,7 @@ public class LogErrors : MonoBehaviour
     {
         if (fileOpen) return;
         //Creates the file
-        using (FileStream sr = File.Open(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"),
+        using (FileStream sr = File.Open(Path.Combine(Application.persistentDataPath, "DumpLogTest.txt"),
                    FileMode.OpenOrCreate, FileAccess.ReadWrite))
         {
             fileOpen = true;
@@ -64,7 +64,7 @@ public class LogErrors : MonoBehaviour
             try
             {
                 //Writes to file
-                StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "ErrorLog.txt"), false);
+                StreamWriter sw = new StreamWriter(Path.Combine(Application.persistentDataPath, "DumpLogTest.txt"), false);
                 foreach(string _str in _errors) 
                 {
                     sw.WriteLine(_str);
@@ -86,13 +86,5 @@ public class LogErrors : MonoBehaviour
     {
         WriteAllErrors();
     }
-
-
-    private void OnApplicationPause(bool pauseStatus) {
-        if(pauseStatus)
-        {
-            WriteAllErrors();
-        }
-    }
-
+    
 }
