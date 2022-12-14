@@ -197,7 +197,7 @@ namespace BrainCloud.Internal
             // Rest of data
             byte[] header = concatenateByteArrays(controlByteHeader, ackIdData);
             byte[] packetData = concatenateByteArrays(header, in_data);
-
+            
             send(packetData);
 
             // UDP, store reliable in send map
@@ -538,19 +538,28 @@ namespace BrainCloud.Internal
                 case RelayConnectionType.WEBSOCKET:
                     {
                         if (m_webSocket == null)
+                        {
+                            UnityEngine.Debug.Log("Websocket Client is DEAD !");
                             return bMessageSent;
+                        }
                     }
                     break;
                 case RelayConnectionType.TCP:
                     {
                         if (m_tcpClient == null)
+                        {
+                            UnityEngine.Debug.Log("TCP Client is DEAD !");
                             return bMessageSent;
+                        }
                     }
                     break;
                 case RelayConnectionType.UDP:
                     {
                         if (m_udpClient == null)
+                        {
+                            UnityEngine.Debug.Log("UDP Client is DEAD !");
                             return bMessageSent;
+                        }
                     }
                     break;
                 default: break;
@@ -1065,9 +1074,11 @@ namespace BrainCloud.Internal
                 lock (fLock)
                 {
                     fToSend.Enqueue(message);
+                    UnityEngine.Debug.Log("RelayComms...Enqueue Finished...");
                     if (1 == fToSend.Count)
                     {
                         m_tcpStream.BeginWrite(message, 0, message.Length, tcpFinishWrite, null);
+                        UnityEngine.Debug.Log("RelayComms...Begin Writing...");
                     }
                 }
             }
@@ -1079,13 +1090,10 @@ namespace BrainCloud.Internal
 
         private void tcpFinishWrite(IAsyncResult result)
         {
-            if (result.IsCompleted)
-            {
-                return;
-            }
             try
             {
                 m_tcpStream.EndWrite(result);
+                UnityEngine.Debug.Log("RelayComms...FinishWrite-EndWrite...");
                 lock (fLock)
                 {
                     // Pop the message we just sent out of the queue
@@ -1115,6 +1123,10 @@ namespace BrainCloud.Internal
                 {
                     read = m_tcpStream.EndRead(ar);
                 }
+                else if (m_tcpStream == null)
+                {
+                    UnityEngine.Debug.Log("RelayComms...TCPReadHeader-Stream Is Null...");
+                }
                 if (read == 0)
                 {
                     queueErrorEvent("Server Closed Connection");
@@ -1143,7 +1155,11 @@ namespace BrainCloud.Internal
         {
             try
             {
-                if (m_tcpStream == null) return;
+                if (m_tcpStream == null)
+                {
+                    UnityEngine.Debug.Log("RelayComms...FinishRead- Stream is null...");
+                    return;
+                }
                 // Finish reading from our stream. 0 bytes read means stream was closed
                 int read = m_tcpStream.EndRead(result);
                 if (read == 0)
