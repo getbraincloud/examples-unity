@@ -421,6 +421,7 @@ namespace BrainCloud.Internal
             byte[] header = { target };
 
             byte[] destination = concatenateByteArrays(header, dataArr);
+            UnityEngine.Debug.Log("Relay Comms....Pinging.....");
             send(destination);
         }
 
@@ -597,6 +598,7 @@ namespace BrainCloud.Internal
                 {
                     m_clientRef.Log("send exception: " + socketException);
                 }
+                UnityEngine.Debug.Log("EXCEPTION CAUGHT: "+ socketException.ToString());
                 queueSocketErrorEvent(socketException.ToString());
             }
 
