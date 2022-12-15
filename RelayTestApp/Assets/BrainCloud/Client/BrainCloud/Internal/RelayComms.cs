@@ -1094,6 +1094,16 @@ namespace BrainCloud.Internal
         {
             try
             {
+                if (result == null)
+                {
+                    UnityEngine.Debug.Log("RelayComms...FinishWrite..IAsyncResult is null...");
+                    return;
+                }
+                if (m_tcpStream == null)
+                {
+                    UnityEngine.Debug.Log("RelayComms...FinishWrite..TCP stream is null...");
+                    return;
+                }
                 m_tcpStream.EndWrite(result);
                 UnityEngine.Debug.Log("RelayComms...FinishWrite-EndWrite...");
                 lock (fLock)
