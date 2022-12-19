@@ -15,6 +15,12 @@ public class GameManager : MonoBehaviour
 
     public bool IsInPlaybackMode;
     private bool _isGameActive;
+
+    public bool GameActive
+    {
+        get => _isGameActive;
+        set => _isGameActive = value;
+    }
     private GameSessionManager _sessionManagerRef;
     public GameSessionManager SessionManager
     {
@@ -93,7 +99,6 @@ public class GameManager : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
         _currentUserInfo = Settings.LoadPlayerInfo();
-        InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
         if(MenuManager.Instance != null)
         {
             MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
@@ -133,8 +138,14 @@ public class GameManager : MonoBehaviour
         UpdateLocalArmySelection(in_defenderSelection, in_invaderSelection);
     }
 
+    public void UpdateSpawnInvaderList()
+    {
+        InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
+    }
+
     public void LoadToGame()
     {
+        InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
         SceneManager.LoadScene("Game");
     }
 
@@ -144,9 +155,10 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("Game");
     }
 
-    public void SetUpGameValues(Transform in_defenderParent)
+    public void SetUpGameValues()
     {
-        _defenderStructParent = in_defenderParent;
+        SetUpSpawners();
+        
         PlaybackStreamManager.Instance.StructuresList.Clear();
         for (int i = 0; i < _defenderStructParent.childCount; i++)
         {
@@ -188,9 +200,12 @@ public class GameManager : MonoBehaviour
         {
             _gameOverScreenRef.WinStatusText.text = "Your troops are defeated";
         }
-        
-        BrainCloudManager.Instance.GameCompleted(in_didInvaderWin);
-        
+
+        if (!IsInPlaybackMode)
+        {
+            BrainCloudManager.Instance.GameCompleted(in_didInvaderWin);    
+        }
+
         //Do Game over things
         _sessionManagerRef.StopTimer();
         
@@ -199,19 +214,27 @@ public class GameManager : MonoBehaviour
         _gameOverScreenRef.gameObject.SetActive(true);
     }
 
-    public void CheckIfGameOver()
+    public bool CheckIfGameOver()
     {
-        if (!_isGameActive) return;
+        if (!_isGameActive) return true;
         if (_defenderStructParent.childCount == 0 ||
             _invaderTroopCount == 0)
         {
             GameOver(_invaderTroopCount > 0);
+            return true;
         }
+
+        return false;
+    }
+
+    public void SetupGameForStream()
+    {
+        ClearGameobjects();
+        //SetUpSpawners();
     }
     
-    public void PrepareGameForPlayback()
+    public void ClearGameobjects()
     {
-        IsInPlaybackMode = true;
         _isGameActive = true;
         var troopsToDestroy = FindObjectsOfType<TroopAI>();
         foreach (var troopAI in troopsToDestroy)
@@ -219,11 +242,27 @@ public class GameManager : MonoBehaviour
             Destroy(troopAI.gameObject);
         }
 
+        var housesToDestroy = FindObjectsOfType<BaseHealthBehavior>();
+        foreach (var house in housesToDestroy)
+        {
+            Destroy(house.gameObject);
+        }
+    }
+
+    private void SetUpSpawners()
+    {
+        var _invaderSpawner = FindObjectOfType<SpawnController>();
+        if (_invaderSpawner)
+        {
+            _invaderSpawner.SetUpInvaders();
+        }
+
         var _defenderSpawner = FindObjectOfType<DefenderSpawner>();
         if (_defenderSpawner)
         {
             //Set up defenders
-            _defenderSpawner.SpawnDefenderSetup();    
+            _defenderSpawner.SpawnDefenderSetup();
+            _defenderStructParent = _defenderSpawner.DefenderParent;
         }
     }
     

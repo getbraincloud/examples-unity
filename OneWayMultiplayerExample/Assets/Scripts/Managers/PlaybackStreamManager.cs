@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
@@ -39,6 +40,14 @@ public class PlaybackStreamManager : MonoBehaviour
         _invaderSpawnData = _spawnController.SpawnData;
     }
 
+    private void Start()
+    {
+        if(GameManager.Instance.IsInPlaybackMode)
+        {
+            StartStream();
+        }
+    }
+
     public void StopStream()
     {
         GameManager.Instance.SessionManager.GameOverScreen.gameObject.SetActive(true);
@@ -48,17 +57,16 @@ public class PlaybackStreamManager : MonoBehaviour
     //Specifically for a button in the Game over screen to replay the game that just finished
     public void LoadStreamThenStart()
     {
+        _frameId = 0;
+        InvadersList.Clear();
+        DefendersList.Clear();
+        GameManager.Instance.ClearGameobjects();
         BrainCloudManager.Instance.ReadStream();
     }
 
     //
     public void StartStream()
     {
-        _frameId = 0;
-        InvadersList.Clear();
-        DefendersList.Clear();
-        GameManager.Instance.PrepareGameForPlayback();
-        GameManager.Instance.SessionManager.GameOverScreen.gameObject.SetActive(false);
         _replayCoroutine = StartCoroutine(StartPlayBack());
     }
 
@@ -74,13 +82,7 @@ public class PlaybackStreamManager : MonoBehaviour
                 {
                     //Any spawn event is automatically an invader because defenders are spawned earlier. 
                     case EventId.Spawn:
-                        TroopAI prefab = _invaderSpawnData.GetTroop(_actionReplayRecords[replayIndex].troopType);
-                        TroopAI troop = Instantiate(prefab, _actionReplayRecords[replayIndex].position, Quaternion.identity);
-                        troop.IsInPlaybackMode = true;
-                        troop.TargetIsHostile = true;
-                        troop.EntityID = _actionReplayRecords[replayIndex].entityID;
-                        troop.AssignToTeam(0);
-                        InvadersList.Add(troop);
+                        SpawnTroop(_actionReplayRecords[replayIndex]);
                         break;
                     case EventId.Ids:
                         //This event is handled when stream is read and then calls ReadIDs
@@ -92,12 +94,42 @@ public class PlaybackStreamManager : MonoBehaviour
                         AssignTarget(_actionReplayRecords[replayIndex]);
                         break;
                 }
-                replayIndex++;
+
+                if (replayIndex < _actionReplayRecords.Count)
+                {
+                    replayIndex++;    
+                }
             }
-            yield return new WaitForFixedUpdate();
+            //Break out of loop if we're done going through list
+            if (replayIndex >= _actionReplayRecords.Count)
+            {
+                break;
+            }
+            //Continue incrementing frames until we have a frame to do stuff
+            if (_frameId != _actionReplayRecords[replayIndex].frameID)
+            {
+                yield return new WaitForFixedUpdate();    
+            }
             _frameId++;
         }
-        yield return null;
+
+        while (!GameManager.Instance.CheckIfGameOver())
+        {
+            yield return new WaitForFixedUpdate();
+        }
+        //Set up gameover screen
+        GameManager.Instance.SessionManager.GameOverScreen.gameObject.SetActive(true);
+    }
+
+    private void SpawnTroop(ActionReplayRecord in_record)
+    {
+        TroopAI prefab = _invaderSpawnData.GetTroop(in_record.troopType);
+        TroopAI troop = Instantiate(prefab, in_record.position, Quaternion.identity);
+        troop.IsInPlaybackMode = true;
+        troop.TargetIsHostile = true;
+        troop.EntityID = in_record.entityID;
+        troop.AssignToTeam(0);
+        InvadersList.Add(troop);
     }
 
     private void AssignTarget(ActionReplayRecord in_record)
@@ -126,9 +158,10 @@ public class PlaybackStreamManager : MonoBehaviour
             target = GetTargetFromList(StructuresList, in_record);
         }
 
-        if (target == null)
+        if (!target)
         {
             Debug.LogWarning("Couldn't find target..");
+            return;
         }
 
         TroopAI troop = null;
@@ -144,47 +177,46 @@ public class PlaybackStreamManager : MonoBehaviour
             troop =  (TroopAI) GetObjectFromList(DefendersList, in_record);
         }
 
-        if (troop != null && target != null)
+        if (troop)
         {
             troop.Target = target.gameObject;    
-        }
-        else
-        {
-            Debug.LogWarning("Troop or target couldn't be found....");
         }
     }
 
     private void DestroyTarget(ActionReplayRecord in_record)
     {
-        //Trooper
         if (in_record.targetID < -1)
         {
-            BaseHealthBehavior troop = null;
-            //Invaders
-            if (in_record.teamID == 0)
+            //Structures
+            BaseHealthBehavior target = null;
+            if (in_record.teamID <= -1)
             {
-                troop = GetObjectFromList(InvadersList, in_record);
+                target = GetObjectFromList(StructuresList, in_record);
+                if (target)
+                {
+                    StructuresList.Remove(target);
+                    Destroy(target.gameObject);
+                }
+            }
+            //Invaders
+            else if (in_record.teamID == 0)
+            {
+                target = GetObjectFromList(InvadersList, in_record);
+                if (target)
+                {
+                    InvadersList.Remove(target);
+                    Destroy(target.gameObject);
+                }
             }
             //Defenders
             else
             {
-                troop = GetObjectFromList(DefendersList, in_record);
-            }
-            
-            if (troop)
-            {
-                DefendersList.Remove(troop);
-                Destroy(troop.gameObject);
-            }
-        }
-        //Structures
-        else
-        {
-            var house = GetObjectFromList(StructuresList, in_record);
-            if (house)
-            {
-                StructuresList.Remove(house);
-                Destroy(house.gameObject);
+                target = GetObjectFromList(DefendersList, in_record);
+                if (target)
+                {
+                    DefendersList.Remove(target);
+                    Destroy(target.gameObject);
+                }
             }
         }
     }
@@ -199,9 +231,19 @@ public class PlaybackStreamManager : MonoBehaviour
                 if (in_listToSearch[i] != null)
                 {
                     value = in_listToSearch[i];
-                    break;
                 }
+                else
+                {
+                    Debug.LogWarning("Troop is missing from list");
+                }
+
+                break;
             }
+        }
+
+        if (value == null)
+        {
+            Debug.LogWarning("Troop is missing from list");
         }
         return value;
     }
@@ -216,11 +258,10 @@ public class PlaybackStreamManager : MonoBehaviour
                 if (in_listToSearch[i] != null)
                 {
                     value = in_listToSearch[i];
-                    
                 }
                 else
                 {
-                    Debug.LogWarning("Target is missing from list");
+                    Debug.LogWarning("Target destroyed too soon? ");
                 }
                 break;
             }

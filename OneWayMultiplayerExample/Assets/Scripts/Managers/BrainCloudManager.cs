@@ -220,8 +220,10 @@ public class BrainCloudManager : MonoBehaviour
 
         string message = cbObject as string;
 
-        MenuManager.Instance.AbortToSignIn($"Message: {message} |||| JSON: {jsonError}");
-
+        if (!SceneManager.GetActiveScene().name.Contains("Game"))
+        {
+            MenuManager.Instance.AbortToSignIn($"Message: {message} |||| JSON: {jsonError}");   
+        }
     }
     
     // User fully logged in. 
@@ -390,10 +392,10 @@ public class BrainCloudManager : MonoBehaviour
         {
             //_bcWrapper.MatchMakingService.DecrementPlayerRating(_decrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
         }
-
+        
         string eventData = CreateJsonIdsEventData();
         string summaryData = CreateSummaryData();
-        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, OnRecordSuccess, OnFailureCallback);
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
         RecordDefenderSelected((int)GameManager.Instance.DefenderSpawnData.Rank);
         PlayerPrefs.SetString("PlaybackKey", _playbackStreamId);
     }
@@ -409,6 +411,8 @@ public class BrainCloudManager : MonoBehaviour
 
     public void RecordTroopSpawn(Vector3 in_spawnPoint, TroopAI in_troop)
     {
+        if (!GameManager.Instance.GameActive) return;
+        
         string eventData = CreateJsonSpawnEventData(in_spawnPoint, in_troop);
         string summaryData = CreateSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
@@ -416,6 +420,8 @@ public class BrainCloudManager : MonoBehaviour
 
     public void RecordTargetSwitch(TroopAI in_troop, int in_targetID, int in_targetTeamID)
     {
+        if (!GameManager.Instance.GameActive) return;
+        
         string eventData = CreateJsonTargetEventData(in_troop, in_targetID, in_targetTeamID);
         string summaryData = CreateSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
@@ -423,6 +429,8 @@ public class BrainCloudManager : MonoBehaviour
 
     public void RecordTargetDestroyed(int in_entityID, int in_teamID)
     {
+        if (!GameManager.Instance.GameActive) return;
+        
         string eventData = CreateJsonDestroyEventData(in_entityID, in_teamID);
         string summaryData = CreateSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
@@ -435,13 +443,14 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("defenderRank", in_defenderRank);
         string value = JsonWriter.Serialize(eventData);
         string summaryData = CreateSummaryData();
-        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, value, summaryData, null, OnFailureCallback);
+        _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, value, summaryData, OnRecordSuccess, OnFailureCallback);
     }
 
     //Game flow for this callback, Game Completed -> Get All Ids -> Send record request -> OnRecordSuccess
     private void OnRecordSuccess(string in_jsonResponse, object cbObject)
     {
-        //this only runs after sending a record of all ID's
+        Debug.LogWarning("Record Completed...");
+        //this only runs after sending a record of all ID's and what defender is selected
         _bcWrapper.PlaybackStreamService.EndStream(_playbackStreamId);
         _bcWrapper.OneWayMatchService.CompleteMatch(_playbackStreamId);
     }
@@ -539,18 +548,19 @@ public class BrainCloudManager : MonoBehaviour
             }
             else if (record.eventID == EventId.Defender)
             {
-                //defenderRank
+                //Assign defender rank   
                 GameManager.Instance.DefenderSpawnData.Rank = (ArmyDivisionRank) events[i]["defenderRank"];
-                Debug.Log("Defender Assigned");
             }
             else
             {
-                GameManager.Instance.ReplayRecords.Add(record);    
+                GameManager.Instance.ReplayRecords.Add(record); 
             }
         }
 
         if (SceneManager.GetActiveScene().name.Contains("Game"))
         {
+            GameManager.Instance.SessionManager.GameOverScreen.gameObject.SetActive(false);
+            GameManager.Instance.SetUpGameValues();
             //Loading things while in game
             PlaybackStreamManager.Instance.StartStream();
         }
@@ -572,6 +582,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void ReplayStream()
     {
+        GameManager.Instance.UpdateSpawnInvaderList();
         LoadID();
         ReadStream();
     }
@@ -617,7 +628,7 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Destroy);
         eventData.Add("frameId", GameManager.Instance.SessionManager.FrameID);
-        eventData.Add("entityId", in_entityID);
+        eventData.Add("troopID", in_entityID);
         eventData.Add("teamID", in_teamID);
         string value = JsonWriter.Serialize(eventData);
         return value;

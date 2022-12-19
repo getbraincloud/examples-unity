@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PopUpMessage : MonoBehaviour
@@ -8,6 +9,12 @@ public class PopUpMessage : MonoBehaviour
 
     public void SetUpPopUpMessage(string message)
     {
+        if (SceneManager.GetActiveScene().name.Contains("Game"))
+        {
+            Debug.LogError("Failure callback during gameplay, message: " + message);
+            return;
+        }
+        
         Cursor.visible = true;
         MenuManager.Instance.LoadingMenuState.CancelNextState = true;
         Message.text = message;

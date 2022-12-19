@@ -30,37 +30,6 @@ public class SpawnController : MonoBehaviour
 
     private const string _targetTag = "Target";
 
-    private void Start()
-    {
-        GameManager.Instance.InvaderTroopCount = 0;
-        //Get our troop data that we can summon
-        troopSelectorList = FindObjectsOfType<SummonSelector>().ToList();
-        for (int i = 0; i < SpawnData.SpawnList.Count; i++)
-        {
-            troopList.Add(new TroopTracker());
-            troopList[i].SpawnLimit = SpawnData.SpawnList[i].SpawnLimit;
-            GameManager.Instance.InvaderTroopCount += troopList[i].SpawnLimit;
-            troopList[i].TroopType = SpawnData.SpawnList[i].TroopType;
-        }
-        
-        //Applying the troop data to UI elements
-        for (int i = 0; i < troopList.Count; i++)
-        {
-            for (int t = 0; t < troopSelectorList.Count; t++)
-            {
-                if (troopList[i].TroopType == troopSelectorList[t].EnemyTypeSelection)
-                {
-                    troopList[i].SummonSelector = troopSelectorList[t];
-                    troopList[i].SummonSelector.UpdateSpawnNumber(troopList[i].SpawnLimit);
-                }
-            }
-            if (troopList[i].TroopType == EnemyTypes.Grunt)
-            {
-                _troopSelected = troopList[i];
-            }
-        }
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -93,6 +62,37 @@ public class SpawnController : MonoBehaviour
                 {
                     BrainCloudManager.Instance.RecordTroopSpawn(spawnPoint, troop);    
                 }
+            }
+        }
+    }
+
+    public void SetUpInvaders()
+    {
+        GameManager.Instance.InvaderTroopCount = 0;
+        //Get our troop data that we can summon
+        troopSelectorList = FindObjectsOfType<SummonSelector>().ToList();
+        for (int i = 0; i < SpawnData.SpawnList.Count; i++)
+        {
+            troopList.Add(new TroopTracker());
+            troopList[i].SpawnLimit = SpawnData.SpawnList[i].SpawnLimit;
+            GameManager.Instance.InvaderTroopCount += troopList[i].SpawnLimit;
+            troopList[i].TroopType = SpawnData.SpawnList[i].TroopType;
+        }
+        
+        //Applying the troop data to UI elements
+        for (int i = 0; i < troopList.Count; i++)
+        {
+            for (int t = 0; t < troopSelectorList.Count; t++)
+            {
+                if (troopList[i].TroopType == troopSelectorList[t].EnemyTypeSelection)
+                {
+                    troopList[i].SummonSelector = troopSelectorList[t];
+                    troopList[i].SummonSelector.UpdateSpawnNumber(troopList[i].SpawnLimit);
+                }
+            }
+            if (troopList[i].TroopType == EnemyTypes.Grunt)
+            {
+                _troopSelected = troopList[i];
             }
         }
     }

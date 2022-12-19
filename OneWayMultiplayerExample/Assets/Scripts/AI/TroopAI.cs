@@ -2,30 +2,27 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public enum TroopStates {Idle, Rotate, Move, Attack}
-public enum EnemyTypes {Grunt, Soldier, Shooter, House}
+public enum TroopStates {Idle, Move, Attack}
+public enum EnemyTypes {Grunt, Soldier, Shooter}
 
 public class TroopAI : BaseHealthBehavior
 {
     public EnemyTypes EnemyType;
-
-    public float MoveSpeed = 10;
     public float RotationSpeed = 5;
     public float AcceptanceRangeToTarget = 2;
-    public GameObject HomeWayPoint;
     public bool IsInPlaybackMode;
     public TroopStates CurrentState = TroopStates.Idle;
+    
     /// <summary>
     /// 0 = invader(local player), 1 = defender(network player)
     /// </summary>
     public int TeamID;
     public LayerMask _activeMask;
-    
     public LayerMask InvaderMask;
     public LayerMask DefenderMask;
-    private GameObject _target;
     
     public int _hitBackForce = 5;
+    
     //Checks every 10 frames for a new target
     private int _searchTargetInterval = 10;
 
@@ -41,7 +38,7 @@ public class TroopAI : BaseHealthBehavior
     private float _distanceToTarget;
 
     private Animator _animator;
-    private string attackParameter = "isAttacking";
+    
 
     private Vector3 _homeLocation;
     private Quaternion _currQuat;
@@ -52,13 +49,13 @@ public class TroopAI : BaseHealthBehavior
 
     private ShootProjectiles _shootScript;
     private NavMeshAgent _navMeshAgent;
-
+    
+    private static readonly int IsAttacking = Animator.StringToHash("isAttacking");
     private const string _nonTargetTag = "NonTarget";
     
+    private GameObject _target;
+    
     public GameObject Target { set => _target = value; }
-
-    
-    
     
     private void Awake()
     {
@@ -89,14 +86,6 @@ public class TroopAI : BaseHealthBehavior
 
     void FixedUpdate()
     {
-        /*
-         * Goals:
-         * - Rotates to target direction
-         * - Moves to target within x distance
-         * - As long as we have _target, keep executing PerformAction()
-         * - If there isn't _target, return and look for a target.(Might need to flag this so its not constantly looking)
-         */
-
         if (_isDead) return;
 
         if (!_target && !IsInPlaybackMode)
@@ -104,7 +93,7 @@ public class TroopAI : BaseHealthBehavior
             if (!_isSearching)
             {
                 _isSearching = true;
-                _animator.SetBool(attackParameter, false);
+                _animator.SetBool(IsAttacking, false);
                 _isAttacking = false;
                 FindTarget();
             }
@@ -138,7 +127,7 @@ public class TroopAI : BaseHealthBehavior
         {
             if (_isAttacking)
             {
-                _animator.SetBool(attackParameter, false);
+                _animator.SetBool(IsAttacking, false);
                 _isAttacking = false;
             }
             _navMeshAgent.isStopped = false;
@@ -214,12 +203,12 @@ public class TroopAI : BaseHealthBehavior
     {
         if (_isAttacking) return;
         _isAttacking = true;
-        _animator.SetBool(attackParameter, true);
+        _animator.SetBool(IsAttacking, true);
     }
 
     private void StartShootingAnimation()
     {
-        _animator.SetBool(attackParameter, true);
+        _animator.SetBool(IsAttacking, true);
     }
     
     //This function is triggered through an Animation Event
@@ -273,7 +262,7 @@ public class TroopAI : BaseHealthBehavior
         _navMeshAgent.isStopped = true;
         _navMeshAgent.speed = 0;
         _navMeshAgent.destination = transform.position;
-        _animator.SetBool(attackParameter, false);
+        _animator.SetBool(IsAttacking, false);
         _rigidbodyComp.velocity = Vector3.zero;
         _isAttacking = false;
         _homeLocation = Vector3.zero;
@@ -290,10 +279,10 @@ public class TroopAI : BaseHealthBehavior
 
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);    
+            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
+            Destroy(gameObject);
         }
-        
-        Destroy(gameObject);
+
         //Check if troop is an invader or defender
         if (TeamID == 0)
         {
@@ -317,7 +306,7 @@ public class TroopAI : BaseHealthBehavior
         if (_isAttacking)
         {
             _isAttacking = false;
-            _animator.SetBool(attackParameter, false);
+            _animator.SetBool(IsAttacking, false);
         }
         
         _isKnockedBack = true;

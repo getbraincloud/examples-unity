@@ -16,6 +16,7 @@ public class MeleeWeapon : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!gameObject.activeSelf) return;
         var damageable = other.GetComponent<BaseHealthBehavior>();
 
         if (damageable != null)

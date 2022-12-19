@@ -12,6 +12,12 @@ public class DefenderSpawner : MonoBehaviour
     private int _offsetRangeZ = 6;
     private int _offsetRangeX = 6;
     public bool TestingMode;
+    private Transform _defenderParent;
+
+    public Transform DefenderParent
+    {
+        get => _defenderParent;
+    }
 
     private void Start()
     {
@@ -22,10 +28,7 @@ public class DefenderSpawner : MonoBehaviour
             DefenderSpawnData.SpawnList = DefenderSpawnData.TestParameterList;
         }
 
-        if (!GameManager.Instance.IsInPlaybackMode)
-        {
-            SpawnDefenderSetup();    
-        }
+        GameManager.Instance.SetUpGameValues();
     }
 
     public void SpawnDefenderSetup()
@@ -55,7 +58,7 @@ public class DefenderSpawner : MonoBehaviour
                 if (GameManager.Instance.IsInPlaybackMode)
                 {
                     //Assign the ID
-                    troop.EntityID = GameManager.Instance.DefenderIDs[i];
+                    troop.EntityID = GameManager.Instance.DefenderIDs[_spawnPointIndex];
                     troop.IsInPlaybackMode = true;
                     PlaybackStreamManager.Instance.DefendersList.Add(troop);
                 }
@@ -83,6 +86,6 @@ public class DefenderSpawner : MonoBehaviour
             }
         }
         GameObject structureSet = Instantiate(Sets[(int) DefenderSpawnData.Rank], StructureSpawnPoint.position, Quaternion.identity, StructureSpawnPoint);
-        GameManager.Instance.SetUpGameValues(structureSet.transform);
+        _defenderParent = structureSet.transform;
     }
 }

@@ -42,6 +42,7 @@ public class BaseHealthBehavior : MonoBehaviour
 
     public virtual void Dead()
     {
+        if (GameManager.Instance.IsInPlaybackMode) return;
         StartCoroutine(DelayToDestroy());
     }
 
