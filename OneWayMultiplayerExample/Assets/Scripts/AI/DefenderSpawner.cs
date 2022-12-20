@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DefenderSpawner : MonoBehaviour
@@ -24,11 +25,11 @@ public class DefenderSpawner : MonoBehaviour
         if (BrainCloudManager.Instance == null)
         {
             TestingMode = true;
-            DefenderSpawnData.Rank = ArmyDivisionRank.Medium;
-            DefenderSpawnData.SpawnList = DefenderSpawnData.TestParameterList;
+            GameManager.Instance.DefenderRank = ArmyDivisionRank.Medium;
+            GameManager.Instance.DefenderSpawnInfo = DefenderSpawnData.TestParameterList;
         }
 
-        GameManager.Instance.SetUpGameValues();
+        GameManager.Instance.GameSetup();
     }
 
     public void SpawnDefenderSetup()
@@ -37,8 +38,9 @@ public class DefenderSpawner : MonoBehaviour
         _addOffset = false;
         _spawnPointIndex = 0;
         GameManager.Instance.DefenderTroopCount = 0;
+        List<SpawnInfo> spawnList = GameManager.Instance.DefenderSpawnInfo;
         //Spawn in troops based on spawner data
-        foreach (SpawnInfo spawnInfo in DefenderSpawnData.SpawnList)
+        foreach (SpawnInfo spawnInfo in spawnList)
         {
             troopToSpawn = DefenderSpawnData.GetTroop(spawnInfo.TroopType);
             for (int i = 0; i < spawnInfo.SpawnLimit; i++)
@@ -85,7 +87,7 @@ public class DefenderSpawner : MonoBehaviour
                 }
             }
         }
-        GameObject structureSet = Instantiate(Sets[(int) DefenderSpawnData.Rank], StructureSpawnPoint.position, Quaternion.identity, StructureSpawnPoint);
+        GameObject structureSet = Instantiate(Sets[(int) GameManager.Instance.DefenderRank], StructureSpawnPoint.position, Quaternion.identity, StructureSpawnPoint);
         _defenderParent = structureSet.transform;
     }
 }

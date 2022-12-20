@@ -70,7 +70,6 @@ public class MenuManager : MonoBehaviour
         {
             ChangeState(MenuStates.SignIn);    
         }
-        
     }
 
     private void Update()

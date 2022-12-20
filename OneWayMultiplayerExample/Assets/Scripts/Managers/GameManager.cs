@@ -36,21 +36,7 @@ public class GameManager : MonoBehaviour
     private GameOverScreen _gameOverScreenRef;
     private int _startingDefenderCount;
     private int _startingInvaderCount;
-    private int _defenderTroopCount;
-    public int DefenderTroopCount
-    {
-        get => _defenderTroopCount;
-        set => _defenderTroopCount = value;
-    }
 
-    private int _invaderTroopCount;
-
-    public int InvaderTroopCount
-    {
-        get => _invaderTroopCount;
-        set => _invaderTroopCount = value;
-    }
-    
     //Transform parent of structure sets for defender user
     private Transform _defenderStructParent;
 
@@ -72,19 +58,55 @@ public class GameManager : MonoBehaviour
     private static GameManager _instance;
     public static GameManager Instance => _instance;
     
-    //Data to send for playback
-    private List<int> _defenderIDs = new List<int>();
-    public List<int> DefenderIDs
+    private int _invaderTroopCount;
+
+    public int InvaderTroopCount
     {
-        get => _defenderIDs;
-        set => _defenderIDs = value;
+        get => _invaderTroopCount;
+        set => _invaderTroopCount = value;
     }
+    
     private List<int> _invaderIDs = new List<int>();
 
     public List<int> InvaderIDs
     {
         get => _invaderIDs;
         set => _invaderIDs = value;
+    }
+    private ArmyDivisionRank _invaderRank = ArmyDivisionRank.None;
+
+    private List<SpawnInfo> _invaderSpawnInfo;
+    public List<SpawnInfo> InvaderSpawnInfo
+    {
+        get => _invaderSpawnInfo;
+        set => _invaderSpawnInfo = value;
+    }
+    
+    private int _defenderTroopCount;
+    public int DefenderTroopCount
+    {
+        get => _defenderTroopCount;
+        set => _defenderTroopCount = value;
+    }
+    
+    private List<SpawnInfo> _defenderSpawnInfo;
+    public List<SpawnInfo> DefenderSpawnInfo
+    {
+        get => _defenderSpawnInfo;
+        set => _defenderSpawnInfo = value;
+    }
+    private ArmyDivisionRank _defenderRank = ArmyDivisionRank.None;
+    public ArmyDivisionRank DefenderRank
+    {
+        get => _defenderRank;
+        set => _defenderRank = value;
+    }
+    //Data to send for playback
+    private List<int> _defenderIDs = new List<int>();
+    public List<int> DefenderIDs
+    {
+        get => _defenderIDs;
+        set => _defenderIDs = value;
     }
 
     private void Awake()
@@ -121,15 +143,16 @@ public class GameManager : MonoBehaviour
     {
         _currentUserInfo.InvaderSelected = (ArmyDivisionRank) in_invaderSelection;
         _currentUserInfo.DefendersSelected = (ArmyDivisionRank) in_defenderSelection;
-        InvaderSpawnData.Rank = (ArmyDivisionRank) in_invaderSelection;
-        InvaderSpawnData.AssignSpawnList(InvaderSpawnData.Rank);
+        _invaderRank = (ArmyDivisionRank) in_invaderSelection;
+        InvaderSpawnInfo = InvaderSpawnData.GetSpawnList(_invaderRank);
     }
 
     public void UpdateOpponentInfo(ArmyDivisionRank in_rank, string in_entityId)
     {
         UpdateEntityId(in_entityId);
         _opponentUserInfo.DefendersSelected = in_rank;
-        DefenderSpawnData.AssignSpawnList(in_rank);
+        _defenderRank = in_rank;
+        DefenderSpawnInfo = DefenderSpawnData.GetSpawnList(in_rank);
     }
 
     public void UpdateFromReadResponse(string in_entityId, int in_defenderSelection, int in_invaderSelection)
@@ -140,12 +163,12 @@ public class GameManager : MonoBehaviour
 
     public void UpdateSpawnInvaderList()
     {
-        InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
+        InvaderSpawnInfo = InvaderSpawnData.GetSpawnList(_currentUserInfo.InvaderSelected);
     }
 
     public void LoadToGame()
     {
-        InvaderSpawnData.AssignSpawnList(_currentUserInfo.InvaderSelected);
+        InvaderSpawnInfo = InvaderSpawnData.GetSpawnList(_currentUserInfo.InvaderSelected);
         SceneManager.LoadScene("Game");
     }
 
@@ -155,7 +178,14 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("Game");
     }
 
-    public void SetUpGameValues()
+    public void ResetGameSceneForStream()
+    {
+        IsInPlaybackMode = true;
+        SetUpSpawners();
+        SessionManager.GameOverScreen.gameObject.SetActive(false);
+    }
+
+    public void GameSetup()
     {
         SetUpSpawners();
         
@@ -174,6 +204,10 @@ public class GameManager : MonoBehaviour
         _startingDefenderCount = _defenderTroopCount;
         _startingInvaderCount = _invaderTroopCount;
     }
+
+    private int slayCount;
+    private int counterAttackCounter;
+    
 
     public void GameOver(bool in_didInvaderWin, bool in_didTimeExpire = false)
     {
@@ -227,12 +261,6 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
-    public void SetupGameForStream()
-    {
-        ClearGameobjects();
-        //SetUpSpawners();
-    }
-    
     public void ClearGameobjects()
     {
         _isGameActive = true;
@@ -248,7 +276,8 @@ public class GameManager : MonoBehaviour
             Destroy(house.gameObject);
         }
     }
-
+    
+    //Sets up defender and invader spawner logic
     private void SetUpSpawners()
     {
         var _invaderSpawner = FindObjectOfType<SpawnController>();
@@ -282,6 +311,18 @@ public class GameManager : MonoBehaviour
         {
             _defenderIDs.Add((int) defendersList[i.ToString()]);
         }
+    }
+
+    public void OnReadSetDefenderList(ArmyDivisionRank in_rank)
+    {
+        _defenderRank = in_rank;
+        DefenderSpawnInfo = DefenderSpawnData.GetSpawnList(in_rank);
+    }
+    
+    public void OnReadSetInvaderList(ArmyDivisionRank in_rank)
+    {
+        _defenderRank = in_rank;
+        DefenderSpawnInfo = DefenderSpawnData.GetSpawnList(in_rank);
     }
 
     public int RemainingStructures() => _defenderStructParent.childCount;

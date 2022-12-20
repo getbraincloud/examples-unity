@@ -61,10 +61,10 @@ public class PlaybackStreamManager : MonoBehaviour
         InvadersList.Clear();
         DefendersList.Clear();
         GameManager.Instance.ClearGameobjects();
+        GameManager.Instance.IsInPlaybackMode = true;
         BrainCloudManager.Instance.ReadStream();
     }
 
-    //
     public void StartStream()
     {
         _replayCoroutine = StartCoroutine(StartPlayBack());
@@ -144,23 +144,22 @@ public class PlaybackStreamManager : MonoBehaviour
             //Invader
             if (in_record.targetTeamID == 0)
             {
-                target = GetTargetFromList(InvadersList, in_record);
+                target = GetObjectFromList(InvadersList, in_record.targetID);
             }
             //Defender
             else
             {
-                target = GetTargetFromList(DefendersList, in_record);
+                target = GetObjectFromList(DefendersList, in_record.targetID);
             }
         }
         //Structures
         else
         {
-            target = GetTargetFromList(StructuresList, in_record);
+            target = GetObjectFromList(StructuresList, in_record.targetID);
         }
 
         if (!target)
         {
-            Debug.LogWarning("Couldn't find target..");
             return;
         }
 
@@ -169,12 +168,12 @@ public class PlaybackStreamManager : MonoBehaviour
         //Invader
         if (in_record.teamID == 0)
         {
-            troop = (TroopAI) GetObjectFromList(InvadersList, in_record);
+            troop = (TroopAI) GetObjectFromList(InvadersList, in_record.entityID);
         }
         //Defender
         else
         {
-            troop =  (TroopAI) GetObjectFromList(DefendersList, in_record);
+            troop =  (TroopAI) GetObjectFromList(DefendersList, in_record.entityID);
         }
 
         if (troop)
@@ -191,7 +190,7 @@ public class PlaybackStreamManager : MonoBehaviour
             BaseHealthBehavior target = null;
             if (in_record.teamID <= -1)
             {
-                target = GetObjectFromList(StructuresList, in_record);
+                target = GetObjectFromList(StructuresList, in_record.entityID);
                 if (target)
                 {
                     StructuresList.Remove(target);
@@ -201,7 +200,7 @@ public class PlaybackStreamManager : MonoBehaviour
             //Invaders
             else if (in_record.teamID == 0)
             {
-                target = GetObjectFromList(InvadersList, in_record);
+                target = GetObjectFromList(InvadersList, in_record.entityID);
                 if (target)
                 {
                     InvadersList.Remove(target);
@@ -211,7 +210,7 @@ public class PlaybackStreamManager : MonoBehaviour
             //Defenders
             else
             {
-                target = GetObjectFromList(DefendersList, in_record);
+                target = GetObjectFromList(DefendersList, in_record.entityID);
                 if (target)
                 {
                     DefendersList.Remove(target);
@@ -221,12 +220,12 @@ public class PlaybackStreamManager : MonoBehaviour
         }
     }
 
-    private BaseHealthBehavior GetObjectFromList(List<BaseHealthBehavior> in_listToSearch, ActionReplayRecord in_record)
+    private BaseHealthBehavior GetObjectFromList(List<BaseHealthBehavior> in_listToSearch, int in_idToMatch)
     {
         BaseHealthBehavior value = null;
         for (int i = 0; i < in_listToSearch.Count; i++)
         {
-            if (in_listToSearch[i].EntityID == in_record.entityID)
+            if (in_listToSearch[i].EntityID == in_idToMatch)
             {
                 if (in_listToSearch[i] != null)
                 {
@@ -234,7 +233,7 @@ public class PlaybackStreamManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("Troop is missing from list");
+                    Debug.LogWarning("Object is destroyed from list but not removed");
                 }
 
                 break;
@@ -243,28 +242,7 @@ public class PlaybackStreamManager : MonoBehaviour
 
         if (value == null)
         {
-            Debug.LogWarning("Troop is missing from list");
-        }
-        return value;
-    }
-
-    private BaseHealthBehavior GetTargetFromList(List<BaseHealthBehavior> in_listToSearch, ActionReplayRecord in_record)
-    {
-        BaseHealthBehavior value = null;
-        for (int i = 0; i < in_listToSearch.Count; i++)
-        {
-            if (in_listToSearch[i].EntityID == in_record.targetID)
-            {
-                if (in_listToSearch[i] != null)
-                {
-                    value = in_listToSearch[i];
-                }
-                else
-                {
-                    Debug.LogWarning("Target destroyed too soon? ");
-                }
-                break;
-            }
+            Debug.LogWarning("Object is missing from list");
         }
         return value;
     }

@@ -396,7 +396,7 @@ public class BrainCloudManager : MonoBehaviour
         string eventData = CreateJsonIdsEventData();
         string summaryData = CreateSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
-        RecordDefenderSelected((int)GameManager.Instance.DefenderSpawnData.Rank);
+        RecordDefenderSelected((int)GameManager.Instance.DefenderRank);
         PlayerPrefs.SetString("PlaybackKey", _playbackStreamId);
     }
 
@@ -549,7 +549,7 @@ public class BrainCloudManager : MonoBehaviour
             else if (record.eventID == EventId.Defender)
             {
                 //Assign defender rank   
-                GameManager.Instance.DefenderSpawnData.Rank = (ArmyDivisionRank) events[i]["defenderRank"];
+                GameManager.Instance.OnReadSetDefenderList((ArmyDivisionRank) events[i]["defenderRank"]); 
             }
             else
             {
@@ -559,8 +559,7 @@ public class BrainCloudManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name.Contains("Game"))
         {
-            GameManager.Instance.SessionManager.GameOverScreen.gameObject.SetActive(false);
-            GameManager.Instance.SetUpGameValues();
+            GameManager.Instance.ResetGameSceneForStream();
             //Loading things while in game
             PlaybackStreamManager.Instance.StartStream();
         }
@@ -585,6 +584,14 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.UpdateSpawnInvaderList();
         LoadID();
         ReadStream();
+    }
+
+    string CreateEndGameSummaryData()
+    {
+        Dictionary<string, object> summaryData = new Dictionary<string, object>();
+
+        string value = JsonWriter.Serialize(summaryData);
+        return value;
     }
 
     string CreateSummaryData()

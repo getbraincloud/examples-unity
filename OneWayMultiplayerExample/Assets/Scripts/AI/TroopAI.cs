@@ -271,18 +271,15 @@ public class TroopAI : BaseHealthBehavior
     
     private IEnumerator DelayToDeath()
     {
-        yield return new WaitForSeconds(_delayBeforeDestroy);
+        yield return new WaitForSeconds(_delayBeforeDestroy/2);
         if (DeathFX)
         {
             Instantiate(DeathFX, transform.position, Quaternion.identity);    
         }
-
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
             Destroy(gameObject);
         }
-
         //Check if troop is an invader or defender
         if (TeamID == 0)
         {
@@ -294,6 +291,13 @@ public class TroopAI : BaseHealthBehavior
             //Defender
             GameManager.Instance.DefenderTroopCount--;
         }
+        yield return new WaitForSeconds(_delayBeforeDestroy/2);
+        
+        if (!GameManager.Instance.IsInPlaybackMode)
+        {
+            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
+        }
+        
     }
 
     public override void LaunchObject(Vector3 direction)
