@@ -109,6 +109,13 @@ public class GameManager : MonoBehaviour
         set => _defenderIDs = value;
     }
 
+    private List<GameObject> _projectiles = new List<GameObject>();
+    public List<GameObject> Projectiles
+    {
+        get => _projectiles;
+        set => _projectiles = value;
+    }
+
     private void Awake()
     {
         if (!_instance)
@@ -221,37 +228,60 @@ public class GameManager : MonoBehaviour
     {
         if (!_isGameActive) return;
         _isGameActive = false;
-        
-        //Fill in defender winning stuff here
-        var slayCount = _startingDefenderCount - _defenderTroopCount;
-        var counterAttackCount = _startingInvaderCount - _invaderTroopCount;
 
-        _gameOverScreenRef.InvadersDefeatedText.text = $"Number of slayed troops: {slayCount}";
-        _gameOverScreenRef.DefendersDefeatedText.text = $"Number of defeated troop: {counterAttackCount}";
-        
-        //Figure out who won
-        if (in_didTimeExpire)
+        var slayCount = 0;
+        var counterAttackCount = 0;
+        if (!IsInPlaybackMode)
         {
-            _gameOverScreenRef.WinStatusText.text = "Time Expired";
-        }
-        else if(in_didInvaderWin)
-        {
-            _gameOverScreenRef.WinStatusText.text = "You Win !";
+            //Fill in defender winning stuff here
+            slayCount = _startingDefenderCount - _defenderTroopCount;
+            counterAttackCount = _startingInvaderCount - _invaderTroopCount;
+
+            //Figure out who won
+            if (in_didTimeExpire)
+            {
+                _gameOverScreenRef.WinStatusText.text = "Time Expired";
+            }
+            else if(in_didInvaderWin)
+            {
+                _gameOverScreenRef.WinStatusText.text = "You Win !";
+            }
+            else
+            {
+                _gameOverScreenRef.WinStatusText.text = "Your troops are defeated";
+            }
+            
+            
+            BrainCloudManager.Instance.SummaryInfo(slayCount, counterAttackCount, _sessionManagerRef.GameSessionTimer);
+            BrainCloudManager.Instance.GameCompleted(in_didInvaderWin);    
         }
         else
         {
-            _gameOverScreenRef.WinStatusText.text = "Your troops are defeated";
-        }
+            slayCount = BrainCloudManager.Instance.SlayCount;
+            counterAttackCount = BrainCloudManager.Instance.DefeatedTroops;
+            _sessionManagerRef.GameSessionTimer = BrainCloudManager.Instance.TimeLeft;
 
-        if (!IsInPlaybackMode)
+            _gameOverScreenRef.WinStatusText.text = "Recording finished !";
+        }
+        
+        _gameOverScreenRef.InvadersDefeatedText.text = $"Number of slayed troops: {slayCount}";
+        _gameOverScreenRef.DefendersDefeatedText.text = $"Number of defeated troop: {counterAttackCount}";
+        
+        //clean up projectiles
+        if (_projectiles.Count > 0)
         {
-            BrainCloudManager.Instance.GameCompleted(in_didInvaderWin);    
+            foreach (GameObject projectile in _projectiles)
+            {
+                Destroy(projectile);
+            }
         }
-
+        _projectiles.Clear();
+        
         //Do Game over things
         _sessionManagerRef.StopTimer();
         
         FindObjectOfType<SpawnController>().enabled = false;
+        
         
         _gameOverScreenRef.gameObject.SetActive(true);
     }

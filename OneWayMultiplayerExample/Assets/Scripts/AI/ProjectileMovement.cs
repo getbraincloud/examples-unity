@@ -21,6 +21,14 @@ public class ProjectileMovement : MonoBehaviour
         _rigidbody.velocity = transform.forward * Speed;
         Destroy(gameObject, LifeTimeDuration);
     }
+
+    IEnumerator DelayToDestroy()
+    {
+        yield return new WaitForSeconds(LifeTimeDuration);
+
+        GameManager.Instance.Projectiles.Remove(gameObject);
+        Destroy(gameObject);
+    }
     
     private void OnTriggerEnter(Collider other)
     {

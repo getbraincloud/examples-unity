@@ -271,7 +271,7 @@ public class TroopAI : BaseHealthBehavior
     
     private IEnumerator DelayToDeath()
     {
-        yield return new WaitForSeconds(_delayBeforeDestroy/2);
+        yield return new WaitForSeconds(_delayBeforeDestroy);
         if (DeathFX)
         {
             Instantiate(DeathFX, transform.position, Quaternion.identity);    
@@ -291,7 +291,9 @@ public class TroopAI : BaseHealthBehavior
             //Defender
             GameManager.Instance.DefenderTroopCount--;
         }
-        yield return new WaitForSeconds(_delayBeforeDestroy/2);
+
+        yield return new WaitForFixedUpdate();
+        yield return new WaitForFixedUpdate();
         
         if (!GameManager.Instance.IsInPlaybackMode)
         {

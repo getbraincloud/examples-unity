@@ -19,8 +19,7 @@ public class ShootProjectiles : MonoBehaviour
             
             GameObject proj = Instantiate(Bullet, SpawnPoints[i].position, SpawnPoints[i].rotation);
             proj.layer = collisionLayer;
+            GameManager.Instance.Projectiles.Add(proj);
         }
-
-        //StartCoroutine(DelayToShootAgain());
     }
 }

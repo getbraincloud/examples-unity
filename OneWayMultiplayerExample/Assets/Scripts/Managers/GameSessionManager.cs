@@ -13,18 +13,32 @@ public class GameSessionManager : MonoBehaviour
     public Image ClockFillImage;
     public int CheckInterval = 60;
     public GameOverScreen GameOverScreen;
+    public GameObject ConfirmPopUp;
+    public GameObject StopStreamButton;
     
     private float _startTime;
-    private float _time;
+    private float _gameSessionTimer;
     private float _value;
     private int _frameId;
     private bool _replayMode;
-    
+
+    public float GameSessionTimer
+    {
+        get => _gameSessionTimer;
+        set => _gameSessionTimer = value;
+    }
     
     public int FrameID
     {
         get => _frameId;
     }
+
+    private void Awake()
+    {
+        ConfirmPopUp.SetActive(false);
+        StopStreamButton.SetActive(false);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +47,10 @@ public class GameSessionManager : MonoBehaviour
             GameManager.Instance.GameSetup();
             ClockFillImage.fillAmount = 1;
             StartCoroutine(Timer(RoundDuration)); 
+        }
+        else
+        {
+            StopStreamButton.SetActive(true);
         }
     }
 
@@ -44,11 +62,16 @@ public class GameSessionManager : MonoBehaviour
         }
     }
 
+    public void OpenConfirmPopUp()
+    {
+        ConfirmPopUp.SetActive(true);
+    }
+
     public void StopTimer()
     {
-        if (_time > 0.0f)
+        if (_gameSessionTimer > 0.0f)
         {
-            GameOverScreen.TimerText.text = $"Time Remaining: {(int)_time} seconds";
+            GameOverScreen.TimerText.text = $"Time Remaining: {(int)_gameSessionTimer} seconds";
         }
         else
         {
@@ -68,13 +91,13 @@ public class GameSessionManager : MonoBehaviour
     private IEnumerator Timer(float duration)
     {
         _startTime = Time.time;
-        _time = duration;
+        _gameSessionTimer = duration;
         _value = 1;
 
         while (Time.time - _startTime < duration)
         {
-            _time -= Time.deltaTime;
-            _value = _time / duration;
+            _gameSessionTimer -= Time.deltaTime;
+            _value = _gameSessionTimer / duration;
             ClockFillImage.fillAmount = _value;
 
             //Check every x frames if game over conditions have been met

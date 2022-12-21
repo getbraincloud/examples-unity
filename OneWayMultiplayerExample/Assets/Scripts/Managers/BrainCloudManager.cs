@@ -442,7 +442,7 @@ public class BrainCloudManager : MonoBehaviour
         eventData.Add("eventId", (int)EventId.Defender);
         eventData.Add("defenderRank", in_defenderRank);
         string value = JsonWriter.Serialize(eventData);
-        string summaryData = CreateSummaryData();
+        string summaryData = CreateEndGameSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, value, summaryData, OnRecordSuccess, OnFailureCallback);
     }
 
@@ -493,11 +493,21 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] events = data["events"] as Dictionary<string, object>[];
+        Dictionary<string, object> summary = data["summary"] as Dictionary<string, object>;
         if (events == null || events.Length == 0)
         {
             Debug.LogWarning("No events were retrieved...");
             return;
         }
+
+        if (summary != null && summary.Count > 0)
+        {
+            slayCount = (int) summary["slayCount"];
+            defeatedTroops = (int) summary["defeatedTroops"];
+            double value = (double) summary["timeLeft"];
+            timeLeft = (float) value;
+        }
+
         for (int i = 0; i < events.Length; i++)
         {
             ActionReplayRecord record = new ActionReplayRecord();
@@ -587,10 +597,35 @@ public class BrainCloudManager : MonoBehaviour
         ReadStream();
     }
 
+    private int slayCount;
+    public int SlayCount
+    {
+        get => slayCount;
+    }
+    private int defeatedTroops;
+    public int DefeatedTroops
+    {
+        get => defeatedTroops;
+    }
+    private float timeLeft;
+    public float TimeLeft
+    {
+        get => timeLeft;
+    }
+
+    public void SummaryInfo(int in_slayCount, int in_defeatedTroops, float in_timeLeft)
+    {
+        slayCount = in_slayCount;
+        defeatedTroops = in_defeatedTroops;
+        timeLeft = in_timeLeft;
+    }
+
     string CreateEndGameSummaryData()
     {
         Dictionary<string, object> summaryData = new Dictionary<string, object>();
-
+        summaryData.Add("slayCount", slayCount);
+        summaryData.Add("defeatedTroops", defeatedTroops);
+        summaryData.Add("timeLeft", timeLeft);
         string value = JsonWriter.Serialize(summaryData);
         return value;
     }
