@@ -17,8 +17,12 @@ public class MeleeWeapon : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!gameObject.activeSelf) return;
+        
+        var troop = other.GetComponent<TroopAI>();
+        
+        if (troop != null && troop.TeamID == _myTroop.TeamID) return;
+        
         var damageable = other.GetComponent<BaseHealthBehavior>();
-
         if (damageable != null)
         {
             damageable.Damage(DamageAmount);
@@ -28,7 +32,7 @@ public class MeleeWeapon : MonoBehaviour
 
         if (other.tag.Equals(TroopTag))
         {
-            var troop = other.GetComponent<TroopAI>();
+            //var troop = other.GetComponent<TroopAI>();
             troop.IncomingAttacker(_myTroop);
         }
 

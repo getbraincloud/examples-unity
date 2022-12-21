@@ -24,7 +24,7 @@ public class ProjectileMovement : MonoBehaviour
     
     private void OnTriggerEnter(Collider other)
     {
-        var damageable = other.GetComponent<IDamageable<int>>();
+        var damageable = other.GetComponent<BaseHealthBehavior>();
 
         if (damageable != null)
         {

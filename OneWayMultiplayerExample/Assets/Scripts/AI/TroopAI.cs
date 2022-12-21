@@ -278,7 +278,7 @@ public class TroopAI : BaseHealthBehavior
         }
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            Destroy(gameObject);
+            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
         }
         //Check if troop is an invader or defender
         if (TeamID == 0)
@@ -295,9 +295,8 @@ public class TroopAI : BaseHealthBehavior
         
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
+            Destroy(gameObject);
         }
-        
     }
 
     public override void LaunchObject(Vector3 direction)

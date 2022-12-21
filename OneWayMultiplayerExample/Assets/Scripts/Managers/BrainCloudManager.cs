@@ -488,6 +488,7 @@ public class BrainCloudManager : MonoBehaviour
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
+        GameManager.Instance.ReplayRecords.Clear();
         //Extracting events from response...
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;

@@ -14,7 +14,7 @@ public class PlaybackStreamManager : MonoBehaviour
     public List<BaseHealthBehavior> DefendersList = new List<BaseHealthBehavior>();
     public List<BaseHealthBehavior> StructuresList = new List<BaseHealthBehavior>();
     private Coroutine _replayCoroutine;
-    
+    private int replayIndex;
     private SpawnData _invaderSpawnData;
     private SpawnController _spawnController;
     
@@ -44,6 +44,7 @@ public class PlaybackStreamManager : MonoBehaviour
     {
         if(GameManager.Instance.IsInPlaybackMode)
         {
+            GameManager.Instance.ResetGameSceneForStream();
             StartStream();
         }
     }
@@ -72,7 +73,7 @@ public class PlaybackStreamManager : MonoBehaviour
 
     IEnumerator StartPlayBack()
     {
-        int replayIndex = 0;
+        replayIndex = 0;
         var _actionReplayRecords = GameManager.Instance.ReplayRecords;
         while (replayIndex < _actionReplayRecords.Count)
         {
@@ -184,38 +185,35 @@ public class PlaybackStreamManager : MonoBehaviour
 
     private void DestroyTarget(ActionReplayRecord in_record)
     {
-        if (in_record.targetID < -1)
+        //Structures
+        BaseHealthBehavior target = null;
+        if (in_record.teamID <= -1)
         {
-            //Structures
-            BaseHealthBehavior target = null;
-            if (in_record.teamID <= -1)
+            target = GetObjectFromList(StructuresList, in_record.entityID);
+            if (target)
             {
-                target = GetObjectFromList(StructuresList, in_record.entityID);
-                if (target)
-                {
-                    StructuresList.Remove(target);
-                    Destroy(target.gameObject);
-                }
+                StructuresList.Remove(target);
+                Destroy(target.gameObject);
             }
-            //Invaders
-            else if (in_record.teamID == 0)
+        }
+        //Invaders
+        else if (in_record.teamID == 0)
+        {
+            target = GetObjectFromList(InvadersList, in_record.entityID);
+            if (target)
             {
-                target = GetObjectFromList(InvadersList, in_record.entityID);
-                if (target)
-                {
-                    InvadersList.Remove(target);
-                    Destroy(target.gameObject);
-                }
+                InvadersList.Remove(target);
+                Destroy(target.gameObject);
             }
-            //Defenders
-            else
+        }
+        //Defenders
+        else
+        {
+            target = GetObjectFromList(DefendersList, in_record.entityID);
+            if (target)
             {
-                target = GetObjectFromList(DefendersList, in_record.entityID);
-                if (target)
-                {
-                    DefendersList.Remove(target);
-                    Destroy(target.gameObject);
-                }
+                DefendersList.Remove(target);
+                Destroy(target.gameObject);
             }
         }
     }

@@ -181,7 +181,7 @@ public class GameManager : MonoBehaviour
     public void ResetGameSceneForStream()
     {
         IsInPlaybackMode = true;
-        SetUpSpawners();
+        GameSetup();
         SessionManager.GameOverScreen.gameObject.SetActive(false);
     }
 
@@ -197,9 +197,17 @@ public class GameManager : MonoBehaviour
             healthScript.EntityID = i;
             PlaybackStreamManager.Instance.StructuresList.Add(healthScript);
         }
-        
-        _sessionManagerRef = FindObjectOfType<GameSessionManager>();
-        _gameOverScreenRef = FindObjectOfType<GameOverScreen>();
+
+        if (!_sessionManagerRef)
+        {
+            _sessionManagerRef = FindObjectOfType<GameSessionManager>();    
+        }
+
+        if (!_gameOverScreenRef)
+        {
+            _gameOverScreenRef = FindObjectOfType<GameOverScreen>();    
+        }
+        _gameOverScreenRef.gameObject.SetActive(false);
         _isGameActive = true;
         _startingDefenderCount = _defenderTroopCount;
         _startingInvaderCount = _invaderTroopCount;
@@ -321,8 +329,9 @@ public class GameManager : MonoBehaviour
     
     public void OnReadSetInvaderList(ArmyDivisionRank in_rank)
     {
-        _defenderRank = in_rank;
-        DefenderSpawnInfo = DefenderSpawnData.GetSpawnList(in_rank);
+        _invaderRank = in_rank;
+        _currentUserInfo.InvaderSelected = in_rank;
+        InvaderSpawnInfo = InvaderSpawnData.GetSpawnList(in_rank);
     }
 
     public int RemainingStructures() => _defenderStructParent.childCount;

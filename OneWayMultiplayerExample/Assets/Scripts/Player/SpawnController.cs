@@ -36,6 +36,7 @@ public class SpawnController : MonoBehaviour
         if (Input.GetButtonDown("Fire1") && 
             _timer < Time.realtimeSinceStartup)
         {
+            if (GameManager.Instance.IsInPlaybackMode) return;
             //Cant spawn more of this troop type
             if (_troopSelected.SpawnedTroops >= _troopSelected.SpawnLimit) return;
             

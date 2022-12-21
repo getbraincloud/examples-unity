@@ -28,9 +28,9 @@ public class GameSessionManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameOverScreen.gameObject.SetActive(false);
         if (!GameManager.Instance.IsInPlaybackMode)
         {
+            GameManager.Instance.GameSetup();
             ClockFillImage.fillAmount = 1;
             StartCoroutine(Timer(RoundDuration)); 
         }

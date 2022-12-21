@@ -28,8 +28,6 @@ public class DefenderSpawner : MonoBehaviour
             GameManager.Instance.DefenderRank = ArmyDivisionRank.Medium;
             GameManager.Instance.DefenderSpawnInfo = DefenderSpawnData.TestParameterList;
         }
-
-        GameManager.Instance.GameSetup();
     }
 
     public void SpawnDefenderSetup()
