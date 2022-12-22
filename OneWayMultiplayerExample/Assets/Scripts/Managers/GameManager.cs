@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using BrainCloud.JsonFx.Json;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -27,8 +25,8 @@ public class GameManager : MonoBehaviour
         get => _sessionManagerRef;
     }
     
-    private List<ActionReplayRecord> _replayRecords = new List<ActionReplayRecord>();
-    public List<ActionReplayRecord> ReplayRecords
+    private List<PlaybackStreamRecord> _replayRecords = new List<PlaybackStreamRecord>();
+    public List<PlaybackStreamRecord> ReplayRecords
     {
         get => _replayRecords;
     }
@@ -156,7 +154,7 @@ public class GameManager : MonoBehaviour
 
     public void UpdateOpponentInfo(ArmyDivisionRank in_rank, string in_entityId)
     {
-        UpdateEntityId(in_entityId);
+        _opponentUserInfo.EntityId = in_entityId;
         _opponentUserInfo.DefendersSelected = in_rank;
         _defenderRank = in_rank;
         DefenderSpawnInfo = DefenderSpawnData.GetSpawnList(in_rank);
@@ -188,6 +186,7 @@ public class GameManager : MonoBehaviour
     public void ResetGameSceneForStream()
     {
         IsInPlaybackMode = true;
+        _sessionManagerRef.StopStreamButton.SetActive(true);
         GameSetup();
         SessionManager.GameOverScreen.gameObject.SetActive(false);
     }
@@ -214,7 +213,12 @@ public class GameManager : MonoBehaviour
         {
             _gameOverScreenRef = FindObjectOfType<GameOverScreen>();    
         }
-        _gameOverScreenRef.gameObject.SetActive(false);
+
+        if (_gameOverScreenRef)
+        {
+            _gameOverScreenRef.gameObject.SetActive(false);
+        }
+        
         _isGameActive = true;
         _startingDefenderCount = _defenderTroopCount;
         _startingInvaderCount = _invaderTroopCount;
@@ -252,14 +256,14 @@ public class GameManager : MonoBehaviour
             }
             
             
-            BrainCloudManager.Instance.SummaryInfo(slayCount, counterAttackCount, _sessionManagerRef.GameSessionTimer);
-            BrainCloudManager.Instance.GameCompleted(in_didInvaderWin);    
+            NetworkManager.Instance.SummaryInfo(slayCount, counterAttackCount, _sessionManagerRef.GameSessionTimer);
+            NetworkManager.Instance.GameCompleted(in_didInvaderWin);    
         }
         else
         {
-            slayCount = BrainCloudManager.Instance.SlayCount;
-            counterAttackCount = BrainCloudManager.Instance.DefeatedTroops;
-            _sessionManagerRef.GameSessionTimer = BrainCloudManager.Instance.TimeLeft;
+            slayCount = NetworkManager.Instance.SlayCount;
+            counterAttackCount = NetworkManager.Instance.DefeatedTroops;
+            _sessionManagerRef.GameSessionTimer = NetworkManager.Instance.TimeLeft;
 
             _gameOverScreenRef.WinStatusText.text = "Recording finished !";
         }

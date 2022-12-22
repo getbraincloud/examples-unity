@@ -19,7 +19,7 @@ public class PlayerCardLobby : MonoBehaviour
             return;
         }
         
-        BrainCloudManager.Instance.ReadLobbyUserSelected(UserInfo.ProfileId);
+        NetworkManager.Instance.ReadLobbyUserSelected(UserInfo.ProfileId);
         GameManager.Instance.OpponentUserInfo = UserInfo;
     }
 }

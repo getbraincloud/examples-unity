@@ -4,7 +4,7 @@ using UnityEngine;
 public enum EventId {Spawn, Target, Destroy, Ids, Defender}
 
 [Serializable]
-public class ActionReplayRecord
+public class PlaybackStreamRecord
 {
     public Vector3 position;
     public EnemyTypes troopType;

@@ -34,12 +34,12 @@ public class TroopAI : BaseHealthBehavior
     
     private float _delayBeforeDestroy = 0.75f;
     private float _delayBeforeResume = 0.5f;
-    private float _detectionRadius = 100;
+    private float _defaultDetectionRadius = 30;
+    private float _currentDetectionRadius;
+    private float _incrementDetectionRadius = 10;
     private float _distanceToTarget;
-
-    private Animator _animator;
     
-
+    private Animator _animator;
     private Vector3 _homeLocation;
     private Quaternion _currQuat;
     private Rigidbody _rigidbodyComp;
@@ -71,6 +71,7 @@ public class TroopAI : BaseHealthBehavior
     // Start is called before the first frame update
     void Start()
     {
+        _currentDetectionRadius = _defaultDetectionRadius;
         _currentHealth = StartingHealth;
         if (_healthBar)
         {
@@ -278,7 +279,7 @@ public class TroopAI : BaseHealthBehavior
         }
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
+            NetworkManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
         }
         //Check if troop is an invader or defender
         if (TeamID == 0)
@@ -339,7 +340,7 @@ public class TroopAI : BaseHealthBehavior
         
         //Search for a target nearby
         Collider[] hitColliders = new Collider[10];
-        int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, _detectionRadius, hitColliders, _activeMask);
+        int numOfColliders = Physics.OverlapSphereNonAlloc(transform.position, _currentDetectionRadius, hitColliders, _activeMask);
         float shortestDistance = Mathf.Infinity;
         //Determine which collider is closest to our troop
         float distance = 0;
@@ -359,6 +360,7 @@ public class TroopAI : BaseHealthBehavior
         //Validate its not a repeated target being set, record target switch for playback stream along with the ID.
         if (_target != null && previousTarget != _target)
         {
+            _currentDetectionRadius = _defaultDetectionRadius;
             _isSearching = false;
             //Send target info as event for playback
             int targetID = -1;
@@ -376,10 +378,14 @@ public class TroopAI : BaseHealthBehavior
                 targetTeamID = -1;
             }
 
-            if (BrainCloudManager.Instance)
+            if (NetworkManager.Instance)
             {
-                BrainCloudManager.Instance.RecordTargetSwitch(this, targetID, targetTeamID);
+                NetworkManager.Instance.RecordTargetSwitch(this, targetID, targetTeamID);
             }
+        }
+        else
+        {
+            _currentDetectionRadius += _incrementDetectionRadius;
         }
     }
 }

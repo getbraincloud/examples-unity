@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ArmySelectionButton : MonoBehaviour
@@ -17,7 +15,7 @@ public class ArmySelectionButton : MonoBehaviour
         {
             GameManager.Instance.CurrentUserInfo.DefendersSelected = ArmyRank;
         }
-        BrainCloudManager.Instance.UpdateEntity();
+        NetworkManager.Instance.UpdateEntity();
         MenuManager.Instance.UpdateButtonSelectorPosition(ArmyType);
     }
 }

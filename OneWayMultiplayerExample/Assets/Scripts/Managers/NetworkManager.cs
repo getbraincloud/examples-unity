@@ -1,28 +1,40 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class BrainCloudManager : MonoBehaviour
+public class NetworkManager : MonoBehaviour
 {
     
     private BrainCloudWrapper _bcWrapper;
-    private bool _dead = false;
-    public bool LeavingGame;
-    public BrainCloudWrapper Wrapper => _bcWrapper;
-    public static BrainCloudManager Instance;
-    private bool _isNewPlayer = false;
+    private bool _dead;
+    public static NetworkManager Instance;
+    private bool _isNewPlayer;
     public int _defaultRating = 1000;
     public long _findPlayersRange;
     public long _numberOfMatches;
-
     private string _playbackStreamId;
     private long _incrementRatingAmount = 100;
     private long _decrementRatingAmount = 50;
+    
+    //Summary info
+    private int slayCount;
+    public int SlayCount
+    {
+        get => slayCount;
+    }
+    private int defeatedTroops;
+    public int DefeatedTroops
+    {
+        get => defeatedTroops;
+    }
+    private float timeLeft;
+    public float TimeLeft
+    {
+        get => timeLeft;
+    }
+    
     private void Awake()
     {
         _bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -386,11 +398,11 @@ public class BrainCloudManager : MonoBehaviour
     {
         if (in_didPlayerWin)
         {
-            //_bcWrapper.MatchMakingService.IncrementPlayerRating(_incrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
+            _bcWrapper.MatchMakingService.IncrementPlayerRating(_incrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
         }
         else
         {
-            //_bcWrapper.MatchMakingService.DecrementPlayerRating(_decrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
+            _bcWrapper.MatchMakingService.DecrementPlayerRating(_decrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
         }
         
         string eventData = CreateJsonIdsEventData();
@@ -510,7 +522,7 @@ public class BrainCloudManager : MonoBehaviour
 
         for (int i = 0; i < events.Length; i++)
         {
-            ActionReplayRecord record = new ActionReplayRecord();
+            PlaybackStreamRecord record = new PlaybackStreamRecord();
             record.eventID = (EventId) events[i]["eventId"];
             
             if (events[i].ContainsKey("frameId"))
@@ -595,22 +607,6 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.UpdateSpawnInvaderList();
         LoadID();
         ReadStream();
-    }
-
-    private int slayCount;
-    public int SlayCount
-    {
-        get => slayCount;
-    }
-    private int defeatedTroops;
-    public int DefeatedTroops
-    {
-        get => defeatedTroops;
-    }
-    private float timeLeft;
-    public float TimeLeft
-    {
-        get => timeLeft;
     }
 
     public void SummaryInfo(int in_slayCount, int in_defeatedTroops, float in_timeLeft)

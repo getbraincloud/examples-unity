@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BaseHealthBehavior : MonoBehaviour
@@ -10,9 +8,8 @@ public class BaseHealthBehavior : MonoBehaviour
     public int EntityID;
     protected HealthBar _healthBar;
     protected int _currentHealth;
-    protected float _delayBeforeDestruction = 1;
+    private float _delayBeforeDestruction = 1;
 
-    public int Health { get => _currentHealth; set => _currentHealth = value; }
     private void Start()
     {
         _currentHealth = StartingHealth;
@@ -61,7 +58,7 @@ public class BaseHealthBehavior : MonoBehaviour
 
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            BrainCloudManager.Instance.RecordTargetDestroyed(EntityID, -1);    
+            NetworkManager.Instance.RecordTargetDestroyed(EntityID, -1);    
         }
         
         Destroy(gameObject);

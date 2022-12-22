@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
@@ -60,7 +58,7 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
-        if (BrainCloudManager.Instance.IsSessionValid())
+        if (NetworkManager.Instance.IsSessionValid())
         {
             UpdateMatchMakingInfo();
             UpdateMainMenu();
@@ -110,13 +108,13 @@ public class MenuManager : MonoBehaviour
             //Logging In...
             case MenuStates.SignIn:
                 CurrentMenuState = MenuStates.MainMenu;
-                BrainCloudManager.Instance.Login();
+                NetworkManager.Instance.Login();
                 LoadingMenuState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE, false, MenuStates.MainMenu);
                 break;
             //Looking for players...
             case MenuStates.MainMenu:
                 CurrentMenuState = MenuStates.Lobby;
-                BrainCloudManager.Instance.LookForPlayers();
+                NetworkManager.Instance.LookForPlayers();
                 LoadingMenuState.ConnectStatesWithLoading(LOOKING_FOR_PLAYERS_MESSAGE, true, MenuStates.Lobby);
                 break;
         }
@@ -210,7 +208,7 @@ public class MenuManager : MonoBehaviour
 
     public void SignOutPressed()
     {
-        BrainCloudManager.Instance.SignOut();
+        NetworkManager.Instance.SignOut();
         ChangeState(MenuStates.SignIn);
     }
 }

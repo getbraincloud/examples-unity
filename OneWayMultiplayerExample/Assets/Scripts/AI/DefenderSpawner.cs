@@ -14,6 +14,7 @@ public class DefenderSpawner : MonoBehaviour
     private int _offsetRangeX = 6;
     public bool TestingMode;
     private Transform _defenderParent;
+    public ArmyDivisionRank TestRank;
 
     public Transform DefenderParent
     {
@@ -22,10 +23,10 @@ public class DefenderSpawner : MonoBehaviour
 
     private void Start()
     {
-        if (BrainCloudManager.Instance == null)
+        if (NetworkManager.Instance == null)
         {
             TestingMode = true;
-            GameManager.Instance.DefenderRank = ArmyDivisionRank.Medium;
+            GameManager.Instance.DefenderRank = TestRank;
             GameManager.Instance.DefenderSpawnInfo = DefenderSpawnData.TestParameterList;
         }
     }
@@ -53,7 +54,7 @@ public class DefenderSpawner : MonoBehaviour
                     spawnPoint = newSpawnPoint;
                 }
                 
-                TroopAI troop = Instantiate(troopToSpawn, spawnPoint, Quaternion.identity);
+                TroopAI troop = Instantiate(troopToSpawn, spawnPoint, SpawnPoints[_spawnPointIndex].rotation);
                 troop.AssignToTeam(1);
                 if (GameManager.Instance.IsInPlaybackMode)
                 {

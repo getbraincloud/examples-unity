@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MeleeWeapon : MonoBehaviour
@@ -32,10 +29,7 @@ public class MeleeWeapon : MonoBehaviour
 
         if (other.tag.Equals(TroopTag))
         {
-            //var troop = other.GetComponent<TroopAI>();
             troop.IncomingAttacker(_myTroop);
         }
-
-        //Debug.Log($"Hitting: {other.gameObject.name}");
     }
 }

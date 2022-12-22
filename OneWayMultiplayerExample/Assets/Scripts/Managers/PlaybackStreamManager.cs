@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using BrainCloud.JsonFx.Json;
 using UnityEngine;
 
 public class PlaybackStreamManager : MonoBehaviour
@@ -63,7 +61,7 @@ public class PlaybackStreamManager : MonoBehaviour
         DefendersList.Clear();
         GameManager.Instance.ClearGameobjects();
         GameManager.Instance.IsInPlaybackMode = true;
-        BrainCloudManager.Instance.ReadStream();
+        NetworkManager.Instance.ReadStream();
     }
 
     public void StartStream()
@@ -122,7 +120,7 @@ public class PlaybackStreamManager : MonoBehaviour
         GameManager.Instance.SessionManager.GameOverScreen.gameObject.SetActive(true);
     }
 
-    private void SpawnTroop(ActionReplayRecord in_record)
+    private void SpawnTroop(PlaybackStreamRecord in_record)
     {
         TroopAI prefab = _invaderSpawnData.GetTroop(in_record.troopType);
         TroopAI troop = Instantiate(prefab, in_record.position, Quaternion.identity);
@@ -133,7 +131,7 @@ public class PlaybackStreamManager : MonoBehaviour
         InvadersList.Add(troop);
     }
 
-    private void AssignTarget(ActionReplayRecord in_record)
+    private void AssignTarget(PlaybackStreamRecord in_record)
     {
         BaseHealthBehavior target = null;
         //Determine if target is a troop or structure
@@ -183,7 +181,7 @@ public class PlaybackStreamManager : MonoBehaviour
         }
     }
 
-    private void DestroyTarget(ActionReplayRecord in_record)
+    private void DestroyTarget(PlaybackStreamRecord in_record)
     {
         //Structures
         BaseHealthBehavior target = null;

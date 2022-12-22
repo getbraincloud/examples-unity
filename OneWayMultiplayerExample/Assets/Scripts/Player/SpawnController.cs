@@ -59,9 +59,9 @@ public class SpawnController : MonoBehaviour
                 GameManager.Instance.InvaderIDs.Add(troop.EntityID);
                 _troopSelected.SpawnedTroops++;
                 _troopSelected.SummonSelector.UpdateSpawnNumber(_troopSelected.SpawnLimit - _troopSelected.SpawnedTroops);
-                if (BrainCloudManager.Instance != null)
+                if (NetworkManager.Instance != null)
                 {
-                    BrainCloudManager.Instance.RecordTroopSpawn(spawnPoint, troop);    
+                    NetworkManager.Instance.RecordTroopSpawn(spawnPoint, troop);    
                 }
             }
         }
@@ -73,6 +73,10 @@ public class SpawnController : MonoBehaviour
         //Get our troop data that we can summon
         troopSelectorList = FindObjectsOfType<SummonSelector>().ToList();
         List<SpawnInfo> spawnList = GameManager.Instance.InvaderSpawnInfo;
+        if (spawnList == null)
+        {
+            spawnList = GameManager.Instance.InvaderSpawnData.TestParameterList;
+        }
         for (int i = 0; i < spawnList.Count; i++)
         {
             troopList.Add(new TroopTracker());
