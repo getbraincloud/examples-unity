@@ -58,7 +58,7 @@ public class BaseHealthBehavior : MonoBehaviour
 
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            NetworkManager.Instance.RecordTargetDestroyed(EntityID, -1);    
+            NetworkManager.Instance?.RecordTargetDestroyed(EntityID, -1);    
         }
         
         Destroy(gameObject);

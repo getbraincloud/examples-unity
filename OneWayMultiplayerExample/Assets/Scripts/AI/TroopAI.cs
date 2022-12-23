@@ -21,19 +21,19 @@ public class TroopAI : BaseHealthBehavior
     public LayerMask InvaderMask;
     public LayerMask DefenderMask;
     
-    public int _hitBackForce = 5;
+    private int _hitBackForce = 1000;
     
     //Checks every 10 frames for a new target
     private int _searchTargetInterval = 10;
 
     private bool _isDead;
     private bool _isAttacking;
-    private bool _isSearching = false;
+    private bool _isSearching;
     private bool _isKnockedBack;
     public bool TargetIsHostile;
     
     private float _delayBeforeDestroy = 0.75f;
-    private float _delayBeforeResume = 0.5f;
+    private float _delayBeforeResume = 0.35f;
     private float _defaultDetectionRadius = 30;
     private float _currentDetectionRadius;
     private float _incrementDetectionRadius = 10;
@@ -141,7 +141,14 @@ public class TroopAI : BaseHealthBehavior
             CurrentState = TroopStates.Attack;
             _navMeshAgent.isStopped = true;
             RotateToTarget();
-            PerformAction();
+            if (EnemyType != EnemyTypes.Shooter)
+            {
+                PerformAction();    
+            }
+            else if (IsFacingObject())
+            {
+                PerformAction();
+            }
         }
     }
 
@@ -212,7 +219,7 @@ public class TroopAI : BaseHealthBehavior
         _animator.SetBool(IsAttacking, true);
     }
     
-    //This function is triggered through an Animation Event
+    //This function is triggered through an Animation Event in Unity
     public void ShootTarget()
     {
         if (_shootScript && gameObject && _target)
@@ -279,7 +286,8 @@ public class TroopAI : BaseHealthBehavior
         }
         if (!GameManager.Instance.IsInPlaybackMode)
         {
-            NetworkManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
+            if(NetworkManager.Instance != null)
+                NetworkManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
         }
         //Check if troop is an invader or defender
         if (TeamID == 0)
@@ -385,7 +393,10 @@ public class TroopAI : BaseHealthBehavior
         }
         else
         {
-            _currentDetectionRadius += _incrementDetectionRadius;
+            if (TeamID == 0)
+            {
+                _currentDetectionRadius += _incrementDetectionRadius;    
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -8,16 +9,21 @@ public class ProjectileMovement : MonoBehaviour
     public float LifeTimeDuration = 5;
     public GameObject ExplosionFX;
     private Rigidbody _rigidbody;
-    
+    private int teamID;
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
     }
 
+    private void Start()
+    {
+        teamID = gameObject.layer == 6 ? 0 : 1;
+    }
+
     private void OnEnable()
     {
         _rigidbody.velocity = transform.forward * Speed;
-        Destroy(gameObject, LifeTimeDuration);
+        StartCoroutine(DelayToDestroy());
     }
 
     IEnumerator DelayToDestroy()
@@ -30,16 +36,33 @@ public class ProjectileMovement : MonoBehaviour
     
     private void OnTriggerEnter(Collider other)
     {
-        var damageable = other.GetComponent<BaseHealthBehavior>();
+        var troop = other.GetComponent<TroopAI>();
+        if (troop != null)
+        {
+            if (troop.TeamID != teamID)
+            {
+                troop.Damage(DamageAmount);
+                DestroyProjectile();
+            }
+            return;    
+        }
 
+        var damageable = other.GetComponent<BaseHealthBehavior>();
         if (damageable != null)
         {
             damageable.Damage(DamageAmount);
-            if (ExplosionFX)
-            {
-                Instantiate(ExplosionFX, transform.position, Quaternion.identity);
-            }
-            Destroy(gameObject);
+            DestroyProjectile();
         }
+    }
+
+    private void DestroyProjectile()
+    {
+        if (ExplosionFX)
+        {
+            Instantiate(ExplosionFX, transform.position, Quaternion.identity);
+        }
+            
+        GameManager.Instance.Projectiles.Remove(gameObject);
+        Destroy(gameObject);
     }
 }
