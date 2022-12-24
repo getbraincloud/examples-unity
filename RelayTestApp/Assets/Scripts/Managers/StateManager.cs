@@ -24,13 +24,9 @@ public class StateManager : MonoBehaviour
     //Network info needed
     public Lobby CurrentLobby;
     public Server CurrentServer;
-    private RelayConnectionType _protocol = RelayConnectionType.WEBSOCKET;
-
-    public RelayConnectionType PROTOCOL
-    {
-        get => _protocol;
-        set => _protocol = value;
-    }
+    internal RelayConnectionType _protocol { get; set; }
+    
+    
     //Specific for loading and waiting
     public bool isReady;
     public bool isLoading;
