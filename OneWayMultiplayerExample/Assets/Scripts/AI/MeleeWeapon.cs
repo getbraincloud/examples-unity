@@ -23,13 +23,13 @@ public class MeleeWeapon : MonoBehaviour
         if (damageable != null)
         {
             damageable.Damage(DamageAmount);
-            var direction = (transform.position - other.transform.position).normalized;
-            damageable.LaunchObject(-direction);
         }
 
         if (other.tag.Equals(TroopTag))
         {
             troop.IncomingAttacker(_myTroop);
+            var direction = (transform.position - other.transform.position).normalized;
+            troop.LaunchObject(-direction);
         }
     }
 }

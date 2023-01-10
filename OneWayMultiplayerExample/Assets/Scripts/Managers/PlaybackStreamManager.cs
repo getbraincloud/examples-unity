@@ -2,6 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class demonstrates how to execute a playback stream with specific events once the events have been read
+/// from BrainCloud.
+///
+/// During gameplay of the stream, this system will only read Spawn, Destroy and Target Reassigned to execute.
+/// Before the stream, we will look through the events and grab the defender set selection and a list of ID's to
+/// use during playback.  
+///
+/// </summary>
+
 public class PlaybackStreamManager : MonoBehaviour
 {
     private static PlaybackStreamManager _instance;
@@ -47,12 +57,6 @@ public class PlaybackStreamManager : MonoBehaviour
         }
     }
 
-    public void StopStream()
-    {
-        GameManager.Instance.SessionManager.GameOverScreen.gameObject.SetActive(true);
-        StopCoroutine(_replayCoroutine);
-    }
-
     //Specifically for a button in the Game over screen to replay the game that just finished
     public void LoadStreamThenStart()
     {
@@ -82,9 +86,6 @@ public class PlaybackStreamManager : MonoBehaviour
                     //Any spawn event is automatically an invader because defenders are spawned earlier. 
                     case EventId.Spawn:
                         SpawnTroop(_actionReplayRecords[replayIndex]);
-                        break;
-                    case EventId.Ids:
-                        //This event is handled when stream is read and then calls ReadIDs
                         break;
                     case EventId.Destroy:
                         DestroyTarget(_actionReplayRecords[replayIndex]);

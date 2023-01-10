@@ -43,11 +43,6 @@ public class BaseHealthBehavior : MonoBehaviour
         StartCoroutine(DelayToDestroy());
     }
 
-    public virtual void LaunchObject(Vector3 direction)
-    {
-        //do nothing cause this is a structure
-    }
-
     IEnumerator DelayToDestroy()
     {
         yield return new WaitForSeconds(_delayBeforeDestruction);

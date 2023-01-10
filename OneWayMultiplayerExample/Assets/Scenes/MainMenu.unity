@@ -729,10 +729,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e54370be6b5156c4295ca2172a8d8537, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LeavingGame: 0
-  _defaultRating: 1000
-  _findPlayersRange: 500
-  _numberOfMatches: 5
 --- !u!4 &228252593
 Transform:
   m_ObjectHideFlags: 0
@@ -2150,6 +2146,10 @@ PrefabInstance:
     - target: {fileID: 3832472844222237755, guid: a5e3e02d17a403d42887a1ddefeb4608, type: 3}
       propertyPath: m_Name
       value: SelectorButton_Defender
+      objectReference: {fileID: 0}
+    - target: {fileID: 7077277763780247064, guid: a5e3e02d17a403d42887a1ddefeb4608, type: 3}
+      propertyPath: m_text
+      value: Easy
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a5e3e02d17a403d42887a1ddefeb4608, type: 3}
@@ -3876,6 +3876,10 @@ PrefabInstance:
     - target: {fileID: 2089710238411316384, guid: da05a28774b1eab40aca030089df2d40, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3781588802506599180, guid: da05a28774b1eab40aca030089df2d40, type: 3}
+      propertyPath: m_text
+      value: Easy
       objectReference: {fileID: 0}
     - target: {fileID: 6938097985844859078, guid: da05a28774b1eab40aca030089df2d40, type: 3}
       propertyPath: m_Name

@@ -41,5 +41,4 @@ public class HealthBar : MonoBehaviour
         
         _slider.value = newValue;
     }
-
 }

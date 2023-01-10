@@ -3,6 +3,17 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// This class is mainly used to connect the data from the different managers so data
+/// from Menu meets with in Game. Examples of this is as follows:
+///     - Invader & Defender Spawn Data
+///     - Class References
+///     - Holds list of playback records when reading a playback stream
+///     - Local and opponent user info (Username, ProfileId, Matches played, etc)
+///     - Set up Game scene (Including Defenders & Structures)
+/// 
+/// </summary>
+
 public enum ArmyDivisionRank{Easy,Medium,Hard,None,Test}
 public enum ArmyType {Invader,Defense}
 
@@ -71,7 +82,6 @@ public class GameManager : MonoBehaviour
         get => _invaderIDs;
         set => _invaderIDs = value;
     }
-    private ArmyDivisionRank _invaderRank = ArmyDivisionRank.None;
 
     private List<SpawnInfo> _invaderSpawnInfo;
     public List<SpawnInfo> InvaderSpawnInfo
@@ -148,8 +158,7 @@ public class GameManager : MonoBehaviour
     {
         _currentUserInfo.InvaderSelected = (ArmyDivisionRank) in_invaderSelection;
         _currentUserInfo.DefendersSelected = (ArmyDivisionRank) in_defenderSelection;
-        _invaderRank = (ArmyDivisionRank) in_invaderSelection;
-        InvaderSpawnInfo = InvaderSpawnData.GetSpawnList(_invaderRank);
+        InvaderSpawnInfo = InvaderSpawnData.GetSpawnList(_currentUserInfo.InvaderSelected);
     }
 
     public void UpdateOpponentInfo(ArmyDivisionRank in_rank, string in_entityId)
@@ -223,10 +232,6 @@ public class GameManager : MonoBehaviour
         _startingDefenderCount = _defenderTroopCount;
         _startingInvaderCount = _invaderTroopCount;
     }
-
-    private int slayCount;
-    private int counterAttackCounter;
-    
 
     public void GameOver(bool in_didInvaderWin, bool in_didTimeExpire = false)
     {
@@ -363,7 +368,6 @@ public class GameManager : MonoBehaviour
     
     public void OnReadSetInvaderList(ArmyDivisionRank in_rank)
     {
-        _invaderRank = in_rank;
         _currentUserInfo.InvaderSelected = in_rank;
         InvaderSpawnInfo = InvaderSpawnData.GetSpawnList(in_rank);
     }

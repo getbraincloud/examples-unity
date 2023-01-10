@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// This class is specifically for Main Menu interactions with Unity's UI.
+/// </summary>
+
 public enum MenuStates {SignIn,MainMenu,Lobby,Game,Connecting}
 
 public class MenuManager : MonoBehaviour
@@ -24,8 +28,7 @@ public class MenuManager : MonoBehaviour
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
 
-    [Header("UI References")] 
-    
+    [Header("UI References")]
     public RectTransform InvaderButtonBorder;
     public RectTransform DefenderButtonBorder;
     public PlayerCardLobby PlayerCardRef;
@@ -37,7 +40,6 @@ public class MenuManager : MonoBehaviour
     private readonly List<float> _selectionXPlacement = new List<float> {-169,-3.7f, 160};
     private const string LOGGING_IN_MESSAGE = "Logging in...";
     private const string LOOKING_FOR_PLAYERS_MESSAGE = "Looking for players...";
-    private const string JOINING_MATCH_MESSAGE = "Joining Match...";
     
     private static MenuManager _instance;
     public static MenuManager Instance => _instance;
@@ -72,6 +74,7 @@ public class MenuManager : MonoBehaviour
 
     private void Update()
     {
+        //This behavior is just to jump from one input field to another while in menu.
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
@@ -89,6 +92,7 @@ public class MenuManager : MonoBehaviour
         }
     }
 
+    //Called from a script that is attached to a Unity Button
     public void ButtonPressChangeState(MenuStates newMenuState = MenuStates.Connecting)
     {
         foreach (MenuState currentState in MenuStatesList)

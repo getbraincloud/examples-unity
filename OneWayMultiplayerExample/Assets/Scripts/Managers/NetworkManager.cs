@@ -4,19 +4,31 @@ using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// This class demonstrates how to communicate with BrainCloud services.
+/// These services include:
+///     - Login with switching user logic
+///     - Retrieving User Entities from local or other users
+///     - Match Making
+///     - Creating & Modifying User Entities
+///     - Adjusting User Ratings
+///     - Recording Playback Stream events
+///     - Reading a completed Playback Stream 
+/// </summary>
+
 public class NetworkManager : MonoBehaviour
 {
     
     private BrainCloudWrapper _bcWrapper;
-    private bool _dead;
     public static NetworkManager Instance;
     private bool _isNewPlayer;
-    public int _defaultRating = 1000;
-    public long _findPlayersRange;
-    public long _numberOfMatches;
+    private int _defaultRating = 1000;
+    private long _findPlayersRange = 500;
+    private long _numberOfMatches = 5;
     private string _playbackStreamId;
     private long _incrementRatingAmount = 100;
     private long _decrementRatingAmount = 50;
+    private bool _dead;
     
     //Summary info
     private int slayCount;
@@ -60,19 +72,13 @@ public class NetworkManager : MonoBehaviour
 
         _bcWrapper.Client.EnableLogging(true);
     }
-    
-    // Uninitialize brainCloud
-    void UninitializeBC()
+
+    private void OnApplicationQuit()
     {
         if (_bcWrapper != null)
         {
             _bcWrapper.Client.ShutDown();
         }
-    }
-
-    private void OnApplicationQuit()
-    {
-        UninitializeBC();
     }
 
     //Called from Unity Button, attempting to login
@@ -182,8 +188,9 @@ public class NetworkManager : MonoBehaviour
 
     void OnFoundPlayersError(int status, int reasonCode, string jsonError, object cbObject)
     {
-        //ToDo: Create a seperate subscreen condition here to hide the lobby screen and show in text "no players found"
-        //Or enable a text that says that with the list empty. 
+        List<UserInfo> emptyList = new List<UserInfo>();
+        MenuManager.Instance.UpdateLobbyList(emptyList);
+        MenuManager.Instance.errorPopUpMessageState.SetUpPopUpMessage("No Players Found");
     }
     
     // User authenticated, handle the result
@@ -227,7 +234,7 @@ public class NetworkManager : MonoBehaviour
     void OnFailureCallback(int status, int reasonCode, string jsonError, object cbObject)
     {
         if (_dead) return;
-
+        _bcWrapper.Client.ResetCommunication();
         _dead = true;
 
         string message = cbObject as string;
@@ -461,8 +468,6 @@ public class NetworkManager : MonoBehaviour
     //Game flow for this callback, Game Completed -> Get All Ids -> Send record request -> OnRecordSuccess
     private void OnRecordSuccess(string in_jsonResponse, object cbObject)
     {
-        Debug.LogWarning("Record Completed...");
-        //this only runs after sending a record of all ID's and what defender is selected
         _bcWrapper.PlaybackStreamService.EndStream(_playbackStreamId);
         _bcWrapper.OneWayMatchService.CompleteMatch(_playbackStreamId);
     }

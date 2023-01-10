@@ -3,6 +3,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// This class is specifically for the Game Scene to manage the game flow such as:
+///     - Uses a timer to determine when the game is over
+///     - Displays Game Over screen
+///     - Keeps track of Frame Number for play back purposes
+///     - Returns to Main Menu from a button click on Game Over screen. 
+///
+/// </summary>
+
 public class GameSessionManager : MonoBehaviour
 {
     public float RoundDuration;

@@ -310,7 +310,7 @@ public class TroopAI : BaseHealthBehavior
         }
     }
 
-    public override void LaunchObject(Vector3 direction)
+    public void LaunchObject(Vector3 direction)
     {
         if (_isKnockedBack)
         {
