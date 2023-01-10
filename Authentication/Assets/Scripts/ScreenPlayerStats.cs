@@ -7,105 +7,74 @@ using BrainCloud.LitJson;
 
 public class ScreenPlayerStats : BCScreen
 {
-    protected class PlayerStatistic
+
+    [SerializeField] PlayerStat playerStatPrefab;
+    [SerializeField] Transform pStatPrefabParent;
+
+    Dictionary<string, PlayerStat> m_playerStats;
+
+    private void Awake()
     {
-        public string name;
-        public long value;
-        public string increment = "0";
+        if (HelpMessage == null)
+        {
+            HelpMessage =   "The player stats screen displays all pre-defined statistics rules from the \"User Statistics\" page under the \"Statistics Rules\" tab in the brainCloud portal.\n\n" +
+                            "Player stats are user scoped and are only accessible to the user they belong to.\n\n" +
+                            "Pressing the increment button next to each player stat will increment that stat by 1.\n\n";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-playerstats";
+        }
     }
-    IDictionary<string, PlayerStatistic> m_stats = new Dictionary<string, PlayerStatistic>();
-    
-    public ScreenPlayerStats(BrainCloudWrapper bc) : base(bc) { }
-    
+
     public override void Activate()
     {
-        _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
-    }
-    
-    private void ReadPlayerStateSuccess(string json, object cb)
-    {
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
+        GameEvents.instance.onIncrementUserStat += IncrementUserStats;
+        GameEvents.instance.onInstantiatePlayerStats += InstantiatePlayerStats;
 
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
-        {
-            foreach (string key in dStats.Keys)
-            {
-                PlayerStatistic stat = new PlayerStatistic();
-                stat.name = (string) key;
-                JsonData value = (JsonData) dStats[key];
-                
-                // silly that LitJson can't upcast an int to a long...
-                stat.value = value.IsInt ? (int) value : (long) value;
-                
-                m_stats[stat.name] = stat;
-            }
-        }
+        m_playerStats = new Dictionary<string, PlayerStat>();
+        
+        BrainCloudInterface.instance.ReadUserState(this);
     }
-    
-    public override void OnScreenGUI()
+
+    public void IncrementUserStats(string statName)
     {
-        int minLeftWidth = 120;
-        
-        GUILayout.BeginHorizontal();
-        GUILayout.Box("Player Stat Name", GUILayout.MinWidth(minLeftWidth));
-        GUILayout.Box("Player Stat Value");
-        GUILayout.EndHorizontal();
-        
-        foreach (PlayerStatistic ps in m_stats.Values)
-        {
-            GUILayout.BeginVertical();
-            GUILayout.Space(5);
-            GUILayout.EndVertical();
-            
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(ps.name, GUILayout.MinWidth(minLeftWidth));
-            GUILayout.Box(ps.value.ToString());
-            GUILayout.EndHorizontal();
-            
-            // increment
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(minLeftWidth);
-            ps.increment = GUILayout.TextField(ps.increment, GUILayout.ExpandWidth(true));
-            if (GUILayout.Button("Increment"))
-            {
-                long valueAsLong = 0;
-                double valueAsDouble = 0;
-                if (long.TryParse(ps.increment, out valueAsLong)
-                    || double.TryParse(ps.increment, out valueAsDouble))
-                {
-                	_bc.PlayerStatisticsService.IncrementUserStats(
-               	    	"{ '" + ps.name +"':" + ps.increment +"}",
-                    	Success_Callback, Failure_Callback);
-               		m_mainScene.AddLogNoLn("[IncrementStat]... ");
-                }
-            }
-            GUILayout.EndHorizontal();
-        }
+        if (!m_playerStats.ContainsKey(statName))
+            return;
+
+        DataManager dataManager = DataManager.instance;
+
+        m_playerStats[statName].SetStatValue(dataManager.PlayerStats[statName]);
     }
-    
-    public override void Success_Callback(string json, object cbObject)
+
+    public void InstantiatePlayerStats()
     {
-        base.Success_Callback(json, cbObject);
-        
-        //{"status":200,"data":{"statisticsExceptions":{},"milestones":{},"experiencePoints":0,"quests":{},"experienceLevel":0,"statistics":{"wood":75}}}
-        JsonData jObj = JsonMapper.ToObject(json);
-        JsonData jStats = jObj["data"]["statistics"];
-        IDictionary dStats = jStats as IDictionary;
-        if (dStats != null)
+        DataManager dataManager = DataManager.instance; 
+
+        foreach (string key in dataManager.PlayerStats.Keys)
         {
-            foreach (string key in dStats.Keys)
-            {
-                JsonData value = (JsonData) dStats[key];
-                long valueAsLong = value.IsInt ? (int) value : (long) value;
-                m_stats[key].value = valueAsLong;
-            }
+            PlayerStat newStat = Instantiate(playerStatPrefab, pStatPrefabParent);
+            newStat.SetStatName(key);
+            m_playerStats[newStat.GetStatName()] = newStat;
+            newStat.SetStatValue(dataManager.PlayerStats[key]);
         }
     }
-    
+
+    protected override void OnDisable()
+    {
+        if (m_playerStats != null)
+        {
+            foreach (string key in m_playerStats.Keys)
+            {
+                Destroy(m_playerStats[key].gameObject);
+            }
+
+            m_playerStats.Clear();
+            m_playerStats = null; 
+        }
+
+        GameEvents.instance.onIncrementUserStat -= IncrementUserStats;
+        GameEvents.instance.onInstantiatePlayerStats -= InstantiatePlayerStats;
+    }
 }

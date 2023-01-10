@@ -202,8 +202,7 @@ public class BCinterface : MonoBehaviour
         string display = "";
         foreach (KeyValuePair<string, object> message in jsonData)
         {
-            display += message.Key +" : "+ JsonWriter.Serialize(message.Value) + "\r\n";
-            
+            display += message.Key +" : "+ JsonWriter.Serialize(message.Value) + "\r\n"; 
         }
 
         SetResponseText("Successfully Enabled RTT \n " + display, Color.white);

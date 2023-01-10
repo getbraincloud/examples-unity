@@ -432,7 +432,7 @@ namespace BrainCloud.Internal
             json["passcode"] = m_connectOptions.passcode;
             json["version"] = m_clientRef.BrainCloudClientVersion;
 
-            byte[] array = concatenateByteArrays(CONNECT_ARR, Encoding.ASCII.GetBytes(JsonWriter.Serialize(json)));
+            byte[] array = concatenateByteArrays(CONNECT_ARR, Encoding.ASCII.GetBytes(m_clientRef.SerializeJson(json)));
             return array;
         }
 
@@ -444,7 +444,7 @@ namespace BrainCloud.Internal
             json["status_message"] = in_statusMessage;
             json["severity"] = "ERROR";
 
-            return JsonWriter.Serialize(json);
+            return m_clientRef.SerializeJson(json);
         }
 
         private byte[] buildDisconnectRequest()
@@ -765,8 +765,8 @@ namespace BrainCloud.Internal
                     }
                 case "DISCONNECT":
                     {
-                        string profileId = parsedDict["profileId"] as string;
-                        if (profileId == m_clientRef.AuthenticationService.ProfileId)
+                        string cxId = parsedDict["cxId"] as string;
+                        if (cxId == m_clientRef.RTTService.getRTTConnectionID())
                         {
                             // We are the one that got disconnected!
                             disconnect();
@@ -1079,6 +1079,10 @@ namespace BrainCloud.Internal
 
         private void tcpFinishWrite(IAsyncResult result)
         {
+            if (result.IsCompleted)
+            {
+                return;
+            }
             try
             {
                 m_tcpStream.EndWrite(result);
@@ -1106,7 +1110,11 @@ namespace BrainCloud.Internal
             try
             {
                 // Read precisely SIZE_OF_HEADER for the length of the following message
-                int read = m_tcpStream.EndRead(ar);
+                int read = -1;
+                if (ar != null && m_tcpStream != null)
+                {
+                    read = m_tcpStream.EndRead(ar);
+                }
                 if (read == 0)
                 {
                     queueErrorEvent("Server Closed Connection");

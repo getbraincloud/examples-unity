@@ -41,6 +41,8 @@ namespace BrainCloud
         public static readonly OperationParam TwitterServiceTweetPic = new OperationParam("pic");
 
         public static readonly OperationParam BlockChainConfig = new OperationParam("blockchainConfig");
+        public static readonly OperationParam BlockChainIntegrationId = new OperationParam("integrationId");
+        public static readonly OperationParam BlockChainContext = new OperationParam("contextJson");
         public static readonly OperationParam PublicKey = new OperationParam("publicKey");
 
         // Authenticate Service - Authenticate Params
@@ -72,6 +74,7 @@ namespace BrainCloud
         public static readonly OperationParam AuthenticateServiceAuthenticateForceCreate = new OperationParam("forceCreate");
         public static readonly OperationParam AuthenticateServiceAuthenticateCompressResponses = new OperationParam("compressResponses");
         public static readonly OperationParam AuthenticateServicePlayerSessionExpiry = new OperationParam("playerSessionExpiry");
+        public static readonly OperationParam AuthenticateServiceAuthenticateExtraJson = new OperationParam("extraJson");
 
         // Authenticate Service - Authenticate Params
         public static readonly OperationParam IdentityServiceExternalId = new OperationParam("externalId");
@@ -536,6 +539,7 @@ namespace BrainCloud
         public static readonly OperationParam CustomEntityServiceDataJson = new OperationParam("dataJson");
         public static readonly OperationParam CustomEntityServiceIsOwned = new OperationParam("isOwned");
         public static readonly OperationParam CustomEntityServiceMaxReturn = new OperationParam("maxReturn");
+        public static readonly OperationParam CustomEntityServiceShardKeyJson = new OperationParam("shardKeyJson");
 
         //item catalog
         public static readonly OperationParam ItemCatalogServiceDefId = new OperationParam("defId");

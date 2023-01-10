@@ -3,114 +3,157 @@ using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.Entity;
+using UnityEngine.UI;
 
 public class ScreenEntity : BCScreen
 {
-    private static string ENTITY_TYPE_PLAYER = "player";
-    private BCUserEntity m_player;
-    
-    public ScreenEntity(BrainCloudWrapper bc) : base(bc) { }
+    EntityInstance m_player;
+
+    string entityName = "";
+    int entityAge = 0; 
+
+    //UI elements 
+    [SerializeField] Text entityIDText;
+    [SerializeField] Text entityTypeText;
+    [SerializeField] InputField nameInput;
+    [SerializeField] InputField ageInput;
+    [SerializeField] GameObject createEntityButton;
+    [SerializeField] GameObject saveEntityButton;
+    [SerializeField] GameObject deleteEntityButton;
+
+    private void Awake()
+    {
+        if (HelpMessage == null)
+        {
+            HelpMessage = "The entity screen demonstrates how a user entity can be created via the brainCloud client.\n\n" +
+                          "By pressing Create, a default user entity is created for the user. " +
+                          "Pressing Delete will delete the user entity while Save updates the user entity of the user.\n\n" +
+                          "This entity can be monitored on the \"User Entites\" page under the \"User Monitoring\" tab in the brainCloud portal.";
+        }
+
+        if (HelpURL == null)
+        {
+            HelpURL = "https://getbraincloud.com/apidocs/apiref/?cloudcode#capi-entity";
+        }
+
+        SetFieldsInteractable(false);
+    }
 
     public override void Activate()
     {
-        _bc.PlayerStateService.ReadUserState(ReadPlayerStateSuccess, Failure_Callback);
-        m_mainScene.AddLogNoLn("[ReadPlayerState]... ");
+        GameEvents.instance.onCreateUserEntitySuccess += OnCreateEntitySuccess;
+        GameEvents.instance.onDeleteUserEntitySuccess += OnDeleteEntitySuccess;
+        GameEvents.instance.onGetUserEntityPageSuccess += OnGetUserEntityPageSuccess;
 
+        BCFuncScreenHandler.instance.EntityInterface.GetPage(); 
     }
 
-    private void ReadPlayerStateSuccess(string json, object cb)
+    void DisplayEntityID()
     {
-        m_mainScene.AddLog("SUCCESS");
-        m_mainScene.AddLogJson(json);
-        m_mainScene.AddLog("");
-        
-        // look for the player entity
-        IList<BCUserEntity> entities = _bc.EntityFactory.NewUserEntitiesFromReadPlayerState(json);
-        foreach (BCUserEntity entity in entities)
-        {
-            if (entity.EntityType == ENTITY_TYPE_PLAYER)
-            {
-                m_player = entity;
-            }
-        }
+        entityIDText.text = (m_player != null ? m_player.EntityId : "---");
     }
 
-    public override void OnScreenGUI()
+    void DisplayEntityType()
     {
-        GUILayout.BeginVertical();
-        //GUILayout.Box("Player Entity");
-        
-        int minLabelWidth = 60;
-        
-        // entity id
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Id", GUILayout.Width(minLabelWidth));
-        GUILayout.Box(m_player != null ? m_player.EntityId : "---");
-        GUILayout.EndHorizontal();
-        
-        // entity type
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Type", GUILayout.Width(minLabelWidth));
-        GUILayout.Box(m_player != null ? m_player.EntityType : "---");
-        GUILayout.EndHorizontal();
-        
-        // entity property 'name'
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Name", GUILayout.Width(minLabelWidth));
-        if (m_player != null)
+        entityTypeText.text = (m_player != null ? m_player.EntityType : "---");
+    }
+
+    void DisplayEntityName()
+    {
+        nameInput.text = (m_player != null ? m_player.Name : "");
+    }
+
+    void DisplayEntityAge()
+    {
+        ageInput.text = (m_player != null ? m_player.Age : "");
+    }
+
+    void DisplayEntityInfo()
+    {
+        DisplayEntityID();
+        DisplayEntityType();
+        DisplayEntityName();
+        DisplayEntityAge(); 
+    }
+
+    void SetActiveButtons(bool isActive)
+    {
+        createEntityButton.SetActive(isActive);
+        saveEntityButton.SetActive(!isActive);
+        deleteEntityButton.SetActive(!isActive);
+    }
+
+    void SetFieldsInteractable(bool isInteractable)
+    {
+        nameInput.interactable = isInteractable;
+        ageInput.interactable = isInteractable; 
+    }
+
+    //*************** UI Event Subscribed Methods ***************
+    public void OnCreateEntity()
+    {
+        BCFuncScreenHandler.instance.EntityInterface.CreateEntity();
+        Debug.Log("Creating Entity...");
+    }
+
+    public void OnSaveEntity()
+    {
+        entityName = nameInput.text;
+        entityAge = int.Parse(ageInput.text);
+
+        if(m_player != null)
         {
-            m_player ["name"] = GUILayout.TextField((string)m_player ["name"]);
-        } else
-        {
-            GUILayout.Box("---");
+            m_player.Name = entityName;
+            m_player.Age = entityAge.ToString();
         }
-        GUILayout.EndHorizontal();
-        
-        // entity property 'age'
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Age", GUILayout.Width(minLabelWidth));
-        if (m_player != null)
-        {
-            string ageStr = GUILayout.TextField(((int)m_player ["age"]).ToString());
-            int ageInt = 0;
-            if (int.TryParse(ageStr, out ageInt))
-            {
-                m_player ["age"] = ageInt;
-            }
-        } else
-        {
-            GUILayout.Box("---");
-        }
-        GUILayout.EndHorizontal();
-        
-        GUILayout.BeginHorizontal();
-        if (m_player == null)
-        {
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Create Entity"))
-            {
-                m_player = _bc.EntityFactory.NewUserEntity(ENTITY_TYPE_PLAYER);
-                m_player ["name"] = "Johnny Philharmonica";
-                m_player ["age"] = 49;
-            }
-        }
-        if (m_player != null)
-        {
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Save Entity"))
-            {
-                m_mainScene.AddLogNoLn("[Entity.StoreAsync()]... ");
-                m_player.StoreAsync(Success_Callback, Failure_Callback);
-            }
-            if (GUILayout.Button("Delete Entity"))
-            {
-                m_player.DeleteAsync(Success_Callback, Failure_Callback);
-                m_player = null;
-                m_mainScene.AddLogNoLn("[Entity.DeleteEntity]... ");
-            }
-        }
-        GUILayout.EndHorizontal();
-        
-        GUILayout.EndVertical();
+
+        BCFuncScreenHandler.instance.EntityInterface.UpdateEntity();
+        Debug.Log("Updating Entity..."); 
+    }
+
+    public void OnDeleteEntity()
+    {
+        BCFuncScreenHandler.instance.EntityInterface.DeleteEntity();
+        m_player = null;
+        Debug.Log("Deleting Entity...");
+    }
+
+    //*************** Game Event Subscribed Methods ***************
+    private void OnCreateEntitySuccess()
+    {
+        m_player = BCFuncScreenHandler.instance.EntityInterface.Player;
+
+        SetFieldsInteractable(true);
+
+        DisplayEntityInfo();
+        SetActiveButtons(false); 
+    }
+
+    private void OnDeleteEntitySuccess()
+    {
+        DisplayEntityInfo();
+
+        SetFieldsInteractable(false);
+
+        SetActiveButtons(true); 
+    }
+
+    private void OnGetUserEntityPageSuccess()
+    {
+        m_player = BCFuncScreenHandler.instance.EntityInterface.Player;
+        DisplayEntityInfo();
+
+        bool bsetActive = m_player == null ? true : false;
+
+        SetFieldsInteractable(!bsetActive);
+
+        SetActiveButtons(bsetActive);
+    }
+
+    protected override void OnDisable()
+    {
+        GameEvents.instance.onCreateUserEntitySuccess -= OnCreateEntitySuccess;
+        GameEvents.instance.onDeleteUserEntitySuccess -= OnDeleteEntitySuccess;
+        GameEvents.instance.onGetUserEntityPageSuccess -= OnGetUserEntityPageSuccess;
     }
 }

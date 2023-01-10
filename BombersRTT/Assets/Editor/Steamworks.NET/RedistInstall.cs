@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 // This copys various files into their required locations when Unity is launched to make installation a breeze.
 [InitializeOnLoad]
 public class RedistInstall {
@@ -260,3 +261,4 @@ public class RedistInstall {
 	}
 #endif // UNITY_5 || UNITY_2017 || UNITY_2017_1_OR_NEWER
 }
+#pragma warning restore CS0618 // Type or member is obsolete

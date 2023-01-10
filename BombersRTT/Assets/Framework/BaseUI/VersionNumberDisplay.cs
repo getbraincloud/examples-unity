@@ -1,15 +1,15 @@
-﻿using UnityEngine.UI;
-using UnityEngine;
+﻿using TMPro;
+
 namespace Gameframework
 {
     public class VersionNumberDisplay : BaseBehaviour
     {
         public const string VERSION_TEXT_FILE = "version";
-        public Text VersionText = null;
-        // Use this for initialization
+        public TextMeshProUGUI VersionText = null;
+
         void Start()
         {
-            VersionText.text = Application.version;
+            VersionText.text = $"v: {BrainCloud.Version.GetVersion()}";
 
             DontDestroyOnLoad(gameObject);
         }

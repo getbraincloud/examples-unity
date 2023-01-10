@@ -28,11 +28,13 @@ public class GameManager : MonoBehaviour
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
+    public Button ReconnectButton;
     //for updating members list of shockwaves
     public GameArea GameArea;  
     //local user's start button for starting a match
-    public GameObject StartGameBtn; 
-    
+    public GameObject StartGameBtn;
+    public TMP_Text LobbyLocalUserText;
+    public TMP_Dropdown CompressionDropdown;
     private EventSystem _eventSystem;
     //List references for clean up when game closes
     private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
@@ -60,6 +62,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        ReconnectButton.gameObject.SetActive(false);
         _eventSystem = EventSystem.current;
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
         LoadPlayerSettings();
@@ -109,6 +112,27 @@ public class GameManager : MonoBehaviour
         //Send update to BC
         Dictionary<string,object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        if (IsLocalUserHost())
+        {
+            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+        }
+        BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
+        (
+            StateManager.Instance.CurrentLobby.LobbyID,
+            StateManager.Instance.isReady,
+            extra
+        );
+    }
+
+    public void SendUpdateRelayCompressionType()
+    {
+        //Send update to BC
+        Dictionary<string,object> extra = new Dictionary<string, object>();
+        extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        if (IsLocalUserHost())
+        {
+            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+        }
         BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
         (
             StateManager.Instance.CurrentLobby.LobbyID,
@@ -141,6 +165,7 @@ public class GameManager : MonoBehaviour
     {   
         AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
         StartGameBtn.SetActive(IsLocalUserHost());
+        CompressionDropdown.interactable = IsLocalUserHost();
     }
     
     /// <summary>
@@ -168,8 +193,11 @@ public class GameManager : MonoBehaviour
         {
             var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
             SetUpUserEntry(lobby.Members[i], newEntry);
-            _matchEntries.Add(newEntry);
+            _matchEntries.Add(newEntry);    
         }
+
+        LobbyLocalUserText.text = _currentUserInfo.Username;
+        LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor); 
     }
     
     private void SetUpUserEntry(UserInfo info,UserEntry entry)

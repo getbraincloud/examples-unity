@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 namespace BrainCloudUNETExample
 {
@@ -10,18 +11,16 @@ namespace BrainCloudUNETExample
         public const string DEFAULT_NAME = "DEFAULT NAME";
 
         #region private Properties
-#pragma warning disable 649
         [SerializeField]
-        private Text Pos;
+        private TextMeshProUGUI Pos = null;
         [SerializeField]
-        private Text UserName;
+        private TextMeshProUGUI UserName = null;
         [SerializeField]
-        private Text Rank;
+        private TextMeshProUGUI Rank = null;
         [SerializeField]
-        private Text Kills;
+        private TextMeshProUGUI Kills = null;
         [SerializeField]
         private PlayerRankIcon PlayerRankIcon = null;
-#pragma warning restore 649
         #endregion
 
         public string ProfileId { get; private set; }

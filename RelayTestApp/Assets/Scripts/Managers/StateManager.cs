@@ -24,7 +24,8 @@ public class StateManager : MonoBehaviour
     //Network info needed
     public Lobby CurrentLobby;
     public Server CurrentServer;
-    public RelayConnectionType protocol = RelayConnectionType.WEBSOCKET;
+    internal RelayConnectionType _protocol { get; set; }
+    
     
     //Specific for loading and waiting
     public bool isReady;
@@ -128,13 +129,21 @@ public class StateManager : MonoBehaviour
             //Logging In...
             case GameStates.SignIn:
                 CurrentGameState = GameStates.MainMenu;
+                if (CurrentLobby != null && CurrentLobby.LobbyID.Length > 0)
+                {
+                    GameManager.Instance.ReconnectButton.gameObject.SetActive(true);
+                }
+                else
+                {
+                    GameManager.Instance.ReconnectButton.gameObject.SetActive(false);
+                }
                 BrainCloudManager.Instance.Login();
                 LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE,false,GameStates.MainMenu);
                 break;
             //Looking for Lobby...
             case GameStates.MainMenu:
                 CurrentGameState = GameStates.Lobby;
-                BrainCloudManager.Instance.FindLobby(protocol);
+                BrainCloudManager.Instance.FindLobby(_protocol);
                 LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE,true,GameStates.Lobby);
                 break;
             //Setting up Match...
@@ -145,6 +154,21 @@ public class StateManager : MonoBehaviour
                 break;
         }
     }
+
+    public void ReconnectToGame()
+    {
+        foreach (GameState state in ListOfStates)
+        {
+            state.gameObject.SetActive(false);
+        }
+        
+        CurrentGameState = GameStates.Match;
+        isLoading = true;
+        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
+
+        BrainCloudManager.Instance.ReconnectUser();
+    }
+
     
     public void ChangeState(GameStates newGameState)
     {
