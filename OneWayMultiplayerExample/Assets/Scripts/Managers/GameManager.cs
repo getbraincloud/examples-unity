@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
     private GameSessionManager _sessionManagerRef;
     public GameSessionManager SessionManager
     {
-        get => _sessionManagerRef;
+        get => GetSessionManager();
     }
     
     private List<PlaybackStreamRecord> _replayRecords = new List<PlaybackStreamRecord>();
@@ -195,9 +195,19 @@ public class GameManager : MonoBehaviour
     public void ResetGameSceneForStream()
     {
         IsInPlaybackMode = true;
-        _sessionManagerRef.StopStreamButton.SetActive(true);
+        GetSessionManager().StopStreamButton.SetActive(true);
         GameSetup();
         SessionManager.GameOverScreen.gameObject.SetActive(false);
+    }
+
+    private GameSessionManager GetSessionManager()
+    {
+        if(_sessionManagerRef == null)
+        {
+            _sessionManagerRef = FindObjectOfType<GameSessionManager>();
+        }
+
+        return _sessionManagerRef;
     }
 
     public void GameSetup()
@@ -211,11 +221,6 @@ public class GameManager : MonoBehaviour
             BaseHealthBehavior healthScript = structure.GetComponent<BaseHealthBehavior>(); 
             healthScript.EntityID = i;
             PlaybackStreamManager.Instance.StructuresList.Add(healthScript);
-        }
-
-        if (!_sessionManagerRef)
-        {
-            _sessionManagerRef = FindObjectOfType<GameSessionManager>();    
         }
 
         if (!_gameOverScreenRef)
@@ -261,14 +266,14 @@ public class GameManager : MonoBehaviour
             }
             
             
-            NetworkManager.Instance.SummaryInfo(slayCount, counterAttackCount, _sessionManagerRef.GameSessionTimer);
+            NetworkManager.Instance.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
             NetworkManager.Instance.GameCompleted(in_didInvaderWin);    
         }
         else
         {
             slayCount = NetworkManager.Instance.SlayCount;
             counterAttackCount = NetworkManager.Instance.DefeatedTroops;
-            _sessionManagerRef.GameSessionTimer = NetworkManager.Instance.TimeLeft;
+            GetSessionManager().GameSessionTimer = NetworkManager.Instance.TimeLeft;
 
             _gameOverScreenRef.WinStatusText.text = "Recording finished !";
         }
@@ -285,9 +290,9 @@ public class GameManager : MonoBehaviour
             }
         }
         _projectiles.Clear();
-        
+
         //Do Game over things
-        _sessionManagerRef.StopTimer();
+        GetSessionManager().StopTimer();
         
         FindObjectOfType<SpawnController>().enabled = false;
         
