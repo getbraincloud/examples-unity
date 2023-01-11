@@ -128,10 +128,11 @@ public class MenuManager : MonoBehaviour
     {
         if (_listOfPlayers.Count > 0)
         {
-            for (int i = _listOfPlayers.Count-1; i < 0; i--)
+            for (int i = _listOfPlayers.Count-1; i >= 0; i--)
             {
                 Destroy(_listOfPlayers[i].gameObject);
-            }    
+            }
+            _listOfPlayers.Clear();
         }
         
         for (int i = 0; i < in_listOfPlayers.Count; i++)

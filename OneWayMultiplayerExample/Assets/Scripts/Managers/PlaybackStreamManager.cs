@@ -31,7 +31,6 @@ public class PlaybackStreamManager : MonoBehaviour
     private float _time;
     private float _value;
     private int _frameId;
-    private bool _replayMode;
 
     void Awake()
     {
@@ -64,7 +63,6 @@ public class PlaybackStreamManager : MonoBehaviour
         InvadersList.Clear();
         DefendersList.Clear();
         GameManager.Instance.ClearGameobjects();
-        GameManager.Instance.IsInPlaybackMode = true;
         NetworkManager.Instance.ReadStream();
     }
 

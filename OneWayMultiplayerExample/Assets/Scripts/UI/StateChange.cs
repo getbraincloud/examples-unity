@@ -8,4 +8,6 @@ public class StateChange : MonoBehaviour
     public void CancelToMainMenu() => MenuManager.Instance.ChangeState(MenuStates.MainMenu);
 
     public void ReplayLastBattle() => NetworkManager.Instance.ReplayStream();
+
+    public void TurnOnShield() => NetworkManager.Instance.TurnOnShield();
 }

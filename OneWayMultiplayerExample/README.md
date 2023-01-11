@@ -41,11 +41,18 @@ Specific Classes
 				- Troop & Structure ID's 
 				- Defender selection
 
+Important Notes:
+
+	- If you want players to see other players while they're online, be sure to enable that feature within the braincloud portal under Multiplayer -> Matchmaking -> Allow attack while online = TRUE.
+	- Defining new user entities types can only be achieved with the CreateEntity() call. 
 
 For more information:
+	Article about designing offline multiplayer
+	https://help.getbraincloud.com/en/articles/3272700-design-multiplayer-matchmaking
+	API examples
 	https://getbraincloud.com/apidocs/api-modules/multiplayer/one-way-offline-multiplayer-example/
 
-	API
+	API References
 		MatchMaking
 		https://getbraincloud.com/apidocs/apiref/#capi-matchmaking
 

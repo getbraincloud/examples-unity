@@ -316,6 +316,8 @@ public class GameManager : MonoBehaviour
     public void ClearGameobjects()
     {
         _isGameActive = true;
+        IsInPlaybackMode = true;
+        GetSessionManager().SetupGameSession();
         var troopsToDestroy = FindObjectsOfType<TroopAI>();
         foreach (var troopAI in troopsToDestroy)
         {

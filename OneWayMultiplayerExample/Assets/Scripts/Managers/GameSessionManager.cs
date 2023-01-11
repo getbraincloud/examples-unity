@@ -20,6 +20,7 @@ public class GameSessionManager : MonoBehaviour
     public GameOverScreen GameOverScreen;
     public GameObject ConfirmPopUp;
     public GameObject StopStreamButton;
+    public GameObject TroopView;
     
     private float _startTime;
     private float _gameSessionTimer;
@@ -47,18 +48,27 @@ public class GameSessionManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        SetupGameSession();
+    }
+
+    public void SetupGameSession()
+    {
         if (!GameManager.Instance.IsInPlaybackMode)
         {
             GameManager.Instance.GameSetup();
+            ClockFillImage.transform.parent.gameObject.SetActive(true);
             ClockFillImage.fillAmount = 1;
+            TroopView.SetActive(true);
             StartCoroutine(Timer(RoundDuration)); 
         }
         else
         {
+            ClockFillImage.transform.parent.gameObject.SetActive(false);
             StopStreamButton.SetActive(true);
+            TroopView.SetActive(false);
         }
     }
-
+    
     private void FixedUpdate()
     {
         if (!_replayMode)
