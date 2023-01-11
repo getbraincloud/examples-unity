@@ -44,7 +44,7 @@ public class BrainCloudManager : MonoBehaviour
         Wrapper.WrapperName = AppName;
         Wrapper.Init(); // Init data is taken from the brainCloud Unity Plugin
 
-        PlayerPrefsHandler.InitPlayerPrefs(this);
+        PlayerPrefsHandler.InitPlayerPrefs();
     }
 
     public void AuthenticateEmail(string email, string password, Action onSuccess = null, Action onFailure = null)

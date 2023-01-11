@@ -16,17 +16,11 @@ public class MainLoginPanelUI : MonoBehaviour
     [SerializeField] private TMP_InputField EmailField = default;
     [SerializeField] private TMP_InputField UsernameField = default;
     [SerializeField] private TMP_InputField PasswordField = default;
-    [SerializeField] private Toggle RemUserToggle = default;
-    [SerializeField] private Toggle RemPasswordToggle = default;
+    [SerializeField] private Toggle RememberMeToggle = default;
+    [SerializeField] private TMP_Text ErrorLabel = default;
     [SerializeField] private Button LoginButton = default;
     [SerializeField] private TMP_InputField NameField = default;
     [SerializeField] private TMP_InputField AgeField = default;
-
-    [Header("Misc Elements")]
-    [SerializeField] private TMP_Text ErrorLabel = default;
-    [SerializeField] private GameObject RemEmailToggleLabel = default;
-    [SerializeField] private GameObject RemUsernameToggleLabel = default;
-    [SerializeField] private GameObject[] OptionalUIElements = default;
 
     [Header("TEMP")]
     [SerializeField] private BrainCloudManager BC = default;
@@ -34,14 +28,15 @@ public class MainLoginPanelUI : MonoBehaviour
     [SerializeField] private GameObject MainContent = default;
     [SerializeField] private TMP_Text LoggedInText = default;
 
-    private bool showOptionalUIElements = false;
-
     #region Unity Messages
 
     private void Awake()
     {
-        showOptionalUIElements = true;//string.IsNullOrEmpty(prefsEmail + prefsUsername); // Based on if Username/Email is remembered or not
-
+        EmailField.text = string.Empty;
+        UsernameField.text = string.Empty;
+        PasswordField.text = string.Empty;
+        NameField.text = string.Empty;
+        AgeField.text = string.Empty;
         ErrorLabel.text = string.Empty;
     }
 
@@ -53,7 +48,6 @@ public class MainLoginPanelUI : MonoBehaviour
         //EmailField.onValueChanged.AddListener();
         //UsernameField.onValueChanged.AddListener();
         //PasswordField.onValueChanged.AddListener();
-        RemUserToggle.onValueChanged.AddListener(OnRememberUserToggle);
         LoginButton.onClick.AddListener(OnLoginButton);
         //NameField.onValueChanged.AddListener();
         //AgeField.onValueChanged.AddListener();
@@ -61,40 +55,33 @@ public class MainLoginPanelUI : MonoBehaviour
 
     private void Start()
     {
-        EmailField.text = PlayerPrefsHandler.LoadPlayerPref(PlayerPrefKey.Email);
-        UsernameField.text = PlayerPrefsHandler.LoadPlayerPref(PlayerPrefKey.Username);
-        PasswordField.text = PlayerPrefsHandler.LoadPlayerPref(PlayerPrefKey.Password);
-        NameField.text = string.Empty;
-        AgeField.text = string.Empty;
+        PlayerPrefsHandler.LoadPlayerPref(PlayerPrefKey.RememberUser, out bool rememberUserToggle);
+        RememberMeToggle.isOn = rememberUserToggle;
 
-        foreach (GameObject element in OptionalUIElements)
-        {
-            element.SetActive(showOptionalUIElements);
-        }
-
-        bool emailRadio = !string.IsNullOrEmpty(EmailField.text) && !string.IsNullOrEmpty(BC.ProfileID);
-        bool universalRadio = !string.IsNullOrEmpty(UsernameField.text) && !string.IsNullOrEmpty(BC.ProfileID);
-        bool anonymousRadio = !emailRadio && !universalRadio && !string.IsNullOrEmpty(BC.AnonymousID);
-
-        RemPasswordToggle.isOn = !string.IsNullOrEmpty(PasswordField.text);
-        RemUserToggle.isOn = !anonymousRadio && (emailRadio || universalRadio);
-        OnRememberUserToggle(RemUserToggle.isOn);
-
-        if (anonymousRadio)
-        {
-            AnonymousRadio.isOn = true;
-            UsernameField.gameObject.SetActive(false);
-            OnAnonymousRadio(true);
-        }
-        else if (universalRadio)
+        AuthenticationType authenticationType = BC.AuthenticationType;
+        if (authenticationType == AuthenticationType.Universal)
         {
             UniversalRadio.isOn = true;
             OnUniversalRadio(true);
         }
-        else // Default to Email
+        else if (authenticationType == AuthenticationType.Anonymous)
+        {
+            AnonymousRadio.isOn = true;
+            OnEmailRadio(true);
+            OnAnonymousRadio(true);
+        }
+        else // Email is default
         {
             EmailRadio.isOn = true;
             OnEmailRadio(true);
+        }
+
+        Debug.LogError(BC.ProfileID);
+        Debug.LogError(BC.AnonymousID);
+
+        if (rememberUserToggle)
+        {
+            // Handle disabling of everything & try to log in
         }
     }
 
@@ -106,8 +93,7 @@ public class MainLoginPanelUI : MonoBehaviour
         EmailField.onValueChanged.RemoveAllListeners();
         UsernameField.onValueChanged.RemoveAllListeners();
         PasswordField.onValueChanged.RemoveAllListeners();
-        RemUserToggle.onValueChanged.RemoveAllListeners();
-        RemPasswordToggle.onValueChanged.RemoveAllListeners();
+        RememberMeToggle.onValueChanged.RemoveAllListeners();
         LoginButton.onClick.RemoveAllListeners();
         NameField.onValueChanged.RemoveAllListeners();
         AgeField.onValueChanged.RemoveAllListeners();
@@ -122,14 +108,28 @@ public class MainLoginPanelUI : MonoBehaviour
 
     #region UI Functionality
 
+    public void EnableFields(bool isEnabled)
+    {
+        EmailRadio.interactable = isEnabled;
+        UniversalRadio.interactable = isEnabled;
+        AnonymousRadio.interactable = isEnabled;
+        EmailField.interactable = isEnabled;
+        UsernameField.interactable = isEnabled;
+        PasswordField.interactable = isEnabled;
+        RememberMeToggle.interactable = isEnabled;
+        LoginButton.interactable = isEnabled;
+        NameField.interactable = isEnabled;
+        AgeField.interactable = isEnabled;
+
+        ErrorLabel.text = string.Empty;
+    }
+
     private void OnEmailRadio(bool value)
     {
         if (value)
         {
             EmailField.gameObject.SetActive(true);
-            RemEmailToggleLabel.SetActive(true);
             UsernameField.gameObject.SetActive(false);
-            RemUsernameToggleLabel.SetActive(false);
         }
     }
 
@@ -138,9 +138,7 @@ public class MainLoginPanelUI : MonoBehaviour
         if (value)
         {
             UsernameField.gameObject.SetActive(true);
-            RemUsernameToggleLabel.SetActive(true);
             EmailField.gameObject.SetActive(false);
-            RemEmailToggleLabel.SetActive(false);
         }
     }
 
@@ -149,14 +147,6 @@ public class MainLoginPanelUI : MonoBehaviour
         EmailField.interactable = !value;
         UsernameField.interactable = !value;
         PasswordField.interactable = !value;
-        RemUserToggle.interactable = !value;
-        RemPasswordToggle.interactable = RemUserToggle.isOn && !value;
-    }
-
-    private void OnRememberUserToggle(bool value)
-    {
-        RemPasswordToggle.interactable = value;
-        RemPasswordToggle.isOn = RemPasswordToggle.isOn && RemPasswordToggle.interactable;
     }
 
     private void OnLoginButton()
@@ -195,10 +185,13 @@ public class MainLoginPanelUI : MonoBehaviour
                 ids.authenticationSubType = "";
             }
 
+            EnableFields(false);
             BC.AuthenticateAdvanced(authenticationType, ids, extraJson, TempHandleAuthenticationSuccess, TempHandleAuthenticationFailure);
 
             return;
         }
+
+        EnableFields(false);
 
         if (EmailRadio.isOn)
         {
@@ -222,29 +215,15 @@ public class MainLoginPanelUI : MonoBehaviour
     {
         if (EmailRadio.isOn || UniversalRadio.isOn)
         {
-            BC.Wrapper.ResetStoredAnonymousId();
             BC.Wrapper.SetStoredAuthenticationType(EmailRadio.isOn ? AuthenticationType.Email.ToString()
                                                                    : AuthenticationType.Universal.ToString());
-
-            if (RemUserToggle.isOn)
-            {
-                PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.Email, EmailRadio.isOn ? EmailField.text : string.Empty);
-                PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.Username, UniversalRadio.isOn ? UsernameField.text : string.Empty);
-
-                if (RemPasswordToggle.isOn)
-                {
-                    PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.Password, PasswordField.text);
-                }
-            }
         }
         else if (AnonymousRadio.isOn)
         {
-            BC.Wrapper.ResetStoredProfileId();
             BC.Wrapper.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
-            PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.Email, string.Empty);
-            PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.Username, string.Empty);
-            PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.Password, string.Empty);
         }
+
+        PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, RememberMeToggle.isOn);
 
         AuthenticationContent.SetActive(false);
         MainContent.SetActive(true);
@@ -253,7 +232,23 @@ public class MainLoginPanelUI : MonoBehaviour
 
     private void TempHandleAuthenticationFailure()
     {
-        ErrorLabel.text = "Authentication Failed";
+        EnableFields(false);
+
+        string errorMessage;
+        if (EmailRadio.isOn)
+        {
+            errorMessage = "Authentication Failed - Please check your email and password and try again.";
+        }
+        else if (UniversalRadio.isOn)
+        {
+            errorMessage = "Authentication Failed - Please check your username and password and try again.";
+        }
+        else
+        {
+            errorMessage = "Authentication Failed - Please try again in a few moments.";
+        }
+
+        ErrorLabel.text = errorMessage;
     }
 
     #endregion
