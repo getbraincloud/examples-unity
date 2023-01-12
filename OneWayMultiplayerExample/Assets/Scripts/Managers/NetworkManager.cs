@@ -348,16 +348,18 @@ public class NetworkManager : MonoBehaviour
 
         GameManager.Instance.CurrentUserInfo.Rating = (int) data["playerRating"];
         GameManager.Instance.CurrentUserInfo.MatchesPlayed = (int) data["matchesPlayed"];
-        var shieldExpiry = (long) data["shieldExpiry"];
-        if (shieldExpiry > 0)
+        
+        try
         {
+            var shieldExpiry = (long) data["shieldExpiry"];
             _shieldActive = true;
             var offset = DateTimeOffset.FromUnixTimeMilliseconds(shieldExpiry);
-            TimeSpan timeSpent = DateTime.Now - offset.Date;
-            GameManager.Instance.CurrentUserInfo.ShieldTime = timeSpent.Minutes;
+            TimeSpan timeSpent = offset.Date - DateTime.Now;
+            GameManager.Instance.CurrentUserInfo.ShieldTime = timeSpent.Duration().Minutes;
         }
-        else
+        catch (Exception e)
         {
+            GameManager.Instance.CurrentUserInfo.ShieldTime = 0;
             _shieldActive = false;
         }
 
