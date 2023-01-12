@@ -6,6 +6,7 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 /// <summary>
 /// This class demonstrates how to communicate with BrainCloud services.
@@ -354,20 +355,12 @@ public class NetworkManager : MonoBehaviour
         //Using try catch in case the shield expiry returns an int rather than a long
         try
         {
-            var shieldExpiry = (long) data["shieldExpiry"];
-            var value = 0;
-            if (shieldExpiry > DateTime.UtcNow.Ticks)
-            {
-                value = 5;
-                _shieldActive = true;
-            }
-            else
-            {
-                value = 0;
-                _shieldActive = false;
-            }
+            DateTime shieldExpiryDateTime = DateTimeOffset.FromUnixTimeMilliseconds((long)data["shieldExpiry"]).DateTime;
+            TimeSpan difference = shieldExpiryDateTime.Subtract(DateTime.UtcNow);
 
-            GameManager.Instance.CurrentUserInfo.ShieldTime = value;
+            _shieldActive = difference.Minutes > 0;
+
+            GameManager.Instance.CurrentUserInfo.ShieldTime = difference.Minutes;
         }
         catch (Exception e)
         {
