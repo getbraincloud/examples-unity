@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.Serialization;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
@@ -349,13 +351,23 @@ public class NetworkManager : MonoBehaviour
         GameManager.Instance.CurrentUserInfo.Rating = (int) data["playerRating"];
         GameManager.Instance.CurrentUserInfo.MatchesPlayed = (int) data["matchesPlayed"];
         
+        //Using try catch in case the shield expiry returns an int rather than a long
         try
         {
             var shieldExpiry = (long) data["shieldExpiry"];
-            _shieldActive = true;
-            var offset = DateTimeOffset.FromUnixTimeMilliseconds(shieldExpiry);
-            TimeSpan timeSpent = offset.Date - DateTime.Now;
-            GameManager.Instance.CurrentUserInfo.ShieldTime = timeSpent.Duration().Minutes;
+            var value = 0;
+            if (shieldExpiry > DateTime.UtcNow.Ticks)
+            {
+                value = 5;
+                _shieldActive = true;
+            }
+            else
+            {
+                value = 0;
+                _shieldActive = false;
+            }
+
+            GameManager.Instance.CurrentUserInfo.ShieldTime = value;
         }
         catch (Exception e)
         {
@@ -366,8 +378,7 @@ public class NetworkManager : MonoBehaviour
         MenuManager.Instance.UpdateMatchMakingInfo();
         MenuManager.Instance.IsLoading = false;
     }
-    
-    
+
     void OnCreatedEntityResponse(string jsonResponse, object cbObject)
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;

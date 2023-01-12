@@ -182,7 +182,7 @@ public class MenuManager : MonoBehaviour
         ShieldButton.interactable = user.ShieldTime <= 0;
         if (user.ShieldTime > 1)
         {
-            ShieldTimerText.text = $"Shield Timer: {user.ShieldTime} minutes (Last Updated {DateTime.Now})";    
+            ShieldTimerText.text = $"Shield Timer: On";    
         }
         else
         {
