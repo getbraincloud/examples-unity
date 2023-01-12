@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
@@ -12,6 +13,10 @@ public enum MenuStates {SignIn,MainMenu,Lobby,Game,Connecting}
 
 public class MenuManager : MonoBehaviour
 {
+    [Header("Button References")]
+    public Button ShieldButton;
+    public Button PlaybackLastMatch;
+    
     [Header("Menu States")]
     public List<MenuState> MenuStatesList = new List<MenuState>();
     public MenuStates CurrentMenuState;
@@ -60,6 +65,7 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
+        PlaybackLastMatch.interactable = NetworkManager.Instance.IsPlaybackIDValid();
         if (NetworkManager.Instance.IsSessionValid())
         {
             UpdateMatchMakingInfo();
@@ -173,7 +179,16 @@ public class MenuManager : MonoBehaviour
         UserInfo user = GameManager.Instance.CurrentUserInfo;
         RatingText.text = $"Rating: {user.Rating}";
         MatchesPlayedText.text = $"Matches Played: {user.MatchesPlayed}";
-        ShieldTimerText.text = $"Shield Timer: {user.ShieldTime}";
+        ShieldButton.interactable = user.ShieldTime <= 0;
+        if (user.ShieldTime > 1)
+        {
+            ShieldTimerText.text = $"Shield Timer: {user.ShieldTime} minutes (Last Updated {DateTime.Now})";    
+        }
+        else
+        {
+            ShieldTimerText.text = "Shield Timer: Off";
+        }
+        
     }
 
     public void UpdateButtonSelectorPosition(ArmyType in_type)

@@ -15,6 +15,7 @@ public class DefenderSpawner : MonoBehaviour
     public bool TestingMode;
     private Transform _defenderParent;
     public ArmyDivisionRank TestRank;
+    public Material TeamColorMaterial;
 
     public Transform DefenderParent
     {

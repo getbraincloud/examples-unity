@@ -7,6 +7,7 @@ public class HealthBar : MonoBehaviour
     public Image BorderImage;
     public Image HeartImage;
     private Slider _slider;
+    public Image TeamColorImage;
     private void Awake()
     {
         _slider = GetComponent<Slider>();
@@ -16,7 +17,7 @@ public class HealthBar : MonoBehaviour
 
     public void AssignTeamColor(Color in_teamColor)
     {
-        FillImage.color = in_teamColor;
+        TeamColorImage.color = in_teamColor;
     }
 
     private void AdjustImageBeingActive(bool isActive)

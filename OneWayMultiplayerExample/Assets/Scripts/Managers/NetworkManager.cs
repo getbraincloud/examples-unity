@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using BrainCloud.JsonFx.Json;
@@ -22,14 +23,14 @@ public class NetworkManager : MonoBehaviour
     private BrainCloudWrapper _bcWrapper;
     public static NetworkManager Instance;
     private bool _isNewPlayer;
-    private int _defaultRating = 1000;
-    private long _findPlayersRange = 500;
+    private int _defaultRating = 1200;
+    private long _findPlayersRange = 10000;
     private long _numberOfMatches = 5;
     private string _playbackStreamId;
     private long _incrementRatingAmount = 100;
     private long _decrementRatingAmount = 50;
     private bool _dead;
-    
+    private bool _shieldActive;
     //Summary info
     private int slayCount;
     public int SlayCount
@@ -46,6 +47,8 @@ public class NetworkManager : MonoBehaviour
     {
         get => timeLeft;
     }
+
+    public bool IsPlaybackIDValid() => !_playbackStreamId.IsNullOrEmpty();
     
     private void Awake()
     {
@@ -59,6 +62,7 @@ public class NetworkManager : MonoBehaviour
             Destroy(gameObject);
         }
         DontDestroyOnLoad(gameObject);
+        LoadID();
     }
 
     public bool IsSessionValid()
@@ -147,7 +151,6 @@ public class NetworkManager : MonoBehaviour
     public void SetDefaultPlayerRating()
     {
         GameManager.Instance.CurrentUserInfo.Rating = _defaultRating;
-        _bcWrapper.MatchMakingService.SetPlayerRating(_defaultRating);
         MenuManager.Instance.UpdateMatchMakingInfo();
     }
 
@@ -345,8 +348,19 @@ public class NetworkManager : MonoBehaviour
 
         GameManager.Instance.CurrentUserInfo.Rating = (int) data["playerRating"];
         GameManager.Instance.CurrentUserInfo.MatchesPlayed = (int) data["matchesPlayed"];
-        GameManager.Instance.CurrentUserInfo.ShieldTime = (int) data["shieldExpiry"];
-        
+        var shieldExpiry = (long) data["shieldExpiry"];
+        if (shieldExpiry > 0)
+        {
+            _shieldActive = true;
+            var offset = DateTimeOffset.FromUnixTimeMilliseconds(shieldExpiry);
+            TimeSpan timeSpent = DateTime.Now - offset.Date;
+            GameManager.Instance.CurrentUserInfo.ShieldTime = timeSpent.Minutes;
+        }
+        else
+        {
+            _shieldActive = false;
+        }
+
         MenuManager.Instance.UpdateMatchMakingInfo();
         MenuManager.Instance.IsLoading = false;
     }
@@ -612,6 +626,18 @@ public class NetworkManager : MonoBehaviour
         GameManager.Instance.UpdateSpawnInvaderList();
         LoadID();
         ReadStream();
+    }
+
+    public void TurnOnShield()
+    {
+        if (_shieldActive) return;
+        GameManager.Instance.CurrentUserInfo.ShieldTime = 60;
+        _bcWrapper.MatchMakingService.TurnShieldOnFor(60, OnTurnOnShieldSuccess);
+    }
+
+    private void OnTurnOnShieldSuccess(string jsonResponse, object cbObject)
+    {
+        MenuManager.Instance.UpdateMatchMakingInfo();
     }
 
     public void SummaryInfo(int in_slayCount, int in_defeatedTroops, float in_timeLeft)
