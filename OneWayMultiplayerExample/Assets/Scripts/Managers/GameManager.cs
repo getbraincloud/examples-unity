@@ -124,6 +124,13 @@ public class GameManager : MonoBehaviour
         set => _projectiles = value;
     }
 
+    private List<TroopAI> _troops = new List<TroopAI>();
+    public List<TroopAI> Troops
+    {
+        get => _troops;
+        set => _troops = value;
+    }
+    
     private void Awake()
     {
         if (!_instance)
@@ -290,6 +297,19 @@ public class GameManager : MonoBehaviour
             }
         }
         _projectiles.Clear();
+        
+        //clean up projectiles
+        if (_troops.Count > 0)
+        {
+            foreach (TroopAI troop in _troops)
+            {
+                if (troop != null)
+                {
+                    troop.Dead();    
+                }
+            }
+        }
+        _troops.Clear();
 
         //Do Game over things
         GetSessionManager().StopTimer();

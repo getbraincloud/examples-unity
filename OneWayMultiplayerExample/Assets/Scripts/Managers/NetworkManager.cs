@@ -28,7 +28,7 @@ public class NetworkManager : MonoBehaviour
     private bool _isNewPlayer;
     private int _defaultRating = 1200;
     private long _findPlayersRange = 10000;
-    private long _numberOfMatches = 5;
+    private long _numberOfMatches = 20;
     private string _playbackStreamId;
     private long _incrementRatingAmount = 100;
     private long _decrementRatingAmount = 50;
@@ -496,7 +496,6 @@ public class NetworkManager : MonoBehaviour
     {
         var opponentId = GameManager.Instance.OpponentUserInfo.ProfileId;
         _bcWrapper.OneWayMatchService.StartMatch(opponentId, 1000, OnStartMatchSuccess, OnFailureCallback);
-        _bcWrapper.PlaybackStreamService.StartStream(opponentId,true, null, OnFailureCallback);
     }
 
     private void OnStartMatchSuccess(string in_jsonResponse, object cbObject)

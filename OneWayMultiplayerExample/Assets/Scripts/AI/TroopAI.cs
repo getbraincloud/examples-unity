@@ -231,6 +231,7 @@ public class TroopAI : BaseHealthBehavior
     /// <param name="in_teamID">0 = invader(local player), 1 = defender(network player)</param>
     public void AssignToTeam(int in_teamID)
     {
+        GameManager.Instance.Troops.Add(this);
         TeamID = in_teamID;
         if (in_teamID == 0)
         {
@@ -267,11 +268,22 @@ public class TroopAI : BaseHealthBehavior
     {
         if (_isDead) return;
         _isDead = true;
-        _navMeshAgent.isStopped = true;
-        _navMeshAgent.speed = 0;
-        _navMeshAgent.destination = transform.position;
-        _animator.SetBool(IsAttacking, false);
-        _rigidbodyComp.velocity = Vector3.zero;
+        if (_navMeshAgent && _navMeshAgent.isActiveAndEnabled)
+        {
+            _navMeshAgent.isStopped = true;
+            _navMeshAgent.speed = 0;
+            _navMeshAgent.destination = transform.position;    
+        }
+
+        if (_animator)
+        {
+            _animator.SetBool(IsAttacking, false);    
+        }
+
+        if (_rigidbodyComp)
+        {
+            _rigidbodyComp.velocity = Vector3.zero;    
+        }
         _isAttacking = false;
         _homeLocation = Vector3.zero;
         StartCoroutine(DelayToDeath());
