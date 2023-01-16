@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -24,11 +25,10 @@ public class TroopAI : BaseHealthBehavior
     private int _hitBackForce = 1000;
     
     //Checks every 10 frames for a new target
-    private int _searchTargetInterval = 10;
+    private int _searchTargetInterval = 5;
 
     private bool _isDead;
     private bool _isAttacking;
-    private bool _isSearching;
     private bool _isKnockedBack;
     public bool TargetIsHostile;
     
@@ -54,6 +54,9 @@ public class TroopAI : BaseHealthBehavior
     private const string _nonTargetTag = "NonTarget";
     
     private GameObject _target;
+
+    private readonly int INVADER_COLLISION_LAYER = 6;
+    private readonly int DEFENDER_COLLISION_LAYER = 7;
     
     public GameObject Target { set => _target = value; }
     
@@ -66,42 +69,26 @@ public class TroopAI : BaseHealthBehavior
         _healthBar = GetComponentInChildren<HealthBar>();
         _shootScript = GetComponent<ShootProjectiles>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
+        _currentHealth = StartingHealth;
+        _currentDetectionRadius = _defaultDetectionRadius;
     }
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        _currentDetectionRadius = _defaultDetectionRadius;
-        _currentHealth = StartingHealth;
         if (_healthBar)
         {
             _healthBar.SetMaxHealth(_currentHealth);    
         }
-
         _homeLocation = transform.position;
-        if (!IsInPlaybackMode)
-        {
-            FindTarget();
-        }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         if (_isDead) return;
-
-        if (!_target && !IsInPlaybackMode)
-        {
-            if (!_isSearching)
-            {
-                _isSearching = true;
-                _animator.SetBool(IsAttacking, false);
-                _isAttacking = false;
-                FindTarget();
-            }
-            //return;
-        }
+        
         //Check every "x" frames, x = _searchTargetInterval
-        if (Time.frameCount % _searchTargetInterval == 0 && !IsInPlaybackMode)
+        if (Time.frameCount % _searchTargetInterval == 0 && !IsInPlaybackMode && !_target)
         {
             FindTarget();
         }
@@ -141,13 +128,14 @@ public class TroopAI : BaseHealthBehavior
             CurrentState = TroopStates.Attack;
             _navMeshAgent.isStopped = true;
             RotateToTarget();
-            if (EnemyType != EnemyTypes.Shooter)
+            if (EnemyType == EnemyTypes.Grunt || 
+                EnemyType == EnemyTypes.Soldier)
             {
-                PerformAction();    
+                PlayAttackAnimation(); 
             }
             else if (IsFacingObject())
             {
-                PerformAction();
+                PlayAttackAnimation();
             }
         }
     }
@@ -191,31 +179,11 @@ public class TroopAI : BaseHealthBehavior
         _currQuat = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, _currQuat, RotationSpeed * Time.deltaTime);
     }
-    
-    //Try to make this a slottable action so this function never has to be overridden
-    private void PerformAction()
-    {
-        switch (EnemyType)
-        {
-            case EnemyTypes.Grunt:
-            case EnemyTypes.Soldier:
-                MeleeTarget();
-                break;
-            case EnemyTypes.Shooter:
-                StartShootingAnimation();
-                break;
-        }
-    }
 
-    private void MeleeTarget()
+    private void PlayAttackAnimation()
     {
         if (_isAttacking) return;
         _isAttacking = true;
-        _animator.SetBool(IsAttacking, true);
-    }
-
-    private void StartShootingAnimation()
-    {
         _animator.SetBool(IsAttacking, true);
     }
     
@@ -239,10 +207,15 @@ public class TroopAI : BaseHealthBehavior
             _activeMask = DefenderMask;
             if (_meleeWeapon)
             {
-                _meleeWeapon.gameObject.layer = 6; 
+                _meleeWeapon.gameObject.layer = INVADER_COLLISION_LAYER; 
+            }
+
+            if (IsInPlaybackMode && NetworkManager.Instance.DidInvadersWin)
+            {
+                _currentHealth += StartingHealth / 3;
             }
             //6 = Invader Layer, 7 = Defender Layer
-            gameObject.layer = 6;
+            gameObject.layer = INVADER_COLLISION_LAYER;
             _healthBar.AssignTeamColor(Color.blue);
         }
         else
@@ -251,10 +224,14 @@ public class TroopAI : BaseHealthBehavior
             _activeMask = InvaderMask;
             if (_meleeWeapon)
             {
-                _meleeWeapon.gameObject.layer = 7; 
+                _meleeWeapon.gameObject.layer = DEFENDER_COLLISION_LAYER; 
+            }
+            if (IsInPlaybackMode && !NetworkManager.Instance.DidInvadersWin)
+            {
+                _currentHealth += StartingHealth / 3;
             }
             //6 = Invader Layer, 7 = Defender Layer
-            gameObject.layer = 7;
+            gameObject.layer = DEFENDER_COLLISION_LAYER;
             _healthBar.AssignTeamColor(Color.red);
         }
     }
@@ -274,6 +251,8 @@ public class TroopAI : BaseHealthBehavior
             _navMeshAgent.speed = 0;
             _navMeshAgent.destination = transform.position;    
         }
+
+        GetComponent<BoxCollider>().enabled = false;
 
         if (_animator)
         {
@@ -301,6 +280,18 @@ public class TroopAI : BaseHealthBehavior
             if(NetworkManager.Instance != null)
                 NetworkManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
         }
+        
+        yield return new WaitForFixedUpdate();
+        yield return new WaitForFixedUpdate();
+        
+        if (!GameManager.Instance.IsInPlaybackMode)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnDestroy()
+    {
         //Check if troop is an invader or defender
         if (TeamID == 0)
         {
@@ -311,14 +302,6 @@ public class TroopAI : BaseHealthBehavior
         {
             //Defender
             GameManager.Instance.DefenderTroopCount--;
-        }
-
-        yield return new WaitForFixedUpdate();
-        yield return new WaitForFixedUpdate();
-        
-        if (!GameManager.Instance.IsInPlaybackMode)
-        {
-            Destroy(gameObject);
         }
     }
 
@@ -342,13 +325,16 @@ public class TroopAI : BaseHealthBehavior
     }
     
     //meant for stun effect
-    IEnumerator DelayToResumeMovement()
+    private IEnumerator DelayToResumeMovement()
     {
         yield return new WaitForSeconds(_delayBeforeResume);
         _rigidbodyComp.velocity = Vector3.zero;
         _stunCoroutine = null;
         _isKnockedBack = false;
-        _navMeshAgent.isStopped = false;
+        if (_navMeshAgent.isActiveAndEnabled)
+        {
+            _navMeshAgent.isStopped = false;    
+        }
     }
 
     private void FindTarget()
@@ -381,7 +367,7 @@ public class TroopAI : BaseHealthBehavior
         if (_target != null && previousTarget != _target)
         {
             _currentDetectionRadius = _defaultDetectionRadius;
-            _isSearching = false;
+            //_isSearching = false;
             //Send target info as event for playback
             int targetID = -1;
             int targetTeamID = -1;
@@ -390,7 +376,7 @@ public class TroopAI : BaseHealthBehavior
                 TroopAI targetTroop = null;
                 targetTroop = _target.GetComponent<TroopAI>();
                 targetID = targetTroop.EntityID;
-                targetTeamID = targetTroop.TeamID;
+                targetTeamID = targetTroop.TeamID;   
             }
             else
             {

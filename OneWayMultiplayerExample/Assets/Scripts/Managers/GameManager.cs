@@ -363,6 +363,10 @@ public class GameManager : MonoBehaviour
         var _defenderSpawner = FindObjectOfType<DefenderSpawner>();
         if (_defenderSpawner)
         {
+            if (!IsInPlaybackMode)
+            {
+                _defenderIDs.Clear();
+            }
             //Set up defenders
             _defenderSpawner.SpawnDefenderSetup();
             _defenderStructParent = _defenderSpawner.DefenderParent;

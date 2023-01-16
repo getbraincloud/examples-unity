@@ -37,6 +37,7 @@ public class DefenderSpawner : MonoBehaviour
         TroopAI troopToSpawn;
         _addOffset = false;
         _spawnPointIndex = 0;
+        int indexID = 0;
         GameManager.Instance.DefenderTroopCount = 0;
         List<SpawnInfo> spawnList = GameManager.Instance.DefenderSpawnInfo;
         //Spawn in troops based on spawner data
@@ -60,9 +61,10 @@ public class DefenderSpawner : MonoBehaviour
                 if (GameManager.Instance.IsInPlaybackMode)
                 {
                     //Assign the ID
-                    troop.EntityID = GameManager.Instance.DefenderIDs[_spawnPointIndex];
+                    troop.EntityID = GameManager.Instance.DefenderIDs[indexID];
                     troop.IsInPlaybackMode = true;
                     PlaybackStreamManager.Instance.DefendersList.Add(troop);
+                    indexID++;
                 }
                 else
                 {

@@ -26,7 +26,7 @@ public class ProjectileMovement : MonoBehaviour
         StartCoroutine(DelayToDestroy());
     }
 
-    IEnumerator DelayToDestroy()
+    private IEnumerator DelayToDestroy()
     {
         yield return new WaitForSeconds(LifeTimeDuration);
 

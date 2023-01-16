@@ -6,7 +6,7 @@ public class Billboard : MonoBehaviour
 {
     private Transform _cam;
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         _cam = FindObjectOfType<Camera>().transform;
         if (!_cam)
@@ -16,7 +16,7 @@ public class Billboard : MonoBehaviour
     }
 
     // Update is called once per frame
-    void LateUpdate()
+    private void LateUpdate()
     {
         transform.LookAt(transform.position + _cam.forward);
     }

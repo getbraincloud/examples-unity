@@ -31,7 +31,7 @@ public class SpawnController : MonoBehaviour
     private const string _targetTag = "Target";
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (Input.GetButtonDown("Fire1") && 
             _timer < Time.realtimeSinceStartup)

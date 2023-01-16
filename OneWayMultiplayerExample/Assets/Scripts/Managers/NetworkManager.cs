@@ -34,6 +34,12 @@ public class NetworkManager : MonoBehaviour
     private long _decrementRatingAmount = 50;
     private bool _dead;
     private bool _shieldActive;
+    private bool _didInvadersWin;
+
+    public bool DidInvadersWin
+    {
+        get => _didInvadersWin;
+    }
     //Summary info
     private int slayCount;
     public int SlayCount
@@ -140,7 +146,7 @@ public class NetworkManager : MonoBehaviour
         _bcWrapper.MatchMakingService.EnableMatchMaking(OnEnableMatchMaking, OnFoundPlayersError);
     }
 
-    void OnEnableMatchMaking(string jsonResponse, object cbObject)
+    private void OnEnableMatchMaking(string jsonResponse, object cbObject)
     {
         _bcWrapper.MatchMakingService.FindPlayers
         (
@@ -157,7 +163,7 @@ public class NetworkManager : MonoBehaviour
         MenuManager.Instance.UpdateMatchMakingInfo();
     }
 
-    void OnFoundPlayers(string jsonResponse, object cbObject)
+    private void OnFoundPlayers(string jsonResponse, object cbObject)
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string,object>;
@@ -192,7 +198,7 @@ public class NetworkManager : MonoBehaviour
         MenuManager.Instance.UpdateLobbyList(users);
     }
 
-    void OnFoundPlayersError(int status, int reasonCode, string jsonError, object cbObject)
+    private void OnFoundPlayersError(int status, int reasonCode, string jsonError, object cbObject)
     {
         List<UserInfo> emptyList = new List<UserInfo>();
         MenuManager.Instance.UpdateLobbyList(emptyList);
@@ -200,7 +206,7 @@ public class NetworkManager : MonoBehaviour
     }
     
     // User authenticated, handle the result
-    void HandlePlayerState(string jsonResponse, object cbObject)
+    private void HandlePlayerState(string jsonResponse, object cbObject)
     {
         var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var data = response["data"] as Dictionary<string, object>;
@@ -237,7 +243,7 @@ public class NetworkManager : MonoBehaviour
     }
     
     // Go back to login screen, with an error message
-    void OnFailureCallback(int status, int reasonCode, string jsonError, object cbObject)
+    private void OnFailureCallback(int status, int reasonCode, string jsonError, object cbObject)
     {
         if (_dead) return;
         _bcWrapper.Client.ResetCommunication();
@@ -252,7 +258,7 @@ public class NetworkManager : MonoBehaviour
     }
     
     // User fully logged in. 
-    void OnLoggedIn(string jsonResponse, object cbObject)
+    private void OnLoggedIn(string jsonResponse, object cbObject)
     {
         //Check if this is a new login, if so then check if this user has entities
         if (!_isNewPlayer)
@@ -278,7 +284,7 @@ public class NetworkManager : MonoBehaviour
         }
     }
     
-    void OnValidEntityResponse(string jsonResponse, object cbObject)
+    private void OnValidEntityResponse(string jsonResponse, object cbObject)
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string,object>;
@@ -306,7 +312,7 @@ public class NetworkManager : MonoBehaviour
         GetUserRating();
     }
 
-    void OnReadEntitiesByTypeResponse(string jsonResponse, object cbObject)
+    private void OnReadEntitiesByTypeResponse(string jsonResponse, object cbObject)
     {
         //Read in the entities, if list is empty than create a new entity.
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
@@ -362,7 +368,7 @@ public class NetworkManager : MonoBehaviour
 
             GameManager.Instance.CurrentUserInfo.ShieldTime = difference.Minutes;
         }
-        catch (Exception e)
+        catch 
         {
             GameManager.Instance.CurrentUserInfo.ShieldTime = 0;
             _shieldActive = false;
@@ -372,7 +378,7 @@ public class NetworkManager : MonoBehaviour
         MenuManager.Instance.IsLoading = false;
     }
 
-    void OnCreatedEntityResponse(string jsonResponse, object cbObject)
+    private void OnCreatedEntityResponse(string jsonResponse, object cbObject)
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
@@ -423,6 +429,7 @@ public class NetworkManager : MonoBehaviour
 
     public void GameCompleted(bool in_didPlayerWin)
     {
+        _didInvadersWin = in_didPlayerWin;
         if (in_didPlayerWin)
         {
             _bcWrapper.MatchMakingService.IncrementPlayerRating(_incrementRatingAmount, OnAdjustPlayerRating, OnFailureCallback);
@@ -495,7 +502,7 @@ public class NetworkManager : MonoBehaviour
     public void StartMatch()
     {
         var opponentId = GameManager.Instance.OpponentUserInfo.ProfileId;
-        _bcWrapper.OneWayMatchService.StartMatch(opponentId, 1000, OnStartMatchSuccess, OnFailureCallback);
+        _bcWrapper.OneWayMatchService.StartMatch(opponentId, _findPlayersRange, OnStartMatchSuccess, OnFailureCallback);
     }
 
     private void OnStartMatchSuccess(string in_jsonResponse, object cbObject)
@@ -542,6 +549,7 @@ public class NetworkManager : MonoBehaviour
             defeatedTroops = (int) summary["defeatedTroops"];
             double value = (double) summary["timeLeft"];
             timeLeft = (float) value;
+            _didInvadersWin = (bool) summary["didInvadersWin"];
         }
 
         for (int i = 0; i < events.Length; i++)
@@ -652,17 +660,18 @@ public class NetworkManager : MonoBehaviour
         timeLeft = in_timeLeft;
     }
 
-    string CreateEndGameSummaryData()
+    private string CreateEndGameSummaryData()
     {
         Dictionary<string, object> summaryData = new Dictionary<string, object>();
         summaryData.Add("slayCount", slayCount);
         summaryData.Add("defeatedTroops", defeatedTroops);
         summaryData.Add("timeLeft", timeLeft);
+        summaryData.Add("didInvadersWin", _didInvadersWin);
         string value = JsonWriter.Serialize(summaryData);
         return value;
     }
 
-    string CreateSummaryData()
+    private string CreateSummaryData()
     {
         int total = GameManager.Instance.RemainingStructures();
         Dictionary<string, object> summaryData = new Dictionary<string, object>();
@@ -671,7 +680,7 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    string CreateJsonSpawnEventData(Vector3 in_spawnPoint, TroopAI in_troop)
+    private string CreateJsonSpawnEventData(Vector3 in_spawnPoint, TroopAI in_troop)
     {
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Spawn);
@@ -685,7 +694,7 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    string CreateJsonTargetEventData(TroopAI in_troop, int in_targetID, int in_targetTeamID)
+    private string CreateJsonTargetEventData(TroopAI in_troop, int in_targetID, int in_targetTeamID)
     {
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Target);
@@ -698,7 +707,7 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    string CreateJsonDestroyEventData(int in_entityID, int in_teamID)
+    private string CreateJsonDestroyEventData(int in_entityID, int in_teamID)
     {
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Destroy);
@@ -709,7 +718,7 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    string CreateJsonIdsEventData()
+    private string CreateJsonIdsEventData()
     {
         Dictionary<string, object> eventData = new Dictionary<string, object>();
         eventData.Add("eventId", (int)EventId.Ids);
@@ -734,7 +743,7 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    string CreateJsonEntityData(bool in_isDataNew)
+    private string CreateJsonEntityData(bool in_isDataNew)
     {
         Dictionary<string, object> entityInfo = new Dictionary<string, object>();
         if (in_isDataNew)
@@ -753,7 +762,7 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    string CreateACLJson()
+    private string CreateACLJson()
     {
         Dictionary<string, object> aclInfo = new Dictionary<string, object>();
         aclInfo.Add("other", 2);

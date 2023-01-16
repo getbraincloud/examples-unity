@@ -50,7 +50,7 @@ public class LoadingMenuState : MenuState
         StartCoroutine(WaitForResponse());
     }
     
-    IEnumerator WaitForResponse()
+    private IEnumerator WaitForResponse()
     {
         while (MenuManager.Instance.IsLoading)
         {

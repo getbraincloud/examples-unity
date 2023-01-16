@@ -32,7 +32,7 @@ public class PlaybackStreamManager : MonoBehaviour
     private float _value;
     private int _frameId;
 
-    void Awake()
+    private void Awake()
     {
         if (!_instance)
         {
@@ -71,7 +71,7 @@ public class PlaybackStreamManager : MonoBehaviour
         _replayCoroutine = StartCoroutine(StartPlayBack());
     }
 
-    IEnumerator StartPlayBack()
+    private IEnumerator StartPlayBack()
     {
         replayIndex = 0;
         var _actionReplayRecords = GameManager.Instance.ReplayRecords;
