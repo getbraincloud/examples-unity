@@ -6,7 +6,7 @@ Overview
 	There are many ways to solve this functionality, but in the following example, the player creates ReadOnly User Entities to define their defense and invasion information and then records specific events during gameplay to then replay the raid. In this example we only save one playback stream ID but it is possible to do this for more than one Playback Stream.
 
 	In this example, users can select which set of troops for your invaders team and/or defenders team for their profile. 
-	For simplicity the sets will be labeled similar to difficulty (easy,medium,hard). 
+	For simplicity the sets will be labeled similar to difficulty (easy,medium,hard) and within each set holds information such as troop prefab reference and number of troops that can be summoned for each type. 
 	Once selections have been made, user can look for other players to invade as long as they're in the same player rating range as other players, otherwise this will show up blank. 
 
 	Once a player has been selected, user will load to a game scene level. 

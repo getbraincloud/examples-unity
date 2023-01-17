@@ -30,6 +30,11 @@ public class SpawnController : MonoBehaviour
 
     private const string _targetTag = "Target";
 
+    private void Start()
+    {
+        GameManager.Instance.SessionManager.UpdateBorderPosition(0);
+    }
+
     // Update is called once per frame
     private void Update()
     {
@@ -105,6 +110,7 @@ public class SpawnController : MonoBehaviour
 
     public void TroopChange(EnemyTypes troopChangedTo)
     {
+        GameManager.Instance.SessionManager.UpdateBorderPosition((int) troopChangedTo);
         for (int i = 0; i < troopList.Count; i++)
         {
             if (troopList[i].TroopType == troopChangedTo)

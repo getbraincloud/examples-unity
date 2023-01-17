@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -21,7 +22,9 @@ public class GameSessionManager : MonoBehaviour
     public GameObject ConfirmPopUp;
     public GameObject StopStreamButton;
     public GameObject TroopView;
+    public RectTransform ButtonBorder;
     
+    private readonly List<float> _selectionXPlacement = new List<float> {-134, 132, 0};
     private float _startTime;
     private float _gameSessionTimer;
     private float _value;
@@ -67,6 +70,14 @@ public class GameSessionManager : MonoBehaviour
             StopStreamButton.SetActive(true);
             TroopView.SetActive(false);
         }
+    }
+
+    public void UpdateBorderPosition(int index)
+    {
+        Vector2 pos = ButtonBorder.anchoredPosition;
+        pos.y = 12;
+        pos.x = _selectionXPlacement[index];
+        ButtonBorder.anchoredPosition = pos;
     }
     
     private void FixedUpdate()
