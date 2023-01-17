@@ -128,6 +128,269 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1876719549554092449, guid: 3594e143a3dfae7488b6fefd7b70bf41, type: 3}
   m_PrefabInstance: {fileID: 5887602022998973592}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &65301464
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 65301465}
+  - component: {fileID: 65301467}
+  - component: {fileID: 65301466}
+  m_Layer: 5
+  m_Name: LogText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &65301465
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65301464}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 439471206}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &65301466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65301464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: "[\r\n    {\r\n        \"_id\": \"63c72de990089f5a841d3211\",\r\n       
+    \"index\": 0,\r\n        \"guid\": \"b36d377c-1ad2-45d7-8feb-aa7d982737a9\",\r\n       
+    \"isActive\": true,\r\n        \"balance\": \"$2,450.75\",\r\n        \"picture\":
+    \"http://placehold.it/32x32\",\r\n        \"age\": 33,\r\n        \"eyeColor\":
+    \"blue\",\r\n        \"name\": \"Myra Burris\",\r\n        \"gender\": \"female\",\r\n       
+    \"company\": \"WAAB\",\r\n        \"email\": \"myraburris@waab.com\",\r\n       
+    \"phone\": \"+1 (838) 521-3034\",\r\n        \"address\": \"475 Waldorf Court,
+    Lumberton, Ohio, 1919\",\r\n        \"about\": \"Quis do Lorem consectetur dolore.
+    Nulla deserunt elit qui est cillum cupidatat. Consectetur anim nisi enim qui
+    cillum. Sint do minim minim cillum labore consequat.\\r\\n\",\r\n        \"registered\":
+    \"2020-12-27T04:55:22 +05:00\",\r\n        \"latitude\": -38.924465,\r\n       
+    \"longitude\": 89.393819,\r\n        \"tags\": [\r\n            \"veniam\",\r\n           
+    \"ea\",\r\n            \"ex\",\r\n            \"eiusmod\",\r\n            \"minim\",\r\n           
+    \"laboris\",\r\n            \"esse\"\r\n        ],\r\n        \"friends\": [\r\n           
+    {\r\n                \"id\": 0,\r\n                \"name\": \"Bowers Colon\"\r\n           
+    },\r\n            {\r\n                \"id\": 1,\r\n                \"name\":
+    \"Barbra Rivera\"\r\n            },\r\n            {\r\n                \"id\":
+    2,\r\n                \"name\": \"Angeline Floyd\"\r\n            }\r\n       
+    ],\r\n        \"greeting\": \"Hello, Myra Burris! You have 9 unread messages.\",\r\n       
+    \"favoriteFruit\": \"strawberry\"\r\n    },\r\n    {\r\n        \"_id\": \"63c72de93183c07d061f0f13\",\r\n       
+    \"index\": 1,\r\n        \"guid\": \"4c6ecb94-02e2-4999-8b11-55f4ac73d310\",\r\n       
+    \"isActive\": true,\r\n        \"balance\": \"$2,639.27\",\r\n        \"picture\":
+    \"http://placehold.it/32x32\",\r\n        \"age\": 22,\r\n        \"eyeColor\":
+    \"brown\",\r\n        \"name\": \"Earlene Anderson\",\r\n        \"gender\":
+    \"female\",\r\n        \"company\": \"COSMETEX\",\r\n        \"email\": \"earleneanderson@cosmetex.com\",\r\n       
+    \"phone\": \"+1 (849) 541-2604\",\r\n        \"address\": \"933 Hoyt Street,
+    Oceola, Utah, 7860\",\r\n        \"about\": \"Aliqua ut ad ad consequat fugiat
+    aute ex ex amet anim. Qui ad dolor aliquip in deserunt proident cupidatat cillum
+    deserunt sunt culpa. Ullamco officia laborum deserunt labore eiusmod cupidatat
+    culpa do dolor cillum laborum dolor ea exercitation.\\r\\n\",\r\n        \"registered\":
+    \"2020-08-23T07:42:14 +04:00\",\r\n        \"latitude\": 44.011794,\r\n       
+    \"longitude\": 162.88254,\r\n        \"tags\": [\r\n            \"velit\",\r\n           
+    \"occaecat\",\r\n            \"eiusmod\",\r\n            \"ex\",\r\n           
+    \"in\",\r\n            \"ullamco\",\r\n            \"et\"\r\n        ],\r\n       
+    \"friends\": [\r\n            {\r\n                \"id\": 0,\r\n               
+    \"name\": \"Branch Moran\"\r\n            },\r\n            {\r\n               
+    \"id\": 1,\r\n                \"name\": \"Fulton Cameron\"\r\n            },\r\n           
+    {\r\n                \"id\": 2,\r\n                \"name\": \"Bender Craig\"\r\n           
+    }\r\n        ],\r\n        \"greeting\": \"Hello, Earlene Anderson! You have
+    4 unread messages.\",\r\n        \"favoriteFruit\": \"strawberry\"\r\n    },\r\n   
+    {\r\n        \"_id\": \"63c72de9dd599a7767cc298b\",\r\n        \"index\": 2,\r\n       
+    \"guid\": \"7fa7c98f-8cbe-4afe-b775-8c7935db9cbb\",\r\n        \"isActive\":
+    true,\r\n        \"balance\": \"$1,120.03\",\r\n        \"picture\": \"http://placehold.it/32x32\",\r\n       
+    \"age\": 27,\r\n        \"eyeColor\": \"green\",\r\n        \"name\": \"Carver
+    Tanner\",\r\n        \"gender\": \"male\",\r\n        \"company\": \"NIXELT\",\r\n       
+    \"email\": \"carvertanner@nixelt.com\",\r\n        \"phone\": \"+1 (905) 524-3388\",\r\n       
+    \"address\": \"403 Story Court, Maybell, Texas, 6825\",\r\n        \"about\":
+    \"Reprehenderit nostrud laboris laboris deserunt id ea dolor tempor incididunt
+    enim duis ut. Ex Lorem ea dolore do eiusmod. Officia qui quis Lorem ut adipisicing
+    mollit eiusmod esse aute magna commodo adipisicing.\\r\\n\",\r\n        \"registered\":
+    \"2018-06-05T10:08:37 +04:00\",\r\n        \"latitude\": -2.201726,\r\n       
+    \"longitude\": 14.198408,\r\n        \"tags\": [\r\n            \"cupidatat\",\r\n           
+    \"eiusmod\",\r\n            \"sit\",\r\n            \"incididunt\",\r\n           
+    \"tempor\",\r\n            \"esse\",\r\n            \"eu\"\r\n        ],\r\n       
+    \"friends\": [\r\n            {\r\n                \"id\": 0,\r\n               
+    \"name\": \"Francesca Waters\"\r\n            },\r\n            {\r\n               
+    \"id\": 1,\r\n                \"name\": \"Alisha Lawrence\"\r\n            },\r\n           
+    {\r\n                \"id\": 2,\r\n                \"name\": \"Estrada Weeks\"\r\n           
+    }\r\n        ],\r\n        \"greeting\": \"Hello, Carver Tanner! You have 9 unread
+    messages.\",\r\n        \"favoriteFruit\": \"banana\"\r\n    },\r\n    {\r\n       
+    \"_id\": \"63c72de937bc8d9f9cf7ccf7\",\r\n        \"index\": 3,\r\n        \"guid\":
+    \"6a31bd31-e8d4-4d18-959d-1faa6a03ac09\",\r\n        \"isActive\": true,\r\n       
+    \"balance\": \"$3,148.29\",\r\n        \"picture\": \"http://placehold.it/32x32\",\r\n       
+    \"age\": 29,\r\n        \"eyeColor\": \"blue\",\r\n        \"name\": \"Weeks
+    Lambert\",\r\n        \"gender\": \"male\",\r\n        \"company\": \"KAGE\",\r\n       
+    \"email\": \"weekslambert@kage.com\",\r\n        \"phone\": \"+1 (955) 481-2214\",\r\n       
+    \"address\": \"426 Fayette Street, Vowinckel, West Virginia, 7248\",\r\n       
+    \"about\": \"Elit incididunt aliqua aliqua aliquip in nisi sunt officia do amet
+    eu minim nisi mollit. Velit Lorem non voluptate dolor occaecat. Id Lorem consequat
+    reprehenderit qui cillum laboris. Voluptate labore sunt enim et qui ex elit.
+    Eu tempor laborum irure laborum non nostrud consectetur voluptate deserunt. Lorem
+    eu culpa ex nostrud. Sit commodo non cillum enim est reprehenderit aliqua aute
+    duis sunt irure.\\r\\n\",\r\n        \"registered\": \"2018-04-12T03:03:05 +04:00\",\r\n       
+    \"latitude\": -60.042443,\r\n        \"longitude\": 76.879621,\r\n        \"tags\":
+    [\r\n            \"est\",\r\n            \"minim\",\r\n            \"eiusmod\",\r\n           
+    \"ex\",\r\n            \"ipsum\",\r\n            \"elit\",\r\n            \"deserunt\"\r\n       
+    ],\r\n        \"friends\": [\r\n            {\r\n                \"id\": 0,\r\n               
+    \"name\": \"Selena Carney\"\r\n            },\r\n            {\r\n               
+    \"id\": 1,\r\n                \"name\": \"Zimmerman Hancock\"\r\n           
+    },\r\n            {\r\n                \"id\": 2,\r\n                \"name\":
+    \"Kline Rich\"\r\n            }\r\n        ],\r\n        \"greeting\": \"Hello,
+    Weeks Lambert! You have 4 unread messages.\",\r\n        \"favoriteFruit\": \"strawberry\"\r\n   
+    },\r\n    {\r\n        \"_id\": \"63c72de94730f84628b8ea34\",\r\n        \"index\":
+    4,\r\n        \"guid\": \"cb03a6f1-ee7a-4bd8-b80a-2175146cbbf7\",\r\n       
+    \"isActive\": false,\r\n        \"balance\": \"$1,837.64\",\r\n        \"picture\":
+    \"http://placehold.it/32x32\",\r\n        \"age\": 24,\r\n        \"eyeColor\":
+    \"green\",\r\n        \"name\": \"Steele Butler\",\r\n        \"gender\": \"male\",\r\n       
+    \"company\": \"DATACATOR\",\r\n        \"email\": \"steelebutler@datacator.com\",\r\n       
+    \"phone\": \"+1 (806) 548-3752\",\r\n        \"address\": \"606 Neptune Court,
+    Mulberry, Mississippi, 205\",\r\n        \"about\": \"Magna ea eiusmod amet irure
+    nostrud officia ea sunt ex et aute cillum incididunt Lorem. Anim eu dolore occaecat
+    irure esse laborum Lorem eiusmod exercitation exercitation ut adipisicing aliquip
+    deserunt. Eu excepteur id aliqua enim. Commodo enim commodo id et deserunt magna
+    non irure occaecat fugiat elit elit laborum. Dolore laboris exercitation qui
+    magna aliquip fugiat reprehenderit amet et cillum qui. Dolor ex adipisicing proident
+    fugiat nisi proident quis anim voluptate.\\r\\n\",\r\n        \"registered\":
+    \"2016-03-24T09:54:48 +04:00\",\r\n        \"latitude\": -57.883437,\r\n       
+    \"longitude\": -171.270271,\r\n        \"tags\": [\r\n            \"incididunt\",\r\n           
+    \"adipisicing\",\r\n            \"eiusmod\",\r\n            \"mollit\",\r\n           
+    \"aute\",\r\n            \"ea\",\r\n            \"dolore\"\r\n        ],\r\n       
+    \"friends\": [\r\n            {\r\n                \"id\": 0,\r\n               
+    \"name\": \"Goldie Palmer\"\r\n            },\r\n            {\r\n               
+    \"id\": 1,\r\n                \"name\": \"Mitzi Stout\"\r\n            },\r\n           
+    {\r\n                \"id\": 2,\r\n                \"name\": \"Sullivan Frost\"\r\n           
+    }\r\n        ],\r\n        \"greeting\": \"Hello, Steele Butler! You have 10
+    unread messages.\",\r\n        \"favoriteFruit\": \"apple\"\r\n    },\r\n   
+    {\r\n        \"_id\": \"63c72de9fe01fa65056b1ff1\",\r\n        \"index\": 5,\r\n       
+    \"guid\": \"b66a7b74-1c35-4437-ba33-b24eb684884b\",\r\n        \"isActive\":
+    true,\r\n        \"balance\": \"$3,824.49\",\r\n        \"picture\": \"http://placehold.it/32x32\",\r\n       
+    \"age\": 21,\r\n        \"eyeColor\": \"blue\",\r\n        \"name\": \"Lara Pickett\",\r\n       
+    \"gender\": \"female\",\r\n        \"company\": \"MARVANE\",\r\n        \"email\":
+    \"larapickett@marvane.com\",\r\n        \"phone\": \"+1 (902) 443-2606\",\r\n       
+    \"address\": \"690 Albany Avenue, Naomi, South Carolina, 818\",\r\n        \"about\":
+    \"In velit occaecat voluptate nostrud culpa nulla sit commodo tempor do excepteur
+    nostrud. Exercitation sint enim quis cupidatat enim ex Lorem nulla. Irure id
+    ut veniam dolor culpa excepteur dolore excepteur esse amet reprehenderit ut sunt
+    adipisicing. Mollit culpa est nisi qui culpa. Do amet cupidatat occaecat minim
+    culpa cupidatat. Qui irure sunt mollit consectetur fugiat nulla irure ut id culpa
+    sit sint nostrud.\\r\\n\",\r\n        \"registered\": \"2019-12-23T09:47:18 +05:00\",\r\n       
+    \"latitude\": -16.450666,\r\n        \"longitude\": 114.711833,\r\n        \"tags\":
+    [\r\n            \"reprehenderit\",\r\n            \"incididunt\",\r\n           
+    \"consectetur\",\r\n            \"ex\",\r\n            \"reprehenderit\",\r\n           
+    \"aliqua\",\r\n            \"occaecat\"\r\n        ],\r\n        \"friends\":
+    [\r\n            {\r\n                \"id\": 0,\r\n                \"name\":
+    \"Cobb Little\"\r\n            },\r\n            {\r\n                \"id\":
+    1,\r\n                \"name\": \"Mercer Alexander\"\r\n            },\r\n           
+    {\r\n                \"id\": 2,\r\n                \"name\": \"Park Fletcher\"\r\n           
+    }\r\n        ],\r\n        \"greeting\": \"Hello, Lara Pickett! You have 1 unread
+    messages.\",\r\n        \"favoriteFruit\": \"strawberry\"\r\n    }\r\n]\u200B"
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 1081c6bd30b67274a9c17abf0fbccc79, type: 2}
+  m_sharedMaterial: {fileID: -7312398999317667924, guid: 1081c6bd30b67274a9c17abf0fbccc79, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 14
+  m_fontSizeBase: 14
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 1
+  m_VerticalAlignment: 256
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_enableWordWrapping: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 1
+  m_enableExtraPadding: 1
+  checkPaddingRequired: 0
+  m_isRichText: 0
+  m_parseCtrlCharacters: 0
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &65301467
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65301464}
+  m_CullTransparentMesh: 1
 --- !u!1 &66964037
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,7 +442,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -817,12 +1080,12 @@ RectTransform:
   m_Children:
   - {fileID: 1551978498}
   m_Father: {fileID: 593986999}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 8, y: 0}
-  m_SizeDelta: {x: 8, y: -0}
+  m_AnchoredPosition: {x: 12, y: 0}
+  m_SizeDelta: {x: 8, y: -16}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &88628252
 MonoBehaviour:
@@ -837,7 +1100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -845,11 +1108,11 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 0, g: 0, b: 0, a: 0.5019608}
+    m_HighlightedColor: {r: 0, g: 0, b: 0, a: 0.627451}
+    m_PressedColor: {r: 0, g: 0, b: 0, a: 0.7529412}
+    m_SelectedColor: {r: 0, g: 0, b: 0, a: 0.5019608}
+    m_DisabledColor: {r: 0, g: 0, b: 0, a: 0}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -867,8 +1130,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 751598709}
   m_HandleRect: {fileID: 751598708}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.08458688
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1258,43 +1521,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8526582274026182566, guid: f2f017c2efd01714e8e24c9cdc1132b0, type: 3}
   m_PrefabInstance: {fileID: 8526582274134473375}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &185187168
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 185187169}
-  m_Layer: 5
-  m_Name: SlidingArea
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &185187169
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 185187168}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1147758715}
-  m_Father: {fileID: 1566503769}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &199942931
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1801,7 +2027,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: -16}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &362044899
 MonoBehaviour:
@@ -1826,7 +2052,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 439471206}
+  - component: {fileID: 439471208}
   - component: {fileID: 439471207}
+  - component: {fileID: 439471210}
+  - component: {fileID: 439471211}
   m_Layer: 5
   m_Name: LogContent
   m_TagString: Untagged
@@ -1845,13 +2074,14 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 65301465}
   m_Father: {fileID: 362044898}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.00012207031}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &439471207
@@ -1863,10 +2093,74 @@ MonoBehaviour:
   m_GameObject: {fileID: 439471205}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: ef3155e7dc9cfb9428f2cfa22e3339f4, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &439471208
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439471205}
+  m_CullTransparentMesh: 1
+--- !u!114 &439471210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439471205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 8
+    m_Right: 8
+    m_Top: 8
+    m_Bottom: 8
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
+--- !u!114 &439471211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439471205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
+  m_HorizontalFit: 0
   m_VerticalFit: 2
 --- !u!1001 &494201666
 PrefabInstance:
@@ -2527,7 +2821,6 @@ GameObject:
   - component: {fileID: 593987000}
   - component: {fileID: 593987002}
   - component: {fileID: 593987001}
-  - component: {fileID: 593987003}
   m_Layer: 5
   m_Name: LogScrollPanel
   m_TagString: Untagged
@@ -2548,13 +2841,12 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 362044898}
-  - {fileID: 1566503769}
   - {fileID: 88628251}
   m_Father: {fileID: 1654306564}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.508, y: 0}
-  m_AnchorMax: {x: 0.9850001, y: 0.8683986}
+  m_AnchorMin: {x: 0.507, y: 0}
+  m_AnchorMax: {x: 0.984, y: 0.8683986}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2588,44 +2880,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 593986998}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.2509804}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ef3155e7dc9cfb9428f2cfa22e3339f4, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &593987002
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 593986998}
-  m_CullTransparentMesh: 1
---- !u!114 &593987003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 593986998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
@@ -2636,17 +2890,34 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 20
   m_Viewport: {fileID: 362044898}
-  m_HorizontalScrollbar: {fileID: 1566503770}
+  m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 88628252}
   m_HorizontalScrollbarVisibility: 1
   m_VerticalScrollbarVisibility: 1
-  m_HorizontalScrollbarSpacing: -8
-  m_VerticalScrollbarSpacing: -8
+  m_HorizontalScrollbarSpacing: 0
+  m_VerticalScrollbarSpacing: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &593987002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 593986998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &629908367
 GameObject:
   m_ObjectHideFlags: 0
@@ -3196,6 +3467,7 @@ GameObject:
   m_Component:
   - component: {fileID: 732561822}
   - component: {fileID: 732561823}
+  - component: {fileID: 732561827}
   - component: {fileID: 732561825}
   - component: {fileID: 732561824}
   - component: {fileID: 732561826}
@@ -3306,7 +3578,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 20
   m_Viewport: {fileID: 170493247}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1788731388}
@@ -3317,6 +3589,23 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &732561827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 732561821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &751598707
 GameObject:
   m_ObjectHideFlags: 0
@@ -3368,7 +3657,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4032,7 +4321,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1064907093
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4259,82 +4548,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!1 &1147758714
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1147758715}
-  - component: {fileID: 1147758717}
-  - component: {fileID: 1147758716}
-  m_Layer: 5
-  m_Name: Handle
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1147758715
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1147758714}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 185187169}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1147758716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1147758714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 355b44537d2556240b5fbaa7b78244bb, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 8
---- !u!222 &1147758717
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1147758714}
-  m_CullTransparentMesh: 1
 --- !u!1 &1183681825
 GameObject:
   m_ObjectHideFlags: 0
@@ -4443,6 +4656,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1204898737}
   - component: {fileID: 1204898739}
+  - component: {fileID: 1204898740}
   - component: {fileID: 1204898738}
   m_Layer: 5
   m_Name: HeaderPanel
@@ -4519,6 +4733,23 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &1204898740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1204898736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &1266076433
 GameObject:
   m_ObjectHideFlags: 0
@@ -5701,133 +5932,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1566503768
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1566503769}
-  - component: {fileID: 1566503772}
-  - component: {fileID: 1566503771}
-  - component: {fileID: 1566503770}
-  m_Layer: 5
-  m_Name: LogHBar
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1566503769
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1566503768}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 185187169}
-  m_Father: {fileID: 593986999}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: -8}
-  m_SizeDelta: {x: 0, y: 8}
-  m_Pivot: {x: 0, y: 0}
---- !u!114 &1566503770
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1566503768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a4db7a114972834c8e4117be1d82ba3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 1147758716}
-  m_HandleRect: {fileID: 1147758715}
-  m_Direction: 0
-  m_Value: 0
-  m_Size: 1
-  m_NumberOfSteps: 0
-  m_OnValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &1566503771
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1566503768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1566503772
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1566503768}
-  m_CullTransparentMesh: 1
 --- !u!1001 &1608484830
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6140,10 +6244,10 @@ RectTransform:
   m_Father: {fileID: 567055885}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.042000003, y: 0.05250469}
+  m_AnchorMin: {x: 0.042000003, y: 0}
   m_AnchorMax: {x: 1, y: 0.9250001}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.0079956055}
+  m_SizeDelta: {x: 0, y: -0.01499939}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &1654306565
 Canvas:
@@ -7137,7 +7241,7 @@ GameObject:
   - component: {fileID: 1788731389}
   - component: {fileID: 1788731388}
   m_Layer: 5
-  m_Name: LogVBar
+  m_Name: FunctionVBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7161,7 +7265,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 10, y: 0}
+  m_AnchoredPosition: {x: 12, y: 0}
   m_SizeDelta: {x: 8, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1788731388
@@ -7177,7 +7281,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -7185,11 +7289,11 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_NormalColor: {r: 0, g: 0, b: 0, a: 0.5019608}
+    m_HighlightedColor: {r: 0, g: 0, b: 0, a: 0.627451}
+    m_PressedColor: {r: 0, g: 0, b: 0, a: 0.7529412}
+    m_SelectedColor: {r: 0, g: 0, b: 0, a: 0.5019608}
+    m_DisabledColor: {r: 0, g: 0, b: 0, a: 0}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -7207,8 +7311,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 66964039}
   m_HandleRect: {fileID: 66964038}
   m_Direction: 2
-  m_Value: 0.9999995
-  m_Size: 0.75981206
+  m_Value: 1
+  m_Size: 0.8818316
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7290,7 +7394,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 115.32, y: 22.76}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1871221474
 MonoBehaviour:
