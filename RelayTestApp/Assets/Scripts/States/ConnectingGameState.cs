@@ -23,7 +23,15 @@ public class ConnectingGameState : GameState
     }
     private void CloseWindow()
     {
-        StateManager.Instance.ChangeState(CancelNextState ? StateManager.Instance.CurrentGameState - 1  : _gameStateToOpen);
+        GameStates currentState = StateManager.Instance.CurrentGameState;
+        if (currentState != GameStates.SignIn)
+        {
+            StateManager.Instance.ChangeState(CancelNextState ? StateManager.Instance.CurrentGameState - 1  : _gameStateToOpen);    
+        }
+        else
+        {
+            StateManager.Instance.ChangeState(GameStates.SignIn);
+        }
         CancelNextState = false;
         gameObject.SetActive(false);
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Sends information when a dropdown menu value is changed based on the DropdownMenu enum selected
 /// </summary>
-public enum DropdownMenus{Socket,Channel}
+public enum DropdownMenus{Socket,Channel,Compression}
 public class DropdownMenuCallback : MonoBehaviour
 {
     public DropdownMenus TargetMenu;
@@ -25,7 +25,11 @@ public class DropdownMenuCallback : MonoBehaviour
                 PlayerPrefs.SetInt(Settings.ChannelKey, _dropdown.value);
                 break;
             case DropdownMenus.Socket:
-                StateManager.Instance.PROTOCOL = (RelayConnectionType)_dropdown.value + 1;
+                StateManager.Instance._protocol = (RelayConnectionType)_dropdown.value + 1;
+                break;
+            case DropdownMenus.Compression:
+                BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)_dropdown.value;
+                GameManager.Instance.SendUpdateRelayCompressionType();
                 break;
         }   
     }

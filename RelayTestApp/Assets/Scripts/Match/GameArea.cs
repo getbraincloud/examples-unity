@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// Features:
@@ -15,11 +16,11 @@ public class GameArea : MonoBehaviour
 {
     public GameObject Shockwave;
     public Canvas MatchCanvas;
-      
+    public CanvasScaler CanvasScaler;
     [HideInInspector] public UserCursor LocalUserCursor;
     //Offsets specific for when spawning a shockwave to local user
-    public Vector2 _localShockwaveOffset=new Vector2(-8.7f,-5.35f);
-    public Vector2 _networkShockwaveOffset =new Vector2(-8.65f,-8.24f);
+    private Vector2 _mouseOffset = new Vector2(13, -23);
+    private Vector2 _shockwaveOffset = new Vector2(-7, 15);
     //local to network is for shockwave input specifically
     private float _localToNetworkOffset = -310f;
     private Vector2 _newPosition;
@@ -38,17 +39,16 @@ public class GameArea : MonoBehaviour
                 LocalUserCursor.AdjustVisibility(true);
             }
             
-            _newPosition = GetMousePosition();
-            BrainCloudManager.Instance.LocalMouseMoved(_newPosition);
+            _newPosition = UnscalePosition(Input.mousePosition / MatchCanvas.scaleFactor);
+            
+            BrainCloudManager.Instance.LocalMouseMoved(_newPosition + _mouseOffset);
             if (Input.GetMouseButtonDown(0))
             {
                 //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition);
+                _localShockwavePositions.Add(_newPosition + _shockwaveOffset);
                 
-                //Position coordinates are different for the nodejs example so I offset it to the right view
-                //_newPosition.y += _localToNetworkOffset;
                 //Send position of local users input for a shockwave to other users
-                BrainCloudManager.Instance.LocalShockwave(_newPosition);
+                BrainCloudManager.Instance.LocalShockwave(_newPosition + _shockwaveOffset);
             }
         }
         else
@@ -97,14 +97,23 @@ public class GameArea : MonoBehaviour
             _localShockwavePositions.Clear();
         }
     }
+    
+    Vector2 UnscalePosition(Vector2 vec)
+    {
+        Vector2 referenceResolution = CanvasScaler.referenceResolution;
+        Vector2 currentResolution = new Vector2(Screen.width, Screen.height);
+       
+        float widthRatio = currentResolution.x / referenceResolution.x;
+        float heightRatio = currentResolution.y / referenceResolution.y;
+        float ratio = Mathf.Lerp(heightRatio, widthRatio, CanvasScaler.matchWidthOrHeight); 
+        return vec / ratio;
+    }
 
     private void SetUpShockwave(Vector2 position, Color waveColor, bool isUserLocal)
     {
         //Get in world position + offset 
         Vector2 newPosition = Camera.main.ScreenToWorldPoint(position);
-        
-        newPosition -= isUserLocal ? _localShockwaveOffset : _networkShockwaveOffset;
-        
+
         _newShockwave = Instantiate(Shockwave, newPosition, Quaternion.identity);
         
         //Adjusting shockwave color to what user settings are
@@ -126,7 +135,10 @@ public class GameArea : MonoBehaviour
             {
                 lobby.Members[i].UserCursor.AdjustVisibility(true);
             }
-            lobby.Members[i].UserCursor.transform.localPosition = lobby.Members[i].MousePosition;
+
+            var newPosition = Camera.main.ScreenToWorldPoint(lobby.Members[i].MousePosition);
+            newPosition.z = 0;
+            lobby.Members[i].UserCursor.transform.position = newPosition;
         }
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
@@ -153,13 +165,5 @@ public class GameArea : MonoBehaviour
         List<RaycastResult> raysastResults = new List<RaycastResult>();
         EventSystem.current.RaycastAll( eventData, raysastResults );
         return raysastResults;
-    }
-
-    private Vector3 GetMousePosition()
-    {
-        Vector2 mouse = Input.mousePosition;
-        //Vector3 position = new Vector3(mouse.x - (MatchCanvas.pixelRect.width / 2), mouse.y - (MatchCanvas.pixelRect.height / 2));
-        Vector3 position = Camera.main.ScreenToViewportPoint(mouse);
-        return position;
     }
 }
