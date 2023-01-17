@@ -41,17 +41,17 @@ public class ScreenResolver : MonoBehaviour
     private const int UHD_4320P = 4320;
 
     private static readonly List<int> ResolutionList = new List<int>
-        {
-            STANDARD, HD_720P, FHD_1080P, QHD_1440P, UHD_2160P, UHD_2880P, UHD_4320P
-        };
+    {
+        STANDARD, HD_720P, FHD_1080P, QHD_1440P, UHD_2160P, UHD_2880P, UHD_4320P
+    };
 
     private static readonly Dictionary<int, ScreenConfigs> ResolutionConfigs = new Dictionary<int, ScreenConfigs>
-        {
-            { STANDARD,  new ScreenConfigs(800,  600) },
-            { HD_720P,   new ScreenConfigs(1280, 720) },  { FHD_1080P, new ScreenConfigs(1920, 1080) },
-            { QHD_1440P, new ScreenConfigs(2560, 1440) }, { UHD_2160P, new ScreenConfigs(3840, 2160) },
-            { UHD_2880P, new ScreenConfigs(5120, 2880) }, { UHD_4320P, new ScreenConfigs(7680, 4320) }
-        };
+    {
+        { STANDARD,  new ScreenConfigs(800,  600) },
+        { HD_720P,   new ScreenConfigs(1280, 720) },  { FHD_1080P, new ScreenConfigs(1920, 1080) },
+        { QHD_1440P, new ScreenConfigs(2560, 1440) }, { UHD_2160P, new ScreenConfigs(3840, 2160) },
+        { UHD_2880P, new ScreenConfigs(5120, 2880) }, { UHD_4320P, new ScreenConfigs(7680, 4320) }
+    };
     #endregion
 
     private bool isFullScreen = false;
@@ -114,7 +114,7 @@ public class ScreenResolver : MonoBehaviour
 #if !UNITY_STANDALONE_OSX
             Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.FullScreenWindow);
 #else
-                Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.MaximizedWindow);
+            Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.MaximizedWindow);
 #endif
             Debug.Log($"Setting game resolution to: {fullscreenConfig.Width}x{fullscreenConfig.Height} (Fullscreen)");
         }
@@ -145,7 +145,7 @@ public class ScreenResolver : MonoBehaviour
 #if !UNITY_STANDALONE_OSX
             Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.FullScreenWindow);
 #else
-                Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.MaximizedWindow);
+            Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.MaximizedWindow);
 #endif
             Debug.Log($"Setting game resolution to: {fullscreenConfig.Width}x{fullscreenConfig.Height} (Fullscreen)");
         }
