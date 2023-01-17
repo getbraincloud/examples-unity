@@ -1,18 +1,19 @@
 /*
  * This will scale the screen to the appropriate resolution based on the monitor the app is running on.
- * App is Windowed by default and will use an appropriate resolution that neither matches nor is greater than the monitor's resolution.
- * When Fullscreened (Alt + Enter), the app will use one of the matching supported resolutions or the closest one that is not greater than the monitor's resolution.
+ * App is Windowed by default and will use an appropriate resolution that doesn't match or is greater than the monitor's resolution.
+ * When Fullscreened (Alt + Enter), the app will use one of the matching supported resolutions, or the closest one that isn't greater than the monitor's resolution.
  *
  * Supported resolutions: 7680x4320 (8K), 5120x2880 (5K), 3840x2160 (4K), 2560x1440 (QHD), 1920x1080 (FHD), 1280x720 (HD), 800x600 (Standard, Default)
  */
 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ScreenResolver : MonoBehaviour
 {
-#pragma warning disable CS0414 // Ignore field is assigned but its value is never used
-    [SerializeField] private bool LaunchFullScreen = false;
+#pragma warning disable CS0414
+    [SerializeField] private bool LaunchAppInFullScreen = false;
 #pragma warning restore CS0414
 
 #if UNITY_EDITOR || !UNITY_STANDALONE
@@ -20,17 +21,17 @@ public class ScreenResolver : MonoBehaviour
     {
         Destroy(gameObject);
     }
-#elif UNITY_STANDALONE // This should only run on Standalone devices
 
-    #region Static Helpers
-    private readonly struct Resolution
+#elif UNITY_STANDALONE // This should only run on Standalone devices
+    private readonly struct ScreenConfigs
     {
         public readonly int Width;
         public readonly int Height;
 
-        public Resolution(int width, int height) { Width = width; Height = height; }
+        public ScreenConfigs(int width, int height) { Width = width; Height = height; }
     }
 
+    #region Static Helpers
     private const int STANDARD = 600;
     private const int HD_720P = 720;
     private const int FHD_1080P = 1080;
@@ -44,40 +45,87 @@ public class ScreenResolver : MonoBehaviour
         STANDARD, HD_720P, FHD_1080P, QHD_1440P, UHD_2160P, UHD_2880P, UHD_4320P
     };
 
-    private static readonly Dictionary<int, Resolution> ResolutionConfigs = new Dictionary<int, Resolution>
+    private static readonly Dictionary<int, ScreenConfigs> ResolutionConfigs = new Dictionary<int, ScreenConfigs>
     {
-        { STANDARD,  new Resolution(800,  600) },
-        { HD_720P,   new Resolution(1280, 720) },  { FHD_1080P, new Resolution(1920, 1080) },
-        { QHD_1440P, new Resolution(2560, 1440) }, { UHD_2160P, new Resolution(3840, 2160) },
-        { UHD_2880P, new Resolution(5120, 2880) }, { UHD_4320P, new Resolution(7680, 4320) }
+        { STANDARD,  new ScreenConfigs(800,  600) },
+        { HD_720P,   new ScreenConfigs(1280, 720) },  { FHD_1080P, new ScreenConfigs(1920, 1080) },
+        { QHD_1440P, new ScreenConfigs(2560, 1440) }, { UHD_2160P, new ScreenConfigs(3840, 2160) },
+        { UHD_2880P, new ScreenConfigs(5120, 2880) }, { UHD_4320P, new ScreenConfigs(7680, 4320) }
     };
     #endregion
 
     private bool isFullScreen = false;
-    private Resolution windowedConfig;
-    private Resolution fullscreenConfig;
+    private ScreenConfigs windowedConfig;
+    private ScreenConfigs fullscreenConfig;
 
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        StartCoroutine(ResolveScreenSize());
+    }
+
+    private IEnumerator ResolveScreenSize()
+    {
+        yield return null;
+
+        Resolution resolutions = Screen.resolutions[0];
+        foreach (Resolution supported in Screen.resolutions)
+        {
+            resolutions = resolutions.height < supported.height ? supported : resolutions;
+        }
+
+        Debug.Log($"Max Resolution: {resolutions.width}x{resolutions.height}");
 
         int windowed = ResolutionList[0]; int fullscreen = ResolutionList[0];
-        int screenHeight = Screen.currentResolution.height;
+        int screenHeight = resolutions.height;
         foreach (int resolution in ResolutionList)
         {
             int compare = screenHeight - resolution;
+            Debug.Log($"Comparing Screen Height: {screenHeight} with Resolution: {resolution}");
+
             if (compare >= 0)
             {
                 windowed = resolution < screenHeight ? resolution : windowed;
                 fullscreen = resolution <= screenHeight ? resolution : fullscreen;
+
+                if (resolution < screenHeight)
+                {
+                    Debug.Log($"Updated Windowed Height: {windowed}");
+                }
+
+                if (resolution <= screenHeight)
+                {
+                    Debug.Log($"Updated Fullscreen Height: {fullscreen}");
+                }
             }
         }
 
         windowedConfig = ResolutionConfigs[windowed];
         fullscreenConfig = ResolutionConfigs[fullscreen];
 
-        isFullScreen = !LaunchFullScreen;
-        Screen.fullScreen = LaunchFullScreen; // This will be resolved in the Update loop
+        if (LaunchAppInFullScreen)
+        {
+            isFullScreen = true;
+
+#if !UNITY_STANDALONE_OSX
+            Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.FullScreenWindow);
+#else
+            Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.MaximizedWindow);
+#endif
+            Debug.Log($"Setting game resolution to: {fullscreenConfig.Width}x{fullscreenConfig.Height} (Fullscreen)");
+        }
+        else
+        {
+            isFullScreen = false;
+
+            Screen.SetResolution(windowedConfig.Width, windowedConfig.Height, FullScreenMode.Windowed);
+
+            Debug.Log($"Setting game resolution to: {windowedConfig.Width}x{windowedConfig.Height} (Windowed)");
+        }
     }
 
     private void Update()
@@ -88,7 +136,7 @@ public class ScreenResolver : MonoBehaviour
 
             Screen.SetResolution(windowedConfig.Width, windowedConfig.Height, FullScreenMode.Windowed);
 
-            Debug.Log($"Setting Windowed Resolution to: {windowedConfig.Width}x{windowedConfig.Height}");
+            Debug.Log($"Setting game resolution to: {windowedConfig.Width}x{windowedConfig.Height} (Windowed)");
         }
         else if (!isFullScreen && Screen.fullScreen)
         {
@@ -97,9 +145,9 @@ public class ScreenResolver : MonoBehaviour
 #if !UNITY_STANDALONE_OSX
             Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.FullScreenWindow);
 #else
-                Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.MaximizedWindow);
+            Screen.SetResolution(fullscreenConfig.Width, fullscreenConfig.Height, FullScreenMode.MaximizedWindow);
 #endif
-            Debug.Log($"Setting Fullscreen Resolution to: {fullscreenConfig.Width}x{fullscreenConfig.Height}");
+            Debug.Log($"Setting game resolution to: {fullscreenConfig.Width}x{fullscreenConfig.Height} (Fullscreen)");
         }
     }
 #endif
