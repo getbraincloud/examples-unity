@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine.EventSystems;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +16,8 @@ public class MenuManager : MonoBehaviour
 {
     [Header("Button References")]
     public Button ShieldButton;
-    public Button PlaybackLastMatch;
+    public Button PlaybackLastMatchButton;
+    public Button InvasionPlaybackButton;
     
     [Header("Menu States")]
     public List<MenuState> MenuStatesList = new List<MenuState>();
@@ -30,6 +32,9 @@ public class MenuManager : MonoBehaviour
     public TMP_Text RatingText;
     public TMP_Text MatchesPlayedText;
     public TMP_Text ShieldTimerText;
+    public TMP_Text LastInvasionStatusText;
+    public TMP_Text SlayCountText;
+    public TMP_Text DefeatedTroopsText;
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
 
@@ -65,7 +70,7 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
-        PlaybackLastMatch.interactable = NetworkManager.Instance.IsPlaybackIDValid();
+        PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
         if (NetworkManager.Instance.IsSessionValid())
         {
             UpdateMatchMakingInfo();
@@ -182,13 +187,30 @@ public class MenuManager : MonoBehaviour
         ShieldButton.interactable = user.ShieldTime <= 0;
         if (user.ShieldTime > 1)
         {
-            ShieldTimerText.text = $"Shield Timer: On";    
+            ShieldTimerText.text = $"Shield is active for {user.ShieldTime} minutes";    
         }
         else
         {
             ShieldTimerText.text = "Shield Timer: Off";
         }
-        
+
+        PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
+
+        StreamInfo invaderInfo = GameManager.Instance.InvadedStreamInfo;
+        if (!invaderInfo.PlaybackStreamID.IsNullOrEmpty())
+        {
+            InvasionPlaybackButton.interactable = true;
+            LastInvasionStatusText.text = invaderInfo.DidInvadersWin ? "Last Invasion: Defeated" : "Last Invasion: Victorious";
+            SlayCountText.text = $"You lost {invaderInfo.SlayCount} troops";
+            DefeatedTroopsText.text = $"You killed {invaderInfo.DefeatedTroops} troops";
+        }
+        else
+        {
+            InvasionPlaybackButton.interactable = false;
+            LastInvasionStatusText.text = "No recent invasions";
+            SlayCountText.text = "";
+            DefeatedTroopsText.text = "";
+        }
     }
 
     public void UpdateButtonSelectorPosition(ArmyType in_type)

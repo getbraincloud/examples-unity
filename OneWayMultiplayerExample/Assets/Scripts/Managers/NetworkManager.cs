@@ -35,21 +35,22 @@ public class NetworkManager : MonoBehaviour
     private bool _dead;
     private bool _shieldActive;
     private bool _didInvadersWin;
+    private string _invadedPlaybackID;
 
     public bool DidInvadersWin
     {
         get => _didInvadersWin;
     }
     //Summary info
-    private int slayCount;
+    private int invaderKillCount;
     public int SlayCount
     {
-        get => slayCount;
+        get => invaderKillCount;
     }
-    private int defeatedTroops;
+    private int defenderKillCount;
     public int DefeatedTroops
     {
-        get => defeatedTroops;
+        get => defenderKillCount;
     }
     private float timeLeft;
     public float TimeLeft
@@ -114,6 +115,8 @@ public class NetworkManager : MonoBehaviour
         if (!username.Equals(GameManager.Instance.CurrentUserInfo.Username))
         {
             _isNewPlayer = true;
+            _playbackStreamId = "";
+            PlayerPrefs.DeleteAll();
         }
         
         Settings.SaveLogin(username, password);
@@ -374,6 +377,40 @@ public class NetworkManager : MonoBehaviour
             _shieldActive = false;
         }
 
+        _bcWrapper.PlaybackStreamService.GetRecentStreamsForTargetPlayer
+        (
+            GameManager.Instance.CurrentUserInfo.ProfileId,
+            10,
+            OnGetRecentStreams,
+            OnFailureCallback
+        );
+    }
+
+    private void OnGetRecentStreams(string jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        StreamInfo streamInfo = new StreamInfo();
+        if (data != null)
+        {
+            Dictionary<string, object>[] streams = data["streams"] as Dictionary<string, object>[];
+
+            if (streams != null && streams.Length > 0)
+            {
+                
+                streamInfo.PlaybackStreamID = streams[0]["playbackStreamId"] as string;
+                Dictionary<string, object> summary = streams[0]["summary"] as Dictionary<string, object>;
+                if (summary != null)
+                {
+                    streamInfo.SlayCount = (int) summary["slayCount"];
+                    streamInfo.DefeatedTroops = (int) summary["defeatedTroops"];
+                    streamInfo.DidInvadersWin = (bool) summary["didInvadersWin"];
+                }
+
+                
+            }
+        }
+        GameManager.Instance.InvadedStreamInfo = streamInfo;
         MenuManager.Instance.UpdateMatchMakingInfo();
         MenuManager.Instance.IsLoading = false;
     }
@@ -545,8 +582,8 @@ public class NetworkManager : MonoBehaviour
 
         if (summary != null && summary.Count > 0)
         {
-            slayCount = (int) summary["slayCount"];
-            defeatedTroops = (int) summary["defeatedTroops"];
+            invaderKillCount = (int) summary["slayCount"];
+            defenderKillCount = (int) summary["defeatedTroops"];
             double value = (double) summary["timeLeft"];
             timeLeft = (float) value;
             _didInvadersWin = (bool) summary["didInvadersWin"];
@@ -655,16 +692,16 @@ public class NetworkManager : MonoBehaviour
 
     public void SummaryInfo(int in_slayCount, int in_defeatedTroops, float in_timeLeft)
     {
-        slayCount = in_slayCount;
-        defeatedTroops = in_defeatedTroops;
+        invaderKillCount = in_slayCount;
+        defenderKillCount = in_defeatedTroops;
         timeLeft = in_timeLeft;
     }
 
     private string CreateEndGameSummaryData()
     {
         Dictionary<string, object> summaryData = new Dictionary<string, object>();
-        summaryData.Add("slayCount", slayCount);
-        summaryData.Add("defeatedTroops", defeatedTroops);
+        summaryData.Add("invaderKillCount", invaderKillCount);
+        summaryData.Add("defenderKillCount", defenderKillCount);
         summaryData.Add("timeLeft", timeLeft);
         summaryData.Add("didInvadersWin", _didInvadersWin);
         string value = JsonWriter.Serialize(summaryData);

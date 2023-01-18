@@ -130,9 +130,12 @@ public class GameManager : MonoBehaviour
         get => _troops;
         set => _troops = value;
     }
+
+    public StreamInfo InvadedStreamInfo;
     
     private void Awake()
     {
+        InvadedStreamInfo = new StreamInfo();
         if (!_instance)
         {
             _instance = this;

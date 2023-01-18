@@ -15,3 +15,14 @@ public class UserInfo
     
     public UserInfo() { }
 }
+
+public class StreamInfo
+{
+    public string PlaybackStreamID;
+    public int SlayCount;
+    public int DefeatedTroops;
+    public bool DidInvadersWin;
+    public string InvaderPlayerName;
+
+    public StreamInfo() { }
+}
