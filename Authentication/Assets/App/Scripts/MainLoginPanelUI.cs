@@ -24,9 +24,8 @@ public class MainLoginPanelUI : MonoBehaviour
 
     [Header("TEMP")]
     [SerializeField] private BrainCloudManager BC = default;
-    [SerializeField] private GameObject AuthenticationContent = default;
+    [SerializeField] private GameObject LoginContent = default;
     [SerializeField] private GameObject MainContent = default;
-    [SerializeField] private TMP_Text LoggedInText = default;
 
     #region Unity Messages
 
@@ -75,9 +74,6 @@ public class MainLoginPanelUI : MonoBehaviour
             EmailRadio.isOn = true;
             OnEmailRadio(true);
         }
-
-        Debug.LogError(BC.ProfileID);
-        Debug.LogError(BC.AnonymousID);
 
         if (rememberUserToggle)
         {
@@ -225,9 +221,8 @@ public class MainLoginPanelUI : MonoBehaviour
 
         PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, RememberMeToggle.isOn);
 
-        AuthenticationContent.SetActive(false);
+        LoginContent.SetActive(false);
         MainContent.SetActive(true);
-        LoggedInText.text += AnonymousRadio.isOn ? $"\nAnonymous ID: {BC.AnonymousID}" : $"\nProfileID: {BC.ProfileID}";
     }
 
     private void TempHandleAuthenticationFailure()
