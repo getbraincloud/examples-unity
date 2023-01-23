@@ -24,6 +24,7 @@ public class MainLoginPanelUI : MonoBehaviour
 
     [Header("TEMP")]
     [SerializeField] private BrainCloudManager BC = default;
+    [SerializeField] private MainMenuUI MainMenu = default;
     [SerializeField] private GameObject LoginContent = default;
     [SerializeField] private GameObject MainContent = default;
 
@@ -223,6 +224,7 @@ public class MainLoginPanelUI : MonoBehaviour
 
         LoginContent.SetActive(false);
         MainContent.SetActive(true);
+        MainMenu.EnableMainMenuUse();
     }
 
     private void TempHandleAuthenticationFailure()
