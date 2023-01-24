@@ -1,14 +1,14 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using BrainCloud.LitJson;
 using System;
-using BrainCloud.LitJson;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
 	////////////////////////////////////////////
-	// BrainCloud integration code
+	// brainCloud Integration Code
 	////////////////////////////////////////////
 
 	private void ReadStatistics()
@@ -68,10 +68,9 @@ public class GameController : MonoBehaviour
 			rank = int.Parse(myPlayer[i]["rank"].ToString());
 			score = int.Parse(myPlayer[i]["score"].ToString());
 			name = myPlayer[i]["data"]["username"].ToString();
-			//name = "test";
 
 			scoreArray[i].gameObject.SetActive(true);
-			scoreArray[i].text = "Rank: " + rank + " Username: " + name + " Score: " + score;
+			scoreArray[i].text = $"Rank: {rank} – Username: {name} – Score: {score}";
 		}
 	}
 
@@ -90,7 +89,7 @@ public class GameController : MonoBehaviour
 
 			score = int.Parse(player[i]["score"].ToString());
 			scoreArray[i].gameObject.SetActive(true);
-			scoreArray[i].text = i + 1 + ": " + "Score: " + score;
+			scoreArray[i].text = $"{i + 1} – Score: {score}";
 		}
 	}
 
@@ -128,13 +127,13 @@ public class GameController : MonoBehaviour
 		}
 		Debug.Log (statusMessage);
 	}
+
 	////////////////////////////////////////////
 	private void Success_Callback(string responseData, object cbObject)
 	{
 		Debug.Log(responseData);
 	}
 
-	//
 	private void Fail_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
 	{
 		Debug.Log(statusMessage);
@@ -159,33 +158,33 @@ public class GameController : MonoBehaviour
 		}
 		Debug.Log(statusMessage);
 	}
+
 	////////////////////////////////////////////
 
+	// Editor Serialized Fields
+	[Header("Game Parameters")]
+    [SerializeField] private Vector3 spawnValues;
+    [SerializeField] private int hazardCount;
+    [SerializeField] private float spawnWait;
+    [SerializeField] private float startWait;
+    [SerializeField] private float waveWait;
+    [SerializeField] private float gameOverWait;
 
-	// Prefabs
-	public GameObject player;
-	public GameObject[] hazards;
+    [Header("Prefabs")]
+    [SerializeField] private GameObject player;
+	[SerializeField] private GameObject[] hazards;
 
-	// Game Parameters
-	public Vector3 spawnValues;
-	public int hazardCount;
-	public float spawnWait;
-	public float startWait;
-	public float waveWait;
-	public float gameOverWait;
-
-	// Screen text objects
-	public Text scoreText;
-	public Text restartText;
-	public Text gameOverText;
-	public Text clickToStartText;
-	public Text brainCloudStatusText;
-	public Text enemiesKilledText;
-	public Text asteroidsDestroyedText;
-	public Text accuracyText;
-	public Text shotsFiredText;
-	public Text gamesPlayedText;
-	public Text[] scoreArray;
+    [Header("Text Objects")]
+    [SerializeField] private TextMeshProUGUI scoreText;
+	[SerializeField] private TextMeshProUGUI gameOverText;
+	[SerializeField] private TextMeshProUGUI clickToStartText;
+	[SerializeField] private TextMeshProUGUI brainCloudStatusText;
+	[SerializeField] private TextMeshProUGUI enemiesKilledText;
+	[SerializeField] private TextMeshProUGUI asteroidsDestroyedText;
+	[SerializeField] private TextMeshProUGUI accuracyText;
+	[SerializeField] private TextMeshProUGUI shotsFiredText;
+	[SerializeField] private TextMeshProUGUI gamesPlayedText;
+    [SerializeField] private TextMeshProUGUI[] scoreArray;
 
 	// States
 	private enum eGameState
@@ -206,7 +205,6 @@ public class GameController : MonoBehaviour
 		PLAY_STATE_IN_BETWEEN_WAVES
 	}
 	private ePlayState m_playState = ePlayState.PLAY_STATE_STARTUP;
-
 
 	// our per round values
 	private int m_enemiesKilledThisRound = 0;
@@ -382,7 +380,7 @@ public class GameController : MonoBehaviour
 
 	void UpdateScoreText()
 	{
-		scoreText.text = "Score: " + m_score;
+		scoreText.text = $"Score: {m_score}";
 	}
 
 	public void GameOver()
@@ -419,20 +417,20 @@ public class GameController : MonoBehaviour
 
 	private void ShowStatistics()
 	{
-		enemiesKilledText.text = "Enemies Killed: " + m_statEnemiesKilled;
+		enemiesKilledText.text = $"Enemies Killed: {m_statEnemiesKilled}";
 		enemiesKilledText.gameObject.SetActive(true);
 
-		asteroidsDestroyedText.text = "Asteroids Destroyed: " + m_statAsteroidsDestroyed;
+		asteroidsDestroyedText.text = $"Asteroids Destroyed: {m_statAsteroidsDestroyed}";
 		asteroidsDestroyedText.gameObject.SetActive(true);
 
-		shotsFiredText.text = "Shots Fired: " + m_statShotsFired;
+		shotsFiredText.text = $"Shots Fired: {m_statShotsFired}";
 		shotsFiredText.gameObject.SetActive(true);
 
 		m_accuracy = (m_statShotsFired == 0) ? 0 : (m_statEnemiesKilled + m_statAsteroidsDestroyed) / (double) m_statShotsFired * 100.0d;
-		accuracyText.text = String.Format("Accuracy: {0:0.00}%", m_accuracy);
+		accuracyText.text = $"Accuracy: {m_accuracy:0.00}%";//string.Format("Accuracy: {0:0.00}%", m_accuracy);
 		accuracyText.gameObject.SetActive(true);
 
-		gamesPlayedText.text = "Games Played: " + m_statGamesPlayed;
+		gamesPlayedText.text = $"Games Played: {m_statGamesPlayed}";
 		gamesPlayedText.gameObject.SetActive(true);
 	}
 

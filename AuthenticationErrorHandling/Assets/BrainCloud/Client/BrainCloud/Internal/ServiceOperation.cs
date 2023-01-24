@@ -35,6 +35,9 @@ using System;
 
         public static readonly ServiceOperation AttachBlockChain = new ServiceOperation("ATTACH_BLOCKCHAIN_IDENTITY");
         public static readonly ServiceOperation DetachBlockChain = new ServiceOperation("DETACH_BLOCKCHAIN_IDENTITY");
+        public static readonly ServiceOperation GetBlockchainItems = new ServiceOperation("GET_BLOCKCHAIN_ITEMS");
+        public static readonly ServiceOperation GetUniqs = new ServiceOperation("GET_UNIQS");
+
         public static readonly ServiceOperation Create = new ServiceOperation("CREATE");
         public static readonly ServiceOperation CreateWithIndexedId = new ServiceOperation("CREATE_WITH_INDEXED_ID");
         public static readonly ServiceOperation Reset = new ServiceOperation("RESET");
@@ -294,6 +297,8 @@ using System;
         public static readonly ServiceOperation GooglePlayConfirmPurchase = new ServiceOperation("CONFIRM_GOOGLEPLAY_PURCHASE");
 
         public static readonly ServiceOperation ReadProperties = new ServiceOperation("READ_PROPERTIES");
+        public static readonly ServiceOperation ReadSelectedProperties = new ServiceOperation("READ_SELECTED_PROPERTIES");
+        public static readonly ServiceOperation ReadPropertiesInCategories = new ServiceOperation("READ_PROPERTIES_IN_CATEGORIES");
 
         public static readonly ServiceOperation GetUpdatedFiles = new ServiceOperation("GET_UPDATED_FILES");
         public static readonly ServiceOperation GetFileList = new ServiceOperation("GET_FILE_LIST");
@@ -447,6 +452,9 @@ using System;
         public static readonly ServiceOperation RemoveMember = new ServiceOperation("REMOVE_MEMBER");
         public static readonly ServiceOperation CancelFindRequest = new ServiceOperation("CANCEL_FIND_REQUEST");
         public static readonly ServiceOperation GetRegionsForLobbies = new ServiceOperation("GET_REGIONS_FOR_LOBBIES");
+        public static readonly ServiceOperation GetLobbyInstances = new ServiceOperation("GET_LOBBY_INSTANCES");
+        public static readonly ServiceOperation GetLobbyInstancesWithPingData = new ServiceOperation("GET_LOBBY_INSTANCES_WITH_PING_DATA");
+
         
         //ItemCatalog
         public static readonly ServiceOperation GetCatalogItemDefinition = new ServiceOperation("GET_CATALOG_ITEM_DEFINITION");
@@ -462,8 +470,10 @@ using System;
         public static readonly ServiceOperation GetEntityPage = new ServiceOperation("GET_ENTITY_PAGE");
         public static readonly ServiceOperation ReadCustomEntity = new ServiceOperation("READ_ENTITY");
         public static readonly ServiceOperation IncrementData = new ServiceOperation("INCREMENT_DATA");
+        public static readonly ServiceOperation IncrementSingletonData = new ServiceOperation("INCREMENT_SINGLETON_DATA");
         public static readonly ServiceOperation UpdateCustomEntity = new ServiceOperation("UPDATE_ENTITY");
         public static readonly ServiceOperation UpdateCustomEntityFields = new ServiceOperation("UPDATE_ENTITY_FIELDS");
+        public static readonly ServiceOperation UpdateCustomEntityFieldsShards = new ServiceOperation("UPDATE_ENTITY_FIELDS_SHARDED");
         public static readonly ServiceOperation DeleteCustomEntity = new ServiceOperation("DELETE_ENTITY");
         public static readonly ServiceOperation GetCount = new ServiceOperation("GET_COUNT");
         public static readonly ServiceOperation UpdateSingletonFields = new ServiceOperation("UPDATE_SINGLETON_FIELDS");

@@ -163,7 +163,22 @@ using BrainCloud.Internal;
         {
             m_commsLayer.DeregisterRTTCallback(ServiceName.UserItems);
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public void RegisterRTTBlockchainItemEvent(RTTCallback in_callback)
+        {
+            m_commsLayer.RegisterRTTCallback(ServiceName.BlockChain, in_callback);
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DeregisterRTTBlockchainItemEvent()
+        {
+            m_commsLayer.DeregisterRTTCallback(ServiceName.BlockChain);
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -197,6 +212,15 @@ using BrainCloud.Internal;
             ServerCall sc = new ServerCall(ServiceName.RTTRegistration, ServiceOperation.RequestClientConnection, null, callback);
                 m_clientRef.SendRequest(sc);
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public string getRTTConnectionID()
+        {
+            return m_commsLayer.RTTConnectionID;
+        }
+        
         #region private
 
         /// <summary>

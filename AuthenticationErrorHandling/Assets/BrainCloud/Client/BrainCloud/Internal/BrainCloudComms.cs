@@ -5,6 +5,7 @@
 
 #if ((UNITY_5_3_OR_NEWER) && !UNITY_WEBPLAYER && (!UNITY_IOS || ENABLE_IL2CPP)) || UNITY_2018_3_OR_NEWER
 #define USE_WEB_REQUEST //Comment out to force use of old WWW class on Unity 5.3+
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 #endif
 
 namespace BrainCloud.Internal
@@ -49,7 +50,7 @@ using UnityEngine.Experimental.Networking;
         /// <summary>
         ///Compress bundles sent from the client to the server for faster sending of large bundles.
         /// </summary>
-        public bool SupportsCompression {get; private set;} = false;
+        public bool SupportsCompression {get; private set;} = true;
         
         public void EnableCompression(bool compress)
         {
@@ -146,7 +147,7 @@ using UnityEngine.Experimental.Networking;
         ///The current number of identical failed attempts at authenticating. This 
         ///will reset when a successful authentication is made.
         ///<summary>
-        private int _identicalFailedAuthenticationAttempts = 0;
+        private int _failedAuthenticationAttempts = 0;
 
         ///<summary>
         ///A blank reference for response data so we don't need to continually allocate new dictionaries when trying to
@@ -213,6 +214,13 @@ using UnityEngine.Experimental.Networking;
         private string _killSwitchService;
         private string _killSwitchOperation;
 
+        private bool _authInProgress = false;
+        public bool AuthenticateInProgress
+        {
+            get => _authInProgress;
+            set => _authInProgress = value;
+        }
+        
         private bool _isAuthenticated = false;
 
         public bool Authenticated
@@ -311,6 +319,7 @@ using UnityEngine.Experimental.Networking;
             _packetTimeouts = new List<int> { 15, 20, 35, 50 };
         }
 
+        private readonly int[] _listAuthPacketTimeouts = { 15, 30, 60 };
         private int _authPacketTimeoutSecs = 15;
         public int AuthenticationPacketTimeoutSecs
         {
@@ -341,6 +350,22 @@ using UnityEngine.Experimental.Networking;
         public void EnableNetworkErrorMessageCaching(bool enabled)
         {
             _cacheMessagesOnNetworkError = enabled;
+        }
+        
+        //Json Serialization
+        private JsonWriterSettings _writerSettings = new JsonWriterSettings(); //Used to adjust settings such as maxdepth while serializing. A new JsonWriterSettings does not need to be created everytime we serialize.
+        private StringBuilder _stringBuilderOutput; //String builder necessary for writing serialized json to a string. Unity complains when this is instantiated at compilation.
+        private static int _maxDepth = 25; //Set to the default maxDepth within JsonFx sdk.
+        private string JSON_ERROR_MESSAGE = "You have exceeded the max json depth, increase the MaxDepth using the MaxDepth variable in BrainCloudClient.cs";
+        
+        public int MaxDepth
+        {
+            get => _maxDepth;
+            set
+            {
+                _maxDepth = value;
+                _writerSettings.MaxDepth = _maxDepth;
+            }
         }
 
         /// <summary>
@@ -488,9 +513,10 @@ using UnityEngine.Experimental.Networking;
 
             // process current request
             bool bypassTimeout = false;
+            RequestState.eWebRequestStatus status = RequestState.eWebRequestStatus.STATUS_PENDING;
             if (_activeRequest != null)
             {
-                RequestState.eWebRequestStatus status = GetWebRequestStatus(_activeRequest);
+                status = GetWebRequestStatus(_activeRequest);
                 if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
                 {
                     // Force the timeout to be elapsed because we have completed the request with error
@@ -499,76 +525,75 @@ using UnityEngine.Experimental.Networking;
                 }
                 else if (status == RequestState.eWebRequestStatus.STATUS_DONE)
                 {
-                    ResetIdleTimer();
-                    HandleResponseBundle(GetWebRequestResponse(_activeRequest));
-
-                    _activeRequest = null;
+                    
+#if USE_WEB_REQUEST
+                    //HttpStatusCode.OK
+                    if (_activeRequest.WebRequest.responseCode == 200)
+                    {
+                        ResetIdleTimer();
+                        HandleResponseBundle(GetWebRequestResponse(_activeRequest));
+                        DisposeUploadHandler();
+                        _activeRequest = null;        
+                    }
+                    //HttpStatusCode.ServiceUnavailable
+                    else if (_activeRequest.WebRequest.responseCode == 503 ||
+                             _activeRequest.WebRequest.responseCode == 502 ||
+                             _activeRequest.WebRequest.responseCode == 504)
+                    {
+                        //Packet in progress
+                        _clientRef.Log("Packet in progress");
+                        RetryRequest(status, bypassTimeout);
+                        return;
+                    }
+                    else
+                    {
+                        //Error Callback
+                        var errorResponse = GetWebRequestResponse(_activeRequest);
+                        if (_serviceCallsInProgress.Count > 0)
+                        {
+                            ServerCallback sc = _serviceCallsInProgress[0].GetCallback();
+                            if (sc != null)
+                            {
+                                sc.OnErrorCallback(404,(int)_activeRequest.WebRequest.responseCode, errorResponse);    
+                            }
+                        }
+                    }
+#elif DOT_NET
+                    //HttpStatusCode.OK
+                    if ((int)_activeRequest.WebRequest.Result.StatusCode == 200)
+                    {
+                        ResetIdleTimer();
+                        HandleResponseBundle(GetWebRequestResponse(_activeRequest));
+                        _activeRequest = null; 
+                    }
+                    //HttpStatusCode.ServiceUnavailable
+                    else if ((int)_activeRequest.WebRequest.Result.StatusCode == 503)
+                    {
+                        //Packet in progress
+                        _clientRef.Log("Packet in progress");
+                        RetryRequest(status, bypassTimeout);
+                        return;
+                    }
+                    else
+                    {
+                        //Error Callback
+                        var errorResponse = GetWebRequestResponse(_activeRequest);
+                        if (_serviceCallsInProgress.Count > 0)
+                        {
+                            ServerCallback sc = _serviceCallsInProgress[0].GetCallback();
+                            if (sc != null)
+                            {
+                                sc.OnErrorCallback(404,(int)_activeRequest.WebRequest.Result.StatusCode, errorResponse);    
+                            }
+                        }
+                    }
+#endif
                 }
             }
 
             // is it time for a retry?
-            if (_activeRequest != null)
-            {
-                if (bypassTimeout || DateTime.Now.Subtract(_activeRequest.TimeSent) >= GetPacketTimeout(_activeRequest))
-                {
-                    // grab status/response before cancelling the request as in Unity, the www object
-                    // will set internal status fields to null when www object is disposed
-                    RequestState.eWebRequestStatus status = GetWebRequestStatus(_activeRequest);
-                    string errorResponse = "";
-                    if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
-                    {
-                        errorResponse = GetWebRequestResponse(_activeRequest);
-                    }
-                    _activeRequest.CancelRequest();
-
-                    if (!ResendMessage(_activeRequest))
-                    {
-                        // we've reached the retry limit - send timeout error to all client callbacks
-                        if (_clientRef.LoggingEnabled)
-                        {
-                            if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
-                            {
-                                _clientRef.Log("Timeout with network error: " + errorResponse);
-                            }
-                            else
-                            {
-                                _clientRef.Log("Timeout no reply from server");
-                            }
-                        }
-
-                        _activeRequest = null;
-
-                        // if we're doing caching of messages on timeout, kick it in now!
-                        if (_cacheMessagesOnNetworkError && _networkErrorCallback != null)
-                        {
-                            if (_clientRef.LoggingEnabled)
-                            {
-                                _clientRef.Log("Caching messages");
-                            }
-                            _blockingQueue = true;
-
-                            // and insert the inProgress messages into head of wait queue
-                            lock (_serviceCallsInTimeoutQueue)
-                            {
-                                _serviceCallsInTimeoutQueue.InsertRange(0, _serviceCallsInProgress);
-                                _serviceCallsInProgress.Clear();
-                            }
-
-                            _networkErrorCallback();
-                        }
-                        else
-                        {
-                            // Fake a message bundle to keep the callback logic in one place
-                            TriggerCommsError(StatusCodes.CLIENT_NETWORK_ERROR, ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT, "Timeout trying to reach brainCloud server");
-                        }
-                    }
-                }
-            }
-            else // send the next message if we're ready
-            {
-                _activeRequest = CreateAndSendNextRequestBundle();
-            }
-
+            RetryRequest(status,bypassTimeout);
+            
             // is it time for a heartbeat?
             if (_isAuthenticated && !_blockingQueue)
             {
@@ -718,7 +743,7 @@ using UnityEngine.Experimental.Networking;
             {
                 bundleObj.responses[i] = new JsonErrorMessage(status, reasonCode, statusMessage);
             }
-            string jsonError = JsonWriter.Serialize(bundleObj);
+            string jsonError = _clientRef.SerializeJson(bundleObj);
             HandleResponseBundle(jsonError);
         }
 
@@ -737,7 +762,7 @@ using UnityEngine.Experimental.Networking;
             ServerCallback callback = BrainCloudClient.CreateServerCallback(null, null, null);
             ServerCall sc = new ServerCall(ServiceName.PlayerState, ServiceOperation.Logout, null, callback);
             AddToQueue(sc);
-
+            DisposeUploadHandler();
             _activeRequest = null;
 
             // calling update will try to send the logout
@@ -767,6 +792,7 @@ using UnityEngine.Experimental.Networking;
                         _clientRef.Log("ERROR - retrying cached messages but there is an active request!");
                     }
                     _activeRequest.CancelRequest();
+                    DisposeUploadHandler();
                     _activeRequest = null;
                 }
 
@@ -790,6 +816,7 @@ using UnityEngine.Experimental.Networking;
                 if (_activeRequest != null)
                 {
                     _activeRequest.CancelRequest();
+                    DisposeUploadHandler();
                     _activeRequest = null;
                 }
 
@@ -827,7 +854,7 @@ using UnityEngine.Experimental.Networking;
                             sc.GetCallback().OnErrorCallback(
                                 StatusCodes.CLIENT_NETWORK_ERROR,
                                 ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT,
-                                "Timeout trying to reach brainCloud server");
+                                "Timeout trying to reach brainCloud server, please check the URL and/or certificates for server");
                         }
                     }
                 }
@@ -862,7 +889,7 @@ using UnityEngine.Experimental.Networking;
         ///<summary>
         private bool tooManyAuthenticationAttempts()
         {
-            return _identicalFailedAuthenticationAttempts >= _identicalFailedAuthAttemptThreshold;
+            return _failedAuthenticationAttempts >= _identicalFailedAuthAttemptThreshold;
         }
 
         //save profileid and sessionId of response
@@ -874,6 +901,7 @@ using UnityEngine.Experimental.Networking;
             {
                 SessionID = sessionId;
                 _isAuthenticated = true;
+                _authInProgress = false;
             }
 
             // save the profile Id
@@ -895,16 +923,29 @@ using UnityEngine.Experimental.Networking;
                 _clientRef.Log(String.Format("{0} - {1}\n{2}", "RESPONSE", DateTime.Now, jsonData));
             }
 
-            if (string.IsNullOrEmpty(jsonData))
+            JsonResponseBundleV2 bundleObj = DeserializeJsonBundle(jsonData);
+            if (bundleObj == null)
             {
-                if (_clientRef.LoggingEnabled)
+                _cachedReasonCode = ReasonCodes.JSON_PARSING_ERROR;
+                _cachedStatusCode = StatusCodes.CLIENT_NETWORK_ERROR;
+                _cachedStatusMessage = "Received an invalid json format response, check your network settings.";
+                _cacheMessagesOnNetworkError = true;
+                lock (_serviceCallsWaiting)
                 {
-                    _clientRef.Log("ERROR - Incoming packet data was null or empty! This is probably a network issue.");
+                    if (_serviceCallsInProgress.Count > 0)
+                    {
+                        var serverCall = _serviceCallsInProgress[0];
+                        if (serverCall?.GetCallback() != null)
+                        {
+                            serverCall.GetCallback().OnErrorCallback(_cachedStatusCode,_cachedReasonCode,_cachedStatusMessage);
+                            _serviceCallsInProgress.RemoveAt(0);    
+                        }
+                    }
                 }
+                _clientRef.Log(_cachedStatusMessage);
                 return;
             }
-
-            JsonResponseBundleV2 bundleObj = JsonReader.Deserialize<JsonResponseBundleV2>(jsonData);
+            
             Dictionary<string, object>[] responseBundle = bundleObj.responses;
             Dictionary<string, object> response = null;
             long receivedPacketId = (long)bundleObj.packetId;
@@ -983,16 +1024,18 @@ using UnityEngine.Experimental.Networking;
                     {
                         responseData = (Dictionary<string, object>)response[OperationParam.ServiceMessageData.Value];
                         // send the data back as not formatted
-                        data = JsonWriter.Serialize(response);
+                        data = SerializeJson(response);
 
                         if (service == ServiceName.Authenticate.Value || service == ServiceName.Identity.Value)
                         {
+                            //Reset authenticate timeout
+                            _authPacketTimeoutSecs = _listAuthPacketTimeouts[0];
                             SaveProfileAndSessionIds(responseData, data);
                         }
                     }
                     else
                     {
-                        data = JsonWriter.Serialize(response);
+                        data = SerializeJson(response);
                     }
 
                     // now try to execute the callback
@@ -1041,10 +1084,17 @@ using UnityEngine.Experimental.Networking;
                             if (fileData.ContainsKey("uploadId") && fileData.ContainsKey("localPath"))
                             {
                                 string uploadId = (string)fileData["uploadId"];
-                                string localPath = (string)fileData["localPath"];
-                                var uploader = new FileUploader(uploadId, localPath, UploadURL, SessionID,
+                                string guid = (string)fileData["localPath"];
+                                string fileName = (string) fileData["cloudFilename"];
+                                var uploader = new FileUploader(uploadId, guid, UploadURL, SessionID,
                                     _uploadLowTransferRateTimeout, _uploadLowTransferRateThreshold, _clientRef, peerCode);
-#if DOT_NET
+                                
+                                uploader.FileName = fileName;
+                                if (_clientRef.FileService.FileStorage.ContainsKey(guid))
+                                {
+                                    uploader.TotalBytesToTransfer = _clientRef.FileService.FileStorage[guid].Length;    
+                                }
+#if DOT_NET                     
                                 uploader.HttpClient = _httpClient;
 #endif
                                 _fileUploads.Add(uploader);
@@ -1068,6 +1118,9 @@ using UnityEngine.Experimental.Networking;
                                 exceptions.Add(e);
                             }
                         }
+                        
+
+                        _failedAuthenticationAttempts = 0;
 
                         // now deal with rewards
                         if (_rewardCallback != null && responseData != null)
@@ -1121,7 +1174,7 @@ using UnityEngine.Experimental.Networking;
                                     rewardList.Add(theReward);
                                     apiRewards["apiRewards"] = rewardList;
 
-                                    string rewardsAsJson = JsonWriter.Serialize(apiRewards);
+                                    string rewardsAsJson = _clientRef.SerializeJson(apiRewards);
 
                                     _rewardCallback(rewardsAsJson);
                                 }
@@ -1148,56 +1201,17 @@ using UnityEngine.Experimental.Networking;
                     //if it was an authentication call 
                     if (operation == ServiceOperation.Authenticate.Value)
                     {
-                        //swap the recent responses, so you have the newest one, and the one last time you came through.
-                        _recentResponseJsonData[1] = _recentResponseJsonData[0];
-                        _recentResponseJsonData[0] = response;
-
-                        //need to compare the json data of the most recent response and the last response. If they are the same, it means the client
-                        //is attempting the exact same authentication call. 
-                        bool responsesAreTheSame = true;
-                        //if the data has different lengths, they're obviously not the same
-                        if (_recentResponseJsonData[0].Count == _recentResponseJsonData[1].Count)
-                        {
-                            foreach (var pair in _recentResponseJsonData[0])
-                            {
-                                object value = null;
-                                //if there is ever a time they're not the same value, then they are not the same
-                                if (_recentResponseJsonData[1].TryGetValue(pair.Key, out value))
-                                {
-                                    //if the values are not the same theyre different
-                                    if (value.ToString() != pair.Value.ToString())
-                                    {
-                                        responsesAreTheSame = false;
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    //If the key isnt found, they also can't be the same
-                                    responsesAreTheSame = false;
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            //different lengths of data mean theyre not the same call.
-                            responsesAreTheSame = false;
-                        }
-
                         //if we haven't already gone above the threshold and are waiting for the timer or a 200 response to reset things
                         if (!tooManyAuthenticationAttempts())
                         {
-                            //we either increment the amount of identical failed authentication attempts, or reset it because its not identical. 
-                            if (responsesAreTheSame == true)
+                            _failedAuthenticationAttempts++;
+                            if (tooManyAuthenticationAttempts())
                             {
-                                _identicalFailedAuthenticationAttempts++;
-                            }
-                            else
-                            {
-                                _identicalFailedAuthenticationAttempts = 0;
+                                ResetAuthenticationTimer();
                             }
                         }
+
+                        _authInProgress = false;
                     }
 
                     if (response.TryGetValue("reason_code", out reasonCodeObj))
@@ -1214,7 +1228,7 @@ using UnityEngine.Experimental.Networking;
                     }
                     else
                     {
-                        errorJson = JsonWriter.Serialize(response);
+                        errorJson = SerializeJson(response);
                     }
 
                     if (reasonCode == ReasonCodes.PLAYER_SESSION_EXPIRED
@@ -1295,7 +1309,7 @@ using UnityEngine.Experimental.Networking;
             {
                 Dictionary<string, Dictionary<string, object>[]> eventsJsonObj = new Dictionary<string, Dictionary<string, object>[]>();
                 eventsJsonObj["events"] = bundleObj.events;
-                string eventsAsJson = JsonWriter.Serialize(eventsJsonObj);
+                string eventsAsJson = _clientRef.SerializeJson(eventsJsonObj);
                 try
                 {
                     _eventCallback(eventsAsJson);
@@ -1312,6 +1326,7 @@ using UnityEngine.Experimental.Networking;
 
             if (exceptions.Count > 0)
             {
+                DisposeUploadHandler();
                 _activeRequest = null; // to make sure we don't reprocess this message
 
                 throw new Exception("User callback handlers threw " + exceptions.Count + " exception(s)."
@@ -1352,10 +1367,10 @@ using UnityEngine.Experimental.Networking;
                 }
 
                 string num;
-                num = _identicalFailedAuthenticationAttempts.ToString();
+                num = _failedAuthenticationAttempts.ToString();
                 if (_clientRef.LoggingEnabled)
                 {
-                    _clientRef.Log("Current number of identical failed authentications: " + num);
+                    _clientRef.Log("Current number of failed authentications: " + num);
                 }
 
                 //have the attempts gone beyond the threshold?
@@ -1366,7 +1381,7 @@ using UnityEngine.Experimental.Networking;
                     //be able to send an authentication request for a time. 
                     if (_clientRef.LoggingEnabled)
                     {
-                        _clientRef.Log("Too many identical repeat authentication failures");
+                        _clientRef.Log("Too many repeat authentication failures");
                     }
                     _killSwitchEngaged = true;
                     ResetAuthenticationTimer();
@@ -1382,7 +1397,7 @@ using UnityEngine.Experimental.Networking;
             _killSwitchOperation = null;
 
             //reset the amount of failed attempts upon a successful attempt
-            _identicalFailedAuthenticationAttempts = 0;
+            _failedAuthenticationAttempts = 0;
             _recentResponseJsonData[0] = blankResponseData;
             _recentResponseJsonData[1] = blankResponseData;
         }
@@ -1501,7 +1516,7 @@ using UnityEngine.Experimental.Networking;
                         Dictionary<string, object> message = new Dictionary<string, object>();
                         message[OperationParam.ServiceMessageService.Value] = scIndex.Service;
                         message[OperationParam.ServiceMessageOperation.Value] = scIndex.Operation;
-                        message[OperationParam.ServiceMessageData.Value] = scIndex.GetJsonData();
+                        message[OperationParam.ServiceMessageData.Value] = scIndex.GetJsonData(); 
 
                         messageList.Add(message);
 
@@ -1512,7 +1527,9 @@ using UnityEngine.Experimental.Networking;
 
                         if (operation.Equals(ServiceOperation.Authenticate.Value) ||
                             operation.Equals(ServiceOperation.ResetEmailPassword.Value) ||
-                            operation.Equals(ServiceOperation.ResetEmailPasswordAdvanced.Value))
+                            operation.Equals(ServiceOperation.ResetEmailPasswordAdvanced.Value) ||
+                            operation.Equals(ServiceOperation.ResetUniversalIdPassword.Value) ||
+                            operation.Equals(ServiceOperation.ResetUniversalIdPasswordAdvanced.Value))
                         {
                             isAuth = true;
                         }
@@ -1580,7 +1597,7 @@ using UnityEngine.Experimental.Networking;
             }
             packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
 
-            string jsonRequestString = JsonWriter.Serialize(packet);
+            string jsonRequestString = SerializeJson(packet);
 
             if (_clientRef.LoggingEnabled)
             {
@@ -1590,7 +1607,60 @@ using UnityEngine.Experimental.Networking;
             ResetIdleTimer();
 
             TriggerCommsError(statusCode, reasonCode, statusMessage);
+            DisposeUploadHandler();
             _activeRequest = null;
+        }
+
+        internal string SerializeJson(object payload)
+        {
+            //Unity doesn't like when we create a new StringBuilder outside of this method.
+            _stringBuilderOutput = new StringBuilder();
+            using (JsonWriter writer = new JsonWriter(_stringBuilderOutput, _writerSettings))
+            {
+                try
+                {
+                    writer.Write(payload);
+                }
+                catch (JsonSerializationException exception)
+                {
+                    //Contains will fail if one input is off, so I had to break it up like this for more consistency
+                    //IE: The maxiumum depth of 24 was exceeded. Check for cycles in object graph.
+                    if (exception.Message.Contains("The maxiumum depth") && 
+                        exception.Message.Contains("exceeded"))
+                    {
+                        lock (_serviceCallsInProgress)
+                        {
+                            if(_serviceCallsInProgress.Count > 0)
+                            {
+                                for (int i = _serviceCallsInProgress.Count - 1; i < 0; --i)
+                                {
+                                    var serviceCall = _serviceCallsInProgress[i];
+                                    if (serviceCall?.GetCallback() != null)
+                                    {
+                                        serviceCall.GetCallback().OnErrorCallback(900, ReasonCodes.JSON_REQUEST_MAXDEPTH_EXCEEDS_LIMIT, JSON_ERROR_MESSAGE);
+                                        _serviceCallsInProgress.RemoveAt(i);
+                                    }    
+                                }
+                            
+                            }
+                        }
+                    }
+                    _clientRef.Log("JSON Exception: " + exception.Message);
+                }
+            }
+
+            return _stringBuilderOutput.ToString();
+        }
+
+        internal Dictionary<string, object> DeserializeJson(string jsonData)
+        {
+            JsonResponseBundleV2 responseBundle = DeserializeJsonBundle(jsonData);
+            if (responseBundle?.responses == null || 
+                responseBundle.responses.Length == 0)
+            {
+                return null;
+            }
+            return responseBundle.responses[0];
         }
 
         /// <summary>
@@ -1616,12 +1686,12 @@ using UnityEngine.Experimental.Networking;
                 packet[OperationParam.ServiceMessageGameId.Value] = AppId;
             }
             packet[OperationParam.ServiceMessageMessages.Value] = requestState.MessageList;
-
-            string jsonRequestString = JsonWriter.Serialize(packet);
+            
+            string jsonRequestString = SerializeJson(packet);
             string sig = CalculateMD5Hash(jsonRequestString + SecretKey);
 
             byte[] byteArray = Encoding.UTF8.GetBytes(jsonRequestString);
-
+            
             requestState.Signature = sig;
             
             bool compressMessage = SupportsCompression &&                               // compression enabled
@@ -1647,7 +1717,7 @@ using UnityEngine.Experimental.Networking;
             {
 #if !(DOT_NET)
                 Dictionary<string, string> formTable = new Dictionary<string, string>();
-#if USE_WEB_REQUEST
+    #if USE_WEB_REQUEST
                 UnityWebRequest request = UnityWebRequest.Post(ServerURL, formTable);
                 request.SetRequestHeader("Content-Type", "application/json; charset=utf-8");
                 request.SetRequestHeader("X-SIG", sig);
@@ -1659,7 +1729,9 @@ using UnityEngine.Experimental.Networking;
 
                 if(compressMessage)
                 {
+    #if DOT_NET
                     request.SetRequestHeader("Accept-Encoding", "gzip");
+    #endif
                     request.SetRequestHeader("Content-Encoding", "gzip");
                 }          
 
@@ -1780,24 +1852,21 @@ using UnityEngine.Experimental.Networking;
             {
                 return status;
             }
-
-#if !(DOT_NET)
+#if USE_WEB_REQUEST
             if (!string.IsNullOrEmpty(_activeRequest.WebRequest.error))
             {
                 status = RequestState.eWebRequestStatus.STATUS_ERROR;
             }
-#if USE_WEB_REQUEST
+
             else if (_activeRequest.WebRequest.downloadHandler.isDone)
             {
                 status = RequestState.eWebRequestStatus.STATUS_DONE;
             }
-#else
             else if (_activeRequest.WebRequest.isDone)
             {
                 status = RequestState.eWebRequestStatus.STATUS_DONE;
             }
-#endif
-#else
+#elif DOT_NET
             status = _activeRequest.DotNetRequestStatus;
 #endif
             return status;
@@ -1812,37 +1881,43 @@ using UnityEngine.Experimental.Networking;
         private string GetWebRequestResponse(RequestState requestState)
         {
             string response = "";
-#if !(DOT_NET)
+#if USE_WEB_REQUEST
+            #if UNITY_2018 || UNITY_2019
+            if (_activeRequest.WebRequest.isNetworkError)
+            {
+                Debug.LogWarning("Failed to communicate with the server. For example, the request couldn't connect or it could not establish a secure channel");
+            }
+            else if (_activeRequest.WebRequest.isHttpError)
+            {
+                Debug.LogWarning("Something went wrong, received a isHttpError flag. Examples for this to happen are: failure to resolve a DNS entry, a socket error or a redirect limit being exceeded. When this property returns true, the error property will contain a human-readable string describing the error.");
+            }
+            #elif UNITY_2020_1_OR_NEWER
+            if (_activeRequest.WebRequest.result == UnityWebRequest.Result.ConnectionError)
+            {
+                Debug.LogWarning("Failed to communicate with the server. For example, the request couldn't connect or it could not establish a secure channel");
+            }
+            else if (_activeRequest.WebRequest.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogWarning("The server returned an error response. The request succeeded in communicating with the server, but received an error as defined by the connection protocol.");
+            }
+            else if (_activeRequest.WebRequest.result == UnityWebRequest.Result.DataProcessingError)
+            {
+                Debug.LogWarning("Error processing data. The request succeeded in communicating with the server, but encountered an error when processing the received data. For example, the data was corrupted or not in the correct format.");
+            }
+            #endif
             if (!string.IsNullOrEmpty(_activeRequest.WebRequest.error))
             {
                 response = _activeRequest.WebRequest.error;
             }
-            else
+
+            response = _activeRequest.WebRequest.downloadHandler.text;
+            
+            if (response.Contains("Security violation 47") ||
+                response.StartsWith("<"))
             {
-#if USE_WEB_REQUEST
-                if(_activeRequest.WebRequest.GetRequestHeader("Content-Encoding") != "gzip")
-                {
-                    response = _activeRequest.WebRequest.downloadHandler.text;
-                }
-                else 
-                {
-                    var decompressedByteArray = Decompress(_activeRequest.WebRequest.downloadHandler.data);
-                    response = Encoding.UTF8.GetString(decompressedByteArray, 0, decompressedByteArray.Length);
-                }
-#else
-                if(!_activeRequest.WebRequest.responseHeaders.ContainsKey("Content-Encoding") ||
-                    _activeRequest.WebRequest.responseHeaders["Content-Encoding"] != "gzip")
-                {
-                    response = _activeRequest.WebRequest.text;
-                }
-                else
-                {
-                    var decompressedByteArray = Decompress(_activeRequest.WebRequest.bytes);
-                    response = Encoding.UTF8.GetString(decompressedByteArray, 0, decompressedByteArray.Length);
-                }
-#endif
+                Debug.LogWarning("Please re-select app in brainCloud settings, something went wrong"); 
             }
-#else
+#elif DOT_NET
             response = _activeRequest.DotNetResponseString;
 #endif
             return response;
@@ -1871,6 +1946,20 @@ using UnityEngine.Experimental.Networking;
         {
             if (requestState.PacketNoRetry)
             {
+                if (DateTime.Now.Subtract(_activeRequest.TimeSent) > TimeSpan.FromSeconds(_authPacketTimeoutSecs))
+                {
+                    for (int i = 0; i < _listAuthPacketTimeouts.Length; i++)
+                    {
+                        if (_listAuthPacketTimeouts[i] == _authPacketTimeoutSecs)
+                        {
+                            if (i + 1 < _listAuthPacketTimeouts.Length)
+                            {
+                                _authPacketTimeoutSecs = _listAuthPacketTimeouts[i + 1];
+                                break;
+                            }
+                        }
+                    }
+                }
                 return TimeSpan.FromSeconds(_authPacketTimeoutSecs);
             }
 
@@ -1942,6 +2031,69 @@ using UnityEngine.Experimental.Networking;
         {
             _enabled = value;
         }
+        /// <summary>
+        /// Checks if json is valid then returns json object
+        /// </summary>
+        /// <param name="jsonData"></param>
+        /// <returns></returns>
+        private JsonResponseBundleV2 DeserializeJsonBundle(string jsonData)
+        {
+            if (string.IsNullOrWhiteSpace(jsonData))
+            {
+                return null;
+            }
+            
+            if (string.IsNullOrEmpty(jsonData))
+            {
+                if (_clientRef.LoggingEnabled)
+                {
+                    _clientRef.Log("ERROR - Incoming packet data was null or empty! This is probably a network issue.");
+                }
+                return null;
+            }
+            
+            jsonData = jsonData.Trim();
+            if ((jsonData.StartsWith("{") && jsonData.EndsWith("}")) || //For object
+                (jsonData.StartsWith("[") && jsonData.EndsWith("]"))) //For array
+            {
+                try
+                {
+                    var obj = JsonReader.Deserialize<JsonResponseBundleV2>(jsonData);
+                    return obj;
+                }
+                catch (Exception ex) //some other exception
+                {
+                    //Contains will fail if one input is off, so I had to break it up like this for more consistency
+                    //IE: The maxiumum depth of 24 was exceeded. Check for cycles in object graph.
+                    if (ex.Message.Contains("The maxiumum depth") &&
+                        ex.Message.Contains("exceeded"))
+                    {
+                        lock (_serviceCallsInProgress)
+                        {
+                            if(_serviceCallsInProgress.Count > 0)
+                            {
+                                for (int i = _serviceCallsInProgress.Count - 1; i < 0; --i)
+                                {
+                                    var serviceCall = _serviceCallsInProgress[i];
+                                    if (serviceCall?.GetCallback() != null)
+                                    {
+                                        serviceCall.GetCallback().OnErrorCallback(900, ReasonCodes.JSON_RESPONSE_MAXDEPTH_EXCEEDS_LIMIT, JSON_ERROR_MESSAGE);
+                                        _serviceCallsInProgress.RemoveAt(i);
+                                    }    
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ResendMessage(_activeRequest);    
+                    }
+                    _clientRef.Log(ex.Message);
+                    return null;
+                }
+            }
+            return null;
+        }
 
         /// <summary>
         /// Resets the communication layer. Clients will need to
@@ -1956,6 +2108,7 @@ using UnityEngine.Experimental.Networking;
                 _serviceCallsWaiting.Clear();
                 _serviceCallsInProgress.Clear();
                 _serviceCallsInTimeoutQueue.Clear();
+                DisposeUploadHandler();
                 _activeRequest = null;
                 _clientRef.AuthenticationService.ProfileId = "";
                 SessionID = "";
@@ -2097,7 +2250,76 @@ using UnityEngine.Experimental.Networking;
 
             return defaultReturn;
         }
+        /// <summary>
+        /// Attempts to create and send next request bundle.
+        /// If to many attempts have been made, the request becomes an error
+        /// </summary>
+        /// <param name="status">Current Request Status</param>
+        /// <param name="bypassTimeout">Was there an error on the request?</param>
+        private void RetryRequest(RequestState.eWebRequestStatus status, bool bypassTimeout)
+        {
+            if (_activeRequest != null)
+            {
+                if (bypassTimeout || DateTime.Now.Subtract(_activeRequest.TimeSent) >= GetPacketTimeout(_activeRequest))
+                {
+                    if (_clientRef.LoggingEnabled)
+                    {
+                        string errorResponse = "";
+                        // we've reached the retry limit - send timeout error to all client callbacks
+                        if (status == RequestState.eWebRequestStatus.STATUS_ERROR)
+                        {
+                            errorResponse = GetWebRequestResponse(_activeRequest);
+                            if (!string.IsNullOrEmpty(errorResponse))
+                            {
+                                _clientRef.Log("Timeout with network error: " + errorResponse);        
+                            }
+                            else
+                            {
+                                _clientRef.Log("Timeout with network error: Please check the URL and/or certificates for server");
+                            }
+                        }
+                        else
+                        {
+                            _clientRef.Log("Timeout no reply from server");
+                        }
+                    }
+                    if (!ResendMessage(_activeRequest))
+                    {
+                        DisposeUploadHandler();
+                        _activeRequest = null;
 
+                        // if we're doing caching of messages on timeout, kick it in now!
+                        if (_cacheMessagesOnNetworkError && _networkErrorCallback != null)
+                        {
+                            if (_clientRef.LoggingEnabled)
+                            {
+                                _clientRef.Log("Caching messages");
+                            }
+                            _blockingQueue = true;
+
+                            // and insert the inProgress messages into head of wait queue
+                            lock (_serviceCallsInTimeoutQueue)
+                            {
+                                _serviceCallsInTimeoutQueue.InsertRange(0, _serviceCallsInProgress);
+                                _serviceCallsInProgress.Clear();
+                            }
+
+                            _networkErrorCallback();
+                        }
+                        else
+                        {
+                            // Fake a message bundle to keep the callback logic in one place
+                            TriggerCommsError(StatusCodes.CLIENT_NETWORK_ERROR, ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT, "Timeout trying to reach brainCloud server");
+                        }
+                    }    
+                }
+            }
+            else // send the next message if we're ready
+            {
+                _activeRequest = CreateAndSendNextRequestBundle();
+            }
+        }
+        
         /// <summary>
         /// Resets the cached error message for local session error handling to default
         /// </summary>
@@ -2106,6 +2328,44 @@ using UnityEngine.Experimental.Networking;
             _cachedStatusCode = StatusCodes.FORBIDDEN;
             _cachedReasonCode = ReasonCodes.NO_SESSION;
             _cachedStatusMessage = "No session";
+        }
+
+        private void DisposeUploadHandler()
+        {
+#if USE_WEB_REQUEST
+            if (_activeRequest != null && 
+                _activeRequest.WebRequest != null && 
+                _activeRequest.WebRequest.uploadHandler != null)
+            {
+                _activeRequest.WebRequest.Dispose();
+            }
+#endif
+        }
+
+        public void AddCallbackToAuthenticateRequest(ServerCallback in_callback)
+        {
+            bool inProgress = false;
+            for (int i = 0; i < _serviceCallsInProgress.Count && !inProgress; ++i)
+            {
+                if (_serviceCallsInProgress[i].Operation == ServiceOperation.Authenticate.Value)
+                {
+                    inProgress = true;
+                    _serviceCallsInProgress[i].GetCallback().AddAuthCallbacks(in_callback);
+                }
+            }
+        }
+
+        public bool IsAuthenticateRequestInProgress()
+        {
+            bool inProgress = false;
+            for (int i = 0; i < _serviceCallsInProgress.Count && !inProgress; ++i)
+            {
+                if (_serviceCallsInProgress[i].Operation == ServiceOperation.Authenticate.Value)
+                {
+                    inProgress = true;
+                }
+            }
+            return inProgress;
         }
     }
 
