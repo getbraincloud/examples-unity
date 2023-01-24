@@ -1085,7 +1085,10 @@ namespace BrainCloud.Internal
             }
             try
             {
-                m_tcpStream.EndWrite(result);
+                if (m_tcpClient != null)
+                {
+                    m_tcpStream.EndWrite(result);    
+                }
                 lock (fLock)
                 {
                     // Pop the message we just sent out of the queue
