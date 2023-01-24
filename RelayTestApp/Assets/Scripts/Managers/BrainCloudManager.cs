@@ -152,7 +152,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void FindLobby(RelayConnectionType protocol)
     {
-        StateManager.Instance._protocol = protocol;
+        StateManager.Instance.Protocol = protocol;
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         
         // Enable RTT
@@ -186,7 +186,7 @@ public class BrainCloudManager : MonoBehaviour
         extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
 
         //
-        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, StateManager.Instance.isReady, extra);
+        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
     }
     
 
@@ -417,10 +417,6 @@ public class BrainCloudManager : MonoBehaviour
                     GameManager.Instance.UpdateMatchState();
                     GameManager.Instance.UpdateCursorList();
                     ConnectRelay();
-                    if (StateManager.Instance._protocol == RelayConnectionType.WEBSOCKET)
-                    {
-                        StateManager.Instance.isLoading = false;    
-                    }
                     break;
             }
         }
@@ -435,7 +431,7 @@ public class BrainCloudManager : MonoBehaviour
         m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
-        switch (StateManager.Instance._protocol)
+        switch (StateManager.Instance.Protocol)
         {
             case RelayConnectionType.WEBSOCKET:
                 port = StateManager.Instance.CurrentServer.WsPort;
@@ -451,7 +447,7 @@ public class BrainCloudManager : MonoBehaviour
         Server server = StateManager.Instance.CurrentServer;
         m_bcWrapper.RelayService.Connect
         (
-            StateManager.Instance._protocol,
+            StateManager.Instance.Protocol,
             new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
             null, 
             LogErrorThenPopUpWindow, 

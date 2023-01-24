@@ -1259,9 +1259,12 @@ namespace BrainCloud.Internal
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.Completed += new EventHandler<SocketAsyncEventArgs>(OnUDPConnected);
                 args.RemoteEndPoint = new DnsEndPoint(host, port);
-
                 initUDPConnection();
-                m_udpClient.Client.ConnectAsync(args);
+                bool value = m_udpClient.Client.ConnectAsync(args);
+                if (!value)
+                {
+                    OnUDPConnected(null, args);
+                }
 #endif
             }
             catch (Exception e)
