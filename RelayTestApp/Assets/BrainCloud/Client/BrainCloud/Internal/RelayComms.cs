@@ -1065,7 +1065,7 @@ namespace BrainCloud.Internal
                 lock (fLock)
                 {
                     fToSend.Enqueue(message);
-                    if (1 == fToSend.Count)
+                    if (fToSend.Count >= 1)
                     {
                         m_tcpStream.BeginWrite(message, 0, message.Length, tcpFinishWrite, null);
                     }
@@ -1085,7 +1085,10 @@ namespace BrainCloud.Internal
             }
             try
             {
-                m_tcpStream.EndWrite(result);
+                if (m_tcpClient != null)
+                {
+                    m_tcpStream.EndWrite(result);    
+                }
                 lock (fLock)
                 {
                     // Pop the message we just sent out of the queue
@@ -1259,9 +1262,12 @@ namespace BrainCloud.Internal
                 SocketAsyncEventArgs args = new SocketAsyncEventArgs();
                 args.Completed += new EventHandler<SocketAsyncEventArgs>(OnUDPConnected);
                 args.RemoteEndPoint = new DnsEndPoint(host, port);
-
                 initUDPConnection();
-                m_udpClient.Client.ConnectAsync(args);
+                bool value = m_udpClient.Client.ConnectAsync(args);
+                if (!value)
+                {
+                    OnUDPConnected(null, args);
+                }
 #endif
             }
             catch (Exception e)

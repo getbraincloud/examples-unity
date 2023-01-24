@@ -24,7 +24,7 @@ public class StateManager : MonoBehaviour
     //Network info needed
     public Lobby CurrentLobby;
     public Server CurrentServer;
-    internal RelayConnectionType _protocol { get; set; }
+    internal RelayConnectionType Protocol { get; set; }
     
     
     //Specific for loading and waiting
@@ -143,7 +143,7 @@ public class StateManager : MonoBehaviour
             //Looking for Lobby...
             case GameStates.MainMenu:
                 CurrentGameState = GameStates.Lobby;
-                BrainCloudManager.Instance.FindLobby(_protocol);
+                BrainCloudManager.Instance.FindLobby(Protocol);
                 LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE,true,GameStates.Lobby);
                 break;
             //Setting up Match...

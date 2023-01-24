@@ -25,7 +25,7 @@ public class DropdownMenuCallback : MonoBehaviour
                 PlayerPrefs.SetInt(Settings.ChannelKey, _dropdown.value);
                 break;
             case DropdownMenus.Socket:
-                StateManager.Instance._protocol = (RelayConnectionType)_dropdown.value + 1;
+                StateManager.Instance.Protocol = (RelayConnectionType)_dropdown.value + 1;
                 break;
             case DropdownMenus.Compression:
                 BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)_dropdown.value;
