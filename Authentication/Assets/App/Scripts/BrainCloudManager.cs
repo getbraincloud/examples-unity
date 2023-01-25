@@ -76,4 +76,19 @@ public class BrainCloudManager : MonoBehaviour
                                      CreateSuccessCallback("Authentication Successful", onSuccess),
                                      CreateFailureCallback("Authentication Failed", onFailure));
     }
+
+    public void HandlePlayerLogout(Action onSuccess = null, Action onFailure = null)
+    {
+        Wrapper.PlayerStateService.Logout(CreateSuccessCallback("Logout Success", onSuccess),
+                                          CreateFailureCallback("Logout Failed", onFailure));
+    }
+
+    public void ResetPlayerData()
+    {
+        Wrapper.ResetStoredProfileId();
+        Wrapper.ResetStoredAnonymousId();
+        Wrapper.ResetStoredAuthenticationType();
+
+        PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, false);
+    }
 }

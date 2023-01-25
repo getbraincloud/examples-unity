@@ -56,7 +56,7 @@ public class MainLoginPanelUI : MonoBehaviour
     private void Start()
     {
         PlayerPrefsHandler.LoadPlayerPref(PlayerPrefKey.RememberUser, out bool rememberUserToggle);
-        RememberMeToggle.isOn = rememberUserToggle;
+        RememberMeToggle.isOn = rememberUserToggle && !string.IsNullOrEmpty(BC.AnonymousID);
 
         AuthenticationType authenticationType = BC.AuthenticationType;
         if (authenticationType == AuthenticationType.Universal)
@@ -76,9 +76,13 @@ public class MainLoginPanelUI : MonoBehaviour
             OnEmailRadio(true);
         }
 
-        if (rememberUserToggle)
+        if (RememberMeToggle.isOn)
         {
-            // Handle disabling of everything & try to log in
+            HandleAutomaticLogin();
+        }
+        else if (rememberUserToggle && !string.IsNullOrEmpty(BC.AnonymousID))
+        {
+            PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, false);
         }
     }
 
@@ -183,7 +187,7 @@ public class MainLoginPanelUI : MonoBehaviour
             }
 
             EnableFields(false);
-            BC.AuthenticateAdvanced(authenticationType, ids, extraJson, TempHandleAuthenticationSuccess, TempHandleAuthenticationFailure);
+            BC.AuthenticateAdvanced(authenticationType, ids, extraJson, HandleAuthenticationSuccess, HandleAuthenticationFailure);
 
             return;
         }
@@ -192,23 +196,48 @@ public class MainLoginPanelUI : MonoBehaviour
 
         if (EmailRadio.isOn)
         {
-            BC.AuthenticateEmail(inputUser, inputPassword, TempHandleAuthenticationSuccess, TempHandleAuthenticationFailure);
+            BC.AuthenticateEmail(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
         }
         else if (UniversalRadio.isOn)
         {
-            BC.AuthenticateUniversal(inputUser, inputPassword, TempHandleAuthenticationSuccess, TempHandleAuthenticationFailure);
+            BC.AuthenticateUniversal(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
         }
         else if (AnonymousRadio.isOn)
         {
-            BC.AuthenticateAnonymous(TempHandleAuthenticationSuccess, TempHandleAuthenticationFailure);
+            BC.AuthenticateAnonymous(HandleAuthenticationSuccess, HandleAuthenticationFailure);
         }
     }
 
     #endregion
 
-    #region Misc Functionality
+    #region brainCloud Authentication
 
-    private void TempHandleAuthenticationSuccess()
+    private void HandleAutomaticLogin()
+    {
+        Debug.Log("Logging in automatically...");
+
+        EnableFields(false);
+
+        BC.AuthenticateAnonymous(() =>
+        {
+            Debug.Log("Automatic Login Successful");
+
+            LoginContent.SetActive(false);
+            MainContent.SetActive(true);
+            MainMenu.EnableMainMenuUse();
+        },
+        () =>
+        {
+            EnableFields(true);
+
+            ErrorLabel.text = "Automatic Login Failed\nPlease try logging in manually.";
+
+            RememberMeToggle.isOn = false;
+            BC.ResetPlayerData();
+        });
+    }
+
+    private void HandleAuthenticationSuccess()
     {
         if (EmailRadio.isOn || UniversalRadio.isOn)
         {
@@ -227,22 +256,22 @@ public class MainLoginPanelUI : MonoBehaviour
         MainMenu.EnableMainMenuUse();
     }
 
-    private void TempHandleAuthenticationFailure()
+    private void HandleAuthenticationFailure()
     {
-        EnableFields(false);
+        EnableFields(true);
 
         string errorMessage;
         if (EmailRadio.isOn)
         {
-            errorMessage = "Authentication Failed - Please check your email and password and try again.";
+            errorMessage = "Authentication Failed\nPlease check your email and password and try again.";
         }
         else if (UniversalRadio.isOn)
         {
-            errorMessage = "Authentication Failed - Please check your username and password and try again.";
+            errorMessage = "Authentication Failed\nPlease check your username and password and try again.";
         }
         else
         {
-            errorMessage = "Authentication Failed - Please try again in a few moments.";
+            errorMessage = "Authentication Failed\nPlease try again in a few moments.";
         }
 
         ErrorLabel.text = errorMessage;

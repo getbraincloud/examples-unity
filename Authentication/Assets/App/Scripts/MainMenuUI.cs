@@ -7,6 +7,9 @@ using UnityEngine.UI;
 public class MainMenuUI : MonoBehaviour
 {
     private const float HEADER_SPACER_HEIGHT = 50;
+    private const string PROFILE_ID_TEXT = "Profile ID:\n{0}";
+    private const string ANONYMOUS_ID_TEXT = "Anonymous ID:\n{0}";
+    private const string APP_INFO_TEXT = "{0} ({1}) v{2}";
 
     private static readonly int UI_IS_ACTIVE = Animator.StringToHash("IsActive");
 
@@ -20,7 +23,6 @@ public class MainMenuUI : MonoBehaviour
 
     [Header("Text")]
     [SerializeField] private TMP_Text HeaderLabel = default;
-    [SerializeField] private TMP_Text ProfileIDLabel = default;
     [SerializeField] private TMP_Text AppInfoLabel = default;
 
     [Header("Buttons")]
@@ -28,6 +30,10 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private Button CloseMenuButton = default;
     [SerializeField] private Button BlockerButton = default;
     [SerializeField] private Button LogoutButton = default;
+
+    [Header("TEMP")]
+    [SerializeField] private GameObject LoginContent = default;
+    [SerializeField] private GameObject MainContent = default;
 
     public bool MainMenuActive
     {
@@ -48,6 +54,9 @@ public class MainMenuUI : MonoBehaviour
     private void Start()
     {
         DisableMainMenuUse();
+
+        // Set App ID & Version properly
+        AppInfoLabel.text = string.Format(APP_INFO_TEXT, BrainCloudManager.AppName, 00000, Application.version);
     }
 
     private void OnDisable()
@@ -80,16 +89,23 @@ public class MainMenuUI : MonoBehaviour
 
     private void OnLogoutButton()
     {
-        // 
+        BC.HandlePlayerLogout(() =>
+        {
+            DisableMainMenuUse();
+
+            LoginContent.SetActive(true);
+            MainContent.SetActive(false);
+
+            BC.ResetPlayerData();
+        });
     }
 
     public void EnableMainMenuUse()
     {
         if (!string.IsNullOrEmpty(BC.ProfileID))
         {
-            ProfileIDLabel.text = BC.ProfileID;
             HeaderLabel.gameObject.SetActive(true);
-            ProfileIDLabel.gameObject.SetActive(true);
+            ShowProfileID();
             HeaderSpacer.preferredHeight = 0;
         }
 
@@ -100,9 +116,24 @@ public class MainMenuUI : MonoBehaviour
     {
         MainMenuActive = false;
 
-        HeaderSpacer.preferredHeight = HEADER_SPACER_HEIGHT;
         HeaderLabel.gameObject.SetActive(false);
-        ProfileIDLabel.gameObject.SetActive(false);
+        HeaderSpacer.preferredHeight = HEADER_SPACER_HEIGHT;
         OpenMenuButton.gameObject.SetActive(false);
+    }
+
+    public void ShowProfileID()
+    {
+        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(BC.ProfileID))
+        {
+            HeaderLabel.text = string.Format(PROFILE_ID_TEXT, BC.ProfileID);
+        }
+    }
+
+    public void ShowAnonymousID()
+    {
+        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(BC.AnonymousID))
+        {
+            HeaderLabel.text = string.Format(ANONYMOUS_ID_TEXT, BC.AnonymousID);
+        }
     }
 }
