@@ -1,7 +1,5 @@
 using BrainCloud;
 using BrainCloud.Common;
-using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -22,11 +20,9 @@ public class MainLoginPanelUI : MonoBehaviour
     [SerializeField] private TMP_InputField NameField = default;
     [SerializeField] private TMP_InputField AgeField = default;
 
-    [Header("TEMP")]
-    [SerializeField] private BrainCloudManager BC = default;
+    [Header("UI Control")]
     [SerializeField] private MainMenuUI MainMenu = default;
-    [SerializeField] private GameObject LoginContent = default;
-    [SerializeField] private GameObject MainContent = default;
+    [SerializeField] private CanvasGroup LoginContent = default;
 
     #region Unity Messages
 
@@ -56,9 +52,9 @@ public class MainLoginPanelUI : MonoBehaviour
     private void Start()
     {
         PlayerPrefsHandler.LoadPlayerPref(PlayerPrefKey.RememberUser, out bool rememberUserToggle);
-        RememberMeToggle.isOn = rememberUserToggle && !string.IsNullOrEmpty(BC.AnonymousID);
+        RememberMeToggle.isOn = rememberUserToggle && !string.IsNullOrEmpty(UserHandler.AnonymousID);
 
-        AuthenticationType authenticationType = BC.AuthenticationType;
+        AuthenticationType authenticationType = UserHandler.AuthenticationType;
         if (authenticationType == AuthenticationType.Universal)
         {
             UniversalRadio.isOn = true;
@@ -80,7 +76,7 @@ public class MainLoginPanelUI : MonoBehaviour
         {
             HandleAutomaticLogin();
         }
-        else if (rememberUserToggle && !string.IsNullOrEmpty(BC.AnonymousID))
+        else if (rememberUserToggle && !string.IsNullOrEmpty(UserHandler.AnonymousID))
         {
             PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, false);
         }
@@ -100,30 +96,9 @@ public class MainLoginPanelUI : MonoBehaviour
         AgeField.onValueChanged.RemoveAllListeners();
     }
 
-    private void OnDestroy()
-    {
-        //
-    }
-
     #endregion
 
     #region UI Functionality
-
-    public void EnableFields(bool isEnabled)
-    {
-        EmailRadio.interactable = isEnabled;
-        UniversalRadio.interactable = isEnabled;
-        AnonymousRadio.interactable = isEnabled;
-        EmailField.interactable = isEnabled;
-        UsernameField.interactable = isEnabled;
-        PasswordField.interactable = isEnabled;
-        RememberMeToggle.interactable = isEnabled;
-        LoginButton.interactable = isEnabled;
-        NameField.interactable = isEnabled;
-        AgeField.interactable = isEnabled;
-
-        ErrorLabel.text = string.Empty;
-    }
 
     private void OnEmailRadio(bool value)
     {
@@ -174,7 +149,7 @@ public class MainLoginPanelUI : MonoBehaviour
             if (AnonymousRadio.isOn)
             {
                 authenticationType = AuthenticationType.Anonymous;
-                ids.externalId = BC.AnonymousID;
+                ids.externalId = UserHandler.AnonymousID;
                 ids.authenticationToken = "";
                 ids.authenticationSubType = "";
             }
@@ -186,25 +161,25 @@ public class MainLoginPanelUI : MonoBehaviour
                 ids.authenticationSubType = "";
             }
 
-            EnableFields(false);
-            BC.AuthenticateAdvanced(authenticationType, ids, extraJson, HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            LoginContent.interactable = false;
+            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJson, HandleAuthenticationSuccess, HandleAuthenticationFailure);
 
             return;
         }
 
-        EnableFields(false);
+        LoginContent.interactable = false;
 
         if (EmailRadio.isOn)
         {
-            BC.AuthenticateEmail(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            UserHandler.AuthenticateEmail(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
         }
         else if (UniversalRadio.isOn)
         {
-            BC.AuthenticateUniversal(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            UserHandler.AuthenticateUniversal(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
         }
         else if (AnonymousRadio.isOn)
         {
-            BC.AuthenticateAnonymous(HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            UserHandler.AuthenticateAnonymous(HandleAuthenticationSuccess, HandleAuthenticationFailure);
         }
     }
 
@@ -216,24 +191,23 @@ public class MainLoginPanelUI : MonoBehaviour
     {
         Debug.Log("Logging in automatically...");
 
-        EnableFields(false);
+        LoginContent.interactable = false;
 
-        BC.AuthenticateAnonymous(() =>
+        UserHandler.AuthenticateAnonymous(() =>
         {
             Debug.Log("Automatic Login Successful");
 
-            LoginContent.SetActive(false);
-            MainContent.SetActive(true);
-            MainMenu.EnableMainMenuUse();
+            MainMenu.ChangeToAppContent();
         },
         () =>
         {
-            EnableFields(true);
+            LoginContent.interactable = true;
 
             ErrorLabel.text = "Automatic Login Failed\nPlease try logging in manually.";
 
             RememberMeToggle.isOn = false;
-            BC.ResetPlayerData();
+
+            UserHandler.ResetAuthenticationData();
         });
     }
 
@@ -241,24 +215,22 @@ public class MainLoginPanelUI : MonoBehaviour
     {
         if (EmailRadio.isOn || UniversalRadio.isOn)
         {
-            BC.Wrapper.SetStoredAuthenticationType(EmailRadio.isOn ? AuthenticationType.Email.ToString()
-                                                                   : AuthenticationType.Universal.ToString());
+            BCManager.Wrapper.SetStoredAuthenticationType(EmailRadio.isOn ? AuthenticationType.Email.ToString()
+                                                                          : AuthenticationType.Universal.ToString());
         }
         else if (AnonymousRadio.isOn)
         {
-            BC.Wrapper.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
+            BCManager.Wrapper.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
         }
 
         PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, RememberMeToggle.isOn);
 
-        LoginContent.SetActive(false);
-        MainContent.SetActive(true);
-        MainMenu.EnableMainMenuUse();
+        MainMenu.ChangeToAppContent();
     }
 
     private void HandleAuthenticationFailure()
     {
-        EnableFields(true);
+        LoginContent.interactable = true;
 
         string errorMessage;
         if (EmailRadio.isOn)

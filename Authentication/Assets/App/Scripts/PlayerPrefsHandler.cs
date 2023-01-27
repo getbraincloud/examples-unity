@@ -14,7 +14,7 @@ public static class PlayerPrefsHandler
 
     private static readonly Dictionary<PlayerPrefKey, string> PREFS_KEY_VALUE_NAME = new Dictionary<PlayerPrefKey, string>
     {
-        { PlayerPrefKey.RememberUser, BrainCloudManager.AppName + PREFS_REMEMBER_USER }
+        { PlayerPrefKey.RememberUser, BCManager.AppName + PREFS_REMEMBER_USER }
     };
 
     #region Public
