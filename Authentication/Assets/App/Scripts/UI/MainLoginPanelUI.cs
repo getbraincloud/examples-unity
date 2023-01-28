@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class MainLoginPanelUI : MonoBehaviour
 {
-    [Header("Main UI")]
+    [Header("Main")]
     [SerializeField] private Toggle EmailRadio = default;
     [SerializeField] private Toggle UniversalRadio = default;
     [SerializeField] private Toggle AnonymousRadio = default;
