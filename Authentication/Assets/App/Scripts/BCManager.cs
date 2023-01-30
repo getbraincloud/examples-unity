@@ -137,10 +137,9 @@ public class BCManager : MonoBehaviour
     public static SuccessCallback CreateSuccessCallback(string logMessage = null, Action onSuccess = null)
     {
         logMessage = string.IsNullOrEmpty(logMessage) ? "Success" : logMessage;
-        return (jsonResponse, cbObject) =>
+        return (jsonResponse, _) =>
         {
-            Debug.Log($"{logMessage}\nJSON Response:\n{jsonResponse}");
-
+            LogMessage(logMessage, jsonResponse);
             onSuccess?.Invoke();
         };
     }
@@ -155,10 +154,9 @@ public class BCManager : MonoBehaviour
     public static FailureCallback CreateFailureCallback(string errorMessage = null, Action onFailure = null)
     {
         errorMessage = string.IsNullOrEmpty(errorMessage) ? "Failure" : errorMessage;
-        return (status, reasonCode, jsonError, cbObject) =>
+        return (status, reasonCode, jsonError, _) =>
         {
-            Debug.LogError($"{errorMessage}\nStatus: {status}\nReason: {reasonCode}\nJSON Response:\n{jsonError}");
-
+            LogError(errorMessage, status, reasonCode, jsonError);
             onFailure?.Invoke();
         };
     }
@@ -206,4 +204,10 @@ public class BCManager : MonoBehaviour
     }
 
     #endregion
+
+    public static void LogMessage(string logMessage, string jsonResponse) =>
+        Debug.Log($"{logMessage}\nJSON Response:\n{jsonResponse}");
+
+    public static void LogError(string errorMessage, int status, int reasonCode, string jsonError) =>
+        Debug.LogError($"{errorMessage}\nStatus: {status}\nReason: {reasonCode}\nJSON Response:\n{jsonError}");
 }

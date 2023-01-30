@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
+using BrainCloud.Entity;
 using System;
 using System.Collections.Generic;
 
@@ -10,6 +11,8 @@ public static class UserHandler
     public static string AnonymousID => BCManager.Wrapper.GetStoredAnonymousId();
 
     public static AuthenticationType AuthenticationType => AuthenticationType.FromString(BCManager.Wrapper.GetStoredAuthenticationType());
+
+    #region Authentication Methods
 
     public static void AuthenticateEmail(string email, string password, Action onSuccess = null, Action onFailure = null)
     {
@@ -54,4 +57,6 @@ public static class UserHandler
 
         PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, false);
     }
+
+    #endregion
 }

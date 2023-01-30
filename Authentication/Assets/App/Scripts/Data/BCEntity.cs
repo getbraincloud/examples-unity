@@ -1,10 +1,11 @@
 using BrainCloud;
 using BrainCloud.Common;
+using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
 
 [Serializable]
-public struct Entity
+public struct BCEntity
 {
     public int Version;
     public string Name;
@@ -16,17 +17,17 @@ public struct Entity
 
     /// <summary>
     /// Access Control List<br></br>
-    /// 0 = Owner can Read/Write<br></br>
-    /// 1 = Public Read, Owner can Write<br></br>
+    /// 0 = Owner Read/Write<br></br>
+    /// 1 = Public Read, Owner Write<br></br>
     /// 2 = Public Read/Write
     /// </summary>
     public ACL ACL;
 
-    public static Entity CreateEmpty() => new Entity
+    public static BCEntity CreateEmpty() => new BCEntity
     {
         Version = -1, // -1 tells the server to create the latest version
         Name = "New User",
-        Age = string.Empty,
+        Age = "?",
         EntityId = string.Empty,
         EntityType = "user",
         CreatedAt = DateTime.UtcNow,
@@ -34,7 +35,7 @@ public struct Entity
         ACL = new ACL(ACL.Access.None)
     };
 
-    public static Entity CreateNew(string name, string age) => new Entity
+    public static BCEntity CreateNew(string name, string age) => new BCEntity
     {
         Version = -1, // -1 tells the server to create the latest version
         Name = name,
@@ -46,11 +47,16 @@ public struct Entity
         ACL = ACL.ReadWrite()
     };
 
-    public Dictionary<string, object> EntityDataToJSON() => new Dictionary<string, object>
+    public string EntityDataToJSON()
     {
-        { "name", Name },
-        { "age", Age }
-    };
+        var entity = new Dictionary<string, object>
+        {
+            { "name", Name },
+            { "age", Age }
+        };
+
+        return JsonWriter.Serialize(entity);
+    }
 
     public void CreateFromPageItemJSON(Dictionary<string, object> pageItem)
     {

@@ -156,10 +156,10 @@ RectTransform:
   m_Father: {fileID: 439471206}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 254.66666, y: -98.03999}
+  m_SizeDelta: {x: 493.3333, y: 131.26}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &65301466
 MonoBehaviour:
@@ -1002,7 +1002,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 751598708}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.8907106
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6697,6 +6697,10 @@ PrefabInstance:
       value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 3444806324111120814, guid: 39ea6f1a1c6006642ac7e5abbaae7d7e, type: 3}
+      propertyPath: m_CharacterValidation
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3444806324111120814, guid: 39ea6f1a1c6006642ac7e5abbaae7d7e, type: 3}
       propertyPath: m_Navigation.m_SelectOnUp
       value: 
       objectReference: {fileID: 1752980818}
@@ -7335,10 +7339,10 @@ RectTransform:
   m_Father: {fileID: 439471206}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 254.66666, y: -16.205}
+  m_SizeDelta: {x: 493.3333, y: 16.41}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1733012112
 MonoBehaviour:
