@@ -9,6 +9,8 @@ public interface IServiceUI
 
 
 /*
+    [SerializeField] private CanvasGroup UICanvasGroup = default;
+ 
     public bool IsInteractable
     {
         get { return UICanvasGroup.interactable; }

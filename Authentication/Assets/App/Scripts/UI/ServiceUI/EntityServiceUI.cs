@@ -190,7 +190,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     #endregion
 
-    #region Entity Functionality
+    #region Entity
 
     private void HandleGetUserEntity()
     {

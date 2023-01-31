@@ -223,7 +223,7 @@ public class BCManager : MonoBehaviour
     /// <param name="reasonCode">The reason code returned from the brainCloud server.</param>
     /// <param name="jsonError">The JSON response from the brainCloud server.</param>
     public static void LogError(string errorMessage, int status, int reasonCode, string jsonError) =>
-        Debug.LogError($"{errorMessage}\nStatus: {status}\nReason: {reasonCode}\nJSON Response:\n{jsonError}");
+        Debug.LogError($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
 
     #endregion
 }
