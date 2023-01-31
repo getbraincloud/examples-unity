@@ -8,8 +8,6 @@ using System.Collections.Generic;
 public struct BCEntity
 {
     public int Version;
-    public string Name;
-    public string Age;
     public string EntityId;
     public string EntityType;
     public DateTime CreatedAt;
@@ -19,35 +17,37 @@ public struct BCEntity
     /// Access Control List<br></br>
     /// 0 = Owner Read/Write<br></br>
     /// 1 = Public Read, Owner Write<br></br>
-    /// 2 = Public Read/Write
+    /// 2 = Public Read/Write<br></br>
+    /// Default is 2.
     /// </summary>
     public ACL ACL;
 
-    public static BCEntity CreateEmpty() => new BCEntity
-    {
-        Version = -1, // -1 tells the server to create the latest version
-        Name = "New User",
-        Age = "?",
-        EntityId = string.Empty,
-        EntityType = "user",
-        CreatedAt = DateTime.UtcNow,
-        UpdatedAt = DateTime.UtcNow,
-        ACL = new ACL(ACL.Access.None)
-    };
+    public static string DEFAULT_NAME = "New User";
+    public static string DEFAULT_AGE = "?";
 
-    public static BCEntity CreateNew(string name, string age) => new BCEntity
+    public string Name;
+    public string Age;
+
+    public static BCEntity Create(string entityType, string name = "", string age = "") => new BCEntity
     {
         Version = -1, // -1 tells the server to create the latest version
-        Name = name,
-        Age = age,
+        Name = !string.IsNullOrEmpty(name) ? name : DEFAULT_NAME,
+        Age = !string.IsNullOrEmpty(age) ? age : DEFAULT_AGE,
         EntityId = string.Empty,
-        EntityType = "user",
+        EntityType = entityType,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow,
         ACL = ACL.ReadWrite()
     };
 
-    public string EntityDataToJSON()
+    public void Update(string name, string age, string entityType = "")
+    {
+        Name = !string.IsNullOrEmpty(name) ? name : DEFAULT_NAME;
+        Age = !string.IsNullOrEmpty(age) ? age : DEFAULT_AGE;
+        EntityType = !string.IsNullOrEmpty(entityType) ? entityType : EntityType;
+    }
+
+    public string DataToJson()
     {
         var entity = new Dictionary<string, object>
         {
@@ -58,17 +58,17 @@ public struct BCEntity
         return JsonWriter.Serialize(entity);
     }
 
-    public void CreateFromPageItemJSON(Dictionary<string, object> pageItem)
+    public void CreateFromJson(Dictionary<string, object> data)
     {
-        EntityId = pageItem["entityId"] as string;
-        EntityType = pageItem["entityType"] as string;
-        Version = (int)pageItem["version"];
-        CreatedAt = Util.BcTimeToDateTime((long)pageItem["createdAt"]);
-        UpdatedAt = Util.BcTimeToDateTime((long)pageItem["updatedAt"]);
+        EntityId = data["entityId"] as string;
+        EntityType = data["entityType"] as string;
+        Version = (int)data["version"];
+        CreatedAt = Util.BcTimeToDateTime((long)data["createdAt"]);
+        UpdatedAt = Util.BcTimeToDateTime((long)data["updatedAt"]);
 
-        Dictionary<string, object> data = pageItem["data"] as Dictionary<string, object>;
-        Name = data["name"] as string;
-        Age = data["age"] as string;
+        Dictionary<string, object> entityData = data["data"] as Dictionary<string, object>;
+        Name = entityData["name"] as string;
+        Age = entityData["age"] as string;
     }
 
     public void UpdateFromJSON(Dictionary<string, object> data)
@@ -77,5 +77,11 @@ public struct BCEntity
         Version = (int)data["version"];
         CreatedAt = Util.BcTimeToDateTime((long)data["createdAt"]);
         UpdatedAt = Util.BcTimeToDateTime((long)data["updatedAt"]);
+
+        if (data["data"] is Dictionary<string, object> entityData)
+        {
+            Name = entityData["name"] as string;
+            Age = entityData["age"] as string;
+        }
     }
 }

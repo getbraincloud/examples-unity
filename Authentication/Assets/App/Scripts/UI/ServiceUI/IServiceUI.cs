@@ -11,14 +11,8 @@ public interface IServiceUI
 /*
     public bool IsInteractable
     {
-        get
-        {
-            return UICanvasGroup.interactable;
-        }
-        set
-        {
-            UICanvasGroup.interactable = value;
-        }
+        get { return UICanvasGroup.interactable; }
+        set { UICanvasGroup.interactable = value; }
     }
 
     #region Unity Messages

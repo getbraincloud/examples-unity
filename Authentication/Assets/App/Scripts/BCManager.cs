@@ -197,17 +197,33 @@ public class BCManager : MonoBehaviour
         if (_isInstanced)
         {
             Debug.LogError($"{gameObject.name} (BCManager) has been destroyed during run time. brainCloud functions might become unstable. Was this intentional?");
+            _isInstanced = false;
         }
-
         Wrapper = null;
         GameObject = null;
     }
 
     #endregion
 
+    #region Additional Methods
+
+    /// <summary>
+    /// Logs brainCloud Messages in a consistent format.
+    /// </summary>
+    /// <param name="logMessage">Custom message to use as a header or to add additional information.</param>
+    /// <param name="jsonResponse">The JSON response from the brainCloud server.</param>
     public static void LogMessage(string logMessage, string jsonResponse) =>
         Debug.Log($"{logMessage}\nJSON Response:\n{jsonResponse}");
 
+    /// <summary>
+    /// Logs brainCloud Errors in a consistent format.
+    /// </summary>
+    /// <param name="errorMessage">Custom error message to use as a header or to add additional information.</param>
+    /// <param name="status">The status code returned from the brainCloud server.</param>
+    /// <param name="reasonCode">The reason code returned from the brainCloud server.</param>
+    /// <param name="jsonError">The JSON response from the brainCloud server.</param>
     public static void LogError(string errorMessage, int status, int reasonCode, string jsonError) =>
         Debug.LogError($"{errorMessage}\nStatus: {status}\nReason: {reasonCode}\nJSON Response:\n{jsonError}");
+
+    #endregion
 }
