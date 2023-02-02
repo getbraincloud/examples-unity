@@ -46,7 +46,7 @@ public interface IServiceUI
 
     #endregion
 
-    #region UI Functionality
+    #region UI
 
     private void OnXUI()
     {
@@ -55,7 +55,7 @@ public interface IServiceUI
 
     #endregion
 
-    #region Service Functionality
+    #region Service
 
     private void HandleServiceFunction()
     {

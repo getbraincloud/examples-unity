@@ -1,14 +1,9 @@
 using BrainCloud;
-using BrainCloud.Common;
-using BrainCloud.Entity;
 using BrainCloud.JsonFx.Json;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 /// <summary>
 /// Entity Interface class demonstrates how to handle JSON requests and responses from braincloud
@@ -91,7 +86,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     #endregion
 
-    #region UI Functionality
+    #region UI
 
     private void ResetUIState()
     {

@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,7 +22,7 @@ public class StatsContainerUI : MonoBehaviour
         set
         {
             statValue = value;
-            StatValueLabel.text = statValue.ToString("N0");
+            StatValueLabel.text = statValue.ToString();
         }
     }
 
@@ -36,12 +35,6 @@ public class StatsContainerUI : MonoBehaviour
     private void OnEnable()
     {
         IncrementButton.onClick.AddListener(OnIncrementButton);
-    }
-
-    private void Start()
-    {
-        Value = 0;
-        IncrementButton.enabled = false;
     }
 
     private void OnDisable()
@@ -57,16 +50,6 @@ public class StatsContainerUI : MonoBehaviour
     #endregion
 
     #region UI Functionality
-
-    public void SetGameObjectName(string name)
-    {
-        const string STATS_GO_NAME_FORMAT = "{0}StatsContainer";
-
-        char[] arr = name.Where(c => (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || c == '-')).ToArray();
-        name = new string(arr).ToLower();
-
-        gameObject.name = string.Format(STATS_GO_NAME_FORMAT, name);
-    }
 
     public void ShowSeparation(bool showBackground)
     {
