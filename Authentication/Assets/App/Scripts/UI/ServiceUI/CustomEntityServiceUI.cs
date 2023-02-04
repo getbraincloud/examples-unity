@@ -1,28 +1,15 @@
 using BrainCloud;
+using BrainCloud.Entity;
 using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Entity Interface class demonstrates how to handle JSON requests and responses from braincloud
-/// when handling User Entities.
-/// 
-/// This includes:
-/// - How to create entity
-/// - How to read entity with ID received from a JSON response
-/// - How to update entity 
-/// - How to delete entity
-/// 
-/// For more info:
-/// https://getbraincloud.com/apidocs/portal-usage/user-monitoring/user-entities/
-/// https://getbraincloud.com/apidocs/cloud-code-central/cloud-code-tutorials/cloud-code-tutorial3-working-with-entities/
-/// </summary>
-public class EntityServiceUI : MonoBehaviour, IServiceUI
+public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
 {
     private const string DEFAULT_EMPTY_FIELD = "---";
-    private const string DEFAULT_ENTITY_TYPE = "user";
+    private const string DEFAULT_ENTITY_TYPE = "athlete";
 
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
@@ -30,6 +17,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
     [SerializeField] private TMP_Text TypeField = default;
     [SerializeField] private TMP_InputField NameField = default;
     [SerializeField] private TMP_InputField AgeField = default;
+    [SerializeField] private Button FetchButton = default;
     [SerializeField] private Button CreateButton = default;
     [SerializeField] private Button SaveButton = default;
     [SerializeField] private Button DeleteButton = default;
@@ -40,8 +28,8 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         set { UICanvasGroup.interactable = value; }
     }
 
-    private BCEntity userEntity = default;
-    private BrainCloudEntity entityService = default;
+    private BCCustomEntity customEntity = default;
+    private BrainCloudCustomEntity customEntityService = default;
 
     #region Unity Messages
 
@@ -55,6 +43,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     private void OnEnable()
     {
+        FetchButton.onClick.AddListener(OnFetchButton);
         CreateButton.onClick.AddListener(OnCreateButton);
         SaveButton.onClick.AddListener(OnSaveButton);
         DeleteButton.onClick.AddListener(OnDeleteButton);
@@ -62,18 +51,19 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     private void Start()
     {
-        entityService = BCManager.EntityService;
+        customEntityService = BCManager.CustomEntityService;
 
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
+        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
 
         SaveButton.gameObject.SetActive(false);
         DeleteButton.gameObject.SetActive(false);
 
-        HandleGetUserEntity();
+        HandleGetCustomEntity();
     }
 
     private void OnDisable()
     {
+        FetchButton.onClick.RemoveAllListeners();
         CreateButton.onClick.RemoveAllListeners();
         SaveButton.onClick.RemoveAllListeners();
         DeleteButton.onClick.RemoveAllListeners();
@@ -81,7 +71,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     private void OnDestroy()
     {
-        entityService = null;
+        customEntityService = null;
     }
 
     #endregion
@@ -90,7 +80,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     private void ResetUIState()
     {
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
+        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
 
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
@@ -104,63 +94,69 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
     {
         IsInteractable = false;
 
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE, NameField.text, AgeField.text);
+        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE, NameField.text, AgeField.text);
 
-        entityService.CreateEntity(userEntity.EntityType,
-                                   JsonWriter.Serialize(userEntity.DataToJson()),
-                                   userEntity.ACL.ToJsonString(),
-                                   OnCreateEntitySuccess,
-                                   HandleDefaultFailureCallback("CreateEntity Failed"));
+        customEntityService.CreateEntity(customEntity.EntityType,
+                                         JsonWriter.Serialize(customEntity.DataToJson()),
+                                         customEntity.ACL.ToJsonString(),
+                                         null,
+                                         customEntity.IsOwned,
+                                         OnCreateEntitySuccess,
+                                         HandleDefaultFailureCallback("CreateEntity Failed"));
+    }
+
+    private void OnFetchButton()
+    {
+        // TODO: Will restructure this to make more sense...
     }
 
     private void OnSaveButton()
     {
         IsInteractable = false;
 
-        if (string.IsNullOrEmpty(userEntity.EntityId))
+        if (customEntity.EntityId.IsNullOrEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ResetUIState();
             return;
         }
 
-        userEntity.Update(NameField.text, AgeField.text);
+        customEntity.Update(NameField.text, AgeField.text, AgeField.text);
 
-        entityService.UpdateEntity(userEntity.EntityId,
-                                   userEntity.EntityType,
-                                   JsonWriter.Serialize(userEntity.DataToJson()),
-                                   userEntity.ACL.ToJsonString(),
-                                   -1,
-                                   OnUpdateEntitySuccess,
-                                   HandleDefaultFailureCallback("UpdateEntity Failed"));
+        customEntityService.UpdateEntity(customEntity.EntityType,
+                                         customEntity.EntityId,
+                                         -1,
+                                         JsonWriter.Serialize(customEntity.DataToJson()),
+                                         customEntity.ACL.ToJsonString(),
+                                         null,
+                                         OnUpdateEntitySuccess,
+                                         HandleDefaultFailureCallback("UpdateEntity Failed"));
     }
 
     private void OnDeleteButton()
     {
         IsInteractable = false;
 
-        if (string.IsNullOrEmpty(userEntity.EntityId))
+        if (customEntity.EntityId.IsNullOrEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ResetUIState();
             return;
         }
 
-        if (!string.IsNullOrEmpty(userEntity.EntityId))
-        {
-            entityService.DeleteEntity(userEntity.EntityId,
-                                       -1,
-                                       OnDeleteEntitySuccess,
-                                       HandleDefaultFailureCallback("DeleteEntity Failed"));
-        }
+        customEntityService.DeleteEntity(customEntity.EntityType,
+                                         customEntity.EntityId,
+                                         -1,
+                                         OnDeleteEntitySuccess,
+                                         HandleDefaultFailureCallback("DeleteEntity Failed"));
     }
 
     private void UpdateUIInformation()
     {
-        if (!string.IsNullOrEmpty(userEntity.EntityId))
+        if (!string.IsNullOrEmpty(customEntity.EntityId))
         {
-            IDField.text = userEntity.EntityId;
-            TypeField.text = userEntity.EntityType;
+            IDField.text = customEntity.EntityId;
+            TypeField.text = customEntity.EntityType;
         }
         else
         {
@@ -168,8 +164,8 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
             TypeField.text = DEFAULT_EMPTY_FIELD;
         }
 
-        NameField.text = userEntity.Name;
-        AgeField.text = userEntity.Age;
+        NameField.text = customEntity.Name;
+        AgeField.text = customEntity.Goals.ToString();
 
         IsInteractable = true;
     }
@@ -178,36 +174,37 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     #region Entity
 
-    private void HandleGetUserEntity()
+    private void HandleGetCustomEntity()
     {
         IsInteractable = false;
 
         var context = new Dictionary<string, object>
         {
             { "pagination", new Dictionary<string, object>
-                            {
-                                { "rowsPerPage", 50 },
-                                { "pageNumber", 1 }
-                            }},
-            { "searchCriteria", new Dictionary<string, object>
-                                {
-                                    { "entityType", DEFAULT_ENTITY_TYPE }
-                                }},
+                {
+                    { "rowsPerPage", 50 },
+                    { "pageNumber", 1 }
+                }},
+            { "optionCriteria", new Dictionary<string, object>
+                {
+                    { "ownedOnly", true }
+                }},
             { "sortCriteria", new Dictionary<string, object>
-                              {
-                                  { "createdAt", 1 },
-                                  { "updatedAt", -1 }
-                              }}
+                {
+                    { "createdAt", 1 },
+                    { "updatedAt", -1 }
+                }}
         };
 
-        entityService.GetPage(JsonWriter.Serialize(context),
-                              HandleGetPageSuccess,
-                              HandleDefaultFailureCallback("GetPage Failed"));
+        customEntityService.GetEntityPage(DEFAULT_ENTITY_TYPE,
+                                          JsonWriter.Serialize(context),
+                                          HandleGetPageSuccess,
+                                          HandleDefaultFailureCallback("GetEntityPage Failed"));
     }
 
     private void HandleGetPageSuccess(string response, object _)
     {
-        BCManager.LogMessage("GetPage Success", response);
+        BCManager.LogMessage("GetEntityPage Success", response);
 
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
@@ -215,12 +212,12 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
         if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
         {
-            Debug.LogWarning("No entities were found for this user.");
+            Debug.LogWarning("No custom entities were found that are owned for this user.");
             ResetUIState();
             return;
         }
 
-        userEntity.CreateFromJson(data[0]);
+        customEntity.CreateFromJson(true, data[0]);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);
@@ -253,7 +250,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
     {
         BCManager.LogMessage("Deleted Entity for User", response);
 
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
+        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
 
         ResetUIState();
     }
@@ -264,7 +261,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
 
-        userEntity.UpdateFromJSON(data);
+        customEntity.UpdateFromJSON(true, data);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);
@@ -273,8 +270,16 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         UpdateUIInformation();
     }
 
-    private FailureCallback HandleDefaultFailureCallback(string errorMessage) =>
-        BCManager.CreateFailureCallback(errorMessage, UpdateUIInformation);
+    private FailureCallback HandleDefaultFailureCallback(string errorMessage)
+    {
+        errorMessage = string.IsNullOrEmpty(errorMessage) ? "Failure" : errorMessage;
+        return (status, reasonCode, jsonError, _) =>
+        {
+            BCManager.LogError(errorMessage, status, reasonCode, jsonError);
+            UpdateUIInformation();
+            IsInteractable = reasonCode != 40570; // Custom Entities not enabled for app
+        };
+    }
 
     #endregion
 }

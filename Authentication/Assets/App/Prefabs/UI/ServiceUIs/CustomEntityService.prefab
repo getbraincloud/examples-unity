@@ -1436,7 +1436,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5458227114281465647, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
       propertyPath: m_Name
-      value: EntityFullService
+      value: CustomEntityService
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
@@ -1450,7 +1450,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5458227114281465647, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
   m_PrefabInstance: {fileID: 2750869649981348317}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &601752209498719529
+--- !u!114 &7393337886996212720
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1459,7 +1459,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7895524808076324594}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2203e49c8246924face6e5a3ab91f3c, type: 3}
+  m_Script: {fileID: 11500000, guid: 55a32e0456d8d92408b44fecd1b220a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   UICanvasGroup: {fileID: 3987831140297834034}

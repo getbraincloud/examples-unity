@@ -1,6 +1,5 @@
 using BrainCloud;
 using BrainCloud.Common;
-using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
 
@@ -31,8 +30,8 @@ public struct BCEntity
     public static BCEntity Create(string entityType, string name = "", string age = "") => new BCEntity
     {
         Version = -1, // -1 tells the server to create the latest version
-        Name = !string.IsNullOrEmpty(name) ? name : DEFAULT_NAME,
-        Age = !string.IsNullOrEmpty(age) ? age : DEFAULT_AGE,
+        Name = !name.IsNullOrEmpty() ? name : DEFAULT_NAME,
+        Age = !age.IsNullOrEmpty() ? age : DEFAULT_AGE,
         EntityId = string.Empty,
         EntityType = entityType,
         CreatedAt = DateTime.UtcNow,
@@ -42,33 +41,31 @@ public struct BCEntity
 
     public void Update(string name, string age, string entityType = "")
     {
-        Name = !string.IsNullOrEmpty(name) ? name : DEFAULT_NAME;
-        Age = !string.IsNullOrEmpty(age) ? age : DEFAULT_AGE;
-        EntityType = !string.IsNullOrEmpty(entityType) ? entityType : EntityType;
+        Name = !name.IsNullOrEmpty() ? name : DEFAULT_NAME;
+        Age = !age.IsNullOrEmpty() ? age : DEFAULT_AGE;
+        EntityType = !entityType.IsNullOrEmpty() ? entityType : EntityType;
     }
 
-    public string DataToJson()
+    public Dictionary<string, object> DataToJson() => new Dictionary<string, object>
     {
-        var entity = new Dictionary<string, object>
-        {
-            { "name", Name },
-            { "age", Age }
-        };
-
-        return JsonWriter.Serialize(entity);
-    }
+        { "name", Name },
+        { "age", Age }
+    };
 
     public void CreateFromJson(Dictionary<string, object> data)
     {
-        EntityId = data["entityId"] as string;
-        EntityType = data["entityType"] as string;
         Version = (int)data["version"];
+        EntityId = data["entityId"] as string;
+        EntityType = data["entityType"] as string;        
         CreatedAt = Util.BcTimeToDateTime((long)data["createdAt"]);
         UpdatedAt = Util.BcTimeToDateTime((long)data["updatedAt"]);
+        ACL.ReadFromJson(data["acl"] as Dictionary<string, object>);
 
-        Dictionary<string, object> entityData = data["data"] as Dictionary<string, object>;
-        Name = entityData["name"] as string;
-        Age = entityData["age"] as string;
+        if (data["data"] is Dictionary<string, object> entityData && entityData.Count > 0)
+        {
+            Name = entityData["name"] as string;
+            Age = entityData["age"] as string;
+        }
     }
 
     public void UpdateFromJSON(Dictionary<string, object> data)
@@ -77,8 +74,9 @@ public struct BCEntity
         Version = (int)data["version"];
         CreatedAt = Util.BcTimeToDateTime((long)data["createdAt"]);
         UpdatedAt = Util.BcTimeToDateTime((long)data["updatedAt"]);
+        ACL.ReadFromJson(data["acl"] as Dictionary<string, object>);
 
-        if (data["data"] is Dictionary<string, object> entityData)
+        if (data["data"] is Dictionary<string, object> entityData && entityData.Count > 0)
         {
             Name = entityData["name"] as string;
             Age = entityData["age"] as string;

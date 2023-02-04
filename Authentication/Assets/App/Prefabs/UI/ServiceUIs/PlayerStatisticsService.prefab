@@ -361,7 +361,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Global Statistic
+  m_text: User Stat
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1081c6bd30b67274a9c17abf0fbccc79, type: 2}
   m_sharedMaterial: {fileID: -7312398999317667924, guid: 1081c6bd30b67274a9c17abf0fbccc79, type: 2}
@@ -527,7 +527,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5458227114281465647, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
       propertyPath: m_Name
-      value: GlobalStatisticsService
+      value: PlayerStatisticsService
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
@@ -546,7 +546,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5458227114281465647, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
   m_PrefabInstance: {fileID: 4465697446216029015}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4059121164876769004
+--- !u!114 &8082901928336283586
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -555,13 +555,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 8522741851553637496}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6030897be3fe8934dabb8781276b8454, type: 3}
+  m_Script: {fileID: 11500000, guid: c8aac4bc32f47e4488a4e1eaa7887e6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   UICanvasGroup: {fileID: 3207629730998695096}
   StatsContent: {fileID: 8522741851553637495}
-  StatsContainerTemplate: {fileID: 1609637238207636370}
---- !u!1001 &8926787089493112925
+  StatsContainerTemplate: {fileID: 872433992106422432}
+--- !u!1001 &7038922885693860719
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -730,10 +730,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1dc56fd5a6eb313499059155480118c4, type: 3}
---- !u!114 &1609637238207636370 stripped
+--- !u!114 &872433992106422432 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7905159875340852175, guid: 1dc56fd5a6eb313499059155480118c4, type: 3}
-  m_PrefabInstance: {fileID: 8926787089493112925}
+  m_PrefabInstance: {fileID: 7038922885693860719}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
+public class PlayerStatsServiceUI : MonoBehaviour
 {
     [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Transform StatsContent = default;
@@ -16,8 +16,8 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
         set { UICanvasGroup.interactable = value; }
     }
 
-    private Dictionary<string, StatsContainerUI> globalStatContainers { get; set; }
-    private BrainCloudGlobalStatistics globalStatsService = default;
+    private Dictionary<string, StatsContainerUI> userStatContainers { get; set; }
+    private BrainCloudPlayerStatistics userStatsService = default;
 
     #region Unity Messages
 
@@ -26,19 +26,19 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
         StatsContainerTemplate.StatName = "LOADING...";
         StatsContainerTemplate.Value = -1;
 
-        globalStatContainers = new Dictionary<string, StatsContainerUI>();
-        globalStatsService = BCManager.GlobalStatisticsService;
+        userStatContainers = new Dictionary<string, StatsContainerUI>();
+        userStatsService = BCManager.PlayerStatisticsService;
 
-        globalStatsService.ReadAllGlobalStats(HandleReadAllGlobalStatsSuccess,
-                                              BCManager.CreateFailureCallback("ReadAllGlobalStats Failed", IsInteractableCheck));
+        userStatsService.ReadAllUserStats(HandleReadUserStatsSuccess,
+                                          BCManager.CreateFailureCallback("ReadAllUserStats Failed", IsInteractableCheck));
 
         IsInteractable = false;
     }
 
     private void OnDestroy()
     {
-        globalStatContainers.Clear();
-        globalStatsService = null;
+        userStatContainers.Clear();
+        userStatsService = null;
     }
 
     #endregion
@@ -63,15 +63,15 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
     private void SetUpStatsContainerUI(Dictionary<string, object> statsObj)
     {
         // Destroy all old containers first
-        if (!globalStatContainers.IsNullOrEmpty())
+        if (!userStatContainers.IsNullOrEmpty())
         {
-            foreach (string key in globalStatContainers.Keys)
+            foreach (string key in userStatContainers.Keys)
             {
-                globalStatContainers[key].IncrementButtonAction = null;
-                Destroy(globalStatContainers[key].gameObject);
+                userStatContainers[key].IncrementButtonAction = null;
+                Destroy(userStatContainers[key].gameObject);
             }
 
-            globalStatContainers.Clear();
+            userStatContainers.Clear();
         }
 
         // Create new StatsContainerUIs
@@ -86,19 +86,19 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
             container.ShowSeparation(alternate);
             container.StatName = key;
             container.Value = Convert.ToInt64(statsObj[key]);
-            container.IncrementButtonAction = () => IncrementGlobalStats(key);
+            container.IncrementButtonAction = () => IncrementUserStats(key);
 
-            globalStatContainers.Add(key, container);
+            userStatContainers.Add(key, container);
         }
     }
 
     #endregion
 
-    #region Global Statistics
+    #region Player Statistics
 
-    private void HandleReadAllGlobalStatsSuccess(string response, object _)
+    private void HandleReadUserStatsSuccess(string response, object _)
     {
-        BCManager.LogMessage("Loading Global Stats...", response);
+        BCManager.LogMessage("Loading Player Stats...", response);
 
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
@@ -112,17 +112,17 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
         IsInteractableCheck();
     }
 
-    private void IncrementGlobalStats(string globalStatName)
+    private void IncrementUserStats(string userStatName)
     {
         IsInteractable = false;
 
-        string jsonData = "{ \"" + globalStatName + "\" : 1 }";
+        string jsonData = "{ \"" + userStatName + "\" : 1 }";
 
-        globalStatsService.IncrementGlobalStats(jsonData, HandleIncrementGlobalStats,
-                                                          BCManager.CreateFailureCallback("IncrementGlobalStats Failed", IsInteractableCheck));
+        userStatsService.IncrementUserStats(jsonData, HandleIncrementUserStat,
+                                                      BCManager.CreateFailureCallback("IncrementUserStats Failed", IsInteractableCheck));
     }
 
-    private void HandleIncrementGlobalStats(string response, object _)
+    private void HandleIncrementUserStat(string response, object _)
     {
         Debug.Log("Incremented Stat");
 
