@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+/// <summary>
+/// 
+/// </summary>
 public interface IServiceUI
 {
     public bool IsInteractable { get; set; }
 
-
-
 /*
+    [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
  
     public bool IsInteractable
@@ -16,6 +14,8 @@ public interface IServiceUI
         get { return UICanvasGroup.interactable; }
         set { UICanvasGroup.interactable = value; }
     }
+
+    private BrainCloudService bcService = default;
 
     #region Unity Messages
 
@@ -31,7 +31,7 @@ public interface IServiceUI
 
     private void Start()
     {
-
+        bcService = BCManager.Service;
     }
 
     private void OnDisable()
@@ -41,7 +41,7 @@ public interface IServiceUI
 
     private void OnDestroy()
     {
-
+        bcService = null;
     }
 
     #endregion

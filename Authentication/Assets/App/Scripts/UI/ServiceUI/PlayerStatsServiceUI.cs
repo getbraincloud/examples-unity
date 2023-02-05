@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class PlayerStatsServiceUI : MonoBehaviour
 {
+    [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Transform StatsContent = default;
     [SerializeField] private StatsContainerUI StatsContainerTemplate = default;
