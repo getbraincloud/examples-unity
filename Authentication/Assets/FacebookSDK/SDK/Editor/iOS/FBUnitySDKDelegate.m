@@ -16,8 +16,8 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
 #import "FBUnitySDKDelegate.h"
-
 #import "FBUnityUtility.h"
 
 NSString *const FBUnityMessageName_OnAppRequestsComplete = @"OnAppRequestsComplete";
@@ -33,6 +33,15 @@ NSString *const FBUnityMessageName_OnFetchDeferredAppLinkComplete = @"OnFetchDef
 NSString *const FBUnityMessageName_OnRefreshCurrentAccessTokenComplete = @"OnRefreshCurrentAccessTokenComplete";
 NSString *const FBUnityMessageName_OnUploadImageToMediaLibraryComplete = @"OnUploadImageToMediaLibraryComplete";
 NSString *const FBUnityMessageName_OnUploadVideoToMediaLibraryComplete = @"OnUploadVideoToMediaLibraryComplete";
+NSString *const FBUnityMessageName_OnCreateGamingContextComplete = @"OnCreateGamingContextComplete";
+NSString *const FBUnityMessageName_OnSwitchGamingContextComplete = @"OnSwitchGamingContextComplete";
+NSString *const FBUnityMessageName_OnChooseGamingContextComplete = @"OnChooseGamingContextComplete";
+NSString *const FBUnityMessageName_OnGetCurrentGamingContextComplete = @"OnGetCurrentGamingContextComplete";
+NSString *const FBUnityMessageName_OnGetTournamentsComplete = @"OnGetTournamentsComplete";
+NSString *const FBUnityMessageName_OnUpdateTournamentComplete = @"OnUpdateTournamentComplete";
+NSString *const FBUnityMessageName_OnTournamentDialogSuccess = @"OnTournamentDialogSuccess";
+NSString *const FBUnityMessageName_OnTournamentDialogCancel = @"OnTournamentDialogCancel";
+NSString *const FBUnityMessageName_OnTournamentDialogError = @"OnTournamentDialogError";
 
 static NSMutableArray *g_instances;
 
@@ -105,6 +114,59 @@ static NSMutableArray *g_instances;
 {
   [FBUnityUtility sendCancelToUnity:FBUnityMessageName_OnShareLinkComplete requestId:_requestID];
   [self complete];
+}
+
+#pragma mark - FBSDKContextDialogDelegate
+
+- (void)contextDialogDidComplete:(NSObject<FBSDKContextDialogDelegate>*)contextDialog;
+{
+  if ([contextDialog isKindOfClass:[FBSDKChooseContextDialog class]]) {
+    [FBUnityUtility sendMessageToUnity: FBUnityMessageName_OnChooseGamingContextComplete userData: NULL requestId:_requestID];
+  } else if ([contextDialog isKindOfClass:[FBSDKSwitchContextDialog class]]) {
+    [FBUnityUtility sendMessageToUnity: FBUnityMessageName_OnSwitchGamingContextComplete userData: NULL requestId:_requestID];
+  } else if ([contextDialog isKindOfClass:[FBSDKCreateContextDialog class]]) {
+    [FBUnityUtility sendMessageToUnity: FBUnityMessageName_OnCreateGamingContextComplete userData: NULL requestId:_requestID];
+  }
+  [self complete];
+}
+
+- (void)contextDialog:(NSObject<FBSDKContextDialogDelegate>*)contextDialog didFailWithError:(NSError *)error
+{
+  if ([contextDialog isKindOfClass:[FBSDKChooseContextDialog class]]) {
+    [FBUnityUtility sendErrorToUnity:FBUnityMessageName_OnChooseGamingContextComplete error:error requestId:_requestID];
+  } else if ([contextDialog isKindOfClass:[FBSDKSwitchContextDialog class]]) {
+    [FBUnityUtility sendErrorToUnity:FBUnityMessageName_OnSwitchGamingContextComplete error:error requestId:_requestID];
+  } else if ([contextDialog isKindOfClass:[FBSDKCreateContextDialog class]]) {
+    [FBUnityUtility sendErrorToUnity:FBUnityMessageName_OnCreateGamingContextComplete error:error requestId:_requestID];
+  }
+  [self complete];
+}
+
+- (void)contextDialogDidCancel:(NSObject<FBSDKContextDialogDelegate>*)contextDialog
+{
+  if ([contextDialog isKindOfClass:[FBSDKChooseContextDialog class]]) {
+    [FBUnityUtility sendCancelToUnity:FBUnityMessageName_OnChooseGamingContextComplete requestId:_requestID];
+  } else if ([contextDialog isKindOfClass:[FBSDKSwitchContextDialog class]]) {
+    [FBUnityUtility sendCancelToUnity:FBUnityMessageName_OnSwitchGamingContextComplete requestId:_requestID];
+  } else if ([contextDialog isKindOfClass:[FBSDKCreateContextDialog class]]) {
+    [FBUnityUtility sendCancelToUnity:FBUnityMessageName_OnCreateGamingContextComplete requestId:_requestID];
+  }
+
+  [self complete];
+}
+
+#pragma mark - FBSDKShareTournamentDialogDelegate
+
+- (void)didCancelWithDialog:(FBSDKShareTournamentDialog * _Nonnull)dialog {
+    [FBUnityUtility sendCancelToUnity:FBUnityMessageName_OnTournamentDialogCancel requestId:_requestID];
+}
+
+- (void)didCompleteWithDialog:(FBSDKShareTournamentDialog * _Nonnull)dialog tournament:(FBSDKTournament * _Nonnull)tournament {
+    [FBUnityUtility sendMessageToUnity: FBUnityMessageName_OnTournamentDialogSuccess userData: [tournament toDictionary] requestId:_requestID];
+}
+
+- (void)didFailWithError:(NSError * _Nonnull)error dialog:(FBSDKShareTournamentDialog * _Nonnull)dialog {
+    [FBUnityUtility sendErrorToUnity:FBUnityMessageName_OnTournamentDialogError error:error requestId:_requestID];
 }
 
 @end

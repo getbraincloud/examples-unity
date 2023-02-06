@@ -92,6 +92,8 @@ public class ScreenIdentity : BCScreen {
 
         BrainCloudInterface.instance.MergeUniversalIdentity(m_username, m_password); 
     }
+    
+    
 
     public void OnSuccess_GetTwitterPIN(bool success, Twitter.RequestTokenResponse response)
     {

@@ -30,14 +30,14 @@ namespace Facebook.Unity.Example
     {
 
         enum Scope {
-            PublicProfile   = 0b_0000_0001, 
-            UserFriends     = 0b_0000_0010, 
-            UserBirthday    = 0b_0000_0100, 
-            UserAgeRange    = 0b_0000_1000,
-            PublishActions  = 0b_0001_0000,
-            UserLocation    = 0b_0010_0000,
-            UserHometown    = 0b_0100_0000,
-            UserGender      = 0b_1000_0000,
+            PublicProfile   = 1,
+            UserFriends     = 2,
+            UserBirthday    = 3,
+            UserAgeRange    = 4,
+            PublishActions  = 5,
+            UserLocation    = 6,
+            UserHometown    = 7,
+            UserGender      = 8,
         };
 
         protected override bool ShowBackButton()
@@ -62,7 +62,7 @@ namespace Facebook.Unity.Example
             GUI.enabled = enabled && FB.IsInitialized;
             if (this.Button("Classic login"))
             {
-                this.CallFBLogin(LoginTracking.ENABLED, Scope.PublicProfile);
+                this.CallFBLogin(LoginTracking.ENABLED, new HashSet<Scope> { Scope.PublicProfile });
                 this.Status = "Classic login called";
             }
             if (this.Button("Get publish_actions"))
@@ -73,32 +73,32 @@ namespace Facebook.Unity.Example
 
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            
+
             if (this.Button("Limited login"))
             {
-                this.CallFBLogin(LoginTracking.LIMITED, Scope.PublicProfile);
+                this.CallFBLogin(LoginTracking.LIMITED, new HashSet<Scope> { Scope.PublicProfile });
                 this.Status = "Limited login called";
 
             }
             if (this.Button("Limited login +friends"))
             {
-                this.CallFBLogin(LoginTracking.LIMITED, Scope.PublicProfile | Scope.UserFriends);
+                this.CallFBLogin(LoginTracking.LIMITED, new HashSet<Scope> { Scope.PublicProfile, Scope.UserFriends });
                 this.Status = "Limited login +friends called";
 
             }
 
             GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();           
+            GUILayout.BeginHorizontal();
 
             if (this.Button("Limited Login+bday"))
             {
-                this.CallFBLogin(LoginTracking.LIMITED, Scope.PublicProfile | Scope.UserBirthday);
+                this.CallFBLogin(LoginTracking.LIMITED, new HashSet<Scope> { Scope.PublicProfile, Scope.UserBirthday });
                 this.Status = "Limited login +bday called";
             }
 
             if (this.Button("Limited Login+agerange"))
             {
-                this.CallFBLogin(LoginTracking.LIMITED, Scope.PublicProfile | Scope.UserAgeRange);
+                this.CallFBLogin(LoginTracking.LIMITED, new HashSet<Scope> { Scope.PublicProfile, Scope.UserAgeRange });
                 this.Status = "Limited login +agerange called";
             }
 
@@ -107,12 +107,12 @@ namespace Facebook.Unity.Example
 
             if (this.Button("Limited Login + location"))
             {
-                this.CallFBLogin(LoginTracking.LIMITED, Scope.PublicProfile | Scope.UserLocation);
+                this.CallFBLogin(LoginTracking.LIMITED, new HashSet<Scope> { Scope.PublicProfile, Scope.UserLocation });
             }
 
             if (this.Button("Limited Login + Hometown"))
             {
-                this.CallFBLogin(LoginTracking.LIMITED, Scope.PublicProfile | Scope.UserHometown);
+                this.CallFBLogin(LoginTracking.LIMITED, new HashSet<Scope> { Scope.PublicProfile, Scope.UserHometown });
             }
 
             GUILayout.EndHorizontal();
@@ -120,7 +120,7 @@ namespace Facebook.Unity.Example
 
             if (this.Button("Limited Login + Gender"))
             {
-                this.CallFBLogin(LoginTracking.LIMITED, Scope.PublicProfile | Scope.UserGender);
+                this.CallFBLogin(LoginTracking.LIMITED, new HashSet<Scope> { Scope.PublicProfile, Scope.UserGender });
             }
 
 
@@ -177,47 +177,57 @@ namespace Facebook.Unity.Example
                 this.SwitchMenu(typeof(AppLinks));
             }
 
+            if (this.Button("Tournaments"))
+            {
+                this.SwitchMenu(typeof(TournamentsMenu));
+            }
+
             if (Constants.IsMobile && this.Button("Access Token"))
             {
                 this.SwitchMenu(typeof(AccessTokenMenu));
             }
 
+            if (this.Button("UploadToMediaLibrary"))
+            {
+                this.SwitchMenu(typeof(UploadToMediaLibrary));
+            }
+            
             GUILayout.EndVertical();
 
             GUI.enabled = enabled;
         }
 
-        private void CallFBLogin(LoginTracking mode, Scope scopemask)
+        private void CallFBLogin(LoginTracking mode, HashSet<Scope> scope)
         {
             List<string> scopes = new List<string>();
 
-            if((scopemask & Scope.PublicProfile) > 0) {
-                scopes.Add("public_profile");                
+            if(scope.Contains(Scope.PublicProfile)) {
+                scopes.Add("public_profile");
             }
-            if((scopemask & Scope.UserFriends) > 0) 
+            if(scope.Contains(Scope.UserFriends))
             {
                 scopes.Add("user_friends");
             }
-            if((scopemask & Scope.UserBirthday) > 0)
+            if(scope.Contains(Scope.UserBirthday))
             {
                 scopes.Add("user_birthday");
             }
-            if((scopemask & Scope.UserAgeRange) > 0)
+            if(scope.Contains(Scope.UserAgeRange))
             {
                 scopes.Add("user_age_range");
             }
 
-            if ((scopemask & Scope.UserLocation) > 0)
+            if(scope.Contains(Scope.UserLocation))
             {
                 scopes.Add("user_location");
             }
 
-            if ((scopemask & Scope.UserHometown) > 0)
+            if(scope.Contains(Scope.UserHometown))
             {
                 scopes.Add("user_hometown");
             }
 
-            if ((scopemask & Scope.UserGender) > 0)
+            if(scope.Contains(Scope.UserGender))
             {
                 scopes.Add("user_gender");
             }
@@ -225,7 +235,11 @@ namespace Facebook.Unity.Example
 
             if (mode == LoginTracking.ENABLED)
             {
-                FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, scopes, "classic_nonce123", this.HandleResult);    
+                if (Constants.CurrentPlatform == FacebookUnityPlatform.IOS) {
+                    FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, scopes, "classic_nonce123", this.HandleResult);
+                } else {
+                    FB.LogInWithReadPermissions(scopes, this.HandleResult);
+                }
             }
             else // mode == loginTracking.LIMITED
             {

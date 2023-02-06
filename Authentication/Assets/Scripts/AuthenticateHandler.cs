@@ -202,10 +202,10 @@ public class AuthenticateHandler : MonoBehaviour
         inputProfileId = profileIdFieldObject.GetComponent<InputField>().text;
         inputPassword = passwordFieldObject.GetComponent<InputField>().text; 
 
-        if((inputProfileId == "" || inputPassword == "") && currentAuthType != eAuthTypes.ANONYMOUS)
+        /*if((inputProfileId == "" || inputPassword == "") && currentAuthType != eAuthTypes.ANONYMOUS)
         {
             return;
-        }
+        }*/
 
         statusText.fontSize = STATUS_SHRINK_SIZE;
         statusText.text = "Attempting to Authenticate...";

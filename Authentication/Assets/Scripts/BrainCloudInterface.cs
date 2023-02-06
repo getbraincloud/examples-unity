@@ -142,7 +142,10 @@ public class BrainCloudInterface : MonoBehaviour
 
     public void AuthenticateFacebook()
     {
-        
+        if (!FB.IsInitialized)
+        {
+            FB.Init(InitCallback, HideUnity);
+        }
     }
 
     public void OnSuccess_Authenticate(string responseData, object cbObject)
@@ -435,7 +438,7 @@ public class BrainCloudInterface : MonoBehaviour
     {
         SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged universal identity."); };
         FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
-
+        
         _bc.IdentityService.MergeUniversalIdentity(username, password, successCallback, failureCallback);
     }
 
@@ -454,6 +457,16 @@ public class BrainCloudInterface : MonoBehaviour
 
         _bc.IdentityService.MergeTwitterIdentity(userId, token, tokenSecret, successCallback, failureCallback);
     }
+
+    public void AttachFacebookIdentity(string facebookId, string authToken)
+    {
+        SuccessCallback successCallback = (response, cbObject) => { Debug.Log("Succesfully merged twitter identity."); };
+        FailureCallback failureCallback = (status, code, error, cbObject) => { Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error)); };
+
+        _bc.IdentityService.AttachFacebookIdentity(facebookId, authToken, successCallback, failureCallback);
+    }
+    
+    
 
     //*******************Google Sign In Stuff*********************
     public void GoogleSignIn()
@@ -486,6 +499,14 @@ public class BrainCloudInterface : MonoBehaviour
     private void InitCallback()
     {
         m_authStatus = "Facebook Initialized!!";
+        Debug.Log("Initialized");
+        var perms = new List<string>()
+        {
+            "public_profile",
+            "email"
+        };
+        FB.LogInWithReadPermissions(perms,AuthCallback);
+        
     }
 
     private void HideUnity(bool isGameShown)
@@ -518,6 +539,7 @@ public class BrainCloudInterface : MonoBehaviour
     {
         m_authStatus += "\n Braincloud Authenticated! \n";
         m_authStatus += responseData;
+        ScreenManager.instance.ActivateMainScreen();
     }
 
     private void GetInfo()
