@@ -1,5 +1,4 @@
 using BrainCloud;
-using BrainCloud.Entity;
 using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
 using TMPro;
@@ -101,8 +100,8 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
                                          customEntity.ACL.ToJsonString(),
                                          null,
                                          customEntity.IsOwned,
-                                         OnCreateEntitySuccess,
-                                         HandleDefaultFailureCallback("CreateEntity Failed"));
+                                         OnCreateEntity_Success,
+                                         OnFailure("CreateEntity Failed"));
     }
 
     private void OnFetchButton()
@@ -129,8 +128,8 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
                                          JsonWriter.Serialize(customEntity.DataToJson()),
                                          customEntity.ACL.ToJsonString(),
                                          null,
-                                         OnUpdateEntitySuccess,
-                                         HandleDefaultFailureCallback("UpdateEntity Failed"));
+                                         OnUpdateEntity_Success,
+                                         OnFailure("UpdateEntity Failed"));
     }
 
     private void OnDeleteButton()
@@ -147,8 +146,8 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
         customEntityService.DeleteEntity(customEntity.EntityType,
                                          customEntity.EntityId,
                                          -1,
-                                         OnDeleteEntitySuccess,
-                                         HandleDefaultFailureCallback("DeleteEntity Failed"));
+                                         OnDeleteEntity_Success,
+                                         OnFailure("DeleteEntity Failed"));
     }
 
     private void UpdateUIInformation()
@@ -172,7 +171,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
 
     #endregion
 
-    #region Entity
+    #region brainCloud
 
     private void HandleGetCustomEntity()
     {
@@ -198,11 +197,11 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
 
         customEntityService.GetEntityPage(DEFAULT_ENTITY_TYPE,
                                           JsonWriter.Serialize(context),
-                                          HandleGetPageSuccess,
-                                          HandleDefaultFailureCallback("GetEntityPage Failed"));
+                                          OnGetPage_Success,
+                                          OnFailure("GetEntityPage Failed"));
     }
 
-    private void HandleGetPageSuccess(string response, object _)
+    private void OnGetPage_Success(string response, object _)
     {
         BCManager.LogMessage("GetEntityPage Success", response);
 
@@ -226,27 +225,27 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
         UpdateUIInformation();
     }
 
-    private void OnCreateEntitySuccess(string response, object _)
+    private void OnCreateEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Created Entity for User", response);
 
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, HandleGetEntitySuccess);
+        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
     }
 
-    private void OnUpdateEntitySuccess(string response, object _)
+    private void OnUpdateEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Updated Entity for User", response);
 
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, HandleGetEntitySuccess);
+        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
     }
 
-    private void OnDeleteEntitySuccess(string response, object _)
+    private void OnDeleteEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Deleted Entity for User", response);
 
@@ -255,7 +254,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
         ResetUIState();
     }
 
-    private void HandleGetEntitySuccess(string response, object _)
+    private void OnGetEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Updating Local Entity Data...", response);
 
@@ -270,7 +269,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
         UpdateUIInformation();
     }
 
-    private FailureCallback HandleDefaultFailureCallback(string errorMessage)
+    private FailureCallback OnFailure(string errorMessage)
     {
         errorMessage = string.IsNullOrEmpty(errorMessage) ? "Failure" : errorMessage;
         return (status, reasonCode, jsonError, _) =>

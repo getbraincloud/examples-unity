@@ -109,8 +109,8 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         entityService.CreateEntity(userEntity.EntityType,
                                    JsonWriter.Serialize(userEntity.DataToJson()),
                                    userEntity.ACL.ToJsonString(),
-                                   OnCreateEntitySuccess,
-                                   HandleDefaultFailureCallback("CreateEntity Failed"));
+                                   OnCreateEntity_Success,
+                                   OnFailure("CreateEntity Failed"));
     }
 
     private void OnSaveButton()
@@ -131,8 +131,8 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
                                    JsonWriter.Serialize(userEntity.DataToJson()),
                                    userEntity.ACL.ToJsonString(),
                                    -1,
-                                   OnUpdateEntitySuccess,
-                                   HandleDefaultFailureCallback("UpdateEntity Failed"));
+                                   OnUpdateEntity_Success,
+                                   OnFailure("UpdateEntity Failed"));
     }
 
     private void OnDeleteButton()
@@ -150,8 +150,8 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         {
             entityService.DeleteEntity(userEntity.EntityId,
                                        -1,
-                                       OnDeleteEntitySuccess,
-                                       HandleDefaultFailureCallback("DeleteEntity Failed"));
+                                       OnDeleteEntity_Success,
+                                       OnFailure("DeleteEntity Failed"));
         }
     }
 
@@ -176,7 +176,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
 
     #endregion
 
-    #region Entity
+    #region Services
 
     private void HandleGetUserEntity()
     {
@@ -201,11 +201,11 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         };
 
         entityService.GetPage(JsonWriter.Serialize(context),
-                              HandleGetPageSuccess,
-                              HandleDefaultFailureCallback("GetPage Failed"));
+                              OnGetPage_Success,
+                              OnFailure("GetPage Failed"));
     }
 
-    private void HandleGetPageSuccess(string response, object _)
+    private void OnGetPage_Success(string response, object _)
     {
         BCManager.LogMessage("GetPage Success", response);
 
@@ -229,27 +229,27 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         UpdateUIInformation();
     }
 
-    private void OnCreateEntitySuccess(string response, object _)
+    private void OnCreateEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Created Entity for User", response);
 
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, HandleGetEntitySuccess);
+        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
     }
 
-    private void OnUpdateEntitySuccess(string response, object _)
+    private void OnUpdateEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Updated Entity for User", response);
 
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, HandleGetEntitySuccess);
+        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
     }
 
-    private void OnDeleteEntitySuccess(string response, object _)
+    private void OnDeleteEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Deleted Entity for User", response);
 
@@ -258,7 +258,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         ResetUIState();
     }
 
-    private void HandleGetEntitySuccess(string response, object _)
+    private void OnGetEntity_Success(string response, object _)
     {
         BCManager.LogMessage("Updating Local Entity Data...", response);
 
@@ -273,7 +273,7 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
         UpdateUIInformation();
     }
 
-    private FailureCallback HandleDefaultFailureCallback(string errorMessage) =>
+    private FailureCallback OnFailure(string errorMessage) =>
         BCManager.CreateFailureCallback(errorMessage, UpdateUIInformation);
 
     #endregion

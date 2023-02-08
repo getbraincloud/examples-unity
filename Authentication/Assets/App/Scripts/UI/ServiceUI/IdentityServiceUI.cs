@@ -89,4 +89,13 @@ public class IdentityServiceUI : MonoBehaviour, IServiceUI
     }
 
     #endregion
+
+    #region brainCloud
+
+    private void OnSuccess(string response, object _)
+    {
+        // TODO: Better testing and handling
+    }
+
+    #endregion
 }

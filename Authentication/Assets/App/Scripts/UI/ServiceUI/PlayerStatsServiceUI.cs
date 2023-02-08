@@ -30,7 +30,7 @@ public class PlayerStatsServiceUI : MonoBehaviour
         userStatContainers = new Dictionary<string, StatsContainerUI>();
         userStatsService = BCManager.PlayerStatisticsService;
 
-        userStatsService.ReadAllUserStats(HandleReadUserStatsSuccess,
+        userStatsService.ReadAllUserStats(OnReadUserStats_Success,
                                           BCManager.CreateFailureCallback("ReadAllUserStats Failed", IsInteractableCheck));
 
         IsInteractable = false;
@@ -61,7 +61,7 @@ public class PlayerStatsServiceUI : MonoBehaviour
         }
     }
 
-    private void SetUpStatsContainerUI(Dictionary<string, object> statsObj)
+    private void UpdateStatContainers(Dictionary<string, object> statsObj)
     {
         // Destroy all old containers first
         if (!userStatContainers.IsNullOrEmpty())
@@ -87,17 +87,27 @@ public class PlayerStatsServiceUI : MonoBehaviour
             container.ShowSeparation(alternate);
             container.StatName = key;
             container.Value = Convert.ToInt64(statsObj[key]);
-            container.IncrementButtonAction = () => IncrementUserStats(key);
+            container.IncrementButtonAction = () => HandleIncrementUserStats(key);
 
             userStatContainers.Add(key, container);
         }
     }
 
+    private void HandleIncrementUserStats(string userStatName)
+    {
+        IsInteractable = false;
+
+        string jsonData = "{ \"" + userStatName + "\" : 1 }";
+
+        userStatsService.IncrementUserStats(jsonData, OnIncrementUserStat_Success,
+                                                      BCManager.CreateFailureCallback("IncrementUserStats Failed", IsInteractableCheck));
+    }
+
     #endregion
 
-    #region Player Statistics
+    #region brainCloud
 
-    private void HandleReadUserStatsSuccess(string response, object _)
+    private void OnReadUserStats_Success(string response, object _)
     {
         BCManager.LogMessage("Loading Player Stats...", response);
 
@@ -107,23 +117,13 @@ public class PlayerStatsServiceUI : MonoBehaviour
 
         if (!statsObj.IsNullOrEmpty())
         {
-            SetUpStatsContainerUI(statsObj);
+            UpdateStatContainers(statsObj);
         }
 
         IsInteractableCheck();
     }
 
-    private void IncrementUserStats(string userStatName)
-    {
-        IsInteractable = false;
-
-        string jsonData = "{ \"" + userStatName + "\" : 1 }";
-
-        userStatsService.IncrementUserStats(jsonData, HandleIncrementUserStat,
-                                                      BCManager.CreateFailureCallback("IncrementUserStats Failed", IsInteractableCheck));
-    }
-
-    private void HandleIncrementUserStat(string response, object _)
+    private void OnIncrementUserStat_Success(string response, object _)
     {
         Debug.Log("Incremented Stat");
 
@@ -133,7 +133,7 @@ public class PlayerStatsServiceUI : MonoBehaviour
 
         if (!statsObj.IsNullOrEmpty())
         {
-            SetUpStatsContainerUI(statsObj);
+            UpdateStatContainers(statsObj);
         }
 
         IsInteractableCheck();

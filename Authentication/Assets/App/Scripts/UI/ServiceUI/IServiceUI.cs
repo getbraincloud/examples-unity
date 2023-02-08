@@ -5,7 +5,7 @@ public interface IServiceUI
 {
     public bool IsInteractable { get; set; }
 
-/*
+/* Template to copy for classes that make use of this interface
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
  
@@ -48,16 +48,16 @@ public interface IServiceUI
 
     #region UI
 
-    private void OnXUI()
+    private void OnInteractable()
     {
 
     }
 
     #endregion
 
-    #region Service
+    #region brainCloud
 
-    private void HandleServiceFunction()
+    private void OnServiceFunction()
     {
 
     }

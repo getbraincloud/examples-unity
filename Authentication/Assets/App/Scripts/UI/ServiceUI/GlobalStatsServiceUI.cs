@@ -30,7 +30,7 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
         globalStatContainers = new Dictionary<string, StatsContainerUI>();
         globalStatsService = BCManager.GlobalStatisticsService;
 
-        globalStatsService.ReadAllGlobalStats(HandleReadAllGlobalStatsSuccess,
+        globalStatsService.ReadAllGlobalStats(OnReadAllGlobalStats_Success,
                                               BCManager.CreateFailureCallback("ReadAllGlobalStats Failed", IsInteractableCheck));
 
         IsInteractable = false;
@@ -61,7 +61,7 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
         }
     }
 
-    private void SetUpStatsContainerUI(Dictionary<string, object> statsObj)
+    private void UpdateStatContainers(Dictionary<string, object> statsObj)
     {
         // Destroy all old containers first
         if (!globalStatContainers.IsNullOrEmpty())
@@ -87,17 +87,27 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
             container.ShowSeparation(alternate);
             container.StatName = key;
             container.Value = Convert.ToInt64(statsObj[key]);
-            container.IncrementButtonAction = () => IncrementGlobalStats(key);
+            container.IncrementButtonAction = () => HandleIncrementGlobalStats(key);
 
             globalStatContainers.Add(key, container);
         }
     }
 
+    private void HandleIncrementGlobalStats(string globalStatName)
+    {
+        IsInteractable = false;
+
+        string jsonData = "{ \"" + globalStatName + "\" : 1 }";
+
+        globalStatsService.IncrementGlobalStats(jsonData, OnIncrementGlobalStats_Success,
+                                                          BCManager.CreateFailureCallback("IncrementGlobalStats Failed", IsInteractableCheck));
+    }
+
     #endregion
 
-    #region Global Statistics
+    #region brainCloud
 
-    private void HandleReadAllGlobalStatsSuccess(string response, object _)
+    private void OnReadAllGlobalStats_Success(string response, object _)
     {
         BCManager.LogMessage("Loading Global Stats...", response);
 
@@ -107,23 +117,13 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
 
         if (!statsObj.IsNullOrEmpty())
         {
-            SetUpStatsContainerUI(statsObj);
+            UpdateStatContainers(statsObj);
         }
 
         IsInteractableCheck();
     }
 
-    private void IncrementGlobalStats(string globalStatName)
-    {
-        IsInteractable = false;
-
-        string jsonData = "{ \"" + globalStatName + "\" : 1 }";
-
-        globalStatsService.IncrementGlobalStats(jsonData, HandleIncrementGlobalStats,
-                                                          BCManager.CreateFailureCallback("IncrementGlobalStats Failed", IsInteractableCheck));
-    }
-
-    private void HandleIncrementGlobalStats(string response, object _)
+    private void OnIncrementGlobalStats_Success(string response, object _)
     {
         Debug.Log("Incremented Stat");
 
@@ -133,7 +133,7 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
 
         if (!statsObj.IsNullOrEmpty())
         {
-            SetUpStatsContainerUI(statsObj);
+            UpdateStatContainers(statsObj);
         }
 
         IsInteractableCheck();

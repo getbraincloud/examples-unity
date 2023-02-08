@@ -64,11 +64,15 @@ public class BCManager : MonoBehaviour
 
     public static BCEntityFactory EntityFactory => Wrapper.EntityFactory;
 
-    public static BrainCloudGlobalApp GlobalAppService => Wrapper.GlobalAppService;
-
     public static BrainCloudGlobalEntity GlobalEntityService => Wrapper.GlobalEntityService;
 
+    public static BrainCloudGlobalApp GlobalAppService => Wrapper.GlobalAppService;
+
     public static BrainCloudPresence PresenceService => Wrapper.PresenceService;
+
+    public static BrainCloudVirtualCurrency VirtualCurrencyService => Wrapper.VirtualCurrencyService;
+
+    public static BrainCloudAppStore AppStoreService => Wrapper.AppStoreService;
 
     public static BrainCloudPlayerStatistics PlayerStatisticsService => Wrapper.PlayerStatisticsService;
 
@@ -92,13 +96,15 @@ public class BCManager : MonoBehaviour
 
     public static BrainCloudPlayerState PlayerStateService => Wrapper.PlayerStateService;
 
-    public static BrainCloudAsyncMatch AsyncMatchService => Wrapper.AsyncMatchService;
-
     public static BrainCloudFriend FriendService => Wrapper.FriendService;
 
     public static BrainCloudEvent EventService => Wrapper.EventService;
 
     public static BrainCloudSocialLeaderboard SocialLeaderboardService => Wrapper.SocialLeaderboardService;
+
+    public static BrainCloudSocialLeaderboard LeaderboardService => Wrapper.LeaderboardService;
+
+    public static BrainCloudAsyncMatch AsyncMatchService => Wrapper.AsyncMatchService;
 
     public static BrainCloudTime TimeService => Wrapper.TimeService;
 
@@ -123,6 +129,20 @@ public class BCManager : MonoBehaviour
     public static BrainCloudFile FileService => Wrapper.FileService;
 
     public static BrainCloudGroup GroupService => Wrapper.GroupService;
+
+    public static BrainCloudMail MailService => Wrapper.MailService;
+
+    public static BrainCloudRTT RTTService => Wrapper.RTTService;
+
+    public static BrainCloudLobby LobbyService => Wrapper.LobbyService;
+
+    public static BrainCloudChat ChatService => Wrapper.ChatService;
+
+    public static BrainCloudMessaging MessagingService => MessagingService;
+
+    public static BrainCloudRelay RelayService => RelayService;
+
+    public static BrainCloudBlockchain Blockchain => Blockchain;
 
     #endregion
 
