@@ -1,11 +1,9 @@
 using BrainCloud;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IdentityServiceUI : MonoBehaviour, IServiceUI
+public class IdentityServiceUI : MonoBehaviour, IContentUI
 {
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
@@ -18,13 +16,27 @@ public class IdentityServiceUI : MonoBehaviour, IServiceUI
     [SerializeField] private Button UniversalAttachButton = default;
     [SerializeField] private Button UniversalMergeButton = default;
 
+    private BrainCloudIdentity identityService = default;
+
+    #region IContentUI
+
     public bool IsInteractable
     {
         get { return UICanvasGroup.interactable; }
         set { UICanvasGroup.interactable = value; }
     }
 
-    private BrainCloudIdentity identityService = default;
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 

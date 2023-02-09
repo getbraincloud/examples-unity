@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
+public class CustomEntityServiceUI : MonoBehaviour, IContentUI
 {
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "athlete";
@@ -21,14 +21,28 @@ public class CustomEntityServiceUI : MonoBehaviour, IServiceUI
     [SerializeField] private Button SaveButton = default;
     [SerializeField] private Button DeleteButton = default;
 
+    private BCCustomEntity customEntity = default;
+    private BrainCloudCustomEntity customEntityService = default;
+
+    #region IContentUI
+
     public bool IsInteractable
     {
         get { return UICanvasGroup.interactable; }
         set { UICanvasGroup.interactable = value; }
     }
 
-    private BCCustomEntity customEntity = default;
-    private BrainCloudCustomEntity customEntityService = default;
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 

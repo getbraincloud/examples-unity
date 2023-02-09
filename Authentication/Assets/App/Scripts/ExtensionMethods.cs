@@ -65,7 +65,7 @@ public static class ExtensionMethods
     /// <param name="format">Optional format. This will not be truncated during the sanitization process.</param>
     public static GameObject SetName(this GameObject go, string name, string format = "{0}")
     {
-        name = name.ToLower().Sanitize(32);
+        name = name.Sanitize(32);
         go.name = string.Format(format, name);
 
         return go;

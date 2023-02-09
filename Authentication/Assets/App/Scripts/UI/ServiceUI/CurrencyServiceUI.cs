@@ -8,7 +8,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CurrencyServiceUI : MonoBehaviour, IServiceUI
+public class CurrencyServiceUI : MonoBehaviour, IContentUI
 {
     private const string DEFAULT_EMPTY_FIELD = "-";
     private const string DEFAULT_CURRENCY_TYPE = "gems";
@@ -35,16 +35,30 @@ public class CurrencyServiceUI : MonoBehaviour, IServiceUI
     [SerializeField] private TMP_InputField ConsumeGemsField = default;
     [SerializeField] private Button ConsumeGemsButton = default;
 
+    private BrainCloudScript scriptService = default;
+    private BrainCloudPlayerState userStateService = default;
+    private BrainCloudPlayerStatistics statsService = default;
+    private BrainCloudVirtualCurrency currencyService = default;
+
+    #region IContentUI
+
     public bool IsInteractable
     {
         get { return UICanvasGroup.interactable; }
         set { UICanvasGroup.interactable = value; }
     }
 
-    private BrainCloudScript scriptService = default;
-    private BrainCloudPlayerState userStateService = default;
-    private BrainCloudPlayerStatistics statsService = default;
-    private BrainCloudVirtualCurrency currencyService = default;
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 

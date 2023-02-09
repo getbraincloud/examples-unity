@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CloudCodeServiceUI : MonoBehaviour, IServiceUI
+public class ScriptServiceUI : MonoBehaviour, IContentUI
 {
     private static Dictionary<string, string> CLOUD_CODE_SCRIPTS = new Dictionary<string, string>
     {
@@ -21,15 +21,29 @@ public class CloudCodeServiceUI : MonoBehaviour, IServiceUI
     [SerializeField] private TMP_InputField ScriptJsonField = default;
     [SerializeField] private Button RunButton = default;
 
+    private int current = -1;
+    private BrainCloudScript scriptService = default;
+    private List<string> scriptNames = default;
+
+    #region IContentUI
+
     public bool IsInteractable
     {
         get { return UICanvasGroup.interactable; }
         set { UICanvasGroup.interactable = value; }
     }
 
-    private int current = -1;
-    private BrainCloudScript scriptService = default;
-    private List<string> scriptNames = default;
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 

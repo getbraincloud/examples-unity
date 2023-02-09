@@ -4,12 +4,17 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
+public class GlobalStatsServiceUI : MonoBehaviour, IContentUI
 {
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Transform StatsContent = default;
     [SerializeField] private StatsContainerUI StatsContainerTemplate = default;
+
+    private Dictionary<string, StatsContainerUI> globalStatContainers { get; set; }
+    private BrainCloudGlobalStatistics globalStatsService = default;
+
+    #region IContentUI
 
     public bool IsInteractable
     {
@@ -17,8 +22,17 @@ public class GlobalStatsServiceUI : MonoBehaviour, IServiceUI
         set { UICanvasGroup.interactable = value; }
     }
 
-    private Dictionary<string, StatsContainerUI> globalStatContainers { get; set; }
-    private BrainCloudGlobalStatistics globalStatsService = default;
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 

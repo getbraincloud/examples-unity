@@ -4,18 +4,26 @@ using UnityEngine.UI;
 public class OpenLinkButton : MonoBehaviour
 {
     [SerializeField] private Button LinkButton = default;
-    [SerializeField] private string URLToOpen = string.Empty;
+    [SerializeField] private string DefaultURL = string.Empty;
 
+    private string url = string.Empty;
+    public string URLToOpen
+    {
+        get => url.IsNullOrEmpty() ? DefaultURL : url;
+        set => url = value;
+    }
+    
     private void OnEnable()
     {
-        if (string.IsNullOrEmpty(URLToOpen))
-        {
-            Debug.LogError($"No proper URL was used! String used: {URLToOpen}");
-            enabled = false;
-            return;
-        }
-
         LinkButton.onClick.AddListener(OnLinkButton);
+    }
+
+    private void Start()
+    {
+        if (DefaultURL.IsNullOrEmpty())
+        {
+            enabled = false;
+        }
     }
 
     private void OnDisable()

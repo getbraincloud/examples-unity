@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd0f747ddd6df94b8598f9bed2a0fde, type: 3}
+  m_Name: CustomEntityService
+  m_EditorClassIdentifier: 
+  ServiceName: Custom Entity
+  ServiceDescription: "Custom Entities are very similar to Global Entities, but with
+    several advanced features that make them more applicable for larger data sets.\r\n\r\nLike
+    Global Entities, Custom Entites are:\r\n \u2022 available across all users of
+    an app\r\n \u2022 access is controlled via ACL\r\n \u2022 have an entityType
+    for organization\r\n \u2022 can have owners or be un-owned (as system objects)\r\n
+    \u2022 can be automatically deleted via TTL (time-to-live)\r\n\r\nCustom Entities
+    differ in these ways:\r\n \u2022 You must pre-declare your entityTypes ahead-of-time\r\n
+    \u2022 You can create custom indexes for each entityType for fast lookups\r\n
+    \u2022 You can have an unlimited # of custom entities\r\n \u2022 You can do partial
+    updates of custom entities\r\n \u2022 Custom entities support auto-migration
+    during deployment"
+  ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-customentity
+  ServicePrefab: {fileID: 7895524808076324594, guid: 057c614243746e84781a23fe7c22ef9d, type: 3}

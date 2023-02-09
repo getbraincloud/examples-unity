@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -17,7 +15,6 @@ public class MainMenuUI : MonoBehaviour
     [Header("Main")]
     [SerializeField] private Animator MainMenuAnim = default;
     [SerializeField] private Animator BlockerAnim = default;
-    [SerializeField] private Transform MenuContent = default;
     [SerializeField] private CanvasGroup HeaderCG = default;
     [SerializeField] private LayoutElement HeaderSpacer = default;
 
@@ -29,11 +26,18 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private Button OpenMenuButton = default;
     [SerializeField] private Button CloseMenuButton = default;
     [SerializeField] private Button BlockerButton = default;
-    [SerializeField] private Button LogoutButton = default;
+    [SerializeField] private MenuItemUI LogoutButton = default;
+
+    [Header("Menu Items")]
+    [SerializeField] private Transform MenuContent = default;
+    [SerializeField] private MenuItemUI MenuItemTemplate = default;
+    [SerializeField] private ServiceItem[] ServiceItemUIs = default;
 
     [Header("UI Control")]
     [SerializeField] private CanvasGroup LoginContent = default;
-    [SerializeField] private CanvasGroup AppContent = default;
+    [SerializeField] private AppContentUI AppContent = default;
+
+    private List<MenuItemUI> menuItems = default;
 
     public bool MainMenuActive
     {
@@ -41,18 +45,29 @@ public class MainMenuUI : MonoBehaviour
         set => SetMainMenuActiveState(value);
     }
 
+    #region Unity Messages
+
     private void OnEnable()
     {
         OpenMenuButton.onClick.AddListener(OnOpenMenuButton);
         CloseMenuButton.onClick.AddListener(OnCloseMenuButton);
         BlockerButton.onClick.AddListener(OnCloseMenuButton);
-        LogoutButton.onClick.AddListener(OnLogoutButton);
 
-        // Enable all content buttons
+        if (!menuItems.IsNullOrEmpty())
+        {
+            foreach (MenuItemUI item in menuItems)
+            {
+                item.enabled = true;
+            }
+        }
+
+        LogoutButton.ButtonAction = OnLogoutButton;
+        LogoutButton.enabled = true;
     }
 
     private void Start()
     {
+        CreateMenuItems();
         ChangeToLoginContent();
 
         AppInfoLabel.text = string.Format(APP_INFO_TEXT, BCManager.AppName, BCManager.Client.AppId, BCManager.Client.AppVersion);
@@ -63,9 +78,45 @@ public class MainMenuUI : MonoBehaviour
         OpenMenuButton.onClick.RemoveAllListeners();
         CloseMenuButton.onClick.RemoveAllListeners();
         BlockerButton.onClick.RemoveAllListeners();
-        LogoutButton.onClick.RemoveAllListeners();
 
-        // Disable all content buttons
+        if (!menuItems.IsNullOrEmpty())
+        {
+            foreach (MenuItemUI item in menuItems)
+            {
+                item.enabled = false;
+            }
+        }
+
+        LogoutButton.ButtonAction = null;
+        LogoutButton.enabled = false;
+    }
+
+    private void OnDestroy()
+    {
+        menuItems.Clear();
+        menuItems = null;
+    }
+
+    #endregion
+
+    #region UI
+
+    private void CreateMenuItems()
+    {
+        menuItems = new List<MenuItemUI>();
+
+        foreach(ServiceItem serviceItem in ServiceItemUIs)
+        {
+            MenuItemUI menuItem = Instantiate(MenuItemTemplate, MenuContent);
+            menuItem.gameObject.SetActive(true);
+            menuItem.gameObject.SetName(serviceItem.Name, "{0}MenuItem");
+            menuItem.Label = serviceItem.Name;
+            menuItem.ButtonAction = () => OnMenuItemButton(serviceItem);
+
+            menuItems.Add(menuItem);
+        }
+
+        MenuItemTemplate.gameObject.SetActive(false);
     }
 
     private void SetMainMenuActiveState(bool isActive)
@@ -84,6 +135,15 @@ public class MainMenuUI : MonoBehaviour
     private void OnCloseMenuButton()
     {
         MainMenuActive = false;
+    }
+
+    private void OnMenuItemButton(ServiceItem serviceItem)
+    {
+        MainMenuActive = false;
+
+        AppContent.LoadServiceItemContent(serviceItem);
+
+        Debug.Log($"Opening {serviceItem.Name} Service UI");
     }
 
     private void OnLogoutButton()
@@ -106,10 +166,10 @@ public class MainMenuUI : MonoBehaviour
         }
 
         LoginContent.interactable = false;
-        AppContent.interactable = true;
+        AppContent.IsInteractable = true;
 
         LoginContent.gameObject.SetActive(false);
-        AppContent.gameObject.SetActive(true);
+        AppContent.GameObject.SetActive(true);
         OpenMenuButton.gameObject.SetActive(true);
     }
 
@@ -121,10 +181,10 @@ public class MainMenuUI : MonoBehaviour
         HeaderSpacer.preferredHeight = HEADER_SPACER_HEIGHT;
 
         LoginContent.interactable = true;
-        AppContent.interactable = false;
+        AppContent.IsInteractable = false;
 
         LoginContent.gameObject.SetActive(true);
-        AppContent.gameObject.SetActive(false);
+        AppContent.GameObject.SetActive(false);
         OpenMenuButton.gameObject.SetActive(false);
     }
 
@@ -143,4 +203,6 @@ public class MainMenuUI : MonoBehaviour
             HeaderLabel.text = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
         }
     }
+
+    #endregion
 }

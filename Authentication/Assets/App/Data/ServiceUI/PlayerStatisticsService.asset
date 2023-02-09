@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd0f747ddd6df94b8598f9bed2a0fde, type: 3}
+  m_Name: PlayerStatisticsService
+  m_EditorClassIdentifier: 
+  ServiceName: Player Statistics
+  ServiceDescription: 'The Player Statistics service is used for all user-scoped
+    statistics operations, including Player Experience (XP).
+
+
+    User Stats must
+    be pre-defined from the Statistics Rules - User Statistics page of the brainCloud
+    portal. If instead you need to create them dynamically at runtime, you can enable
+    the Generate User Statistic Rule Enabled setting on the Advanced Settings page
+    of your app in the brainCloud portal.'
+  ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstats
+  ServicePrefab: {fileID: 8522741851553637496, guid: 4457238e60143854c9242490bf14ed36, type: 3}

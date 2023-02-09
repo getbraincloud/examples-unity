@@ -19,7 +19,7 @@ using UnityEngine.UI;
 /// https://getbraincloud.com/apidocs/portal-usage/user-monitoring/user-entities/
 /// https://getbraincloud.com/apidocs/cloud-code-central/cloud-code-tutorials/cloud-code-tutorial3-working-with-entities/
 /// </summary>
-public class EntityServiceUI : MonoBehaviour, IServiceUI
+public class EntityServiceUI : MonoBehaviour, IContentUI
 {
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "user";
@@ -34,14 +34,28 @@ public class EntityServiceUI : MonoBehaviour, IServiceUI
     [SerializeField] private Button SaveButton = default;
     [SerializeField] private Button DeleteButton = default;
 
+    private BCEntity userEntity = default;
+    private BrainCloudEntity entityService = default;
+
+    #region IContentUI
+
     public bool IsInteractable
     {
         get { return UICanvasGroup.interactable; }
         set { UICanvasGroup.interactable = value; }
     }
 
-    private BCEntity userEntity = default;
-    private BrainCloudEntity entityService = default;
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 
