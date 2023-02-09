@@ -10,7 +10,7 @@ public class AppContentUI : MonoBehaviour, IContentUI
     [SerializeField] private TMP_Text TitleLabel = default;
     [SerializeField] private OpenLinkButton APILink = default;
     [SerializeField] private Transform ServiceContent = default;
-    //[SerializeField] private GameObject Logger = default;
+    [SerializeField] private LoggerContentUI Logger = default;
 
     [Header("Information Box")]
     [SerializeField] private TMP_Text InfoBoxBodyText = default;

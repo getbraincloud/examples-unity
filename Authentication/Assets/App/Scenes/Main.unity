@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 65301467}
   - component: {fileID: 65301466}
   m_Layer: 5
-  m_Name: LogText
+  m_Name: LogTemplate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2631,6 +2631,7 @@ MonoBehaviour:
   TitleLabel: {fileID: 1379240602}
   APILink: {fileID: 1965224872}
   ServiceContent: {fileID: 665492629}
+  Logger: {fileID: 0}
   InfoBoxBodyText: {fileID: 537113359}
   DefaultHeaderText: Welcome to brainCloud!
   DefaultInformationText: 'To begin, open the menu and choose one of the services
@@ -3673,6 +3674,8 @@ GameObject:
   - component: {fileID: 952410308}
   - component: {fileID: 952410310}
   - component: {fileID: 952410309}
+  - component: {fileID: 952410312}
+  - component: {fileID: 952410311}
   m_Layer: 5
   m_Name: LogContent
   m_TagString: Untagged
@@ -3739,6 +3742,37 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &952410311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952410307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5e9e5b98ef0d114ca622e25348066ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UICanvasGroup: {fileID: 952410312}
+  LogScroll: {fileID: 593987001}
+  LogContent: {fileID: 439471206}
+  ClearLogButton: {fileID: 1838308463}
+  CopyLogButton: {fileID: 1172132697}
+  LogTemplate: {fileID: 65301466}
+  ErrorTemplate: {fileID: 1733012112}
+--- !u!225 &952410312
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952410307}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &975915348
 GameObject:
   m_ObjectHideFlags: 0
@@ -4383,6 +4417,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8454693388917185668, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
   m_PrefabInstance: {fileID: 1108272214}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1172132697 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2517447089725146550, guid: b039a5443a38ca54e8bde9dc3fe46697, type: 3}
+  m_PrefabInstance: {fileID: 188449888}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1183681825
 GameObject:
   m_ObjectHideFlags: 0
@@ -6091,7 +6136,7 @@ GameObject:
   - component: {fileID: 1733012113}
   - component: {fileID: 1733012112}
   m_Layer: 5
-  m_Name: ErrorLabel
+  m_Name: ErrorTemplate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7225,6 +7270,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2517447089725146549, guid: b039a5443a38ca54e8bde9dc3fe46697, type: 3}
   m_PrefabInstance: {fileID: 6156975737409341055}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1838308463 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2517447089725146550, guid: b039a5443a38ca54e8bde9dc3fe46697, type: 3}
+  m_PrefabInstance: {fileID: 6156975737409341055}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1871221472
 GameObject:
   m_ObjectHideFlags: 0
