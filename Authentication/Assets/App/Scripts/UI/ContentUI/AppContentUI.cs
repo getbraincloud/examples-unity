@@ -12,7 +12,6 @@ public class AppContentUI : MonoBehaviour, IContentUI
     [SerializeField] private TMP_Text TitleLabel = default;
     [SerializeField] private OpenLinkButton APILink = default;
     [SerializeField] private Transform ServiceContent = default;
-    [SerializeField] private LoggerContentUI Logger = default;
 
     [Header("Information Box")]
     [SerializeField] private TMP_Text InfoBoxBodyText = default;
@@ -21,7 +20,7 @@ public class AppContentUI : MonoBehaviour, IContentUI
     [SerializeField] private string DefaultHeaderText = string.Empty;
     [SerializeField, TextArea(6, 6)] private string DefaultInformationText = string.Empty;
 
-    private IContentUI currentServiceUI;
+    private IContentUI currentServiceUI = default;
 
     #region IContentUI
 
@@ -63,10 +62,7 @@ public class AppContentUI : MonoBehaviour, IContentUI
 
     private void Start()
     {
-        TitleLabel.text = DefaultHeaderText;
-        InfoBoxBodyText.text = DefaultInformationText;
-
-        APILink.gameObject.SetActive(false);
+        ShowDefaultContent();
     }
 
     private void OnDisable()
@@ -82,21 +78,26 @@ public class AppContentUI : MonoBehaviour, IContentUI
     private void OnDestroy()
     {
         APILink.URLToOpen = string.Empty;
-        currentServiceUI = null;
+        ClearCurrentServiceUI();
     }
 
     #endregion
 
     #region UI
 
+    public void ShowDefaultContent()
+    {
+        ClearCurrentServiceUI();
+
+        TitleLabel.text = DefaultHeaderText;
+        InfoBoxBodyText.text = DefaultInformationText;
+
+        APILink.gameObject.SetActive(false);
+    }
+
     public void LoadServiceItemContent(ServiceItem serviceItem)
     {
-        if (currentServiceUI != null &&
-            currentServiceUI.GameObject != null)
-        {
-            Destroy(currentServiceUI.GameObject);
-            currentServiceUI = null;
-        }
+        ClearCurrentServiceUI();
 
         TitleLabel.text = serviceItem.Name;
         InfoBoxBodyText.text = serviceItem.Description;
@@ -106,6 +107,16 @@ public class AppContentUI : MonoBehaviour, IContentUI
         currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent).GetComponent(typeof(IContentUI)) as IContentUI;
         currentServiceUI.GameObject.SetActive(true);
         currentServiceUI.GameObject.SetName(serviceItem.Name, "{0}ContentUI");
+    }
+
+    private void ClearCurrentServiceUI()
+    {
+        if (currentServiceUI != null &&
+            currentServiceUI.GameObject != null)
+        {
+            Destroy(currentServiceUI.GameObject);
+            currentServiceUI = null;
+        }
     }
 
     #endregion

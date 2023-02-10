@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ServiceName: Virtual Currency
   ServiceDescription: "The Virtual Currency service manages virtual currency balances
-    for app users.\r\n\r\nThis service replaces the currency functions of the deprecated
-    Product Service.\r\n\r\nThe currency APIs of the two services are largely the
-    same, with the following two changes:\r\n \u2022 For security purposes, only
-    the get methods are callable from the client -- use Cloud Code for the rest\r\n
-    \u2022 We have cleaned up the responses a bit, removing unnecessary fields like
-    createdAt, updatedAt and profileId"
+    for app users.\r\n\nThis service replaces the currency functions of the deprecated
+    Product Service.\r\n\nThe currency APIs of the two services are largely the same,
+    with the following two changes:\r\n\u2022 For security purposes, only the get
+    methods are callable from the client \u2013 use Cloud Code for the rest\r\n\u2022
+    We have cleaned up the responses a bit, removing unnecessary fields like createdAt,
+    updatedAt and profileId"
   ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-virtualcurrency
   ServicePrefab: {fileID: 2250408912605580320, guid: 6c3c926aeee19f84a92803edac799891, type: 3}

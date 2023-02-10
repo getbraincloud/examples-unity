@@ -2,9 +2,10 @@ using BrainCloud;
 using BrainCloud.Common;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using UnityEditor;
 
+/// <summary>
+/// A basic data struct for brainCloud's custom entities.
+/// </summary>
 [Serializable]
 public struct BCCustomEntity
 {

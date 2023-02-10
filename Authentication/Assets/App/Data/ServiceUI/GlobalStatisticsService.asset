@@ -13,19 +13,13 @@ MonoBehaviour:
   m_Name: GlobalStatisticsService
   m_EditorClassIdentifier: 
   ServiceName: Global Statistics
-  ServiceDescription: 'The Global Statistics service allows you to retrieve and update
-    your app''s predefined statistics defined on the Global Statistics page of the
-    brainCloud portal.
-
-
-    Global Statistics must be pre-defined from the Statistics
-    Rules - Global Statistics page of the brainCloud portal. If instead you need
-    to create them dynamically at runtime, you can enable the Generate App Statistic
+  ServiceDescription: "The Global Statistics service allows you to retrieve and update
+    your app's predefined statistics defined on the Global Statistics page of the
+    brainCloud portal.\n\nGlobal Statistics must be pre-defined from the Statistics
+    Rules \u2013 Global Statistics page of the brainCloud portal. If instead you
+    need to create them dynamically at runtime, you can enable the Generate App Statistic
     Rule Enabled setting on the Advanced Settings page of your app in the brainCloud
-    portal.
-
-
-    Global (or App) Statistics are similar to User Stats, except that
-    they are stored centrally across all of an app''s users.'
+    portal.\n\nGlobal (or App) Statistics are similar to User Stats, except that
+    they are stored centrally across all of an app's users."
   ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-globalstats
   ServicePrefab: {fileID: 8522741851553637496, guid: b368ad6dcf394b842a27c9f7dc5ab100, type: 3}

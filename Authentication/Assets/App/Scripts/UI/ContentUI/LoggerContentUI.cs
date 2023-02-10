@@ -26,7 +26,10 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
     [SerializeField] private Transform LogContent = default;
     [SerializeField] private Button ClearLogButton = default;
     [SerializeField] private Button CopyLogButton = default;
-    [SerializeField] private GameObject CopyLogContainer = default;
+
+#pragma warning disable CS0414
+    [Space, SerializeField] private GameObject CopyLogContainer = default;
+#pragma warning restore CS0414
 
     [Header("Templates")]
     [SerializeField] private TMP_Text LogTemplate = default;
@@ -87,8 +90,7 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
 #if !UNITY_STANDALONE
         CopyLogContainer.SetActive(false);
 #endif
-
-        LogMessage(LOG_INITIAL_TEXT);
+        ResetLogger();
     }
 
     private void OnDisable()
@@ -115,27 +117,7 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
     public void LogError(string error) =>
         CreateLogObject("Error", ++errorCount, error, ErrorTemplate);
 
-    private void CreateLogObject(string type, int count, string message, TMP_Text textTemplate)
-    {
-        TMP_Text text = Instantiate(textTemplate, LogContent);
-        text.gameObject.SetActive(true);
-        text.gameObject.SetName($"{type}{count}", "{0}LogText");
-        text.text = message;
-
-        logGOs.Add(text.gameObject);
-
-        StopCoroutine(ScrollAfterLogCreated());
-        StartCoroutine(ScrollAfterLogCreated());
-    }
-
-    private IEnumerator ScrollAfterLogCreated()
-    {
-        yield return null;
-
-        LogScroll.verticalNormalizedPosition = 0.0f;
-    }
-
-    private void OnClearLogButton()
+    public void ClearLogs()
     {
         for (int i = 0; i < logGOs.Count; i++)
         {
@@ -147,6 +129,42 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
         logCount = 0;
         errorCount = 0;
         lastMessage = string.Empty;
+
+        LogScroll.verticalNormalizedPosition = 1.0f;
+    }
+
+    public void ResetLogger()
+    {
+        ClearLogs();
+        LogMessage(LOG_INITIAL_TEXT);
+    }
+
+    private void CreateLogObject(string type, int count, string message, TMP_Text textTemplate)
+    {
+        TMP_Text text = Instantiate(textTemplate, LogContent);
+        text.gameObject.SetActive(true);
+        text.gameObject.SetName($"{type}{count}", "{0}LogText");
+        text.text = message;
+
+        logGOs.Add(text.gameObject);
+
+        if (isActiveAndEnabled)
+        {
+            StopCoroutine(ScrollAfterLogCreated());
+            StartCoroutine(ScrollAfterLogCreated());
+        }
+    }
+
+    private IEnumerator ScrollAfterLogCreated()
+    {
+        yield return null;
+
+        LogScroll.verticalNormalizedPosition = 0.0f;
+    }
+
+    private void OnClearLogButton()
+    {
+        ClearLogs();
     }
 
     private void OnCopyLogButton()

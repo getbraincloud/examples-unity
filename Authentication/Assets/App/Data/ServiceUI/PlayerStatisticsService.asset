@@ -13,14 +13,11 @@ MonoBehaviour:
   m_Name: PlayerStatisticsService
   m_EditorClassIdentifier: 
   ServiceName: Player Statistics
-  ServiceDescription: 'The Player Statistics service is used for all user-scoped
-    statistics operations, including Player Experience (XP).
-
-
-    User Stats must
-    be pre-defined from the Statistics Rules - User Statistics page of the brainCloud
+  ServiceDescription: "The Player Statistics service is used for all user-scoped
+    statistics operations, including Player Experience (XP).\n\nUser Stats must be
+    pre-defined from the Statistics Rules \u2013 User Statistics page of the brainCloud
     portal. If instead you need to create them dynamically at runtime, you can enable
     the Generate User Statistic Rule Enabled setting on the Advanced Settings page
-    of your app in the brainCloud portal.'
+    of your app in the brainCloud portal."
   ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstats
   ServicePrefab: {fileID: 8522741851553637496, guid: 4457238e60143854c9242490bf14ed36, type: 3}

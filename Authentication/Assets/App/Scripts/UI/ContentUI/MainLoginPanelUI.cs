@@ -85,7 +85,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     private void Start()
     {
         bool rememberUserToggle = GetRememberMePref();
-        RememberMeToggle.isOn = rememberUserToggle && !string.IsNullOrEmpty(UserHandler.AnonymousID);
+        RememberMeToggle.isOn = rememberUserToggle && !UserHandler.AnonymousID.IsNullOrEmpty();
 
         AuthenticationType authenticationType = UserHandler.AuthenticationType;
         if (authenticationType == AuthenticationType.Universal)
@@ -109,7 +109,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         {
             OnAutomaticLogin();
         }
-        else if (rememberUserToggle && !string.IsNullOrEmpty(UserHandler.AnonymousID))
+        else if (rememberUserToggle && !UserHandler.AnonymousID.IsNullOrEmpty())
         {
             SetRememberMePref(false);
         }
@@ -133,7 +133,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
     #region UI
 
-    private void InitRememberMePref()
+    public void InitRememberMePref()
     {
         if (!PlayerPrefs.HasKey(PREFS_REMEMBER_ME))
         {
@@ -141,14 +141,24 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         }
     }
 
-    private bool GetRememberMePref()
+    public bool GetRememberMePref()
     {
         return PlayerPrefs.GetInt(PREFS_REMEMBER_ME) > 0;
     }
 
-    private void SetRememberMePref(bool value)
+    public void SetRememberMePref(bool value)
     {
         PlayerPrefs.SetInt(PREFS_REMEMBER_ME, value ? int.MaxValue : 0);
+    }
+
+    public void ClearFields()
+    {
+        EmailField.text = string.Empty;
+        UsernameField.text = string.Empty;
+        PasswordField.text = string.Empty;
+        NameField.text = string.Empty;
+        AgeField.text = string.Empty;
+        ErrorLabel.text = string.Empty;
     }
 
     private void OnEmailRadio(bool value)
@@ -184,13 +194,14 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         string inputName = NameField.text;
         string inputAge = AgeField.text;
 
-        if (!AnonymousRadio.isOn && (string.IsNullOrEmpty(inputUser) || string.IsNullOrEmpty(inputPassword)))
+        if (!AnonymousRadio.isOn && (inputUser.IsNullOrEmpty() || inputPassword.IsNullOrEmpty()))
         {
+            ErrorLabel.text = "Please fill out login details in order to log in.";
             return;
         }
 
         // Advanced Authentication if Name & Age were inputted
-        if (!string.IsNullOrEmpty(inputName) && !string.IsNullOrEmpty(inputAge))
+        if (!inputName.IsNullOrEmpty() && !inputAge.IsNullOrEmpty())
         {
             AuthenticationType authenticationType;
             Dictionary<string, object> extraJson = new Dictionary<string, object>();
@@ -248,6 +259,8 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         {
             Debug.Log("Automatic Login Successful");
 
+            RememberMeToggle.isOn = false;
+
             MainMenu.ChangeToAppContent();
         },
         () =>
@@ -259,6 +272,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
             RememberMeToggle.isOn = false;
 
             UserHandler.ResetAuthenticationData();
+            SetRememberMePref(false);
         });
     }
 
@@ -275,6 +289,9 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         }
 
         SetRememberMePref(RememberMeToggle.isOn);
+
+        RememberMeToggle.isOn = false;
+        ClearFields();
 
         MainMenu.ChangeToAppContent();
     }
@@ -297,6 +314,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
             errorMessage = "Authentication Failed\nPlease try again in a few moments.";
         }
 
+        PasswordField.text = string.Empty;
         ErrorLabel.text = errorMessage;
     }
 

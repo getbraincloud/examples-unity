@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -40,6 +41,7 @@ public class MainMenuUI : MonoBehaviour, IContentUI
     [Header("UI Control")]
     [SerializeField] private LoginContentUI LoginContent = default;
     [SerializeField] private AppContentUI AppContent = default;
+    [SerializeField] private LoggerContentUI Logger = default;
 
     public bool MainMenuActive
     {
@@ -177,7 +179,15 @@ public class MainMenuUI : MonoBehaviour, IContentUI
             ChangeToLoginContent();
 
             UserHandler.ResetAuthenticationData();
+
+            AppContent.ShowDefaultContent();
+            Logger.ResetLogger();
+        },
+        () =>
+        {
+            Logger.LogError("#APP - Logout Failed! Please try again in a few moments.");
         });
+
     }
 
     public void ChangeToAppContent()

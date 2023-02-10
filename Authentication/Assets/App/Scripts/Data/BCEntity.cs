@@ -3,6 +3,9 @@ using BrainCloud.Common;
 using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// A basic data struct for brainCloud's user entities.
+/// </summary>
 [Serializable]
 public struct BCEntity
 {
