@@ -30,16 +30,12 @@ public static class UserHandler
 
     public static void AuthenticateEmail(string email, string password, Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.Wrapper.ResetStoredProfileId();
-        BCManager.Wrapper.ResetStoredAnonymousId();
         BCManager.Wrapper.AuthenticateEmailPassword(email, password, true, BCManager.CreateSuccessCallback("Email Authentication Successful", onSuccess),
                                                                            BCManager.CreateFailureCallback("Email Authentication Failed", onFailure));
     }
 
     public static void AuthenticateUniversal(string username, string password, Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.Wrapper.ResetStoredProfileId();
-        BCManager.Wrapper.ResetStoredAnonymousId();
         BCManager.Wrapper.AuthenticateUniversal(username, password, true, BCManager.CreateSuccessCallback("Universal Authentication Successful", onSuccess),
                                                                           BCManager.CreateFailureCallback("Universal Authentication Failed", onFailure));
     }
@@ -68,8 +64,6 @@ public static class UserHandler
         BCManager.Wrapper.ResetStoredProfileId();
         BCManager.Wrapper.ResetStoredAnonymousId();
         BCManager.Wrapper.ResetStoredAuthenticationType();
-
-        PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, false);
     }
 
     #endregion

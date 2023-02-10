@@ -15,6 +15,8 @@ using UnityEngine.UI;
 /// </summary>
 public class MainLoginPanelUI : MonoBehaviour, IContentUI
 {
+    private static string PREFS_REMEMBER_ME => BCManager.AppName + ".rememberMe";
+
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Toggle EmailRadio = default;
@@ -63,6 +65,8 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         NameField.text = string.Empty;
         AgeField.text = string.Empty;
         ErrorLabel.text = string.Empty;
+
+        InitRememberMePref();
     }
 
     private void OnEnable()
@@ -80,7 +84,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
     private void Start()
     {
-        PlayerPrefsHandler.LoadPlayerPref(PlayerPrefKey.RememberUser, out bool rememberUserToggle);
+        bool rememberUserToggle = GetRememberMePref();
         RememberMeToggle.isOn = rememberUserToggle && !string.IsNullOrEmpty(UserHandler.AnonymousID);
 
         AuthenticationType authenticationType = UserHandler.AuthenticationType;
@@ -103,11 +107,11 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
         if (RememberMeToggle.isOn)
         {
-            HandleAutomaticLogin();
+            OnAutomaticLogin();
         }
         else if (rememberUserToggle && !string.IsNullOrEmpty(UserHandler.AnonymousID))
         {
-            PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, false);
+            SetRememberMePref(false);
         }
     }
 
@@ -128,6 +132,24 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     #endregion
 
     #region UI
+
+    private void InitRememberMePref()
+    {
+        if (!PlayerPrefs.HasKey(PREFS_REMEMBER_ME))
+        {
+            PlayerPrefs.SetInt(PREFS_REMEMBER_ME, 0);
+        }
+    }
+
+    private bool GetRememberMePref()
+    {
+        return PlayerPrefs.GetInt(PREFS_REMEMBER_ME) > 0;
+    }
+
+    private void SetRememberMePref(bool value)
+    {
+        PlayerPrefs.SetInt(PREFS_REMEMBER_ME, value ? int.MaxValue : 0);
+    }
 
     private void OnEmailRadio(bool value)
     {
@@ -191,7 +213,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
             }
 
             LoginContent.IsInteractable = false;
-            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJson, HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJson, OnAuthenticationSuccess, OnAuthenticationFailure);
 
             return;
         }
@@ -200,15 +222,15 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
         if (EmailRadio.isOn)
         {
-            UserHandler.AuthenticateEmail(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            UserHandler.AuthenticateEmail(inputUser, inputPassword, OnAuthenticationSuccess, OnAuthenticationFailure);
         }
         else if (UniversalRadio.isOn)
         {
-            UserHandler.AuthenticateUniversal(inputUser, inputPassword, HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            UserHandler.AuthenticateUniversal(inputUser, inputPassword, OnAuthenticationSuccess, OnAuthenticationFailure);
         }
         else if (AnonymousRadio.isOn)
         {
-            UserHandler.AuthenticateAnonymous(HandleAuthenticationSuccess, HandleAuthenticationFailure);
+            UserHandler.AuthenticateAnonymous(OnAuthenticationSuccess, OnAuthenticationFailure);
         }
     }
 
@@ -216,7 +238,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
     #region brainCloud
 
-    private void HandleAutomaticLogin()
+    private void OnAutomaticLogin()
     {
         Debug.Log("Logging in automatically...");
 
@@ -240,7 +262,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         });
     }
 
-    private void HandleAuthenticationSuccess()
+    private void OnAuthenticationSuccess()
     {
         if (EmailRadio.isOn || UniversalRadio.isOn)
         {
@@ -252,12 +274,12 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
             BCManager.Wrapper.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
         }
 
-        PlayerPrefsHandler.SavePlayerPref(PlayerPrefKey.RememberUser, RememberMeToggle.isOn);
+        SetRememberMePref(RememberMeToggle.isOn);
 
         MainMenu.ChangeToAppContent();
     }
 
-    private void HandleAuthenticationFailure()
+    private void OnAuthenticationFailure()
     {
         LoginContent.IsInteractable = true;
 

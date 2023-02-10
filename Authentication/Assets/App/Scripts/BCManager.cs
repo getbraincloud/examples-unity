@@ -198,8 +198,6 @@ public class BCManager : MonoBehaviour
         Wrapper.WrapperName = AppName;
         Wrapper.Init(); // Init data is taken from the brainCloud Unity Plugin
 
-        PlayerPrefsHandler.InitPlayerPrefs();
-
         DontDestroyOnLoad(gameObject);
 
         _isInstanced = true;

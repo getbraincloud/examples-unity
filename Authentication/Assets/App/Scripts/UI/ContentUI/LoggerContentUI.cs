@@ -84,7 +84,7 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
         LogTemplate.gameObject.SetActive(false);
         ErrorTemplate.gameObject.SetActive(false);
 
-#if UNITY_STANDALONE
+#if !UNITY_STANDALONE
         CopyLogContainer.SetActive(false);
 #endif
 
