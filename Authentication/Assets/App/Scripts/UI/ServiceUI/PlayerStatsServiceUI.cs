@@ -4,6 +4,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// <para>
+/// Example of how a user's statistics can be handled via brainCloud's PlayerStatistics service.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudPlayerStatistics"/>
+/// </summary>
+/// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstats
 public class PlayerStatsServiceUI : MonoBehaviour, IContentUI
 {
     [Header("Main")]

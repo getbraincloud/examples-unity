@@ -5,6 +5,15 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// TODO: Currently not used in the App until it has been redone
+/// <summary>
+/// <para>
+/// Example of how custom data can be handled via brainCloud's CustomEntity service.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudCustomEntity"/>
+/// </summary>
+/// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-customentity
 public class CustomEntityServiceUI : MonoBehaviour, IContentUI
 {
     private const string DEFAULT_EMPTY_FIELD = "---";

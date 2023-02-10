@@ -6,19 +6,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Entity Interface class demonstrates how to handle JSON requests and responses from braincloud
-/// when handling User Entities.
+/// <para>
+/// Example of how user data can be handled via brainCloud's Entity service.
+/// </para>
 /// 
-/// This includes:
-/// - How to create entity
-/// - How to read entity with ID received from a JSON response
-/// - How to update entity 
-/// - How to delete entity
-/// 
-/// For more info:
-/// https://getbraincloud.com/apidocs/portal-usage/user-monitoring/user-entities/
-/// https://getbraincloud.com/apidocs/cloud-code-central/cloud-code-tutorials/cloud-code-tutorial3-working-with-entities/
+/// <seealso cref="BrainCloudEntity"/>
 /// </summary>
+/// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-entity
 public class EntityServiceUI : MonoBehaviour, IContentUI
 {
     private const string DEFAULT_EMPTY_FIELD = "---";

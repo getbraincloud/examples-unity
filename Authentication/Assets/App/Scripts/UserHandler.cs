@@ -1,9 +1,23 @@
 using BrainCloud;
 using BrainCloud.Common;
-using BrainCloud.Entity;
 using System;
 using System.Collections.Generic;
 
+/// TODO: More authentication methods are coming!
+/// <summary>
+/// <para>
+/// Interacts with <see cref="BCManager"/> to handle User Authentication.
+/// </para>
+///
+/// <para>
+/// This script can be copied into your Unity or C# project alongside <see cref="BCManager"/>
+/// to be used for all the various authentication methods for your brainCloud app.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudWrapper"/><br></br>
+/// <seealso cref="BrainCloudClient"/><br></br>
+/// <seealso cref="BCManager"/>
+/// </summary>
 public static class UserHandler
 {
     public static string ProfileID => BCManager.Wrapper.GetStoredProfileId();

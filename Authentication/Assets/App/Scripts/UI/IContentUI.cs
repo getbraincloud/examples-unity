@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 
+/// Interface for some basic uniform functions for various UI screens and content.
 /// </summary>
 public interface IContentUI
 {

@@ -3,6 +3,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// <para>
+/// Example of how user idenity can be handled via brainCloud's Identity service.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudIdentity"/>
+/// </summary>
+/// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-identity
 public class IdentityServiceUI : MonoBehaviour, IContentUI
 {
     [Header("Main")]

@@ -1,8 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Used for app navigation on the App screen.
+/// It is able to Instantiate the various ServiceUI prefab through <see cref="MainMenuUI"/>.
+/// </summary>
 public class AppContentUI : MonoBehaviour, IContentUI
 {
     [Header("Main")]

@@ -1,12 +1,24 @@
+using BrainCloud.LitJson;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// <para>
+/// An example of how a Logger can be used in your app.
+/// Can be useful to help debug your app on tester devices.
+/// </para>
+///
+/// <seealso cref="BCManager"/><br></br>
+/// <seealso cref="BrainCloud.LogCallback"/>
+/// </summary>
 public class LoggerContentUI : MonoBehaviour, IContentUI
 {
-    private const string INITIAL_TEXT = "##APP LOG -\nLogs, Json, and Error messages will appear here.";
+    private const string LOG_INITIAL_TEXT = "#APP - Logs, Json, and Error messages will appear here.";
+    private const string LOG_COPY_TEXT = "#APP - Previous BCC Log copied to clipboard.";
 
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
@@ -14,11 +26,15 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
     [SerializeField] private Transform LogContent = default;
     [SerializeField] private Button ClearLogButton = default;
     [SerializeField] private Button CopyLogButton = default;
+    [SerializeField] private GameObject CopyLogContainer = default;
+
+    [Header("Templates")]
     [SerializeField] private TMP_Text LogTemplate = default;
     [SerializeField] private TMP_Text ErrorTemplate = default;
 
     private int logCount = 0;
     private int errorCount = 0;
+    private string lastMessage = string.Empty;
     private List<GameObject> logGOs = default;
 
     #region IContentUI
@@ -56,6 +72,9 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
 #if UNITY_STANDALONE
         CopyLogButton.onClick.AddListener(OnCopyLogButton);
 #endif
+
+        BCManager.Client.EnableLogging(true);
+        BCManager.Client.RegisterLogDelegate(OnLogDelegate);
     }
 
     private void Start()
@@ -66,10 +85,10 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
         ErrorTemplate.gameObject.SetActive(false);
 
 #if UNITY_STANDALONE
-        CopyLogButton.gameObject.SetActive(false);
+        CopyLogContainer.SetActive(false);
 #endif
 
-        LogMessage(INITIAL_TEXT);
+        LogMessage(LOG_INITIAL_TEXT);
     }
 
     private void OnDisable()
@@ -77,6 +96,7 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
         StopAllCoroutines();
         ClearLogButton.onClick.RemoveAllListeners();
         CopyLogButton.onClick.RemoveAllListeners();
+        BCManager.Client?.EnableLogging(false);
     }
 
     private void OnDestroy()
@@ -122,15 +142,54 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
             Destroy(logGOs[i]);
         }
 
+        logGOs.Clear();
+
         logCount = 0;
         errorCount = 0;
-        logGOs.Clear();
+        lastMessage = string.Empty;
     }
 
     private void OnCopyLogButton()
     {
-        // TODO: Do copy
+        if(!lastMessage.IsNullOrEmpty())
+        {
+            GUIUtility.systemCopyBuffer = lastMessage;
+            LogMessage(LOG_COPY_TEXT);
+        }
     }
 
-#endregion
+    #endregion
+
+    #region brainCloud
+
+    private void OnLogDelegate(string log)
+    {
+        if (!log.Contains("\n"))
+        {
+            lastMessage = log;
+            LogMessage(log);
+            return;
+        }
+
+        string message = log[..log.IndexOf("\n")]; // Server Message 
+
+        string json = log[(log.LastIndexOf("\n") + 1)..]; // Build Json Response
+        if (json.StartsWith("{") && json.EndsWith("}"))
+        {
+            StringBuilder sb = new StringBuilder();
+            JsonWriter writer = new JsonWriter(sb)
+            {
+                PrettyPrint = true
+            };
+
+            JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
+
+            message += sb.ToString();
+        }
+
+        lastMessage = message;
+        LogMessage(message);
+    }
+
+    #endregion
 }

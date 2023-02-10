@@ -1,13 +1,22 @@
 using BrainCloud;
-using BrainCloud.JsonFx;
 using BrainCloud.JsonFx.Json;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// <para>
+/// Example of how user currency can be handled via brainCloud's VirtualCurrency and PlayerState services.
+/// </para>
+///
+/// <seealso cref="BrainCloudVirtualCurrency"/><br></br>
+/// <seealso cref="BrainCloudPlayerState"/><br></br>
+/// <seealso cref="BrainCloudPlayerStatistics"/><br></br>
+/// <seealso cref="BrainCloudScript"/>
+/// </summary>
+/// VirtualCurrency API: https://getbraincloud.com/apidocs/apiref/?csharp#capi-virtualcurrency
+/// PlayerState API: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstate
 public class CurrencyServiceUI : MonoBehaviour, IContentUI
 {
     private const string DEFAULT_EMPTY_FIELD = "-";

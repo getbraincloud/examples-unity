@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Used to select services on the <see cref="MainMenuUI"/>.
+/// </summary>
 public class MenuItemUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text MenuLabel;

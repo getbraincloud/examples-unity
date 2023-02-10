@@ -1,8 +1,6 @@
 using BrainCloud;
-using BrainCloud.Common;
 using BrainCloud.Entity;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -53,96 +51,95 @@ public class BCManager : MonoBehaviour
     /// <summary>
     /// Access brainCloud services directly. Useful if the Wrapper doesn't expose something in particular.
     /// </summary>
-    public static BrainCloudClient Client => Wrapper.Client;
+    public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
 
     #endregion
 
-    // TODO: Add links to all of the API references for these services.
     #region Client Services
 
-    public static BrainCloudEntity EntityService => Wrapper.EntityService;
+    public static BrainCloudEntity EntityService => Wrapper != null ? Wrapper.EntityService : null;
 
-    public static BCEntityFactory EntityFactory => Wrapper.EntityFactory;
+    public static BCEntityFactory EntityFactory => Wrapper != null ? Wrapper.EntityFactory : null;
 
-    public static BrainCloudGlobalEntity GlobalEntityService => Wrapper.GlobalEntityService;
+    public static BrainCloudGlobalEntity GlobalEntityService => Wrapper != null ? Wrapper.GlobalEntityService : null;
 
-    public static BrainCloudGlobalApp GlobalAppService => Wrapper.GlobalAppService;
+    public static BrainCloudGlobalApp GlobalAppService => Wrapper != null ? Wrapper.GlobalAppService : null;
 
-    public static BrainCloudPresence PresenceService => Wrapper.PresenceService;
+    public static BrainCloudPresence PresenceService => Wrapper != null ? Wrapper.PresenceService : null;
 
-    public static BrainCloudVirtualCurrency VirtualCurrencyService => Wrapper.VirtualCurrencyService;
+    public static BrainCloudVirtualCurrency VirtualCurrencyService => Wrapper != null ? Wrapper.VirtualCurrencyService : null;
 
-    public static BrainCloudAppStore AppStoreService => Wrapper.AppStoreService;
+    public static BrainCloudAppStore AppStoreService => Wrapper != null ? Wrapper.AppStoreService : null;
 
-    public static BrainCloudPlayerStatistics PlayerStatisticsService => Wrapper.PlayerStatisticsService;
+    public static BrainCloudPlayerStatistics PlayerStatisticsService => Wrapper != null ? Wrapper.PlayerStatisticsService : null;
 
-    public static BrainCloudGlobalStatistics GlobalStatisticsService => Wrapper.GlobalStatisticsService;
+    public static BrainCloudGlobalStatistics GlobalStatisticsService => Wrapper != null ? Wrapper.GlobalStatisticsService : null;
 
-    public static BrainCloudIdentity IdentityService => Wrapper.IdentityService;
+    public static BrainCloudIdentity IdentityService => Wrapper != null ? Wrapper.IdentityService : null;
 
-    public static BrainCloudItemCatalog ItemCatalogService => Wrapper.ItemCatalogService;
+    public static BrainCloudItemCatalog ItemCatalogService => Wrapper != null ? Wrapper.ItemCatalogService : null;
 
-    public static BrainCloudUserItems UserItemsService => Wrapper.UserItemsService;
+    public static BrainCloudUserItems UserItemsService => Wrapper != null ? Wrapper.UserItemsService : null;
 
-    public static BrainCloudScript ScriptService => Wrapper.ScriptService;
+    public static BrainCloudScript ScriptService => Wrapper != null ? Wrapper.ScriptService : null;
 
-    public static BrainCloudMatchMaking MatchMakingService => Wrapper.MatchMakingService;
+    public static BrainCloudMatchMaking MatchMakingService => Wrapper != null ? Wrapper.MatchMakingService : null;
 
-    public static BrainCloudOneWayMatch OneWayMatchService => Wrapper.OneWayMatchService;
+    public static BrainCloudOneWayMatch OneWayMatchService => Wrapper != null ? Wrapper.OneWayMatchService : null;
 
-    public static BrainCloudPlaybackStream PlaybackStreamService => Wrapper.PlaybackStreamService;
+    public static BrainCloudPlaybackStream PlaybackStreamService => Wrapper != null ? Wrapper.PlaybackStreamService : null;
 
-    public static BrainCloudGamification GamificationService => Wrapper.GamificationService;
+    public static BrainCloudGamification GamificationService => Wrapper != null ? Wrapper.GamificationService : null;
 
-    public static BrainCloudPlayerState PlayerStateService => Wrapper.PlayerStateService;
+    public static BrainCloudPlayerState PlayerStateService => Wrapper != null ? Wrapper.PlayerStateService : null;
 
-    public static BrainCloudFriend FriendService => Wrapper.FriendService;
+    public static BrainCloudFriend FriendService => Wrapper != null ? Wrapper.FriendService : null;
 
-    public static BrainCloudEvent EventService => Wrapper.EventService;
+    public static BrainCloudEvent EventService => Wrapper != null ? Wrapper.EventService : null;
 
-    public static BrainCloudSocialLeaderboard SocialLeaderboardService => Wrapper.SocialLeaderboardService;
+    public static BrainCloudSocialLeaderboard SocialLeaderboardService => Wrapper != null ? Wrapper.SocialLeaderboardService : null;
 
-    public static BrainCloudSocialLeaderboard LeaderboardService => Wrapper.LeaderboardService;
+    public static BrainCloudSocialLeaderboard LeaderboardService => Wrapper != null ? Wrapper.LeaderboardService : null;
 
-    public static BrainCloudAsyncMatch AsyncMatchService => Wrapper.AsyncMatchService;
+    public static BrainCloudAsyncMatch AsyncMatchService => Wrapper != null ? Wrapper.AsyncMatchService : null;
 
-    public static BrainCloudTime TimeService => Wrapper.TimeService;
+    public static BrainCloudTime TimeService => Wrapper != null ? Wrapper.TimeService : null;
 
-    public static BrainCloudTournament TournamentService => Wrapper.TournamentService;
+    public static BrainCloudTournament TournamentService => Wrapper != null ? Wrapper.TournamentService : null;
 
-    public static BrainCloudGlobalFile GlobalFileService => Wrapper.GlobalFileService;
+    public static BrainCloudGlobalFile GlobalFileService => Wrapper != null ? Wrapper.GlobalFileService : null;
 
-    public static BrainCloudCustomEntity CustomEntityService => Wrapper.CustomEntityService;
+    public static BrainCloudCustomEntity CustomEntityService => Wrapper != null ? Wrapper.CustomEntityService : null;
 
-    public static BrainCloudPushNotification PushNotificationService => Wrapper.PushNotificationService;
+    public static BrainCloudPushNotification PushNotificationService => Wrapper != null ? Wrapper.PushNotificationService : null;
 
-    public static BrainCloudPlayerStatisticsEvent PlayerStatisticsEventService => Wrapper.PlayerStatisticsEventService;
+    public static BrainCloudPlayerStatisticsEvent PlayerStatisticsEventService => Wrapper != null ? Wrapper.PlayerStatisticsEventService : null;
 
-    public static BrainCloudS3Handling S3HandlingService => Wrapper.S3HandlingService;
+    public static BrainCloudS3Handling S3HandlingService => Wrapper != null ? Wrapper.S3HandlingService : null;
 
-    public static BrainCloudRedemptionCode RedemptionCodeService => Wrapper.RedemptionCodeService;
+    public static BrainCloudRedemptionCode RedemptionCodeService => Wrapper != null ? Wrapper.RedemptionCodeService : null;
 
-    public static BrainCloudDataStream DataStreamService => Wrapper.DataStreamService;
+    public static BrainCloudDataStream DataStreamService => Wrapper != null ? Wrapper.DataStreamService : null;
 
-    public static BrainCloudProfanity ProfanityService => Wrapper.ProfanityService;
+    public static BrainCloudProfanity ProfanityService => Wrapper != null ? Wrapper.ProfanityService : null;
 
-    public static BrainCloudFile FileService => Wrapper.FileService;
+    public static BrainCloudFile FileService => Wrapper != null ? Wrapper.FileService : null;
 
-    public static BrainCloudGroup GroupService => Wrapper.GroupService;
+    public static BrainCloudGroup GroupService => Wrapper != null ? Wrapper.GroupService : null;
 
-    public static BrainCloudMail MailService => Wrapper.MailService;
+    public static BrainCloudMail MailService => Wrapper != null ? Wrapper.MailService : null;
 
-    public static BrainCloudRTT RTTService => Wrapper.RTTService;
+    public static BrainCloudRTT RTTService => Wrapper != null ? Wrapper.RTTService : null;
 
-    public static BrainCloudLobby LobbyService => Wrapper.LobbyService;
+    public static BrainCloudLobby LobbyService => Wrapper != null ? Wrapper.LobbyService : null;
 
-    public static BrainCloudChat ChatService => Wrapper.ChatService;
+    public static BrainCloudChat ChatService => Wrapper != null ? Wrapper.ChatService : null;
 
-    public static BrainCloudMessaging MessagingService => MessagingService;
+    public static BrainCloudMessaging MessagingService => Wrapper != null ? Wrapper.MessagingService : null;
 
-    public static BrainCloudRelay RelayService => RelayService;
+    public static BrainCloudRelay RelayService => Wrapper != null ? Wrapper.RelayService : null;
 
-    public static BrainCloudBlockchain Blockchain => Blockchain;
+    public static BrainCloudBlockchain BlockchainService => Wrapper != null ? Client.Blockchain : null;
 
     #endregion
 
@@ -220,6 +217,7 @@ public class BCManager : MonoBehaviour
             Debug.LogError($"{gameObject.name} (BCManager) has been destroyed during run time. brainCloud functions might become unstable. Was this intentional?");
             _isInstanced = false;
         }
+
         Wrapper = null;
         GameObject = null;
     }

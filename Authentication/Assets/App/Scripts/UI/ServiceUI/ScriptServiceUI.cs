@@ -6,6 +6,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// <para>
+/// Example of how scripts can be executed on brainCloud via the Script service.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudScript"/>
+/// </summary>
+/// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-script
 public class ScriptServiceUI : MonoBehaviour, IContentUI
 {
     private static Dictionary<string, string> CLOUD_CODE_SCRIPTS = new Dictionary<string, string>

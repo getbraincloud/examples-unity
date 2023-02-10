@@ -4,6 +4,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// <para>
+/// Example of how an app's statistics can be handled via brainCloud's GlobalStatistics service.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudGlobalStatistics"/>
+/// </summary>
+/// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-globalstats
 public class GlobalStatsServiceUI : MonoBehaviour, IContentUI
 {
     [Header("Main")]

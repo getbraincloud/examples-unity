@@ -5,9 +5,18 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainLoginPanelUI : MonoBehaviour
+/// <summary>
+/// <para>
+/// An example on how User Authentication can he handled in your app.
+/// </para>
+///
+/// <seealso cref="BCManager"/><br></br>
+/// <seealso cref="UserHandler"/>
+/// </summary>
+public class MainLoginPanelUI : MonoBehaviour, IContentUI
 {
     [Header("Main")]
+    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Toggle EmailRadio = default;
     [SerializeField] private Toggle UniversalRadio = default;
     [SerializeField] private Toggle AnonymousRadio = default;
@@ -22,7 +31,27 @@ public class MainLoginPanelUI : MonoBehaviour
 
     [Header("UI Control")]
     [SerializeField] private MainMenuUI MainMenu = default;
-    [SerializeField] private CanvasGroup LoginContent = default;
+    [SerializeField] private LoginContentUI LoginContent = default;
+
+    #region IContentUI
+
+    public bool IsInteractable
+    {
+        get { return UICanvasGroup.interactable; }
+        set { UICanvasGroup.interactable = value; }
+    }
+
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 
@@ -98,7 +127,7 @@ public class MainLoginPanelUI : MonoBehaviour
 
     #endregion
 
-    #region UI Functionality
+    #region UI
 
     private void OnEmailRadio(bool value)
     {
@@ -161,13 +190,13 @@ public class MainLoginPanelUI : MonoBehaviour
                 ids.authenticationSubType = "";
             }
 
-            LoginContent.interactable = false;
+            LoginContent.IsInteractable = false;
             UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJson, HandleAuthenticationSuccess, HandleAuthenticationFailure);
 
             return;
         }
 
-        LoginContent.interactable = false;
+        LoginContent.IsInteractable = false;
 
         if (EmailRadio.isOn)
         {
@@ -185,13 +214,13 @@ public class MainLoginPanelUI : MonoBehaviour
 
     #endregion
 
-    #region brainCloud Authentication
+    #region brainCloud
 
     private void HandleAutomaticLogin()
     {
         Debug.Log("Logging in automatically...");
 
-        LoginContent.interactable = false;
+        LoginContent.IsInteractable = false;
 
         UserHandler.AuthenticateAnonymous(() =>
         {
@@ -201,7 +230,7 @@ public class MainLoginPanelUI : MonoBehaviour
         },
         () =>
         {
-            LoginContent.interactable = true;
+            LoginContent.IsInteractable = true;
 
             ErrorLabel.text = "Automatic Login Failed\nPlease try logging in manually.";
 
@@ -230,7 +259,7 @@ public class MainLoginPanelUI : MonoBehaviour
 
     private void HandleAuthenticationFailure()
     {
-        LoginContent.interactable = true;
+        LoginContent.IsInteractable = true;
 
         string errorMessage;
         if (EmailRadio.isOn)

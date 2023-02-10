@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Used to display & interact with global and player statistics.
+/// </summary>
 public class StatsContainerUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text StatNameLabel;

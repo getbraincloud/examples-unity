@@ -3,7 +3,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainMenuUI : MonoBehaviour
+/// <summary>
+/// Used for the app's navigation.
+/// </summary>
+public class MainMenuUI : MonoBehaviour, IContentUI
 {
     private const float HEADER_SPACER_HEIGHT = 50;
     private const string PROFILE_ID_TEXT = "Profile ID:\n{0}";
@@ -13,6 +16,7 @@ public class MainMenuUI : MonoBehaviour
     private static readonly int UI_IS_ACTIVE = Animator.StringToHash("IsActive");
 
     [Header("Main")]
+    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Animator MainMenuAnim = default;
     [SerializeField] private Animator BlockerAnim = default;
     [SerializeField] private CanvasGroup HeaderCG = default;
@@ -34,16 +38,36 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private ServiceItem[] ServiceItemUIs = default;
 
     [Header("UI Control")]
-    [SerializeField] private CanvasGroup LoginContent = default;
+    [SerializeField] private LoginContentUI LoginContent = default;
     [SerializeField] private AppContentUI AppContent = default;
-
-    private List<MenuItemUI> menuItems = default;
 
     public bool MainMenuActive
     {
         get => MainMenuAnim.GetBool(UI_IS_ACTIVE);
         set => SetMainMenuActiveState(value);
     }
+
+    private List<MenuItemUI> menuItems = default;
+
+    #region IContentUI
+
+    public bool IsInteractable
+    {
+        get { return UICanvasGroup.interactable; }
+        set { UICanvasGroup.interactable = value; }
+    }
+
+    public float Opacity
+    {
+        get { return UICanvasGroup.alpha; }
+        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+    }
+
+    public GameObject GameObject => gameObject;
+
+    public Transform Transform => transform;
+
+    #endregion
 
     #region Unity Messages
 
@@ -165,7 +189,7 @@ public class MainMenuUI : MonoBehaviour
             HeaderSpacer.preferredHeight = 0;
         }
 
-        LoginContent.interactable = false;
+        LoginContent.IsInteractable = false;
         AppContent.IsInteractable = true;
 
         LoginContent.gameObject.SetActive(false);
@@ -180,7 +204,7 @@ public class MainMenuUI : MonoBehaviour
         HeaderLabel.gameObject.SetActive(false);
         HeaderSpacer.preferredHeight = HEADER_SPACER_HEIGHT;
 
-        LoginContent.interactable = true;
+        LoginContent.IsInteractable = true;
         AppContent.IsInteractable = false;
 
         LoginContent.gameObject.SetActive(true);
