@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -28,7 +29,10 @@ public class GameManager : MonoBehaviour
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
+    public TMP_Text AppIdText;
+    public TMP_Text LobbyIdText;
     public Button ReconnectButton;
+    public Button JoinInProgressButton;
     //for updating members list of shockwaves
     public GameArea GameArea;  
     //local user's start button for starting a match
@@ -54,6 +58,8 @@ public class GameManager : MonoBehaviour
         set => _currentUserInfo = value;
     }
     
+    public void ActivateJoinMatchButton() => JoinInProgressButton.gameObject.SetActive(true);
+    
     private void Awake()
     {
         if (!_instance)
@@ -65,13 +71,16 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
         ReconnectButton.gameObject.SetActive(false);
+        JoinInProgressButton.gameObject.SetActive(false);
         _eventSystem = EventSystem.current;
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
         LoadPlayerSettings();
+        LobbyIdText.enabled = false;
+        AppIdText.text = $"App ID: {BrainCloud.Plugin.Interface.AppId}";
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
@@ -151,7 +160,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < lobby.Members.Count; i++)
         {
             UserCursor newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
-            
+            lobby.Members[i].MousePosition = new Vector2(9999, 9999);
             newCursor.AdjustVisibility(false);
             newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
             newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
@@ -169,6 +178,11 @@ public class GameManager : MonoBehaviour
         StartGameBtn.SetActive(IsLocalUserHost());
         EndGameBtn.SetActive(IsLocalUserHost());
         CompressionDropdown.interactable = IsLocalUserHost();
+        LobbyIdText.text = $"Lobby ID: {StateManager.Instance.CurrentLobby.LobbyID}";
+        if (!LobbyIdText.enabled)
+        {
+            LobbyIdText.enabled = true;
+        }
     }
 
     public void UpdateMatchAndLobbyState()

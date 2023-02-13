@@ -26,6 +26,7 @@ public class BrainCloudManager : MonoBehaviour
     private float _mouseYOffset = 321;
     internal RelayCompressionTypes _relayCompressionType { get; set; }
     private LogErrors _logger;
+    private bool _presentWhileStarted;
     private void Awake()
     {
         _logger = FindObjectOfType<LogErrors>();
@@ -207,6 +208,12 @@ public class BrainCloudManager : MonoBehaviour
         //Continue doing reconnection stuff.....
         m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, RTTReconnect, OnRTTDisconnected);
         m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+    }
+
+    public void JoinMatch()
+    {
+        StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
+        ConnectRelay();
     }
 
     private void RTTReconnect(string jsonResponse, object cbObject)
@@ -417,6 +424,7 @@ public class BrainCloudManager : MonoBehaviour
                 }
                 case "STARTING":
                     // Save our picked color index
+                    _presentWhileStarted = true;
                     Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
                     if (!GameManager.Instance.IsLocalUserHost())
                     {
@@ -427,7 +435,16 @@ public class BrainCloudManager : MonoBehaviour
                     StateManager.Instance.CurrentServer = new Server(jsonData);
                     GameManager.Instance.UpdateMatchState();
                     GameManager.Instance.UpdateCursorList();
-                    ConnectRelay();
+                    //Check to see if a user joined the lobby before the match started or after.
+                    //If a user joins while match is in progress, you will only receive MEMBER_JOIN & ROOM_READY RTT updates.
+                    if (_presentWhileStarted)
+                    {
+                        ConnectRelay();    
+                    }
+                    else
+                    {
+                        GameManager.Instance.ActivateJoinMatchButton();
+                    }
                     break;
             }
         }

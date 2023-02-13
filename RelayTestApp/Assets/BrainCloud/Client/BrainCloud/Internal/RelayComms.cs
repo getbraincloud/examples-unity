@@ -653,7 +653,15 @@ namespace BrainCloud.Internal
         {
             if (m_clientRef.LoggingEnabled)
             {
-                m_clientRef.Log("Relay: Connection closed: " + reason);
+                if (m_endMatchRequested)
+                {
+                    m_clientRef.Log("Relay: Connection closed by host");
+                }
+                else
+                {
+                    m_clientRef.Log("Relay: Connection closed: " + reason);    
+                }
+                
             }
             queueErrorEvent(reason);
         }

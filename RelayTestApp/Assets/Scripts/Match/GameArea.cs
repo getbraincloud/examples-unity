@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -61,6 +62,14 @@ public class GameArea : MonoBehaviour
         }
         UpdateAllCursorsMovement();
         UpdateAllShockwaves();
+    }
+
+    private void OnDisable()
+    {
+        if (!Cursor.visible)
+        {
+            Cursor.visible = true;    
+        }
     }
 
     private void UpdateAllShockwaves()

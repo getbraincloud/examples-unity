@@ -88,6 +88,7 @@ public class StateManager : MonoBehaviour
 
     public void LeaveMatchBackToMenu()
     {
+        GameManager.Instance.LobbyIdText.enabled = false;
         ResetData();
         ChangeState(GameStates.SignIn);
     }
