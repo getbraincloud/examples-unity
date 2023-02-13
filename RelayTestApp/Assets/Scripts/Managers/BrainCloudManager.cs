@@ -133,6 +133,13 @@ public class BrainCloudManager : MonoBehaviour
     {
         if (m_dead) return;
 
+        if (jsonError.Contains("Disconnected by server from end match message"))
+        {
+            /*m_bcWrapper.RelayService.DeregisterRelayCallback();
+            m_bcWrapper.RelayService.DeregisterSystemCallback();*/
+            return;
+        }
+
         m_dead = true;
         m_bcWrapper.RTTService.DeregisterRTTLobbyCallback();
         m_bcWrapper.RelayService.DeregisterRelayCallback();
@@ -188,7 +195,11 @@ public class BrainCloudManager : MonoBehaviour
         //
         m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
     }
-    
+
+    public void EndMatch()
+    {
+        m_bcWrapper.RelayService.EndMatch();
+    }
 
     public void ReconnectUser()
     {
@@ -284,19 +295,19 @@ public class BrainCloudManager : MonoBehaviour
             case RelayCompressionTypes.JsonString:
                 jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
-                _logger.WriteGameplayInput(jsonData, jsonBytes);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
                 m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
             case RelayCompressionTypes.KeyValuePairString:
                 jsonData = SerializeDict(in_dict, in_joinChar, in_splitChar); 
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
-                _logger.WriteGameplayInput(jsonData, jsonBytes);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
                 m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
             case RelayCompressionTypes.DataStreamByte:
                 jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = SerializeDict(in_dict);
-                _logger.WriteGameplayInput(jsonData, jsonBytes);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
                 m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
         }
@@ -463,14 +474,14 @@ public class BrainCloudManager : MonoBehaviour
             if (json.ContainsKey("cxId"))
             {
                 var profileId = json["cxId"] as string;
-                profileId = profileId.Substring(6);
                 Lobby lobby = StateManager.Instance.CurrentLobby;
+                profileId = lobby.FormatCxIdToProfileId(profileId);
                 foreach (var member in lobby.Members)
                 {
                     if (member.ID == profileId)
                     {
                         member.IsAlive = false;
-                        GameManager.Instance.MemberLeft();
+                        GameManager.Instance.UpdateMatchAndLobbyState();
                         break;
                     }
                 }    
@@ -479,6 +490,17 @@ public class BrainCloudManager : MonoBehaviour
         else if (json["op"] as string == "CONNECT")
         {
             StateManager.Instance.isLoading = false;
+        }
+        else if (json["op"] as string == "END_MATCH")
+        {
+            StateManager.Instance.isReady = false;
+            GameManager.Instance.UpdateMatchAndLobbyState();
+            StateManager.Instance.ChangeState(GameStates.Lobby);
+        }
+        else if (json["op"] as string == "MIGRATE_OWNER")
+        {
+            StateManager.Instance.CurrentLobby.ReassignOwnerID(m_bcWrapper.RelayService.OwnerCxId);
+            GameManager.Instance.UpdateMatchAndLobbyState();
         }
     }
 
@@ -506,7 +528,7 @@ public class BrainCloudManager : MonoBehaviour
         //
         m_bcWrapper.LobbyService.FindOrCreateLobby
         (
-            "CursorPartyV2", // lobby type
+            "CursorPartyV2Backfill",//"CursorPartyV2", // lobby type
             0, // rating
             1, // max steps
             algo, // algorithm

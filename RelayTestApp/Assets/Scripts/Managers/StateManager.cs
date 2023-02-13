@@ -22,7 +22,9 @@ public class StateManager : MonoBehaviour
     public ConnectingGameState LoadingGameState;
     public DialogueMessage ErrorMessage;
     //Network info needed
+    [SerializeField]
     public Lobby CurrentLobby;
+    [SerializeField]
     public Server CurrentServer;
     internal RelayConnectionType Protocol { get; set; }
     

@@ -129,6 +129,11 @@ using BrainCloud.Internal;
             m_commsLayer.Disconnect();
         }
 
+        public void EndMatch()
+        {
+            m_commsLayer.EndMatch();
+        }
+
         /// <summary>
         /// Is Connected
         /// </summary>

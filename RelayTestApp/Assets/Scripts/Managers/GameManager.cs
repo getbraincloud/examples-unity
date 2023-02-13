@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour
     public GameArea GameArea;  
     //local user's start button for starting a match
     public GameObject StartGameBtn;
+    public GameObject EndGameBtn;
     public TMP_Text LobbyLocalUserText;
     public TMP_Dropdown CompressionDropdown;
     private EventSystem _eventSystem;
@@ -45,6 +46,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance => _instance;
     
     //Local User Info
+    [SerializeField]
     private UserInfo _currentUserInfo;
     public UserInfo CurrentUserInfo
     {
@@ -165,7 +167,14 @@ public class GameManager : MonoBehaviour
     {   
         AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
         StartGameBtn.SetActive(IsLocalUserHost());
+        EndGameBtn.SetActive(IsLocalUserHost());
         CompressionDropdown.interactable = IsLocalUserHost();
+    }
+
+    public void UpdateMatchAndLobbyState()
+    {
+        UpdateLobbyState();
+        UpdateMatchState();
     }
     
     /// <summary>
@@ -191,9 +200,12 @@ public class GameManager : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
-            SetUpUserEntry(lobby.Members[i], newEntry);
-            _matchEntries.Add(newEntry);    
+            if (lobby.Members[i].IsAlive)
+            {
+                var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
+                SetUpUserEntry(lobby.Members[i], newEntry);
+                _matchEntries.Add(newEntry);   
+            }    
         }
 
         LobbyLocalUserText.text = _currentUserInfo.Username;
@@ -226,12 +238,6 @@ public class GameManager : MonoBehaviour
         {
             CurrentUserInfo.AllowSendTo = isVisible;
         }
-    }
-    
-    public void MemberLeft()
-    {
-        UpdateMatchState();
-        UpdateCursorList();
     }
 
     public void EmptyCursorList()
