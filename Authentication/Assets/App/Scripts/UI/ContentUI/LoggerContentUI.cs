@@ -103,7 +103,7 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
 
     private void OnDestroy()
     {
-        logGOs.Clear();
+        logGOs?.Clear();
         logGOs = null;
     }
 

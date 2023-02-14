@@ -51,6 +51,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5300559702700530651, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 22100000, guid: 87544d78bcbb5d345ba0dbb8646ff6c9, type: 2}
     - target: {fileID: 8619392731486478952, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
       propertyPath: m_Color.g
       value: 0.627451
@@ -241,23 +245,3 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
---- !u!1 &2641332300072192249 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8202776155572949741, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
-  m_PrefabInstance: {fileID: 6156975735873067540}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1838308462
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2641332300072192249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0, g: 0.627451, b: 1, a: 1}
-  m_EffectDistance: {x: 1, y: 1}
-  m_UseGraphicAlpha: 0
