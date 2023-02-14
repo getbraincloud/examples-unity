@@ -655,7 +655,7 @@ namespace BrainCloud.Internal
             {
                 if (m_endMatchRequested)
                 {
-                    m_clientRef.Log("Relay: Connection closed by host");
+                    m_clientRef.Log("Relay: Connection closed by end match");
                 }
                 else
                 {

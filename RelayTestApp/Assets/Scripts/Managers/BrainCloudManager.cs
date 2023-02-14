@@ -213,6 +213,7 @@ public class BrainCloudManager : MonoBehaviour
     public void JoinMatch()
     {
         StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
+        GameManager.Instance.JoinInProgressButton.gameObject.SetActive(false);
         ConnectRelay();
     }
 
@@ -319,7 +320,6 @@ public class BrainCloudManager : MonoBehaviour
                 break;
         }
     }
-    
 
 #endregion Input update
 
@@ -441,6 +441,10 @@ public class BrainCloudManager : MonoBehaviour
                     {
                         ConnectRelay();    
                     }
+                    else
+                    {
+                        GameManager.Instance.JoinInProgressButton.gameObject.SetActive(true);
+                    }
                     break;
             }
         }
@@ -504,6 +508,8 @@ public class BrainCloudManager : MonoBehaviour
         else if (json["op"] as string == "CONNECT")
         {
             StateManager.Instance.isLoading = false;
+            //Check if user connected is new, if so update name to not have "In Lobby" 
+            GameManager.Instance.UpdateMatchState();
         }
         else if (json["op"] as string == "END_MATCH")
         {

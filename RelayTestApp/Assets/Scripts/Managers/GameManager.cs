@@ -185,18 +185,9 @@ public class GameManager : MonoBehaviour
     
     public void UpdateLobbyState()
     {   
-        AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
+        AdjustLobbyList();
         StartGameBtn.SetActive(IsLocalUserHost());
         EndGameBtn.SetActive(IsLocalUserHost());
-        if (!StartGameBtn.gameObject.activeSelf &&
-            !BrainCloudManager.Instance.PresentWhileStarted)
-        {
-            JoinInProgressButton.gameObject.SetActive(true);
-        }
-        else
-        {
-            JoinInProgressButton.gameObject.SetActive(false);
-        }
         CompressionDropdown.interactable = IsLocalUserHost();
         LobbyIdText.text = $"Lobby ID: {StateManager.Instance.CurrentLobby.LobbyID}";
         if (!LobbyIdText.enabled)
@@ -216,10 +207,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void UpdateMatchState()
     {
-        AdjustEntryList(UserEntryMatchParent.transform,UserEntryMatchPrefab);
+        AdjustMatchList();
     }
 
-    private void AdjustEntryList(Transform parent, UserEntry prefab)
+    private void CleanUpChildrenOfParent(Transform parent)
     {
         //Clean up any child objects in parent
         if (parent.childCount > 0)
@@ -230,21 +221,50 @@ public class GameManager : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
-        
+    }
+
+    private void AdjustLobbyList()
+    {
+        CleanUpChildrenOfParent(UserEntryLobbyParent.transform);
         //populate user entries based on members in lobby
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
             if (lobby.Members[i].IsAlive)
             {
-                var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
+                var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
                 SetUpUserEntry(lobby.Members[i], newEntry);
                 _matchEntries.Add(newEntry);
             }    
         }
 
         LobbyLocalUserText.text = _currentUserInfo.Username;
-        LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor); 
+        LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor);
+    }
+
+    private void AdjustMatchList()
+    {
+        CleanUpChildrenOfParent(UserEntryMatchParent.transform);
+        //populate user entries based on members in lobby
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        for (int i = 0; i < lobby.Members.Count; i++)
+        {
+            if (lobby.Members[i].IsAlive)
+            {
+                var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, UserEntryMatchParent.transform);
+                if (lobby.Members[i].IsReady)
+                {
+                    SetUpUserEntry(lobby.Members[i], newEntry);    
+                }
+                else
+                {
+                    lobby.Members[i].Username += " (In Lobby)";
+                    SetUpUserEntry(lobby.Members[i], newEntry);   
+                }
+
+                _matchEntries.Add(newEntry);
+            }    
+        }
     }
     
     private void SetUpUserEntry(UserInfo info,UserEntry entry)

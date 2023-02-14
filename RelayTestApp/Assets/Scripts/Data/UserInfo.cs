@@ -27,6 +27,8 @@ public class UserInfo
     public UserCursor UserCursor;
     public UserInfo() { }
     public string cxId;
+    //Used to determine if user is in lobby or in match.
+    public bool IsReady;
     public UserInfo(Dictionary<string, object> userJson)
     {
         cxId = userJson["cxId"] as string;
@@ -35,5 +37,6 @@ public class UserInfo
         Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
         int colorIndex = (int)extra["colorIndex"];
         UserGameColor = (GameColors) colorIndex;
+        IsReady = (bool)userJson["isReady"];
     }
 }
