@@ -19,14 +19,15 @@ public class BrainCloudManager : MonoBehaviour
 {
     private BrainCloudWrapper m_bcWrapper;
     private bool m_dead = false;
-    public bool LeavingGame;
     public BrainCloudWrapper Wrapper => m_bcWrapper;
     public static BrainCloudManager Instance;
-    //Offset for the different mouse coordinates from Unity space to Nodejs space
-    private float _mouseYOffset = 321;
     internal RelayCompressionTypes _relayCompressionType { get; set; }
     private LogErrors _logger;
     private bool _presentWhileStarted;
+    public bool PresentWhileStarted
+    {
+        get => _presentWhileStarted;
+    }
     private void Awake()
     {
         _logger = FindObjectOfType<LogErrors>();
@@ -89,7 +90,6 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-    
 #region BC Callbacks
 
     // User fully logged in. 
@@ -136,8 +136,6 @@ public class BrainCloudManager : MonoBehaviour
 
         if (jsonError.Contains("Disconnected by server from end match message"))
         {
-            /*m_bcWrapper.RelayService.DeregisterRelayCallback();
-            m_bcWrapper.RelayService.DeregisterSystemCallback();*/
             return;
         }
 
@@ -181,6 +179,7 @@ public class BrainCloudManager : MonoBehaviour
         if (changeState)
         {
             StateManager.Instance.LeaveMatchBackToMenu();    
+            GameManager.Instance.ClearMatchEntries();
         }
     }
     
@@ -199,6 +198,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void EndMatch()
     {
+        GameManager.Instance.UpdateLobbyState();
         m_bcWrapper.RelayService.EndMatch();
     }
 
@@ -401,9 +401,9 @@ public class BrainCloudManager : MonoBehaviour
             //If we're still in lobby, then update the list of users
             if (StateManager.Instance.CurrentGameState == GameStates.Lobby)
             {
-                GameManager.Instance.UpdateLobbyState();
                 StateManager.Instance.isLoading = false;
             }
+            GameManager.Instance.UpdateMatchAndLobbyState();
         }
         
         //Using the key "operation" to determine what state the lobby is in
@@ -433,17 +433,13 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case "ROOM_READY":
                     StateManager.Instance.CurrentServer = new Server(jsonData);
-                    GameManager.Instance.UpdateMatchState();
+                    GameManager.Instance.UpdateMatchAndLobbyState();
                     GameManager.Instance.UpdateCursorList();
                     //Check to see if a user joined the lobby before the match started or after.
                     //If a user joins while match is in progress, you will only receive MEMBER_JOIN & ROOM_READY RTT updates.
                     if (_presentWhileStarted)
                     {
                         ConnectRelay();    
-                    }
-                    else
-                    {
-                        GameManager.Instance.ActivateJoinMatchButton();
                     }
                     break;
             }
@@ -453,6 +449,7 @@ public class BrainCloudManager : MonoBehaviour
     // Connect to the Relay server and start the game
     public void ConnectRelay()
     {
+        _presentWhileStarted = false;
         m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
         m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         m_bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);

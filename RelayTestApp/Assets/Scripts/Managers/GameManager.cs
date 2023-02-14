@@ -58,8 +58,6 @@ public class GameManager : MonoBehaviour
         set => _currentUserInfo = value;
     }
     
-    public void ActivateJoinMatchButton() => JoinInProgressButton.gameObject.SetActive(true);
-    
     private void Awake()
     {
         if (!_instance)
@@ -172,11 +170,33 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    public void ClearMatchEntries()
+    { 
+        if (_matchEntries.Count > 0)
+        {
+            foreach (UserEntry matchEntry in _matchEntries)
+            {
+                Destroy(matchEntry.gameObject);
+            }
+            _matchEntries.Clear();    
+        }
+    }
+    
     public void UpdateLobbyState()
     {   
         AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
         StartGameBtn.SetActive(IsLocalUserHost());
         EndGameBtn.SetActive(IsLocalUserHost());
+        if (!StartGameBtn.gameObject.activeSelf &&
+            !BrainCloudManager.Instance.PresentWhileStarted)
+        {
+            JoinInProgressButton.gameObject.SetActive(true);
+        }
+        else
+        {
+            JoinInProgressButton.gameObject.SetActive(false);
+        }
         CompressionDropdown.interactable = IsLocalUserHost();
         LobbyIdText.text = $"Lobby ID: {StateManager.Instance.CurrentLobby.LobbyID}";
         if (!LobbyIdText.enabled)
@@ -201,13 +221,14 @@ public class GameManager : MonoBehaviour
 
     private void AdjustEntryList(Transform parent, UserEntry prefab)
     {
-        if (_matchEntries.Count > 0)
+        //Clean up any child objects in parent
+        if (parent.childCount > 0)
         {
-            foreach (UserEntry matchEntry in _matchEntries)
+            for (int i = 0; i < parent.childCount; ++i)
             {
-                Destroy(matchEntry.gameObject);   
+                Transform child = parent.GetChild(i);
+                Destroy(child.gameObject);
             }
-            _matchEntries.Clear();    
         }
         
         //populate user entries based on members in lobby
@@ -218,7 +239,7 @@ public class GameManager : MonoBehaviour
             {
                 var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
                 SetUpUserEntry(lobby.Members[i], newEntry);
-                _matchEntries.Add(newEntry);   
+                _matchEntries.Add(newEntry);
             }    
         }
 
