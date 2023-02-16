@@ -175,7 +175,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
 
     private void UpdateUIInformation()
     {
-        if (!string.IsNullOrEmpty(customEntity.EntityId))
+        if (!customEntity.EntityId.IsEmpty())
         {
             IDField.text = customEntity.EntityId;
             TypeField.text = customEntity.EntityType;
@@ -294,7 +294,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
 
     private FailureCallback OnFailure(string errorMessage)
     {
-        errorMessage = string.IsNullOrEmpty(errorMessage) ? "Failure" : errorMessage;
+        errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
         return (status, reasonCode, jsonError, _) =>
         {
             BCManager.LogError(errorMessage, status, reasonCode, jsonError);

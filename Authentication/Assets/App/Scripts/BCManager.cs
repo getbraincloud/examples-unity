@@ -154,7 +154,7 @@ public class BCManager : MonoBehaviour
     /// <returns></returns>
     public static SuccessCallback CreateSuccessCallback(string logMessage = null, Action onSuccess = null)
     {
-        logMessage = string.IsNullOrEmpty(logMessage) ? "Success" : logMessage;
+        logMessage = logMessage.IsEmpty() ? "Success" : logMessage;
         return (jsonResponse, _) =>
         {
             LogMessage(logMessage, jsonResponse);
@@ -171,7 +171,7 @@ public class BCManager : MonoBehaviour
     /// <returns></returns>
     public static FailureCallback CreateFailureCallback(string errorMessage = null, Action onFailure = null)
     {
-        errorMessage = string.IsNullOrEmpty(errorMessage) ? "Failure" : errorMessage;
+        errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
         return (status, reasonCode, jsonError, _) =>
         {
             LogError(errorMessage, status, reasonCode, jsonError);

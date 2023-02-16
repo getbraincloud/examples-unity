@@ -270,7 +270,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
 
     #endregion
 
-    #region Services
+    #region brainCloud
 
     private void HandleGetUserEntity()
     {
