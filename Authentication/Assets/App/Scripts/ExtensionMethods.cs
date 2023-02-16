@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public static class ExtensionMethods
 {
+    private static readonly int ANIMATION_TRIGGER_ERROR = Animator.StringToHash("Error");
     private const string ALPHANUMERIC_CHARACTER_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     /// <summary>
@@ -69,5 +72,22 @@ public static class ExtensionMethods
         go.name = string.Format(format, name);
 
         return go;
+    }
+
+    /// <summary>
+    /// Meant to be used alongside Selectables using the <b>BaseAnimator</b> asset. Will set the Selectable's animation to the <b>Error</b> state.
+    /// </summary>
+    public static Selectable DisplayError(this Selectable selectable)
+    {
+        if (selectable.animator != null)
+        {
+            selectable.animator.SetTrigger(ANIMATION_TRIGGER_ERROR);
+        }
+        else
+        {
+            Debug.LogWarning($"Selectable {selectable.name} does not have an animator.");
+        }
+
+        return selectable;
     }
 }

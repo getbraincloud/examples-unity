@@ -181,11 +181,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "{\n    \"data\":\"Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-    Proin feugiat lorem finibus est dignissim, a commodo lacus semper. Mauris semper
-    velit dictum ligula pretium semper et non diam.\\n\\nNam nec lorem justo. Suspendisse
-    potenti. Duis eu commodo sapien. Morbi vitae orci et justo sodales sagittis.
-    Nunc consequat sapien in ante pellentesque, et ullamcorper elit faucibus.\"\n}"
+  m_text: "#BCC RESPONSE -\n{\n    \"data\":\"Lorem ipsum dolor sit amet\"\n}"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1081c6bd30b67274a9c17abf0fbccc79, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: ebfa8a5b2a67dfe4183fb75eda6a2967, type: 2}
@@ -2522,15 +2518,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185669, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Color.b
-      value: 0.85882354
+      value: 0.8784314
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185669, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Color.g
-      value: 0.85882354
+      value: 0.8784314
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185669, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Color.r
-      value: 0.85882354
+      value: 0.8784314
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185671, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Name
@@ -4483,7 +4479,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8588236, g: 0.8588236, b: 0.8588236, a: 1}
+  m_Color: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -6286,7 +6282,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '#APP ERROR: Lorem Ipsum'
+  m_text: '#APP - Lorem Ipsum'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1081c6bd30b67274a9c17abf0fbccc79, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: ebfa8a5b2a67dfe4183fb75eda6a2967, type: 2}
@@ -8507,15 +8503,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185669, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Color.b
-      value: 0.85882354
+      value: 0.8784314
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185669, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Color.g
-      value: 0.85882354
+      value: 0.8784314
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185669, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Color.r
-      value: 0.85882354
+      value: 0.8784314
       objectReference: {fileID: 0}
     - target: {fileID: 8454693388917185671, guid: dbee8104d0fa3a54c8bdac582421fbc2, type: 3}
       propertyPath: m_Name
@@ -8626,7 +8622,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 32
-  m_VerticalAlignment: 8192
+  m_VerticalAlignment: 4096
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0

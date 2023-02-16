@@ -178,8 +178,6 @@ public class MainMenuUI : MonoBehaviour, IContentUI
         {
             ChangeToLoginContent();
 
-            UserHandler.ResetAuthenticationData();
-
             AppContent.ShowDefaultContent();
             Logger.ResetLogger();
         },

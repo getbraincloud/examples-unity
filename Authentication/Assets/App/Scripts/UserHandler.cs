@@ -53,6 +53,12 @@ public static class UserHandler
                                                                               BCManager.CreateFailureCallback("Authentication Failed", onFailure));
     }
 
+    public static void HandleUserReconnect(Action onSuccess = null, Action onFailure = null)
+    {
+        BCManager.Wrapper.Reconnect(BCManager.CreateSuccessCallback("Reconnect Success", onSuccess),
+                                    BCManager.CreateFailureCallback("Reconnect Failed", onFailure));
+    }
+
     public static void HandleUserLogout(Action onSuccess = null, Action onFailure = null)
     {
         BCManager.PlayerStateService.Logout(BCManager.CreateSuccessCallback("Logout Success", onSuccess),
