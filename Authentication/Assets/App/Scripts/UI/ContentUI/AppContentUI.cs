@@ -102,7 +102,7 @@ public class AppContentUI : MonoBehaviour, IContentUI
         TitleLabel.text = serviceItem.Name;
         InfoBoxBodyText.text = serviceItem.Description;
         APILink.URLToOpen = serviceItem.APILink;
-        APILink.gameObject.SetActive(!serviceItem.APILink.IsNullOrEmpty());
+        APILink.gameObject.SetActive(!serviceItem.APILink.IsEmpty());
 
         currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent).GetComponent(typeof(IContentUI)) as IContentUI;
         currentServiceUI.GameObject.SetActive(true);

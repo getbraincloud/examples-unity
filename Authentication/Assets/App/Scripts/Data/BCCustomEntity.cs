@@ -49,8 +49,8 @@ public struct BCCustomEntity
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow,
         ACL = ACL.ReadWrite(),
-        Name = !name.IsNullOrEmpty() ? name : DEFAULT_NAME,
-        Position = !position.IsNullOrEmpty() ? position : DEFAULT_POSITION,
+        Name = !name.IsEmpty() ? name : DEFAULT_NAME,
+        Position = !position.IsEmpty() ? position : DEFAULT_POSITION,
         Goals = goals,
         Assists = assists
     };
@@ -58,8 +58,8 @@ public struct BCCustomEntity
     public void Update(string entityType = "", string name = "", string position = "", int goals = -1, int assists = -1)
     {
         EntityType = !string.IsNullOrEmpty(entityType) ? entityType : EntityType;
-        Name = !name.IsNullOrEmpty() ? name : name;
-        Position = !position.IsNullOrEmpty() ? position : Position;
+        Name = !name.IsEmpty() ? name : name;
+        Position = !position.IsEmpty() ? position : Position;
         Goals = goals >= 0 ? goals : Goals;
         Assists = assists >= 0 ? assists : Assists;
     }

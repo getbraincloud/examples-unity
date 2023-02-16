@@ -9,7 +9,7 @@ public class OpenLinkButton : MonoBehaviour
     private string url = string.Empty;
     public string URLToOpen
     {
-        get => url.IsNullOrEmpty() ? DefaultURL : url;
+        get => url.IsEmpty() ? DefaultURL : url;
         set => url = value;
     }
     
@@ -20,7 +20,7 @@ public class OpenLinkButton : MonoBehaviour
 
     private void Start()
     {
-        if (DefaultURL.IsNullOrEmpty())
+        if (DefaultURL.IsEmpty())
         {
             enabled = false;
         }

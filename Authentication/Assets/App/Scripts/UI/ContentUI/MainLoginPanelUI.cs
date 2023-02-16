@@ -3,6 +3,7 @@ using BrainCloud.Common;
 using System.Collections.Generic;
 using System.Net.Mail;
 using TMPro;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,12 +17,14 @@ using UnityEngine.UI;
 /// </summary>
 public class MainLoginPanelUI : MonoBehaviour, IContentUI
 {
-    private const int MINIMUM_USERNAME_LENGTH = 4;
-    private const int MINIMUM_PASSWORD_LENGTH = 6;
-    private const int MINIMUM_NAME_LENGTH = 3;
-    private const int MINIMUM_REGISTRATION_AGE = 13;
-    private const int MAXIMUM_REGISTRATION_AGE = 120;
-    private static string PREFS_REMEMBER_ME => BCManager.AppName + ".rememberMe";
+    // User Input Restrictions
+    public const int MINIMUM_USERNAME_LENGTH = 4;
+    public const int MINIMUM_PASSWORD_LENGTH = 6;
+    public const int MINIMUM_REGISTRATION_NAME_LENGTH = 3;
+    public const int MINIMUM_REGISTRATION_AGE = 13;
+    public const int MAXIMUM_REGISTRATION_AGE = 120;
+
+    public static string PREFS_REMEMBER_ME => BCManager.AppName + ".rememberMe";
 
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
@@ -91,7 +94,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     private void Start()
     {
         bool rememberUserToggle = GetRememberMePref();
-        RememberMeToggle.isOn = rememberUserToggle && !UserHandler.AnonymousID.IsNullOrEmpty();
+        RememberMeToggle.isOn = rememberUserToggle && !UserHandler.AnonymousID.IsEmpty();
 
         AuthenticationType authenticationType = UserHandler.AuthenticationType;
         if (authenticationType == AuthenticationType.Universal)
@@ -115,7 +118,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         {
             OnAutomaticLogin();
         }
-        else if (rememberUserToggle && !UserHandler.AnonymousID.IsNullOrEmpty())
+        else if (rememberUserToggle && !UserHandler.AnonymousID.IsEmpty())
         {
             SetRememberMePref(false);
         }
@@ -156,10 +159,15 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     public void ClearFields()
     {
         EmailField.text = string.Empty;
+        EmailField.DisplayNormal();
         UsernameField.text = string.Empty;
+        UsernameField.DisplayNormal();
         PasswordField.text = string.Empty;
+        PasswordField.DisplayNormal();
         NameField.text = string.Empty;
+        NameField.DisplayNormal();
         AgeField.text = string.Empty;
+        AgeField.DisplayNormal();
         ErrorLabel.text = string.Empty;
     }
 
@@ -195,20 +203,20 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
     private void OnAnonymousRadio(bool value)
     {
-        EmailField.interactable = !value;
-        UsernameField.interactable = !value;
-        PasswordField.interactable = !value;
-
         if (value)
         {
             ClearFields();
         }
+
+        EmailField.interactable = !value;
+        UsernameField.interactable = !value;
+        PasswordField.interactable = !value;
     }
 
     private bool CheckEmailVerification(string value)
     {
         EmailField.text = value.Trim();
-        if (!EmailField.text.IsNullOrEmpty())
+        if (!EmailField.text.IsEmpty())
         {
             ErrorLabel.text = string.Empty;
 
@@ -222,7 +230,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
                 string user = validate.User;
                 string host = validate.Host;
-                if (user.IsNullOrEmpty() || host.IsNullOrEmpty() ||
+                if (user.IsEmpty() || host.IsEmpty() ||
                     !host.Contains('.') || host.StartsWith('.') || host.EndsWith('.'))
                 {
                     DisplayError("Please use a valid email address.", EmailField);
@@ -244,7 +252,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     private bool CheckUsernameVerification(string value)
     {
         UsernameField.text = value.Trim();
-        if (!UsernameField.text.IsNullOrEmpty())
+        if (!UsernameField.text.IsEmpty())
         {
             ErrorLabel.text = string.Empty;
             if (UsernameField.text.Length < MINIMUM_USERNAME_LENGTH)
@@ -262,7 +270,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     private bool CheckPasswordVerification(string value)
     {
         PasswordField.text = value.Trim();
-        if (!PasswordField.text.IsNullOrEmpty())
+        if (!PasswordField.text.IsEmpty())
         {
             ErrorLabel.text = string.Empty;
             if (PasswordField.text.Length < MINIMUM_PASSWORD_LENGTH)
@@ -280,12 +288,12 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     private bool CheckNameVerification(string value)
     {
         NameField.text = value.Trim();
-        if (!NameField.text.IsNullOrEmpty())
+        if (!NameField.text.IsEmpty())
         {
             ErrorLabel.text = string.Empty;
-            if (NameField.text.Length < MINIMUM_NAME_LENGTH)
+            if (NameField.text.Length < MINIMUM_REGISTRATION_NAME_LENGTH)
             {
-                DisplayError($"Please register with a name with at least {MINIMUM_NAME_LENGTH} characters.", NameField);
+                DisplayError($"Please register with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.", NameField);
                 return false;
             }
 
@@ -298,7 +306,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     private bool CheckAgeVerification(string value)
     {
         AgeField.text = value.Trim();
-        if (!AgeField.text.IsNullOrEmpty())
+        if (!AgeField.text.IsEmpty())
         {
             ErrorLabel.text = string.Empty;
             if (int.TryParse(AgeField.text, out int result))
@@ -337,16 +345,16 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         if (!AnonymousRadio.isOn && (!CheckPasswordVerification(inputPassword) ||
             !(CheckEmailVerification(inputEmail) || CheckUsernameVerification(inputUser))))
         {
-            if (EmailRadio.isOn && inputEmail.IsNullOrEmpty())
+            if (EmailRadio.isOn && inputEmail.IsEmpty())
             {
                 DisplayError("Please use a valid email address.", EmailField);
             }
-            else if (UniversalRadio.isOn && inputUser.IsNullOrEmpty())
+            else if (UniversalRadio.isOn && inputUser.IsEmpty())
             {
                 DisplayError("Please use a valid username.", UsernameField);
             }
 
-            if (inputPassword.IsNullOrEmpty())
+            if (inputPassword.IsEmpty())
             {
                 DisplayError("Please use a valid password.", PasswordField);
             }
@@ -382,10 +390,11 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
             return;
         }
-        else if (!inputName.IsNullOrEmpty() || !inputAge.IsNullOrEmpty())
+        else if (!inputName.IsEmpty() || !inputAge.IsEmpty())
         {
-            DisplayError("Please register with both a valid name and age.", inputName.IsNullOrEmpty() ? NameField : AgeField);
-
+            NameField.DisplayError();
+            AgeField.DisplayError();
+            DisplayError("Please register with both a valid name and age.");
             return;
         }
 
@@ -399,7 +408,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         {
             UserHandler.AuthenticateUniversal(inputUser, inputPassword, OnAuthenticationSuccess, OnAuthenticationFailure);
         }
-        else if (AnonymousRadio.isOn)
+        else // Anonymous login
         {
             UserHandler.AuthenticateAnonymous(OnAuthenticationSuccess, OnAuthenticationFailure);
         }

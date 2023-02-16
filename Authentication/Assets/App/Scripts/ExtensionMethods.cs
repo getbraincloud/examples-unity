@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public static class ExtensionMethods
 {
+    private static readonly int ANIMATION_TRIGGER_NORMAL = Animator.StringToHash("Normal");
     private static readonly int ANIMATION_TRIGGER_ERROR = Animator.StringToHash("Error");
     private const string ALPHANUMERIC_CHARACTER_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -46,7 +47,7 @@ public static class ExtensionMethods
     /// <summary>
     /// Extension method for <see cref="string"/> using <see cref="string.IsNullOrWhiteSpace(string)"/>.
     /// </summary>
-    public static bool IsNullOrEmpty(this string str) => string.IsNullOrWhiteSpace(str);
+    public static bool IsEmpty(this string str) => string.IsNullOrWhiteSpace(str);
 
     /// <summary>
     /// Extension method for all collection types to see if it is null or empty.
@@ -72,6 +73,23 @@ public static class ExtensionMethods
         go.name = string.Format(format, name);
 
         return go;
+    }
+
+    /// <summary>
+    /// Meant to be used alongside Selectables using the <b>BaseAnimator</b> asset. Will set the Selectable's animation to the <b>Normal</b> state.
+    /// </summary>
+    public static Selectable DisplayNormal(this Selectable selectable)
+    {
+        if (selectable.animator != null)
+        {
+            selectable.animator.SetTrigger(ANIMATION_TRIGGER_NORMAL);
+        }
+        else
+        {
+            Debug.LogWarning($"Selectable {selectable.name} does not have an animator.");
+        }
+
+        return selectable;
     }
 
     /// <summary>

@@ -15,6 +15,9 @@ using UnityEngine.UI;
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-entity
 public class EntityServiceUI : MonoBehaviour, IContentUI
 {
+    public const int MINIMUM_REGISTRATION_NAME_LENGTH = 3;
+    public const int MINIMUM_REGISTRATION_AGE = 13;
+    public const int MAXIMUM_REGISTRATION_AGE = 120;
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "user";
 
@@ -103,69 +106,16 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
         NameField.text = string.Empty;
+        NameField.DisplayNormal();
         AgeField.text = string.Empty;
+        AgeField.DisplayNormal();
 
         IsInteractable = true;
     }
 
-    private void OnCreateButton()
-    {
-        IsInteractable = false;
-
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE, NameField.text, AgeField.text);
-
-        entityService.CreateEntity(userEntity.EntityType,
-                                   JsonWriter.Serialize(userEntity.DataToJson()),
-                                   userEntity.ACL.ToJsonString(),
-                                   OnCreateEntity_Success,
-                                   OnFailure("CreateEntity Failed"));
-    }
-
-    private void OnSaveButton()
-    {
-        IsInteractable = false;
-
-        if (string.IsNullOrEmpty(userEntity.EntityId))
-        {
-            Debug.LogWarning($"Entity ID is blank...");
-            ResetUIState();
-            return;
-        }
-
-        userEntity.Update(NameField.text, AgeField.text);
-
-        entityService.UpdateEntity(userEntity.EntityId,
-                                   userEntity.EntityType,
-                                   JsonWriter.Serialize(userEntity.DataToJson()),
-                                   userEntity.ACL.ToJsonString(),
-                                   -1,
-                                   OnUpdateEntity_Success,
-                                   OnFailure("UpdateEntity Failed"));
-    }
-
-    private void OnDeleteButton()
-    {
-        IsInteractable = false;
-
-        if (string.IsNullOrEmpty(userEntity.EntityId))
-        {
-            Debug.LogWarning($"Entity ID is blank...");
-            ResetUIState();
-            return;
-        }
-
-        if (!string.IsNullOrEmpty(userEntity.EntityId))
-        {
-            entityService.DeleteEntity(userEntity.EntityId,
-                                       -1,
-                                       OnDeleteEntity_Success,
-                                       OnFailure("DeleteEntity Failed"));
-        }
-    }
-
     private void UpdateUIInformation()
     {
-        if (!string.IsNullOrEmpty(userEntity.EntityId))
+        if (!userEntity.EntityId.IsEmpty())
         {
             IDField.text = userEntity.EntityId;
             TypeField.text = userEntity.EntityType;
@@ -180,6 +130,142 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         AgeField.text = userEntity.Age;
 
         IsInteractable = true;
+    }
+
+    private bool CheckNameVerification(string value)
+    {
+        NameField.text = value.Trim();
+        if (!NameField.text.IsEmpty())
+        {
+            if (NameField.text.Length < MINIMUM_REGISTRATION_NAME_LENGTH)
+            {
+                NameField.DisplayError();
+                //LogError($"Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool CheckAgeVerification(string value)
+    {
+        AgeField.text = value.Trim();
+        if (!AgeField.text.IsEmpty())
+        {
+            if (int.TryParse(AgeField.text, out int result))
+            {
+                if (result < MINIMUM_REGISTRATION_AGE)
+                {
+                    AgeField.text = result < 0 ? 0.ToString() : AgeField.text;
+                    AgeField.DisplayError();
+                    //LogError($"Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
+                    return false;
+                }
+                else if (result > MAXIMUM_REGISTRATION_AGE)
+                {
+                    AgeField.DisplayError();
+                    //LogError("Please use a valid age.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            AgeField.DisplayError();
+            //LogError("Please use a valid age.");
+        }
+
+        return false;
+    }
+
+    private void OnCreateButton()
+    {
+        string inputName = NameField.text;
+        string inputAge = AgeField.text;
+
+        if (CheckNameVerification(inputName) && CheckAgeVerification(inputAge))
+        {
+            IsInteractable = false;
+
+            userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE, inputName, inputAge);
+
+            entityService.CreateEntity(userEntity.EntityType,
+                                       JsonWriter.Serialize(userEntity.DataToJson()),
+                                       userEntity.ACL.ToJsonString(),
+                                       OnCreateEntity_Success,
+                                       OnFailure("CreateEntity Failed"));
+        }
+        else if (!inputName.IsEmpty())
+        {
+            NameField.DisplayError();
+            //LogError("Please enter a valid name.");
+        }
+        else if (!inputAge.IsEmpty())
+        {
+            AgeField.DisplayError();
+            //LogError("Please enter a valid age.");
+        }
+    }
+
+    private void OnSaveButton()
+    {
+        string inputName = NameField.text;
+        string inputAge = AgeField.text;
+
+        if (userEntity.EntityId.IsEmpty())
+        {
+            //LogError("Entity ID is blank. Has an Entity been created yet?");
+            ResetUIState();
+            return;
+        }
+        else if (CheckNameVerification(inputName) && CheckAgeVerification(inputAge))
+        {
+            IsInteractable = false;
+
+            userEntity.Update(inputName, inputAge);
+
+            entityService.UpdateEntity(userEntity.EntityId,
+                                       userEntity.EntityType,
+                                       JsonWriter.Serialize(userEntity.DataToJson()),
+                                       userEntity.ACL.ToJsonString(),
+                                       -1,
+                                       OnUpdateEntity_Success,
+                                       OnFailure("UpdateEntity Failed"));
+        }
+
+        if (inputName.IsEmpty())
+        {
+            NameField.DisplayError();
+            //LogError("Please enter a valid name.");
+        }
+
+        if (inputAge.IsEmpty())
+        {
+            AgeField.DisplayError();
+            //LogError("Please enter a valid age.");
+        }
+    }
+
+    private void OnDeleteButton()
+    {
+        if (userEntity.EntityId.IsEmpty())
+        {
+            //LogError("Entity ID is blank. Has an Entity been created yet?");
+            ResetUIState();
+            return;
+        }
+        else
+        {
+            IsInteractable = false;
+
+            entityService.DeleteEntity(userEntity.EntityId,
+                                       -1,
+                                       OnDeleteEntity_Success,
+                                       OnFailure("DeleteEntity Failed"));
+        }
     }
 
     #endregion

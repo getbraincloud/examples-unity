@@ -176,6 +176,7 @@ public class MainMenuUI : MonoBehaviour, IContentUI
     {
         UserHandler.HandleUserLogout(() =>
         {
+            LoginContent.ResetRememberUserPref();
             ChangeToLoginContent();
 
             AppContent.ShowDefaultContent();
@@ -185,7 +186,6 @@ public class MainMenuUI : MonoBehaviour, IContentUI
         {
             Logger.LogError("#APP - Logout Failed! Please try again in a few moments.");
         });
-
     }
 
     public void ChangeToAppContent()

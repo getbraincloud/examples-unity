@@ -105,7 +105,7 @@ public class ScriptServiceUI : MonoBehaviour, IContentUI
     {
         try
         {
-            if (!ScriptJsonField.text.IsNullOrEmpty())
+            if (!ScriptJsonField.text.IsEmpty())
             {
                 string jsonData = ScriptJsonField.text;
                 if (JsonReader.Deserialize(jsonData) is ICollection json && json.Count > 0)

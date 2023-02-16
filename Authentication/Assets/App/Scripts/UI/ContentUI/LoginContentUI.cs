@@ -28,4 +28,13 @@ public class LoginContentUI : MonoBehaviour, IContentUI
     public Transform Transform => transform;
 
     #endregion
+
+    #region UI
+
+    public void ResetRememberUserPref()
+    {
+        MainLoginPanel.SetRememberMePref(false);
+    }
+
+    #endregion
 }

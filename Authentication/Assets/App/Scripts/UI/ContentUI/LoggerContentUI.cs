@@ -169,7 +169,7 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
 
     private void OnCopyLogButton()
     {
-        if(!lastMessage.IsNullOrEmpty())
+        if(!lastMessage.IsEmpty())
         {
             GUIUtility.systemCopyBuffer = lastMessage;
             LogMessage(LOG_COPY_TEXT);

@@ -33,8 +33,8 @@ public struct BCEntity
     public static BCEntity Create(string entityType, string name = "", string age = "") => new BCEntity
     {
         Version = -1, // -1 tells the server to create the latest version
-        Name = !name.IsNullOrEmpty() ? name : DEFAULT_NAME,
-        Age = !age.IsNullOrEmpty() ? age : DEFAULT_AGE,
+        Name = !name.IsEmpty() ? name : DEFAULT_NAME,
+        Age = !age.IsEmpty() ? age : DEFAULT_AGE,
         EntityId = string.Empty,
         EntityType = entityType,
         CreatedAt = DateTime.UtcNow,
@@ -44,9 +44,9 @@ public struct BCEntity
 
     public void Update(string name, string age, string entityType = "")
     {
-        Name = !name.IsNullOrEmpty() ? name : DEFAULT_NAME;
-        Age = !age.IsNullOrEmpty() ? age : DEFAULT_AGE;
-        EntityType = !entityType.IsNullOrEmpty() ? entityType : EntityType;
+        Name = !name.IsEmpty() ? name : DEFAULT_NAME;
+        Age = !age.IsEmpty() ? age : DEFAULT_AGE;
+        EntityType = !entityType.IsEmpty() ? entityType : EntityType;
     }
 
     public Dictionary<string, object> DataToJson() => new Dictionary<string, object>

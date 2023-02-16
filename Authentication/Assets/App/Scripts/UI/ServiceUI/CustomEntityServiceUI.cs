@@ -136,7 +136,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
     {
         IsInteractable = false;
 
-        if (customEntity.EntityId.IsNullOrEmpty())
+        if (customEntity.EntityId.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ResetUIState();
@@ -159,7 +159,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
     {
         IsInteractable = false;
 
-        if (customEntity.EntityId.IsNullOrEmpty())
+        if (customEntity.EntityId.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ResetUIState();
