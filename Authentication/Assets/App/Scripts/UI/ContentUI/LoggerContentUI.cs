@@ -15,13 +15,11 @@ using UnityEngine.UI;
 /// <seealso cref="BCManager"/><br></br>
 /// <seealso cref="BrainCloud.LogCallback"/>
 /// </summary>
-public class LoggerContentUI : MonoBehaviour, IContentUI
+public class LoggerContentUI : ContentUIBehaviour
 {
     private const string LOG_INITIAL_TEXT = "#APP - Logs, Json, and Error messages will appear here.";
     private const string LOG_COPY_TEXT = "#APP - Previous BCC Log copied to clipboard.";
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private ScrollRect LogScroll = default;
     [SerializeField] private Transform LogContent = default;
     [SerializeField] private Button ClearLogButton = default;
@@ -40,32 +38,14 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
     private string lastMessage = string.Empty;
     private List<GameObject> logGOs = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         LogTemplate.text = string.Empty;
         ErrorTemplate.text = string.Empty;
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -80,7 +60,7 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
         BCManager.Client.RegisterLogDelegate(OnLogDelegate);
     }
 
-    private void Start()
+    protected override void Start()
     {
         logGOs = new List<GameObject>();
 
@@ -91,6 +71,8 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
         CopyLogContainer.SetActive(false);
 #endif
         ResetLogger();
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -101,10 +83,12 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
         BCManager.Client?.EnableLogging(false);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         logGOs?.Clear();
         logGOs = null;
+
+        base.OnDestroy();
     }
 
     #endregion
@@ -137,6 +121,11 @@ public class LoggerContentUI : MonoBehaviour, IContentUI
     {
         ClearLogs();
         LogMessage(LOG_INITIAL_TEXT);
+    }
+
+    protected override void InternalResetUI()
+    {
+        //
     }
 
     private void CreateLogObject(string type, int count, string message, TMP_Text textTemplate)

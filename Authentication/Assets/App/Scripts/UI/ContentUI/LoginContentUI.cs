@@ -3,37 +3,30 @@ using UnityEngine;
 /// <summary>
 /// Used for app navigation on the Login screen.
 /// </summary>
-public class LoginContentUI : MonoBehaviour, IContentUI
+public class LoginContentUI : ContentUIBehaviour
 {
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private MainLoginPanelUI MainLoginPanel = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
+    private void OnEnable()
     {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
+        MainLoginPanel.IsInteractable = true;
     }
 
-    public float Opacity
+    private void OnDisable()
     {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
+        MainLoginPanel.IsInteractable = false;
     }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
 
     #region UI
 
     public void ResetRememberUserPref()
     {
         MainLoginPanel.SetRememberMePref(false);
+    }
+
+    protected override void InternalResetUI()
+    {
+        //
     }
 
     #endregion

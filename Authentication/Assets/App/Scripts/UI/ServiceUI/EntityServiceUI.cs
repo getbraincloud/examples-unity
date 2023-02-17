@@ -13,7 +13,7 @@ using UnityEngine.UI;
 /// <seealso cref="BrainCloudEntity"/>
 /// </summary>
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-entity
-public class EntityServiceUI : MonoBehaviour, IContentUI
+public class EntityServiceUI : ContentUIBehaviour
 {
     private const int MINIMUM_REGISTRATION_NAME_LENGTH = 3;
     private const int MINIMUM_REGISTRATION_AGE = 13;
@@ -21,8 +21,6 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "user";
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private TMP_Text IDField = default;
     [SerializeField] private TMP_Text TypeField = default;
     [SerializeField] private TMP_InputField NameField = default;
@@ -34,34 +32,16 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
     private BCEntity userEntity = default;
     private BrainCloudEntity entityService = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
         NameField.text = string.Empty;
         AgeField.text = string.Empty;
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -72,7 +52,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         DeleteButton.onClick.AddListener(OnDeleteButton);
     }
 
-    private void Start()
+    protected override void Start()
     {
         entityService = BCManager.EntityService;
 
@@ -82,6 +62,8 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         DeleteButton.gameObject.SetActive(false);
 
         HandleGetUserEntity();
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -92,14 +74,21 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         DeleteButton.onClick.RemoveAllListeners();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         entityService = null;
+
+        base.OnDestroy();
     }
 
     #endregion
 
     #region UI
+
+    protected override void InternalResetUI()
+    {
+        //
+    }
 
     private void ResetUIState()
     {

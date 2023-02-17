@@ -12,13 +12,11 @@ using UnityEngine.UI;
 /// <seealso cref="BrainCloudIdentity"/>
 /// </summary>
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-identity
-public class IdentityServiceUI : MonoBehaviour, IContentUI
+public class IdentityServiceUI : ContentUIBehaviour
 {
     private const int MINIMUM_USERNAME_LENGTH = 4;
     private const int MINIMUM_PASSWORD_LENGTH = 6;
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private TMP_InputField EmailLoginField = default;
     [SerializeField] private TMP_InputField EmailPasswordField = default;
     [SerializeField] private Button EmailAttachButton = default;
@@ -30,34 +28,16 @@ public class IdentityServiceUI : MonoBehaviour, IContentUI
 
     private BrainCloudIdentity identityService = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         EmailLoginField.text = string.Empty;
         EmailPasswordField.text = string.Empty;
         UniversalLoginField.text = string.Empty;
         UniversalPasswordField.text = string.Empty;
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -72,11 +52,11 @@ public class IdentityServiceUI : MonoBehaviour, IContentUI
         UniversalMergeButton.onClick.AddListener(OnUniversalMergeButton);
     }
 
-    private void Start()
+    protected override void Start()
     {
         identityService = BCManager.IdentityService;
 
-        IsInteractable = true;
+        base.Start();
     }
 
     private void OnDisable()
@@ -91,14 +71,21 @@ public class IdentityServiceUI : MonoBehaviour, IContentUI
         UniversalMergeButton.onClick.RemoveAllListeners();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         identityService = null;
+
+        base.OnDestroy();
     }
 
     #endregion
 
     #region UI
+
+    protected override void InternalResetUI()
+    {
+        //
+    }
 
     private bool CheckEmailVerification(string value)
     {

@@ -17,7 +17,7 @@ using UnityEngine.UI;
 /// </summary>
 /// VirtualCurrency API: https://getbraincloud.com/apidocs/apiref/?csharp#capi-virtualcurrency
 /// PlayerState API: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstate
-public class CurrencyServiceUI : MonoBehaviour, IContentUI
+public class CurrencyServiceUI : ContentUIBehaviour
 {
     private const int MINIMUM_AWARD_AMOUNT = 0;
     private const int MAXIMUM_AWARD_AMOUNT = 99999;
@@ -25,8 +25,6 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
     private const string DEFAULT_CURRENCY_TYPE = "gems";
     private const string CURRENCY_TYPE_FORMAT = "Currency Type: <b>{0}</b>";
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Button ResetButton = default;
 
     [Header("XP Management")]
@@ -51,29 +49,9 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
     private BrainCloudPlayerStatistics statsService = default;
     private BrainCloudVirtualCurrency currencyService = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         PlayerLevelField.text = DEFAULT_EMPTY_FIELD;
         XPAccruedField.text = DEFAULT_EMPTY_FIELD;
@@ -85,6 +63,8 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
         PurchasedField.text = DEFAULT_EMPTY_FIELD;
         AwardGemsField.text = string.Empty;
         ConsumeGemsField.text = string.Empty;
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -98,7 +78,7 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
         ConsumeGemsButton.onClick.AddListener(OnConsumeGemsButton);
     }
 
-    private void Start()
+    protected override void Start()
     {
         IsInteractable = false;
 
@@ -109,6 +89,8 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
 
         userStateService.ReadUserState(OnXPStateUpdate_Success,
                                        OnXPStateUpdate_Failure);
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -122,17 +104,24 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
         ConsumeGemsButton.onClick.RemoveAllListeners();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         scriptService = null;
         userStateService = null;
         statsService = null;
         currencyService = null;
+
+        base.OnDestroy();
     }
 
     #endregion
 
     #region UI
+
+    protected override void InternalResetUI()
+    {
+        //
+    }
 
     private void ClampAwardAmount(TMP_InputField field, string value)
     {

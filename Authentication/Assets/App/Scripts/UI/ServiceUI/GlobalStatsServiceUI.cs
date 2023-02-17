@@ -12,39 +12,17 @@ using UnityEngine;
 /// <seealso cref="BrainCloudGlobalStatistics"/>
 /// </summary>
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-globalstats
-public class GlobalStatsServiceUI : MonoBehaviour, IContentUI
+public class GlobalStatsServiceUI : ContentUIBehaviour
 {
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Transform StatsContent = default;
     [SerializeField] private StatsContainerUI StatsContainerTemplate = default;
 
     private Dictionary<string, StatsContainerUI> globalStatContainers { get; set; }
     private BrainCloudGlobalStatistics globalStatsService = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Start()
+    protected override void Start()
     {
         StatsContainerTemplate.StatName = "LOADING...";
         StatsContainerTemplate.Value = -1;
@@ -56,17 +34,26 @@ public class GlobalStatsServiceUI : MonoBehaviour, IContentUI
                                               BCManager.CreateFailureCallback("ReadAllGlobalStats Failed", IsInteractableCheck));
 
         IsInteractable = false;
+
+        base.Start();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         globalStatContainers.Clear();
         globalStatsService = null;
+
+        base.OnDestroy();
     }
 
     #endregion
 
     #region UI
+
+    protected override void InternalResetUI()
+    {
+        //
+    }
 
     private void IsInteractableCheck()
     {

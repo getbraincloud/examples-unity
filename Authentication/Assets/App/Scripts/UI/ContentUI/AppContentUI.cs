@@ -5,10 +5,8 @@ using UnityEngine;
 /// Used for app navigation on the App screen.
 /// It is able to Instantiate the various ServiceUI prefab through <see cref="MainMenuUI"/>.
 /// </summary>
-public class AppContentUI : MonoBehaviour, IContentUI
+public class AppContentUI : ContentUIBehaviour
 {
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private TMP_Text TitleLabel = default;
     [SerializeField] private OpenLinkButton APILink = default;
     [SerializeField] private Transform ServiceContent = default;
@@ -20,34 +18,16 @@ public class AppContentUI : MonoBehaviour, IContentUI
     [SerializeField] private string DefaultHeaderText = string.Empty;
     [SerializeField, TextArea(6, 6)] private string DefaultInformationText = string.Empty;
 
-    private IContentUI currentServiceUI = default;
-
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
+    private ContentUIBehaviour currentServiceUI = default;
 
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         TitleLabel.text = string.Empty;
         InfoBoxBodyText.text = string.Empty;
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -60,9 +40,11 @@ public class AppContentUI : MonoBehaviour, IContentUI
         }
     }
 
-    private void Start()
+    protected override void Start()
     {
         ShowDefaultContent();
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -75,10 +57,12 @@ public class AppContentUI : MonoBehaviour, IContentUI
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         APILink.URLToOpen = string.Empty;
         ClearCurrentServiceUI();
+
+        base.OnDestroy();
     }
 
     #endregion
@@ -104,17 +88,22 @@ public class AppContentUI : MonoBehaviour, IContentUI
         APILink.URLToOpen = serviceItem.APILink;
         APILink.gameObject.SetActive(!serviceItem.APILink.IsEmpty());
 
-        currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent).GetComponent(typeof(IContentUI)) as IContentUI;
-        currentServiceUI.GameObject.SetActive(true);
-        currentServiceUI.GameObject.SetName(serviceItem.Name, "{0}ContentUI");
+        currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent).GetComponent(typeof(ContentUIBehaviour)) as ContentUIBehaviour;
+        currentServiceUI.gameObject.SetActive(true);
+        currentServiceUI.gameObject.SetName(serviceItem.Name, "{0}ContentUI");
+    }
+
+    protected override void InternalResetUI()
+    {
+        //
     }
 
     private void ClearCurrentServiceUI()
     {
         if (currentServiceUI != null &&
-            currentServiceUI.GameObject != null)
+            currentServiceUI.gameObject != null)
         {
-            Destroy(currentServiceUI.GameObject);
+            Destroy(currentServiceUI.gameObject);
             currentServiceUI = null;
         }
     }

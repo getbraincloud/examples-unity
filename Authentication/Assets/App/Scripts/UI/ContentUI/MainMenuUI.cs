@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// Used for the app's navigation.
 /// </summary>
-public class MainMenuUI : MonoBehaviour, IContentUI
+public class MainMenuUI : ContentUIBehaviour
 {
     private const float HEADER_SPACER_HEIGHT = 50;
     private const string PROFILE_ID_TEXT = "Profile ID:\n{0}";
@@ -16,8 +16,6 @@ public class MainMenuUI : MonoBehaviour, IContentUI
 
     private static readonly int UI_IS_ACTIVE = Animator.StringToHash("IsActive");
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Animator MainMenuAnim = default;
     [SerializeField] private Animator BlockerAnim = default;
     [SerializeField] private CanvasGroup HeaderCG = default;
@@ -51,26 +49,6 @@ public class MainMenuUI : MonoBehaviour, IContentUI
 
     private List<MenuItemUI> menuItems = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
     private void OnEnable()
@@ -91,12 +69,14 @@ public class MainMenuUI : MonoBehaviour, IContentUI
         LogoutButton.enabled = true;
     }
 
-    private void Start()
+    protected override void Start()
     {
         CreateMenuItems();
         ChangeToLoginContent();
 
         AppInfoLabel.text = string.Format(APP_INFO_TEXT, BCManager.AppName, BCManager.Client.AppId, BCManager.Client.AppVersion);
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -117,15 +97,22 @@ public class MainMenuUI : MonoBehaviour, IContentUI
         LogoutButton.enabled = false;
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         menuItems.Clear();
         menuItems = null;
+
+        base.OnDestroy();
     }
 
     #endregion
 
     #region UI
+
+    protected override void InternalResetUI()
+    {
+        //
+    }
 
     private void CreateMenuItems()
     {
@@ -201,7 +188,7 @@ public class MainMenuUI : MonoBehaviour, IContentUI
         AppContent.IsInteractable = true;
 
         LoginContent.gameObject.SetActive(false);
-        AppContent.GameObject.SetActive(true);
+        AppContent.gameObject.SetActive(true);
         OpenMenuButton.gameObject.SetActive(true);
     }
 
@@ -216,7 +203,7 @@ public class MainMenuUI : MonoBehaviour, IContentUI
         AppContent.IsInteractable = false;
 
         LoginContent.gameObject.SetActive(true);
-        AppContent.GameObject.SetActive(false);
+        AppContent.gameObject.SetActive(false);
         OpenMenuButton.gameObject.SetActive(false);
     }
 

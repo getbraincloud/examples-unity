@@ -15,7 +15,7 @@ using UnityEngine.UI;
 /// <seealso cref="BCManager"/><br></br>
 /// <seealso cref="UserHandler"/>
 /// </summary>
-public class MainLoginPanelUI : MonoBehaviour, IContentUI
+public class MainLoginPanelUI : ContentUIBehaviour
 {
     // User Input Restrictions
     private const int MINIMUM_USERNAME_LENGTH = 4;
@@ -26,8 +26,6 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
     private static string PREFS_REMEMBER_ME => BCManager.AppName + ".rememberMe";
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private Toggle EmailRadio = default;
     [SerializeField] private Toggle UniversalRadio = default;
     [SerializeField] private Toggle AnonymousRadio = default;
@@ -44,29 +42,9 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
     [SerializeField] private MainMenuUI MainMenu = default;
     [SerializeField] private LoginContentUI LoginContent = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         EmailField.text = string.Empty;
         UsernameField.text = string.Empty;
@@ -76,6 +54,8 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         ErrorLabel.text = string.Empty;
 
         InitRememberMePref();
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -91,7 +71,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         AgeField.onEndEdit.AddListener((age) => CheckAgeVerification(age));
     }
 
-    private void Start()
+    protected override void Start()
     {
         bool rememberUserToggle = GetRememberMePref();
         RememberMeToggle.isOn = rememberUserToggle && !UserHandler.AnonymousID.IsEmpty();
@@ -122,6 +102,8 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         {
             SetRememberMePref(false);
         }
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -179,6 +161,11 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
         }
 
         ErrorLabel.text = error;
+    }
+
+    protected override void InternalResetUI()
+    {
+        //
     }
 
     private void OnEmailRadio(bool value)

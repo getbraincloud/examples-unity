@@ -14,7 +14,7 @@ using UnityEngine.UI;
 /// <seealso cref="BrainCloudScript"/>
 /// </summary>
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-script
-public class ScriptServiceUI : MonoBehaviour, IContentUI
+public class ScriptServiceUI : ContentUIBehaviour
 {
     private static Dictionary<string, string> CLOUD_CODE_SCRIPTS = new Dictionary<string, string>
     {
@@ -23,8 +23,6 @@ public class ScriptServiceUI : MonoBehaviour, IContentUI
         { "IncrementPlayerStat", "{\n    \"playerStat\" : \"experiencePoints\",\n    \"incrementAmount\" : 1\n}" },
     };
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private TMP_Dropdown ScriptDropdown = default;
     [SerializeField] private TMP_InputField ScriptJsonField = default;
     [SerializeField] private Button RunButton = default;
@@ -33,31 +31,13 @@ public class ScriptServiceUI : MonoBehaviour, IContentUI
     private BrainCloudScript scriptService = default;
     private List<string> scriptNames = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         ScriptJsonField.text = string.Empty;
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -66,7 +46,7 @@ public class ScriptServiceUI : MonoBehaviour, IContentUI
         RunButton.onClick.AddListener(OnRunButton);
     }
 
-    private void Start()
+    protected override void Start()
     {
         scriptService = BCManager.ScriptService;
 
@@ -78,6 +58,8 @@ public class ScriptServiceUI : MonoBehaviour, IContentUI
 
         ScriptDropdown.AddOptions(scriptNames);
         OnScriptDropdown(0);
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -86,14 +68,21 @@ public class ScriptServiceUI : MonoBehaviour, IContentUI
         RunButton.onClick.RemoveAllListeners();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         scriptService = null;
+
+        base.OnDestroy();
     }
 
     #endregion
 
     #region UI
+
+    protected override void InternalResetUI()
+    {
+        //
+    }
 
     private void OnScriptDropdown(int option)
     {

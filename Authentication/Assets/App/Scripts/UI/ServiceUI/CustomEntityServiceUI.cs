@@ -14,13 +14,11 @@ using UnityEngine.UI;
 /// <seealso cref="BrainCloudCustomEntity"/>
 /// </summary>
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-customentity
-public class CustomEntityServiceUI : MonoBehaviour, IContentUI
+public class CustomEntityServiceUI : ContentUIBehaviour
 {
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "athlete";
 
-    [Header("Main")]
-    [SerializeField] private CanvasGroup UICanvasGroup = default;
     [SerializeField] private TMP_Text IDField = default;
     [SerializeField] private TMP_Text TypeField = default;
     [SerializeField] private TMP_InputField NameField = default;
@@ -33,34 +31,16 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
     private BCCustomEntity customEntity = default;
     private BrainCloudCustomEntity customEntityService = default;
 
-    #region IContentUI
-
-    public bool IsInteractable
-    {
-        get { return UICanvasGroup.interactable; }
-        set { UICanvasGroup.interactable = value; }
-    }
-
-    public float Opacity
-    {
-        get { return UICanvasGroup.alpha; }
-        set { UICanvasGroup.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
-    }
-
-    public GameObject GameObject => gameObject;
-
-    public Transform Transform => transform;
-
-    #endregion
-
     #region Unity Messages
 
-    private void Awake()
+    protected override void Awake()
     {
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
         NameField.text = string.Empty;
         AgeField.text = string.Empty;
+
+        base.Awake();
     }
 
     private void OnEnable()
@@ -71,7 +51,7 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
         DeleteButton.onClick.AddListener(OnDeleteButton);
     }
 
-    private void Start()
+    protected override void Start()
     {
         customEntityService = BCManager.CustomEntityService;
 
@@ -81,6 +61,8 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
         DeleteButton.gameObject.SetActive(false);
 
         HandleGetCustomEntity();
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -91,14 +73,21 @@ public class CustomEntityServiceUI : MonoBehaviour, IContentUI
         DeleteButton.onClick.RemoveAllListeners();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         customEntityService = null;
+
+        base.OnDestroy();
     }
 
     #endregion
 
     #region UI
+
+    protected override void InternalResetUI()
+    {
+        //
+    }
 
     private void ResetUIState()
     {
