@@ -118,14 +118,16 @@ public class ScriptServiceUI : MonoBehaviour, IContentUI
                 }
                 else
                 {
-                    Debug.LogError("Json Data is not formatted properly!");
+                    ScriptJsonField.DisplayError();
+                    //LogError("#APP - Json Data is not formatted properly!");
                     return;
                 }
             }
         }
         catch
         {
-            Debug.LogError($"Cannot run script! Please check your Json data and try again.");
+            ScriptJsonField.DisplayError();
+            //LogError($"#APP - Cannot run script! Please check your Json data and try again.");
             throw;
         }
     }

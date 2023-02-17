@@ -15,9 +15,9 @@ using UnityEngine.UI;
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-entity
 public class EntityServiceUI : MonoBehaviour, IContentUI
 {
-    public const int MINIMUM_REGISTRATION_NAME_LENGTH = 3;
-    public const int MINIMUM_REGISTRATION_AGE = 13;
-    public const int MAXIMUM_REGISTRATION_AGE = 120;
+    private const int MINIMUM_REGISTRATION_NAME_LENGTH = 3;
+    private const int MINIMUM_REGISTRATION_AGE = 13;
+    private const int MAXIMUM_REGISTRATION_AGE = 120;
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "user";
 
@@ -66,6 +66,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
 
     private void OnEnable()
     {
+        AgeField.onEndEdit.AddListener(OnAgeFieldEndEdit);
         CreateButton.onClick.AddListener(OnCreateButton);
         SaveButton.onClick.AddListener(OnSaveButton);
         DeleteButton.onClick.AddListener(OnDeleteButton);
@@ -85,6 +86,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
 
     private void OnDisable()
     {
+        AgeField.onEndEdit.RemoveAllListeners();
         CreateButton.onClick.RemoveAllListeners();
         SaveButton.onClick.RemoveAllListeners();
         DeleteButton.onClick.RemoveAllListeners();
@@ -132,6 +134,23 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         IsInteractable = true;
     }
 
+    private void OnAgeFieldEndEdit(string value)
+    {
+        AgeField.text = value.Trim();
+        if (!AgeField.text.IsEmpty())
+        {
+            if (int.TryParse(AgeField.text, out int result))
+            {
+                result = result < 0 ? 0 : result;
+                AgeField.text = result.ToString();
+            }
+            else
+            {
+                AgeField.text = string.Empty;
+            }
+        }
+    }
+
     private bool CheckNameVerification(string value)
     {
         NameField.text = value.Trim();
@@ -140,7 +159,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
             if (NameField.text.Length < MINIMUM_REGISTRATION_NAME_LENGTH)
             {
                 NameField.DisplayError();
-                //LogError($"Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
+                //LogError($"APP - Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
                 return false;
             }
 
@@ -161,13 +180,13 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
                 {
                     AgeField.text = result < 0 ? 0.ToString() : AgeField.text;
                     AgeField.DisplayError();
-                    //LogError($"Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
+                    //LogError($"APP - Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
                     return false;
                 }
                 else if (result > MAXIMUM_REGISTRATION_AGE)
                 {
                     AgeField.DisplayError();
-                    //LogError("Please use a valid age.");
+                    //LogError("APP - Please use a valid age.");
                     return false;
                 }
 
@@ -175,7 +194,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
             }
 
             AgeField.DisplayError();
-            //LogError("Please use a valid age.");
+            //LogError("APP - Please use a valid age.");
         }
 
         return false;
@@ -201,12 +220,12 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         else if (!inputName.IsEmpty())
         {
             NameField.DisplayError();
-            //LogError("Please enter a valid name.");
+            //LogError("APP - Please enter a valid name.");
         }
         else if (!inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            //LogError("Please enter a valid age.");
+            //LogError("APP - Please enter a valid age.");
         }
     }
 
@@ -217,7 +236,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
 
         if (userEntity.EntityId.IsEmpty())
         {
-            //LogError("Entity ID is blank. Has an Entity been created yet?");
+            //LogError("APP - Entity ID is blank. Has an Entity been created yet?");
             ResetUIState();
             return;
         }
@@ -239,13 +258,13 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
         if (inputName.IsEmpty())
         {
             NameField.DisplayError();
-            //LogError("Please enter a valid name.");
+            //LogError("APP - Please enter a valid name.");
         }
 
         if (inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            //LogError("Please enter a valid age.");
+            //LogError("APP - Please enter a valid age.");
         }
     }
 
@@ -253,7 +272,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
     {
         if (userEntity.EntityId.IsEmpty())
         {
-            //LogError("Entity ID is blank. Has an Entity been created yet?");
+            //LogError("APP - Entity ID is blank. Has an Entity been created yet?");
             ResetUIState();
             return;
         }
@@ -309,7 +328,7 @@ public class EntityServiceUI : MonoBehaviour, IContentUI
 
         if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
         {
-            Debug.LogWarning("No entities were found for this user.");
+            //LogError("APP - No entities were found for this user.");
             ResetUIState();
             return;
         }

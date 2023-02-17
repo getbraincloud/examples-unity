@@ -19,6 +19,8 @@ using UnityEngine.UI;
 /// PlayerState API: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstate
 public class CurrencyServiceUI : MonoBehaviour, IContentUI
 {
+    private const int MINIMUM_AWARD_AMOUNT = 0;
+    private const int MAXIMUM_AWARD_AMOUNT = 99999;
     private const string DEFAULT_EMPTY_FIELD = "-";
     private const string DEFAULT_CURRENCY_TYPE = "gems";
     private const string CURRENCY_TYPE_FORMAT = "Currency Type: <b>{0}</b>";
@@ -88,8 +90,11 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
     private void OnEnable()
     {
         ResetButton.onClick.AddListener(OnResetButton);
+        IncrementXPField.onEndEdit.AddListener((value) => ClampAwardAmount(IncrementXPField, value));
         IncrementXPButton.onClick.AddListener(OnIncrementXPButton);
+        AwardGemsField.onEndEdit.AddListener((value) => ClampAwardAmount(AwardGemsField, value));
         AwardGemsButton.onClick.AddListener(OnAwardGemsButton);
+        ConsumeGemsField.onEndEdit.AddListener((value) => ClampAwardAmount(ConsumeGemsField, value));
         ConsumeGemsButton.onClick.AddListener(OnConsumeGemsButton);
     }
 
@@ -109,8 +114,11 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
     private void OnDisable()
     {
         ResetButton.onClick.RemoveAllListeners();
+        IncrementXPField.onEndEdit.RemoveAllListeners();
         IncrementXPButton.onClick.RemoveAllListeners();
+        AwardGemsField.onEndEdit.RemoveAllListeners();
         AwardGemsButton.onClick.RemoveAllListeners();
+        ConsumeGemsField.onEndEdit.RemoveAllListeners();
         ConsumeGemsButton.onClick.RemoveAllListeners();
     }
 
@@ -126,6 +134,23 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
 
     #region UI
 
+    private void ClampAwardAmount(TMP_InputField field, string value)
+    {
+        field.text = value.Trim();
+        if (!field.text.IsEmpty())
+        {
+            if (int.TryParse(field.text, out int result))
+            {
+                result = Mathf.Clamp(result, MINIMUM_AWARD_AMOUNT, MAXIMUM_AWARD_AMOUNT);
+                field.text = result.ToString();
+            }
+            else
+            {
+                field.text = string.Empty;
+            }
+        }
+    }
+
     private void OnIncrementXPButton()
     {
         if (int.TryParse(IncrementXPField.text, out int xpValue) && xpValue > 0)
@@ -135,6 +160,11 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
             statsService.IncrementExperiencePoints(xpValue,
                                                    OnXPStateUpdate_Success,
                                                    OnXPStateUpdate_Failure);
+        }
+        else
+        {
+            IncrementXPField.DisplayError();
+            //LogError("#APP - Please input a proper XP increment value.");
         }
     }
 
@@ -149,6 +179,11 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
                                     BCManager.CreateSuccessCallback("AwardCurrency Script Ran Successfully", UpdateUserGems),
                                     BCManager.CreateFailureCallback("AwardCurrency Script Failed", () => IsInteractable = true));
         }
+        else
+        {
+            AwardGemsField.DisplayError();
+            //LogError("#APP - Please input a proper award value.");
+        }
     }
 
     private void OnConsumeGemsButton()
@@ -161,6 +196,11 @@ public class CurrencyServiceUI : MonoBehaviour, IContentUI
                                     "{\"vcID\": \"gems\", \"vcAmount\": " + amount + "}",
                                     BCManager.CreateSuccessCallback("ConsumeCurrency Script Ran Successfully", UpdateUserGems),
                                     BCManager.CreateFailureCallback("ConsumeCurrency Script Failed", () => IsInteractable = true));
+        }
+        else
+        {
+            ConsumeGemsField.DisplayError();
+            //LogError("#APP - Please input a proper consume value.");
         }
     }
 

@@ -18,13 +18,13 @@ using UnityEngine.UI;
 public class MainLoginPanelUI : MonoBehaviour, IContentUI
 {
     // User Input Restrictions
-    public const int MINIMUM_USERNAME_LENGTH = 4;
-    public const int MINIMUM_PASSWORD_LENGTH = 6;
-    public const int MINIMUM_REGISTRATION_NAME_LENGTH = 3;
-    public const int MINIMUM_REGISTRATION_AGE = 13;
-    public const int MAXIMUM_REGISTRATION_AGE = 120;
+    private const int MINIMUM_USERNAME_LENGTH = 4;
+    private const int MINIMUM_PASSWORD_LENGTH = 6;
+    private const int MINIMUM_REGISTRATION_NAME_LENGTH = 3;
+    private const int MINIMUM_REGISTRATION_AGE = 13;
+    private const int MAXIMUM_REGISTRATION_AGE = 120;
 
-    public static string PREFS_REMEMBER_ME => BCManager.AppName + ".rememberMe";
+    private static string PREFS_REMEMBER_ME => BCManager.AppName + ".rememberMe";
 
     [Header("Main")]
     [SerializeField] private CanvasGroup UICanvasGroup = default;
@@ -116,7 +116,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
         if (RememberMeToggle.isOn)
         {
-            OnAutomaticLogin();
+            HandleAutomaticLogin();
         }
         else if (rememberUserToggle && !UserHandler.AnonymousID.IsEmpty())
         {
@@ -418,7 +418,7 @@ public class MainLoginPanelUI : MonoBehaviour, IContentUI
 
     #region brainCloud
 
-    private void OnAutomaticLogin()
+    private void HandleAutomaticLogin()
     {
         Debug.Log("Logging in automatically...");
 
