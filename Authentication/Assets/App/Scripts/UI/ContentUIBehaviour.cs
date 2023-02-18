@@ -6,11 +6,10 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasGroup))]
 public abstract class ContentUIBehaviour : MonoBehaviour
 {
-    [Header("Main")]
     [SerializeField] private CanvasGroup ContentUICG = default;
 
-    public new GameObject gameObject = default; // Cache these for faster access
-    public new Transform transform = default;
+    [System.NonSerialized] public new GameObject gameObject = default; // Cache these for faster access
+    [System.NonSerialized] public new Transform transform = default;
 
     public bool IsInteractable
     {
@@ -54,25 +53,11 @@ public abstract class ContentUIBehaviour : MonoBehaviour
     {
         if (isInitialized)
         {
-            InternalResetUI();
+            InitializeUI();
         }
     }
 
-    protected abstract void InternalResetUI();
-
-    //private void OnInteractable()
-    //{
-    //
-    //}
-
-    #endregion
-
-    #region brainCloud
-
-    //private void OnServiceFunction()
-    //{
-    //
-    //}
+    protected abstract void InitializeUI();
 
     #endregion
 }

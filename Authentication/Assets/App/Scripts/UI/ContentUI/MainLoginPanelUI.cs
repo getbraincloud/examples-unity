@@ -3,7 +3,6 @@ using BrainCloud.Common;
 using System.Collections.Generic;
 using System.Net.Mail;
 using TMPro;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,6 +25,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
     private static string PREFS_REMEMBER_ME => BCManager.AppName + ".rememberMe";
 
+    [Header("Main")]
     [SerializeField] private Toggle EmailRadio = default;
     [SerializeField] private Toggle UniversalRadio = default;
     [SerializeField] private Toggle AnonymousRadio = default;
@@ -138,7 +138,17 @@ public class MainLoginPanelUI : ContentUIBehaviour
     public void SetRememberMePref(bool value) =>
         PlayerPrefs.SetInt(PREFS_REMEMBER_ME, value ? int.MaxValue : 0);
 
-    public void ClearFields()
+    public void DisplayError(string error, Selectable problemSelectable = null)
+    {
+        if (problemSelectable != null)
+        {
+            problemSelectable.DisplayError();
+        }
+
+        ErrorLabel.text = error;
+    }
+
+    protected override void InitializeUI()
     {
         EmailField.text = string.Empty;
         EmailField.DisplayNormal();
@@ -153,26 +163,11 @@ public class MainLoginPanelUI : ContentUIBehaviour
         ErrorLabel.text = string.Empty;
     }
 
-    public void DisplayError(string error, Selectable problemSelectable = null)
-    {
-        if (problemSelectable != null)
-        {
-            problemSelectable.DisplayError();
-        }
-
-        ErrorLabel.text = error;
-    }
-
-    protected override void InternalResetUI()
-    {
-        //
-    }
-
     private void OnEmailRadio(bool value)
     {
         if (value)
         {
-            ClearFields();
+            InitializeUI();
             EmailField.gameObject.SetActive(true);
             UsernameField.gameObject.SetActive(false);
         }
@@ -182,7 +177,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
     {
         if (value)
         {
-            ClearFields();
+            InitializeUI();
             UsernameField.gameObject.SetActive(true);
             EmailField.gameObject.SetActive(false);
         }
@@ -192,7 +187,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
     {
         if (value)
         {
-            ClearFields();
+            InitializeUI();
         }
 
         EmailField.interactable = !value;
@@ -443,7 +438,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
         SetRememberMePref(RememberMeToggle.isOn);
 
         RememberMeToggle.isOn = false;
-        ClearFields();
+        InitializeUI();
 
         MainMenu.ChangeToAppContent();
     }

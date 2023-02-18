@@ -998,7 +998,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 751598708}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.8907106
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1311,7 +1311,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24992041b185b444a8b21524169f8e77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UICanvasGroup: {fileID: 0}
+  ContentUICG: {fileID: 129724623}
   EmailRadio: {fileID: 72071394}
   UniversalRadio: {fileID: 72071393}
   AnonymousRadio: {fileID: 72071392}
@@ -2624,7 +2624,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e733c4aeeb0b1744f859424f48ff5455, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UICanvasGroup: {fileID: 567055887}
+  ContentUICG: {fileID: 567055887}
   TitleLabel: {fileID: 1379240602}
   APILink: {fileID: 1965224872}
   ServiceContent: {fileID: 665492629}
@@ -2949,7 +2949,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98bf6a545b5ec454d9adb42550093955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UICanvasGroup: {fileID: 0}
+  ContentUICG: {fileID: 629908376}
   MainMenuAnim: {fileID: 629908375}
   BlockerAnim: {fileID: 1769563581}
   HeaderCG: {fileID: 1372690803}
@@ -3675,7 +3675,7 @@ GameObject:
   - component: {fileID: 952410311}
   m_Layer: 5
   m_Name: LogContent
-  m_TagString: Untagged
+  m_TagString: Logger
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3751,7 +3751,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5e9e5b98ef0d114ca622e25348066ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UICanvasGroup: {fileID: 952410312}
+  ContentUICG: {fileID: 952410312}
   LogScroll: {fileID: 593987001}
   LogContent: {fileID: 439471206}
   ClearLogButton: {fileID: 1838308463}
@@ -7956,7 +7956,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d02b47e53196b5046b61d49590968247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UICanvasGroup: {fileID: 1923327382}
+  ContentUICG: {fileID: 1923327382}
   MainLoginPanel: {fileID: 129724624}
 --- !u!1001 &1959614836
 PrefabInstance:

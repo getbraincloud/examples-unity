@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -25,6 +26,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
     private const string DEFAULT_CURRENCY_TYPE = "gems";
     private const string CURRENCY_TYPE_FORMAT = "Currency Type: <b>{0}</b>";
 
+    [Header("Main")]
     [SerializeField] private Button ResetButton = default;
 
     [Header("XP Management")]
@@ -80,15 +82,12 @@ public class CurrencyServiceUI : ContentUIBehaviour
 
     protected override void Start()
     {
-        IsInteractable = false;
-
         scriptService = BCManager.ScriptService;
         userStateService = BCManager.PlayerStateService;
         statsService = BCManager.PlayerStatisticsService;
         currencyService = BCManager.VirtualCurrencyService;
 
-        userStateService.ReadUserState(OnXPStateUpdate_Success,
-                                       OnXPStateUpdate_Failure);
+        InitializeUI();
 
         base.Start();
     }
@@ -118,9 +117,19 @@ public class CurrencyServiceUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        IsInteractable = false;
+
+        IncrementXPField.text = string.Empty;
+        IncrementXPField.DisplayNormal();
+        AwardGemsField.text = string.Empty;
+        IncrementXPField.DisplayNormal();
+        ConsumeGemsField.text = string.Empty;
+        IncrementXPField.DisplayNormal();
+
+        userStateService.ReadUserState(OnXPStateUpdate_Success,
+                                       OnXPStateUpdate_Failure);
     }
 
     private void ClampAwardAmount(TMP_InputField field, string value)
@@ -153,7 +162,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
         else
         {
             IncrementXPField.DisplayError();
-            //LogError("#APP - Please input a proper XP increment value.");
+            Logger.LogError("#APP - Please input a proper XP increment value.");
         }
     }
 
@@ -171,7 +180,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
         else
         {
             AwardGemsField.DisplayError();
-            //LogError("#APP - Please input a proper award value.");
+            Logger.LogError("#APP - Please input a proper award value.");
         }
     }
 
@@ -189,7 +198,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
         else
         {
             ConsumeGemsField.DisplayError();
-            //LogError("#APP - Please input a proper consume value.");
+            Logger.LogError("#APP - Please input a proper consume value.");
         }
     }
 

@@ -16,6 +16,7 @@ public class MainMenuUI : ContentUIBehaviour
 
     private static readonly int UI_IS_ACTIVE = Animator.StringToHash("IsActive");
 
+    [Header("Main")]
     [SerializeField] private Animator MainMenuAnim = default;
     [SerializeField] private Animator BlockerAnim = default;
     [SerializeField] private CanvasGroup HeaderCG = default;
@@ -50,6 +51,14 @@ public class MainMenuUI : ContentUIBehaviour
     private List<MenuItemUI> menuItems = default;
 
     #region Unity Messages
+
+    protected override void Awake()
+    {
+        HeaderLabel.text = string.Empty;
+        AppInfoLabel.text = string.Empty;
+
+        base.Awake();
+    }
 
     private void OnEnable()
     {
@@ -109,9 +118,57 @@ public class MainMenuUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    public void ChangeToAppContent()
     {
-        //
+        if (!string.IsNullOrEmpty(UserHandler.ProfileID))
+        {
+            HeaderLabel.gameObject.SetActive(true);
+            ShowProfileID();
+            HeaderSpacer.preferredHeight = 0;
+        }
+
+        LoginContent.IsInteractable = false;
+        AppContent.IsInteractable = true;
+
+        LoginContent.gameObject.SetActive(false);
+        AppContent.gameObject.SetActive(true);
+        OpenMenuButton.gameObject.SetActive(true);
+    }
+
+    public void ChangeToLoginContent()
+    {
+        MainMenuActive = false;
+
+        HeaderLabel.gameObject.SetActive(false);
+        HeaderSpacer.preferredHeight = HEADER_SPACER_HEIGHT;
+
+        LoginContent.IsInteractable = true;
+        AppContent.IsInteractable = false;
+
+        LoginContent.gameObject.SetActive(true);
+        AppContent.gameObject.SetActive(false);
+        OpenMenuButton.gameObject.SetActive(false);
+    }
+
+    public void ShowProfileID()
+    {
+        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(UserHandler.ProfileID))
+        {
+            HeaderLabel.text = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);
+        }
+    }
+
+    public void ShowAnonymousID()
+    {
+        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(UserHandler.AnonymousID))
+        {
+            HeaderLabel.text = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
+        }
+    }
+
+    protected override void InitializeUI()
+    {
+        MainMenuActive = false;
     }
 
     private void CreateMenuItems()
@@ -166,61 +223,13 @@ public class MainMenuUI : ContentUIBehaviour
             LoginContent.ResetRememberUserPref();
             ChangeToLoginContent();
 
-            AppContent.ShowDefaultContent();
-            Logger.ResetLogger();
+            AppContent.ResetUI();
+            Logger.ResetUI();
         },
         () =>
         {
             Logger.LogError("#APP - Logout Failed! Please try again in a few moments.");
         });
-    }
-
-    public void ChangeToAppContent()
-    {
-        if (!string.IsNullOrEmpty(UserHandler.ProfileID))
-        {
-            HeaderLabel.gameObject.SetActive(true);
-            ShowProfileID();
-            HeaderSpacer.preferredHeight = 0;
-        }
-
-        LoginContent.IsInteractable = false;
-        AppContent.IsInteractable = true;
-
-        LoginContent.gameObject.SetActive(false);
-        AppContent.gameObject.SetActive(true);
-        OpenMenuButton.gameObject.SetActive(true);
-    }
-
-    public void ChangeToLoginContent()
-    {
-        MainMenuActive = false;
-
-        HeaderLabel.gameObject.SetActive(false);
-        HeaderSpacer.preferredHeight = HEADER_SPACER_HEIGHT;
-
-        LoginContent.IsInteractable = true;
-        AppContent.IsInteractable = false;
-
-        LoginContent.gameObject.SetActive(true);
-        AppContent.gameObject.SetActive(false);
-        OpenMenuButton.gameObject.SetActive(false);
-    }
-
-    public void ShowProfileID()
-    {
-        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(UserHandler.ProfileID))
-        {
-            HeaderLabel.text = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);
-        }
-    }
-
-    public void ShowAnonymousID()
-    {
-        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(UserHandler.AnonymousID))
-        {
-            HeaderLabel.text = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
-        }
     }
 
     #endregion

@@ -23,6 +23,7 @@ public class ScriptServiceUI : ContentUIBehaviour
         { "IncrementPlayerStat", "{\n    \"playerStat\" : \"experiencePoints\",\n    \"incrementAmount\" : 1\n}" },
     };
 
+    [Header("Main")]
     [SerializeField] private TMP_Dropdown ScriptDropdown = default;
     [SerializeField] private TMP_InputField ScriptJsonField = default;
     [SerializeField] private Button RunButton = default;
@@ -57,7 +58,7 @@ public class ScriptServiceUI : ContentUIBehaviour
         }
 
         ScriptDropdown.AddOptions(scriptNames);
-        OnScriptDropdown(0);
+        InitializeUI();
 
         base.Start();
     }
@@ -79,9 +80,11 @@ public class ScriptServiceUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        ScriptDropdown.DisplayNormal();
+        ScriptJsonField.DisplayNormal();
+        OnScriptDropdown(0);
     }
 
     private void OnScriptDropdown(int option)
@@ -108,7 +111,7 @@ public class ScriptServiceUI : ContentUIBehaviour
                 else
                 {
                     ScriptJsonField.DisplayError();
-                    //LogError("#APP - Json Data is not formatted properly!");
+                    Logger.LogError("#APP - Json Data is not formatted properly!");
                     return;
                 }
             }
@@ -116,7 +119,7 @@ public class ScriptServiceUI : ContentUIBehaviour
         catch
         {
             ScriptJsonField.DisplayError();
-            //LogError($"#APP - Cannot run script! Please check your Json data and try again.");
+            Logger.LogError($"#APP - Cannot run script! Please check your Json data and try again.");
             throw;
         }
     }

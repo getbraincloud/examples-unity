@@ -363,7 +363,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5458227114281465647, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
       propertyPath: m_Name
-      value: CloudCodeService
+      value: ScriptService
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
@@ -389,7 +389,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05c0df9212767c845a1aaf1f9591ef60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UICanvasGroup: {fileID: 2650023563753859079}
+  ContentUICG: {fileID: 2650023563753859079}
   ScriptDropdown: {fileID: 3872062620080246932}
   ScriptJsonField: {fileID: 1905653117342142099}
   RunButton: {fileID: 4765486211302057466}
@@ -460,6 +460,10 @@ PrefabInstance:
     - target: {fileID: 8619392731835069529, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
       propertyPath: m_text
       value: Run Script
+      objectReference: {fileID: 0}
+    - target: {fileID: 8619392731835069529, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: 8619392732321243910, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
       propertyPath: m_IsActive

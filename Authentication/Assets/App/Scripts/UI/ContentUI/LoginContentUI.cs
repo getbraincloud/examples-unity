@@ -5,6 +5,7 @@ using UnityEngine;
 /// </summary>
 public class LoginContentUI : ContentUIBehaviour
 {
+    [Header("Main")]
     [SerializeField] private MainLoginPanelUI MainLoginPanel = default;
 
     private void OnEnable()
@@ -24,9 +25,9 @@ public class LoginContentUI : ContentUIBehaviour
         MainLoginPanel.SetRememberMePref(false);
     }
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        MainLoginPanel.ResetUI();
     }
 
     #endregion

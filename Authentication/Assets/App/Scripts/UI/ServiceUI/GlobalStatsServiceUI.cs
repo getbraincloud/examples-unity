@@ -14,6 +14,7 @@ using UnityEngine;
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-globalstats
 public class GlobalStatsServiceUI : ContentUIBehaviour
 {
+    [Header("Main")]
     [SerializeField] private Transform StatsContent = default;
     [SerializeField] private StatsContainerUI StatsContainerTemplate = default;
 
@@ -30,10 +31,7 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
         globalStatContainers = new Dictionary<string, StatsContainerUI>();
         globalStatsService = BCManager.GlobalStatisticsService;
 
-        globalStatsService.ReadAllGlobalStats(OnReadAllGlobalStats_Success,
-                                              BCManager.CreateFailureCallback("ReadAllGlobalStats Failed", IsInteractableCheck));
-
-        IsInteractable = false;
+        InitializeUI();
 
         base.Start();
     }
@@ -50,9 +48,11 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        IsInteractable = false;
+        globalStatsService.ReadAllGlobalStats(OnReadAllGlobalStats_Success,
+                                              BCManager.CreateFailureCallback("ReadAllGlobalStats Failed", IsInteractableCheck));
     }
 
     private void IsInteractableCheck()

@@ -20,6 +20,7 @@ public class LoggerContentUI : ContentUIBehaviour
     private const string LOG_INITIAL_TEXT = "#APP - Logs, Json, and Error messages will appear here.";
     private const string LOG_COPY_TEXT = "#APP - Previous BCC Log copied to clipboard.";
 
+    [Header("Main")]
     [SerializeField] private ScrollRect LogScroll = default;
     [SerializeField] private Transform LogContent = default;
     [SerializeField] private Button ClearLogButton = default;
@@ -56,6 +57,7 @@ public class LoggerContentUI : ContentUIBehaviour
         CopyLogButton.onClick.AddListener(OnCopyLogButton);
 #endif
 
+        Logger.SetLoggerMethods(LogMessage, LogError);
         BCManager.Client.EnableLogging(true);
         BCManager.Client.RegisterLogDelegate(OnLogDelegate);
     }
@@ -70,7 +72,7 @@ public class LoggerContentUI : ContentUIBehaviour
 #if !UNITY_STANDALONE
         CopyLogContainer.SetActive(false);
 #endif
-        ResetLogger();
+        InitializeUI();
 
         base.Start();
     }
@@ -80,6 +82,7 @@ public class LoggerContentUI : ContentUIBehaviour
         StopAllCoroutines();
         ClearLogButton.onClick.RemoveAllListeners();
         CopyLogButton.onClick.RemoveAllListeners();
+        Logger.ClearLoggerMethods();
         BCManager.Client?.EnableLogging(false);
     }
 
@@ -117,15 +120,10 @@ public class LoggerContentUI : ContentUIBehaviour
         LogScroll.verticalNormalizedPosition = 1.0f;
     }
 
-    public void ResetLogger()
+    protected override void InitializeUI()
     {
         ClearLogs();
         LogMessage(LOG_INITIAL_TEXT);
-    }
-
-    protected override void InternalResetUI()
-    {
-        //
     }
 
     private void CreateLogObject(string type, int count, string message, TMP_Text textTemplate)

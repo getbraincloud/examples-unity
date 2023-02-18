@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public class AppContentUI : ContentUIBehaviour
 {
+    [Header("Main")]
     [SerializeField] private TMP_Text TitleLabel = default;
     [SerializeField] private OpenLinkButton APILink = default;
     [SerializeField] private Transform ServiceContent = default;
@@ -42,7 +43,7 @@ public class AppContentUI : ContentUIBehaviour
 
     protected override void Start()
     {
-        ShowDefaultContent();
+        InitializeUI();
 
         base.Start();
     }
@@ -69,16 +70,6 @@ public class AppContentUI : ContentUIBehaviour
 
     #region UI
 
-    public void ShowDefaultContent()
-    {
-        ClearCurrentServiceUI();
-
-        TitleLabel.text = DefaultHeaderText;
-        InfoBoxBodyText.text = DefaultInformationText;
-
-        APILink.gameObject.SetActive(false);
-    }
-
     public void LoadServiceItemContent(ServiceItem serviceItem)
     {
         ClearCurrentServiceUI();
@@ -88,14 +79,19 @@ public class AppContentUI : ContentUIBehaviour
         APILink.URLToOpen = serviceItem.APILink;
         APILink.gameObject.SetActive(!serviceItem.APILink.IsEmpty());
 
-        currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent).GetComponent(typeof(ContentUIBehaviour)) as ContentUIBehaviour;
+        currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent);
         currentServiceUI.gameObject.SetActive(true);
         currentServiceUI.gameObject.SetName(serviceItem.Name, "{0}ContentUI");
     }
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        ClearCurrentServiceUI();
+
+        TitleLabel.text = DefaultHeaderText;
+        InfoBoxBodyText.text = DefaultInformationText;
+
+        APILink.gameObject.SetActive(false);
     }
 
     private void ClearCurrentServiceUI()

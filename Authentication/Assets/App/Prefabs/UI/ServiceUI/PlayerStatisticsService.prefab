@@ -558,7 +558,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8aac4bc32f47e4488a4e1eaa7887e6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UICanvasGroup: {fileID: 3207629730998695096}
+  ContentUICG: {fileID: 3207629730998695096}
   StatsContent: {fileID: 8522741851553637495}
   StatsContainerTemplate: {fileID: 872433992106422432}
 --- !u!1001 &7038922885693860719
@@ -591,6 +591,10 @@ PrefabInstance:
     - target: {fileID: 7274665176657335302, guid: 1dc56fd5a6eb313499059155480118c4, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7274665176657335303, guid: 1dc56fd5a6eb313499059155480118c4, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4282400832
       objectReference: {fileID: 0}
     - target: {fileID: 8926787088603840387, guid: 1dc56fd5a6eb313499059155480118c4, type: 3}
       propertyPath: m_AnchorMax.y

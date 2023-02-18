@@ -19,6 +19,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "athlete";
 
+    [Header("Main")]
     [SerializeField] private TMP_Text IDField = default;
     [SerializeField] private TMP_Text TypeField = default;
     [SerializeField] private TMP_InputField NameField = default;
@@ -53,16 +54,12 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     protected override void Start()
     {
-        customEntityService = BCManager.CustomEntityService;
+        //customEntityService = BCManager.CustomEntityService;
 
-        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
+        //InitializeUI();
 
-        SaveButton.gameObject.SetActive(false);
-        DeleteButton.gameObject.SetActive(false);
-
-        HandleGetCustomEntity();
-
-        base.Start();
+        Destroy(gameObject); // TODO: Currently not used in the App until it has been redone
+        //base.Start();
     }
 
     private void OnDisable()
@@ -84,21 +81,28 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        ClearFields();
+
+        FetchButton.gameObject.SetActive(true);
+        CreateButton.gameObject.SetActive(true);
+        SaveButton.gameObject.SetActive(false);
+        DeleteButton.gameObject.SetActive(false);
+
+        HandleGetCustomEntity();
     }
 
-    private void ResetUIState()
+    private void ClearFields()
     {
         customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
 
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
         NameField.text = string.Empty;
+        NameField.DisplayNormal();
         AgeField.text = string.Empty;
-
-        IsInteractable = true;
+        AgeField.DisplayNormal();
     }
 
     private void OnCreateButton()
@@ -128,7 +132,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         if (customEntity.EntityId.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
-            ResetUIState();
+            ClearFields();
+            IsInteractable = true;
             return;
         }
 
@@ -151,7 +156,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         if (customEntity.EntityId.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
-            ResetUIState();
+            ClearFields();
+            IsInteractable = true;
             return;
         }
 
@@ -224,7 +230,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
         {
             Debug.LogWarning("No custom entities were found that are owned for this user.");
-            ResetUIState();
+            ClearFields();
+            IsInteractable = true;
             return;
         }
 
@@ -263,7 +270,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
 
-        ResetUIState();
+        ClearFields();
+        IsInteractable = true;
     }
 
     private void OnGetEntity_Success(string response, object _)

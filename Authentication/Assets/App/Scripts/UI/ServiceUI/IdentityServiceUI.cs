@@ -17,6 +17,7 @@ public class IdentityServiceUI : ContentUIBehaviour
     private const int MINIMUM_USERNAME_LENGTH = 4;
     private const int MINIMUM_PASSWORD_LENGTH = 6;
 
+    [Header("Main")]
     [SerializeField] private TMP_InputField EmailLoginField = default;
     [SerializeField] private TMP_InputField EmailPasswordField = default;
     [SerializeField] private Button EmailAttachButton = default;
@@ -82,9 +83,16 @@ public class IdentityServiceUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        EmailLoginField.text = string.Empty;
+        EmailLoginField.DisplayNormal();
+        EmailPasswordField.text = string.Empty;
+        EmailPasswordField.DisplayNormal();
+        UniversalLoginField.text = string.Empty;
+        UniversalLoginField.DisplayNormal();
+        UniversalPasswordField.text = string.Empty;
+        UniversalPasswordField.DisplayNormal();
     }
 
     private bool CheckEmailVerification(string value)
@@ -106,14 +114,14 @@ public class IdentityServiceUI : ContentUIBehaviour
                     !host.Contains('.') || host.StartsWith('.') || host.EndsWith('.'))
                 {
                     EmailLoginField.DisplayError();
-                    //LogError("#APP - Please use a valid email address.");
+                    Logger.LogError("#APP - Please use a valid email address.");
                     return false;
                 }
             }
             catch
             {
                 EmailLoginField.DisplayError();
-                //LogError("#APP - Please use a valid email address.");
+                Logger.LogError("#APP - Please use a valid email address.");
                 return false;
             }
 
@@ -131,7 +139,7 @@ public class IdentityServiceUI : ContentUIBehaviour
             if (UniversalLoginField.text.Length < MINIMUM_USERNAME_LENGTH)
             {
                 UniversalLoginField.DisplayError();
-                //LogError($"#APP - Please use a username with at least {MINIMUM_USERNAME_LENGTH} characters.");
+                Logger.LogError($"#APP - Please use a username with at least {MINIMUM_USERNAME_LENGTH} characters.");
                 return false;
             }
 
@@ -149,7 +157,7 @@ public class IdentityServiceUI : ContentUIBehaviour
             if (pwField.text.Length < MINIMUM_PASSWORD_LENGTH)
             {
                 pwField.DisplayError();
-                //LogError($"#APP - Please use a password with at least {MINIMUM_PASSWORD_LENGTH} characters.");
+                Logger.LogError($"#APP - Please use a password with at least {MINIMUM_PASSWORD_LENGTH} characters.");
                 return false;
             }
 
@@ -173,7 +181,7 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             EmailLoginField.DisplayError();
             EmailPasswordField.DisplayError();
-            //LogError("#APP - Please fill out both the email and password fields properly.");
+            Logger.LogError("#APP - Please fill out both the email and password fields properly.");
         }
     }
 
@@ -191,7 +199,7 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             EmailLoginField.DisplayError();
             EmailPasswordField.DisplayError();
-            //LogError("#APP - Please fill out both the email and password fields properly.");
+            Logger.LogError("#APP - Please fill out both the email and password fields properly.");
         }
     }
 
@@ -209,7 +217,7 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             UniversalLoginField.DisplayError();
             UniversalPasswordField.DisplayError();
-            //LogError("#APP - Please fill out both the username and password fields properly.");
+            Logger.LogError("#APP - Please fill out both the username and password fields properly.");
         }
     }
 
@@ -227,7 +235,7 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             UniversalLoginField.DisplayError();
             UniversalPasswordField.DisplayError();
-            //LogError("#APP - Please fill out both the username and password fields properly.");
+            Logger.LogError("#APP - Please fill out both the username and password fields properly.");
         }
     }
 

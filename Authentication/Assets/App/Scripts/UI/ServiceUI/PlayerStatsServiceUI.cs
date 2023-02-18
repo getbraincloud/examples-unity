@@ -14,6 +14,7 @@ using UnityEngine;
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstats
 public class PlayerStatsServiceUI : ContentUIBehaviour
 {
+    [Header("Main")]
     [SerializeField] private Transform StatsContent = default;
     [SerializeField] private StatsContainerUI StatsContainerTemplate = default;
 
@@ -30,10 +31,7 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
         userStatContainers = new Dictionary<string, StatsContainerUI>();
         userStatsService = BCManager.PlayerStatisticsService;
 
-        userStatsService.ReadAllUserStats(OnReadUserStats_Success,
-                                          BCManager.CreateFailureCallback("ReadAllUserStats Failed", IsInteractableCheck));
-
-        IsInteractable = false;
+        InitializeUI();
 
         base.Start();
     }
@@ -50,9 +48,11 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        IsInteractable = false;
+        userStatsService.ReadAllUserStats(OnReadUserStats_Success,
+                                          BCManager.CreateFailureCallback("ReadAllUserStats Failed", IsInteractableCheck));
     }
 
     private void IsInteractableCheck()

@@ -6,7 +6,7 @@ public class ServiceItem : ScriptableObject
     [SerializeField] private string ServiceName = string.Empty;
     [SerializeField, TextArea(10, 50)] private string ServiceDescription = string.Empty;
     [SerializeField] private string ServiceAPILink = string.Empty;
-    [SerializeField] private GameObject ServicePrefab = default;
+    [SerializeField] private ContentUIBehaviour ServicePrefab = default;
 
     public string Name => ServiceName;
 
@@ -14,5 +14,5 @@ public class ServiceItem : ScriptableObject
 
     public string APILink => ServiceAPILink;
 
-    public GameObject Prefab => ServicePrefab;
+    public ContentUIBehaviour Prefab => ServicePrefab;
 }

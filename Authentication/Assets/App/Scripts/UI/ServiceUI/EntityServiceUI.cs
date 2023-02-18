@@ -21,6 +21,7 @@ public class EntityServiceUI : ContentUIBehaviour
     private const string DEFAULT_EMPTY_FIELD = "---";
     private const string DEFAULT_ENTITY_TYPE = "user";
 
+    [Header("Main")]
     [SerializeField] private TMP_Text IDField = default;
     [SerializeField] private TMP_Text TypeField = default;
     [SerializeField] private TMP_InputField NameField = default;
@@ -56,12 +57,7 @@ public class EntityServiceUI : ContentUIBehaviour
     {
         entityService = BCManager.EntityService;
 
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
-
-        SaveButton.gameObject.SetActive(false);
-        DeleteButton.gameObject.SetActive(false);
-
-        HandleGetUserEntity();
+        InitializeUI();
 
         base.Start();
     }
@@ -85,12 +81,18 @@ public class EntityServiceUI : ContentUIBehaviour
 
     #region UI
 
-    protected override void InternalResetUI()
+    protected override void InitializeUI()
     {
-        //
+        ClearFields();
+
+        CreateButton.gameObject.SetActive(true);
+        SaveButton.gameObject.SetActive(false);
+        DeleteButton.gameObject.SetActive(false);
+
+        HandleGetUserEntity();
     }
 
-    private void ResetUIState()
+    private void ClearFields()
     {
         userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
 
@@ -100,8 +102,6 @@ public class EntityServiceUI : ContentUIBehaviour
         NameField.DisplayNormal();
         AgeField.text = string.Empty;
         AgeField.DisplayNormal();
-
-        IsInteractable = true;
     }
 
     private void UpdateUIInformation()
@@ -148,7 +148,7 @@ public class EntityServiceUI : ContentUIBehaviour
             if (NameField.text.Length < MINIMUM_REGISTRATION_NAME_LENGTH)
             {
                 NameField.DisplayError();
-                //LogError($"APP - Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
+                Logger.LogError($"APP - Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
                 return false;
             }
 
@@ -169,13 +169,13 @@ public class EntityServiceUI : ContentUIBehaviour
                 {
                     AgeField.text = result < 0 ? 0.ToString() : AgeField.text;
                     AgeField.DisplayError();
-                    //LogError($"APP - Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
+                    Logger.LogError($"APP - Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
                     return false;
                 }
                 else if (result > MAXIMUM_REGISTRATION_AGE)
                 {
                     AgeField.DisplayError();
-                    //LogError("APP - Please use a valid age.");
+                    Logger.LogError("APP - Please use a valid age.");
                     return false;
                 }
 
@@ -183,7 +183,7 @@ public class EntityServiceUI : ContentUIBehaviour
             }
 
             AgeField.DisplayError();
-            //LogError("APP - Please use a valid age.");
+            Logger.LogError("APP - Please use a valid age.");
         }
 
         return false;
@@ -209,12 +209,12 @@ public class EntityServiceUI : ContentUIBehaviour
         else if (!inputName.IsEmpty())
         {
             NameField.DisplayError();
-            //LogError("APP - Please enter a valid name.");
+            Logger.LogError("APP - Please enter a valid name.");
         }
         else if (!inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            //LogError("APP - Please enter a valid age.");
+            Logger.LogError("APP - Please enter a valid age.");
         }
     }
 
@@ -225,8 +225,8 @@ public class EntityServiceUI : ContentUIBehaviour
 
         if (userEntity.EntityId.IsEmpty())
         {
-            //LogError("APP - Entity ID is blank. Has an Entity been created yet?");
-            ResetUIState();
+            Logger.LogError("APP - Entity ID is blank. Has an Entity been created yet?");
+            ClearFields();
             return;
         }
         else if (CheckNameVerification(inputName) && CheckAgeVerification(inputAge))
@@ -247,13 +247,13 @@ public class EntityServiceUI : ContentUIBehaviour
         if (inputName.IsEmpty())
         {
             NameField.DisplayError();
-            //LogError("APP - Please enter a valid name.");
+            Logger.LogError("APP - Please enter a valid name.");
         }
 
         if (inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            //LogError("APP - Please enter a valid age.");
+            Logger.LogError("APP - Please enter a valid age.");
         }
     }
 
@@ -261,8 +261,8 @@ public class EntityServiceUI : ContentUIBehaviour
     {
         if (userEntity.EntityId.IsEmpty())
         {
-            //LogError("APP - Entity ID is blank. Has an Entity been created yet?");
-            ResetUIState();
+            Logger.LogError("APP - Entity ID is blank. Has an Entity been created yet?");
+            ClearFields();
             return;
         }
         else
@@ -317,8 +317,9 @@ public class EntityServiceUI : ContentUIBehaviour
 
         if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
         {
-            //LogError("APP - No entities were found for this user.");
-            ResetUIState();
+            Logger.LogError("APP - No entities were found for this user.");
+            ClearFields();
+            IsInteractable = true;
             return;
         }
 
@@ -357,7 +358,8 @@ public class EntityServiceUI : ContentUIBehaviour
 
         userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
 
-        ResetUIState();
+        ClearFields();
+        IsInteractable = true;
     }
 
     private void OnGetEntity_Success(string response, object _)
