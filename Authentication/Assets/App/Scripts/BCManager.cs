@@ -261,6 +261,7 @@ public class BCManager : MonoBehaviour
                 logMessage = $"{cbObjectName}: {logMessage}";
             }
 
+#if UNITY_EDITOR
             logMessage = $"{logMessage}\nJSON Response:\n{jsonResponse}";
             if (cbObject is MonoBehaviour mbObject)
             {
@@ -270,6 +271,9 @@ public class BCManager : MonoBehaviour
             {
                 Debug.Log(logMessage);
             }
+#else
+            Debug.Log($"{logMessage}\nJSON Response:\n{jsonResponse}");
+#endif
 
             onSuccess?.Invoke(jsonResponse, cbObject);
         };
@@ -291,6 +295,7 @@ public class BCManager : MonoBehaviour
                 errorMessage = $"{cbObjectName}: {errorMessage}";
             }
 
+#if UNITY_EDITOR
             errorMessage = $"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}";
             if (cbObject is MonoBehaviour mbObject)
             {
@@ -300,10 +305,13 @@ public class BCManager : MonoBehaviour
             {
                 Debug.LogError(errorMessage);
             }
+#else
+            Debug.Log($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
+#endif
 
             onFailure?.Invoke(jsonError, cbObject);
         };
     }
 
-    #endregion
+#endregion
 }

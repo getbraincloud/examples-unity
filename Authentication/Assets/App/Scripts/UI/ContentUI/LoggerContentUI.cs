@@ -1,4 +1,5 @@
 using BrainCloud.LitJson;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -17,8 +18,10 @@ using UnityEngine.UI;
 /// </summary>
 public class LoggerContentUI : ContentUIBehaviour
 {
-    private const string LOG_INITIAL_TEXT = "#APP - Logs, Json, and Error messages will appear here.";
-    private const string LOG_COPY_TEXT = "#APP - Previous BCC Log copied to clipboard.";
+    private const int MAX_LOG_MESSAGES = 30;
+    private const string LOG_APP_HEADER = "#APP";
+    private const string LOG_INITIAL_TEXT = "Logs, Json, and Error messages will appear here.";
+    private const string LOG_COPY_TEXT = "Previous BCC Log copied to clipboard.";
 
     [Header("Main")]
     [SerializeField] private ScrollRect LogScroll = default;
@@ -32,9 +35,11 @@ public class LoggerContentUI : ContentUIBehaviour
 
     [Header("Templates")]
     [SerializeField] private TMP_Text LogTemplate = default;
+    [SerializeField] private TMP_Text WarningTemplate = default;
     [SerializeField] private TMP_Text ErrorTemplate = default;
 
     private int logCount = 0;
+    private int warningCount = 0;
     private int errorCount = 0;
     private string lastMessage = string.Empty;
     private List<GameObject> logGOs = default;
@@ -44,6 +49,7 @@ public class LoggerContentUI : ContentUIBehaviour
     protected override void Awake()
     {
         LogTemplate.text = string.Empty;
+        WarningTemplate.text = string.Empty;
         ErrorTemplate.text = string.Empty;
 
         base.Awake();
@@ -59,6 +65,8 @@ public class LoggerContentUI : ContentUIBehaviour
 
         BCManager.Client.EnableLogging(true);
         BCManager.Client.RegisterLogDelegate(OnLogDelegate);
+
+        Application.logMessageReceived += OnLogMessageReceived;
     }
 
     protected override void Start()
@@ -66,6 +74,7 @@ public class LoggerContentUI : ContentUIBehaviour
         logGOs = new List<GameObject>();
 
         LogTemplate.gameObject.SetActive(false);
+        WarningTemplate.gameObject.SetActive(false);
         ErrorTemplate.gameObject.SetActive(false);
 
 #if !UNITY_STANDALONE
@@ -82,6 +91,7 @@ public class LoggerContentUI : ContentUIBehaviour
         ClearLogButton.onClick.RemoveAllListeners();
         CopyLogButton.onClick.RemoveAllListeners();
         BCManager.Client?.EnableLogging(false);
+        Application.logMessageReceived -= OnLogMessageReceived;
     }
 
     protected override void OnDestroy()
@@ -99,6 +109,9 @@ public class LoggerContentUI : ContentUIBehaviour
     public void LogMessage(string message) =>
         CreateLogObject("Log", ++logCount, message, LogTemplate);
 
+    public void LogWarning(string warning) =>
+        CreateLogObject("Warning", ++warningCount, warning, WarningTemplate);
+
     public void LogError(string error) =>
         CreateLogObject("Error", ++errorCount, error, ErrorTemplate);
 
@@ -112,6 +125,7 @@ public class LoggerContentUI : ContentUIBehaviour
         logGOs.Clear();
 
         logCount = 0;
+        warningCount = 0;
         errorCount = 0;
         lastMessage = string.Empty;
 
@@ -121,11 +135,17 @@ public class LoggerContentUI : ContentUIBehaviour
     protected override void InitializeUI()
     {
         ClearLogs();
-        LogMessage(LOG_INITIAL_TEXT);
+        LogMessage($"{LOG_APP_HEADER} - {LOG_INITIAL_TEXT}");
     }
 
     private void CreateLogObject(string type, int count, string message, TMP_Text textTemplate)
     {
+        if (logGOs.Count >= MAX_LOG_MESSAGES)
+        {
+            Destroy(logGOs[0]);
+            logGOs.RemoveAt(0);
+        }
+
         TMP_Text text = Instantiate(textTemplate, LogContent);
         text.gameObject.SetActive(true);
         text.gameObject.SetName($"{type}{count}", "{0}LogText");
@@ -157,7 +177,31 @@ public class LoggerContentUI : ContentUIBehaviour
         if(!lastMessage.IsEmpty())
         {
             GUIUtility.systemCopyBuffer = lastMessage;
-            LogMessage(LOG_COPY_TEXT);
+            LogMessage($"{LOG_APP_HEADER} - {LOG_COPY_TEXT}");
+        }
+    }
+
+    private void OnLogMessageReceived(string log, string _, LogType type)
+    {
+        if (log.Contains("\nJSON Response:\n")) // Strip JSON from Success & Failure callbacks from BCManager
+        {
+            log = log[..log.IndexOf("\nJSON Response:\n")];
+        }
+
+        log = $"{LOG_APP_HEADER} - {log}";
+        switch (type)
+        {
+            case LogType.Error:
+            case LogType.Exception:
+                LogError(log);
+                break;
+            case LogType.Warning:
+                LogWarning(log);
+                break;
+            case LogType.Log:
+            default:
+                LogMessage(log);
+                break;
         }
     }
 

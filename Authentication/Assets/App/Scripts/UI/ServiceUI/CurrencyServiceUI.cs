@@ -162,7 +162,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
         else
         {
             IncrementXPField.DisplayError();
-            Debug.LogError("#APP - Please input a proper XP increment value.");
+            Debug.LogError("Please input a proper XP increment value.");
         }
     }
 
@@ -180,7 +180,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
         else
         {
             AwardGemsField.DisplayError();
-            Debug.LogError("#APP - Please input a proper award value.");
+            Debug.LogError("Please input a proper award value.");
         }
     }
 
@@ -198,7 +198,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
         else
         {
             ConsumeGemsField.DisplayError();
-            Debug.LogError("#APP - Please input a proper consume value.");
+            Debug.LogError("Please input a proper consume value.");
         }
     }
 

@@ -2,6 +2,7 @@ using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,9 +17,11 @@ using UnityEngine.UI;
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-script
 public class ScriptServiceUI : ContentUIBehaviour
 {
+    private const string SCRIPT_HELLO_WORLD = "HelloWorld";
+
     private static Dictionary<string, string> CLOUD_CODE_SCRIPTS = new Dictionary<string, string>
     {
-        { "HelloWorld", "{\n    \"name\" : \"John Smith\",\n    \"age\" : 21\n}" },
+        { SCRIPT_HELLO_WORLD,    "{\n    \"name\" : \"John Smith\",\n    \"age\" : 21\n}" },
         { "IncrementGlobalStat", "{\n    \"globalStat\" : \"PLAYER_COUNT\",\n    \"incrementAmount\" : 1\n}" },
         { "IncrementPlayerStat", "{\n    \"playerStat\" : \"experiencePoints\",\n    \"incrementAmount\" : 1\n}" },
     };
@@ -104,14 +107,17 @@ public class ScriptServiceUI : ContentUIBehaviour
                 {
                     IsInteractable = false;
                     string scriptName = scriptNames[current];
+
+                    SuccessCallback onSuccess = scriptName == SCRIPT_HELLO_WORLD ? OnSuccess($"{scriptName} Script Ran Successfully", OnHelloWorldScript_Success)
+                                                                                 : OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Returned);
+
                     scriptService.RunScript(scriptName, JsonWriter.Serialize(json),
-                                            OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Returned),
-                                            OnFailure($"{scriptName} Script Failed", OnRunScript_Returned));
+                                            onSuccess, OnFailure($"{scriptName} Script Failed", OnRunScript_Returned));
                 }
                 else
                 {
                     ScriptJsonField.DisplayError();
-                    Debug.LogError("#APP - Json Data is not formatted properly!");
+                    Debug.LogError("Json Data is not formatted properly!");
                     return;
                 }
             }
@@ -119,7 +125,7 @@ public class ScriptServiceUI : ContentUIBehaviour
         catch
         {
             ScriptJsonField.DisplayError();
-            Debug.LogError($"#APP - Cannot run script! Please check your Json data and try again.");
+            Debug.LogError($"Cannot run script! Please check your Json data and try again.");
             throw;
         }
     }
@@ -130,7 +136,23 @@ public class ScriptServiceUI : ContentUIBehaviour
 
     private void OnHelloWorldScript_Success(string response)
     {
-        //TODO: Show message proper in Log
+        const int COLOR_TAG_CHARACTERS = 24;
+        const string COLOR_TAG_FORMAT = "<color=#{0}{1}{2}>{3}</color>";
+
+        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
+        string message = (string)(data["response"] as Dictionary<string, object>)["data"];
+
+        Color32 letterColor;
+        StringBuilder helloWorld = new StringBuilder(message.Length * COLOR_TAG_CHARACTERS);
+        foreach (char c in message)
+        {
+            letterColor = new Color(Random.Range(0.2f, 0.99f), Random.Range(0.2f, 0.99f), Random.Range(0.2f, 0.99f));
+            helloWorld.Append(string.Format(COLOR_TAG_FORMAT, letterColor.r.ToString("X2"), letterColor.g.ToString("X2"), letterColor.b.ToString("X2"), c));
+        }
+
+        Debug.Log(helloWorld);
+
+        OnRunScript_Returned();
     }
 
     private void OnRunScript_Returned()
