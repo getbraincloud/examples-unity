@@ -51,8 +51,8 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
     protected override void InitializeUI()
     {
         IsInteractable = false;
-        userStatsService.ReadAllUserStats(OnReadUserStats_Success,
-                                          BCManager.CreateFailureCallback("ReadAllUserStats Failed", IsInteractableCheck));
+        userStatsService.ReadAllUserStats(OnSuccess("Loading Player Stats...", OnReadUserStats_Success),
+                                          OnFailure("ReadAllUserStats Failed", IsInteractableCheck));
     }
 
     private void IsInteractableCheck()
@@ -108,18 +108,16 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
 
         string jsonData = "{ \"" + userStatName + "\" : 1 }";
 
-        userStatsService.IncrementUserStats(jsonData, OnIncrementUserStat_Success,
-                                                      BCManager.CreateFailureCallback("IncrementUserStats Failed", IsInteractableCheck));
+        userStatsService.IncrementUserStats(jsonData, OnSuccess("Incremented Stat", OnIncrementUserStat_Success),
+                                                      OnFailure("IncrementUserStats Failed", IsInteractableCheck));
     }
 
     #endregion
 
     #region brainCloud
 
-    private void OnReadUserStats_Success(string response, object _)
+    private void OnReadUserStats_Success(string response)
     {
-        BCManager.LogMessage("Loading Player Stats...", response);
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
         var statsObj = dataObj["statistics"] as Dictionary<string, object>;
@@ -132,10 +130,8 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
         IsInteractableCheck();
     }
 
-    private void OnIncrementUserStat_Success(string response, object _)
+    private void OnIncrementUserStat_Success(string response)
     {
-        Debug.Log("Incremented Stat");
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
         var statsObj = dataObj["statistics"] as Dictionary<string, object>;

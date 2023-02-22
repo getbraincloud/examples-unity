@@ -1,6 +1,7 @@
 using BrainCloud;
 using BrainCloud.Entity;
 using System;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 /// <summary>
@@ -143,44 +144,6 @@ public class BCManager : MonoBehaviour
 
     #endregion
 
-    #region Callback Creation Helpers
-
-    /// <summary>
-    /// Creates a callback for various brainCloud API calls if they return as a success.
-    /// This will also format a log into the console with all the relevant information.
-    /// </summary>
-    /// <param name="logMessage">Optional information to provide context on the success.</param>
-    /// <param name="onSuccess">Optional callback to invoke from successful API calls.</param>
-    /// <returns></returns>
-    public static SuccessCallback CreateSuccessCallback(string logMessage = null, Action onSuccess = null)
-    {
-        logMessage = logMessage.IsEmpty() ? "Success" : logMessage;
-        return (jsonResponse, _) =>
-        {
-            LogMessage(logMessage, jsonResponse);
-            onSuccess?.Invoke();
-        };
-    }
-
-    /// <summary>
-    /// Creates a callback for various brainCloud API calls if they return as a failure.
-    /// This will also format a log into the console with all the relevant information.
-    /// </summary>
-    /// <param name="errorMessage">Optional information to provide context on the failure.</param>
-    /// <param name="onFailure">Optional callback to invoke from failed API calls.</param>
-    /// <returns></returns>
-    public static FailureCallback CreateFailureCallback(string errorMessage = null, Action onFailure = null)
-    {
-        errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
-        return (status, reasonCode, jsonError, _) =>
-        {
-            LogError(errorMessage, status, reasonCode, jsonError);
-            onFailure?.Invoke();
-        };
-    }
-
-    #endregion
-
     #region Unity Messages
 
     private void Awake()
@@ -222,25 +185,123 @@ public class BCManager : MonoBehaviour
 
     #endregion
 
-    #region Additional Methods
+    #region Callback Creation Helpers
 
     /// <summary>
-    /// Logs brainCloud Messages in a consistent format.
+    /// Creates a callback used for various brainCloud API calls for when they return as a success.
+    /// This will also format a log into the console with all the relevant information.
     /// </summary>
-    /// <param name="logMessage">Custom message to use as a header or to add additional information.</param>
-    /// <param name="jsonResponse">The JSON response from the brainCloud server.</param>
-    public static void LogMessage(string logMessage, string jsonResponse) =>
-        Debug.Log($"{logMessage}\nJSON Response:\n{jsonResponse}");
+    /// <param name="logMessage">Optional information to provide context on the success.</param>
+    /// <param name="onSuccess">Optional callback to invoke after successful API calls.</param>
+    public static SuccessCallback HandleSuccess(string logMessage = "", Action onSuccess = null) =>
+        InternalHandleSuccess(logMessage, onSuccess?.Target, onSuccess != null ? (_, _) => onSuccess.Invoke() : null);
 
     /// <summary>
-    /// Logs brainCloud Errors in a consistent format.
+    /// Creates a callback used for various brainCloud API calls for when they return as a success.
+    /// This will also format a log into the console with all the relevant information and as
+    /// well as invoke the onSuccess Action with the JSON response.
     /// </summary>
-    /// <param name="errorMessage">Custom error message to use as a header or to add additional information.</param>
-    /// <param name="status">The status code returned from the brainCloud server.</param>
-    /// <param name="reasonCode">The reason code returned from the brainCloud server.</param>
-    /// <param name="jsonError">The JSON response from the brainCloud server.</param>
-    public static void LogError(string errorMessage, int status, int reasonCode, string jsonError) =>
-        Debug.LogError($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
+    /// <param name="logMessage">Optional information to provide context on the success.</param>
+    /// <param name="onSuccess">Optional callback to invoke after successful API calls which passes the JSON response.</param>
+    public static SuccessCallback HandleSuccess(string logMessage = "", Action<string> onSuccess = null) =>
+        InternalHandleSuccess(logMessage, onSuccess?.Target, onSuccess != null ? (jsonResponse, _) => onSuccess.Invoke(jsonResponse) : null);
+
+    /// <summary>
+    /// Creates a callback for various brainCloud API calls for when they return as a success.
+    /// This will also format a log into the console with all the relevant information and as
+    /// well as invoke the onSuccess Action with the JSON response and the callback object.
+    /// </summary>
+    /// <param name="logMessage">Optional information to provide context on the success.</param>
+    /// <param name="onSuccess">Optional callback to invoke after successful API calls which passes the JSON response and the callback object.</param>
+    public static SuccessCallback HandleSuccess(string logMessage = "", Action<string, object> onSuccess = null) =>
+        InternalHandleSuccess(logMessage, onSuccess?.Target, onSuccess);
+
+    /// <summary>
+    /// Creates a callback for various brainCloud API calls for when they return as a failure.
+    /// This will also format a log into the console with all the relevant information.
+    /// </summary>
+    /// <param name="errorMessage">Optional information to provide context on the failure.</param>
+    /// <param name="onFailure">Optional callback to invoke after failed API calls.</param>
+    public static FailureCallback HandleFailure(string errorMessage = "", Action onFailure = null) =>
+        InternalHandleFailure(errorMessage, onFailure?.Target, onFailure != null ? (_, _) => onFailure.Invoke() : null);
+
+    /// <summary>
+    /// Creates a callback for various brainCloud API calls for when they return as a failure.
+    /// This will also format a log into the console with all the relevant information and as
+    /// well as invoke the onFailure Action with the JSON error.
+    /// </summary>
+    /// <param name="errorMessage">Optional information to provide context on the failure.</param>
+    /// <param name="onFailure">Optional callback to invoke after failed API calls which contains the JSON error.</param>
+    public static FailureCallback HandleFailure(string errorMessage, Action<string> onFailure = null) =>
+        InternalHandleFailure(errorMessage, onFailure?.Target, onFailure != null ? (jsonError, _) => onFailure.Invoke(jsonError) : null);
+
+    /// <summary>
+    /// Creates a callback for various brainCloud API calls for when they return as a failure.
+    /// This will also format a log into the console with all the relevant information and as
+    /// well as invoke the onFailure Action with the JSON error and the callback object.
+    /// </summary>
+    /// <param name="errorMessage">Optional information to provide context on the failure.</param>
+    /// <param name="onFailure">Optional callback to invoke after failed API calls which passes the JSON error and the callback object.</param>
+    public static FailureCallback HandleFailure(string errorMessage, Action<string, object> onFailure = null) =>
+        InternalHandleFailure(errorMessage, onFailure?.Target, onFailure);
+
+    private static SuccessCallback InternalHandleSuccess(string logMessage, object cbObject, Action<string, object> onSuccess)
+    {
+        logMessage = logMessage.IsEmpty() ? "Success" : logMessage;
+        return (jsonResponse, _) =>
+        {
+            string cbObjectName = cbObject != null ? cbObject.GetType().Name : string.Empty;
+            if (cbObjectName.Contains("DisplayClass"))
+            {
+                cbObject = null;
+            }
+            else if (!cbObjectName.IsEmpty())
+            {
+                logMessage = $"{cbObject.GetType().Name}: {logMessage}";
+            }
+
+            logMessage = $"{logMessage}\nJSON Response:\n{jsonResponse}";
+            if (cbObject is MonoBehaviour mbObject)
+            {
+                Debug.Log(logMessage, mbObject);
+            }
+            else
+            {
+                Debug.Log(logMessage);
+            }
+
+            onSuccess?.Invoke(jsonResponse, cbObject);
+        };
+    }
+
+    private static FailureCallback InternalHandleFailure(string errorMessage, object cbObject, Action<string, object> onFailure = null)
+    {
+        errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
+        return (status, reasonCode, jsonError, _) =>
+        {
+            string cbObjectName = cbObject != null ? cbObject.GetType().Name : string.Empty;
+            if (cbObjectName.Contains("DisplayClass"))
+            {
+                cbObject = null;
+            }
+            else if (!cbObjectName.IsEmpty())
+            {
+                errorMessage = $"{cbObject.GetType().Name}: {errorMessage}";
+            }
+
+            errorMessage = $"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}";
+            if (cbObject is MonoBehaviour mbObject)
+            {
+                Debug.LogError(errorMessage, mbObject);
+            }
+            else
+            {
+                Debug.LogError(errorMessage);
+            }
+
+            onFailure?.Invoke(jsonError, cbObject);
+        };
+    }
 
     #endregion
 }

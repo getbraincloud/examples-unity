@@ -105,13 +105,13 @@ public class ScriptServiceUI : ContentUIBehaviour
                     IsInteractable = false;
                     string scriptName = scriptNames[current];
                     scriptService.RunScript(scriptName, JsonWriter.Serialize(json),
-                                            BCManager.CreateSuccessCallback($"{scriptName} Script Ran Successfully", OnRunScriptFinished),
-                                            BCManager.CreateFailureCallback($"{scriptName} Script Failed", OnRunScriptFinished));
+                                            OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Returned),
+                                            OnFailure($"{scriptName} Script Failed", OnRunScript_Returned));
                 }
                 else
                 {
                     ScriptJsonField.DisplayError();
-                    Logger.LogError("#APP - Json Data is not formatted properly!");
+                    Logger.Error("#APP - Json Data is not formatted properly!");
                     return;
                 }
             }
@@ -119,25 +119,25 @@ public class ScriptServiceUI : ContentUIBehaviour
         catch
         {
             ScriptJsonField.DisplayError();
-            Logger.LogError($"#APP - Cannot run script! Please check your Json data and try again.");
+            Logger.Error($"#APP - Cannot run script! Please check your Json data and try again.");
             throw;
         }
-    }
-
-    private void OnRunScriptFinished()
-    {
-        ScriptDropdown.value = current;
-
-        IsInteractable = true;
     }
 
     #endregion
 
     #region brainCloud
 
-    private void OnHelloWorldScript_Success(string response, object _)
+    private void OnHelloWorldScript_Success(string response)
     {
         //TODO: Show message proper in Log
+    }
+
+    private void OnRunScript_Returned()
+    {
+        ScriptDropdown.value = current;
+
+        IsInteractable = true;
     }
 
     #endregion

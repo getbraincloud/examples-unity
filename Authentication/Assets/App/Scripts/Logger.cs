@@ -2,24 +2,20 @@ using System;
 
 public static class Logger
 {
-    private static Action<string> logMessageAction = default;
-    private static Action<string> logErrorAction = default;
+    public static Action<string> OnLogMessage = default;
+    public static Action<string> OnLogWarning = default;
+    public static Action<string> OnLogError = default;
 
-    public static void SetLoggerMethods(Action<string> logMessageMethod, Action<string> logErrorMethod)
+    public static void ResetLogger()
     {
-        logMessageAction = logMessageMethod;
-        logErrorAction = logErrorMethod;
+        OnLogMessage = null;
+        OnLogWarning = null;
+        OnLogError = null;
     }
 
-    public static void ClearLoggerMethods()
-    {
-        logMessageAction = null;
-        logErrorAction = null;
-    }
+    public static void Log(string message) => OnLogMessage?.Invoke(message);
 
-    public static void LogMessage(string message) =>
-        logMessageAction?.Invoke(message);
+    public static void Warning(string message) => OnLogWarning?.Invoke(message);
 
-    public static void LogError(string message) =>
-        logErrorAction?.Invoke(message);
+    public static void Error(string message) => OnLogError?.Invoke(message);
 }

@@ -30,39 +30,39 @@ public static class UserHandler
 
     public static void AuthenticateEmail(string email, string password, Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.Wrapper.AuthenticateEmailPassword(email, password, true, BCManager.CreateSuccessCallback("Email Authentication Successful", onSuccess),
-                                                                           BCManager.CreateFailureCallback("Email Authentication Failed", onFailure));
+        BCManager.Wrapper.AuthenticateEmailPassword(email, password, true, BCManager.HandleSuccess("Email Authentication Successful", onSuccess),
+                                                                           BCManager.HandleFailure("Email Authentication Failed", onFailure));
     }
 
     public static void AuthenticateUniversal(string username, string password, Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.Wrapper.AuthenticateUniversal(username, password, true, BCManager.CreateSuccessCallback("Universal Authentication Successful", onSuccess),
-                                                                          BCManager.CreateFailureCallback("Universal Authentication Failed", onFailure));
+        BCManager.Wrapper.AuthenticateUniversal(username, password, true, BCManager.HandleSuccess("Universal Authentication Successful", onSuccess),
+                                                                          BCManager.HandleFailure("Universal Authentication Failed", onFailure));
     }
 
     public static void AuthenticateAnonymous(Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.Wrapper.AuthenticateAnonymous(BCManager.CreateSuccessCallback("Anonymous Authentication Successful", onSuccess),
-                                                BCManager.CreateFailureCallback("Anonymous Authentication Failed", onFailure));
+        BCManager.Wrapper.AuthenticateAnonymous(BCManager.HandleSuccess("Anonymous Authentication Successful", onSuccess),
+                                                BCManager.HandleFailure("Anonymous Authentication Failed", onFailure));
     }
 
     public static void AuthenticateAdvanced(AuthenticationType authType, AuthenticationIds ids, Dictionary<string, object> extraJson,
                                             Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.Wrapper.AuthenticateAdvanced(authType, ids, true, extraJson,BCManager.CreateSuccessCallback("Authentication Successful", onSuccess),
-                                                                              BCManager.CreateFailureCallback("Authentication Failed", onFailure));
+        BCManager.Wrapper.AuthenticateAdvanced(authType, ids, true, extraJson,BCManager.HandleSuccess("Authentication Successful", onSuccess),
+                                                                              BCManager.HandleFailure("Authentication Failed", onFailure));
     }
 
     public static void HandleUserReconnect(Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.Wrapper.Reconnect(BCManager.CreateSuccessCallback("Reconnect Success", onSuccess),
-                                    BCManager.CreateFailureCallback("Reconnect Failed", onFailure));
+        BCManager.Wrapper.Reconnect(BCManager.HandleSuccess("Reconnect Success", onSuccess),
+                                    BCManager.HandleFailure("Reconnect Failed", onFailure));
     }
 
     public static void HandleUserLogout(Action onSuccess = null, Action onFailure = null)
     {
-        BCManager.PlayerStateService.Logout(BCManager.CreateSuccessCallback("Logout Success", onSuccess),
-                                            BCManager.CreateFailureCallback("Logout Failed", onFailure));
+        BCManager.PlayerStateService.Logout(BCManager.HandleSuccess("Logout Success", onSuccess),
+                                            BCManager.HandleFailure("Logout Failed", onFailure));
     }
 
     public static void ResetAuthenticationData()

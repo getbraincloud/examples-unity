@@ -116,8 +116,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
                                          customEntity.ACL.ToJsonString(),
                                          null,
                                          customEntity.IsOwned,
-                                         OnCreateEntity_Success,
-                                         OnFailure("CreateEntity Failed"));
+                                         OnSuccess("Created Entity for User", OnCreateEntity_Success),
+                                         OnFailure("CreateEntity Failed", UpdateUIInformation));
     }
 
     private void OnFetchButton()
@@ -145,8 +145,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
                                          JsonWriter.Serialize(customEntity.DataToJson()),
                                          customEntity.ACL.ToJsonString(),
                                          null,
-                                         OnUpdateEntity_Success,
-                                         OnFailure("UpdateEntity Failed"));
+                                         OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
+                                         OnFailure("UpdateEntity Failed", UpdateUIInformation));
     }
 
     private void OnDeleteButton()
@@ -164,8 +164,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         customEntityService.DeleteEntity(customEntity.EntityType,
                                          customEntity.EntityId,
                                          -1,
-                                         OnDeleteEntity_Success,
-                                         OnFailure("DeleteEntity Failed"));
+                                         OnSuccess("Deleted Entity for User", OnDeleteEntity_Success),
+                                         OnFailure("DeleteEntity Failed", UpdateUIInformation));
     }
 
     private void UpdateUIInformation()
@@ -215,14 +215,12 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         customEntityService.GetEntityPage(DEFAULT_ENTITY_TYPE,
                                           JsonWriter.Serialize(context),
-                                          OnGetPage_Success,
-                                          OnFailure("GetEntityPage Failed"));
+                                          OnSuccess("GetEntityPage Success", OnGetPage_Success),
+                                          OnFailure("GetEntityPage Failed", UpdateUIInformation));
     }
 
-    private void OnGetPage_Success(string response, object _)
+    private void OnGetPage_Success(string response)
     {
-        BCManager.LogMessage("GetEntityPage Success", response);
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
         var resultsObj = dataObj["results"] as Dictionary<string, object>;
@@ -244,40 +242,32 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         UpdateUIInformation();
     }
 
-    private void OnCreateEntity_Success(string response, object _)
+    private void OnCreateEntity_Success(string response)
     {
-        BCManager.LogMessage("Created Entity for User", response);
-
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
+        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success), OnFailure(string.Empty, UpdateUIInformation));
     }
 
-    private void OnUpdateEntity_Success(string response, object _)
+    private void OnUpdateEntity_Success(string response)
     {
-        BCManager.LogMessage("Updated Entity for User", response);
-
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
+        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success), OnFailure(string.Empty, UpdateUIInformation));
     }
 
-    private void OnDeleteEntity_Success(string response, object _)
+    private void OnDeleteEntity_Success(string response)
     {
-        BCManager.LogMessage("Deleted Entity for User", response);
-
         customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
 
         ClearFields();
         IsInteractable = true;
     }
 
-    private void OnGetEntity_Success(string response, object _)
+    private void OnGetEntity_Success(string response)
     {
-        BCManager.LogMessage("Updating Local Entity Data...", response);
-
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
 
         customEntity.UpdateFromJSON(true, data);
@@ -287,17 +277,6 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         DeleteButton.gameObject.SetActive(true);
 
         UpdateUIInformation();
-    }
-
-    private FailureCallback OnFailure(string errorMessage)
-    {
-        errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
-        return (status, reasonCode, jsonError, _) =>
-        {
-            BCManager.LogError(errorMessage, status, reasonCode, jsonError);
-            UpdateUIInformation();
-            IsInteractable = reasonCode != 40570; // Custom Entities not enabled for app
-        };
     }
 
     #endregion

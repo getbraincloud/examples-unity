@@ -1,3 +1,5 @@
+using BrainCloud;
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -8,8 +10,8 @@ public abstract class ContentUIBehaviour : MonoBehaviour
 {
     [SerializeField] private CanvasGroup ContentUICG = default;
 
-    [System.NonSerialized] public new GameObject gameObject = default; // Cache these for faster access
-    [System.NonSerialized] public new Transform transform = default;
+    [NonSerialized] public new GameObject gameObject = default; // Cache these for faster access
+    [NonSerialized] public new Transform transform = default;
 
     public bool IsInteractable
     {
@@ -58,6 +60,22 @@ public abstract class ContentUIBehaviour : MonoBehaviour
     }
 
     protected abstract void InitializeUI();
+
+    #endregion
+
+    #region brainCloud
+
+    protected SuccessCallback OnSuccess(string response, Action onSuccess) =>
+        BCManager.HandleSuccess(response, onSuccess);
+
+    protected SuccessCallback OnSuccess(string response, Action<string> onSuccess) =>
+        BCManager.HandleSuccess(response, onSuccess);
+
+    protected FailureCallback OnFailure(string errorMessage, Action onFailure) =>
+        BCManager.HandleFailure(errorMessage, onFailure);
+
+    protected FailureCallback OnFailure(string errorMessage, Action<string> onFailure) =>
+        BCManager.HandleFailure(errorMessage, onFailure);
 
     #endregion
 }

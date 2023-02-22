@@ -51,8 +51,8 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
     protected override void InitializeUI()
     {
         IsInteractable = false;
-        globalStatsService.ReadAllGlobalStats(OnReadAllGlobalStats_Success,
-                                              BCManager.CreateFailureCallback("ReadAllGlobalStats Failed", IsInteractableCheck));
+        globalStatsService.ReadAllGlobalStats(OnSuccess("Loading Global Stats...", OnReadAllGlobalStats_Success),
+                                              OnFailure("ReadAllGlobalStats Failed", IsInteractableCheck));
     }
 
     private void IsInteractableCheck()
@@ -108,18 +108,16 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
 
         string jsonData = "{ \"" + globalStatName + "\" : 1 }";
 
-        globalStatsService.IncrementGlobalStats(jsonData, OnIncrementGlobalStats_Success,
-                                                          BCManager.CreateFailureCallback("IncrementGlobalStats Failed", IsInteractableCheck));
+        globalStatsService.IncrementGlobalStats(jsonData, OnSuccess("Incremented Stat", OnIncrementGlobalStats_Success),
+                                                          OnFailure("IncrementGlobalStats Failed", IsInteractableCheck));
     }
 
     #endregion
 
     #region brainCloud
 
-    private void OnReadAllGlobalStats_Success(string response, object _)
+    private void OnReadAllGlobalStats_Success(string response)
     {
-        BCManager.LogMessage("Loading Global Stats...", response);
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
         var statsObj = dataObj["statistics"] as Dictionary<string, object>;
@@ -132,10 +130,8 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
         IsInteractableCheck();
     }
 
-    private void OnIncrementGlobalStats_Success(string response, object _)
+    private void OnIncrementGlobalStats_Success(string response)
     {
-        Debug.Log("Incremented Stat");
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
         var statsObj = dataObj["statistics"] as Dictionary<string, object>;

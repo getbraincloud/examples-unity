@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -58,6 +59,7 @@ public class EntityServiceUI : ContentUIBehaviour
         entityService = BCManager.EntityService;
 
         InitializeUI();
+        HandleGetUserEntity();
 
         base.Start();
     }
@@ -83,17 +85,6 @@ public class EntityServiceUI : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        ClearFields();
-
-        CreateButton.gameObject.SetActive(true);
-        SaveButton.gameObject.SetActive(false);
-        DeleteButton.gameObject.SetActive(false);
-
-        HandleGetUserEntity();
-    }
-
-    private void ClearFields()
-    {
         userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
 
         IDField.text = DEFAULT_EMPTY_FIELD;
@@ -102,6 +93,10 @@ public class EntityServiceUI : ContentUIBehaviour
         NameField.DisplayNormal();
         AgeField.text = string.Empty;
         AgeField.DisplayNormal();
+
+        CreateButton.gameObject.SetActive(true);
+        SaveButton.gameObject.SetActive(false);
+        DeleteButton.gameObject.SetActive(false);
     }
 
     private void UpdateUIInformation()
@@ -148,7 +143,7 @@ public class EntityServiceUI : ContentUIBehaviour
             if (NameField.text.Length < MINIMUM_REGISTRATION_NAME_LENGTH)
             {
                 NameField.DisplayError();
-                Logger.LogError($"APP - Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
+                Logger.Error($"APP - Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
                 return false;
             }
 
@@ -169,13 +164,13 @@ public class EntityServiceUI : ContentUIBehaviour
                 {
                     AgeField.text = result < 0 ? 0.ToString() : AgeField.text;
                     AgeField.DisplayError();
-                    Logger.LogError($"APP - Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
+                    Logger.Error($"APP - Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
                     return false;
                 }
                 else if (result > MAXIMUM_REGISTRATION_AGE)
                 {
                     AgeField.DisplayError();
-                    Logger.LogError("APP - Please use a valid age.");
+                    Logger.Error("APP - Please use a valid age.");
                     return false;
                 }
 
@@ -183,7 +178,7 @@ public class EntityServiceUI : ContentUIBehaviour
             }
 
             AgeField.DisplayError();
-            Logger.LogError("APP - Please use a valid age.");
+            Logger.Error("APP - Please use a valid age.");
         }
 
         return false;
@@ -203,18 +198,18 @@ public class EntityServiceUI : ContentUIBehaviour
             entityService.CreateEntity(userEntity.EntityType,
                                        JsonWriter.Serialize(userEntity.DataToJson()),
                                        userEntity.ACL.ToJsonString(),
-                                       OnCreateEntity_Success,
-                                       OnFailure("CreateEntity Failed"));
+                                       OnSuccess("Created Entity for User", OnCreateEntity_Success),
+                                       OnFailure("CreateEntity Failed", UpdateUIInformation));
         }
         else if (!inputName.IsEmpty())
         {
             NameField.DisplayError();
-            Logger.LogError("APP - Please enter a valid name.");
+            Logger.Error("APP - Please enter a valid name.");
         }
         else if (!inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            Logger.LogError("APP - Please enter a valid age.");
+            Logger.Error("APP - Please enter a valid age.");
         }
     }
 
@@ -225,8 +220,8 @@ public class EntityServiceUI : ContentUIBehaviour
 
         if (userEntity.EntityId.IsEmpty())
         {
-            Logger.LogError("APP - Entity ID is blank. Has an Entity been created yet?");
-            ClearFields();
+            Logger.Error("APP - Entity ID is blank. Has an Entity been created yet?");
+            InitializeUI();
             return;
         }
         else if (CheckNameVerification(inputName) && CheckAgeVerification(inputAge))
@@ -240,20 +235,20 @@ public class EntityServiceUI : ContentUIBehaviour
                                        JsonWriter.Serialize(userEntity.DataToJson()),
                                        userEntity.ACL.ToJsonString(),
                                        -1,
-                                       OnUpdateEntity_Success,
-                                       OnFailure("UpdateEntity Failed"));
+                                       OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
+                                       OnFailure("UpdateEntity Failed", UpdateUIInformation));
         }
 
         if (inputName.IsEmpty())
         {
             NameField.DisplayError();
-            Logger.LogError("APP - Please enter a valid name.");
+            Logger.Error("APP - Please enter a valid name.");
         }
 
         if (inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            Logger.LogError("APP - Please enter a valid age.");
+            Logger.Error("APP - Please enter a valid age.");
         }
     }
 
@@ -261,8 +256,8 @@ public class EntityServiceUI : ContentUIBehaviour
     {
         if (userEntity.EntityId.IsEmpty())
         {
-            Logger.LogError("APP - Entity ID is blank. Has an Entity been created yet?");
-            ClearFields();
+            Logger.Error("APP - Entity ID is blank. Has an Entity been created yet?");
+            InitializeUI();
             return;
         }
         else
@@ -271,8 +266,8 @@ public class EntityServiceUI : ContentUIBehaviour
 
             entityService.DeleteEntity(userEntity.EntityId,
                                        -1,
-                                       OnDeleteEntity_Success,
-                                       OnFailure("DeleteEntity Failed"));
+                                       OnSuccess("Deleted Entity for User", OnDeleteEntity_Success),
+                                       OnFailure("DeleteEntity Failed", UpdateUIInformation));
         }
     }
 
@@ -303,22 +298,20 @@ public class EntityServiceUI : ContentUIBehaviour
         };
 
         entityService.GetPage(JsonWriter.Serialize(context),
-                              OnGetPage_Success,
-                              OnFailure("GetPage Failed"));
+                              OnSuccess("GetPage Success", OnGetPage_Success),
+                              OnFailure("GetPage Failed", UpdateUIInformation));
     }
 
-    private void OnGetPage_Success(string response, object _)
+    private void OnGetPage_Success(string response)
     {
-        BCManager.LogMessage("GetPage Success", response);
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var dataObj = responseObj["data"] as Dictionary<string, object>;
         var resultsObj = dataObj["results"] as Dictionary<string, object>;
 
         if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
         {
-            Logger.LogError("APP - No entities were found for this user.");
-            ClearFields();
+            Logger.Error("APP - No entities were found for this user.");
+            InitializeUI();
             IsInteractable = true;
             return;
         }
@@ -332,40 +325,32 @@ public class EntityServiceUI : ContentUIBehaviour
         UpdateUIInformation();
     }
 
-    private void OnCreateEntity_Success(string response, object _)
+    private void OnCreateEntity_Success(string response)
     {
-        BCManager.LogMessage("Created Entity for User", response);
-
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
+        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
 
-    private void OnUpdateEntity_Success(string response, object _)
+    private void OnUpdateEntity_Success(string response)
     {
-        BCManager.LogMessage("Updated Entity for User", response);
-
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, OnGetEntity_Success);
+        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
 
-    private void OnDeleteEntity_Success(string response, object _)
+    private void OnDeleteEntity_Success(string response)
     {
-        BCManager.LogMessage("Deleted Entity for User", response);
-
         userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
 
-        ClearFields();
+        InitializeUI();
         IsInteractable = true;
     }
 
-    private void OnGetEntity_Success(string response, object _)
+    private void OnGetEntity_Success(string response)
     {
-        BCManager.LogMessage("Updating Local Entity Data...", response);
-
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
 
         userEntity.UpdateFromJSON(data);
@@ -376,9 +361,6 @@ public class EntityServiceUI : ContentUIBehaviour
 
         UpdateUIInformation();
     }
-
-    private FailureCallback OnFailure(string errorMessage) =>
-        BCManager.CreateFailureCallback(errorMessage, UpdateUIInformation);
 
     #endregion
 }

@@ -128,8 +128,8 @@ public class CurrencyServiceUI : ContentUIBehaviour
         ConsumeGemsField.text = string.Empty;
         IncrementXPField.DisplayNormal();
 
-        userStateService.ReadUserState(OnXPStateUpdate_Success,
-                                       OnXPStateUpdate_Failure);
+        userStateService.ReadUserState(OnSuccess("User XP Updated", OnXPStateUpdate_Success),
+                                       OnFailure("Cannot update User XP", OnXPStateUpdate_Failure));
     }
 
     private void ClampAwardAmount(TMP_InputField field, string value)
@@ -156,13 +156,13 @@ public class CurrencyServiceUI : ContentUIBehaviour
             IsInteractable = false;
 
             statsService.IncrementExperiencePoints(xpValue,
-                                                   OnXPStateUpdate_Success,
-                                                   OnXPStateUpdate_Failure);
+                                                   OnSuccess("User XP Updated", OnXPStateUpdate_Success),
+                                                   OnFailure("Cannot update User XP", OnXPStateUpdate_Failure));
         }
         else
         {
             IncrementXPField.DisplayError();
-            Logger.LogError("#APP - Please input a proper XP increment value.");
+            Logger.Error("#APP - Please input a proper XP increment value.");
         }
     }
 
@@ -174,13 +174,13 @@ public class CurrencyServiceUI : ContentUIBehaviour
 
             scriptService.RunScript("AwardCurrency",
                                     "{\"vcID\": \"gems\", \"vcAmount\": " + amount + "}",
-                                    BCManager.CreateSuccessCallback("AwardCurrency Script Ran Successfully", UpdateUserGems),
-                                    BCManager.CreateFailureCallback("AwardCurrency Script Failed", () => IsInteractable = true));
+                                    OnSuccess("AwardCurrency Script Ran Successfully", UpdateUserGems),
+                                    OnFailure("AwardCurrency Script Failed", () => IsInteractable = true));
         }
         else
         {
             AwardGemsField.DisplayError();
-            Logger.LogError("#APP - Please input a proper award value.");
+            Logger.Error("#APP - Please input a proper award value.");
         }
     }
 
@@ -192,21 +192,21 @@ public class CurrencyServiceUI : ContentUIBehaviour
 
             scriptService.RunScript("ConsumeCurrency",
                                     "{\"vcID\": \"gems\", \"vcAmount\": " + amount + "}",
-                                    BCManager.CreateSuccessCallback("ConsumeCurrency Script Ran Successfully", UpdateUserGems),
-                                    BCManager.CreateFailureCallback("ConsumeCurrency Script Failed", () => IsInteractable = true));
+                                    OnSuccess("ConsumeCurrency Script Ran Successfully", UpdateUserGems),
+                                    OnFailure("ConsumeCurrency Script Failed", () => IsInteractable = true));
         }
         else
         {
             ConsumeGemsField.DisplayError();
-            Logger.LogError("#APP - Please input a proper consume value.");
+            Logger.Error("#APP - Please input a proper consume value.");
         }
     }
 
     private void UpdateUserGems()
     {
         currencyService.GetCurrency(DEFAULT_CURRENCY_TYPE,
-                        OnGemsStateUpdate_Success,
-                        OnGemsStateUpdate_Failure);
+                        OnSuccess($"User {DEFAULT_CURRENCY_TYPE} Updated", OnGemsStateUpdate_Success),
+                        OnFailure($"Cannot update User {DEFAULT_CURRENCY_TYPE}", OnGemsStateUpdate_Failure));
     }
 
     private void OnResetButton()
@@ -214,18 +214,16 @@ public class CurrencyServiceUI : ContentUIBehaviour
         IsInteractable = false;
 
         scriptService.RunScript("ResetCurrency", "{}",
-                                BCManager.CreateSuccessCallback("ResetCurrency Script Ran Successfully", UpdateUserGems),
-                                BCManager.CreateFailureCallback("ResetCurrency Script Failed", () => IsInteractable = true));
+                                OnSuccess("ResetCurrency Script Ran Successfully", UpdateUserGems),
+                                OnFailure("ResetCurrency Script Failed", () => IsInteractable = true));
     }
 
     #endregion
 
     #region brainCloud
 
-    private void OnXPStateUpdate_Success(string response, object _)
+    private void OnXPStateUpdate_Success(string response)
     {
-        BCManager.LogMessage("User XP Updated", response);
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var data = responseObj["data"] as Dictionary<string, object>;
 
@@ -236,18 +234,14 @@ public class CurrencyServiceUI : ContentUIBehaviour
         UpdateUserGems();
     }
 
-    private void OnXPStateUpdate_Failure(int status, int code, string error, object _)
+    private void OnXPStateUpdate_Failure()
     {
-        BCManager.LogError("Cannot update User XP", status, code, error);
-
         IncrementXPField.text = string.Empty;
         UpdateUserGems();
     }
 
-    private void OnGemsStateUpdate_Success(string response, object _)
+    private void OnGemsStateUpdate_Success(string response)
     {
-        BCManager.LogMessage($"User {DEFAULT_CURRENCY_TYPE} Updated", response);
-
         var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
         var data = responseObj["data"] as Dictionary<string, object>;
         var currencyMap = data["currencyMap"] as Dictionary<string, object>;
@@ -280,10 +274,8 @@ public class CurrencyServiceUI : ContentUIBehaviour
         IsInteractable = true;
     }
 
-    private void OnGemsStateUpdate_Failure(int status, int code, string error, object _)
+    private void OnGemsStateUpdate_Failure()
     {
-        BCManager.LogError($"Cannot update User {DEFAULT_CURRENCY_TYPE}", status, code, error);
-
         AwardGemsField.text = string.Empty;
         ConsumeGemsField.text = string.Empty;
 
