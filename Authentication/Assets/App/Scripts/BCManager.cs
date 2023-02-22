@@ -202,9 +202,9 @@ public class BCManager : MonoBehaviour
     /// well as invoke the onSuccess Action with the JSON response.
     /// </summary>
     /// <param name="logMessage">Optional information to provide context on the success.</param>
-    /// <param name="onSuccess">Optional callback to invoke after successful API calls which passes the JSON response.</param>
-    public static SuccessCallback HandleSuccess(string logMessage = "", Action<string> onSuccess = null) =>
-        InternalHandleSuccess(logMessage, onSuccess?.Target, onSuccess != null ? (jsonResponse, _) => onSuccess.Invoke(jsonResponse) : null);
+    /// <param name="onSuccessS">Optional callback to invoke after successful API calls which passes the JSON response.</param>
+    public static SuccessCallback HandleSuccess(string logMessage = "", Action<string> onSuccessS = null) =>
+        InternalHandleSuccess(logMessage, onSuccessS?.Target, onSuccessS != null ? (jsonResponse, _) => onSuccessS.Invoke(jsonResponse) : null);
 
     /// <summary>
     /// Creates a callback for various brainCloud API calls for when they return as a success.
@@ -212,9 +212,9 @@ public class BCManager : MonoBehaviour
     /// well as invoke the onSuccess Action with the JSON response and the callback object.
     /// </summary>
     /// <param name="logMessage">Optional information to provide context on the success.</param>
-    /// <param name="onSuccess">Optional callback to invoke after successful API calls which passes the JSON response and the callback object.</param>
-    public static SuccessCallback HandleSuccess(string logMessage = "", Action<string, object> onSuccess = null) =>
-        InternalHandleSuccess(logMessage, onSuccess?.Target, onSuccess);
+    /// <param name="onSuccessSO">Optional callback to invoke after successful API calls which passes the JSON response and the callback object.</param>
+    public static SuccessCallback HandleSuccess(string logMessage = "", Action<string, object> onSuccessSO = null) =>
+        InternalHandleSuccess(logMessage, onSuccessSO?.Target, onSuccessSO);
 
     /// <summary>
     /// Creates a callback for various brainCloud API calls for when they return as a failure.
@@ -231,9 +231,9 @@ public class BCManager : MonoBehaviour
     /// well as invoke the onFailure Action with the JSON error.
     /// </summary>
     /// <param name="errorMessage">Optional information to provide context on the failure.</param>
-    /// <param name="onFailure">Optional callback to invoke after failed API calls which contains the JSON error.</param>
-    public static FailureCallback HandleFailure(string errorMessage, Action<string> onFailure = null) =>
-        InternalHandleFailure(errorMessage, onFailure?.Target, onFailure != null ? (jsonError, _) => onFailure.Invoke(jsonError) : null);
+    /// <param name="onFailureS">Optional callback to invoke after failed API calls which contains the JSON error.</param>
+    public static FailureCallback HandleFailure(string errorMessage, Action<string> onFailureS = null) =>
+        InternalHandleFailure(errorMessage, onFailureS?.Target, onFailureS != null ? (jsonError, _) => onFailureS.Invoke(jsonError) : null);
 
     /// <summary>
     /// Creates a callback for various brainCloud API calls for when they return as a failure.
@@ -241,23 +241,24 @@ public class BCManager : MonoBehaviour
     /// well as invoke the onFailure Action with the JSON error and the callback object.
     /// </summary>
     /// <param name="errorMessage">Optional information to provide context on the failure.</param>
-    /// <param name="onFailure">Optional callback to invoke after failed API calls which passes the JSON error and the callback object.</param>
-    public static FailureCallback HandleFailure(string errorMessage, Action<string, object> onFailure = null) =>
-        InternalHandleFailure(errorMessage, onFailure?.Target, onFailure);
+    /// <param name="onFailureSO">Optional callback to invoke after failed API calls which passes the JSON error and the callback object.</param>
+    public static FailureCallback HandleFailure(string errorMessage, Action<string, object> onFailureSO = null) =>
+        InternalHandleFailure(errorMessage, onFailureSO?.Target, onFailureSO);
 
-    private static SuccessCallback InternalHandleSuccess(string logMessage, object cbObject, Action<string, object> onSuccess)
+    private static SuccessCallback InternalHandleSuccess(string logMessage, object targetObject, Action<string, object> onSuccess)
     {
         logMessage = logMessage.IsEmpty() ? "Success" : logMessage;
-        return (jsonResponse, _) =>
+        return (jsonResponse, cbObject) =>
         {
+            cbObject ??= targetObject;
             string cbObjectName = cbObject != null ? cbObject.GetType().Name : string.Empty;
-            if (cbObjectName.Contains("DisplayClass"))
+            if (cbObjectName.Contains("DisplayClass")) // Generated Class
             {
                 cbObject = null;
             }
             else if (!cbObjectName.IsEmpty())
             {
-                logMessage = $"{cbObject.GetType().Name}: {logMessage}";
+                logMessage = $"{cbObjectName}: {logMessage}";
             }
 
             logMessage = $"{logMessage}\nJSON Response:\n{jsonResponse}";
@@ -274,19 +275,20 @@ public class BCManager : MonoBehaviour
         };
     }
 
-    private static FailureCallback InternalHandleFailure(string errorMessage, object cbObject, Action<string, object> onFailure = null)
+    private static FailureCallback InternalHandleFailure(string errorMessage, object targetObject, Action<string, object> onFailure = null)
     {
         errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
-        return (status, reasonCode, jsonError, _) =>
+        return (status, reasonCode, jsonError, cbObject) =>
         {
+            cbObject ??= targetObject;
             string cbObjectName = cbObject != null ? cbObject.GetType().Name : string.Empty;
-            if (cbObjectName.Contains("DisplayClass"))
+            if (cbObjectName.Contains("DisplayClass")) // Generated Class
             {
                 cbObject = null;
             }
             else if (!cbObjectName.IsEmpty())
             {
-                errorMessage = $"{cbObject.GetType().Name}: {errorMessage}";
+                errorMessage = $"{cbObjectName}: {errorMessage}";
             }
 
             errorMessage = $"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}";

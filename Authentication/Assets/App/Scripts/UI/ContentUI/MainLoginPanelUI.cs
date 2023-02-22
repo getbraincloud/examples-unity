@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
+using System;
 using System.Collections.Generic;
 using System.Net.Mail;
 using TMPro;
@@ -368,7 +369,9 @@ public class MainLoginPanelUI : ContentUIBehaviour
             }
 
             LoginContent.IsInteractable = false;
-            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJson, OnAuthenticationSuccess, OnAuthenticationFailure);
+            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJson, true,
+                                             OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                             OnFailure("Authentication Failed", OnAuthenticationFailure));
 
             return;
         }
@@ -384,15 +387,20 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
         if (EmailRadio.isOn)
         {
-            UserHandler.AuthenticateEmail(inputEmail, inputPassword, OnAuthenticationSuccess, OnAuthenticationFailure);
+            UserHandler.AuthenticateEmail(inputEmail, inputPassword, true,
+                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
         }
         else if (UniversalRadio.isOn)
         {
-            UserHandler.AuthenticateUniversal(inputUser, inputPassword, OnAuthenticationSuccess, OnAuthenticationFailure);
+            UserHandler.AuthenticateUniversal(inputUser, inputPassword, true,
+                                              OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                              OnFailure("Authentication Failed", OnAuthenticationFailure));
         }
         else // Anonymous login
         {
-            UserHandler.AuthenticateAnonymous(OnAuthenticationSuccess, OnAuthenticationFailure);
+            UserHandler.AuthenticateAnonymous(OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                              OnFailure("Authentication Failed", OnAuthenticationFailure));
         }
     }
 
@@ -402,17 +410,15 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
     private void HandleAutomaticLogin()
     {
-        Debug.Log("Logging in automatically...");
-
         LoginContent.IsInteractable = false;
 
-        UserHandler.HandleUserReconnect(() =>
+        SuccessCallback onSuccess = OnSuccess("Automatically Logging In...", () =>
         {
             RememberMeToggle.isOn = false;
-
             MainMenu.ChangeToAppContent();
-        },
-        () =>
+        });
+
+        FailureCallback onFailure = OnFailure("Automatic Login Failed", () =>
         {
             LoginContent.IsInteractable = true;
 
@@ -421,6 +427,8 @@ public class MainLoginPanelUI : ContentUIBehaviour
             RememberMeToggle.isOn = false;
             SetRememberMePref(false);
         });
+
+        UserHandler.HandleUserReconnect(onSuccess, onFailure);
     }
 
     private void OnAuthenticationSuccess()

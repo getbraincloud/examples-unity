@@ -111,7 +111,7 @@ public class ScriptServiceUI : ContentUIBehaviour
                 else
                 {
                     ScriptJsonField.DisplayError();
-                    Logger.Error("#APP - Json Data is not formatted properly!");
+                    Debug.LogError("#APP - Json Data is not formatted properly!");
                     return;
                 }
             }
@@ -119,7 +119,7 @@ public class ScriptServiceUI : ContentUIBehaviour
         catch
         {
             ScriptJsonField.DisplayError();
-            Logger.Error($"#APP - Cannot run script! Please check your Json data and try again.");
+            Debug.LogError($"#APP - Cannot run script! Please check your Json data and try again.");
             throw;
         }
     }

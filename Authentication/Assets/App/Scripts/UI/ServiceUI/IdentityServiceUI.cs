@@ -114,14 +114,14 @@ public class IdentityServiceUI : ContentUIBehaviour
                     !host.Contains('.') || host.StartsWith('.') || host.EndsWith('.'))
                 {
                     EmailLoginField.DisplayError();
-                    Logger.Error("#APP - Please use a valid email address.");
+                    Debug.LogError("#APP - Please use a valid email address.");
                     return false;
                 }
             }
             catch
             {
                 EmailLoginField.DisplayError();
-                Logger.Error("#APP - Please use a valid email address.");
+                Debug.LogError("#APP - Please use a valid email address.");
                 return false;
             }
 
@@ -139,7 +139,7 @@ public class IdentityServiceUI : ContentUIBehaviour
             if (UniversalLoginField.text.Length < MINIMUM_USERNAME_LENGTH)
             {
                 UniversalLoginField.DisplayError();
-                Logger.Error($"#APP - Please use a username with at least {MINIMUM_USERNAME_LENGTH} characters.");
+                Debug.LogError($"#APP - Please use a username with at least {MINIMUM_USERNAME_LENGTH} characters.");
                 return false;
             }
 
@@ -157,7 +157,7 @@ public class IdentityServiceUI : ContentUIBehaviour
             if (pwField.text.Length < MINIMUM_PASSWORD_LENGTH)
             {
                 pwField.DisplayError();
-                Logger.Error($"#APP - Please use a password with at least {MINIMUM_PASSWORD_LENGTH} characters.");
+                Debug.LogError($"#APP - Please use a password with at least {MINIMUM_PASSWORD_LENGTH} characters.");
                 return false;
             }
 
@@ -174,14 +174,14 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.AttachEmailIdentity(EmailLoginField.text, EmailPasswordField.text,
-                                                BCManager.HandleSuccess("AttachEmailIdentity Success", () => IsInteractable = true),
-                                                BCManager.HandleFailure("AttachEmailIdentity Failed", () => IsInteractable = true));
+                                                OnSuccess("AttachEmailIdentity Success", () => IsInteractable = true),
+                                                OnFailure("AttachEmailIdentity Failed", () => IsInteractable = true));
         }
         else
         {
             EmailLoginField.DisplayError();
             EmailPasswordField.DisplayError();
-            Logger.Error("#APP - Please fill out both the email and password fields properly.");
+            Debug.LogError("#APP - Please fill out both the email and password fields properly.");
         }
     }
 
@@ -192,14 +192,14 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.MergeEmailIdentity(EmailLoginField.text, EmailPasswordField.text,
-                                               BCManager.HandleSuccess("MergeEmailIdentity Success", () => IsInteractable = true),
-                                               BCManager.HandleFailure("MergeEmailIdentity Failed", () => IsInteractable = true));
+                                               OnSuccess("MergeEmailIdentity Success", () => IsInteractable = true),
+                                               OnFailure("MergeEmailIdentity Failed", () => IsInteractable = true));
         }
         else
         {
             EmailLoginField.DisplayError();
             EmailPasswordField.DisplayError();
-            Logger.Error("#APP - Please fill out both the email and password fields properly.");
+            Debug.LogError("#APP - Please fill out both the email and password fields properly.");
         }
     }
 
@@ -210,14 +210,14 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.AttachUniversalIdentity(UniversalLoginField.text, UniversalPasswordField.text,
-                                                    BCManager.HandleSuccess("MergeUniversalIdentity Success", () => IsInteractable = true),
-                                                    BCManager.HandleFailure("MergeUniversalIdentity Failed", () => IsInteractable = true));
+                                                    OnSuccess("MergeUniversalIdentity Success", () => IsInteractable = true),
+                                                    OnFailure("MergeUniversalIdentity Failed", () => IsInteractable = true));
         }
         else
         {
             UniversalLoginField.DisplayError();
             UniversalPasswordField.DisplayError();
-            Logger.Error("#APP - Please fill out both the username and password fields properly.");
+            Debug.LogError("#APP - Please fill out both the username and password fields properly.");
         }
     }
 
@@ -228,14 +228,14 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.MergeUniversalIdentity(UniversalLoginField.text, UniversalLoginField.text,
-                                                   BCManager.HandleSuccess("MergeUniversalIdentity Success", () => IsInteractable = true),
-                                                   BCManager.HandleFailure("MergeUniversalIdentity Failed", () => IsInteractable = true));
+                                                   OnSuccess("MergeUniversalIdentity Success", () => IsInteractable = true),
+                                                   OnFailure("MergeUniversalIdentity Failed", () => IsInteractable = true));
         }
         else
         {
             UniversalLoginField.DisplayError();
             UniversalPasswordField.DisplayError();
-            Logger.Error("#APP - Please fill out both the username and password fields properly.");
+            Debug.LogError("#APP - Please fill out both the username and password fields properly.");
         }
     }
 

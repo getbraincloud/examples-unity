@@ -1,6 +1,5 @@
 using BrainCloud;
 using BrainCloud.Common;
-using System;
 using System.Collections.Generic;
 
 /// TODO: More authentication methods are coming!
@@ -28,42 +27,26 @@ public static class UserHandler
 
     #region Authentication Methods
 
-    public static void AuthenticateEmail(string email, string password, Action onSuccess = null, Action onFailure = null)
-    {
-        BCManager.Wrapper.AuthenticateEmailPassword(email, password, true, BCManager.HandleSuccess("Email Authentication Successful", onSuccess),
-                                                                           BCManager.HandleFailure("Email Authentication Failed", onFailure));
-    }
+    public static void AuthenticateEmail(string email, string password, bool forceCreate = true, SuccessCallback onSuccess = null,
+                                         FailureCallback onFailure = null, object cbObject = null) =>
+        BCManager.Wrapper.AuthenticateEmailPassword(email, password, forceCreate, onSuccess, onFailure, cbObject);
 
-    public static void AuthenticateUniversal(string username, string password, Action onSuccess = null, Action onFailure = null)
-    {
-        BCManager.Wrapper.AuthenticateUniversal(username, password, true, BCManager.HandleSuccess("Universal Authentication Successful", onSuccess),
-                                                                          BCManager.HandleFailure("Universal Authentication Failed", onFailure));
-    }
+    public static void AuthenticateUniversal(string username, string password, bool forceCreate = true, SuccessCallback onSuccess = null,
+                                             FailureCallback onFailure = null, object cbObject = null) =>
+        BCManager.Wrapper.AuthenticateUniversal(username, password, forceCreate, onSuccess, onFailure, cbObject);
 
-    public static void AuthenticateAnonymous(Action onSuccess = null, Action onFailure = null)
-    {
-        BCManager.Wrapper.AuthenticateAnonymous(BCManager.HandleSuccess("Anonymous Authentication Successful", onSuccess),
-                                                BCManager.HandleFailure("Anonymous Authentication Failed", onFailure));
-    }
+    public static void AuthenticateAnonymous(SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
+        BCManager.Wrapper.AuthenticateAnonymous(onSuccess, onFailure, cbObject);
 
     public static void AuthenticateAdvanced(AuthenticationType authType, AuthenticationIds ids, Dictionary<string, object> extraJson,
-                                            Action onSuccess = null, Action onFailure = null)
-    {
-        BCManager.Wrapper.AuthenticateAdvanced(authType, ids, true, extraJson,BCManager.HandleSuccess("Authentication Successful", onSuccess),
-                                                                              BCManager.HandleFailure("Authentication Failed", onFailure));
-    }
+                                            bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
+        BCManager.Wrapper.AuthenticateAdvanced(authType, ids, forceCreate, extraJson, onSuccess, onFailure, cbObject);
 
-    public static void HandleUserReconnect(Action onSuccess = null, Action onFailure = null)
-    {
-        BCManager.Wrapper.Reconnect(BCManager.HandleSuccess("Reconnect Success", onSuccess),
-                                    BCManager.HandleFailure("Reconnect Failed", onFailure));
-    }
+    public static void HandleUserReconnect(SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
+        BCManager.Wrapper.Reconnect(onSuccess, onFailure, cbObject);
 
-    public static void HandleUserLogout(Action onSuccess = null, Action onFailure = null)
-    {
-        BCManager.PlayerStateService.Logout(BCManager.HandleSuccess("Logout Success", onSuccess),
-                                            BCManager.HandleFailure("Logout Failed", onFailure));
-    }
+    public static void HandleUserLogout(SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
+        BCManager.PlayerStateService.Logout(onSuccess, onFailure, cbObject);
 
     public static void ResetAuthenticationData()
     {

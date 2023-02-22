@@ -143,7 +143,7 @@ public class EntityServiceUI : ContentUIBehaviour
             if (NameField.text.Length < MINIMUM_REGISTRATION_NAME_LENGTH)
             {
                 NameField.DisplayError();
-                Logger.Error($"APP - Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
+                Debug.LogError($"APP - Please use with a name with at least {MINIMUM_REGISTRATION_NAME_LENGTH} characters.");
                 return false;
             }
 
@@ -164,13 +164,13 @@ public class EntityServiceUI : ContentUIBehaviour
                 {
                     AgeField.text = result < 0 ? 0.ToString() : AgeField.text;
                     AgeField.DisplayError();
-                    Logger.Error($"APP - Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
+                    Debug.LogError($"APP - Please use an age of at least {MINIMUM_REGISTRATION_AGE} years old.");
                     return false;
                 }
                 else if (result > MAXIMUM_REGISTRATION_AGE)
                 {
                     AgeField.DisplayError();
-                    Logger.Error("APP - Please use a valid age.");
+                    Debug.LogError("APP - Please use a valid age.");
                     return false;
                 }
 
@@ -178,7 +178,7 @@ public class EntityServiceUI : ContentUIBehaviour
             }
 
             AgeField.DisplayError();
-            Logger.Error("APP - Please use a valid age.");
+            Debug.LogError("APP - Please use a valid age.");
         }
 
         return false;
@@ -204,12 +204,12 @@ public class EntityServiceUI : ContentUIBehaviour
         else if (!inputName.IsEmpty())
         {
             NameField.DisplayError();
-            Logger.Error("APP - Please enter a valid name.");
+            Debug.LogError("APP - Please enter a valid name.");
         }
         else if (!inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            Logger.Error("APP - Please enter a valid age.");
+            Debug.LogError("APP - Please enter a valid age.");
         }
     }
 
@@ -220,7 +220,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
         if (userEntity.EntityId.IsEmpty())
         {
-            Logger.Error("APP - Entity ID is blank. Has an Entity been created yet?");
+            Debug.LogError("APP - Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
             return;
         }
@@ -242,13 +242,13 @@ public class EntityServiceUI : ContentUIBehaviour
         if (inputName.IsEmpty())
         {
             NameField.DisplayError();
-            Logger.Error("APP - Please enter a valid name.");
+            Debug.LogError("APP - Please enter a valid name.");
         }
 
         if (inputAge.IsEmpty())
         {
             AgeField.DisplayError();
-            Logger.Error("APP - Please enter a valid age.");
+            Debug.LogError("APP - Please enter a valid age.");
         }
     }
 
@@ -256,7 +256,7 @@ public class EntityServiceUI : ContentUIBehaviour
     {
         if (userEntity.EntityId.IsEmpty())
         {
-            Logger.Error("APP - Entity ID is blank. Has an Entity been created yet?");
+            Debug.LogError("APP - Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
             return;
         }
@@ -310,7 +310,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
         if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
         {
-            Logger.Error("APP - No entities were found for this user.");
+            Debug.LogError("APP - No entities were found for this user.");
             InitializeUI();
             IsInteractable = true;
             return;

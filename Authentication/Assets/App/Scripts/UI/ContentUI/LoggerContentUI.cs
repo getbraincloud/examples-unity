@@ -57,8 +57,6 @@ public class LoggerContentUI : ContentUIBehaviour
         CopyLogButton.onClick.AddListener(OnCopyLogButton);
 #endif
 
-        Logger.OnLogMessage += LogMessage;
-        Logger.OnLogError += LogError;
         BCManager.Client.EnableLogging(true);
         BCManager.Client.RegisterLogDelegate(OnLogDelegate);
     }
@@ -83,8 +81,6 @@ public class LoggerContentUI : ContentUIBehaviour
         StopAllCoroutines();
         ClearLogButton.onClick.RemoveAllListeners();
         CopyLogButton.onClick.RemoveAllListeners();
-        Logger.OnLogMessage -= LogMessage;
-        Logger.OnLogError -= LogError;
         BCManager.Client?.EnableLogging(false);
     }
 

@@ -1,3 +1,4 @@
+using BrainCloud;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -218,18 +219,24 @@ public class MainMenuUI : ContentUIBehaviour
 
     private void OnLogoutButton()
     {
-        UserHandler.HandleUserLogout(() =>
+        IsInteractable = false;
+
+        SuccessCallback onSuccess = OnSuccess("Logging Out...", () =>
         {
+            IsInteractable = true;
             LoginContent.ResetRememberUserPref();
             ChangeToLoginContent();
 
             AppContent.ResetUI();
             Logger.ResetUI();
-        },
-        () =>
-        {
-            Logger.LogError("#APP - Logout Failed! Please try again in a few moments.");
         });
+
+        FailureCallback onFailure = OnFailure("Logout Failed! Please try again in a few moments.", () =>
+        {
+            IsInteractable = true;
+        });
+
+        UserHandler.HandleUserLogout(onSuccess, onFailure);
     }
 
     #endregion
