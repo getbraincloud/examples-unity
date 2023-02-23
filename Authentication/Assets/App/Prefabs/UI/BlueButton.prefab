@@ -286,7 +286,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4292927712
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -473,6 +473,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8619392732370132897}
   - component: {fileID: 8619392732370132898}
+  - component: {fileID: 5093408088264024493}
   - component: {fileID: 5300559702700530651}
   - component: {fileID: 8619392732370132910}
   - component: {fileID: 8619392732370132909}
@@ -551,6 +552,21 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5093408088264024493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8619392732370132896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad89d9364691cd94f92c07356c06bd68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ButtonLabel: {fileID: 8619392731835069529}
+  IconLeft: {fileID: 8619392731486478952}
+  IconRight: {fileID: 8619392732321243905}
 --- !u!95 &5300559702700530651
 Animator:
   serializedVersion: 4

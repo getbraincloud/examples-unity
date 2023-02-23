@@ -7,76 +7,80 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 
+/// Used to display popups and present options to the user.
 /// </summary>
-public class PopUpUI : ContentUIBehaviour
+public class PopupUI : ContentUIBehaviour
 {
     private static readonly int UI_IS_ACTIVE = Animator.StringToHash("IsActive");
 
     [Header("Main")]
-    [SerializeField] private Animator PopUpAnim = default;
-    [SerializeField] private Animator BlockerAnim = default;
+    [SerializeField] private Animator PopupAnim = default;
     [SerializeField] private Button BlockerButton = default;
-    [SerializeField] private Transform Content = default;
+    [SerializeField] private Transform BodyContent = default;
 
     [Header("Labels")]
     [SerializeField] private TMP_Text HeaderLabel = default;
+
+    [Header("Text Templates")]
+    [SerializeField] private TMP_Text CenteredBodyText = default;
+    [SerializeField] private TMP_Text JustifiedBodyText = default;
     [SerializeField] private TMP_Text ErrorBodyText = default;
-    [SerializeField] private TMP_Text NormalBodyText = default;
 
     [Header("Button Templates")]
-    [SerializeField] private Button PlainButton = default;
-    [SerializeField] private Button BlueButton = default;
-    [SerializeField] private Button GreenButton = default;
-    [SerializeField] private Button RedButton = default;
+    [SerializeField] private ButtonContent PlainButton = default;
+    [SerializeField] private ButtonContent BlueButton = default;
+    [SerializeField] private ButtonContent GreenButton = default;
+    [SerializeField] private ButtonContent RedButton = default;
 
-    public bool PopUpActive
+    public bool PopupActive
     {
-        get => PopUpAnim.GetBool(UI_IS_ACTIVE);
-        set => SetPopUpActiveState(value);
+        get => PopupAnim.GetBool(UI_IS_ACTIVE);
+        set => PopupAnim.SetBool(UI_IS_ACTIVE, value);
     }
 
-    private List<GameObject> buttons = default;
+    private List<GameObject> uiElements = default;
 
     #region Unity Messages
 
     protected override void Awake()
     {
         HeaderLabel.text = string.Empty;
+        CenteredBodyText.text = string.Empty;
+        JustifiedBodyText.text = string.Empty;
         ErrorBodyText.text = string.Empty;
-        NormalBodyText.text = string.Empty;
 
         base.Awake();
     }
 
     private void OnEnable()
     {
-        //
+        BlockerButton.onClick.AddListener(OnClosePopupButton);
     }
 
     protected override void Start()
     {
-        PlainButton.gameObject.SetActive(false);
-        BlueButton.gameObject.SetActive(false);
-        GreenButton.gameObject.SetActive(false);
-        RedButton.gameObject.SetActive(false);
+        CenteredBodyText.gameObject.SetActive(false);
+        JustifiedBodyText.gameObject.SetActive(false);
+        ErrorBodyText.gameObject.SetActive(false);
 
-        buttons = new List<GameObject>();
+        uiElements = new List<GameObject>();
 
         base.Start();
+
+        InitializeUI();
     }
 
     private void OnDisable()
     {
-        BlockerButton.onClick.RemoveListener(OnClosePopUpButton);
+        BlockerButton.onClick.RemoveAllListeners();
 
-        ClearButtons();
+        ClearUIElements();
     }
 
     protected override void OnDestroy()
     {
-        buttons?.Clear();
-        buttons = null;
+        uiElements?.Clear();
+        uiElements = null;
 
         base.OnDestroy();
     }
@@ -87,53 +91,32 @@ public class PopUpUI : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        PopUpActive = false;
-        ClearButtons();
+        PopupActive = false;
+        ClearUIElements();
     }
 
-    private void CreateButtons()
+    private void CreateUIElement(string elementName, GameObject template)
     {
-        //foreach (ServiceItem serviceItem in ServiceItemUIs)
-        //{
-        //    MenuItemUI menuItem = Instantiate(MenuItemTemplate, MenuContent);
-        //    menuItem.gameObject.SetActive(true);
-        //    menuItem.gameObject.SetName(serviceItem.Name, "{0}MenuItem");
-        //    menuItem.Label = serviceItem.Name;
-        //    menuItem.ButtonAction = () => OnMenuItemButton(serviceItem);
-        //
-        //    menuItems.Add(menuItem);
-        //}
+        GameObject uiElement = Instantiate(template, BodyContent);
+        uiElement.SetActive(true);
+        uiElement.SetName(elementName);
+
+        uiElements.Add(uiElement);
     }
 
-    private void SetPopUpActiveState(bool isActive)
+    private void OnClosePopupButton()
     {
-        IsInteractable = !isActive;
-        PopUpAnim.SetBool(UI_IS_ACTIVE, isActive);
-        BlockerAnim.SetBool(UI_IS_ACTIVE, isActive);
+        PopupActive = false;
+    }
 
-        if (isActive)
+    private void ClearUIElements()
+    {
+        for (int i = 0; i < uiElements.Count; i++)
         {
-            BlockerButton.onClick.AddListener(OnClosePopUpButton);
-        }
-        else
-        {
-            BlockerButton.onClick.RemoveListener(OnClosePopUpButton);
-        }
-    }
-
-    private void OnClosePopUpButton()
-    {
-        PopUpActive = false;
-    }
-
-    private void ClearButtons()
-    {
-        for (int i = 0; i < buttons.Count; i++)
-        {
-            Destroy(buttons[i]);
+            Destroy(uiElements[i]);
         }
 
-        buttons.Clear();
+        uiElements.Clear();
     }
 
     #endregion

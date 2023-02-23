@@ -19,7 +19,7 @@ public class MainMenuUI : ContentUIBehaviour
 
     [Header("Main")]
     [SerializeField] private Animator MainMenuAnim = default;
-    [SerializeField] private Animator BlockerAnim = default;
+    [SerializeField] private Button BlockerButton = default;
     [SerializeField] private LayoutElement HeaderSpacer = default;
 
     [Header("Text")]
@@ -29,7 +29,6 @@ public class MainMenuUI : ContentUIBehaviour
     [Header("Buttons")]
     [SerializeField] private Button OpenMenuButton = default;
     [SerializeField] private Button CloseMenuButton = default;
-    [SerializeField] private Button BlockerButton = default;
     [SerializeField] private MenuItemUI LogoutButton = default;
 
     [Header("Menu Items")]
@@ -64,6 +63,7 @@ public class MainMenuUI : ContentUIBehaviour
     {
         OpenMenuButton.onClick.AddListener(OnOpenMenuButton);
         CloseMenuButton.onClick.AddListener(OnCloseMenuButton);
+        BlockerButton.onClick.AddListener(OnCloseMenuButton);
 
         if (!menuItems.IsNullOrEmpty())
         {
@@ -85,13 +85,15 @@ public class MainMenuUI : ContentUIBehaviour
         AppInfoLabel.text = string.Format(APP_INFO_TEXT, BCManager.AppName, BCManager.Client.AppId, BCManager.Client.AppVersion);
 
         base.Start();
+
+        InitializeUI();
     }
 
     private void OnDisable()
     {
         OpenMenuButton.onClick.RemoveAllListeners();
         CloseMenuButton.onClick.RemoveAllListeners();
-        BlockerButton.onClick.RemoveListener(OnCloseMenuButton);
+        BlockerButton.onClick.RemoveAllListeners();
 
         if (!menuItems.IsNullOrEmpty())
         {
@@ -119,7 +121,7 @@ public class MainMenuUI : ContentUIBehaviour
 
     public void ChangeToAppContent()
     {
-        if (!string.IsNullOrEmpty(UserHandler.ProfileID))
+        if (!UserHandler.ProfileID.IsEmpty())
         {
             HeaderLabel.gameObject.SetActive(true);
             ShowProfileID();
@@ -151,7 +153,7 @@ public class MainMenuUI : ContentUIBehaviour
 
     public void ShowProfileID()
     {
-        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(UserHandler.ProfileID))
+        if (HeaderLabel.gameObject.activeSelf && !UserHandler.ProfileID.IsEmpty())
         {
             HeaderLabel.text = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);
         }
@@ -159,7 +161,7 @@ public class MainMenuUI : ContentUIBehaviour
 
     public void ShowAnonymousID()
     {
-        if (HeaderLabel.isActiveAndEnabled && !string.IsNullOrEmpty(UserHandler.AnonymousID))
+        if (HeaderLabel.gameObject.activeSelf && !UserHandler.AnonymousID.IsEmpty())
         {
             HeaderLabel.text = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
         }
@@ -190,19 +192,8 @@ public class MainMenuUI : ContentUIBehaviour
 
     private void SetMainMenuActiveState(bool isActive)
     {
-        IsInteractable = !isActive;
         OpenMenuButton.gameObject.SetActive(!isActive);
         MainMenuAnim.SetBool(UI_IS_ACTIVE, isActive);
-        BlockerAnim.SetBool(UI_IS_ACTIVE, isActive);
-
-        if (isActive)
-        {
-            BlockerButton.onClick.AddListener(OnCloseMenuButton);
-        }
-        else
-        {
-            BlockerButton.onClick.RemoveListener(OnCloseMenuButton);
-        }
     }
 
     private void OnOpenMenuButton()
@@ -227,13 +218,9 @@ public class MainMenuUI : ContentUIBehaviour
     private void OnLogoutButton()
     {
         IsInteractable = false;
-        BlockerButton.enabled = false;
 
         SuccessCallback onSuccess = OnSuccess("Logging Out...", () =>
         {
-            IsInteractable = true;
-            BlockerButton.enabled = true;
-
             LoginContent.ResetRememberUserPref();
             ChangeToLoginContent();
 
@@ -244,7 +231,6 @@ public class MainMenuUI : ContentUIBehaviour
         FailureCallback onFailure = OnFailure("Logout Failed! Please try again in a few moments.", () =>
         {
             IsInteractable = true;
-            BlockerButton.enabled = true;
         });
 
         UserHandler.HandleUserLogout(onSuccess, onFailure);
