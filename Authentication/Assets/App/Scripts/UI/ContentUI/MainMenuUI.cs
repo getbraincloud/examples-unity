@@ -20,7 +20,6 @@ public class MainMenuUI : ContentUIBehaviour
     [Header("Main")]
     [SerializeField] private Animator MainMenuAnim = default;
     [SerializeField] private Animator BlockerAnim = default;
-    [SerializeField] private CanvasGroup HeaderCG = default;
     [SerializeField] private LayoutElement HeaderSpacer = default;
 
     [Header("Text")]
@@ -65,7 +64,6 @@ public class MainMenuUI : ContentUIBehaviour
     {
         OpenMenuButton.onClick.AddListener(OnOpenMenuButton);
         CloseMenuButton.onClick.AddListener(OnCloseMenuButton);
-        BlockerButton.onClick.AddListener(OnCloseMenuButton);
 
         if (!menuItems.IsNullOrEmpty())
         {
@@ -93,7 +91,7 @@ public class MainMenuUI : ContentUIBehaviour
     {
         OpenMenuButton.onClick.RemoveAllListeners();
         CloseMenuButton.onClick.RemoveAllListeners();
-        BlockerButton.onClick.RemoveAllListeners();
+        BlockerButton.onClick.RemoveListener(OnCloseMenuButton);
 
         if (!menuItems.IsNullOrEmpty())
         {
@@ -192,10 +190,19 @@ public class MainMenuUI : ContentUIBehaviour
 
     private void SetMainMenuActiveState(bool isActive)
     {
-        HeaderCG.interactable = !isActive;
+        IsInteractable = !isActive;
         OpenMenuButton.gameObject.SetActive(!isActive);
         MainMenuAnim.SetBool(UI_IS_ACTIVE, isActive);
         BlockerAnim.SetBool(UI_IS_ACTIVE, isActive);
+
+        if (isActive)
+        {
+            BlockerButton.onClick.AddListener(OnCloseMenuButton);
+        }
+        else
+        {
+            BlockerButton.onClick.RemoveListener(OnCloseMenuButton);
+        }
     }
 
     private void OnOpenMenuButton()
@@ -220,10 +227,13 @@ public class MainMenuUI : ContentUIBehaviour
     private void OnLogoutButton()
     {
         IsInteractable = false;
+        BlockerButton.enabled = false;
 
         SuccessCallback onSuccess = OnSuccess("Logging Out...", () =>
         {
             IsInteractable = true;
+            BlockerButton.enabled = true;
+
             LoginContent.ResetRememberUserPref();
             ChangeToLoginContent();
 
@@ -234,6 +244,7 @@ public class MainMenuUI : ContentUIBehaviour
         FailureCallback onFailure = OnFailure("Logout Failed! Please try again in a few moments.", () =>
         {
             IsInteractable = true;
+            BlockerButton.enabled = true;
         });
 
         UserHandler.HandleUserLogout(onSuccess, onFailure);
