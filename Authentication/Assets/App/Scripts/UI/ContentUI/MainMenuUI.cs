@@ -220,18 +220,26 @@ public class MainMenuUI : ContentUIBehaviour
     {
         MainMenuActive = false;
 
-        // TODO: Check if account is only anonymous
-        Popup.DisplayPopup(new PopupInfo("Disconnect Account?",
-                                         new PopupInfoBody[]
-                                         {
-                                             new PopupInfoBody("Would you like to disconnect your account upon logout?", PopupInfoBody.Type.Centered),
-                                             new PopupInfoBody("You are logged in anonymously. You will lose access to your account if you disconnect!", PopupInfoBody.Type.Error)
-                                         },
-                                         new PopupInfoButton[]
-                                         {
-                                             new PopupInfoButton("Logout", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(false)),
-                                             new PopupInfoButton("Logout and Disconnect", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(true)),
-                                         }));
+        PopupInfoBody logoutBody = new PopupInfoBody("Would you like to <b>disconnect</b> your account upon logout?", PopupInfoBody.Type.Centered);
+        PopupInfoBody warningBody = new PopupInfoBody("You are logged in anonymously. You will lose access to your account if you <b>disconnect!</b>", PopupInfoBody.Type.Error);
+
+        PopupInfoBody[] bodyTexts;
+        if (UserHandler.AnonymousUser)
+        {
+            bodyTexts = new PopupInfoBody[] { logoutBody, warningBody };
+        }
+        else
+        {
+            bodyTexts = new PopupInfoBody[] { logoutBody };
+        }
+
+        PopupInfoButton[] popupButtons = new PopupInfoButton[]
+        {
+            new PopupInfoButton("Logout", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(false)),
+            new PopupInfoButton("Logout and Disconnect", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(true)),
+        };
+
+        Popup.DisplayPopup(new PopupInfo("Disconnect Account?", bodyTexts, popupButtons));
     }
 
     private void OnLogoutConfirm(bool disconnectAccount)

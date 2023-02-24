@@ -48,6 +48,8 @@ public class LoggerContentUI : ContentUIBehaviour
 
     protected override void Awake()
     {
+        logGOs = new List<GameObject>();
+
         LogTemplate.text = string.Empty;
         WarningTemplate.text = string.Empty;
         ErrorTemplate.text = string.Empty;
@@ -71,8 +73,6 @@ public class LoggerContentUI : ContentUIBehaviour
 
     protected override void Start()
     {
-        logGOs = new List<GameObject>();
-
         LogTemplate.gameObject.SetActive(false);
         WarningTemplate.gameObject.SetActive(false);
         ErrorTemplate.gameObject.SetActive(false);
@@ -140,7 +140,12 @@ public class LoggerContentUI : ContentUIBehaviour
 
     private void CreateLogObject(string type, int count, string message, TMP_Text textTemplate)
     {
-        if (logGOs.Count >= MAX_LOG_MESSAGES)
+        if (logGOs == null)
+        {
+            Debug.LogWarning("Logger is not initialized yet!");
+            return;
+        }
+        else if (logGOs.Count >= MAX_LOG_MESSAGES)
         {
             Destroy(logGOs[0]);
             logGOs.RemoveAt(0);

@@ -31,7 +31,7 @@ public abstract class ContentUIBehaviour : MonoBehaviour
         set { ContentUICG.alpha = value < 0.0f ? 0.0f : value > 1.0f ? 1.0f : value; }
     }
 
-    private bool isInitialized = false;
+    protected bool UIInitialized { get; private set; } = false;
 
     #region Unity Messages
 
@@ -43,14 +43,14 @@ public abstract class ContentUIBehaviour : MonoBehaviour
 
     protected virtual void Start()
     {
-        isInitialized = true;
+        UIInitialized = true;
     }
 
     protected virtual void OnDestroy()
     {
         gameObject = null;
         transform = null;
-        isInitialized = false;
+        UIInitialized = false;
     }
 
     #endregion
@@ -62,7 +62,7 @@ public abstract class ContentUIBehaviour : MonoBehaviour
     /// </summary>
     public void ResetUI()
     {
-        if (isInitialized)
+        if (UIInitialized)
         {
             InitializeUI();
         }

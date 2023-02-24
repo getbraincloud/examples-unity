@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
+using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -412,12 +413,6 @@ public class MainLoginPanelUI : ContentUIBehaviour
     {
         LoginContent.IsInteractable = false;
 
-        SuccessCallback onSuccess = OnSuccess("Automatically Logging In...", () =>
-        {
-            RememberMeToggle.isOn = false;
-            MainMenu.ChangeToAppContent();
-        });
-
         FailureCallback onFailure = OnFailure("Automatic Login Failed", () =>
         {
             LoginContent.IsInteractable = true;
@@ -428,22 +423,26 @@ public class MainLoginPanelUI : ContentUIBehaviour
             SetRememberMePref(false);
         });
 
-        UserHandler.HandleUserReconnect(onSuccess, onFailure);
+        UserHandler.HandleUserReconnect(OnSuccess("Automatically Logging In...", OnAuthenticationSuccess), onFailure);
     }
 
     private void OnAuthenticationSuccess()
     {
-        if (EmailRadio.isOn || UniversalRadio.isOn)
-        {
-            BCManager.Wrapper.SetStoredAuthenticationType(EmailRadio.isOn ? AuthenticationType.Email.ToString()
-                                                                          : AuthenticationType.Universal.ToString());
-        }
-        else if (AnonymousRadio.isOn)
-        {
-            BCManager.Wrapper.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
-        }
-
         SetRememberMePref(RememberMeToggle.isOn);
+
+        BCManager.Wrapper.SetStoredAuthenticationType(EmailRadio.isOn ? AuthenticationType.Email.ToString() :
+                                                      UniversalRadio.isOn ? AuthenticationType.Universal.ToString() :
+                                                      AuthenticationType.Anonymous.ToString());
+
+        BCManager.IdentityService.GetIdentities(OnSuccess("Get Identities Success", OnGetIdentitiesSuccess),
+                                                OnFailure("Get Identities Failed", OnAuthenticationFailure));
+    }
+
+    private void OnGetIdentitiesSuccess(string response)
+    {
+        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
+
+        UserHandler.AnonymousUser = (data["identities"] as Dictionary<string, object>).Count <= 0;
 
         RememberMeToggle.isOn = false;
         InitializeUI();
