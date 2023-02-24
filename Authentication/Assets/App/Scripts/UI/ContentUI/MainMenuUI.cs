@@ -1,5 +1,5 @@
 using BrainCloud;
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -37,6 +37,7 @@ public class MainMenuUI : ContentUIBehaviour
     [SerializeField] private ServiceItem[] ServiceItemUIs = default;
 
     [Header("UI Control")]
+    [SerializeField] private PopupUI Popup = default;
     [SerializeField] private LoginContentUI LoginContent = default;
     [SerializeField] private AppContentUI AppContent = default;
     [SerializeField] private LoggerContentUI Logger = default;
@@ -84,9 +85,9 @@ public class MainMenuUI : ContentUIBehaviour
 
         AppInfoLabel.text = string.Format(APP_INFO_TEXT, BCManager.AppName, BCManager.Client.AppId, BCManager.Client.AppVersion);
 
-        base.Start();
-
         InitializeUI();
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -217,10 +218,33 @@ public class MainMenuUI : ContentUIBehaviour
 
     private void OnLogoutButton()
     {
+        MainMenuActive = false;
+
+        // TODO: Check if account is only anonymous
+        Popup.DisplayPopup(new PopupInfo("Disconnect Account?",
+                                         new PopupInfoBody[]
+                                         {
+                                             new PopupInfoBody("Would you like to disconnect your account upon logout?", PopupInfoBody.Type.Centered),
+                                             new PopupInfoBody("You are logged in anonymously. You will lose access to your account if you disconnect!", PopupInfoBody.Type.Error)
+                                         },
+                                         new PopupInfoButton[]
+                                         {
+                                             new PopupInfoButton("Logout", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(false)),
+                                             new PopupInfoButton("Logout and Disconnect", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(true)),
+                                         }));
+    }
+
+    private void OnLogoutConfirm(bool disconnectAccount)
+    {
         IsInteractable = false;
 
         SuccessCallback onSuccess = OnSuccess("Logging Out...", () =>
         {
+            if (disconnectAccount)
+            {
+                UserHandler.ResetAuthenticationData();
+            }
+
             LoginContent.ResetRememberUserPref();
             ChangeToLoginContent();
 

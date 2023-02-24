@@ -1,4 +1,3 @@
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,8 +12,33 @@ public class ButtonContent : MonoBehaviour
     [SerializeField] private Image IconLeft = default;
     [SerializeField] private Image IconRight = default;
 
-    [NonSerialized] public Button button = default;
-    [NonSerialized] public Animator animator = default;
+    private Button button;
+    public Button Button
+    {
+        get
+        {
+            if (button == null)
+            {
+                button = GetComponent<Button>();
+            }
+
+            return button;
+        }
+    }
+
+    private Animator animator;
+    public Animator Animator
+    {
+        get
+        {
+            if (animator == null)
+            {
+                animator = Button.animator;
+            }
+
+            return animator;
+        }
+    }
 
     public string Label
     {
@@ -50,9 +74,6 @@ public class ButtonContent : MonoBehaviour
 
     private void Start()
     {
-        button = GetComponent<Button>();
-        animator = button.animator;
-
         Label = ButtonLabel.text;
         ShowIcons();
     }

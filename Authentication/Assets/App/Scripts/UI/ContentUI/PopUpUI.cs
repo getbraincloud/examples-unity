@@ -1,8 +1,5 @@
-using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -65,21 +62,21 @@ public class PopupUI : ContentUIBehaviour
 
         uiElements = new List<GameObject>();
 
-        base.Start();
-
         InitializeUI();
+
+        base.Start();
     }
 
     private void OnDisable()
     {
         BlockerButton.onClick.RemoveAllListeners();
 
-        ClearUIElements();
+        ClearPopupBody();
     }
 
     protected override void OnDestroy()
     {
-        uiElements?.Clear();
+        ClearPopupBody();
         uiElements = null;
 
         base.OnDestroy();
@@ -89,19 +86,73 @@ public class PopupUI : ContentUIBehaviour
 
     #region UI
 
+    public void DisplayPopup(PopupInfo popupInfo)
+    {
+        ClearPopupBody();
+
+        HeaderLabel.text = popupInfo.Title;
+        HeaderLabel.gameObject.SetActive(popupInfo.HasTitle);
+
+        foreach(PopupInfoBody bodyInfo in popupInfo.BodyTexts)
+        {
+            AddBodyText(bodyInfo);
+        }
+
+        foreach (PopupInfoButton buttonInfo in popupInfo.Buttons)
+        {
+            AddButton(buttonInfo);
+        }
+
+        BlockerButton.enabled = popupInfo.CanDismiss;
+        if (popupInfo.CanDismiss)
+        {
+            AddButton(new PopupInfoButton(popupInfo.DismissButtonText, PopupInfoButton.Color.Red, null));
+        }
+
+        PopupActive = true;
+    }
+
+    public void DismissPopup() => OnClosePopupButton();
+
     protected override void InitializeUI()
     {
         PopupActive = false;
-        ClearUIElements();
+        ClearPopupBody();
     }
 
-    private void CreateUIElement(string elementName, GameObject template)
+    private void AddBodyText(PopupInfoBody bodyInfo)
     {
-        GameObject uiElement = Instantiate(template, BodyContent);
-        uiElement.SetActive(true);
-        uiElement.SetName(elementName);
+        TMP_Text template = bodyInfo.BodyType == PopupInfoBody.Type.Error ? ErrorBodyText :
+                            bodyInfo.BodyType == PopupInfoBody.Type.Justified ? JustifiedBodyText : CenteredBodyText;
 
-        uiElements.Add(uiElement);
+        TMP_Text bodyText = Instantiate(template, BodyContent);
+        bodyText.text = bodyInfo.Text;
+        bodyText.gameObject.SetActive(true);
+        bodyText.gameObject.SetName((uiElements.Count + 1).ToString(), "{0}ElementBodyText");
+
+        uiElements.Add(bodyText.gameObject);
+    }
+
+    private void AddButton(PopupInfoButton buttonInfo)
+    {
+        ButtonContent template = buttonInfo.ButtonColor == PopupInfoButton.Color.Red ? RedButton :
+                                 buttonInfo.ButtonColor == PopupInfoButton.Color.Green ? GreenButton :
+                                 buttonInfo.ButtonColor == PopupInfoButton.Color.Blue ? BlueButton: PlainButton;
+
+        ButtonContent bodyButton = Instantiate(template, BodyContent);
+        bodyButton.Label = buttonInfo.Label;
+        bodyButton.HideIcons();
+
+        if (buttonInfo.OnButtonAction != null)
+        {
+            bodyButton.Button.onClick.AddListener(() => buttonInfo.OnButtonAction());
+        }
+
+        bodyButton.Button.onClick.AddListener(OnClosePopupButton);
+        bodyButton.gameObject.SetActive(true);
+        bodyButton.gameObject.SetName((uiElements.Count + 1).ToString(), "{0}ElementButton");
+
+        uiElements.Add(bodyButton.gameObject);
     }
 
     private void OnClosePopupButton()
@@ -109,23 +160,21 @@ public class PopupUI : ContentUIBehaviour
         PopupActive = false;
     }
 
-    private void ClearUIElements()
+    private void ClearPopupBody()
     {
+        HeaderLabel.text = string.Empty;
+
         for (int i = 0; i < uiElements.Count; i++)
         {
+            if(uiElements[i].GetComponent<ButtonContent>() != null)
+            {
+                uiElements[i].GetComponent<ButtonContent>().Button.onClick.RemoveAllListeners();
+            }
+
             Destroy(uiElements[i]);
         }
 
         uiElements.Clear();
-    }
-
-    #endregion
-
-    #region brainCloud
-
-    private void OnServiceFunction()
-    {
-        //
     }
 
     #endregion

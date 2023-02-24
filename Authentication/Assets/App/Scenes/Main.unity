@@ -998,7 +998,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 751598708}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.8907106
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1152,7 +1152,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 100
+  m_SortingOrder: 200
   m_TargetDisplay: 0
 --- !u!114 &90648258
 MonoBehaviour:
@@ -1168,8 +1168,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ContentUICG: {fileID: 90648252}
   PopupAnim: {fileID: 90648251}
-  BlockerButton: {fileID: 1769563582}
-  BodyContent: {fileID: 90648250}
+  BlockerButton: {fileID: 2058025777}
+  BodyContent: {fileID: 1823069430}
   HeaderLabel: {fileID: 1946797506}
   CenteredBodyText: {fileID: 1478867566}
   JustifiedBodyText: {fileID: 366716170}
@@ -2712,6 +2712,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3692c8a3b58422f4982ee338921eda7c, type: 2}
   - {fileID: 11400000, guid: 15a52f136b6e02f4593722f65acf89bf, type: 2}
   - {fileID: 11400000, guid: bce668a14d9a64f4fbb0bddeaf6d22a9, type: 2}
+  Popup: {fileID: 90648258}
   LoginContent: {fileID: 1923327383}
   AppContent: {fileID: 567055888}
   Logger: {fileID: 952410311}
