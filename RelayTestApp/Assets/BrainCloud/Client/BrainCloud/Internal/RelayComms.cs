@@ -39,7 +39,6 @@ namespace BrainCloud.Internal
         public const byte RS2CL_RELAY = 2;
         public const byte RS2CL_ACK = 3;
         public const byte RS2CL_PONG = 4;
-        public const byte RS2CL_ENDMATCH = 6;
         #endregion
 
         private const int MAX_RSMG_HISTORY = 50;
@@ -110,16 +109,18 @@ namespace BrainCloud.Internal
             if (IsConnected()) send(buildDisconnectRequest());
             disconnect();
         }
-
-        public void EndMatch()
+        
+        /// <summary>
+        /// This call only supports apps that are supported with long lived lobbies.
+        /// END_MATCH will end a game session while players remain attached to the lobby that spawned it.
+        /// </summary>
+        /// <param name="in_jsonPayload">Extra data that is sent to all users in the same server</param>
+        public void EndMatch(Dictionary<string, object> in_jsonPayload)
         {
             if (IsConnected())
             {
-                Dictionary<string, object> json = new Dictionary<string, object>();
-                json["cxId"] = m_clientRef.RTTConnectionID;
-                json["lobbyId"] = m_connectOptions.lobbyId;
-                json["op"] = "END_MATCH";
-                send(buildEndMatchRequest(json));
+                send(buildEndMatchRequest(in_jsonPayload));
+
                 m_endMatchRequested = true;
             }
         }
@@ -400,7 +401,7 @@ namespace BrainCloud.Internal
                                 var callbackObj = m_connectedObj;
                                 m_connectionFailureCallback = null;
                                 m_connectedObj = null;
-                                callback(400, -1, buildRSRequestError(evt.message), callbackObj);
+                                callback(200, ReasonCodes.RS_ENDMATCH_REQUESTED, buildRSRequestError(evt.message), callbackObj);
                             }
                             break;
                         case EventType.System:
@@ -1121,10 +1122,7 @@ namespace BrainCloud.Internal
         {
             try
             {
-                if (m_tcpClient != null)
-                {
-                    m_tcpStream.EndWrite(result);    
-                }
+                m_tcpStream.EndWrite(result);
                 lock (fLock)
                 {
                     // Pop the message we just sent out of the queue
@@ -1477,7 +1475,7 @@ namespace BrainCloud.Internal
         // end 
 
         private bool m_resendConnectRequest = false;
-        private bool m_endMatchRequested;
+        private bool m_endMatchRequested = false;
         private DateTime m_lastConnectResendTime = DateTime.Now;
 
         private const int CONTROL_BYTE_HEADER_LENGTH = 1;

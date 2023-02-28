@@ -134,7 +134,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         if (m_dead) return;
 
-        if (jsonError.Contains("Disconnected by server from end match message"))
+        if (reasonCode == ReasonCodes.RS_ENDMATCH_REQUESTED)
         {
             return;
         }
@@ -199,7 +199,11 @@ public class BrainCloudManager : MonoBehaviour
     public void EndMatch()
     {
         GameManager.Instance.UpdateLobbyState();
-        m_bcWrapper.RelayService.EndMatch();
+        Dictionary<string, object> json = new Dictionary<string, object>();
+        json["cxId"] = m_bcWrapper.Client.RTTConnectionID;
+        json["lobbyId"] = StateManager.Instance.CurrentLobby.LobbyID;
+        json["op"] = "END_MATCH";
+        m_bcWrapper.RelayService.EndMatch(json);
     }
 
     public void ReconnectUser()

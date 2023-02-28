@@ -129,9 +129,9 @@ using BrainCloud.Internal;
             m_commsLayer.Disconnect();
         }
 
-        public void EndMatch()
+        public void EndMatch(Dictionary<string, object> json)
         {
-            m_commsLayer.EndMatch();
+            m_commsLayer.EndMatch(json);
         }
 
         /// <summary>
