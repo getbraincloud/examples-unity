@@ -1,8 +1,7 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using BrainCloud;
-using UnityEngine;
 
+[Serializable]
 public class Lobby
 {
     public string LobbyID;
@@ -27,7 +26,7 @@ public class Lobby
             {
                 user.AllowSendTo = false;
             }
-
+            user.IsAlive = true;
             if (user.ID.Equals(OwnerID))
             {
                 Dictionary<string, object> extra = jsonMember["extra"] as Dictionary<string, object>;
@@ -39,6 +38,18 @@ public class Lobby
             }
             Members.Add(user);
         }
+    }
+
+    public string ReassignOwnerID(string id)
+    {
+        OwnerID = FormatOwnerID(id);
+
+        return OwnerID;
+    }
+
+    public string FormatCxIdToProfileId(string id)
+    {
+        return FormatOwnerID(id);
     }
 
     private string FormatOwnerID(string id)

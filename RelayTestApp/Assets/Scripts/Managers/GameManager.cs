@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -28,11 +29,15 @@ public class GameManager : MonoBehaviour
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
+    public TMP_Text AppIdText;
+    public TMP_Text LobbyIdText;
     public Button ReconnectButton;
+    public Button JoinInProgressButton;
     //for updating members list of shockwaves
     public GameArea GameArea;  
     //local user's start button for starting a match
     public GameObject StartGameBtn;
+    public GameObject EndGameBtn;
     public TMP_Text LobbyLocalUserText;
     public TMP_Dropdown CompressionDropdown;
     private EventSystem _eventSystem;
@@ -45,6 +50,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance => _instance;
     
     //Local User Info
+    [SerializeField]
     private UserInfo _currentUserInfo;
     public UserInfo CurrentUserInfo
     {
@@ -63,13 +69,16 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
         ReconnectButton.gameObject.SetActive(false);
+        JoinInProgressButton.gameObject.SetActive(false);
         _eventSystem = EventSystem.current;
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
         LoadPlayerSettings();
+        LobbyIdText.enabled = false;
+        AppIdText.text = $"App ID: {BrainCloud.Plugin.Interface.AppId}";
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
@@ -149,7 +158,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < lobby.Members.Count; i++)
         {
             UserCursor newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
-            
+            lobby.Members[i].MousePosition = new Vector2(9999, 9999);
             newCursor.AdjustVisibility(false);
             newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
             newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
@@ -161,11 +170,36 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    public void ClearMatchEntries()
+    { 
+        if (_matchEntries.Count > 0)
+        {
+            foreach (UserEntry matchEntry in _matchEntries)
+            {
+                Destroy(matchEntry.gameObject);
+            }
+            _matchEntries.Clear();    
+        }
+    }
+    
     public void UpdateLobbyState()
     {   
-        AdjustEntryList(UserEntryLobbyParent.transform,UserEntryLobbyPrefab);
+        AdjustLobbyList();
         StartGameBtn.SetActive(IsLocalUserHost());
+        EndGameBtn.SetActive(IsLocalUserHost());
         CompressionDropdown.interactable = IsLocalUserHost();
+        LobbyIdText.text = $"Lobby ID: {StateManager.Instance.CurrentLobby.LobbyID}";
+        if (!LobbyIdText.enabled)
+        {
+            LobbyIdText.enabled = true;
+        }
+    }
+
+    public void UpdateMatchAndLobbyState()
+    {
+        UpdateLobbyState();
+        UpdateMatchState();
     }
     
     /// <summary>
@@ -173,31 +207,64 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void UpdateMatchState()
     {
-        AdjustEntryList(UserEntryMatchParent.transform,UserEntryMatchPrefab);
+        AdjustMatchList();
     }
 
-    private void AdjustEntryList(Transform parent, UserEntry prefab)
+    private void CleanUpChildrenOfParent(Transform parent)
     {
-        if (_matchEntries.Count > 0)
+        //Clean up any child objects in parent
+        if (parent.childCount > 0)
         {
-            foreach (UserEntry matchEntry in _matchEntries)
+            for (int i = 0; i < parent.childCount; ++i)
             {
-                Destroy(matchEntry.gameObject);   
+                Transform child = parent.GetChild(i);
+                Destroy(child.gameObject);
             }
-            _matchEntries.Clear();    
         }
-        
+    }
+
+    private void AdjustLobbyList()
+    {
+        CleanUpChildrenOfParent(UserEntryLobbyParent.transform);
         //populate user entries based on members in lobby
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            var newEntry = Instantiate(prefab, Vector3.zero, Quaternion.identity,parent);
-            SetUpUserEntry(lobby.Members[i], newEntry);
-            _matchEntries.Add(newEntry);    
+            if (lobby.Members[i].IsAlive)
+            {
+                var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
+                SetUpUserEntry(lobby.Members[i], newEntry);
+                _matchEntries.Add(newEntry);
+            }    
         }
 
         LobbyLocalUserText.text = _currentUserInfo.Username;
-        LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor); 
+        LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor);
+    }
+
+    private void AdjustMatchList()
+    {
+        CleanUpChildrenOfParent(UserEntryMatchParent.transform);
+        //populate user entries based on members in lobby
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        for (int i = 0; i < lobby.Members.Count; i++)
+        {
+            if (lobby.Members[i].IsAlive)
+            {
+                var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, UserEntryMatchParent.transform);
+                if (lobby.Members[i].IsReady)
+                {
+                    SetUpUserEntry(lobby.Members[i], newEntry);    
+                }
+                else
+                {
+                    lobby.Members[i].Username += " (In Lobby)";
+                    SetUpUserEntry(lobby.Members[i], newEntry);   
+                }
+
+                _matchEntries.Add(newEntry);
+            }    
+        }
     }
     
     private void SetUpUserEntry(UserInfo info,UserEntry entry)
@@ -226,12 +293,6 @@ public class GameManager : MonoBehaviour
         {
             CurrentUserInfo.AllowSendTo = isVisible;
         }
-    }
-    
-    public void MemberLeft()
-    {
-        UpdateMatchState();
-        UpdateCursorList();
     }
 
     public void EmptyCursorList()
