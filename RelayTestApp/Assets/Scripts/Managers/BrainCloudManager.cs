@@ -11,6 +11,9 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 
 public enum RelayCompressionTypes {JsonString, KeyValuePairString, DataStreamByte }
 
+//Names of lobby types are custom made within brainCloud portal.
+public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive}
+
 /// <summary>
 /// Example of how to communicate game logic to brain cloud functions
 /// </summary>
@@ -27,6 +30,13 @@ public class BrainCloudManager : MonoBehaviour
     public bool PresentWhileStarted
     {
         get => _presentWhileStarted;
+    }
+
+    private RelayLobbyTypes _lobbyType = RelayLobbyTypes.CursorPartyV2;
+
+    public RelayLobbyTypes LobbyType
+    {
+        set => _lobbyType = value;
     }
     private void Awake()
     {
@@ -552,7 +562,7 @@ public class BrainCloudManager : MonoBehaviour
         //
         m_bcWrapper.LobbyService.FindOrCreateLobby
         (
-            "CursorPartyV2Backfill",//"CursorPartyV2", // lobby type
+            _lobbyType.ToString(), 
             0, // rating
             1, // max steps
             algo, // algorithm

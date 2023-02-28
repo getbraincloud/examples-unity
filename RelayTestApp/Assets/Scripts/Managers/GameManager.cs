@@ -233,7 +233,7 @@ public class GameManager : MonoBehaviour
             if (lobby.Members[i].IsAlive)
             {
                 var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
-                SetUpUserEntry(lobby.Members[i], newEntry);
+                SetUpUserEntry(lobby.Members[i], newEntry, false);
                 _matchEntries.Add(newEntry);
             }    
         }
@@ -252,24 +252,22 @@ public class GameManager : MonoBehaviour
             if (lobby.Members[i].IsAlive)
             {
                 var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, UserEntryMatchParent.transform);
-                if (lobby.Members[i].IsReady)
-                {
-                    SetUpUserEntry(lobby.Members[i], newEntry);    
-                }
-                else
-                {
-                    lobby.Members[i].Username += " (In Lobby)";
-                    SetUpUserEntry(lobby.Members[i], newEntry);   
-                }
-
+                SetUpUserEntry(lobby.Members[i], newEntry, true);
                 _matchEntries.Add(newEntry);
             }    
         }
     }
     
-    private void SetUpUserEntry(UserInfo info,UserEntry entry)
+    private void SetUpUserEntry(UserInfo info,UserEntry entry, bool updateMatch)
     {
-        entry.UsernameText.text = info.Username;
+        if (info.IsReady)
+        {
+            entry.UsernameText.text = info.Username;    
+        }
+        else if(updateMatch)
+        {
+            entry.UsernameText.text = info.Username + " (In Lobby)";
+        }
         Color userColor = ReturnUserColor(info.UserGameColor);
         entry.UsernameText.color = userColor;
         if (entry.UserDotImage != null)
