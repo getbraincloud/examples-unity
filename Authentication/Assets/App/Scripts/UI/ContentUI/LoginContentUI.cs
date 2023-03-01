@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// Used for app navigation on the Login screen.
@@ -7,6 +9,8 @@ public class LoginContentUI : ContentUIBehaviour
 {
     [Header("Main")]
     [SerializeField] private MainLoginPanelUI MainLoginPanel = default;
+
+    #region Unity Messages
 
     private void OnEnable()
     {
@@ -17,6 +21,8 @@ public class LoginContentUI : ContentUIBehaviour
     {
         MainLoginPanel.IsInteractable = false;
     }
+
+    #endregion
 
     #region UI
 
