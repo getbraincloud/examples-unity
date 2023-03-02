@@ -393,6 +393,22 @@ MonoBehaviour:
   ScriptDropdown: {fileID: 3872062620080246932}
   ScriptJsonField: {fileID: 1905653117342142099}
   RunButton: {fileID: 4765486211302057466}
+--- !u!114 &-3070653116993636799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9080330883380787399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51374db19d159404ca070b3430ee7ff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UIElementNavigationOrder:
+  - {fileID: 3872062620080246932}
+  - {fileID: 1905653117342142099}
+  - {fileID: 4765486211302057466}
 --- !u!224 &9080330883380787400 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5458227114281465632, guid: 9dcff0776dcd88449828a79f7669af3a, type: 3}
@@ -581,6 +597,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8619392732370132898, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f9a30b39abd3ea4396cc1d4d10a0954, type: 3}
 --- !u!114 &4765486211302057466 stripped
@@ -742,6 +762,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3444806324111120814, guid: 39ea6f1a1c6006642ac7e5abbaae7d7e, type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3444806324111120814, guid: 39ea6f1a1c6006642ac7e5abbaae7d7e, type: 3}
       propertyPath: m_ScrollSensitivity
       value: 20
       objectReference: {fileID: 0}
@@ -808,6 +832,10 @@ PrefabInstance:
     - target: {fileID: 6604049480537248664, guid: a7575caf434af704e948446f792131a2, type: 3}
       propertyPath: m_Name
       value: CCDropdown
+      objectReference: {fileID: 0}
+    - target: {fileID: 6604049480537248678, guid: a7575caf434af704e948446f792131a2, type: 3}
+      propertyPath: m_Navigation.m_Mode
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6604049480537248679, guid: a7575caf434af704e948446f792131a2, type: 3}
       propertyPath: m_Pivot.x

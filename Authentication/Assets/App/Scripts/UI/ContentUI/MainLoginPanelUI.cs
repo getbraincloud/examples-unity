@@ -169,7 +169,11 @@ public class MainLoginPanelUI : ContentUIBehaviour
     {
         if (value)
         {
-            InitializeUI();
+            if (!EmailField.isActiveAndEnabled)
+            {
+                InitializeUI();
+            }
+
             EmailField.gameObject.SetActive(true);
             UsernameField.gameObject.SetActive(false);
         }
@@ -179,7 +183,11 @@ public class MainLoginPanelUI : ContentUIBehaviour
     {
         if (value)
         {
-            InitializeUI();
+            if (!UsernameField.isActiveAndEnabled)
+            {
+                InitializeUI();
+            }
+
             UsernameField.gameObject.SetActive(true);
             EmailField.gameObject.SetActive(false);
         }
@@ -187,7 +195,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
     private void OnAnonymousRadio(bool value)
     {
-        if (value)
+        if (PasswordField.interactable)
         {
             InitializeUI();
         }

@@ -1,15 +1,15 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// 
+/// Simple way to navigate UI elements using Tab and Shift+Tab.
+/// TODO: Will be expanded upon in the future for controller support.
 /// </summary>
-public class UINavigation : MonoBehaviour
+public class UINavigation : MonoBehaviour, ISelectHandler
 {
-    [SerializeField] private Selectable NextUINavigation = default;
-    [SerializeField] private Selectable PreviousUINavigation = default;
+    //[SerializeField] private Selectable NextNavigation = default;
+    //[SerializeField] private Selectable PreviousNavigation = default;
     [SerializeField] private Selectable[] UIElementNavigationOrder = default;
 
     private int selectedIndex = 0;
@@ -24,15 +24,6 @@ public class UINavigation : MonoBehaviour
         eventSystem = EventSystem.current;
     }
 
-    private void OnEnable()
-    {
-        foreach (Selectable selectable in UIElementNavigationOrder)
-        {
-
-            //selectable.
-        }
-    }
-
     private void Start()
     {
         Debug.Assert(eventSystem != null, "There is no EventSystem in the scene!");
@@ -41,6 +32,11 @@ public class UINavigation : MonoBehaviour
         {
             SetSelectedGameObject(UIElementNavigationOrder[0].gameObject);
         }
+    }
+
+    private void OnDestroy()
+    {
+        eventSystem = null;
     }
 
     private void Update()
@@ -53,44 +49,42 @@ public class UINavigation : MonoBehaviour
             eventSystem.currentSelectedGameObject.GetComponent<Selectable>() is Selectable current &&
             GetSelectableIndex(current) >= 0 && selectedIndex < maxIndex)
         {
-            //bool isInputField = current.GetComponent<TMP_InputField>() != null;
-            //
-            //getNext = getNext || !isInputField && (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.RightArrow));
-            //getPrev = getPrev || !isInputField && (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.LeftArrow));
-
             SetSelectedGameObject(getPrev ? GetPreviousUIElement() : getNext ? GetNextUIElement() : null);
         }
-        //else if (!hasSelectedGameObject && (getNext || getPrev ||
-        //         Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
-        //         Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)))
-        //{
-        //    SetSelectedGameObject(GetCurrentElement());
-        //}
-    }
-
-    private void OnDisable()
-    {
-
-    }
-
-    private void OnDestroy()
-    {
-        eventSystem = null;
+        else if (!hasSelectedGameObject && selectedIndex >= 0 && (getNext || getPrev ||
+                 Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
+                 Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow)))
+        {
+            selectedIndex--;
+            selectedIndex = selectedIndex < 0 ? maxIndex - 1 : selectedIndex;
+            SetSelectedGameObject(GetNextUIElement());
+        }
     }
 
     #endregion
 
-    private void OnUIElementSelected(BaseEventData eventData)
-    {
+    #region UINavigation
 
+    public void OnSelect(BaseEventData eventData)
+    {
+        if (selectedIndex < 0)
+        {
+            selectedIndex = maxIndex;
+        }
+        else
+        {
+            selectedIndex--;
+            selectedIndex = selectedIndex < 0 ? maxIndex - 1 : selectedIndex;
+        }
+        
+        SetSelectedGameObject(GetNextUIElement());
     }
 
-    private void SetSelectedGameObject(GameObject next)
+    private void SetSelectedGameObject(GameObject next, BaseEventData eventData = null)
     {
         if (next != null)
         {
-            Debug.Log(next.name);
-            eventSystem.SetSelectedGameObject(next, new BaseEventData(eventSystem));
+            eventSystem.SetSelectedGameObject(next, eventData != null ? eventData : new BaseEventData(eventSystem));
         }
     }
 
@@ -112,19 +106,6 @@ public class UINavigation : MonoBehaviour
         return selectedIndex;
     }
 
-    private GameObject GetCurrentElement()
-    {
-        if (selectedIndex < 0)
-        {
-            return null;
-        }
-
-        selectedIndex--;
-        selectedIndex = selectedIndex < 0 ? maxIndex - 1 : selectedIndex;
-
-        return GetNextUIElement();
-    }
-
     private GameObject GetNextUIElement()
     {
         if (selectedIndex < 0)
@@ -135,12 +116,13 @@ public class UINavigation : MonoBehaviour
         Selectable selected = null;
         for (int i = 0; i < maxIndex; i++)
         {
-            if(selectedIndex++ >= maxIndex && IsSelectable(NextUINavigation))
-            {
-                selectedIndex = -1;
-                return NextUINavigation.gameObject;
-            }
+            //if(selectedIndex++ >= maxIndex && IsSelectable(NextSelectable))
+            //{
+            //    selectedIndex = -1;
+            //    return NextSelectable.gameObject;
+            //}
 
+            selectedIndex++;
             selectedIndex = selectedIndex >= maxIndex ? 0 : selectedIndex;
             selected = UIElementNavigationOrder[selectedIndex];
 
@@ -163,12 +145,13 @@ public class UINavigation : MonoBehaviour
         Selectable selected = null;
         for (int i = 0; i < maxIndex; i++)
         {
-            if (selectedIndex-- < 0 && IsSelectable(PreviousUINavigation))
-            {
-                selectedIndex = -1;
-                return PreviousUINavigation.gameObject;
-            }
+            //if (selectedIndex-- < 0 && IsSelectable(PreviousSelectable))
+            //{
+            //    selectedIndex = -1;
+            //    return PreviousSelectable.gameObject;
+            //}
 
+            selectedIndex--;
             selectedIndex = selectedIndex < 0 ? maxIndex - 1 : selectedIndex;
             selected = UIElementNavigationOrder[selectedIndex];
 
@@ -180,4 +163,6 @@ public class UINavigation : MonoBehaviour
 
         return selected != null ? selected.gameObject : null;
     }
+
+    #endregion
 }
