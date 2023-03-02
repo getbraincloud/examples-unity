@@ -2,6 +2,7 @@ using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 /// <summary>
@@ -18,6 +19,11 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
     [SerializeField] private Transform StatsContent = default;
     [SerializeField] private StatsContainerUI StatsContainerTemplate = default;
 
+    [Header("Info Row")]
+    [SerializeField] private GameObject InfoRow = default;
+    [SerializeField] private TMP_Text InfoLabel = default;
+    [SerializeField] private TMP_Text ErrorLabel = default;
+
     private Dictionary<string, StatsContainerUI> userStatContainers { get; set; }
     private BrainCloudPlayerStatistics userStatsService = default;
 
@@ -25,11 +31,12 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
 
     protected override void Start()
     {
-        StatsContainerTemplate.StatName = "LOADING...";
-        StatsContainerTemplate.Value = -1;
-
         userStatContainers = new Dictionary<string, StatsContainerUI>();
         userStatsService = BCManager.PlayerStatisticsService;
+
+        StatsContainerTemplate.StatName = string.Empty;
+        StatsContainerTemplate.Value = 0;
+        StatsContainerTemplate.gameObject.SetActive(false);
 
         InitializeUI();
 
@@ -51,22 +58,28 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
     protected override void InitializeUI()
     {
         IsInteractable = false;
+
+        InfoLabel.gameObject.SetActive(true);
+        ErrorLabel.gameObject.SetActive(false);
+        InfoRow.SetActive(true);
+
         userStatsService.ReadAllUserStats(OnSuccess("Loading Player Stats...", OnReadUserStats_Success),
                                           OnFailure("ReadAllUserStats Failed", IsInteractableCheck));
     }
 
     private void IsInteractableCheck()
     {
-        if (StatsContent.childCount > 1)
+        if (userStatContainers.Count > 0)
         {
             IsInteractable = true;
-            StatsContainerTemplate.gameObject.SetActive(false);
+            InfoRow.SetActive(false);
         }
         else
         {
             IsInteractable = false;
-            StatsContainerTemplate.StatName = "ERROR";
-            StatsContainerTemplate.gameObject.SetActive(true);
+            InfoLabel.gameObject.SetActive(false);
+            ErrorLabel.gameObject.SetActive(true);
+            InfoRow.SetActive(true);
         }
     }
 

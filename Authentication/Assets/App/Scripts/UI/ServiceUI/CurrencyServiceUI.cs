@@ -128,8 +128,19 @@ public class CurrencyServiceUI : ContentUIBehaviour
         ConsumeGemsField.text = string.Empty;
         IncrementXPField.DisplayNormal();
 
-        userStateService.ReadUserState(OnSuccess("User XP Updated", OnXPStateUpdate_Success),
-                                       OnFailure("Cannot update User XP", OnXPStateUpdate_Failure));
+        SuccessCallback initialSuccess = OnSuccess("User XP Updated", (response) =>
+        {
+            OnXPStateUpdate_Success(response);
+            UpdateUserGems();
+        });
+
+        FailureCallback initialFailure = OnFailure("Cannot update User XP", () =>
+        {
+            OnXPStateUpdate_Failure();
+            UpdateUserGems();
+        });
+
+        userStateService.ReadUserState(initialSuccess, initialFailure);
     }
 
     private void ClampAwardAmount(TMP_InputField field, string value)
@@ -230,14 +241,13 @@ public class CurrencyServiceUI : ContentUIBehaviour
         PlayerLevelField.text = data["experienceLevel"].ToString();
         XPAccruedField.text = data["experiencePoints"].ToString();
         IncrementXPField.text = string.Empty;
-
-        UpdateUserGems();
+        IsInteractable = true;
     }
 
     private void OnXPStateUpdate_Failure()
     {
         IncrementXPField.text = string.Empty;
-        UpdateUserGems();
+        IsInteractable = true;
     }
 
     private void OnGemsStateUpdate_Success(string response)
