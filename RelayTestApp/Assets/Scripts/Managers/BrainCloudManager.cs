@@ -201,6 +201,7 @@ public class BrainCloudManager : MonoBehaviour
         //Setting up a update to send to brain cloud about local users color
         var extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
+        extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
 
         //
         m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
@@ -439,6 +440,7 @@ public class BrainCloudManager : MonoBehaviour
                 case "STARTING":
                     // Save our picked color index
                     _presentWhileStarted = true;
+                    GameManager.Instance.UpdatePresentSinceStart();
                     Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
                     if (!GameManager.Instance.IsLocalUserHost())
                     {
@@ -528,6 +530,7 @@ public class BrainCloudManager : MonoBehaviour
         else if (json["op"] as string == "END_MATCH")
         {
             StateManager.Instance.isReady = false;
+            GameManager.Instance.CurrentUserInfo.PresentSinceStart = false;
             GameManager.Instance.UpdateMatchAndLobbyState();
             StateManager.Instance.ChangeState(GameStates.Lobby);
         }

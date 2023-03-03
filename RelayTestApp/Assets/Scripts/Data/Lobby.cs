@@ -35,6 +35,11 @@ public class Lobby
                     BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes) extra["relayCompressionType"];
                     GameManager.Instance.CompressionDropdown.value = (int) extra["relayCompressionType"];   
                 }
+
+                if (extra.ContainsKey("presentSinceStart"))
+                {
+                    user.PresentSinceStart = (bool) extra["presentSinceStart"];
+                }
             }
             Members.Add(user);
         }

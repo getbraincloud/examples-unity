@@ -29,6 +29,7 @@ public class UserInfo
     public string cxId;
     //Used to determine if user is in lobby or in match.
     public bool IsReady;
+    public bool PresentSinceStart;
     public UserInfo(Dictionary<string, object> userJson)
     {
         cxId = userJson["cxId"] as string;
@@ -38,5 +39,9 @@ public class UserInfo
         int colorIndex = (int)extra["colorIndex"];
         UserGameColor = (GameColors) colorIndex;
         IsReady = (bool)userJson["isReady"];
+        if (userJson.ContainsKey("presentSinceStart"))
+        {
+            PresentSinceStart = (bool)userJson["presentSinceStart"];    
+        }
     }
 }

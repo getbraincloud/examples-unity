@@ -121,6 +121,26 @@ public class GameManager : MonoBehaviour
         //Send update to BC
         Dictionary<string,object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
+        if (IsLocalUserHost())
+        {
+            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+        }
+        BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
+        (
+            StateManager.Instance.CurrentLobby.LobbyID,
+            StateManager.Instance.isReady,
+            extra
+        );
+    }
+
+    public void UpdatePresentSinceStart()
+    {
+        _currentUserInfo.PresentSinceStart = true;
+        //Send update to BC
+        Dictionary<string,object> extra = new Dictionary<string, object>();
+        extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
         if (IsLocalUserHost())
         {
             extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
@@ -138,6 +158,7 @@ public class GameManager : MonoBehaviour
         //Send update to BC
         Dictionary<string,object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
+        extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
         if (IsLocalUserHost())
         {
             extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
@@ -260,11 +281,9 @@ public class GameManager : MonoBehaviour
     
     private void SetUpUserEntry(UserInfo info,UserEntry entry, bool updateMatch)
     {
-        if (info.IsReady)
-        {
-            entry.UsernameText.text = info.Username;    
-        }
-        else if(updateMatch)
+        entry.UsernameText.text = info.Username;
+        
+        if(updateMatch && !info.IsReady && !info.PresentSinceStart)
         {
             entry.UsernameText.text = info.Username + " (In Lobby)";
         }
