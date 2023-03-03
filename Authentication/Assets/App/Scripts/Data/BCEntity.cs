@@ -49,13 +49,13 @@ public struct BCEntity
         EntityType = !entityType.IsEmpty() ? entityType : EntityType;
     }
 
-    public Dictionary<string, object> DataToJson() => new Dictionary<string, object>
+    public Dictionary<string, object> DataToJSON() => new Dictionary<string, object>
     {
         { "name", Name },
         { "age", Age }
     };
 
-    public void CreateFromJson(Dictionary<string, object> data)
+    public void CreateFromJSON(Dictionary<string, object> data)
     {
         Version = (int)data["version"];
         EntityId = data["entityId"] as string;

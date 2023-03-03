@@ -112,7 +112,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE, NameField.text, AgeField.text);
 
         customEntityService.CreateEntity(customEntity.EntityType,
-                                         JsonWriter.Serialize(customEntity.DataToJson()),
+                                         JsonWriter.Serialize(customEntity.DataToJSON()),
                                          customEntity.ACL.ToJsonString(),
                                          null,
                                          customEntity.IsOwned,
@@ -142,7 +142,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         customEntityService.UpdateEntity(customEntity.EntityType,
                                          customEntity.EntityId,
                                          -1,
-                                         JsonWriter.Serialize(customEntity.DataToJson()),
+                                         JsonWriter.Serialize(customEntity.DataToJSON()),
                                          customEntity.ACL.ToJsonString(),
                                          null,
                                          OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
@@ -233,7 +233,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
             return;
         }
 
-        customEntity.CreateFromJson(true, data[0]);
+        customEntity.CreateFromJSON(true, data[0]);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);

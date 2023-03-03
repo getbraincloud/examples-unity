@@ -119,10 +119,10 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        string jsonData = "{ \"" + globalStatName + "\" : 1 }";
+        string json = "{ \"" + globalStatName + "\" : 1 }";
 
-        globalStatsService.IncrementGlobalStats(jsonData, OnSuccess("Incremented Stat", OnIncrementGlobalStats_Success),
-                                                          OnFailure("IncrementGlobalStats Failed", IsInteractableCheck));
+        globalStatsService.IncrementGlobalStats(json, OnSuccess("Incremented Stat", OnIncrementGlobalStats_Success),
+                                                      OnFailure("IncrementGlobalStats Failed", IsInteractableCheck));
     }
 
     #endregion

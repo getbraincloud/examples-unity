@@ -1,9 +1,7 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 /// <summary>
-/// Used for app navigation on the Login screen.
+/// Used for functionality on the Login screen.
 /// </summary>
 public class LoginContentUI : ContentUIBehaviour
 {

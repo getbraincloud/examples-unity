@@ -129,25 +129,12 @@ public class MainMenuUI : ContentUIBehaviour
 
     public void ChangeToAppContent()
     {
-        if (!UserHandler.ProfileID.IsEmpty())
-        {
-            ProfileIDButton.Label = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);
-            ProfileIDButton.gameObject.SetActive(true);
-        }
-
-        if (!UserHandler.AnonymousID.IsEmpty())
-        {
-            AnonymousIDButton.Label = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
-            AnonymousIDButton.gameObject.SetActive(true);
-        }
-
         LoginContent.IsInteractable = false;
         AppContent.IsInteractable = true;
 
         LoginContent.gameObject.SetActive(false);
         AppContent.gameObject.SetActive(true);
         OpenMenuButton.gameObject.SetActive(true);
-        HeaderSpacer.SetActive(!(ProfileIDButton.gameObject.activeSelf || AnonymousIDButton.gameObject.activeSelf));
     }
 
     public void ChangeToLoginContent()
@@ -191,6 +178,20 @@ public class MainMenuUI : ContentUIBehaviour
 
     private void SetMainMenuActiveState(bool isActive)
     {
+        if (!UserHandler.ProfileID.IsEmpty())
+        {
+            ProfileIDButton.Label = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);
+            ProfileIDButton.gameObject.SetActive(true);
+        }
+
+        if (!UserHandler.AnonymousID.IsEmpty())
+        {
+            AnonymousIDButton.Label = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
+            AnonymousIDButton.gameObject.SetActive(true);
+        }
+
+        HeaderSpacer.SetActive(!(ProfileIDButton.gameObject.activeSelf || AnonymousIDButton.gameObject.activeSelf));
+
         OpenMenuButton.gameObject.SetActive(!isActive);
         MainMenuAnim.SetBool(UI_IS_ACTIVE, isActive);
     }
@@ -210,7 +211,7 @@ public class MainMenuUI : ContentUIBehaviour
         if (!UserHandler.ProfileID.IsEmpty())
         {
             GUIUtility.systemCopyBuffer = UserHandler.ProfileID;
-            Debug.Log($"Copied Profile ID: {UserHandler.ProfileID}");
+            Debug.Log($"Copied Profile ID ({UserHandler.ProfileID}) to clipboard.");
         }
         else
         {
@@ -223,7 +224,7 @@ public class MainMenuUI : ContentUIBehaviour
         if (!UserHandler.AnonymousID.IsEmpty())
         {
             GUIUtility.systemCopyBuffer = UserHandler.AnonymousID;
-            Debug.Log($"Copied Anonymous ID: {UserHandler.AnonymousID}");
+            Debug.Log($"Copied Anonymous ID ({UserHandler.AnonymousID}) to clipboard.");
         }
         else
         {
@@ -245,7 +246,7 @@ public class MainMenuUI : ContentUIBehaviour
         MainMenuActive = false;
 
         PopupInfoBody logoutBody = new PopupInfoBody("Would you like to <b>disconnect</b> your account upon logout?", PopupInfoBody.Type.Centered);
-        PopupInfoBody warningBody = new PopupInfoBody("You are logged in anonymously. You will lose access to your account if you <b>disconnect!</b>", PopupInfoBody.Type.Error);
+        PopupInfoBody warningBody = new PopupInfoBody("Warning!\nYou are logged in anonymously. You will lose access to your account if you <b>disconnect!</b>", PopupInfoBody.Type.Error);
 
         PopupInfoBody[] bodyTexts;
         if (UserHandler.AnonymousUser)

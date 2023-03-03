@@ -8,8 +8,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// <para>
-/// An example of how a Logger can be used in your app.
-/// Can be useful to help debug your app on tester devices.
+/// An example of how a Logger can be used in your app. Can be useful to help debug your app on tester devices.
 /// </para>
 ///
 /// <seealso cref="BCManager"/><br></br>
@@ -19,7 +18,7 @@ public class LoggerContentUI : ContentUIBehaviour
 {
     private const int MAX_LOG_MESSAGES = 30;
     private const string LOG_APP_HEADER = "#APP";
-    private const string LOG_INITIAL_TEXT = "Logs, Json, and Error messages will appear here.";
+    private const string LOG_INITIAL_TEXT = "Logs, JSON, and Error messages will appear here.";
     private const string LOG_COPY_TEXT = "Previous BCC Log copied to clipboard.";
 
     [Header("Main")]
@@ -224,7 +223,7 @@ public class LoggerContentUI : ContentUIBehaviour
 
         string message = log[..log.IndexOf("\n")]; // Server Message 
 
-        string json = log[(log.LastIndexOf("\n") + 1)..]; // Build Json Response
+        string json = log[(log.LastIndexOf("\n") + 1)..]; // Build JSON Response
         if (json.StartsWith("{") && json.EndsWith("}"))
         {
             StringBuilder sb = new StringBuilder();

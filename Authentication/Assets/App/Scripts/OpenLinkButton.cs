@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Simple script to text any <see cref="Button"/> into a link.
+/// </summary>
 public class OpenLinkButton : MonoBehaviour
 {
     [SerializeField] private Button LinkButton = default;

@@ -1,4 +1,7 @@
 using BrainCloud;
+using BrainCloud.Common;
+using BrainCloud.JsonFx.Json;
+using System.Collections.Generic;
 using System.Net.Mail;
 using TMPro;
 using UnityEngine;
@@ -174,8 +177,8 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.AttachEmailIdentity(EmailLoginField.text, EmailPasswordField.text,
-                                                OnSuccess("AttachEmailIdentity Success", () => IsInteractable = true),
-                                                OnFailure("AttachEmailIdentity Failed", () => IsInteractable = true));
+                                                OnSuccess("AttachEmailIdentity Success", OnIdentityUpdate_Success),
+                                                OnFailure("AttachEmailIdentity Failed", OnIdentityUpdate_Failure));
         }
         else
         {
@@ -192,8 +195,8 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.MergeEmailIdentity(EmailLoginField.text, EmailPasswordField.text,
-                                               OnSuccess("MergeEmailIdentity Success", () => IsInteractable = true),
-                                               OnFailure("MergeEmailIdentity Failed", () => IsInteractable = true));
+                                               OnSuccess("MergeEmailIdentity Success", OnIdentityUpdate_Success),
+                                               OnFailure("MergeEmailIdentity Failed", OnIdentityUpdate_Failure));
         }
         else
         {
@@ -210,8 +213,8 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.AttachUniversalIdentity(UniversalLoginField.text, UniversalPasswordField.text,
-                                                    OnSuccess("MergeUniversalIdentity Success", () => IsInteractable = true),
-                                                    OnFailure("MergeUniversalIdentity Failed", () => IsInteractable = true));
+                                                    OnSuccess("AttachUniversalIdentity Success", OnIdentityUpdate_Success),
+                                                    OnFailure("AttachUniversalIdentity Failed", OnIdentityUpdate_Failure));
         }
         else
         {
@@ -228,8 +231,8 @@ public class IdentityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
             identityService.MergeUniversalIdentity(UniversalLoginField.text, UniversalLoginField.text,
-                                                   OnSuccess("MergeUniversalIdentity Success", () => IsInteractable = true),
-                                                   OnFailure("MergeUniversalIdentity Failed", () => IsInteractable = true));
+                                                   OnSuccess("MergeUniversalIdentity Success", OnIdentityUpdate_Success),
+                                                   OnFailure("MergeUniversalIdentity Failed", OnIdentityUpdate_Failure));
         }
         else
         {
@@ -237,6 +240,54 @@ public class IdentityServiceUI : ContentUIBehaviour
             UniversalPasswordField.DisplayError();
             Debug.LogError("Please fill out both the username and password fields properly.");
         }
+    }
+
+    #endregion
+
+    #region brainCloud
+
+    private void OnIdentityUpdate_Success(string response)
+    {
+        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
+
+        // Attach does not send back a profileID as it will keep the current one, but merge does since we will need to replace the current one
+        if ((responseObj["data"] as Dictionary<string, object>).TryGetValue("profileId", out object profileID))
+        {
+            BCManager.Wrapper.SetStoredProfileId((string)profileID);
+        }
+
+        UserHandler.AnonymousUser = false; // With a profile ID from an attached/merged account, the user is no longer anonymous
+
+        if (!EmailLoginField.text.IsEmpty())
+        {
+            BCManager.Wrapper.SetStoredAuthenticationType(AuthenticationType.Email.ToString());
+        }
+        else // UniversalLoginField
+        {
+            BCManager.Wrapper.SetStoredAuthenticationType(AuthenticationType.Universal.ToString());
+        }
+
+        InitializeUI();
+        IsInteractable = true;
+    }
+
+    private void OnIdentityUpdate_Failure()
+    {
+        if (!EmailLoginField.text.IsEmpty())
+        {
+            EmailLoginField.DisplayError();
+            EmailPasswordField.DisplayError();
+        }
+        else // UniversalLoginField
+        {
+            UniversalLoginField.DisplayError();
+            UniversalPasswordField.DisplayError();
+        }
+
+        EmailPasswordField.text = string.Empty;
+        UniversalPasswordField.text = string.Empty;
+
+        IsInteractable = true;
     }
 
     #endregion

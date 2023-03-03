@@ -1,7 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
-using System;
 using System.Collections.Generic;
 using System.Net.Mail;
 using TMPro;
@@ -358,9 +357,9 @@ public class MainLoginPanelUI : ContentUIBehaviour
         if (CheckNameVerification(inputName) && CheckAgeVerification(inputAge))
         {
             AuthenticationType authenticationType;
-            Dictionary<string, object> extraJson = new Dictionary<string, object>();
-            extraJson["name"] = inputName;
-            extraJson["age"] = inputAge;
+            Dictionary<string, object> extraJSON = new Dictionary<string, object>();
+            extraJSON["name"] = inputName;
+            extraJSON["age"] = inputAge;
 
             if (AnonymousRadio.isOn)
             {
@@ -378,7 +377,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
             }
 
             LoginContent.IsInteractable = false;
-            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJson, true,
+            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJSON, true,
                                              OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                              OnFailure("Authentication Failed", OnAuthenticationFailure));
 

@@ -64,7 +64,7 @@ public struct BCCustomEntity
         Assists = assists >= 0 ? assists : Assists;
     }
 
-    public Dictionary<string, object> DataToJson() => new Dictionary<string, object>
+    public Dictionary<string, object> DataToJSON() => new Dictionary<string, object>
     {
         { "name", Name },
         { "position", Position },
@@ -72,7 +72,7 @@ public struct BCCustomEntity
         { "assists", Assists }
     };
 
-    public void CreateFromJson(bool isOwned, Dictionary<string, object> data)
+    public void CreateFromJSON(bool isOwned, Dictionary<string, object> data)
     {
         IsOwned = isOwned;
         Version = (int)data["version"];

@@ -1,6 +1,5 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -196,7 +195,7 @@ public class EntityServiceUI : ContentUIBehaviour
             userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE, inputName, inputAge);
 
             entityService.CreateEntity(userEntity.EntityType,
-                                       JsonWriter.Serialize(userEntity.DataToJson()),
+                                       JsonWriter.Serialize(userEntity.DataToJSON()),
                                        userEntity.ACL.ToJsonString(),
                                        OnSuccess("Created Entity for User", OnCreateEntity_Success),
                                        OnFailure("CreateEntity Failed", UpdateUIInformation));
@@ -232,7 +231,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
             entityService.UpdateEntity(userEntity.EntityId,
                                        userEntity.EntityType,
-                                       JsonWriter.Serialize(userEntity.DataToJson()),
+                                       JsonWriter.Serialize(userEntity.DataToJSON()),
                                        userEntity.ACL.ToJsonString(),
                                        -1,
                                        OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
@@ -316,7 +315,7 @@ public class EntityServiceUI : ContentUIBehaviour
             return;
         }
 
-        userEntity.CreateFromJson(data[0]);
+        userEntity.CreateFromJSON(data[0]);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);

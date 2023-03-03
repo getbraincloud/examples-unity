@@ -119,10 +119,10 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        string jsonData = "{ \"" + userStatName + "\" : 1 }";
+        string json = "{ \"" + userStatName + "\" : 1 }";
 
-        userStatsService.IncrementUserStats(jsonData, OnSuccess("Incremented Stat", OnIncrementUserStat_Success),
-                                                      OnFailure("IncrementUserStats Failed", IsInteractableCheck));
+        userStatsService.IncrementUserStats(json, OnSuccess("Incremented Stat", OnIncrementUserStat_Success),
+                                                  OnFailure("IncrementUserStats Failed", IsInteractableCheck));
     }
 
     #endregion

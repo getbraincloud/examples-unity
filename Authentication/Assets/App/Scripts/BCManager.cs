@@ -1,7 +1,6 @@
 using BrainCloud;
 using BrainCloud.Entity;
 using System;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 /// <summary>

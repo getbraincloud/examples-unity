@@ -1,6 +1,5 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
-using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;

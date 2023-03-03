@@ -28,7 +28,7 @@ public class ScriptServiceUI : ContentUIBehaviour
 
     [Header("Main")]
     [SerializeField] private TMP_Dropdown ScriptDropdown = default;
-    [SerializeField] private TMP_InputField ScriptJsonField = default;
+    [SerializeField] private TMP_InputField ScriptJSONField = default;
     [SerializeField] private Button RunButton = default;
 
     private int current = -1;
@@ -39,7 +39,7 @@ public class ScriptServiceUI : ContentUIBehaviour
 
     protected override void Awake()
     {
-        ScriptJsonField.text = string.Empty;
+        ScriptJSONField.text = string.Empty;
 
         base.Awake();
     }
@@ -86,24 +86,24 @@ public class ScriptServiceUI : ContentUIBehaviour
     protected override void InitializeUI()
     {
         ScriptDropdown.DisplayNormal();
-        ScriptJsonField.DisplayNormal();
+        ScriptJSONField.DisplayNormal();
         OnScriptDropdown(0);
     }
 
     private void OnScriptDropdown(int option)
     {
         current = option;
-        ScriptJsonField.text = CLOUD_CODE_SCRIPTS[scriptNames[option]];
+        ScriptJSONField.text = CLOUD_CODE_SCRIPTS[scriptNames[option]];
     }
 
     private void OnRunButton()
     {
         try
         {
-            if (!ScriptJsonField.text.IsEmpty())
+            if (!ScriptJSONField.text.IsEmpty())
             {
-                string jsonData = ScriptJsonField.text;
-                if (JsonReader.Deserialize(jsonData) is ICollection json && json.Count > 0)
+                string json = ScriptJSONField.text;
+                if (JsonReader.Deserialize(json) is ICollection data && data.Count > 0)
                 {
                     IsInteractable = false;
                     string scriptName = scriptNames[current];
@@ -111,21 +111,21 @@ public class ScriptServiceUI : ContentUIBehaviour
                     SuccessCallback onSuccess = scriptName == SCRIPT_HELLO_WORLD ? OnSuccess($"{scriptName} Script Ran Successfully", OnHelloWorldScript_Success)
                                                                                  : OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Returned);
 
-                    scriptService.RunScript(scriptName, JsonWriter.Serialize(json),
+                    scriptService.RunScript(scriptName, JsonWriter.Serialize(data),
                                             onSuccess, OnFailure($"{scriptName} Script Failed", OnRunScript_Returned));
                 }
                 else
                 {
-                    ScriptJsonField.DisplayError();
-                    Debug.LogError("Json Data is not formatted properly!");
+                    ScriptJSONField.DisplayError();
+                    Debug.LogError("JSON Data is not formatted properly!");
                     return;
                 }
             }
         }
         catch
         {
-            ScriptJsonField.DisplayError();
-            Debug.LogError($"Cannot run script! Please check your Json data and try again.");
+            ScriptJSONField.DisplayError();
+            Debug.LogError($"Cannot run script! Please check your JSON data and try again.");
             throw;
         }
     }
