@@ -1,5 +1,4 @@
 using BrainCloud;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -10,25 +9,23 @@ using UnityEngine.UI;
 /// </summary>
 public class MainMenuUI : ContentUIBehaviour
 {
-    private const float HEADER_SPACER_HEIGHT = 50;
-    private const string PROFILE_ID_TEXT = "Profile ID:\n{0}";
-    private const string ANONYMOUS_ID_TEXT = "Anonymous ID:\n{0}";
+    private const string PROFILE_ID_TEXT = "<align=left>Profile ID:</align>\n{0}";
+    private const string ANONYMOUS_ID_TEXT = "<align=left>Anonymous ID:</align>\n{0}";
     private const string APP_INFO_TEXT = "{0} ({1}) v{2}";
 
     private static readonly int UI_IS_ACTIVE = Animator.StringToHash("IsActive");
 
     [Header("Main")]
     [SerializeField] private Animator MainMenuAnim = default;
-    [SerializeField] private Button BlockerButton = default;
-    [SerializeField] private LayoutElement HeaderSpacer = default;
-
-    [Header("Text")]
-    [SerializeField] private TMP_Text HeaderLabel = default;
+    [SerializeField] private GameObject HeaderSpacer = default;
     [SerializeField] private TMP_Text AppInfoLabel = default;
 
     [Header("Buttons")]
+    [SerializeField] private Button BlockerButton = default;
     [SerializeField] private Button OpenMenuButton = default;
     [SerializeField] private Button CloseMenuButton = default;
+    [SerializeField] private MenuItemUI ProfileIDButton = default;
+    [SerializeField] private MenuItemUI AnonymousIDButton = default;
     [SerializeField] private MenuItemUI LogoutButton = default;
 
     [Header("Menu Items")]
@@ -54,8 +51,8 @@ public class MainMenuUI : ContentUIBehaviour
 
     protected override void Awake()
     {
-        HeaderLabel.text = string.Empty;
-        AppInfoLabel.text = string.Empty;
+        ProfileIDButton.Label = string.Empty;
+        AnonymousIDButton.Label = string.Empty;
 
         base.Awake();
     }
@@ -66,6 +63,14 @@ public class MainMenuUI : ContentUIBehaviour
         CloseMenuButton.onClick.AddListener(OnCloseMenuButton);
         BlockerButton.onClick.AddListener(OnCloseMenuButton);
 
+        ProfileIDButton.ButtonAction = OnProfileIDButton;
+        AnonymousIDButton.ButtonAction = OnAnonymousIDButton;
+        LogoutButton.ButtonAction = OnLogoutButton;
+
+        ProfileIDButton.enabled = true;
+        AnonymousIDButton.enabled = true;
+        LogoutButton.enabled = true;
+
         if (!menuItems.IsNullOrEmpty())
         {
             foreach (MenuItemUI item in menuItems)
@@ -73,9 +78,6 @@ public class MainMenuUI : ContentUIBehaviour
                 item.enabled = true;
             }
         }
-
-        LogoutButton.ButtonAction = OnLogoutButton;
-        LogoutButton.enabled = true;
     }
 
     protected override void Start()
@@ -96,6 +98,14 @@ public class MainMenuUI : ContentUIBehaviour
         CloseMenuButton.onClick.RemoveAllListeners();
         BlockerButton.onClick.RemoveAllListeners();
 
+        ProfileIDButton.ButtonAction = null;
+        AnonymousIDButton.ButtonAction = null;
+        LogoutButton.ButtonAction = null;
+
+        ProfileIDButton.enabled = false;
+        AnonymousIDButton.enabled = false;
+        LogoutButton.enabled = false;
+
         if (!menuItems.IsNullOrEmpty())
         {
             foreach (MenuItemUI item in menuItems)
@@ -103,9 +113,6 @@ public class MainMenuUI : ContentUIBehaviour
                 item.enabled = false;
             }
         }
-
-        LogoutButton.ButtonAction = null;
-        LogoutButton.enabled = false;
     }
 
     protected override void OnDestroy()
@@ -124,9 +131,14 @@ public class MainMenuUI : ContentUIBehaviour
     {
         if (!UserHandler.ProfileID.IsEmpty())
         {
-            HeaderLabel.gameObject.SetActive(true);
-            ShowProfileID();
-            HeaderSpacer.preferredHeight = 0;
+            ProfileIDButton.Label = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);
+            ProfileIDButton.gameObject.SetActive(true);
+        }
+
+        if (!UserHandler.AnonymousID.IsEmpty())
+        {
+            AnonymousIDButton.Label = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
+            AnonymousIDButton.gameObject.SetActive(true);
         }
 
         LoginContent.IsInteractable = false;
@@ -135,14 +147,16 @@ public class MainMenuUI : ContentUIBehaviour
         LoginContent.gameObject.SetActive(false);
         AppContent.gameObject.SetActive(true);
         OpenMenuButton.gameObject.SetActive(true);
+        HeaderSpacer.SetActive(!(ProfileIDButton.gameObject.activeSelf || AnonymousIDButton.gameObject.activeSelf));
     }
 
     public void ChangeToLoginContent()
     {
         MainMenuActive = false;
 
-        HeaderLabel.gameObject.SetActive(false);
-        HeaderSpacer.preferredHeight = HEADER_SPACER_HEIGHT;
+        ProfileIDButton.gameObject.SetActive(false);
+        AnonymousIDButton.gameObject.SetActive(false);
+        HeaderSpacer.SetActive(true);
 
         LoginContent.IsInteractable = true;
         AppContent.IsInteractable = false;
@@ -150,22 +164,6 @@ public class MainMenuUI : ContentUIBehaviour
         LoginContent.gameObject.SetActive(true);
         AppContent.gameObject.SetActive(false);
         OpenMenuButton.gameObject.SetActive(false);
-    }
-
-    public void ShowProfileID()
-    {
-        if (HeaderLabel.gameObject.activeSelf && !UserHandler.ProfileID.IsEmpty())
-        {
-            HeaderLabel.text = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);
-        }
-    }
-
-    public void ShowAnonymousID()
-    {
-        if (HeaderLabel.gameObject.activeSelf && !UserHandler.AnonymousID.IsEmpty())
-        {
-            HeaderLabel.text = string.Format(ANONYMOUS_ID_TEXT, UserHandler.AnonymousID);
-        }
     }
 
     protected override void InitializeUI()
@@ -205,6 +203,32 @@ public class MainMenuUI : ContentUIBehaviour
     private void OnCloseMenuButton()
     {
         MainMenuActive = false;
+    }
+
+    private void OnProfileIDButton()
+    {
+        if (!UserHandler.ProfileID.IsEmpty())
+        {
+            GUIUtility.systemCopyBuffer = UserHandler.ProfileID;
+            Debug.Log($"Copied Profile ID: {UserHandler.ProfileID}");
+        }
+        else
+        {
+            Debug.LogWarning("Profile ID not found. Was this enabled by mistake?");
+        }
+    }
+
+    private void OnAnonymousIDButton()
+    {
+        if (!UserHandler.AnonymousID.IsEmpty())
+        {
+            GUIUtility.systemCopyBuffer = UserHandler.AnonymousID;
+            Debug.Log($"Copied Anonymous ID: {UserHandler.AnonymousID}");
+        }
+        else
+        {
+            Debug.LogWarning("Anonymous ID not found. Was this enabled by mistake?");
+        }
     }
 
     private void OnMenuItemButton(ServiceItem serviceItem)
