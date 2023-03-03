@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class Server
 {
     public string Host;
@@ -10,7 +12,7 @@ public class Server
     public int UdpPort = -1;
     public string Passcode;
     public string LobbyId;
-
+    
     public Server(Dictionary<string, object> serverJson)
     {
         var connectData = serverJson["connectData"] as Dictionary<string, object>;

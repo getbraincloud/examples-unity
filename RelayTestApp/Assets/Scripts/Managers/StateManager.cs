@@ -21,11 +21,13 @@ public class StateManager : MonoBehaviour
     public GameStates CurrentGameState;
     public ConnectingGameState LoadingGameState;
     public DialogueMessage ErrorMessage;
+    
     //Network info needed
+    [SerializeField]
     public Lobby CurrentLobby;
+    [SerializeField]
     public Server CurrentServer;
     internal RelayConnectionType Protocol { get; set; }
-    
     
     //Specific for loading and waiting
     public bool isReady;
@@ -74,18 +76,17 @@ public class StateManager : MonoBehaviour
 
     IEnumerator DelayToDisconnect()
     {
-        BrainCloudManager.Instance.LeavingGame = true;
         yield return new WaitForSeconds(0.2f);
-        
+        GameManager.Instance.LobbyIdText.enabled = false;
         BrainCloudManager.Instance.CloseGame();
         ChangeState(GameStates.MainMenu);
         ResetData();
         yield return new WaitForFixedUpdate();
-        BrainCloudManager.Instance.LeavingGame = false;
     }
 
     public void LeaveMatchBackToMenu()
     {
+        GameManager.Instance.LobbyIdText.enabled = false;
         ResetData();
         ChangeState(GameStates.SignIn);
     }

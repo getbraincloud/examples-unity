@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -18,11 +19,11 @@ public class GameArea : MonoBehaviour
     public Canvas MatchCanvas;
     public CanvasScaler CanvasScaler;
     [HideInInspector] public UserCursor LocalUserCursor;
-    //Offsets specific for when spawning a shockwave to local user
+    //Offsets are to adjust the image closer to the cursor's point
     private Vector2 _mouseOffset = new Vector2(13, -23);
     private Vector2 _shockwaveOffset = new Vector2(-7, 15);
+    
     //local to network is for shockwave input specifically
-    private float _localToNetworkOffset = -310f;
     private Vector2 _newPosition;
     private ParticleSystem.MainModule _shockwaveParticle;
     private GameObject _newShockwave;
@@ -61,6 +62,14 @@ public class GameArea : MonoBehaviour
         }
         UpdateAllCursorsMovement();
         UpdateAllShockwaves();
+    }
+
+    private void OnDisable()
+    {
+        if (!Cursor.visible)
+        {
+            Cursor.visible = true;    
+        }
     }
 
     private void UpdateAllShockwaves()
@@ -131,7 +140,9 @@ public class GameArea : MonoBehaviour
             {
                 GameManager.Instance.UpdateCursorList();
             }
-            if (!lobby.Members[i].UserCursor.CursorImage.enabled && lobby.Members[i].IsAlive)
+            if (GameManager.Instance.CurrentUserInfo.ID != lobby.Members[i].ID && 
+                !lobby.Members[i].UserCursor.CursorImage.enabled && 
+                lobby.Members[i].IsAlive)
             {
                 lobby.Members[i].UserCursor.AdjustVisibility(true);
             }

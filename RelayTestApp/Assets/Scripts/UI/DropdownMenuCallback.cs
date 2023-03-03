@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Sends information when a dropdown menu value is changed based on the DropdownMenu enum selected
 /// </summary>
-public enum DropdownMenus{Socket,Channel,Compression}
+public enum DropdownMenus{Socket,Channel,Compression, LobbyType}
 public class DropdownMenuCallback : MonoBehaviour
 {
     public DropdownMenus TargetMenu;
@@ -31,6 +31,9 @@ public class DropdownMenuCallback : MonoBehaviour
                 BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)_dropdown.value;
                 GameManager.Instance.SendUpdateRelayCompressionType();
                 break;
+            case DropdownMenus.LobbyType:
+                BrainCloudManager.Instance.LobbyType = (RelayLobbyTypes) _dropdown.value;
+                 break;
         }   
     }
 }
