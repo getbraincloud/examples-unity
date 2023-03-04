@@ -95,12 +95,9 @@ public class MainLoginPanelUI : ContentUIBehaviour
             OnEmailRadio(true);
         }
 
-        if (RememberMeToggle.isOn)
+        if (UserHandler.AnonymousID.IsEmpty())
         {
-            HandleAutomaticLogin();
-        }
-        else if (rememberUserToggle && !UserHandler.AnonymousID.IsEmpty())
-        {
+            RememberMeToggle.isOn = false;
             SetRememberMePref(false);
         }
 
@@ -416,20 +413,20 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
     #region brainCloud
 
-    private void HandleAutomaticLogin()
+    public void HandleAutomaticLogin()
     {
         LoginContent.IsInteractable = false;
 
         FailureCallback onFailure = OnFailure("Automatic Login Failed", () =>
         {
             LoginContent.IsInteractable = true;
-
+        
             DisplayError("Automatic Login Failed\nPlease try logging in manually.");
-
+        
             RememberMeToggle.isOn = false;
             SetRememberMePref(false);
         });
-
+        
         UserHandler.HandleUserReconnect(OnSuccess("Automatically Logging In...", OnAuthenticationSuccess), onFailure);
     }
 

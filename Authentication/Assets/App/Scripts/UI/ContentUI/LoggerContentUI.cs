@@ -1,4 +1,5 @@
-using BrainCloud.LitJson;
+using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -221,24 +222,24 @@ public class LoggerContentUI : ContentUIBehaviour
             return;
         }
 
-        string message = log[..log.IndexOf("\n")]; // Server Message 
+        LogMessage(log[..log.IndexOf("\n")]);// Server Message 
 
         string json = log[(log.LastIndexOf("\n") + 1)..]; // Build JSON Response
         if (json.StartsWith("{") && json.EndsWith("}"))
         {
             StringBuilder sb = new StringBuilder();
-            JsonWriter writer = new JsonWriter(sb)
+            JsonWriter writer = new JsonWriter(sb, new JsonWriterSettings()
             {
-                PrettyPrint = true
-            };
+                PrettyPrint = true,
+                Tab = "    "
+            });
 
-            JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
-
-            message += sb.ToString();
+            writer.Write(JsonReader.Deserialize(json));
+            json = sb.ToString();
         }
 
-        lastMessage = message;
-        LogMessage(message);
+        lastMessage = json;
+        LogMessage(json);
     }
 
     #endregion
