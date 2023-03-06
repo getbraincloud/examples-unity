@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd0f747ddd6df94b8598f9bed2a0fde, type: 3}
+  m_Name: CurrencyService
+  m_EditorClassIdentifier: 
+  ServiceName: Virtual Currency
+  ServiceDescription: "The Virtual Currency service manages virtual currency balances
+    for app users.\r\n\nThis service replaces the currency functions of the deprecated
+    Product Service.\r\n\nThe currency APIs of the two services are largely the same,
+    with the following two changes:\r\n\u2022 For security purposes, only the get
+    methods are callable from the client \u2013 use Cloud Code for the rest\r\n\u2022
+    We have cleaned up the responses a bit, removing unnecessary fields like createdAt,
+    updatedAt and profileId"
+  ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-virtualcurrency
+  ServicePrefab: {fileID: 955278741173811123, guid: 6c3c926aeee19f84a92803edac799891, type: 3}

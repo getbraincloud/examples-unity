@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd0f747ddd6df94b8598f9bed2a0fde, type: 3}
+  m_Name: IdentityService
+  m_EditorClassIdentifier: 
+  ServiceName: Identity
+  ServiceDescription: "The Identity APIs are used to attach additional identities
+    to a profile \u2013 these APIs are most commonly used for apps that allow users
+    to begin anonymously, and later encourage them to attach their Facebook ID for
+    additional social features.\r\n\nThe identity APIs are organized into the following
+    operations:\r\r\n\u2022 AttachIdentity \u2013 attach an additional identity to
+    the current profile.\n\u2022 DetachIdentity \u2013 used if the user wishes to
+    detach an identity from a profile.\r\n\u2022 MergeIdentity \u2013 used if the
+    user wants to merge the current profile with a profile associated with a provided
+    identity\n\nPlease see the API for examples and use cases."
+  ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-identity
+  ServicePrefab: {fileID: 2633237951956206811, guid: bbc52a7856c53c14b9e1858b04b1f2db, type: 3}
