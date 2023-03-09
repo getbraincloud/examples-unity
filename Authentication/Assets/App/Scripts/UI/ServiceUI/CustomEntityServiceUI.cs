@@ -29,7 +29,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     [SerializeField] private Button SaveButton = default;
     [SerializeField] private Button DeleteButton = default;
 
-    private BCCustomEntity customEntity = default;
+    private CustomEntity customEntity = default;
     private BrainCloudCustomEntity customEntityService = default;
 
     #region Unity Messages
@@ -95,7 +95,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     private void ClearFields()
     {
-        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
+        customEntity = new CustomEntity(DEFAULT_ENTITY_TYPE, new HockeyPlayerData());
 
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
@@ -109,10 +109,10 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE, NameField.text, AgeField.text);
+        customEntity = new CustomEntity(DEFAULT_ENTITY_TYPE, new HockeyPlayerData(NameField.text, AgeField.text));
 
         customEntityService.CreateEntity(customEntity.EntityType,
-                                         JsonWriter.Serialize(customEntity.DataToJSON()),
+                                         customEntity.Data.Serialize(),
                                          customEntity.ACL.ToJsonString(),
                                          null,
                                          customEntity.IsOwned,
@@ -129,7 +129,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        if (customEntity.EntityId.IsEmpty())
+        if (customEntity.EntityID.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ClearFields();
@@ -137,12 +137,12 @@ public class CustomEntityServiceUI : ContentUIBehaviour
             return;
         }
 
-        customEntity.Update(NameField.text, AgeField.text, AgeField.text);
+        customEntity.SetData(new HockeyPlayerData(NameField.text, AgeField.text, 0, 0));
 
         customEntityService.UpdateEntity(customEntity.EntityType,
-                                         customEntity.EntityId,
+                                         customEntity.EntityID,
                                          -1,
-                                         JsonWriter.Serialize(customEntity.DataToJSON()),
+                                         customEntity.Data.Serialize(),
                                          customEntity.ACL.ToJsonString(),
                                          null,
                                          OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
@@ -153,7 +153,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        if (customEntity.EntityId.IsEmpty())
+        if (customEntity.EntityID.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ClearFields();
@@ -162,7 +162,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         }
 
         customEntityService.DeleteEntity(customEntity.EntityType,
-                                         customEntity.EntityId,
+                                         customEntity.EntityID,
                                          -1,
                                          OnSuccess("Deleted Entity for User", OnDeleteEntity_Success),
                                          OnFailure("DeleteEntity Failed", UpdateUIInformation));
@@ -170,9 +170,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     private void UpdateUIInformation()
     {
-        if (!customEntity.EntityId.IsEmpty())
+        if (!customEntity.EntityID.IsEmpty())
         {
-            IDField.text = customEntity.EntityId;
+            IDField.text = customEntity.EntityID;
             TypeField.text = customEntity.EntityType;
         }
         else
@@ -181,8 +181,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
             TypeField.text = DEFAULT_EMPTY_FIELD;
         }
 
-        NameField.text = customEntity.Name;
-        AgeField.text = customEntity.Goals.ToString();
+        NameField.text = customEntity.GetData<HockeyPlayerData>().Name;
+        AgeField.text = customEntity.GetData<HockeyPlayerData>().Goals.ToString();
 
         IsInteractable = true;
     }
@@ -233,7 +233,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
             return;
         }
 
-        customEntity.CreateFromJSON(true, data[0]);
+        customEntity.IsOwned = true;
+        customEntity.Deserialize(data[0]);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);
@@ -260,7 +261,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     private void OnDeleteEntity_Success(string response)
     {
-        customEntity = BCCustomEntity.Create(DEFAULT_ENTITY_TYPE);
+        customEntity = new CustomEntity(DEFAULT_ENTITY_TYPE, new HockeyPlayerData());
 
         ClearFields();
         IsInteractable = true;
@@ -270,7 +271,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
 
-        customEntity.UpdateFromJSON(true, data);
+        customEntity.IsOwned = true;
+        customEntity.Deserialize(data);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);

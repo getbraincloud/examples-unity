@@ -223,65 +223,57 @@ public class LoggerContentUI : ContentUIBehaviour
     private string FormatJSON(string json)
     {
         // Special Chars
-        const char nullChar = '\0';
-        const char newLine = '\n';
-        const char escape = '\\';
         const string tab = "    ";
 
         // Setup
         char current;
-        char next = json[0];
         bool insideProperty = false;
         string indents = string.Empty;
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < json.Length; i++)
         {
-            current = next;
-            next = i + 1 >= json.Length ? nullChar : json[i + 1];
-            if (!char.IsWhiteSpace(current))
+            current = json[i];
+            if (current == '\"')
             {
-                if (current == escape && next == '\"')
-                {
-                    insideProperty = !insideProperty;
-                }
+                insideProperty = !insideProperty;
+            }
 
-                if (insideProperty)
+            if (insideProperty)
+            {
+                sb.Append(current);
+            }
+            else if (!char.IsWhiteSpace(current))
+            {
+                if (current == '{' || current == '[')
+                {
+                    indents += tab;
+
+                    sb.Append(current);
+                    sb.Append(Environment.NewLine);
+                    sb.Append(indents);
+                }
+                else if (current == '}' || current == ']')
+                {
+                    sb.Append(Environment.NewLine);
+
+                    if (indents.Length >= tab.Length)
+                    {
+                        int removeTab = indents.Length - tab.Length;
+                        indents = indents[..removeTab];
+                    }
+
+                    sb.Append(indents);
+                    sb.Append(current);
+                }
+                else if (current == ',')
                 {
                     sb.Append(current);
+                    sb.Append(Environment.NewLine);
+                    sb.Append(indents);
                 }
                 else
                 {
-                    if (current == '{' || current == '[')
-                    {
-                        indents += tab;
-
-                        sb.Append(current);
-                        sb.Append(newLine);
-                        sb.Append(indents);
-                    }
-                    else if (current == '}' || current == ']')
-                    {
-                        sb.Append(newLine);
-
-                        if (indents.Length >= tab.Length)
-                        {
-                            int removeTab = indents.Length - tab.Length;
-                            indents = indents[..removeTab];
-                        }
-
-                        sb.Append(indents);
-                        sb.Append(current);
-                    }
-                    else if (current == ',')
-                    {
-                        sb.Append(current);
-                        sb.Append(newLine);
-                        sb.Append(indents);
-                    }
-                    else
-                    {
-                        sb.Append(current);
-                    }
+                    sb.Append(current);
                 }
             }
         }
