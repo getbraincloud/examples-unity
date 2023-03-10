@@ -12,16 +12,16 @@ public struct Entity : IJSON
 {
     [JsonName("version")]public int Version;
     [JsonName("entityId")]public string EntityID;
-    [JsonName("entityType")]public string EntityType;
     [JsonName("createdAt")]public DateTime CreatedAt;
     [JsonName("updatedAt")]public DateTime UpdatedAt;
     [JsonName("acl")]public ACL ACL;
     [JsonName("data")]public IJSON Data;
 
-    public Entity(string entityType, IJSON data)
+    [JsonName("entityType")] public string EntityType => GetDataType();
+
+    public Entity(IJSON data)
     {
         this = Create();
-        EntityType = entityType;
         Data = data;
     }
 
@@ -36,16 +36,22 @@ public struct Entity : IJSON
         }
     }
 
+    public string GetDataType() => Data != null ? Data.GetDataType() : "undefined";
+
     public string Serialize() => JsonWriter.Serialize(this);
 
     public void Deserialize(Dictionary<string, object> json)
     {
         Version = (int)json["version"];
         EntityID = json["entityId"] as string;
-        EntityType = json["entityType"] as string;
         CreatedAt = Util.BcTimeToDateTime((long)json["createdAt"]);
         UpdatedAt = Util.BcTimeToDateTime((long)json["updatedAt"]);
         ACL.ReadFromJson(json["acl"] as Dictionary<string, object>);
+
+        if (Data == null && (string)json["entityType"] == UserData.DataType)
+        {
+            Data = new UserData();
+        }
 
         if (Data != null && json["data"] != null)
         {

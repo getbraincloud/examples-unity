@@ -19,7 +19,6 @@ public class EntityServiceUI : ContentUIBehaviour
     private const int MINIMUM_REGISTRATION_AGE = 13;
     private const int MAXIMUM_REGISTRATION_AGE = 120;
     private const string DEFAULT_EMPTY_FIELD = "---";
-    private const string DEFAULT_ENTITY_TYPE = "user";
 
     [Header("Main")]
     [SerializeField] private TMP_Text IDField = default;
@@ -84,7 +83,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        userEntity = new Entity(DEFAULT_ENTITY_TYPE, new UserData());
+        userEntity = new Entity(new UserData());
 
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
@@ -192,7 +191,7 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            userEntity = new Entity(DEFAULT_ENTITY_TYPE, new UserData(inputName, inputAge));
+            userEntity = new Entity(new UserData(inputName, inputAge));
 
             entityService.CreateEntity(userEntity.EntityType,
                                        userEntity.Data.Serialize(),
@@ -287,7 +286,7 @@ public class EntityServiceUI : ContentUIBehaviour
                             }},
             { "searchCriteria", new Dictionary<string, object>
                                 {
-                                    { "entityType", DEFAULT_ENTITY_TYPE }
+                                    { "entityType", userEntity.EntityType }
                                 }},
             { "sortCriteria", new Dictionary<string, object>
                               {
@@ -342,7 +341,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnDeleteEntity_Success(string response)
     {
-        userEntity = new Entity(DEFAULT_ENTITY_TYPE, new UserData());
+        userEntity = new Entity(new UserData());
 
         InitializeUI();
         IsInteractable = true;

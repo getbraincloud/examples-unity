@@ -8,6 +8,8 @@ using System.Collections.Generic;
 [Serializable]
 public struct UserData : IJSON
 {
+    public static readonly string DataType = "user";
+
     private const string DEFAULT_NAME = "New User";
     private const string DEFAULT_AGE = "?";
 
@@ -19,6 +21,8 @@ public struct UserData : IJSON
         Name = name.IsEmpty() ? DEFAULT_NAME : name;
         Age = age.IsEmpty() ? DEFAULT_AGE : age;
     }
+
+    public string GetDataType() => DataType;
 
     public string Serialize() => JsonWriter.Serialize(this);
 
