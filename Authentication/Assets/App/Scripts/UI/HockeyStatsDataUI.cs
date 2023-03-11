@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,8 +7,7 @@ using UnityEngine.UI;
 
 public class HockeyStatsDataUI : ContentUIBehaviour
 {
-    public static string DataType => HockeyStatsData.DataType;
-
+    private const int MINIMUM_NAME_LENGTH = 4;
     private const string DEFAULT_POINTS_FIELD = "---";
 
     [Header("Main")]
@@ -17,9 +17,14 @@ public class HockeyStatsDataUI : ContentUIBehaviour
     [SerializeField] private TMP_InputField GoalsField = default;
     [SerializeField] private TMP_InputField AssistsField = default;
 
-    [Header("CustomEntityServiceUI Buttons")]
+    [Header("Buttons")]
     [SerializeField] private Button UpdateButton = default;
     [SerializeField] private Button DeleteButton = default;
+
+    public Action<HockeyStatsData> UpdateButtonAction = default;
+    public Action DeleteButtonAction = default;
+
+    private HockeyStatsData hockeyStats = default;
 
     #region Unity Messages
 
@@ -35,17 +40,18 @@ public class HockeyStatsDataUI : ContentUIBehaviour
 
     private void OnEnable()
     {
-        if (UpdateButton.onClick != null || DeleteButton.onClick != null)
-        {
-            OnDisable();
-        }
-
+        NameField.onEndEdit.AddListener((name) => CheckNameVerification(name));
+        PositionDropdown.onValueChanged.AddListener(OnPositionsDropdown);
+        GoalsField.onEndEdit.AddListener((goals) => CheckGoalsVerification(goals));
+        AssistsField.onEndEdit.AddListener((assists) => CheckAssistsVerification(assists));
         UpdateButton.onClick.AddListener(OnUpdateButton);
         DeleteButton.onClick.AddListener(OnDeleteButton);
     }
 
     protected override void Start()
     {
+        PositionDropdown.AddOptions(new List<string>(HockeyStatsData.FieldPositions.Values));
+
         InitializeUI();
 
         base.Start();
@@ -53,13 +59,18 @@ public class HockeyStatsDataUI : ContentUIBehaviour
 
     private void OnDisable()
     {
+        NameField.onEndEdit.RemoveAllListeners();
+        PositionDropdown.onValueChanged.RemoveAllListeners();
+        GoalsField.onEndEdit.RemoveAllListeners();
+        AssistsField.onEndEdit.RemoveAllListeners();
         UpdateButton.onClick.RemoveAllListeners();
         DeleteButton.onClick.RemoveAllListeners();
     }
 
     protected override void OnDestroy()
     {
-        //
+        UpdateButtonAction = null;
+        DeleteButtonAction = null;
 
         base.OnDestroy();
     }
@@ -68,42 +79,139 @@ public class HockeyStatsDataUI : ContentUIBehaviour
 
     #region UI
 
-    public void UpdateUI(HockeyStatsData hockeyStatsData)
+    public void UpdateUI(bool isOwned, HockeyStatsData hockeyStatsData)
     {
-        NameField.text = hockeyStatsData.Name;
-        NameField.DisplayNormal();
-        PointsField.text = hockeyStatsData.GetPoints().ToString();
-        GoalsField.text = hockeyStatsData.Goals.ToString();
-        GoalsField.DisplayNormal();
-        AssistsField.text = hockeyStatsData.Assists.ToString();
-        AssistsField.DisplayNormal();
+        hockeyStats = hockeyStatsData;
+        NameField.text = hockeyStats.Name;
+        OnPositionsDropdown((int)hockeyStats.Position);
+        UpdatePointsDisplay();
+        GoalsField.text = hockeyStats.Goals.ToString();
+        AssistsField.text = hockeyStats.Assists.ToString();
+
+        IsInteractable = isOwned;
+
+        if (isOwned)
+        {
+            NameField.DisplayNormal();
+            PositionDropdown.DisplayNormal();
+            GoalsField.DisplayNormal();
+            AssistsField.DisplayNormal();
+            UpdateButton.DisplayNormal();
+            DeleteButton.DisplayNormal();
+        }
     }
 
     protected override void InitializeUI()
     {
-        UpdateUI(new HockeyStatsData());
+        UpdateUI(false, new HockeyStatsData());
+    }
 
-        UpdateButton.DisplayNormal();
-        DeleteButton.DisplayNormal();
+    private void DisplayError(string error, Selectable problemSelectable = null)
+    {
+        if (problemSelectable != null)
+        {
+            problemSelectable.DisplayError();
+        }
+
+        Debug.LogError(error);
+    }
+
+    private bool CheckNameVerification(string value)
+    {
+        NameField.text = value.Trim();
+        if (!NameField.text.IsEmpty())
+        {
+            if (NameField.text.Length < MINIMUM_NAME_LENGTH)
+            {
+                DisplayError($"Please use a name with at least {MINIMUM_NAME_LENGTH} characters.", NameField);
+                return false;
+            }
+
+            hockeyStats.Name = value;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void OnPositionsDropdown(int option)
+    {
+        foreach (HockeyStatsData.FieldPosition pos in HockeyStatsData.FieldPositions.Keys)
+        {
+            if ((HockeyStatsData.FieldPosition)option == pos)
+            {
+                hockeyStats.Position = (HockeyStatsData.FieldPosition)option;
+                return;
+            }
+        }
+
+        OnPositionsDropdown(0); // If we somehow entered a value that doesn't exist, go to default
+    }
+
+    private void UpdatePointsDisplay()
+    {
+        PointsField.text = hockeyStats.GetPoints().ToString();
+    }
+
+    private bool CheckGoalsVerification(string value)
+    {
+        GoalsField.text = value.Trim();
+        if (!GoalsField.text.IsEmpty())
+        {
+            if (int.TryParse(GoalsField.text, out int result))
+            {
+                if (result < 0)
+                {
+                    GoalsField.text = result < 0 ? 0.ToString() : GoalsField.text;
+                }
+
+                hockeyStats.Goals = result;
+                UpdatePointsDisplay();
+                return true;
+            }
+
+            DisplayError("Please enter a valid number.", GoalsField);
+        }
+
+        return false;
+    }
+
+    private bool CheckAssistsVerification(string value)
+    {
+        AssistsField.text = value.Trim();
+        if (!AssistsField.text.IsEmpty())
+        {
+            if (int.TryParse(AssistsField.text, out int result))
+            {
+                if (result < 0)
+                {
+                    AssistsField.text = result < 0 ? 0.ToString() : AssistsField.text;
+                }
+
+                hockeyStats.Assists = result;
+                UpdatePointsDisplay();
+                return true;
+            }
+
+            DisplayError("Please enter a valid number.", AssistsField);
+        }
+
+        return false;
     }
 
     private void OnUpdateButton()
     {
-        //
+        if (CheckNameVerification(NameField.text) &&
+            CheckGoalsVerification(GoalsField.text) &&
+            CheckAssistsVerification(AssistsField.text))
+        {
+            UpdateButtonAction?.Invoke(hockeyStats);
+        }
     }
 
     private void OnDeleteButton()
     {
-        //
-    }
-
-    #endregion
-
-    #region brainCloud
-
-    private void OnServiceFunction()
-    {
-        //
+        DeleteButtonAction?.Invoke();
     }
 
     #endregion

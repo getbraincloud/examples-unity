@@ -1,13 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class RPGDataUI : ContentUIBehaviour
 {
-    public static string DataType => RPGData.DataType;
-
     private const string DEFAULT_POWER_FIELD = "---";
 
     [Header("Main")]
@@ -19,9 +19,12 @@ public class RPGDataUI : ContentUIBehaviour
     [SerializeField] private TMP_InputField StrengthField = default;
     [SerializeField] private TMP_InputField DefenseField = default;
 
-    [Header("CustomEntityServiceUI Buttons")]
+    [Header("Buttons")]
     [SerializeField] private Button UpdateButton = default;
     [SerializeField] private Button DeleteButton = default;
+
+    public Action<RPGData> UpdateButtonAction = default;
+    public Action DeleteButtonAction = default;
 
     #region Unity Messages
 
@@ -40,11 +43,6 @@ public class RPGDataUI : ContentUIBehaviour
 
     private void OnEnable()
     {
-        if (UpdateButton.onClick != null || DeleteButton.onClick != null)
-        {
-            OnDisable();
-        }
-
         UpdateButton.onClick.AddListener(OnUpdateButton);
         DeleteButton.onClick.AddListener(OnDeleteButton);
     }
@@ -64,7 +62,8 @@ public class RPGDataUI : ContentUIBehaviour
 
     protected override void OnDestroy()
     {
-        //
+        UpdateButtonAction = null;
+        DeleteButtonAction = null;
 
         base.OnDestroy();
     }
@@ -73,39 +72,47 @@ public class RPGDataUI : ContentUIBehaviour
 
     #region UI
 
-    public void UpdateUI(RPGData rpgData)
+    public void UpdateUI(bool isOwned, RPGData rpgData)
     {
         NameField.text = rpgData.Name;
-        NameField.DisplayNormal();
         LevelField.text = rpgData.Level.ToString();
-        LevelField.DisplayNormal();
         JobField.text = rpgData.Job;
-        JobField.DisplayNormal();
         PowerField.text = rpgData.GetPower().ToString();
         HealthField.text = rpgData.Health.ToString();
-        HealthField.DisplayNormal();
         StrengthField.text = rpgData.Strength.ToString();
-        StrengthField.DisplayNormal();
         DefenseField.text = rpgData.Defense.ToString();
-        DefenseField.DisplayNormal();
+
+        IsInteractable = isOwned;
+
+        if (isOwned)
+        {
+            NameField.DisplayNormal();
+            LevelField.DisplayNormal();
+            JobField.DisplayNormal();
+            HealthField.DisplayNormal();
+            StrengthField.DisplayNormal();
+            DefenseField.DisplayNormal();
+        }
     }
 
     protected override void InitializeUI()
     {
-        UpdateUI(new RPGData());
-
-        UpdateButton.DisplayNormal();
-        DeleteButton.DisplayNormal();
+        UpdateUI(false, new RPGData());
     }
 
     private void OnUpdateButton()
     {
-        //
+        UpdateButtonAction?.Invoke(new RPGData(name: NameField.text,
+                                               job: JobField.text,
+                                               level: int.Parse(LevelField.text),
+                                               health: int.Parse(HealthField.text),
+                                               strength: int.Parse(StrengthField.text),
+                                               defense: int.Parse(DefenseField.text)));
     }
 
     private void OnDeleteButton()
     {
-        //
+        DeleteButtonAction?.Invoke();
     }
 
     #endregion

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 [Serializable]
 public struct HockeyStatsData : IJSON
 {
-    public enum SkaterPosition
+    public enum FieldPosition
     {
         Center,
         LeftWing,
@@ -17,27 +17,27 @@ public struct HockeyStatsData : IJSON
         RightDefense
     }
 
+    public static readonly Dictionary<FieldPosition, string> FieldPositions = new Dictionary<FieldPosition, string>
+    {
+        { FieldPosition.Center,      "Center" },
+        { FieldPosition.LeftWing,    "Left-Winger" },        { FieldPosition.RightWing, "Right-Winger" },
+        { FieldPosition.LeftDefense, "Left-Defenseperson" }, { FieldPosition.RightDefense, "Right-Defenseperson" }
+    };
+
     public static readonly string DataType = "hockey_player";
 
     private const string DEFAULT_NAME = "Wayne Gretzky";
 
-    private static readonly Dictionary<SkaterPosition, string> POSITIONS = new Dictionary<SkaterPosition, string>
-    {
-        { SkaterPosition.Center, "Center" },
-        { SkaterPosition.LeftWing, "Left-Winger" }, { SkaterPosition.RightWing, "Right-Winger" },
-        { SkaterPosition.LeftDefense, "Left-Defenseperson" }, { SkaterPosition.RightDefense, "Right-Defenseperson" }
-    };
-
     [JsonName("name")] public string Name;
-    [JsonName("position")] public SkaterPosition Position;
+    [JsonName("position")] public FieldPosition Position;
     [JsonName("goals")] public int Goals;
     [JsonName("assists")] public int Assists;
 
     public int GetPoints() => Goals + Assists;
 
-    public string GetPosition() => POSITIONS[Position];
+    public string GetPosition() => FieldPositions[Position];
 
-    public HockeyStatsData(string name = DEFAULT_NAME, SkaterPosition position = SkaterPosition.Center, int goals = 0, int assists = 0)
+    public HockeyStatsData(string name = DEFAULT_NAME, FieldPosition position = FieldPosition.Center, int goals = 0, int assists = 0)
     {
         Name = !name.IsEmpty() ? name : DEFAULT_NAME;
         Position = position;
@@ -52,7 +52,7 @@ public struct HockeyStatsData : IJSON
     public void Deserialize(Dictionary<string, object> json)
     {
         Name = json["name"] as string;
-        Position = (SkaterPosition)json["position"];
+        Position = (FieldPosition)json["position"];
         Goals = (int)json["goals"];
         Assists = (int)json["assists"];
     }

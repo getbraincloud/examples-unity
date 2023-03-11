@@ -79,7 +79,7 @@ public static class ExtensionMethods
     /// </summary>
     public static Selectable DisplayNormal(this Selectable selectable)
     {
-        if (selectable.animator != null)
+        if (selectable.animator != null && selectable.interactable)
         {
             selectable.animator.SetTrigger(ANIMATION_TRIGGER_NORMAL);
         }
@@ -96,7 +96,7 @@ public static class ExtensionMethods
     /// </summary>
     public static Selectable DisplayError(this Selectable selectable)
     {
-        if (selectable.animator != null)
+        if (selectable.animator != null && selectable.interactable)
         {
             selectable.animator.SetTrigger(ANIMATION_TRIGGER_ERROR);
         }

@@ -1,9 +1,14 @@
 using BrainCloud;
+using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// <para>
@@ -15,8 +20,13 @@ using UnityEngine.UI;
 /// API Link: https://getbraincloud.com/apidocs/apiref/?csharp#capi-customentity
 public class CustomEntityServiceUI : ContentUIBehaviour
 {
-    private const int MAX_NUMBER_OF_CUSTOM_ENTITIES = 10;
     private const string DEFAULT_EMPTY_FIELD = "---";
+    private const string CURRENT_ENTITY_LABEL_FORMAT = "Current Custom Entity: {0}/{1}";
+
+    private static readonly Dictionary<string, string> DATA_TYPES = new Dictionary<string, string>()
+    {
+        { HockeyStatsData.DataType, "Hockey Player Stats" }, { RPGData.DataType, "RPG Character Stats" }
+    };
 
     [Header("Main")]
     [SerializeField] private TMP_Text IDField = default;
@@ -33,9 +43,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     [SerializeField] private TMP_Dropdown EntityTypeDropdown = default;
     [SerializeField] private Button NewButton = default;
 
-    private int currentMax = 0;
     private int currentIndex = 0;
-    private CustomEntity[] customEntities = default;
+    private string selectedEntityType = string.Empty;
+    private List<CustomEntity> customEntities = default;
     private BrainCloudCustomEntity customEntityService = default;
 
     #region Unity Messages
@@ -50,25 +60,29 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     private void OnEnable()
     {
-        //UpdateButton.onClick.AddListener(OnUpdateButton);
-        //DeleteButton.onClick.AddListener(OnDeleteButton);
+        PreviousButton.onClick.AddListener(OnPreviousButton);
+        NextButton.onClick.AddListener(OnNextButton);
+        EntityTypeDropdown.onValueChanged.AddListener(OnEntityTypeDropdown);
         NewButton.onClick.AddListener(OnNewButton);
     }
 
     protected override void Start()
     {
-        customEntities = new CustomEntity[MAX_NUMBER_OF_CUSTOM_ENTITIES];
+        customEntities = new List<CustomEntity>();
         customEntityService = BCManager.CustomEntityService;
 
-        InitializeUI();
+        EntityTypeDropdown.AddOptions(new List<string>(DATA_TYPES.Values));
+
+        StartCoroutine(DelayedInitialization());
 
         base.Start();
     }
 
     private void OnDisable()
     {
-        //UpdateButton.onClick.RemoveAllListeners();
-        //DeleteButton.onClick.RemoveAllListeners();
+        PreviousButton.onClick.RemoveAllListeners();
+        NextButton.onClick.RemoveAllListeners();
+        EntityTypeDropdown.onValueChanged.RemoveAllListeners();
         NewButton.onClick.RemoveAllListeners();
     }
 
@@ -87,11 +101,27 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         ClearFields();
 
-        //UpdateButton.gameObject.SetActive(false);
-        //DeleteButton.gameObject.SetActive(false);
-        NewButton.gameObject.SetActive(true);
+        CurrentEntityLabel.text = string.Format(CURRENT_ENTITY_LABEL_FORMAT, DEFAULT_EMPTY_FIELD, DEFAULT_EMPTY_FIELD);
 
-        HandleGetCustomEntities();
+        HockeyStatsUI.IsInteractable = false;
+        RPGUI.IsInteractable = false;
+        PreviousButton.interactable = false;
+        NextButton.interactable = false;
+
+        HockeyStatsUI.gameObject.SetActive(true);
+        RPGUI.gameObject.SetActive(false);
+
+        customEntities.Clear();
+
+        HandleGetCustomEntities(HockeyStatsData.DataType);
+        //HandleGetCustomEntities(RPGData.DataType);
+    }
+
+    private IEnumerator DelayedInitialization()
+    {
+        yield return new WaitForEndOfFrame();
+
+        InitializeUI();
     }
 
     private void ClearFields()
@@ -100,6 +130,51 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         TypeField.text = DEFAULT_EMPTY_FIELD;
         HockeyStatsUI.ResetUI();
         RPGUI.ResetUI();
+    }
+
+    private void GetCurrentEntityIndex()
+    {
+        CurrentEntityLabel.text = string.Format(CURRENT_ENTITY_LABEL_FORMAT, currentIndex + 1, customEntities.Count);
+
+        CustomEntity current = customEntities[currentIndex];
+        if (current.Data is HockeyStatsData hockeyData)
+        {
+            HockeyStatsUI.gameObject.SetActive(true);
+            HockeyStatsUI.IsInteractable = true;
+            RPGUI.gameObject.SetActive(false);
+            RPGUI.IsInteractable = false;
+
+            HockeyStatsUI.UpdateUI(current.IsOwned, hockeyData);
+        }
+        else if (current.Data is RPGData rpgData)
+        {
+            HockeyStatsUI.gameObject.SetActive(false);
+            HockeyStatsUI.IsInteractable = false;
+            RPGUI.gameObject.SetActive(true);
+            RPGUI.IsInteractable = true;
+
+            RPGUI.UpdateUI(current.IsOwned, rpgData);
+        }
+
+        PreviousButton.interactable = currentIndex > 0;
+        NextButton.interactable = currentIndex < customEntities.Count - 1;
+    }
+
+    private void OnPreviousButton()
+    {
+        currentIndex = --currentIndex <= 0 ? 0 : currentIndex;
+        GetCurrentEntityIndex();
+    }
+
+    private void OnNextButton()
+    {
+        currentIndex = ++currentIndex >= customEntities.Count ? customEntities.Count - 1 : currentIndex;
+        GetCurrentEntityIndex();
+    }
+
+    private void OnEntityTypeDropdown(int option)
+    {
+        selectedEntityType = new List<string>(DATA_TYPES.Keys)[option];
     }
 
     private void OnNewButton()
@@ -160,55 +235,60 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         //                                 OnFailure("DeleteEntity Failed", UpdateUIInformation));
     }
 
-    private void UpdateUIInformation()
-    {
-        //if (!customEntities.EntityID.IsEmpty())
-        //{
-        //    IDField.text = customEntities.EntityID;
-        //    TypeField.text = customEntities.EntityType;
-        //}
-        //else
-        //{
-        //    IDField.text = DEFAULT_EMPTY_FIELD;
-        //    TypeField.text = DEFAULT_EMPTY_FIELD;
-        //}
-        //
-        //NameField.text = customEntities.GetData<HockeyPlayerData>().Name;
-        //AgeField.text = customEntities.GetData<HockeyPlayerData>().Goals.ToString();
-
-        IsInteractable = true;
-    }
-
     #endregion
 
     #region brainCloud
 
-    private void HandleGetCustomEntities()
+    private void HandleGetCustomEntities(string entityType)
     {
-        IsInteractable = false;
-
-        var context = new Dictionary<string, object>
+        int max = Random.Range(5, 15);
+        CustomEntity current;
+        for (int i = 0; i < max; i++)
         {
-            { "pagination", new Dictionary<string, object>
-                {
-                    { "rowsPerPage", 50 },
-                    { "pageNumber", 1 }
-                }},
-            { "optionCriteria", new Dictionary<string, object>
-                {
-                    { "ownedOnly", true }
-                }},
-            { "sortCriteria", new Dictionary<string, object>
-                {
-                    { "createdAt", 1 },
-                    { "updatedAt", -1 }
-                }}
-        };
+            current = new CustomEntity()
+            {
+                IsOwned = Random.Range(0, 10) > 2,
+                Version = -1,
+                TimeToLive = -1,
+                OwnerID = "",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+                ACL = ACL.ReadWrite(),
+                Data = new HockeyStatsData(name: "",
+                                           position: HockeyStatsData.FieldPosition.Center,
+                                           Random.Range(1, 25),
+                                           Random.Range(0, 75)),
+            };
 
-        customEntityService.GetEntityPage("",
-                                          JsonWriter.Serialize(context),
-                                          OnSuccess("GetEntityPage Success", OnGetPage_Success),
-                                          OnFailure("GetEntityPage Failed", UpdateUIInformation));
+            customEntities.Add(current);
+        }
+
+        GetCurrentEntityIndex();
+
+        //IsInteractable = false;
+        //
+        //var context = new Dictionary<string, object>
+        //{
+        //    { "pagination", new Dictionary<string, object>
+        //        {
+        //            { "rowsPerPage", 50 },
+        //            { "pageNumber", 1 }
+        //        }},
+        //    { "optionCriteria", new Dictionary<string, object>
+        //        {
+        //            { "ownedOnly", true }
+        //        }},
+        //    { "sortCriteria", new Dictionary<string, object>
+        //        {
+        //            { "createdAt", 1 },
+        //            { "updatedAt", -1 }
+        //        }}
+        //};
+        //
+        //customEntityService.GetEntityPage(entityType,
+        //                                  JsonWriter.Serialize(context),
+        //                                  OnSuccess("GetEntityPage Success", OnGetPage_Success),
+        //                                  OnFailure("GetEntityPage Failed", () => IsInteractable = false));
     }
 
     private void OnGetPage_Success(string response)
@@ -225,14 +305,20 @@ public class CustomEntityServiceUI : ContentUIBehaviour
             return;
         }
 
-        //customEntities.IsOwned = true;
-        //customEntities.Deserialize(data[0]);
+        CustomEntity newCustomEntity;
+        for (int i = 0; i < data.Length; i++)
+        {
+            newCustomEntity = new CustomEntity
+            {
+                IsOwned = true
+            };
 
-        //UpdateButton.gameObject.SetActive(true);
-        //DeleteButton.gameObject.SetActive(true);
-        NewButton.gameObject.SetActive(false);
+            newCustomEntity.Deserialize(data[i]);
+            customEntities.Add(newCustomEntity);
+        }
 
-        UpdateUIInformation();
+        GetCurrentEntityIndex();
+        IsInteractable = true;
     }
 
     private void OnCreateEntity_Success(string response)
@@ -240,7 +326,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success), OnFailure(string.Empty, UpdateUIInformation));
+        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success), OnFailure(string.Empty, () => IsInteractable = true));
     }
 
     private void OnUpdateEntity_Success(string response)
@@ -248,7 +334,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
         string entityID = (string)data["entityId"];
 
-        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success), OnFailure(string.Empty, UpdateUIInformation));
+        BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success), OnFailure(string.Empty, () => IsInteractable = true));
     }
 
     private void OnDeleteEntity_Success(string response)
@@ -268,9 +354,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         //UpdateButton.gameObject.SetActive(true);
         //DeleteButton.gameObject.SetActive(true);
-        NewButton.gameObject.SetActive(false);
 
-        UpdateUIInformation();
+        IsInteractable = true;
     }
 
     #endregion
