@@ -24,7 +24,7 @@ public struct HockeyStatsData : IJSON
         { FieldPosition.LeftDefense, "Left-Defenseperson" }, { FieldPosition.RightDefense, "Right-Defenseperson" }
     };
 
-    public static readonly string DataType = "hockey_player";
+    public static readonly string DataType = "hockey_player_stats";
 
     private const string DEFAULT_NAME = "Wayne Gretzky";
 

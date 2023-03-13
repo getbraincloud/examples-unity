@@ -9,16 +9,17 @@ using UnityEngine;
 [Serializable]
 public struct RPGData : IJSON
 {
-    public static readonly string DataType = "rpg";
+    public static readonly string DataType = "rpg_character";
 
-    private const int MIN_LEVEL = 1;
-    private const int MAX_LEVEL = 99;
-    private const int MIN_HEALTH = 100;
-    private const int MAX_HEALTH = 9999;
-    private const int MIN_STRENGTH = 1;
-    private const int MAX_STRENGTH = 99;
-    private const int MIN_DEFENSE = 0;
-    private const int MAX_DEFENSE = 99;
+    public const int MIN_LEVEL = 1;
+    public const int MAX_LEVEL = 99;
+    public const int MIN_HEALTH = 100;
+    public const int MAX_HEALTH = 9999;
+    public const int MIN_STRENGTH = 1;
+    public const int MAX_STRENGTH = 99;
+    public const int MIN_DEFENSE = 0;
+    public const int MAX_DEFENSE = 99;
+
     private const string DEFAULT_NAME = "Gandalf";
     private const string DEFAULT_JOB = "wizard";
 
@@ -41,7 +42,7 @@ public struct RPGData : IJSON
                    int health = MIN_HEALTH, int strength = MIN_STRENGTH, int defense = MIN_DEFENSE)
     {
         Name = !name.IsEmpty() ? name : DEFAULT_NAME;
-        Job = !job.IsEmpty() ? job : DEFAULT_JOB;
+        Job = !job.IsEmpty() ? job.ToLower() : DEFAULT_JOB;
         Level = Mathf.Clamp(level, MIN_LEVEL, MAX_LEVEL);
         Health = Mathf.Clamp(health, MIN_HEALTH, MAX_HEALTH);
         Strength = Mathf.Clamp(strength, MIN_STRENGTH, MAX_STRENGTH);
@@ -55,7 +56,7 @@ public struct RPGData : IJSON
     public void Deserialize(Dictionary<string, object> json)
     {
         Name = json["name"] as string;
-        Job = json["job"] as string;
+        Job = (json["job"] as string).ToLower();
         Level = (int)json["level"];
         Health = (int)json["health"];
         Strength = (int)json["strength"];

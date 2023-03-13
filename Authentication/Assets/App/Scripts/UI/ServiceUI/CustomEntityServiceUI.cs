@@ -113,8 +113,8 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         customEntities.Clear();
 
-        HandleGetCustomEntities(HockeyStatsData.DataType);
-        //HandleGetCustomEntities(RPGData.DataType);
+        //HandleGetCustomEntities(HockeyStatsData.DataType);
+        HandleGetCustomEntities(RPGData.DataType);
     }
 
     private IEnumerator DelayedInitialization()
@@ -137,6 +137,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         CurrentEntityLabel.text = string.Format(CURRENT_ENTITY_LABEL_FORMAT, currentIndex + 1, customEntities.Count);
 
         CustomEntity current = customEntities[currentIndex];
+
+        IDField.text = current.OwnerID;
+        TypeField.text = current.EntityType;
         if (current.Data is HockeyStatsData hockeyData)
         {
             HockeyStatsUI.gameObject.SetActive(true);
@@ -254,10 +257,16 @@ public class CustomEntityServiceUI : ContentUIBehaviour
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
                 ACL = ACL.ReadWrite(),
-                Data = new HockeyStatsData(name: "",
-                                           position: HockeyStatsData.FieldPosition.Center,
-                                           Random.Range(1, 25),
-                                           Random.Range(0, 75)),
+                Data = Random.Range(0, 10) > 2 ? new HockeyStatsData(name: string.Empty,
+                                                                     position: (HockeyStatsData.FieldPosition)Random.Range(0, 6),
+                                                                     goals: Random.Range(0, 35),
+                                                                     assists: Random.Range(0, 70))
+                                               : new RPGData(name: string.Empty,
+                                                             job: string.Empty,
+                                                             level: Random.Range(1, 99),
+                                                             health: Random.Range(100, 9999),
+                                                             strength: Random.Range(1, 99),
+                                                             defense: Random.Range(0, 99))
             };
 
             customEntities.Add(current);

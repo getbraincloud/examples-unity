@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -42,8 +41,8 @@ public class HockeyStatsDataUI : ContentUIBehaviour
     {
         NameField.onEndEdit.AddListener((name) => CheckNameVerification(name));
         PositionDropdown.onValueChanged.AddListener(OnPositionsDropdown);
-        GoalsField.onEndEdit.AddListener((goals) => CheckGoalsVerification(goals));
-        AssistsField.onEndEdit.AddListener((assists) => CheckAssistsVerification(assists));
+        GoalsField.onEndEdit.AddListener((goals) => CheckPointsVerification(goals, GoalsField));
+        AssistsField.onEndEdit.AddListener((assists) => CheckPointsVerification(assists, AssistsField));
         UpdateButton.onClick.AddListener(OnUpdateButton);
         DeleteButton.onClick.AddListener(OnDeleteButton);
     }
@@ -83,7 +82,7 @@ public class HockeyStatsDataUI : ContentUIBehaviour
     {
         hockeyStats = hockeyStatsData;
         NameField.text = hockeyStats.Name;
-        OnPositionsDropdown((int)hockeyStats.Position);
+        PositionDropdown.value = (int)hockeyStats.Position;
         UpdatePointsDisplay();
         GoalsField.text = hockeyStats.Goals.ToString();
         AssistsField.text = hockeyStats.Assists.ToString();
@@ -140,6 +139,7 @@ public class HockeyStatsDataUI : ContentUIBehaviour
         {
             if ((HockeyStatsData.FieldPosition)option == pos)
             {
+                PositionDropdown.value = option;
                 hockeyStats.Position = (HockeyStatsData.FieldPosition)option;
                 return;
             }
@@ -153,47 +153,30 @@ public class HockeyStatsDataUI : ContentUIBehaviour
         PointsField.text = hockeyStats.GetPoints().ToString();
     }
 
-    private bool CheckGoalsVerification(string value)
+    private bool CheckPointsVerification(string value, TMP_InputField inputField)
     {
-        GoalsField.text = value.Trim();
-        if (!GoalsField.text.IsEmpty())
+        inputField.text = value.Trim();
+        if (!inputField.text.IsEmpty())
         {
-            if (int.TryParse(GoalsField.text, out int result))
+            if (int.TryParse(inputField.text, out int result))
             {
-                if (result < 0)
-                {
-                    GoalsField.text = result < 0 ? 0.ToString() : GoalsField.text;
-                }
+                result = result < 0 ? 0 : result;
+                inputField.text = result.ToString();
 
-                hockeyStats.Goals = result;
+                if (inputField == GoalsField)
+                {
+                    hockeyStats.Goals = result;
+                }
+                else // AssitsField
+                {
+                    hockeyStats.Assists = result;
+                }
+                
                 UpdatePointsDisplay();
                 return true;
             }
 
-            DisplayError("Please enter a valid number.", GoalsField);
-        }
-
-        return false;
-    }
-
-    private bool CheckAssistsVerification(string value)
-    {
-        AssistsField.text = value.Trim();
-        if (!AssistsField.text.IsEmpty())
-        {
-            if (int.TryParse(AssistsField.text, out int result))
-            {
-                if (result < 0)
-                {
-                    AssistsField.text = result < 0 ? 0.ToString() : AssistsField.text;
-                }
-
-                hockeyStats.Assists = result;
-                UpdatePointsDisplay();
-                return true;
-            }
-
-            DisplayError("Please enter a valid number.", AssistsField);
+            DisplayError("Please enter a valid number.", inputField);
         }
 
         return false;
@@ -202,8 +185,8 @@ public class HockeyStatsDataUI : ContentUIBehaviour
     private void OnUpdateButton()
     {
         if (CheckNameVerification(NameField.text) &&
-            CheckGoalsVerification(GoalsField.text) &&
-            CheckAssistsVerification(AssistsField.text))
+            CheckPointsVerification(GoalsField.text, GoalsField) &&
+            CheckPointsVerification(AssistsField.text, AssistsField))
         {
             UpdateButtonAction?.Invoke(hockeyStats);
         }
