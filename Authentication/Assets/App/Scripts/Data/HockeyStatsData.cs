@@ -29,9 +29,11 @@ public struct HockeyStatsData : IJSON
     private const string DEFAULT_NAME = "Wayne Gretzky";
 
     [JsonName("name")] public string Name;
-    [JsonName("position")] public FieldPosition Position;
+    [JsonName("position")] public int PositionValue;
     [JsonName("goals")] public int Goals;
     [JsonName("assists")] public int Assists;
+
+    public FieldPosition Position => (FieldPosition)PositionValue;
 
     public int GetPoints() => Goals + Assists;
 
@@ -40,7 +42,7 @@ public struct HockeyStatsData : IJSON
     public HockeyStatsData(string name = DEFAULT_NAME, FieldPosition position = FieldPosition.Center, int goals = 0, int assists = 0)
     {
         Name = !name.IsEmpty() ? name : DEFAULT_NAME;
-        Position = position;
+        PositionValue = (int)position;
         Goals = goals >= 0 ? goals : 0;
         Assists = assists >= 0 ? assists : 0;
     }
@@ -52,7 +54,7 @@ public struct HockeyStatsData : IJSON
     public void Deserialize(Dictionary<string, object> json)
     {
         Name = json["name"] as string;
-        Position = (FieldPosition)json["position"];
+        PositionValue = (int)json["position"];
         Goals = (int)json["goals"];
         Assists = (int)json["assists"];
     }

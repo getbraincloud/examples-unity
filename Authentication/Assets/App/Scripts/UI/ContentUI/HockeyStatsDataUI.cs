@@ -140,7 +140,7 @@ public class HockeyStatsDataUI : ContentUIBehaviour
             if ((HockeyStatsData.FieldPosition)option == pos)
             {
                 PositionDropdown.value = option;
-                hockeyStats.Position = (HockeyStatsData.FieldPosition)option;
+                hockeyStats.PositionValue = option;
                 return;
             }
         }

@@ -87,14 +87,14 @@ public class LoggerContentUI : ContentUIBehaviour
 
     #region UI
 
-    public void LogMessage(string message, bool canCopy = false) =>
-        DisplayLogObject(LogType.Log, message, canCopy);
+    public void LogMessage(string message, bool wordWrap = true, bool canCopy = false) =>
+        DisplayLogObject(LogType.Log, message, wordWrap, canCopy);
 
-    public void LogWarning(string warning, bool canCopy = false) =>
-        DisplayLogObject(LogType.Warning, warning, canCopy);
+    public void LogWarning(string warning, bool wordWrap = true, bool canCopy = false) =>
+        DisplayLogObject(LogType.Warning, warning, wordWrap, canCopy);
 
-    public void LogError(string error, bool canCopy = false) =>
-        DisplayLogObject(LogType.Error, error, canCopy);
+    public void LogError(string error, bool wordWrap = true, bool canCopy = false) =>
+        DisplayLogObject(LogType.Error, error, wordWrap, canCopy);
 
     public void ClearLogs()
     {
@@ -138,7 +138,7 @@ public class LoggerContentUI : ContentUIBehaviour
         }
     }
 
-    private void DisplayLogObject(LogType type, string message, bool canCopy)
+    private void DisplayLogObject(LogType type, string message, bool wordWrap, bool canCopy)
     {
         if (logObjects.IsNullOrEmpty())
         {
@@ -151,7 +151,7 @@ public class LoggerContentUI : ContentUIBehaviour
         }
 
         LogMessageUI log = logObjects[logIndex];
-        log.ConfigureLogObject(type, message, canCopy);
+        log.ConfigureLogObject(type, message, wordWrap, canCopy);
         log.transform.SetAsLastSibling();
         log.gameObject.SetName($"{type}{(type == LogType.Log ? "Message" : "Log")}Object{logIndex:00}");
         log.gameObject.SetActive(true);
@@ -216,7 +216,7 @@ public class LoggerContentUI : ContentUIBehaviour
         string json = log[(log.LastIndexOf("\n") + 1)..]; // Build JSON Response
         if (json.StartsWith("{") && json.EndsWith("}"))
         {
-            LogMessage(FormatJSON(json), true);
+            LogMessage(FormatJSON(json), wordWrap:false, canCopy:true);
         }
     }
 
@@ -240,7 +240,23 @@ public class LoggerContentUI : ContentUIBehaviour
 
             if (insideProperty)
             {
-                sb.Append(current);
+                if (current == '\\' && json[i + 1] == 'n')
+                {
+                    if (json[i + 2] != '\"')
+                    {
+                        sb.Append(Environment.NewLine);
+                    }
+                    i++;
+                }
+                else if (current == '\\' && json[i + 1] == 't')
+                {
+                    sb.Append(indents + tab);
+                    i++;
+                }
+                else
+                {
+                    sb.Append(current);
+                }
             }
             else if (!char.IsWhiteSpace(current))
             {

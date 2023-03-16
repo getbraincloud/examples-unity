@@ -10,17 +10,21 @@ using System.Collections.Generic;
 [Serializable]
 public struct CustomEntity
 {
-    public bool IsOwned;
+    public bool IsOwned => OwnerID == UserHandler.ProfileID;
+
     [JsonName("version")] public int Version;
-    [JsonName("timeToLive")] public int TimeToLive;
     [JsonName("ownerId")] public string OwnerID;
     [JsonName("entityId")] public string EntityID;
     [JsonName("createdAt")] public DateTime CreatedAt;
     [JsonName("updatedAt")] public DateTime UpdatedAt;
+    [JsonName("timeToLive")] public TimeSpan TimeToLive;
+    [JsonName("expiresAt")] public DateTime ExpiresAt;
     [JsonName("acl")] public ACL ACL;
     [JsonName("data")] public IJSON Data;
 
     [JsonName("entityType")] public string EntityType => GetDataType();
+
+    public TimeSpan ExpiresIn => ExpiresAt - DateTime.UtcNow;
 
     public CustomEntity(IJSON data)
     {
@@ -46,11 +50,31 @@ public struct CustomEntity
     public void Deserialize(Dictionary<string, object> json)
     {
         Version = (int)json["version"];
-        TimeToLive = json.ContainsValue("timeToLive") ? (int)json["timeToLive"] : -1;
         OwnerID = json["ownerId"] as string;
         EntityID = json["entityId"] as string;
         CreatedAt = Util.BcTimeToDateTime((long)json["createdAt"]);
         UpdatedAt = Util.BcTimeToDateTime((long)json["updatedAt"]);
+
+        if (json.ContainsValue(json["timeToLive"]))
+        {
+            if (json["timeToLive"].GetType() == typeof(long))
+            {
+                TimeToLive = TimeSpan.FromMilliseconds((long)json["timeToLive"]);
+            }
+            else
+            {
+                TimeToLive = TimeSpan.FromMilliseconds((int)json["timeToLive"]);
+            }
+
+            ExpiresAt = Util.BcTimeToDateTime((long)json["expiresAt"]);
+        }
+        else
+        {
+            TimeToLive = TimeSpan.MaxValue;
+            ExpiresAt = DateTime.MaxValue;
+        }
+
+        ACL ??= new ACL();
         ACL.ReadFromJson(json["acl"] as Dictionary<string, object>);
 
         if (Data == null)
@@ -66,7 +90,7 @@ public struct CustomEntity
             }
         }
 
-        if (Data != null && json["data"] != null)
+        if (Data != null && json.ContainsKey("data"))
         {
             Data.Deserialize(json["data"] as Dictionary<string, object>);
         }
@@ -74,12 +98,13 @@ public struct CustomEntity
 
     private static CustomEntity Create() => new CustomEntity()
     {
-        IsOwned = true,
         Version = -1, // -1 tells the server to create the latest version
-        TimeToLive = -1,
         OwnerID = string.Empty,
+        EntityID = string.Empty,
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow,
-        ACL = ACL.ReadWrite(),
+        TimeToLive = TimeSpan.MaxValue,
+        ExpiresAt = DateTime.MaxValue,
+        ACL = ACL.ReadWrite()
     };
 }

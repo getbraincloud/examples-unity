@@ -21,8 +21,8 @@ public class LogMessageUI : MonoBehaviour
     /// </summary>
     public string Text
     {
-        get { return LogText.text; }
-        set { LogText.text = value; }
+        get => LogText.text;
+        set => LogText.text = value;
     }
 
     /// <summary>
@@ -30,8 +30,8 @@ public class LogMessageUI : MonoBehaviour
     /// </summary>
     public string StackTrace
     {
-        get { return stackTrace; }
-        set { stackTrace = value; }
+        get => stackTrace;
+        set => stackTrace = value;
     }
 
     /// <summary>
@@ -39,8 +39,17 @@ public class LogMessageUI : MonoBehaviour
     /// </summary>
     public Color TextColor
     {
-        get { return LogText.color; }
-        set { LogText.color = value; }
+        get => LogText.color;
+        set => LogText.color = value;
+    }
+
+    /// <summary>
+    /// If the log text should word wrap or not in its container.
+    /// </summary>
+    public bool WordWrapText
+    {
+        get => LogText.enableWordWrapping;
+        set => LogText.enableWordWrapping = value;
     }
 
     /// <summary>
@@ -92,16 +101,17 @@ public class LogMessageUI : MonoBehaviour
 
     #region UI Functionality
 
-    public void ConfigureLogObject(LogType type, string message, bool canCopy)
+    public void ConfigureLogObject(LogType type, string message, bool wordWrap, bool canCopy)
     {
         Text = message;
         SetLogType(type);
+        WordWrapText = wordWrap;
         CanCopyText = canCopy;
     }
 
     public void ClearLogObject()
     {
-        ConfigureLogObject(LogType.Log, string.Empty, false);
+        ConfigureLogObject(LogType.Log, string.Empty, false, false);
         StackTrace = string.Empty;
     }
 
