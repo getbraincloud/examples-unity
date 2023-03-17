@@ -83,10 +83,6 @@ public static class ExtensionMethods
         {
             selectable.animator.SetTrigger(ANIMATION_TRIGGER_NORMAL);
         }
-        else
-        {
-            Debug.LogWarning($"Selectable {selectable.name} does not have an animator.");
-        }
 
         return selectable;
     }

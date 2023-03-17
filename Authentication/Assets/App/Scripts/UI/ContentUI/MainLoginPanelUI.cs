@@ -354,9 +354,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
         if (CheckNameVerification(inputName) && CheckAgeVerification(inputAge))
         {
             AuthenticationType authenticationType;
-            Dictionary<string, object> extraJSON = new Dictionary<string, object>();
-            extraJSON["name"] = inputName;
-            extraJSON["age"] = inputAge;
+            UserData userData = new UserData(inputName, inputAge);
 
             if (AnonymousRadio.isOn)
             {
@@ -374,7 +372,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
             }
 
             LoginContent.IsInteractable = false;
-            UserHandler.AuthenticateAdvanced(authenticationType, ids, extraJSON, true,
+            UserHandler.AuthenticateAdvanced(authenticationType, ids, userData.GetDictionary(), true,
                                              OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                              OnFailure("Authentication Failed", OnAuthenticationFailure));
 

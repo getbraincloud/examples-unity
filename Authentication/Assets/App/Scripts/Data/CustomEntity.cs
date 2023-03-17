@@ -8,27 +8,50 @@ using System.Collections.Generic;
 /// A basic data struct for brainCloud's custom entities.
 /// </summary>
 [Serializable]
-public struct CustomEntity
+public struct CustomEntity : IJSON
 {
+    #region Consts
+
+    // JSON Properties
+    private const string PROPERTY_VERSION      = "version";
+    private const string PROPERTY_OWNER_ID     = "ownerId";
+    private const string PROPERTY_ENTITY_ID    = "entityId";
+    private const string PROPERTY_ENTITY_TYPE  = "entityType";
+    private const string PROPERTY_CREATED_AT   = "createdAt";
+    private const string PROPERTY_UPDATED_AT   = "updatedAt";
+    private const string PROPERTY_TIME_TO_LIVE = "timeToLive";
+    private const string PROPERTY_EXPIRES_AT   = "expiresAt";
+    private const string PROPERTY_ACL          = "acl";
+    private const string PROPERTY_DATA         = "data";
+
+    #endregion
+
+    [JsonName(PROPERTY_VERSION)]      public int Version;
+    [JsonName(PROPERTY_OWNER_ID)]     public string OwnerID;
+    [JsonName(PROPERTY_ENTITY_ID)]    public string EntityID;
+    [JsonName(PROPERTY_ENTITY_TYPE)]  public string EntityType;
+    [JsonName(PROPERTY_CREATED_AT)]   public DateTime CreatedAt;
+    [JsonName(PROPERTY_UPDATED_AT)]   public DateTime UpdatedAt;
+    [JsonName(PROPERTY_TIME_TO_LIVE)] public TimeSpan TimeToLive;
+    [JsonName(PROPERTY_EXPIRES_AT)]   public DateTime ExpiresAt;
+    [JsonName(PROPERTY_ACL)]          public ACL ACL;
+    [JsonName(PROPERTY_DATA)]         public IJSON Data;
+
     public bool IsOwned => OwnerID == UserHandler.ProfileID;
-
-    [JsonName("version")] public int Version;
-    [JsonName("ownerId")] public string OwnerID;
-    [JsonName("entityId")] public string EntityID;
-    [JsonName("createdAt")] public DateTime CreatedAt;
-    [JsonName("updatedAt")] public DateTime UpdatedAt;
-    [JsonName("timeToLive")] public TimeSpan TimeToLive;
-    [JsonName("expiresAt")] public DateTime ExpiresAt;
-    [JsonName("acl")] public ACL ACL;
-    [JsonName("data")] public IJSON Data;
-
-    [JsonName("entityType")] public string EntityType => GetDataType();
 
     public TimeSpan ExpiresIn => ExpiresAt - DateTime.UtcNow;
 
     public CustomEntity(IJSON data)
     {
-        this = Create();
+        Version = -1; // -1 tells the server to create the latest version
+        OwnerID = string.Empty;
+        EntityID = string.Empty;
+        EntityType = string.Empty;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+        TimeToLive = TimeSpan.MaxValue;
+        ExpiresAt = DateTime.MaxValue;
+        ACL = ACL.ReadWrite();
         Data = data;
     }
 
@@ -43,30 +66,34 @@ public struct CustomEntity
         }
     }
 
-    public string GetDataType() => Data != null ? Data.GetDataType() : "undefined";
+    #region IJSON
+
+    public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
+
+    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    {
+        { PROPERTY_VERSION,      Version },    { PROPERTY_OWNER_ID,   OwnerID },   { PROPERTY_ENTITY_ID,  EntityID },
+        { PROPERTY_ENTITY_TYPE,  EntityType }, { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt },
+        { PROPERTY_TIME_TO_LIVE, TimeToLive }, { PROPERTY_EXPIRES_AT, ExpiresAt }, { PROPERTY_ACL,        ACL },
+        { PROPERTY_DATA,         Data }
+    };
 
     public string Serialize() => JsonWriter.Serialize(this);
 
     public void Deserialize(Dictionary<string, object> json)
     {
-        Version = (int)json["version"];
-        OwnerID = json["ownerId"] as string;
-        EntityID = json["entityId"] as string;
-        CreatedAt = Util.BcTimeToDateTime((long)json["createdAt"]);
-        UpdatedAt = Util.BcTimeToDateTime((long)json["updatedAt"]);
+        Version = (int)json[PROPERTY_VERSION];
+        OwnerID = json[PROPERTY_OWNER_ID] as string;
+        EntityID = json[PROPERTY_ENTITY_ID] as string;
+        CreatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_CREATED_AT]);
+        UpdatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_UPDATED_AT]);
 
-        if (json.ContainsValue(json["timeToLive"]))
+        if (json.ContainsValue(json[PROPERTY_TIME_TO_LIVE]))
         {
-            if (json["timeToLive"].GetType() == typeof(long))
-            {
-                TimeToLive = TimeSpan.FromMilliseconds((long)json["timeToLive"]);
-            }
-            else
-            {
-                TimeToLive = TimeSpan.FromMilliseconds((int)json["timeToLive"]);
-            }
+            TimeToLive = json[PROPERTY_TIME_TO_LIVE].GetType() == typeof(long) ? TimeSpan.FromMilliseconds((long)json[PROPERTY_TIME_TO_LIVE])
+                                                                               : TimeSpan.FromMilliseconds((int)json[PROPERTY_TIME_TO_LIVE]);
 
-            ExpiresAt = Util.BcTimeToDateTime((long)json["expiresAt"]);
+            ExpiresAt = Util.BcTimeToDateTime((long)json[PROPERTY_EXPIRES_AT]);
         }
         else
         {
@@ -75,36 +102,21 @@ public struct CustomEntity
         }
 
         ACL ??= new ACL();
-        ACL.ReadFromJson(json["acl"] as Dictionary<string, object>);
+        ACL.ReadFromJson(json[PROPERTY_ACL] as Dictionary<string, object>);
 
         if (Data == null)
         {
-            string entityType = (string)json["entityType"];
-            if (entityType == HockeyStatsData.DataType)
-            {
-                Data = new HockeyStatsData();
-            }
-            else if (entityType == RPGData.DataType)
-            {
-                Data = new RPGData();
-            }
+            EntityType = json[PROPERTY_ENTITY_TYPE] as string;
+            Data = EntityType == HockeyStatsData.DataType ? new HockeyStatsData() : new RPGData();
         }
 
-        if (Data != null && json.ContainsKey("data"))
+        if (Data != null && json.ContainsKey(PROPERTY_DATA))
         {
-            Data.Deserialize(json["data"] as Dictionary<string, object>);
+            Data.Deserialize(json[PROPERTY_DATA] as Dictionary<string, object>);
         }
+
+        EntityType = GetDataType();
     }
 
-    private static CustomEntity Create() => new CustomEntity()
-    {
-        Version = -1, // -1 tells the server to create the latest version
-        OwnerID = string.Empty,
-        EntityID = string.Empty,
-        CreatedAt = DateTime.UtcNow,
-        UpdatedAt = DateTime.UtcNow,
-        TimeToLive = TimeSpan.MaxValue,
-        ExpiresAt = DateTime.MaxValue,
-        ACL = ACL.ReadWrite()
-    };
+    #endregion
 }

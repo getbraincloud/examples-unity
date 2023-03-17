@@ -8,13 +8,22 @@ using System.Collections.Generic;
 [Serializable]
 public struct UserData : IJSON
 {
+    #region Consts
+
     public static readonly string DataType = "user";
 
-    private const string DEFAULT_NAME = "New User";
-    private const string DEFAULT_AGE = "?";
+    // JSON Properties
+    private const string PROPERTY_NAME = "name";
+    private const string PROPERTY_AGE  = "age";
 
-    [JsonName("name")] public string Name;
-    [JsonName("age")] public string Age;
+    // Defaults
+    private const string DEFAULT_NAME = "New User";
+    private const string DEFAULT_AGE  = "?";
+
+    #endregion
+
+    [JsonName(PROPERTY_NAME)] public string Name;
+    [JsonName(PROPERTY_AGE)]  public string Age;
 
     public UserData(string name = "", string age = "")
     {
@@ -22,13 +31,22 @@ public struct UserData : IJSON
         Age = age.IsEmpty() ? DEFAULT_AGE : age;
     }
 
+    #region IJSON
+
     public string GetDataType() => DataType;
+
+    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    {
+        { PROPERTY_NAME, Name }, { PROPERTY_AGE, Age }
+    };
 
     public string Serialize() => JsonWriter.Serialize(this);
 
     public void Deserialize(Dictionary<string, object> json)
     {
-        Name = json["name"] as string;
-        Age = json["age"] as string;
+        Name = json[PROPERTY_NAME] as string;
+        Age = json[PROPERTY_AGE] as string;
     }
+
+    #endregion
 }
