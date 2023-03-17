@@ -35,7 +35,7 @@ public struct Entity : IJSON
     {
         Version = -1; // -1 tells the server to create the latest version
         EntityID = string.Empty;
-        EntityType = string.Empty;
+        EntityType = data.GetDataType();
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
         ACL = ACL.ReadWrite();

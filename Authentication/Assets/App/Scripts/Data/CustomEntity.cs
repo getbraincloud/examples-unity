@@ -46,7 +46,7 @@ public struct CustomEntity : IJSON
         Version = -1; // -1 tells the server to create the latest version
         OwnerID = string.Empty;
         EntityID = string.Empty;
-        EntityType = string.Empty;
+        EntityType = data.GetDataType();
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
         TimeToLive = TimeSpan.MaxValue;
