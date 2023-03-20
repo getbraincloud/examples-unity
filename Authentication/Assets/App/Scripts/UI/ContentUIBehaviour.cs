@@ -102,16 +102,16 @@ public abstract class ContentUIBehaviour : MonoBehaviour
         BCManager.HandleFailure(errorMessage, onFailure);
 
     /// <summary>
-    /// A quick method for ContentUIBehaviours to create a <see cref="FailureCallback"/> with <see cref="BCManager.HandleFailure(string, Action{string})"/>.
+    /// A quick method for ContentUIBehaviours to create a <see cref="FailureCallback"/> with <see cref="BCManager.HandleFailure(string, Action{ErrorResponse})"/>.
     /// </summary>
-    protected FailureCallback OnFailure(string errorMessage, Action<string> onFailureS) =>
-        BCManager.HandleFailure(errorMessage, onFailureS);
+    protected FailureCallback OnFailure(string errorMessage, Action<ErrorResponse> onFailureER) =>
+        BCManager.HandleFailure(errorMessage, onFailureER);
 
     /// <summary>
-    /// A quick method for ContentUIBehaviours to create a <see cref="FailureCallback"/> with <see cref="BCManager.HandleSuccess(string, Action{string, object})"/>.
+    /// A quick method for ContentUIBehaviours to create a <see cref="FailureCallback"/> with <see cref="BCManager.HandleFailure(string, Action{ErrorResponse, object})"/>.
     /// </summary>
-    protected FailureCallback OnFailure(string errorMessage, Action<string, object> onFailureSO) =>
-        BCManager.HandleFailure(errorMessage, onFailureSO);
+    protected FailureCallback OnFailure(string errorMessage, Action<ErrorResponse, object> onFailureERO) =>
+        BCManager.HandleFailure(errorMessage, onFailureERO);
 
     #endregion
 }

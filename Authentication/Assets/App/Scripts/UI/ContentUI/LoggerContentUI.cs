@@ -222,7 +222,7 @@ public class LoggerContentUI : ContentUIBehaviour
 
     private string FormatJSON(string json)
     {
-        // Special Chars
+        // Consts
         const string tab = "    ";
 
         // Setup

@@ -188,7 +188,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         CustomEntity current = customEntities[currentIndex];
 
         IDField.text = current.EntityID;
-        TypeField.text = current.EntityType;
+        TypeField.text = current.GetDataType();
         if (current.Data is HockeyStatsData hockeyData)
         {
             HockeyStatsUI.gameObject.SetActive(true);
@@ -267,13 +267,13 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         current.Data = hockeyData;
 
-        customEntityService.UpdateEntity(current.EntityType,
+        customEntityService.UpdateEntity(current.GetDataType(),
                                          current.EntityID,
                                          -1,
                                          current.Data.Serialize(),
                                          current.ACL.ToJsonString(),
                                          current.TimeToLive.Milliseconds.ToString(),
-                                         OnSuccess($"Updated Custom Entity ({current.EntityType})", OnUpdateEntity_Success),
+                                         OnSuccess($"Updated Custom Entity ({current.GetDataType()})", OnUpdateEntity_Success),
                                          OnFailure("UpdateEntity Failed", () => IsInteractable = true));
     }
 
@@ -290,10 +290,10 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         IsInteractable = false;
 
-        customEntityService.DeleteEntity(current.EntityType,
+        customEntityService.DeleteEntity(current.GetDataType(),
                                          current.EntityID,
                                          -1,
-                                         OnSuccess($"Deleted Custom Entity ({current.EntityType})", OnDeleteEntity_Success),
+                                         OnSuccess($"Deleted Custom Entity ({current.GetDataType()})", OnDeleteEntity_Success),
                                          OnFailure("DeleteEntity Failed", () => IsInteractable = true));
     }
 
@@ -380,15 +380,12 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         }
     }
 
-    private void OnGetPage_Failed(string response)
+    private void OnGetPage_Failed(ErrorResponse response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
-
         LoadingLabel.gameObject.SetActive(false);
         ErrorLabel.gameObject.SetActive(true);
 
-        if ((int)responseObj["reason_code"] == 40570 ||
-            ((string)responseObj["status_message"]).ToLower().Contains("no custom entity config exists"))
+        if (response.ReasonCode == 40570 || response.Message.ToLower().Contains("no custom entity config exists"))
         {
             string error = $"Custom Entities has not been enabled for this app on brainCloud (App ID: {BCManager.Client.AppId}).";
             ErrorLabel.text = error;
@@ -410,9 +407,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         if (newCustomEntity.Data == null || !data.ContainsKey("data"))
         {
-            customEntityService.ReadEntity(newCustomEntity.EntityType,
+            customEntityService.ReadEntity(newCustomEntity.GetDataType(),
                                            newCustomEntity.EntityID,
-                                           OnSuccess($"Reading Custom Entity ({newCustomEntity.EntityType})", OnReadEntity_Success),
+                                           OnSuccess($"Reading Custom Entity ({newCustomEntity.GetDataType()})", OnReadEntity_Success),
                                            OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
         }
     }
@@ -425,9 +422,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         if (customEntities[currentIndex].Data == null || !data.ContainsKey("data"))
         {
-            customEntityService.ReadEntity(customEntities[currentIndex].EntityType,
+            customEntityService.ReadEntity(customEntities[currentIndex].GetDataType(),
                                            customEntities[currentIndex].EntityID,
-                                           OnSuccess($"Reading Custom Entity ({customEntities[currentIndex].EntityType})", OnReadEntity_Success),
+                                           OnSuccess($"Reading Custom Entity ({customEntities[currentIndex].GetDataType()})", OnReadEntity_Success),
                                            OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
         }
     }

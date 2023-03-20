@@ -77,8 +77,8 @@ public struct RPGData : IJSON
 
     public void Deserialize(Dictionary<string, object> json)
     {
-        Name = json[PROPERTY_NAME] as string;
-        Job = (json[PROPERTY_JOB] as string).ToLower();
+        Name = (string)json[PROPERTY_NAME];
+        Job = ((string)json[PROPERTY_JOB]).ToLower();
         Level = (int)json[PROPERTY_LEVEL];
         Health = (int)json[PROPERTY_HEALTH];
         Strength = (int)json[PROPERTY_STRENGTH];

@@ -73,7 +73,7 @@ public struct HockeyStatsData : IJSON
 
     public void Deserialize(Dictionary<string, object> json)
     {
-        Name = json[PROPERTY_NAME] as string;
+        Name = (string)json[PROPERTY_NAME];
         PositionValue = (int)json[PROPERTY_POSITION];
         Goals = (int)json[PROPERTY_GOALS];
         Assists = (int)json[PROPERTY_ASSISTS];

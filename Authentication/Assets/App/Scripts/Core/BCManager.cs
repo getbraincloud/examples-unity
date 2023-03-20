@@ -227,22 +227,22 @@ public class BCManager : MonoBehaviour
     /// <summary>
     /// Creates a callback for various brainCloud API calls for when they return as a failure.
     /// This will also format a log into the console with all the relevant information and as
-    /// well as invoke the onFailure Action with the JSON error.
+    /// well as invoke the onFailure Action with an <see cref="ErrorResponse"/>.
     /// </summary>
     /// <param name="errorMessage">Optional information to provide context on the failure.</param>
-    /// <param name="onFailureS">Optional callback to invoke after failed API calls which contains the JSON error.</param>
-    public static FailureCallback HandleFailure(string errorMessage, Action<string> onFailureS = null) =>
-        InternalHandleFailure(errorMessage, onFailureS?.Target, onFailureS != null ? (jsonError, _) => onFailureS.Invoke(jsonError) : null);
+    /// <param name="onFailureER">Optional callback to invoke after failed API calls which contains the JSON error.</param>
+    public static FailureCallback HandleFailure(string errorMessage, Action<ErrorResponse> onFailureER = null) =>
+        InternalHandleFailure(errorMessage, onFailureER?.Target, onFailureER != null ? (jsonError, _) => onFailureER.Invoke(jsonError) : null);
 
     /// <summary>
     /// Creates a callback for various brainCloud API calls for when they return as a failure.
     /// This will also format a log into the console with all the relevant information and as
-    /// well as invoke the onFailure Action with the JSON error and the callback object.
+    /// well as invoke the onFailure Action with an <see cref="ErrorResponse"/> and the callback object.
     /// </summary>
     /// <param name="errorMessage">Optional information to provide context on the failure.</param>
-    /// <param name="onFailureSO">Optional callback to invoke after failed API calls which passes the JSON error and the callback object.</param>
-    public static FailureCallback HandleFailure(string errorMessage, Action<string, object> onFailureSO = null) =>
-        InternalHandleFailure(errorMessage, onFailureSO?.Target, onFailureSO);
+    /// <param name="onFailureERO">Optional callback to invoke after failed API calls which passes the JSON error and the callback object.</param>
+    public static FailureCallback HandleFailure(string errorMessage, Action<ErrorResponse, object> onFailureERO = null) =>
+        InternalHandleFailure(errorMessage, onFailureERO?.Target, onFailureERO);
 
     private static SuccessCallback InternalHandleSuccess(string logMessage, object targetObject, Action<string, object> onSuccess)
     {
@@ -278,7 +278,7 @@ public class BCManager : MonoBehaviour
         };
     }
 
-    private static FailureCallback InternalHandleFailure(string errorMessage, object targetObject, Action<string, object> onFailure = null)
+    private static FailureCallback InternalHandleFailure(string errorMessage, object targetObject, Action<ErrorResponse, object> onFailure = null)
     {
         errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
         return (status, reasonCode, jsonError, cbObject) =>
@@ -308,7 +308,7 @@ public class BCManager : MonoBehaviour
             Debug.Log($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
 #endif
 
-            onFailure?.Invoke(jsonError, cbObject);
+            onFailure?.Invoke(new ErrorResponse(jsonError), cbObject);
         };
     }
 

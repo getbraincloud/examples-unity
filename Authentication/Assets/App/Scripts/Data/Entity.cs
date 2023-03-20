@@ -69,8 +69,8 @@ public struct Entity : IJSON
     public void Deserialize(Dictionary<string, object> json)
     {
         Version = (int)json[PROPERTY_VERSION];
-        EntityID = json[PROPERTY_ENTITY_ID] as string;
-        EntityType = json[PROPERTY_ENTITY_TYPE] as string;
+        EntityID = (string)json[PROPERTY_ENTITY_ID];
+        EntityType = (string)json[PROPERTY_ENTITY_TYPE];
         CreatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_CREATED_AT]);
         UpdatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_UPDATED_AT]);
         ACL.ReadFromJson(json[PROPERTY_ACL] as Dictionary<string, object>);

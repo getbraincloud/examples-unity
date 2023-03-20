@@ -44,8 +44,8 @@ public struct UserData : IJSON
 
     public void Deserialize(Dictionary<string, object> json)
     {
-        Name = json[PROPERTY_NAME] as string;
-        Age = json[PROPERTY_AGE] as string;
+        Name = (string)json[PROPERTY_NAME];
+        Age = (string)json[PROPERTY_AGE];
     }
 
     #endregion

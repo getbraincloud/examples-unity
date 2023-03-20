@@ -83,8 +83,8 @@ public struct CustomEntity : IJSON
     public void Deserialize(Dictionary<string, object> json)
     {
         Version = (int)json[PROPERTY_VERSION];
-        OwnerID = json[PROPERTY_OWNER_ID] as string;
-        EntityID = json[PROPERTY_ENTITY_ID] as string;
+        OwnerID = (string)json[PROPERTY_OWNER_ID];
+        EntityID = (string)json[PROPERTY_ENTITY_ID];
         CreatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_CREATED_AT]);
         UpdatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_UPDATED_AT]);
 
@@ -106,7 +106,7 @@ public struct CustomEntity : IJSON
 
         if (Data == null)
         {
-            EntityType = json[PROPERTY_ENTITY_TYPE] as string;
+            EntityType = (string)json[PROPERTY_ENTITY_TYPE];
             Data = EntityType == HockeyStatsData.DataType ? new HockeyStatsData() : new RPGData();
         }
 

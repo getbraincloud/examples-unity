@@ -102,7 +102,7 @@ public class EntityServiceUI : ContentUIBehaviour
         if (!userEntity.EntityID.IsEmpty())
         {
             IDField.text = userEntity.EntityID;
-            TypeField.text = userEntity.EntityType;
+            TypeField.text = userEntity.GetDataType();
         }
         else
         {
@@ -193,7 +193,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
             userEntity = new Entity(new UserData(inputName, inputAge));
 
-            entityService.CreateEntity(userEntity.EntityType,
+            entityService.CreateEntity(userEntity.GetDataType(),
                                        userEntity.Data.Serialize(),
                                        userEntity.ACL.ToJsonString(),
                                        OnSuccess("Created Entity for User", OnCreateEntity_Success),
@@ -229,7 +229,7 @@ public class EntityServiceUI : ContentUIBehaviour
             userEntity.Data = new UserData(inputName, inputAge);
 
             entityService.UpdateEntity(userEntity.EntityID,
-                                       userEntity.EntityType,
+                                       userEntity.GetDataType(),
                                        userEntity.Data.Serialize(),
                                        userEntity.ACL.ToJsonString(),
                                        -1,
@@ -286,7 +286,7 @@ public class EntityServiceUI : ContentUIBehaviour
                             }},
             { "searchCriteria", new Dictionary<string, object>
                                 {
-                                    { "entityType", userEntity.EntityType }
+                                    { "entityType", userEntity.GetDataType() }
                                 }},
             { "sortCriteria", new Dictionary<string, object>
                               {
