@@ -77,10 +77,15 @@ crashlytics-build.properties
 
 # Compiled Artifacts
 *.exe
+*.exe.meta
 *.o
+*.o.meta
 *.so
+*.so.meta
 *.com
+*.com.meta
 *.class
+*.class.meta
 
 # OS Generated Files 
 .DS_Store
@@ -96,7 +101,6 @@ Thumbs.db
 *.idea*
 */.idea/*
 *.lighting*
-AssetBundleServer.exe*
 FacebookSettings*
 steam_appid*
 */[Aa]ssets/[Bb]rain[Cc]loud*
