@@ -299,7 +299,7 @@ public class TicTacToe : GameScene
             App.OwnerId,
             App.MatchId,
             App.MatchVersion,
-            JsonWriter.Serialize(boardStateBuilder),
+            JsonWriter.Serialize(boardStateJson),
             "A turn has been played",
             null,
             null,

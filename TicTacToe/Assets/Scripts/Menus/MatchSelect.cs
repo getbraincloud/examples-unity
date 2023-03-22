@@ -111,10 +111,10 @@ public class MatchSelect : ResourcesManager
 
         // Construct our matched players list using response data
         var matchesData = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
-                                ["data"] as Dictionary<string, object>)
-                                ["matchesFound"] as Dictionary<string, object>;
+                            ["data"] as Dictionary<string, object>)
+                            ["matchesFound"] as Dictionary<string, object>[];
 
-        foreach (Dictionary<string, object> match in matchesData.Values)
+        foreach (Dictionary<string, object> match in matchesData)
         {
             matchedProfiles.Add(new PlayerInfo(match));
         }
@@ -130,13 +130,13 @@ public class MatchSelect : ResourcesManager
         // Construct our game list using response data
         var jsonMatches = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
                                 ["data"] as Dictionary<string, object>)
-                                ["results"] as Dictionary<string, object>[];
+                                ["results"] as object[];
 
         for (var i = 0; i < jsonMatches.Length; ++i)
         {
-            var jsonMatch = jsonMatches[i];
-
+            var jsonMatch = jsonMatches[i] as Dictionary<string, object>;
             var match = new MatchInfo(jsonMatch, this);
+
             if (!match.expired)
                 matches.Add(match);
         }
@@ -152,11 +152,11 @@ public class MatchSelect : ResourcesManager
         // Construct our game list using response data
         var jsonMatches = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
                                 ["data"] as Dictionary<string, object>)
-                                ["results"] as Dictionary<string, object>[];
+                                ["results"] as object[];
 
         for (var i = 0; i < jsonMatches.Length; ++i)
         {
-            var jsonMatch = jsonMatches[i];
+            var jsonMatch = jsonMatches[i] as Dictionary<string, object>;
             var match = new MatchInfo(jsonMatch, this);
             completedMatches.Add(match);
         }

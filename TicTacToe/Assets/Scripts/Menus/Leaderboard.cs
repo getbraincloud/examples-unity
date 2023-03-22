@@ -90,10 +90,10 @@ public class Leaderboard : ResourcesManager
         scores.Clear();
 
         var leaderboardData = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
-                                    ["data"] as Dictionary<string, object>)
-                                    ["leaderboard"] as Dictionary<string, object>;
+                                ["data"] as Dictionary<string, object>)
+                                ["leaderboard"] as Dictionary<string, object>[];
 
-        foreach (Dictionary<string, object> score in leaderboardData.Values)
+        foreach (Dictionary<string, object> score in leaderboardData)
         {
             scores.Add(new PlayerInfo(score));
         }

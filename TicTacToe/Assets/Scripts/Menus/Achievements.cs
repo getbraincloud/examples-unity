@@ -94,9 +94,11 @@ public class Achievements : ResourcesManager
     {
         achievements.Clear();
 
-        var achievementData = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>)["achievements"] as Dictionary<string, object>;
+        var achievementData = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+                                ["data"] as Dictionary<string, object>)
+                                ["achievements"] as Dictionary<string, object>[];
 
-        foreach (Dictionary<string, object> achievement in achievementData.Values)
+        foreach (Dictionary<string, object> achievement in achievementData)
         {
             achievements.Add(new AchievementInfo(achievement));
         }
