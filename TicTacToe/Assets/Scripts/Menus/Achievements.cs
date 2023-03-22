@@ -1,10 +1,6 @@
-﻿#region
-
+﻿using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
-using BrainCloud.LitJson;
 using UnityEngine;
-
-#endregion
 
 // Achievements are set on the brainCloud Dashboard, under Design | Gamification | Achievements
 /**
@@ -98,10 +94,12 @@ public class Achievements : ResourcesManager
     {
         achievements.Clear();
 
-        var achievementData = JsonMapper.ToObject(responseData)["data"]["achievements"];
+        var achievementData = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>)["achievements"] as Dictionary<string, object>;
 
-        foreach (JsonData achievement in achievementData)
+        foreach (Dictionary<string, object> achievement in achievementData.Values)
+        {
             achievements.Add(new AchievementInfo(achievement));
+        }
     }
 
     public void OnUpdateUI()
@@ -169,15 +167,16 @@ public class Achievements : ResourcesManager
         public string UnlockText;
         public string ImageURL;
 
-        public AchievementInfo(JsonData jsonData)
+        public AchievementInfo(Dictionary<string, object> data)
         {
-            UnlockText = jsonData["extraData"]["TODO"].ToString();
-            UnlockedText = jsonData["extraData"]["DONE"].ToString();
-            Status = jsonData["status"].ToString();
+            var extraData = data["extraData"] as Dictionary<string, object>;
+            UnlockText = extraData["TODO"].ToString();
+            UnlockedText = extraData["DONE"].ToString();
+            Status = data["status"].ToString();
 #if UNITY_WEBGL
-            ImageURL = HOSTED_WEB_ROOT + jsonData["extraData"]["webRelativeURL"].ToString();
+            ImageURL = HOSTED_WEB_ROOT + extraData["webRelativeURL"].ToString();
 #else
-            ImageURL = jsonData["imageUrl"].ToString();
+            ImageURL = data["imageUrl"].ToString();
 #endif
         }
     }

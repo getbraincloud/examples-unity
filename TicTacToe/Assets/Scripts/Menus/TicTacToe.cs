@@ -1,13 +1,10 @@
-﻿#region
+﻿using BrainCloud;
+using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BrainCloud;
-using BrainCloud.LitJson;
-using UnityEngine;
 using TMPro;
-
-#endregion
+using UnityEngine;
 
 public class TicTacToe : GameScene
 {
@@ -125,15 +122,17 @@ public class TicTacToe : GameScene
                         App.CheckAchievements();
                         App.PostToLeaderboard();
                     }
+
                     App.CurrentMatch.scoreSubmitted = true;
-                    var jsonData = new JsonData();
-                    jsonData["scoreSubmitted"] = true;
-                    jsonData["opponentProfileID"] = App.ProfileId;
-                    jsonData["opponentName"] = App.Name;
-                    jsonData["matchID"] = App.MatchId;
-                    jsonData["ownerID"] = App.OwnerId;
+
+                    var jsonData = new Dictionary<string, object> { { "scoreSubmitted", true },
+                                                                    { "opponentProfileID", App.ProfileId },
+                                                                    { "opponentName", App.Name },
+                                                                    { "matchID", App.MatchId },
+                                                                    { "ownerID", App.OwnerId } };
+
                     //Send event to opponent to prompt them to play again
-                    App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId, "gameConcluded", jsonData.ToJson());
+                    App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId, "gameConcluded", JsonWriter.Serialize(jsonData));
                 }
             }
             else
@@ -213,7 +212,7 @@ public class TicTacToe : GameScene
             .ReadMatch(App.OwnerId, App.MatchId, (response, cbObject) =>
             {
                 var match = App.CurrentMatch;
-                var data = JsonMapper.ToObject(response)["data"];
+                var data = JsonReader.Deserialize<Dictionary<string, object>>(response)["data"] as Dictionary<string, object>;
 
                 int newVersion = int.Parse(data["version"].ToString());
 
@@ -222,7 +221,7 @@ public class TicTacToe : GameScene
                     App.MatchVersion = (ulong)newVersion;
 
                     // Setup a couple stuff into our TicTacToe scene
-                    App.BoardState = (string)data["matchState"]["board"];
+                    App.BoardState = (string)(data["matchState"] as Dictionary<string, object>)["board"];
                     App.PlayerInfoX = match.playerXInfo;
                     App.PlayerInfoO = match.playerOInfo;
                     App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
@@ -260,12 +259,15 @@ public class TicTacToe : GameScene
 
     private void OnReadMatchHistory(string responseData, object cbPostObject)
     {
-        var turns = JsonMapper.ToObject(responseData)["data"]["turns"];
+        var turns = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+                        ["data"] as Dictionary<string, object>)
+                        ["turns"] as Dictionary<string, object>[];
+
         _history = new List<string>();
-        for (var i = 0; i < turns.Count; ++i)
+        for (var i = 0; i < turns.Length; ++i)
         {
             var turn = turns[i];
-            var turnState = (string)turn["matchState"]["board"];
+            var turnState = (string)(turn["matchState"] as Dictionary<string, object>)["board"];
             _history.Add(turnState);
         }
     }
@@ -291,14 +293,13 @@ public class TicTacToe : GameScene
         App.BoardState = boardStateBuilder.ToString();
 
         // send the info off
-        var boardStateJson = new JsonData();
-        boardStateJson["board"] = App.BoardState;
+        var boardStateJson = new Dictionary<string, object> { { "board", App.BoardState } };
 
         App.Bc.AsyncMatchService.SubmitTurn(
             App.OwnerId,
             App.MatchId,
             App.MatchVersion,
-            boardStateJson.ToJson(),
+            JsonWriter.Serialize(boardStateBuilder),
             "A turn has been played",
             null,
             null,
@@ -411,14 +412,16 @@ public class TicTacToe : GameScene
     public void onPlayAgain()
     {
         PlayAgainButton.SetActive(false);
-        var jsonData = new JsonData();
-        jsonData["isReady"] = true;
-        jsonData["opponentProfileID"] = App.ProfileId;
-        jsonData["opponentName"] = App.Name;
-        jsonData["matchID"] = App.MatchId;
-        jsonData["ownerID"] = App.OwnerId;
-        //Send event to opponent to prompt them to play again
-        App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+        var jsonData = new Dictionary<string, object> { { "isReady", true },
+                                                        { "opponentProfileID", App.ProfileId },
+                                                        { "opponentName", App.Name },
+                                                        { "matchID", App.MatchId },
+                                                        { "ownerID", App.OwnerId } };
+
+        // Send event to opponent to prompt them to play again
+        App.Bc.EventService.SendEvent(App.CurrentMatch.matchedProfile.ProfileId,
+                                      "playAgain",
+                                      JsonWriter.Serialize(jsonData));
         App.IsAskingToRematch = true;
     }
 

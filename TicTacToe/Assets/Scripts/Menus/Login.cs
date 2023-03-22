@@ -1,9 +1,7 @@
-﻿#region
-
-using BrainCloud.LitJson;
+﻿using BrainCloud.JsonFx.Json;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-#endregion
 
 public class Login : GameScene
 {
@@ -115,7 +113,8 @@ public class Login : GameScene
     private void OnAuthentication(string response, object cbObject)
     {
         Spinner.gameObject.SetActive(false);
-        var data = JsonMapper.ToObject(response)["data"];
+
+        var data = JsonReader.Deserialize<Dictionary<string, object>>(response)["data"] as Dictionary<string, object>;
         App.ProfileId = data["profileId"].ToString();
         App.Name = data["playerName"].ToString();
 
