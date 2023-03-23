@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using BrainCloud.LitJson;
-using System.Collections.Generic;
+﻿using BrainCloud;
+using BrainCloud.JsonFx.Json;
 using Gameframework;
-using BrainCloud;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace BrainCloudUNETExample.Connection
 {
@@ -134,13 +134,17 @@ namespace BrainCloudUNETExample.Connection
 
         public void AchievementSuccess_Callback(string responseData, object cbObject)
         {
-            JsonData achievementData = JsonMapper.ToObject(responseData);
-            achievementData = achievementData["data"]["achievements"];
+            var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
+            var achievementData = data["achievements"] as Dictionary<string, object>[];
             m_achievements.Clear();
             AchievementData achievement = null;
-            for (int i = 0; i < achievementData.Count; i++)
+            for (int i = 0; i < achievementData.Length; i++)
             {
-                achievement = new AchievementData(achievementData[i]["title"].ToString(), achievementData[i]["id"].ToString(), achievementData[i]["description"].ToString(), achievementData[i]["status"].ToString() == "AWARDED", achievementData[i]["imageUrl"].ToString());
+                achievement = new AchievementData(achievementData[i]["title"].ToString(),
+                                                  achievementData[i]["id"].ToString(),
+                                                  achievementData[i]["description"].ToString(),
+                                                  achievementData[i]["status"].ToString() == "AWARDED",
+                                                  achievementData[i]["imageUrl"].ToString());
                 m_achievements.Add(achievement);
             }
             /*
@@ -272,43 +276,43 @@ namespace BrainCloudUNETExample.Connection
 
         private void StateSuccess_Callback(string responseData, object cbObject)
         {
-            JsonData jsonData = JsonMapper.ToObject(responseData);
-            JsonData entries = jsonData["data"];
+            var entries = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
 
             m_playerLevel = int.Parse(entries["experienceLevel"].ToString());
             m_playerExperience = int.Parse(entries["experiencePoints"].ToString());
 
-            if (entries.Keys.Contains("rewardDetails"))
+            if (entries.ContainsKey("rewardDetails"))
             {
-                JsonData rewardDetails = entries["rewardDetails"];
-                if (rewardDetails.Keys.Contains("xp"))
+                var rewardDetails = entries["rewardDetails"] as Dictionary<string, object>;
+                if (rewardDetails.ContainsKey("xp"))
                 {
-                    var xp = rewardDetails["xp"];
+                    var xp = rewardDetails["xp"] as Dictionary<string, object>;
 
-                    if (xp.Keys.Contains("experienceLevels"))
+                    if (xp.ContainsKey("experienceLevels"))
                     {
-                        var levels = xp["experienceLevels"];
-                        if (levels.Count > 0)
+                        var levels = xp["experienceLevels"] as Dictionary<string, object>[];
+                        if (levels.Length > 0)
                         {
                             //var dialogDisplay = GameObject.Find("DialogDisplay").GetComponent<DialogDisplay>();
-                            //dialogDisplay.DisplayRankUp(int.Parse(rewardDetails["xp"]["experienceLevels"][0]["level"].ToString()));
+                            //dialogDisplay.DisplayRankUp(int.Parse(levels[0]["level"].ToString()));
                         }
                     }
                 }
             }
 
-            if (entries.Keys.Contains("entities"))
+            if (entries.ContainsKey("entities"))
             {
-                var entities = entries["entities"];
-                for (int i = 0; i < entities.Count; ++i)
+                var entities = entries["entities"] as Dictionary<string, object>[];
+                for (int i = 0; i < entities.Length; ++i)
                 {
-                    if (entities[i]["data"].Keys.Contains("gameName"))
+                    var data = entities[i]["data"] as Dictionary<string, object>;
+                    if (data.ContainsKey("gameName"))
                     {
-                        m_previousGameName = entities[i]["data"]["gameName"].ToString();
+                        m_previousGameName = data["gameName"].ToString();
                     }
                     else
                     {
-                        GFriendsManager.Instance.OnReadRecentlyViewedEntitySuccess(entities[i].ToJson(), cbObject);
+                        GFriendsManager.Instance.OnReadRecentlyViewedEntitySuccess(JsonWriter.Serialize(data), cbObject);
                     }
                 }
             }
@@ -321,12 +325,12 @@ namespace BrainCloudUNETExample.Connection
 
         private void LevelsSuccess_Callback(string responseData, object cbObject)
         {
-            JsonData jsonData = JsonMapper.ToObject(responseData);
-            JsonData entries = jsonData["data"]["xp_levels"];
+            var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
+            var entries = data["xp_levels"] as Dictionary<string, object>[];
 
-            m_playerLevelTitles = new string[entries.Count];
+            m_playerLevelTitles = new string[entries.Length];
 
-            for (int i = 0; i < entries.Count; i++)
+            for (int i = 0; i < entries.Length; i++)
             {
                 m_playerLevelTitles[i] = entries[i]["statusTitle"].ToString();
             }
@@ -340,8 +344,8 @@ namespace BrainCloudUNETExample.Connection
         private void StatsSuccess_Callback(string responseData, object cbObject)
         {
             // Read the json and update our values
-            JsonData jsonData = JsonMapper.ToObject(responseData);
-            JsonData entries = jsonData["data"]["statistics"];
+            var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
+            var entries = data["statistics"] as Dictionary<string, object>;
 
             m_statBombsDropped = int.Parse(entries["bombsDropped"].ToString());
             m_statPlanesDestroyed = int.Parse(entries["planesDestroyed"].ToString());
@@ -352,17 +356,17 @@ namespace BrainCloudUNETExample.Connection
             m_statGamesWon = int.Parse(entries["gamesWon"].ToString());
             m_statBombsHit = int.Parse(entries["bombsHit"].ToString());
 
-            if (entries.Keys.Contains("rewardDetails"))
+            if (entries.ContainsKey("rewardDetails"))
             {
-                JsonData rewardDetails = entries["rewardDetails"];
-                if (rewardDetails.Keys.Contains("milestones"))
+                var rewardDetails = entries["rewardDetails"] as Dictionary<string, object>;
+                if (rewardDetails.ContainsKey("milestones"))
                 {
-                    var milestones = rewardDetails["milestones"];
-                    if (milestones.Count > 0)
+                    var milestones = rewardDetails["milestones"] as Dictionary<string, object>[];
+                    if (milestones.Length > 0)
                     {
-                        var rewards = rewardDetails["milestones"][0]["rewards"];
+                        var rewards = milestones[0]["rewards"] as Dictionary<string, object>;
 
-                        if (rewards.Count > 0 && rewards.Keys.Contains("achievement"))
+                        if (rewards.Count > 0 && rewards.ContainsKey("achievement"))
                         {
                             //assuming the player received an achievement
                             int achievementID = int.Parse(rewards["achievement"].ToString());
