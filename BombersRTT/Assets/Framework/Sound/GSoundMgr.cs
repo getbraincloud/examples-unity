@@ -386,13 +386,13 @@ namespace Gameframework
                     {
                         fileName = ((string)soundConfig[FILE_NAME_KEY]).Trim();
                     }
-                    catch (System.Exception) { fileName = ""; }
+                    catch { fileName = ""; }
 
                     try
                     {
                         assetBundleName = (string)soundConfig[ASSET_BUNDLE_KEY];
                     }
-                    catch (System.Exception) { assetBundleName = ""; }
+                    catch { assetBundleName = ""; }
 
                     try
                     {
@@ -402,7 +402,7 @@ namespace Gameframework
                             fileNames[index] = fileNames[index].Trim();
                         }
                     }
-                    catch (System.Exception) { fileNames = null; }
+                    catch { fileNames = null; }
 
                     newData = new AudioData(keyValue,
                                             assetBundleName,
@@ -416,21 +416,21 @@ namespace Gameframework
                     {
                         newData.FadeAmount = (float)(double)soundConfig[FADE_AMOUNT_KEY];
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                     // set fade out time  
                     try
                     {
                         newData.FadeOutTime = (float)(double)soundConfig[FADE_OUT_TIME_KEY];
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                     // set probability 
                     try
                     {
                         newData.Probability = (float)(double)soundConfig[PROBABILITY_KEY];
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                     // set the audio type
                     try
@@ -443,12 +443,10 @@ namespace Gameframework
                         else if (tempType == "voice")
                             newData.AudioType = AudioData.eAudioType.voice;
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                 }
-                catch (System.Exception)
-                {
-                }
+                catch { }
 
                 if (newData != null)
                 {

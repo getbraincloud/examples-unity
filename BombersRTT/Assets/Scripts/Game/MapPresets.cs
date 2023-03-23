@@ -14,8 +14,7 @@ namespace BrainCloudUNETExample.Connection
             {
                 if (m_listDurations.Count == 0)
                 {
-                    var data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("GameDurations"))
-                                    ["data"] as Dictionary<string, object>;
+                    var data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("GameDurations"));
                     int numPresets = data.Count;
                     Dictionary<string, object> preset;
                     string name;
@@ -39,8 +38,7 @@ namespace BrainCloudUNETExample.Connection
             {
                 if (m_listRegions.Count == 0)
                 {
-                    var data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("RegionTypes"))
-                                    ["data"] as Dictionary<string, object>;
+                    var data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("RegionTypes"));
                     int numPresets = data.Count;
                     Dictionary<string, object> preset;
 
@@ -153,8 +151,7 @@ namespace BrainCloudUNETExample.Connection
             m_listDurations = new List<GameDuration>();
             m_listRegions = new List<RegionInfo>();
 
-            var data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("MapLayouts"))
-                                    ["data"] as Dictionary<string, object>;
+            var data = JsonReader.Deserialize<Dictionary<string, object>>(((TextAsset)Resources.Load("MapLayouts")).text);
             int numPresets = data.Count;
             Dictionary<string, object> preset;
             string name;
@@ -214,8 +211,7 @@ namespace BrainCloudUNETExample.Connection
                 m_presets.Add(newPreset);
             }
 
-            data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("MapSizes"))
-                        ["data"] as Dictionary<string, object>;
+            data = JsonReader.Deserialize<Dictionary<string, object>>(((TextAsset)Resources.Load("MapSizes")).text);
             numPresets = data.Count;
 
             for (int i = 0; i < numPresets; i++)
