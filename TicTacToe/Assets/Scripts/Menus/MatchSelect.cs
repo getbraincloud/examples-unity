@@ -1,12 +1,11 @@
-﻿#region
+﻿using BrainCloud;
+using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
-using BrainCloud;
-using BrainCloud.LitJson;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 using Random = UnityEngine.Random;
-using TMPro;
-#endregion
 
 public class MatchSelect : ResourcesManager
 {
@@ -111,8 +110,14 @@ public class MatchSelect : ResourcesManager
         matchedProfiles.Clear();
 
         // Construct our matched players list using response data
-        var matchesData = JsonMapper.ToObject(responseData)["data"]["matchesFound"];
-        foreach (JsonData match in matchesData) matchedProfiles.Add(new PlayerInfo(match));
+        var matchesData = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+                            ["data"] as Dictionary<string, object>)
+                            ["matchesFound"] as Dictionary<string, object>[];
+
+        foreach (Dictionary<string, object> match in matchesData)
+        {
+            matchedProfiles.Add(new PlayerInfo(match));
+        }
 
         // After, fetch our game list from Braincloud
         App.Bc.AsyncMatchService.FindMatches(OnFindMatches);
@@ -123,12 +128,15 @@ public class MatchSelect : ResourcesManager
         matches.Clear();
 
         // Construct our game list using response data
-        var jsonMatches = JsonMapper.ToObject(responseData)["data"]["results"];
-        for (var i = 0; i < jsonMatches.Count; ++i)
-        {
-            var jsonMatch = jsonMatches[i];
+        var jsonMatches = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+                                ["data"] as Dictionary<string, object>)
+                                ["results"] as object[];
 
+        for (var i = 0; i < jsonMatches.Length; ++i)
+        {
+            var jsonMatch = jsonMatches[i] as Dictionary<string, object>;
             var match = new MatchInfo(jsonMatch, this);
+
             if (!match.expired)
                 matches.Add(match);
         }
@@ -142,10 +150,13 @@ public class MatchSelect : ResourcesManager
         completedMatches.Clear();
 
         // Construct our game list using response data
-        var jsonMatches = JsonMapper.ToObject(responseData)["data"]["results"];
-        for (var i = 0; i < jsonMatches.Count; ++i)
+        var jsonMatches = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+                                ["data"] as Dictionary<string, object>)
+                                ["results"] as object[];
+
+        for (var i = 0; i < jsonMatches.Length; ++i)
         {
-            var jsonMatch = jsonMatches[i];
+            var jsonMatch = jsonMatches[i] as Dictionary<string, object>;
             var match = new MatchInfo(jsonMatch, this);
             completedMatches.Add(match);
         }
@@ -207,26 +218,20 @@ public class MatchSelect : ResourcesManager
         if (isLookingForMatch)
         {
             isLookingForMatch = false;
-
-            var MATCH_STATE = "MATCH_STATE";
-            var CANCEL_LOOKING = "CANCEL_LOOKING";
-
-            var attributesJson = new JsonData();
-            attributesJson[MATCH_STATE] = CANCEL_LOOKING;
+            var attributesJson = new Dictionary<string, object> { { "MATCH_STATE", "CANCEL_LOOKING" } };
 
             QuickPlayText.text = "QUICKPLAY";
 
-            App.Bc.PlayerStateService.UpdateAttributes(attributesJson.ToJson(), false);
+            App.Bc.PlayerStateService.UpdateAttributes(JsonWriter.Serialize(attributesJson), false);
         }
         else
         {
-            var scriptDataJson = new JsonData();
-            scriptDataJson["rankRangeDelta"] = RANGE_DELTA;
-            scriptDataJson["pushNotificationMessage"] = null;
+            var scriptDataJson = new Dictionary<string, object> { { "rankRangeDelta", RANGE_DELTA },
+                                                                  { "pushNotificationMessage", null } };
 
             QuickPlayText.text = "Looking\nfor match...";
 
-            App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", scriptDataJson.ToJson(), OnCreateMatchSuccess, OnCreateMatchFailed);
+            App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", JsonWriter.Serialize(scriptDataJson), OnCreateMatchSuccess, OnCreateMatchFailed);
         }
     }
     //Populates matches in progress
@@ -250,10 +255,11 @@ public class MatchSelect : ResourcesManager
     private void AddNewCell(string jsonResponse, object cbObject)
     {
         var match = cbObject as MatchInfo;
-        var data = JsonMapper.ToObject(jsonResponse)["data"];
-        
+        string board = (string)((JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)
+                                ["data"] as Dictionary<string, object>)
+                                ["matchState"] as Dictionary<string, object>)["board"];
+
         //Determining if game is completed
-        string board = (string)data["matchState"]["board"];
         match.complete = BoardUtility.IsGameCompleted(board);
         if (match.complete)
         {
@@ -313,49 +319,27 @@ public class MatchSelect : ResourcesManager
     {
         var yourTurnFirst = Random.Range(0, 100) < 50;
 
-        // Setup our summary data. This is what we see when we query
-        // the list of games.
-        var summaryData = new JsonData();
-        summaryData["players"] = new JsonData();
-        {
-            // Us
-            var playerData = new JsonData();
-            playerData["profileId"] = App.ProfileId;
-            //playerData["facebookId"] = FB.UserId;
-            if (yourTurnFirst)
-                playerData["token"] = "X"; // First player has X
-            else
-                playerData["token"] = "O";
+        // Setup our summary data. This is what we see when we query the list of games.
+        var summaryData = new Dictionary<string, List<object>> { { "players", new List<object>() } };
 
-            summaryData["players"].Add(playerData);
-        }
-        {
-            // Our friend
-            var playerData = new JsonData();
-            playerData["profileId"] = matchedProfile.ProfileId;
-            if (!yourTurnFirst)
-                playerData["token"] = "X"; // First player has X
-            else
-                playerData["token"] = "O";
+        // Us
+        summaryData["players"].Add(new Dictionary<string, string>() { { "profileId" , App.ProfileId },
+                                                                      { "token", yourTurnFirst ? "X" : "O" } }); // First player has X
 
-            summaryData["players"].Add(playerData);
-        }
+        // Our Friend
+        summaryData["players"].Add(new Dictionary<string, string>() { { "profileId" , matchedProfile.ProfileId },
+                                                                      { "token", !yourTurnFirst ? "X" : "O" } });
 
-        // Setup our match State. We only store where Os and Xs are in
-        // the tic tac toe board. 
-        var matchState = new JsonData();
-        matchState["board"] = "#########"; // Empty the board. # = nothing, O,X = tokens
-
-        // Setup our opponent list. In this case, we have just one opponent.
-        //JsonData opponentIds = new JsonData();
+        // Setup our match State. We only store where Os and Xs are in the tic tac toe board. 
+        var matchState = new Dictionary<string, string> { { "board", "#########" } }; // Empty the board. # = nothing, O,X = tokens
 
         // Create the match
         App.Bc.AsyncMatchService.CreateMatchWithInitialTurn(
             "[{\"platform\":\"BC\",\"id\":\"" + matchedProfile.ProfileId + "\"}]", // Opponents
-            matchState.ToJson(), // Current match state
+            JsonWriter.Serialize(matchState), // Current match state
             "A friend has challenged you to a match of Tic Tac Toe.", // Push notification Message
             yourTurnFirst ? App.ProfileId : matchedProfile.ProfileId, // Which turn it is. We picked randomly
-            summaryData.ToJson(), // Summary data
+            JsonWriter.Serialize(summaryData), // Summary data
             OnCreateMatchSuccess,
             OnCreateMatchFailed,
             null);
@@ -363,20 +347,22 @@ public class MatchSelect : ResourcesManager
 
     private void OnCreateMatchSuccess(string responseData, object cbPostObject)
     {
-        var data = JsonMapper.ToObject(responseData);
+        var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
         MatchInfo match;
 
         // Cloud Code returns wrap the data in a responseJson
-        if (data["data"].Keys.Contains("response"))
+        if (data.ContainsKey("response"))
         {
-            if (data["data"]["response"].IsObject && data["data"]["response"].Keys.Contains("data"))
+            if (data["response"] is Dictionary<string, object> response &&
+                response.ContainsKey("data") &&
+                response["data"] is Dictionary<string, object> matchInfo)
             {
-                match = new MatchInfo(data["data"]["response"]["data"], this);
+                match = new MatchInfo(matchInfo, this);
             }
             else
             {
                 // No match found. Handle this result
-                Debug.Log(data["data"]["response"].ToString());
+                Debug.Log(data["response"].ToString());
 
                 isLookingForMatch = true;
                 return;
@@ -384,7 +370,7 @@ public class MatchSelect : ResourcesManager
         }
         else
         {
-            match = new MatchInfo(data["data"], this);
+            match = new MatchInfo(data, this);
         }
 
         // Go to the game if it's your turn
@@ -417,10 +403,10 @@ public class MatchSelect : ResourcesManager
     private void OnReadMatch(string responseData, object cbPostObject)
     {
         var match = cbPostObject as MatchInfo;
-        var data = JsonMapper.ToObject(responseData)["data"];
+        var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
 
         // Setup a couple stuff into our TicTacToe scene
-        App.BoardState = (string)data["matchState"]["board"];
+        App.BoardState = (string)(data["matchState"] as Dictionary<string, object>)["board"];
         App.PlayerInfoX = match.playerXInfo;
         App.PlayerInfoO = match.playerOInfo;
         App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
@@ -492,29 +478,31 @@ public class MatchSelect : ResourcesManager
         public bool complete = false;
         public bool expired = false;
         public bool scoreSubmitted = false;
-        public MatchInfo(JsonData jsonMatch, MatchSelect matchSelect)
+        public MatchInfo(Dictionary<string, object> data, MatchSelect matchSelect)
         {
-            version = (int)jsonMatch["version"];
-            ownerId = (string)jsonMatch["ownerId"];
-            matchId = (string)jsonMatch["matchId"];
-            yourTurn = (string)jsonMatch["status"]["currentPlayer"] == matchSelect.App.ProfileId;
-            complete = (string)jsonMatch["status"]["status"] == "COMPLETE";
-            expired = (string)jsonMatch["status"]["status"] == "EXPIRED";
+            var statusData = data["status"] as Dictionary<string, object>;
+            version = (int)data["version"];
+            ownerId = (string)data["ownerId"];
+            matchId = (string)data["matchId"];
+            yourTurn = (string)statusData["currentPlayer"] == matchSelect.App.ProfileId;
+            complete = (string)statusData["status"] == "COMPLETE";
+            expired = (string)statusData["status"] == "EXPIRED";
 
             this.matchSelect = matchSelect;
 
             // Load player info
-            LoadPlayerInfo(jsonMatch, 0);
-            LoadPlayerInfo(jsonMatch, 1);
+            LoadPlayerInfo(data, 0);
+            LoadPlayerInfo(data, 1);
         }
 
-        private void LoadPlayerInfo(JsonData jsonMatch, int index)
+        private void LoadPlayerInfo(Dictionary<string, object> data, int index)
         {
-            JsonData playerData = jsonMatch["players"][index];
-            JsonData playerSummaryData = jsonMatch["summary"]["players"][index];
-
+            var playerData = (data["players"] as Dictionary<string, object>[])[index];
+            var playerSummaryData = ((data["summary"] as Dictionary<string, object>)
+                                          ["players"] as Dictionary<string, object>[])[index];
             var token = (string)playerSummaryData["token"];
-            PlayerInfo playerInfo = new PlayerInfo();
+
+            PlayerInfo playerInfo;
             if (token == "X") playerInfo = playerXInfo;
             else playerInfo = playerOInfo;
 

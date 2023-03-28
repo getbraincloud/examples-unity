@@ -1,11 +1,7 @@
-﻿#region
+﻿using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
-using BrainCloud.LitJson;
 using UnityEngine;
-using JsonReader = BrainCloud.JsonFx.Json.JsonReader;
-
-#endregion
 
 public class App : MonoBehaviour
 {
@@ -74,9 +70,8 @@ public class App : MonoBehaviour
     //Callback used for "Play Again?" scenario
     public void RTTEventCallback(string json)
     {
-        var jsonData = JsonReader.Deserialize<Dictionary<string, object>>(json);
-        var data = jsonData["data"] as Dictionary<string, object>;
-        
+        var data = JsonReader.Deserialize<Dictionary<string, object>>(json)["data"] as Dictionary<string, object>;
+
         if (data.ContainsKey("eventData"))
         {
             var eventData = data["eventData"] as Dictionary<string,object>;
@@ -95,6 +90,7 @@ public class App : MonoBehaviour
                             ProfileId = (string)eventData["opponentProfileID"],
                             PlayerName = (string)eventData["opponentName"],
                         };
+
                         MatchId = (string)eventData["matchID"];
                         OwnerId = (string)eventData["ownerID"];
                     }
@@ -194,7 +190,7 @@ public class App : MonoBehaviour
     public void OnCompleteGame()
     {
         // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
-        var matchResults = new JsonData { ["ownerId"] = OwnerId, ["matchId"] = MatchId };
+        var matchResults = new Dictionary<string, object> { { "ownerId", OwnerId }, { "matchId",  MatchId } };
 
         if (Winner < 0)
         {
@@ -206,9 +202,10 @@ public class App : MonoBehaviour
             matchResults["winnerId"] = WinnerInfo.ProfileId;
             matchResults["loserId"] = LoserInfo.ProfileId;
         }
-        Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnMatchCompleted, FailureCallback);
+
+        Bc.ScriptService.RunScript("RankGame_FinishMatch", JsonWriter.Serialize(matchResults), OnMatchCompleted, FailureCallback);
     }
-    
+
     private void OnMatchCompleted(string responseData, object cbPostObject)
     {
         if (_localTicTacToe)
@@ -221,18 +218,21 @@ public class App : MonoBehaviour
     public void AcceptRematch(GameObject previousScene)
     {
         // Send Event back to opponent that its accepted
-        var jsonData = new JsonData();
-        jsonData["isReady"] = true;
-        //Event to send to opponent to disable PleaseWaitScreen
-        Bc.EventService.SendEvent(OpponentInfo.ProfileId,"playAgain",jsonData.ToJson());
+        var data = new Dictionary<string, object> { { "isReady", true} };
 
-        //Making sure player info is ready to be sent for OnCompleteGame()
+        // Event to send to opponent to disable PleaseWaitScreen
+        Bc.EventService.SendEvent(OpponentInfo.ProfileId,
+                                  "playAgain",
+                                  JsonWriter.Serialize(data));
+
+        // Making sure player info is ready to be sent for OnCompleteGame()
         if (WinnerInfo == null || LoserInfo == null)
         {
             Winner = BoardUtility.CheckForWinner();
             WinnerInfo = Winner == 1 ? PlayerInfoX : PlayerInfoO;
             LoserInfo = Winner == 1 ? PlayerInfoO : PlayerInfoX;
         }
+
         // Reset Match
         OnCompleteGame();
         GotoMatchSelectScene(previousScene);
@@ -242,10 +242,12 @@ public class App : MonoBehaviour
     public void DeclineMatch()
     {
         // Send Event back to opponent that its accepted
-        var jsonData = new JsonData();
-        jsonData["isReady"] = false;
+        var data = new Dictionary<string, object> { { "isReady", false } };
+
         //Event to send to opponent to disable PleaseWaitScreen
-        Bc.EventService.SendEvent(CurrentMatch.matchedProfile.ProfileId,"playAgain",jsonData.ToJson());
+        Bc.EventService.SendEvent(CurrentMatch.matchedProfile.ProfileId,
+                                  "playAgain",
+                                  JsonWriter.Serialize(data));
     }
     
     // ***********Leaderboards Submission*****************

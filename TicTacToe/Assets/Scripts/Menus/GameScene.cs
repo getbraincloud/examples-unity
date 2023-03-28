@@ -1,8 +1,6 @@
-﻿#region
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-#endregion
 
 public class GameScene : MonoBehaviour
 {

@@ -582,10 +582,9 @@ public class NetworkManager : MonoBehaviour
 
         if (summary != null && summary.Count > 0)
         {
-            invaderKillCount = (int) summary["slayCount"];
-            defenderKillCount = (int) summary["defeatedTroops"];
-            double value = (double) summary["timeLeft"];
-            timeLeft = (float) value;
+            invaderKillCount = (int) summary["invaderKillCount"];
+            defenderKillCount = (int) summary["defenderKillCount"];
+            timeLeft = (float)(double)summary["timeLeft"];
             _didInvadersWin = (bool) summary["didInvadersWin"];
         }
 

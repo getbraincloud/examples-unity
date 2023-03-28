@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using BrainCloud;
-using BrainCloud.LitJson;
+using BrainCloud.JsonFx.Json;
 using UnityEngine;
+using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 
@@ -24,8 +25,7 @@ public class User
 
     public void OnLoginResponse(string responseData)
     {
-        var root = JsonMapper.ToObject(responseData);
-        var data = root["data"];
+        var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
 
         try
         {
@@ -68,8 +68,7 @@ public class User
 
     public void OnNameChangedResponse(string responseData)
     {
-        var root = JsonMapper.ToObject(responseData);
-        var data = root["data"];
+        var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
 
         m_userData.m_screenName = data["playerName"].ToString();
 
@@ -111,9 +110,7 @@ public class User
     public void OnSuccess_ReadPlayerState(string responseData, object cbObject)
     {
         // Handle
-
-        var root = JsonMapper.ToObject(responseData);
-        var data = root["data"];
+        var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
 
         m_userData.m_screenName = data["playerName"].ToString();
 
@@ -148,17 +145,15 @@ public class User
 
     public void OnSuccess_GetIdentities(string responseData, object cbObject)
     {
-        var root = JsonMapper.ToObject(responseData);
-        var data = root["data"];
+        var identities = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+            ["data"] as Dictionary<string, object>)
+            ["identities"] as Dictionary<string, object>;
 
         m_userData.m_identities = "";
-
-        var identities = data["identities"];
-
-        foreach (var identitiy in identities)
+        foreach (string identitiy in identities.Values)
         {
-            m_userData.m_identities += identitiy.ToString();
-
+            m_userData.m_identities += identitiy;
+        
             Debug.Log(identitiy);
         }
 
