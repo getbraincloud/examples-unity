@@ -79,13 +79,9 @@ public static class ExtensionMethods
     /// </summary>
     public static Selectable DisplayNormal(this Selectable selectable)
     {
-        if (selectable.animator != null)
+        if (selectable.animator != null && selectable.interactable)
         {
             selectable.animator.SetTrigger(ANIMATION_TRIGGER_NORMAL);
-        }
-        else
-        {
-            Debug.LogWarning($"Selectable {selectable.name} does not have an animator.");
         }
 
         return selectable;
@@ -96,7 +92,7 @@ public static class ExtensionMethods
     /// </summary>
     public static Selectable DisplayError(this Selectable selectable)
     {
-        if (selectable.animator != null)
+        if (selectable.animator != null && selectable.interactable)
         {
             selectable.animator.SetTrigger(ANIMATION_TRIGGER_ERROR);
         }

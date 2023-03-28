@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -13,6 +14,15 @@ public class LoginContentUI : ContentUIBehaviour
     private void OnEnable()
     {
         MainLoginPanel.IsInteractable = true;
+    }
+
+    protected override void Start()
+    {
+        IsInteractable = false;
+
+        StartCoroutine(InitialAppLoad());
+
+        base.Start();
     }
 
     private void OnDisable()
@@ -32,6 +42,20 @@ public class LoginContentUI : ContentUIBehaviour
     protected override void InitializeUI()
     {
         MainLoginPanel.ResetUI();
+    }
+
+    private IEnumerator InitialAppLoad()
+    {
+        yield return null;
+
+        if (MainLoginPanel.GetRememberMePref())
+        {
+            MainLoginPanel.HandleAutomaticLogin();
+        }
+        else
+        {
+            IsInteractable = true;
+        }
     }
 
     #endregion

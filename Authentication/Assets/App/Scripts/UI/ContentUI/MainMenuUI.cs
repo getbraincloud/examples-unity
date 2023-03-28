@@ -178,6 +178,11 @@ public class MainMenuUI : ContentUIBehaviour
 
     private void SetMainMenuActiveState(bool isActive)
     {
+        if (MainMenuActive == isActive)
+        {
+            return;
+        }
+
         if (!UserHandler.ProfileID.IsEmpty())
         {
             ProfileIDButton.Label = string.Format(PROFILE_ID_TEXT, UserHandler.ProfileID);

@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Used for functionality on the App screen.
@@ -10,6 +11,7 @@ public class AppContentUI : ContentUIBehaviour
     [Header("Main")]
     [SerializeField] private TMP_Text TitleLabel = default;
     [SerializeField] private OpenLinkButton APILink = default;
+    [SerializeField] private ScrollRect ServiceScroll = default;
     [SerializeField] private Transform ServiceContent = default;
 
     [Header("Information Box")]
@@ -72,6 +74,11 @@ public class AppContentUI : ContentUIBehaviour
 
     public void LoadServiceItemContent(ServiceItem serviceItem)
     {
+        if (TitleLabel.text == serviceItem.Name)
+        {
+            return;
+        }
+
         ClearCurrentServiceUI();
 
         TitleLabel.text = serviceItem.Name;
@@ -82,6 +89,8 @@ public class AppContentUI : ContentUIBehaviour
         currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent);
         currentServiceUI.gameObject.SetActive(true);
         currentServiceUI.gameObject.SetName(serviceItem.Name, "{0}ContentUI");
+
+        ServiceScroll.verticalNormalizedPosition = 1.0f;
     }
 
     protected override void InitializeUI()
