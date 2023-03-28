@@ -1,8 +1,7 @@
-using BrainCloud.LitJson;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,47 +9,35 @@ using UnityEngine.UI;
 /// <para>
 /// An example of how a Logger can be used in your app. Can be useful to help debug your app on tester devices.
 /// </para>
-///
+/// <para>
+/// Makes use of <see cref="LogMessageUI"/> objects to be able to store data about the logs and copy them to the clipboard.
+/// </para>
 /// <seealso cref="BCManager"/><br></br>
 /// <seealso cref="BrainCloud.LogCallback"/>
 /// </summary>
 public class LoggerContentUI : ContentUIBehaviour
 {
-    private const int MAX_LOG_MESSAGES = 30;
     private const string LOG_APP_HEADER = "#APP";
     private const string LOG_INITIAL_TEXT = "Logs, JSON, and Error messages will appear here.";
-    private const string LOG_COPY_TEXT = "Previous BCC Log copied to clipboard.";
 
     [Header("Main")]
     [SerializeField] private ScrollRect LogScroll = default;
     [SerializeField] private Transform LogContent = default;
     [SerializeField] private Button ClearLogButton = default;
-    [SerializeField] private Button CopyLogButton = default;
 
-#pragma warning disable CS0414
-    [Space, SerializeField] private GameObject CopyLogContainer = default;
-#pragma warning restore CS0414
+    [Header("Log Messages")]
+    [SerializeField] private LogMessageUI LogTemplate = default;
+    [SerializeField, Range(10, 200)] private int MaxLogMessages = 30;
 
-    [Header("Templates")]
-    [SerializeField] private TMP_Text LogTemplate = default;
-    [SerializeField] private TMP_Text WarningTemplate = default;
-    [SerializeField] private TMP_Text ErrorTemplate = default;
-
-    private int logCount = 0;
-    private int warningCount = 0;
-    private int errorCount = 0;
-    private string lastMessage = string.Empty;
-    private List<GameObject> logGOs = default;
+    private int logIndex = 0;
+    private List<LogMessageUI> logObjects = default;
 
     #region Unity Messages
 
     protected override void Awake()
     {
-        logGOs = new List<GameObject>();
-
-        LogTemplate.text = string.Empty;
-        WarningTemplate.text = string.Empty;
-        ErrorTemplate.text = string.Empty;
+        logObjects = new List<LogMessageUI>();
+        logObjects.Capacity = MaxLogMessages;
 
         base.Awake();
     }
@@ -58,10 +45,6 @@ public class LoggerContentUI : ContentUIBehaviour
     private void OnEnable()
     {
         ClearLogButton.onClick.AddListener(OnClearLogButton);
-
-#if UNITY_STANDALONE
-        CopyLogButton.onClick.AddListener(OnCopyLogButton);
-#endif
 
         BCManager.Client.EnableLogging(true);
         BCManager.Client.RegisterLogDelegate(OnLogDelegate);
@@ -71,13 +54,6 @@ public class LoggerContentUI : ContentUIBehaviour
 
     protected override void Start()
     {
-        LogTemplate.gameObject.SetActive(false);
-        WarningTemplate.gameObject.SetActive(false);
-        ErrorTemplate.gameObject.SetActive(false);
-
-#if !UNITY_STANDALONE
-        CopyLogContainer.SetActive(false);
-#endif
         InitializeUI();
 
         base.Start();
@@ -87,15 +63,22 @@ public class LoggerContentUI : ContentUIBehaviour
     {
         StopAllCoroutines();
         ClearLogButton.onClick.RemoveAllListeners();
-        CopyLogButton.onClick.RemoveAllListeners();
         BCManager.Client?.EnableLogging(false);
         Application.logMessageReceived -= OnLogMessageReceived;
     }
 
     protected override void OnDestroy()
     {
-        logGOs?.Clear();
-        logGOs = null;
+        if (!logObjects.IsNullOrEmpty())
+        {
+            for (int i = 0; i < logObjects.Count; i++)
+            {
+                Destroy(logObjects[i]);
+            }
+
+            logObjects.Clear();
+            logObjects = null;
+        }
 
         base.OnDestroy();
     }
@@ -104,57 +87,74 @@ public class LoggerContentUI : ContentUIBehaviour
 
     #region UI
 
-    public void LogMessage(string message) =>
-        CreateLogObject("Log", ++logCount, message, LogTemplate);
+    public void LogMessage(string message, bool wordWrap = true, bool canCopy = false) =>
+        DisplayLogObject(LogType.Log, message, wordWrap, canCopy);
 
-    public void LogWarning(string warning) =>
-        CreateLogObject("Warning", ++warningCount, warning, WarningTemplate);
+    public void LogWarning(string warning, bool wordWrap = true, bool canCopy = false) =>
+        DisplayLogObject(LogType.Warning, warning, wordWrap, canCopy);
 
-    public void LogError(string error) =>
-        CreateLogObject("Error", ++errorCount, error, ErrorTemplate);
+    public void LogError(string error, bool wordWrap = true, bool canCopy = false) =>
+        DisplayLogObject(LogType.Error, error, wordWrap, canCopy);
 
     public void ClearLogs()
     {
-        for (int i = 0; i < logGOs.Count; i++)
+        for (int i = 0; i < logObjects.Count; i++)
         {
-            Destroy(logGOs[i]);
+            logObjects[i].ClearLogObject();
+            logObjects[i].gameObject.SetName($"UnusedLogObject");
+            logObjects[i].gameObject.SetActive(false);
         }
 
-        logGOs.Clear();
-
-        logCount = 0;
-        warningCount = 0;
-        errorCount = 0;
-        lastMessage = string.Empty;
-
+        logIndex = 0;
         LogScroll.verticalNormalizedPosition = 1.0f;
     }
 
     protected override void InitializeUI()
     {
-        ClearLogs();
+        if (logObjects.Count < MaxLogMessages)
+        {
+            CreateLogObjects();
+        }
+        else
+        {
+            ClearLogs();
+        }
+
         LogMessage($"{LOG_APP_HEADER} - {LOG_INITIAL_TEXT}");
     }
 
-    private void CreateLogObject(string type, int count, string message, TMP_Text textTemplate)
+    private void CreateLogObjects()
     {
-        if (logGOs == null)
+        logIndex = logObjects.Count;
+
+        LogMessageUI log;
+        for (int i = logIndex; i < MaxLogMessages; i++)
+        {
+            log = Instantiate(LogTemplate, LogContent);
+            log.gameObject.SetName($"UnusedLogObject");
+            log.gameObject.SetActive(false);
+
+            logObjects.Add(log);
+        }
+    }
+
+    private void DisplayLogObject(LogType type, string message, bool wordWrap, bool canCopy)
+    {
+        if (logObjects.IsNullOrEmpty())
         {
             Debug.LogWarning("Logger is not initialized yet!");
             return;
         }
-        else if (logGOs.Count >= MAX_LOG_MESSAGES)
+        else if (++logIndex >= logObjects.Count)
         {
-            Destroy(logGOs[0]);
-            logGOs.RemoveAt(0);
+            logIndex = 0;
         }
 
-        TMP_Text text = Instantiate(textTemplate, LogContent);
-        text.gameObject.SetActive(true);
-        text.gameObject.SetName($"{type}{count}", "{0}LogText");
-        text.text = message;
-
-        logGOs.Add(text.gameObject);
+        LogMessageUI log = logObjects[logIndex];
+        log.ConfigureLogObject(type, message, wordWrap, canCopy);
+        log.transform.SetAsLastSibling();
+        log.gameObject.SetName($"{type}{(type == LogType.Log ? "Message" : "Log")}Object{logIndex:00}");
+        log.gameObject.SetActive(true);
 
         if (isActiveAndEnabled)
         {
@@ -173,15 +173,6 @@ public class LoggerContentUI : ContentUIBehaviour
     private void OnClearLogButton()
     {
         ClearLogs();
-    }
-
-    private void OnCopyLogButton()
-    {
-        if(!lastMessage.IsEmpty())
-        {
-            GUIUtility.systemCopyBuffer = lastMessage;
-            LogMessage($"{LOG_APP_HEADER} - {LOG_COPY_TEXT}");
-        }
     }
 
     private void OnLogMessageReceived(string log, string _, LogType type)
@@ -216,29 +207,94 @@ public class LoggerContentUI : ContentUIBehaviour
     {
         if (!log.Contains("\n"))
         {
-            lastMessage = log;
             LogMessage(log);
             return;
         }
 
-        string message = log[..log.IndexOf("\n")]; // Server Message 
+        LogMessage(log[..log.IndexOf("\n")]);// Server Message 
 
         string json = log[(log.LastIndexOf("\n") + 1)..]; // Build JSON Response
         if (json.StartsWith("{") && json.EndsWith("}"))
         {
-            StringBuilder sb = new StringBuilder();
-            JsonWriter writer = new JsonWriter(sb)
+            LogMessage(FormatJSON(json), wordWrap:false, canCopy:true);
+        }
+    }
+
+    private string FormatJSON(string json)
+    {
+        // Consts
+        const string tab = "    ";
+
+        // Setup
+        char current;
+        bool insideProperty = false;
+        string indents = string.Empty;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < json.Length; i++)
+        {
+            current = json[i];
+            if (current == '\"')
             {
-                PrettyPrint = true
-            };
+                insideProperty = !insideProperty;
+            }
 
-            JsonMapper.ToJson(JsonMapper.ToObject(json), writer);
+            if (insideProperty)
+            {
+                if (current == '\\' && json[i + 1] == 'n')
+                {
+                    if (json[i + 2] != '\"')
+                    {
+                        sb.Append(Environment.NewLine);
+                    }
+                    i++;
+                }
+                else if (current == '\\' && json[i + 1] == 't')
+                {
+                    sb.Append(indents + tab);
+                    i++;
+                }
+                else
+                {
+                    sb.Append(current);
+                }
+            }
+            else if (!char.IsWhiteSpace(current))
+            {
+                if (current == '{' || current == '[')
+                {
+                    indents += tab;
 
-            message += sb.ToString();
+                    sb.Append(current);
+                    sb.Append(Environment.NewLine);
+                    sb.Append(indents);
+                }
+                else if (current == '}' || current == ']')
+                {
+                    sb.Append(Environment.NewLine);
+
+                    if (indents.Length >= tab.Length)
+                    {
+                        int removeTab = indents.Length - tab.Length;
+                        indents = indents[..removeTab];
+                    }
+
+                    sb.Append(indents);
+                    sb.Append(current);
+                }
+                else if (current == ',')
+                {
+                    sb.Append(current);
+                    sb.Append(Environment.NewLine);
+                    sb.Append(indents);
+                }
+                else
+                {
+                    sb.Append(current);
+                }
+            }
         }
 
-        lastMessage = message;
-        LogMessage(message);
+        return sb.ToString();
     }
 
     #endregion

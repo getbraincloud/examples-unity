@@ -19,7 +19,6 @@ public class EntityServiceUI : ContentUIBehaviour
     private const int MINIMUM_REGISTRATION_AGE = 13;
     private const int MAXIMUM_REGISTRATION_AGE = 120;
     private const string DEFAULT_EMPTY_FIELD = "---";
-    private const string DEFAULT_ENTITY_TYPE = "user";
 
     [Header("Main")]
     [SerializeField] private TMP_Text IDField = default;
@@ -30,7 +29,7 @@ public class EntityServiceUI : ContentUIBehaviour
     [SerializeField] private Button SaveButton = default;
     [SerializeField] private Button DeleteButton = default;
 
-    private BCEntity userEntity = default;
+    private Entity userEntity = default;
     private BrainCloudEntity entityService = default;
 
     #region Unity Messages
@@ -84,7 +83,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
+        userEntity = new Entity(new UserData());
 
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
@@ -100,10 +99,10 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void UpdateUIInformation()
     {
-        if (!userEntity.EntityId.IsEmpty())
+        if (!userEntity.EntityID.IsEmpty())
         {
-            IDField.text = userEntity.EntityId;
-            TypeField.text = userEntity.EntityType;
+            IDField.text = userEntity.EntityID;
+            TypeField.text = userEntity.GetDataType();
         }
         else
         {
@@ -111,8 +110,8 @@ public class EntityServiceUI : ContentUIBehaviour
             TypeField.text = DEFAULT_EMPTY_FIELD;
         }
 
-        NameField.text = userEntity.Name;
-        AgeField.text = userEntity.Age;
+        NameField.text = userEntity.GetData<UserData>().Name;
+        AgeField.text = userEntity.GetData<UserData>().Age;
 
         IsInteractable = true;
     }
@@ -192,10 +191,10 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE, inputName, inputAge);
+            userEntity = new Entity(new UserData(inputName, inputAge));
 
-            entityService.CreateEntity(userEntity.EntityType,
-                                       JsonWriter.Serialize(userEntity.DataToJSON()),
+            entityService.CreateEntity(userEntity.GetDataType(),
+                                       userEntity.Data.Serialize(),
                                        userEntity.ACL.ToJsonString(),
                                        OnSuccess("Created Entity for User", OnCreateEntity_Success),
                                        OnFailure("CreateEntity Failed", UpdateUIInformation));
@@ -217,7 +216,7 @@ public class EntityServiceUI : ContentUIBehaviour
         string inputName = NameField.text;
         string inputAge = AgeField.text;
 
-        if (userEntity.EntityId.IsEmpty())
+        if (userEntity.EntityID.IsEmpty())
         {
             Debug.LogError("Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
@@ -227,11 +226,11 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            userEntity.Update(inputName, inputAge);
+            userEntity.Data = new UserData(inputName, inputAge);
 
-            entityService.UpdateEntity(userEntity.EntityId,
-                                       userEntity.EntityType,
-                                       JsonWriter.Serialize(userEntity.DataToJSON()),
+            entityService.UpdateEntity(userEntity.EntityID,
+                                       userEntity.GetDataType(),
+                                       userEntity.Data.Serialize(),
                                        userEntity.ACL.ToJsonString(),
                                        -1,
                                        OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
@@ -253,7 +252,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnDeleteButton()
     {
-        if (userEntity.EntityId.IsEmpty())
+        if (userEntity.EntityID.IsEmpty())
         {
             Debug.LogError("Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
@@ -263,7 +262,7 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            entityService.DeleteEntity(userEntity.EntityId,
+            entityService.DeleteEntity(userEntity.EntityID,
                                        -1,
                                        OnSuccess("Deleted Entity for User", OnDeleteEntity_Success),
                                        OnFailure("DeleteEntity Failed", UpdateUIInformation));
@@ -287,7 +286,7 @@ public class EntityServiceUI : ContentUIBehaviour
                             }},
             { "searchCriteria", new Dictionary<string, object>
                                 {
-                                    { "entityType", DEFAULT_ENTITY_TYPE }
+                                    { "entityType", userEntity.GetDataType() }
                                 }},
             { "sortCriteria", new Dictionary<string, object>
                               {
@@ -315,7 +314,7 @@ public class EntityServiceUI : ContentUIBehaviour
             return;
         }
 
-        userEntity.CreateFromJSON(data[0]);
+        userEntity.Deserialize(data[0]);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);
@@ -342,7 +341,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnDeleteEntity_Success(string response)
     {
-        userEntity = BCEntity.Create(DEFAULT_ENTITY_TYPE);
+        userEntity = new Entity(new UserData());
 
         InitializeUI();
         IsInteractable = true;
@@ -352,7 +351,7 @@ public class EntityServiceUI : ContentUIBehaviour
     {
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
 
-        userEntity.UpdateFromJSON(data);
+        userEntity.Deserialize(data);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);
