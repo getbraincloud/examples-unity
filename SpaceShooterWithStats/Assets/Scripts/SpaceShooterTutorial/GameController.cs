@@ -1,5 +1,4 @@
-﻿using BrainCloud.LitJson;
-using System;
+﻿using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -51,23 +50,21 @@ public class GameController : MonoBehaviour
 
 	void DisplayTopLeaderBoardScores(string data)
 	{
-		//displaying the top 5 scores from users on the leaderboard
+		// Displaying the top 5 scores from users on the leaderboard
 		int rank;
 		int score;
 		string name;
+
 		// Read the json to display nearby leaderboard rankings
-		JsonData jsonData = JsonMapper.ToObject(data);
-		JsonData[] myPlayer = new JsonData[5];
+		var entriesArray = (JsonReader.Deserialize<Dictionary<string, object>>(data)["data"]
+								as Dictionary<string, object>)["leaderboard"] as Dictionary<string, object>[];
 
-		for (int i = 0; i < 5; i++)
+		int maxCount = entriesArray.Length > 5 ? 5 : entriesArray.Length;
+		for (int i = 0; i < maxCount; i++)
 		{
-			if (jsonData["data"]["leaderboard"].Count == i)
-				break;
-
-			myPlayer[i] = jsonData["data"]["leaderboard"][i];
-			rank = int.Parse(myPlayer[i]["rank"].ToString());
-			score = int.Parse(myPlayer[i]["score"].ToString());
-			name = myPlayer[i]["data"]["username"].ToString();
+			rank = int.Parse(entriesArray[i]["rank"].ToString());
+			score = int.Parse(entriesArray[i]["score"].ToString());
+			name = (entriesArray[i]["data"] as Dictionary<string, object>)["username"].ToString();
 
 			scoreArray[i].gameObject.SetActive(true);
 			scoreArray[i].text = $"Rank: {rank} – Username: {name} – Score: {score}";
@@ -76,18 +73,16 @@ public class GameController : MonoBehaviour
 
 	private void DisplayPlayerScores(string response)
 	{
-		//displaying users own personal best 5 scores
+		// Displaying users own personal best 5 scores
 		int score;
-		JsonData jsonData = JsonMapper.ToObject(response);
-		JsonData player = jsonData["data"]["scores"];
 
-		//.size?
-		for (int i = 0; i < 5; i++)
-		{
-			if (player.Count == i)
-				break;
+		var entriesArray = (JsonReader.Deserialize<Dictionary<string, object>>(response)["data"]
+								as Dictionary<string, object>)["scores"] as Dictionary<string, object>[];
 
-			score = int.Parse(player[i]["score"].ToString());
+        int maxCount = entriesArray.Length > 5 ? 5 : entriesArray.Length;
+        for (int i = 0; i < maxCount; i++)
+		{		
+			score = int.Parse(entriesArray[i]["score"].ToString());
 			scoreArray[i].gameObject.SetActive(true);
 			scoreArray[i].text = $"{i + 1} – Score: {score}";
 		}
@@ -101,17 +96,17 @@ public class GameController : MonoBehaviour
 
 	private void StatsSuccess_Callback(string responseData, object cbObject)
 	{
-		// Read the json and update our values
-		JsonData jsonData = JsonMapper.ToObject (responseData);
-		JsonData entries = jsonData["data"]["statistics"];
-
+		// Read the JSON and update our values
+		var entries = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"]
+						as Dictionary<string, object>)["statistics"] as Dictionary<string, object>;
+		
 		m_statEnemiesKilled = int.Parse(entries["enemyShipsKilled"].ToString());
 		m_statAsteroidsDestroyed = int.Parse(entries["asteroidsDestroyed"].ToString());
 		m_statShotsFired = int.Parse(entries["shotsFired"].ToString());
 		m_statGamesPlayed = int.Parse(entries["gamesPlayed"].ToString());
-
+		
 		ShowStatistics();
-
+		
 		if (brainCloudStatusText)
 		{
 			brainCloudStatusText.text = "Sync'd with brainCloud";

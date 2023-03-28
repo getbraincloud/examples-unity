@@ -77,10 +77,15 @@ crashlytics-build.properties
 
 # Compiled Artifacts
 *.exe
+*.exe.meta
 *.o
+*.o.meta
 *.so
+*.so.meta
 *.com
+*.com.meta
 *.class
+*.class.meta
 
 # OS Generated Files 
 .DS_Store
@@ -90,27 +95,14 @@ crashlytics-build.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
-*RelayTestApp/Logs
-Bombers/Assets/ImportedAssets/Textures/CloudsAtlas.tif
-Bombers/Assets/ImportedAssets/Textures/CloudsAtlas.tif.meta
-BrainCloudSettings.asset
-BrainCloudSettings.asset.meta
-#PhotonServerSettings.asset
-*.idea
-*.log
-
-/Logs/*
-*/.idea/*
-*/.vs/*
-*/Assets/BrainCloud/Resources/*
 
 # Misc Files
 *.log*
 *.idea*
 */.idea/*
 *.lighting*
-*/[Aa]ssets/[Bb]rain[Cc]loud/[Rr]esources/*
-*/[Aa]ssets/[Bb]rain[Cc]loud/[Rr]esources.meta
-AssetBundleServer.exe*
 FacebookSettings*
-steam_appid.txt
+steam_appid*
+*/[Aa]ssets/[Bb]rain[Cc]loud*
+[Bb]ombers/[Aa]ssets/[Ii]mported[Aa]ssets/[Tt]extures/[Cc]louds[Aa]tlas.tif
+[Bb]ombers/[Aa]ssets/[Ii]mported[Aa]ssets/[Tt]extures/[Cc]louds[Aa]tlas.tif.meta

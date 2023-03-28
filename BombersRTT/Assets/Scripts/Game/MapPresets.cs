@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using BrainCloud.LitJson;
+﻿using BrainCloud.JsonFx.Json;
 using BrainCloudUNETExample.Game;
 using Gameframework;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace BrainCloudUNETExample.Connection
 {
@@ -14,15 +14,14 @@ namespace BrainCloudUNETExample.Connection
             {
                 if (m_listDurations.Count == 0)
                 {
-                    string text = GConfigManager.GetStringValue("GameDurations");
-                    JsonData jsonData = JsonMapper.ToObject(text);
-                    int numPresets = jsonData.Count;
-                    JsonData preset;
+                    var data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("GameDurations"));
+                    int numPresets = data.Count;
+                    Dictionary<string, object> preset;
                     string name;
 
                     for (int i = 0; i < numPresets; i++)
                     {
-                        preset = jsonData[i.ToString()];
+                        preset = data[i.ToString()] as Dictionary<string, object>;
                         name = preset["name"].ToString();
                         int timeSec = int.Parse(preset["duration"].ToString());
                         GameDuration gameDuration = new GameDuration(name, timeSec);
@@ -39,14 +38,13 @@ namespace BrainCloudUNETExample.Connection
             {
                 if (m_listRegions.Count == 0)
                 {
-                    string text = GConfigManager.GetStringValue("RegionTypes");
-                    JsonData jsonData = JsonMapper.ToObject(text);
-                    int numPresets = jsonData.Count;
-                    JsonData preset;
+                    var data = JsonReader.Deserialize<Dictionary<string, object>>(GConfigManager.GetStringValue("RegionTypes"));
+                    int numPresets = data.Count;
+                    Dictionary<string, object> preset;
 
                     for (int i = 0; i < numPresets; i++)
                     {
-                        preset = jsonData[i.ToString()];
+                        preset = data[i.ToString()] as Dictionary<string, object>;
                         RegionInfo region = new RegionInfo(preset["name"].ToString(), preset["lobby"].ToString());
                         m_listRegions.Add(region);
                     }
@@ -153,22 +151,21 @@ namespace BrainCloudUNETExample.Connection
             m_listDurations = new List<GameDuration>();
             m_listRegions = new List<RegionInfo>();
 
-            string text = ((TextAsset)Resources.Load("MapLayouts")).text;
-            JsonData jsonData = JsonMapper.ToObject(text);
-            int numPresets = jsonData.Count;
-            JsonData preset;
+            var data = JsonReader.Deserialize<Dictionary<string, object>>(((TextAsset)Resources.Load("MapLayouts")).text);
+            int numPresets = data.Count;
+            Dictionary<string, object> preset;
             string name;
 
             for (int i = 0; i < numPresets; i++)
             {
-                preset = jsonData[i.ToString()];
+                preset = data[i.ToString()] as Dictionary<string, object>;
                 name = preset["name"].ToString();
                 int numShips = int.Parse(preset["numShips"].ToString());
                 Preset newPreset = new Preset(name, numShips);
 
                 for (int j = 0; j < numShips; j++)
                 {
-                    JsonData ship = preset["ship" + (j + 1)];
+                    var ship = preset["ship" + (j + 1)] as Dictionary<string, object>;
                     int team = int.Parse(ship["team"].ToString());
                     int shipType = 0;
                     string shipTypeString = ship["shipType"].ToString();
@@ -200,7 +197,7 @@ namespace BrainCloudUNETExample.Connection
                     Vector3[] path = new Vector3[4];
                     for (int k = 0; k < 4; k++)
                     {
-                        JsonData point = ship["path"]["p" + (k + 1)];
+                        var point = (ship["path"] as Dictionary<string, object>)["p" + (k + 1)] as Dictionary<string, object>;
                         float x = float.Parse(point["x"].ToString());
                         float y = float.Parse(point["y"].ToString());
                         path[k] = new Vector3(x, y, 0);
@@ -214,13 +211,12 @@ namespace BrainCloudUNETExample.Connection
                 m_presets.Add(newPreset);
             }
 
-            text = ((TextAsset)Resources.Load("MapSizes")).text;
-            jsonData = JsonMapper.ToObject(text);
-            numPresets = jsonData.Count;
+            data = JsonReader.Deserialize<Dictionary<string, object>>(((TextAsset)Resources.Load("MapSizes")).text);
+            numPresets = data.Count;
 
             for (int i = 0; i < numPresets; i++)
             {
-                preset = jsonData[i.ToString()];
+                preset = data[i.ToString()] as Dictionary<string, object>;
                 name = preset["name"].ToString();
                 float horz = float.Parse(preset["horizontalSize"].ToString());
                 float vert = float.Parse(preset["verticalSize"].ToString());
