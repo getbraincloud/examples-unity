@@ -145,20 +145,19 @@ public class User
 
     public void OnSuccess_GetIdentities(string responseData, object cbObject)
     {
-        var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
+        var identities = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+            ["data"] as Dictionary<string, object>)
+            ["identities"] as Dictionary<string, object>;
 
         m_userData.m_identities = "";
+        foreach (string identitiy in identities.Values)
+        {
+            m_userData.m_identities += identitiy;
+        
+            Debug.Log(identitiy);
+        }
 
-        var identities = data["identities"];
-
-        //foreach (var identitiy in identities)
-        //{
-        //    m_userData.m_identities += identitiy.ToString();
-        //
-        //    Debug.Log(identitiy);
-        //}
-
-        //SaveData();
+        SaveData();
     }
 
     public void OnFailed_GetIdentities(int statusCode, int reasonCode, string statusMessage, object cbObject)
