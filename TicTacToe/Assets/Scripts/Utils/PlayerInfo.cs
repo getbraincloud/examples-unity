@@ -1,9 +1,4 @@
-﻿#region
-
-using System;
-using BrainCloud.LitJson;
-
-#endregion
+﻿using System.Collections.Generic;
 
 public class PlayerInfo
 {
@@ -12,39 +7,32 @@ public class PlayerInfo
     public string Rank = "";
     public string Score = "";
 
+    public PlayerInfo() { }
 
-    public PlayerInfo(JsonData jsonData)
+    public PlayerInfo(Dictionary<string, object> data)
     {
-        PlayerName = SafeGet(jsonData, "playerName");
+        PlayerName = SafeGet(data, "playerName");
 
-        if (PlayerName.Equals("")) PlayerName = SafeGet(jsonData, "name");
+        if (PlayerName.Equals("")) PlayerName = SafeGet(data, "name");
 
-        Score = SafeGet(jsonData, "score");
+        Score = SafeGet(data, "score");
 
+        ProfileId = SafeGet(data, "playerId");
 
-        ProfileId = SafeGet(jsonData, "playerId");
+        if (ProfileId.Equals("")) ProfileId = SafeGet(data, "profileId");
 
-        if (ProfileId.Equals("")) ProfileId = SafeGet(jsonData, "profileId");
-
-        Rank = SafeGet(jsonData, "rank");
+        Rank = SafeGet(data, "rank");
     }
 
-    public PlayerInfo()
+    private string SafeGet(Dictionary<string, object> data, string key)
     {
-    }
-
-    private string SafeGet(JsonData jsonData, string key)
-    {
-        var returnValue = "";
-
         try
         {
-            returnValue = jsonData[key].ToString();
+            return data[key].ToString();
         }
-        catch (Exception)
+        catch
         {
+            return string.Empty;
         }
-
-        return returnValue;
     }
 }

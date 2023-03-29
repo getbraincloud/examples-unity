@@ -7,6 +7,7 @@ using BrainCloud;
 using BrainCloudUNETExample.Connection;
 using BrainCloud.JsonFx.Json;
 using Gameframework;
+using TMPro;
 
 namespace BrainCloudUNETExample
 {
@@ -36,7 +37,7 @@ namespace BrainCloudUNETExample
         private GameObject LobbyChatCellSystem = null;
 
         [SerializeField]
-        private Text NoFriendsOnline = null;
+        private TextMeshProUGUI NoFriendsOnline = null;
 
         [SerializeField]
         private RectTransform FriendsScrollView = null;
@@ -73,7 +74,7 @@ namespace BrainCloudUNETExample
         private Image TextInputMaxIndicator = null;
 
         [SerializeField]
-        private InputField ChatInputField = null;
+        private TMP_InputField ChatInputField = null;
 
         #region BaseState
         protected override void Start()
@@ -98,7 +99,7 @@ namespace BrainCloudUNETExample
             BombersNetworkManager.Instance.ConnectRTT();
 
             GameObject playerName = GameObject.Find("PlayerName");
-            m_inputField = playerName.GetComponent<InputField>();
+            m_inputField = playerName.GetComponent<TMP_InputField>();
             m_inputField.characterLimit = MAX_CHARACTERS_NAME;
             m_inputField.text = GPlayerMgr.Instance.PlayerData.PlayerName;
             m_inputField.interactable = false;
@@ -178,7 +179,7 @@ namespace BrainCloudUNETExample
         #region Public
         public void Update()
         {
-#if !UNITY_WEBGL
+#if UNITY_EDITOR || UNITY_STANDALONE
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 QuitMenu.SetActive(true);
@@ -204,7 +205,7 @@ namespace BrainCloudUNETExample
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-#elif STEAMWORKS_ENABLED
+#elif UNITY_STANDALONE || STEAMWORKS_ENABLED
             Application.Quit();
 #endif
         }
@@ -259,7 +260,7 @@ namespace BrainCloudUNETExample
                 GlobalChatEntered();
         }
 
-        public void OnGlobalChatValueChanged(InputField in_field)
+        public void OnGlobalChatValueChanged(TMP_InputField in_field)
         {
             if (in_field.isFocused)
             {
@@ -297,7 +298,7 @@ namespace BrainCloudUNETExample
             }
         }
 
-        private IEnumerator delayedSelect(InputField in_field)
+        private IEnumerator delayedSelect(TMP_InputField in_field)
         {
             in_field.interactable = false;
             yield return YieldFactory.GetWaitForSeconds(0.15f);
@@ -582,7 +583,9 @@ namespace BrainCloudUNETExample
         private Image m_statsImage = null;
         private void OnUpdateStats()
         {
-            if (m_statsPanelContentLeft != null)
+            if (m_statsPanelContentLeft != null &&
+                BrainCloudStats.Instance.m_playerLevelTitles != null &&
+                BrainCloudStats.Instance.m_playerLevelTitles.Length > 0)
             {
                 // clear all stats
                 for (int i = 0; i < m_statsPanelContentLeft.transform.childCount; ++i)
@@ -603,16 +606,21 @@ namespace BrainCloudUNETExample
                     PlayerRankIcon.UpdateIcon(GPlayerMgr.Instance.PlayerData.PlayerRank);
                 }
 
-                string rank = BrainCloudStats.Instance.m_playerLevelTitles[0] + "(" + GPlayerMgr.Instance.PlayerData.PlayerXPData.CurrentLevel + ")";
+                string rank = String.Empty;
 
-                if (currentLevel > 0 && currentLevel < BrainCloudStats.Instance.m_playerLevelTitles.Length)
+                if (BrainCloudStats.Instance.m_playerLevelTitles.Length > 0)
                 {
-                    rank = BrainCloudStats.Instance.m_playerLevelTitles[currentLevel - 1] + " (" + currentLevel + ")";
-                }
-                // over max
-                else if (currentLevel > 0)
-                {
-                    rank = BrainCloudStats.Instance.m_playerLevelTitles[BrainCloudStats.Instance.m_playerLevelTitles.Length - 1] + " (" + currentLevel + ")";
+                    rank = BrainCloudStats.Instance.m_playerLevelTitles[0] + "(" + GPlayerMgr.Instance.PlayerData.PlayerXPData.CurrentLevel + ")";
+
+                    if (currentLevel > 0 && currentLevel < BrainCloudStats.Instance.m_playerLevelTitles.Length)
+                    {
+                        rank = BrainCloudStats.Instance.m_playerLevelTitles[currentLevel - 1] + " (" + currentLevel + ")";
+                    }
+                    // over max
+                    else if (currentLevel > 0)
+                    {
+                        rank = BrainCloudStats.Instance.m_playerLevelTitles[BrainCloudStats.Instance.m_playerLevelTitles.Length - 1] + " (" + currentLevel + ")";
+                    }
                 }
 
                 if (m_statsImage == null)
@@ -620,16 +628,16 @@ namespace BrainCloudUNETExample
 
                 m_statsImage.fillAmount = Mathf.InverseLerp(xpData.PrevThreshold, xpData.NextThreshold, xpData.ExperiencePoints);
 
-                Text tempText = null;
+                TextMeshProUGUI tempText = null;
                 for (int i = 2; i < playerStats.Count; ++i)
                 {
-                    tempText = Instantiate(m_statText, m_statsPanelContentLeft.transform).GetComponent<Text>();
-                    tempText.alignment = TextAnchor.MiddleLeft;
+                    tempText = Instantiate(m_statText, m_statsPanelContentLeft.transform).GetComponent<TextMeshProUGUI>();
+                    tempText.alignment = TextAlignmentOptions.MidlineLeft;
                     tempText.text = "  " + playerStats[i].Name;
-                    tempText = Instantiate(m_statValue, m_statsPanelContentRight.transform).GetComponent<Text>();
+                    tempText = Instantiate(m_statValue, m_statsPanelContentRight.transform).GetComponent<TextMeshProUGUI>();
                     tempText.text = HudHelper.ToGUIString(playerStats[i].Value);
                 }
-                GameObject.Find("RankText").GetComponent<Text>().text = rank;
+                GameObject.Find("RankText").GetComponent<TextMeshProUGUI>().text = rank;
             }
         }
 
@@ -842,7 +850,7 @@ namespace BrainCloudUNETExample
         }
 
         private string platform = "";   // denotes All
-        private InputField m_inputField = null;
+        private TMP_InputField m_inputField = null;
         private int MIN_CHARACTERS_NAME = 3;
         private int MAX_CHARACTERS_NAME = 16;
 

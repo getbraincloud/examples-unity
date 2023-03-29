@@ -1,7 +1,7 @@
-using UnityEngine;
+using BrainCloud.JsonFx.Json;
 using System.Collections;
 using System.Collections.Generic;
-using BrainCloud.LitJson;
+using UnityEngine;
 
 namespace Gameframework
 {
@@ -366,77 +366,76 @@ namespace Gameframework
 
         public void LoadSoundConfig(string in_jsonConfig)
         {
-            JsonReader reader = new JsonReader(in_jsonConfig);
-            JsonData root = JsonMapper.ToObject(reader);
-            JsonData jObject;
+            var data = JsonReader.Deserialize<Dictionary<string, object>[]>(in_jsonConfig);
+            Dictionary<string, object> soundConfig;
 
             AudioData newData = null;
             string keyValue = "";
             string assetBundleName = "";
             string fileName = "";
             string[] fileNames = null;
-            for (int i = 0; i < root.Count; ++i)
+            for (int i = 0; i < data.Length; ++i)
             {
-                jObject = root[i];
+                soundConfig = data[i];
                 newData = null;
                 try
                 {
-                    keyValue = (string)jObject[SOUND_KEY];
+                    keyValue = (string)soundConfig[SOUND_KEY];
 
                     try
                     {
-                        fileName = ((string)jObject[FILE_NAME_KEY]).Trim();
+                        fileName = ((string)soundConfig[FILE_NAME_KEY]).Trim();
                     }
-                    catch (System.Exception) { fileName = ""; }
+                    catch { fileName = ""; }
 
                     try
                     {
-                        assetBundleName = (string)jObject[ASSET_BUNDLE_KEY];
+                        assetBundleName = (string)soundConfig[ASSET_BUNDLE_KEY];
                     }
-                    catch (System.Exception) { assetBundleName = ""; }
+                    catch { assetBundleName = ""; }
 
                     try
                     {
-                        fileNames = ((string)jObject[FILE_NAMES_KEY]).Split(',');
+                        fileNames = ((string)soundConfig[FILE_NAMES_KEY]).Split(',');
                         for (int index = 0; index < fileNames.Length; ++index)
                         {
                             fileNames[index] = fileNames[index].Trim();
                         }
                     }
-                    catch (System.Exception) { fileNames = null; }
+                    catch { fileNames = null; }
 
                     newData = new AudioData(keyValue,
                                             assetBundleName,
                                             fileName,
                                             fileNames,
-                                            (float)(double)jObject[VOLUME_KEY],
-                                            (bool)jObject[LOOP_KEY]
+                                            (float)(double)soundConfig[VOLUME_KEY],
+                                            (bool)soundConfig[LOOP_KEY]
                                             );
                     // set fade amount 
                     try
                     {
-                        newData.FadeAmount = (float)(double)jObject[FADE_AMOUNT_KEY];
+                        newData.FadeAmount = (float)(double)soundConfig[FADE_AMOUNT_KEY];
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                     // set fade out time  
                     try
                     {
-                        newData.FadeOutTime = (float)(double)jObject[FADE_OUT_TIME_KEY];
+                        newData.FadeOutTime = (float)(double)soundConfig[FADE_OUT_TIME_KEY];
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                     // set probability 
                     try
                     {
-                        newData.Probability = (float)(double)jObject[PROBABILITY_KEY];
+                        newData.Probability = (float)(double)soundConfig[PROBABILITY_KEY];
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                     // set the audio type
                     try
                     {
-                        string tempType = (string)jObject[AUDIO_TYPE_KEY];
+                        string tempType = (string)soundConfig[AUDIO_TYPE_KEY];
                         if (tempType == "effect")
                             newData.AudioType = AudioData.eAudioType.effect;
                         else if (tempType == "music")
@@ -444,12 +443,10 @@ namespace Gameframework
                         else if (tempType == "voice")
                             newData.AudioType = AudioData.eAudioType.voice;
                     }
-                    catch (System.Exception) { }
+                    catch { }
 
                 }
-                catch (System.Exception)
-                {
-                }
+                catch { }
 
                 if (newData != null)
                 {
@@ -472,22 +469,21 @@ namespace Gameframework
 
         public void UnloadSoundConfig(string in_jsonConfig)
         {
-            JsonReader reader = new JsonReader(in_jsonConfig);
-            JsonData root = JsonMapper.ToObject(reader);
-            JsonData jObject;
+            var data = JsonReader.Deserialize<Dictionary<string, object>[]>(in_jsonConfig);
+            Dictionary<string, object> soundConfig;
             GEntityFactory entFact = GEntityFactory.Instance;
 
             string keyValue = "";
-            for (int i = 0; i < root.Count; ++i)
+            for (int i = 0; i < data.Length; ++i)
             {
-                jObject = root[i];
+                soundConfig = data[i];
                 try
                 {
-                    keyValue = (string)jObject[SOUND_KEY];
+                    keyValue = (string)soundConfig[SOUND_KEY];
                     m_audioLookupData.Remove(keyValue);
                     entFact.RemoveReferencedResource(keyValue, false);
                 }
-                catch (System.Exception) { }
+                catch { }
             }
         }
 

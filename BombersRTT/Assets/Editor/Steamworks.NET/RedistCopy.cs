@@ -19,12 +19,14 @@ using UnityEditor.Callbacks;
 using Steamworks;
 using System.IO;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 public class RedistCopy {
 	[PostProcessBuild]
 	public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject) {
 		string baseDir;
 		string pluginsDir;
-		switch(target)
+
+		switch (target)
 		{
 		case BuildTarget.StandaloneWindows:
 		case BuildTarget.StandaloneWindows64:
@@ -118,5 +120,6 @@ public class RedistCopy {
 		}
 	}
 }
+#pragma warning restore CS0618 // Type or member is obsolete
 
 #endif // !DISABLESTEAMWORKS

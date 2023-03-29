@@ -4,13 +4,14 @@
  * 
  */
 
-using UnityEngine;
+using BrainCloudUNETExample.Connection;
+using Gameframework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
-using BrainCloudUNETExample.Connection;
-using Gameframework;
 
 namespace BrainCloudUNETExample.Game
 {
@@ -29,10 +30,7 @@ namespace BrainCloudUNETExample.Game
             GAME_STATE_SPECTATING
         }
 
-        [SerializeField]
         public eGameState m_gameState = eGameState.GAME_STATE_INITIALIZE_GAME;
-
-        //public GUISkin m_skin;
 
         public int m_respawnTime = 3;
 
@@ -59,18 +57,13 @@ namespace BrainCloudUNETExample.Game
 
         public bool m_once = false;
 
-        [SerializeField]
         public Collider m_team1SpawnBounds;
-
-        [SerializeField]
         public Collider m_team2SpawnBounds;
 
-#pragma warning disable 649
         [SerializeField]
         private RectTransform m_greenChevron;
         [SerializeField]
         private RectTransform m_redChevron;
-#pragma warning restore 649
 
         public GameObject MissionText { get { return m_missionText; } }
 
@@ -90,8 +83,8 @@ namespace BrainCloudUNETExample.Game
                 return;
             }
 
-            m_greenTeamScore = GameObject.Find("Team Green Score").transform.Find("Team Score").GetComponent<Text>();
-            m_redTeamScore = GameObject.Find("Team Red Score").transform.Find("Team Score").GetComponent<Text>();
+            m_greenTeamScore = GameObject.Find("Team Green Score").transform.Find("Team Score").GetComponent<TextMeshProUGUI>();
+            m_redTeamScore = GameObject.Find("Team Red Score").transform.Find("Team Score").GetComponent<TextMeshProUGUI>();
 
             m_greenTeamResultsTransform = GameObject.Find("Team Green Score Inner").transform.FindDeepChild("PlayerResultsGroup").transform;
             m_redTeamResultsTransform = GameObject.Find("Team Red Score Inner").transform.FindDeepChild("PlayerResultsGroup").transform;
@@ -101,7 +94,7 @@ namespace BrainCloudUNETExample.Game
             m_redShipLogo = GameObject.Find("ShipSink").transform.Find("RedLogo").gameObject;
             m_greenShipLogo = GameObject.Find("ShipSink").transform.Find("GreenLogo").gameObject;
             m_initialLoadingScreen = GameObject.Find("InitialLoadingScreen");
-            m_countDownText = GameObject.Find("CountDown").GetComponent<Text>();
+            m_countDownText = GameObject.Find("CountDown").GetComponent<TextMeshProUGUI>();
 
             m_allyShipSunk.SetActive(false);
             m_enemyShipSunk.SetActive(false);
@@ -118,7 +111,6 @@ namespace BrainCloudUNETExample.Game
             m_allyWinText = GameObject.Find("Window Title - Win");
             m_resetButton = GameObject.Find("Continue");
             m_quitButton = GameObject.Find("ResultsQuit");
-            m_gameStartButton = GameObject.Find("StartGame");
             m_gameTime = GConfigManager.GetFloatValue("DefaultGameTime");
             m_mapPresets = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_presets;
             m_mapSizes = GameObject.Find("MapPresets").GetComponent<MapPresets>().m_mapSizes;
@@ -137,8 +129,8 @@ namespace BrainCloudUNETExample.Game
             m_greenShipAnimators = m_greenScoreTrans.transform.parent.FindDeepChildren<GenericAnimator>();
             m_greenShipAnimators.Reverse();
 
-            m_timeLeft = m_HUD.transform.GetChild(0).Find("TimeLeft").GetChild(0).GetComponent<Text>();
-            m_respawnText = GameObject.Find("RespawnText").GetComponent<Text>();
+            m_timeLeft = m_HUD.transform.GetChild(0).Find("TimeLeft").GetChild(0).GetComponent<TextMeshProUGUI>();
+            m_respawnText = GameObject.Find("RespawnText").GetComponent<TextMeshProUGUI>();
 
             m_respawnText.text = "";
 
@@ -300,7 +292,7 @@ namespace BrainCloudUNETExample.Game
             newDisplay.SetActive(true);
             CanvasGroup canvasGroup = newDisplay.GetComponent<CanvasGroup>();
             canvasGroup.alpha = 0;
-            Text text = newDisplay.transform.FindDeepChild<Text>();
+            TextMeshProUGUI text = newDisplay.transform.FindDeepChild<TextMeshProUGUI>();
             text.text = in_message;
             Vector3 newPos = newDisplay.transform.position;
             while (canvasGroup.alpha < 1.0f)
@@ -545,7 +537,7 @@ namespace BrainCloudUNETExample.Game
             }
             // update red hud
             int count = 0;
-            m_redScoreTrans.GetChild(0).GetComponent<Text>().text = m_team2Score.ToString("n0");
+            m_redScoreTrans.GetChild(0).GetComponent<TextMeshProUGUI>().text = m_team2Score.ToString("n0");
             foreach (GenericAnimator animator in m_redShipAnimators)
             {
                 animator.PlayAnimation("Alive", ++count <= team2Ships.Count);
@@ -553,7 +545,7 @@ namespace BrainCloudUNETExample.Game
             }
             // update green hud
             count = 0;
-            m_greenScoreTrans.GetChild(0).GetComponent<Text>().text = m_team1Score.ToString("n0");
+            m_greenScoreTrans.GetChild(0).GetComponent<TextMeshProUGUI>().text = m_team1Score.ToString("n0");
 
             foreach (GenericAnimator animator in m_greenShipAnimators)
             {
@@ -654,7 +646,7 @@ namespace BrainCloudUNETExample.Game
 
         IEnumerator startingInCountDown()
         {
-            Text startingIn = m_resultsWindow.transform.FindDeepChild("CountdownText").GetComponent<Text>();
+            TextMeshProUGUI startingIn = m_resultsWindow.transform.FindDeepChild("startingInCountdownText").GetComponent<TextMeshProUGUI>();
             int countDown = GConfigManager.GetIntValue("playAgainTime");
             bool bAllHumansReadiedUp = false;
             bool bPreviousOwnerJoinedUp = false;
@@ -713,7 +705,7 @@ namespace BrainCloudUNETExample.Game
                 {
                     m_greenLogo.SetActive(true);
                     m_redLogo.SetActive(false);
-                    
+
                     if (BombersNetworkManager.LocalPlayer != null && BombersNetworkManager.LocalPlayer.m_team == 1)
                     {
                         m_allyWinText.SetActive(true);
@@ -966,7 +958,7 @@ namespace BrainCloudUNETExample.Game
                             ShipController controller = ship.GetComponent<ShipController>();
 
                             controller.SetShipType(preset.m_ships[i].m_shipType, preset.m_ships[i].m_team, shipID, preset.m_ships[i].m_angle, position, preset.m_ships[i].m_respawnTime, preset.m_ships[i].m_path, preset.m_ships[i].m_pathSpeed);
-                            SendStart(BombersNetworkManager.SHIP, controller.GetShipType().ToString() + "***" + shipID.ToString() + "^^^"+ preset.m_ships[i].m_team.ToString(), ship.name.Replace("(Clone)", ""), ship.transform);
+                            SendStart(BombersNetworkManager.SHIP, controller.GetShipType().ToString() + "***" + shipID.ToString() + "^^^" + preset.m_ships[i].m_team.ToString(), ship.name.Replace("(Clone)", ""), ship.transform);
                             // yield return YieldFactory.GetWaitForEndOfFrame();
                             shipID++;
                         }
@@ -1257,7 +1249,6 @@ namespace BrainCloudUNETExample.Game
                 case eGameState.GAME_STATE_GAME_OVER:
                     m_resultsWindow.gameObject.SetActive(true);
                     m_HUD.SetActive(false);
-
                     OnScoresWindow();
                     break;
 
@@ -1897,12 +1888,16 @@ namespace BrainCloudUNETExample.Game
                 if (IsServer)
                 {
                     // spawn a bomb pick up at this location and all the other bombs
-                    Vector3 position = tempController.m_playerPlane.transform.position;
-                    int bombs = tempController.WeaponController.GetBombs();
-                    CmdSpawnBombPickup(position);
-                    for (int i = 0; i < bombs; i++)
+                    // only do this if plane was shot by valid shooter
+                    if (aShooter != -1)
                     {
+                        Vector3 position = tempController.m_playerPlane.transform.position;
+                        int bombs = tempController.WeaponController.GetBombs();
                         CmdSpawnBombPickup(position);
+                        for (int i = 0; i < bombs; i++)
+                        {
+                            CmdSpawnBombPickup(position);
+                        }
                     }
 
                     // send destroyed!
@@ -1951,7 +1946,6 @@ namespace BrainCloudUNETExample.Game
         private GameObject m_bombWaterExplosion;
         private GameObject m_bombDud;
 
-        private GameObject m_gameStartButton;
         private GameObject m_displayDialog;
         private CanvasGroup m_resultsWindow;
         private GameObject m_greenLogo;
@@ -1977,24 +1971,22 @@ namespace BrainCloudUNETExample.Game
         private GameObject m_resultsCellPrefabYou;
         private GameObject m_missionText;
 
-        private Text m_timeLeft;
-        private Text m_respawnText;
-        private Text m_countDownText;
-        private Text m_greenTeamScore = null;
-
-        private Text m_redTeamScore = null;
+        private TextMeshProUGUI m_timeLeft;
+        private TextMeshProUGUI m_respawnText;
+        private TextMeshProUGUI m_countDownText;
+        private TextMeshProUGUI m_greenTeamScore;
+        private TextMeshProUGUI m_redTeamScore;
 
         private Transform m_redScoreTrans;
         private Transform m_greenScoreTrans;
 
-        private Transform m_greenTeamResultsTransform = null;
-        private Transform m_redTeamResultsTransform = null;
+        private Transform m_greenTeamResultsTransform;
+        private Transform m_redTeamResultsTransform;
 
         private GameInfo m_gameInfo;
 
         private bool m_showQuitMenu = false;
         private bool m_showScores = false;
-        private const float RESULTS_Y_DIF = 21.8f;
 
         private List<GenericAnimator> m_redShipAnimators;
         private List<GenericAnimator> m_greenShipAnimators;

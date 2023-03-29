@@ -1,14 +1,13 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System;
-using BrainCloud.LitJson;
+﻿using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
 	////////////////////////////////////////////
-	// BrainCloud integration code
+	// brainCloud Integration Code
 	////////////////////////////////////////////
 
 	private void ReadStatistics()
@@ -51,46 +50,41 @@ public class GameController : MonoBehaviour
 
 	void DisplayTopLeaderBoardScores(string data)
 	{
-		//displaying the top 5 scores from users on the leaderboard
+		// Displaying the top 5 scores from users on the leaderboard
 		int rank;
 		int score;
 		string name;
+
 		// Read the json to display nearby leaderboard rankings
-		JsonData jsonData = JsonMapper.ToObject(data);
-		JsonData[] myPlayer = new JsonData[5];
+		var entriesArray = (JsonReader.Deserialize<Dictionary<string, object>>(data)["data"]
+								as Dictionary<string, object>)["leaderboard"] as Dictionary<string, object>[];
 
-		for (int i = 0; i < 5; i++)
+		int maxCount = entriesArray.Length > 5 ? 5 : entriesArray.Length;
+		for (int i = 0; i < maxCount; i++)
 		{
-			if (jsonData["data"]["leaderboard"].Count == i)
-				break;
-
-			myPlayer[i] = jsonData["data"]["leaderboard"][i];
-			rank = int.Parse(myPlayer[i]["rank"].ToString());
-			score = int.Parse(myPlayer[i]["score"].ToString());
-			name = myPlayer[i]["data"]["username"].ToString();
-			//name = "test";
+			rank = int.Parse(entriesArray[i]["rank"].ToString());
+			score = int.Parse(entriesArray[i]["score"].ToString());
+			name = (entriesArray[i]["data"] as Dictionary<string, object>)["username"].ToString();
 
 			scoreArray[i].gameObject.SetActive(true);
-			scoreArray[i].text = "Rank: " + rank + " Username: " + name + " Score: " + score;
+			scoreArray[i].text = $"Rank: {rank} – Username: {name} – Score: {score}";
 		}
 	}
 
 	private void DisplayPlayerScores(string response)
 	{
-		//displaying users own personal best 5 scores
+		// Displaying users own personal best 5 scores
 		int score;
-		JsonData jsonData = JsonMapper.ToObject(response);
-		JsonData player = jsonData["data"]["scores"];
 
-		//.size?
-		for (int i = 0; i < 5; i++)
-		{
-			if (player.Count == i)
-				break;
+		var entriesArray = (JsonReader.Deserialize<Dictionary<string, object>>(response)["data"]
+								as Dictionary<string, object>)["scores"] as Dictionary<string, object>[];
 
-			score = int.Parse(player[i]["score"].ToString());
+        int maxCount = entriesArray.Length > 5 ? 5 : entriesArray.Length;
+        for (int i = 0; i < maxCount; i++)
+		{		
+			score = int.Parse(entriesArray[i]["score"].ToString());
 			scoreArray[i].gameObject.SetActive(true);
-			scoreArray[i].text = i + 1 + ": " + "Score: " + score;
+			scoreArray[i].text = $"{i + 1} – Score: {score}";
 		}
 	}
 
@@ -102,17 +96,17 @@ public class GameController : MonoBehaviour
 
 	private void StatsSuccess_Callback(string responseData, object cbObject)
 	{
-		// Read the json and update our values
-		JsonData jsonData = JsonMapper.ToObject (responseData);
-		JsonData entries = jsonData["data"]["statistics"];
-
+		// Read the JSON and update our values
+		var entries = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"]
+						as Dictionary<string, object>)["statistics"] as Dictionary<string, object>;
+		
 		m_statEnemiesKilled = int.Parse(entries["enemyShipsKilled"].ToString());
 		m_statAsteroidsDestroyed = int.Parse(entries["asteroidsDestroyed"].ToString());
 		m_statShotsFired = int.Parse(entries["shotsFired"].ToString());
 		m_statGamesPlayed = int.Parse(entries["gamesPlayed"].ToString());
-
+		
 		ShowStatistics();
-
+		
 		if (brainCloudStatusText)
 		{
 			brainCloudStatusText.text = "Sync'd with brainCloud";
@@ -128,13 +122,13 @@ public class GameController : MonoBehaviour
 		}
 		Debug.Log (statusMessage);
 	}
+
 	////////////////////////////////////////////
 	private void Success_Callback(string responseData, object cbObject)
 	{
 		Debug.Log(responseData);
 	}
 
-	//
 	private void Fail_Callback(int statusCode, int reasonCode, string statusMessage, object cbObject)
 	{
 		Debug.Log(statusMessage);
@@ -159,33 +153,33 @@ public class GameController : MonoBehaviour
 		}
 		Debug.Log(statusMessage);
 	}
+
 	////////////////////////////////////////////
 
+	// Editor Serialized Fields
+	[Header("Game Parameters")]
+    [SerializeField] private Vector3 spawnValues;
+    [SerializeField] private int hazardCount;
+    [SerializeField] private float spawnWait;
+    [SerializeField] private float startWait;
+    [SerializeField] private float waveWait;
+    [SerializeField] private float gameOverWait;
 
-	// Prefabs
-	public GameObject player;
-	public GameObject[] hazards;
+    [Header("Prefabs")]
+    [SerializeField] private GameObject player;
+	[SerializeField] private GameObject[] hazards;
 
-	// Game Parameters
-	public Vector3 spawnValues;
-	public int hazardCount;
-	public float spawnWait;
-	public float startWait;
-	public float waveWait;
-	public float gameOverWait;
-
-	// Screen text objects
-	public Text scoreText;
-	public Text restartText;
-	public Text gameOverText;
-	public Text clickToStartText;
-	public Text brainCloudStatusText;
-	public Text enemiesKilledText;
-	public Text asteroidsDestroyedText;
-	public Text accuracyText;
-	public Text shotsFiredText;
-	public Text gamesPlayedText;
-	public Text[] scoreArray;
+    [Header("Text Objects")]
+    [SerializeField] private TextMeshProUGUI scoreText;
+	[SerializeField] private TextMeshProUGUI gameOverText;
+	[SerializeField] private TextMeshProUGUI clickToStartText;
+	[SerializeField] private TextMeshProUGUI brainCloudStatusText;
+	[SerializeField] private TextMeshProUGUI enemiesKilledText;
+	[SerializeField] private TextMeshProUGUI asteroidsDestroyedText;
+	[SerializeField] private TextMeshProUGUI accuracyText;
+	[SerializeField] private TextMeshProUGUI shotsFiredText;
+	[SerializeField] private TextMeshProUGUI gamesPlayedText;
+    [SerializeField] private TextMeshProUGUI[] scoreArray;
 
 	// States
 	private enum eGameState
@@ -206,7 +200,6 @@ public class GameController : MonoBehaviour
 		PLAY_STATE_IN_BETWEEN_WAVES
 	}
 	private ePlayState m_playState = ePlayState.PLAY_STATE_STARTUP;
-
 
 	// our per round values
 	private int m_enemiesKilledThisRound = 0;
@@ -382,7 +375,7 @@ public class GameController : MonoBehaviour
 
 	void UpdateScoreText()
 	{
-		scoreText.text = "Score: " + m_score;
+		scoreText.text = $"Score: {m_score}";
 	}
 
 	public void GameOver()
@@ -419,20 +412,20 @@ public class GameController : MonoBehaviour
 
 	private void ShowStatistics()
 	{
-		enemiesKilledText.text = "Enemies Killed: " + m_statEnemiesKilled;
+		enemiesKilledText.text = $"Enemies Killed: {m_statEnemiesKilled}";
 		enemiesKilledText.gameObject.SetActive(true);
 
-		asteroidsDestroyedText.text = "Asteroids Destroyed: " + m_statAsteroidsDestroyed;
+		asteroidsDestroyedText.text = $"Asteroids Destroyed: {m_statAsteroidsDestroyed}";
 		asteroidsDestroyedText.gameObject.SetActive(true);
 
-		shotsFiredText.text = "Shots Fired: " + m_statShotsFired;
+		shotsFiredText.text = $"Shots Fired: {m_statShotsFired}";
 		shotsFiredText.gameObject.SetActive(true);
 
 		m_accuracy = (m_statShotsFired == 0) ? 0 : (m_statEnemiesKilled + m_statAsteroidsDestroyed) / (double) m_statShotsFired * 100.0d;
-		accuracyText.text = String.Format("Accuracy: {0:0.00}%", m_accuracy);
+		accuracyText.text = $"Accuracy: {m_accuracy:0.00}%";//string.Format("Accuracy: {0:0.00}%", m_accuracy);
 		accuracyText.gameObject.SetActive(true);
 
-		gamesPlayedText.text = "Games Played: " + m_statGamesPlayed;
+		gamesPlayedText.text = $"Games Played: {m_statGamesPlayed}";
 		gamesPlayedText.gameObject.SetActive(true);
 	}
 

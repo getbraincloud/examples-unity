@@ -1,4 +1,5 @@
 ﻿using Gameframework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,20 +7,18 @@ namespace BrainCloudUNETExample
 {
     public class ResultsCell : BaseBehaviour
     {
-#pragma warning disable 649
         [SerializeField]
         private Image PlayAgainIcon = null;
         [SerializeField]
         private Image QuitIcon = null;
         [SerializeField]
-        private Text Name = null;
+        private TextMeshProUGUI Name = null;
         [SerializeField]
-        private Text KDRatio = null;
+        private TextMeshProUGUI KDRatio = null;
         [SerializeField]
-        private Text Score = null;
+        private TextMeshProUGUI Score = null;
         [SerializeField]
-        private Text Ping = null;
-#pragma warning restore 649
+        private TextMeshProUGUI Ping = null;
 
         public void UpdateDisplay(ResultsData in_data)
         {
@@ -36,7 +35,7 @@ namespace BrainCloudUNETExample
     #region public ResultsData stuct
     public struct ResultsData
     {
-        public ResultsData(string in_name, string in_kdRatio, string in_scoreDisplay, string in_pingDisplay, 
+        public ResultsData(string in_name, string in_kdRatio, string in_scoreDisplay, string in_pingDisplay,
                             bool in_displayConfirmPlayAgainAction = false, bool in_confirmedPlayAgainAction = false)
         {
             _name = in_name;
@@ -51,7 +50,7 @@ namespace BrainCloudUNETExample
         public string _kdRatio;
         public string _scoreDisplay;
         public string _pingDisplay;
-        
+
         public bool _displayConfirmPlayAgainAction;
         public bool _confirmedPlayAgainAction;
     }

@@ -2,11 +2,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
+
+public enum RelayCompressionTypes {JsonString, KeyValuePairString, DataStreamByte }
+
+//Names of lobby types are custom made within brainCloud portal.
+public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive}
 
 /// <summary>
 /// Example of how to communicate game logic to brain cloud functions
@@ -16,13 +22,25 @@ public class BrainCloudManager : MonoBehaviour
 {
     private BrainCloudWrapper m_bcWrapper;
     private bool m_dead = false;
-    public bool LeavingGame;
     public BrainCloudWrapper Wrapper => m_bcWrapper;
     public static BrainCloudManager Instance;
-    //Offset for the different mouse coordinates from Unity space to Nodejs space
-    private float _mouseYOffset = 321;
+    internal RelayCompressionTypes _relayCompressionType { get; set; }
+    private LogErrors _logger;
+    private bool _presentWhileStarted;
+    public bool PresentWhileStarted
+    {
+        get => _presentWhileStarted;
+    }
+
+    private RelayLobbyTypes _lobbyType = RelayLobbyTypes.CursorPartyV2;
+
+    public RelayLobbyTypes LobbyType
+    {
+        set => _lobbyType = value;
+    }
     private void Awake()
     {
+        _logger = FindObjectOfType<LogErrors>();
         m_bcWrapper = GetComponent<BrainCloudWrapper>();
         if (!Instance)
         {
@@ -82,7 +100,6 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-    
 #region BC Callbacks
 
     // User fully logged in. 
@@ -127,6 +144,11 @@ public class BrainCloudManager : MonoBehaviour
     {
         if (m_dead) return;
 
+        if (reasonCode == ReasonCodes.RS_ENDMATCH_REQUESTED)
+        {
+            return;
+        }
+
         m_dead = true;
         m_bcWrapper.RTTService.DeregisterRTTLobbyCallback();
         m_bcWrapper.RelayService.DeregisterRelayCallback();
@@ -146,8 +168,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void FindLobby(RelayConnectionType protocol)
     {
-        StateManager.Instance.protocol = protocol;
-        
+        StateManager.Instance.Protocol = protocol;
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         
         // Enable RTT
@@ -168,6 +189,7 @@ public class BrainCloudManager : MonoBehaviour
         if (changeState)
         {
             StateManager.Instance.LeaveMatchBackToMenu();    
+            GameManager.Instance.ClearMatchEntries();
         }
     }
     
@@ -179,11 +201,21 @@ public class BrainCloudManager : MonoBehaviour
         //Setting up a update to send to brain cloud about local users color
         var extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
+        extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
 
         //
-        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, StateManager.Instance.isReady, extra);
+        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
     }
-    
+
+    public void EndMatch()
+    {
+        GameManager.Instance.UpdateLobbyState();
+        Dictionary<string, object> json = new Dictionary<string, object>();
+        json["cxId"] = m_bcWrapper.Client.RTTConnectionID;
+        json["lobbyId"] = StateManager.Instance.CurrentLobby.LobbyID;
+        json["op"] = "END_MATCH";
+        m_bcWrapper.RelayService.EndMatch(json);
+    }
 
     public void ReconnectUser()
     {
@@ -191,6 +223,13 @@ public class BrainCloudManager : MonoBehaviour
         //Continue doing reconnection stuff.....
         m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, RTTReconnect, OnRTTDisconnected);
         m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+    }
+
+    public void JoinMatch()
+    {
+        StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
+        GameManager.Instance.JoinInProgressButton.gameObject.SetActive(false);
+        ConnectRelay();
     }
 
     private void RTTReconnect(string jsonResponse, object cbObject)
@@ -234,21 +273,19 @@ public class BrainCloudManager : MonoBehaviour
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
-        jsonData["y"] = -pos.y + _mouseYOffset;
+        jsonData["y"] = -pos.y;
         //Set up JSON to send
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "move";
         json["data"] = jsonData;
 
-        byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-        m_bcWrapper.RelayService.Send
-            (
-                data, 
-                BrainCloudRelay.TO_ALL_PLAYERS, 
-                Settings.GetPlayerPrefBool(Settings.ReliableKey), 
-                Settings.GetPlayerPrefBool(Settings.OrderedKey),
-                Settings.GetChannel()
-            );
+        SendWithSpecificCompression
+        (
+            json,
+            Settings.GetPlayerPrefBool(Settings.ReliableKey), 
+            Settings.GetPlayerPrefBool(Settings.OrderedKey),
+            Settings.GetChannel()
+        );
     }
 
     // Local User summoned a shockwave in the play area
@@ -262,17 +299,42 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "shockwave";
         json["data"] = jsonData;
-
-        byte[] data = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
-        m_bcWrapper.RelayService.Send
-            (
-                data, 
-                BrainCloudRelay.TO_ALL_PLAYERS, 
-                true, // Reliable
-                false, // Unordered
-                Settings.GetChannel()
-            );
-   }
+        
+        SendWithSpecificCompression
+        (
+            json,
+            true,
+            false,
+            Settings.GetChannel()
+        );
+    }
+    
+    private void SendWithSpecificCompression(Dictionary<string, object> in_dict, bool in_reliable = true, bool in_ordered = true, int in_channel = 0, char in_joinChar = '=', char in_splitChar = ';')
+    {
+        string jsonData;
+        byte[] jsonBytes = {0x0};
+        switch (_relayCompressionType)
+        {
+            case RelayCompressionTypes.JsonString:
+                jsonData = JsonWriter.Serialize(in_dict);
+                jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
+                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                break;
+            case RelayCompressionTypes.KeyValuePairString:
+                jsonData = SerializeDict(in_dict, in_joinChar, in_splitChar); 
+                jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
+                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                break;
+            case RelayCompressionTypes.DataStreamByte:
+                jsonData = JsonWriter.Serialize(in_dict);
+                jsonBytes = SerializeDict(in_dict);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
+                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                break;
+        }
+    }
 
 #endregion Input update
 
@@ -282,32 +344,60 @@ public class BrainCloudManager : MonoBehaviour
     public void OnRelayMessage(short netId, byte[] jsonResponse)
     {
         var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
-        string jsonMessage = Encoding.ASCII.GetString(jsonResponse);
-        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
+        
+        var json = DeserializeString(jsonResponse);
         Lobby lobby = StateManager.Instance.CurrentLobby;
         foreach (var member in lobby.Members)
         {
-            if (member.ID == memberProfileId)
+            switch (_relayCompressionType)
             {
-                var op = json["op"] as string;
-                if (op == "move")
-                {
-                    var data = json["data"] as Dictionary<string, object>;
-
-                    member.IsAlive = true;
-                    member.MousePosition.x = Convert.ToSingle(data["x"]);
-                    member.MousePosition.y = -Convert.ToSingle(data["y"]) + _mouseYOffset;
-                }
-                else if (op == "shockwave")
-                {
-                    var data = json["data"] as Dictionary<string, object>;
-                    Vector2 position; 
-                    position.x = Convert.ToSingle(data["x"]);
-                    position.y = -Convert.ToSingle(data["y"]);
-                    member.ShockwavePositions.Add(position);
-                }
-                break;
+                case RelayCompressionTypes.JsonString:
+                    if (member.ID == memberProfileId)
+                    {
+                        var data = json["data"] as Dictionary<string, object>;
+                        if (data == null)
+                        {
+                            Debug.LogWarning("On Relay Message is null !");
+                            break;
+                        }
+                        var op = json["op"] as string;
+                        if (op == "move")
+                        {
+                            member.IsAlive = true;
+                            member.MousePosition.x = Convert.ToSingle(data["x"]);
+                            member.MousePosition.y = -Convert.ToSingle(data["y"]); // + _mouseYOffset;
+                        }
+                        else if (op == "shockwave")
+                        {
+                            Vector2 position; 
+                            position.x = Convert.ToSingle(data["x"]);
+                            position.y = -Convert.ToSingle(data["y"]);
+                            member.ShockwavePositions.Add(position);
+                        }
+                    }
+                    break;
+                case RelayCompressionTypes.DataStreamByte:
+                case RelayCompressionTypes.KeyValuePairString:
+                    if (member.ID == memberProfileId)
+                    {
+                        var op = json["op"] as string;
+                        if (op == "move")
+                        {
+                            member.IsAlive = true;
+                            member.MousePosition.x = Convert.ToSingle(json["x"]);
+                            member.MousePosition.y = -Convert.ToSingle(json["y"]); // + _mouseYOffset;
+                        }
+                        else if (op == "shockwave")
+                        {
+                            Vector2 position; 
+                            position.x = Convert.ToSingle(json["x"]);
+                            position.y = -Convert.ToSingle(json["y"]);
+                            member.ShockwavePositions.Add(position);
+                        }
+                    }
+                    break;
             }
+            
         }
     }
 
@@ -326,9 +416,9 @@ public class BrainCloudManager : MonoBehaviour
             //If we're still in lobby, then update the list of users
             if (StateManager.Instance.CurrentGameState == GameStates.Lobby)
             {
-                GameManager.Instance.UpdateLobbyState();
                 StateManager.Instance.isLoading = false;
             }
+            GameManager.Instance.UpdateMatchAndLobbyState();
         }
         
         //Using the key "operation" to determine what state the lobby is in
@@ -349,6 +439,8 @@ public class BrainCloudManager : MonoBehaviour
                 }
                 case "STARTING":
                     // Save our picked color index
+                    _presentWhileStarted = true;
+                    GameManager.Instance.UpdatePresentSinceStart();
                     Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
                     if (!GameManager.Instance.IsLocalUserHost())
                     {
@@ -357,11 +449,18 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case "ROOM_READY":
                     StateManager.Instance.CurrentServer = new Server(jsonData);
-                    Debug.Log($"JSON LOBBY DATA: {jsonResponse}");
-                    GameManager.Instance.UpdateMatchState();
+                    GameManager.Instance.UpdateMatchAndLobbyState();
                     GameManager.Instance.UpdateCursorList();
-                    ConnectRelay();
-                    StateManager.Instance.isLoading = false;
+                    //Check to see if a user joined the lobby before the match started or after.
+                    //If a user joins while match is in progress, you will only receive MEMBER_JOIN & ROOM_READY RTT updates.
+                    if (_presentWhileStarted)
+                    {
+                        ConnectRelay();    
+                    }
+                    else
+                    {
+                        GameManager.Instance.JoinInProgressButton.gameObject.SetActive(true);
+                    }
                     break;
             }
         }
@@ -370,11 +469,14 @@ public class BrainCloudManager : MonoBehaviour
     // Connect to the Relay server and start the game
     public void ConnectRelay()
     {
+        _presentWhileStarted = false;
+        m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
+        m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         m_bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
         m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
-        switch (StateManager.Instance.protocol)
+        switch (StateManager.Instance.Protocol)
         {
             case RelayConnectionType.WEBSOCKET:
                 port = StateManager.Instance.CurrentServer.WsPort;
@@ -390,7 +492,7 @@ public class BrainCloudManager : MonoBehaviour
         Server server = StateManager.Instance.CurrentServer;
         m_bcWrapper.RelayService.Connect
         (
-            StateManager.Instance.protocol,
+            StateManager.Instance.Protocol,
             new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
             null, 
             LogErrorThenPopUpWindow, 
@@ -403,17 +505,39 @@ public class BrainCloudManager : MonoBehaviour
         var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         if (json["op"] as string == "DISCONNECT")
         {
-            var profileId = json["profileId"] as string;
-            Lobby lobby = StateManager.Instance.CurrentLobby;
-            foreach (var member in lobby.Members)
+            if (json.ContainsKey("cxId"))
             {
-                if (member.ID == profileId)
+                var profileId = json["cxId"] as string;
+                Lobby lobby = StateManager.Instance.CurrentLobby;
+                profileId = lobby.FormatCxIdToProfileId(profileId);
+                foreach (var member in lobby.Members)
                 {
-                    member.IsAlive = false;
-                    GameManager.Instance.MemberLeft();
-                    break;
-                }
+                    if (member.ID == profileId)
+                    {
+                        member.IsAlive = false;
+                        GameManager.Instance.UpdateMatchAndLobbyState();
+                        break;
+                    }
+                }    
             }
+        }
+        else if (json["op"] as string == "CONNECT")
+        {
+            StateManager.Instance.isLoading = false;
+            //Check if user connected is new, if so update name to not have "In Lobby" 
+            GameManager.Instance.UpdateMatchState();
+        }
+        else if (json["op"] as string == "END_MATCH")
+        {
+            StateManager.Instance.isReady = false;
+            GameManager.Instance.CurrentUserInfo.PresentSinceStart = false;
+            GameManager.Instance.UpdateMatchAndLobbyState();
+            StateManager.Instance.ChangeState(GameStates.Lobby);
+        }
+        else if (json["op"] as string == "MIGRATE_OWNER")
+        {
+            StateManager.Instance.CurrentLobby.ReassignOwnerID(m_bcWrapper.RelayService.OwnerCxId);
+            GameManager.Instance.UpdateMatchAndLobbyState();
         }
     }
 
@@ -441,7 +565,7 @@ public class BrainCloudManager : MonoBehaviour
         //
         m_bcWrapper.LobbyService.FindOrCreateLobby
         (
-            "CursorPartyV2", // lobby type
+            _lobbyType.ToString(), 
             0, // rating
             1, // max steps
             algo, // algorithm
@@ -464,5 +588,144 @@ public class BrainCloudManager : MonoBehaviour
     }
 
 #endregion RTT Functions
-}
 
+    private Dictionary<string, object> DeserializeString(byte[] in_data, char in_joinChar = '=', char in_splitChar = ';')
+    {
+        Dictionary<string, object> toDict = new Dictionary<string, object>();
+        string jsonMessage = Encoding.ASCII.GetString(in_data);
+        if (jsonMessage == "") return toDict;
+
+        switch (_relayCompressionType)
+        {
+            case RelayCompressionTypes.JsonString:
+                try
+                {
+                    toDict = (Dictionary<string, object>)JsonReader.Deserialize(jsonMessage);
+                }
+                catch (Exception)
+                {
+                    Debug.LogWarning("COULD NOT SERIALIZE " + jsonMessage);
+                }
+                break;
+            case RelayCompressionTypes.DataStreamByte:
+                RelayInfo info = ByteArrayToStructure<RelayInfo>(in_data);
+                toDict.Add("op", info.Operation);
+                toDict.Add("x", info.PositionX);
+                toDict.Add("y", info.PositionY);
+                break;
+            case RelayCompressionTypes.KeyValuePairString:
+                string[] splitItems = jsonMessage.Split(in_splitChar);
+                int indexOf = -1;
+                foreach (string item in splitItems)
+                {
+                    indexOf = item.IndexOf(in_joinChar);
+                    if (indexOf >= 0)
+                    {
+                        toDict[item.Substring(0, indexOf)] = item.Substring(indexOf + 1);
+                    }
+                }
+                break;
+        }
+        return toDict;
+    }
+
+    private string SerializeDict(Dictionary<string, object> in_dict, char in_joinChar = '=', char in_splitChar = ';')
+    {
+        string toString = "";
+        string toSubString = "";
+        foreach (string key in in_dict.Keys)
+        {
+            if (in_dict[key] != null)
+            {
+                Dictionary<string, object> data = in_dict[key] as Dictionary<string, object>;
+                if (data != null)
+                {
+                    foreach (string dataKey in data.Keys)
+                    {
+                        toSubString += dataKey + in_joinChar + data[dataKey] + in_splitChar;
+                    }
+                }
+                else
+                {
+                    toString += key + in_joinChar + in_dict[key] + in_splitChar;    
+                }
+            }
+        }
+        return toString + toSubString;
+    }
+
+    private static byte[] EMPTY_ARRAY = new byte[0];
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct RelayInfo
+    {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+        public string Operation;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+        public float PositionX;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 5)]
+        public float PositionY;
+    }
+    
+    private byte[] SerializeDict(Dictionary<string, object> in_dict)
+    {
+        RelayInfo relayInfo;
+        relayInfo.Operation = in_dict["op"] as string;
+        Dictionary<string, object> data = in_dict["data"] as Dictionary<string, object>;
+        relayInfo.PositionX = (float) data["x"];
+        relayInfo.PositionY = (float) data["y"];
+        try
+        {
+            byte[] toReturn = StructureToByteArray(relayInfo);
+            return toReturn;
+        }
+        catch (Exception)
+        {
+            return EMPTY_ARRAY;
+        }
+    }
+    
+    private byte[] StructureToByteArray<T>(T str)
+    {
+        int size = Marshal.SizeOf(str);
+        byte[] arr = new byte[size];
+        GCHandle h = default(GCHandle);
+        try
+        {
+            h = GCHandle.Alloc(arr, GCHandleType.Pinned);
+            Marshal.StructureToPtr<T>(str, h.AddrOfPinnedObject(), false);
+        }
+        finally
+        {
+            if (h.IsAllocated)
+            {
+                h.Free();
+            }
+        }
+
+        return arr;
+    }
+    
+    public static T ByteArrayToStructure<T>(byte[] arr) where T : struct
+    {
+        T str = default(T);
+        if (arr.Length != Marshal.SizeOf(str))
+        {
+            throw new InvalidOperationException("WRONG SIZE STRUCTURE COPY");
+        }
+        GCHandle h = default(GCHandle);
+        try
+        {
+            h = GCHandle.Alloc(arr, GCHandleType.Pinned);
+            str = Marshal.PtrToStructure<T>(h.AddrOfPinnedObject());
+        }
+        finally
+        {
+            if (h.IsAllocated)
+            {
+                h.Free();
+            }
+        }
+        return str;
+    }
+}

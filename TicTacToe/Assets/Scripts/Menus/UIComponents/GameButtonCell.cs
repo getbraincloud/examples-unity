@@ -1,5 +1,6 @@
 ﻿using BrainCloud;
-using BrainCloud.LitJson;
+using BrainCloud.JsonFx.Json;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,13 +61,13 @@ public class GameButtonCell : MonoBehaviour
     public void OnAbandonMatchButton()
     {
         // However, we are using a custom FINISH_RANK_MATCH script which is set up on brainCloud. View the commented Cloud Code script below
-        var matchResults = new JsonData { ["ownerId"] = m_pMatchData.ownerId, ["matchId"] = m_pMatchData.matchId };
+        var matchResults = new Dictionary<string, object>() { { "ownerId", m_pMatchData.ownerId },
+                                                              { "matchId", m_pMatchData.matchId },
+                                                              { "abandonnedId", m_pMatchSelect.App.ProfileId },
+                                                              { "version", m_pMatchData.version },
+                                                              { "isTie", false }, };
 
-        matchResults["abandonnedId"] = m_pMatchSelect.App.ProfileId;
-        matchResults["version"] = m_pMatchData.version;
-        matchResults["isTie"] = false;
-
-        m_pMatchSelect.App.Bc.ScriptService.RunScript("RankGame_FinishMatch", matchResults.ToJson(), OnAbandonMatchSuccess,
+        m_pMatchSelect.App.Bc.ScriptService.RunScript("RankGame_FinishMatch", JsonWriter.Serialize(matchResults), OnAbandonMatchSuccess,
             (status, code, error, cbObject) => { });
     }
 

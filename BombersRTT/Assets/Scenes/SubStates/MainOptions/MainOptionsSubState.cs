@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
-using BrainCloud.Plugin;
+using TMPro;
 
 namespace BrainCloudUNETExample
 {
@@ -12,16 +12,16 @@ namespace BrainCloudUNETExample
     {
         public static string STATE_NAME = "mainOptionsSubState";
 
-        public Text GlobalVolumeDisplayText = null;
-        public Text MusicVolumeDisplayText = null;
-        public Text SoundVolumeDisplayText = null;
+        public TextMeshProUGUI GlobalVolumeDisplayText = null;
+        public TextMeshProUGUI MusicVolumeDisplayText = null;
+        public TextMeshProUGUI SoundVolumeDisplayText = null;
 
-        public Text NotificationsText = null;
-        public Text FacebookButtonText = null;
-        public Text VersionText = null;
+        public TextMeshProUGUI NotificationsText = null;
+        public TextMeshProUGUI FacebookButtonText = null;
+        public TextMeshProUGUI VersionText = null;
         public GameObject EmailSection = null;
         public Toggle ShowToolsToggle = null;
-        public InputField emailInputField = null;
+        public TMP_InputField emailInputField = null;
 
         [SerializeField]
         private Button EditNameNavButton = null;
@@ -187,7 +187,7 @@ namespace BrainCloudUNETExample
 
         public void InputFieldChanged()
         {
-            Text text = emailInputField.GetComponentInChildren<Text>();
+            TextMeshProUGUI text = emailInputField.GetComponentInChildren<TextMeshProUGUI>();
             text.color = LIGHT_TEXT;
         }
 

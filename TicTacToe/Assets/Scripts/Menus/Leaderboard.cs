@@ -1,12 +1,8 @@
-﻿#region
-
+﻿using BrainCloud;
+using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
-using BrainCloud;
-using BrainCloud.LitJson;
 using UnityEngine;
 using TMPro;
-
-#endregion
 
 // Leaderbaords are set on the brainCloud Dashboard, under Design | Leaderboard | Leaderboard Configs
 /**
@@ -93,10 +89,14 @@ public class Leaderboard : ResourcesManager
     {
         scores.Clear();
 
-        var leaderboardData = JsonMapper.ToObject(responseData)["data"]["leaderboard"];
+        var leaderboardData = (JsonReader.Deserialize<Dictionary<string, object>>(responseData)
+                                ["data"] as Dictionary<string, object>)
+                                ["leaderboard"] as Dictionary<string, object>[];
 
-        foreach (JsonData score in leaderboardData)
+        foreach (Dictionary<string, object> score in leaderboardData)
+        {
             scores.Add(new PlayerInfo(score));
+        }
     }
 
     public void OnUpdateUI()

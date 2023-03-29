@@ -10,8 +10,11 @@ namespace Gameframework
 {
     public class BaseNetworkBehavior : BaseBehaviour
     {
-        public static float SEND_INTERVAL = 0.1f; // This should be dynamic based on packet load, but we just want to keep it simple here.
+        private const float DEFAULT_INTERVAL = 0.15f;
+
+        public static float SEND_INTERVAL = DEFAULT_INTERVAL; // This should be dynamic based on packet load, but we just want to keep it simple here.
         public static float MSG_ENCODED = 2; // 0 = regular, 1 = json, 2, data stream , mixed
+
         #region public static
         public static void UpdateTransform(short in_netId, float hisPing, Vector3 pos, Vector3 eulerAngles, Vector3 velocity)
         {
@@ -202,6 +205,7 @@ namespace Gameframework
         #region protected
         protected virtual void Start()
         {
+            SEND_INTERVAL = SEND_INTERVAL < DEFAULT_INTERVAL ? DEFAULT_INTERVAL : SEND_INTERVAL; // Small bandaid; this occassionally gets set to -1
             if (_syncTransformInformation) InvokeRepeating("sendTransformInformation", SEND_INTERVAL, SEND_INTERVAL);
         }
 
@@ -241,7 +245,6 @@ namespace Gameframework
         protected string _classType = "";
         protected string _fileName = "";
         #endregion
-
 
         #region private
         private void sendTransformInformation()

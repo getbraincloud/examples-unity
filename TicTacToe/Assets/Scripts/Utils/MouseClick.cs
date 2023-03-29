@@ -1,8 +1,4 @@
-﻿#region
-
-using UnityEngine;
-
-#endregion
+﻿using UnityEngine;
 
 public class MouseClick : MonoBehaviour
 {

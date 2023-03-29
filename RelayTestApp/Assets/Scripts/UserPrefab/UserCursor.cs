@@ -1,7 +1,9 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
 public class UserCursor : MonoBehaviour
 {
     public TMP_Text UsernameText;
