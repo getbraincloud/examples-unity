@@ -44,25 +44,10 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 
 *This app is a code example*
 
-This example demonstrates how to call methods in the following modules:
-
--   Authentication
-
-    -   Email
-    -   Universal
-    -   Anonymous
-    -   Google - http://getbraincloud.com/apidocs/portal-usage/authentication-google/
-
--   Player Entities
--   XP/Currency
--   Player Statistics
--   Global Statistics
--   Cloud Code
+Authentication has been updated with a new look! Check out its [README.md](https://github.com/getbraincloud/examples-unity/blob/master/Authentication/README.md) for more information. New examples showing off more brainCloud features will be added throughout the coming months.
 
 You can find more information about how to run the example here:
-
 http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-authentication-example/
-
 
 ---
 
@@ -85,7 +70,7 @@ Go to the SplashScreen scene and run it to test it out in the editor!
 
 [Demo Link](http://apps.braincloudservers.com/bombersrtt-demo/index.html)
 
-For more information, see this [README.mb](https://github.com/getbraincloud/examples-unity/blob/master/BombersRTT/README.md) file.
+For more information, see this [README.md](https://github.com/getbraincloud/examples-unity/blob/master/BombersRTT/README.md) file.
 
 **Note** Compiler Flags
 
