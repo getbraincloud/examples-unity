@@ -93,14 +93,20 @@ public class PopupUI : ContentUIBehaviour
         HeaderLabel.text = popupInfo.Title;
         HeaderLabel.gameObject.SetActive(popupInfo.HasTitle);
 
-        foreach(PopupInfoBody bodyInfo in popupInfo.BodyTexts)
+        if (!popupInfo.BodyTexts.IsNullOrEmpty())
         {
-            AddBodyText(bodyInfo);
+            foreach (PopupInfoBody bodyInfo in popupInfo.BodyTexts)
+            {
+                AddBodyText(bodyInfo);
+            }
         }
 
-        foreach (PopupInfoButton buttonInfo in popupInfo.Buttons)
+        if (!popupInfo.Buttons.IsNullOrEmpty())
         {
-            AddButton(buttonInfo);
+            foreach (PopupInfoButton buttonInfo in popupInfo.Buttons)
+            {
+                AddButton(buttonInfo);
+            }
         }
 
         BlockerButton.enabled = popupInfo.CanDismiss;

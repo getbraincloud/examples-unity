@@ -1,3 +1,4 @@
+using BrainCloud.Common;
 using UnityEngine;
 
 /// <summary>
@@ -8,6 +9,7 @@ public class ExternalAuthItem : ScriptableObject
 {
     [SerializeField] private string AuthName = string.Empty;
     [SerializeField] private Sprite AuthIcon = default;
+    [SerializeField] private string AuthType = string.Empty;
     [SerializeField] private Color ButtonLabelColor = Color.white;
     [SerializeField] private Color ButtonIconColor = Color.white;
     [SerializeField] private Color ButtonBackgroundColor = Color.black;
@@ -21,6 +23,11 @@ public class ExternalAuthItem : ScriptableObject
     /// Icon for the external authentication method.
     /// </summary>
     public Sprite Icon => AuthIcon;
+
+    /// <summary>
+    /// Authentication type. Should match one of the strings in <see cref="AuthenticationType"/>.
+    /// </summary>
+    public AuthenticationType AuthenticationType => AuthenticationType.FromString(AuthType);
 
     /// <summary>
     /// Color for the text label.

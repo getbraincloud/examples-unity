@@ -1,5 +1,7 @@
 using BrainCloud;
+using BrainCloud.JsonFx.Json;
 using BrainCloud.Common;
+using Facebook.Unity;
 using System.Collections.Generic;
 
 /// TODO: More authentication methods are coming!
@@ -45,15 +47,15 @@ public static class UserHandler
     /// <summary>
     /// Authenticate the user using their email and password.
     /// </summary>
-    public static void AuthenticateEmail(string email, string password, bool forceCreate = true, SuccessCallback onSuccess = null,
-                                         FailureCallback onFailure = null, object cbObject = null) =>
+    public static void AuthenticateEmail(string email, string password, bool forceCreate = true,
+                                         SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
         BCManager.Wrapper.AuthenticateEmailPassword(email, password, forceCreate, onSuccess, onFailure, cbObject);
 
     /// <summary>
     /// Authenticate the user using a username they set and a password.
     /// </summary>
-    public static void AuthenticateUniversal(string username, string password, bool forceCreate = true, SuccessCallback onSuccess = null,
-                                             FailureCallback onFailure = null, object cbObject = null) =>
+    public static void AuthenticateUniversal(string username, string password, bool forceCreate = true,
+                                             SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
         BCManager.Wrapper.AuthenticateUniversal(username, password, forceCreate, onSuccess, onFailure, cbObject);
 
     /// <summary>
@@ -92,4 +94,27 @@ public static class UserHandler
     }
 
     #endregion
+
+    public static void AuthenticateFacebook(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+        var perms = new List<string>() { "public_profile", "email" };
+
+        FB.LogInWithReadPermissions(perms, (result) =>
+        {
+            if (FB.IsLoggedIn && result.AccessToken != null)
+            {
+                // Uncomment whichever version your app requires. Unless deeply integrated with Facebook, FacebookLimited will work for most apps.
+                BCManager.Wrapper.AuthenticateFacebook(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+                //BCManager.Wrapper.AuthenticateFacebookLimited(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+            }
+            else if (result.Cancelled)
+            {
+                onFailure(-1, -1, JsonWriter.Serialize(new ErrorResponse(-1, -1, "Log in was cancelled.")), cbObject);
+            }
+            else // Error
+            {
+                onFailure(-1, -1, JsonWriter.Serialize(new ErrorResponse(-1, -1, result.Error)), cbObject);
+            }
+        });
+    }
 }

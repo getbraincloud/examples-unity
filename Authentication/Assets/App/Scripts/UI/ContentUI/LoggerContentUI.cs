@@ -140,9 +140,8 @@ public class LoggerContentUI : ContentUIBehaviour
 
     private void DisplayLogObject(LogType type, string message, bool wordWrap, bool canCopy)
     {
-        if (logObjects.IsNullOrEmpty())
+        if (!UIInitialized || logObjects.IsNullOrEmpty())
         {
-            Debug.LogWarning("Logger is not initialized yet!");
             return;
         }
         else if (++logIndex >= logObjects.Count)

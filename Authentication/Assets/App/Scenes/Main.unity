@@ -1753,6 +1753,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: AppContent
       objectReference: {fileID: 0}
+    - target: {fileID: 235003457190083717, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 235003457190083736, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 235003457221408284, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
@@ -2605,7 +2613,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1333374543809269029, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1333374543809269029, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_AnchorMax.y
@@ -2963,6 +2971,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4713808941647017120, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: Popup
+      value: 
+      objectReference: {fileID: 90648258}
+    - target: {fileID: 4713808941647017120, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: MainMenu
+      value: 
+      objectReference: {fileID: 457589502}
+    - target: {fileID: 4713808941647017120, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: LoginContent
+      value: 
+      objectReference: {fileID: 1923327383}
     - target: {fileID: 5190391447449538882, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3193,7 +3213,7 @@ PrefabInstance:
       objectReference: {fileID: 457589502}
     - target: {fileID: 7478667656085680213, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7478667656085680213, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_AnchorMax.y
@@ -3315,6 +3335,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LoginContent
       objectReference: {fileID: 0}
+    - target: {fileID: 7478667658048070914, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7478667658048070915, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -3397,6 +3421,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7478667658048070915, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7478667658048070922, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8792309311322685076, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
