@@ -140,7 +140,7 @@ public class LoggerContentUI : ContentUIBehaviour
 
     private void DisplayLogObject(LogType type, string message, bool wordWrap, bool canCopy)
     {
-        if (!UIInitialized || logObjects.IsNullOrEmpty())
+        if (logObjects.IsNullOrEmpty())
         {
             return;
         }

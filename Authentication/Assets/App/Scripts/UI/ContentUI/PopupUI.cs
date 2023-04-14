@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -86,8 +87,20 @@ public class PopupUI : ContentUIBehaviour
 
     #region UI
 
-    public void DisplayPopup(PopupInfo popupInfo)
+    public void DisplayPopup(PopupInfo popupInfo) => StartCoroutine(DisplayPopupWhenReady(popupInfo));
+
+    public void DismissPopup() => OnClosePopupButton();
+
+    protected override void InitializeUI()
     {
+        PopupActive = false;
+        ClearPopupBody();
+    }
+
+    private IEnumerator DisplayPopupWhenReady(PopupInfo popupInfo)
+    {
+        yield return new WaitUntil(() => Opacity <= 0.0f);
+
         ClearPopupBody();
 
         HeaderLabel.text = popupInfo.Title;
@@ -116,14 +129,6 @@ public class PopupUI : ContentUIBehaviour
         }
 
         PopupActive = true;
-    }
-
-    public void DismissPopup() => OnClosePopupButton();
-
-    protected override void InitializeUI()
-    {
-        PopupActive = false;
-        ClearPopupBody();
     }
 
     private void AddBodyText(PopupInfoBody bodyInfo)

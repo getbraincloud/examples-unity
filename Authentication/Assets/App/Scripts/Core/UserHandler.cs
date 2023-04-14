@@ -1,8 +1,10 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.Common;
-using Facebook.Unity;
 using System.Collections.Generic;
+using UnityEngine;
+
+using Facebook.Unity;
 
 /// TODO: More authentication methods are coming!
 /// <summary>
@@ -95,26 +97,122 @@ public static class UserHandler
 
     #endregion
 
+    #region External Authentication Methods
+
+    /// <summary>
+    /// 
+    /// </summary>
     public static void AuthenticateFacebook(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
-        var perms = new List<string>() { "public_profile", "email" };
+        // Adjust the permissions as you see fit
+        // Please see Facebook's perfmissions reference:
+        // https://developers.facebook.com/docs/permissions/reference
+        var perms = new List<string>() { "public_profile" };
 
-        FB.LogInWithReadPermissions(perms, (result) =>
+#if UNITY_STANDALONE_WIN || UNITY_WEBGL || UNITY_ANDROID
+        FB.LogInWithReadPermissions(perms, (result) => /// <seealso cref="FB.LogInWithPublishPermissions(IEnumerable{string}, FacebookDelegate{ILoginResult})"/>
         {
-            if (FB.IsLoggedIn && result.AccessToken != null)
+            if (FB.IsLoggedIn)
             {
-                // Uncomment whichever version your app requires. Unless deeply integrated with Facebook, FacebookLimited will work for most apps.
-                BCManager.Wrapper.AuthenticateFacebook(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
-                //BCManager.Wrapper.AuthenticateFacebookLimited(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+                Debug.Log($"Is AccessToken not null? {result.AccessToken != null}");
+                Debug.Log($"Is AuthenticationToken not null? {result.AuthenticationToken != null}");
+
+                if (result.AccessToken != null)
+                {
+                    BCManager.Wrapper.AuthenticateFacebook(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+                    return;
+                }
             }
             else if (result.Cancelled)
             {
-                onFailure(-1, -1, JsonWriter.Serialize(new ErrorResponse(-1, -1, "Log in was cancelled.")), cbObject);
+                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
+                return;
             }
-            else // Error
-            {
-                onFailure(-1, -1, JsonWriter.Serialize(new ErrorResponse(-1, -1, result.Error)), cbObject);
-            }
+
+            // Error
+            onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, result.Error)), cbObject);
         });
+#elif UNITY_IOS
+        string nonce = System.DateTime.Now.Ticks.ToString(); // Please provide your own nonce, this is simply used as an example
+
+        FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, perms, nonce, (result) =>
+        {
+            if (FB.IsLoggedIn)
+            {
+                Debug.Log($"Is AccessToken not null? {result.AccessToken != null}");
+                Debug.Log($"Is AuthenticationToken not null? {result.AuthenticationToken != null} If not, what is the nonce? Original: {nonce}, FB: {result.AuthenticationToken?.Nonce}");
+
+                if (result.AccessToken != null)
+                {
+                    BCManager.Wrapper.AuthenticateFacebook(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+                    return;
+                }
+                else if (result.AuthenticationToken != null && result.AuthenticationToken.Nonce == nonce)
+                {
+                    BCManager.Wrapper.AuthenticateFacebook(FB.Mobile.CurrentProfile().UserID, result.AuthenticationToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+                    return;
+                }
+            }
+            else if (result.Cancelled)
+            {
+                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
+                return;
+            }
+
+            // Error
+            onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, result.Error)), cbObject);
+        });
+#else
+        Debug.LogError("AuthenticateFacebook is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebook</b> is not available on this platform.")), cbObject);
+#endif
     }
+
+    /// <summary>
+    /// Read more: https://getbraincloud.com/apidocs/apple-ios-14-5-privacy-facebook-limited-login-mode/
+    /// </summary>
+    public static void AuthenticateFacebookLimited(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_IOS
+        // Adjust the permissions as you see fit
+        // These are the permissions available in Limited mode:
+        // https://developers.facebook.com/docs/facebook-login/limited-login/permissions
+        var perms = new List<string>() { "public_profile" };
+
+        string nonce = System.DateTime.Now.Ticks.ToString(); // Please provide your own nonce, this is simply used as an example
+
+        FB.Mobile.LoginWithTrackingPreference(LoginTracking.LIMITED, perms, nonce, (result) =>
+        {
+            if (FB.IsLoggedIn)
+            {
+                Debug.Log($"Is AccessToken not null? {result.AccessToken != null}");
+                Debug.Log($"Is AuthenticationToken not null? {result.AuthenticationToken != null} If not, what is the nonce? Original: {nonce}, FB: {result.AuthenticationToken?.Nonce}");
+
+                if (result.AccessToken != null)
+                {
+                    BCManager.Wrapper.AuthenticateFacebookLimited(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+                    return;
+                }
+                else if (result.AuthenticationToken != null && result.AuthenticationToken.Nonce == nonce)
+                {
+                    BCManager.Wrapper.AuthenticateFacebookLimited(FB.Mobile.CurrentProfile().UserID, result.AuthenticationToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
+                    return;
+                }
+            }
+            else if (result.Cancelled)
+            {
+                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
+                return;
+            }
+
+            // Error
+            onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, result.Error)), cbObject);
+        });
+#else
+        Debug.LogError("AuthenticateFacebookLimited is only available on iOS. Returning with error...");
+        onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead.")), cbObject);
+#endif
+    }
+
+    #endregion
 }

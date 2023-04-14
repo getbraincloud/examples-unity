@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+using Facebook.Unity;
+
 /// <summary>
 /// Used for the app's navigation.
 /// </summary>
@@ -278,6 +280,11 @@ public class MainMenuUI : ContentUIBehaviour
 
         SuccessCallback onSuccess = OnSuccess("Logging Out...", () =>
         {
+            if(FB.IsLoggedIn)
+            {
+                FB.LogOut();
+            }
+
             if (disconnectAccount)
             {
                 UserHandler.ResetAuthenticationData();

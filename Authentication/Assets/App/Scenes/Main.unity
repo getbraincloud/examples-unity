@@ -1369,6 +1369,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d02b47e53196b5046b61d49590968247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2064540911 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7478667656085680194, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+  m_PrefabInstance: {fileID: 7478667656141979794}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24992041b185b444a8b21524169f8e77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &135271830057870611
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1759,7 +1770,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 235003457190083736, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 235003457221408284, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
       propertyPath: m_SizeDelta.y
@@ -2983,6 +2994,10 @@ PrefabInstance:
       propertyPath: LoginContent
       value: 
       objectReference: {fileID: 1923327383}
+    - target: {fileID: 4713808941647017120, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: MainLoginPanel
+      value: 
+      objectReference: {fileID: 2064540911}
     - target: {fileID: 5190391447449538882, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3425,7 +3440,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7478667658048070922, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8792309311322685076, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_AnchorMax.y

@@ -1,10 +1,10 @@
-using Facebook.Unity;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public static class FacebookManager
+
+using Facebook.Unity;
+
+public static class BCFacebook
 {
     public static void Initialize(Action<bool> onHideUnity)
     {

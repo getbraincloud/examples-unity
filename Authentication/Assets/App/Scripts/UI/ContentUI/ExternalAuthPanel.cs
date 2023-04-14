@@ -3,6 +3,8 @@ using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Facebook.Unity;
+
 public class ExternalAuthPanel : ContentUIBehaviour
 {
     [Header("Main")]
@@ -81,12 +83,54 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        FacebookManager.Initialize(HandleFacebook);
+        BCFacebook.Initialize(HandleFacebookInitialized);
     }
 
-    private void HandleFacebook(bool isGameShown)
+    private void HandleFacebookInitialized(bool isGameShown)
     {
         LoginContent.IsInteractable = isGameShown;
+    }
+
+    private void HandleFacebookAuthenticationButton()
+    {
+#if UNITY_STANDALONE_WIN || UNITY_WEBGL || UNITY_ANDROID
+        selectedAuthenticationType = AuthenticationType.Facebook;
+        UserHandler.AuthenticateFacebook(true,
+                                         OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                         OnFailure("Authentication Failed", OnAuthenticationFailure));
+#elif UNITY_IOS
+        PopupInfoButton[] buttons = new PopupInfoButton[]
+        { new PopupInfoButton("Facebook Standard", PopupInfoButton.Color.Blue, () =>
+            {
+                selectedAuthenticationType = AuthenticationType.Facebook;
+                UserHandler.AuthenticateFacebook(true,
+                                                 OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                 OnFailure("Authentication Failed", OnAuthenticationFailure));
+            }),
+            new PopupInfoButton("Facebook Limited", PopupInfoButton.Color.Blue, () =>
+            {
+                selectedAuthenticationType = AuthenticationType.FacebookLimited;
+                UserHandler.AuthenticateFacebookLimited(true,
+                                                        OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                        OnFailure("Authentication Failed", OnAuthenticationFailure));
+            }),
+            new PopupInfoButton("Cancel", PopupInfoButton.Color.Red, () =>
+            {
+                selectedAuthenticationType = AuthenticationType.Unknown;
+                LoginContent.IsInteractable = true;
+            })
+        };
+
+        Popup.DisplayPopup(new PopupInfo("Facebook Login Preference",
+                                     new PopupInfoBody[] { new PopupInfoBody("Would you like to log into Facebook in Standard or Limited mode?", PopupInfoBody.Type.Centered),
+                                                           new PopupInfoBody("Note: Limited mode does not allow you to use Facebook's Graph API features.", PopupInfoBody.Type.Centered)},
+                                     buttons,
+                                     false));
+#else
+        Debug.LogError("AuthenticateFacebook is not available on this platform.");
+        selectedAuthenticationType = AuthenticationType.Unknown;
+        LoginContent.IsInteractable = true;
+#endif
     }
 
     private void OnExternalAuthentication(AuthenticationType type)
@@ -96,13 +140,13 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
         if (type == AuthenticationType.Facebook || type == AuthenticationType.FacebookLimited)
         {
-            UserHandler.AuthenticateFacebook(true,
-                                             OnSuccess("Authentication Success", OnAuthenticationSuccess),
-                                             OnFailure("Authentication Failed", OnAuthenticationFailure));
+            HandleFacebookAuthenticationButton();
         }
         else
         {
-            Debug.LogError($"Unknown Authentication Type: {type}");
+            Debug.LogError($"Authentication method is either unavailable on this platform or unknown: {type}");
+            selectedAuthenticationType = AuthenticationType.Unknown;
+            LoginContent.IsInteractable = true;
         }
     }
 
@@ -126,11 +170,16 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
     private void OnAuthenticationFailure(ErrorResponse response)
     {
+        if (FB.IsLoggedIn)
+        {
+            FB.LogOut();
+        }
+
         Popup.DisplayPopup(new PopupInfo("Could not Authenticate",
-                                         new PopupInfoBody[] { new PopupInfoBody(response.Message, PopupInfoBody.Type.Centered),
-                                                               new PopupInfoBody("Please try again.", PopupInfoBody.Type.Centered) },
+                                         new PopupInfoBody[] { new PopupInfoBody(response.Message, PopupInfoBody.Type.Centered) },
                                          null, true, "Close"));
 
+        selectedAuthenticationType = AuthenticationType.Unknown;
         LoginContent.IsInteractable = true;
     }
 
