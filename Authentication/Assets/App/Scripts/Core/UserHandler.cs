@@ -3,7 +3,9 @@ using BrainCloud.JsonFx.Json;
 using BrainCloud.Common;
 using System.Collections.Generic;
 
+#if FACEBOOK_SDK
 using Facebook.Unity;
+#endif
 
 /// TODO: More authentication methods are coming!
 /// <summary>
@@ -100,6 +102,7 @@ public static class UserHandler
 
     #region External Authentication Methods
 
+#if FACEBOOK_SDK
     /// <summary>
     /// Authenticate the user using their Facebook account.
     /// </summary>
@@ -180,6 +183,6 @@ public static class UserHandler
         onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead.")), cbObject);
 #endif
     }
-
+#endif
     #endregion
 }

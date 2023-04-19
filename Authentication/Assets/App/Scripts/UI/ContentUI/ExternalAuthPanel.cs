@@ -3,7 +3,9 @@ using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if FACEBOOK_SDK
 using Facebook.Unity;
+#endif
 
 public class ExternalAuthPanel : ContentUIBehaviour
 {
@@ -83,22 +85,44 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        BCFacebook.Initialize(HandleFacebookInitialized);
-    }
+#if FACEBOOK_SDK
+        void OnInitComplete()
+        {
+            if (FB.IsInitialized)
+            {
+                FB.ActivateApp();
+                FB.LimitAppEventUsage = true;
+            }
+            else
+            {
+                Debug.LogError("Failed to Initialize the Facebook SDK!");
+            }
+        }
 
-    private void HandleFacebookInitialized(bool isGameShown)
-    {
-        LoginContent.IsInteractable = isGameShown;
+        void HandleFacebookInitialized(bool isGameShown)
+        {
+            LoginContent.IsInteractable = isGameShown;
+        }
+
+        if (!FB.IsInitialized)
+        {
+            FB.Init(OnInitComplete, HandleFacebookInitialized);
+        }
+        else
+        {
+            OnInitComplete();
+        }
+#endif
     }
 
     private void HandleFacebookAuthenticationButton()
     {
-#if UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID
+#if FACEBOOK_SDK && (UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID)
         selectedAuthenticationType = AuthenticationType.Facebook;
         UserHandler.AuthenticateFacebook(true,
                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
-#elif UNITY_IOS
+#elif FACEBOOK_SDK && UNITY_IOS
         PopupInfoButton[] buttons = new PopupInfoButton[]
         { new PopupInfoButton("Facebook Standard", PopupInfoButton.Color.Blue, () =>
             {
@@ -127,7 +151,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
                                      buttons,
                                      false));
 #else
-        Debug.LogError("AuthenticateFacebook is not available on this platform.");
+        Debug.LogError("Either FACEBOOK_SDK has not been added to your Scripting Define Symbols or AuthenticateFacebook is not available on this platform.");
         selectedAuthenticationType = AuthenticationType.Unknown;
         LoginContent.IsInteractable = true;
 #endif
@@ -138,7 +162,8 @@ public class ExternalAuthPanel : ContentUIBehaviour
         LoginContent.IsInteractable = false;
         selectedAuthenticationType = type;
 
-        if (type == AuthenticationType.Facebook || type == AuthenticationType.FacebookLimited)
+        if (type == AuthenticationType.Facebook ||
+            type == AuthenticationType.FacebookLimited)
         {
             HandleFacebookAuthenticationButton();
         }
@@ -170,10 +195,12 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
     private void OnAuthenticationFailure(ErrorResponse response)
     {
+#if FACEBOOK_SDK
         if (FB.IsLoggedIn)
         {
             FB.LogOut();
         }
+#endif
 
         Popup.DisplayPopup(new PopupInfo("Could not Authenticate",
                                          new PopupInfoBody[] { new PopupInfoBody(response.Message, PopupInfoBody.Type.Centered) },
