@@ -4,11 +4,9 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// <para>
 /// Attach to a GameObject in the Unity Editor to automatically create a bridge between
 /// <see cref="BrainCloudWrapper"/> and scripts that require access to the various brainCloud services.
 /// This also gives you more direct access to BrainCloudWrapper's properties.
-/// </para>
 ///
 /// <para>
 /// Despite living as a GameObject, <see cref="BCManager"/> will set up its properties to work as
@@ -22,9 +20,9 @@ using UnityEngine;
 /// references to whichever service you need in the script for faster accessing in the IL/CPP source.
 /// </para>
 /// 
-/// <seealso cref="BrainCloudWrapper"/><br></br>
-/// <seealso cref="BrainCloudClient"/><br></br>
-/// <seealso cref="UserHandler"/>
+/// <br><seealso cref="BrainCloudWrapper"/></br>
+/// <br><seealso cref="BrainCloudClient"/></br>
+/// <br><seealso cref="UserHandler"/></br>
 /// </summary>
 public class BCManager : MonoBehaviour
 {

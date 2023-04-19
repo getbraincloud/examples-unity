@@ -2,24 +2,21 @@ using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.Common;
 using System.Collections.Generic;
-using UnityEngine;
 
 using Facebook.Unity;
 
 /// TODO: More authentication methods are coming!
 /// <summary>
-/// <para>
 /// Interacts with <see cref="BCManager"/> to handle User Authentication.
-/// </para>
 ///
 /// <para>
 /// This script can be copied into your Unity or C# project alongside <see cref="BCManager"/>
 /// to be used for all the various authentication methods for your brainCloud app.
 /// </para>
 /// 
-/// <seealso cref="BrainCloudWrapper"/><br></br>
-/// <seealso cref="BrainCloudClient"/><br></br>
-/// <seealso cref="BCManager"/>
+/// <br><seealso cref="BrainCloudWrapper"/></br>
+/// <br><seealso cref="BrainCloudClient"/></br>
+/// <br><seealso cref="BCManager"/></br>
 /// </summary>
 public static class UserHandler
 {
@@ -61,13 +58,16 @@ public static class UserHandler
         BCManager.Wrapper.AuthenticateUniversal(username, password, forceCreate, onSuccess, onFailure, cbObject);
 
     /// <summary>
-    /// Authenticate the user anonymously.
+    /// Authenticate the user anonymously. This keeps the ProfileID tied to the device.
+    /// If the user disconnects their ProfileID from the app, then the user can no longer log into the same account.
     /// </summary>
     public static void AuthenticateAnonymous(SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
         BCManager.Wrapper.AuthenticateAnonymous(onSuccess, onFailure, cbObject);
 
     /// <summary>
-    /// Authenticate the user in a way that can be customize. Allows you to send user inputted information with <paramref name="extraJSON"/>.
+    /// Authenticate the user in a way that can be customized. Allows you to send user inputted information with <paramref name="extraJSON"/>.
+    /// <b>AdvancedAuthPostHook</b> will be called on brainCloud to make use of the <paramref name="extraJSON"/>.
+    /// <br>Note: This example only accepts <see cref="UserData"/> for the JSON. This will create a user entity for the user.</br>
     /// </summary>
     public static void AuthenticateAdvanced(AuthenticationType authType, AuthenticationIds ids, Dictionary<string, object> extraJSON,
                                             bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
@@ -87,6 +87,7 @@ public static class UserHandler
 
     /// <summary>
     /// Reset the authentication data stored on the user's device.
+    /// <br>Note: If the user is logged in anonymously then they will no longer be able to log back into to the same account!</br>
     /// </summary>
     public static void ResetAuthenticationData()
     {
@@ -100,8 +101,9 @@ public static class UserHandler
     #region External Authentication Methods
 
     /// <summary>
-    /// 
+    /// Authenticate the user using their Facebook account.
     /// </summary>
+    /// Facebook SDK for Unity: https://developers.facebook.com/docs/unity
     public static void AuthenticateFacebook(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
         // Adjust the permissions as you see fit
@@ -109,68 +111,41 @@ public static class UserHandler
         // https://developers.facebook.com/docs/permissions/reference
         var perms = new List<string>() { "public_profile" };
 
-#if UNITY_STANDALONE_WIN || UNITY_WEBGL || UNITY_ANDROID
-        FB.LogInWithReadPermissions(perms, (result) => /// <seealso cref="FB.LogInWithPublishPermissions(IEnumerable{string}, FacebookDelegate{ILoginResult})"/>
+        void onFBResult(ILoginResult result)
         {
-            if (FB.IsLoggedIn)
+            if (FB.IsLoggedIn && result.AccessToken != null)
             {
-                Debug.Log($"Is AccessToken not null? {result.AccessToken != null}");
-                Debug.Log($"Is AuthenticationToken not null? {result.AuthenticationToken != null}");
-
-                if (result.AccessToken != null)
-                {
-                    BCManager.Wrapper.AuthenticateFacebook(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
-                    return;
-                }
+                BCManager.Wrapper.AuthenticateFacebook(result.AccessToken.UserId, result.AccessToken.TokenString,
+                                                       forceCreate, onSuccess, onFailure, cbObject);
             }
             else if (result.Cancelled)
             {
                 onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
-                return;
             }
+            else // Error
+            {
+                string errorMessage = result.Error.IsNullOrEmpty() ? "An error has occured. Please try again." : result.Error;
+                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, errorMessage)), cbObject);
+            }
+        }
 
-            // Error
-            onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, result.Error)), cbObject);
-        });
+#if UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID
+        FB.LogInWithReadPermissions(perms, onFBResult); /// <seealso cref="FB.LogInWithPublishPermissions(IEnumerable{string}, FacebookDelegate{ILoginResult})"/>
 #elif UNITY_IOS
-        string nonce = System.DateTime.Now.Ticks.ToString(); // Please provide your own nonce, this is simply used as an example
-
-        FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, perms, nonce, (result) =>
-        {
-            if (FB.IsLoggedIn)
-            {
-                Debug.Log($"Is AccessToken not null? {result.AccessToken != null}");
-                Debug.Log($"Is AuthenticationToken not null? {result.AuthenticationToken != null} If not, what is the nonce? Original: {nonce}, FB: {result.AuthenticationToken?.Nonce}");
-
-                if (result.AccessToken != null)
-                {
-                    BCManager.Wrapper.AuthenticateFacebook(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
-                    return;
-                }
-                else if (result.AuthenticationToken != null && result.AuthenticationToken.Nonce == nonce)
-                {
-                    BCManager.Wrapper.AuthenticateFacebook(FB.Mobile.CurrentProfile().UserID, result.AuthenticationToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
-                    return;
-                }
-            }
-            else if (result.Cancelled)
-            {
-                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
-                return;
-            }
-
-            // Error
-            onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, result.Error)), cbObject);
-        });
+        FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, perms, null, onFBResult);
 #else
-        Debug.LogError("AuthenticateFacebook is not available on this platform. Check your scripting defines. Returning with error...");
+        UnityEngine.Debug.LogError("AuthenticateFacebook is not available on this platform. Check your scripting defines. Returning with error...");
         onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebook</b> is not available on this platform.")), cbObject);
 #endif
     }
 
     /// <summary>
-    /// Read more: https://getbraincloud.com/apidocs/apple-ios-14-5-privacy-facebook-limited-login-mode/
+    /// Authenticate the user using their Facebook account with limited permissions.
+    /// Facebook's Graph API will not be available for these users.
+    /// <br>Only available on iOS.</br>
     /// </summary>
+    /// Read more: https://getbraincloud.com/apidocs/apple-ios-14-5-privacy-facebook-limited-login-mode/
+    /// Facebook Limited Login: https://developers.facebook.com/docs/facebook-login/limited-login
     public static void AuthenticateFacebookLimited(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
 #if UNITY_IOS
@@ -179,37 +154,29 @@ public static class UserHandler
         // https://developers.facebook.com/docs/facebook-login/limited-login/permissions
         var perms = new List<string>() { "public_profile" };
 
-        string nonce = System.DateTime.Now.Ticks.ToString(); // Please provide your own nonce, this is simply used as an example
+        string nonce = System.DateTime.UtcNow.Ticks.ToString(); // This is only an example of a nonce; please provide your own method of generating a nonce
 
         FB.Mobile.LoginWithTrackingPreference(LoginTracking.LIMITED, perms, nonce, (result) =>
         {
-            if (FB.IsLoggedIn)
+            if (FB.IsLoggedIn && result.AuthenticationToken != null &&
+                result.AuthenticationToken.Nonce == nonce)
             {
-                Debug.Log($"Is AccessToken not null? {result.AccessToken != null}");
-                Debug.Log($"Is AuthenticationToken not null? {result.AuthenticationToken != null} If not, what is the nonce? Original: {nonce}, FB: {result.AuthenticationToken?.Nonce}");
-
-                if (result.AccessToken != null)
-                {
-                    BCManager.Wrapper.AuthenticateFacebookLimited(result.AccessToken.UserId, result.AccessToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
-                    return;
-                }
-                else if (result.AuthenticationToken != null && result.AuthenticationToken.Nonce == nonce)
-                {
-                    BCManager.Wrapper.AuthenticateFacebookLimited(FB.Mobile.CurrentProfile().UserID, result.AuthenticationToken.TokenString, forceCreate, onSuccess, onFailure, cbObject);
-                    return;
-                }
+                BCManager.Wrapper.AuthenticateFacebookLimited(FB.Mobile.CurrentProfile().UserID,
+                                                              result.AuthenticationToken.TokenString,
+                                                              forceCreate, onSuccess, onFailure, cbObject);
             }
             else if (result.Cancelled)
             {
                 onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
-                return;
             }
-
-            // Error
-            onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, result.Error)), cbObject);
+            else // Error
+            {
+                string errorMessage = result.Error.IsNullOrEmpty() ? "An error has occured. Please try again." : result.Error;
+                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, errorMessage)), cbObject);
+            }
         });
 #else
-        Debug.LogError("AuthenticateFacebookLimited is only available on iOS. Returning with error...");
+        UnityEngine.Debug.LogError("AuthenticateFacebookLimited is only available on iOS. Returning with error...");
         onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead.")), cbObject);
 #endif
     }

@@ -93,7 +93,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
     private void HandleFacebookAuthenticationButton()
     {
-#if UNITY_STANDALONE_WIN || UNITY_WEBGL || UNITY_ANDROID
+#if UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID
         selectedAuthenticationType = AuthenticationType.Facebook;
         UserHandler.AuthenticateFacebook(true,
                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
