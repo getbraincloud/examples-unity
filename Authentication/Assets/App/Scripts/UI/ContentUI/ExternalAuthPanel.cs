@@ -7,6 +7,8 @@ using UnityEngine;
 using Facebook.Unity;
 #endif
 
+using GooglePlayGames;
+
 public class ExternalAuthPanel : ContentUIBehaviour
 {
     [Header("Main")]
@@ -113,6 +115,9 @@ public class ExternalAuthPanel : ContentUIBehaviour
             OnInitComplete();
         }
 #endif
+
+        PlayGamesPlatform.DebugLogEnabled = true;
+
     }
 
     private void HandleFacebookAuthenticationButton()
@@ -167,9 +172,15 @@ public class ExternalAuthPanel : ContentUIBehaviour
         {
             HandleFacebookAuthenticationButton();
         }
+        else if (type == AuthenticationType.Google)
+        {
+            UserHandler.AuthenticateGoogle(true,
+                                           OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                           OnFailure("Authentication Failed", OnAuthenticationFailure));
+        }
         else
         {
-            Debug.LogError($"Authentication method is either unavailable on this platform or unknown: {type}");
+            Debug.LogError($"Authentication method is either unavailable on this platform or is unknown: {type}");
             selectedAuthenticationType = AuthenticationType.Unknown;
             LoginContent.IsInteractable = true;
         }

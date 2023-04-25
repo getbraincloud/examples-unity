@@ -1,11 +1,15 @@
 using BrainCloud;
-using BrainCloud.JsonFx.Json;
 using BrainCloud.Common;
+using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
+using UnityEngine;
 
 #if FACEBOOK_SDK
 using Facebook.Unity;
 #endif
+
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 
 /// TODO: More authentication methods are coming!
 /// <summary>
@@ -137,7 +141,7 @@ public static class UserHandler
 #elif UNITY_IOS
         FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, perms, null, onFBResult);
 #else
-        UnityEngine.Debug.LogError("AuthenticateFacebook is not available on this platform. Check your scripting defines. Returning with error...");
+        Debug.LogError("AuthenticateFacebook is not available on this platform. Check your scripting defines. Returning with error...");
         onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebook</b> is not available on this platform.")), cbObject);
 #endif
     }
@@ -179,10 +183,43 @@ public static class UserHandler
             }
         });
 #else
-        UnityEngine.Debug.LogError("AuthenticateFacebookLimited is only available on iOS. Returning with error...");
+        Debug.LogError("AuthenticateFacebookLimited is only available on iOS. Returning with error...");
         onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead.")), cbObject);
 #endif
     }
 #endif
+
+    /// <summary>
+    /// Authenticate the user using their Google account.
+    /// </summary>
+    /// Google Play Games plugin for Unity: https://developer.android.com/games/pgs/unity/overview
+    public static void AuthenticateGoogle(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_ANDROID
+        PlayGamesPlatform.Instance.ManuallyAuthenticate((status) =>
+        {
+            if (status == SignInStatus.Success)
+            {
+                PlayGamesPlatform.Instance.RequestServerSideAccess(true, (response) =>
+                {
+                    BCManager.Wrapper.AuthenticateGoogle(PlayGamesPlatform.Instance.GetUserId(), response,
+                                                         forceCreate, onSuccess, onFailure, cbObject);
+                });
+            }
+            else if (status == SignInStatus.Canceled)
+            {
+                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
+            }
+            else // Error
+            {
+                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "An error has occured. Please try again.")), cbObject);
+            }
+        });
+#else
+        Debug.LogError("AuthenticateGoogle is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateGoogle</b> is not available on this platform.")), cbObject);
+#endif
+    }
+
     #endregion
 }

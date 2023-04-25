@@ -2998,6 +2998,18 @@ PrefabInstance:
       propertyPath: MainLoginPanel
       value: 
       objectReference: {fileID: 2064540911}
+    - target: {fileID: 4713808941647017120, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: AuthItems.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4713808941647017120, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: AuthItems.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 98338f7b33f5c9143a31b2cc4bef2cd4, type: 2}
+    - target: {fileID: 4713808941647017120, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
+      propertyPath: AuthItems.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 99d3d61d14c249d419f04849448036f6, type: 2}
     - target: {fileID: 5190391447449538882, guid: 7071a20d9254fda4fbf2c9b20e5cf0c2, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
