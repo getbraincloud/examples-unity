@@ -284,9 +284,14 @@ public class MainMenuUI : ContentUIBehaviour
                 Facebook.Unity.FB.LogOut();
             }
 #endif
+
+            Google.GoogleSignIn.DefaultInstance.SignOut();
+
             if (disconnectAccount)
             {
                 UserHandler.ResetAuthenticationData();
+
+                Google.GoogleSignIn.DefaultInstance.Disconnect();
             }
 
             LoginContent.ResetRememberUserPref();

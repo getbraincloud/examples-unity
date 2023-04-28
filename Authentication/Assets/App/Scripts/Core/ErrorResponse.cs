@@ -35,4 +35,6 @@ public readonly struct ErrorResponse
         Status = (int)json[PROPERTY_STATUS];
         Message = (string)json[PROPERTY_MESSAGE];
     }
+
+    public string Serialize() => JsonWriter.Serialize(this);
 }

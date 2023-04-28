@@ -7,7 +7,11 @@ using UnityEngine;
 using Facebook.Unity;
 #endif
 
+#if GOOGLE_PLAY_GAMES_SDK
 using GooglePlayGames;
+#endif
+
+using Google;
 
 public class ExternalAuthPanel : ContentUIBehaviour
 {
@@ -38,12 +42,45 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
     }
 
+    protected override void Awake()
+    {
+        base.Awake();
+
+#if GOOGLE_PLAY_GAMES_SDK && GOOGLE_SIGN_IN_SDK && UNITY_ANDROID
+        Debug.LogError("Google Play Games & Google OpenID are not supported at the same time! This may lead to undesirable results...");
+#endif
+    }
+
     protected override void Start()
     {
+        HashSet<string> authentications = new()
+        {
+#if FACEBOOK_SDK && (UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID)
+            AuthenticationType.Facebook.ToString(),
+#elif FACEBOOK_SDK && UNITY_IOS
+            AuthenticationType.Facebook.ToString(),
+            AuthenticationType.FacebookLimited.ToString(),
+#endif
+
+#if GOOGLE_PLAY_GAMES_SDK && UNITY_ANDROID
+            AuthenticationType.Google.ToString(),
+#endif
+
+#if !GOOGLE_SIGN_IN_SDK && (UNITY_ANDROID || UNITY_IOS)
+            AuthenticationType.GoogleOpenId.ToString(),
+#endif
+        };
+
         authButtons = new List<ButtonContent>();
 
         foreach (ExternalAuthItem authItem in AuthItems)
         {
+            if (authItem.AuthenticationType == AuthenticationType.Unknown ||
+                !authentications.Contains(authItem.AuthenticationType.ToString()))
+            {
+                continue;
+            }
+
             ButtonContent button = Instantiate(ButtonTemplate, ButtonContent);
             button.gameObject.SetActive(true);
             button.gameObject.SetName(authItem.Name, "{0}MenuItem");
@@ -116,18 +153,20 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
 #endif
 
+#if GOOGLE_PLAY_GAMES_SDK
         PlayGamesPlatform.DebugLogEnabled = true;
-
+#endif
     }
 
+#if FACEBOOK_SDK
     private void HandleFacebookAuthenticationButton()
     {
-#if FACEBOOK_SDK && (UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID)
+#if UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID
         selectedAuthenticationType = AuthenticationType.Facebook;
         UserHandler.AuthenticateFacebook(true,
                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
-#elif FACEBOOK_SDK && UNITY_IOS
+#elif UNITY_IOS
         PopupInfoButton[] buttons = new PopupInfoButton[]
         { new PopupInfoButton("Facebook Standard", PopupInfoButton.Color.Blue, () =>
             {
@@ -155,12 +194,9 @@ public class ExternalAuthPanel : ContentUIBehaviour
                                                            new PopupInfoBody("Note: Limited mode does not allow you to use Facebook's Graph API features.", PopupInfoBody.Type.Centered)},
                                      buttons,
                                      false));
-#else
-        Debug.LogError("Either FACEBOOK_SDK has not been added to your Scripting Define Symbols or AuthenticateFacebook is not available on this platform.");
-        selectedAuthenticationType = AuthenticationType.Unknown;
-        LoginContent.IsInteractable = true;
 #endif
     }
+#endif
 
     private void OnExternalAuthentication(AuthenticationType type)
     {
@@ -170,20 +206,31 @@ public class ExternalAuthPanel : ContentUIBehaviour
         if (type == AuthenticationType.Facebook ||
             type == AuthenticationType.FacebookLimited)
         {
+#if FACEBOOK_SDK
             HandleFacebookAuthenticationButton();
+            return;
+#endif
         }
         else if (type == AuthenticationType.Google)
         {
+#if GOOGLE_PLAY_GAMES_SDK
             UserHandler.AuthenticateGoogle(true,
                                            OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                            OnFailure("Authentication Failed", OnAuthenticationFailure));
+            return;
+#endif
         }
-        else
+        else if (type == AuthenticationType.GoogleOpenId)
         {
-            Debug.LogError($"Authentication method is either unavailable on this platform or is unknown: {type}");
-            selectedAuthenticationType = AuthenticationType.Unknown;
-            LoginContent.IsInteractable = true;
+            UserHandler.AuthenticateGoogleOpenId(true,
+                                                 OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                 OnFailure("Authentication Failed", OnAuthenticationFailure));
+            return;
         }
+
+        Debug.LogError($"Authentication method is either unavailable on this platform or is unknown: {type}");
+        selectedAuthenticationType = AuthenticationType.Unknown;
+        LoginContent.IsInteractable = true;
     }
 
     private void OnAuthenticationSuccess()
@@ -212,6 +259,8 @@ public class ExternalAuthPanel : ContentUIBehaviour
             FB.LogOut();
         }
 #endif
+
+        GoogleSignIn.DefaultInstance.Disconnect();
 
         Popup.DisplayPopup(new PopupInfo("Could not Authenticate",
                                          new PopupInfoBody[] { new PopupInfoBody(response.Message, PopupInfoBody.Type.Centered) },

@@ -1,6 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
-using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,8 +8,12 @@ using UnityEngine;
 using Facebook.Unity;
 #endif
 
+#if GOOGLE_PLAY_GAMES_SDK
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
+#endif
+
+using Google;
 
 /// TODO: More authentication methods are coming!
 /// <summary>
@@ -47,7 +51,7 @@ public static class UserHandler
     /// </summary>
     public static AuthenticationType AuthenticationType => AuthenticationType.FromString(BCManager.Wrapper.GetStoredAuthenticationType());
 
-    #region Authentication Methods
+#region Authentication Methods
 
     /// <summary>
     /// Authenticate the user using their email and password.
@@ -104,7 +108,7 @@ public static class UserHandler
 
     #endregion
 
-    #region External Authentication Methods
+#region External Authentication Methods
 
 #if FACEBOOK_SDK
     /// <summary>
@@ -113,7 +117,7 @@ public static class UserHandler
     /// Facebook SDK for Unity: https://developers.facebook.com/docs/unity
     public static void AuthenticateFacebook(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
-        // Adjust the permissions as you see fit
+        // Adjust the permissions as it relates to your app
         // Please see Facebook's perfmissions reference:
         // https://developers.facebook.com/docs/permissions/reference
         var perms = new List<string>() { "public_profile" };
@@ -127,12 +131,12 @@ public static class UserHandler
             }
             else if (result.Cancelled)
             {
-                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
+                onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").Serialize(), cbObject);
             }
             else // Error
             {
                 string errorMessage = result.Error.IsNullOrEmpty() ? "An error has occured. Please try again." : result.Error;
-                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, errorMessage)), cbObject);
+                onFailure(0, 0, new ErrorResponse(0, 0, errorMessage).Serialize(), cbObject);
             }
         }
 
@@ -142,7 +146,7 @@ public static class UserHandler
         FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, perms, null, onFBResult);
 #else
         Debug.LogError("AuthenticateFacebook is not available on this platform. Check your scripting defines. Returning with error...");
-        onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebook</b> is not available on this platform.")), cbObject);
+        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateFacebook</b> is not available on this platform.").Serialize(), cbObject);
 #endif
     }
 
@@ -156,7 +160,7 @@ public static class UserHandler
     public static void AuthenticateFacebookLimited(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
 #if UNITY_IOS
-        // Adjust the permissions as you see fit
+        // Adjust the permissions as it relates to your app
         // These are the permissions available in Limited mode:
         // https://developers.facebook.com/docs/facebook-login/limited-login/permissions
         var perms = new List<string>() { "public_profile" };
@@ -174,23 +178,24 @@ public static class UserHandler
             }
             else if (result.Cancelled)
             {
-                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
+                onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").Serialize(), cbObject);
             }
             else // Error
             {
                 string errorMessage = result.Error.IsNullOrEmpty() ? "An error has occured. Please try again." : result.Error;
-                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, errorMessage)), cbObject);
+                onFailure(0, 0, new ErrorResponse(0, 0, errorMessage).Serialize(), cbObject);
             }
         });
 #else
         Debug.LogError("AuthenticateFacebookLimited is only available on iOS. Returning with error...");
-        onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead.")), cbObject);
+        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead.").Serialize(), cbObject);
 #endif
     }
 #endif
 
+#if GOOGLE_PLAY_GAMES_SDK
     /// <summary>
-    /// Authenticate the user using their Google account.
+    /// Authenticate the user using their Google account via Google Play Games.
     /// </summary>
     /// Google Play Games plugin for Unity: https://developer.android.com/games/pgs/unity/overview
     public static void AuthenticateGoogle(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
@@ -200,7 +205,7 @@ public static class UserHandler
         {
             if (status == SignInStatus.Success)
             {
-                PlayGamesPlatform.Instance.RequestServerSideAccess(true, (response) =>
+                PlayGamesPlatform.Instance.RequestServerSideAccess(false, (response) =>
                 {
                     BCManager.Wrapper.AuthenticateGoogle(PlayGamesPlatform.Instance.GetUserId(), response,
                                                          forceCreate, onSuccess, onFailure, cbObject);
@@ -208,16 +213,80 @@ public static class UserHandler
             }
             else if (status == SignInStatus.Canceled)
             {
-                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "Log in was cancelled.")), cbObject);
+                onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").Serialize(), cbObject);
             }
             else // Error
             {
-                onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "An error has occured. Please try again.")), cbObject);
+                onFailure(0, 0, new ErrorResponse(0, 0, "An error has occured. Please try again.").Serialize(), cbObject);
             }
         });
 #else
         Debug.LogError("AuthenticateGoogle is not available on this platform. Check your scripting defines. Returning with error...");
-        onFailure(0, 0, JsonWriter.Serialize(new ErrorResponse(0, 0, "<b>AuthenticateGoogle</b> is not available on this platform.")), cbObject);
+        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateGoogle</b> is not available on this platform.").Serialize(), cbObject);
+#endif
+    }
+#endif
+
+    /// <summary>
+    /// Authenticate the user using their Google account via Google Sign-In.
+    /// </summary>
+    /// Google Sign-In Unity Plugin: https://developers.google.com/identity/sign-in/
+    public static void AuthenticateGoogleOpenId(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_ANDROID || UNITY_IOS
+        // Adjust the configuration as it relates to your app
+        // This will need to be set-up in your app somewhere before sign-in
+        // These values are all required to be set to these for authentication
+        if (GoogleSignIn.Configuration == null)
+        {
+            GoogleSignIn.Configuration = new GoogleSignInConfiguration
+            {
+                WebClientId = "YOUR_WEB_CLIENT_ID_HERE",
+                RequestEmail = true,
+                RequestIdToken = true,
+                UseGameSignIn = false
+            };
+
+            GoogleSignIn.DefaultInstance.EnableDebugLogging(true);
+        }
+
+        try
+        {
+            GoogleSignIn.DefaultInstance.SignIn().ContinueWith(task =>
+            {
+                if (task.IsFaulted)
+                {
+                    using IEnumerator<Exception> enumerator = task.Exception.InnerExceptions.GetEnumerator();
+                    {
+                        if (enumerator.MoveNext())
+                        {
+                            GoogleSignIn.SignInException error = (GoogleSignIn.SignInException)enumerator.Current;
+                            onFailure(0, 0, new ErrorResponse(0, 0, $"{error.Status}\n{error.Message}").Serialize(), cbObject);
+                        }
+                        else
+                        {
+                            onFailure(0, 0, new ErrorResponse(0, 0, $"An error has occured. Please try again.\nError: {task.Exception}").Serialize(), cbObject);
+                        }
+                    }
+                }
+                else if (task.IsCanceled)
+                {
+                    onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").Serialize(), cbObject);
+                }
+                else
+                {
+                    BCManager.Wrapper.AuthenticateGoogleOpenId(task.Result.Email, task.Result.IdToken,
+                                                               forceCreate, onSuccess, onFailure, cbObject);
+                }
+            });
+        }
+        catch
+        {
+            onFailure(0, 0, new ErrorResponse(0, 0, $"An error has occured. Please try again.").Serialize(), cbObject);
+        }
+#else
+        Debug.LogError("AuthenticateGoogleOpenID is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateGoogleOpenID</b> is not available on this platform.").Serialize(), cbObject);
 #endif
     }
 
