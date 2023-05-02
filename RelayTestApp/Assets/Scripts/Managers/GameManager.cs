@@ -178,12 +178,22 @@ public class GameManager : MonoBehaviour
         Color newColor;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            UserCursor newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
-            lobby.Members[i].MousePosition = new Vector2(9999, 9999);
+            //Set up Cursor image
+            UserCursor newCursor = Instantiate(UserCursorPrefab, new Vector3(9999, 9999, 0), Quaternion.identity, UserCursorParent.transform);
             newCursor.AdjustVisibility(false);
             newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
             newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
+            
+            //Set up Rect Transform settings to anchor image
             lobby.Members[i].UserCursor = newCursor;
+            RectTransform UITransform = newCursor.GetComponent<RectTransform>();
+            Vector2 minMax = new Vector2(0, 1);
+            UITransform.anchorMin = minMax;
+            UITransform.anchorMax = minMax;
+            UITransform.pivot = new Vector2(0.5f, 0.5f);;
+            
+            //Save references for later..
+            lobby.Members[i].CursorTransform = UITransform;
             _userCursorsList.Add(newCursor);
             if (lobby.Members[i].Username == CurrentUserInfo.Username)
             {

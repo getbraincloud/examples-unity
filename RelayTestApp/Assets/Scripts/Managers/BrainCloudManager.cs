@@ -364,14 +364,14 @@ public class BrainCloudManager : MonoBehaviour
                         if (op == "move")
                         {
                             member.IsAlive = true;
-                            member.MousePosition.x = Convert.ToSingle(data["x"]);
-                            member.MousePosition.y = -Convert.ToSingle(data["y"]); // + _mouseYOffset;
+                            member.MousePosition.x = (float)Convert.ToDouble(data["x"]);
+                            member.MousePosition.y = (float)-Convert.ToDouble(data["y"]); // + _mouseYOffset;
                         }
                         else if (op == "shockwave")
                         {
                             Vector2 position; 
-                            position.x = Convert.ToSingle(data["x"]);
-                            position.y = -Convert.ToSingle(data["y"]);
+                            position.x = (float)Convert.ToDouble(data["x"]);
+                            position.y = (float)-Convert.ToDouble(data["y"]);
                             member.ShockwavePositions.Add(position);
                         }
                     }
@@ -384,14 +384,14 @@ public class BrainCloudManager : MonoBehaviour
                         if (op == "move")
                         {
                             member.IsAlive = true;
-                            member.MousePosition.x = Convert.ToSingle(json["x"]);
-                            member.MousePosition.y = -Convert.ToSingle(json["y"]); // + _mouseYOffset;
+                            member.MousePosition.x = (float)Convert.ToDouble(json["x"]);
+                            member.MousePosition.y = (float)-Convert.ToDouble(json["y"]); // + _mouseYOffset;
                         }
                         else if (op == "shockwave")
                         {
                             Vector2 position; 
-                            position.x = Convert.ToSingle(json["x"]);
-                            position.y = -Convert.ToSingle(json["y"]);
+                            position.x = (float)Convert.ToDouble(json["x"]);
+                            position.y = (float)-Convert.ToDouble(json["y"]);
                             member.ShockwavePositions.Add(position);
                         }
                     }
