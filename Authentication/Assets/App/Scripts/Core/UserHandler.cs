@@ -13,7 +13,9 @@ using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 #endif
 
+#if GOOGLE_SIGN_IN_SDK
 using Google;
+#endif
 
 /// TODO: More authentication methods are coming!
 /// <summary>
@@ -51,7 +53,7 @@ public static class UserHandler
     /// </summary>
     public static AuthenticationType AuthenticationType => AuthenticationType.FromString(BCManager.Wrapper.GetStoredAuthenticationType());
 
-#region Authentication Methods
+    #region Authentication Methods
 
     /// <summary>
     /// Authenticate the user using their email and password.
@@ -108,7 +110,7 @@ public static class UserHandler
 
     #endregion
 
-#region External Authentication Methods
+    #region External Authentication Methods
 
 #if FACEBOOK_SDK
     /// <summary>
@@ -227,12 +229,17 @@ public static class UserHandler
     }
 #endif
 
+#if GOOGLE_SIGN_IN_SDK
     /// <summary>
     /// Authenticate the user using their Google account via Google Sign-In.
     /// </summary>
     /// Google Sign-In Unity Plugin: https://developers.google.com/identity/sign-in/
     public static void AuthenticateGoogleOpenId(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
+#if DEVELOPMENT_BUILD && UNITY_IOS
+        Debug.LogWarning("Development Builds for iOS causes issues with the GoogleSignIn SDK.\n"+
+                         "You may need to disable Development Builds for AuthenticateGoogleOpenId to work.");
+#endif
 #if UNITY_ANDROID || UNITY_IOS
         // Adjust the configuration as it relates to your app
         // This will need to be set-up in your app somewhere before sign-in
@@ -246,8 +253,9 @@ public static class UserHandler
                 RequestIdToken = true,
                 UseGameSignIn = false
             };
-
+#if UNITY_ANDROID
             GoogleSignIn.DefaultInstance.EnableDebugLogging(true);
+#endif
         }
 
         try
@@ -289,6 +297,7 @@ public static class UserHandler
         onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateGoogleOpenID</b> is not available on this platform.").Serialize(), cbObject);
 #endif
     }
+#endif
 
     #endregion
 }

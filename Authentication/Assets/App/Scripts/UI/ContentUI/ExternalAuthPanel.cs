@@ -11,7 +11,9 @@ using Facebook.Unity;
 using GooglePlayGames;
 #endif
 
+#if GOOGLE_SIGN_IN_SDK
 using Google;
+#endif
 
 public class ExternalAuthPanel : ContentUIBehaviour
 {
@@ -61,12 +63,10 @@ public class ExternalAuthPanel : ContentUIBehaviour
             AuthenticationType.Facebook.ToString(),
             AuthenticationType.FacebookLimited.ToString(),
 #endif
-
 #if GOOGLE_PLAY_GAMES_SDK && UNITY_ANDROID
             AuthenticationType.Google.ToString(),
 #endif
-
-#if !GOOGLE_SIGN_IN_SDK && (UNITY_ANDROID || UNITY_IOS)
+#if GOOGLE_SIGN_IN_SDK && (UNITY_ANDROID || UNITY_IOS)
             AuthenticationType.GoogleOpenId.ToString(),
 #endif
         };
@@ -92,6 +92,12 @@ public class ExternalAuthPanel : ContentUIBehaviour
             button.Button.onClick.AddListener(() => OnExternalAuthentication(authItem.AuthenticationType));
 
             authButtons.Add(button);
+        }
+
+        if (authButtons.Count == 0)
+        {
+            gameObject.SetActive(false);
+            return;
         }
 
         InitializeUI();
@@ -222,10 +228,12 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
         else if (type == AuthenticationType.GoogleOpenId)
         {
+#if GOOGLE_SIGN_IN_SDK
             UserHandler.AuthenticateGoogleOpenId(true,
                                                  OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                                  OnFailure("Authentication Failed", OnAuthenticationFailure));
             return;
+#endif
         }
 
         Debug.LogError($"Authentication method is either unavailable on this platform or is unknown: {type}");
@@ -259,9 +267,9 @@ public class ExternalAuthPanel : ContentUIBehaviour
             FB.LogOut();
         }
 #endif
-
+#if GOOGLE_SIGN_IN_SDK
         GoogleSignIn.DefaultInstance.Disconnect();
-
+#endif
         Popup.DisplayPopup(new PopupInfo("Could not Authenticate",
                                          new PopupInfoBody[] { new PopupInfoBody(response.Message, PopupInfoBody.Type.Centered) },
                                          null, true, "Close"));
