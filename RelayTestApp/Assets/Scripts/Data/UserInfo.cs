@@ -30,6 +30,7 @@ public class UserInfo
     //Used to determine if user is in lobby or in match.
     public bool IsReady;
     public bool PresentSinceStart;
+    public RectTransform CursorTransform;
     public UserInfo(Dictionary<string, object> userJson)
     {
         cxId = userJson["cxId"] as string;

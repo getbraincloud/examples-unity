@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -15,19 +16,18 @@ using UnityEngine.UI;
 
 public class GameArea : MonoBehaviour
 {
-    public GameObject Shockwave;
-    public Canvas MatchCanvas;
-    public CanvasScaler CanvasScaler;
+    public AnimateRipple ShockwaveAnimation;
     [HideInInspector] public UserCursor LocalUserCursor;
     //Offsets are to adjust the image closer to the cursor's point
-    private Vector2 _mouseOffset = new Vector2(13, -23);
-    private Vector2 _shockwaveOffset = new Vector2(-7, 15);
+    private Vector2 _mouseOffset = new Vector2(60, -580);
+    private Vector2 _shockwaveOffset = new Vector2(-35, 30);
     
     //local to network is for shockwave input specifically
     private Vector2 _newPosition;
     private ParticleSystem.MainModule _shockwaveParticle;
     private GameObject _newShockwave;
     private List<Vector2> _localShockwavePositions = new List<Vector2>();
+    private Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
 
     // Update is called once per frame
     private void Update()
@@ -39,17 +39,18 @@ public class GameArea : MonoBehaviour
                 Cursor.visible = false;
                 LocalUserCursor.AdjustVisibility(true);
             }
-            
-            _newPosition = UnscalePosition(Input.mousePosition / MatchCanvas.scaleFactor);
-            
+
+            _newPosition = Input.mousePosition;
+            _newPosition.x -= bottomLeftPositionGameArea.x;
+            _newPosition.y -= bottomLeftPositionGameArea.y;
             BrainCloudManager.Instance.LocalMouseMoved(_newPosition + _mouseOffset);
             if (Input.GetMouseButtonDown(0))
             {
                 //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition + _shockwaveOffset);
+                _localShockwavePositions.Add(_newPosition+ _mouseOffset);
                 
                 //Send position of local users input for a shockwave to other users
-                BrainCloudManager.Instance.LocalShockwave(_newPosition + _shockwaveOffset);
+                BrainCloudManager.Instance.LocalShockwave(_newPosition+ _mouseOffset);
             }
         }
         else
@@ -71,7 +72,7 @@ public class GameArea : MonoBehaviour
             Cursor.visible = true;    
         }
     }
-
+    
     private void UpdateAllShockwaves()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
@@ -106,29 +107,20 @@ public class GameArea : MonoBehaviour
             _localShockwavePositions.Clear();
         }
     }
-    
-    Vector2 UnscalePosition(Vector2 vec)
-    {
-        Vector2 referenceResolution = CanvasScaler.referenceResolution;
-        Vector2 currentResolution = new Vector2(Screen.width, Screen.height);
-       
-        float widthRatio = currentResolution.x / referenceResolution.x;
-        float heightRatio = currentResolution.y / referenceResolution.y;
-        float ratio = Mathf.Lerp(heightRatio, widthRatio, CanvasScaler.matchWidthOrHeight); 
-        return vec / ratio;
-    }
 
     private void SetUpShockwave(Vector2 position, Color waveColor, bool isUserLocal)
     {
-        //Get in world position + offset 
-        Vector2 newPosition = Camera.main.ScreenToWorldPoint(position);
-
-        _newShockwave = Instantiate(Shockwave, newPosition, Quaternion.identity);
+        var newShockwave = Instantiate(ShockwaveAnimation, Vector3.zero, Quaternion.identity, GameManager.Instance.UserCursorParent.transform);
+        RectTransform UITransform = newShockwave.GetComponent<RectTransform>();
+        Vector2 minMax = new Vector2(0, 1);
         
-        //Adjusting shockwave color to what user settings are
-        _shockwaveParticle = _newShockwave.GetComponent<ParticleSystem>().main;
-        _shockwaveParticle.startColor = waveColor;    
-        StateManager.Instance.Shockwaves.Add(_newShockwave);
+        UITransform.anchorMin = minMax;
+        UITransform.anchorMax = minMax;
+        UITransform.pivot = new Vector2(0.5f, 0.5f);;
+        newShockwave.RippleColor = waveColor;
+        UITransform.anchoredPosition = position + _shockwaveOffset;
+        
+        StateManager.Instance.Shockwaves.Add(newShockwave.gameObject);
     }
     
     private void UpdateAllCursorsMovement()
@@ -147,9 +139,7 @@ public class GameArea : MonoBehaviour
                 lobby.Members[i].UserCursor.AdjustVisibility(true);
             }
 
-            var newPosition = Camera.main.ScreenToWorldPoint(lobby.Members[i].MousePosition);
-            newPosition.z = 0;
-            lobby.Members[i].UserCursor.transform.position = newPosition;
+            lobby.Members[i].CursorTransform.anchoredPosition = lobby.Members[i].MousePosition;
         }
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
