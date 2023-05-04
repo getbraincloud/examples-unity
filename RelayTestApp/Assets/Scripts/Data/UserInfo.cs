@@ -31,15 +31,32 @@ public class UserInfo
     public bool IsReady;
     public bool PresentSinceStart;
     public RectTransform CursorTransform;
+    public TeamCodes Team;
     public UserInfo(Dictionary<string, object> userJson)
     {
         cxId = userJson["cxId"] as string;
         ID = userJson["profileId"] as string;
         Username = userJson["name"] as string;
-        Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
-        int colorIndex = (int)extra["colorIndex"];
-        UserGameColor = (GameColors) colorIndex;
         IsReady = (bool)userJson["isReady"];
+        string value = userJson["team"] as string;
+        Enum.TryParse(value, out Team);
+        if (GameManager.Instance.GameMode == GameMode.FreeForAll)
+        {
+            Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
+            int colorIndex = (int)extra["colorIndex"];
+            UserGameColor = (GameColors) colorIndex;    
+        }
+        else if(GameManager.Instance.GameMode == GameMode.Team)
+        {
+            if (Team == TeamCodes.alpha)
+            {
+                UserGameColor = GameColors.Blue;
+            }
+            else
+            {
+                UserGameColor = GameColors.Orange;
+            }
+        }
         if (userJson.ContainsKey("presentSinceStart"))
         {
             PresentSinceStart = (bool)userJson["presentSinceStart"];    

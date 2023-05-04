@@ -12,8 +12,9 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 public enum RelayCompressionTypes {JsonString, KeyValuePairString, DataStreamByte }
 
 //Names of lobby types are custom made within brainCloud portal.
-public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive}
-
+public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive, TeamCursorPartyV2}
+//Team codes for Free for all = all and team specific is alpha and beta
+public enum TeamCodes {all, alpha, beta}
 /// <summary>
 /// Example of how to communicate game logic to brain cloud functions
 /// </summary>
@@ -28,12 +29,19 @@ public class BrainCloudManager : MonoBehaviour
     private LogErrors _logger;
     private bool _presentWhileStarted;
 
-    private RelayLobbyTypes _lobbyType = RelayLobbyTypes.CursorPartyV2;
+    private TeamCodes _teamCode = TeamCodes.all;
+    public TeamCodes TeamCode
+    {
+        get => _teamCode;
+        set => _teamCode = value;
+    }
 
+    private RelayLobbyTypes _lobbyType = RelayLobbyTypes.CursorPartyV2;
     public RelayLobbyTypes LobbyType
     {
         set => _lobbyType = value;
     }
+    
     private void Awake()
     {
         _logger = FindObjectOfType<LogErrors>();
@@ -221,7 +229,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void JoinMatch()
     {
-        StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
+        StateManager.Instance.ButtonPressed_ChangeState(GameStates.LobbyFFA);
         GameManager.Instance.JoinInProgressButton.gameObject.SetActive(false);
         ConnectRelay();
     }
@@ -408,7 +416,8 @@ public class BrainCloudManager : MonoBehaviour
             StateManager.Instance.CurrentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>,
                 jsonData["lobbyId"] as string);
             //If we're still in lobby, then update the list of users
-            if (StateManager.Instance.CurrentGameState == GameStates.Lobby)
+            if (StateManager.Instance.CurrentGameState == GameStates.LobbyFFA ||
+                StateManager.Instance.CurrentGameState == GameStates.LobbyTeam)
             {
                 StateManager.Instance.isLoading = false;
             }
@@ -438,7 +447,7 @@ public class BrainCloudManager : MonoBehaviour
                     Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
                     if (!GameManager.Instance.IsLocalUserHost())
                     {
-                        StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
+                        StateManager.Instance.ButtonPressed_ChangeState(GameStates.LobbyFFA);
                     }
                     break;
                 case "ROOM_READY":
@@ -526,7 +535,7 @@ public class BrainCloudManager : MonoBehaviour
             StateManager.Instance.isReady = false;
             GameManager.Instance.CurrentUserInfo.PresentSinceStart = false;
             GameManager.Instance.UpdateMatchAndLobbyState();
-            StateManager.Instance.ChangeState(GameStates.Lobby);
+            StateManager.Instance.ChangeState(GameStates.LobbyFFA);
         }
         else if (json["op"] as string == "MIGRATE_OWNER")
         {
@@ -556,6 +565,8 @@ public class BrainCloudManager : MonoBehaviour
         //
         var settings = new Dictionary<string, object>();
 
+        string teamCode = GameManager.Instance.GameMode == GameMode.FreeForAll ? "all" : "";
+
         //
         _bcWrapper.LobbyService.FindOrCreateLobby
         (
@@ -567,7 +578,7 @@ public class BrainCloudManager : MonoBehaviour
             0, // Timeout
             false, // ready
             extra, // extra
-            "all", // team code
+            teamCode, // team code
             settings, // settings
             null, // other users
             null, // Success of lobby found will be in the event onLobbyEvent

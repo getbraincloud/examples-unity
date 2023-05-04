@@ -19,7 +19,12 @@ public class GameArea : MonoBehaviour
     public AnimateRipple ShockwaveAnimation;
     [HideInInspector] public UserCursor LocalUserCursor;
     //Offsets are to adjust the image closer to the cursor's point
+//#if UNITY_EDITOR
+    //private Vector2 _mouseOffset = new Vector2(920, -800);
+//#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE
+    //Offset meant for Window and Mac Standalone builds
     private Vector2 _mouseOffset = new Vector2(60, -580);
+//#endif
     private Vector2 _shockwaveOffset = new Vector2(-35, 30);
     
     //local to network is for shockwave input specifically
@@ -110,7 +115,7 @@ public class GameArea : MonoBehaviour
 
     private void SetUpShockwave(Vector2 position, Color waveColor, bool isUserLocal)
     {
-        var newShockwave = Instantiate(ShockwaveAnimation, Vector3.zero, Quaternion.identity, GameManager.Instance.UserCursorParent.transform);
+        var newShockwave = Instantiate(ShockwaveAnimation, Vector3.zero, Quaternion.identity, GameManager.Instance.UserCursorParentFFA.transform);
         RectTransform UITransform = newShockwave.GetComponent<RectTransform>();
         Vector2 minMax = new Vector2(0, 1);
         

@@ -13,7 +13,7 @@ using BrainCloud;
 ///     - Info about Server and Lobby
 /// </summary>
 
-public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting}
+public enum GameStates{SignIn,MainMenu,LobbyFFA,LobbyTeam,MatchFFA,MatchTeam,Connecting}
 public class StateManager : MonoBehaviour
 {
     //Game States
@@ -143,15 +143,16 @@ public class StateManager : MonoBehaviour
                 break;
             //Looking for Lobby...
             case GameStates.MainMenu:
-                CurrentGameState = GameStates.Lobby;
+                CurrentGameState = GameManager.Instance.GameMode == GameMode.FreeForAll ? GameStates.LobbyFFA : GameStates.LobbyTeam;
                 BrainCloudManager.Instance.FindLobby(Protocol);
-                LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE,true,GameStates.Lobby);
+                LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE,true, CurrentGameState);
                 break;
             //Setting up Match...
-            case GameStates.Lobby:
-                CurrentGameState = GameStates.Match;
+            case GameStates.LobbyFFA:
+            case GameStates.LobbyTeam:
+                CurrentGameState = GameManager.Instance.GameMode == GameMode.FreeForAll ? GameStates.MatchFFA : GameStates.MatchTeam;
                 BrainCloudManager.Instance.StartGame();
-                LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
+                LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false, CurrentGameState);
                 break;
         }
     }
@@ -163,9 +164,9 @@ public class StateManager : MonoBehaviour
             state.gameObject.SetActive(false);
         }
         
-        CurrentGameState = GameStates.Match;
+        CurrentGameState = GameStates.MatchFFA;
         isLoading = true;
-        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
+        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.MatchFFA);
 
         BrainCloudManager.Instance.ReconnectUser();
     }
