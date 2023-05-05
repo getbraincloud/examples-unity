@@ -456,6 +456,18 @@ public class GameManager : MonoBehaviour
         return currentLobby.OwnerID == CurrentUserInfo.ID;
     }
 
+    public Transform GetCurrentShockwaveParent()
+    {
+        if (_gameMode == GameMode.FreeForAll)
+        {
+            return UserCursorParentFFA.transform;
+        }
+        else
+        {
+            return UserCursorParentTeam.transform;
+        }
+    }
+
 #endregion
 }
 

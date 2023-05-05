@@ -27,6 +27,8 @@ public class UserInfo
     public UserCursor UserCursor;
     public UserInfo() { }
     public string cxId;
+
+    public string NetID;
     //Used to determine if user is in lobby or in match.
     public bool IsReady;
     public bool PresentSinceStart;

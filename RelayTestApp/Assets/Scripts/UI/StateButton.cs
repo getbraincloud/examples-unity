@@ -6,6 +6,13 @@ public class StateButton : MonoBehaviour
 {
     //Called from Unity Button
     public void StateButtonChange() => StateManager.Instance.ButtonPressed_ChangeState();
+
+    public void LookingForFFALobby()
+    {
+        GameManager.Instance.GameMode = GameMode.FreeForAll;
+        BrainCloudManager.Instance.SetPreviousLobbyType();
+        StateManager.Instance.ButtonPressed_ChangeState();
+    }
     
     //Called from Unity Button
     public void LookingForTeamLobby()
