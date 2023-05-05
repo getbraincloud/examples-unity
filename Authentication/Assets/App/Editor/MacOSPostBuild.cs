@@ -9,7 +9,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-public class MacOSPostBuild
+public static class MacOSPostBuild
 {
     [PostProcessBuild(100)]
     public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
@@ -24,12 +24,16 @@ public class MacOSPostBuild
                     foreach (string bundle in bundles)
                     {
                         UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(bundle);
-
+#if true // APPLE_SIGN_IN_SDK
+                        AppleAuth.Editor.AppleAuthMacosPostprocessorHelper.FixManagerBundleIdentifier(target, pathToBuiltProject);
+#endif
                         Debug.Log($"Found Bundle: {bundle}");
                     }
 
                     UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(pathToBuiltProject);
-
+#if true // APPLE_SIGN_IN_SDK
+                    AppleAuth.Editor.AppleAuthMacosPostprocessorHelper.FixManagerBundleIdentifier(target, pathToBuiltProject);
+#endif
                     Debug.Log("MacOS Bundles & App Signed.");
                 }
                 catch (Exception e)

@@ -1,7 +1,9 @@
 using BrainCloud;
 using BrainCloud.Common;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 #if FACEBOOK_SDK
@@ -15,6 +17,14 @@ using GooglePlayGames.BasicApi;
 
 #if GOOGLE_SIGN_IN_SDK
 using Google;
+#endif
+
+#if true
+using AppleAuth;
+using AppleAuth.Enums;
+using AppleAuth.Native;
+using AppleAuth.Extensions;
+using AppleAuth.Interfaces;
 #endif
 
 /// TODO: More authentication methods are coming!
@@ -111,6 +121,86 @@ public static class UserHandler
     #endregion
 
     #region External Authentication Methods
+
+    // For the sake of handling Apple authentication via this example app,
+    // we will store the AppleAuthManager here. If you intend on including
+    // this script in your own app it is highly recommended that you create
+    // your custom code to handle all the features supplied by AppleAuthManager.
+    private static IAppleAuthManager appleAuthManager;
+
+    // It would be best practce to include this loop in your own custom code
+    // that includes the standard Unity Update method.
+    private static IEnumerator HandleAppleAuthManagerUpdate()
+    {
+        while (appleAuthManager != null)
+        {
+            appleAuthManager.Update();
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// Authenticate the user using their Apple account.
+    /// </summary>
+    /// Sign in with Apple Unity Plugin: https://github.com/lupidan/apple-signin-unity
+    public static void AuthenticateApple(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_STANDALONE_OSX || UNITY_IOS
+        // For the sake of handling Apple authentication via this example app,
+        // we will create our AppleAuthManager here. If you intend on including
+        // this script in your own app it is highly recommended that you create
+        // your custom code to handle all the features supplied by AppleAuthManager.
+        if (AppleAuthManager.IsCurrentPlatformSupported &&
+            appleAuthManager == null)
+        {
+            var deserializer = new PayloadDeserializer();
+            appleAuthManager = new AppleAuthManager(deserializer);
+
+            BCManager.Wrapper.StartCoroutine(HandleAppleAuthManagerUpdate());
+        }
+
+        // You can request the user's email and full name from here
+        // Note: You will only receive the user's email and name only during the first
+        // time the user logs in. Future logins will only return null unless the user
+        // revokes access to this app. If you require those to be stored in this app,
+        // ensure that you store them when the user first logs in.
+        AppleAuthLoginArgs loginArgs = new AppleAuthLoginArgs(LoginOptions.None);
+
+        appleAuthManager.LoginWithAppleId(loginArgs,
+            credential =>
+            {
+                if (credential is IAppleIDCredential appleIdCredential)
+                {
+                    //var email = appleIdCredential.Email;
+                    //var fullName = appleIdCredential.FullName;
+                    // Authorization code
+                    //var authorizationCode = Encoding.UTF8.GetString(
+                    //    appleIdCredential.AuthorizationCode,
+                    //    0,
+                    //    appleIdCredential.AuthorizationCode.Length);
+
+                    string identityToken = Encoding.UTF8.GetString(appleIdCredential.IdentityToken, 0,
+                                                                   appleIdCredential.IdentityToken.Length);
+
+                    BCManager.Wrapper.AuthenticateApple(appleIdCredential.User, identityToken,
+                                                        forceCreate, onSuccess, onFailure, cbObject);
+                }
+                else
+                {
+                    onFailure(0, 0, new ErrorResponse(0, 0, "An error has occured. Please try again.").Serialize(), cbObject);
+                }
+            },
+            error =>
+            {
+                string errorMessage = error != null ? $"{error.LocalizedDescription}\nReason: {error.LocalizedFailureReason}"
+                                                    : "An error has occured. Please try again.";
+                onFailure(0, 0, new ErrorResponse(0, 0, errorMessage).Serialize(), cbObject);
+            });
+#else
+        Debug.LogError("AuthenticateApple is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateApple</b> is not available on this platform.").Serialize(), cbObject);
+#endif
+    }
 
 #if FACEBOOK_SDK
     /// <summary>
