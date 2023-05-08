@@ -24,14 +24,13 @@ public class GameManager : MonoBehaviour
     public UserEntry UserEntryMatchPrefab;
     public UserCursor UserCursorPrefab;
     [Header("Parent Transforms")]
-    [FormerlySerializedAs("UserEntryLobbyParent")] public GameObject UserEntryLobbyParentFFA;
-    [FormerlySerializedAs("UserEntryMatchParent")] public GameObject UserEntryMatchParentFFA;
-    [FormerlySerializedAs("UserCursorParentLobby")] public GameObject UserCursorParentFFA;
+    public GameObject UserEntryLobbyParentFFA;
+    public GameObject UserEntryMatchParentFFA;
     public GameObject UserEntryLobbyParentTeamAlpha;
     public GameObject UserEntryLobbyParentTeamBeta;
     public GameObject UserEntryMatchParentTeamAlpha;
     public GameObject UserEntryMatchParentTeamBeta;
-    public GameObject UserCursorParentTeam;
+    public GameObject UserCursorParent;
     [Header("UI References")]
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
@@ -39,11 +38,9 @@ public class GameManager : MonoBehaviour
     public TMP_Text AppIdText;
     public TMP_Text LobbyIdText;
     public Button ReconnectButton;
-    public Button JoinInProgressButton;
     //for updating members list of shockwaves
-    [FormerlySerializedAs("GameArea")] public GameArea GameAreaFFA;
-
-    public GameArea GameAreaTeam;
+    public GameArea GameArea;
+    public Button JoinInProgressButton;
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public GameObject EndGameBtn;
@@ -191,9 +188,7 @@ public class GameManager : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         EmptyCursorList();
         Color newColor;
-        Transform parent = _gameMode == GameMode.FreeForAll
-            ? UserCursorParentFFA.transform
-            : UserCursorParentTeam.transform;
+        Transform parent = UserCursorParent.transform;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
             //Set up Cursor image
@@ -215,14 +210,7 @@ public class GameManager : MonoBehaviour
             _userCursorsList.Add(newCursor);
             if (lobby.Members[i].Username == CurrentUserInfo.Username)
             {
-                if (_gameMode == GameMode.FreeForAll)
-                {
-                    GameAreaFFA.LocalUserCursor = newCursor;    
-                }
-                else if (_gameMode == GameMode.Team)
-                {
-                    GameAreaTeam.LocalUserCursor = newCursor;
-                }
+                GameArea.LocalUserCursor = newCursor;
             }
         }
     }
@@ -456,18 +444,6 @@ public class GameManager : MonoBehaviour
         return currentLobby.OwnerID == CurrentUserInfo.ID;
     }
 
-    public Transform GetCurrentShockwaveParent()
-    {
-        if (_gameMode == GameMode.FreeForAll)
-        {
-            return UserCursorParentFFA.transform;
-        }
-        else
-        {
-            return UserCursorParentTeam.transform;
-        }
-    }
-
-#endregion
+    #endregion
 }
 

@@ -239,7 +239,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void JoinMatch()
     {
-        StateManager.Instance.ButtonPressed_ChangeState(GameStates.LobbyFFA);
+        StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
         GameManager.Instance.JoinInProgressButton.gameObject.SetActive(false);
         ConnectRelay();
     }
@@ -529,8 +529,7 @@ public class BrainCloudManager : MonoBehaviour
             StateManager.Instance.CurrentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>,
                 jsonData["lobbyId"] as string);
             //If we're still in lobby, then update the list of users
-            if (StateManager.Instance.CurrentGameState == GameStates.LobbyFFA ||
-                StateManager.Instance.CurrentGameState == GameStates.LobbyTeam)
+            if (StateManager.Instance.CurrentGameState == GameStates.Lobby)
             {
                 StateManager.Instance.isLoading = false;
             }
@@ -560,7 +559,7 @@ public class BrainCloudManager : MonoBehaviour
                     Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
                     if (!GameManager.Instance.IsLocalUserHost())
                     {
-                        StateManager.Instance.ButtonPressed_ChangeState(GameStates.LobbyFFA);
+                        StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
                     }
                     break;
                 case "ROOM_READY":
@@ -648,7 +647,7 @@ public class BrainCloudManager : MonoBehaviour
             StateManager.Instance.isReady = false;
             GameManager.Instance.CurrentUserInfo.PresentSinceStart = false;
             GameManager.Instance.UpdateMatchAndLobbyState();
-            StateManager.Instance.ChangeState(GameStates.LobbyFFA);
+            StateManager.Instance.ChangeState(GameStates.Lobby);
         }
         else if (json["op"] as string == "MIGRATE_OWNER")
         {

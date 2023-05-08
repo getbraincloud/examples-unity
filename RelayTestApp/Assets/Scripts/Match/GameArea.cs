@@ -26,6 +26,12 @@ public class GameArea : MonoBehaviour
     protected GameObject _newShockwave;
     protected List<Vector2> _localShockwavePositions = new List<Vector2>();
     protected Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
+    private GameMode _currentGameMode;
+
+    private void OnEnable()
+    {
+        _currentGameMode = GameManager.Instance.GameMode;
+    }
 
     // Update is called once per frame
     private void Update()
@@ -41,11 +47,30 @@ public class GameArea : MonoBehaviour
             SendMousePosition();
             if (Input.GetMouseButtonDown(0))
             {
+                if (_currentGameMode == GameMode.FreeForAll)
+                {
+                    //Save position locally for us to spawn in UpdateAllShockwaves()
+                    _localShockwavePositions.Add(_newPosition+ _cursorOffset);
+                
+                    //Send position of local users input for a shockwave to other users
+                    BrainCloudManager.Instance.LocalShockwave(_newPosition+ _cursorOffset);    
+                }
+                else
+                {
+                    //Save position locally for us to spawn in UpdateAllShockwaves()
+                    _localShockwavePositions.Add(_newPosition+ _cursorOffset);
+                
+                    //Send Position to local players team
+                    BrainCloudManager.Instance.SendShockwaveToTeam(_newPosition + _cursorOffset);
+                }
+            }
+            else if (Input.GetMouseButtonDown(1) && _currentGameMode == GameMode.Team)
+            {
                 //Save position locally for us to spawn in UpdateAllShockwaves()
                 _localShockwavePositions.Add(_newPosition+ _cursorOffset);
                 
-                //Send position of local users input for a shockwave to other users
-                BrainCloudManager.Instance.LocalShockwave(_newPosition+ _cursorOffset);
+                //Send Position to opposite team
+                BrainCloudManager.Instance.SendShockwaveToOpponents(_newPosition + _cursorOffset);
             }
         }
         else
@@ -113,7 +138,7 @@ public class GameArea : MonoBehaviour
 
     protected void SetUpShockwave(Vector2 position, Color waveColor)
     {
-        Transform shockwaveParent = GameManager.Instance.GetCurrentShockwaveParent();
+        Transform shockwaveParent = GameManager.Instance.UserCursorParent.transform;
         var newShockwave = Instantiate(ShockwaveAnimation, Vector3.zero, Quaternion.identity, shockwaveParent);
         RectTransform UITransform = newShockwave.GetComponent<RectTransform>();
         Vector2 minMax = new Vector2(0, 1);

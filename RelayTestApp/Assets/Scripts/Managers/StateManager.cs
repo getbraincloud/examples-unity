@@ -13,7 +13,7 @@ using BrainCloud;
 ///     - Info about Server and Lobby
 /// </summary>
 
-public enum GameStates{SignIn,MainMenu,LobbyFFA,LobbyTeam,MatchFFA,MatchTeam,Connecting}
+public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting}
 public class StateManager : MonoBehaviour
 {
     //Game States
@@ -21,6 +21,10 @@ public class StateManager : MonoBehaviour
     public GameStates CurrentGameState;
     public ConnectingGameState LoadingGameState;
     public DialogueMessage ErrorMessage;
+    public GameObject LobbyFFAView;
+    public GameObject LobbyTeamView;
+    public GameObject MatchFFAView;
+    public GameObject MatchTeamView;
     
     //Network info needed
     [SerializeField]
@@ -122,7 +126,7 @@ public class StateManager : MonoBehaviour
         {
             CurrentGameState = newState;
         }
-
+        EnableCurrentGameModeScreen();
         isLoading = true;
         //User is in this state and moving onto the next
         switch (CurrentGameState)
@@ -143,17 +147,47 @@ public class StateManager : MonoBehaviour
                 break;
             //Looking for Lobby...
             case GameStates.MainMenu:
-                CurrentGameState = GameManager.Instance.GameMode == GameMode.FreeForAll ? GameStates.LobbyFFA : GameStates.LobbyTeam;
+                CurrentGameState = GameStates.Lobby;
                 BrainCloudManager.Instance.FindLobby(Protocol);
                 LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE,true, CurrentGameState);
                 break;
             //Setting up Match...
-            case GameStates.LobbyFFA:
-            case GameStates.LobbyTeam:
-                CurrentGameState = GameManager.Instance.GameMode == GameMode.FreeForAll ? GameStates.MatchFFA : GameStates.MatchTeam;
+            case GameStates.Lobby:
+                CurrentGameState = GameStates.Match;
                 BrainCloudManager.Instance.StartGame();
                 LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false, CurrentGameState);
                 break;
+        }
+    }
+
+    private void EnableCurrentGameModeScreen()
+    {
+        
+        if (CurrentGameState == GameStates.Lobby)
+        {
+            if (GameManager.Instance.GameMode == GameMode.FreeForAll)
+            {
+                LobbyTeamView.SetActive(false);
+                LobbyFFAView.SetActive(true);
+            }
+            else
+            {
+                LobbyTeamView.SetActive(true);
+                LobbyFFAView.SetActive(false);
+            }
+        }
+        else if (CurrentGameState == GameStates.Match)
+        {
+            if (GameManager.Instance.GameMode == GameMode.FreeForAll)
+            {
+                MatchTeamView.SetActive(false);
+                MatchFFAView.SetActive(true);
+            }
+            else
+            {
+                MatchTeamView.SetActive(true);
+                MatchFFAView.SetActive(false);
+            }
         }
     }
 
@@ -164,9 +198,9 @@ public class StateManager : MonoBehaviour
             state.gameObject.SetActive(false);
         }
         
-        CurrentGameState = GameStates.MatchFFA;
+        CurrentGameState = GameStates.Match;
         isLoading = true;
-        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.MatchFFA);
+        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
 
         BrainCloudManager.Instance.ReconnectUser();
     }
@@ -174,11 +208,11 @@ public class StateManager : MonoBehaviour
     
     public void ChangeState(GameStates newGameState)
     {
+        CurrentGameState = newGameState;
+        EnableCurrentGameModeScreen();
         foreach (GameState currentState in ListOfStates)
         {
             currentState.gameObject.SetActive(currentState.CurrentGameState == newGameState);
         }
-
-        CurrentGameState = newGameState;
     }
 }
