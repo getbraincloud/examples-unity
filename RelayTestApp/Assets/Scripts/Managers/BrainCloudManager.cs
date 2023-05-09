@@ -8,11 +8,12 @@ using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
+using TMPro;
 
 public enum RelayCompressionTypes {JsonString, KeyValuePairString, DataStreamByte }
 
 //Names of lobby types are custom made within brainCloud portal.
-public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive, TeamCursorPartyV2}
+public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive, TeamCursorPartyV2, TeamCursorPartyV2Backfill}
 //Team codes for Free for all = all and team specific is alpha and beta
 public enum TeamCodes {all, alpha, beta}
 /// <summary>
@@ -25,6 +26,8 @@ public class BrainCloudManager : MonoBehaviour
     private bool _dead = false;
     public BrainCloudWrapper Wrapper => _bcWrapper;
     public static BrainCloudManager Instance;
+    public TMP_Dropdown FreeForAllDropdown;
+    public TMP_Dropdown TeamDropdown;
     internal RelayCompressionTypes _relayCompressionType { get; set; }
     private LogErrors _logger;
     private bool _presentWhileStarted;
@@ -38,10 +41,6 @@ public class BrainCloudManager : MonoBehaviour
 
     private RelayLobbyTypes _previousSelectedType;
 
-    public RelayLobbyTypes PreviousLobbyType
-    {
-        get => _previousSelectedType;
-    }
     private RelayLobbyTypes _lobbyType = RelayLobbyTypes.CursorPartyV2;
     public RelayLobbyTypes LobbyType
     {
@@ -437,19 +436,16 @@ public class BrainCloudManager : MonoBehaviour
         {
             GameManager.Instance.CurrentUserInfo.Team = TeamCodes.alpha;
         }
+        //On success is null because we will get an update from RTT about the switch
         _bcWrapper.LobbyService.SwitchTeam
         (
             StateManager.Instance.CurrentLobby.LobbyID,
             GameManager.Instance.CurrentUserInfo.Team.ToString(),
-            OnSwitchTeamSuccess,
+            null,
             LogErrorThenPopUpWindow
         );
     }
 
-    private void OnSwitchTeamSuccess(string in_json, object cbObject)
-    {
-        Debug.Log($"Switch Team Response: {in_json}");
-    }
 
 #endregion Input update
 
@@ -585,7 +581,6 @@ public class BrainCloudManager : MonoBehaviour
     public void ConnectRelay()
     {
         _presentWhileStarted = false;
-        _bcWrapper.RTTService.DeregisterAllRTTCallbacks();
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         _bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
         _bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
@@ -678,6 +673,16 @@ public class BrainCloudManager : MonoBehaviour
         var settings = new Dictionary<string, object>();
 
         string teamCode = GameManager.Instance.GameMode == GameMode.FreeForAll ? "all" : "";
+
+        if (GameManager.Instance.GameMode == GameMode.FreeForAll)
+        {
+            _lobbyType = (RelayLobbyTypes) FreeForAllDropdown.value;
+        }
+        else
+        {
+            //+3 to offset to where the team section is in the enum
+            _lobbyType = (RelayLobbyTypes) TeamDropdown.value + 3;
+        }
 
         //
         _bcWrapper.LobbyService.FindOrCreateLobby

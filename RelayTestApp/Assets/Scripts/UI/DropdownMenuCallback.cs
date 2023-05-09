@@ -1,6 +1,7 @@
 using BrainCloud;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Sends information when a dropdown menu value is changed based on the DropdownMenu enum selected
@@ -9,12 +10,12 @@ public enum DropdownMenus{Socket,Channel,Compression, LobbyType}
 public class DropdownMenuCallback : MonoBehaviour
 {
     public DropdownMenus TargetMenu;
-    private TMP_Dropdown _dropdown;
+    public TMP_Dropdown Dropdown;
 
-    private void Awake()
+    private void OnEnable()
     {
-        _dropdown = GetComponent<TMP_Dropdown>();
-        OnValueChange();
+        Dropdown = GetComponent<TMP_Dropdown>();
+        //OnValueChange();
     }
     //Called from dropdown menu's value change event
     public void OnValueChange()
@@ -22,17 +23,17 @@ public class DropdownMenuCallback : MonoBehaviour
         switch (TargetMenu)
         {
             case DropdownMenus.Channel:
-                PlayerPrefs.SetInt(Settings.ChannelKey, _dropdown.value);
+                PlayerPrefs.SetInt(Settings.ChannelKey, Dropdown.value);
                 break;
             case DropdownMenus.Socket:
-                StateManager.Instance.Protocol = (RelayConnectionType)_dropdown.value + 1;
+                StateManager.Instance.Protocol = (RelayConnectionType)Dropdown.value + 1;
                 break;
             case DropdownMenus.Compression:
-                BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)_dropdown.value;
+                BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)Dropdown.value;
                 GameManager.Instance.SendUpdateRelayCompressionType();
                 break;
             case DropdownMenus.LobbyType:
-                BrainCloudManager.Instance.LobbyType = (RelayLobbyTypes) _dropdown.value;
+                BrainCloudManager.Instance.LobbyType = (RelayLobbyTypes) Dropdown.value;
                  break;
         }   
     }
