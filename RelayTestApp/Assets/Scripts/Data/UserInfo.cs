@@ -40,8 +40,8 @@ public class UserInfo
         ID = userJson["profileId"] as string;
         Username = userJson["name"] as string;
         IsReady = (bool)userJson["isReady"];
-        string value = userJson["team"] as string;
-        Enum.TryParse(value, out Team);
+        string teamValue = userJson["team"] as string;
+        Enum.TryParse(teamValue, out Team);
         if (GameManager.Instance.GameMode == GameMode.FreeForAll)
         {
             Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;

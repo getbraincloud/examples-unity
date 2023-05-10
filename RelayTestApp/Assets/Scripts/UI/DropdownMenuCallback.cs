@@ -15,7 +15,7 @@ public class DropdownMenuCallback : MonoBehaviour
     private void OnEnable()
     {
         Dropdown = GetComponent<TMP_Dropdown>();
-        //OnValueChange();
+        OnValueChange();
     }
     //Called from dropdown menu's value change event
     public void OnValueChange()
