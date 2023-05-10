@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: YourCompany
-  productName: AuthenticationExample
+  productName: BCAuthenticationExample
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.08627451, g: 0.14509805, b: 0.2901961, a: 1}
@@ -157,9 +157,9 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.YourCompany.AuthenticationExample
-    Standalone: com.YourCompany.AuthenticationExample
-    iPhone: com.YourCompany.AuthenticationExample
+    Android: com.YourCompany.BCAuthenticationExample
+    Standalone: com.YourCompany.BCAuthenticationExample
+    iPhone: com.YourCompany.BCAuthenticationExample
   buildNumber:
     Standalone: 0
     iPhone: 0
@@ -775,6 +775,7 @@ PlayerSettings:
   platformArchitecture: {}
   scriptingBackend:
     Android: 1
+    Standalone: 0
   il2cppCompilerConfiguration:
     Android: 1
   managedStrippingLevel: {}

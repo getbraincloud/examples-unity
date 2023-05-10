@@ -19,11 +19,10 @@ using GooglePlayGames.BasicApi;
 using Google;
 #endif
 
-#if true
+#if APPLE_SDK
 using AppleAuth;
 using AppleAuth.Enums;
 using AppleAuth.Native;
-using AppleAuth.Extensions;
 using AppleAuth.Interfaces;
 #endif
 
@@ -122,14 +121,11 @@ public static class UserHandler
 
     #region External Authentication Methods
 
-    // For the sake of handling Apple authentication via this example app,
-    // we will store the AppleAuthManager here. If you intend on including
-    // this script in your own app it is highly recommended that you create
-    // your custom code to handle all the features supplied by AppleAuthManager.
+#if APPLE_SDK
+    // For the sake of handling Apple authentication via this example app, we will keep AppleAuthManager here
     private static IAppleAuthManager appleAuthManager;
 
-    // It would be best practce to include this loop in your own custom code
-    // that includes the standard Unity Update method.
+    // It would be best practice to include this loop in your own custom manager
     private static IEnumerator HandleAppleAuthManagerUpdate()
     {
         while (appleAuthManager != null)
@@ -146,39 +142,39 @@ public static class UserHandler
     public static void AuthenticateApple(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
 #if UNITY_STANDALONE_OSX || UNITY_IOS
-        // For the sake of handling Apple authentication via this example app,
-        // we will create our AppleAuthManager here. If you intend on including
-        // this script in your own app it is highly recommended that you create
-        // your custom code to handle all the features supplied by AppleAuthManager.
-        if (AppleAuthManager.IsCurrentPlatformSupported &&
-            appleAuthManager == null)
+        // For the sake of handling Apple authentication via this example app, we will create our AppleAuthManager here.
+        // If you intend on including this script in your own app it is highly recommended that you create your own
+        // custom manager to handle all the features supplied by AppleAuthManager.
+        if (AppleAuthManager.IsCurrentPlatformSupported && appleAuthManager == null)
         {
             var deserializer = new PayloadDeserializer();
             appleAuthManager = new AppleAuthManager(deserializer);
 
             BCManager.Wrapper.StartCoroutine(HandleAppleAuthManagerUpdate());
         }
+        else
+        {
+            onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateApple</b> is not available on this platform.").Serialize(), cbObject);
+            return;
+        }
+
+        // These are only an example of a nonce and state; please provide your own method of generating these
+        long ticks = DateTime.UtcNow.Ticks;
+        string nonce = ticks.ToString();
+        string state = (~ticks).ToString();
 
         // You can request the user's email and full name from here
-        // Note: You will only receive the user's email and name only during the first
-        // time the user logs in. Future logins will only return null unless the user
-        // revokes access to this app. If you require those to be stored in this app,
-        // ensure that you store them when the user first logs in.
-        AppleAuthLoginArgs loginArgs = new AppleAuthLoginArgs(LoginOptions.None);
+        // Note: You will only receive the user's email and name the first time the user logs in.
+        // Future logins will only return null unless the user revokes access to this app.
+        // If you require those to be stored in your app, ensure that you store them when the user first logs in.
+        AppleAuthLoginArgs loginArgs = new AppleAuthLoginArgs(LoginOptions.IncludeFullName,
+                                                              nonce, state);
 
         appleAuthManager.LoginWithAppleId(loginArgs,
             credential =>
             {
-                if (credential is IAppleIDCredential appleIdCredential)
+                if (credential is IAppleIDCredential appleIdCredential && state == appleIdCredential.State)
                 {
-                    //var email = appleIdCredential.Email;
-                    //var fullName = appleIdCredential.FullName;
-                    // Authorization code
-                    //var authorizationCode = Encoding.UTF8.GetString(
-                    //    appleIdCredential.AuthorizationCode,
-                    //    0,
-                    //    appleIdCredential.AuthorizationCode.Length);
-
                     string identityToken = Encoding.UTF8.GetString(appleIdCredential.IdentityToken, 0,
                                                                    appleIdCredential.IdentityToken.Length);
 
@@ -192,8 +188,7 @@ public static class UserHandler
             },
             error =>
             {
-                string errorMessage = error != null ? $"{error.LocalizedDescription}\nReason: {error.LocalizedFailureReason}"
-                                                    : "An error has occured. Please try again.";
+                string errorMessage = error != null ? $"{error.LocalizedDescription}" : "An error has occured. Please try again.";
                 onFailure(0, 0, new ErrorResponse(0, 0, errorMessage).Serialize(), cbObject);
             });
 #else
@@ -201,6 +196,7 @@ public static class UserHandler
         onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateApple</b> is not available on this platform.").Serialize(), cbObject);
 #endif
     }
+#endif
 
 #if FACEBOOK_SDK
     /// <summary>
@@ -257,7 +253,7 @@ public static class UserHandler
         // https://developers.facebook.com/docs/facebook-login/limited-login/permissions
         var perms = new List<string>() { "public_profile" };
 
-        string nonce = System.DateTime.UtcNow.Ticks.ToString(); // This is only an example of a nonce; please provide your own method of generating a nonce
+        string nonce = DateTime.UtcNow.Ticks.ToString(); // This is only an example of a nonce; please provide your own method of generating a nonce
 
         FB.Mobile.LoginWithTrackingPreference(LoginTracking.LIMITED, perms, nonce, (result) =>
         {

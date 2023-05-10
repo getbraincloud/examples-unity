@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 7478667658048070919}
   - component: {fileID: 7478667658048070916}
   - component: {fileID: 7478667658048070912}
-  - component: {fileID: 7478667658048070917}
   - component: {fileID: 7478667658048070922}
+  - component: {fileID: 7478667658048070917}
   m_Layer: 5
   m_Name: LoginContent
   m_TagString: Untagged
@@ -102,20 +102,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &7478667658048070917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7478667658048070914}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d02b47e53196b5046b61d49590968247, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ContentUICG: {fileID: 7478667658048070916}
-  MainLoginPanel: {fileID: 7478667656085680194}
 --- !u!114 &7478667658048070922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,6 +125,20 @@ MonoBehaviour:
   - {fileID: 1177599603620889184}
   - {fileID: 5190391448989533368}
   - {fileID: 5190391448949975077}
+--- !u!114 &7478667658048070917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7478667658048070914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d02b47e53196b5046b61d49590968247, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ContentUICG: {fileID: 7478667658048070916}
+  MainLoginPanel: {fileID: 7478667656085680194}
 --- !u!1001 &1270143674762153482
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1069,14 +1069,6 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5926647649395227435, guid: a9932480b0c65b44fb7afe4f586fb512, type: 3}
-      propertyPath: AuthItems.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5926647649395227435, guid: a9932480b0c65b44fb7afe4f586fb512, type: 3}
-      propertyPath: AuthItems.Array.data[0]
-      value: 
-      objectReference: {fileID: 11400000, guid: 46296b713a649e849b178f74501233fa, type: 2}
     - target: {fileID: 8523726346158779817, guid: a9932480b0c65b44fb7afe4f586fb512, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

@@ -18,6 +18,9 @@ public class CanvasHelper : MonoBehaviour
     private static Vector2 lastResolution = Vector2.zero;
     private static Rect lastSafeArea = Rect.zero;
 
+    [SerializeField] private bool resizeHorizontal = true;
+    [SerializeField] private bool resizeVertical = true;
+
     private Canvas canvas;
     private RectTransform safeAreaTransform;
 
@@ -81,13 +84,16 @@ public class CanvasHelper : MonoBehaviour
 
         var anchorMin = safeArea.position;
         var anchorMax = safeArea.position + safeArea.size;
+
         anchorMin.x /= canvas.pixelRect.width;
         anchorMin.y /= canvas.pixelRect.height;
         anchorMax.x /= canvas.pixelRect.width;
         anchorMax.y /= canvas.pixelRect.height;
 
-        safeAreaTransform.anchorMin = anchorMin;
-        safeAreaTransform.anchorMax = anchorMax;
+        safeAreaTransform.anchorMin = new Vector2(resizeHorizontal ? anchorMin.x : safeAreaTransform.anchorMin.x,
+                                                    resizeVertical ? anchorMin.y : safeAreaTransform.anchorMin.y);
+        safeAreaTransform.anchorMax = new Vector2(resizeHorizontal ? anchorMax.x : safeAreaTransform.anchorMax.x,
+                                                    resizeVertical ? anchorMax.y : safeAreaTransform.anchorMax.y);
     }
 
     private void OnDestroy()

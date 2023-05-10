@@ -444,7 +444,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 235003457408161533}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.8907106
+  m_Size: 0.89071065
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -731,8 +731,9 @@ GameObject:
   - component: {fileID: 235003457190083716}
   - component: {fileID: 235003457190083719}
   - component: {fileID: 235003457190083718}
-  - component: {fileID: 235003457190083737}
+  - component: {fileID: 3147950897293964240}
   - component: {fileID: 235003457190083736}
+  - component: {fileID: 235003457190083737}
   m_Layer: 5
   m_Name: AppContent
   m_TagString: Untagged
@@ -794,6 +795,36 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &3147950897293964240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235003457190083717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d05ba5f8d1052a4f9988d39fc3d7894, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resizeHorizontal: 1
+  resizeVertical: 1
+--- !u!114 &235003457190083736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235003457190083717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51374db19d159404ca070b3430ee7ff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UIElementNavigationOrder:
+  - {fileID: 235003458378069365}
+  - {fileID: 235003456711653013}
+  - {fileID: 8420845525067245888}
 --- !u!114 &235003457190083737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -822,22 +853,6 @@ MonoBehaviour:
     the API for that service via the <color=#40A0FF><b>(API)</b></color> link in
     the title. Check out the various ServiceUI scripts to see how that service in
     particular is made use of in this app.'
---- !u!114 &235003457190083736
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 235003457190083717}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51374db19d159404ca070b3430ee7ff6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UIElementNavigationOrder:
-  - {fileID: 235003458378069365}
-  - {fileID: 235003456711653013}
-  - {fileID: 8420845525067245888}
 --- !u!1 &235003457221408285
 GameObject:
   m_ObjectHideFlags: 0
@@ -893,7 +908,7 @@ MonoBehaviour:
     m_Left: 0
     m_Right: 0
     m_Top: 0
-    m_Bottom: 16
+    m_Bottom: 0
   m_ChildAlignment: 0
   m_Spacing: 16
   m_ChildForceExpandWidth: 1
@@ -1768,11 +1783,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 235003458243763597}
-  - component: {fileID: 235003458243763596}
-  - component: {fileID: 235003458243763598}
   - component: {fileID: 235003458243763585}
   m_Layer: 5
-  m_Name: AppContainer
+  m_Name: SafeArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1800,39 +1813,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!223 &235003458243763596
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 235003458243763594}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 2
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!225 &235003458243763598
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 235003458243763594}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!114 &235003458243763585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1934,7 +1914,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 12, y: 0}
-  m_SizeDelta: {x: 8, y: -16}
+  m_SizeDelta: {x: 8, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &235003458378069367
 CanvasRenderer:
@@ -2017,7 +1997,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 235003456622747854}
   m_HandleRect: {fileID: 235003456622747855}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

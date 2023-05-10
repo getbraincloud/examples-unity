@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using UnityEditor.OSXStandalone;
 using UnityEngine;
 
 public static class MacOSPostBuild
@@ -19,22 +20,22 @@ public static class MacOSPostBuild
             case BuildTarget.StandaloneOSX:
                 try
                 {
+#if APPLE_SDK
+                    AppleAuth.Editor.AppleAuthMacosPostprocessorHelper.FixManagerBundleIdentifier(target, pathToBuiltProject);
+#else
                     string[] bundles = Directory.GetDirectories(Path.Combine(pathToBuiltProject, "Contents", "PlugIns"), "*.bundle");
 
                     foreach (string bundle in bundles)
                     {
-                        UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(bundle);
-#if true // APPLE_SIGN_IN_SDK
-                        AppleAuth.Editor.AppleAuthMacosPostprocessorHelper.FixManagerBundleIdentifier(target, pathToBuiltProject);
-#endif
+                        MacOSCodeSigning.CodeSignAppBundle(bundle);
+
                         Debug.Log($"Found Bundle: {bundle}");
                     }
 
-                    UnityEditor.OSXStandalone.MacOSCodeSigning.CodeSignAppBundle(pathToBuiltProject);
-#if true // APPLE_SIGN_IN_SDK
-                    AppleAuth.Editor.AppleAuthMacosPostprocessorHelper.FixManagerBundleIdentifier(target, pathToBuiltProject);
-#endif
+                    MacOSCodeSigning.CodeSignAppBundle(pathToBuiltProject);
+
                     Debug.Log("MacOS Bundles & App Signed.");
+#endif
                 }
                 catch (Exception e)
                 {

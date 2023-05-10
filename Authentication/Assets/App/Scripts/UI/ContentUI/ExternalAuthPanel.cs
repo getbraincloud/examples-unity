@@ -15,7 +15,7 @@ using GooglePlayGames;
 using Google;
 #endif
 
-#if true
+#if APPLE_SDK
 using AppleAuth;
 #endif
 
@@ -61,8 +61,10 @@ public class ExternalAuthPanel : ContentUIBehaviour
     {
         HashSet<string> authentications = new()
         {
-#if true && (UNITY_STANDALONE_OSX || UNITY_IOS)
+#if APPLE_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
             AuthenticationType.Apple.ToString(),
+#endif
+#if GAME_CENTER_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
             AuthenticationType.GameCenter.ToString(),
 #endif
 #if FACEBOOK_SDK && (UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID)
@@ -219,7 +221,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
         if (type == AuthenticationType.Apple)
         {
-#if true
+#if APPLE_SDK
             UserHandler.AuthenticateApple(true,
                                           OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                           OnFailure("Authentication Failed", OnAuthenticationFailure));
@@ -227,7 +229,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #endif
         }
         else if (type == AuthenticationType.Facebook ||
-            type == AuthenticationType.FacebookLimited)
+                 type == AuthenticationType.FacebookLimited)
         {
 #if FACEBOOK_SDK
             HandleFacebookAuthenticationButton();
