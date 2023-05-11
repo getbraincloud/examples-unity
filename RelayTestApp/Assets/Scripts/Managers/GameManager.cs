@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 /// <summary>
@@ -14,6 +15,7 @@ using UnityEngine.UI;
 /// </summary>
 
 public enum GameColors{Black,Purple,Grey,Orange,Blue,Green,Yellow,Cyan,White}
+public enum GameMode {FreeForAll, Team}
 
 public class GameManager : MonoBehaviour
 {
@@ -22,8 +24,12 @@ public class GameManager : MonoBehaviour
     public UserEntry UserEntryMatchPrefab;
     public UserCursor UserCursorPrefab;
     [Header("Parent Transforms")]
-    public GameObject UserEntryLobbyParent;
-    public GameObject UserEntryMatchParent;
+    public GameObject UserEntryLobbyParentFFA;
+    public GameObject UserEntryMatchParentFFA;
+    public GameObject UserEntryLobbyParentTeamAlpha;
+    public GameObject UserEntryLobbyParentTeamBeta;
+    public GameObject UserEntryMatchParentTeamAlpha;
+    public GameObject UserEntryMatchParentTeamBeta;
     public GameObject UserCursorParent;
     [Header("UI References")]
     public TMP_InputField UsernameInputField;
@@ -32,9 +38,9 @@ public class GameManager : MonoBehaviour
     public TMP_Text AppIdText;
     public TMP_Text LobbyIdText;
     public Button ReconnectButton;
-    public Button JoinInProgressButton;
     //for updating members list of shockwaves
-    public GameArea GameArea;  
+    public GameArea GameArea;
+    public Button JoinInProgressButton;
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public GameObject EndGameBtn;
@@ -43,8 +49,14 @@ public class GameManager : MonoBehaviour
     private EventSystem _eventSystem;
     //List references for clean up when game closes
     private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
-    private readonly List<UserCursor> _userCursorsList = new List<UserCursor>();     
-    
+    private readonly List<UserCursor> _userCursorsList = new List<UserCursor>();
+
+    private GameMode _gameMode = GameMode.FreeForAll;
+    public GameMode GameMode
+    {
+        get => _gameMode;
+        set => _gameMode = value;
+    }
     //Singleton Pattern
     private static GameManager _instance;
     public static GameManager Instance => _instance;
@@ -176,14 +188,25 @@ public class GameManager : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         EmptyCursorList();
         Color newColor;
+        Transform parent = UserCursorParent.transform;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
-            UserCursor newCursor = Instantiate(UserCursorPrefab, Vector3.zero, Quaternion.identity, UserCursorParent.transform);
-            lobby.Members[i].MousePosition = new Vector2(9999, 9999);
+            //Set up Cursor image
+            UserCursor newCursor = Instantiate(UserCursorPrefab, new Vector3(9999, 9999, 0), Quaternion.identity, parent);
             newCursor.AdjustVisibility(false);
             newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
             newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
+            
+            //Set up Rect Transform settings to anchor image
             lobby.Members[i].UserCursor = newCursor;
+            RectTransform UITransform = newCursor.GetComponent<RectTransform>();
+            Vector2 minMax = new Vector2(0, 1);
+            UITransform.anchorMin = minMax;
+            UITransform.anchorMax = minMax;
+            UITransform.pivot = new Vector2(0.5f, 0.5f);;
+            
+            //Save references for later..
+            lobby.Members[i].CursorTransform = UITransform;
             _userCursorsList.Add(newCursor);
             if (lobby.Members[i].Username == CurrentUserInfo.Username)
             {
@@ -246,18 +269,48 @@ public class GameManager : MonoBehaviour
 
     private void AdjustLobbyList()
     {
-        CleanUpChildrenOfParent(UserEntryLobbyParent.transform);
-        //populate user entries based on members in lobby
-        Lobby lobby = StateManager.Instance.CurrentLobby;
-        for (int i = 0; i < lobby.Members.Count; i++)
+        if (_gameMode == GameMode.FreeForAll)
         {
-            if (lobby.Members[i].IsAlive)
+            CleanUpChildrenOfParent(UserEntryLobbyParentFFA.transform);
+            //populate user entries based on members in lobby
+            Lobby lobby = StateManager.Instance.CurrentLobby;
+            for (int i = 0; i < lobby.Members.Count; i++)
             {
-                var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParent.transform);
-                SetUpUserEntry(lobby.Members[i], newEntry, false);
-                _matchEntries.Add(newEntry);
+                if (lobby.Members[i].IsAlive)
+                {
+                    var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParentFFA.transform);
+                    SetUpUserEntry(lobby.Members[i], newEntry, false);
+                    _matchEntries.Add(newEntry);
+                }    
             }    
         }
+        else if (_gameMode == GameMode.Team)
+        {
+            CleanUpChildrenOfParent(UserEntryLobbyParentTeamAlpha.transform);
+            CleanUpChildrenOfParent(UserEntryLobbyParentTeamBeta.transform);
+            //populate user entries based on members in lobby
+            Lobby lobby = StateManager.Instance.CurrentLobby;
+            for (int i = 0; i < lobby.Members.Count; i++)
+            {
+                if (lobby.Members[i].IsAlive)
+                {
+                    Transform parent = null;
+                    if (lobby.Members[i].Team == TeamCodes.alpha)
+                    {
+                        parent = UserEntryLobbyParentTeamAlpha.transform;
+                    }
+                    //Member should be on team beta
+                    else
+                    {
+                        parent = UserEntryLobbyParentTeamBeta.transform;
+                    }
+                    var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, parent);
+                    SetUpUserEntry(lobby.Members[i], newEntry, false);
+                    _matchEntries.Add(newEntry);
+                }    
+            }   
+        }
+        
 
         LobbyLocalUserText.text = _currentUserInfo.Username;
         LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor);
@@ -265,17 +318,46 @@ public class GameManager : MonoBehaviour
 
     private void AdjustMatchList()
     {
-        CleanUpChildrenOfParent(UserEntryMatchParent.transform);
-        //populate user entries based on members in lobby
-        Lobby lobby = StateManager.Instance.CurrentLobby;
-        for (int i = 0; i < lobby.Members.Count; i++)
+        if (_gameMode == GameMode.FreeForAll)
         {
-            if (lobby.Members[i].IsAlive)
+            CleanUpChildrenOfParent(UserEntryMatchParentFFA.transform);
+            //populate user entries based on members in lobby
+            Lobby lobby = StateManager.Instance.CurrentLobby;
+            for (int i = 0; i < lobby.Members.Count; i++)
             {
-                var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, UserEntryMatchParent.transform);
-                SetUpUserEntry(lobby.Members[i], newEntry, true);
-                _matchEntries.Add(newEntry);
+                if (lobby.Members[i].IsAlive)
+                {
+                    var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, UserEntryMatchParentFFA.transform);
+                    SetUpUserEntry(lobby.Members[i], newEntry, true);
+                    _matchEntries.Add(newEntry);
+                }    
             }    
+        }
+        else if(_gameMode == GameMode.Team)
+        {
+            CleanUpChildrenOfParent(UserEntryMatchParentTeamAlpha.transform);
+            CleanUpChildrenOfParent(UserEntryMatchParentTeamBeta.transform);
+            //populate user entries based on members in lobby
+            Lobby lobby = StateManager.Instance.CurrentLobby;
+            for (int i = 0; i < lobby.Members.Count; i++)
+            {
+                if (lobby.Members[i].IsAlive)
+                {
+                    Transform parent = null;
+                    if (lobby.Members[i].Team == TeamCodes.alpha)
+                    {
+                        parent = UserEntryMatchParentTeamAlpha.transform;
+                    }
+                    //Member should be on team beta
+                    else
+                    {
+                        parent = UserEntryMatchParentTeamBeta.transform;
+                    }
+                    var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, parent);
+                    SetUpUserEntry(lobby.Members[i], newEntry, true);
+                    _matchEntries.Add(newEntry);
+                }
+            }
         }
     }
     
@@ -287,6 +369,12 @@ public class GameManager : MonoBehaviour
         {
             entry.UsernameText.text = info.Username + " (In Lobby)";
         }
+
+        if (entry.HostImage)
+        {
+            entry.HostImage.enabled = info.IsHost;    
+        }
+         
         Color userColor = ReturnUserColor(info.UserGameColor);
         entry.UsernameText.color = userColor;
         if (entry.UserDotImage != null)
@@ -362,6 +450,6 @@ public class GameManager : MonoBehaviour
         return currentLobby.OwnerID == CurrentUserInfo.ID;
     }
 
-#endregion
+    #endregion
 }
 

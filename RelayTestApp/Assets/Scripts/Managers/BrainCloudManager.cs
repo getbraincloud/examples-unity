@@ -8,40 +8,53 @@ using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
+using TMPro;
 
 public enum RelayCompressionTypes {JsonString, KeyValuePairString, DataStreamByte }
 
 //Names of lobby types are custom made within brainCloud portal.
-public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive}
-
+public enum RelayLobbyTypes {CursorPartyV2, CursorPartyV2Backfill, CursorPartyV2LongLive, TeamCursorPartyV2, TeamCursorPartyV2Backfill}
+//Team codes for Free for all = all and team specific is alpha and beta
+public enum TeamCodes {all, alpha, beta}
 /// <summary>
 /// Example of how to communicate game logic to brain cloud functions
 /// </summary>
 
 public class BrainCloudManager : MonoBehaviour
 {
-    private BrainCloudWrapper m_bcWrapper;
-    private bool m_dead = false;
-    public BrainCloudWrapper Wrapper => m_bcWrapper;
+    private BrainCloudWrapper _bcWrapper;
+    private bool _dead = false;
+    public BrainCloudWrapper Wrapper => _bcWrapper;
     public static BrainCloudManager Instance;
+    public TMP_Dropdown FreeForAllDropdown;
+    public TMP_Dropdown TeamDropdown;
     internal RelayCompressionTypes _relayCompressionType { get; set; }
     private LogErrors _logger;
     private bool _presentWhileStarted;
-    public bool PresentWhileStarted
+
+    private TeamCodes _teamCode = TeamCodes.all;
+    public TeamCodes TeamCode
     {
-        get => _presentWhileStarted;
+        get => _teamCode;
+        set => _teamCode = value;
     }
+
+    private RelayLobbyTypes _previousSelectedType;
 
     private RelayLobbyTypes _lobbyType = RelayLobbyTypes.CursorPartyV2;
-
     public RelayLobbyTypes LobbyType
     {
-        set => _lobbyType = value;
+        set
+        {
+            _previousSelectedType = _lobbyType;
+            _lobbyType = value;
+        }
     }
+    
     private void Awake()
     {
         _logger = FindObjectOfType<LogErrors>();
-        m_bcWrapper = GetComponent<BrainCloudWrapper>();
+        _bcWrapper = GetComponent<BrainCloudWrapper>();
         if (!Instance)
         {
             Instance = this;
@@ -71,32 +84,30 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.CurrentUserInfo.Username = username;
         InitializeBC();
         // Authenticate with brainCloud
-        m_bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LogErrorThenPopUpWindow, "Login Failed");
+        _bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LogErrorThenPopUpWindow, "Login Failed");
     }
 
     private void FixedUpdate()
     {
-
-        if (m_dead)
+        if (_dead)
         {
-            m_dead = false;
-            
+            _dead = false;
             UninitializeBC();
         }
     }
 
     public void InitializeBC()
     {
-        m_bcWrapper.Init();
+        _bcWrapper.Init();
 
-        m_bcWrapper.Client.EnableLogging(true);
+        _bcWrapper.Client.EnableLogging(true);
     }
     // Uninitialize brainCloud
     void UninitializeBC()
     {
-        if (m_bcWrapper != null)
+        if (_bcWrapper != null)
         {
-            m_bcWrapper.Client.ShutDown();
+            _bcWrapper.Client.ShutDown();
         }
     }
 
@@ -123,7 +134,7 @@ public class BrainCloudManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            m_bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, LogErrorThenPopUpWindow,
+            _bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         else
@@ -133,7 +144,7 @@ public class BrainCloudManager : MonoBehaviour
             {
                 userInfo.Username = tempUsername;
             }
-            m_bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LogErrorThenPopUpWindow,
+            _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         GameManager.Instance.CurrentUserInfo = userInfo;
@@ -142,20 +153,20 @@ public class BrainCloudManager : MonoBehaviour
     // Go back to login screen, with an error message
     void LogErrorThenPopUpWindow(int status, int reasonCode, string jsonError, object cbObject)
     {
-        if (m_dead) return;
+        if (_dead) return;
 
-        if (reasonCode == ReasonCodes.RS_ENDMATCH_REQUESTED)
+        /*if (reasonCode == ReasonCodes.RS_ENDMATCH_REQUESTED)
         {
             return;
-        }
+        }*/
 
-        m_dead = true;
-        m_bcWrapper.RTTService.DeregisterRTTLobbyCallback();
-        m_bcWrapper.RelayService.DeregisterRelayCallback();
-        m_bcWrapper.RelayService.DeregisterSystemCallback();
-        m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
-        m_bcWrapper.RTTService.DisableRTT();
-        m_bcWrapper.Client.ResetCommunication();
+        _dead = true;
+        _bcWrapper.RTTService.DeregisterRTTLobbyCallback();
+        _bcWrapper.RelayService.DeregisterRelayCallback();
+        _bcWrapper.RelayService.DeregisterSystemCallback();
+        _bcWrapper.RTTService.DeregisterAllRTTCallbacks();
+        _bcWrapper.RTTService.DisableRTT();
+        _bcWrapper.Client.ResetCommunication();
         string message = cbObject as string;
         Debug.Log($"JSON ERROR: {jsonError}");
         Debug.Log($"MESSAGE: {message}");
@@ -172,19 +183,19 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         
         // Enable RTT
-        m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
-        m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
+        _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
     }
     
     // Cleanly close the game. Go back to main menu but don't log 
     public void CloseGame(bool changeState = false)
     {
-        m_bcWrapper.RelayService.DeregisterRelayCallback();
-        m_bcWrapper.RelayService.DeregisterSystemCallback();
-        m_bcWrapper.RelayService.Disconnect();
+        _bcWrapper.RelayService.DeregisterRelayCallback();
+        _bcWrapper.RelayService.DeregisterSystemCallback();
+        _bcWrapper.RelayService.Disconnect();
         
-        m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
-        m_bcWrapper.RTTService.DisableRTT();
+        _bcWrapper.RTTService.DeregisterAllRTTCallbacks();
+        _bcWrapper.RTTService.DisableRTT();
 
         if (changeState)
         {
@@ -204,25 +215,25 @@ public class BrainCloudManager : MonoBehaviour
         extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
 
         //
-        m_bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
+        _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
     }
 
     public void EndMatch()
     {
         GameManager.Instance.UpdateLobbyState();
         Dictionary<string, object> json = new Dictionary<string, object>();
-        json["cxId"] = m_bcWrapper.Client.RTTConnectionID;
+        json["cxId"] = _bcWrapper.Client.RTTConnectionID;
         json["lobbyId"] = StateManager.Instance.CurrentLobby.LobbyID;
         json["op"] = "END_MATCH";
-        m_bcWrapper.RelayService.EndMatch(json);
+        //_bcWrapper.RelayService.EndMatch(json);
     }
 
     public void ReconnectUser()
     {
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         //Continue doing reconnection stuff.....
-        m_bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, RTTReconnect, OnRTTDisconnected);
-        m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, RTTReconnect, OnRTTDisconnected);
+        _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
     }
 
     public void JoinMatch()
@@ -238,7 +249,7 @@ public class BrainCloudManager : MonoBehaviour
         var extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
         
-        m_bcWrapper.LobbyService.JoinLobby
+        _bcWrapper.LobbyService.JoinLobby
         (
             StateManager.Instance.CurrentLobby.LobbyID,
             true,
@@ -291,22 +302,69 @@ public class BrainCloudManager : MonoBehaviour
     // Local User summoned a shockwave in the play area
     public void LocalShockwave(Vector2 pos)
     {
-        // Send to other players
-        Dictionary<string, object> jsonData = new Dictionary<string, object>();
-        jsonData["x"] = pos.x;
-        jsonData["y"] = -pos.y;
-
-        Dictionary<string, object> json = new Dictionary<string, object>();
-        json["op"] = "shockwave";
-        json["data"] = jsonData;
-        
         SendWithSpecificCompression
         (
-            json,
+            CreateShockwaveJson(pos, TeamCodes.all),
             true,
             false,
             Settings.GetChannel()
         );
+    }
+
+    public void SendShockwaveToAll(Vector2 pos)
+    {
+        SendToSpecificTeamWithCompression
+        (
+            CreateShockwaveJson(pos, TeamCodes.all),
+            TeamCodes.all,
+            true,
+            false,
+            Settings.GetChannel()
+        );
+    }
+
+    public void SendShockwaveToTeam(Vector2 pos)
+    {
+        TeamCodes teamToSend = GameManager.Instance.CurrentUserInfo.Team;
+        SendToSpecificTeamWithCompression
+        (
+            CreateShockwaveJson(pos, teamToSend),
+            teamToSend,
+            true,
+            false,
+            Settings.GetChannel()
+        );
+    }
+
+    public void SendShockwaveToOpponents(Vector2 pos)
+    {
+        TeamCodes TeamToSend = GameManager.Instance.CurrentUserInfo.Team == TeamCodes.alpha
+            ? TeamCodes.beta
+            : TeamCodes.alpha;
+        SendToSpecificTeamWithCompression
+        (
+            CreateShockwaveJson(pos, TeamToSend),
+            TeamToSend,
+            true,
+            false,
+            Settings.GetChannel()
+        );
+    }
+
+    private Dictionary<string, object> CreateShockwaveJson(Vector2 pos, TeamCodes intendedTeam)
+    {
+        // Send to other players
+        Dictionary<string, object> jsonData = new Dictionary<string, object>();
+        jsonData["x"] = pos.x;
+        jsonData["y"] = -pos.y;
+        jsonData["teamCode"] = (int)intendedTeam;
+        jsonData["instigator"] = (int)GameManager.Instance.CurrentUserInfo.Team;
+
+        Dictionary<string, object> json = new Dictionary<string, object>();
+        json["op"] = "shockwave";
+        json["data"] = jsonData;
+
+        return json;
     }
     
     private void SendWithSpecificCompression(Dictionary<string, object> in_dict, bool in_reliable = true, bool in_ordered = true, int in_channel = 0, char in_joinChar = '=', char in_splitChar = ';')
@@ -319,22 +377,114 @@ public class BrainCloudManager : MonoBehaviour
                 jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
                 _logger?.WriteGameplayInput(jsonData, jsonBytes);
-                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
             case RelayCompressionTypes.KeyValuePairString:
                 jsonData = SerializeDict(in_dict, in_joinChar, in_splitChar); 
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
                 _logger?.WriteGameplayInput(jsonData, jsonBytes);
-                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
             case RelayCompressionTypes.DataStreamByte:
                 jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = SerializeDict(in_dict);
                 _logger?.WriteGameplayInput(jsonData, jsonBytes);
-                m_bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
                 break;
         }
     }
+
+    private void SendToSpecificTeamWithCompression(Dictionary<string, object> in_dict,TeamCodes teamToSend, bool in_reliable = true,
+        bool in_ordered = true, int in_channel = 0, char in_joinChar = '=', char in_splitChar = ';')
+    {
+        string jsonData;
+        byte[] jsonBytes = {0x0};
+        List<int> netIDsToSend = new List<int>();
+        
+        if (teamToSend != TeamCodes.all)
+        {
+            foreach (UserInfo member in StateManager.Instance.CurrentLobby.Members)
+            {
+                if (member.Team == teamToSend)
+                {
+                    int netID = _bcWrapper.RelayService.GetNetIdForCxId(member.cxId);
+                    netIDsToSend.Add(netID);
+                }
+            }   
+        }
+        switch (_relayCompressionType)
+        {
+            case RelayCompressionTypes.JsonString:
+                jsonData = JsonWriter.Serialize(in_dict);
+                jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
+                if (teamToSend == TeamCodes.all)
+                {
+                    _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                }
+                else
+                {
+                    for (int i = 0; i < netIDsToSend.Count; ++i)
+                    {
+                        _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    }    
+                }
+                break;
+            case RelayCompressionTypes.KeyValuePairString:
+                jsonData = SerializeDict(in_dict, in_joinChar, in_splitChar); 
+                jsonBytes = Encoding.ASCII.GetBytes(jsonData);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
+                if (teamToSend == TeamCodes.all)
+                {
+                    _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                }
+                else
+                {
+                    for (int i = 0; i < netIDsToSend.Count; ++i)
+                    {
+                        _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    }    
+                }
+                break;
+            case RelayCompressionTypes.DataStreamByte:
+                jsonData = JsonWriter.Serialize(in_dict);
+                jsonBytes = SerializeDict(in_dict);
+                _logger?.WriteGameplayInput(jsonData, jsonBytes);
+                if (teamToSend == TeamCodes.all)
+                {
+                    _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                }
+                else
+                {
+                    for (int i = 0; i < netIDsToSend.Count; ++i)
+                    {
+                        _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    }    
+                }
+                break;
+        }
+    }
+
+    public void SwitchTeams()
+    {
+        if (GameManager.Instance.CurrentUserInfo.Team == TeamCodes.alpha)
+        {
+            GameManager.Instance.CurrentUserInfo.Team = TeamCodes.beta;
+        }
+        else
+        {
+            GameManager.Instance.CurrentUserInfo.Team = TeamCodes.alpha;
+        }
+        //On success is null because we will get an update from RTT about the switch
+        _bcWrapper.LobbyService.SwitchTeam
+        (
+            StateManager.Instance.CurrentLobby.LobbyID,
+            GameManager.Instance.CurrentUserInfo.Team.ToString(),
+            null,
+            LogErrorThenPopUpWindow
+        );
+    }
+
 
 #endregion Input update
 
@@ -343,7 +493,7 @@ public class BrainCloudManager : MonoBehaviour
     //Getting input from other members
     public void OnRelayMessage(short netId, byte[] jsonResponse)
     {
-        var memberProfileId = m_bcWrapper.RelayService.GetProfileIdForNetId(netId);
+        var memberProfileId = _bcWrapper.RelayService.GetProfileIdForNetId(netId);
         
         var json = DeserializeString(jsonResponse);
         Lobby lobby = StateManager.Instance.CurrentLobby;
@@ -364,15 +514,21 @@ public class BrainCloudManager : MonoBehaviour
                         if (op == "move")
                         {
                             member.IsAlive = true;
-                            member.MousePosition.x = Convert.ToSingle(data["x"]);
-                            member.MousePosition.y = -Convert.ToSingle(data["y"]); // + _mouseYOffset;
+                            member.MousePosition.x = (float)Convert.ToDouble(data["x"]);
+                            member.MousePosition.y = (float)-Convert.ToDouble(data["y"]); 
                         }
                         else if (op == "shockwave")
                         {
                             Vector2 position; 
-                            position.x = Convert.ToSingle(data["x"]);
-                            position.y = -Convert.ToSingle(data["y"]);
+                            position.x = (float)Convert.ToDouble(data["x"]);
+                            position.y = (float)-Convert.ToDouble(data["y"]);
                             member.ShockwavePositions.Add(position);
+
+                            TeamCodes shockwaveCode = (TeamCodes) data["teamCode"];
+                            member.ShockwaveTeamCodes.Add(shockwaveCode);
+                            
+                            TeamCodes instigatorCode = (TeamCodes) data["instigator"];
+                            member.InstigatorTeamCodes.Add(instigatorCode);
                         }
                     }
                     break;
@@ -384,15 +540,21 @@ public class BrainCloudManager : MonoBehaviour
                         if (op == "move")
                         {
                             member.IsAlive = true;
-                            member.MousePosition.x = Convert.ToSingle(json["x"]);
-                            member.MousePosition.y = -Convert.ToSingle(json["y"]); // + _mouseYOffset;
+                            member.MousePosition.x = (float)Convert.ToDouble(json["x"]);
+                            member.MousePosition.y = (float)-Convert.ToDouble(json["y"]);
                         }
                         else if (op == "shockwave")
                         {
                             Vector2 position; 
-                            position.x = Convert.ToSingle(json["x"]);
-                            position.y = -Convert.ToSingle(json["y"]);
+                            position.x = (float)Convert.ToDouble(json["x"]);
+                            position.y = (float)-Convert.ToDouble(json["y"]);
                             member.ShockwavePositions.Add(position);
+                            
+                            TeamCodes shockwaveCode = (TeamCodes) json["teamCode"];
+                            member.ShockwaveTeamCodes.Add(shockwaveCode);
+
+                            TeamCodes instigatorCode = (TeamCodes) json["instigator"];
+                            member.InstigatorTeamCodes.Add(instigatorCode);
                         }
                     }
                     break;
@@ -470,10 +632,9 @@ public class BrainCloudManager : MonoBehaviour
     public void ConnectRelay()
     {
         _presentWhileStarted = false;
-        m_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
-        m_bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
-        m_bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
-        m_bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
+        _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
+        _bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
         switch (StateManager.Instance.Protocol)
@@ -490,7 +651,7 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         Server server = StateManager.Instance.CurrentServer;
-        m_bcWrapper.RelayService.Connect
+        _bcWrapper.RelayService.Connect
         (
             StateManager.Instance.Protocol,
             new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
@@ -536,7 +697,7 @@ public class BrainCloudManager : MonoBehaviour
         }
         else if (json["op"] as string == "MIGRATE_OWNER")
         {
-            StateManager.Instance.CurrentLobby.ReassignOwnerID(m_bcWrapper.RelayService.OwnerCxId);
+            StateManager.Instance.CurrentLobby.ReassignOwnerID(_bcWrapper.RelayService.OwnerCxId);
             GameManager.Instance.UpdateMatchAndLobbyState();
         }
     }
@@ -562,8 +723,20 @@ public class BrainCloudManager : MonoBehaviour
         //
         var settings = new Dictionary<string, object>();
 
+        string teamCode = GameManager.Instance.GameMode == GameMode.FreeForAll ? "all" : "";
+
+        if (GameManager.Instance.GameMode == GameMode.FreeForAll)
+        {
+            _lobbyType = (RelayLobbyTypes) FreeForAllDropdown.value;
+        }
+        else
+        {
+            //+3 to offset to where the team section is in the enum
+            _lobbyType = (RelayLobbyTypes) TeamDropdown.value + 3;
+        }
+
         //
-        m_bcWrapper.LobbyService.FindOrCreateLobby
+        _bcWrapper.LobbyService.FindOrCreateLobby
         (
             _lobbyType.ToString(), 
             0, // rating
@@ -573,7 +746,7 @@ public class BrainCloudManager : MonoBehaviour
             0, // Timeout
             false, // ready
             extra, // extra
-            "all", // team code
+            teamCode, // team code
             settings, // settings
             null, // other users
             null, // Success of lobby found will be in the event onLobbyEvent
@@ -727,5 +900,10 @@ public class BrainCloudManager : MonoBehaviour
             }
         }
         return str;
+    }
+
+    public void SetPreviousLobbyType()
+    {
+        _lobbyType = _previousSelectedType;
     }
 }
