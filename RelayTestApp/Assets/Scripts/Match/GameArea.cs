@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 /// <summary>
@@ -16,10 +17,11 @@ using UnityEngine.UI;
 
 public class GameArea : MonoBehaviour
 {
+    public RectTransform LocalRectTransform;
     public AnimateRipple ShockwaveAnimation;
     public AnimateRipple TeammateAnimation;
     [HideInInspector] public UserCursor LocalUserCursor;
-    protected Vector2 _cursorOffset = new Vector2(920, -800);
+    protected Vector2 _cursorOffset = new Vector2(12, -22);
     protected Vector2 _shockwaveOffset = new Vector2(-35, 30);
     //local to network is for shockwave input specifically
     protected Vector2 _newPosition;
@@ -29,10 +31,11 @@ public class GameArea : MonoBehaviour
     protected List<TeamCodes> _localShockwaveCodes = new List<TeamCodes>();
     protected Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
     private GameMode _currentGameMode;
-    
+    private RectTransform _cursorParentRectTransform;
     private void OnEnable()
     {
         _currentGameMode = GameManager.Instance.GameMode;
+        _cursorParentRectTransform = GameManager.Instance.UserCursorParent.GetComponent<RectTransform>();
     }
 
     // Update is called once per frame
@@ -97,9 +100,8 @@ public class GameArea : MonoBehaviour
 
     protected void SendMousePosition()
     {
-        _newPosition = Input.mousePosition;
-        _newPosition.x -= bottomLeftPositionGameArea.x;
-        _newPosition.y -= bottomLeftPositionGameArea.y;
+        LocalRectTransform.position = Input.mousePosition;
+        _newPosition = LocalRectTransform.anchoredPosition;
         BrainCloudManager.Instance.LocalMouseMoved(_newPosition + _cursorOffset);
     }
     
