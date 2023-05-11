@@ -1,7 +1,7 @@
 // iOS ONLY
-// This will run after an iOS build is made if APPLE_SIGN_IN_SDK is also defined.
+// This will run after an iOS build is made if APPLE_SDK is also defined.
 
-#if UNITY_IOS // && APPLE_SIGN_IN_SDK
+#if UNITY_IOS && APPLE_SDK
 
 using AppleAuth.Editor;
 using System;
