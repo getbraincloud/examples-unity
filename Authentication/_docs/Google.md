@@ -30,6 +30,6 @@ You will need to create a project on [Google Cloud](https://console.developers.g
 - [brainCloud Portal Tutorial – Authentication - Google (PlayGame)](https://getbraincloud.com/apidocs/portal-usage/authentication-google-playgame/)
 - [Games Dev Center – Google Play Games plugin for Unity](https://developer.android.com/games/pgs/unity/overview)
 - [Google Identity – Authentication](https://developers.google.com/identity/sign-in/)
+- [Google Identity – Google Sign-In for Android (legacy)](https://developers.google.com/identity/sign-in/android/start-integrating#configure_a_project)
 - [Google Identity – Sign In with Google for Web](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
-- [Google Identity – Start Integrating Google Sign-In into Your Android App](https://developers.google.com/identity/sign-in/android/start-integrating)
 - [Unity Documentation – Set up a Google Play Games sign-in](https://docs.unity.com/authentication/en/manual/set-up-google-play-games-signin)

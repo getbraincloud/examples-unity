@@ -81,6 +81,6 @@ The Google Sign-In plugin technically still supports iOS, but it requires some e
 #### Read More
 - [brainCloud Portal Tutorial – Authentication - Google (OpenID)](https://getbraincloud.com/apidocs/portal-usage/authentication-google-openid/)
 - [Google Identity – Authentication](https://developers.google.com/identity/sign-in/)
+- [Google Identity – Google Sign-In for Android (legacy)](https://developers.google.com/identity/sign-in/android/start-integrating)
+- [Google Identity – Google Sign-In for iOS and macOS](https://developers.google.com/identity/sign-in/ios/start-integrating)
 - [Google Identity – Sign In with Google for Web](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
-- [Google Identity – Start Integrating Google Sign-In into Your Android App](https://developers.google.com/identity/sign-in/android/start-integrating)
-- [Google Identity – Get started with Google Sign-In for iOS and macOS](https://developers.google.com/identity/sign-in/ios/start-integrating)
