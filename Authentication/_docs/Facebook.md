@@ -1,7 +1,7 @@
 # Facebook SDK Integration
-| Supported Platforms |
-| :-----------------: |
-| Android | iOS | Web |
+| Supported Platforms   |
+| :-------------------: |
+| Android \| iOS \| Web |
 
 - [Download & Install Plugin](https://developers.facebook.com/docs/unity/)
 - [Follow instructions for proper integration](https://developers.facebook.com/docs/unity/gettingstarted)
@@ -31,5 +31,5 @@ In `UserHandler.AuthenticateFacebook()` and `UserHandler.AuthenticateFacebookLim
 ---
 
 #### Read More
-https://getbraincloud.com/apidocs/portal-usage/basic-configuration-facebook/
-https://docs.unity.com/authentication/en/manual/set-up-facebook-signin
+- [brainCloud Portal Tutorial – Authentication - Apple](https://getbraincloud.com/apidocs/portal-usage/basic-configuration-facebook/)
+- [Unity Documentation – Set up a Facebook account sign-in](https://docs.unity.com/authentication/en/manual/set-up-facebook-signin)

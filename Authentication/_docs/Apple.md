@@ -1,7 +1,7 @@
 # Sign in with Apple Plugin Integration
 | Supported Platforms |
 | :-----------------: |
-| iOS | macOS         |
+| iOS \| macOS        |
 
 - [Download & Install Plugin](https://github.com/lupidan/apple-signin-unity)
 - [Follow instructions for proper integration](https://github.com/lupidan/apple-signin-unity#installation)
@@ -19,7 +19,7 @@ This example app makes use of `AppleAuthManager` from within `UserHandler` itsel
 3. Fill out the **Signin Client Id** field using the Identifier attached to your app from the Apple Developer portal.
 
 ### Building for macOS
-macOS builds require code signing for the app to be able to make use of this plugin. You will need to create an [.entitlements](./Apple.md#entitlements-template) file to sign the app with as well as a provioning profile. You will find the information needed for signing on the Apple Developer portal. Additional in-depth instructions are on the [Sign in with Apple GitHub](https://github.com/lupidan/apple-signin-unity/blob/master/docs/macOS_NOTES.md).
+macOS builds require code signing for the app to be able to make use of this plugin. You will need to create an [.entitlements](./Apple.md#entitlements-template) file to sign the app with as well as a provioning profile. You will find the information needed for signing in the Apple Developer portal for your app. Additional in-depth instructions are on the [Sign in with Apple GitHub](https://github.com/lupidan/apple-signin-unity/blob/master/docs/macOS_NOTES.md).
 
 #### .entitlements Template
 ```
@@ -46,6 +46,6 @@ macOS builds require code signing for the app to be able to make use of this plu
 ---
 
 #### Read More
-https://getbraincloud.com/apidocs/portal-usage/authentication-apple/
-https://docs.unity.com/authentication/en/manual/set-up-apple-signin
-https://developer.apple.com/sign-in-with-apple/get-started/
+- [brainCloud Portal Tutorial – Authentication - Apple](https://getbraincloud.com/apidocs/portal-usage/authentication-apple/)
+- [Apple – Sign in with Apple](https://developer.apple.com/sign-in-with-apple/get-started/)
+- [Unity Documentation – Set up an Apple sign-in](https://docs.unity.com/authentication/en/manual/set-up-apple-signin)

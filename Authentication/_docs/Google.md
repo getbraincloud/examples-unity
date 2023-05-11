@@ -12,9 +12,9 @@ This Unity example project by default includes Google's **External Dependency Ma
 ## Set-Up
 Once the Google Play Games plugin is integrated into this example project, add `GOOGLE_SDK` to your **Scripting Define Symbols** under `Project Settings > Player > Other Settings`.
 
-Configure `Window > Google Play Games > Setup > Android Setup` as instructed above for proper use of the SDK.
+Configure `Window > Google Play Games > Setup > Android Setup` as instructed above for proper use of the plugin.
 
-You will need to set up a project on [Google Cloud](https://console.developers.google.com/) and set up OAuth 2.0 Client Credentials for Android and Web to obtain your **Client ID** and **Web Client ID**, respectively. You will also need to enable **Google Play Game Services** in your Google Cloud project under [APIs](https://console.developers.google.com/apis), and configure an Android project on the [Google Play developer console](https://play.google.com/console/).
+You will need to create a project on [Google Cloud](https://console.developers.google.com/) and set up OAuth 2.0 Client Credentials for both Android and Web to obtain your **Client ID** and **Web Client ID**, respectively. You will also need to enable **Google Play Game Services** in your Google Cloud project under [APIs](https://console.developers.google.com/apis), and configure an Android project on the [Google Play developer console](https://play.google.com/console/).
 
 ### brainCloud Configuration
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
@@ -27,7 +27,9 @@ You will need to set up a project on [Google Cloud](https://console.developers.g
 ---
 
 #### Read More
-https://getbraincloud.com/apidocs/portal-usage/authentication-google-playgame/
-https://docs.unity.com/authentication/en/manual/set-up-google-play-games-signin
-https://developer.android.com/games/pgs/unity/overview
-https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+- [brainCloud Portal Tutorial – Authentication - Google (PlayGame)](https://getbraincloud.com/apidocs/portal-usage/authentication-google-playgame/)
+- [Games Dev Center – Google Play Games plugin for Unity](https://developer.android.com/games/pgs/unity/overview)
+- [Google Identity – Authentication](https://developers.google.com/identity/sign-in/)
+- [Google Identity – Sign In with Google for Web](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
+- [Google Identity – Start Integrating Google Sign-In into Your Android App](https://developers.google.com/identity/sign-in/android/start-integrating)
+- [Unity Documentation – Set up a Google Play Games sign-in](https://docs.unity.com/authentication/en/manual/set-up-google-play-games-signin)
