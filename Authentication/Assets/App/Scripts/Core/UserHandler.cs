@@ -10,12 +10,12 @@ using UnityEngine;
 using Facebook.Unity;
 #endif
 
-#if GOOGLE_PLAY_GAMES_SDK
+#if GOOGLE_SDK
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
 #endif
 
-#if GOOGLE_SIGN_IN_SDK
+#if GOOGLE_OPENID_SDK
 using Google;
 #endif
 
@@ -281,7 +281,7 @@ public static class UserHandler
     }
 #endif
 
-#if GOOGLE_PLAY_GAMES_SDK
+#if GOOGLE_SDK
     /// <summary>
     /// Authenticate the user using their Google account via Google Play Games.
     /// </summary>
@@ -315,7 +315,7 @@ public static class UserHandler
     }
 #endif
 
-#if GOOGLE_SIGN_IN_SDK
+#if GOOGLE_OPENID_SDK
     /// <summary>
     /// Authenticate the user using their Google account via Google Sign-In.
     /// </summary>

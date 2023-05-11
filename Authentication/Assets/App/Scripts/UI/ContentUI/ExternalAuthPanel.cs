@@ -7,11 +7,11 @@ using UnityEngine;
 using Facebook.Unity;
 #endif
 
-#if GOOGLE_PLAY_GAMES_SDK
+#if GOOGLE_SDK
 using GooglePlayGames;
 #endif
 
-#if GOOGLE_SIGN_IN_SDK
+#if GOOGLE_OPENID_SDK
 using Google;
 #endif
 
@@ -52,7 +52,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
     {
         base.Awake();
 
-#if GOOGLE_PLAY_GAMES_SDK && GOOGLE_SIGN_IN_SDK && UNITY_ANDROID
+#if GOOGLE_SDK && GOOGLE_OPENID_SDK && UNITY_ANDROID
         Debug.LogError("Google Play Games & Google OpenID are not supported at the same time! This may lead to undesirable results...");
 #endif
     }
@@ -73,10 +73,10 @@ public class ExternalAuthPanel : ContentUIBehaviour
             AuthenticationType.Facebook.ToString(),
             AuthenticationType.FacebookLimited.ToString(),
 #endif
-#if GOOGLE_PLAY_GAMES_SDK && UNITY_ANDROID
+#if GOOGLE_SDK && UNITY_ANDROID
             AuthenticationType.Google.ToString(),
 #endif
-#if GOOGLE_SIGN_IN_SDK && (UNITY_ANDROID || UNITY_IOS)
+#if GOOGLE_OPENID_SDK && (UNITY_ANDROID || UNITY_IOS)
             AuthenticationType.GoogleOpenId.ToString(),
 #endif
         };
@@ -169,7 +169,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
 #endif
 
-#if GOOGLE_PLAY_GAMES_SDK
+#if GOOGLE_SDK
         PlayGamesPlatform.DebugLogEnabled = true;
 #endif
     }
@@ -238,7 +238,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
         else if (type == AuthenticationType.Google)
         {
-#if GOOGLE_PLAY_GAMES_SDK
+#if GOOGLE_SDK
             UserHandler.AuthenticateGoogle(true,
                                            OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                            OnFailure("Authentication Failed", OnAuthenticationFailure));
@@ -247,7 +247,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
         else if (type == AuthenticationType.GoogleOpenId)
         {
-#if GOOGLE_SIGN_IN_SDK
+#if GOOGLE_OPENID_SDK
             UserHandler.AuthenticateGoogleOpenId(true,
                                                  OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                                  OnFailure("Authentication Failed", OnAuthenticationFailure));
@@ -286,7 +286,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
             FB.LogOut();
         }
 #endif
-#if GOOGLE_SIGN_IN_SDK
+#if GOOGLE_OPENID_SDK
         GoogleSignIn.DefaultInstance.Disconnect();
 #endif
         Popup.DisplayPopup(new PopupInfo("Could not Authenticate",

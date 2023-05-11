@@ -284,13 +284,13 @@ public class MainMenuUI : ContentUIBehaviour
                 Facebook.Unity.FB.LogOut();
             }
 #endif
-#if GOOGLE_SIGN_IN_SDK
+#if GOOGLE_OPENID_SDK
             Google.GoogleSignIn.DefaultInstance.SignOut();
 #endif
             if (disconnectAccount)
             {
                 UserHandler.ResetAuthenticationData();
-#if GOOGLE_SIGN_IN_SDK
+#if GOOGLE_OPENID_SDK
                 Google.GoogleSignIn.DefaultInstance.Disconnect();
 #endif
             }

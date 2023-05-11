@@ -60,7 +60,7 @@ Currently integrated external authentication methods:
 | [AuthenticateApple](./_docs/Apple.md)               | `APPLE_SDK`             |
 | [AuthenticateFacebook](./_docs/Facebook.md)         | `FACEBOOK_SDK`          |
 | [AuthenticateGoogle](./_docs/Google.md)             | `GOOGLE_SDK`            |
-| [AuthenticateGoogleOpenId](./_docs/GoogleOpenID.md) | `GOOGLE_OPENID_SDK`     |
+| [AuthenticateGoogleOpenId](./_docs/GoogleOpenId.md) | `GOOGLE_OPENID_SDK`     |
 
 More external authentication methods to come!
 
