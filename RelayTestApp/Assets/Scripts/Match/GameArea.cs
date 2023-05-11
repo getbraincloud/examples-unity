@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 /// <summary>
@@ -16,18 +17,26 @@ using UnityEngine.UI;
 
 public class GameArea : MonoBehaviour
 {
+    public RectTransform LocalRectTransform;
     public AnimateRipple ShockwaveAnimation;
+    public AnimateRipple TeammateAnimation;
     [HideInInspector] public UserCursor LocalUserCursor;
-    //Offsets are to adjust the image closer to the cursor's point
-    private Vector2 _mouseOffset = new Vector2(60, -580);
-    private Vector2 _shockwaveOffset = new Vector2(-35, 30);
-    
+    protected Vector2 _cursorOffset = new Vector2(12, -22);
+    protected Vector2 _shockwaveOffset = new Vector2(-35, 30);
     //local to network is for shockwave input specifically
-    private Vector2 _newPosition;
-    private ParticleSystem.MainModule _shockwaveParticle;
-    private GameObject _newShockwave;
-    private List<Vector2> _localShockwavePositions = new List<Vector2>();
-    private Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
+    protected Vector2 _newPosition;
+    protected ParticleSystem.MainModule _shockwaveParticle;
+    protected GameObject _newShockwave;
+    protected List<Vector2> _localShockwavePositions = new List<Vector2>();
+    protected List<TeamCodes> _localShockwaveCodes = new List<TeamCodes>();
+    protected Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
+    private GameMode _currentGameMode;
+    private RectTransform _cursorParentRectTransform;
+    private void OnEnable()
+    {
+        _currentGameMode = GameManager.Instance.GameMode;
+        _cursorParentRectTransform = GameManager.Instance.UserCursorParent.GetComponent<RectTransform>();
+    }
 
     // Update is called once per frame
     private void Update()
@@ -40,17 +49,41 @@ public class GameArea : MonoBehaviour
                 LocalUserCursor.AdjustVisibility(true);
             }
 
-            _newPosition = Input.mousePosition;
-            _newPosition.x -= bottomLeftPositionGameArea.x;
-            _newPosition.y -= bottomLeftPositionGameArea.y;
-            BrainCloudManager.Instance.LocalMouseMoved(_newPosition + _mouseOffset);
+            SendMousePosition();
             if (Input.GetMouseButtonDown(0))
             {
                 //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition+ _mouseOffset);
-                
-                //Send position of local users input for a shockwave to other users
-                BrainCloudManager.Instance.LocalShockwave(_newPosition+ _mouseOffset);
+                _localShockwavePositions.Add(_newPosition + _cursorOffset);
+                _localShockwaveCodes.Add(TeamCodes.all);
+                if (_currentGameMode == GameMode.FreeForAll)
+                {
+                    //Send position of local users input for a shockwave to other users
+                    BrainCloudManager.Instance.LocalShockwave(_newPosition + _cursorOffset);    
+                }
+                else
+                {
+                    BrainCloudManager.Instance.SendShockwaveToAll(_newPosition + _cursorOffset);
+                }
+                    
+            }
+            else if (Input.GetMouseButtonDown(1) && _currentGameMode == GameMode.Team)
+            {
+                //Save position locally for us to spawn in UpdateAllShockwaves()
+                _localShockwavePositions.Add(_newPosition + _cursorOffset);
+                _localShockwaveCodes.Add(GameManager.Instance.CurrentUserInfo.Team);
+                //Send Position to local players team
+                BrainCloudManager.Instance.SendShockwaveToTeam(_newPosition + _cursorOffset);
+            }
+            else if (Input.GetMouseButtonDown(2) && _currentGameMode == GameMode.Team)
+            {
+                //Save position locally for us to spawn in UpdateAllShockwaves()
+                _localShockwavePositions.Add(_newPosition+ _cursorOffset);
+                TeamCodes TeamToSend = GameManager.Instance.CurrentUserInfo.Team == TeamCodes.alpha
+                    ? TeamCodes.beta
+                    : TeamCodes.alpha;
+                _localShockwaveCodes.Add(TeamToSend);
+                //Send Position to opposite team
+                BrainCloudManager.Instance.SendShockwaveToOpponents(_newPosition + _cursorOffset);
             }
         }
         else
@@ -65,7 +98,14 @@ public class GameArea : MonoBehaviour
         UpdateAllShockwaves();
     }
 
-    private void OnDisable()
+    protected void SendMousePosition()
+    {
+        LocalRectTransform.position = Input.mousePosition;
+        _newPosition = LocalRectTransform.anchoredPosition;
+        BrainCloudManager.Instance.LocalMouseMoved(_newPosition + _cursorOffset);
+    }
+    
+    protected void OnDisable()
     {
         if (!Cursor.visible)
         {
@@ -73,7 +113,7 @@ public class GameArea : MonoBehaviour
         }
     }
     
-    private void UpdateAllShockwaves()
+    protected void UpdateAllShockwaves()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
         
@@ -81,9 +121,11 @@ public class GameArea : MonoBehaviour
         {
             if (member.AllowSendTo)
             {
+                int i = 0;
                 foreach (Vector2 position in member.ShockwavePositions)
                 {
-                    SetUpShockwave(position, GameManager.ReturnUserColor(member.UserGameColor), false);
+                    SetUpShockwave(position, GameManager.ReturnUserColor(member.UserGameColor), member.ShockwaveTeamCodes[i], member.InstigatorTeamCodes[i]);
+                    i++;
                 }   
             }
             
@@ -91,39 +133,78 @@ public class GameArea : MonoBehaviour
             if (member.ShockwavePositions.Count > 0)
             {
                 member.ShockwavePositions.Clear();    
+                member.ShockwaveTeamCodes.Clear();
+                member.InstigatorTeamCodes.Clear();
             }
         }
 
         if (GameManager.Instance.CurrentUserInfo.AllowSendTo)
         {
+            int i = 0;
             foreach (var pos in _localShockwavePositions)
             {
-                SetUpShockwave(pos, GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor),true);
+                SetUpShockwave
+                (
+                    pos,
+                    GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor),
+                    _localShockwaveCodes[i],
+                    GameManager.Instance.CurrentUserInfo.Team
+                );  
+                i++;
             }   
         }
         //Clear the list so there's no backlog of input positions
         if (_localShockwavePositions.Count > 0)
         {
             _localShockwavePositions.Clear();
+            _localShockwaveCodes.Clear();
         }
     }
 
-    private void SetUpShockwave(Vector2 position, Color waveColor, bool isUserLocal)
+    protected void SetUpShockwave(Vector2 position, Color waveColor, TeamCodes team, TeamCodes instigatorTeam)
     {
-        var newShockwave = Instantiate(ShockwaveAnimation, Vector3.zero, Quaternion.identity, GameManager.Instance.UserCursorParent.transform);
+        Transform shockwaveParent = GameManager.Instance.UserCursorParent.transform;
+        AnimateRipple prefab = null;
+        if (team == TeamCodes.all)
+        {
+            prefab = ShockwaveAnimation;
+        }
+        else 
+        {
+            if (instigatorTeam == team)
+            {
+                prefab = TeammateAnimation;
+            }
+            else
+            {
+                prefab = ShockwaveAnimation;
+            }
+            
+        }
+        var newShockwave = Instantiate
+        (
+            prefab,
+            Vector3.zero,
+            Quaternion.identity,
+            shockwaveParent
+        );
         RectTransform UITransform = newShockwave.GetComponent<RectTransform>();
         Vector2 minMax = new Vector2(0, 1);
         
         UITransform.anchorMin = minMax;
         UITransform.anchorMax = minMax;
         UITransform.pivot = new Vector2(0.5f, 0.5f);;
+        if (_currentGameMode == GameMode.Team && team == TeamCodes.all)
+        {
+            waveColor = Color.white;
+        }
         newShockwave.RippleColor = waveColor;
         UITransform.anchoredPosition = position + _shockwaveOffset;
         
         StateManager.Instance.Shockwaves.Add(newShockwave.gameObject);
     }
     
-    private void UpdateAllCursorsMovement()
+    protected void UpdateAllCursorsMovement()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
@@ -143,12 +224,12 @@ public class GameArea : MonoBehaviour
         }
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
-    private bool IsPointerOverUIElement()
+    protected bool IsPointerOverUIElement()
     {
         return CheckForRayCastHit(GetEventSystemRaycastResults());
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
-    private bool CheckForRayCastHit(List<RaycastResult> eventSystemRayCastResults )
+    protected bool CheckForRayCastHit(List<RaycastResult> eventSystemRayCastResults )
     {
         for(int index = 0;  index < eventSystemRayCastResults.Count; index ++)
         {
@@ -159,7 +240,7 @@ public class GameArea : MonoBehaviour
         return false;
     }
     ///Gets all event system raycast results of current mouse or touch position.
-    static List<RaycastResult> GetEventSystemRaycastResults()
+    protected static List<RaycastResult> GetEventSystemRaycastResults()
     {   
         PointerEventData eventData = new PointerEventData(EventSystem.current);
         eventData.position =  Input.mousePosition;
