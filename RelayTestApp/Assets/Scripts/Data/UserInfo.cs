@@ -23,11 +23,14 @@ public class UserInfo
     public Vector2 MousePosition;
     //Shockwaves are created based on each location given from list
     public List<Vector2> ShockwavePositions = new List<Vector2>();
+    //Shockwaves that take different shapes base on team code
+    public List<TeamCodes> ShockwaveTeamCodes = new List<TeamCodes>();
+    public List<TeamCodes> InstigatorTeamCodes = new List<TeamCodes>();
     //Class to handle each user's cursor
     public UserCursor UserCursor;
     public UserInfo() { }
     public string cxId;
-
+    public bool IsHost;
     public string NetID;
     //Used to determine if user is in lobby or in match.
     public bool IsReady;

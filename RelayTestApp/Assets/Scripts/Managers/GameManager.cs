@@ -369,6 +369,12 @@ public class GameManager : MonoBehaviour
         {
             entry.UsernameText.text = info.Username + " (In Lobby)";
         }
+
+        if (entry.HostImage)
+        {
+            entry.HostImage.enabled = info.IsHost;    
+        }
+         
         Color userColor = ReturnUserColor(info.UserGameColor);
         entry.UsernameText.color = userColor;
         if (entry.UserDotImage != null)

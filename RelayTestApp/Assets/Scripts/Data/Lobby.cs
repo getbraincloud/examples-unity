@@ -40,6 +40,8 @@ public class Lobby
                 {
                     user.PresentSinceStart = (bool) extra["presentSinceStart"];
                 }
+
+                user.IsHost = true;
             }
             Members.Add(user);
         }

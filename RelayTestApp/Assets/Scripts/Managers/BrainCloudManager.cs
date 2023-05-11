@@ -155,10 +155,10 @@ public class BrainCloudManager : MonoBehaviour
     {
         if (_dead) return;
 
-        if (reasonCode == ReasonCodes.RS_ENDMATCH_REQUESTED)
+        /*if (reasonCode == ReasonCodes.RS_ENDMATCH_REQUESTED)
         {
             return;
-        }
+        }*/
 
         _dead = true;
         _bcWrapper.RTTService.DeregisterRTTLobbyCallback();
@@ -225,7 +225,7 @@ public class BrainCloudManager : MonoBehaviour
         json["cxId"] = _bcWrapper.Client.RTTConnectionID;
         json["lobbyId"] = StateManager.Instance.CurrentLobby.LobbyID;
         json["op"] = "END_MATCH";
-        _bcWrapper.RelayService.EndMatch(json);
+        //_bcWrapper.RelayService.EndMatch(json);
     }
 
     public void ReconnectUser()
@@ -304,7 +304,19 @@ public class BrainCloudManager : MonoBehaviour
     {
         SendWithSpecificCompression
         (
-            CreateShockwaveJson(pos),
+            CreateShockwaveJson(pos, TeamCodes.all),
+            true,
+            false,
+            Settings.GetChannel()
+        );
+    }
+
+    public void SendShockwaveToAll(Vector2 pos)
+    {
+        SendToSpecificTeamWithCompression
+        (
+            CreateShockwaveJson(pos, TeamCodes.all),
+            TeamCodes.all,
             true,
             false,
             Settings.GetChannel()
@@ -313,10 +325,11 @@ public class BrainCloudManager : MonoBehaviour
 
     public void SendShockwaveToTeam(Vector2 pos)
     {
+        TeamCodes teamToSend = GameManager.Instance.CurrentUserInfo.Team;
         SendToSpecificTeamWithCompression
         (
-            CreateShockwaveJson(pos),
-            GameManager.Instance.CurrentUserInfo.Team,
+            CreateShockwaveJson(pos, teamToSend),
+            teamToSend,
             true,
             false,
             Settings.GetChannel()
@@ -330,7 +343,7 @@ public class BrainCloudManager : MonoBehaviour
             : TeamCodes.alpha;
         SendToSpecificTeamWithCompression
         (
-            CreateShockwaveJson(pos),
+            CreateShockwaveJson(pos, TeamToSend),
             TeamToSend,
             true,
             false,
@@ -338,12 +351,14 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    private Dictionary<string, object> CreateShockwaveJson(Vector2 pos)
+    private Dictionary<string, object> CreateShockwaveJson(Vector2 pos, TeamCodes intendedTeam)
     {
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
         jsonData["y"] = -pos.y;
+        jsonData["teamCode"] = (int)intendedTeam;
+        jsonData["instigator"] = (int)GameManager.Instance.CurrentUserInfo.Team;
 
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "shockwave";
@@ -385,14 +400,17 @@ public class BrainCloudManager : MonoBehaviour
         string jsonData;
         byte[] jsonBytes = {0x0};
         List<int> netIDsToSend = new List<int>();
-        foreach (UserInfo member in StateManager.Instance.CurrentLobby.Members)
+        
+        if (teamToSend != TeamCodes.all)
         {
-            if (member.Team == teamToSend)
+            foreach (UserInfo member in StateManager.Instance.CurrentLobby.Members)
             {
-                int netID = _bcWrapper.RelayService.GetNetIdForCxId(member.cxId);
-                netIDsToSend.Add(netID);
-                Debug.Log("NetID Added..." + netID);
-            }
+                if (member.Team == teamToSend)
+                {
+                    int netID = _bcWrapper.RelayService.GetNetIdForCxId(member.cxId);
+                    netIDsToSend.Add(netID);
+                }
+            }   
         }
         switch (_relayCompressionType)
         {
@@ -400,27 +418,48 @@ public class BrainCloudManager : MonoBehaviour
                 jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
                 _logger?.WriteGameplayInput(jsonData, jsonBytes);
-                for (int i = 0; i < netIDsToSend.Count; ++i)
+                if (teamToSend == TeamCodes.all)
                 {
-                    _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                }
+                else
+                {
+                    for (int i = 0; i < netIDsToSend.Count; ++i)
+                    {
+                        _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    }    
                 }
                 break;
             case RelayCompressionTypes.KeyValuePairString:
                 jsonData = SerializeDict(in_dict, in_joinChar, in_splitChar); 
                 jsonBytes = Encoding.ASCII.GetBytes(jsonData);
                 _logger?.WriteGameplayInput(jsonData, jsonBytes);
-                for (int i = 0; i < netIDsToSend.Count; ++i)
+                if (teamToSend == TeamCodes.all)
                 {
-                    _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                }
+                else
+                {
+                    for (int i = 0; i < netIDsToSend.Count; ++i)
+                    {
+                        _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    }    
                 }
                 break;
             case RelayCompressionTypes.DataStreamByte:
                 jsonData = JsonWriter.Serialize(in_dict);
                 jsonBytes = SerializeDict(in_dict);
                 _logger?.WriteGameplayInput(jsonData, jsonBytes);
-                for (int i = 0; i < netIDsToSend.Count; ++i)
+                if (teamToSend == TeamCodes.all)
                 {
-                    _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    _bcWrapper.RelayService.Send(jsonBytes, BrainCloudRelay.TO_ALL_PLAYERS, in_reliable, in_ordered, in_channel);
+                }
+                else
+                {
+                    for (int i = 0; i < netIDsToSend.Count; ++i)
+                    {
+                        _bcWrapper.RelayService.Send(jsonBytes, (ulong)netIDsToSend[i], in_reliable, in_ordered, in_channel);    
+                    }    
                 }
                 break;
         }
@@ -484,6 +523,12 @@ public class BrainCloudManager : MonoBehaviour
                             position.x = (float)Convert.ToDouble(data["x"]);
                             position.y = (float)-Convert.ToDouble(data["y"]);
                             member.ShockwavePositions.Add(position);
+
+                            TeamCodes shockwaveCode = (TeamCodes) data["teamCode"];
+                            member.ShockwaveTeamCodes.Add(shockwaveCode);
+                            
+                            TeamCodes instigatorCode = (TeamCodes) data["instigator"];
+                            member.InstigatorTeamCodes.Add(instigatorCode);
                         }
                     }
                     break;
@@ -504,6 +549,12 @@ public class BrainCloudManager : MonoBehaviour
                             position.x = (float)Convert.ToDouble(json["x"]);
                             position.y = (float)-Convert.ToDouble(json["y"]);
                             member.ShockwavePositions.Add(position);
+                            
+                            TeamCodes shockwaveCode = (TeamCodes) json["teamCode"];
+                            member.ShockwaveTeamCodes.Add(shockwaveCode);
+
+                            TeamCodes instigatorCode = (TeamCodes) json["instigator"];
+                            member.InstigatorTeamCodes.Add(instigatorCode);
                         }
                     }
                     break;
