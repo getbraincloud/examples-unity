@@ -142,7 +142,6 @@ public class LoggerContentUI : ContentUIBehaviour
     {
         if (logObjects.IsNullOrEmpty())
         {
-            Debug.LogWarning("Logger is not initialized yet!");
             return;
         }
         else if (++logIndex >= logObjects.Count)

@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// <see cref="ScriptableObject"/> on loading prefabs and scripts to show brainCloud service examples.
 /// </summary>
-[CreateAssetMenu(fileName = "ServiceItem", menuName = "ScriptableObjects/ServiceItem")]
+[CreateAssetMenu(fileName = "ServiceItem", menuName = "ScriptableObjects/Service Item")]
 public class ServiceItem : ScriptableObject
 {
     [SerializeField] private string ServiceName = string.Empty;

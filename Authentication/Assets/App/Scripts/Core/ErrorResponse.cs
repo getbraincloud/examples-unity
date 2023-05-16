@@ -1,7 +1,6 @@
 using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// Data struct for brainCloud Error Responses.
@@ -9,9 +8,18 @@ using UnityEngine;
 [Serializable]
 public readonly struct ErrorResponse
 {
-    public readonly int ReasonCode;
-    public readonly int Status;
-    public readonly string Message;
+    #region Consts
+
+    // JSON Properties
+    private const string PROPERTY_REASON_CODE = "reason_code";
+    private const string PROPERTY_STATUS = "status";
+    private const string PROPERTY_MESSAGE = "status_message";
+
+    #endregion
+
+    [JsonName(PROPERTY_REASON_CODE)] public readonly int ReasonCode;
+    [JsonName(PROPERTY_STATUS)] public readonly int Status;
+    [JsonName(PROPERTY_MESSAGE)] public readonly string Message;
 
     public ErrorResponse(int reasonCode, int status, string message)
     {
@@ -23,8 +31,10 @@ public readonly struct ErrorResponse
     public ErrorResponse(string jsonError)
     {
         Dictionary<string, object> json = JsonReader.Deserialize(jsonError) as Dictionary<string, object>;
-        ReasonCode = (int)json["reason_code"];
-        Status = (int)json["status"];
-        Message = (string)json["status_message"];
+        ReasonCode = (int)json[PROPERTY_REASON_CODE];
+        Status = (int)json[PROPERTY_STATUS];
+        Message = (string)json[PROPERTY_MESSAGE];
     }
+
+    public string Serialize() => JsonWriter.Serialize(this);
 }

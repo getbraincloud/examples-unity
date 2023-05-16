@@ -278,9 +278,21 @@ public class MainMenuUI : ContentUIBehaviour
 
         SuccessCallback onSuccess = OnSuccess("Logging Out...", () =>
         {
+#if FACEBOOK_SDK
+            if(Facebook.Unity.FB.IsLoggedIn)
+            {
+                Facebook.Unity.FB.LogOut();
+            }
+#endif
+#if GOOGLE_OPENID_SDK
+            Google.GoogleSignIn.DefaultInstance.SignOut();
+#endif
             if (disconnectAccount)
             {
                 UserHandler.ResetAuthenticationData();
+#if GOOGLE_OPENID_SDK
+                Google.GoogleSignIn.DefaultInstance.Disconnect();
+#endif
             }
 
             LoginContent.ResetRememberUserPref();
