@@ -1,7 +1,8 @@
 # Sign in with Apple Plugin Integration
 | Supported Platforms |
 | :-----------------: |
-| iOS \| macOS        |
+| iOS                 |
+| macOS               |
 
 - [Download & Install Plugin](https://github.com/lupidan/apple-signin-unity)
 - [Follow instructions for proper integration](https://github.com/lupidan/apple-signin-unity#installation)
