@@ -4,7 +4,7 @@ This repository contains example Unity projects that make use of the [brainCloud
 
 These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code! 
 
-Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform back end, such as the Google Play console or Apple developer portal. 
+Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform back end, such as the Google Play console or Apple Developer portal. 
 
 ---
 
@@ -22,7 +22,9 @@ Create a new app using a template of one of these examples:
 
 2. In the brainCloud Settings window, login to your current account or signup for the first time
     - Note: brainCloud is free during development!
+
 3. With your team selected, select **Create New App ...** and check **Create with template?**
+
 4. Select the template you wish to use
     - If using the SpaceShooter example, select the SpaceShooter template
 
@@ -53,7 +55,7 @@ An example app demonstrating **Amazon In-App Purchases** and verification with b
 
 ## BombersRTT
 
-This example is a real-time multiplayer game implemented using brainCloud. brainCloud provides the backend services for storing data, as well as the **Matchmaking** and brainCloud's **Relay Multiplayer** server.
+This example is a real-time multiplayer game implemented using brainCloud. brainCloud provides the backend services for storing data, as well as the **Matchmaking** service and brainCloud's **Relay Multiplayer** server.
 
 Go to the **SplashScreen** scene and run it to test it out in the editor!
 
@@ -70,6 +72,12 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 - `DEBUG_LOG_ENABLED` - Enable logs via GDebug Class
 - `STEAMWORKS_ENABLED` - Enable Steam SDK integration, must have the steam client open on a desktop to use via the editor
 - `BUY_CURRENCY_ENABLED` - Enable store product purchasing – PC / Mac / Standalone builds require the `STEAMWORKS_ENABLED` flag
+
+---
+
+## Clashers
+
+This example showcases the **One-Way Match** service in brainCloud. Check out the [Clashers README.md](./brainCloud%20Clashers/README.md) for more information.
 
 ---
 
@@ -111,9 +119,9 @@ Find more information, including the video itself, here: http://getbraincloud.co
 
 ## TicTacToe
 
-Showcases brainCloud's **Async Multiplayer** and **Cloud Code** features.
+Showcases brainCloud's **Async Multiplayer** and **Cloud Code** services.
 
-Open up the two player scene to see it operate in side-by-side action, or build the one player scene and run two different instances of the game to test it out!
+Open up the **Start - TwoPlayer** scene to see it operate in side-by-side action, or build the **Start - OnePlayer** scene and run two different instances of the game to test it out!
 
 For more information, see the [TicTacToe README.md](./TicTacToe/README.md) file.
 
