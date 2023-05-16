@@ -1,7 +1,8 @@
 # Google Sign-In Plugin Integration
 | Supported Platforms |
 | :-----------------: |
-| Android \| iOS      |
+| Android             |
+| iOS                 |
 
 - [Download & Install Plugin](https://github.com/googlesamples/google-signin-unity/releases)
 - [Follow instructions for proper integration](https://github.com/googlesamples/google-signin-unity#configuring-the-application--on-the-api-console)
