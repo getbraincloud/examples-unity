@@ -23,9 +23,7 @@ You will need to create a project on [Google Cloud](https://console.developers.g
 ### brainCloud Configuration
 
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
-
 2. Click **Configure Google**
-
 3. Fill out the following required fields using the information in your Google Cloud project for your app:
     - Google App ID
     - Google Client ID

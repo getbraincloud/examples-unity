@@ -24,9 +24,7 @@ In `UserHandler.AuthenticateGoogleOpenId()`, you can set up `GoogleSignInConfigu
 ### brainCloud Configuration
 
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
-
 2. Click **Configure Google**
-
 3. Fill out the following required fields using the information in your Google Cloud project for your app:
     - Google App ID
     - Google Client ID
@@ -35,24 +33,17 @@ In `UserHandler.AuthenticateGoogleOpenId()`, you can set up `GoogleSignInConfigu
 ### Building for iOS
 
 The Google Sign-In plugin technically still supports iOS, but it requires some extra overhead:
-
 - Before building, open `Assets > External Dependency Manager > iOS Resolver > Settings` and ensure `Link frameworks statically` is enabled
-
 - In the `Build Settings` menu, `Development Build` will need to be disabled
-
 - Open `GoogleSignInDependencies.xml`; the `iosPods` property for `iosPod name ="GoogleSignIn"` will need to be edited to the below:
-
 ```
 <iosPod name="GoogleSignIn" version="&#60; 5.0.0" bitcodeEnabled="true"
 ```
-
 - [GoogleService-Info.plist](./GoogleOpenId.md#googleservice-infoplist-template) is a template to create a `GoogleService-Info.plist` file to add to your Xcode project
     - Fill out the properties with your app's credentials from the Google Cloud project
     - When importing this into Xcode, make sure that `Target Membership` is enabled for `Unity-iPhone`
-
 - You will also need to add the [URL types](./GoogleOpenId.md#url-types-property) property to your `Info.plist`
-    - Copy your `REVERSED_CLIENT_ID` from `GoogleService-Info.plist`
-    
+    - Copy your `REVERSED_CLIENT_ID` from `GoogleService-Info.plist`    
 - Finally, the `Pods` project in Xcode will need `Build Settings > Build Options > Enable Bitcode` set to `Yes`
 
 #### GoogleService-Info.plist Template

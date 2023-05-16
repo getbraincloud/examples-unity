@@ -10,6 +10,7 @@ These examples are no longer maintained and are archived here for reference. The
 
 Example of authenticating with brainCloud using an Apple account. Inside there is a pdf tutorial describing the steps you will need to take in order to properly connect your Apple developer's app and braincloud app. This is for IOS only.
 
+---
 
 ## Authentication
 
@@ -32,6 +33,7 @@ This example demonstrates how to call methods in the following modules:
 You can find more information about how to run the example here:
 http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-authentication-example/
 
+---
 
 ## AuthenticationErrorHandling
 
@@ -40,6 +42,7 @@ http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-authentication-
 This example demonstrates various error handling cases around authentication.
 Use it to experiment with authentication error states.
 
+---
 
 ## OldGoogleAuth
 
@@ -49,6 +52,7 @@ Example of authenticating with brainCloud using a Google account. Inside there i
 
 This method of authenticating with google is NOT recommended, and only works for Android. We highly recommend you looking into our GoogleOpenId example instead, and setting up your google authentication using the googleOpenId. 
 
+--
 
 ## OpenIdGoogle
 

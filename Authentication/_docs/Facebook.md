@@ -31,9 +31,7 @@ In `UserHandler.AuthenticateFacebook()` and `UserHandler.AuthenticateFacebookLim
 ### brainCloud Configuration
 
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
-
 2. Click **Configure Facebook**
-
 3. Fill out the following required fields using the information in the Facebook developer portal for your app:
     - Facebook App ID
     - Facebook App Secret

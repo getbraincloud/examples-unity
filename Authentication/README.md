@@ -30,13 +30,10 @@ Be sure to check out the various **Data**, **ServiceUI**, and **ContentUI** scri
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/), you will need to set up your own app for the API calls in this project to return responses
     - For a quick start, within the **brainCloud - UNITY PLUGIN TEMPLATE LIST - NOEDIT** team, you can [export the configuration data](https://getbraincloud.com/apidocs/portal-usage/importexport-game-data/) from the **Authentication (14185)** example app and import that data into your own authentication app for your team
     - Ensure that your app has enabled support for the platforms you intend on testing on, such as Facebook, Google Android, Windows, etc.
-
 2. In the Unity Authentication project, open up `Main.unity`
-
 3. Log into your brainCloud account via `brainCloud > Settings` in the dropdown menu and select your Team & App from the dropdowns in the brainCloud window
     - This will create the `BrainCloudSettings.asset` and the `BrainCloudEditorSettings.asset` files required for the brainCloud client to function properly
     - Toggle `Enable Logging` to see brainCloud responses in the Unity Console logs
-
 4. The **Main** scene has the GameObject **brainCloudManager** with **BCManager** attached as a component; running this scene will allow you to use & test the app
 
 ### Data Objects
@@ -68,7 +65,6 @@ This Unity example project by default includes Google's **External Dependency Ma
 This example app also has various external authentication methods integrated to showcase how it can be done with your own app. This functionality requires third-party plugins to make use of, which are **not** included with this example app. Once they are integrated in your local copy, you can enable external authentication using certain **Scripting Define Symbols**.
 
 Currently integrated external authentication methods:
-
 | Instructions                                        | Scripting Define Symbol |
 | --------------------------------------------------- | :---------------------: |
 | [AuthenticateApple](./_docs/Apple.md)               | `APPLE_SDK`             |
