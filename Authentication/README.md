@@ -66,4 +66,4 @@ More external authentication methods to come!
 
 ---
 
-For more information on brainCloud and its services, please checkout the brainCloud [API Documents](https://getbraincloud.com/apidocs/) and [API References](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+For more information on brainCloud and its services, please checkout the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
