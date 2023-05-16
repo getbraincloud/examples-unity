@@ -1,7 +1,9 @@
 # Facebook SDK Integration
-| Supported Platforms   |
-| :-------------------: |
-| Android \| iOS \| Web |
+| Supported Platforms |
+| :-----------------: |
+| Android             |
+| iOS                 |
+| Web                 |
 
 - [Download & Install Plugin](https://developers.facebook.com/docs/unity/)
 - [Follow instructions for proper integration](https://developers.facebook.com/docs/unity/gettingstarted)
