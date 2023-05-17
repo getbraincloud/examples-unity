@@ -23,7 +23,7 @@ Create a new app using a template of one of these examples:
 2. In the brainCloud Settings window, login to your current account or signup for the first time
     - Note: brainCloud is free during development!
 
-3. With your team selected, select **Create New App ...** and check **Create with template?**
+3. With your team selected, select `-- Create New App --` and check `Create using Tutorial template`
 
 4. Select the template you wish to use
     - If using the SpaceShooter example, select the SpaceShooter template
