@@ -4,9 +4,8 @@
 | :-----------------: |
 | Android             |
 
-[Download & Install Plugin](https://github.com/playgameservices/play-games-plugin-for-unity/releases/)
-
-[Follow instructions for proper integration](https://github.com/playgameservices/play-games-plugin-for-unity#configure-your-game)
+- [Download & Install Plugin](https://github.com/playgameservices/play-games-plugin-for-unity/releases/)
+- [Follow instructions for proper integration](https://github.com/playgameservices/play-games-plugin-for-unity#configure-your-game)
 
 ### External Dependency Manager
 

@@ -5,9 +5,8 @@
 | iOS                 |
 | macOS               |
 
-[Download & Install Plugin](https://github.com/lupidan/apple-signin-unity)
-
-[Follow instructions for proper integration](https://github.com/lupidan/apple-signin-unity#installation)
+- [Download & Install Plugin](https://github.com/lupidan/apple-signin-unity)
+- [Follow instructions for proper integration](https://github.com/lupidan/apple-signin-unity#installation)
 
 ## Set-Up
 

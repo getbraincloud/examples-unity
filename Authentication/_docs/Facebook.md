@@ -6,9 +6,8 @@
 | iOS                 |
 | Web                 |
 
-[Download & Install Plugin](https://developers.facebook.com/docs/unity/)
-
-[Follow instructions for proper integration](https://developers.facebook.com/docs/unity/gettingstarted)
+- [Download & Install Plugin](https://developers.facebook.com/docs/unity/)
+- [Follow instructions for proper integration](https://developers.facebook.com/docs/unity/gettingstarted)
 
 ### External Dependency Manager
 

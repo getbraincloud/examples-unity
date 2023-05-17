@@ -1,10 +1,10 @@
 # brainCloud Unity Examples
 
-This repository contains example Unity projects that make use of the [brainCloud client](https://github.com/getbraincloud/braincloud-csharp) — an excellent place to start learning how the various [brainCloud APIs](https://getbraincloud.com/) are used.
+This repository contains example Unity projects that make use of the [brainCloud client](https://github.com/getbraincloud/braincloud-csharp) — an excellent place to start learning how the various [brainCloud APIs](https://getbraincloud.com/) are used!
 
-These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code! 
+These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code.
 
-Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform back end, such as the Google Play console or Apple Developer portal. 
+Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform backend, such as the Google Play console or Apple Developer portal.
 
 ---
 
@@ -43,13 +43,25 @@ Create a new app using a template of one of these examples:
 
 ## Authentication
 
-Authentication has been updated with a new look! Check out the [Authentication README.md](./Authentication/README.md) for more information. This app will be updated as new features and authentication methods are added to brainCloud.
+Authentication has been updated with a new look! Check out the [Authentication README.md](./Authentication/README.md) for more information. This example will be updated as new features and authentication methods are added to brainCloud.
 
 ---
 
 ## BCAmazonIAP
 
-An example app demonstrating **Amazon In-App Purchases** and verification with brainCloud. Inside there is a [PDF](./BCAmazonIAP/amazonIAPTutorial.pdf) describing the steps you will need to take to get going.
+This example demonstrates **Amazon In-App Purchases** and verification with brainCloud. Inside there is a [PDF](./BCAmazonIAP/amazonIAPTutorial.pdf) describing the steps you will need to take to get going.
+
+---
+
+## BCChat
+
+An example demonstrating the **Chat** service on brainCloud, which works on apps making use of brainCloud RTT.
+
+---
+
+## BCClashers
+
+This example showcases the **One-Way Match** and **Playback Stream** services in brainCloud. Check out the [Clashers README.md](./brainCloud%20Clashers/README.md) for more information.
 
 ---
 
@@ -61,7 +73,7 @@ Go to the **SplashScreen** scene and run it to test it out in the editor!
 
 For more information, check out the [BombersRTT README.md](./BombersRTT/README.md) file.
 
-Demo Link: http://apps.braincloudservers.com/bombersrtt-demo/index.html
+- [Demo Link](http://apps.braincloudservers.com/bombersrtt-demo/index.html)
 
 ### Enable Hosting
 
@@ -72,12 +84,6 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 - `DEBUG_LOG_ENABLED` - Enable logs via GDebug Class
 - `STEAMWORKS_ENABLED` - Enable Steam SDK integration, must have the steam client open on a desktop to use via the editor
 - `BUY_CURRENCY_ENABLED` - Enable store product purchasing – PC / Mac / Standalone builds require the `STEAMWORKS_ENABLED` flag
-
----
-
-## Clashers
-
-This example showcases the **One-Way Match** service in brainCloud. Check out the [Clashers README.md](./brainCloud%20Clashers/README.md) for more information.
 
 ---
 
@@ -100,10 +106,18 @@ This code example is based on the [Firebase Unity Quickstart Project](https://gi
 You can see more FCM documentation here: https://firebase.google.com/docs/cloud-messaging/android/client
 
 Project currently only contains a push notifications example for Android FCM
-- Add your google-services.json file to the asset folder. Found on the Firebase dashboard
-- Update the brainCloud AppId and Secret on BrainCloudSettings to match yours. Id and Secret found on the brainCloud Dashboard
+- Add your google-services.json file to the asset folder
+    - Found on the Firebase dashboard
+- Update the brainCloud AppId and Secret on BrainCloudSettings to match yours
+    - Id and Secret found on the brainCloud Dashboard
 - Download and import the Auth and Messaging Firebase Unity SDK
-- Read more: https://firebase.google.com/docs/unity/setup
+- Set-up Instructions: https://firebase.google.com/docs/unity/setup
+
+---
+
+## RelayTestApp
+
+An example that showcases the **Matchmaking** and **Relay** services in brainCloud.
 
 ---
 
@@ -111,7 +125,7 @@ Project currently only contains a push notifications example for Android FCM
 
 The _Getting Started With Unity_ video uses the Space Shooter example as a backing project.
 
-Go to the **BrainCloudConnect** scene and run the app to test it out in the editor!
+Go to the **BrainCloudConnect** scene and run the game to test it out in the editor!
 
 Find more information, including the video itself, here: http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-tutorial-1-getting-started/
 
