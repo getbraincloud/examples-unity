@@ -15,3 +15,7 @@ Project currently only contains a push notifications example for Android FCM
 - Update the brainCloud AppId and Secret on BrainCloudSettings to match yours. Id and Secret found on the brainCloud Dashboard
 - Download and import the Auth and Messaging Firebase Unity SDK
 - Read more: https://firebase.google.com/docs/unity/setup
+
+---
+
+For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).

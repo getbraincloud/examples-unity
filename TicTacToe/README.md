@@ -168,6 +168,8 @@ private void onRTTFailure(int status, int reasonCode, string responseData, objec
 }
 ```
 
-
-
 Enabling RTT, and activating a listener for the Async Match Service, allows for real-time messages to be acted upon from within the client. `queryMatchState()` used to be controlled via user interaction. By connecting this to an RTT listener, we can provide the user with a SEAMLESS interaction into both a pure offline Async Match and its real-time updates. 
+
+---
+
+For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
