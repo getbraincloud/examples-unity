@@ -30,11 +30,11 @@ public readonly struct ErrorResponse
 
     public ErrorResponse(string jsonError)
     {
-        Dictionary<string, object> json = JsonReader.Deserialize(jsonError) as Dictionary<string, object>;
+        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonError);
         ReasonCode = (int)json[PROPERTY_REASON_CODE];
         Status = (int)json[PROPERTY_STATUS];
         Message = (string)json[PROPERTY_MESSAGE];
     }
 
-    public string Serialize() => JsonWriter.Serialize(this);
+    public override string ToString() => JsonWriter.Serialize(this);
 }
