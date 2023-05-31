@@ -1,4 +1,5 @@
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 
@@ -8,7 +9,8 @@ using System.Collections.Generic;
 [Serializable]
 public struct HockeyStatsData : IJSON
 {
-    // Public
+    public static readonly string DataType = "hockey_player_stats";
+
     public enum FieldPosition
     {
         Center,
@@ -26,8 +28,6 @@ public struct HockeyStatsData : IJSON
     };
 
     #region Consts
-
-    public static readonly string DataType = "hockey_player_stats";
 
     // JSON Properties
     private const string PROPERTY_NAME     = "name";
@@ -63,7 +63,7 @@ public struct HockeyStatsData : IJSON
 
     public string GetDataType() => DataType;
 
-    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    public Dictionary<string, object> GetDictionary() => new()
     {
         { PROPERTY_NAME,  Name },  { PROPERTY_POSITION, PositionValue },
         { PROPERTY_GOALS, Goals }, { PROPERTY_ASSISTS,  Assists }
@@ -71,12 +71,19 @@ public struct HockeyStatsData : IJSON
 
     public string Serialize() => JsonWriter.Serialize(this);
 
-    public void Deserialize(Dictionary<string, object> json)
+    public IJSON Deserialize(string json)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IJSON Deserialize(Dictionary<string, object> json)
     {
         Name = (string)json[PROPERTY_NAME];
         PositionValue = (int)json[PROPERTY_POSITION];
         Goals = (int)json[PROPERTY_GOALS];
         Assists = (int)json[PROPERTY_ASSISTS];
+
+        return this;
     }
 
     #endregion

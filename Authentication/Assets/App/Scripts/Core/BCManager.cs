@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.Entity;
+using BrainCloud.JSONHelper;
 using System;
 using UnityEngine;
 

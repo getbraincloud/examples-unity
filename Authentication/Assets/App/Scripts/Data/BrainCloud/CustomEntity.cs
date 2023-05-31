@@ -1,6 +1,7 @@
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 
@@ -55,22 +56,11 @@ public struct CustomEntity : IJSON
         Data = data;
     }
 
-    public T GetData<T>() where T : IJSON
-        => (T)(Data is T ? Data : default);
-
-    public void SetData<T>(T data) where T : IJSON
-    {
-        if (Data is T)
-        {
-            Data = data;
-        }
-    }
-
     #region IJSON
 
     public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
 
-    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    public Dictionary<string, object> GetDictionary() => new()
     {
         { PROPERTY_VERSION,      Version },    { PROPERTY_OWNER_ID,   OwnerID },   { PROPERTY_ENTITY_ID,  EntityID },
         { PROPERTY_ENTITY_TYPE,  EntityType }, { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt },
@@ -80,7 +70,12 @@ public struct CustomEntity : IJSON
 
     public string Serialize() => JsonWriter.Serialize(this);
 
-    public void Deserialize(Dictionary<string, object> json)
+    public IJSON Deserialize(string json)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IJSON Deserialize(Dictionary<string, object> json)
     {
         Version = (int)json[PROPERTY_VERSION];
         OwnerID = (string)json[PROPERTY_OWNER_ID];
@@ -109,13 +104,15 @@ public struct CustomEntity : IJSON
             EntityType = (string)json[PROPERTY_ENTITY_TYPE];
             Data = EntityType == HockeyStatsData.DataType ? new HockeyStatsData() : new RPGData();
         }
-
+        
         if (Data != null && json.ContainsKey(PROPERTY_DATA))
         {
             Data.Deserialize(json[PROPERTY_DATA] as Dictionary<string, object>);
         }
 
         EntityType = GetDataType();
+
+        return this;
     }
 
     #endregion

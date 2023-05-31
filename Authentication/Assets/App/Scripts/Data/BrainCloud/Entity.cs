@@ -1,6 +1,7 @@
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +12,6 @@ using System.Collections.Generic;
 public struct Entity : IJSON
 {
     #region Consts
-
     // JSON Properties
     private const string PROPERTY_VERSION     = "version";
     private const string PROPERTY_ENTITY_ID   = "entityId";
@@ -42,22 +42,11 @@ public struct Entity : IJSON
         Data = data;
     }
 
-    public T GetData<T>() where T : IJSON
-        => (T)(Data is T ? Data : default);
-
-    public void SetData<T>(T data) where T : IJSON
-    {
-        if (Data is T)
-        {
-            Data = data;
-        }
-    }
-
     #region IJSON
 
     public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
 
-    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    public Dictionary<string, object> GetDictionary() => new()
     {
         { PROPERTY_VERSION,    Version },   { PROPERTY_ENTITY_ID,  EntityID },  { PROPERTY_ENTITY_TYPE, EntityType },
         { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt }, { PROPERTY_ACL,         ACL },
@@ -66,7 +55,12 @@ public struct Entity : IJSON
 
     public string Serialize() => JsonWriter.Serialize(this);
 
-    public void Deserialize(Dictionary<string, object> json)
+    public IJSON Deserialize(string json)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IJSON Deserialize(Dictionary<string, object> json)
     {
         Version = (int)json[PROPERTY_VERSION];
         EntityID = (string)json[PROPERTY_ENTITY_ID];
@@ -79,13 +73,15 @@ public struct Entity : IJSON
         {
             Data = new UserData();
         }
-
+        
         if (Data != null && json.ContainsKey(PROPERTY_DATA))
         {
             Data.Deserialize(json[PROPERTY_DATA] as Dictionary<string, object>);
         }
 
         EntityType = GetDataType();
+
+        return this;
     }
 
     #endregion

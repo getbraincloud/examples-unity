@@ -6,6 +6,13 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
+#if APPLE_SDK
+using AppleAuth;
+using AppleAuth.Enums;
+using AppleAuth.Native;
+using AppleAuth.Interfaces;
+#endif
+
 #if FACEBOOK_SDK
 using Facebook.Unity;
 #endif
@@ -17,13 +24,6 @@ using GooglePlayGames.BasicApi;
 
 #if GOOGLE_OPENID_SDK
 using Google;
-#endif
-
-#if APPLE_SDK
-using AppleAuth;
-using AppleAuth.Enums;
-using AppleAuth.Native;
-using AppleAuth.Interfaces;
 #endif
 
 /// <summary>

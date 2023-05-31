@@ -261,11 +261,19 @@ public class LoggerContentUI : ContentUIBehaviour
             {
                 if (current == '{' || current == '[')
                 {
-                    indents += tab;
-
                     sb.Append(current);
-                    sb.Append(Environment.NewLine);
-                    sb.Append(indents);
+                    if ((current == '{' && json[i + 1] == '}') ||
+                        (current == '[' && json[i + 1] == ']'))
+                    {
+                        sb.Append(json[i + 1]);
+                        i++;
+                    }
+                    else
+                    {
+                        indents += tab;
+                        sb.Append(Environment.NewLine);
+                        sb.Append(indents);
+                    }
                 }
                 else if (current == '}' || current == ']')
                 {

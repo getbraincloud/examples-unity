@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -110,8 +111,8 @@ public class EntityServiceUI : ContentUIBehaviour
             TypeField.text = DEFAULT_EMPTY_FIELD;
         }
 
-        NameField.text = userEntity.GetData<UserData>().Name;
-        AgeField.text = userEntity.GetData<UserData>().Age;
+        NameField.text = userEntity.Data.ToType<UserData>().Name;
+        AgeField.text = userEntity.Data.ToType<UserData>().Age;
 
         IsInteractable = true;
     }

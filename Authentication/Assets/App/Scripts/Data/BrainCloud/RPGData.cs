@@ -1,4 +1,5 @@
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,11 +10,11 @@ using UnityEngine;
 [Serializable]
 public struct RPGData : IJSON
 {
+    public static readonly string DataType = "rpg_character";
+
     #region Consts
 
     // Public
-    public static readonly string DataType = "rpg_character";
-
     public const int MIN_LEVEL    = 1;
     public const int MAX_LEVEL    = 99;
     public const int MIN_HEALTH   = 100;
@@ -67,7 +68,7 @@ public struct RPGData : IJSON
 
     public string GetDataType() => DataType;
 
-    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    public Dictionary<string, object> GetDictionary() => new()
     {
         { PROPERTY_NAME,   Name },   { PROPERTY_JOB,      Job },      { PROPERTY_LEVEL,   Level },
         { PROPERTY_HEALTH, Health }, { PROPERTY_STRENGTH, Strength }, { PROPERTY_DEFENSE, Defense }
@@ -75,7 +76,7 @@ public struct RPGData : IJSON
 
     public string Serialize() => JsonWriter.Serialize(this);
 
-    public void Deserialize(Dictionary<string, object> json)
+    public IJSON Deserialize(Dictionary<string, object> json)
     {
         Name = (string)json[PROPERTY_NAME];
         Job = ((string)json[PROPERTY_JOB]).ToLower();
@@ -83,6 +84,13 @@ public struct RPGData : IJSON
         Health = (int)json[PROPERTY_HEALTH];
         Strength = (int)json[PROPERTY_STRENGTH];
         Defense = (int)json[PROPERTY_DEFENSE];
+
+        return this;
+    }
+
+    public IJSON Deserialize(string json)
+    {
+        throw new NotImplementedException();
     }
 
     #endregion
