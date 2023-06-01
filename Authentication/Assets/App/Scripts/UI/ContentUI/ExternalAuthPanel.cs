@@ -93,7 +93,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
             ButtonContent button = Instantiate(ButtonTemplate, ButtonContent);
             button.gameObject.SetActive(true);
-            button.gameObject.SetName(authItem.Name, "{0}MenuItem");
+            button.gameObject.SetName("{0}MenuItem", authItem.Name);
             button.Label = authItem.Name;
             button.LeftIcon = authItem.Icon;
             button.LabelColor = authItem.LabelColor;

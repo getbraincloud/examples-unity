@@ -23,35 +23,28 @@ public struct UserData : IJSON
 
     #endregion
 
-    [JsonName(PROPERTY_NAME)] public string Name;
-    [JsonName(PROPERTY_AGE)]  public string Age;
+    [JsonName(PROPERTY_NAME)] public string name;
+    [JsonName(PROPERTY_AGE)]  public string age;
 
-    public UserData(string name = "", string age = "")
+    public UserData(string name, string age)
     {
-        Name = name.IsEmpty() ? DEFAULT_NAME : name;
-        Age = age.IsEmpty() ? DEFAULT_AGE : age;
+        this.name = name.IsEmpty() ? DEFAULT_NAME : name;
+        this.age = age.IsEmpty() ? DEFAULT_AGE : age;
     }
 
     #region IJSON
 
     public string GetDataType() => DataType;
 
-    public Dictionary<string, object> GetDictionary() => new()
+    public Dictionary<string, object> ToJSONObject() => new()
     {
-        { PROPERTY_NAME, Name }, { PROPERTY_AGE, Age }
+        { PROPERTY_NAME, name }, { PROPERTY_AGE, age }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public IJSON Deserialize(string json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        throw new NotImplementedException();
-    }
-
-    public IJSON Deserialize(Dictionary<string, object> json)
-    {
-        Name = (string)json[PROPERTY_NAME];
-        Age = (string)json[PROPERTY_AGE];
+        name = obj[PROPERTY_NAME].ToString();
+        age = obj[PROPERTY_AGE].ToString();
 
         return this;
     }

@@ -60,7 +60,7 @@ public struct CustomEntity : IJSON
 
     public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
 
-    public Dictionary<string, object> GetDictionary() => new()
+    public Dictionary<string, object> ToJSONObject() => new()
     {
         { PROPERTY_VERSION,      Version },    { PROPERTY_OWNER_ID,   OwnerID },   { PROPERTY_ENTITY_ID,  EntityID },
         { PROPERTY_ENTITY_TYPE,  EntityType }, { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt },
@@ -68,27 +68,18 @@ public struct CustomEntity : IJSON
         { PROPERTY_DATA,         Data }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public IJSON Deserialize(string json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        throw new NotImplementedException();
-    }
+        Version = obj[PROPERTY_VERSION].ToType<int>();
+        OwnerID = obj[PROPERTY_OWNER_ID].ToString();
+        EntityID = obj[PROPERTY_ENTITY_ID].ToString();
+        CreatedAt = Util.BcTimeToDateTime(obj[PROPERTY_CREATED_AT].ToType<long>());
+        UpdatedAt = Util.BcTimeToDateTime(obj[PROPERTY_UPDATED_AT].ToType<long>());
 
-    public IJSON Deserialize(Dictionary<string, object> json)
-    {
-        Version = (int)json[PROPERTY_VERSION];
-        OwnerID = (string)json[PROPERTY_OWNER_ID];
-        EntityID = (string)json[PROPERTY_ENTITY_ID];
-        CreatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_CREATED_AT]);
-        UpdatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_UPDATED_AT]);
-
-        if (json.ContainsValue(json[PROPERTY_TIME_TO_LIVE]))
+        if (obj.ContainsKey(PROPERTY_TIME_TO_LIVE))
         {
-            TimeToLive = json[PROPERTY_TIME_TO_LIVE].GetType() == typeof(long) ? TimeSpan.FromMilliseconds((long)json[PROPERTY_TIME_TO_LIVE])
-                                                                               : TimeSpan.FromMilliseconds((int)json[PROPERTY_TIME_TO_LIVE]);
-
-            ExpiresAt = Util.BcTimeToDateTime((long)json[PROPERTY_EXPIRES_AT]);
+            TimeToLive = TimeSpan.FromMilliseconds(obj[PROPERTY_TIME_TO_LIVE].ToType<long>());
+            ExpiresAt = Util.BcTimeToDateTime(obj[PROPERTY_EXPIRES_AT].ToType<long>());
         }
         else
         {
@@ -97,17 +88,17 @@ public struct CustomEntity : IJSON
         }
 
         ACL ??= new ACL();
-        ACL.ReadFromJson(json[PROPERTY_ACL] as Dictionary<string, object>);
+        ACL.ReadFromJson(obj[PROPERTY_ACL].ToJSONObject());
 
         if (Data == null)
         {
-            EntityType = (string)json[PROPERTY_ENTITY_TYPE];
+            EntityType = (string)obj[PROPERTY_ENTITY_TYPE];
             Data = EntityType == HockeyStatsData.DataType ? new HockeyStatsData() : new RPGData();
         }
         
-        if (Data != null && json.ContainsKey(PROPERTY_DATA))
+        if (Data != null && obj.ContainsKey(PROPERTY_DATA))
         {
-            Data.Deserialize(json[PROPERTY_DATA] as Dictionary<string, object>);
+            Data.FromJSONObject(obj[PROPERTY_DATA] as Dictionary<string, object>);
         }
 
         EntityType = GetDataType();

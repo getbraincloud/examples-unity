@@ -372,7 +372,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
             }
 
             LoginContent.IsInteractable = false;
-            UserHandler.AuthenticateAdvanced(authenticationType, ids, userData.GetDictionary(), true,
+            UserHandler.AuthenticateAdvanced(authenticationType, ids, userData.ToJSONObject(), true,
                                              OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                              OnFailure("Authentication Failed", OnAuthenticationFailure));
 

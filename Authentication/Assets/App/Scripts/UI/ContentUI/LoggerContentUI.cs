@@ -101,7 +101,7 @@ public class LoggerContentUI : ContentUIBehaviour
         for (int i = 0; i < logObjects.Count; i++)
         {
             logObjects[i].ClearLogObject();
-            logObjects[i].gameObject.SetName($"UnusedLogObject");
+            logObjects[i].gameObject.SetName("UnusedLogObject");
             logObjects[i].gameObject.SetActive(false);
         }
 
@@ -131,7 +131,7 @@ public class LoggerContentUI : ContentUIBehaviour
         for (int i = logIndex; i < MaxLogMessages; i++)
         {
             log = Instantiate(LogTemplate, LogContent);
-            log.gameObject.SetName($"UnusedLogObject");
+            log.gameObject.SetName("UnusedLogObject");
             log.gameObject.SetActive(false);
 
             logObjects.Add(log);
@@ -152,7 +152,10 @@ public class LoggerContentUI : ContentUIBehaviour
         LogMessageUI log = logObjects[logIndex];
         log.ConfigureLogObject(type, message, wordWrap, canCopy);
         log.transform.SetAsLastSibling();
-        log.gameObject.SetName($"{type}{(type == LogType.Log ? "Message" : "Log")}Object{logIndex:00}");
+        log.gameObject.SetName("{0}{1}{2}Object{3}", string.Empty,
+                                                     type == LogType.Log ? "Message" : "Log",
+                                                     type.ToString(),
+                                                     logIndex.ToString("00"));
         log.gameObject.SetActive(true);
 
         if (isActiveAndEnabled)

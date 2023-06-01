@@ -105,7 +105,7 @@ public class PlayerStatsServiceUI : ContentUIBehaviour
 
             StatsContainerUI container = Instantiate(StatsContainerTemplate, StatsContent);
             container.gameObject.SetActive(true);
-            container.gameObject.SetName(key, "{0}StatsContainer");
+            container.gameObject.SetName("{0}StatsContainer", key);
             container.ShowSeparation(alternate);
             container.StatName = key;
             container.Value = Convert.ToInt64(statsObj[key]);

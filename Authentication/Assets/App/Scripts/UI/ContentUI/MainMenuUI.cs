@@ -166,7 +166,7 @@ public class MainMenuUI : ContentUIBehaviour
         {
             MenuItemUI menuItem = Instantiate(MenuItemTemplate, MenuContent);
             menuItem.gameObject.SetActive(true);
-            menuItem.gameObject.SetName(serviceItem.Name, "{0}MenuItem");
+            menuItem.gameObject.SetName("{0}MenuItem", serviceItem.Name);
             menuItem.Label = serviceItem.Name;
             menuItem.ButtonAction = () => OnMenuItemButton(serviceItem);
 

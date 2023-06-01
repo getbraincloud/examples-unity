@@ -88,7 +88,7 @@ public class AppContentUI : ContentUIBehaviour
 
         currentServiceUI = Instantiate(serviceItem.Prefab, ServiceContent);
         currentServiceUI.gameObject.SetActive(true);
-        currentServiceUI.gameObject.SetName(serviceItem.Name, "{0}ContentUI");
+        currentServiceUI.gameObject.SetName("{0}ContentUI", serviceItem.Name);
 
         ServiceScroll.verticalNormalizedPosition = 1.0f;
     }

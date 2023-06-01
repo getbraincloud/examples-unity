@@ -376,7 +376,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         for (int i = 0; i < data.Length; i++)
         {
             newCustomEntity = new CustomEntity();
-            newCustomEntity.Deserialize(data[i]);
+            newCustomEntity.FromJSONObject(data[i]);
             customEntities.Add(newCustomEntity);
         }
     }
@@ -401,7 +401,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
 
         CustomEntity newCustomEntity = new CustomEntity();
-        newCustomEntity.Deserialize(data);
+        newCustomEntity.FromJSONObject(data);
         customEntities.Add(newCustomEntity);
 
         currentIndex = customEntities.Count - 1;
@@ -419,7 +419,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
 
-        customEntities[currentIndex].Deserialize(data);
+        customEntities[currentIndex].FromJSONObject(data);
 
         if (customEntities[currentIndex].Data == null || !data.ContainsKey("data"))
         {
@@ -450,7 +450,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
             if (entityID == customEntities[i].EntityID)
             {
                 currentIndex = i;
-                customEntities[currentIndex].Deserialize(data);
+                customEntities[currentIndex].FromJSONObject(data);
                 GetCurrentEntityIndex();
 
                 break;

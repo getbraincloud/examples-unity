@@ -20,7 +20,7 @@ public struct HockeyStatsData : IJSON
         RightDefense
     }
 
-    public static readonly Dictionary<FieldPosition, string> FieldPositions = new Dictionary<FieldPosition, string>
+    public static readonly Dictionary<FieldPosition, string> FieldPositions = new()
     {
         { FieldPosition.Center,      "Center" },
         { FieldPosition.LeftWing,    "Left-Winger" },        { FieldPosition.RightWing, "Right-Winger" },
@@ -63,25 +63,18 @@ public struct HockeyStatsData : IJSON
 
     public string GetDataType() => DataType;
 
-    public Dictionary<string, object> GetDictionary() => new()
+    public Dictionary<string, object> ToJSONObject() => new()
     {
         { PROPERTY_NAME,  Name },  { PROPERTY_POSITION, PositionValue },
         { PROPERTY_GOALS, Goals }, { PROPERTY_ASSISTS,  Assists }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public IJSON Deserialize(string json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        throw new NotImplementedException();
-    }
-
-    public IJSON Deserialize(Dictionary<string, object> json)
-    {
-        Name = (string)json[PROPERTY_NAME];
-        PositionValue = (int)json[PROPERTY_POSITION];
-        Goals = (int)json[PROPERTY_GOALS];
-        Assists = (int)json[PROPERTY_ASSISTS];
+        Name = obj[PROPERTY_NAME].ToString();
+        PositionValue = obj[PROPERTY_POSITION].ToType<int>();
+        Goals = obj[PROPERTY_GOALS].ToType<int>();
+        Assists = obj[PROPERTY_ASSISTS].ToType<int>();
 
         return this;
     }

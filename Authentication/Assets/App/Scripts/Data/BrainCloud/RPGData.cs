@@ -68,29 +68,22 @@ public struct RPGData : IJSON
 
     public string GetDataType() => DataType;
 
-    public Dictionary<string, object> GetDictionary() => new()
+    public Dictionary<string, object> ToJSONObject() => new()
     {
         { PROPERTY_NAME,   Name },   { PROPERTY_JOB,      Job },      { PROPERTY_LEVEL,   Level },
         { PROPERTY_HEALTH, Health }, { PROPERTY_STRENGTH, Strength }, { PROPERTY_DEFENSE, Defense }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public IJSON Deserialize(Dictionary<string, object> json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        Name = (string)json[PROPERTY_NAME];
-        Job = ((string)json[PROPERTY_JOB]).ToLower();
-        Level = (int)json[PROPERTY_LEVEL];
-        Health = (int)json[PROPERTY_HEALTH];
-        Strength = (int)json[PROPERTY_STRENGTH];
-        Defense = (int)json[PROPERTY_DEFENSE];
+        Name = obj[PROPERTY_NAME].ToString();
+        Job = obj[PROPERTY_JOB].ToString().ToLower();
+        Level = obj[PROPERTY_LEVEL].ToType<int>();
+        Health = obj[PROPERTY_HEALTH].ToType<int>();
+        Strength = obj[PROPERTY_STRENGTH].ToType<int>();
+        Defense = obj[PROPERTY_DEFENSE].ToType<int>();
 
         return this;
-    }
-
-    public IJSON Deserialize(string json)
-    {
-        throw new NotImplementedException();
     }
 
     #endregion

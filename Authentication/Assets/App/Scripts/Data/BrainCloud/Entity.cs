@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// A basic data struct for brainCloud's user entities.
 /// </summary>
 [Serializable]
-public struct Entity : IJSON
+public struct Entity<T> : IJSON where T : IJSON
 {
     #region Consts
     // JSON Properties
@@ -29,9 +29,9 @@ public struct Entity : IJSON
     [JsonName(PROPERTY_CREATED_AT)]  public DateTime CreatedAt;
     [JsonName(PROPERTY_UPDATED_AT)]  public DateTime UpdatedAt;
     [JsonName(PROPERTY_ACL)]         public ACL ACL;
-    [JsonName(PROPERTY_DATA)]        public IJSON Data;
+    [JsonName(PROPERTY_DATA)]        public T Data;
 
-    public Entity(IJSON data)
+    public Entity(T data)
     {
         Version = -1; // -1 tells the server to create the latest version
         EntityID = string.Empty;
@@ -46,40 +46,23 @@ public struct Entity : IJSON
 
     public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
 
-    public Dictionary<string, object> GetDictionary() => new()
+    public Dictionary<string, object> ToJSONObject() => new()
     {
         { PROPERTY_VERSION,    Version },   { PROPERTY_ENTITY_ID,  EntityID },  { PROPERTY_ENTITY_TYPE, EntityType },
         { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt }, { PROPERTY_ACL,         ACL },
         { PROPERTY_DATA,       Data }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public IJSON Deserialize(string json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        throw new NotImplementedException();
-    }
-
-    public IJSON Deserialize(Dictionary<string, object> json)
-    {
-        Version = (int)json[PROPERTY_VERSION];
-        EntityID = (string)json[PROPERTY_ENTITY_ID];
-        EntityType = (string)json[PROPERTY_ENTITY_TYPE];
-        CreatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_CREATED_AT]);
-        UpdatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_UPDATED_AT]);
-        ACL.ReadFromJson(json[PROPERTY_ACL] as Dictionary<string, object>);
-
-        if (Data == null && EntityType == UserData.DataType)
-        {
-            Data = new UserData();
-        }
-        
-        if (Data != null && json.ContainsKey(PROPERTY_DATA))
-        {
-            Data.Deserialize(json[PROPERTY_DATA] as Dictionary<string, object>);
-        }
-
-        EntityType = GetDataType();
+        Version = obj[PROPERTY_VERSION].ToType<int>();
+        EntityID = obj[PROPERTY_ENTITY_ID].ToString();
+        EntityType = obj[PROPERTY_ENTITY_TYPE].ToString();
+        CreatedAt = Util.BcTimeToDateTime(obj[PROPERTY_CREATED_AT].ToType<long>());
+        UpdatedAt = Util.BcTimeToDateTime(obj[PROPERTY_UPDATED_AT].ToType<long>());
+        ACL ??= new ACL();
+        ACL.ReadFromJson(obj[PROPERTY_ACL].ToJSONObject());
+        Data = obj[PROPERTY_DATA].ToJSONType<T>();
 
         return this;
     }

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ public static class ExtensionMethods
 {
     private const int MAX_GAMEOBJECT_NAME = 32;
     private const string ALPHANUMERIC_CHARACTER_ARRAY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private const string GAMEOBJECT_NAME_CHARACTER_ARRAY = ALPHANUMERIC_CHARACTER_ARRAY + ".-+_()<>[] ";
+    private const string GAMEOBJECT_NAME_CHARACTER_ARRAY = ALPHANUMERIC_CHARACTER_ARRAY + ".-+_()<>[]";
     private static readonly int ANIMATION_TRIGGER_NORMAL = Animator.StringToHash("Normal");
     private static readonly int ANIMATION_TRIGGER_ERROR = Animator.StringToHash("Error");
 
@@ -60,7 +61,7 @@ public static class ExtensionMethods
         return enumerable switch
         {
             null => true,
-            ICollection<T> collection => collection.Count == 0,
+            ICollection collection => collection.Count == 0,
             _ => !enumerable.Any()
         };
     }
@@ -82,22 +83,25 @@ public static class ExtensionMethods
     {
         HashSet<char> alphanumeric = new(GAMEOBJECT_NAME_CHARACTER_ARRAY);
 
-        int count = 0;
-        StringBuilder result = new(MAX_GAMEOBJECT_NAME);
-        foreach (char c in args[0])
+        if (!args[0].IsEmpty())
         {
-            if (alphanumeric.Contains(c))
+            int count = 0;
+            StringBuilder result = new(MAX_GAMEOBJECT_NAME);
+            foreach (char c in args[0])
             {
-                result.Append(c);
-
-                if (++count >= MAX_GAMEOBJECT_NAME)
+                if (alphanumeric.Contains(c))
                 {
-                    break;
+                    result.Append(c);
+
+                    if (++count >= MAX_GAMEOBJECT_NAME)
+                    {
+                        break;
+                    }
                 }
             }
+            args[0] = result.ToString();
         }
 
-        args[0] = result.ToString();
         go.name = string.Format(format, args);
     }
 
