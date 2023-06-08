@@ -1,7 +1,10 @@
 using BrainCloud;
 using BrainCloud.Entity;
 using BrainCloud.JSONHelper;
+using BrainCloud.JsonFx.Json;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -307,7 +310,7 @@ public class BCManager : MonoBehaviour
             Debug.Log($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
 #endif
 
-            onFailure?.Invoke(new ErrorResponse(jsonError), cbObject);
+            onFailure?.Invoke(jsonError.Deserialize<ErrorResponse>(), cbObject);
         };
     }
 

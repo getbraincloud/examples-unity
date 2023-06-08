@@ -188,9 +188,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         CustomEntity current = customEntities[currentIndex];
 
-        IDField.text = current.EntityID;
+        IDField.text = current.entityId;
         TypeField.text = current.GetDataType();
-        if (current.Data is HockeyStatsData hockeyData)
+        if (current.data is HockeyStatsData hockeyData)
         {
             HockeyStatsUI.gameObject.SetActive(true);
             HockeyStatsUI.IsInteractable = true;
@@ -199,7 +199,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
             HockeyStatsUI.UpdateUI(current.IsOwned, hockeyData);
         }
-        else if (current.Data is RPGData rpgData)
+        else if (current.data is RPGData rpgData)
         {
             HockeyStatsUI.gameObject.SetActive(false);
             HockeyStatsUI.IsInteractable = false;
@@ -257,7 +257,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         CustomEntity current = customEntities[currentIndex];
 
-        if (current.EntityID.IsEmpty())
+        if (current.entityId.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ClearFields();
@@ -266,14 +266,14 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         IsInteractable = false;
 
-        current.Data = hockeyData;
+        current.data = hockeyData;
 
         customEntityService.UpdateEntity(current.GetDataType(),
-                                         current.EntityID,
+                                         current.entityId,
                                          -1,
-                                         current.Data.Serialize(),
-                                         current.ACL.ToJsonString(),
-                                         current.TimeToLive.Milliseconds.ToString(),
+                                         current.data.Serialize(),
+                                         current.acl.ToJsonString(),
+                                         current.timeToLive.Milliseconds.ToString(),
                                          OnSuccess($"Updated Custom Entity ({current.GetDataType()})", OnUpdateEntity_Success),
                                          OnFailure("UpdateEntity Failed", () => IsInteractable = true));
     }
@@ -282,7 +282,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         CustomEntity current = customEntities[currentIndex];
 
-        if (current.EntityID.IsEmpty())
+        if (current.entityId.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ClearFields();
@@ -292,7 +292,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         IsInteractable = false;
 
         customEntityService.DeleteEntity(current.GetDataType(),
-                                         current.EntityID,
+                                         current.entityId,
                                          -1,
                                          OnSuccess($"Deleted Custom Entity ({current.GetDataType()})", OnDeleteEntity_Success),
                                          OnFailure("DeleteEntity Failed", () => IsInteractable = true));
@@ -406,10 +406,10 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         currentIndex = customEntities.Count - 1;
 
-        if (newCustomEntity.Data == null || !data.ContainsKey("data"))
+        if (newCustomEntity.data == null || !data.ContainsKey("data"))
         {
             customEntityService.ReadEntity(newCustomEntity.GetDataType(),
-                                           newCustomEntity.EntityID,
+                                           newCustomEntity.entityId,
                                            OnSuccess($"Reading Custom Entity ({newCustomEntity.GetDataType()})", OnReadEntity_Success),
                                            OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
         }
@@ -421,10 +421,10 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         customEntities[currentIndex].FromJSONObject(data);
 
-        if (customEntities[currentIndex].Data == null || !data.ContainsKey("data"))
+        if (customEntities[currentIndex].data == null || !data.ContainsKey("data"))
         {
             customEntityService.ReadEntity(customEntities[currentIndex].GetDataType(),
-                                           customEntities[currentIndex].EntityID,
+                                           customEntities[currentIndex].entityId,
                                            OnSuccess($"Reading Custom Entity ({customEntities[currentIndex].GetDataType()})", OnReadEntity_Success),
                                            OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
         }
@@ -447,7 +447,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         for (int i = 0; i < customEntities.Count; i++)
         {
-            if (entityID == customEntities[i].EntityID)
+            if (entityID == customEntities[i].entityId)
             {
                 currentIndex = i;
                 customEntities[currentIndex].FromJSONObject(data);

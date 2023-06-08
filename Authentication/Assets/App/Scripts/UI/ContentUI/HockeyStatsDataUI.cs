@@ -81,11 +81,11 @@ public class HockeyStatsDataUI : ContentUIBehaviour
     public void UpdateUI(bool isOwned, HockeyStatsData hockeyStatsData)
     {
         hockeyStats = hockeyStatsData;
-        NameField.text = hockeyStats.Name;
-        PositionDropdown.value = (int)hockeyStats.Position;
+        NameField.text = hockeyStats.name;
+        PositionDropdown.value = (int)hockeyStats.PlayerPosition;
         UpdatePointsDisplay();
-        GoalsField.text = hockeyStats.Goals.ToString();
-        AssistsField.text = hockeyStats.Assists.ToString();
+        GoalsField.text = hockeyStats.goals.ToString();
+        AssistsField.text = hockeyStats.assists.ToString();
 
         IsInteractable = isOwned;
 
@@ -126,7 +126,7 @@ public class HockeyStatsDataUI : ContentUIBehaviour
                 return false;
             }
 
-            hockeyStats.Name = value;
+            hockeyStats.name = value;
             return true;
         }
 
@@ -140,7 +140,7 @@ public class HockeyStatsDataUI : ContentUIBehaviour
             if ((HockeyStatsData.FieldPosition)option == pos)
             {
                 PositionDropdown.value = option;
-                hockeyStats.PositionValue = option;
+                hockeyStats.position = option;
                 return;
             }
         }
@@ -165,11 +165,11 @@ public class HockeyStatsDataUI : ContentUIBehaviour
 
                 if (inputField == GoalsField)
                 {
-                    hockeyStats.Goals = result;
+                    hockeyStats.goals = result;
                 }
                 else // AssitsField
                 {
-                    hockeyStats.Assists = result;
+                    hockeyStats.assists = result;
                 }
                 
                 UpdatePointsDisplay();

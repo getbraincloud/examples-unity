@@ -1,4 +1,4 @@
-using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 
@@ -6,35 +6,41 @@ using System.Collections.Generic;
 /// Data struct for brainCloud Error Responses.
 /// </summary>
 [Serializable]
-public readonly struct ErrorResponse
+public readonly struct ErrorResponse : IJSON
 {
-    #region Consts
+    public readonly int ReasonCode;
+    public readonly int Status;
+    public readonly string Message;
 
-    // JSON Properties
-    private const string PROPERTY_REASON_CODE = "reason_code";
-    private const string PROPERTY_STATUS = "status";
-    private const string PROPERTY_MESSAGE = "status_message";
+    public ErrorResponse(int reason_code, int status, string status_message)
+    {
+        ReasonCode = reason_code;
+        Status = status;
+        Message = status_message;
+    }
+
+    public override string ToString() => this.Serialize();
+
+    public static string CreateGeneric(string message) => new ErrorResponse(0, 0, message).Serialize();
+
+    #region IJSON
+
+    public string GetDataType() => "error_response";
+
+    public Dictionary<string, object> ToJSONObject() => new()
+    {
+        { "reason_code",    ReasonCode }, { "status",  Status },
+        { "status_message", Message }
+    };
+
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
+    {
+        int reason_code = obj.GetValue<int>("reason_code");
+        int status = obj.GetValue<int>("status");
+        string status_message = obj.GetString("status_message");
+
+        return new ErrorResponse(reason_code, status, status_message);
+    }
 
     #endregion
-
-    [JsonName(PROPERTY_REASON_CODE)] public readonly int ReasonCode;
-    [JsonName(PROPERTY_STATUS)] public readonly int Status;
-    [JsonName(PROPERTY_MESSAGE)] public readonly string Message;
-
-    public ErrorResponse(int reasonCode, int status, string message)
-    {
-        ReasonCode = reasonCode;
-        Status = status;
-        Message = message;
-    }
-
-    public ErrorResponse(string jsonError)
-    {
-        var json = JsonReader.Deserialize<Dictionary<string, object>>(jsonError);
-        ReasonCode = (int)json[PROPERTY_REASON_CODE];
-        Status = (int)json[PROPERTY_STATUS];
-        Message = (string)json[PROPERTY_MESSAGE];
-    }
-
-    public override string ToString() => JsonWriter.Serialize(this);
 }

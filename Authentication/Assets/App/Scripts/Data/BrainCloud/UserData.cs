@@ -17,10 +17,6 @@ public struct UserData : IJSON
     private const string PROPERTY_NAME = "name";
     private const string PROPERTY_AGE  = "age";
 
-    // Defaults
-    private const string DEFAULT_NAME = "New User";
-    private const string DEFAULT_AGE  = "?";
-
     #endregion
 
     [JsonName(PROPERTY_NAME)] public string name;
@@ -28,8 +24,8 @@ public struct UserData : IJSON
 
     public UserData(string name, string age)
     {
-        this.name = name.IsEmpty() ? DEFAULT_NAME : name;
-        this.age = age.IsEmpty() ? DEFAULT_AGE : age;
+        this.name = name;
+        this.age = age;
     }
 
     #region IJSON
@@ -43,8 +39,8 @@ public struct UserData : IJSON
 
     public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        name = obj[PROPERTY_NAME].ToString();
-        age = obj[PROPERTY_AGE].ToString();
+        name = obj.GetString(PROPERTY_NAME);
+        age = obj.GetString(PROPERTY_AGE);
 
         return this;
     }

@@ -27,81 +27,64 @@ public struct CustomEntity : IJSON
 
     #endregion
 
-    [JsonName(PROPERTY_VERSION)]      public int Version;
-    [JsonName(PROPERTY_OWNER_ID)]     public string OwnerID;
-    [JsonName(PROPERTY_ENTITY_ID)]    public string EntityID;
-    [JsonName(PROPERTY_ENTITY_TYPE)]  public string EntityType;
-    [JsonName(PROPERTY_CREATED_AT)]   public DateTime CreatedAt;
-    [JsonName(PROPERTY_UPDATED_AT)]   public DateTime UpdatedAt;
-    [JsonName(PROPERTY_TIME_TO_LIVE)] public TimeSpan TimeToLive;
-    [JsonName(PROPERTY_EXPIRES_AT)]   public DateTime ExpiresAt;
-    [JsonName(PROPERTY_ACL)]          public ACL ACL;
-    [JsonName(PROPERTY_DATA)]         public IJSON Data;
+    [JsonName(PROPERTY_VERSION)]      public int version;
+    [JsonName(PROPERTY_OWNER_ID)]     public string ownerId;
+    [JsonName(PROPERTY_ENTITY_ID)]    public string entityId;
+    [JsonName(PROPERTY_ENTITY_TYPE)]  public string entityType;
+    [JsonName(PROPERTY_CREATED_AT)]   public DateTime createdAt;
+    [JsonName(PROPERTY_UPDATED_AT)]   public DateTime updatedAt;
+    [JsonName(PROPERTY_TIME_TO_LIVE)] public TimeSpan timeToLive;
+    [JsonName(PROPERTY_EXPIRES_AT)]   public DateTime expiresAt;
+    [JsonName(PROPERTY_ACL)]          public ACL acl;
+    [JsonName(PROPERTY_DATA)]         public IJSON data;
 
-    public bool IsOwned => OwnerID == UserHandler.ProfileID;
+    public bool IsOwned => ownerId == UserHandler.ProfileID;
 
-    public TimeSpan ExpiresIn => ExpiresAt - DateTime.UtcNow;
+    public TimeSpan ExpiresIn => expiresAt - DateTime.UtcNow;
 
     public CustomEntity(IJSON data)
     {
-        Version = -1; // -1 tells the server to create the latest version
-        OwnerID = string.Empty;
-        EntityID = string.Empty;
-        EntityType = data.GetDataType();
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-        TimeToLive = TimeSpan.MaxValue;
-        ExpiresAt = DateTime.MaxValue;
-        ACL = ACL.ReadWrite();
-        Data = data;
+        version = -1; // -1 tells the server to create the latest version
+        ownerId = string.Empty;
+        entityId = string.Empty;
+        entityType = data.GetDataType();
+        createdAt = DateTime.UtcNow;
+        updatedAt = DateTime.UtcNow;
+        timeToLive = TimeSpan.MaxValue;
+        expiresAt = DateTime.MaxValue;
+        acl = ACL.None();
+        this.data = data;
     }
 
     #region IJSON
 
-    public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
+    public string GetDataType() => data != null ? data.GetDataType() : entityType;
 
     public Dictionary<string, object> ToJSONObject() => new()
     {
-        { PROPERTY_VERSION,      Version },    { PROPERTY_OWNER_ID,   OwnerID },   { PROPERTY_ENTITY_ID,  EntityID },
-        { PROPERTY_ENTITY_TYPE,  EntityType }, { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt },
-        { PROPERTY_TIME_TO_LIVE, TimeToLive }, { PROPERTY_EXPIRES_AT, ExpiresAt }, { PROPERTY_ACL,        ACL },
-        { PROPERTY_DATA,         Data }
+        { PROPERTY_VERSION,      version },    { PROPERTY_OWNER_ID,   ownerId },   { PROPERTY_ENTITY_ID,  entityId },
+        { PROPERTY_ENTITY_TYPE,  entityType }, { PROPERTY_CREATED_AT, createdAt }, { PROPERTY_UPDATED_AT, updatedAt },
+        { PROPERTY_TIME_TO_LIVE, timeToLive }, { PROPERTY_EXPIRES_AT, expiresAt }, { PROPERTY_ACL,        acl },
+        { PROPERTY_DATA,         data }
     };
 
     public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        Version = obj[PROPERTY_VERSION].ToType<int>();
-        OwnerID = obj[PROPERTY_OWNER_ID].ToString();
-        EntityID = obj[PROPERTY_ENTITY_ID].ToString();
-        CreatedAt = Util.BcTimeToDateTime(obj[PROPERTY_CREATED_AT].ToType<long>());
-        UpdatedAt = Util.BcTimeToDateTime(obj[PROPERTY_UPDATED_AT].ToType<long>());
+        version = obj.GetValue<int>(PROPERTY_VERSION);
+        ownerId = obj.GetString(PROPERTY_OWNER_ID);
+        entityId = obj.GetString(PROPERTY_ENTITY_ID);
+        entityType = obj.GetString(PROPERTY_ENTITY_TYPE);
+        createdAt = obj.GetDateTime(PROPERTY_CREATED_AT);
+        updatedAt = obj.GetDateTime(PROPERTY_UPDATED_AT);
+        timeToLive = obj.GetTimeSpan(PROPERTY_TIME_TO_LIVE);
+        expiresAt = obj.GetDateTime(PROPERTY_EXPIRES_AT);
+        acl = obj.GetACL(PROPERTY_ACL);
 
-        if (obj.ContainsKey(PROPERTY_TIME_TO_LIVE))
+        data = entityType == HockeyStatsData.DataType ? new HockeyStatsData() : new RPGData();
+        if (data != null && obj.ContainsKey(PROPERTY_DATA))
         {
-            TimeToLive = TimeSpan.FromMilliseconds(obj[PROPERTY_TIME_TO_LIVE].ToType<long>());
-            ExpiresAt = Util.BcTimeToDateTime(obj[PROPERTY_EXPIRES_AT].ToType<long>());
+            data.FromJSONObject(obj.GetJSONObject(PROPERTY_DATA));
         }
-        else
-        {
-            TimeToLive = TimeSpan.MaxValue;
-            ExpiresAt = DateTime.MaxValue;
-        }
-
-        ACL ??= new ACL();
-        ACL.ReadFromJson(obj[PROPERTY_ACL].ToJSONObject());
-
-        if (Data == null)
-        {
-            EntityType = (string)obj[PROPERTY_ENTITY_TYPE];
-            Data = EntityType == HockeyStatsData.DataType ? new HockeyStatsData() : new RPGData();
-        }
-        
-        if (Data != null && obj.ContainsKey(PROPERTY_DATA))
-        {
-            Data.FromJSONObject(obj[PROPERTY_DATA] as Dictionary<string, object>);
-        }
-
-        EntityType = GetDataType();
 
         return this;
     }

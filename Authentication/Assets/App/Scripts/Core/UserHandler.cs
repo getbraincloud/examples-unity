@@ -153,7 +153,7 @@ public static class UserHandler
         }
         else
         {
-            onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateApple</b> is not available on this platform.").ToString(), cbObject);
+            onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateApple</b> is not available on this platform."), cbObject);
             return;
         }
 
@@ -182,17 +182,17 @@ public static class UserHandler
                 }
                 else
                 {
-                    onFailure(0, 0, new ErrorResponse(0, 0, "An error has occured. Please try again.").ToString(), cbObject);
+                    onFailure(0, 0, ErrorResponse.CreateGeneric("An error has occured. Please try again."), cbObject);
                 }
             },
             error =>
             {
                 string errorMessage = error != null ? $"{error.LocalizedDescription}" : "An error has occured. Please try again.";
-                onFailure(0, 0, new ErrorResponse(0, 0, errorMessage).ToString(), cbObject);
+                onFailure(0, 0, ErrorResponse.CreateGeneric(errorMessage), cbObject);
             });
 #else
         Debug.LogError("AuthenticateApple is not available on this platform. Check your scripting defines. Returning with error...");
-        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateApple</b> is not available on this platform.").ToString(), cbObject);
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateApple</b> is not available on this platform."), cbObject);
 #endif
     }
 #endif
@@ -218,12 +218,12 @@ public static class UserHandler
             }
             else if (result.Cancelled)
             {
-                onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").ToString(), cbObject);
+                onFailure(0, 0, ErrorResponse.CreateGeneric("Log in was cancelled."), cbObject);
             }
             else // Error
             {
                 string errorMessage = result.Error ?? "An error has occured. Please try again.";
-                onFailure(0, 0, new ErrorResponse(0, 0, errorMessage).ToString(), cbObject);
+                onFailure(0, 0, ErrorResponse.CreateGeneric(errorMessage), cbObject);
             }
         }
 
@@ -233,7 +233,7 @@ public static class UserHandler
         FB.Mobile.LoginWithTrackingPreference(LoginTracking.ENABLED, perms, null, onFBResult);
 #else
         Debug.LogError("AuthenticateFacebook is not available on this platform. Check your scripting defines. Returning with error...");
-        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateFacebook</b> is not available on this platform.").ToString(), cbObject);
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateFacebook</b> is not available on this platform."), cbObject);
 #endif
     }
 
@@ -265,17 +265,17 @@ public static class UserHandler
             }
             else if (result.Cancelled)
             {
-                onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").ToString(), cbObject);
+                onFailure(0, 0, ErrorResponse.CreateGeneric("Log in was cancelled."), cbObject);
             }
             else // Error
             {
                 string errorMessage = result.Error ?? "An error has occured. Please try again.";
-                onFailure(0, 0, new ErrorResponse(0, 0, errorMessage).ToString(), cbObject);
+                onFailure(0, 0, ErrorResponse.CreateGeneric(errorMessage), cbObject);
             }
         });
 #else
         Debug.LogError("AuthenticateFacebookLimited is only available on iOS. Returning with error...");
-        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead.").ToString(), cbObject);
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateFacebookLimited</b> is only available on iOS. Please use <b>AuthenticateFacebook</b> instead."), cbObject);
 #endif
     }
 #endif
@@ -300,16 +300,16 @@ public static class UserHandler
             }
             else if (status == SignInStatus.Canceled)
             {
-                onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").ToString(), cbObject);
+                onFailure(0, 0, ErrorResponse.CreateGeneric("Log in was cancelled."), cbObject);
             }
             else // Error
             {
-                onFailure(0, 0, new ErrorResponse(0, 0, "An error has occured. Please try again.").ToString(), cbObject);
+                onFailure(0, 0, ErrorResponse.CreateGeneric("An error has occured. Please try again."), cbObject);
             }
         });
 #else
         Debug.LogError("AuthenticateGoogle is not available on this platform. Check your scripting defines. Returning with error...");
-        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateGoogle</b> is not available on this platform.").ToString(), cbObject);
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateGoogle</b> is not available on this platform."), cbObject);
 #endif
     }
 #endif
@@ -354,17 +354,17 @@ public static class UserHandler
                         if (enumerator.MoveNext())
                         {
                             GoogleSignIn.SignInException error = (GoogleSignIn.SignInException)enumerator.Current;
-                            onFailure(0, 0, new ErrorResponse(0, 0, $"{error.Status}\n{error.Message}").ToString(), cbObject);
+                            onFailure(0, 0, ErrorResponse.CreateGeneric($"{error.Status}\n{error.Message}"), cbObject);
                         }
                         else
                         {
-                            onFailure(0, 0, new ErrorResponse(0, 0, $"An error has occured. Please try again.\nError: {task.Exception}").ToString(), cbObject);
+                            onFailure(0, 0, ErrorResponse.CreateGeneric($"An error has occured. Please try again.\nError: {task.Exception}"), cbObject);
                         }
                     }
                 }
                 else if (task.IsCanceled)
                 {
-                    onFailure(0, 0, new ErrorResponse(0, 0, "Log in was cancelled.").ToString(), cbObject);
+                    onFailure(0, 0, ErrorResponse.CreateGeneric("Log in was cancelled."), cbObject);
                 }
                 else
                 {
@@ -375,11 +375,11 @@ public static class UserHandler
         }
         catch
         {
-            onFailure(0, 0, new ErrorResponse(0, 0, $"An error has occured. Please try again.").ToString(), cbObject);
+            onFailure(0, 0, ErrorResponse.CreateGeneric($"An error has occured. Please try again."), cbObject);
         }
 #else
         Debug.LogError("AuthenticateGoogleOpenID is not available on this platform. Check your scripting defines. Returning with error...");
-        onFailure(0, 0, new ErrorResponse(0, 0, "<b>AuthenticateGoogleOpenID</b> is not available on this platform.").ToString(), cbObject);
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateGoogleOpenID</b> is not available on this platform."), cbObject);
 #endif
     }
 #endif

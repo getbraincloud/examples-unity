@@ -12,6 +12,7 @@ using System.Collections.Generic;
 public struct Entity<T> : IJSON where T : IJSON
 {
     #region Consts
+
     // JSON Properties
     private const string PROPERTY_VERSION     = "version";
     private const string PROPERTY_ENTITY_ID   = "entityId";
@@ -23,46 +24,45 @@ public struct Entity<T> : IJSON where T : IJSON
 
     #endregion
 
-    [JsonName(PROPERTY_VERSION)]     public int Version;
-    [JsonName(PROPERTY_ENTITY_ID)]   public string EntityID;
-    [JsonName(PROPERTY_ENTITY_TYPE)] public string EntityType;
-    [JsonName(PROPERTY_CREATED_AT)]  public DateTime CreatedAt;
-    [JsonName(PROPERTY_UPDATED_AT)]  public DateTime UpdatedAt;
-    [JsonName(PROPERTY_ACL)]         public ACL ACL;
-    [JsonName(PROPERTY_DATA)]        public T Data;
+    [JsonName(PROPERTY_VERSION)]     public int version;
+    [JsonName(PROPERTY_ENTITY_ID)]   public string entityId;
+    [JsonName(PROPERTY_ENTITY_TYPE)] public string entityType;
+    [JsonName(PROPERTY_CREATED_AT)]  public DateTime createdAt;
+    [JsonName(PROPERTY_UPDATED_AT)]  public DateTime updatedAt;
+    [JsonName(PROPERTY_ACL)]         public ACL acl;
+    [JsonName(PROPERTY_DATA)]        public T data;
 
     public Entity(T data)
     {
-        Version = -1; // -1 tells the server to create the latest version
-        EntityID = string.Empty;
-        EntityType = data.GetDataType();
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-        ACL = ACL.ReadWrite();
-        Data = data;
+        version = -1; // -1 tells the server to create the latest version
+        entityId = string.Empty;
+        entityType = data.GetDataType();
+        createdAt = DateTime.UtcNow;
+        updatedAt = DateTime.UtcNow;
+        acl = ACL.None();
+        this.data = data;
     }
 
     #region IJSON
 
-    public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
+    public string GetDataType() => data != null ? data.GetDataType() : entityType;
 
     public Dictionary<string, object> ToJSONObject() => new()
     {
-        { PROPERTY_VERSION,    Version },   { PROPERTY_ENTITY_ID,  EntityID },  { PROPERTY_ENTITY_TYPE, EntityType },
-        { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt }, { PROPERTY_ACL,         ACL },
-        { PROPERTY_DATA,       Data }
+        { PROPERTY_VERSION,    version },   { PROPERTY_ENTITY_ID,  entityId },  { PROPERTY_ENTITY_TYPE, entityType },
+        { PROPERTY_CREATED_AT, createdAt }, { PROPERTY_UPDATED_AT, updatedAt }, { PROPERTY_ACL,         acl },
+        { PROPERTY_DATA,       data }
     };
 
     public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        Version = obj[PROPERTY_VERSION].ToType<int>();
-        EntityID = obj[PROPERTY_ENTITY_ID].ToString();
-        EntityType = obj[PROPERTY_ENTITY_TYPE].ToString();
-        CreatedAt = Util.BcTimeToDateTime(obj[PROPERTY_CREATED_AT].ToType<long>());
-        UpdatedAt = Util.BcTimeToDateTime(obj[PROPERTY_UPDATED_AT].ToType<long>());
-        ACL ??= new ACL();
-        ACL.ReadFromJson(obj[PROPERTY_ACL].ToJSONObject());
-        Data = obj[PROPERTY_DATA].ToJSONType<T>();
+        version = obj.GetValue<int>(PROPERTY_VERSION);
+        entityId = obj.GetString(PROPERTY_ENTITY_ID);
+        entityType = obj.GetString(PROPERTY_ENTITY_TYPE);
+        createdAt = obj.GetDateTime(PROPERTY_CREATED_AT);
+        updatedAt = obj.GetDateTime(PROPERTY_UPDATED_AT);
+        acl = obj.GetACL(PROPERTY_ACL);
+        data = obj.GetJSONObject<T>(PROPERTY_DATA);
 
         return this;
     }

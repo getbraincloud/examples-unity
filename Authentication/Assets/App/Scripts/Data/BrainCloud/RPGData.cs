@@ -32,34 +32,29 @@ public struct RPGData : IJSON
     private const string PROPERTY_STRENGTH = "strength";
     private const string PROPERTY_DEFENSE  = "defense";
 
-    // Defaults
-    private const string DEFAULT_NAME = "Gandalf";
-    private const string DEFAULT_JOB  = "wizard";
-
     #endregion
 
-    [JsonName(PROPERTY_NAME)]     public string Name;
-    [JsonName(PROPERTY_JOB)]      public string Job;
-    [JsonName(PROPERTY_LEVEL)]    public int Level;
-    [JsonName(PROPERTY_HEALTH)]   public int Health;
-    [JsonName(PROPERTY_STRENGTH)] public int Strength;
-    [JsonName(PROPERTY_DEFENSE)]  public int Defense;
+    [JsonName(PROPERTY_NAME)]     public string name;
+    [JsonName(PROPERTY_JOB)]      public string job;
+    [JsonName(PROPERTY_LEVEL)]    public int level;
+    [JsonName(PROPERTY_HEALTH)]   public int health;
+    [JsonName(PROPERTY_STRENGTH)] public int strength;
+    [JsonName(PROPERTY_DEFENSE)]  public int defense;
 
-    public RPGData(string name = DEFAULT_NAME, string job = DEFAULT_JOB, int level = MIN_LEVEL,
-                   int health = MIN_HEALTH, int strength = MIN_STRENGTH, int defense = MIN_DEFENSE)
+    public RPGData(string name, string job, int level, int health, int strength, int defense)
     {
-        Name = !name.IsEmpty() ? name : DEFAULT_NAME;
-        Job = !job.IsEmpty() ? job.ToLower() : DEFAULT_JOB;
-        Level = Mathf.Clamp(level, MIN_LEVEL, MAX_LEVEL);
-        Health = Mathf.Clamp(health, MIN_HEALTH, MAX_HEALTH);
-        Strength = Mathf.Clamp(strength, MIN_STRENGTH, MAX_STRENGTH);
-        Defense = Mathf.Clamp(defense, MIN_DEFENSE, MAX_DEFENSE);
+        this.name = name;
+        this.job = job.ToLower();
+        this.level = Mathf.Clamp(level, MIN_LEVEL, MAX_LEVEL);
+        this.health = Mathf.Clamp(health, MIN_HEALTH, MAX_HEALTH);
+        this.strength = Mathf.Clamp(strength, MIN_STRENGTH, MAX_STRENGTH);
+        this.defense = Mathf.Clamp(defense, MIN_DEFENSE, MAX_DEFENSE);
     }
 
     public int GetPower()
     {
-        float baseFactor = (Health / (float)MIN_HEALTH) + (Strength + Defense);
-        float levelFactor = Mathf.Lerp(0.5f, 5.0f, Mathf.InverseLerp(MIN_LEVEL, MAX_LEVEL, Level));
+        float baseFactor = (health / (float)MIN_HEALTH) + (strength + defense);
+        float levelFactor = Mathf.Lerp(0.5f, 5.0f, Mathf.InverseLerp(MIN_LEVEL, MAX_LEVEL, level));
 
         return Mathf.RoundToInt(baseFactor * levelFactor);
     }
@@ -70,18 +65,18 @@ public struct RPGData : IJSON
 
     public Dictionary<string, object> ToJSONObject() => new()
     {
-        { PROPERTY_NAME,   Name },   { PROPERTY_JOB,      Job },      { PROPERTY_LEVEL,   Level },
-        { PROPERTY_HEALTH, Health }, { PROPERTY_STRENGTH, Strength }, { PROPERTY_DEFENSE, Defense }
+        { PROPERTY_NAME,   name },   { PROPERTY_JOB,      job.ToLower() }, { PROPERTY_LEVEL,   level },
+        { PROPERTY_HEALTH, health }, { PROPERTY_STRENGTH, strength      }, { PROPERTY_DEFENSE, defense }
     };
 
     public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        Name = obj[PROPERTY_NAME].ToString();
-        Job = obj[PROPERTY_JOB].ToString().ToLower();
-        Level = obj[PROPERTY_LEVEL].ToType<int>();
-        Health = obj[PROPERTY_HEALTH].ToType<int>();
-        Strength = obj[PROPERTY_STRENGTH].ToType<int>();
-        Defense = obj[PROPERTY_DEFENSE].ToType<int>();
+        name = obj.GetString(PROPERTY_NAME);
+        job = obj.GetString(PROPERTY_JOB).ToLower();
+        level = obj.GetValue<int>(PROPERTY_LEVEL);
+        health = obj.GetValue<int>(PROPERTY_HEALTH);
+        strength = obj.GetValue<int>(PROPERTY_STRENGTH);
+        defense = obj.GetValue<int>(PROPERTY_DEFENSE);
 
         return this;
     }

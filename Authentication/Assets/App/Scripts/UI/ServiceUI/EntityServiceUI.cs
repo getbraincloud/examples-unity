@@ -100,9 +100,9 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void UpdateUIInformation()
     {
-        if (!userEntity.EntityID.IsEmpty())
+        if (!userEntity.entityId.IsEmpty())
         {
-            IDField.text = userEntity.EntityID;
+            IDField.text = userEntity.entityId;
             TypeField.text = userEntity.GetDataType();
         }
         else
@@ -111,8 +111,8 @@ public class EntityServiceUI : ContentUIBehaviour
             TypeField.text = DEFAULT_EMPTY_FIELD;
         }
 
-        NameField.text = userEntity.Data.ToType<UserData>().name;
-        AgeField.text = userEntity.Data.ToType<UserData>().age;
+        NameField.text = userEntity.data.name;
+        AgeField.text = userEntity.data.age;
 
         IsInteractable = true;
     }
@@ -195,8 +195,8 @@ public class EntityServiceUI : ContentUIBehaviour
             userEntity = new Entity<UserData>(new UserData(inputName, inputAge));
 
             entityService.CreateEntity(userEntity.GetDataType(),
-                                       userEntity.Data.Serialize(),
-                                       userEntity.ACL.ToJsonString(),
+                                       userEntity.data.Serialize(),
+                                       userEntity.acl.ToJsonString(),
                                        OnSuccess("Created Entity for User", OnCreateEntity_Success),
                                        OnFailure("CreateEntity Failed", UpdateUIInformation));
         }
@@ -217,7 +217,7 @@ public class EntityServiceUI : ContentUIBehaviour
         string inputName = NameField.text;
         string inputAge = AgeField.text;
 
-        if (userEntity.EntityID.IsEmpty())
+        if (userEntity.entityId.IsEmpty())
         {
             Debug.LogError("Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
@@ -227,12 +227,12 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            userEntity.Data = new UserData(inputName, inputAge);
+            userEntity.data = new UserData(inputName, inputAge);
 
-            entityService.UpdateEntity(userEntity.EntityID,
+            entityService.UpdateEntity(userEntity.entityId,
                                        userEntity.GetDataType(),
-                                       userEntity.Data.Serialize(),
-                                       userEntity.ACL.ToJsonString(),
+                                       userEntity.data.Serialize(),
+                                       userEntity.acl.ToJsonString(),
                                        -1,
                                        OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
                                        OnFailure("UpdateEntity Failed", UpdateUIInformation));
@@ -253,7 +253,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnDeleteButton()
     {
-        if (userEntity.EntityID.IsEmpty())
+        if (userEntity.entityId.IsEmpty())
         {
             Debug.LogError("Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
@@ -263,7 +263,7 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            entityService.DeleteEntity(userEntity.EntityID,
+            entityService.DeleteEntity(userEntity.entityId,
                                        -1,
                                        OnSuccess("Deleted Entity for User", OnDeleteEntity_Success),
                                        OnFailure("DeleteEntity Failed", UpdateUIInformation));
@@ -287,7 +287,7 @@ public class EntityServiceUI : ContentUIBehaviour
                 }},
             { "searchCriteria", new Dictionary<string, object>
                 {
-                    { "entityType", UserData.DataType }
+                    { "entityType", userEntity.GetDataType() }
                 }},
             { "sortCriteria", new Dictionary<string, object>
                 {
@@ -303,10 +303,10 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnGetPage_Success(string response)
     {
-        var responseObj = response.ToJSONObject();
-        var dataObj = responseObj["data"].ToJSONObject();
-        var resultsObj = dataObj["results"].ToJSONObject();
-        var data = resultsObj["items"].ToJSONArray();
+        var responseObj = response.Deserialize();
+        var dataObj = responseObj.GetJSONObject("data");
+        var resultsObj = dataObj.GetJSONObject("results");
+        var data = resultsObj.GetJSONArray("items");
 
         if (data == null || data.Length <= 0)
         {
@@ -327,16 +327,16 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnCreateEntity_Success(string response)
     {
-        var data = response.ToJSONObject()["data"].ToJSONObject();
-        string entityID = data["entityId"].ToString();
+        var data = response.Deserialize().GetJSONObject("data");
+        string entityID = data.GetString("entityId");
 
         BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
 
     private void OnUpdateEntity_Success(string response)
     {
-        var data = response.ToJSONObject()["data"].ToJSONObject();
-        string entityID = data["entityId"].ToString();
+        var data = response.Deserialize().GetJSONObject("data");
+        string entityID = data.GetString("entityId");
 
         BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
@@ -351,7 +351,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnGetEntity_Success(string response)
     {
-        var data = response.ToJSONObject()["data"].ToJSONObject();
+        var data = response.Deserialize().GetJSONObject("data");
 
         userEntity.FromJSONObject(data);
 
