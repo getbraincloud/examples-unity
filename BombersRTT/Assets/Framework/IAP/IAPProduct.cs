@@ -1,7 +1,7 @@
 ﻿using BrainCloud;
 using System.Collections.Generic;
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
 using UnityEngine.Purchasing;
 #endif
 
@@ -43,7 +43,7 @@ namespace Gameframework
         public string BrainCloudProductID { get; private set; }
         public string StoreProductId { get; private set; }
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
         public ProductType Type { get; private set; }
 #endif
         public string Category { get; private set; }
@@ -68,7 +68,7 @@ namespace Gameframework
             string in_bcID,
             string in_productId,
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
             ProductType in_type,
 #endif
             string in_category,
@@ -85,7 +85,7 @@ namespace Gameframework
             this.BrainCloudProductID = in_bcID;
             this.StoreProductId = in_productId;
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
             this.Type = in_type;
 #endif
             this.Category = in_category;
