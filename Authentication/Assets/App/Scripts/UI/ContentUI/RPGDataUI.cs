@@ -1,9 +1,11 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// A UI Panel that allows the user to edit the data for an <see cref="RPGData"/> object.
+/// </summary>
 public class RPGDataUI : ContentUIBehaviour
 {
     private const int MINIMUM_NAME_LENGTH = 4;

@@ -1,7 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
-using BrainCloud.JsonFx.Json;
-using System.Collections.Generic;
+using BrainCloud.JSONHelper;
 using System.Net.Mail;
 using TMPro;
 using UnityEngine;
@@ -11,9 +10,9 @@ using UnityEngine.UI;
 /// <para>
 /// An example on how User Authentication can he handled in your app.
 /// </para>
-///
-/// <seealso cref="BCManager"/><br></br>
-/// <seealso cref="UserHandler"/>
+/// 
+/// <br><seealso cref="BCManager"/></br>
+/// <br><seealso cref="UserHandler"/></br>
 /// </summary>
 public class MainLoginPanelUI : ContentUIBehaviour
 {
@@ -442,9 +441,9 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
     private void OnGetIdentitiesSuccess(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
+        var data = response.Deserialize("data", "identities");
 
-        UserHandler.AnonymousUser = (data["identities"] as Dictionary<string, object>).Count <= 0;
+        UserHandler.AnonymousUser = data.Count <= 0;
 
         RememberMeToggle.isOn = false;
         InitializeUI();

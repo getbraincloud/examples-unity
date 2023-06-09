@@ -240,10 +240,7 @@ public class MainMenuUI : ContentUIBehaviour
     private void OnMenuItemButton(ServiceItem serviceItem)
     {
         MainMenuActive = false;
-
         AppContent.LoadServiceItemContent(serviceItem);
-
-        Debug.Log($"Opening {serviceItem.Name} Service UI");
     }
 
     private void OnLogoutButton()

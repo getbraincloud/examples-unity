@@ -1,5 +1,4 @@
 using BrainCloud;
-using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using System.Collections.Generic;
 using TMPro;
@@ -30,7 +29,7 @@ public class EntityServiceUI : ContentUIBehaviour
     [SerializeField] private Button SaveButton = default;
     [SerializeField] private Button DeleteButton = default;
 
-    private Entity<UserData> userEntity = default;
+    private Entity userEntity = default;
     private BrainCloudEntity entityService = default;
 
     #region Unity Messages
@@ -84,7 +83,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        userEntity = new Entity<UserData>(new UserData());
+        userEntity = new Entity(new UserData());
 
         IDField.text = DEFAULT_EMPTY_FIELD;
         TypeField.text = DEFAULT_EMPTY_FIELD;
@@ -111,8 +110,8 @@ public class EntityServiceUI : ContentUIBehaviour
             TypeField.text = DEFAULT_EMPTY_FIELD;
         }
 
-        NameField.text = userEntity.data.name;
-        AgeField.text = userEntity.data.age;
+        NameField.text = ((UserData)userEntity.data).name;
+        AgeField.text = ((UserData)userEntity.data).age;
 
         IsInteractable = true;
     }
@@ -192,7 +191,7 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            userEntity = new Entity<UserData>(new UserData(inputName, inputAge));
+            userEntity = new Entity(new UserData(inputName, inputAge));
 
             entityService.CreateEntity(userEntity.GetDataType(),
                                        userEntity.data.Serialize(),
@@ -278,7 +277,7 @@ public class EntityServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        var context = new Dictionary<string, object>
+        string context = new Dictionary<string, object>
         {
             { "pagination", new Dictionary<string, object>
                 {
@@ -294,21 +293,17 @@ public class EntityServiceUI : ContentUIBehaviour
                     { "createdAt", 1 },
                     { "updatedAt", -1 }
                 }}
-        };
+        }.Serialize();
 
-        entityService.GetPage(context.Serialize(),
+        entityService.GetPage(context,
                               OnSuccess("GetPage Success", OnGetPage_Success),
                               OnFailure("GetPage Failed", UpdateUIInformation));
     }
 
     private void OnGetPage_Success(string response)
     {
-        var responseObj = response.Deserialize();
-        var dataObj = responseObj.GetJSONObject("data");
-        var resultsObj = dataObj.GetJSONObject("results");
-        var data = resultsObj.GetJSONArray("items");
-
-        if (data == null || data.Length <= 0)
+        var data = response.Deserialize("data", "results").GetJSONArray("items");
+        if (data.IsNullOrEmpty())
         {
             Debug.LogWarning("No entities were found for this user.");
             InitializeUI();
@@ -327,23 +322,21 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnCreateEntity_Success(string response)
     {
-        var data = response.Deserialize().GetJSONObject("data");
-        string entityID = data.GetString("entityId");
+        string entityID = response.Deserialize("data").GetString("entityId");
 
         BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
 
     private void OnUpdateEntity_Success(string response)
     {
-        var data = response.Deserialize().GetJSONObject("data");
-        string entityID = data.GetString("entityId");
+        string entityID = response.Deserialize("data").GetString("entityId");
 
         BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
 
     private void OnDeleteEntity_Success(string response)
     {
-        userEntity = new Entity<UserData>(new UserData());
+        userEntity = new Entity(new UserData());
 
         InitializeUI();
         IsInteractable = true;
@@ -351,9 +344,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnGetEntity_Success(string response)
     {
-        var data = response.Deserialize().GetJSONObject("data");
-
-        userEntity.FromJSONObject(data);
+        userEntity = response.Deserialize<Entity>("data");
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);

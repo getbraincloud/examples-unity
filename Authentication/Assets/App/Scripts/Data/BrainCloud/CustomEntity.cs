@@ -1,4 +1,3 @@
-using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
@@ -58,14 +57,14 @@ public struct CustomEntity : IJSON
 
     #region IJSON
 
-    public string GetDataType() => data != null ? data.GetDataType() : entityType;
+    public string GetDataType() => data is not null and IJSON ? ((IJSON)data).GetDataType() : entityType;
 
     public Dictionary<string, object> ToJSONObject() => new()
     {
         { PROPERTY_VERSION,      version },    { PROPERTY_OWNER_ID,   ownerId },   { PROPERTY_ENTITY_ID,  entityId },
         { PROPERTY_ENTITY_TYPE,  entityType }, { PROPERTY_CREATED_AT, createdAt }, { PROPERTY_UPDATED_AT, updatedAt },
         { PROPERTY_TIME_TO_LIVE, timeToLive }, { PROPERTY_EXPIRES_AT, expiresAt }, { PROPERTY_ACL,        acl },
-        { PROPERTY_DATA,         data }
+        { PROPERTY_DATA,         data.ToJSONObject() }
     };
 
     public IJSON FromJSONObject(Dictionary<string, object> obj)
@@ -79,12 +78,8 @@ public struct CustomEntity : IJSON
         timeToLive = obj.GetTimeSpan(PROPERTY_TIME_TO_LIVE);
         expiresAt = obj.GetDateTime(PROPERTY_EXPIRES_AT);
         acl = obj.GetACL(PROPERTY_ACL);
-
-        data = entityType == HockeyStatsData.DataType ? new HockeyStatsData() : new RPGData();
-        if (data != null && obj.ContainsKey(PROPERTY_DATA))
-        {
-            data.FromJSONObject(obj.GetJSONObject(PROPERTY_DATA));
-        }
+        data = entityType == HockeyStatsData.DataType ? obj.GetJSONObject<HockeyStatsData>(PROPERTY_DATA)
+                                                      : obj.GetJSONObject<RPGData>(PROPERTY_DATA);
 
         return this;
     }

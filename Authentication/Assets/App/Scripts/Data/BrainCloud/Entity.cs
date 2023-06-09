@@ -1,4 +1,3 @@
-using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
@@ -9,7 +8,7 @@ using System.Collections.Generic;
 /// A basic data struct for brainCloud's user entities.
 /// </summary>
 [Serializable]
-public struct Entity<T> : IJSON where T : IJSON
+public struct Entity : IJSON
 {
     #region Consts
 
@@ -30,9 +29,9 @@ public struct Entity<T> : IJSON where T : IJSON
     [JsonName(PROPERTY_CREATED_AT)]  public DateTime createdAt;
     [JsonName(PROPERTY_UPDATED_AT)]  public DateTime updatedAt;
     [JsonName(PROPERTY_ACL)]         public ACL acl;
-    [JsonName(PROPERTY_DATA)]        public T data;
+    [JsonName(PROPERTY_DATA)]        public IJSON data;
 
-    public Entity(T data)
+    public Entity(IJSON data)
     {
         version = -1; // -1 tells the server to create the latest version
         entityId = string.Empty;
@@ -51,7 +50,7 @@ public struct Entity<T> : IJSON where T : IJSON
     {
         { PROPERTY_VERSION,    version },   { PROPERTY_ENTITY_ID,  entityId },  { PROPERTY_ENTITY_TYPE, entityType },
         { PROPERTY_CREATED_AT, createdAt }, { PROPERTY_UPDATED_AT, updatedAt }, { PROPERTY_ACL,         acl },
-        { PROPERTY_DATA,       data }
+        { PROPERTY_DATA,       data.ToJSONObject() }
     };
 
     public IJSON FromJSONObject(Dictionary<string, object> obj)
@@ -62,7 +61,7 @@ public struct Entity<T> : IJSON where T : IJSON
         createdAt = obj.GetDateTime(PROPERTY_CREATED_AT);
         updatedAt = obj.GetDateTime(PROPERTY_UPDATED_AT);
         acl = obj.GetACL(PROPERTY_ACL);
-        data = obj.GetJSONObject<T>(PROPERTY_DATA);
+        data = obj.GetJSONObject<UserData>(PROPERTY_DATA);
 
         return this;
     }

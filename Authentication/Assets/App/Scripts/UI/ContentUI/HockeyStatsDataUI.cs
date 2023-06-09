@@ -4,6 +4,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// A UI Panel that allows the user to edit the data for an <see cref="HockeyStatsData"/> object.
+/// </summary>
 public class HockeyStatsDataUI : ContentUIBehaviour
 {
     private const int MINIMUM_NAME_LENGTH = 4;

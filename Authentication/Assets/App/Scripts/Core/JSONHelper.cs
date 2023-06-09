@@ -1,8 +1,8 @@
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BrainCloud.JSONHelper
 {
@@ -160,7 +160,7 @@ namespace BrainCloud.JSONHelper
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError($"Unable to convert {property} into {typeof(T).Name}!\nException: {e}");
+                        Debug.LogError($"Unable to convert {property} into {typeof(T).Name}!\nException: {e}");
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace BrainCloud.JSONHelper
                     }
                     catch (Exception e)
                     {
-                        UnityEngine.Debug.LogError($"Unable to convert {property} into an array of {typeof(T).Name}!\nException: {e}");
+                        Debug.LogError($"Unable to convert {property} into an array of {typeof(T).Name}!\nException: {e}");
                     }
                 }
             }
@@ -225,32 +225,67 @@ namespace BrainCloud.JSONHelper
         }
 
         /// <summary>
-        /// Serializes this <see cref="IDictionary"/> into a JSON-formatted <see cref="string"/>.
+        /// Serializes this <see cref="object"/> into a JSON-formatted <see cref="string"/>.
         /// </summary>
-        public static string Serialize(this IDictionary self)
-            => JsonWriter.Serialize(self);
+        public static string Serialize(this object self) => JsonWriter.Serialize(self);
 
         /// <summary>
         /// Serializes this <see cref="IJSON"/> into a JSON-formatted <see cref="string"/>.
         /// </summary>
-        public static string Serialize(this IJSON self)
-            => JsonWriter.Serialize(self.ToJSONObject());
+        public static string Serialize(this IJSON self) => JsonWriter.Serialize(self.ToJSONObject());
 
         /// <summary>
         /// Deserializes a JSON-formatted string into a Dictionary(<see cref="string"/>, <see cref="object"/>).
         /// </summary>
-        public static Dictionary<string, object> Deserialize(this string self)
-            => JsonReader.Deserialize<Dictionary<string, object>>(self);
+        /// <param name="hierarchy">Go directly to the Dictionary(<see cref="string"/>, <see cref="object"/>) you want by
+        /// listing in order the properties of each level of JSON objects.</param>
+        public static Dictionary<string, object> Deserialize(this string self, params string[] hierarchy)
+        {
+            if (hierarchy != null && hierarchy.Length > 0)
+            {
+                var obj = JsonReader.Deserialize<Dictionary<string, object>>(self);
+
+                int level = 0;
+                while (obj.TryGetValue(hierarchy[level], out object child))
+                {
+                    if (child != null && child is Dictionary<string, object> next)
+                    {
+                        obj = next;
+                    }
+                    else
+                    {
+                        Debug.LogError($"{hierarchy[level]} is not a Dictionary in the hierarchy of the JSON! Returning null...");
+                        return null;
+                    }
+
+                    if (++level >= hierarchy.Length)
+                    {
+                        break;
+                    }
+                }
+
+                if (level < hierarchy.Length)
+                {
+                    Debug.LogError($"{hierarchy[level]} is not found in the hierarchy of the JSON! Returning null...");
+                    return null;
+                }
+
+                return obj;
+            }
+
+            return JsonReader.Deserialize<Dictionary<string, object>>(self);
+        }
 
         /// <summary>
         /// Deserializes a JSON-formatted <see cref="string"/> into type <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">Constrained to <see cref="IJSON"/>.</typeparam>
+        /// <param name="hierarchy">Go directly to the <see cref="IJSON"/> you want by listing in order the properties of each level of JSON objects.</param>
         /// <returns>The <see cref="IJSON"/> object that the JSON <see cref="string"/> represents.
         /// If the <see cref="string"/> cannot deserialize into type <typeparamref name="T"/> then this return <b>null</b> or <b>default</b>.</returns>
-        public static T Deserialize<T>(this string self) where T : IJSON
+        public static T Deserialize<T>(this string self, params string[] hierarchy) where T : IJSON
         {
-            var obj = self.Deserialize();
+            var obj = self.Deserialize(hierarchy);
             if (obj is not null)
             {
                 try
@@ -259,7 +294,7 @@ namespace BrainCloud.JSONHelper
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError($"Unable to deserialize string into {typeof(T).Name}!\nException: {e}");
+                    Debug.LogError($"Unable to deserialize string into {typeof(T).Name}!\nException: {e}");
                 }
             }
 

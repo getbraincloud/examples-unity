@@ -9,11 +9,13 @@ using UnityEngine.UI;
 /// <para>
 /// An example of how a Logger can be used in your app. Can be useful to help debug your app on tester devices.
 /// </para>
+/// 
 /// <para>
 /// Makes use of <see cref="LogMessageUI"/> objects to be able to store data about the logs and copy them to the clipboard.
 /// </para>
-/// <seealso cref="BCManager"/><br></br>
-/// <seealso cref="BrainCloud.LogCallback"/>
+/// 
+/// <br><seealso cref="BCManager"/></br>
+/// <br><seealso cref="BrainCloud.LogCallback"/></br>
 /// </summary>
 public class LoggerContentUI : ContentUIBehaviour
 {

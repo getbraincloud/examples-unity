@@ -1,10 +1,7 @@
 using BrainCloud;
 using BrainCloud.Entity;
 using BrainCloud.JSONHelper;
-using BrainCloud.JsonFx.Json;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
