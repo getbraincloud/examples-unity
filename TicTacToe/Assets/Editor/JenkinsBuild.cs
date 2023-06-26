@@ -183,7 +183,15 @@ public class JenkinsBuild
                 environmentString = "Prod";
             }
 
+#if UNITY_STANDALONE_WIN
             return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+#elif UNITY_STANDALONE_OSX
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+#elif UNITY_WEBGL
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()};
+#else
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+#endif
         }
         
         public void GetEnviroVariables()

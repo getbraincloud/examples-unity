@@ -176,12 +176,25 @@ public class JenkinsBuild {
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
+            string[] s = Application.dataPath.Split('/');
+            string projectName = s[s.Length - 2];
+            string environmentString;
+            if (BrainCloud.Plugin.Interface.DispatcherURL.Contains("internal"))
+            {
+                environmentString = "Internal";
+            }
+            else
+            {
+                environmentString = "Prod";
+            }
 #if UNITY_STANDALONE_WIN
-            return $"BombersRTT_ProdBaas_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
 #elif UNITY_STANDALONE_OSX
-            return $"BombersRTT_ProdBaas_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+#elif UNITY_WEBGL
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}";
 #else
-            return $"BombersRTT_ProdBaas_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
 #endif
         }
         
