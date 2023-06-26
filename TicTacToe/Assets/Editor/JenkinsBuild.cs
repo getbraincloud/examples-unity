@@ -3,11 +3,13 @@ using UnityEditor;
 using System.Collections.Generic;
 using UnityEditor.Build.Reporting;
 using System.IO;
-  
+using BrainCloud.Plugin;
+
 // ------------------------------------------------------------------------
 // https://docs.unity3d.com/Manual/CommandLineArguments.html
 // ------------------------------------------------------------------------
-public class JenkinsBuild {
+public class JenkinsBuild 
+{
   
     static string[] EnabledScenes = FindEnabledEditorScenes();
   
@@ -159,7 +161,7 @@ public class JenkinsBuild {
             System.Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
         }
     }
- 
+
     private class Args
     {
         public string appName;
@@ -169,7 +171,19 @@ public class JenkinsBuild {
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
-            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            string[] s = Application.dataPath.Split('/');
+            string projectName = s[s.Length - 2];
+            string environmentString;
+            if (BrainCloud.Plugin.Interface.DispatcherURL.Contains("internal"))
+            {
+                environmentString = "Internal";
+            }
+            else
+            {
+                environmentString = "Prod";
+            }
+
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
         }
         
         public void GetEnviroVariables()
