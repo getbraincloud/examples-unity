@@ -65,7 +65,7 @@ public class LoggerContentUI : ContentUIBehaviour
     {
         StopAllCoroutines();
         ClearLogButton.onClick.RemoveAllListeners();
-        BCManager.Client?.EnableLogging(false);
+
         Application.logMessageReceived -= OnLogMessageReceived;
     }
 
@@ -185,6 +185,10 @@ public class LoggerContentUI : ContentUIBehaviour
         {
             log = log[..log.IndexOf("\nJSON Response:\n")];
         }
+        else if (log.Contains("#BCC"))
+        {
+            return;
+        }
 
         log = $"{LOG_APP_HEADER} - {log}";
         switch (type)
@@ -209,6 +213,8 @@ public class LoggerContentUI : ContentUIBehaviour
 
     private void OnLogDelegate(string log)
     {
+        Debug.Log(log);
+
         if (!log.Contains("\n"))
         {
             LogMessage(log);

@@ -104,14 +104,14 @@ public class ScriptServiceUI : ContentUIBehaviour
             if (!ScriptJSONField.text.IsEmpty())
             {
                 string json = ScriptJSONField.text;
-                if (JsonReader.Deserialize(json) is ICollection data && data.Count > 0)
+                if (JsonReader.Deserialize(json) is ICollection data)
                 {
                     IsInteractable = false;
                     string scriptName = scriptNames[current];
-
+                
                     SuccessCallback onSuccess = scriptName == SCRIPT_HELLO_WORLD ? OnSuccess($"{scriptName} Script Ran Successfully", OnHelloWorldScript_Success)
-                                                                                 : OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Returned);
-
+                                                                                 : OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Success);
+                
                     scriptService.RunScript(scriptName,
                                             data.Serialize(),
                                             onSuccess, OnFailure($"{scriptName} Script Failed", OnRunScript_Returned));
@@ -152,6 +152,13 @@ public class ScriptServiceUI : ContentUIBehaviour
         }
 
         Debug.Log(helloWorld);
+
+        OnRunScript_Returned();
+    }
+
+    private void OnRunScript_Success(string response)
+    {
+        //var data = response.Deserialize("data", "response");
 
         OnRunScript_Returned();
     }
