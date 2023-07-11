@@ -399,7 +399,7 @@ GameObject:
   - component: {fileID: 792581543}
   - component: {fileID: 792581545}
   m_Layer: 0
-  m_Name: brainCloudManager
+  m_Name: brainCloud
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1664,7 +1664,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 235003456491939567, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000061035156
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 235003456622747855, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1672,6 +1672,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 235003456622747855, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 235003456622747855, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 235003456711653013, guid: 3c8e9c76fbe442e43af95b35702fafad, type: 3}
