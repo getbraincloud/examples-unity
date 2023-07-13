@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -86,21 +87,39 @@ public class PopupUI : ContentUIBehaviour
 
     #region UI
 
-    public void DisplayPopup(PopupInfo popupInfo)
+    public void DisplayPopup(PopupInfo popupInfo) => StartCoroutine(DisplayPopupWhenReady(popupInfo));
+
+    public void DismissPopup() => OnClosePopupButton();
+
+    protected override void InitializeUI()
     {
+        PopupActive = false;
+        ClearPopupBody();
+    }
+
+    private IEnumerator DisplayPopupWhenReady(PopupInfo popupInfo)
+    {
+        yield return new WaitUntil(() => Opacity <= 0.0f);
+
         ClearPopupBody();
 
         HeaderLabel.text = popupInfo.Title;
         HeaderLabel.gameObject.SetActive(popupInfo.HasTitle);
 
-        foreach(PopupInfoBody bodyInfo in popupInfo.BodyTexts)
+        if (!popupInfo.BodyTexts.IsNullOrEmpty())
         {
-            AddBodyText(bodyInfo);
+            foreach (PopupInfoBody bodyInfo in popupInfo.BodyTexts)
+            {
+                AddBodyText(bodyInfo);
+            }
         }
 
-        foreach (PopupInfoButton buttonInfo in popupInfo.Buttons)
+        if (!popupInfo.Buttons.IsNullOrEmpty())
         {
-            AddButton(buttonInfo);
+            foreach (PopupInfoButton buttonInfo in popupInfo.Buttons)
+            {
+                AddButton(buttonInfo);
+            }
         }
 
         BlockerButton.enabled = popupInfo.CanDismiss;
@@ -112,14 +131,6 @@ public class PopupUI : ContentUIBehaviour
         PopupActive = true;
     }
 
-    public void DismissPopup() => OnClosePopupButton();
-
-    protected override void InitializeUI()
-    {
-        PopupActive = false;
-        ClearPopupBody();
-    }
-
     private void AddBodyText(PopupInfoBody bodyInfo)
     {
         TMP_Text template = bodyInfo.BodyType == PopupInfoBody.Type.Error ? ErrorBodyText :
@@ -128,7 +139,7 @@ public class PopupUI : ContentUIBehaviour
         TMP_Text bodyText = Instantiate(template, BodyContent);
         bodyText.text = bodyInfo.Text;
         bodyText.gameObject.SetActive(true);
-        bodyText.gameObject.SetName((uiElements.Count + 1).ToString(), "{0}ElementBodyText");
+        bodyText.gameObject.SetName("Element{0}BodyText", (uiElements.Count + 1).ToString("00"));
 
         uiElements.Add(bodyText.gameObject);
     }
@@ -150,7 +161,7 @@ public class PopupUI : ContentUIBehaviour
 
         bodyButton.Button.onClick.AddListener(OnClosePopupButton);
         bodyButton.gameObject.SetActive(true);
-        bodyButton.gameObject.SetName((uiElements.Count + 1).ToString(), "{0}ElementButton");
+        bodyButton.gameObject.SetName("Element{0}Button", (uiElements.Count + 1).ToString("00"));
 
         uiElements.Add(bodyButton.gameObject);
     }

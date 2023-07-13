@@ -91,3 +91,7 @@ private void onDataRecv(byte[] in_data)
             Dictionary<string, object> jsonMessage = readRSData(in_data);
             ...
 ```
+
+---
+
+For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).

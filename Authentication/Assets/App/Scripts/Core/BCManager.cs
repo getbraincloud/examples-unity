@@ -1,14 +1,13 @@
 using BrainCloud;
 using BrainCloud.Entity;
+using BrainCloud.JSONHelper;
 using System;
 using UnityEngine;
 
 /// <summary>
-/// <para>
 /// Attach to a GameObject in the Unity Editor to automatically create a bridge between
 /// <see cref="BrainCloudWrapper"/> and scripts that require access to the various brainCloud services.
 /// This also gives you more direct access to BrainCloudWrapper's properties.
-/// </para>
 ///
 /// <para>
 /// Despite living as a GameObject, <see cref="BCManager"/> will set up its properties to work as
@@ -22,9 +21,9 @@ using UnityEngine;
 /// references to whichever service you need in the script for faster accessing in the IL/CPP source.
 /// </para>
 /// 
-/// <seealso cref="BrainCloudWrapper"/><br></br>
-/// <seealso cref="BrainCloudClient"/><br></br>
-/// <seealso cref="UserHandler"/>
+/// <br><seealso cref="BrainCloudWrapper"/></br>
+/// <br><seealso cref="BrainCloudClient"/></br>
+/// <br><seealso cref="UserHandler"/></br>
 /// </summary>
 public class BCManager : MonoBehaviour
 {
@@ -246,7 +245,7 @@ public class BCManager : MonoBehaviour
 
     private static SuccessCallback InternalHandleSuccess(string logMessage, object targetObject, Action<string, object> onSuccess)
     {
-        logMessage = logMessage.IsEmpty() ? "Success" : logMessage;
+        logMessage = string.IsNullOrWhiteSpace(logMessage) ? "Success" : logMessage;
         return (jsonResponse, cbObject) =>
         {
             cbObject ??= targetObject;
@@ -255,7 +254,7 @@ public class BCManager : MonoBehaviour
             {
                 cbObject = null;
             }
-            else if (!cbObjectName.IsEmpty())
+            else if (!string.IsNullOrWhiteSpace(cbObjectName))
             {
                 logMessage = $"{cbObjectName}: {logMessage}";
             }
@@ -280,7 +279,7 @@ public class BCManager : MonoBehaviour
 
     private static FailureCallback InternalHandleFailure(string errorMessage, object targetObject, Action<ErrorResponse, object> onFailure = null)
     {
-        errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
+        errorMessage = string.IsNullOrWhiteSpace(errorMessage) ? "Failure" : errorMessage;
         return (status, reasonCode, jsonError, cbObject) =>
         {
             cbObject ??= targetObject;
@@ -289,7 +288,7 @@ public class BCManager : MonoBehaviour
             {
                 cbObject = null;
             }
-            else if (!cbObjectName.IsEmpty())
+            else if (!string.IsNullOrWhiteSpace(cbObjectName))
             {
                 errorMessage = $"{cbObjectName}: {errorMessage}";
             }
@@ -308,7 +307,7 @@ public class BCManager : MonoBehaviour
             Debug.Log($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
 #endif
 
-            onFailure?.Invoke(new ErrorResponse(jsonError), cbObject);
+            onFailure?.Invoke(jsonError.Deserialize<ErrorResponse>(), cbObject);
         };
     }
 

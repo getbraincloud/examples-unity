@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 using BrainCloud;
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
 using UnityEngine.Purchasing;
 #endif
 namespace Gameframework
 {
     // Deriving the Purchaser class from IStoreListener enables it to receive messages from Unity Purchasing.
     public class GIAPManager : SingletonBehaviour<GIAPManager>
-#if BUY_CURRENCY_ENABLED 
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
         , IStoreListener
 #endif
     {
@@ -92,7 +92,7 @@ namespace Gameframework
             }
         }
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
         /// <summary>
         /// Initialized callback
         /// </summary>
@@ -130,7 +130,7 @@ namespace Gameframework
 
         public void CheckAllSubscriptions()
         {
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
             List<IAPProduct> list = GetIAPProductsByType(ProductType.Subscription);
 #else
             List<IAPProduct> list = new List<IAPProduct>();
@@ -232,7 +232,7 @@ namespace Gameframework
                 }
             }
         }
-
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
         {
             handleProcessPurchase(args.purchasedProduct.definition.id, args.purchasedProduct.receipt);
@@ -260,6 +260,7 @@ namespace Gameframework
             }
         }
 #endif
+#endif
         /// <summary>
         /// Callback for succesful ProductService.GetSalesInventory
         /// </summary>
@@ -285,7 +286,7 @@ namespace Gameframework
 
             IAPProduct iapProduct = null;
 
-#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED
+#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED && !UNITY_WEBGL
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 #endif
             for (int index = 0; index < jsonArray.Length; index++)
@@ -356,7 +357,7 @@ namespace Gameframework
                 var currencyValue = Convert.ToInt32(currencyVal);
                 var type = (string)product[KEY_TYPE];
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
                 var productType = ProductType.Consumable;
 
                 switch (type.ToLower())
@@ -376,10 +377,10 @@ namespace Gameframework
 
                 Dictionary<string, object> packRewards = (Dictionary<string, object>)product[BrainCloudConsts.JSON_DATA];
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
                 iapProduct = new IAPProduct(braincloudID, storeId, productType, category, title, description, imageUrl, referencePrice, price, isPromotion, currencyValue, currencyRewards, packRewards);
-#else
-                iapProduct = new IAPProduct(braincloudID, storeId, category, title, description, imageUrl, referencePrice, price, isPromotion, currencyValue, currencyRewards, packRewards);
+#elif !UNITY_WEBGL
+                iapProduct = new IAPProduct(braincloudID, storeId ,category, title, description, imageUrl, referencePrice, price, isPromotion, currencyValue, currencyRewards, packRewards);
 #endif
 
                 iapProduct.PriceString = String.Format("{0:c}", referencePrice / 100);
@@ -404,16 +405,16 @@ namespace Gameframework
                     iapProduct.RegularPriceID = regularId;
                     iapProduct.RegularPrice = refPrice / 100;
                     iapProduct.RegularPriceString = String.Format("{0:c}", refPrice / 100);
-#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED // unity does not support steam works iap
+#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED  && !UNITY_WEBGL// unity does not support steam works iap
                     builder.AddProduct(regularId, productType); //add this as a reference to the regular priced item
 #endif
                 }
-#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED // unity does not support steam works iap
+#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED && !UNITY_WEBGL // unity does not support steam works iap
                 builder.AddProduct(iapProduct.StoreProductId, productType); //add to ConfigurationBuilder
 #endif
                 m_productInventory.Add(iapProduct); //add to List of products
             }
-#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED // unity does not support steam works iap
+#if BUY_CURRENCY_ENABLED && !STEAMWORKS_ENABLED && !UNITY_WEBGL // unity does not support steam works iap
             UnityPurchasing.Initialize(this, builder);
 #else
             GEventManager.TriggerEvent(GEventManager.ON_IAP_PRODUCTS_UPDATED);
@@ -460,7 +461,7 @@ namespace Gameframework
         }
 
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
         public Product GetProduct(string in_id)
         {
             Product product = m_StoreController.products.WithID(in_id);
@@ -494,7 +495,7 @@ namespace Gameframework
         /// <param name="in_type"></param>
         /// <returns></returns>
         /// 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
         public List<IAPProduct> GetIAPProductsByType(ProductType in_type)
         {
             List<IAPProduct> list = new List<IAPProduct>();
@@ -538,7 +539,7 @@ namespace Gameframework
 
         private void handlePurchase(string storeProductId, SuccessCallback in_success = null, FailureCallback in_failure = null)
         {
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
             // dont process while purchasing
             if (IsPurchasing) return;
 
@@ -612,7 +613,7 @@ namespace Gameframework
         /// </summary>
         private void updateStoreProductInfo()
         {
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
             for (int index = 0; index < m_productInventory.Count; index++)
             {
                 var iapProduct = m_productInventory[index];
@@ -645,7 +646,7 @@ namespace Gameframework
 #endif
         }
 
-#if BUY_CURRENCY_ENABLED
+#if BUY_CURRENCY_ENABLED && !UNITY_WEBGL
         private bool IsInitialized()
         {
 #if !STEAMWORKS_ENABLED
@@ -660,9 +661,8 @@ namespace Gameframework
         private static IStoreController m_StoreController;          // The Unity Purchasing system.
         private static IExtensionProvider m_StoreExtensionProvider; // The store-specific Purchasing subsystems.
 #pragma warning restore 414
-
-        private bool m_enableDebug = false;
 #endif
+        private bool m_enableDebug = false;
         private List<IAPProduct> m_productInventory = new List<IAPProduct>();
         
 #pragma warning disable 414

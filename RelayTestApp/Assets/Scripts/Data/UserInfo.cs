@@ -23,22 +23,45 @@ public class UserInfo
     public Vector2 MousePosition;
     //Shockwaves are created based on each location given from list
     public List<Vector2> ShockwavePositions = new List<Vector2>();
+    //Shockwaves that take different shapes base on team code
+    public List<TeamCodes> ShockwaveTeamCodes = new List<TeamCodes>();
+    public List<TeamCodes> InstigatorTeamCodes = new List<TeamCodes>();
     //Class to handle each user's cursor
     public UserCursor UserCursor;
     public UserInfo() { }
     public string cxId;
+    public bool IsHost;
+    public string NetID;
     //Used to determine if user is in lobby or in match.
     public bool IsReady;
     public bool PresentSinceStart;
+    public RectTransform CursorTransform;
+    public TeamCodes Team;
     public UserInfo(Dictionary<string, object> userJson)
     {
         cxId = userJson["cxId"] as string;
         ID = userJson["profileId"] as string;
         Username = userJson["name"] as string;
-        Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
-        int colorIndex = (int)extra["colorIndex"];
-        UserGameColor = (GameColors) colorIndex;
         IsReady = (bool)userJson["isReady"];
+        string teamValue = userJson["team"] as string;
+        Enum.TryParse(teamValue, out Team);
+        if (GameManager.Instance.GameMode == GameMode.FreeForAll)
+        {
+            Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
+            int colorIndex = (int)extra["colorIndex"];
+            UserGameColor = (GameColors) colorIndex;    
+        }
+        else if(GameManager.Instance.GameMode == GameMode.Team)
+        {
+            if (Team == TeamCodes.alpha)
+            {
+                UserGameColor = GameColors.Blue;
+            }
+            else
+            {
+                UserGameColor = GameColors.Orange;
+            }
+        }
         if (userJson.ContainsKey("presentSinceStart"))
         {
             PresentSinceStart = (bool)userJson["presentSinceStart"];    

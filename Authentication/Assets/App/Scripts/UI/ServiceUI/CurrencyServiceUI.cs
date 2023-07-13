@@ -1,5 +1,5 @@
 using BrainCloud;
-using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -10,10 +10,10 @@ using UnityEngine.UI;
 /// Example of how user currency can be handled via brainCloud's VirtualCurrency and PlayerState services.
 /// </para>
 ///
-/// <seealso cref="BrainCloudVirtualCurrency"/><br></br>
-/// <seealso cref="BrainCloudPlayerState"/><br></br>
-/// <seealso cref="BrainCloudPlayerStatistics"/><br></br>
-/// <seealso cref="BrainCloudScript"/>
+/// <br><seealso cref="BrainCloudVirtualCurrency"/></br>
+/// <br><seealso cref="BrainCloudPlayerState"/></br>
+/// <br><seealso cref="BrainCloudPlayerStatistics"/></br>
+/// <br><seealso cref="BrainCloudScript"/></br>
 /// </summary>
 /// VirtualCurrency API: https://getbraincloud.com/apidocs/apiref/?csharp#capi-virtualcurrency
 /// PlayerState API: https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstate
@@ -234,8 +234,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
 
     private void OnXPStateUpdate_Success(string response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
-        var data = responseObj["data"] as Dictionary<string, object>;
+        var data = response.Deserialize("data");
 
         PlayerLevelField.text = data["experienceLevel"].ToString();
         XPAccruedField.text = data["experiencePoints"].ToString();
@@ -251,17 +250,15 @@ public class CurrencyServiceUI : ContentUIBehaviour
 
     private void OnGemsStateUpdate_Success(string response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
-        var data = responseObj["data"] as Dictionary<string, object>;
-        var currencyMap = data["currencyMap"] as Dictionary<string, object>;
+        var data = response.Deserialize("data", "currencyMap");
 
         bool currencyFound = false;
-        foreach (string key in currencyMap.Keys)
+        foreach (string key in data.Keys)
         {
             if (key == DEFAULT_CURRENCY_TYPE)
             {
                 currencyFound = true;
-                var gems = currencyMap[key] as Dictionary<string, object>;
+                var gems = data[key] as Dictionary<string, object>;
 
                 BalanceField.text = gems["balance"].ToString();
                 ConsumedField.text = gems["consumed"].ToString();

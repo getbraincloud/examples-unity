@@ -9,11 +9,13 @@ using UnityEngine.UI;
 /// <para>
 /// An example of how a Logger can be used in your app. Can be useful to help debug your app on tester devices.
 /// </para>
+/// 
 /// <para>
 /// Makes use of <see cref="LogMessageUI"/> objects to be able to store data about the logs and copy them to the clipboard.
 /// </para>
-/// <seealso cref="BCManager"/><br></br>
-/// <seealso cref="BrainCloud.LogCallback"/>
+/// 
+/// <br><seealso cref="BCManager"/></br>
+/// <br><seealso cref="BrainCloud.LogCallback"/></br>
 /// </summary>
 public class LoggerContentUI : ContentUIBehaviour
 {
@@ -63,7 +65,7 @@ public class LoggerContentUI : ContentUIBehaviour
     {
         StopAllCoroutines();
         ClearLogButton.onClick.RemoveAllListeners();
-        BCManager.Client?.EnableLogging(false);
+
         Application.logMessageReceived -= OnLogMessageReceived;
     }
 
@@ -101,7 +103,7 @@ public class LoggerContentUI : ContentUIBehaviour
         for (int i = 0; i < logObjects.Count; i++)
         {
             logObjects[i].ClearLogObject();
-            logObjects[i].gameObject.SetName($"UnusedLogObject");
+            logObjects[i].gameObject.SetName("UnusedLogObject");
             logObjects[i].gameObject.SetActive(false);
         }
 
@@ -131,7 +133,7 @@ public class LoggerContentUI : ContentUIBehaviour
         for (int i = logIndex; i < MaxLogMessages; i++)
         {
             log = Instantiate(LogTemplate, LogContent);
-            log.gameObject.SetName($"UnusedLogObject");
+            log.gameObject.SetName("UnusedLogObject");
             log.gameObject.SetActive(false);
 
             logObjects.Add(log);
@@ -142,7 +144,6 @@ public class LoggerContentUI : ContentUIBehaviour
     {
         if (logObjects.IsNullOrEmpty())
         {
-            Debug.LogWarning("Logger is not initialized yet!");
             return;
         }
         else if (++logIndex >= logObjects.Count)
@@ -153,7 +154,10 @@ public class LoggerContentUI : ContentUIBehaviour
         LogMessageUI log = logObjects[logIndex];
         log.ConfigureLogObject(type, message, wordWrap, canCopy);
         log.transform.SetAsLastSibling();
-        log.gameObject.SetName($"{type}{(type == LogType.Log ? "Message" : "Log")}Object{logIndex:00}");
+        log.gameObject.SetName("{0}{1}{2}Object{3}", string.Empty,
+                                                     type == LogType.Log ? "Message" : "Log",
+                                                     type.ToString(),
+                                                     logIndex.ToString("00"));
         log.gameObject.SetActive(true);
 
         if (isActiveAndEnabled)
@@ -181,6 +185,10 @@ public class LoggerContentUI : ContentUIBehaviour
         {
             log = log[..log.IndexOf("\nJSON Response:\n")];
         }
+        else if (log.Contains("#BCC"))
+        {
+            return;
+        }
 
         log = $"{LOG_APP_HEADER} - {log}";
         switch (type)
@@ -205,6 +213,8 @@ public class LoggerContentUI : ContentUIBehaviour
 
     private void OnLogDelegate(string log)
     {
+        Debug.Log(log);
+
         if (!log.Contains("\n"))
         {
             LogMessage(log);
@@ -262,11 +272,19 @@ public class LoggerContentUI : ContentUIBehaviour
             {
                 if (current == '{' || current == '[')
                 {
-                    indents += tab;
-
                     sb.Append(current);
-                    sb.Append(Environment.NewLine);
-                    sb.Append(indents);
+                    if ((current == '{' && json[i + 1] == '}') ||
+                        (current == '[' && json[i + 1] == ']'))
+                    {
+                        sb.Append(json[i + 1]);
+                        i++;
+                    }
+                    else
+                    {
+                        indents += tab;
+                        sb.Append(Environment.NewLine);
+                        sb.Append(indents);
+                    }
                 }
                 else if (current == '}' || current == ']')
                 {

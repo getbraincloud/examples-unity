@@ -1,7 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
-using BrainCloud.JsonFx.Json;
-using System.Collections.Generic;
+using BrainCloud.JSONHelper;
 using System.Net.Mail;
 using TMPro;
 using UnityEngine;
@@ -248,12 +247,12 @@ public class IdentityServiceUI : ContentUIBehaviour
 
     private void OnIdentityUpdate_Success(string response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
+        string mergeID = response.Deserialize("data").GetString("profileId");
 
         // Attach does not send back a profileID as it will keep the current one, but merge does since we will need to replace the current one
-        if ((responseObj["data"] as Dictionary<string, object>).TryGetValue("profileId", out object profileID))
+        if (!mergeID.IsEmpty())
         {
-            BCManager.Wrapper.SetStoredProfileId((string)profileID);
+            BCManager.Wrapper.SetStoredProfileId(mergeID);
         }
 
         UserHandler.AnonymousUser = false; // With a profile ID from an attached/merged account, the user is no longer anonymous

@@ -166,7 +166,7 @@ public class MainMenuUI : ContentUIBehaviour
         {
             MenuItemUI menuItem = Instantiate(MenuItemTemplate, MenuContent);
             menuItem.gameObject.SetActive(true);
-            menuItem.gameObject.SetName(serviceItem.Name, "{0}MenuItem");
+            menuItem.gameObject.SetName("{0}MenuItem", serviceItem.Name);
             menuItem.Label = serviceItem.Name;
             menuItem.ButtonAction = () => OnMenuItemButton(serviceItem);
 
@@ -240,10 +240,7 @@ public class MainMenuUI : ContentUIBehaviour
     private void OnMenuItemButton(ServiceItem serviceItem)
     {
         MainMenuActive = false;
-
         AppContent.LoadServiceItemContent(serviceItem);
-
-        Debug.Log($"Opening {serviceItem.Name} Service UI");
     }
 
     private void OnLogoutButton()
@@ -278,9 +275,21 @@ public class MainMenuUI : ContentUIBehaviour
 
         SuccessCallback onSuccess = OnSuccess("Logging Out...", () =>
         {
+#if FACEBOOK_SDK
+            if(Facebook.Unity.FB.IsLoggedIn)
+            {
+                Facebook.Unity.FB.LogOut();
+            }
+#endif
+#if GOOGLE_OPENID_SDK
+            Google.GoogleSignIn.DefaultInstance.SignOut();
+#endif
             if (disconnectAccount)
             {
                 UserHandler.ResetAuthenticationData();
+#if GOOGLE_OPENID_SDK
+                Google.GoogleSignIn.DefaultInstance.Disconnect();
+#endif
             }
 
             LoginContent.ResetRememberUserPref();

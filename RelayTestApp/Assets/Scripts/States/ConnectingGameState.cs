@@ -53,6 +53,8 @@ public class ConnectingGameState : GameState
             }
             yield return new WaitForFixedUpdate();
         }
+
+        yield return new WaitForSeconds(2);
         CloseWindow();
     }
 }

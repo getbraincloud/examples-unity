@@ -14,7 +14,6 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildWebGL()
     {
-        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
@@ -24,7 +23,6 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildWindowStandalone()
     {
-        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
@@ -34,13 +32,22 @@ public class JenkinsBuild {
     // called from Jenkins
     public static void BuildMacOS()
     {
-        SetRemoteBuildSettings();
         var args = FindArgs();
         args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX, BuildOptions.None);
     }
+
+    // called from Jenkins
+    public static void BuildAndroid()
+    {
+        var args = FindArgs();
+        args.GetEnviroVariables();
+        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
+    }
     
+    //WIP, doesn't work on Mac but works fine in Windows..
     private static void SetRemoteBuildSettings()
     {
         string appId = GetArg("-appId");
@@ -169,7 +176,26 @@ public class JenkinsBuild {
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
-            return $"BombersRTT_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            string[] s = Application.dataPath.Split('/');
+            string projectName = s[s.Length - 2];
+            string environmentString;
+            if (BrainCloud.Plugin.Interface.DispatcherURL.Contains("internal"))
+            {
+                environmentString = "Internal";
+            }
+            else
+            {
+                environmentString = "Prod";
+            }
+#if UNITY_STANDALONE_WIN
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+#elif UNITY_STANDALONE_OSX
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+#elif UNITY_WEBGL
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}";
+#else
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+#endif
         }
         
         public void GetEnviroVariables()

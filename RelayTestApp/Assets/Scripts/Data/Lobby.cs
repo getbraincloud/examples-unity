@@ -24,7 +24,7 @@ public class Lobby
             var user = new UserInfo(jsonMember);
             if (user.ID == GameManager.Instance.CurrentUserInfo.ID)
             {
-                user.AllowSendTo = false;
+                GameManager.Instance.CurrentUserInfo = user;
             }
             user.IsAlive = true;
             if (user.ID.Equals(OwnerID))
@@ -40,6 +40,8 @@ public class Lobby
                 {
                     user.PresentSinceStart = (bool) extra["presentSinceStart"];
                 }
+
+                user.IsHost = true;
             }
             Members.Add(user);
         }
