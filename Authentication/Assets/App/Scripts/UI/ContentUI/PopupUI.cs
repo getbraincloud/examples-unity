@@ -139,7 +139,7 @@ public class PopupUI : ContentUIBehaviour
         TMP_Text bodyText = Instantiate(template, BodyContent);
         bodyText.text = bodyInfo.Text;
         bodyText.gameObject.SetActive(true);
-        bodyText.gameObject.SetName((uiElements.Count + 1).ToString(), "{0}ElementBodyText");
+        bodyText.gameObject.SetName("Element{0}BodyText", (uiElements.Count + 1).ToString("00"));
 
         uiElements.Add(bodyText.gameObject);
     }
@@ -161,7 +161,7 @@ public class PopupUI : ContentUIBehaviour
 
         bodyButton.Button.onClick.AddListener(OnClosePopupButton);
         bodyButton.gameObject.SetActive(true);
-        bodyButton.gameObject.SetName((uiElements.Count + 1).ToString(), "{0}ElementButton");
+        bodyButton.gameObject.SetName("Element{0}Button", (uiElements.Count + 1).ToString("00"));
 
         uiElements.Add(bodyButton.gameObject);
     }

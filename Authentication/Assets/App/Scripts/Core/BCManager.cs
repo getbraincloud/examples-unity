@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.Entity;
+using BrainCloud.JSONHelper;
 using System;
 using UnityEngine;
 
@@ -244,7 +245,7 @@ public class BCManager : MonoBehaviour
 
     private static SuccessCallback InternalHandleSuccess(string logMessage, object targetObject, Action<string, object> onSuccess)
     {
-        logMessage = logMessage.IsEmpty() ? "Success" : logMessage;
+        logMessage = string.IsNullOrWhiteSpace(logMessage) ? "Success" : logMessage;
         return (jsonResponse, cbObject) =>
         {
             cbObject ??= targetObject;
@@ -253,7 +254,7 @@ public class BCManager : MonoBehaviour
             {
                 cbObject = null;
             }
-            else if (!cbObjectName.IsEmpty())
+            else if (!string.IsNullOrWhiteSpace(cbObjectName))
             {
                 logMessage = $"{cbObjectName}: {logMessage}";
             }
@@ -278,7 +279,7 @@ public class BCManager : MonoBehaviour
 
     private static FailureCallback InternalHandleFailure(string errorMessage, object targetObject, Action<ErrorResponse, object> onFailure = null)
     {
-        errorMessage = errorMessage.IsEmpty() ? "Failure" : errorMessage;
+        errorMessage = string.IsNullOrWhiteSpace(errorMessage) ? "Failure" : errorMessage;
         return (status, reasonCode, jsonError, cbObject) =>
         {
             cbObject ??= targetObject;
@@ -287,7 +288,7 @@ public class BCManager : MonoBehaviour
             {
                 cbObject = null;
             }
-            else if (!cbObjectName.IsEmpty())
+            else if (!string.IsNullOrWhiteSpace(cbObjectName))
             {
                 errorMessage = $"{cbObjectName}: {errorMessage}";
             }
@@ -306,7 +307,7 @@ public class BCManager : MonoBehaviour
             Debug.Log($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
 #endif
 
-            onFailure?.Invoke(new ErrorResponse(jsonError), cbObject);
+            onFailure?.Invoke(jsonError.Deserialize<ErrorResponse>(), cbObject);
         };
     }
 

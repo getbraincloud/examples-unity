@@ -1,6 +1,6 @@
 using BrainCloud;
 using BrainCloud.Common;
-using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -186,10 +186,10 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         CurrentEntityLabel.text = string.Format(CURRENT_ENTITY_LABEL_FORMAT, currentIndex + 1, customEntities.Count);
 
         CustomEntity current = customEntities[currentIndex];
-
-        IDField.text = current.EntityID;
+        IDField.text = current.entityId;
         TypeField.text = current.GetDataType();
-        if (current.Data is HockeyStatsData hockeyData)
+
+        if (current.data is HockeyStatsData hockeyData)
         {
             HockeyStatsUI.gameObject.SetActive(true);
             HockeyStatsUI.IsInteractable = true;
@@ -198,7 +198,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
             HockeyStatsUI.UpdateUI(current.IsOwned, hockeyData);
         }
-        else if (current.Data is RPGData rpgData)
+        else if (current.data is RPGData rpgData)
         {
             HockeyStatsUI.gameObject.SetActive(false);
             HockeyStatsUI.IsInteractable = false;
@@ -252,11 +252,10 @@ public class CustomEntityServiceUI : ContentUIBehaviour
                                          OnFailure("CreateEntity Failed", () => IsInteractable = true));
     }
 
-    private void OnUpdateButton(IJSON hockeyData)
+    private void OnUpdateButton(IJSON entityData)
     {
         CustomEntity current = customEntities[currentIndex];
-
-        if (current.EntityID.IsEmpty())
+        if (current.GetDataType().IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ClearFields();
@@ -265,14 +264,14 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
         IsInteractable = false;
 
-        current.Data = hockeyData;
+        current.data = entityData;
 
         customEntityService.UpdateEntity(current.GetDataType(),
-                                         current.EntityID,
+                                         current.entityId,
                                          -1,
-                                         current.Data.Serialize(),
-                                         current.ACL.ToJsonString(),
-                                         current.TimeToLive.Milliseconds.ToString(),
+                                         current.data.Serialize(),
+                                         current.acl.ToJsonString(),
+                                         current.timeToLive.Milliseconds.ToString(),
                                          OnSuccess($"Updated Custom Entity ({current.GetDataType()})", OnUpdateEntity_Success),
                                          OnFailure("UpdateEntity Failed", () => IsInteractable = true));
     }
@@ -280,8 +279,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     private void OnDeleteButton()
     {
         CustomEntity current = customEntities[currentIndex];
-
-        if (current.EntityID.IsEmpty())
+        if (current.entityId.IsEmpty())
         {
             Debug.LogWarning($"Entity ID is blank...");
             ClearFields();
@@ -291,7 +289,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         IsInteractable = false;
 
         customEntityService.DeleteEntity(current.GetDataType(),
-                                         current.EntityID,
+                                         current.entityId,
                                          -1,
                                          OnSuccess($"Deleted Custom Entity ({current.GetDataType()})", OnDeleteEntity_Success),
                                          OnFailure("DeleteEntity Failed", () => IsInteractable = true));
@@ -305,7 +303,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        string context = JsonWriter.Serialize(new Dictionary<string, object>
+        string context = new Dictionary<string, object>
         {
             { "pagination", new Dictionary<string, object>
                 {
@@ -321,7 +319,7 @@ public class CustomEntityServiceUI : ContentUIBehaviour
                     { "createdAt", 1 },
                     { "updatedAt", -1 }
                 }}
-        });
+        }.Serialize();
 
         // Get HockeyStatsData first, then RPGData
         SuccessCallback onGetHockeyDataSuccess = OnSuccess($"GetEntityPage ({HockeyStatsData.DataType}) Success", (response) =>
@@ -349,9 +347,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
             });
 
             customEntityService.GetEntityPage(RPGData.DataType,
-                                          context,
-                                          onGetRPGDataSuccess,
-                                          OnFailure($"GetEntityPage ({RPGData.DataType}) Failed", OnGetPage_Failed));
+                                              context,
+                                              onGetRPGDataSuccess,
+                                              OnFailure($"GetEntityPage ({RPGData.DataType}) Failed", OnGetPage_Failed));
         });
 
         customEntityService.GetEntityPage(HockeyStatsData.DataType,
@@ -362,22 +360,13 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     private void OnGetPage_Success(string response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
-        var dataObj = responseObj["data"] as Dictionary<string, object>;
-        var resultsObj = dataObj["results"] as Dictionary<string, object>;
-
-        if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
+        var entities = response.Deserialize("data", "results").GetJSONArray<CustomEntity>("items");
+        if (entities.IsNullOrEmpty())
         {
             return;
         }
 
-        CustomEntity newCustomEntity;
-        for (int i = 0; i < data.Length; i++)
-        {
-            newCustomEntity = new CustomEntity();
-            newCustomEntity.Deserialize(data[i]);
-            customEntities.Add(newCustomEntity);
-        }
+        customEntities.AddRange(entities);
     }
 
     private void OnGetPage_Failed(ErrorResponse response)
@@ -385,9 +374,9 @@ public class CustomEntityServiceUI : ContentUIBehaviour
         LoadingLabel.gameObject.SetActive(false);
         ErrorLabel.gameObject.SetActive(true);
 
-        if (response.ReasonCode == 40570 || response.Message.ToLower().Contains("no custom entity config exists"))
+        if (response.ReasonCode == ReasonCodes.NO_CUSTOM_ENTITY_CONFIG_FOUND)
         {
-            string error = $"Custom Entities has not been enabled for this app on brainCloud (App ID: {BCManager.Client.AppId}).";
+            string error = $"Custom Entities have not been enabled for this app on brainCloud (App ID: {BCManager.Client.AppId}).";
             ErrorLabel.text = error;
             Debug.LogError(error);
         }
@@ -397,36 +386,26 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     private void OnCreateEntity_Success(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
+        var entity = response.Deserialize<CustomEntity>("data");
 
-        CustomEntity newCustomEntity = new CustomEntity();
-        newCustomEntity.Deserialize(data);
-        customEntities.Add(newCustomEntity);
+        customEntities.Add(entity);
 
-        currentIndex = customEntities.Count - 1;
-
-        if (newCustomEntity.Data == null || !data.ContainsKey("data"))
-        {
-            customEntityService.ReadEntity(newCustomEntity.GetDataType(),
-                                           newCustomEntity.EntityID,
-                                           OnSuccess($"Reading Custom Entity ({newCustomEntity.GetDataType()})", OnReadEntity_Success),
-                                           OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
-        }
+        customEntityService.ReadEntity(entity.GetDataType(),
+                                       entity.entityId,
+                                       OnSuccess($"Reading Custom Entity ({entity.GetDataType()})", OnReadEntity_Success),
+                                       OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
     }
 
     private void OnUpdateEntity_Success(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
+        var current = response.Deserialize<CustomEntity>("data");
 
-        customEntities[currentIndex].Deserialize(data);
+        customEntities[currentIndex] = current;
 
-        if (customEntities[currentIndex].Data == null || !data.ContainsKey("data"))
-        {
-            customEntityService.ReadEntity(customEntities[currentIndex].GetDataType(),
-                                           customEntities[currentIndex].EntityID,
-                                           OnSuccess($"Reading Custom Entity ({customEntities[currentIndex].GetDataType()})", OnReadEntity_Success),
-                                           OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
-        }
+        customEntityService.ReadEntity(current.GetDataType(),
+                                       current.entityId,
+                                       OnSuccess($"Reading Custom Entity ({customEntities[currentIndex].GetDataType()})", OnReadEntity_Success),
+                                       OnFailure("Error Reading Custom Entity", () => IsInteractable = true));
     }
 
     private void OnDeleteEntity_Success()
@@ -439,17 +418,17 @@ public class CustomEntityServiceUI : ContentUIBehaviour
 
     private void OnReadEntity_Success(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
-        string entityID = data["entityId"] as string;
+        var data = response.Deserialize("data");
+        string entityId = data.GetString("entityId");
 
         ClearFields();
 
         for (int i = 0; i < customEntities.Count; i++)
         {
-            if (entityID == customEntities[i].EntityID)
+            if (entityId == customEntities[i].entityId)
             {
                 currentIndex = i;
-                customEntities[currentIndex].Deserialize(data);
+                customEntities[i] = (CustomEntity)customEntities[i].FromJSONObject(data);
                 GetCurrentEntityIndex();
 
                 break;

@@ -1,4 +1,5 @@
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 
@@ -8,44 +9,40 @@ using System.Collections.Generic;
 [Serializable]
 public struct UserData : IJSON
 {
-    #region Consts
-
     public static readonly string DataType = "user";
+
+    #region Consts
 
     // JSON Properties
     private const string PROPERTY_NAME = "name";
     private const string PROPERTY_AGE  = "age";
 
-    // Defaults
-    private const string DEFAULT_NAME = "New User";
-    private const string DEFAULT_AGE  = "?";
-
     #endregion
 
-    [JsonName(PROPERTY_NAME)] public string Name;
-    [JsonName(PROPERTY_AGE)]  public string Age;
+    [JsonName(PROPERTY_NAME)] public string name;
+    [JsonName(PROPERTY_AGE)]  public string age;
 
-    public UserData(string name = "", string age = "")
+    public UserData(string name, string age)
     {
-        Name = name.IsEmpty() ? DEFAULT_NAME : name;
-        Age = age.IsEmpty() ? DEFAULT_AGE : age;
+        this.name = name;
+        this.age = age;
     }
 
     #region IJSON
 
     public string GetDataType() => DataType;
 
-    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    public Dictionary<string, object> ToJSONObject() => new()
     {
-        { PROPERTY_NAME, Name }, { PROPERTY_AGE, Age }
+        { PROPERTY_NAME, name }, { PROPERTY_AGE, age }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public void Deserialize(Dictionary<string, object> json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        Name = (string)json[PROPERTY_NAME];
-        Age = (string)json[PROPERTY_AGE];
+        name = obj.GetString(PROPERTY_NAME);
+        age = obj.GetString(PROPERTY_AGE);
+
+        return this;
     }
 
     #endregion

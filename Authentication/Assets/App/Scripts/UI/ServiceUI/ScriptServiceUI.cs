@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -103,15 +104,16 @@ public class ScriptServiceUI : ContentUIBehaviour
             if (!ScriptJSONField.text.IsEmpty())
             {
                 string json = ScriptJSONField.text;
-                if (JsonReader.Deserialize(json) is ICollection data && data.Count > 0)
+                if (JsonReader.Deserialize(json) is ICollection data)
                 {
                     IsInteractable = false;
                     string scriptName = scriptNames[current];
-
+                
                     SuccessCallback onSuccess = scriptName == SCRIPT_HELLO_WORLD ? OnSuccess($"{scriptName} Script Ran Successfully", OnHelloWorldScript_Success)
-                                                                                 : OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Returned);
-
-                    scriptService.RunScript(scriptName, JsonWriter.Serialize(data),
+                                                                                 : OnSuccess($"{scriptName} Script Ran Successfully", OnRunScript_Success);
+                
+                    scriptService.RunScript(scriptName,
+                                            data.Serialize(),
                                             onSuccess, OnFailure($"{scriptName} Script Failed", OnRunScript_Returned));
                 }
                 else
@@ -139,11 +141,10 @@ public class ScriptServiceUI : ContentUIBehaviour
         const int COLOR_TAG_CHARACTERS = 24;
         const string COLOR_TAG_FORMAT = "<color=#{0}{1}{2}>{3}</color>";
 
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
-        string message = (string)(data["response"] as Dictionary<string, object>)["data"];
+        string message = response.Deserialize("data", "response").GetString("data");
 
         Color32 letterColor;
-        StringBuilder helloWorld = new StringBuilder(message.Length * COLOR_TAG_CHARACTERS);
+        StringBuilder helloWorld = new(message.Length * COLOR_TAG_CHARACTERS);
         foreach (char c in message)
         {
             letterColor = new Color(Random.Range(0.2f, 0.99f), Random.Range(0.2f, 0.99f), Random.Range(0.2f, 0.99f));
@@ -151,6 +152,13 @@ public class ScriptServiceUI : ContentUIBehaviour
         }
 
         Debug.Log(helloWorld);
+
+        OnRunScript_Returned();
+    }
+
+    private void OnRunScript_Success(string response)
+    {
+        //var data = response.Deserialize("data", "response");
 
         OnRunScript_Returned();
     }

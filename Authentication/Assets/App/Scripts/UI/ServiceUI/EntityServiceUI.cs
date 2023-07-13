@@ -1,5 +1,5 @@
 using BrainCloud;
-using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -99,9 +99,9 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void UpdateUIInformation()
     {
-        if (!userEntity.EntityID.IsEmpty())
+        if (!userEntity.entityId.IsEmpty())
         {
-            IDField.text = userEntity.EntityID;
+            IDField.text = userEntity.entityId;
             TypeField.text = userEntity.GetDataType();
         }
         else
@@ -110,8 +110,8 @@ public class EntityServiceUI : ContentUIBehaviour
             TypeField.text = DEFAULT_EMPTY_FIELD;
         }
 
-        NameField.text = userEntity.GetData<UserData>().Name;
-        AgeField.text = userEntity.GetData<UserData>().Age;
+        NameField.text = ((UserData)userEntity.data).name;
+        AgeField.text = ((UserData)userEntity.data).age;
 
         IsInteractable = true;
     }
@@ -194,8 +194,8 @@ public class EntityServiceUI : ContentUIBehaviour
             userEntity = new Entity(new UserData(inputName, inputAge));
 
             entityService.CreateEntity(userEntity.GetDataType(),
-                                       userEntity.Data.Serialize(),
-                                       userEntity.ACL.ToJsonString(),
+                                       userEntity.data.Serialize(),
+                                       userEntity.acl.ToJsonString(),
                                        OnSuccess("Created Entity for User", OnCreateEntity_Success),
                                        OnFailure("CreateEntity Failed", UpdateUIInformation));
         }
@@ -216,7 +216,7 @@ public class EntityServiceUI : ContentUIBehaviour
         string inputName = NameField.text;
         string inputAge = AgeField.text;
 
-        if (userEntity.EntityID.IsEmpty())
+        if (userEntity.entityId.IsEmpty())
         {
             Debug.LogError("Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
@@ -226,12 +226,12 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            userEntity.Data = new UserData(inputName, inputAge);
+            userEntity.data = new UserData(inputName, inputAge);
 
-            entityService.UpdateEntity(userEntity.EntityID,
+            entityService.UpdateEntity(userEntity.entityId,
                                        userEntity.GetDataType(),
-                                       userEntity.Data.Serialize(),
-                                       userEntity.ACL.ToJsonString(),
+                                       userEntity.data.Serialize(),
+                                       userEntity.acl.ToJsonString(),
                                        -1,
                                        OnSuccess("Updated Entity for User", OnUpdateEntity_Success),
                                        OnFailure("UpdateEntity Failed", UpdateUIInformation));
@@ -252,7 +252,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnDeleteButton()
     {
-        if (userEntity.EntityID.IsEmpty())
+        if (userEntity.entityId.IsEmpty())
         {
             Debug.LogError("Entity ID is blank. Has an Entity been created yet?");
             InitializeUI();
@@ -262,7 +262,7 @@ public class EntityServiceUI : ContentUIBehaviour
         {
             IsInteractable = false;
 
-            entityService.DeleteEntity(userEntity.EntityID,
+            entityService.DeleteEntity(userEntity.entityId,
                                        -1,
                                        OnSuccess("Deleted Entity for User", OnDeleteEntity_Success),
                                        OnFailure("DeleteEntity Failed", UpdateUIInformation));
@@ -277,44 +277,41 @@ public class EntityServiceUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
-        var context = new Dictionary<string, object>
+        string context = new Dictionary<string, object>
         {
             { "pagination", new Dictionary<string, object>
-                            {
-                                { "rowsPerPage", 50 },
-                                { "pageNumber", 1 }
-                            }},
+                {
+                    { "rowsPerPage", 50 },
+                    { "pageNumber", 1 }
+                }},
             { "searchCriteria", new Dictionary<string, object>
-                                {
-                                    { "entityType", userEntity.GetDataType() }
-                                }},
+                {
+                    { "entityType", userEntity.GetDataType() }
+                }},
             { "sortCriteria", new Dictionary<string, object>
-                              {
-                                  { "createdAt", 1 },
-                                  { "updatedAt", -1 }
-                              }}
-        };
+                {
+                    { "createdAt", 1 },
+                    { "updatedAt", -1 }
+                }}
+        }.Serialize();
 
-        entityService.GetPage(JsonWriter.Serialize(context),
+        entityService.GetPage(context,
                               OnSuccess("GetPage Success", OnGetPage_Success),
                               OnFailure("GetPage Failed", UpdateUIInformation));
     }
 
     private void OnGetPage_Success(string response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
-        var dataObj = responseObj["data"] as Dictionary<string, object>;
-        var resultsObj = dataObj["results"] as Dictionary<string, object>;
-
-        if (resultsObj["items"] is not Dictionary<string, object>[] data || data.Length <= 0)
+        var data = response.Deserialize("data", "results").GetJSONArray("items");
+        if (data.IsNullOrEmpty())
         {
-            Debug.LogError("No entities were found for this user.");
+            Debug.LogWarning("No entities were found for this user.");
             InitializeUI();
             IsInteractable = true;
             return;
         }
 
-        userEntity.Deserialize(data[0]);
+        userEntity.FromJSONObject(data[0]);
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);
@@ -325,16 +322,14 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnCreateEntity_Success(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
-        string entityID = (string)data["entityId"];
+        string entityID = response.Deserialize("data").GetString("entityId");
 
         BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
 
     private void OnUpdateEntity_Success(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
-        string entityID = (string)data["entityId"];
+        string entityID = response.Deserialize("data").GetString("entityId");
 
         BCManager.EntityService.GetEntity(entityID, OnSuccess("Updating Local Entity Data...", OnGetEntity_Success));
     }
@@ -349,9 +344,7 @@ public class EntityServiceUI : ContentUIBehaviour
 
     private void OnGetEntity_Success(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
-
-        userEntity.Deserialize(data);
+        userEntity = response.Deserialize<Entity>("data");
 
         CreateButton.gameObject.SetActive(false);
         SaveButton.gameObject.SetActive(true);

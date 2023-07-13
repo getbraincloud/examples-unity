@@ -1,4 +1,5 @@
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 
@@ -8,7 +9,8 @@ using System.Collections.Generic;
 [Serializable]
 public struct HockeyStatsData : IJSON
 {
-    // Public
+    public static readonly string DataType = "hockey_player_stats";
+
     public enum FieldPosition
     {
         Center,
@@ -18,7 +20,7 @@ public struct HockeyStatsData : IJSON
         RightDefense
     }
 
-    public static readonly Dictionary<FieldPosition, string> FieldPositions = new Dictionary<FieldPosition, string>
+    public static readonly Dictionary<FieldPosition, string> FieldPositions = new()
     {
         { FieldPosition.Center,      "Center" },
         { FieldPosition.LeftWing,    "Left-Winger" },        { FieldPosition.RightWing, "Right-Winger" },
@@ -27,56 +29,51 @@ public struct HockeyStatsData : IJSON
 
     #region Consts
 
-    public static readonly string DataType = "hockey_player_stats";
-
     // JSON Properties
     private const string PROPERTY_NAME     = "name";
     private const string PROPERTY_POSITION = "position";
     private const string PROPERTY_GOALS    = "goals";
     private const string PROPERTY_ASSISTS  = "assists";
 
-    // Defaults
-    private const string DEFAULT_NAME = "John Smith";
-
     #endregion
 
-    [JsonName(PROPERTY_NAME)]     public string Name;
-    [JsonName(PROPERTY_POSITION)] public int PositionValue;
-    [JsonName(PROPERTY_GOALS)]    public int Goals;
-    [JsonName(PROPERTY_ASSISTS)]  public int Assists;
+    [JsonName(PROPERTY_NAME)]     public string name;
+    [JsonName(PROPERTY_POSITION)] public int position;
+    [JsonName(PROPERTY_GOALS)]    public int goals;
+    [JsonName(PROPERTY_ASSISTS)]  public int assists;
 
-    public FieldPosition Position => (FieldPosition)PositionValue;
+    public FieldPosition PlayerPosition => (FieldPosition)position;
 
-    public HockeyStatsData(string name = DEFAULT_NAME, FieldPosition position = FieldPosition.Center, int goals = 0, int assists = 0)
+    public HockeyStatsData(string name, FieldPosition position, int goals, int assists)
     {
-        Name = !name.IsEmpty() ? name : DEFAULT_NAME;
-        PositionValue = (int)position;
-        Goals = goals >= 0 ? goals : 0;
-        Assists = assists >= 0 ? assists : 0;
+        this.name = name;
+        this.position = (int)position;
+        this.goals = goals >= 0 ? goals : 0;
+        this.assists = assists >= 0 ? assists : 0;
     }
 
-    public int GetPoints() => Goals + Assists;
+    public int GetPoints() => goals + assists;
 
-    public string GetPosition() => FieldPositions[Position];
+    public string GetPosition() => FieldPositions[PlayerPosition];
 
     #region IJSON
 
     public string GetDataType() => DataType;
 
-    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    public Dictionary<string, object> ToJSONObject() => new()
     {
-        { PROPERTY_NAME,  Name },  { PROPERTY_POSITION, PositionValue },
-        { PROPERTY_GOALS, Goals }, { PROPERTY_ASSISTS,  Assists }
+        { PROPERTY_NAME,  name },  { PROPERTY_POSITION, position },
+        { PROPERTY_GOALS, goals }, { PROPERTY_ASSISTS,  assists }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public void Deserialize(Dictionary<string, object> json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        Name = (string)json[PROPERTY_NAME];
-        PositionValue = (int)json[PROPERTY_POSITION];
-        Goals = (int)json[PROPERTY_GOALS];
-        Assists = (int)json[PROPERTY_ASSISTS];
+        name = obj.GetString(PROPERTY_NAME);
+        position = obj.GetValue<int>(PROPERTY_POSITION);
+        goals = obj.GetValue<int>(PROPERTY_GOALS);
+        assists = obj.GetValue<int>(PROPERTY_ASSISTS);
+
+        return this;
     }
 
     #endregion
