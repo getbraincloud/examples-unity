@@ -61,4 +61,4 @@ After the game has completed, these events will execute:
 
 ---
 
-For more information on brainCloud and its services, please checkout the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).

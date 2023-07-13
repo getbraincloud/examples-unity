@@ -23,13 +23,17 @@ public static class MacOSPostBuild
 #if APPLE_SDK
                     AppleAuth.Editor.AppleAuthMacosPostprocessorHelper.FixManagerBundleIdentifier(target, pathToBuiltProject);
 #else
-                    string[] bundles = Directory.GetDirectories(Path.Combine(pathToBuiltProject, "Contents", "PlugIns"), "*.bundle");
-
-                    foreach (string bundle in bundles)
+                    string plugInsPath = Path.Combine(pathToBuiltProject, "Contents", "PlugIns");
+                    if(Directory.Exists(plugInsPath))
                     {
-                        MacOSCodeSigning.CodeSignAppBundle(bundle);
+                        string[] bundles = Directory.GetDirectories(plugInsPath, "*.bundle");
 
-                        Debug.Log($"Found Bundle: {bundle}");
+                        foreach (string bundle in bundles)
+                        {
+                            MacOSCodeSigning.CodeSignAppBundle(bundle);
+
+                            Debug.Log($"Found Bundle: {bundle}");
+                        }
                     }
 
                     MacOSCodeSigning.CodeSignAppBundle(pathToBuiltProject);

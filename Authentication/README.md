@@ -19,7 +19,13 @@ These scripts, under `Assets > App > Scripts > Core`, can be copied into your ow
     - This class can be expanded as needed for your own app to store more user data, such as entity data
     - It contains various scripting symbols to enable functionality for [external authentication methods](./README.md#external-authentication-methods) for when their plugins are integrated
         - These can be edited or removed as needed for your own app
-        
+
+- **JSONHelper** contains several helper methods to help with serializing and deserializing generic JSON objects
+    - `IJSON` is an interface that can be used for classes and structs that will make use of these helper methods for easier management with more strongly-typed JSON objects
+    - Includes extension methods for dealing with `Dictionary<string, object>` objects in-particular
+    - Add `using BrainCloud.JSONHelper` in your scripts to make use of `IJSON` and these helper methods
+        - Take a look at the various service scripts and data objects (such as `UserData`, `HockeyStatsData`, and `RPGData`) to see examples of how JSONHelper gets used
+
 - **ErrorResponse** is a struct that gives you an easy way to deserialize data in error responses received from brainCloud
     - `BCManager.HandleFailure()` will return an ErrorResponse
 
@@ -44,7 +50,7 @@ Be sure to check out the various **Data**, **ServiceUI**, and **ContentUI** scri
     
 ### Services
 
-Services that this example implements:
+Services that this example project makes use of:
 
 - [Custom Entity](https://getbraincloud.com/apidocs/apiref/?csharp#capi-customentity)
 - [Entity](https://getbraincloud.com/apidocs/apiref/?csharp#capi-entity)
@@ -76,4 +82,4 @@ More external authentication methods to come!
 
 ---
 
-For more information on brainCloud and its services, please checkout the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).

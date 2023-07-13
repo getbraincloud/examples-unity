@@ -1,6 +1,6 @@
-using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 
@@ -23,69 +23,47 @@ public struct Entity : IJSON
 
     #endregion
 
-    [JsonName(PROPERTY_VERSION)]     public int Version;
-    [JsonName(PROPERTY_ENTITY_ID)]   public string EntityID;
-    [JsonName(PROPERTY_ENTITY_TYPE)] public string EntityType;
-    [JsonName(PROPERTY_CREATED_AT)]  public DateTime CreatedAt;
-    [JsonName(PROPERTY_UPDATED_AT)]  public DateTime UpdatedAt;
-    [JsonName(PROPERTY_ACL)]         public ACL ACL;
-    [JsonName(PROPERTY_DATA)]        public IJSON Data;
+    [JsonName(PROPERTY_VERSION)]     public int version;
+    [JsonName(PROPERTY_ENTITY_ID)]   public string entityId;
+    [JsonName(PROPERTY_ENTITY_TYPE)] public string entityType;
+    [JsonName(PROPERTY_CREATED_AT)]  public DateTime createdAt;
+    [JsonName(PROPERTY_UPDATED_AT)]  public DateTime updatedAt;
+    [JsonName(PROPERTY_ACL)]         public ACL acl;
+    [JsonName(PROPERTY_DATA)]        public IJSON data;
 
     public Entity(IJSON data)
     {
-        Version = -1; // -1 tells the server to create the latest version
-        EntityID = string.Empty;
-        EntityType = data.GetDataType();
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-        ACL = ACL.ReadWrite();
-        Data = data;
-    }
-
-    public T GetData<T>() where T : IJSON
-        => (T)(Data is T ? Data : default);
-
-    public void SetData<T>(T data) where T : IJSON
-    {
-        if (Data is T)
-        {
-            Data = data;
-        }
+        version = -1; // -1 tells the server to create the latest version
+        entityId = string.Empty;
+        entityType = data.GetDataType();
+        createdAt = DateTime.UtcNow;
+        updatedAt = DateTime.UtcNow;
+        acl = ACL.None();
+        this.data = data;
     }
 
     #region IJSON
 
-    public string GetDataType() => Data != null ? Data.GetDataType() : EntityType;
+    public string GetDataType() => data != null ? data.GetDataType() : entityType;
 
-    public Dictionary<string, object> GetDictionary() => new Dictionary<string, object>
+    public Dictionary<string, object> ToJSONObject() => new()
     {
-        { PROPERTY_VERSION,    Version },   { PROPERTY_ENTITY_ID,  EntityID },  { PROPERTY_ENTITY_TYPE, EntityType },
-        { PROPERTY_CREATED_AT, CreatedAt }, { PROPERTY_UPDATED_AT, UpdatedAt }, { PROPERTY_ACL,         ACL },
-        { PROPERTY_DATA,       Data }
+        { PROPERTY_VERSION,    version },   { PROPERTY_ENTITY_ID,  entityId },  { PROPERTY_ENTITY_TYPE, entityType },
+        { PROPERTY_CREATED_AT, createdAt }, { PROPERTY_UPDATED_AT, updatedAt }, { PROPERTY_ACL,         acl },
+        { PROPERTY_DATA,       data.ToJSONObject() }
     };
 
-    public string Serialize() => JsonWriter.Serialize(this);
-
-    public void Deserialize(Dictionary<string, object> json)
+    public IJSON FromJSONObject(Dictionary<string, object> obj)
     {
-        Version = (int)json[PROPERTY_VERSION];
-        EntityID = (string)json[PROPERTY_ENTITY_ID];
-        EntityType = (string)json[PROPERTY_ENTITY_TYPE];
-        CreatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_CREATED_AT]);
-        UpdatedAt = Util.BcTimeToDateTime((long)json[PROPERTY_UPDATED_AT]);
-        ACL.ReadFromJson(json[PROPERTY_ACL] as Dictionary<string, object>);
+        version = obj.GetValue<int>(PROPERTY_VERSION);
+        entityId = obj.GetString(PROPERTY_ENTITY_ID);
+        entityType = obj.GetString(PROPERTY_ENTITY_TYPE);
+        createdAt = obj.GetDateTime(PROPERTY_CREATED_AT);
+        updatedAt = obj.GetDateTime(PROPERTY_UPDATED_AT);
+        acl = obj.GetACL(PROPERTY_ACL);
+        data = obj.GetJSONObject<UserData>(PROPERTY_DATA);
 
-        if (Data == null && EntityType == UserData.DataType)
-        {
-            Data = new UserData();
-        }
-
-        if (Data != null && json.ContainsKey(PROPERTY_DATA))
-        {
-            Data.Deserialize(json[PROPERTY_DATA] as Dictionary<string, object>);
-        }
-
-        EntityType = GetDataType();
+        return this;
     }
 
     #endregion

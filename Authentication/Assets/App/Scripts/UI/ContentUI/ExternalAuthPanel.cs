@@ -1,5 +1,5 @@
 using BrainCloud.Common;
-using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +19,9 @@ using Google;
 using AppleAuth;
 #endif
 
+/// <summary>
+/// A login panel to hold buttons for multiple external authentication methods.
+/// </summary>
 public class ExternalAuthPanel : ContentUIBehaviour
 {
     [Header("Main")]
@@ -93,7 +96,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
             ButtonContent button = Instantiate(ButtonTemplate, ButtonContent);
             button.gameObject.SetActive(true);
-            button.gameObject.SetName(authItem.Name, "{0}MenuItem");
+            button.gameObject.SetName("{0}MenuItem", authItem.Name);
             button.Label = authItem.Name;
             button.LeftIcon = authItem.Icon;
             button.LabelColor = authItem.LabelColor;
@@ -268,9 +271,9 @@ public class ExternalAuthPanel : ContentUIBehaviour
 
     private void OnGetIdentitiesSuccess(string response)
     {
-        var data = (JsonReader.Deserialize(response) as Dictionary<string, object>)["data"] as Dictionary<string, object>;
+        var data = response.Deserialize("data", "identities");
 
-        UserHandler.AnonymousUser = (data["identities"] as Dictionary<string, object>).Count <= 0;
+        UserHandler.AnonymousUser = data.Count <= 0;
 
         BCManager.Wrapper.SetStoredAuthenticationType(selectedAuthenticationType.ToString());
         MainLoginPanel.SetRememberMePref(true);

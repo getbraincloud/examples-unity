@@ -1,5 +1,5 @@
 using BrainCloud;
-using BrainCloud.JsonFx.Json;
+using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -105,7 +105,7 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
 
             StatsContainerUI container = Instantiate(StatsContainerTemplate, StatsContent);
             container.gameObject.SetActive(true);
-            container.gameObject.SetName(key, "{0}StatsContainer");
+            container.gameObject.SetName("{0}StatsContainer", key);
             container.ShowSeparation(alternate);
             container.StatName = key;
             container.Value = Convert.ToInt64(statsObj[key]);
@@ -131,13 +131,10 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
 
     private void OnReadAllGlobalStats_Success(string response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
-        var dataObj = responseObj["data"] as Dictionary<string, object>;
-        var statsObj = dataObj["statistics"] as Dictionary<string, object>;
-
-        if (!statsObj.IsNullOrEmpty())
+        var data = response.Deserialize("data", "statistics");
+        if (!data.IsNullOrEmpty())
         {
-            UpdateStatContainers(statsObj);
+            UpdateStatContainers(data);
         }
 
         IsInteractableCheck();
@@ -145,13 +142,10 @@ public class GlobalStatsServiceUI : ContentUIBehaviour
 
     private void OnIncrementGlobalStats_Success(string response)
     {
-        var responseObj = JsonReader.Deserialize(response) as Dictionary<string, object>;
-        var dataObj = responseObj["data"] as Dictionary<string, object>;
-        var statsObj = dataObj["statistics"] as Dictionary<string, object>;
-
-        if (!statsObj.IsNullOrEmpty())
+        var data = response.Deserialize("data", "statistics");
+        if (!data.IsNullOrEmpty())
         {
-            UpdateStatContainers(statsObj);
+            UpdateStatContainers(data);
         }
 
         IsInteractableCheck();

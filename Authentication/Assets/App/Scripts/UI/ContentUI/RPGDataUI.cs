@@ -1,9 +1,11 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// A UI Panel that allows the user to edit the data for an <see cref="RPGData"/> object.
+/// </summary>
 public class RPGDataUI : ContentUIBehaviour
 {
     private const int MINIMUM_NAME_LENGTH = 4;
@@ -88,13 +90,13 @@ public class RPGDataUI : ContentUIBehaviour
     public void UpdateUI(bool isOwned, RPGData rpgData)
     {
         rpgCharacter = rpgData;
-        NameField.text = rpgData.Name;
-        LevelField.text = rpgData.Level.ToString();
-        JobField.text = rpgData.Job;
+        NameField.text = rpgData.name;
+        LevelField.text = rpgData.level.ToString();
+        JobField.text = rpgData.job;
         PowerField.text = rpgData.GetPower().ToString();
-        HealthField.text = rpgData.Health.ToString();
-        StrengthField.text = rpgData.Strength.ToString();
-        DefenseField.text = rpgData.Defense.ToString();
+        HealthField.text = rpgData.health.ToString();
+        StrengthField.text = rpgData.strength.ToString();
+        DefenseField.text = rpgData.defense.ToString();
 
         IsInteractable = isOwned;
 
@@ -137,11 +139,11 @@ public class RPGDataUI : ContentUIBehaviour
 
             if (inputField == NameField)
             {
-                rpgCharacter.Name = value;
+                rpgCharacter.name = value;
             }
             else // JobField
             {
-                rpgCharacter.Job = value;
+                rpgCharacter.job = value;
             }
 
             return true;
@@ -167,19 +169,19 @@ public class RPGDataUI : ContentUIBehaviour
 
                 if (inputField == HealthField)
                 {
-                    rpgCharacter.Health = result;
+                    rpgCharacter.health = result;
                 }
                 else if (inputField == StrengthField)
                 {
-                    rpgCharacter.Strength = result;
+                    rpgCharacter.strength = result;
                 }
                 else if (inputField == DefenseField)
                 {
-                    rpgCharacter.Defense = result;
+                    rpgCharacter.defense = result;
                 }
                 else // LevelField
                 {
-                    rpgCharacter.Level = result;
+                    rpgCharacter.level = result;
                 }
 
                 UpdatePointsDisplay();
