@@ -6,6 +6,38 @@ These examples can be found within the `_archived` folder for the tag alongside 
 
 ---
 
+# Newly Archived
+
+## BCAmazonIAP
+
+This example demonstrates **Amazon In-App Purchases** and verification with brainCloud. Inside there is a [PDF](./BCAmazonIAP/amazonIAPTutorial.pdf) describing the steps you will need to take to get going.
+
+## GoogleIAP
+
+An example of making a purchase with Google, and verifying it with braincloud. Refer to the [PDF](./GoogleIAP/GooglePurchasesTutorial.pdf) for proper setup.
+
+## PushNotifications
+
+An example of connecting **Firebase FCM Notifications** to brainCloud.
+
+Read more information here: http://getbraincloud.com/apidocs/portal-usage/push-notification-setup-firebase/
+
+### Additional Information
+
+This code example is based on the [Firebase Unity Quickstart Project](https://github.com/firebase/quickstart-unity).
+
+You can see more FCM documentation here: https://firebase.google.com/docs/cloud-messaging/android/client
+
+Project currently only contains a push notifications example for Android FCM
+- Add your google-services.json file to the asset folder
+    - Found on the Firebase dashboard
+- Update the brainCloud AppId and Secret on BrainCloudSettings to match yours
+    - Id and Secret found on the brainCloud Dashboard
+- Download and import the Auth and Messaging Firebase Unity SDK
+- Set-up Instructions: https://firebase.google.com/docs/unity/setup
+
+---
+
 ## [Archive Date: June 8th, 2023](https://github.com/getbraincloud/examples-unity/tree/archive-06-08-2023)
 
 ##### [Pull Request 147 - Archive Old Examples](https://github.com/getbraincloud/examples-unity/pull/147)
