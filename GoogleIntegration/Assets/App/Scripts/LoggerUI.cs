@@ -10,14 +10,13 @@ public class LoggerUI : MonoBehaviour
 {
     internal struct LoggerMessage
     {
-        public const string NO_COPY = "[nc]";
         private static readonly Color LOG_COLOR = Color.white;
         private static readonly Color WARNING_COLOR = new Color32(0xEE, 0xD2, 0x02, 255); // Yellow
         private static readonly Color ERROR_COLOR = new Color32(0xFF, 0x1E, 0x1E, 255); // Red
 
         private TMP_Text LogText;
         private Button LogButton;
-        private Action<string> LogAction;
+        private LoggerUI Logger;
 
         public GameObject GameObject
         {
@@ -29,11 +28,11 @@ public class LoggerUI : MonoBehaviour
             get => LogText.transform;
         }
 
-        public LoggerMessage(TMP_Text logText, Action<string> logAction)
+        public LoggerMessage(TMP_Text logText, LoggerUI logger)
         {
             LogText = logText;
             LogButton = logText.GetComponent<Button>();
-            LogAction = logAction;
+            Logger = logger;
             DisableButton();
         }
 
@@ -56,21 +55,12 @@ public class LoggerUI : MonoBehaviour
 
             LogText = null;
             LogButton = null;
-            LogAction = null;
+            Logger = null;
         }
 
-        public void ConfigureLogObject(LogType type, string message)
+        public void ConfigureLogObject(LogType type, string message, bool canCopy)
         {
-            if (message.Contains(NO_COPY))
-            {
-                LogText.text = message.Remove(message.IndexOf(NO_COPY), NO_COPY.Length);
-                DisableButton();
-            }
-            else
-            {
-                LogText.text = message;
-                EnableButton();
-            }
+            LogText.text = message;
 
             LogText.color = type switch
             {
@@ -78,6 +68,15 @@ public class LoggerUI : MonoBehaviour
                 LogType.Warning => WARNING_COLOR,
                 _ => LOG_COLOR
             };
+
+            if (canCopy)
+            {
+                EnableButton();
+            }
+            else
+            {
+                DisableButton();
+            }
         }
 
         private void OnLogMessageButton()
@@ -89,13 +88,13 @@ public class LoggerUI : MonoBehaviour
             {
                 GUIUtility.systemCopyBuffer = text;
 
-                if (text.StartsWith("{") && text.EndsWith("}"))
+                if (text.Contains("{") && text.EndsWith("}"))
                 {
-                    LogAction($"{NO_COPY}{APP_HEADER} - Copied JSON to clipboard.");
+                    Logger.LogMessageNoCopy($"{APP_HEADER} - Copied JSON to clipboard.");
                 }
                 else
                 {
-                    LogAction($"{NO_COPY}{APP_HEADER} - Copied Log to clipboard.");
+                    Logger.LogMessageNoCopy($"{APP_HEADER} - Copied Log to clipboard.");
                 }
             }
         }
@@ -104,7 +103,7 @@ public class LoggerUI : MonoBehaviour
     private const int MAX_LOG_MESSAGES = 50;
     private const string LOG_APP_HEADER = "#APP";
     private const string LOG_BCC_HEADER = "#BCC";
-    private const string LOG_INITIAL_TEXT = LoggerMessage.NO_COPY + LOG_APP_HEADER + " - Logs, JSON, and Error messages will appear here. You can " +
+    private const string LOG_INITIAL_TEXT = LOG_APP_HEADER + " - Logs, JSON, and Error messages will appear here. You can " +
 #if UNITY_IOS || UNITY_ANDROID
         "Tap" +
 #else
@@ -123,8 +122,10 @@ public class LoggerUI : MonoBehaviour
 
     private void Awake()
     {
-        logObjects = new();
-        logObjects.Capacity = MAX_LOG_MESSAGES;
+        logObjects = new()
+        {
+            Capacity = MAX_LOG_MESSAGES
+        };
     }
 
     private void OnEnable()
@@ -143,7 +144,7 @@ public class LoggerUI : MonoBehaviour
     private void Start()
     {
         CreateLogObjects();
-        LogMessage(LOG_INITIAL_TEXT);
+        LogMessageNoCopy(LOG_INITIAL_TEXT);
     }
 
     private void OnDisable()
@@ -178,7 +179,9 @@ public class LoggerUI : MonoBehaviour
 
     #region UI
 
-    private void LogMessage(string message) => DisplayLogObject(LogType.Log, message);
+    private void LogMessage(string message) => DisplayLogObject(LogType.Log, message, true);
+
+    private void LogMessageNoCopy(string message) => DisplayLogObject(LogType.Log, message, false);
 
     private void CreateLogObjects()
     {
@@ -189,7 +192,7 @@ public class LoggerUI : MonoBehaviour
 
         for (int i = logIndex; i < MAX_LOG_MESSAGES; i++)
         {
-            LoggerMessage log = new(Instantiate(LogTemplate, LogContent), LogMessage);
+            LoggerMessage log = new(Instantiate(LogTemplate, LogContent), this);
             log.GameObject.name = "UnusedLogObject";
             log.GameObject.SetActive(false);
 
@@ -199,7 +202,7 @@ public class LoggerUI : MonoBehaviour
         Destroy(LogTemplate.gameObject);
     }
 
-    private void DisplayLogObject(LogType type, string message)
+    private void DisplayLogObject(LogType type, string message, bool canCopy)
     {
         if (logObjects == null)
         {
@@ -211,7 +214,7 @@ public class LoggerUI : MonoBehaviour
         }
 
         LoggerMessage log = logObjects[logIndex];
-        log.ConfigureLogObject(type, message);
+        log.ConfigureLogObject(type, message, canCopy);
         log.Transform.SetAsLastSibling();
         log.GameObject.name = $"{type}{(type == LogType.Log ? "Message" : "Log")}Object_{logIndex:00}";
         log.GameObject.SetActive(true);
@@ -238,7 +241,7 @@ public class LoggerUI : MonoBehaviour
             return;
         }
 
-        DisplayLogObject(type, $"{LOG_APP_HEADER} - {log}");
+        DisplayLogObject(type, $"{LOG_APP_HEADER} - {log}", true);
     }
 
     #endregion
@@ -249,16 +252,21 @@ public class LoggerUI : MonoBehaviour
     {
         if (!log.Contains("\n"))
         {
-            LogMessage(log);
+            LogMessageNoCopy(log);
             return;
         }
 
-        LogMessage(log[..log.IndexOf("\n")]);// Server Message 
+        string serverMessage = log[..log.IndexOf("\n")];
 
         string json = log[(log.LastIndexOf("\n") + 1)..]; // Build JSON Response
         if (json.StartsWith("{") && json.EndsWith("}"))
         {
-            LogMessage(FormatJSON(json));
+            json = serverMessage + '\n' + FormatJSON(json);
+            LogMessage(json);
+        }
+        else
+        {
+            LogMessageNoCopy(serverMessage);
         }
     }
 

@@ -1,43 +1,29 @@
-using System;
-using System.Collections.Generic;
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
+using Firebase;
+using Firebase.Messaging;
 using TMPro;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class Authentication : MonoBehaviour
 {
-    private const int MINIMUM_USERNAME_LENGTH = 4;
-    private const int MINIMUM_PASSWORD_LENGTH = 6;
-    private const string NO_COPY = "[nc]";
-    private const string PROFILE_ID_FORMAT = "Profile ID: {0}";
-    private const string ANONYMOUS_ID_FORMAT = "Anonymous ID: {0}";
+    private const string PROFILE_ID_FORMAT = "<align=left>Profile ID:</align>\n{0}";
+    private const string ANONYMOUS_ID_FORMAT = "<align=left>Anonymous ID:</align>\n{0}";
     private const string APP_INFO_FORMAT = "{0} ({1}) v{2}";
     private const string BC_VERSION_FORMAT = "brainCloud v{0}";
 
     [SerializeField] private CanvasGroup MainCG = default;
 
-    [Header("Toggle Group")]
-    [SerializeField] private CanvasGroup ToggleCG = default;
-    [SerializeField] private Toggle EmailRadio = default;
-    [SerializeField] private Toggle UniversalRadio = default;
-    [SerializeField] private Toggle AnonymousRadio = default;
-
-    [Header("Email Group")]
-    [SerializeField] private CanvasGroup EmailCG = default;
-    [SerializeField] private TMP_InputField EmailInputField = default;
-    [SerializeField] private TMP_InputField EmailPasswordField = default;
-
-    [Header("Universal Group")]
-    [SerializeField] private CanvasGroup UniversalCG = default;
-    [SerializeField] private TMP_InputField UserInputField = default;
-    [SerializeField] private TMP_InputField UserPasswordField = default;
-
-    [Header("Login/Logout")]
+    [Header("Buttons")]
     [SerializeField] private Button LoginButton = default;
     [SerializeField] private Button LogoutButton = default;
+    [SerializeField] private Button SendPushButton = default;
+    [SerializeField] private Button ShowStoreButton = default;
 
     [Header("User Info")]
     [SerializeField] private TMP_Text ProfileIDLabel = default;
@@ -48,6 +34,9 @@ public class Authentication : MonoBehaviour
     [SerializeField] private TMP_Text VersionInfoLabel = default;
 
     private BrainCloudWrapper BC = null;
+    private FirebaseApp FireBase = null;
+    private string FirebaseToken = string.Empty;
+    private readonly string NotificationMessage = "Testing Google Notification with brainCloud";
 
     #region Unity Messages
 
@@ -58,168 +47,80 @@ public class Authentication : MonoBehaviour
         BC.WrapperName = Application.productName;
         BC.Init();
 
-        EmailInputField.text = string.Empty;
-        EmailPasswordField.text = string.Empty;
-        UserInputField.text = string.Empty;
-        UserPasswordField.text = string.Empty;
-
         DontDestroyOnLoad(gameObject);
     }
 
     private void OnEnable()
     {
-        EmailRadio.onValueChanged.AddListener(OnEmailRadio);
-        UniversalRadio.onValueChanged.AddListener(OnUniversalRadio);
         LoginButton.onClick.AddListener(OnLoginButton);
         LogoutButton.onClick.AddListener(OnLogoutButton);
+        SendPushButton.onClick.AddListener(OnSendPushButton);
+        ShowStoreButton.onClick.AddListener(OnShowStoreButton);
     }
 
     private void Start()
     {
-        // Set default radio
-        AuthenticationType authenticationType = AuthenticationType.FromString(BC.GetStoredAuthenticationType());
-        if (authenticationType == AuthenticationType.Universal)
-        {
-            UniversalRadio.isOn = true;
-            OnEmailRadio(false);
-            OnUniversalRadio(true);
-        }
-        else if (authenticationType == AuthenticationType.Anonymous)
-        {
-            AnonymousRadio.isOn = true;
-            OnEmailRadio(false);
-            OnUniversalRadio(false);
-        }
-        else // Email is default
-        {
-            EmailRadio.isOn = true;
-            OnEmailRadio(true);
-            OnUniversalRadio(false);
-        }
+        MainCG.interactable = false;
 
-        // Disable login button
+        // Setup buttons
+        LoginButton.gameObject.SetActive(true);
         LogoutButton.gameObject.SetActive(false);
+        SendPushButton.interactable = false;
+        ShowStoreButton.interactable = false;
 
+        GetStoredUserIDs();
         AppInfoLabel.text = string.Format(APP_INFO_FORMAT, BC.WrapperName, BC.Client.AppId, BC.Client.AppVersion);
         VersionInfoLabel.text = string.Format(BC_VERSION_FORMAT, BC.Client.BrainCloudClientVersion);
 
-        // Do BC reconnect if there is a stored profile ID and anonymous ID
-        if (GetStoredUserIDs() &&
-            (authenticationType == AuthenticationType.Email ||
-             authenticationType == AuthenticationType.Universal ||
-             authenticationType == AuthenticationType.Anonymous))
-        {
-            HandleAutomaticLogin();
-        }
+        StartCoroutine(WaitToEnableApp());
     }
 
     private void OnDisable()
     {
-        EmailRadio.onValueChanged.RemoveAllListeners();
-        UniversalRadio.onValueChanged.RemoveAllListeners();
         LoginButton.onClick.RemoveAllListeners();
         LogoutButton.onClick.RemoveAllListeners();
+        SendPushButton.onClick.RemoveAllListeners();
+        ShowStoreButton.onClick.RemoveAllListeners();
     }
 
     private void OnDestroy()
     {
         BC = null;
+        FireBase?.Dispose();
+        FireBase = null;
     }
 
     #endregion
 
     #region UI
 
-    private void OnEmailRadio(bool value)
+    private IEnumerator WaitToEnableApp()
     {
-        EmailCG.interactable = value;
-        EmailCG.gameObject.SetActive(value);
-    }
+        DependencyStatus status = (DependencyStatus)(-1);
 
-    private void OnUniversalRadio(bool value)
-    {
-        UniversalCG.interactable = value;
-        UniversalCG.gameObject.SetActive(value);
-    }
-
-    private bool CheckEmailVerification(string value)
-    {
-        EmailInputField.text = value.Trim();
-        if (!string.IsNullOrWhiteSpace(EmailInputField.text))
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
         {
-            try
-            {
-                // Use MailAddress to validate the email address
-                // NOTE: This is NOT a guaranteed way to validate an email address and this will NOT ping the email to
-                // validate that it is a real email address. brainCloud DOES NOT validate this upon registration as well.
-                // You should implement your own method of verificaiton.
-                System.Net.Mail.MailAddress validate = new(EmailInputField.text);
+            status = task.Result;
+        });
 
-                string user = validate.User;
-                string host = validate.Host;
-                if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(host) ||
-                    !host.Contains('.') || host.StartsWith('.') || host.EndsWith('.'))
-                {
-                    Debug.LogError($"{NO_COPY}Please use a valid email address.");
-                    return false;
-                }
-            }
-            catch
-            {
-                Debug.LogError($"{NO_COPY}Please use a valid email address.");
-                return false;
-            }
+        yield return new WaitUntil(() => (int)status >= 0);
 
-            return true;
+        if (status == DependencyStatus.Available)
+        {
+            //FireBase = FirebaseApp.DefaultInstance;
+            FirebaseMessaging.MessageReceived += OnMessageReceived;
+            FirebaseMessaging.TokenReceived += OnTokenReceived;
+
+            Debug.Log($"Firebase is ready for use. Status: {status}");
+        }
+        else
+        {
+            Debug.LogError($"Could not resolve all Firebase dependencies: {status}");
         }
 
-        Debug.LogError($"{NO_COPY}Please use a valid email address.");
+        yield return null;
 
-        return false;
-    }
-
-    private bool CheckUsernameVerification(string value)
-    {
-        UserInputField.text = value.Trim();
-        if (!string.IsNullOrWhiteSpace(UserInputField.text))
-        {
-            if (UserInputField.text.Length < MINIMUM_USERNAME_LENGTH)
-            {
-                Debug.LogError($"{NO_COPY}Please use a username with at least {MINIMUM_USERNAME_LENGTH} characters.");
-                return false;
-            }
-
-            return true;
-        }
-
-        Debug.LogError($"{NO_COPY}Please use a valid username.");
-
-        return false;
-    }
-
-    private bool CheckPasswordVerification(TMP_InputField passwordField, string value)
-    {
-        if (passwordField == null)
-        {
-            Debug.LogError($"{NO_COPY}Cannot verify which password field. Is Anonymous toggle on?");
-            return false;
-        }
-
-        passwordField.text = value.Trim();
-        if (!string.IsNullOrWhiteSpace(passwordField.text))
-        {
-            if (passwordField.text.Length < MINIMUM_PASSWORD_LENGTH)
-            {
-                Debug.LogError($"{NO_COPY}Please use a password with at least {MINIMUM_PASSWORD_LENGTH} characters.");
-                return false;
-            }
-
-            return true;
-        }
-
-        Debug.LogError($"{NO_COPY}Please use a valid password.");
-
-        return false;
+        MainCG.interactable = true;
     }
 
     public bool GetStoredUserIDs()
@@ -253,59 +154,13 @@ public class Authentication : MonoBehaviour
 
     private void OnLoginButton()
     {
-        string inputUser = EmailRadio.isOn ? EmailInputField.text : UniversalRadio.isOn ? UserInputField.text : string.Empty;
-        string inputPassword = EmailRadio.isOn ? EmailPasswordField.text : UniversalRadio.isOn ? UserPasswordField.text : string.Empty;
-
-        if (!AnonymousRadio.isOn)
+        if (GetStoredUserIDs())
         {
-            bool cancel = false;
-            if (EmailRadio.isOn && !CheckEmailVerification(inputUser))
-            {
-                cancel = true;
-            }
-            else if (UniversalRadio.isOn && !CheckUsernameVerification(inputUser))
-            {
-                cancel = true;
-            }
-
-            if (!CheckPasswordVerification(EmailRadio.isOn ? EmailPasswordField :
-                                           UniversalRadio.isOn ? UserPasswordField : null,
-                                           inputPassword))
-            {
-                cancel = true;
-            }
-
-            if (cancel)
-            {
-                return;
-            }
+            HandleAutomaticLogin();
         }
-
-        EmailPasswordField.text = string.Empty;
-        UserPasswordField.text = string.Empty;
-
-        MainCG.interactable = false;
-
-        Debug.Log($"{NO_COPY}Attempting to authenticate...");
-
-        if (EmailRadio.isOn)
+        else
         {
-            BC.AuthenticateEmailPassword(inputUser, inputPassword, true, OnAuthenticationSuccess, OnAuthenticationFailure, this);
-        }
-        else if (UniversalRadio.isOn)
-        {
-            BC.AuthenticateUniversal(inputUser, inputPassword, true, OnAuthenticationSuccess, OnAuthenticationFailure, this);
-        }
-        else // Anonymous login
-        {
-            if (GetStoredUserIDs())
-            {
-                HandleAutomaticLogin();
-            }
-            else
-            {
-                BC.AuthenticateAnonymous(OnAuthenticationSuccess, OnAuthenticationFailure, this);
-            }
+            BC.AuthenticateAnonymous(OnAuthenticationSuccess, OnAuthenticationFailure, this);
         }
     }
 
@@ -315,21 +170,12 @@ public class Authentication : MonoBehaviour
 
         SuccessCallback onSuccess = (_, _) =>
         {
-            Debug.Log($"{NO_COPY}Logout success!");
+            Debug.Log($"Logout success!");
 
-            EmailInputField.text = string.Empty;
-            EmailPasswordField.text = string.Empty;
-            UserInputField.text = string.Empty;
-            UserPasswordField.text = string.Empty;
-
-            ToggleCG.interactable = true;
             LoginButton.gameObject.SetActive(true);
             LogoutButton.gameObject.SetActive(false);
+            SendPushButton.interactable = false;
 
-            OnEmailRadio(AuthenticationType.FromString(BC.GetStoredAuthenticationType()) == AuthenticationType.Email);
-            OnUniversalRadio(AuthenticationType.FromString(BC.GetStoredAuthenticationType()) == AuthenticationType.Universal);
-
-            BC.ResetStoredAuthenticationType();
             GetStoredUserIDs();
 
             MainCG.interactable = true;
@@ -337,14 +183,36 @@ public class Authentication : MonoBehaviour
 
         FailureCallback onFailure = (_, _, _, _) =>
         {
-            Debug.LogError($"{NO_COPY}Logout failed!");
-            Debug.LogError($"{NO_COPY}Try restarting the app...");
+            Debug.LogError($"Logout failed!");
+            Debug.LogError($"Try restarting the app...");
 
-            BC.ResetStoredAuthenticationType();
             GetStoredUserIDs();
         };
 
         BC.PlayerStateService.Logout(onSuccess, onFailure, this);
+    }
+
+    private void OnSendPushButton()
+    {
+        MainCG.interactable = false;
+
+        string content = "{\"notification\":{\"body\":\"" + NotificationMessage + "\",\"title\":\"message title\"},\"data\":{\"customfield1\":\"customValue1\",\"customfield2\":\"customValue2\"},\"priority\":\"normal\"}";
+
+        BC.PushNotificationService.SendRawPushNotification
+        (
+            BC.GetStoredProfileId(),
+            content,
+            string.Empty,
+            string.Empty,
+            SendRawPushNotificationSuccess,
+            OnBrainCloudError,
+            this
+        );
+    }
+
+    private void OnShowStoreButton()
+    {
+        Debug.Log("Showing the IAP Store...");
     }
 
     #endregion
@@ -355,54 +223,26 @@ public class Authentication : MonoBehaviour
     {
         MainCG.interactable = false;
 
-        FailureCallback onFailure = (_, _, _, _) =>
-        {
-            MainCG.interactable = true;
+        Debug.Log($"Logging in with previous credentials...");
 
-            Debug.LogError($"{NO_COPY}Automatic login failed. Please try logging in manually.");
-        };
-
-        Debug.Log($"{NO_COPY}Performing automatic authentication...");
-
-        BC.Reconnect(OnAuthenticationSuccess, onFailure, this);
+        BC.Reconnect(OnAuthenticationSuccess, OnAuthenticationFailure, this);
     }
 
     private void OnAuthenticationSuccess(string jsonResponse, object cbObject)
     {
-        BC.SetStoredAuthenticationType(EmailRadio.isOn ? AuthenticationType.Email.ToString() :
-                                              UniversalRadio.isOn ? AuthenticationType.Universal.ToString() :
-                                              AuthenticationType.Anonymous.ToString());
+        BC.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
 
-        ToggleCG.interactable = false;
-        EmailCG.interactable = false;
-        UniversalCG.interactable = false;
         LoginButton.gameObject.SetActive(false);
         LogoutButton.gameObject.SetActive(true);
+        SendPushButton.interactable = true;
+        ShowStoreButton.interactable = true;
         MainCG.interactable = true;
 
         GetStoredUserIDs();
         Debug.Log($"User Profile ID: {BC.GetStoredProfileId()}");
         Debug.Log($"User Anonymous ID: {BC.GetStoredAnonymousId()}");
-        Debug.Log($"Authentication Method: {BC.GetStoredAuthenticationType()}");
 
-        // Deserialize jsonResponse
-        var data = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>;
-
-        // Properties to potentially store
-        var newUser = data["newUser"];
-        var sessionId = (string)data["sessionId"];
-        var loginCount = data["loginCount"].GetType() == typeof(long) ? (long)data["loginCount"]
-                                                                      : (int)data["loginCount"];
-        var expiryTime = data["playerSessionExpiry"].GetType() == typeof(long) ? TimeSpan.FromSeconds((long)data["playerSessionExpiry"])
-                                                                               : TimeSpan.FromSeconds((int)data["playerSessionExpiry"]);
-
-        Debug.Log("Deserializing some properties:\n" +
-                  $"  Are they a new user? {newUser}\n" +
-                  $"  User Session ID: {sessionId}\n" +
-                  $"  Login Counts: {loginCount}\n" +
-                  $"  Session Expiry Time: {expiryTime.TotalSeconds} seconds");
-
-        Debug.Log($"{NO_COPY}Authentication success! You are now logged into your app on brainCloud.");
+        Debug.Log($"Authentication success! You are now logged into your app on brainCloud.");
     }
 
     private void OnAuthenticationFailure(int status, int reason, string jsonError, object cbObject)
@@ -410,15 +250,81 @@ public class Authentication : MonoBehaviour
         BC.ResetStoredAuthenticationType();
         GetStoredUserIDs();
 
+        OnBrainCloudError(status, reason, jsonError, cbObject);
+
+        Debug.LogError($"Authentication failed! Please try again.");
+    }
+
+    private void SendRawPushNotificationSuccess(string jsonResponse, object cbObject)
+    {
+        MainCG.interactable = true;
+        SendPushButton.interactable = false;
+
+        Debug.Log($"Push notification request sent!");
+        Debug.Log($"Push notifications are expensive to send so the button will remain disabled for this login.");
+    }
+
+    private void OnBrainCloudError(int status, int reason, string jsonError, object cbObject)
+    {
         // Deserialize jsonError
         var error = JsonReader.Deserialize<Dictionary<string, object>>(jsonError);
         var message = (string)error["status_message"];
 
         Debug.LogError($"Status: {status} | Reason: {reason} | Message:\n  {message}");
 
-        Debug.LogError($"{NO_COPY}Authentication failed! Please try again.");
-
         MainCG.interactable = true;
+    }
+
+    #endregion
+
+    #region Firebase
+
+    public virtual void OnMessageReceived(object sender, MessageReceivedEventArgs e)
+    {
+        Debug.Log("Received a new message");
+        var notification = e.Message.Notification;
+        if (notification != null)
+        {
+            Debug.Log("title: " + notification.Title);
+            Debug.Log("body: " + notification.Body);
+            var android = notification.Android;
+            if (android != null)
+            {
+                Debug.Log("android channel_id: " + android.ChannelId);
+            }
+
+            if (notification.Body.Contains(NotificationMessage))
+            {
+                Debug.Log($"Notification received: {NotificationMessage}");
+            }
+        }
+        if (e.Message.From.Length > 0)
+            Debug.Log("from: " + e.Message.From);
+        if (e.Message.Link != null)
+        {
+            Debug.Log("link: " + e.Message.Link.ToString());
+        }
+        if (e.Message.Data.Count > 0)
+        {
+            Debug.Log("data:");
+            foreach (KeyValuePair<string, string> iter in e.Message.Data)
+            {
+                Debug.Log("  " + iter.Key + ": " + iter.Value);
+            }
+        }
+    }
+
+    public virtual void OnTokenReceived(object sender, TokenReceivedEventArgs token)
+    {
+        Debug.Log("Received Registration Token: " + token.Token);
+        FirebaseToken = token.Token;
+        //OnRegisterToken();
+        //AddStatusText("Received Registration Token: " + token.Token);
+    }
+
+    public void OnRegisterToken()
+    {
+        BC.PushNotificationService.RegisterPushNotificationDeviceToken(Platform.GooglePlayAndroid, FirebaseToken, failure:OnBrainCloudError, cbObject:this);
     }
 
     #endregion
