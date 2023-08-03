@@ -5,10 +5,11 @@ using Firebase;
 using Firebase.Messaging;
 using TMPro;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class Authentication : MonoBehaviour
 {
@@ -94,35 +95,6 @@ public class Authentication : MonoBehaviour
 
     #region UI
 
-    private IEnumerator WaitToEnableApp()
-    {
-        DependencyStatus status = (DependencyStatus)(-1);
-
-        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
-        {
-            status = task.Result;
-        });
-
-        yield return new WaitUntil(() => (int)status >= 0);
-
-        if (status == DependencyStatus.Available)
-        {
-            //FireBase = FirebaseApp.DefaultInstance;
-            FirebaseMessaging.MessageReceived += OnMessageReceived;
-            FirebaseMessaging.TokenReceived += OnTokenReceived;
-
-            Debug.Log($"Firebase is ready for use. Status: {status}");
-        }
-        else
-        {
-            Debug.LogError($"Could not resolve all Firebase dependencies: {status}");
-        }
-
-        yield return null;
-
-        MainCG.interactable = true;
-    }
-
     public bool GetStoredUserIDs()
     {
         bool canDoReconnect = false;
@@ -196,15 +168,29 @@ public class Authentication : MonoBehaviour
     {
         MainCG.interactable = false;
 
-        string content = "{\"notification\":{\"body\":\"" + NotificationMessage + "\",\"title\":\"message title\"},\"data\":{\"customfield1\":\"customValue1\",\"customfield2\":\"customValue2\"},\"priority\":\"normal\"}";
+        SuccessCallback onSuccess = (_, _) =>
+        {
+            Debug.Log($"Registered Device for Push Notifications! Sending one now...");
 
-        BC.PushNotificationService.SendRawPushNotification
+            string content = "{\"notification\":{\"body\":\"" + NotificationMessage + "\",\"title\":\"message title\"},\"data\":{\"customfield1\":\"customValue1\",\"customfield2\":\"customValue2\"},\"priority\":\"normal\"}";
+
+            BC.PushNotificationService.SendRawPushNotification
+            (
+                BC.GetStoredProfileId(),
+                content,
+                string.Empty,
+                string.Empty,
+                SendRawPushNotificationSuccess,
+                OnBrainCloudError,
+                this
+            );
+        };
+
+        BC.PushNotificationService.RegisterPushNotificationDeviceToken
         (
-            BC.GetStoredProfileId(),
-            content,
-            string.Empty,
-            string.Empty,
-            SendRawPushNotificationSuccess,
+            Platform.GooglePlayAndroid,
+            FirebaseToken,
+            onSuccess,
             OnBrainCloudError,
             this
         );
@@ -279,6 +265,38 @@ public class Authentication : MonoBehaviour
 
     #region Firebase
 
+    private IEnumerator WaitToEnableApp()
+    {
+        DependencyStatus status = (DependencyStatus)(-1);
+
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+        {
+            status = task.Result;
+        });
+
+        yield return new WaitUntil(() => (int)status >= 0);
+
+        if (status == DependencyStatus.Available)
+        {
+            //FireBase = FirebaseApp.DefaultInstance;
+            FirebaseMessaging.MessageReceived += OnMessageReceived;
+            FirebaseMessaging.TokenReceived += OnTokenReceived;
+
+            FirebaseMessaging.SubscribeAsync("brainCloudExampleTopic").ContinueWith(LogTaskCompletion("SubscribeAsync"));
+            FirebaseMessaging.RequestPermissionAsync().ContinueWith(LogTaskCompletion("RequestPermissionAsync"));
+
+            Debug.Log($"Firebase is ready for use. Status: {status}");
+        }
+        else
+        {
+            Debug.LogError($"Could not resolve all Firebase dependencies: {status}");
+        }
+
+        yield return null;
+
+        MainCG.interactable = true;
+    }
+
     public virtual void OnMessageReceived(object sender, MessageReceivedEventArgs e)
     {
         Debug.Log("Received a new message");
@@ -316,16 +334,41 @@ public class Authentication : MonoBehaviour
 
     public virtual void OnTokenReceived(object sender, TokenReceivedEventArgs token)
     {
-        Debug.Log("Received Registration Token: " + token.Token);
+        Debug.Log($"Received Firebase Registration Token: {token.Token}");
         FirebaseToken = token.Token;
-        //OnRegisterToken();
-        //AddStatusText("Received Registration Token: " + token.Token);
     }
 
-    public void OnRegisterToken()
+    private Func<Task, bool> LogTaskCompletion(string operation) => task =>
     {
-        BC.PushNotificationService.RegisterPushNotificationDeviceToken(Platform.GooglePlayAndroid, FirebaseToken, failure:OnBrainCloudError, cbObject:this);
-    }
+        bool complete = false;
+        if (task.IsCanceled)
+        {
+            Debug.Log(operation + " canceled.");
+        }
+        else if (task.IsFaulted)
+        {
+            Debug.Log(operation + " encounted an error.");
+            if (task.Exception == null) return false;
+            foreach (Exception exception in task.Exception.Flatten().InnerExceptions)
+            {
+                string errorCode = "";
+                FirebaseException firebaseEx = exception as Firebase.FirebaseException;
+                if (firebaseEx != null)
+                {
+                    errorCode = String.Format("Error.{0}: ",
+                        ((Error)firebaseEx.ErrorCode).ToString());
+                }
+                Debug.Log(errorCode + exception.ToString());
+            }
+        }
+        else if (task.IsCompleted)
+        {
+            Debug.Log(operation + " completed");
+            complete = true;
+        }
+
+        return complete;
+    };
 
     #endregion
 }
