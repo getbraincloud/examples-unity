@@ -270,7 +270,7 @@ public class LoggerUI : MonoBehaviour
         }
     }
 
-    private string FormatJSON(string json)
+    public static string FormatJSON(string json)
     {
         // Consts
         const string tab = "    ";

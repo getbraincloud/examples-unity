@@ -13,11 +13,16 @@ using UnityEngine.UI;
 
 public class Authentication : MonoBehaviour
 {
-    private const string PROFILE_ID_FORMAT = "<align=left>Profile ID:</align>\n{0}";
-    private const string ANONYMOUS_ID_FORMAT = "<align=left>Anonymous ID:</align>\n{0}";
+    private const string USER_INFO_FORMAT = "Profile ID: {0}\nAnonymous ID: {1}\nFirebase Token: {2}";
     private const string APP_INFO_FORMAT = "{0} ({1}) v{2}";
     private const string BC_VERSION_FORMAT = "brainCloud v{0}";
 
+    [Header("Message Data")]
+    [SerializeField] private string NotificationTitle = "Notification Title";
+    [SerializeField] private string NotificationBody = "Hello World from brainCloud!";
+    [SerializeField] private string NotificationImageURL = string.Empty;
+
+    [Header("UI Elements")]
     [SerializeField] private CanvasGroup MainCG = default;
 
     [Header("Buttons")]
@@ -27,8 +32,7 @@ public class Authentication : MonoBehaviour
     [SerializeField] private Button ShowStoreButton = default;
 
     [Header("User Info")]
-    [SerializeField] private TMP_Text ProfileIDLabel = default;
-    [SerializeField] private TMP_Text AnonIDLabel = default;
+    [SerializeField] private TMP_Text UserInfoText = default;
 
     [Header("App Info")]
     [SerializeField] private TMP_Text AppInfoLabel = default;
@@ -37,7 +41,6 @@ public class Authentication : MonoBehaviour
     private BrainCloudWrapper BC = null;
     private FirebaseApp FireBase = null;
     private string FirebaseToken = string.Empty;
-    private readonly string NotificationMessage = "Testing Google Notification with brainCloud";
 
     #region Unity Messages
 
@@ -73,7 +76,7 @@ public class Authentication : MonoBehaviour
         AppInfoLabel.text = string.Format(APP_INFO_FORMAT, BC.WrapperName, BC.Client.AppId, BC.Client.AppVersion);
         VersionInfoLabel.text = string.Format(BC_VERSION_FORMAT, BC.Client.BrainCloudClientVersion);
 
-        StartCoroutine(WaitToEnableApp());
+        StartCoroutine(InitializeFirebase());
     }
 
     private void OnDisable()
@@ -97,31 +100,15 @@ public class Authentication : MonoBehaviour
 
     public bool GetStoredUserIDs()
     {
-        bool canDoReconnect = false;
+        const string DEFAULT_TEXT = "---";
 
-        // Set Profile ID info
-        if (!string.IsNullOrWhiteSpace(BC.GetStoredProfileId()))
-        {
-            ProfileIDLabel.text = string.Format(PROFILE_ID_FORMAT, BC.GetStoredProfileId());
-            canDoReconnect = true;
-        }
-        else
-        {
-            ProfileIDLabel.text = string.Format(PROFILE_ID_FORMAT, "---");
-        }
+        string profileID = BC.GetStoredProfileId(), anonID = BC.GetStoredAnonymousId(), token = DEFAULT_TEXT;
 
-        // Set Anonymous ID info
-        if (!string.IsNullOrWhiteSpace(BC.GetStoredAnonymousId()))
-        {
-            AnonIDLabel.text = string.Format(ANONYMOUS_ID_FORMAT, BC.GetStoredAnonymousId());
-        }
-        else
-        {
-            AnonIDLabel.text = string.Format(ANONYMOUS_ID_FORMAT, "---");
-            canDoReconnect = false;
-        }
+        UserInfoText.text = string.Format(USER_INFO_FORMAT, string.IsNullOrWhiteSpace(profileID) ? DEFAULT_TEXT : profileID,
+                            string.IsNullOrWhiteSpace(anonID) ? DEFAULT_TEXT : anonID,
+                            token);
 
-        return canDoReconnect;
+        return !string.IsNullOrEmpty(profileID + anonID);
     }
 
     private void OnLoginButton()
@@ -166,18 +153,38 @@ public class Authentication : MonoBehaviour
 
     private void OnSendPushButton()
     {
+        // https://github.com/firebase/firebase-admin-dotnet/blob/db55e58ee591dab1f90a399336670ae84bab915b/FirebaseAdmin/FirebaseAdmin.Snippets/FirebaseMessagingSnippets.cs
+
         MainCG.interactable = false;
 
         SuccessCallback onSuccess = (_, _) =>
         {
             Debug.Log($"Registered Device for Push Notifications! Sending one now...");
 
-            string content = "{\"notification\":{\"body\":\"" + NotificationMessage + "\",\"title\":\"message title\"},\"data\":{\"customfield1\":\"customValue1\",\"customfield2\":\"customValue2\"},\"priority\":\"normal\"}";
+            // Basic message structure for notifications; see the FirebaseMessagingSnippets for more on how this can be customized
+            var message = JsonWriter.Serialize(new Dictionary<string, object>
+            {
+                { "notification", new Dictionary<string, object>
+                    {
+                        { "title", NotificationTitle },
+                        { "body", NotificationBody },
+                        { "image", NotificationImageURL }
+                    }
+                },
+                { "data", new Dictionary<string, object> // Pass whichever data the app can use
+                    {
+                        //{ "customfield1", "value1" },
+                        //{ "customfield2", "value2" },
+                        //{ "customfield3", "value3" }
+                    }
+                },
+                { "priority", "normal" } // Can only be normal or high
+            });
 
             BC.PushNotificationService.SendRawPushNotification
             (
                 BC.GetStoredProfileId(),
-                content,
+                message,
                 string.Empty,
                 string.Empty,
                 SendRawPushNotificationSuccess,
@@ -265,7 +272,7 @@ public class Authentication : MonoBehaviour
 
     #region Firebase
 
-    private IEnumerator WaitToEnableApp()
+    private IEnumerator InitializeFirebase()
     {
         DependencyStatus status = (DependencyStatus)(-1);
 
@@ -279,8 +286,8 @@ public class Authentication : MonoBehaviour
         if (status == DependencyStatus.Available)
         {
             //FireBase = FirebaseApp.DefaultInstance;
-            FirebaseMessaging.MessageReceived += OnMessageReceived;
-            FirebaseMessaging.TokenReceived += OnTokenReceived;
+            FirebaseMessaging.MessageReceived += OnFirebaseMessageReceived;
+            FirebaseMessaging.TokenReceived += OnFirebaseTokenReceived;
 
             FirebaseMessaging.SubscribeAsync("brainCloudExampleTopic").ContinueWith(LogTaskCompletion("SubscribeAsync"));
             FirebaseMessaging.RequestPermissionAsync().ContinueWith(LogTaskCompletion("RequestPermissionAsync"));
@@ -297,78 +304,85 @@ public class Authentication : MonoBehaviour
         MainCG.interactable = true;
     }
 
-    public virtual void OnMessageReceived(object sender, MessageReceivedEventArgs e)
+    public virtual void OnFirebaseMessageReceived(object sender, MessageReceivedEventArgs args)
     {
-        Debug.Log("Received a new message");
-        var notification = e.Message.Notification;
-        if (notification != null)
+        if (args == null || args.Message == null)
         {
-            Debug.Log("title: " + notification.Title);
-            Debug.Log("body: " + notification.Body);
-            var android = notification.Android;
-            if (android != null)
-            {
-                Debug.Log("android channel_id: " + android.ChannelId);
-            }
+            Debug.LogWarning("Received an unknown message from Firebase!");
+            return;
+        }
 
-            if (notification.Body.Contains(NotificationMessage))
+        FirebaseMessage message = args.Message;
+        Dictionary<string, object> json = new();
+
+        if (message.Notification is FirebaseNotification notification)
+        {
+            json.Add("title", notification.Title);
+            json.Add("body", notification.Body);
+            json.Add("image", notification.Icon);
+
+            if (notification.Android is AndroidNotificationParams anp)
             {
-                Debug.Log($"Notification received: {NotificationMessage}");
+                json.Add("androidConfig", new Dictionary<string, string> {{ "channelId", anp.ChannelId }});
             }
         }
-        if (e.Message.From.Length > 0)
-            Debug.Log("from: " + e.Message.From);
-        if (e.Message.Link != null)
+
+        if (!string.IsNullOrWhiteSpace(message.From))
         {
-            Debug.Log("link: " + e.Message.Link.ToString());
+            json.Add("from", message.From);
         }
-        if (e.Message.Data.Count > 0)
+
+        if (message.Link != null)
         {
-            Debug.Log("data:");
-            foreach (KeyValuePair<string, string> iter in e.Message.Data)
-            {
-                Debug.Log("  " + iter.Key + ": " + iter.Value);
-            }
+            json.Add("link", message.Link);
         }
+
+        if (message.Data != null && message.Data.Count > 0)
+        {
+            json.Add("data", message.Data);
+        }
+
+        Debug.Log($"Message received from Firebase:\n{LoggerUI.FormatJSON(JsonWriter.Serialize(json))}");
     }
 
-    public virtual void OnTokenReceived(object sender, TokenReceivedEventArgs token)
+    public virtual void OnFirebaseTokenReceived(object sender, TokenReceivedEventArgs token)
     {
         Debug.Log($"Received Firebase Registration Token: {token.Token}");
         FirebaseToken = token.Token;
     }
 
+    #endregion
+
     private Func<Task, bool> LogTaskCompletion(string operation) => task =>
     {
-        bool complete = false;
-        if (task.IsCanceled)
+        if (task.IsCompleted)
         {
-            Debug.Log(operation + " canceled.");
+            Debug.Log($"{operation} task is completed.");
+
+            return true;
         }
-        else if (task.IsFaulted)
+        else if (task.IsCanceled)
         {
-            Debug.Log(operation + " encounted an error.");
-            if (task.Exception == null) return false;
-            foreach (Exception exception in task.Exception.Flatten().InnerExceptions)
+            Debug.LogWarning($"{operation} task is canceled.");
+        }
+        else
+        {
+            Debug.LogError($"{operation} task encounted an error.");
+
+            if (task.Exception != null)
             {
-                string errorCode = "";
-                FirebaseException firebaseEx = exception as Firebase.FirebaseException;
-                if (firebaseEx != null)
+                foreach (Exception e in task.Exception.Flatten().InnerExceptions)
                 {
-                    errorCode = String.Format("Error.{0}: ",
-                        ((Error)firebaseEx.ErrorCode).ToString());
+                    if (e is FirebaseException fbe)
+                    {
+                        Debug.LogError($"Firebase Error {(Error)fbe.ErrorCode}: {e}");
+                    }
+
+                    Debug.LogError(e);
                 }
-                Debug.Log(errorCode + exception.ToString());
             }
         }
-        else if (task.IsCompleted)
-        {
-            Debug.Log(operation + " completed");
-            complete = true;
-        }
 
-        return complete;
+        return false;
     };
-
-    #endregion
 }
