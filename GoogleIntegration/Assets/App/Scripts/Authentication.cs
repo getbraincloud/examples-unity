@@ -13,7 +13,11 @@ using UnityEngine.UI;
 
 public class Authentication : MonoBehaviour
 {
-    private const string USER_INFO_FORMAT = "Profile ID: {0}\nAnonymous ID: {1}\nFirebase Token: {2}";
+    private const string TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION = "/topics/brainCloud/example/PushNotification";
+    private const string PLAYERPREFS_FIREBASE_TOKEN_KEY = TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION + "." + "FIREBASE_TOKEN_KEY";
+
+    private const string IAP_INFO_FORMAT = "Energy: <b>{0}</b> | {1}: <b>{2}</b> | Has Special Item? <b>{3}</b>";
+    private const string USER_INFO_FORMAT = "Profile ID: {0}\nAnonymous ID: {1}";
     private const string APP_INFO_FORMAT = "{0} ({1}) v{2}";
     private const string BC_VERSION_FORMAT = "brainCloud v{0}";
 
@@ -29,18 +33,27 @@ public class Authentication : MonoBehaviour
     [SerializeField] private Button LoginButton = default;
     [SerializeField] private Button LogoutButton = default;
     [SerializeField] private Button SendPushButton = default;
-    [SerializeField] private Button ShowStoreButton = default;
+    [SerializeField] private Button OpenStoreButton = default;
+    [SerializeField] private Button CloseStoreButton = default;
+    [Space]
+    [SerializeField] private Button BuyEnergyButton = default;
+    [SerializeField] private Button BuyCurrencyButton = default;
+    [SerializeField] private Button BuyItemButton = default;
 
-    [Header("User Info")]
+    [Header("Info Labels")]
+    [SerializeField] private TMP_Text IAPInfoText = default;
     [SerializeField] private TMP_Text UserInfoText = default;
-
-    [Header("App Info")]
     [SerializeField] private TMP_Text AppInfoLabel = default;
     [SerializeField] private TMP_Text VersionInfoLabel = default;
 
+    [Header("Misc")]
+    [SerializeField] private GameObject TopSeparator = default;
+    [SerializeField] private GameObject[] StoreClosedElements = default;
+    [SerializeField] private GameObject[] StoreOpenedElements = default;
+
+    private bool IsStoreOpened = false;
     private BrainCloudWrapper BC = null;
-    private FirebaseApp FireBase = null;
-    private string FirebaseToken = string.Empty;
+    private FirebaseApp Firebase = null;
 
     #region Unity Messages
 
@@ -59,7 +72,11 @@ public class Authentication : MonoBehaviour
         LoginButton.onClick.AddListener(OnLoginButton);
         LogoutButton.onClick.AddListener(OnLogoutButton);
         SendPushButton.onClick.AddListener(OnSendPushButton);
-        ShowStoreButton.onClick.AddListener(OnShowStoreButton);
+        OpenStoreButton.onClick.AddListener(OnOpenStoreButton);
+        CloseStoreButton.onClick.AddListener(OnCloseStoreButton);
+        BuyEnergyButton.onClick.AddListener(OnBuyEnergyButton);
+        BuyCurrencyButton.onClick.AddListener(OnBuyCurrencyButton);
+        BuyItemButton.onClick.AddListener(OnBuyItemButton);
     }
 
     private void Start()
@@ -67,11 +84,14 @@ public class Authentication : MonoBehaviour
         MainCG.interactable = false;
 
         // Setup buttons
+        OnCloseStoreButton();
         LoginButton.gameObject.SetActive(true);
+        TopSeparator.SetActive(false);
         LogoutButton.gameObject.SetActive(false);
-        SendPushButton.interactable = false;
-        ShowStoreButton.interactable = false;
+        SendPushButton.gameObject.SetActive(false);
+        OpenStoreButton.gameObject.SetActive(false);
 
+        UpdateUserData();
         GetStoredUserIDs();
         AppInfoLabel.text = string.Format(APP_INFO_FORMAT, BC.WrapperName, BC.Client.AppId, BC.Client.AppVersion);
         VersionInfoLabel.text = string.Format(BC_VERSION_FORMAT, BC.Client.BrainCloudClientVersion);
@@ -84,29 +104,42 @@ public class Authentication : MonoBehaviour
         LoginButton.onClick.RemoveAllListeners();
         LogoutButton.onClick.RemoveAllListeners();
         SendPushButton.onClick.RemoveAllListeners();
-        ShowStoreButton.onClick.RemoveAllListeners();
+        OpenStoreButton.onClick.RemoveAllListeners();
+        CloseStoreButton.onClick.RemoveAllListeners();
+        BuyEnergyButton.onClick.RemoveAllListeners();
+        BuyCurrencyButton.onClick.RemoveAllListeners();
+        BuyItemButton.onClick.RemoveAllListeners();
     }
 
     private void OnDestroy()
     {
+        FirebaseMessaging.MessageReceived -= OnFirebaseMessageReceived;
+        FirebaseMessaging.TokenReceived -= OnFirebaseTokenReceived;
+
+        Firebase?.Dispose();
+        Firebase = null;
+
         BC = null;
-        FireBase?.Dispose();
-        FireBase = null;
     }
 
     #endregion
 
     #region UI
 
+    public void UpdateUserData()
+    {
+        IAPInfoText.text = string.Format(IAP_INFO_FORMAT, UserData.EnergyAmount, "Gems", UserData.CurrencyAmount, UserData.HasSpecialItem ? "YES" : "NO");
+    }
+
     public bool GetStoredUserIDs()
     {
         const string DEFAULT_TEXT = "---";
 
-        string profileID = BC.GetStoredProfileId(), anonID = BC.GetStoredAnonymousId(), token = DEFAULT_TEXT;
+        string profileID = BC.GetStoredProfileId(), anonID = BC.GetStoredAnonymousId();
 
-        UserInfoText.text = string.Format(USER_INFO_FORMAT, string.IsNullOrWhiteSpace(profileID) ? DEFAULT_TEXT : profileID,
-                            string.IsNullOrWhiteSpace(anonID) ? DEFAULT_TEXT : anonID,
-                            token);
+        UserInfoText.text = string.Format(USER_INFO_FORMAT,
+                                          string.IsNullOrWhiteSpace(profileID) ? DEFAULT_TEXT : profileID,
+                                          string.IsNullOrWhiteSpace(anonID) ? DEFAULT_TEXT : anonID);
 
         return !string.IsNullOrEmpty(profileID + anonID);
     }
@@ -131,9 +164,12 @@ public class Authentication : MonoBehaviour
         {
             Debug.Log($"Logout success!");
 
+            OnCloseStoreButton();
             LoginButton.gameObject.SetActive(true);
+            TopSeparator.SetActive(false);
             LogoutButton.gameObject.SetActive(false);
-            SendPushButton.interactable = false;
+            SendPushButton.gameObject.SetActive(false);
+            OpenStoreButton.gameObject.SetActive(false);
 
             GetStoredUserIDs();
 
@@ -154,6 +190,12 @@ public class Authentication : MonoBehaviour
     private void OnSendPushButton()
     {
         // https://github.com/firebase/firebase-admin-dotnet/blob/db55e58ee591dab1f90a399336670ae84bab915b/FirebaseAdmin/FirebaseAdmin.Snippets/FirebaseMessagingSnippets.cs
+
+        if (!HasFirebaseToken())
+        {
+            Debug.LogWarning("Have not received Firebase token for push notifications. Unable to send Push Notification yet.");
+            return;
+        }
 
         MainCG.interactable = false;
 
@@ -196,16 +238,56 @@ public class Authentication : MonoBehaviour
         BC.PushNotificationService.RegisterPushNotificationDeviceToken
         (
             Platform.GooglePlayAndroid,
-            FirebaseToken,
+            GetFirebaseToken(),
             onSuccess,
             OnBrainCloudError,
             this
         );
     }
 
-    private void OnShowStoreButton()
+    private void OnOpenStoreButton()
     {
-        Debug.Log("Showing the IAP Store...");
+        IsStoreOpened = true;
+
+        foreach (var element in StoreClosedElements)
+        {
+            element.SetActive(true);
+        }
+
+        foreach (var element in StoreOpenedElements)
+        {
+            element.SetActive(false);
+        }
+    }
+
+    private void OnCloseStoreButton()
+    {
+        IsStoreOpened = false;
+
+        foreach (var element in StoreClosedElements)
+        {
+            element.SetActive(false);
+        }
+
+        foreach (var element in StoreOpenedElements)
+        {
+            element.SetActive(true);
+        }
+    }
+
+    private void OnBuyEnergyButton()
+    {
+        Debug.Log("Buying ENERGY");
+    }
+
+    private void OnBuyCurrencyButton()
+    {
+        Debug.Log("Buying CURRENCY");
+    }
+
+    private void OnBuyItemButton()
+    {
+        Debug.Log("Buying ITEM");
     }
 
     #endregion
@@ -225,10 +307,12 @@ public class Authentication : MonoBehaviour
     {
         BC.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
 
+        OnCloseStoreButton();
         LoginButton.gameObject.SetActive(false);
+        TopSeparator.SetActive(true);
         LogoutButton.gameObject.SetActive(true);
-        SendPushButton.interactable = true;
-        ShowStoreButton.interactable = true;
+        SendPushButton.gameObject.SetActive(true);
+        OpenStoreButton.gameObject.SetActive(true);
         MainCG.interactable = true;
 
         GetStoredUserIDs();
@@ -285,12 +369,15 @@ public class Authentication : MonoBehaviour
 
         if (status == DependencyStatus.Available)
         {
-            //FireBase = FirebaseApp.DefaultInstance;
+            Firebase = FirebaseApp.DefaultInstance;
             FirebaseMessaging.MessageReceived += OnFirebaseMessageReceived;
             FirebaseMessaging.TokenReceived += OnFirebaseTokenReceived;
 
-            FirebaseMessaging.SubscribeAsync("brainCloudExampleTopic").ContinueWith(LogTaskCompletion("SubscribeAsync"));
-            FirebaseMessaging.RequestPermissionAsync().ContinueWith(LogTaskCompletion("RequestPermissionAsync"));
+            if (!HasFirebaseToken())
+            {
+                FirebaseMessaging.SubscribeAsync(TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION).ContinueWith(LogTaskCompletion("SubscribeAsync"));
+                FirebaseMessaging.RequestPermissionAsync().ContinueWith(LogTaskCompletion("RequestPermissionAsync"));
+            }
 
             Debug.Log($"Firebase is ready for use. Status: {status}");
         }
@@ -304,7 +391,15 @@ public class Authentication : MonoBehaviour
         MainCG.interactable = true;
     }
 
-    public virtual void OnFirebaseMessageReceived(object sender, MessageReceivedEventArgs args)
+    private bool HasFirebaseToken() => !string.IsNullOrWhiteSpace(PlayerPrefs.GetString(PLAYERPREFS_FIREBASE_TOKEN_KEY));
+
+    private string GetFirebaseToken() => PlayerPrefs.GetString(PLAYERPREFS_FIREBASE_TOKEN_KEY);
+
+    private void SetFirebaseToken(string token) => PlayerPrefs.SetString(PLAYERPREFS_FIREBASE_TOKEN_KEY, token);
+
+    private void ResetFirebaseToken() => PlayerPrefs.DeleteKey(PLAYERPREFS_FIREBASE_TOKEN_KEY);
+
+    private void OnFirebaseMessageReceived(object sender, MessageReceivedEventArgs args)
     {
         if (args == null || args.Message == null)
         {
@@ -334,21 +429,28 @@ public class Authentication : MonoBehaviour
 
         if (message.Link != null)
         {
-            json.Add("link", message.Link);
+            json.Add("link", message.Link.ToString());
         }
 
         if (message.Data != null && message.Data.Count > 0)
         {
-            json.Add("data", message.Data);
+            var data = new Dictionary<string, string>();
+
+            foreach (string key in message.Data.Keys)
+            {
+                data.Add(key, message.Data[key].ToString());
+            }
+
+            json.Add("data", data);
         }
 
         Debug.Log($"Message received from Firebase:\n{LoggerUI.FormatJSON(JsonWriter.Serialize(json))}");
     }
 
-    public virtual void OnFirebaseTokenReceived(object sender, TokenReceivedEventArgs token)
+    private void OnFirebaseTokenReceived(object sender, TokenReceivedEventArgs token)
     {
         Debug.Log($"Received Firebase Registration Token: {token.Token}");
-        FirebaseToken = token.Token;
+        SetFirebaseToken(token.Token);
     }
 
     #endregion
