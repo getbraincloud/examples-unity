@@ -8,20 +8,32 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Purchasing;
+using UnityEngine.Purchasing.Extension;
 
-public class Authentication : MonoBehaviour
+/// <summary>
+/// 
+/// </summary>
+public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 {
+    #region App Defines
+
+    // Firebase Messaging
     private const string TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION = "/topics/brainCloud/example/PushNotification";
     private const string PLAYERPREFS_FIREBASE_TOKEN_KEY = TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION + "." + "FIREBASE_TOKEN_KEY";
 
-    private const string IAP_INFO_FORMAT = "Energy: <b>{0}</b> | {1}: <b>{2}</b> | Has Special Item? <b>{3}</b>";
+    // String Formats
+    private const string IAP_INFO_FORMAT = "Energy: <b>{0}</b> | {1}: <b>{2}</b>";
     private const string USER_INFO_FORMAT = "Profile ID: {0}\nAnonymous ID: {1}";
     private const string APP_INFO_FORMAT = "{0} ({1}) v{2}";
     private const string BC_VERSION_FORMAT = "brainCloud v{0}";
 
-    [Header("Message Data")]
+    #endregion
+
+    [Header("Firebase Messaging")]
     [SerializeField] private string NotificationTitle = "Notification Title";
     [SerializeField] private string NotificationBody = "Hello World from brainCloud!";
     [SerializeField] private string NotificationImageURL = string.Empty;
@@ -35,10 +47,6 @@ public class Authentication : MonoBehaviour
     [SerializeField] private Button SendPushButton = default;
     [SerializeField] private Button OpenStoreButton = default;
     [SerializeField] private Button CloseStoreButton = default;
-    [Space]
-    [SerializeField] private Button BuyEnergyButton = default;
-    [SerializeField] private Button BuyCurrencyButton = default;
-    [SerializeField] private Button BuyItemButton = default;
 
     [Header("Info Labels")]
     [SerializeField] private TMP_Text IAPInfoText = default;
@@ -51,9 +59,9 @@ public class Authentication : MonoBehaviour
     [SerializeField] private GameObject[] StoreClosedElements = default;
     [SerializeField] private GameObject[] StoreOpenedElements = default;
 
-    private bool IsStoreOpened = false;
-    private BrainCloudWrapper BC = null;
+    private BrainCloudWrapper BC = null; // How we will interact with the brainCloud client
     private FirebaseApp Firebase = null;
+    private IStoreController StoreController; // Used for the Unity IAP system
 
     #region Unity Messages
 
@@ -74,9 +82,6 @@ public class Authentication : MonoBehaviour
         SendPushButton.onClick.AddListener(OnSendPushButton);
         OpenStoreButton.onClick.AddListener(OnOpenStoreButton);
         CloseStoreButton.onClick.AddListener(OnCloseStoreButton);
-        BuyEnergyButton.onClick.AddListener(OnBuyEnergyButton);
-        BuyCurrencyButton.onClick.AddListener(OnBuyCurrencyButton);
-        BuyItemButton.onClick.AddListener(OnBuyItemButton);
     }
 
     private void Start()
@@ -96,7 +101,7 @@ public class Authentication : MonoBehaviour
         AppInfoLabel.text = string.Format(APP_INFO_FORMAT, BC.WrapperName, BC.Client.AppId, BC.Client.AppVersion);
         VersionInfoLabel.text = string.Format(BC_VERSION_FORMAT, BC.Client.BrainCloudClientVersion);
 
-        StartCoroutine(InitializeFirebase());
+        StartCoroutine(InitializeApp());
     }
 
     private void OnDisable()
@@ -106,9 +111,6 @@ public class Authentication : MonoBehaviour
         SendPushButton.onClick.RemoveAllListeners();
         OpenStoreButton.onClick.RemoveAllListeners();
         CloseStoreButton.onClick.RemoveAllListeners();
-        BuyEnergyButton.onClick.RemoveAllListeners();
-        BuyCurrencyButton.onClick.RemoveAllListeners();
-        BuyItemButton.onClick.RemoveAllListeners();
     }
 
     private void OnDestroy()
@@ -123,6 +125,78 @@ public class Authentication : MonoBehaviour
     }
 
     #endregion
+
+    private IEnumerator InitializeApp()
+    {
+        Debug.Log("Initializing app plugins and subsystems, please wait...");
+
+        // Wait for brainCloud to be initialized
+        yield return new WaitUntil(() => BC.Client != null && BC.Client.IsInitialized());
+
+        // Initialize Firebase Messaging
+        DependencyStatus status = (DependencyStatus)(-1);
+
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+        {
+            status = task.Result;
+        });
+
+        yield return new WaitUntil(() => (int)status >= 0);
+
+        if (status == DependencyStatus.Available)
+        {
+            Firebase = FirebaseApp.DefaultInstance;
+            FirebaseMessaging.MessageReceived += OnFirebaseMessageReceived;
+            FirebaseMessaging.TokenReceived += OnFirebaseTokenReceived;
+
+            if (!HasFirebaseToken())
+            {
+                FirebaseMessaging.SubscribeAsync(TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION).ContinueWith(LogTaskCompletion("SubscribeAsync"));
+                FirebaseMessaging.RequestPermissionAsync().ContinueWith(LogTaskCompletion("RequestPermissionAsync"));
+            }
+
+            Debug.Log($"Firebase is ready for use. Status: {status}");
+        }
+        else
+        {
+            Debug.LogError($"Could not resolve all Firebase dependencies: {status}");
+            Debug.LogError("App cannot start. Please close the app and try again.");
+        }
+
+        yield return new WaitUntil(() => Firebase != null);
+
+        // Enable Unity Gaming Services
+        bool ugsEnabled = false;
+        try
+        {
+            var options = new InitializationOptions();
+            UnityServices.InitializeAsync(options).ContinueWith(task => ugsEnabled = true);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Unity Gaming Services failed to initialize.\nError: {e.Message}.");
+            Debug.LogError("App cannot start. Please close the app and try again.");
+        }
+
+        yield return new WaitUntil(() => ugsEnabled);
+
+        Debug.Log("Unity Gaming Services has been successfully initialized.");
+
+        // Enable Unity IAP
+        //var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+        //
+        //// TODO: Get these from BC...
+        //builder.AddProduct("gems_up_100", ProductType.Consumable);
+        //builder.AddProduct("special_item", ProductType.NonConsumable);
+        ////builder.AddProduct("game_pass", ProductType.Subscription);
+        //
+        //UnityPurchasing.Initialize(this, builder);
+
+        yield return null;
+
+        // Enable App
+        MainCG.interactable = true;
+    }
 
     #region UI
 
@@ -247,47 +321,46 @@ public class Authentication : MonoBehaviour
 
     private void OnOpenStoreButton()
     {
-        IsStoreOpened = true;
+        MainCG.interactable = false;
 
         foreach (var element in StoreClosedElements)
         {
-            element.SetActive(true);
+            element.SetActive(false);
         }
 
         foreach (var element in StoreOpenedElements)
         {
-            element.SetActive(false);
+            element.SetActive(true);
         }
+
+        BC.AppStoreService.GetSalesInventory("googlePlay",
+                                             "{\"userCurrency\":\"CAD\"}",
+                                             OnGetSalesInventorySuccess,
+                                             OnGetSalesInventoryFailure,
+                                             this);
     }
 
     private void OnCloseStoreButton()
     {
-        IsStoreOpened = false;
-
         foreach (var element in StoreClosedElements)
         {
-            element.SetActive(false);
+            element.SetActive(true);
         }
 
         foreach (var element in StoreOpenedElements)
         {
-            element.SetActive(true);
+            element.SetActive(false);
         }
     }
 
-    private void OnBuyEnergyButton()
+    private void OnBuyBCProduct(BCProduct product)
     {
-        Debug.Log("Buying ENERGY");
+
     }
 
-    private void OnBuyCurrencyButton()
+    private void OnRedeemBCItem(BCItem item)
     {
-        Debug.Log("Buying CURRENCY");
-    }
 
-    private void OnBuyItemButton()
-    {
-        Debug.Log("Buying ITEM");
     }
 
     #endregion
@@ -319,7 +392,7 @@ public class Authentication : MonoBehaviour
         Debug.Log($"User Profile ID: {BC.GetStoredProfileId()}");
         Debug.Log($"User Anonymous ID: {BC.GetStoredAnonymousId()}");
 
-        Debug.Log($"Authentication success! You are now logged into your app on brainCloud.");
+        Debug.Log("Authentication success! You are now logged into your app on brainCloud.");
     }
 
     private void OnAuthenticationFailure(int status, int reason, string jsonError, object cbObject)
@@ -330,6 +403,26 @@ public class Authentication : MonoBehaviour
         OnBrainCloudError(status, reason, jsonError, cbObject);
 
         Debug.LogError($"Authentication failed! Please try again.");
+    }
+
+    private void OnGetSalesInventorySuccess(string jsonResponse, object cbObject)
+    {
+        MainCG.interactable = true;
+
+        // Products created in brainCloud's Marketplace portal get stored as an array under data > productInventory
+        //JsonUtility.FromJson<BCProduct[]>(jsonResponse);
+        var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)["productInventory"];
+        var inventory = JsonReader.Deserialize<BCProduct[]>(JsonWriter.Serialize(data));
+
+        Debug.Log(inventory[2].GetItem("special_item").defId);
+        Debug.Log(inventory[2].GetGooglePlayPriceData().GetIAPPrice());
+
+        //Debug.Log($"");
+    }
+
+    private void OnGetSalesInventoryFailure(int status, int reason, string jsonError, object cbObject)
+    {   
+        OnBrainCloudError(status, reason, jsonError, cbObject);
     }
 
     private void SendRawPushNotificationSuccess(string jsonResponse, object cbObject)
@@ -354,42 +447,7 @@ public class Authentication : MonoBehaviour
 
     #endregion
 
-    #region Firebase
-
-    private IEnumerator InitializeFirebase()
-    {
-        DependencyStatus status = (DependencyStatus)(-1);
-
-        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
-        {
-            status = task.Result;
-        });
-
-        yield return new WaitUntil(() => (int)status >= 0);
-
-        if (status == DependencyStatus.Available)
-        {
-            Firebase = FirebaseApp.DefaultInstance;
-            FirebaseMessaging.MessageReceived += OnFirebaseMessageReceived;
-            FirebaseMessaging.TokenReceived += OnFirebaseTokenReceived;
-
-            if (!HasFirebaseToken())
-            {
-                FirebaseMessaging.SubscribeAsync(TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION).ContinueWith(LogTaskCompletion("SubscribeAsync"));
-                FirebaseMessaging.RequestPermissionAsync().ContinueWith(LogTaskCompletion("RequestPermissionAsync"));
-            }
-
-            Debug.Log($"Firebase is ready for use. Status: {status}");
-        }
-        else
-        {
-            Debug.LogError($"Could not resolve all Firebase dependencies: {status}");
-        }
-
-        yield return null;
-
-        MainCG.interactable = true;
-    }
+    #region Firebase Messaging
 
     private bool HasFirebaseToken() => !string.IsNullOrWhiteSpace(PlayerPrefs.GetString(PLAYERPREFS_FIREBASE_TOKEN_KEY));
 
@@ -451,6 +509,55 @@ public class Authentication : MonoBehaviour
     {
         Debug.Log($"Received Firebase Registration Token: {token.Token}");
         SetFirebaseToken(token.Token);
+    }
+
+    #endregion
+
+    #region Unity IAP
+
+    public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
+    {
+        Debug.Log("Unity IAP initialized.");
+
+        StoreController = controller;
+    }
+
+    public void OnInitializeFailed(InitializationFailureReason error)
+    {
+        OnInitializeFailed(error, null);
+    }
+
+    public void OnInitializeFailed(InitializationFailureReason error, string message)
+    {
+        var errorMessage = $"Unity IAP failed to initialize. Reason: {error}.";
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            errorMessage += $"\nDetails: {message}";
+        }
+
+        Debug.LogError(errorMessage);
+    }
+
+    public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
+    {
+        // Retrieve the purchased product
+        var product = args.purchasedProduct;
+        Debug.Log($"Purchase Complete! Product: {product.definition.id}");
+
+        // Need to update brainCloud...
+        //
+
+        return PurchaseProcessingResult.Complete;
+    }
+
+    public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
+    {
+        Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureDescription.reason}\nDetails: {failureDescription.message}");
+    }
+
+    public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
+    {
+        Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureReason}");
     }
 
     #endregion
