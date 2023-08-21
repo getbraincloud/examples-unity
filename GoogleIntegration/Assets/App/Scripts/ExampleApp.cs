@@ -40,24 +40,27 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
     [Header("UI Elements")]
     [SerializeField] private CanvasGroup MainCG = default;
-
-    [Header("Buttons")]
-    [SerializeField] private Button LoginButton = default;
-    [SerializeField] private Button LogoutButton = default;
-    [SerializeField] private Button SendPushButton = default;
-    [SerializeField] private Button OpenStoreButton = default;
-    [SerializeField] private Button CloseStoreButton = default;
-
-    [Header("Info Labels")]
-    [SerializeField] private TMP_Text IAPInfoText = default;
     [SerializeField] private TMP_Text UserInfoText = default;
     [SerializeField] private TMP_Text AppInfoLabel = default;
     [SerializeField] private TMP_Text VersionInfoLabel = default;
 
-    [Header("Misc")]
-    [SerializeField] private GameObject TopSeparator = default;
-    [SerializeField] private GameObject[] StoreClosedElements = default;
-    [SerializeField] private GameObject[] StoreOpenedElements = default;
+    [Header("Login Panel")]
+    [SerializeField] private GameObject LoginPanelGO = default;
+    [SerializeField] private Button LoginButton = default;
+
+    [Header("Main Panel")]
+    [SerializeField] private GameObject MainPanelGO = default;
+    [SerializeField] private Button LogoutButton = default;
+    [SerializeField] private Button SendPushButton = default;
+    [SerializeField] private Button OpenStoreButton = default;
+
+    [Header("Store Panel")]
+    [SerializeField] private GameObject StorePanelGO = default;
+    [SerializeField] private TMP_Text IAPInfoText = default;
+    [SerializeField] private Button CloseStoreButton = default;
+    [Space]
+    [SerializeField] private IAPButton IAPButtonTemplate = default;
+    [SerializeField] private Transform IAPItemsContent = default;
 
     private BrainCloudWrapper BC = null; // How we will interact with the brainCloud client
     private FirebaseApp Firebase = null;
@@ -89,12 +92,9 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         MainCG.interactable = false;
 
         // Setup buttons
-        OnCloseStoreButton();
-        LoginButton.gameObject.SetActive(true);
-        TopSeparator.SetActive(false);
-        LogoutButton.gameObject.SetActive(false);
-        SendPushButton.gameObject.SetActive(false);
-        OpenStoreButton.gameObject.SetActive(false);
+        LoginPanelGO.SetActive(true);
+        MainPanelGO.SetActive(false);
+        StorePanelGO.SetActive(false);
 
         UpdateUserData();
         GetStoredUserIDs();
@@ -234,29 +234,27 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
     {
         MainCG.interactable = false;
 
-        SuccessCallback onSuccess = (_, _) =>
+        void onSuccess(string jsonResponse, object cbObject)
         {
             Debug.Log($"Logout success!");
 
-            OnCloseStoreButton();
-            LoginButton.gameObject.SetActive(true);
-            TopSeparator.SetActive(false);
-            LogoutButton.gameObject.SetActive(false);
-            SendPushButton.gameObject.SetActive(false);
-            OpenStoreButton.gameObject.SetActive(false);
+            LoginPanelGO.SetActive(true);
+            MainPanelGO.SetActive(false);
 
             GetStoredUserIDs();
 
             MainCG.interactable = true;
         };
 
-        FailureCallback onFailure = (_, _, _, _) =>
+        void onFailure (int status, int reason, string jsonError, object cbObject)
         {
+            OnBrainCloudError(status, reason, jsonError, cbObject);
+
             Debug.LogError($"Logout failed!");
             Debug.LogError($"Try restarting the app...");
 
             GetStoredUserIDs();
-        };
+        }
 
         BC.PlayerStateService.Logout(onSuccess, onFailure, this);
     }
@@ -273,7 +271,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         MainCG.interactable = false;
 
-        SuccessCallback onSuccess = (_, _) =>
+        void onRegisterSuccess(string jsonResponse, object cbObject)
         {
             Debug.Log($"Registered Device for Push Notifications! Sending one now...");
 
@@ -297,23 +295,32 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
                 { "priority", "normal" } // Can only be normal or high
             });
 
+            void onSendSuccess(string jsonResponse, object cbObject)
+            {
+                MainCG.interactable = true;
+                SendPushButton.interactable = false;
+
+                Debug.Log($"Push notification request sent!");
+                Debug.Log($"Push notifications are expensive to send so the button will remain disabled for this login.");
+            }
+
             BC.PushNotificationService.SendRawPushNotification
             (
                 BC.GetStoredProfileId(),
                 message,
                 string.Empty,
                 string.Empty,
-                SendRawPushNotificationSuccess,
+                onSendSuccess,
                 OnBrainCloudError,
                 this
             );
-        };
+        }
 
         BC.PushNotificationService.RegisterPushNotificationDeviceToken
         (
             Platform.GooglePlayAndroid,
             GetFirebaseToken(),
-            onSuccess,
+            onRegisterSuccess,
             OnBrainCloudError,
             this
         );
@@ -323,34 +330,40 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
     {
         MainCG.interactable = false;
 
-        foreach (var element in StoreClosedElements)
+        void onSuccess(string jsonResponse, object cbObject)
         {
-            element.SetActive(false);
-        }
+            MainCG.interactable = true;
 
-        foreach (var element in StoreOpenedElements)
-        {
-            element.SetActive(true);
-        }
+            MainPanelGO.SetActive(false);
+            StorePanelGO.SetActive(true);
+
+            // Products created in brainCloud's Marketplace portal get stored as an array under data > productInventory
+            var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)["productInventory"];
+            var inventory = JsonReader.Deserialize<BCProduct[]>(JsonWriter.Serialize(data));
+
+            foreach(var product in inventory)
+            {
+                Instantiate(IAPButtonTemplate, IAPItemsContent, false)
+                    .SetProductDetails(product);
+            }
+        };
 
         BC.AppStoreService.GetSalesInventory("googlePlay",
                                              "{\"userCurrency\":\"CAD\"}",
-                                             OnGetSalesInventorySuccess,
-                                             OnGetSalesInventoryFailure,
+                                             onSuccess,
+                                             OnBrainCloudError,
                                              this);
     }
 
     private void OnCloseStoreButton()
     {
-        foreach (var element in StoreClosedElements)
+        for (int i = 0; i < IAPItemsContent.childCount; i++)
         {
-            element.SetActive(true);
+            Destroy(IAPItemsContent.GetChild(i).gameObject);
         }
 
-        foreach (var element in StoreOpenedElements)
-        {
-            element.SetActive(false);
-        }
+        MainPanelGO.SetActive(true);
+        StorePanelGO.SetActive(false);
     }
 
     private void OnBuyBCProduct(BCProduct product)
@@ -367,25 +380,12 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
     #region brainCloud
 
-    public void HandleAutomaticLogin()
-    {
-        MainCG.interactable = false;
-
-        Debug.Log($"Logging in with previous credentials...");
-
-        BC.Reconnect(OnAuthenticationSuccess, OnAuthenticationFailure, this);
-    }
-
-    private void OnAuthenticationSuccess(string jsonResponse, object cbObject)
+    void OnAuthenticationSuccess(string jsonResponse, object cbObject)
     {
         BC.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
 
-        OnCloseStoreButton();
-        LoginButton.gameObject.SetActive(false);
-        TopSeparator.SetActive(true);
-        LogoutButton.gameObject.SetActive(true);
-        SendPushButton.gameObject.SetActive(true);
-        OpenStoreButton.gameObject.SetActive(true);
+        LoginPanelGO.SetActive(false);
+        MainPanelGO.SetActive(true);
         MainCG.interactable = true;
 
         GetStoredUserIDs();
@@ -395,7 +395,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         Debug.Log("Authentication success! You are now logged into your app on brainCloud.");
     }
 
-    private void OnAuthenticationFailure(int status, int reason, string jsonError, object cbObject)
+    void OnAuthenticationFailure(int status, int reason, string jsonError, object cbObject)
     {
         BC.ResetStoredAuthenticationType();
         GetStoredUserIDs();
@@ -405,33 +405,9 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         Debug.LogError($"Authentication failed! Please try again.");
     }
 
-    private void OnGetSalesInventorySuccess(string jsonResponse, object cbObject)
+    private void OnBrainCloudSuccess(string jsonResponse, object cbObject)
     {
-        MainCG.interactable = true;
 
-        // Products created in brainCloud's Marketplace portal get stored as an array under data > productInventory
-        //JsonUtility.FromJson<BCProduct[]>(jsonResponse);
-        var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)["productInventory"];
-        var inventory = JsonReader.Deserialize<BCProduct[]>(JsonWriter.Serialize(data));
-
-        Debug.Log(inventory[2].GetItem("special_item").defId);
-        Debug.Log(inventory[2].GetGooglePlayPriceData().GetIAPPrice());
-
-        //Debug.Log($"");
-    }
-
-    private void OnGetSalesInventoryFailure(int status, int reason, string jsonError, object cbObject)
-    {   
-        OnBrainCloudError(status, reason, jsonError, cbObject);
-    }
-
-    private void SendRawPushNotificationSuccess(string jsonResponse, object cbObject)
-    {
-        MainCG.interactable = true;
-        SendPushButton.interactable = false;
-
-        Debug.Log($"Push notification request sent!");
-        Debug.Log($"Push notifications are expensive to send so the button will remain disabled for this login.");
     }
 
     private void OnBrainCloudError(int status, int reason, string jsonError, object cbObject)
@@ -561,6 +537,15 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
     }
 
     #endregion
+
+    private void HandleAutomaticLogin()
+    {
+        MainCG.interactable = false;
+
+        Debug.Log($"Logging in with previous credentials...");
+
+        BC.Reconnect(OnAuthenticationSuccess, OnAuthenticationFailure, this);
+    }
 
     private Func<Task, bool> LogTaskCompletion(string operation) => task =>
     {
