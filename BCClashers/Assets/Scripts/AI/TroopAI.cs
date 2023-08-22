@@ -24,7 +24,7 @@ public class TroopAI : BaseHealthBehavior
     
     private int _hitBackForce = 1000;
     
-    //Checks every 10 frames for a new target
+    //Checks every x frames for a new target
     private int _searchTargetInterval = 5;
 
     private bool _isDead;
