@@ -290,17 +290,29 @@ public class LoggerUI : MonoBehaviour
 
             if (insideProperty)
             {
-                if (current == '\\' && json[i + 1] == 'n')
+                if (current == '\\')
                 {
-                    if (json[i + 2] != '\"')
+                    char next = i + 1 < json.Length ? json[i + 1] : ' ';
+                    if (next == '\"')
+                    {
+                        sb.Append('\"');
+                        if (i + 3 < json.Length && json[i + 2] == ','
+                                                && json[i + 3] != '\n')
+                        {
+                            sb.Append(',');
+                            sb.Append(Environment.NewLine);
+                            sb.Append(indents + tab);
+                            i++;
+                        }
+                    }
+                    if (next == 'n' && i + 2 < json.Length && json[i + 2] != '\"')
                     {
                         sb.Append(Environment.NewLine);
                     }
-                    i++;
-                }
-                else if (current == '\\' && json[i + 1] == 't')
-                {
-                    sb.Append(indents + tab);
+                    else if (json[i + 1] == 't')
+                    {
+                        sb.Append(indents + tab);
+                    }
                     i++;
                 }
                 else

@@ -25,7 +25,7 @@ public class IAPButton : MonoBehaviour
     private Image BGImage = default;
     private Button SelfButton = default;
 
-    public Action OnButtonAction { get; set; }
+    public Action<BCProduct> OnButtonAction { get; set; }
 
     public BCProduct ProductData { get; private set; }
 
@@ -72,11 +72,15 @@ public class IAPButton : MonoBehaviour
             case ProductType.Consumable:
             case ProductType.NonConsumable:
                 ItemLabel.color = usesRealCurrency ? REAL_CURRENCY_TEXT_COLOR : GAME_CURRENCY_TEXT_COLOR;
+                DescriptionLabel.color = usesRealCurrency ? REAL_CURRENCY_TEXT_COLOR : GAME_CURRENCY_TEXT_COLOR;
+                CostLabel.color = usesRealCurrency ? REAL_CURRENCY_TEXT_COLOR : GAME_CURRENCY_TEXT_COLOR;
                 SeparatorLine.color = usesRealCurrency ? REAL_CURRENCY_TEXT_COLOR : REAL_CURRENCY_TEXT_COLOR;
                 BGImage.color = usesRealCurrency ? REAL_CURRENCY_BACKGROUND_COLOR : GAME_CURRENCY_BACKGROUND_COLOR;
                 break;
             case ProductType.Subscription:
                 ItemLabel.color = SUBSCRIPTION_TEXT_COLOR;
+                DescriptionLabel.color = SUBSCRIPTION_TEXT_COLOR;
+                CostLabel.color = SUBSCRIPTION_TEXT_COLOR;
                 SeparatorLine.color = SUBSCRIPTION_TEXT_COLOR;
                 BGImage.color = SUBSCRIPTION_BACKGROUND_COLOR;
                 CostLabel.text += "\nmonthly";
@@ -89,5 +93,5 @@ public class IAPButton : MonoBehaviour
         ProductData = data;
     }
 
-    private void OnPurchaseButton() => OnButtonAction?.Invoke();
+    private void OnPurchaseButton() => OnButtonAction?.Invoke(ProductData);
 }

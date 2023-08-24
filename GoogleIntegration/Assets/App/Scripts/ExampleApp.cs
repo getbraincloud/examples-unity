@@ -65,6 +65,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
     private BrainCloudWrapper BC = null; // How we will interact with the brainCloud client
     private FirebaseApp Firebase = null;
     private IStoreController StoreController; // Used for the Unity IAP system
+    private IExtensionProvider ExtensionProvider;
 
     #region Unity Messages
 
@@ -91,7 +92,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
     {
         MainCG.interactable = false;
 
-        // Setup buttons
+        // Initial UI
         LoginPanelGO.SetActive(true);
         MainPanelGO.SetActive(false);
         StorePanelGO.SetActive(false);
@@ -115,6 +116,9 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
     private void OnDestroy()
     {
+        StoreController = null;
+        ExtensionProvider = null;
+
         FirebaseMessaging.MessageReceived -= OnFirebaseMessageReceived;
         FirebaseMessaging.TokenReceived -= OnFirebaseTokenReceived;
 
@@ -182,20 +186,54 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         Debug.Log("Unity Gaming Services has been successfully initialized.");
 
-        // Enable Unity IAP
-        //var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-        //
-        //// TODO: Get these from BC...
-        //builder.AddProduct("gems_up_100", ProductType.Consumable);
-        //builder.AddProduct("special_item", ProductType.NonConsumable);
-        ////builder.AddProduct("game_pass", ProductType.Subscription);
-        //
-        //UnityPurchasing.Initialize(this, builder);
-
         yield return null;
 
         // Enable App
         MainCG.interactable = true;
+    }
+
+    private Func<Task, bool> LogTaskCompletion(string operation) => task =>
+    {
+        if (task.IsCompleted)
+        {
+            Debug.Log($"{operation} task is completed.");
+
+            return true;
+        }
+        else if (task.IsCanceled)
+        {
+            Debug.LogWarning($"{operation} task is canceled.");
+        }
+        else
+        {
+            Debug.LogError($"{operation} task encounted an error.");
+
+            if (task.Exception != null)
+            {
+                foreach (Exception e in task.Exception.Flatten().InnerExceptions)
+                {
+                    if (e is FirebaseException fbe)
+                    {
+                        Debug.LogError($"Firebase Error {(Error)fbe.ErrorCode}: {e}");
+                    }
+
+                    Debug.LogError(e);
+                }
+            }
+        }
+
+        return false;
+    };
+
+    private void HandleAutomaticLogin()
+    {
+        MainCG.interactable = false;
+
+        Debug.Log($"Logging in with previous credentials...");
+
+        BC.Reconnect(OnAuthenticationSuccess,
+                     OnAuthenticationFailure,
+                     this);
     }
 
     #region UI
@@ -215,7 +253,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
                                           string.IsNullOrWhiteSpace(profileID) ? DEFAULT_TEXT : profileID,
                                           string.IsNullOrWhiteSpace(anonID) ? DEFAULT_TEXT : anonID);
 
-        return !string.IsNullOrEmpty(profileID + anonID);
+        return !string.IsNullOrWhiteSpace(profileID) && !string.IsNullOrWhiteSpace(anonID);
     }
 
     private void OnLoginButton()
@@ -226,7 +264,9 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         }
         else
         {
-            BC.AuthenticateAnonymous(OnAuthenticationSuccess, OnAuthenticationFailure, this);
+            BC.AuthenticateAnonymous(OnAuthenticationSuccess,
+                                     OnAuthenticationFailure,
+                                     this);
         }
     }
 
@@ -265,7 +305,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         if (!HasFirebaseToken())
         {
-            Debug.LogWarning("Have not received Firebase token for push notifications. Unable to send Push Notification yet.");
+            Debug.LogWarning("Have not received Firebase token for push notifications. Unable to send push notification yet.");
             return;
         }
 
@@ -332,8 +372,6 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         void onSuccess(string jsonResponse, object cbObject)
         {
-            MainCG.interactable = true;
-
             MainPanelGO.SetActive(false);
             StorePanelGO.SetActive(true);
 
@@ -341,11 +379,20 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
             var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)["productInventory"];
             var inventory = JsonReader.Deserialize<BCProduct[]>(JsonWriter.Serialize(data));
 
-            foreach(var product in inventory)
+            // Enable Unity IAP and add the products
+            var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+
+            foreach (var product in inventory)
             {
-                Instantiate(IAPButtonTemplate, IAPItemsContent, false)
-                    .SetProductDetails(product);
+                var iapButton = Instantiate(IAPButtonTemplate, IAPItemsContent, false);
+                iapButton.SetProductDetails(product);
+                iapButton.OnButtonAction += OnPurchaseBCProduct;
+                iapButton.gameObject.SetActive(false);
+
+                builder.AddProduct(product.itemId, product.IAPProductType);
             }
+
+            UnityPurchasing.Initialize(this, builder);
         };
 
         BC.AppStoreService.GetSalesInventory("googlePlay",
@@ -366,21 +413,49 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         StorePanelGO.SetActive(false);
     }
 
-    private void OnBuyBCProduct(BCProduct product)
+    private void OnPurchaseBCProduct(BCProduct bcProduct)
     {
+#if !UNITY_EDITOR
+        MainCG.interactable = false;
 
+        if (StoreController != null)
+        {
+            var iapProduct = StoreController.products.WithID(bcProduct.itemId);
+
+            if (iapProduct != null && iapProduct.availableToPurchase)
+            {
+                StoreController.InitiatePurchase(iapProduct);
+
+                Debug.Log($"Purchasing: {bcProduct.title} (ID: {bcProduct.itemId} | Price: {bcProduct.GetGooglePlayPriceData().GetIAPPrice()} | Type: {bcProduct.IAPProductType})");
+            }
+            else
+            {
+                Debug.Log($"Product is not available! Cannot purchse: {bcProduct.title} (Product exists: {iapProduct != null} | Available: {iapProduct.availableToPurchase})");
+            }
+        }
+        else
+        {
+            Debug.LogError($"Store is not available! Cannot purchase: {bcProduct.title}");
+        }
+#else
+        Debug.Log($"Purchasing: {bcProduct.title} (ID: {bcProduct.itemId} | Price: {bcProduct.GetGooglePlayPriceData().GetIAPPrice()} | Type: {bcProduct.IAPProductType})");
+#endif
     }
 
     private void OnRedeemBCItem(BCItem item)
     {
+        MainCG.interactable = false;
 
+        // TODO: Be able to redeem Gems for items
+
+        Debug.Log($"Redeeming {item.defId} x{item.quantity}");
     }
 
-    #endregion
+#endregion
 
     #region brainCloud
 
-    void OnAuthenticationSuccess(string jsonResponse, object cbObject)
+    private void OnAuthenticationSuccess(string jsonResponse, object cbObject)
     {
         BC.SetStoredAuthenticationType(AuthenticationType.Anonymous.ToString());
 
@@ -395,7 +470,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         Debug.Log("Authentication success! You are now logged into your app on brainCloud.");
     }
 
-    void OnAuthenticationFailure(int status, int reason, string jsonError, object cbObject)
+    private void OnAuthenticationFailure(int status, int reason, string jsonError, object cbObject)
     {
         BC.ResetStoredAuthenticationType();
         GetStoredUserIDs();
@@ -405,9 +480,60 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         Debug.LogError($"Authentication failed! Please try again.");
     }
 
+    private void OnVerifyPurchasesSuccess(string jsonResponse, object cbObject)
+    {
+        var data = ((JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)
+            ["data"] as Dictionary<string, object>)
+            ["transactionSummary"] as Dictionary<string, object>)
+            ["transactionDetails"];
+        var details = JsonReader.Deserialize<Dictionary<string, object>[]>(JsonWriter.Serialize(data));
+
+        List<string> failedTransactions = new();
+        foreach(var transaction in details)
+        {
+            string status = string.Empty;
+            string productId = transaction["productId"].ToString();
+
+            Debug.Log($"Does {productId} contain error message? {transaction.ContainsKey("errorMessage")}");
+
+            if (transaction.ContainsValue("errorMessage"))
+            {
+                status = transaction["errorMessage"].ToString();
+            }
+            else if ((bool)transaction["processed"] == false)
+            {
+                status = "Could not process.";
+            }
+            else if (StoreController.products.WithID(productId) is Product product && product.hasReceipt)
+            {
+                StoreController.ConfirmPendingPurchase(product);
+            }
+            else
+            {
+                status = "Unknown Error";
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                failedTransactions.Add($"{productId} - {status}");
+            }
+        }
+
+        if (failedTransactions.Count > 0)
+        {
+            Debug.Log($"One or more purchases were unable to be fully processed:\n{JsonWriter.Serialize(data)}");
+        }
+        else
+        {
+            Debug.Log($"Purchase(s) verified with brainCloud!");
+        }
+
+        MainCG.interactable = true;
+    }
+
     private void OnBrainCloudSuccess(string jsonResponse, object cbObject)
     {
-
+        //
     }
 
     private void OnBrainCloudError(int status, int reason, string jsonError, object cbObject)
@@ -493,90 +619,91 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
     public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
     {
-        Debug.Log("Unity IAP initialized.");
+        MainCG.interactable = true;
 
         StoreController = controller;
+        ExtensionProvider = extensions;
+
+        for (int i = 0; i < IAPItemsContent.childCount; i++)
+        {
+            var product = StoreController.products.WithID(IAPItemsContent.GetChild(i).GetComponent<IAPButton>().ProductData.itemId);
+            if (product == null || !product.availableToPurchase || !product.definition.enabled)
+            {
+                IAPItemsContent.GetChild(i).gameObject.SetActive(false);
+            }
+            else
+            {
+                IAPItemsContent.GetChild(i).gameObject.SetActive(true);
+            }
+        }
+
+        Debug.Log("Unity IAP updated.");
     }
 
-    public void OnInitializeFailed(InitializationFailureReason error)
-    {
-        OnInitializeFailed(error, null);
-    }
+    public void OnInitializeFailed(InitializationFailureReason error) => OnInitializeFailed(error, null);
 
     public void OnInitializeFailed(InitializationFailureReason error, string message)
     {
+        MainCG.interactable = true;
+
         var errorMessage = $"Unity IAP failed to initialize. Reason: {error}.";
         if (string.IsNullOrWhiteSpace(message))
         {
             errorMessage += $"\nDetails: {message}";
         }
 
+        StoreController = null;
+        ExtensionProvider = null;
+
         Debug.LogError(errorMessage);
     }
 
     public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
     {
+        MainCG.interactable = true;
+
         // Retrieve the purchased product
         var product = args.purchasedProduct;
-        Debug.Log($"Purchase Complete! Product: {product.definition.id}");
+        Debug.Log($"Purchase Complete! Product: {product.definition.id}; Receipt:\n{LoggerUI.FormatJSON(product.receipt)}");
 
-        // Need to update brainCloud...
-        //
+        string payload = JsonReader.Deserialize<Dictionary<string, object>>(product.receipt)["Payload"].ToString();
+        string json = JsonReader.Deserialize<Dictionary<string, object>>(payload)["json"].ToString();
+        var details = JsonReader.Deserialize<Dictionary<string, object>>(json);
 
-        return PurchaseProcessingResult.Complete;
-    }
+        void onFailure(int status, int reason, string jsonError, object cbObject)
+        {
+            OnBrainCloudError(status, reason, jsonError, cbObject);
 
-    public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
-    {
-        Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureDescription.reason}\nDetails: {failureDescription.message}");
+            Debug.LogError($"Unable to verify purchase(s) with brainCloud!");
+        }
+
+        BC.AppStoreService.VerifyPurchase("googlePlay",
+                                          JsonWriter.Serialize(new Dictionary<string, object>
+                                          {
+                                              { "productId", details["productId"] },     { "orderId",          details["orderId"] },
+                                              { "token",     details["purchaseToken"] }, { "developerPayload", json }
+                                          }),
+                                          OnVerifyPurchasesSuccess,
+                                          onFailure,
+                                          this);
+
+        return PurchaseProcessingResult.Pending;
     }
 
     public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
     {
+        MainCG.interactable = true;
+
         Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureReason}");
     }
 
-    #endregion
-
-    private void HandleAutomaticLogin()
+    public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
     {
-        MainCG.interactable = false;
+        MainCG.interactable = true;
 
-        Debug.Log($"Logging in with previous credentials...");
-
-        BC.Reconnect(OnAuthenticationSuccess, OnAuthenticationFailure, this);
+        Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureDescription.reason}" +
+                       (!string.IsNullOrWhiteSpace(failureDescription.message) ? $"\nDetails: {failureDescription.message}" : string.Empty));
     }
 
-    private Func<Task, bool> LogTaskCompletion(string operation) => task =>
-    {
-        if (task.IsCompleted)
-        {
-            Debug.Log($"{operation} task is completed.");
-
-            return true;
-        }
-        else if (task.IsCanceled)
-        {
-            Debug.LogWarning($"{operation} task is canceled.");
-        }
-        else
-        {
-            Debug.LogError($"{operation} task encounted an error.");
-
-            if (task.Exception != null)
-            {
-                foreach (Exception e in task.Exception.Flatten().InnerExceptions)
-                {
-                    if (e is FirebaseException fbe)
-                    {
-                        Debug.LogError($"Firebase Error {(Error)fbe.ErrorCode}: {e}");
-                    }
-
-                    Debug.LogError(e);
-                }
-            }
-        }
-
-        return false;
-    };
+    #endregion
 }
