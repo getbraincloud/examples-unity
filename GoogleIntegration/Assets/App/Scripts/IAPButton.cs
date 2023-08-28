@@ -29,6 +29,12 @@ public class IAPButton : MonoBehaviour
 
     public BCProduct ProductData { get; private set; }
 
+    public bool IsInteractable
+    {
+        get => SelfButton.interactable;
+        set => SelfButton.interactable = value;
+    }
+
 #region Unity Messages
 
     private void Awake()

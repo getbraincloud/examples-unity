@@ -33,6 +33,10 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
     #endregion
 
+    [Header("DEBUG")]
+    [SerializeField] int DEBUG_BUILD_NUMBER = 0;
+    [Space]
+
     [Header("Firebase Messaging")]
     [SerializeField] private string NotificationTitle = "Notification Title";
     [SerializeField] private string NotificationBody = "Hello World from brainCloud!";
@@ -188,9 +192,41 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         yield return null;
 
+        Debug.Log($"<b>App Build Number: {DEBUG_BUILD_NUMBER}</b>");
+
         // Enable App
         MainCG.interactable = true;
     }
+
+#if UNITY_EDITOR
+    private static readonly string TEST_RECEIPT = "{\"Payload\":\"{\\\"json\\\":\\\"{\\\\\\\"orderId\\\\\\\":\\\\\\\"GPA.3342-6433-1657-91103\\\\\\\",\\\\\\\"packageName\\\\\\\":\\\\\\\"com.brainCloud.Authentication2021\\\\\\\",\\\\\\\"productId\\\\\\\":\\\\\\\"gems_up_100\\\\\\\",\\\\\\\"purchaseTime\\\\\\\":1693019562881,\\\\\\\"purchaseState\\\\\\\":0,\\\\\\\"purchaseToken\\\\\\\":\\\\\\\"hekmihflhnilbingmelfgeji.AO-J1Owq6bqZTJ9nvWejKcAkV2VbBW0XpJq41TIJTEExLQ2bWHjfc1EGkaZ8DsP0B3tCjQ-dSbRSOoAdLyOHQdBOXcJ-R3xF7WiL1iUdt7ehMRytX8QZjDk\\\\\\\",\\\\\\\"quantity\\\\\\\":1,\\\\\\\"acknowledged\\\\\\\":false}\\\",\\\"signature\\\":\\\"TXpuf2PENVaudzWkoeR5nDx6p9TkQ4U40Q6mBZKTUa1iPRZ6v+vCPfNK6XV7FnexFSjCBQ4BQPBAzyBYEceZBu+62Y3N1aubGTNOUtPaHht0Xpnp9aRDu5yGr5j7FiwwXz7TVskgNfTn2R7wzeby/mCWmnHa2+eOQ2w1qTHX+yVy0ZGTOQTZvfttkptpFtOtbQWcXge1bawes73sXXYNTjNYJ/hgtKjSHRtGUvjHRiDOQ3kZDWAUyeGGyhyjzeQSak0bjtWI/nbjhIJrebdEr37jIz6WCLZDPZHpefS88dSRfcmhVdp02M2vonnlagDRL9y2H7DBuPnvhuIzMIkJTw==\\\",\\\"skuDetails\\\":[\\\"{\\\\\\\"productId\\\\\\\":\\\\\\\"gems_up_100\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"inapp\\\\\\\",\\\\\\\"title\\\\\\\":\\\\\\\"Gems +100 (Authentication2021)\\\\\\\",\\\\\\\"name\\\\\\\":\\\\\\\"Gems +100\\\\\\\",\\\\\\\"iconUrl\\\\\\\":\\\\\\\"https:\\\\\\\\/\\\\\\\\/lh3.googleusercontent.com\\\\\\\\/xPrjTR1v1c0QTbFPwu44_Rf9VwmIam_KbmTmGUDj4bOxi3F3t3KgiK-wnYMLUpoJVjdB\\\\\\\",\\\\\\\"description\\\\\\\":\\\\\\\"Increase your Gems by 100.\\\\\\\",\\\\\\\"price\\\\\\\":\\\\\\\"$1.39\\\\\\\",\\\\\\\"price_amount_micros\\\\\\\":1390000,\\\\\\\"price_currency_code\\\\\\\":\\\\\\\"CAD\\\\\\\",\\\\\\\"skuDetailsToken\\\\\\\":\\\\\\\"AEuhp4J-xONzdAHaUgX5xPAZWfEv2uxUozu95Qs5QatzFQG-rPomC888PNWhd8Q4tEBY\\\\\\\"}\\\"]}\",\"Store\":\"GooglePlay\",\"TransactionID\":\"hekmihflhnilbingmelfgeji.AO-J1Owq6bqZTJ9nvWejKcAkV2VbBW0XpJq41TIJTEExLQ2bWHjfc1EGkaZ8DsP0B3tCjQ-dSbRSOoAdLyOHQdBOXcJ-R3xF7WiL1iUdt7ehMRytX8QZjDk\"}";
+
+    private void StoreTesting()
+    {
+        Debug.Log($"Purchase Complete! Product: gems_up_100; Receipt:\n{TEST_RECEIPT}");
+
+        var json = JsonReader.Deserialize<Dictionary<string, object>>(TEST_RECEIPT);
+        json = JsonReader.Deserialize<Dictionary<string, object>>(json["Payload"].ToString());
+        json = JsonReader.Deserialize<Dictionary<string, object>>(json["json"].ToString());
+
+        void onFailure(int status, int reason, string jsonError, object cbObject)
+        {
+            OnBrainCloudError(status, reason, jsonError, cbObject);
+
+            Debug.LogError($"Unable to verify purchase(s) with brainCloud!");
+        }
+
+        BC.AppStoreService.VerifyPurchase("googlePlay",
+                                          JsonWriter.Serialize(new Dictionary<string, object>
+                                          {
+                                              { "productId", json["productId"]     }, { "orderId", json["orderId"]        },
+                                              { "token",     json["purchaseToken"] }, { "includeSubscriptionCheck", false }
+                                          }),
+                                          OnVerifyPurchasesSuccess,
+                                          onFailure,
+                                          this);
+    }
+#endif
 
     private Func<Task, bool> LogTaskCompletion(string operation) => task =>
     {
@@ -286,7 +322,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
             MainCG.interactable = true;
         };
 
-        void onFailure (int status, int reason, string jsonError, object cbObject)
+        void onFailure(int status, int reason, string jsonError, object cbObject)
         {
             OnBrainCloudError(status, reason, jsonError, cbObject);
 
@@ -370,18 +406,21 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
     {
         MainCG.interactable = false;
 
+        //StoreTesting();
+        //return;
+
         void onSuccess(string jsonResponse, object cbObject)
         {
             MainPanelGO.SetActive(false);
             StorePanelGO.SetActive(true);
-
+        
             // Products created in brainCloud's Marketplace portal get stored as an array under data > productInventory
             var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)["productInventory"];
             var inventory = JsonReader.Deserialize<BCProduct[]>(JsonWriter.Serialize(data));
-
+        
             // Enable Unity IAP and add the products
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-
+        
             foreach (var product in inventory)
             {
                 var iapButton = Instantiate(IAPButtonTemplate, IAPItemsContent, false);
@@ -389,12 +428,12 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
                 iapButton.OnButtonAction += OnPurchaseBCProduct;
                 iapButton.gameObject.SetActive(false);
 
-                builder.AddProduct(product.itemId, product.IAPProductType);
+                builder.AddProduct(product.GetGooglePlayPriceData().id, product.IAPProductType);
             }
-
+        
             UnityPurchasing.Initialize(this, builder);
         };
-
+        
         BC.AppStoreService.GetSalesInventory("googlePlay",
                                              "{\"userCurrency\":\"CAD\"}",
                                              onSuccess,
@@ -420,13 +459,14 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         if (StoreController != null)
         {
-            var iapProduct = StoreController.products.WithID(bcProduct.itemId);
+            string id = bcProduct.GetGooglePlayPriceData().id;
+            var iapProduct = StoreController.products.WithID(id);
 
             if (iapProduct != null && iapProduct.availableToPurchase)
             {
                 StoreController.InitiatePurchase(iapProduct);
 
-                Debug.Log($"Purchasing: {bcProduct.title} (ID: {bcProduct.itemId} | Price: {bcProduct.GetGooglePlayPriceData().GetIAPPrice()} | Type: {bcProduct.IAPProductType})");
+                Debug.Log($"Purchasing: {bcProduct.title} (ID: {id} | Price: {bcProduct.GetGooglePlayPriceData().GetIAPPrice()} | Type: {bcProduct.IAPProductType})");
             }
             else
             {
@@ -438,7 +478,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
             Debug.LogError($"Store is not available! Cannot purchase: {bcProduct.title}");
         }
 #else
-        Debug.Log($"Purchasing: {bcProduct.title} (ID: {bcProduct.itemId} | Price: {bcProduct.GetGooglePlayPriceData().GetIAPPrice()} | Type: {bcProduct.IAPProductType})");
+        Debug.Log($"Purchasing: {bcProduct.title} (ID: {bcProduct.GetGooglePlayPriceData().id} | Price: {bcProduct.GetGooglePlayPriceData().GetIAPPrice()} | Type: {bcProduct.IAPProductType})");
 #endif
     }
 
@@ -451,7 +491,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         Debug.Log($"Redeeming {item.defId} x{item.quantity}");
     }
 
-#endregion
+    #endregion
 
     #region brainCloud
 
@@ -494,9 +534,8 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
             string status = string.Empty;
             string productId = transaction["productId"].ToString();
 
-            Debug.Log($"Does {productId} contain error message? {transaction.ContainsKey("errorMessage")}");
-
-            if (transaction.ContainsValue("errorMessage"))
+            if (transaction.ContainsKey("errorMessage") &&
+                !string.IsNullOrWhiteSpace(transaction["errorMessage"].ToString()))
             {
                 status = transaction["errorMessage"].ToString();
             }
@@ -504,6 +543,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
             {
                 status = "Could not process.";
             }
+#if !UNITY_EDITOR
             else if (StoreController.products.WithID(productId) is Product product && product.hasReceipt)
             {
                 StoreController.ConfirmPendingPurchase(product);
@@ -512,7 +552,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
             {
                 status = "Unknown Error";
             }
-
+#endif
             if (!string.IsNullOrWhiteSpace(status))
             {
                 failedTransactions.Add($"{productId} - {status}");
@@ -521,7 +561,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         if (failedTransactions.Count > 0)
         {
-            Debug.Log($"One or more purchases were unable to be fully processed:\n{JsonWriter.Serialize(data)}");
+            Debug.Log($"One or more purchases were unable to be fully processed:\n{LoggerUI.FormatJSON(JsonWriter.Serialize(failedTransactions))}");
         }
         else
         {
@@ -626,14 +666,15 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         for (int i = 0; i < IAPItemsContent.childCount; i++)
         {
-            var product = StoreController.products.WithID(IAPItemsContent.GetChild(i).GetComponent<IAPButton>().ProductData.itemId);
-            if (product == null || !product.availableToPurchase || !product.definition.enabled)
+            var iapButton = IAPItemsContent.GetChild(i).GetComponent<IAPButton>();
+            var product = StoreController.products.WithID(iapButton.ProductData.GetGooglePlayPriceData().id);
+            iapButton.gameObject.SetActive(product != null && product.availableToPurchase && product.definition.enabled);
+
+            if (iapButton.isActiveAndEnabled &&
+                product.definition.type == ProductType.Subscription &&
+                HasSubscription(product.definition.id))
             {
-                IAPItemsContent.GetChild(i).gameObject.SetActive(false);
-            }
-            else
-            {
-                IAPItemsContent.GetChild(i).gameObject.SetActive(true);
+                iapButton.IsInteractable = false;
             }
         }
 
@@ -664,11 +705,11 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         // Retrieve the purchased product
         var product = args.purchasedProduct;
-        Debug.Log($"Purchase Complete! Product: {product.definition.id}; Receipt:\n{LoggerUI.FormatJSON(product.receipt)}");
+        Debug.Log($"Purchase Complete! Product: {product.definition.id}; Receipt:\n{product.receipt}");
 
-        string payload = JsonReader.Deserialize<Dictionary<string, object>>(product.receipt)["Payload"].ToString();
-        string json = JsonReader.Deserialize<Dictionary<string, object>>(payload)["json"].ToString();
-        var details = JsonReader.Deserialize<Dictionary<string, object>>(json);
+        var json = JsonReader.Deserialize<Dictionary<string, object>>(product.receipt);
+        json = JsonReader.Deserialize<Dictionary<string, object>>(json["Payload"].ToString());
+        json = JsonReader.Deserialize<Dictionary<string, object>>(json["json"].ToString());
 
         void onFailure(int status, int reason, string jsonError, object cbObject)
         {
@@ -680,8 +721,10 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         BC.AppStoreService.VerifyPurchase("googlePlay",
                                           JsonWriter.Serialize(new Dictionary<string, object>
                                           {
-                                              { "productId", details["productId"] },     { "orderId",          details["orderId"] },
-                                              { "token",     details["purchaseToken"] }, { "developerPayload", json }
+                                              { "productId", json["productId"]     },
+                                              { "orderId",   json["orderId"]       },
+                                              { "token",     json["purchaseToken"] },
+                                              { "includeSubscriptionCheck", product.definition.type == ProductType.Subscription }
                                           }),
                                           OnVerifyPurchasesSuccess,
                                           onFailure,
@@ -703,6 +746,19 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
         Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureDescription.reason}" +
                        (!string.IsNullOrWhiteSpace(failureDescription.message) ? $"\nDetails: {failureDescription.message}" : string.Empty));
+    }
+
+    public bool HasSubscription(string productId)
+    {
+        if (StoreController.products.WithID(productId) is Product subscription &&
+            subscription.definition.type == ProductType.Subscription && subscription.hasReceipt)
+        {
+            var subscriptionManager = new SubscriptionManager(subscription, null);
+
+            return subscriptionManager.getSubscriptionInfo().isSubscribed() == Result.True;
+        }
+
+        return false;
     }
 
     #endregion
