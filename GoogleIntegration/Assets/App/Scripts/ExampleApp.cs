@@ -64,7 +64,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
     [SerializeField] private Button CloseStoreButton = default;
     [Space]
     [SerializeField] private IAPButton IAPButtonTemplate = default;
-    [SerializeField] private Transform IAPItemsContent = default;
+    [SerializeField] private Transform IAPContent = default;
 
     private BrainCloudWrapper BC = null; // How we will interact with the brainCloud client
     private FirebaseApp Firebase = null;
@@ -136,6 +136,7 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
     private IEnumerator InitializeApp()
     {
+        Debug.Log($"<b>App Build Number: {DEBUG_BUILD_NUMBER}</b>");
         Debug.Log("Initializing app plugins and subsystems, please wait...");
 
         // Wait for brainCloud to be initialized
@@ -191,8 +192,6 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         Debug.Log("Unity Gaming Services has been successfully initialized.");
 
         yield return null;
-
-        Debug.Log($"<b>App Build Number: {DEBUG_BUILD_NUMBER}</b>");
 
         // Enable App
         MainCG.interactable = true;
@@ -423,9 +422,9 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         
             foreach (var product in inventory)
             {
-                var iapButton = Instantiate(IAPButtonTemplate, IAPItemsContent, false);
+                var iapButton = Instantiate(IAPButtonTemplate, IAPContent, false);
                 iapButton.SetProductDetails(product);
-                iapButton.OnButtonAction += OnPurchaseBCProduct;
+                iapButton.IsInteractable = false;
                 iapButton.gameObject.SetActive(false);
 
                 builder.AddProduct(product.GetGooglePlayPriceData().id, product.IAPProductType);
@@ -443,9 +442,10 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
 
     private void OnCloseStoreButton()
     {
-        for (int i = 0; i < IAPItemsContent.childCount; i++)
+        var iapButtons = IAPContent.GetComponentsInChildren<IAPButton>();
+        for (int i = 0; i < iapButtons.Length; i++)
         {
-            Destroy(IAPItemsContent.GetChild(i).gameObject);
+            Destroy(iapButtons[i].gameObject);
         }
 
         MainPanelGO.SetActive(true);
@@ -664,17 +664,23 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
         StoreController = controller;
         ExtensionProvider = extensions;
 
-        for (int i = 0; i < IAPItemsContent.childCount; i++)
+        for (int i = 0; i < IAPContent.childCount; i++)
         {
-            var iapButton = IAPItemsContent.GetChild(i).GetComponent<IAPButton>();
+            var iapButton = IAPContent.GetChild(i).GetComponent<IAPButton>();
             var product = StoreController.products.WithID(iapButton.ProductData.GetGooglePlayPriceData().id);
             iapButton.gameObject.SetActive(product != null && product.availableToPurchase && product.definition.enabled);
 
-            if (iapButton.isActiveAndEnabled &&
-                product.definition.type == ProductType.Subscription &&
-                HasSubscription(product.definition.id))
+            if (iapButton.isActiveAndEnabled)
             {
-                iapButton.IsInteractable = false;
+                if (product.definition.type == ProductType.Subscription && HasSubscription(product.definition.id))
+                {
+                    iapButton.IsInteractable = false;
+                }
+                else
+                {
+                    iapButton.IsInteractable = true;
+                    iapButton.OnButtonAction += OnPurchaseBCProduct;
+                }
             }
         }
 
@@ -754,8 +760,10 @@ public class ExampleApp : MonoBehaviour, IDetailedStoreListener
             subscription.definition.type == ProductType.Subscription && subscription.hasReceipt)
         {
             var subscriptionManager = new SubscriptionManager(subscription, null);
-
-            return subscriptionManager.getSubscriptionInfo().isSubscribed() == Result.True;
+            if (subscriptionManager.getSubscriptionInfo() is SubscriptionInfo info)
+            {
+                return info.isCancelled() != Result.True && info.isSubscribed() == Result.True;
+            }
         }
 
         return false;
