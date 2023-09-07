@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 //This script simply forces the object's roation to 0,0,0 at every frame 

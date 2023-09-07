@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Most game logic and spawning of items is controlled through the player controller, 
  * which also controls the movement and display of the plane, and collision with billet and bomb pickups
  * 

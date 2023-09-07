@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "64ba7f2328d030e7f859521c5b71c702347952ab"
+      "hash": "8b66bb823d7110d1162f9d0266a94f7c6ce590dd"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -30,7 +30,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.18",
+      "version": "2.0.20",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -46,7 +46,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.1.31",
+      "version": "1.1.33",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -205,17 +205,6 @@
     "com.unity.modules.uielements": {
       "version": "1.0.0",
       "depth": 0,
-      "source": "builtin",
-      "dependencies": {
-        "com.unity.modules.ui": "1.0.0",
-        "com.unity.modules.imgui": "1.0.0",
-        "com.unity.modules.jsonserialize": "1.0.0",
-        "com.unity.modules.uielementsnative": "1.0.0"
-      }
-    },
-    "com.unity.modules.uielementsnative": {
-      "version": "1.0.0",
-      "depth": 1,
       "source": "builtin",
       "dependencies": {
         "com.unity.modules.ui": "1.0.0",

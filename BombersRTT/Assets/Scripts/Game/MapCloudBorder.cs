@@ -1,4 +1,4 @@
-﻿//This script places the cloud border particle emitters on the edges of the playfield based on the bounds of the playfield extents.
+//This script places the cloud border particle emitters on the edges of the playfield based on the bounds of the playfield extents.
 
 using UnityEngine;
 using System.Collections;

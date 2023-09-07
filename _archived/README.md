@@ -6,11 +6,25 @@ These examples can be found within the `_archived` folder for the tag alongside 
 
 ---
 
+## [Archive Date: September 5th, 2023](https://github.com/getbraincloud/examples-unity/tree/archive-09-05-2023)
+
+##### [brainCloud 5.0.0 Release PR #154](https://github.com/getbraincloud/examples-unity/pull/154)
+
+##### [Original README.md](https://github.com/getbraincloud/examples-unity/tree/archive-09-05-2023/_archived#newly-archived)
+
+The following examples were removed on September 5th, 2023:
+
+- BCAmazonIAP
+- GoogleIAP
+- PushNotifications
+
+---
+
 ## [Archive Date: June 8th, 2023](https://github.com/getbraincloud/examples-unity/tree/archive-06-08-2023)
 
-##### [Pull Request 147 - Archive Old Examples](https://github.com/getbraincloud/examples-unity/pull/147)
+##### [Archive Old Examples PR #147](https://github.com/getbraincloud/examples-unity/pull/147)
 
-##### [README.md](https://github.com/getbraincloud/examples-unity/tree/archive-06-08-2023/_archived#readme)
+##### [Original README.md](https://github.com/getbraincloud/examples-unity/tree/archive-06-08-2023/_archived#readme)
 
 The following examples were removed on June 8th, 2023:
 

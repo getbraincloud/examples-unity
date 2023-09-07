@@ -1,4 +1,4 @@
-﻿using BrainCloud.JsonFx.Json;
+using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

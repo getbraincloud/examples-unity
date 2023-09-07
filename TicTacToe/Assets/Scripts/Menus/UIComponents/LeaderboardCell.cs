@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 
 public class LeaderboardCell : MonoBehaviour

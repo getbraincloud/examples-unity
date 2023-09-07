@@ -47,12 +47,6 @@ Authentication has been updated with a new look! Check out the [Authentication R
 
 ---
 
-## BCAmazonIAP
-
-This example demonstrates **Amazon In-App Purchases** and verification with brainCloud. Inside there is a [PDF](./BCAmazonIAP/amazonIAPTutorial.pdf) describing the steps you will need to take to get going.
-
----
-
 ## BCChat
 
 An example demonstrating the **Chat** service on brainCloud, which works on apps making use of brainCloud RTT.
@@ -84,34 +78,6 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 - `DEBUG_LOG_ENABLED` - Enable logs via GDebug Class
 - `STEAMWORKS_ENABLED` - Enable Steam SDK integration, must have the steam client open on a desktop to use via the editor
 - `BUY_CURRENCY_ENABLED` - Enable store product purchasing – PC / Mac / Standalone builds require the `STEAMWORKS_ENABLED` flag
-
----
-
-## GoogleIAP
-
-An example of making a purchase with Google, and verifying it with braincloud. Refer to the [PDF](./GoogleIAP/GooglePurchasesTutorial.pdf) for proper setup.
-
----
-
-## PushNotifications
-
-An example of connecting **Firebase FCM Notifications** to brainCloud.
-
-Read more information here: http://getbraincloud.com/apidocs/portal-usage/push-notification-setup-firebase/
-
-### Additional Information
-
-This code example is based on the [Firebase Unity Quickstart Project](https://github.com/firebase/quickstart-unity).
-
-You can see more FCM documentation here: https://firebase.google.com/docs/cloud-messaging/android/client
-
-Project currently only contains a push notifications example for Android FCM
-- Add your google-services.json file to the asset folder
-    - Found on the Firebase dashboard
-- Update the brainCloud AppId and Secret on BrainCloudSettings to match yours
-    - Id and Secret found on the brainCloud Dashboard
-- Download and import the Auth and Messaging Firebase Unity SDK
-- Set-up Instructions: https://firebase.google.com/docs/unity/setup
 
 ---
 
