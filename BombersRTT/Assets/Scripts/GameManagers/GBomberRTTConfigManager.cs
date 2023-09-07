@@ -1,4 +1,4 @@
-﻿using Gameframework;
+using Gameframework;
 
 namespace BrainCloudUNETExample
 {
