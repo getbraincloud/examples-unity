@@ -1,4 +1,4 @@
-﻿/*
+/*
  * The GameManager class is mainly used by the server, as none of its functions can be called on the client side. It 
  * controls the basic progress of the game, populating the scoreboards and dealing with players connecting.
  * 
