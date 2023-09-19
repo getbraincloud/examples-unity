@@ -256,6 +256,12 @@ namespace BrainCloudUNETExample
 
         public void LeaveLobby()
         {
+            GStateManager stateMgr = GStateManager.Instance;
+            if (stateMgr.CurrentStateId == MainMenuState.STATE_NAME)
+            {
+                stateMgr.ClearAllSubStates();
+            }
+
             if (LobbyInfo != null && LobbyInfo.LobbyId != "")
             {
                 GCore.Wrapper.RelayService.Disconnect();
@@ -363,6 +369,7 @@ namespace BrainCloudUNETExample
                         }
                     }
                     break;
+
                 case "STATUS_UPDATE":
                 case "JOIN_SUCCESS":
                 case "SETTINGS_UPDATE":
@@ -382,26 +389,34 @@ namespace BrainCloudUNETExample
                             int codeInt = (int)reasonDict["code"];
                             if (codeInt != ReasonCodes.RTT_ROOM_READY)
                             {
-                                BaseState baseState = GStateManager.Instance.FindSubState(LobbySubState.STATE_NAME);
-                                GStateManager.Instance.PopSubState(baseState.StateInfo);
+                                static IEnumerator ShowError()
+                                {
+                                    yield return null;
+
+                                    HudHelper.DisplayMessageDialog("ERROR", "THERE WAS A CONNECTION ERROR.  PLEASE TRY AGAIN SOON.", "OK");
+                                }
+
                                 LeaveLobby();
-                                HudHelper.DisplayMessageDialog("ERROR", "THERE WAS A CONNECTION ERROR.  PLEASE TRY AGAIN SOON.", "OK");
+                                StartCoroutine(ShowError());
                             }
                         }
                     }
                     break;
+
                 case "ROOM_ASSIGNED":
                     {
                         ReadRoomAssignedInfo(jsonData);
                         GCore.Wrapper.GlobalAppService.ReadProperties(GConfigManager.Instance.OnReadBrainCloudProperties);
                     }
                     break;
+
                 case "ROOM_READY":
                     {
                         // deregister them all! we're going in game
                         CreateRoomServerMatch();
                     }
                     break;
+
                 case "JOIN_FAIL":
                     {
                         Dictionary<string, object> reasonDict = (Dictionary<string, object>)jsonData["reason"];
@@ -421,6 +436,7 @@ namespace BrainCloudUNETExample
                         }
                     }
                     break;
+
                 case "ROOM_CONNECT":
                     {
                     }

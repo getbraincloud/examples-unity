@@ -1,4 +1,4 @@
-﻿using Gameframework;
+using Gameframework;
 using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections;
@@ -303,9 +303,16 @@ namespace BrainCloudUNETExample
             }
             else
             {
-                GStateManager.Instance.PopSubState(_stateInfo);
+                static IEnumerator ShowError()
+                {
+                    yield return null;
+
+                    HudHelper.DisplayMessageDialog("ERROR", "THERE WAS A CONNECTION ERROR.  PLEASE TRY AGAIN SOON.", "OK");
+                }
+
                 BombersNetworkManager.Instance.LeaveLobby();
-                HudHelper.DisplayMessageDialog("ERROR", "THERE WAS A CONNECTION ERROR.  PLEASE TRY AGAIN SOON.", "OK");
+
+                StartCoroutine(ShowError());
             }
         }
 

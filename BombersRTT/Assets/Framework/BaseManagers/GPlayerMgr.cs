@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BrainCloud.JsonFx.Json;
 using System.Collections;
 using System.Collections.Generic;
@@ -309,10 +309,10 @@ namespace Gameframework
         {
 #if UNITY_IOS //|| UNITY_TVOS
             // register for push notifications
-            UnityEngine.iOS.NotificationServices.RegisterForNotifications(
-                                                    UnityEngine.iOS.NotificationType.Alert |
-                                                    UnityEngine.iOS.NotificationType.Badge |
-                                                    UnityEngine.iOS.NotificationType.Sound);
+            //UnityEngine.iOS.NotificationServices.RegisterForNotifications(
+            //                                     UnityEngine.iOS.NotificationType.Alert |
+            //                                     UnityEngine.iOS.NotificationType.Badge |
+            //                                     UnityEngine.iOS.NotificationType.Sound);
 #elif UNITY_ANDROID
            // Firebase.Messaging.FirebaseMessaging.TokenReceived += OnTokenReceived;
 #endif
@@ -330,6 +330,7 @@ namespace Gameframework
         public void RegisterPushNotificationDeviceToken(SuccessCallback in_success = null, FailureCallback in_failure = null)
         {
 #if UNITY_IOS && !UNITY_EDITOR
+            /*
             if (UnityEngine.iOS.NotificationServices.deviceToken != null)
             {
                 GCore.Wrapper.PushNotificationService.RegisterPushNotificationDeviceToken(UnityEngine.iOS.NotificationServices.deviceToken,
@@ -337,6 +338,7 @@ namespace Gameframework
                                                                                                     in_failure,
                                                                                                     null);
             }
+            */
 #elif UNITY_ANDROID && !UNITY_EDITOR
             /*
             if (m_firebaseToken != "")
