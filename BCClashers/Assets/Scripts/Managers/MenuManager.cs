@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine.EventSystems;
@@ -35,6 +34,7 @@ public class MenuManager : MonoBehaviour
     public TMP_Text LastInvasionStatusText;
     public TMP_Text SlayCountText;
     public TMP_Text DefeatedTroopsText;
+    public TMP_Text BrainCloudVersionText;
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
 
@@ -45,7 +45,7 @@ public class MenuManager : MonoBehaviour
     public GameObject LobbyListParent;
 
     private UserInfo _opponent;
-    private List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
+    private readonly List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
     private EventSystem _eventSystem;
     private readonly List<float> _selectionXPlacement = new List<float> {-169,-3.7f, 160};
     private const string LOGGING_IN_MESSAGE = "Logging in...";
@@ -53,7 +53,6 @@ public class MenuManager : MonoBehaviour
     
     private static MenuManager _instance;
     public static MenuManager Instance => _instance;
-
 
     private void Awake()
     {
@@ -70,6 +69,7 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
+        BrainCloudVersionText.text = $"brainCloud Version: {BrainCloud.Version.GetVersion()}";
         PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
         if (NetworkManager.Instance.IsSessionValid())
         {
@@ -139,14 +139,14 @@ public class MenuManager : MonoBehaviour
     {
         if (_listOfPlayers.Count > 0)
         {
-            for (int i = _listOfPlayers.Count-1; i >= 0; i--)
+            for (int i = _listOfPlayers.Count - 1; i >= 0; --i)
             {
                 Destroy(_listOfPlayers[i].gameObject);
             }
             _listOfPlayers.Clear();
         }
-        
-        for (int i = 0; i < in_listOfPlayers.Count; i++)
+
+        for (int i = 0; i < in_listOfPlayers.Count; ++i)
         {
             PlayerCardLobby user = Instantiate(PlayerCardRef, LobbyListParent.transform);
             //Apply relevant user data to text
@@ -185,14 +185,7 @@ public class MenuManager : MonoBehaviour
         RatingText.text = $"Rating: {user.Rating}";
         MatchesPlayedText.text = $"Matches Played: {user.MatchesPlayed}";
         ShieldButton.interactable = user.ShieldTime <= 0;
-        if (user.ShieldTime > 1)
-        {
-            ShieldTimerText.text = $"Shield is active for {user.ShieldTime} minutes";    
-        }
-        else
-        {
-            ShieldTimerText.text = "Shield Timer: Off";
-        }
+        ShieldTimerText.text = user.ShieldTime > 1 ? $"Shield is active for {user.ShieldTime} minutes" : "Shield Timer: Off";
 
         PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
 
@@ -215,19 +208,24 @@ public class MenuManager : MonoBehaviour
 
     public void UpdateButtonSelectorPosition(ArmyType in_type)
     {
-        if (in_type == ArmyType.Invader)
+        switch (in_type)
         {
-            int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
-            Vector2 posD = InvaderButtonBorder.anchoredPosition; 
-            posD.x = _selectionXPlacement[invaderIndex];
-            InvaderButtonBorder.anchoredPosition = posD;    
-        }
-        else
-        {
-            int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
-            Vector2 posI = DefenderButtonBorder.anchoredPosition; 
-            posI.x = _selectionXPlacement[defenderIndex];
-            DefenderButtonBorder.anchoredPosition = posI;    
+            case ArmyType.Invader:
+            {
+                int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+                Vector2 posD = InvaderButtonBorder.anchoredPosition;
+                posD.x = _selectionXPlacement[invaderIndex];
+                InvaderButtonBorder.anchoredPosition = posD;
+                break;
+            }
+            case ArmyType.Defense:
+            {
+                int defenderIndex = (int) GameManager.Instance.CurrentUserInfo.DefendersSelected;
+                Vector2 posI = DefenderButtonBorder.anchoredPosition;
+                posI.x = _selectionXPlacement[defenderIndex];
+                DefenderButtonBorder.anchoredPosition = posI;
+                break;
+            }
         }
     }
     
