@@ -322,7 +322,7 @@ public class ExampleApp : MonoBehaviour
         var error = JsonReader.Deserialize<Dictionary<string, object>>(jsonError);
         var message = (string)error["status_message"];
 
-        Debug.LogError($"Status: {status} | Reason: {reason} | Message:\n  {message}");
+        Debug.LogError($"Status: {status} | Reason: {reason} | Message:\n{message}");
 
         IsInteractable = true;
     }
