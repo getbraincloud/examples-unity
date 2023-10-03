@@ -71,7 +71,7 @@ public class IAPButton : MonoBehaviour
 
         ItemLabel.text = data.title;
         DescriptionLabel.text = data.description;
-        CostLabel.text = usesRealCurrency ? $"{data.GetGooglePlayPriceData().GetIAPPrice()}" : $"{data.GetCurrencyAmount(gameCurrencyName)}\n{gameCurrencyName}!";
+        CostLabel.text = usesRealCurrency ? $"{data.GetLocalizedPriceString()}" : $"{data.GetCurrencyAmount(gameCurrencyName)}\n{gameCurrencyName}!";
 
         switch (data.IAPProductType)
         {

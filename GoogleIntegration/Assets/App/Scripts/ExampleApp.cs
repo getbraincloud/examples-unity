@@ -42,10 +42,6 @@ public class ExampleApp : MonoBehaviour
 
     #endregion
 
-    [Header("DEBUG")]
-    [SerializeField] int DEBUG_BUILD_NUMBER = 0;
-    [Space]
-
     [Header("UI Elements")]
     [SerializeField] private CanvasGroup MainCG = default;
     [SerializeField] private TMP_Text UserInfoText = default;
@@ -112,7 +108,6 @@ public class ExampleApp : MonoBehaviour
 
     private IEnumerator InitializeApp()
     {
-        Debug.Log($"<b>App Build Number: {DEBUG_BUILD_NUMBER}</b>");
         Debug.Log("Initializing app plugins and subsystems, please wait...");
 
         // Wait for brainCloud to be initialized

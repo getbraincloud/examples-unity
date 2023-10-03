@@ -1,4 +1,3 @@
-using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,7 +15,9 @@ public class BCProduct
     public Dictionary<string, int> currency;
     public Dictionary<string, BCItem> items;
     public Dictionary<string, object> data;
-    public Dictionary<string, object> priceData;
+    public BCPriceData priceData;
+
+    public Product unityProduct { get; private set; }
 
     public BCProduct() { }
 
@@ -57,13 +58,26 @@ public class BCProduct
             return item;
         }
     
-        Debug.LogWarning($"BCProduct.currency does not contain a value for: '{name}'. Returning default...");
+        Debug.LogWarning($"BCProduct.items does not contain a value for: '{name}'. Returning default...");
         return default;
     }
-    
-    public T GetData<T>() where T : new() => JsonReader.Deserialize<T>(JsonWriter.Serialize(priceData));
 
-    public BCGooglePlayPriceData GetGooglePlayPriceData() => JsonReader.Deserialize<BCGooglePlayPriceData>(JsonWriter.Serialize(priceData));
+
+    public string GetProductID() => priceData.id;
+
+    public string GetLocalizedTitle() => unityProduct.metadata.localizedTitle;
+
+    public string GetLocalizedDescription() => unityProduct.metadata.localizedDescription;
+
+    public decimal GetLocalizedPrice() => unityProduct.metadata.localizedPrice;
+
+    public string GetLocalizedPriceString() => unityProduct.metadata.localizedPriceString;
+
+    public string GetLocalizedISOCurrencyCode() => unityProduct.metadata.isoCurrencyCode;
+
+    public ProductMetadata GetProductMetaData() => unityProduct.metadata;
+
+    public void SetUnityProduct(Product product) => unityProduct = product;
 }
 
 [Serializable]
@@ -76,13 +90,11 @@ public class BCItem
 }
 
 [Serializable]
-public class BCGooglePlayPriceData
+public class BCPriceData
 {
     public string id;
     public int referencePrice;
     public bool isPromotion;
 
-    public BCGooglePlayPriceData() { }
-
-    public string GetIAPPrice() => (referencePrice/100.0f).ToString("C");
+    public BCPriceData() { }
 }

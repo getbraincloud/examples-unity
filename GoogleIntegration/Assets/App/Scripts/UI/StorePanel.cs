@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Purchasing;
 using UnityEngine.UI;
 using static ExampleApp;
 
@@ -168,9 +169,9 @@ public class StorePanel : MonoBehaviour
         void onFetchProducts(BCProduct[] inventory)
         {
             App.IsInteractable = true;
-            if (inventory == null || inventory.Length < 0 || BrainCloudMarketplace.ErrorOccurred)
+            if (inventory == null || inventory.Length < 0 || BrainCloudMarketplace.HasErrorOccurred)
             {
-                StoreInfoText.text = BrainCloudMarketplace.ErrorOccurred ? ERROR_STORE_TEXT : NO_PRODUCTS_STORE_TEXT;
+                StoreInfoText.text = BrainCloudMarketplace.HasErrorOccurred ? ERROR_STORE_TEXT : NO_PRODUCTS_STORE_TEXT;
                 return;
             }
 
@@ -178,21 +179,23 @@ public class StorePanel : MonoBehaviour
             {
                 var iapButton = Instantiate(IAPButtonTemplate, IAPContent, false);
                 iapButton.SetProductDetails(product);
-                iapButton.OnButtonAction += OnPurchaseBCProduct;
+
+                if (BrainCloudMarketplace.OwnsNonconsumable(product) ||
+                    BrainCloudMarketplace.HasSubscription(product))
+                {
+                    iapButton.IsInteractable = false;
+                }
+                else
+                {
+                    iapButton.OnButtonAction += OnPurchaseBCProduct;
+                }
             }
 
             UpdateUserData();
             StoreInfoText.gameObject.SetActive(false);
         }
 
-        if (BrainCloudMarketplace.IsInitialized)
-        {
-            BrainCloudMarketplace.FetchProducts(onFetchProducts);
-        }
-        else
-        {
-            BrainCloudMarketplace.Initialize(BC, onFetchProducts);
-        }
+        BrainCloudMarketplace.FetchProducts(onFetchProducts);
     }
 
     private void UpdateUserData()
@@ -219,9 +222,22 @@ public class StorePanel : MonoBehaviour
         {
             if (purchasedProducts != null && purchasedProducts.Length > 0)
             {
+                IAPButton[] buttons = IAPContent.GetComponentsInChildren<IAPButton>();
                 foreach (var item in purchasedProducts)
                 {
-                    Debug.Log($"Purchase Success: {item.title} (ID: {item.GetGooglePlayPriceData().id} | Price: {item.GetGooglePlayPriceData().GetIAPPrice()} | Type: {item.IAPProductType})");
+                    Debug.Log($"Purchase Success: {item.title} (ID: {item.GetProductID()} | Price: {item.GetLocalizedPrice()} | Type: {item.IAPProductType})");
+
+                    for (int i = 0; i < buttons.Length; i++)
+                    {
+                        if (buttons[i].ProductData == item &&
+                            (BrainCloudMarketplace.OwnsNonconsumable(product) ||
+                             BrainCloudMarketplace.HasSubscription(product)))
+                        {
+                            buttons[i].OnButtonAction -= OnPurchaseBCProduct;
+                            buttons[i].IsInteractable = false;
+                            break;
+                        }
+                    }
                 }
             }
 

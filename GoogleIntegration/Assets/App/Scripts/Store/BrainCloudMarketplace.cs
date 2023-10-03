@@ -17,40 +17,13 @@ public class BrainCloudMarketplace : IDetailedStoreListener
     private static BCProduct[] bcIventory = null;
 
     public static bool IsInitialized => instance != null;
-    public static bool ErrorOccurred { get; private set; } = false;
+    public static bool HasErrorOccurred { get; private set; } = false;
 
     private BrainCloudMarketplace() { }
 
-    public static void Initialize(BrainCloudWrapper bcWrapper, Action<BCProduct[]> onInitialized = null)
-    {
-#if UNITY_EDITOR || UNITY_ANDROID
-        if (IsInitialized)
-        {
-            Debug.Log("BrainCloudMarketplace has already been initialized.");
-            onInitialized?.Invoke(GetInventory());
-            return;
-        }
-
-        instance = new();
-        bc = bcWrapper;
-
-        FetchProducts(onInitialized);
-#else
-        ErrorOccurred = true;
-        Debug.Log("BrainCloudMarketplace is not supported on this platform.");
-        onInitialized?.Invoke(null);
-#endif
-    }
-
     public static void FetchProducts(Action<BCProduct[]> onFetchFinished = null)
     {
-        if (InternalInitializedCheck())
-        {
-            onFetchFinished?.Invoke(null);
-            return;
-        }
-
-        static void onSuccess(string jsonResponse, object cbObject)
+        static void onFetchSuccess(string jsonResponse, object cbObject)
         {
             // Products created in brainCloud's Marketplace portal get stored as an array under data > productInventory
             var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)["productInventory"];
@@ -60,23 +33,29 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
             foreach (var product in bcIventory)
             {
-                builder.AddProduct(product.GetGooglePlayPriceData().id, product.IAPProductType);
+                builder.AddProduct(product.GetProductID(), product.IAPProductType);
             }
 
             UnityPurchasing.Initialize(instance, builder);
         };
 
+        if (!IsInitialized)
+        {
+            InternalInitialize(onFetchFinished);
+            return;
+        }
+
         InternalSetCallback(onFetchFinished);
         bc.AppStoreService.GetSalesInventory("googlePlay",
                                              "{\"userCurrency\":\"CAD\"}",
-                                             onSuccess,
+                                             onFetchSuccess,
                                              OnBrainCloudFailure("Unable to fetch products from brainCloud!",
                                                                  () => InternalInvokeCallback(null)));
     }
 
     public static BCProduct[] GetInventory()
     {
-        if (InternalInitializedCheck())
+        if (InternalCheckNotInitialized())
         {
             return null;
         }
@@ -84,55 +63,75 @@ public class BrainCloudMarketplace : IDetailedStoreListener
         List<BCProduct> updated = new(bcIventory);
         for (int i = 0; i < bcIventory.Length; i++)
         {
-            string id = bcIventory[i].GetGooglePlayPriceData().id;
+            string id = bcIventory[i].GetProductID();
             if (controller.products.WithID(id) is not Product iapProduct || !iapProduct.availableToPurchase)
             {
                 updated.Remove(bcIventory[i]);
             }
+            else
+            {
+                bcIventory[i].SetUnityProduct(iapProduct);
+            }
         }
 
-        bcIventory = updated.Count > 0 ? new BCProduct[updated.Count] : null;
-        for(int i = 0; i < updated.Count; i++)
-        {
-            bcIventory[i] = updated[i];
-        }
+        bcIventory = updated.Count > 0 ? updated.ToArray() : null;
 
         return bcIventory;
     }
 
     public static void PurchaseProduct(BCProduct product, Action<BCProduct[]> onPurchaseFinished = null)
     {
-        if (InternalInitializedCheck())
+        if (InternalCheckNotInitialized())
         {
             onPurchaseFinished?.Invoke(null);
             return;
         }
 
         InternalSetCallback(onPurchaseFinished);
-        string id = product.GetGooglePlayPriceData().id;
+        string id = product.GetProductID();
         var iapProduct = controller.products.WithID(id);
 
         if (iapProduct != null && iapProduct.availableToPurchase)
         {
-            Debug.Log($"Purchasing: {product.title} (ID: {id} | Price: {product.GetGooglePlayPriceData().GetIAPPrice()} | Type: {product.IAPProductType})");
+            Debug.Log($"Purchasing: {product.title} (ID: {id} | Price: {product.GetLocalizedPrice()} | Type: {product.IAPProductType})");
 
             controller.InitiatePurchase(iapProduct);
         }
         else
         {
-            Debug.Log($"Product is not available! Cannot purchse: {product.title} (Product exists: {iapProduct != null} | Available? {iapProduct.availableToPurchase})");
+            Debug.Log($"Product is not available! Cannot purchse: {product.title} (Exists? {iapProduct != null} | Available? {iapProduct.availableToPurchase})");
 
             InternalInvokeCallback(null);
         }
     }
 
-    public static bool HasSubscription(string productId)
+    public static bool OwnsNonconsumable(BCProduct product) => OwnsNonconsumable(product.GetProductID());
+
+    public static bool OwnsNonconsumable(string id)
     {
-        if (InternalInitializedCheck())
+        if (InternalCheckNotInitialized())
         {
             return false;
         }
-        else if (controller.products.WithID(productId) is Product subscription &&
+#if !UNITY_EDITOR
+        return controller.products.WithID(id) is Product nonconsumable &&
+               nonconsumable.definition.type == ProductType.NonConsumable &&
+               nonconsumable.hasReceipt;
+#else
+        return false;
+#endif
+    }
+
+    public static bool HasSubscription(BCProduct product) => HasSubscription(product.GetProductID());
+
+    public static bool HasSubscription(string id)
+    {
+        if (InternalCheckNotInitialized())
+        {
+            return false;
+        }
+#if !UNITY_EDITOR
+        else if (controller.products.WithID(id) is Product subscription &&
                  subscription.definition.type == ProductType.Subscription && subscription.hasReceipt)
         {
             var subscriptionManager = new SubscriptionManager(subscription, null);
@@ -141,13 +140,13 @@ public class BrainCloudMarketplace : IDetailedStoreListener
                 return info.isCancelled() != Result.True && info.isSubscribed() == Result.True;
             }
         }
-
+#endif
         return false;
     }
 
     public static T GetExtension<T>() where T : IStoreExtension
     {
-        if (InternalInitializedCheck())
+        if (InternalCheckNotInitialized())
         {
             return default;
         }
@@ -171,7 +170,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
     public void OnInitializeFailed(InitializationFailureReason error, string message)
     {
-        ErrorOccurred = true;
+        HasErrorOccurred = true;
         var errorMessage = $"Unity IAP failed to initialize. Reason: {error}.";
         if (string.IsNullOrWhiteSpace(message))
         {
@@ -214,7 +213,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
         {
             foreach (var item in bcIventory)
             {
-                if (product.definition.id == item.GetGooglePlayPriceData().id)
+                if (product.definition.id == item.GetProductID())
                 {
                     Debug.Log($"Purchase Transaction: {json["TransactionID"]}");
                     InternalInvokeCallback(new BCProduct[] { item });
@@ -223,7 +222,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
             }
         }
 
-        ErrorOccurred = true;
+        HasErrorOccurred = true;
         InternalInvokeCallback(null);
         Debug.LogError("An unknown error occurred with fake store.");
 
@@ -233,7 +232,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
     public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
     {
-        ErrorOccurred = true;
+        HasErrorOccurred = true;
         Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureReason}");
 
         InternalInvokeCallback(null);
@@ -241,7 +240,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
     public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
     {
-        ErrorOccurred = true;
+        HasErrorOccurred = true;
         Debug.LogError($"Purchase Failed. Product: {product.definition.id}. Reason: {failureDescription.reason}" +
                        (!string.IsNullOrWhiteSpace(failureDescription.message) ? $"\nDetails: {failureDescription.message}" : string.Empty));
 
@@ -252,7 +251,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
     #region brainCloud
 
-    private static void OnVerifyPurchasesSuccess(string jsonResponse, object cbObject)
+    public static void OnVerifyPurchasesSuccess(string jsonResponse, object _)
     {
         var data = ((JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)
             ["data"] as Dictionary<string, object>)
@@ -281,7 +280,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
                 status = "Could not confirm pruchase!";
                 foreach (var item in bcIventory)
                 {
-                    if (productId == item.GetGooglePlayPriceData().id)
+                    if (productId == item.GetProductID())
                     {
                         controller.ConfirmPendingPurchase(product);
                         paidProducts.Add(item);
@@ -303,7 +302,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
         if (failedTransactions.Count > 0)
         {
-            ErrorOccurred = true;
+            HasErrorOccurred = true;
             string failedMessage = "One or more purchases were unable to be fully processed:";
             for (int i = 0; i < failedTransactions.Count; i++)
             {
@@ -324,7 +323,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
     {
         return (int status, int reason, string jsonError, object _) =>
         {
-            ErrorOccurred = true;
+            HasErrorOccurred = true;
             var error = JsonReader.Deserialize<Dictionary<string, object>>(jsonError);
             var message = (string)error["status_message"];
 
@@ -341,15 +340,29 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
     #endregion
 
-    private static bool InternalInitializedCheck()
+    private static void InternalInitialize(Action<BCProduct[]> onInitialized = null)
+    {
+#if UNITY_EDITOR || UNITY_ANDROID
+        instance = new();
+        bc = UnityEngine.Object.FindObjectOfType<BrainCloudWrapper>();
+
+        FetchProducts(onInitialized);
+#else
+        ErrorOccurred = true;
+        Debug.Log("BrainCloudMarketplace is not supported on this platform.");
+        onInitialized?.Invoke(null);
+#endif
+    }
+
+    private static bool InternalCheckNotInitialized()
     {
         if (!IsInitialized)
         {
-            Debug.LogError("BrainCloudMarketplace has not been initialized! Call BrainCloudMarketplace.Initialize() first.");
+            Debug.LogError("BrainCloudMarketplace has not been initialized! Call BrainCloudMarketplace.FetchProducts() first.");
             return true;
         }
 
-        ErrorOccurred = false;
+        HasErrorOccurred = false;
         return false;
     }
 
@@ -366,12 +379,9 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
     private static void InternalDispose()
     {
-        bc.StopCoroutine(InternalConfirmingPurchase());
-
         bc = null;
         controller = null;
         extensions = null;
-        processingProduct = null;
         onProcessingFinished = null;
         bcIventory = null;
 
