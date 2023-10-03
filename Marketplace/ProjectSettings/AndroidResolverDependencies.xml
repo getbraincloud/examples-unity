@@ -9,10 +9,7 @@
     <package>com.google.firebase:firebase-messaging-unity:11.3.0</package>
     <package>com.google.flatbuffers:flatbuffers-java:1.12.0</package>
   </packages>
-  <files>
-    <file>Assets/Plugins/Android/androidx.concurrent.concurrent-futures-1.1.0.jar</file>
-    <file>Assets/Plugins/Android/org.jetbrains.kotlin.kotlin-stdlib-common-1.7.10.jar</file>
-  </files>
+  <files />
   <settings>
     <setting name="androidAbis" value="arm64-v8a,armeabi-v7a" />
     <setting name="bundleId" value="com.brainCloud.Authentication2021" />
