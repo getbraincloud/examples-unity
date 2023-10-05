@@ -1,6 +1,6 @@
 # Authentication
 
-An example project made in **Unity 2021.3** that showcases the use of the [Authentication](https://getbraincloud.com/apidocs/apiref/?csharp#capi-authentication) service available on [brainCloud](https://getbraincloud.com/) and as well as several other services that brainCloud supports.
+This showcases the use of the [Authentication](https://getbraincloud.com/apidocs/apiref/?csharp#capi-authentication) service available on [brainCloud](https://getbraincloud.com/) and as well as several other services that brainCloud supports.
 
 ---
 
