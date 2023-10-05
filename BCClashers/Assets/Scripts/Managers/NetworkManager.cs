@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.Serialization;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.IO;
 
 /// <summary>
 /// This class demonstrates how to communicate with BrainCloud services.
@@ -22,7 +19,6 @@ using System.IO;
 
 public class NetworkManager : MonoBehaviour
 {
-    
     private BrainCloudWrapper _bcWrapper;
     public static NetworkManager Instance;
     private bool _isNewPlayer;
@@ -73,18 +69,14 @@ public class NetworkManager : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
         LoadID();
+
+        //Initialize brainCloud by grabbing plugin info that is set up using brainCloud->Settings
+        _bcWrapper.Init();
     }
 
     public bool IsSessionValid()
     {
         return _bcWrapper.Client.Authenticated;
-    }
-    
-    private void InitializeBC()
-    {
-        _bcWrapper.Init();
-
-        _bcWrapper.Client.EnableLogging(true);
     }
 
     private void OnApplicationQuit()
@@ -112,6 +104,7 @@ public class NetworkManager : MonoBehaviour
             return;
         }
 
+        //If a new player is logging in, delete previous player data
         if (!username.Equals(GameManager.Instance.CurrentUserInfo.Username))
         {
             _isNewPlayer = true;
@@ -120,9 +113,8 @@ public class NetworkManager : MonoBehaviour
         }
         
         Settings.SaveLogin(username, password);
-        InitializeBC();
         // Authenticate with brainCloud
-        _bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, OnFailureCallback, "Login Failed");
+        _bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, OnFailureCallback);
     }
 
     public void SignOut()
@@ -160,7 +152,7 @@ public class NetworkManager : MonoBehaviour
         );
     }
 
-    public void SetDefaultPlayerRating()
+    private void SetDefaultPlayerRating()
     {
         GameManager.Instance.CurrentUserInfo.Rating = _defaultRating;
         MenuManager.Instance.UpdateMatchMakingInfo();
@@ -168,37 +160,37 @@ public class NetworkManager : MonoBehaviour
 
     private void OnFoundPlayers(string jsonResponse, object cbObject)
     {
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data = response["data"] as Dictionary<string,object>;
-        
-        if (data == null)
+        if (JsonReader.Deserialize(jsonResponse) is Dictionary<string, object> response)
         {
-            Debug.LogWarning("Something went wrong, data is null");
-            return;
-        }
+            if (response["data"] is not Dictionary<string, object> data)
+            {
+                Debug.LogWarning("Something went wrong, data is null");
+                return;
+            }
 
-        Dictionary<string, object>[] matchesFound = data["matchesFound"] as Dictionary<string, object>[];
-        List<UserInfo> users = new List<UserInfo>();
+            Dictionary<string, object>[] matchesFound = data["matchesFound"] as Dictionary<string, object>[];
+            List<UserInfo> users = new List<UserInfo>();
 
-        if (matchesFound == null || matchesFound.Length == 0)
-        {
-            Debug.LogWarning("No Players Found.");
-            MenuManager.Instance.errorPopUpMessageState.SetUpPopUpMessage("No Players Found");
-            return;
-        }
-        
-        for (int i = 0; i < matchesFound.Length; i++)
-        {
-            var newUser = new UserInfo();
+            if (matchesFound == null || matchesFound.Length == 0)
+            {
+                Debug.LogWarning("No Players Found.");
+                MenuManager.Instance.errorPopUpMessageState.SetUpPopUpMessage("No Players Found");
+                return;
+            }
 
-            newUser.Username = matchesFound[i]["playerName"] as string;
-            newUser.Rating = (int) matchesFound[i]["playerRating"];
-            newUser.ProfileId = matchesFound[i]["playerId"] as string;
-            
-            users.Add(newUser);
+            for (int i = 0; i < matchesFound.Length; ++i)
+            {
+                var newUser = new UserInfo();
+
+                newUser.Username = matchesFound[i]["playerName"] as string;
+                newUser.Rating = (int) matchesFound[i]["playerRating"];
+                newUser.ProfileId = matchesFound[i]["playerId"] as string;
+
+                users.Add(newUser);
+            }
+
+            MenuManager.Instance.UpdateLobbyList(users);
         }
-        
-        MenuManager.Instance.UpdateLobbyList(users);
     }
 
     private void OnFoundPlayersError(int status, int reasonCode, string jsonError, object cbObject)
@@ -213,14 +205,14 @@ public class NetworkManager : MonoBehaviour
     {
         var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var data = response["data"] as Dictionary<string, object>;
-        var tempUsername = GameManager.Instance.CurrentUserInfo.Username;
+        
         var userInfo = GameManager.Instance.CurrentUserInfo;
-        
-        userInfo = new UserInfo
+        if (data is not null)
         {
-            ProfileId = data["profileId"] as string
-        };
-        
+            userInfo.ProfileId = data["profileId"] as string;
+        }
+
+        var tempUsername = GameManager.Instance.CurrentUserInfo.Username;
         // If no username is set for this user, then update the name
         if (!data.ContainsKey("playerName"))
         {
@@ -264,17 +256,14 @@ public class NetworkManager : MonoBehaviour
     private void OnLoggedIn(string jsonResponse, object cbObject)
     {
         //Check if this is a new login, if so then check if this user has entities
-        if (!_isNewPlayer)
+        if (!_isNewPlayer && GameManager.Instance.IsEntityIdValid())
         {
-            if (GameManager.Instance.IsEntityIdValid())
-            {
-                _bcWrapper.EntityService.GetEntity
-                (
-                    GameManager.Instance.CurrentUserInfo.EntityId,
-                    OnValidEntityResponse,
-                    OnFailureCallback
-                );    
-            }
+            _bcWrapper.EntityService.GetEntity
+            (
+                GameManager.Instance.CurrentUserInfo.EntityId,
+                OnValidEntityResponse,
+                OnFailureCallback
+            );
         }
         else
         {
@@ -289,28 +278,31 @@ public class NetworkManager : MonoBehaviour
     
     private void OnValidEntityResponse(string jsonResponse, object cbObject)
     {
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data = response["data"] as Dictionary<string,object>;
-        
-        //Attempted to read entity but got no data
-        if (data == null)
+        if (JsonReader.Deserialize(jsonResponse) is Dictionary<string, object> response)
         {
-            Debug.LogWarning("Invalid entity from response");
-            //Attempt to get entities of the type we want
-            _bcWrapper.EntityService.GetEntitiesByType
-            (
-                "vikings",
-                OnReadEntitiesByTypeResponse,
-                OnFailureCallback
-            );
-            return;
+            //Attempted to read entity but got no data
+            if (response["data"] is not Dictionary<string, object> data)
+            {
+                Debug.LogWarning("Invalid entity from response");
+                //Attempt to get entities of the type we want
+                _bcWrapper.EntityService.GetEntitiesByType
+                (
+                    "vikings",
+                    OnReadEntitiesByTypeResponse,
+                    OnFailureCallback
+                );
+                return;
+            }
+
+            if (data["data"] is Dictionary<string, object> entityData)
+            {
+                int defenderSelection = (int) entityData["defenderSelection"];
+                int invaderSelection = (int) entityData["invaderSelection"];
+
+                GameManager.Instance.UpdateLocalArmySelection(defenderSelection, invaderSelection);
+            }
         }
-        Dictionary<string, object> entityData = data["data"] as Dictionary<string,object>;
-        
-        int defenderSelection = (int) entityData["defenderSelection"];
-        int invaderSelection = (int) entityData["invaderSelection"];
-        
-        GameManager.Instance.UpdateLocalArmySelection(defenderSelection, invaderSelection);
+
         MenuManager.Instance.UpdateMainMenu();
         GetUserRating();
     }
@@ -318,33 +310,34 @@ public class NetworkManager : MonoBehaviour
     private void OnReadEntitiesByTypeResponse(string jsonResponse, object cbObject)
     {
         //Read in the entities, if list is empty than create a new entity.
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        if (JsonReader.Deserialize(jsonResponse) is Dictionary<string, object> response)
+        {
+            if (response["data"] is Dictionary<string, object> data && data["entities"] is Dictionary<string, object>[] {Length: > 0 } entities)
+            {
+                if (entities[0]["data"] is Dictionary<string, object> entityData)
+                {
+                    int defenderSelection = (int) entityData["defenderSelection"];
+                    int invaderSelection = (int) entityData["invaderSelection"];
+                    string entityId = entities[0]["entityId"] as string;
 
-        var entities = data["entities"] as Dictionary<string, object>[];
-        
-        if (entities != null && entities.Length > 0)
-        {
-            Dictionary<string, object> entityData = entities[0]["data"] as Dictionary<string, object>;
-            
-            int defenderSelection = (int) entityData["defenderSelection"];
-            int invaderSelection = (int) entityData["invaderSelection"];
-            string entityId = entities[0]["entityId"] as string;
-            
-            GameManager.Instance.UpdateFromReadResponse(entityId, defenderSelection, invaderSelection);
-            MenuManager.Instance.UpdateMainMenu();
+                    GameManager.Instance.UpdateFromReadResponse(entityId, defenderSelection, invaderSelection);
+                }
+
+                MenuManager.Instance.UpdateMainMenu();
+            }
+            else
+            {
+                _bcWrapper.EntityService.CreateEntity
+                (
+                    "vikings",
+                    CreateJsonEntityData(true),
+                    CreateACLJson(),
+                    OnCreatedEntityResponse,
+                    OnFailureCallback
+                );
+            }
         }
-        else
-        {
-            _bcWrapper.EntityService.CreateEntity
-            (
-                "vikings",
-                CreateJsonEntityData(true),
-                CreateACLJson(),
-                OnCreatedEntityResponse,
-                OnFailureCallback
-            );
-        }
+
         GetUserRating();
     }
 
@@ -355,26 +348,29 @@ public class NetworkManager : MonoBehaviour
 
     private void OnReadMatchMaking(string jsonResponse, object cbObject)
     {
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
-
-        GameManager.Instance.CurrentUserInfo.Rating = (int) data["playerRating"];
-        GameManager.Instance.CurrentUserInfo.MatchesPlayed = (int) data["matchesPlayed"];
-        
-        //Using try catch in case the shield expiry returns an int rather than a long
-        try
+        if (JsonReader.Deserialize(jsonResponse) is Dictionary<string, object> response)
         {
-            DateTime shieldExpiryDateTime = DateTimeOffset.FromUnixTimeMilliseconds((long)data["shieldExpiry"]).DateTime;
-            TimeSpan difference = shieldExpiryDateTime.Subtract(DateTime.UtcNow);
+            if (response["data"] is Dictionary<string, object> data)
+            {
+                GameManager.Instance.CurrentUserInfo.Rating = (int) data["playerRating"];
+                GameManager.Instance.CurrentUserInfo.MatchesPlayed = (int) data["matchesPlayed"];
 
-            _shieldActive = difference.Minutes > 0;
+                //Using try catch in case the shield expiry returns an int rather than a long
+                try
+                {
+                    DateTime shieldExpiryDateTime = DateTimeOffset.FromUnixTimeMilliseconds((long) data["shieldExpiry"]).DateTime;
+                    TimeSpan difference = shieldExpiryDateTime.Subtract(DateTime.UtcNow);
 
-            GameManager.Instance.CurrentUserInfo.ShieldTime = difference.Minutes;
-        }
-        catch 
-        {
-            GameManager.Instance.CurrentUserInfo.ShieldTime = 0;
-            _shieldActive = false;
+                    _shieldActive = difference.Minutes > 0;
+
+                    GameManager.Instance.CurrentUserInfo.ShieldTime = difference.Minutes;
+                }
+                catch
+                {
+                    GameManager.Instance.CurrentUserInfo.ShieldTime = 0;
+                    _shieldActive = false;
+                }
+            }
         }
 
         _bcWrapper.PlaybackStreamService.GetRecentStreamsForTargetPlayer
@@ -388,40 +384,43 @@ public class NetworkManager : MonoBehaviour
 
     private void OnGetRecentStreams(string jsonResponse, object cbObject)
     {
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
-        StreamInfo streamInfo = new StreamInfo();
-        if (data != null)
+        if (JsonReader.Deserialize(jsonResponse) is Dictionary<string, object> response)
         {
-            Dictionary<string, object>[] streams = data["streams"] as Dictionary<string, object>[];
-
-            if (streams != null && streams.Length > 0)
+            Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+            StreamInfo streamInfo = new StreamInfo();
+            if (data != null)
             {
-                
-                streamInfo.PlaybackStreamID = streams[0]["playbackStreamId"] as string;
-                Dictionary<string, object> summary = streams[0]["summary"] as Dictionary<string, object>;
-                if (summary != null)
+                if (data["streams"] is Dictionary<string, object>[] {Length: > 0 } streams)
                 {
-                    streamInfo.SlayCount = (int) summary["slayCount"];
-                    streamInfo.DefeatedTroops = (int) summary["defeatedTroops"];
-                    streamInfo.DidInvadersWin = (bool) summary["didInvadersWin"];
+                    streamInfo.PlaybackStreamID = streams[0]["playbackStreamId"] as string;
+                    if (streams[0]["summary"] is Dictionary<string, object> summary)
+                    {
+                        streamInfo.SlayCount = (int) summary["slayCount"];
+                        streamInfo.DefeatedTroops = (int) summary["defeatedTroops"];
+                        streamInfo.DidInvadersWin = (bool) summary["didInvadersWin"];
+                    }
                 }
-
-                
             }
+
+            GameManager.Instance.InvadedStreamInfo = streamInfo;
         }
-        GameManager.Instance.InvadedStreamInfo = streamInfo;
+
         MenuManager.Instance.UpdateMatchMakingInfo();
         MenuManager.Instance.IsLoading = false;
     }
 
     private void OnCreatedEntityResponse(string jsonResponse, object cbObject)
     {
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
-        string entityId = jsonData["entityId"] as string;
-        
-        GameManager.Instance.UpdateEntityId(entityId);
+        if (JsonReader.Deserialize(jsonResponse) is Dictionary<string, object> response)
+        {
+            if (response["data"] is Dictionary<string, object> jsonData)
+            {
+                string entityId = jsonData["entityId"] as string;
+
+                GameManager.Instance.UpdateEntityId(entityId);
+            }
+        }
+
         GameManager.Instance.UpdateLocalArmySelection(0, 0);
         MenuManager.Instance.IsLoading = false;
         MenuManager.Instance.UpdateMainMenu();
@@ -437,17 +436,14 @@ public class NetworkManager : MonoBehaviour
     {
         Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
-        
-        var entities = jsonData["entities"] as Dictionary<string, object>[];
 
-        if (entities == null || entities.Length == 0)
+        if (jsonData["entities"] is not Dictionary<string, object>[] entities || entities.Length == 0)
         {
             Debug.LogWarning("This user has no user entities set up");
             return;
         }
-        var entityData = entities[0]["data"] as Dictionary<string, object>;
 
-        if (entityData == null || !entityData.ContainsKey("defenderSelection"))
+        if (entities[0]["data"] is not Dictionary<string, object> entityData || !entityData.ContainsKey("defenderSelection"))
         {
             Debug.LogWarning("This user has no user entities set up");
             return;
