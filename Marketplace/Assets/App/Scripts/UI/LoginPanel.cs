@@ -21,7 +21,7 @@ public class LoginPanel : MonoBehaviour
 
     private void Start()
     {
-        App = GameObject.FindObjectOfType<ExampleApp>();
+        App = FindObjectOfType<ExampleApp>();
 
         StartCoroutine(GetBrainCloudWrapper());
     }
@@ -43,7 +43,7 @@ public class LoginPanel : MonoBehaviour
     {
         yield return new WaitUntil(() =>
         {
-            BC = BC ?? GameObject.FindObjectOfType<BrainCloudWrapper>();
+            BC = BC ?? FindObjectOfType<BrainCloudWrapper>();
 
             return BC != null && BC.Client != null && BC.Client.IsInitialized();
         });

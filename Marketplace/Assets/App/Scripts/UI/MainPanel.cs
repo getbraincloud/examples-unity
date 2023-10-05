@@ -1,9 +1,5 @@
-using BrainCloud.Common;
-using BrainCloud.JsonFx.Json;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Purchasing;
 using UnityEngine.UI;
 using static ExampleApp;
 
@@ -28,7 +24,7 @@ public class MainPanel : MonoBehaviour
 
     private void Start()
     {
-        App = GameObject.FindObjectOfType<ExampleApp>();
+        App = FindObjectOfType<ExampleApp>();
 
         StartCoroutine(GetBrainCloudWrapper());
     }
@@ -54,7 +50,7 @@ public class MainPanel : MonoBehaviour
 
         yield return new WaitUntil(() =>
         {
-            BC = BC ?? GameObject.FindObjectOfType<BrainCloudWrapper>();
+            BC = BC ?? FindObjectOfType<BrainCloudWrapper>();
 
             return BC != null && BC.Client != null && BC.Client.IsInitialized();
         });

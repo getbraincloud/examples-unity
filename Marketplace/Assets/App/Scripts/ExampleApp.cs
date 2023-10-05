@@ -1,4 +1,3 @@
-using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
 using Firebase;
@@ -10,13 +9,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Core;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Purchasing;
-using UnityEngine.Purchasing.Extension;
-using BrainCloud.Plugin;
 
 /// <summary>
-/// 
+/// The main class that will interface with the app. Check the various UI scripts that load different parts of the UI.
+///
+/// <br><seealso cref="LoginPanel"/> Handles the login process for the user. Currently just makes use of AuthenticateAnonymous.</br>
+/// <br><seealso cref="MainPanel"/> Handles flow between the different states. Also allows you to send a Push Notification.</br>
+/// <br><seealso cref="StorePanel"/> Handles the in-app store. Makes use of <seealso cref="BrainCloudMarketplace"/>.</br>
 /// </summary>
 [RequireComponent(typeof(BrainCloudWrapper))]
 public class ExampleApp : MonoBehaviour
@@ -258,7 +257,8 @@ public class ExampleApp : MonoBehaviour
         {
             Debug.Log($"Registered Device for Push Notifications! Sending one now...");
 
-            // Basic message structure for notifications; see the FirebaseMessagingSnippets for more on how this can be customized
+            // Basic message structure for notifications; see the FirebaseMessagingSnippets link below for more on how this can be customized
+            // https://github.com/firebase/firebase-admin-dotnet/blob/db55e58ee591dab1f90a399336670ae84bab915b/FirebaseAdmin/FirebaseAdmin.Snippets/FirebaseMessagingSnippets.cs
             var message = JsonWriter.Serialize(new Dictionary<string, object>
             {
                 { "notification", new Dictionary<string, object>
@@ -306,12 +306,7 @@ public class ExampleApp : MonoBehaviour
         );
     }
 
-    public void OnBrainCloudSuccess(string jsonResponse, object cbObject)
-    {
-        //
-    }
-
-    public void OnBrainCloudError(int status, int reason, string jsonError, object cbObject)
+    public void OnBrainCloudError(int status, int reason, string jsonError, object _)
     {
         // Deserialize jsonError
         var error = JsonReader.Deserialize<Dictionary<string, object>>(jsonError);

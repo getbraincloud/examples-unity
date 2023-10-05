@@ -1,8 +1,16 @@
+using BrainCloud;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Purchasing;
 
+/// <summary>
+/// <see cref="BrainCloudAppStore.GetSalesInventory(string, string, SuccessCallback, FailureCallback, object)"/>
+/// returns JSON data that contains the product data configured under brainCloud Marketplace's <b>Products</b>.
+/// This JSON data can be deserialized into this class.
+/// 
+/// <br><seealso cref="BrainCloudAppStore"/></br>
+/// </summary>
 [Serializable]
 public class BCProduct
 {
@@ -21,6 +29,9 @@ public class BCProduct
 
     public BCProduct() { }
 
+    /// <summary>
+    /// Gets the <see cref="ProductType"/> from <see cref="type"/>.
+    /// </summary>
     public ProductType IAPProductType
     {
         get
@@ -40,6 +51,10 @@ public class BCProduct
         }
     }
 
+    /// <summary>
+    /// Gets the amount of currency this <see cref="BCProduct"/> redeems.
+    /// </summary>
+    /// <param name="name">The currency as its named under the Marketplace's <b>Virtual Currencies</b>.</param>
     public int GetCurrencyAmount(string name)
     {
         if (currency != null && currency.TryGetValue(name, out int amount))
@@ -50,7 +65,11 @@ public class BCProduct
         Debug.LogWarning($"BCProduct.currency does not contain a value for: '{name}'. Returning 0...");
         return 0;
     }
-    
+
+    /// <summary>
+    /// Gets the <see cref="BCItem"/> that this <see cref="BCProduct"/> redeems.
+    /// </summary>
+    /// <param name="name">The <see cref="BCItem"/> as its named under the Marketplace's <b>Item Catalog</b>.</param>
     public BCItem GetItem(string name)
     {
         if (items != null && items.TryGetValue(name, out BCItem item))
@@ -80,6 +99,9 @@ public class BCProduct
     public void SetUnityProduct(Product product) => unityProduct = product;
 }
 
+/// <summary>
+/// <see cref="BCProduct"/> can redeem items as configured under brainCloud Marketplace's <b>Item Catalog</b>.
+/// </summary>
 [Serializable]
 public class BCItem
 {
@@ -89,6 +111,9 @@ public class BCItem
     public BCItem() { }
 }
 
+/// <summary>
+/// <see cref="BCProduct"/> can have data for individual stores as configured under brainCloud Marketplace's <b>Products</b>.
+/// </summary>
 [Serializable]
 public class BCPriceData
 {
