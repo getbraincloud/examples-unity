@@ -54,5 +54,5 @@ macOS builds require code signing for the app to be able to make use of this plu
 #### Read More
 
 - [Apple Developer – Sign in with Apple](https://developer.apple.com/sign-in-with-apple/get-started/)
-- [brainCloud Portal Tutorial – Authentication - Apple](https://getbraincloud.com/apidocs/portal-usage/authentication-apple/)
+- [brainCloud Portal Tutorial – Authentication - Apple](https://docs.braincloudservers.com/learn/portal-tutorials/authentication-apple/)
 - [Unity Documentation – Set up an Apple sign-in](https://docs.unity.com/authentication/en/manual/set-up-apple-signin)

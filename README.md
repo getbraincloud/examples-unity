@@ -99,7 +99,7 @@ The _Getting Started With Unity_ video uses the Space Shooter example as a backi
 
 Go to the **BrainCloudConnect** scene and run the game to test it out in the editor!
 
-Find more information, including the video itself, here: http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-tutorial-1-getting-started/
+Find more information, including the video itself, here: https://docs.braincloudservers.com/learn/sdk-tutorials/unity-tutorials/unity-getting-started/
 
 ---
 
@@ -113,4 +113,4 @@ For more information, see the [TicTacToe README.md](./TicTacToe/README.md) file.
 
 ---
 
-For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).

@@ -32,7 +32,7 @@ You will have to setup a project on both the [Google Cloud Console](https://cons
 #### Google Play Console
 
 - Ensure that you have billing enabled for your developer account
-- Give the service account you have set up under the Google CLoud Console **API access** to your developer account
+- Give the service account you have set up under the Google Cloud Console **API access** to your developer account
 - Under **Users and permissions**, add the same service account app as a user and give it permissions to your app and enable the following permissions:
     - View app information (read-only)
     - View financial data
@@ -59,7 +59,7 @@ You will have to setup a project on both the [Google Cloud Console](https://cons
 4. You will also need to upload the .p12 certificate created for the service account here
 5. Navigate to `Design > Marketplace > Products` to set up your in-app purchases
     - Each product here is meant to reflect a product that your users can purchase; setting these up will automatically facilitate currencies and items that your in-app purchases can redeem on brainCloud once the purchases are verified
-    - You will need to ensure that when adding the Google product info for your products that the Google Product ID matches the product ID in your app's Google Play Console
+    - You will need to ensure that when adding the Google product info for your products that the **Google Product ID** matches the product ID in your app's Google Play Console
     - The prices here are for your own references and is not the same as what is set up for your Google Play Store app
     - It is recommended that you use the localized titles, descriptions, and prices that you can obtain through the product's metadata in Unity to display the proper information to your users
     - See [StorePanel](./Assets/App/Scripts/UI/StorePanel.cs), [BrainCloudMarketplace](./Assets/App/Scripts/Store/BrainCloudMarketplace.cs), and [BCProduct](./Assets/App/Scripts/Store/BCProduct.cs) for how this example makes use of brainCloud's Marketplace features
@@ -70,4 +70,4 @@ Follow Unity's [setup](https://docs.unity3d.com/Manual/UnityIAPSettingUp.html) g
 
 ---
 
-For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+Check out [brainCloud Monetization](https://docs.braincloudservers.com/learn/key-concepts/monetization/) for more information on how to make use of brainCloud monetization features. For more information on other brainCloud services, check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).
