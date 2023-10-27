@@ -83,7 +83,7 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 
 ## Push Notifications & Marketplace
 
-This example showcases how to push notifications through brainCloud using the Firebase Messaging plugin and as well as how to make use of brainCloud's Marketplace features. Check out the [Marketplace README.md](./Marketplace/README.md) for more information.
+This example showcases how to push notifications through brainCloud using the Firebase Messaging plugin and how to make use of brainCloud's Marketplace features. Check out the [Marketplace README.md](./Marketplace/README.md) for more information.
 
 ---
 
