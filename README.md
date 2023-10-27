@@ -2,7 +2,7 @@
 
 This repository contains example Unity projects that make use of the [brainCloud client](https://github.com/getbraincloud/braincloud-csharp) — an excellent place to start learning how the various [brainCloud APIs](https://getbraincloud.com/) are used!
 
-These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code.
+These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code. All projects, unless stated otherwise, make use of **Unity 2022.3**.
 
 Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform backend, such as the Google Play console or Apple Developer portal.
 
@@ -81,6 +81,12 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 
 ---
 
+## Push Notifications & Marketplace
+
+This example showcases how to push notifications through brainCloud using the Firebase Messaging plugin and how to make use of brainCloud's Marketplace features. Check out the [Marketplace README.md](./Marketplace/README.md) for more information.
+
+---
+
 ## RelayTestApp
 
 An example that showcases the **Matchmaking** and **Relay** services in brainCloud.
@@ -93,7 +99,7 @@ The _Getting Started With Unity_ video uses the Space Shooter example as a backi
 
 Go to the **BrainCloudConnect** scene and run the game to test it out in the editor!
 
-Find more information, including the video itself, here: http://getbraincloud.com/apidocs/tutorials/unity-tutorials/unity-tutorial-1-getting-started/
+Find more information, including the video itself, here: https://docs.braincloudservers.com/learn/sdk-tutorials/unity-tutorials/unity-getting-started/
 
 ---
 
@@ -107,4 +113,4 @@ For more information, see the [TicTacToe README.md](./TicTacToe/README.md) file.
 
 ---
 
-For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).
