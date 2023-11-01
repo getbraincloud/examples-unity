@@ -31,17 +31,11 @@ public class GameManager : MonoBehaviour
         set => _isGameActive = value;
     }
     private GameSessionManager _sessionManagerRef;
-    public GameSessionManager SessionManager
-    {
-        get => GetSessionManager();
-    }
-    
-    private List<PlaybackStreamRecord> _replayRecords = new List<PlaybackStreamRecord>();
-    public List<PlaybackStreamRecord> ReplayRecords
-    {
-        get => _replayRecords;
-    }
-    
+    public GameSessionManager SessionManager => GetSessionManager();
+
+    private readonly List<PlaybackStreamRecord> _replayRecords = new List<PlaybackStreamRecord>();
+    public List<PlaybackStreamRecord> ReplayRecords => _replayRecords;
+
     private GameOverScreen _gameOverScreenRef;
     private int _startingDefenderCount;
     private int _startingInvaderCount;
@@ -274,10 +268,10 @@ public class GameManager : MonoBehaviour
             {
                 _gameOverScreenRef.WinStatusText.text = "Your troops are defeated";
             }
-            
-            
-            NetworkManager.Instance.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
-            NetworkManager.Instance.GameCompleted(in_didInvaderWin);    
+
+
+            NetworkManager.Instance?.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
+            NetworkManager.Instance?.GameCompleted(in_didInvaderWin);    
         }
         else
         {

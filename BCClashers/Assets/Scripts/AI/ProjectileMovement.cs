@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -8,8 +7,10 @@ public class ProjectileMovement : MonoBehaviour
     public int DamageAmount;
     public float LifeTimeDuration = 5;
     public GameObject ExplosionFX;
+    
     private Rigidbody _rigidbody;
-    private int teamID;
+    private int _teamID;
+    
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
@@ -17,7 +18,7 @@ public class ProjectileMovement : MonoBehaviour
 
     private void Start()
     {
-        teamID = gameObject.layer == 6 ? 0 : 1;
+        _teamID = gameObject.layer == 6 ? 0 : 1;
     }
 
     private void OnEnable()
@@ -39,7 +40,7 @@ public class ProjectileMovement : MonoBehaviour
         var troop = other.GetComponent<TroopAI>();
         if (troop != null)
         {
-            if (troop.TeamID != teamID)
+            if (troop.TeamID != _teamID)
             {
                 troop.Damage(DamageAmount);
                 DestroyProjectile();

@@ -3,7 +3,7 @@ using UnityEngine;
 public class MeleeWeapon : MonoBehaviour
 {
     public int DamageAmount;
-    private readonly string TroopTag = "Troop";
+    private readonly string _troopTag = "Troop";
     private TroopAI _myTroop;
 
     private void Awake()
@@ -25,7 +25,7 @@ public class MeleeWeapon : MonoBehaviour
             damageable.Damage(DamageAmount);
         }
 
-        if (other.tag.Equals(TroopTag))
+        if (other.tag.Equals(_troopTag))
         {
             troop.IncomingAttacker(_myTroop);
             var direction = (transform.position - other.transform.position).normalized;

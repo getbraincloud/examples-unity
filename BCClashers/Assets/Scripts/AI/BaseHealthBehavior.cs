@@ -39,6 +39,7 @@ public class BaseHealthBehavior : MonoBehaviour
 
     public virtual void Dead()
     {
+        //Dead events are recorded for playback so we skip destroying
         if (GameManager.Instance.IsInPlaybackMode) return;
         StartCoroutine(DelayToDestroy());
     }

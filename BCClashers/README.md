@@ -51,14 +51,14 @@ After the game has completed, these events will execute:
 ### brainCloud Resources
 
 - [Designing Offline Multiplayer](https://help.getbraincloud.com/en/articles/3272700-design-multiplayer-matchmaking)
-- [One Way Offline Example](https://getbraincloud.com/apidocs/api-modules/multiplayer/one-way-offline-multiplayer-example)
+- [One Way Offline Example](https://docs.braincloudservers.com/learn/key-concepts/multiplayer/#one-way-offline-multiplayer)
 
 ### API References
 
-- [Matchmaking](https://getbraincloud.com/apidocs/apiref/#capi-matchmaking)
-- [Playback Stream](https://getbraincloud.com/apidocs/apiref/#capi-playbackstream)
-- [One-Way Match](https://getbraincloud.com/apidocs/apiref/#capi-onewaymatch)
+- [Matchmaking](https://docs.braincloudservers.com/api/capi/matchmaking/)
+- [Playback Stream](https://docs.braincloudservers.com/api/capi/playbackstream/)
+- [One-Way Match](https://docs.braincloudservers.com/api/capi/playbackstream/)
 
 ---
 
-For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).
