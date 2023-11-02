@@ -114,10 +114,6 @@ public static class ExtensionMethods
         {
             selectable.animator.SetTrigger(ANIMATION_TRIGGER_NORMAL);
         }
-        else
-        {
-            Debug.LogWarning($"Selectable {selectable.name} does not have an animator.");
-        }
     }
 
     /// <summary>
@@ -128,10 +124,6 @@ public static class ExtensionMethods
         if (selectable.animator != null && selectable.interactable)
         {
             selectable.animator.SetTrigger(ANIMATION_TRIGGER_ERROR);
-        }
-        else
-        {
-            Debug.LogWarning($"Selectable {selectable.name} does not have an animator.");
         }
     }
 }
