@@ -21,7 +21,6 @@ public class PlaybackStreamManager : MonoBehaviour
     public List<BaseHealthBehavior> InvadersList = new List<BaseHealthBehavior>();
     public List<BaseHealthBehavior> DefendersList = new List<BaseHealthBehavior>();
     public List<BaseHealthBehavior> StructuresList = new List<BaseHealthBehavior>();
-    private Coroutine _replayCoroutine;
     private int replayIndex;
     private SpawnData _invaderSpawnData;
     private SpawnController _spawnController;
@@ -68,7 +67,7 @@ public class PlaybackStreamManager : MonoBehaviour
 
     public void StartStream()
     {
-        _replayCoroutine = StartCoroutine(StartPlayBack());
+        StartCoroutine(StartPlayBack());
     }
 
     private IEnumerator StartPlayBack()
@@ -130,11 +129,15 @@ public class PlaybackStreamManager : MonoBehaviour
         InvadersList.Add(troop);
     }
 
+    /// <summary>
+    /// Determine if target is a troop or a structure
+    /// Troops will have a big negative number whereas structures will have an ID from 0-10
+    /// </summary>
+    /// <param name="in_record"></param>
     private void AssignTarget(PlaybackStreamRecord in_record)
     {
         BaseHealthBehavior target = null;
-        //Determine if target is a troop or structure
-        // Troops will have a big negative number whereas structures will have an ID from 0-10
+        
         //Troops
         if (in_record.targetID < -1)
         {
@@ -230,7 +233,6 @@ public class PlaybackStreamManager : MonoBehaviour
                 {
                     Debug.LogWarning("Object is destroyed from list but not removed");
                 }
-
                 break;
             }
         }

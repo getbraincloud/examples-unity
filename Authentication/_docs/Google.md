@@ -32,7 +32,7 @@ You will need to create a project on [Google Cloud](https://console.developers.g
 
 #### Read More
 
-- [brainCloud Portal Tutorial – Authentication - Google (PlayGame)](https://getbraincloud.com/apidocs/portal-usage/authentication-google-playgame/)
+- [brainCloud Portal Tutorial – Authentication - Google (PlayGame)](https://docs.braincloudservers.com/learn/portal-tutorials/authentication-google-playgame/)
 - [Games Dev Center – Google Play Games plugin for Unity](https://developer.android.com/games/pgs/unity/overview)
 - [Google Identity – Authentication](https://developers.google.com/identity/sign-in/)
 - [Google Identity – Google Sign-In for Android (legacy)](https://developers.google.com/identity/sign-in/android/start-integrating#configure_a_project)

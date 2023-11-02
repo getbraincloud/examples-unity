@@ -39,5 +39,5 @@ In `UserHandler.AuthenticateFacebook()` and `UserHandler.AuthenticateFacebookLim
 
 #### Read More
 
-- [brainCloud Portal Tutorial – Authentication - Facebook](https://getbraincloud.com/apidocs/portal-usage/basic-configuration-facebook/)
+- [brainCloud Portal Tutorial – Authentication - Facebook](https://docs.braincloudservers.com/learn/portal-tutorials/authentication-facebook/)
 - [Unity Documentation – Set up a Facebook account sign-in](https://docs.unity.com/authentication/en/manual/set-up-facebook-signin)

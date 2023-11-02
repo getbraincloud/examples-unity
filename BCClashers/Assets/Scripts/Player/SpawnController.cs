@@ -38,8 +38,7 @@ public class SpawnController : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (Input.GetButtonDown("Fire1") && 
-            _timer < Time.realtimeSinceStartup)
+        if (Input.GetButtonDown("Fire1") && _timer < Time.realtimeSinceStartup)
         {
             if (GameManager.Instance.IsInPlaybackMode) return;
             //Cant spawn more of this troop type
@@ -91,9 +90,9 @@ public class SpawnController : MonoBehaviour
         }
         
         //Applying the troop data to UI elements
-        for (int i = 0; i < troopList.Count; i++)
+        for (int i = 0; i < troopList.Count; ++i)
         {
-            for (int t = 0; t < troopSelectorList.Count; t++)
+            for (int t = 0; t < troopSelectorList.Count; ++t)
             {
                 if (troopList[i].TroopType == troopSelectorList[t].EnemyTypeSelection)
                 {
@@ -111,7 +110,7 @@ public class SpawnController : MonoBehaviour
     public void TroopChange(EnemyTypes troopChangedTo)
     {
         GameManager.Instance.SessionManager.UpdateBorderPosition((int) troopChangedTo);
-        for (int i = 0; i < troopList.Count; i++)
+        for (int i = 0; i < troopList.Count; ++i)
         {
             if (troopList[i].TroopType == troopChangedTo)
             {

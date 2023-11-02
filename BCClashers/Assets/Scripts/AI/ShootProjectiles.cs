@@ -3,18 +3,12 @@ using UnityEngine;
 public class ShootProjectiles : MonoBehaviour
 {
     public GameObject Bullet;
-    public Transform[] SpawnPoints;
-    private bool _canShoot = true;
-    
-    public void SpawnProjectile(int collisionLayer, GameObject target)
-    {
-        if (!_canShoot) return;
+    public Transform SpawnPoint;
 
-        for (int i = 0; i < SpawnPoints.Length; i++)
-        {
-            GameObject proj = Instantiate(Bullet, SpawnPoints[i].position, SpawnPoints[i].rotation);
-            proj.layer = collisionLayer;
-            GameManager.Instance.Projectiles.Add(proj);
-        }
+    public void SpawnProjectile(int collisionLayer)
+    {
+        GameObject proj = Instantiate(Bullet, SpawnPoint.position, SpawnPoint.rotation);
+        proj.layer = collisionLayer;
+        GameManager.Instance.Projectiles.Add(proj);
     }
 }
