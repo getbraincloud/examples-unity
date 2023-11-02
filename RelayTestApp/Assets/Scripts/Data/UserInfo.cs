@@ -14,7 +14,7 @@ public class UserInfo
     //Used for displaying and identifying users
     public string Username;
     //if this user should show shockwaves locally
-    public bool AllowSendTo = true;     
+    public bool AllowSendTo = true;
     //Is this user still connected
     public bool IsAlive;
     //Current user color to display
@@ -48,8 +48,12 @@ public class UserInfo
         if (GameManager.Instance.GameMode == GameMode.FreeForAll)
         {
             Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
-            int colorIndex = (int)extra["colorIndex"];
-            UserGameColor = (GameColors) colorIndex;    
+            int colorIndex = 0;
+            if (extra != null && extra.ContainsKey("colorIndex"))
+            {
+                colorIndex = (int)extra["colorIndex"];
+            }
+            UserGameColor = (GameColors) colorIndex;
         }
         else if(GameManager.Instance.GameMode == GameMode.Team)
         {
@@ -64,7 +68,7 @@ public class UserInfo
         }
         if (userJson.ContainsKey("presentSinceStart"))
         {
-            PresentSinceStart = (bool)userJson["presentSinceStart"];    
+            PresentSinceStart = (bool)userJson["presentSinceStart"];
         }
     }
 }

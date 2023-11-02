@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -544,6 +544,7 @@ namespace BrainCloudUNETExample
             GStateManager.Instance.PushSubState(CreateGameSubState.STATE_NAME, false, false);
             GStateManager.Instance.OnInitializeDelegate += onQuickPlayInit;
         }
+
         #endregion
 
         #region Private

@@ -1,6 +1,6 @@
 # Authentication
 
-An example project made in **Unity 2021.3** that showcases the use of the [Authentication](https://getbraincloud.com/apidocs/apiref/?csharp#capi-authentication) service available on [brainCloud](https://getbraincloud.com/) and as well as several other services that brainCloud supports.
+This showcases the use of the [Authentication](https://docs.braincloudservers.com/api/capi/authentication/) service available on [brainCloud](https://getbraincloud.com/) as well as several other services that brainCloud supports.
 
 ---
 
@@ -34,7 +34,7 @@ Be sure to check out the various **Data**, **ServiceUI**, and **ContentUI** scri
 ## Getting Started
 
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/), you will need to set up your own app for the API calls in this project to return responses
-    - For a quick start, within the **brainCloud - UNITY PLUGIN TEMPLATE LIST - NOEDIT** team, you can [export the configuration data](https://getbraincloud.com/apidocs/portal-usage/importexport-game-data/) from the **Authentication (14185)** example app and import that data into your own authentication app for your team
+    - For a quick start, within the Unity brainCloud settings window, you can create a new app and enable **Create using Tutorial template**; choose **Authentication** from the list
     - Ensure that your app has enabled support for the platforms you intend on testing on, such as Facebook, Google Android, Windows, etc.
 2. In the Unity Authentication project, open up `Main.unity`
 3. Log into your brainCloud account via `brainCloud > Settings` in the dropdown menu and select your Team & App from the dropdowns in the brainCloud window
@@ -52,13 +52,13 @@ Be sure to check out the various **Data**, **ServiceUI**, and **ContentUI** scri
 
 Services that this example project makes use of:
 
-- [Custom Entity](https://getbraincloud.com/apidocs/apiref/?csharp#capi-customentity)
-- [Entity](https://getbraincloud.com/apidocs/apiref/?csharp#capi-entity)
-- [Global Statistics](https://getbraincloud.com/apidocs/apiref/?csharp#capi-globalstats)
-- [Identity](https://getbraincloud.com/apidocs/apiref/?csharp#capi-identity)
-- [Player Statistics](https://getbraincloud.com/apidocs/apiref/?csharp#capi-playerstats)
-- [Script](https://getbraincloud.com/apidocs/apiref/?csharp#capi-script)
-- [Virtual Currency](https://getbraincloud.com/apidocs/apiref/?csharp#capi-virtualcurrency)
+- [Custom Entity](https://docs.braincloudservers.com/api/capi/customentity/)
+- [Entity](https://docs.braincloudservers.com/api/capi/entity/)
+- [Global Statistics](https://docs.braincloudservers.com/api/capi/globalstats/)
+- [Identity](https://docs.braincloudservers.com/api/capi/identity/)
+- [Player Statistics](https://docs.braincloudservers.com/api/capi/playerstats/)
+- [Script](https://docs.braincloudservers.com/api/capi/script/)
+- [Virtual Currency](https://docs.braincloudservers.com/api/capi/virtualcurrency/)
 
 More service examples to come!
 
@@ -82,4 +82,4 @@ More external authentication methods to come!
 
 ---
 
-For more information on brainCloud and its services, please check out the [brainCloud Docs](https://getbraincloud.com/apidocs/) and [API Reference](https://getbraincloud.com/apidocs/apiref/?csharp#introduction).
+For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).

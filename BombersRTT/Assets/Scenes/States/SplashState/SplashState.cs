@@ -1,4 +1,4 @@
-﻿//#define SMRJ_HACK
+//#define SMRJ_HACK
 #if ENABLE_ASSET_BUNDLES
 using AssetBundles;
 #endif
@@ -38,7 +38,7 @@ namespace BrainCloudUNETExample
             GStateManager.Instance.ForceStateInfo(_stateInfo);
 
             // warmup shaders inside /Resources/Shaders/ (do this once)
-            Shader.WarmupAllShaders();
+            //Shader.WarmupAllShaders();
 
             // ensure the rest are setup
             yield return YieldFactory.GetWaitForEndOfFrame();

@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 public enum TroopStates {Idle, Move, Attack}
 public enum EnemyTypes {Grunt, Soldier, Shooter}
 
@@ -44,6 +42,7 @@ public class TroopAI : BaseHealthBehavior
     private Quaternion _currQuat;
     private Rigidbody _rigidbodyComp;
     private MeleeWeapon _meleeWeapon;
+    private BoxCollider _collider;
     
     private Coroutine _stunCoroutine;
 
@@ -64,7 +63,7 @@ public class TroopAI : BaseHealthBehavior
     {
         _rigidbodyComp = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
-        
+        _collider = GetComponent<BoxCollider>();
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
         _healthBar = GetComponentInChildren<HealthBar>();
         _shootScript = GetComponent<ShootProjectiles>();
@@ -128,8 +127,7 @@ public class TroopAI : BaseHealthBehavior
             CurrentState = TroopStates.Attack;
             _navMeshAgent.isStopped = true;
             RotateToTarget();
-            if (EnemyType == EnemyTypes.Grunt || 
-                EnemyType == EnemyTypes.Soldier)
+            if (EnemyType is EnemyTypes.Grunt or EnemyTypes.Soldier)
             {
                 PlayAttackAnimation(); 
             }
@@ -137,6 +135,12 @@ public class TroopAI : BaseHealthBehavior
             {
                 PlayAttackAnimation();
             }
+        }
+        else
+        {
+            CurrentState = TroopStates.Idle;
+            _navMeshAgent.isStopped = true;
+            PlayIdleAnimation();
         }
     }
 
@@ -186,13 +190,20 @@ public class TroopAI : BaseHealthBehavior
         _isAttacking = true;
         _animator.SetBool(IsAttacking, true);
     }
+
+    private void PlayIdleAnimation()
+    {
+        if (!_isAttacking) return;
+        _isAttacking = false;
+        _animator.SetBool(IsAttacking, false);
+    }
     
     //This function is triggered through an Animation Event in Unity
     public void ShootTarget()
     {
-        if (_shootScript && gameObject && _target)
+        if (_shootScript && gameObject)
         {
-            _shootScript.SpawnProjectile(gameObject.layer, _target);
+            _shootScript.SpawnProjectile(gameObject.layer);
         }
     }
 
@@ -252,7 +263,7 @@ public class TroopAI : BaseHealthBehavior
             _navMeshAgent.destination = transform.position;    
         }
 
-        GetComponent<BoxCollider>().enabled = false;
+        _collider.enabled = false;
 
         if (_animator)
         {
@@ -281,7 +292,6 @@ public class TroopAI : BaseHealthBehavior
                 NetworkManager.Instance.RecordTargetDestroyed(EntityID, TeamID);
         }
         
-        yield return new WaitForFixedUpdate();
         yield return new WaitForFixedUpdate();
         
         if (!GameManager.Instance.IsInPlaybackMode)
@@ -367,7 +377,6 @@ public class TroopAI : BaseHealthBehavior
         if (_target != null && previousTarget != _target)
         {
             _currentDetectionRadius = _defaultDetectionRadius;
-            //_isSearching = false;
             //Send target info as event for playback
             int targetID = -1;
             int targetTeamID = -1;

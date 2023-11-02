@@ -7,11 +7,11 @@ public class ArmySelectionButton : MonoBehaviour
     
     public void OnArmySelected()
     {
-        if (ArmyType == ArmyType.Invader)
+        if (ArmyType is ArmyType.Invader)
         {
             GameManager.Instance.OnReadSetInvaderList(ArmyRank);
         }
-        else
+        else if (ArmyType is ArmyType.Defense)
         {
             GameManager.Instance.CurrentUserInfo.DefendersSelected = ArmyRank;
         }
