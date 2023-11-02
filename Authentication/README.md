@@ -34,7 +34,7 @@ Be sure to check out the various **Data**, **ServiceUI**, and **ContentUI** scri
 ## Getting Started
 
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/), you will need to set up your own app for the API calls in this project to return responses
-    - For a quick start, within the **brainCloud - UNITY PLUGIN TEMPLATE LIST - NOEDIT** team, you can [export the configuration data](https://docs.braincloudservers.com/learn/portal-tutorials/importexport-game-data/) from the **Authentication (14185)** example app and import that data into your own authentication app for your team
+    - For a quick start, within the Unity brainCloud settings window, you can create a new app and enable **Create using Tutorial template**; choose **Authentication** from the list
     - Ensure that your app has enabled support for the platforms you intend on testing on, such as Facebook, Google Android, Windows, etc.
 2. In the Unity Authentication project, open up `Main.unity`
 3. Log into your brainCloud account via `brainCloud > Settings` in the dropdown menu and select your Team & App from the dropdowns in the brainCloud window
