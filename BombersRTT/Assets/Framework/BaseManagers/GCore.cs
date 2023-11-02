@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloud;
@@ -82,7 +82,7 @@ namespace Gameframework
         {
             EnsureMgrsAreSetup();
 #if !UNITY_EDITOR && UNITY_IOS
-            UnityEngine.iOS.NotificationServices.CancelAllLocalNotifications();
+            //UnityEngine.iOS.NotificationServices.CancelAllLocalNotifications();
 #endif
         }
 
@@ -148,10 +148,10 @@ namespace Gameframework
         private void CreateLocalNotification(string aMessage, DateTime aTime)
         {
 #if !UNITY_EDITOR && UNITY_IOS
-            UnityEngine.iOS.LocalNotification shortNotification = new UnityEngine.iOS.LocalNotification();
-            shortNotification.fireDate = aTime;
-            shortNotification.alertBody = aMessage;
-            UnityEngine.iOS.NotificationServices.ScheduleLocalNotification(shortNotification);
+            //UnityEngine.iOS.LocalNotification shortNotification = new UnityEngine.iOS.LocalNotification();
+            //shortNotification.fireDate = aTime;
+            //shortNotification.alertBody = aMessage;
+            //UnityEngine.iOS.NotificationServices.ScheduleLocalNotification(shortNotification);
 #endif
         }
 #if UNITY_ANDROID
