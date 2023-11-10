@@ -135,20 +135,17 @@ public class GameArea : MonoBehaviour
         {
             if (member.AllowSendTo)
             {
-                lock(member.ShockwavePositions)
+                for(int i= 0; i < member.ShockwavePositions.Count; ++i)
                 {
-                    for(int i= 0; i < member.ShockwavePositions.Count; ++i)
+                    if(member.ShockwaveTeamCodes.Count > 0 && member.InstigatorTeamCodes.Count > 0)
                     {
-                        if(member.ShockwaveTeamCodes.Count > 0 && member.InstigatorTeamCodes.Count > 0)
-                        {
-                            SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor), member.ShockwaveTeamCodes[i], member.InstigatorTeamCodes[i]);                            
-                        }
-                        else
-                        {
-                            SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor));
-                        }
-                    }   
-                }
+                        SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor), member.ShockwaveTeamCodes[i], member.InstigatorTeamCodes[i]);                            
+                    }
+                    else
+                    {
+                        SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor));
+                    }
+                } 
             }
             
             //Clear the list so there's no backlog of input positions
