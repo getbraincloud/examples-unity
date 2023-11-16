@@ -99,8 +99,6 @@ public class BrainCloudManager : MonoBehaviour
     public void InitializeBC()
     {
         _bcWrapper.Init();
-
-        _bcWrapper.Client.EnableLogging(true);
     }
     // Uninitialize brainCloud
     void UninitializeBC()
@@ -284,7 +282,7 @@ public class BrainCloudManager : MonoBehaviour
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
-        jsonData["y"] = -pos.y;
+        jsonData["y"] = pos.y;
         //Set up JSON to send
         Dictionary<string, object> json = new Dictionary<string, object>();
         json["op"] = "move";
@@ -356,7 +354,7 @@ public class BrainCloudManager : MonoBehaviour
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
-        jsonData["y"] = -pos.y;
+        jsonData["y"] = pos.y;
         jsonData["teamCode"] = (int)intendedTeam;
         jsonData["instigator"] = (int)GameManager.Instance.CurrentUserInfo.Team;
 
@@ -514,21 +512,26 @@ public class BrainCloudManager : MonoBehaviour
                         if (op == "move")
                         {
                             member.IsAlive = true;
-                            member.MousePosition.x = (float)Convert.ToDouble(data["x"]);
-                            member.MousePosition.y = (float)-Convert.ToDouble(data["y"]);
+                            float mousePosX = (float)Convert.ToDouble(data["x"]);
+                            float mousePosY = (float)Convert.ToDouble(data["y"]);
+
+                            member.MousePosition.y = mousePosY;
+                            member.MousePosition.x = mousePosX;
                         }
                         else if (op == "shockwave")
                         {
                             Vector2 position;
                             position.x = (float)Convert.ToDouble(data["x"]);
-                            position.y = (float)-Convert.ToDouble(data["y"]);
+                            position.y = (float)Convert.ToDouble(data["y"]);
                             member.ShockwavePositions.Add(position);
+                            if(data.ContainsKey("teamCode"))
+                            {
+                                TeamCodes shockwaveCode = (TeamCodes) data["teamCode"];
+                                member.ShockwaveTeamCodes.Add(shockwaveCode);
 
-                            TeamCodes shockwaveCode = (TeamCodes) data["teamCode"];
-                            member.ShockwaveTeamCodes.Add(shockwaveCode);
-
-                            TeamCodes instigatorCode = (TeamCodes) data["instigator"];
-                            member.InstigatorTeamCodes.Add(instigatorCode);
+                                TeamCodes instigatorCode = (TeamCodes) data["instigator"];
+                                member.InstigatorTeamCodes.Add(instigatorCode);   
+                            }
                         }
                     }
                     break;
