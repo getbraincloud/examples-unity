@@ -31,7 +31,7 @@ public class BrainCloudManager : MonoBehaviour
     internal RelayCompressionTypes _relayCompressionType { get; set; }
     private LogErrors _logger;
     private bool _presentWhileStarted;
-
+    private bool _isReconnecting;
     private TeamCodes _teamCode = TeamCodes.all;
     public TeamCodes TeamCode
     {
@@ -157,7 +157,7 @@ public class BrainCloudManager : MonoBehaviour
         {
             return;
         }*/
-
+        _isReconnecting = false;
         _dead = true;
         _bcWrapper.RTTService.DeregisterRTTLobbyCallback();
         _bcWrapper.RelayService.DeregisterRelayCallback();
@@ -179,7 +179,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         StateManager.Instance.Protocol = protocol;
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
-
+        _isReconnecting = false;
         // Enable RTT
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         _bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
@@ -229,6 +229,7 @@ public class BrainCloudManager : MonoBehaviour
     public void ReconnectUser()
     {
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
+        _isReconnecting = true;
         //Continue doing reconnection stuff.....
         _bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, RTTReconnect, OnRTTDisconnected);
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
@@ -618,7 +619,7 @@ public class BrainCloudManager : MonoBehaviour
                     GameManager.Instance.UpdateCursorList();
                     //Check to see if a user joined the lobby before the match started or after.
                     //If a user joins while match is in progress, you will only receive MEMBER_JOIN & ROOM_READY RTT updates.
-                    if (_presentWhileStarted)
+                    if (_presentWhileStarted || _isReconnecting)
                     {
                         ConnectRelay();
                     }
