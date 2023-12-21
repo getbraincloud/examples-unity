@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 /// <summary>
 /// Sends information when a dropdown menu value is changed based on the DropdownMenu enum selected
 /// </summary>
-public enum DropdownMenus{Socket,Channel,Compression, LobbyType}
+public enum DropdownMenus{Socket,Channel,Compression, FFALobbyType, TeamLobbyType}
 public class DropdownMenuCallback : MonoBehaviour
 {
     public DropdownMenus TargetMenu;
@@ -32,9 +32,12 @@ public class DropdownMenuCallback : MonoBehaviour
                 BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)Dropdown.value;
                 GameManager.Instance.SendUpdateRelayCompressionType();
                 break;
-            case DropdownMenus.LobbyType:
-                BrainCloudManager.Instance.LobbyType = (RelayLobbyTypes) Dropdown.value;
+            case DropdownMenus.FFALobbyType:
+                BrainCloudManager.Instance.SetLobbyType(GameMode.FreeForAll, Dropdown.value);
                  break;
+            case DropdownMenus.TeamLobbyType:
+                BrainCloudManager.Instance.SetLobbyType(GameMode.Team, Dropdown.value);
+                break;
         }   
     }
 }

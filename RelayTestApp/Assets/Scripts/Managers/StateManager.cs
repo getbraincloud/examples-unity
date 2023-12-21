@@ -25,7 +25,8 @@ public class StateManager : MonoBehaviour
     public GameObject LobbyTeamView;
     public GameObject MatchFFAView;
     public GameObject MatchTeamView;
-    
+    public GameObject DisconnectButton;
+    public GameObject ReconnectToRelayButton;
     //Network info needed
     [SerializeField]
     public Lobby CurrentLobby;
@@ -63,6 +64,7 @@ public class StateManager : MonoBehaviour
     
     private void Start()
     {
+        UpdateDisconnectButtons(false);
         ChangeState(GameStates.SignIn);
     }
 
@@ -209,6 +211,11 @@ public class StateManager : MonoBehaviour
         BrainCloudManager.Instance.ReconnectUser();
     }
 
+    public void UpdateDisconnectButtons(bool isEnabled)
+    {
+        DisconnectButton.SetActive(isEnabled);
+        ReconnectToRelayButton.SetActive(isEnabled);
+    }
     
     public void ChangeState(GameStates newGameState)
     {

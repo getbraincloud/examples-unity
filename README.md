@@ -91,6 +91,20 @@ This example showcases how to push notifications through brainCloud using the Fi
 
 An example that showcases the **Matchmaking** and **Relay** services in brainCloud.
 
+Example of Lobby Types as a Global Property:
+Set type to String.
+Value should look like this:
+{
+     "0":
+    {
+    "lobby": "FreeForAllParty"
+    },
+     "1":
+    {
+    "lobby": "TeamParty"
+    }
+}
+
 ---
 
 ## SpaceShooterWithStats
