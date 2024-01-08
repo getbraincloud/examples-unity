@@ -372,7 +372,7 @@ public class ExampleApp : MonoBehaviour
             json.Add("data", data);
         }
 
-        Debug.Log($"Message received from Firebase:\n{LoggerUI.FormatJSON(JsonWriter.Serialize(json))}");
+        Debug.Log($"Message received from Firebase:\n{JsonWriter.Serialize(json).FormatJSON()}");
     }
 
     private void OnFirebaseTokenReceived(object sender, TokenReceivedEventArgs token)

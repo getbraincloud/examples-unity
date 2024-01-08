@@ -19,8 +19,10 @@ using UnityEngine.Purchasing.Extension;
 public class BrainCloudMarketplace : IDetailedStoreListener
 {
     private const string APP_STORE =
-#if UNITY_EDITOR || UNITY_ANDROID
+#if UNITY_ANDROID
         "googlePlay";
+#elif UNITY_IOS
+        "itunes";
 #else
         "";
 #endif
@@ -328,7 +330,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
         InternalInvokeCallback(null);
     }
 
-#endregion
+    #endregion
 
     #region brainCloud
 
