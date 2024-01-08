@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
     //for updating members list of shockwaves
     public GameArea GameArea;
     public Button JoinInProgressButton;
+    public TMP_Dropdown FFADropdown;
+    public TMP_Dropdown TeamDropdown;
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public GameObject EndGameBtn;
@@ -409,6 +411,23 @@ public class GameManager : MonoBehaviour
             Destroy(userCursor.gameObject);   
         }
         _userCursorsList.Clear();
+    }
+    
+    public void UpdateLobbyDropdowns(List<string> in_ffaList, List<string> in_teamList)
+    {
+        FFADropdown.options.Clear();
+        TeamDropdown.options.Clear();
+        for (int i = 0; i < in_ffaList.Count; i++)
+        {
+            TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_ffaList[i]);
+            FFADropdown.options.Add(entry);            
+        }
+
+        for (int i = 0; i < in_teamList.Count; i++)
+        {
+            TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_teamList[i]);
+            TeamDropdown.options.Add(entry);
+        }
     }
 #endregion Update Components
     
