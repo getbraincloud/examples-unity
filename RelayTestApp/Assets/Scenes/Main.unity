@@ -3808,6 +3808,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FreeForAllDropdown: {fileID: 2101961752}
   TeamDropdown: {fileID: 1506271484}
+  IsProd: 1
 --- !u!114 &363795622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10022,8 +10023,7 @@ MonoBehaviour:
   MatchFFAView: {fileID: 1626313736}
   MatchTeamView: {fileID: 927679200}
   DisconnectButton: {fileID: 1778911528}
-  ReconnectButton1: {fileID: 0}
-  ReconnectButton2: {fileID: 156543383}
+  ReconnectToRelayButton: {fileID: 156543383}
   CurrentLobby:
     LobbyID: 
     OwnerID: 
