@@ -9,10 +9,6 @@ using UnityEngine.Purchasing.Extension;
 /// <summary>
 /// Makes use of <see cref="BrainCloudWrapper"/> to act as a bridge between brainCloud's Marketplace features and Unity IAP.
 ///
-/// <para>
-/// Currently only supports <b>Google Play Store</b>.
-/// </para>
-///
 /// <br><seealso cref="BrainCloudWrapper"/></br>
 /// <br><seealso cref="BrainCloudAppStore"/></br>
 /// </summary>
@@ -274,7 +270,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
         Debug.Log($"Purchase Complete: {product.definition.id}; Receipt:\n{product.receipt}");
 
         var json = JsonReader.Deserialize<Dictionary<string, object>>(product.receipt);
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && UNITY_ANDROID
         json = JsonReader.Deserialize<Dictionary<string, object>>(json["Payload"].ToString());
         json = JsonReader.Deserialize<Dictionary<string, object>>(json["json"].ToString());
 
@@ -285,6 +281,18 @@ public class BrainCloudMarketplace : IDetailedStoreListener
                                               { "orderId",   json["orderId"]       },
                                               { "token",     json["purchaseToken"] },
                                               { "includeSubscriptionCheck", product.definition.type == ProductType.Subscription }
+                                          }),
+                                          OnVerifyPurchasesSuccess,
+                                          OnBrainCloudFailure("Unable to verify purchase(s) with brainCloud!",
+                                                              () => InternalInvokeCallback(null)));
+
+        return PurchaseProcessingResult.Pending;
+#elif !UNITY_EDITOR && UNITY_IOS
+        bc.AppStoreService.VerifyPurchase(APP_STORE,
+                                          JsonWriter.Serialize(new Dictionary<string, object>
+                                          {
+                                              { "receipt",                json["Payload"] },
+                                              { "excludeOldTransactions", false           }
                                           }),
                                           OnVerifyPurchasesSuccess,
                                           OnBrainCloudFailure("Unable to verify purchase(s) with brainCloud!",
@@ -347,12 +355,19 @@ public class BrainCloudMarketplace : IDetailedStoreListener
         foreach (var transaction in details)
         {
             string status = string.Empty;
-            string productId = transaction["productId"].ToString();
+            string productId = transaction.ContainsKey("productId") ? transaction["productId"].ToString()   // googlePlay
+                             : transaction.ContainsKey("product_id") ? transaction["product_id"].ToString() // itunes
+                             : "UnknownProduct";
 
             if (transaction.ContainsKey("errorMessage") &&
                 !string.IsNullOrWhiteSpace(transaction["errorMessage"].ToString()))
             {
                 status = transaction["errorMessage"].ToString();
+                if (status.ToLower().Contains("already") && status.ToLower().Contains("processed") &&
+                    controller.products.WithID(productId) is Product product && product.hasReceipt)
+                {
+                    controller.ConfirmPendingPurchase(product);
+                }
             }
             else if ((bool)transaction["processed"] == false)
             {
@@ -425,7 +440,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
 
     private static void InternalInitialize(Action<BCProduct[]> onInitialized = null)
     {
-#if UNITY_EDITOR || UNITY_ANDROID
+#if UNITY_EDITOR || UNITY_ANDROID || UNITY_IOS
         instance = new();
         bc = UnityEngine.Object.FindObjectOfType<BrainCloudWrapper>();
 

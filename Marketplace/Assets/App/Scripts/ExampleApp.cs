@@ -1,14 +1,19 @@
 using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
-using Firebase;
-using Firebase.Messaging;
 using TMPro;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unity.Services.Core;
 using UnityEngine;
+
+#if UNITY_ANDROID
+using Firebase;
+using Firebase.Messaging;
+using System.Threading.Tasks;
+#elif UNITY_IOS
+using Unity.Notifications.iOS;
+#endif
 
 /// <summary>
 /// The main class that will interface with the app. Check the various UI scripts that load different parts of the UI.
@@ -30,9 +35,13 @@ public class ExampleApp : MonoBehaviour
         Store
     }
 
-    // Firebase Messaging
+    // Messaging
+#if UNITY_ANDROID
     private const string TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION = "/topics/brainCloud/example/PushNotification";
-    private const string PLAYERPREFS_FIREBASE_TOKEN_KEY = TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION + "." + "FIREBASE_TOKEN_KEY";
+    private const string PLAYERPREFS_DEVICE_TOKEN_KEY = TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION + "." + "FIREBASE_TOKEN_KEY";
+#elif UNITY_IOS
+    private const string PLAYERPREFS_DEVICE_TOKEN_KEY = "PUSHNOTIFICATION.IOS_DEVICE_TOKEN_KEY";
+#endif
 
     // String Formats
     private const string USER_INFO_FORMAT = "Profile ID: {0}\nAnonymous ID: {1}";
@@ -53,7 +62,8 @@ public class ExampleApp : MonoBehaviour
     [SerializeField] private StorePanel StorePanel = default;
 
     [Header("Firebase Messaging")]
-    [SerializeField] private string NotificationTitle = "Notification Title";
+    [SerializeField] private string NotificationTitle = "Marketplace Example";
+    [SerializeField] private string NotificationSubtitle = "Subtitle Goes Here";
     [SerializeField] private string NotificationBody = "Hello World from brainCloud!";
     [SerializeField] private string NotificationImageURL = string.Empty;
 
@@ -64,7 +74,10 @@ public class ExampleApp : MonoBehaviour
     }
 
     private BrainCloudWrapper BC = null; // How we will interact with the brainCloud client
+
+#if UNITY_ANDROID
     private FirebaseApp Firebase = null;
+#endif
 
     #region Unity Messages
 
@@ -94,12 +107,12 @@ public class ExampleApp : MonoBehaviour
 
     private void OnDestroy()
     {
+#if UNITY_ANDROID
         FirebaseMessaging.MessageReceived -= OnFirebaseMessageReceived;
         FirebaseMessaging.TokenReceived -= OnFirebaseTokenReceived;
-
         Firebase?.Dispose();
         Firebase = null;
-
+#endif
         BC = null;
     }
 
@@ -112,6 +125,7 @@ public class ExampleApp : MonoBehaviour
         // Wait for brainCloud to be initialized
         yield return new WaitUntil(() => BC.Client != null && BC.Client.IsInitialized());
 
+#if UNITY_ANDROID
         // Initialize Firebase Messaging
         DependencyStatus status = (DependencyStatus)(-1);
 
@@ -125,10 +139,11 @@ public class ExampleApp : MonoBehaviour
         if (status == DependencyStatus.Available)
         {
             Firebase = FirebaseApp.DefaultInstance;
+
             FirebaseMessaging.MessageReceived += OnFirebaseMessageReceived;
             FirebaseMessaging.TokenReceived += OnFirebaseTokenReceived;
 
-            if (!HasFirebaseToken())
+            if (!HasDeviceToken())
             {
                 FirebaseMessaging.SubscribeAsync(TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION).ContinueWith(LogTaskCompletion("SubscribeAsync"));
                 FirebaseMessaging.RequestPermissionAsync().ContinueWith(LogTaskCompletion("RequestPermissionAsync"));
@@ -143,7 +158,21 @@ public class ExampleApp : MonoBehaviour
         }
 
         yield return new WaitUntil(() => Firebase != null);
+#elif UNITY_IOS
+        var authRequest = new AuthorizationRequest(AuthorizationOption.Alert | AuthorizationOption.Badge | AuthorizationOption.Sound, true);
 
+        yield return new WaitUntil(() => authRequest.IsFinished);
+
+        if (authRequest.Granted && !string.IsNullOrWhiteSpace(authRequest.DeviceToken))
+        {
+            Debug.Log($"Received Device Token: {authRequest.DeviceToken}");
+            SetDeviceToken(authRequest.DeviceToken);
+        }
+        else
+        {
+            Debug.LogError($"Did not receive a device token for iOS!");
+        }
+#endif
         // Enable Unity Gaming Services
         bool ugsEnabled = false;
         try
@@ -166,39 +195,6 @@ public class ExampleApp : MonoBehaviour
         // Enable App
         IsInteractable = true;
     }
-
-    public Func<Task, bool> LogTaskCompletion(string operation) => task =>
-    {
-        if (task.IsCompleted)
-        {
-            Debug.Log($"{operation} task is completed.");
-
-            return true;
-        }
-        else if (task.IsCanceled)
-        {
-            Debug.LogWarning($"{operation} task is canceled.");
-        }
-        else
-        {
-            Debug.LogError($"{operation} task encounted an error.");
-
-            if (task.Exception != null)
-            {
-                foreach (Exception e in task.Exception.Flatten().InnerExceptions)
-                {
-                    if (e is FirebaseException fbe)
-                    {
-                        Debug.LogError($"Firebase Error {(Error)fbe.ErrorCode}: {e}");
-                    }
-
-                    Debug.LogError(e);
-                }
-            }
-        }
-
-        return false;
-    };
 
     public void ChangePanelState(PanelState state)
     {
@@ -245,9 +241,9 @@ public class ExampleApp : MonoBehaviour
 
     public void SendPushNotification(Action onPushNotificationSent = null)
     {
-        if (!HasFirebaseToken())
+        if (!HasDeviceToken())
         {
-            Debug.LogWarning("Have not received Firebase token for push notifications. Unable to send push notification yet.");
+            Debug.LogWarning("Have not received device token for push notifications. Unable to send push notification yet.");
             return;
         }
 
@@ -257,9 +253,13 @@ public class ExampleApp : MonoBehaviour
         {
             Debug.Log($"Registered Device for Push Notifications! Sending one now...");
 
-            // Basic message structure for notifications; see the FirebaseMessagingSnippets link below for more on how this can be customized
+            string fcmContent = string.Empty;
+            string iosContent = string.Empty;
+
+#if UNITY_ANDROID
+            // Basic message structure for Firebase notifications; see the FirebaseMessagingSnippets link below for more on how this can be customized
             // https://github.com/firebase/firebase-admin-dotnet/blob/db55e58ee591dab1f90a399336670ae84bab915b/FirebaseAdmin/FirebaseAdmin.Snippets/FirebaseMessagingSnippets.cs
-            var message = JsonWriter.Serialize(new Dictionary<string, object>
+            fcmContent = JsonWriter.Serialize(new Dictionary<string, object>
             {
                 { "notification", new Dictionary<string, object>
                     {
@@ -277,7 +277,24 @@ public class ExampleApp : MonoBehaviour
                 },
                 { "priority", "normal" } // Can only be normal or high
             });
-
+#elif UNITY_IOS
+            // Basic message structure for iOS notifications; see the link below for more information
+            // https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/generating_a_remote_notification
+            iosContent = JsonWriter.Serialize(new Dictionary<string, object>
+            {
+                { "aps", new Dictionary<string, object>
+                    {
+                        { "alert", new Dictionary<string, object>
+                            {
+                                { "title",    NotificationTitle },
+                                { "subtitle", NotificationSubtitle },
+                                { "body",     NotificationBody }
+                            }
+                        }
+                    }
+                }
+            });
+#endif
             void onSendSuccess(string jsonResponse, object cbObject)
             {
                 IsInteractable = true;
@@ -287,8 +304,8 @@ public class ExampleApp : MonoBehaviour
             BC.PushNotificationService.SendRawPushNotification
             (
                 BC.GetStoredProfileId(),
-                message,
-                string.Empty,
+                fcmContent,
+                iosContent,
                 string.Empty,
                 onSendSuccess,
                 OnBrainCloudError,
@@ -298,8 +315,14 @@ public class ExampleApp : MonoBehaviour
 
         BC.PushNotificationService.RegisterPushNotificationDeviceToken
         (
+#if UNITY_ANDROID
             Platform.GooglePlayAndroid,
-            GetFirebaseToken(),
+#elif UNITY_IOS
+            Platform.iOS,
+#else
+            Platform.Unknown,
+#endif
+            GetDeviceToken(),
             onRegisterSuccess,
             OnBrainCloudError,
             this
@@ -317,15 +340,49 @@ public class ExampleApp : MonoBehaviour
         IsInteractable = true;
     }
 
-    #region Firebase Messaging
+    #region Messaging
 
-    public bool HasFirebaseToken() => !string.IsNullOrWhiteSpace(PlayerPrefs.GetString(PLAYERPREFS_FIREBASE_TOKEN_KEY));
+    public bool HasDeviceToken() => !string.IsNullOrWhiteSpace(PlayerPrefs.GetString(PLAYERPREFS_DEVICE_TOKEN_KEY));
 
-    public string GetFirebaseToken() => PlayerPrefs.GetString(PLAYERPREFS_FIREBASE_TOKEN_KEY);
+    public string GetDeviceToken() => PlayerPrefs.GetString(PLAYERPREFS_DEVICE_TOKEN_KEY);
 
-    public void SetFirebaseToken(string token) => PlayerPrefs.SetString(PLAYERPREFS_FIREBASE_TOKEN_KEY, token);
+    public void SetDeviceToken(string token) => PlayerPrefs.SetString(PLAYERPREFS_DEVICE_TOKEN_KEY, token);
 
-    public void ResetFirebaseToken() => PlayerPrefs.DeleteKey(PLAYERPREFS_FIREBASE_TOKEN_KEY);
+    public void ResetDeviceToken() => PlayerPrefs.DeleteKey(PLAYERPREFS_DEVICE_TOKEN_KEY);
+
+#if UNITY_ANDROID
+    public Func<Task, bool> LogTaskCompletion(string operation) => task =>
+    {
+        if (task.IsCompleted)
+        {
+            Debug.Log($"{operation} task is completed.");
+
+            return true;
+        }
+        else if (task.IsCanceled)
+        {
+            Debug.LogWarning($"{operation} task is canceled.");
+        }
+        else
+        {
+            Debug.LogError($"{operation} task encounted an error.");
+
+            if (task.Exception != null)
+            {
+                foreach (Exception e in task.Exception.Flatten().InnerExceptions)
+                {
+                    if (e is FirebaseException fbe)
+                    {
+                        Debug.LogError($"Firebase Error {(Error)fbe.ErrorCode}: {e}");
+                    }
+
+                    Debug.LogError(e);
+                }
+            }
+        }
+
+        return false;
+    };
 
     private void OnFirebaseMessageReceived(object sender, MessageReceivedEventArgs args)
     {
@@ -378,8 +435,9 @@ public class ExampleApp : MonoBehaviour
     private void OnFirebaseTokenReceived(object sender, TokenReceivedEventArgs token)
     {
         Debug.Log($"Received Firebase Registration Token: {token.Token}");
-        SetFirebaseToken(token.Token);
+        SetDeviceToken(token.Token);
     }
+#endif
 
     #endregion
 }
