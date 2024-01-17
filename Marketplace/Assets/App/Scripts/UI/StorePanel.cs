@@ -161,14 +161,5 @@ public class StorePanel : MonoBehaviour
         BrainCloudMarketplace.PurchaseProduct(product, onPurchaseFinished);
     }
 
-    private void OnRedeemBCItem(BCItem item)
-    {
-        //App.IsInteractable = false;
-
-        // TODO: Be able to redeem currencies for items
-
-        //Debug.Log($"Redeeming {item.defId} x{item.quantity}");
-    }
-
     #endregion
 }
