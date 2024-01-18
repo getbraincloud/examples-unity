@@ -253,13 +253,9 @@ public class ExampleApp : MonoBehaviour
         {
             Debug.Log($"Registered Device for Push Notifications! Sending one now...");
 
-            string fcmContent = string.Empty;
-            string iosContent = string.Empty;
-
-#if UNITY_ANDROID
             // Basic message structure for Firebase notifications; see the FirebaseMessagingSnippets link below for more on how this can be customized
             // https://github.com/firebase/firebase-admin-dotnet/blob/db55e58ee591dab1f90a399336670ae84bab915b/FirebaseAdmin/FirebaseAdmin.Snippets/FirebaseMessagingSnippets.cs
-            fcmContent = JsonWriter.Serialize(new Dictionary<string, object>
+            string fcmContent = JsonWriter.Serialize(new Dictionary<string, object>
             {
                 { "notification", new Dictionary<string, object>
                     {
@@ -277,10 +273,10 @@ public class ExampleApp : MonoBehaviour
                 },
                 { "priority", "normal" } // Can only be normal or high
             });
-#elif UNITY_IOS
+
             // Basic message structure for iOS notifications; see the link below for more information
             // https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/generating_a_remote_notification
-            iosContent = JsonWriter.Serialize(new Dictionary<string, object>
+            string iosContent = JsonWriter.Serialize(new Dictionary<string, object>
             {
                 { "aps", new Dictionary<string, object>
                     {
@@ -294,11 +290,11 @@ public class ExampleApp : MonoBehaviour
                     }
                 }
             });
-#endif
+
             void onSendSuccess(string jsonResponse, object cbObject)
             {
-                IsInteractable = true;
                 onPushNotificationSent?.Invoke();
+                IsInteractable = true;
             }
 
             BC.PushNotificationService.SendRawPushNotification
