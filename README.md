@@ -91,19 +91,23 @@ This example showcases how to push notifications through brainCloud using the Fi
 
 An example that showcases the **Matchmaking** and **Relay** services in brainCloud.
 
-Example of Lobby Types as a Global Property:
-Set type to String.
-Value should look like this:
-{
-     "0":
+Navigate to Global Properties in the brainCloud Portal(Design -> Cloud Data -> Global Properties)
+Relay Test App is set up to look for the word "Team" in the lobby types, so if you want to test
+Team Mode in Relay Test App, ensure your lobby type has the word "Team" in it, otherwise it will 
+use Free For All mode. 
+    Example of Lobby Types as a Global Property:
+    Set type to String.
+    Value should look like this:
     {
-    "lobby": "FreeForAllParty"
-    },
-     "1":
-    {
-    "lobby": "TeamParty"
+         "0":
+        {
+        "lobby": "FreeForAllParty"
+        },
+         "1":
+        {
+        "lobby": "TeamParty"
+        }
     }
-}
 
 ---
 
