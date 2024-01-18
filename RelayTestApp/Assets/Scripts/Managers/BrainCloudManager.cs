@@ -147,7 +147,8 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         if(data == null)
         {   
-            Debug.LogWarning("Need to set up lobby types as a global properties in brainCloud portal. Refer to the README.md for an example under Relay Test App.");
+            Debug.LogWarning("Need to set up lobby types as a global properties in brainCloud portal. " +
+                             "Refer to the README.md for an example under Relay Test App.");
             OnLoggedIn();
             return;
         }
@@ -625,8 +626,22 @@ public class BrainCloudManager : MonoBehaviour
                     var lobby = jsonData["lobby"] as Dictionary<string, object>;
                     var lobbyTypeDef = lobby["lobbyTypeDef"] as Dictionary<string, object>;
                     var roomConfig = lobbyTypeDef["roomConfig"] as Dictionary<string, object>;
-                    bool buttonStatus = (bool)roomConfig["enableDisconnectButton"];
-                    StateManager.Instance.UpdateDisconnectButtons(buttonStatus);
+                    
+                    //These buttons are for testing a disconnect from internet scenario.
+                    //One button will disconnect everything and then the other button is
+                    //to re-initialize and re-authenticate and then join back to the same room
+                    //the User was disconnected from. To set this up for your app, go to your
+                    //lobby settings(Design->Multiplayer->Lobbies) and add 
+                    //{"enableDisconnectButton":true} to the Custom Config to your lobby.
+                    if(roomConfig != null && roomConfig.ContainsKey("enableDisconnectButton"))
+                    {
+                        bool buttonStatus = (bool)roomConfig["enableDisconnectButton"];
+                        StateManager.Instance.UpdateDisconnectButtons(buttonStatus);                        
+                    }
+                    else
+                    {
+                        StateManager.Instance.UpdateDisconnectButtons(false);
+                    }
                     break;
                 case "DISBANDED":
                 {
