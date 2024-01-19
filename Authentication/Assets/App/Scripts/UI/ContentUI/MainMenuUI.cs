@@ -304,7 +304,7 @@ public class MainMenuUI : ContentUIBehaviour
             IsInteractable = true;
         });
 
-        UserHandler.HandleUserLogout(onSuccess, onFailure);
+        UserHandler.HandleUserLogout(disconnectAccount, onSuccess, onFailure);
     }
 
     #endregion

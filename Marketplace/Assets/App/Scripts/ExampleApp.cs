@@ -125,7 +125,9 @@ public class ExampleApp : MonoBehaviour
         // Wait for brainCloud to be initialized
         yield return new WaitUntil(() => BC.Client != null && BC.Client.IsInitialized());
 
-#if UNITY_ANDROID
+#if UNITY_EDITOR
+        Debug.Log("Skipping device token registration in the editor.");
+#elif UNITY_ANDROID
         // Initialize Firebase Messaging
         DependencyStatus status = (DependencyStatus)(-1);
 
