@@ -83,7 +83,7 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 
 ## Push Notifications & Marketplace
 
-This example showcases how to push notifications through brainCloud using the Firebase Messaging plugin for Android and Apple Push Services for iOS. It also showcases brainCloud's Marketplace features. Check out the [Marketplace README.md](./Marketplace/README.md) for more information.
+This example showcases how to push notifications through brainCloud using the Firebase Messaging plugin for Android and Apple Push Services for iOS. It also showcases brainCloud's Marketplace features for In-App Purchases. Check out the [Marketplace README.md](./Marketplace/README.md) for more information.
 
 ---
 
@@ -107,7 +107,7 @@ To set up lobby types as a **Global Property**, in the [brainCloud server portal
 }
 ```
 
-RelayTestApp is set up to look for the word **Team** in the lobby types, so if you want to test Team Mode in example app, ensure your lobby type has the word **Team** in it, otherwise it will use **Free For All** mode by default.
+RelayTestApp is set up to look for the word **Team** in the lobby types, so if you want to test Team Mode in the example app, ensure your lobby type has the word **Team** in it. It will otherwise use **Free For All** mode by default.
 
 ---
 
