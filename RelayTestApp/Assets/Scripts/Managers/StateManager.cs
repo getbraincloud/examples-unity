@@ -25,8 +25,9 @@ public class StateManager : MonoBehaviour
     public GameObject LobbyTeamView;
     public GameObject MatchFFAView;
     public GameObject MatchTeamView;
-    public GameObject DisconnectButton;
-    public GameObject ReconnectToRelayButton;
+    public GameObject DisconnectButtonGroup;
+    //List of users to keep as reference for players that disconnect then reconnect
+    public List<UserInfo> SessionPlayers = new List<UserInfo>();
     //Network info needed
     [SerializeField]
     public Lobby CurrentLobby;
@@ -213,8 +214,7 @@ public class StateManager : MonoBehaviour
 
     public void UpdateDisconnectButtons(bool isEnabled)
     {
-        DisconnectButton.SetActive(isEnabled);
-        ReconnectToRelayButton.SetActive(isEnabled);
+        DisconnectButtonGroup.SetActive(isEnabled);
     }
     
     public void ChangeState(GameStates newGameState)
@@ -228,6 +228,29 @@ public class StateManager : MonoBehaviour
         foreach (GameState currentState in ListOfStates)
         {
             currentState.gameObject.SetActive(currentState.CurrentGameState == newGameState);
+        }
+    }
+        
+    public void CheckPlayerReconnecting(string in_cxId)
+    {
+        List<string> listOfIds = new List<string>();
+        for (int i = 0; i < CurrentLobby.Members.Count; i++)
+        {
+            listOfIds.Add(CurrentLobby.Members[i].cxId);
+        }
+        
+        for (int i = 0; i < SessionPlayers.Count; i++)
+        {
+            if(in_cxId.Equals(SessionPlayers[i].cxId))
+            {
+                for (int j = 0; j < CurrentLobby.Members.Count; j++)
+                {
+                    if(CurrentLobby.Members[j].cxId.Equals(in_cxId))
+                    {
+                        CurrentLobby.Members[j].IsAlive = true;
+                    }
+                }
+            }
         }
     }
 }

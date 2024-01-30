@@ -109,6 +109,9 @@ use Free For All mode.
         }
     }
 
+Disconnect/Reconnect feature:
+In Relay Test App you can follow our demonstration on how to reconnect a user that lost connection. Just for convenience there is also disconnect buttons that can be brought up, One button will disconnect everything(RTT, Relay, and wipe any authenticated info) and then the other button is to re-initialize and re-authenticate to then join back to the same room the User was disconnected from. There is also a button to just disconnect the RTT connection and reconnect only RTT. To set this up for your app, go to your lobby settings(Design->Multiplayer->Lobbies) and add {"enableDisconnectButton":true} to the Custom Config to your lobby. 
+
 ---
 
 ## SpaceShooterWithStats

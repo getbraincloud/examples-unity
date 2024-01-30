@@ -22,12 +22,12 @@ public class Lobby
         {
             Dictionary<string,object> jsonMember = jsonMembers[i];
             var user = new UserInfo(jsonMember);
-            if (user.ID == GameManager.Instance.CurrentUserInfo.ID)
+            if (user.ProfileID == GameManager.Instance.CurrentUserInfo.ProfileID)
             {
                 GameManager.Instance.CurrentUserInfo = user;
             }
             user.IsAlive = true;
-            if (user.ID.Equals(OwnerID))
+            if (user.ProfileID.Equals(OwnerID))
             {
                 Dictionary<string, object> extra = jsonMember["extra"] as Dictionary<string, object>;
                 if (extra.ContainsKey("relayCompressionType"))
@@ -44,6 +44,17 @@ public class Lobby
                 user.IsHost = true;
             }
             Members.Add(user);
+            List<UserInfo> userList = StateManager.Instance.SessionPlayers;
+            List<string> listOfIds = new List<string>();
+            for (int j = 0; j < userList.Count; j++)
+            {
+                listOfIds.Add(userList[j].cxId);
+            }
+            
+            if(!listOfIds.Contains(user.cxId))
+            {
+                StateManager.Instance.SessionPlayers.Add(user);
+            }
         }
     }
 

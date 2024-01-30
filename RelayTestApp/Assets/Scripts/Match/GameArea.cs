@@ -238,7 +238,7 @@ public class GameArea : MonoBehaviour
             {
                 GameManager.Instance.UpdateCursorList();
             }
-            if (GameManager.Instance.CurrentUserInfo.ID != lobby.Members[i].ID &&
+            if (GameManager.Instance.CurrentUserInfo.ProfileID != lobby.Members[i].ProfileID &&
                 !lobby.Members[i].UserCursor.CursorImage.enabled &&
                 lobby.Members[i].IsAlive)
             {

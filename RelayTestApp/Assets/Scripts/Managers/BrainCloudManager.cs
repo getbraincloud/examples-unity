@@ -115,7 +115,7 @@ public class BrainCloudManager : MonoBehaviour
         var tempUsername = GameManager.Instance.CurrentUserInfo.Username;
         var userInfo = GameManager.Instance.CurrentUserInfo;
         userInfo = new UserInfo();
-        userInfo.ID = data["profileId"] as string;
+        userInfo.ProfileID = data["profileId"] as string;
         // If no username is set for this user, ask for it
         if (!data.ContainsKey("playerName"))
         {
@@ -188,6 +188,7 @@ public class BrainCloudManager : MonoBehaviour
         }
         _isReconnecting = false;
         _dead = true;
+        StateManager.Instance.SessionPlayers.Clear();
         _bcWrapper.RTTService.DeregisterRTTLobbyCallback();
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
@@ -206,6 +207,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void FindLobby(RelayConnectionType protocol)
     {
+        StateManager.Instance.SessionPlayers.Clear();
         StateManager.Instance.Protocol = protocol;
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         _isReconnecting = false;
@@ -301,7 +303,7 @@ public class BrainCloudManager : MonoBehaviour
         Lobby lobby = StateManager.Instance.CurrentLobby;
         foreach (var user in lobby.Members)
         {
-            if (GameManager.Instance.CurrentUserInfo.ID == user.ID)
+            if (GameManager.Instance.CurrentUserInfo.ProfileID == user.ProfileID)
             {
                 //Save it for later !
                 user.IsAlive = true;
@@ -530,7 +532,7 @@ public class BrainCloudManager : MonoBehaviour
             switch (_relayCompressionType)
             {
                 case RelayCompressionTypes.JsonString:
-                    if (member.ID == memberProfileId)
+                    if (member.ProfileID == memberProfileId)
                     {
                         var data = json["data"] as Dictionary<string, object>;
                         if (data == null)
@@ -567,7 +569,7 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case RelayCompressionTypes.DataStreamByte:
                 case RelayCompressionTypes.KeyValuePairString:
-                    if (member.ID == memberProfileId)
+                    if (member.ProfileID == memberProfileId)
                     {
                         var op = json["op"] as string;
                         if (op == "move")
@@ -715,13 +717,20 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
     
-    public void DisconnectFromRelay()
+    public void DisconnectFromEverything()
     {
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
         _bcWrapper.RTTService.DisableRTT();
         _bcWrapper.Client.ResetCommunication();
+    }
+    
+    public void DisconnectFromRelay()
+    {
+        _bcWrapper.RelayService.DeregisterRelayCallback();
+        _bcWrapper.RelayService.DeregisterSystemCallback();
+        _bcWrapper.RelayService.Disconnect();
     }
 
     public void ReauthenticateAndReconnectToRelay()
@@ -730,6 +739,11 @@ public class BrainCloudManager : MonoBehaviour
         string password = GameManager.Instance.PasswordInputField.text;
         
         _bcWrapper.AuthenticateUniversal(username, password, true, OnReAuthenticateSuccess, LogErrorThenPopUpWindow, "Login Failed");
+    }
+    
+    public void ReconnectToRelay()
+    {
+        ConnectRelay();
     }
     
     private void OnReAuthenticateSuccess(string response, object cbObject)
@@ -760,7 +774,7 @@ public class BrainCloudManager : MonoBehaviour
                 profileId = lobby.FormatCxIdToProfileId(profileId);
                 foreach (var member in lobby.Members)
                 {
-                    if (member.ID == profileId)
+                    if (member.ProfileID == profileId)
                     {
                         member.IsAlive = false;
                         GameManager.Instance.UpdateMatchAndLobbyState();
@@ -772,6 +786,8 @@ public class BrainCloudManager : MonoBehaviour
         else if (json["op"] as string == "CONNECT")
         {
             StateManager.Instance.isLoading = false;
+            var cxId = json["cxId"] as string;
+            StateManager.Instance.CheckPlayerReconnecting(cxId);
             //Check if user connected is new, if so update name to not have "In Lobby"
             GameManager.Instance.UpdateMatchState();
         }
