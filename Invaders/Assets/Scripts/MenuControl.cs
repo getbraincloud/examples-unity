@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Text.RegularExpressions;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using TMPro;
@@ -9,7 +10,15 @@ using UnityEngine;
 public class MenuControl : MonoBehaviour
 {
     [SerializeField]
-    TMP_Text m_IPAddressText;
+    TMP_Text LoadingIndicator;
+
+    private bool _isLoading;
+    
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => _isLoading = value;
+    }
 
     [SerializeField]
     string m_LobbySceneName = "InvadersLobby";
@@ -19,6 +28,10 @@ public class MenuControl : MonoBehaviour
 
     [SerializeField] private TMP_InputField UsernameInputField;
     [SerializeField] private TMP_InputField PasswordInputField;
+
+    private string _loadingIndicatorMessage = "Looking for a server";
+    private string _dotsForLoadingIndicator;
+    private int _numberOfDots;
     
     public static MenuControl Singleton { get; private set; }
 
@@ -32,8 +45,10 @@ public class MenuControl : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-#if UNITY_SERVER
+        LoadingIndicator.gameObject.SetActive(false);
+        LoginInputFields.gameObject.SetActive(true);
+        MainMenuButtons.gameObject.SetActive(false);
+#if UNITY_SERVER && !UNITY_EDITOR
         NetworkManager.Singleton.OnServerStarted += () =>
         {
             //Debug.Log("Server Started Successfully !");
@@ -47,37 +62,40 @@ public class MenuControl : MonoBehaviour
         StartServer();
 #endif
     }
-
-    // Logic for hosting a game
-    // public void StartGame()
-    // {
-    //      var utpTransport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
-    //      if (utpTransport)
-    //      {
-    //          utpTransport.SetConnectionData(Sanitize(m_IPAddressText.text), 7777);
-    //      }
-    //      if (NetworkManager.Singleton.StartHost())
-    //      {
-    //          SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
-    //          SceneTransitionHandler.sceneTransitionHandler.SwitchScene(m_LobbySceneName);
-    //      }
-    //      else
-    //      {
-    //          Debug.LogError("Failed to start host.");
-    //      }
-    // }
-
+    
     public void JoinGame()
     {
-        var utpTransport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
-        if (utpTransport)
+        BrainCloudManager.Singleton.FindOrCreateLobby();
+
+        LoadingIndicator.gameObject.SetActive(true);
+        _isLoading = true;
+        _numberOfDots = 0;
+        LoadingIndicator.text = _loadingIndicatorMessage;
+        StartCoroutine(WaitingForLobby());
+    }
+    
+    IEnumerator WaitingForLobby()
+    {
+        while(_isLoading)
         {
-            utpTransport.SetConnectionData(Sanitize(m_IPAddressText.text), 7777);
+            if(_numberOfDots < 3)
+            {
+                LoadingIndicator.text += ".";
+                _numberOfDots++;
+            }
+            else
+            {
+                _numberOfDots = 0;
+                LoadingIndicator.text = _loadingIndicatorMessage;
+            }
+
+            yield return new WaitForSeconds(0.5f);
         }
-        if (!NetworkManager.Singleton.StartClient())
-        {
-            Debug.LogError("Failed to start client.");
-        }
+        
+        //Set Connection here?
+        //StartClient();
+        //SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
+        SceneTransitionHandler.sceneTransitionHandler.SwitchScene(m_LobbySceneName);
     }
     
     public void Login()
@@ -98,7 +116,17 @@ public class MenuControl : MonoBehaviour
     
     public void StartClient()
     {
-        NetworkManager.Singleton.StartClient();
+        /*var utpTransport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
+        if (utpTransport)
+        {
+            //ToDo: Need to replace the set connection data to IP address from brainCloud
+            utpTransport.SetConnectionData(Sanitize(m_IPAddressText.text), 7777);
+        }
+        if (!NetworkManager.Singleton.StartClient())
+        {
+            Debug.LogError("Failed to start client.");
+        }*/
+
     }
     
     public void StartServer()

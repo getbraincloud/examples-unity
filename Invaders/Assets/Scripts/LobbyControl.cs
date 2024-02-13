@@ -20,31 +20,47 @@ public class LobbyControl : NetworkBehaviour
     private Dictionary<ulong, bool> m_ClientsInLobby;
     private string m_UserLobbyStatusText;
 
-    public override void OnNetworkSpawn()
-    {
-        m_ClientsInLobby = new Dictionary<ulong, bool>();
-        
-        //If we are hosting, then handle the server side for detecting when clients have connected
-        //and when their lobby scenes are finished loading.
-        if (IsServer)
-        {
-            m_AllPlayersInLobby = false;
+    public static LobbyControl Singleton { get; private set; }
 
-            //Server will be notified when a client connects
-            NetworkManager.OnClientConnectedCallback += OnClientConnectedCallback;
-            SceneTransitionHandler.sceneTransitionHandler.OnClientLoadedScene += ClientLoadedScene;
+    private void Awake()
+    {
+        if(Singleton == null)
+        {
+            Singleton = this;
         }
         else
         {
-            //Always add ourselves to the list at first
-            m_ClientsInLobby.Add(NetworkManager.LocalClientId, false);
+            Destroy(gameObject);
         }
 
-        //Update our lobby
         GenerateUserStatsForLobby();
-
-        SceneTransitionHandler.sceneTransitionHandler.SetSceneState(SceneTransitionHandler.SceneStates.Lobby);
     }
+
+    // public override void OnNetworkSpawn()
+    // {
+    //     m_ClientsInLobby = new Dictionary<ulong, bool>();
+    //     
+    //     //If we are hosting, then handle the server side for detecting when clients have connected
+    //     //and when their lobby scenes are finished loading.
+    //     if (IsServer)
+    //     {
+    //         m_AllPlayersInLobby = false;
+    //
+    //         //Server will be notified when a client connects
+    //         NetworkManager.OnClientConnectedCallback += OnClientConnectedCallback;
+    //         SceneTransitionHandler.sceneTransitionHandler.OnClientLoadedScene += ClientLoadedScene;
+    //     }
+    //     else
+    //     {
+    //         //Always add ourselves to the list at first
+    //         m_ClientsInLobby.Add(NetworkManager.LocalClientId, false);
+    //     }
+    //
+    //     //Update our lobby
+    //     GenerateUserStatsForLobby();
+    //
+    //     SceneTransitionHandler.sceneTransitionHandler.SetSceneState(SceneTransitionHandler.SceneStates.Lobby);
+    // }
 
     private void OnGUI()
     {
@@ -56,16 +72,35 @@ public class LobbyControl : NetworkBehaviour
     ///     Psuedo code for setting player state
     ///     Just updating a text field, this could use a lot of "refactoring"  :)
     /// </summary>
-    private void GenerateUserStatsForLobby()
+    public void GenerateUserStatsForLobby()
     {
         m_UserLobbyStatusText = string.Empty;
-        foreach (var clientLobbyStatus in m_ClientsInLobby)
+        List<UserInfo> listOfMembers = new List<UserInfo>();
+        if(BrainCloudManager.Singleton.CurrentLobby != null)
         {
-            m_UserLobbyStatusText += "PLAYER_" + clientLobbyStatus.Key + "          ";
-            if (clientLobbyStatus.Value)
+            listOfMembers = BrainCloudManager.Singleton.CurrentLobby.Members;
+        }
+        else
+        {
+            return;
+        }
+
+        foreach (var clientInfo in listOfMembers)
+        {
+            m_UserLobbyStatusText += clientInfo.Username + "          ";
+            if(clientInfo.IsReady)
+            {
                 m_UserLobbyStatusText += "(READY)\n";
+            }
             else
+            {
                 m_UserLobbyStatusText += "(NOT READY)\n";
+            }
+            // m_UserLobbyStatusText += "PLAYER_" + clientLobbyStatus.Key + "          ";
+            // if (clientLobbyStatus.Value)
+            //     m_UserLobbyStatusText += "(READY)\n";
+            // else
+            //     m_UserLobbyStatusText += "(NOT READY)\n";
         }
     }
 
@@ -75,16 +110,16 @@ public class LobbyControl : NetworkBehaviour
     /// </summary>
     private void UpdateAndCheckPlayersInLobby()
     {
-        m_AllPlayersInLobby = m_ClientsInLobby.Count >= m_MinimumPlayerCount;
+        m_AllPlayersInLobby = BrainCloudManager.Singleton.LobbyMemberCount >= m_MinimumPlayerCount;
 
-        foreach (var clientLobbyStatus in m_ClientsInLobby)
-        {
-            SendClientReadyStatusUpdatesClientRpc(clientLobbyStatus.Key, clientLobbyStatus.Value);
-            if (!NetworkManager.Singleton.ConnectedClients.ContainsKey(clientLobbyStatus.Key))
-
-                //If some clients are still loading into the lobby scene then this is false
-                m_AllPlayersInLobby = false;
-        }
+        // foreach (var clientLobbyStatus in m_ClientsInLobby)
+        // {
+        //     SendClientReadyStatusUpdatesClientRpc(clientLobbyStatus.Key, clientLobbyStatus.Value);
+        //     if (!NetworkManager.Singleton.ConnectedClients.ContainsKey(clientLobbyStatus.Key))
+        //
+        //         //If some clients are still loading into the lobby scene then this is false
+        //         m_AllPlayersInLobby = false;
+        // }
 
         CheckForAllPlayersReady();
     }
@@ -199,16 +234,16 @@ public class LobbyControl : NetworkBehaviour
     /// </summary>
     public void PlayerIsReady()
     {
-        m_ClientsInLobby[NetworkManager.Singleton.LocalClientId] = true;
-        if (IsServer)
-        {
-            UpdateAndCheckPlayersInLobby();
-        }
-        else
-        {
-            OnClientIsReadyServerRpc(NetworkManager.Singleton.LocalClientId);
-        }
-
+        // m_ClientsInLobby[NetworkManager.Singleton.LocalClientId] = true;
+        // if (IsServer)
+        // {
+        //     UpdateAndCheckPlayersInLobby();
+        // }
+        // else
+        // {
+        //     OnClientIsReadyServerRpc(NetworkManager.Singleton.LocalClientId);
+        // }
+        BrainCloudManager.Singleton.UpdateReady();
         GenerateUserStatsForLobby();
     }
 
