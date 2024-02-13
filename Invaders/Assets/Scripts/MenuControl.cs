@@ -36,13 +36,11 @@ public class MenuControl : MonoBehaviour
 #if UNITY_SERVER
         NetworkManager.Singleton.OnServerStarted += () =>
         {
-            Debug.Log("Server Started Successfully ! Huzzah !");
-            
+            //Debug.Log("Server Started Successfully !");
         };
 
         NetworkManager.Singleton.OnClientConnectedCallback += clientID =>
         {
-            Debug.Log("Client connected: " + clientID);
             SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
             SceneTransitionHandler.sceneTransitionHandler.SwitchScene(m_LobbySceneName);
         };

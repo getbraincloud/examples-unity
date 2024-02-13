@@ -98,7 +98,6 @@ public class LobbyControl : NetworkBehaviour
     {
         if (IsServer)
         {
-            //FL: Taken out so server doesn't include itself as a client.
             if (!m_ClientsInLobby.ContainsKey(clientId) && clientId != OwnerClientId)
             {
                 m_ClientsInLobby.Add(clientId, false);
@@ -106,6 +105,14 @@ public class LobbyControl : NetworkBehaviour
             }
             GenerateUserStatsForLobby();
             UpdateAndCheckPlayersInLobby();
+        }
+        else
+        {
+            if (!m_ClientsInLobby.ContainsKey(clientId) && clientId != OwnerClientId)
+            {
+                m_ClientsInLobby.Add(clientId, false);
+                GenerateUserStatsForLobby();
+            }
         }
     }
 
@@ -119,11 +126,19 @@ public class LobbyControl : NetworkBehaviour
     {
         if (IsServer)
         {
-            //FL: Taken out so server doesn't include itself as a client.
-            if (!m_ClientsInLobby.ContainsKey(clientId) && clientId != OwnerClientId) m_ClientsInLobby.Add(clientId, false);
+            if (!m_ClientsInLobby.ContainsKey(clientId) && clientId != OwnerClientId)
+            {
+                m_ClientsInLobby.Add(clientId, false);
+            }
             GenerateUserStatsForLobby();
-
             UpdateAndCheckPlayersInLobby();
+        }
+        else
+        {
+            if (!m_ClientsInLobby.ContainsKey(clientId) && clientId != OwnerClientId)
+            {
+                m_ClientsInLobby.Add(clientId, false);
+            }
         }
     }
 

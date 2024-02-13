@@ -115,13 +115,17 @@ public class SceneTransitionHandler : NetworkBehaviour
 
     private void OnLoadComplete(ulong clientId, string sceneName, LoadSceneMode loadSceneMode)
     {
-        m_numberOfClientLoaded += 1;          
+        if(clientId != OwnerClientId)
+        {
+            m_numberOfClientLoaded += 1; 
+        }
+
         OnClientLoadedScene?.Invoke(clientId);
     }
 
     public bool AllClientsAreLoaded()
     {
-        return m_numberOfClientLoaded >= NetworkManager.Singleton.ConnectedClients.Count; 
+        return m_numberOfClientLoaded == NetworkManager.Singleton.ConnectedClients.Count; 
     }
 
     /// <summary>

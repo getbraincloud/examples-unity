@@ -111,8 +111,6 @@ public class InvadersGame : NetworkBehaviour
 
             //Set our time remaining locally
             m_TimeRemaining = m_DelayedStartTime;
-            
-            Debug.Log("Time remaining set to: " + m_TimeRemaining);
 
             //Set for server side
             m_ReplicatedTimeSent = false;
@@ -202,7 +200,6 @@ public class InvadersGame : NetworkBehaviour
     {
         if (m_ReplicatedTimeSent)
         {
-            m_TimeRemaining = m_DelayedStartTime;
             // Send the RPC only to the newly connected client
             SetReplicatedTimeRemainingClientRPC(m_TimeRemaining, new ClientRpcParams {Send = new ClientRpcSendParams{TargetClientIds = new List<ulong>() {clientId}}});
         }
@@ -218,7 +215,6 @@ public class InvadersGame : NetworkBehaviour
         //If the game has started, then don't bother with the rest of the count down checks.
         if (HasGameStarted())
         {
-            Debug.Log("Game has started");
             return false;
         }
         if (IsServer)
