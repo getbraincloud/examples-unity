@@ -10,8 +10,6 @@ using UnityEngine;
 
 public class BrainCloudManager : MonoBehaviour
 {
-    [SerializeField] private TMP_InputField UsernameField;
-    [SerializeField] private TMP_InputField PasswordField;
     private BrainCloudWrapper _wrapper;
     private BrainCloudS2S _bcS2S = new BrainCloudS2S();
     private Lobby _currentLobby;
@@ -190,7 +188,8 @@ public class BrainCloudManager : MonoBehaviour
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        Debug.Log("Error: " + statusMessage);
+        Debug.LogError("Error: " + statusMessage);
+        SceneTransitionHandler.sceneTransitionHandler.ExitAndLoadStartMenu();
     }
 
 }
