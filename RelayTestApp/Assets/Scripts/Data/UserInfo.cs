@@ -10,7 +10,7 @@ using UnityEngine;
 public class UserInfo
 {
     //Used to know if local user is hosting
-    public string ID;
+    public string ProfileID;
     //Used for displaying and identifying users
     public string Username;
     //if this user should show shockwaves locally
@@ -40,7 +40,7 @@ public class UserInfo
     public UserInfo(Dictionary<string, object> userJson)
     {
         cxId = userJson["cxId"] as string;
-        ID = userJson["profileId"] as string;
+        ProfileID = userJson["profileId"] as string;
         Username = userJson["name"] as string;
         IsReady = (bool)userJson["isReady"];
         string teamValue = userJson["team"] as string;

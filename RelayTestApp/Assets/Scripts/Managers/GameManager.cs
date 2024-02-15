@@ -223,7 +223,10 @@ public class GameManager : MonoBehaviour
         {
             foreach (UserEntry matchEntry in _matchEntries)
             {
-                Destroy(matchEntry.gameObject);
+                if(matchEntry != null && matchEntry.gameObject != null)
+                {
+                    Destroy(matchEntry.gameObject);                    
+                }
             }
             _matchEntries.Clear();    
         }
@@ -466,7 +469,7 @@ public class GameManager : MonoBehaviour
     public bool IsLocalUserHost()
     {
         Lobby currentLobby = StateManager.Instance.CurrentLobby;
-        return currentLobby.OwnerID == CurrentUserInfo.ID;
+        return currentLobby.OwnerID == CurrentUserInfo.ProfileID;
     }
 
     #endregion

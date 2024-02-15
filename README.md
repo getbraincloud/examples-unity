@@ -109,6 +109,9 @@ To set up lobby types as a **Global Property**, in the [brainCloud server portal
 
 RelayTestApp is set up to look for the word **Team** in the lobby types, so if you want to test Team Mode in the example app, ensure your lobby type has the word **Team** in it. It will otherwise use **Free For All** mode by default.
 
+Disconnect/Reconnect feature:
+In Relay Test App you can follow our demonstration on how to reconnect a user that lost connection. Just for convenience there is also disconnect buttons that can be brought up, One button will disconnect everything(RTT, Relay, and wipe any authenticated info) and then the other button is to re-initialize and re-authenticate to then join back to the same room the User was disconnected from. There is also a button to just disconnect the RTT connection and reconnect only RTT. To set this up for your app, go to your lobby settings(Design->Multiplayer->Lobbies) and add {"enableDisconnectButton":true} to the Custom Config to your lobby. 
+
 ---
 
 ## SpaceShooterWithStats
