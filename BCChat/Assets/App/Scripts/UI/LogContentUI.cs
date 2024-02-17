@@ -34,9 +34,9 @@ public class LogContentUI : ContentUIBehaviour
     [SerializeField] private LogMessage LogTemplate = default;
     [SerializeField, Range(10, 200)] private int MaxLogMessages = 32;
 
-    private bool scrollAfterLog = false;
     private int logIndex = 0;
     private List<LogMessage> logObjects = default;
+    private List<(LogType type, string message, bool wordWrap, bool canCopy)> logMessages = default;
 
     #region Unity Messages
 
@@ -47,13 +47,13 @@ public class LogContentUI : ContentUIBehaviour
             Capacity = MaxLogMessages
         };
 
+        logMessages = new();
+
         base.Awake();
     }
 
     private void OnEnable()
     {
-        scrollAfterLog = false;
-
         ClearLogButton.onClick.AddListener(OnClearLogButton);
         BackButton.onClick.AddListener(OnBackButton);
 
@@ -109,7 +109,38 @@ public class LogContentUI : ContentUIBehaviour
             logObjects = null;
         }
 
+        if (!logMessages.IsNullOrEmpty())
+        {
+            logMessages.Clear();
+            logMessages = null;
+        }
+
         base.OnDestroy();
+    }
+
+    private void LateUpdate()
+    {
+        if (logMessages.Count > 0)
+        {
+            foreach (var log in logMessages)
+            {
+                LogMessage obj = logObjects[logIndex];
+                obj.ConfigureLogObject(log.type, log.message, log.wordWrap, log.canCopy);
+                obj.transform.SetAsLastSibling();
+                obj.gameObject.SetName("{0}{1}{2}Object{3}", string.Empty,
+                                                             log.type == LogType.Log ? "Message" : "Log",
+                                                             log.type.ToString(),
+                                                             logIndex.ToString("000"));
+                obj.gameObject.SetActive(true);
+            }
+
+            if (isActiveAndEnabled)
+            {
+                StartCoroutine(ScrollAfterLogCreated());
+            }
+
+            logMessages.Clear();
+        }
     }
 
     #endregion
@@ -193,20 +224,7 @@ public class LogContentUI : ContentUIBehaviour
             logIndex = 0;
         }
 
-        LogMessage log = logObjects[logIndex];
-        log.ConfigureLogObject(type, message, wordWrap, canCopy);
-        log.transform.SetAsLastSibling();
-        log.gameObject.SetName("{0}{1}{2}Object{3}", string.Empty,
-                                                     type == LogType.Log ? "Message" : "Log",
-                                                     type.ToString(),
-                                                     logIndex.ToString("000"));
-        log.gameObject.SetActive(true);
-
-        if (isActiveAndEnabled && !scrollAfterLog)
-        {
-            scrollAfterLog = true;
-            StartCoroutine(ScrollAfterLogCreated());
-        }
+        logMessages.Add((type, message, wordWrap, canCopy));
     }
 
     private IEnumerator ScrollAfterLogCreated()
@@ -214,8 +232,6 @@ public class LogContentUI : ContentUIBehaviour
         yield return null;
 
         LogScroll.verticalNormalizedPosition = 0.0f;
-
-        scrollAfterLog = false;
     }
 
     private void OnClearLogButton()

@@ -34,8 +34,8 @@ public class ChatMessage : MonoBehaviour
 
     public Message Message { get; private set; }
 
-    public Action DeleteAction = null;
-    public Action EditAction = null;
+    public Action<Message> DeleteAction = null;
+    public Action<Message> EditAction = null;
 
     #region Unity Messages
 
@@ -88,6 +88,11 @@ public class ChatMessage : MonoBehaviour
         MessageText.text = message.content.text;
         DateText.text = $"{message.date.ToShortDateString()} at {message.date.ToShortTimeString()}";
 
+        if(message.ver > 1)
+        {
+            MessageText.text += " <size=50%>(edited)</size>";
+        }
+
         ContentLayout.reverseArrangement = !isActiveUser;
         MessageBox.color = isActiveUser ? ACTIVE_USER_COLOR : OTHER_USER_COLOR;
         UserImage.color = isActiveUser ? ACTIVE_USER_COLOR : OTHER_USER_COLOR;
@@ -130,12 +135,12 @@ public class ChatMessage : MonoBehaviour
 
     private void OnDeleteButton()
     {
-        DeleteAction?.Invoke();
+        DeleteAction?.Invoke(Message);
     }
 
     private void OnEditButton()
     {
-        EditAction?.Invoke();
+        EditAction?.Invoke(Message);
     }
 
     #endregion

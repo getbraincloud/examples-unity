@@ -1,11 +1,12 @@
 using BrainCloud;
+using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static System.Net.Mime.MediaTypeNames;
 
 public class MainContentUI : ContentUIBehaviour
 {
@@ -33,7 +34,9 @@ public class MainContentUI : ContentUIBehaviour
     [SerializeField] private ChatMessage ChatMessageTemplate = default;
     [SerializeField] private GameObject MessageSpacer = default;
 
+    private Message messageToEdit;
     private ChannelInfo currentChannelInfo;
+    private BrainCloudRTT rttService = null;
     private BrainCloudChat chatService = null;
     private List<ChannelButton> channelButtons = null;
     private List<ChatMessage> channelChatMessages = null;
@@ -60,6 +63,7 @@ public class MainContentUI : ContentUIBehaviour
 
     protected override void Start()
     {
+        rttService = BCManager.RTTService;
         chatService = BCManager.ChatService;
 
         channelButtons = new();
@@ -73,6 +77,8 @@ public class MainContentUI : ContentUIBehaviour
 
     private void OnDisable()
     {
+        StopAllCoroutines();
+
         ShowLogButton.onClick.RemoveAllListeners();
         LogoutButton.onClick.RemoveAllListeners();
         SettingsButton.onClick.RemoveAllListeners();
@@ -82,6 +88,18 @@ public class MainContentUI : ContentUIBehaviour
 
     protected override void OnDestroy()
     {
+        if (rttService.IsRTTEnabled())
+        {
+            rttService.DisableRTT();
+            rttService.DeregisterRTTChatCallback();
+        }
+
+        if (!currentChannelInfo.id.IsEmpty())
+        {
+            chatService.ChannelDisconnect(currentChannelInfo.id);
+        }
+
+        rttService = null;
         chatService = null;
 
         if (channelButtons != null)
@@ -219,7 +237,6 @@ public class MainContentUI : ContentUIBehaviour
         {
             if (channelButtons[i].ChannelInfo.id == info.id)
             {
-                currentChannelInfo = info;
                 channelButtons[i].IsActiveChannel = true;
             }
             else
@@ -254,6 +271,8 @@ public class MainContentUI : ContentUIBehaviour
             {
                 var chatMessageToAdd = Instantiate(ChatMessageTemplate, ChatContent, false);
                 chatMessageToAdd.SetChatContents(message);
+                chatMessageToAdd.DeleteAction = DeleteChatMessage;
+                chatMessageToAdd.EditAction = EditChatMessage;
 
                 if (previous.from.id == message.from.id &&
                     (message.date - previous.date).TotalMinutes < 1.0)
@@ -273,13 +292,64 @@ public class MainContentUI : ContentUIBehaviour
                 channelChatMessages.Add(chatMessageToAdd);
             }
 
+            //if (!rttService.IsRTTEnabled())
+            //{
+            //    rttService.EnableRTT(RTTConnectionType.WEBSOCKET);
+            //    rttService.RegisterRTTChatCallback(RTTCallback);
+            //}
+
             ChatField.placeholder.GetComponent<TMP_Text>().text = $"Message #{info.name}";
             ChatField.interactable = true;
 
+            StartCoroutine(ScrollChatToBottom());
+            chatService.PostChatMessageSimple(info.id, "<i>User has entered chat.</i>", false); // RTT will need to get this...
+
+            currentChannelInfo = info;
             IsInteractable = true;
         }
 
-        chatService.GetRecentChatMessages(info.id, MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
+        if (!currentChannelInfo.id.IsEmpty())
+        {
+            chatService.ChannelDisconnect(currentChannelInfo.id,
+                                          (_, _) =>
+                                          {
+                                              chatService.ChannelConnect(info.id, MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
+                                          },
+                                          HandleFailures);
+        }
+        else
+        {
+            chatService.ChannelConnect(info.id, MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
+        }
+    }
+
+    private void DeleteChatMessage(Message message)
+    {
+        // Need to handle chat deletion via RTT
+
+        chatService.DeleteChatMessage(message.chId,
+                                      message.msgId,
+                                      -1,
+                                      null,
+                                      HandleFailures);
+
+        ClearMessageToEdit();
+    }
+
+    private void EditChatMessage(Message message)
+    {
+        // Need to handle chat edit via RTT
+
+        messageToEdit = message;
+        ChatField.text = message.content.text;
+
+        ChatField.Select();
+        ChatField.ActivateInputField();
+    }
+
+    private void RTTCallback(string responseData)
+    {
+        Debug.Log(responseData);
     }
 
     private void OnShowLogButton()
@@ -300,7 +370,7 @@ public class MainContentUI : ContentUIBehaviour
 
     private void OnSettingsButton()
     {
-        UserContent.IsInteractable = true;
+        UserContent.ResetUI();
         UserContent.gameObject.SetActive(true);
 
         IsInteractable = false;
@@ -310,6 +380,11 @@ public class MainContentUI : ContentUIBehaviour
     private void OnChatValidation(string value)
     {
         SendButton.interactable = !value.IsEmpty();
+
+        if (value.IsEmpty())
+        {
+            ClearMessageToEdit();
+        }
     }
 
     private void OnSendButton()
@@ -320,12 +395,38 @@ public class MainContentUI : ContentUIBehaviour
             {"text", ChatField.text }
         };
 
-        chatService.PostChatMessage(currentChannelInfo.id,
-                                    contentJson.Serialize(),
-                                    true,
-                                    failure:HandleFailures);
+        if (!messageToEdit.msgId.IsEmpty())
+        {
+            chatService.UpdateChatMessage(messageToEdit.chId,
+                                          messageToEdit.msgId,
+                                          messageToEdit.ver,
+                                          contentJson.Serialize(),
+                                          failure:HandleFailures);
+        }
+        else
+        {
+            chatService.PostChatMessage(currentChannelInfo.id,
+                                        contentJson.Serialize(),
+                                        true,
+                                        failure:HandleFailures);
+        }
 
         ChatField.text = string.Empty;
+        ClearMessageToEdit();
+    }
+
+    private void ClearMessageToEdit()
+    {
+        messageToEdit.ver = 0;
+        messageToEdit.chId = string.Empty;
+        messageToEdit.msgId = string.Empty;
+    }
+
+    private IEnumerator ScrollChatToBottom()
+    {
+        yield return null;
+
+        ChatScroll.verticalNormalizedPosition = 0.0f;
     }
 
     #endregion
