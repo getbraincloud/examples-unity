@@ -131,6 +131,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 463849294562631123, guid: a33721e9ba3981444b972ae70c494d73,
+        type: 3}
+      propertyPath: SceneTransitionHandler
+      value: 
+      objectReference: {fileID: 7334280963267320185}
+    - target: {fileID: 463849294562631123, guid: a33721e9ba3981444b972ae70c494d73,
+        type: 3}
+      propertyPath: _sceneTransitionHandler
+      value: 
+      objectReference: {fileID: 7334280963267320185}
     - target: {fileID: 2577463361084716459, guid: a33721e9ba3981444b972ae70c494d73,
         type: 3}
       propertyPath: m_Name
@@ -191,6 +201,16 @@ PrefabInstance:
       propertyPath: LogLevel
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8303540700821626563, guid: a33721e9ba3981444b972ae70c494d73,
+        type: 3}
+      propertyPath: ConnectionData.Address
+      value: 127.0.0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8303540700821626563, guid: a33721e9ba3981444b972ae70c494d73,
+        type: 3}
+      propertyPath: ConnectionData.ServerListenAddress
+      value: 0.0.0.0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -204,6 +224,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7334280962834855336, guid: 91098c3dcdcf21840a4b3d63b07286d8,
+        type: 3}
+      propertyPath: _SceneToTest
+      value: InGame
+      objectReference: {fileID: 0}
     - target: {fileID: 7334280962834855337, guid: 91098c3dcdcf21840a4b3d63b07286d8,
         type: 3}
       propertyPath: m_RootOrder
@@ -274,6 +299,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 91098c3dcdcf21840a4b3d63b07286d8, type: 3}
+--- !u!114 &7334280963267320185 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7334280962834855336, guid: 91098c3dcdcf21840a4b3d63b07286d8,
+    type: 3}
+  m_PrefabInstance: {fileID: 7334280963267320184}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ea5becd79dc277409330648bf627a3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

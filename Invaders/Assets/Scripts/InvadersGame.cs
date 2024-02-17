@@ -94,18 +94,22 @@ public class InvadersGame : NetworkBehaviour
 
     private int numberOfLogsSent;
 
+    private bool IsDedicatedServer;
+
     /// <summary>
     ///     Awake
     ///     A good time to initialize server side values
     /// </summary>
     private void Awake()
     {
+        IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
+
         Assert.IsNull(Singleton, $"Multiple instances of {nameof(InvadersGame)} detected. This should not happen.");
         Singleton = this;
         
         OnSingletonReady?.Invoke();
 
-        if (IsServer)
+        if (IsDedicatedServer)
         {
             hasGameStarted.Value = false;
 
@@ -135,7 +139,7 @@ public class InvadersGame : NetworkBehaviour
         UpdateGameTimer();
 
         //If we are a connected client, then don't update the enemies (server side only)
-        if (!IsServer) return;
+        if (!IsDedicatedServer) return;
 
         //If we are the server and the game has started, then update the enemies
         if (HasGameStarted()) UpdateEnemies();
@@ -144,7 +148,7 @@ public class InvadersGame : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
-        if (IsServer)
+        if (IsDedicatedServer)
         {
             m_Enemies.Clear();
             m_Shields.Clear();
@@ -157,7 +161,7 @@ public class InvadersGame : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (IsClient && !IsServer)
+        if (IsClient && !IsDedicatedServer)
         {
             m_ClientGameOver = false;
             m_ClientStartCountdown = false;
@@ -187,7 +191,7 @@ public class InvadersGame : NetworkBehaviour
         //and in turn makes the players visible and allows for the players to be controlled.
         SceneTransitionHandler.sceneTransitionHandler.SetSceneState(SceneTransitionHandler.SceneStates.Ingame);
 
-        if (IsServer)
+        if (IsDedicatedServer)
         {
             m_TimeRemaining = m_DelayedStartTime;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -217,10 +221,9 @@ public class InvadersGame : NetworkBehaviour
         {
             return false;
         }
-        if (IsServer)
+        if (IsDedicatedServer)
         {
             m_CountdownStarted.Value = SceneTransitionHandler.sceneTransitionHandler.AllClientsAreLoaded();
-
             //While we are counting down, continually set the replicated time remaining value for clients (client should only receive the update once)
             if (m_CountdownStarted.Value && !m_ReplicatedTimeSent)
             {
@@ -262,7 +265,7 @@ public class InvadersGame : NetworkBehaviour
     /// <returns>true or false</returns>
     private bool IsCurrentGameOver()
     {
-        if (IsServer)
+        if (IsDedicatedServer)
             return isGameOver.Value;
         return m_ClientGameOver;
     }
@@ -274,7 +277,7 @@ public class InvadersGame : NetworkBehaviour
     /// <returns>true or false</returns>
     private bool HasGameStarted()
     {
-        if (IsServer)
+        if (IsDedicatedServer)
             return hasGameStarted.Value;
         return m_ClientGameStarted;
     }
@@ -291,7 +294,7 @@ public class InvadersGame : NetworkBehaviour
         if (!HasGameStarted() && m_TimeRemaining > 0.0f)
         {
             m_TimeRemaining -= Time.deltaTime;
-            if (IsServer && m_TimeRemaining <= 0f) // Only the server should be updating this
+            if (IsDedicatedServer && m_TimeRemaining <= 0f) // Only the server should be updating this
             {
                 m_TimeRemaining = 0.0f;
                 hasGameStarted.Value = true;
@@ -431,7 +434,7 @@ public class InvadersGame : NetworkBehaviour
 
     public void SetGameEnd(GameOverReason reason)
     {
-        Assert.IsTrue(IsServer, "SetGameEnd should only be called server side!");
+        Assert.IsTrue(IsDedicatedServer, "SetGameEnd should only be called server side!");
 
         // We should only end the game if all the player's are dead
         if (reason != GameOverReason.Death)
@@ -497,7 +500,7 @@ public class InvadersGame : NetworkBehaviour
 
     public void UnregisterSpawnableObject(InvadersObjectType invadersObjectType, GameObject gameObject)
     {
-        Assert.IsTrue(IsServer);
+        Assert.IsTrue(IsDedicatedServer);
 
         switch (invadersObjectType)
         {
@@ -535,7 +538,7 @@ public class InvadersGame : NetworkBehaviour
 
     private void CreateShield(GameObject prefab, int posX, int posY)
     {
-        Assert.IsTrue(IsServer, "Create Shield should be called server-side only!");
+        Assert.IsTrue(IsDedicatedServer , "Create Shield should be called server-side only!");
 
         const float dy = 0.41f;
         const float dx = 0.41f;
@@ -573,7 +576,7 @@ public class InvadersGame : NetworkBehaviour
 
     private void CreateSuperEnemy()
     {
-        Assert.IsTrue(IsServer, "Create Saucer should be called server-side only!");
+        Assert.IsTrue(IsDedicatedServer, "Create Saucer should be called server-side only!");
 
         m_Saucer = Instantiate(superEnemyPrefab, saucerSpawnPoint.position, Quaternion.identity);
 
@@ -583,7 +586,7 @@ public class InvadersGame : NetworkBehaviour
 
     private void CreateEnemy(GameObject prefab, float posX, float posY)
     {
-        Assert.IsTrue(IsServer, "Create Enemy should be called server-side only!");
+        Assert.IsTrue(IsDedicatedServer, "Create Enemy should be called server-side only!");
 
         var enemy = Instantiate(prefab);
         enemy.transform.position = new Vector3(posX, posY, 0.0f);

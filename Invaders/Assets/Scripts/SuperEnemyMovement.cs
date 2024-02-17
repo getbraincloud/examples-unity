@@ -11,13 +11,18 @@ public class SuperEnemyMovement : NetworkBehaviour
     [Tooltip("The constant speed at which the Saucer moves")]
     private float m_MoveSpeed = 3.5f;
 
+    public bool IsDedicatedServer
+    {
+        get => BrainCloudManager.Singleton.IsDedicatedServer;
+    }
+
     private void Update()
     {
-        if (!IsServer) return;
+        if (!IsDedicatedServer) return;
         
         if (transform.position.x > k_YBoundary)
         {
-            if (IsServer) NetworkObject.Despawn();
+            if (IsDedicatedServer) NetworkObject.Despawn();
             return;
         }
 

@@ -44,6 +44,13 @@ public class UserInfo
     [SerializeField] private string NetID;
     //Used to determine if user is in lobby or in match.
     [SerializeField] private bool _isReady;
+
+    [SerializeField] private string _passCode;
+    public string PassCode
+    {
+        get => _passCode;
+        set => _passCode = value;
+    }
     public bool IsReady
     {
         get => _isReady;
@@ -57,5 +64,9 @@ public class UserInfo
         _profileID = userJson["profileId"] as string;
         _username = userJson["name"] as string;
         _isReady = (bool)userJson["isReady"];
+        if (userJson.ContainsKey("passcode"))
+        {
+            _passCode = userJson["passcode"] as string;
+        }
     }
 }

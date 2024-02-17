@@ -92,9 +92,6 @@ public class MenuControl : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
         
-        //Set Connection here?
-        //StartClient();
-        //SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
         SceneTransitionHandler.sceneTransitionHandler.SwitchScene(m_LobbySceneName);
     }
     

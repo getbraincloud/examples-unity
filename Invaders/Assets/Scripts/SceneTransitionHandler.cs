@@ -20,8 +20,15 @@ public class SceneTransitionHandler : NetworkBehaviour
     [HideInInspector]
     public event SceneStateChangedDelegateHandler OnSceneStateChanged;
 
+    [SerializeField]
+    private bool _testScene = false;
+    [SerializeField]
+    private string _SceneToTest = "";
+
     public int m_numberOfClientLoaded;
-    
+
+    public bool IsDedicatedServer;
+
     /// <summary>
     /// Example scene states
     /// </summary>
@@ -30,9 +37,10 @@ public class SceneTransitionHandler : NetworkBehaviour
         Init,
         Start,
         Lobby,
-        Ingame
+        Ingame,
+        Connecting
     }
-
+    [SerializeField]
     private SceneStates m_SceneState;
 
     /// <summary>
@@ -42,7 +50,9 @@ public class SceneTransitionHandler : NetworkBehaviour
     /// </summary>
     private void Awake()
     {
-        if(sceneTransitionHandler != this && sceneTransitionHandler != null)
+        IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
+
+        if (sceneTransitionHandler != this && sceneTransitionHandler != null)
         {
             GameObject.Destroy(sceneTransitionHandler.gameObject);
         }
@@ -75,16 +85,41 @@ public class SceneTransitionHandler : NetworkBehaviour
         return m_SceneState;
     }
 
+    private void Update()
+    {
+        //test scene
+        if (_testScene && !string.IsNullOrEmpty(_SceneToTest))
+        {
+            SwitchScene(_SceneToTest);
+            _testScene = false;
+        }
+    }
+
     /// <summary>
     /// Start
     /// Loads the default main menu when started (this should always be a component added to the networking manager)
     /// </summary>
     private void Start()
     {
-        if(m_SceneState == SceneStates.Init)
+        if (!IsDedicatedServer)
         {
-            SceneManager.LoadScene(DefaultMainMenu);
+            if (m_SceneState == SceneStates.Init)
+            {
+                SceneManager.LoadScene(DefaultMainMenu);
+            }
         }
+        else
+        {
+            if (m_SceneState == SceneStates.Init)
+            {
+                Debug.Log("Loading Server Connection Scene");
+                SceneManager.LoadScene("Connecting");
+                Debug.Log("Starting NetCode Server");
+                NetworkManager.Singleton.StartServer();
+
+            }
+        }
+        
     }
 
     /// <summary>

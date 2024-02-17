@@ -41,6 +41,11 @@ public class PlayerControl : NetworkBehaviour
 
     public bool IsAlive => m_Lives.Value > 0;
 
+    public bool IsDedicatedServer
+    {
+        get => BrainCloudManager.Singleton.IsDedicatedServer;
+    }
+
     private void Awake()
     {
         m_HasGameStarted = false;
@@ -114,7 +119,7 @@ public class PlayerControl : NetworkBehaviour
         m_Lives.OnValueChanged += OnLivesChanged;
         m_Score.OnValueChanged += OnScoreChanged;
 
-        if (IsServer) m_OwnerRPCParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { OwnerClientId } } };
+        if (IsDedicatedServer) m_OwnerRPCParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { OwnerClientId } } };
 
         if (!InvadersGame.Singleton)
             InvadersGame.OnSingletonReady += SubscribeToDelegatesAndUpdateValues;
@@ -141,7 +146,7 @@ public class PlayerControl : NetworkBehaviour
 
     public void IncreasePlayerScore(int amount)
     {
-        Assert.IsTrue(IsServer, "IncreasePlayerScore should be called server-side only");
+        Assert.IsTrue(IsDedicatedServer, "IncreasePlayerScore should be called server-side only");
         m_Score.Value += amount;
     }
 
@@ -208,7 +213,7 @@ public class PlayerControl : NetworkBehaviour
 
     public void HitByBullet()
     {
-        Assert.IsTrue(IsServer, "HitByBullet must be called server-side only!");
+        Assert.IsTrue(IsDedicatedServer, "HitByBullet must be called server-side only!");
         if (!m_IsAlive) return;
 
         m_Lives.Value -= 1;

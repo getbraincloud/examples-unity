@@ -15,6 +15,11 @@ public class PlayerBullet : NetworkBehaviour
     [SerializeField]
     ParticleSystem m_EnemyExplosionParticle;
 
+    public bool IsDedicatedServer
+    {
+        get => BrainCloudManager.Singleton.IsDedicatedServer;
+    }
+
     void Awake()
     {
         enabled = false;
@@ -22,7 +27,7 @@ public class PlayerBullet : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        enabled = IsServer;
+        enabled = IsDedicatedServer;
     }
 
     private void Update()
@@ -39,7 +44,7 @@ public class PlayerBullet : NetworkBehaviour
     {
         // several OnTriggerEnter2D calls may be invoked in the same frame (for different Colliders), so we check if
         // we're spawned to make sure we don't trigger hits for already despawned bullets
-        if (!IsServer || !IsSpawned)
+        if (!IsDedicatedServer || !IsSpawned)
             return;
 
         var hitEnemy = collider.gameObject.GetComponent<EnemyAgent>();

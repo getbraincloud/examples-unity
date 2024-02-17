@@ -7,11 +7,16 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using System;
 
 public class BrainCloudManager : MonoBehaviour
 {
     [SerializeField] private TMP_InputField UsernameField;
     [SerializeField] private TMP_InputField PasswordField;
+
+    [SerializeField] private SceneTransitionHandler _sceneTransitionHandler;
+    private NetworkManager _netManager;
+
     private BrainCloudWrapper _wrapper;
     private BrainCloudS2S _bcS2S = new BrainCloudS2S();
     private Lobby _currentLobby;
@@ -25,7 +30,30 @@ public class BrainCloudManager : MonoBehaviour
     {
         get => _currentLobby.Members.Count;
     }
-    public UnityTransport _unityTransport;
+    
+    public BrainCloudS2S S2SWrapper
+    {
+        get => _bcS2S;
+    }
+
+    public SceneTransitionHandler SceneTransitionHandler
+    {
+        get => _sceneTransitionHandler;
+    }
+
+    public NetworkManager NetworkManager
+    {
+        get => _netManager;
+    }
+
+    private UnityTransport _unityTransport;
+
+    public UnityTransport UnityTransport
+    {
+        get => _unityTransport;
+    }
+
+    public bool IsDedicatedServer;
 
     private UserInfo _localUserInfo = new UserInfo();
     public UserInfo LocalUserInfo
@@ -37,7 +65,12 @@ public class BrainCloudManager : MonoBehaviour
     public static BrainCloudManager Singleton { get; private set; }
     void Awake()
     {
-        if(Singleton == null)
+        IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
+
+        _netManager = GetComponent<NetworkManager>();
+        _unityTransport = GetComponent<UnityTransport>();
+
+        if (Singleton == null)
         {
             Singleton = this;
         }
@@ -45,11 +78,31 @@ public class BrainCloudManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    
-        _wrapper = GetComponent<BrainCloudWrapper>();
-        _wrapper.Init();
-        _unityTransport = GetComponent<UnityTransport>();
-        _bcS2S.Init(BrainCloud.Plugin.Interface.AppId, "Testing", BrainCloud.Plugin.Interface.AppSecret, true);
+
+        if (IsDedicatedServer)
+        {       
+            Debug.Log("Initializing S2S on server");
+            _bcS2S = new BrainCloudS2S();
+            string appId = Environment.GetEnvironmentVariable("APP_ID");
+            string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
+            string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
+            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.internal.braincloudservers.com/s2sdispatcher");
+            //_bcS2S.Authenticate();
+            _bcS2S.LoggingEnabled = true;
+        }
+        else
+        {
+            _wrapper = GetComponent<BrainCloudWrapper>();
+            _wrapper.Init();
+        }
+    }
+
+    private void Update()
+    {
+        if (IsDedicatedServer)
+        {
+            _bcS2S.RunCallbacks();
+        }
     }
 
     public void AuthenticateWithBrainCloud(string in_username, string in_password)
@@ -173,10 +226,13 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 }
                 case "STARTING":
-                    
                     break;
                 case "ROOM_READY":
-                    
+                    SceneTransitionHandler.SwitchScene("Connecting");
+                    _unityTransport.ConnectionData.Address = "127.0.0.1";
+                    _unityTransport.ConnectionData.Port = 7777;
+                    _netManager.StartClient();
+                    //open in game level and then connect to server
                     break;
             }
         }

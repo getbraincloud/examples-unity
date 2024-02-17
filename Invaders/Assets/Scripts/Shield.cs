@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class Shield : MonoBehaviour
 {
+    public bool IsDedicatedServer
+    {
+        get => BrainCloudManager.Singleton.IsDedicatedServer;
+    }
+
     protected void Start()
     {
-        var networkingManager = NetworkManager.Singleton;
-        if (networkingManager && networkingManager.IsServer) InvadersGame.Singleton.RegisterSpawnableObject(InvadersObjectType.Shield, gameObject);
+        if (IsDedicatedServer) InvadersGame.Singleton.RegisterSpawnableObject(InvadersObjectType.Shield, gameObject);
     }
 
     protected void OnDestroy()
     {
-        var networkingManager = NetworkManager.Singleton;
-        if (networkingManager && networkingManager.IsServer) InvadersGame.Singleton.UnregisterSpawnableObject(InvadersObjectType.Shield, gameObject);
+        if (IsDedicatedServer) InvadersGame.Singleton.UnregisterSpawnableObject(InvadersObjectType.Shield, gameObject);
     }
 }

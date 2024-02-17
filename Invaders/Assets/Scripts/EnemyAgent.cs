@@ -20,6 +20,11 @@ public class EnemyAgent : NetworkBehaviour
     private float m_ShootTimer = 0.0f;
     private float m_FirstShootTimeAfterSpawn = 0.0f;
 
+    public bool IsDedicatedServer
+    {
+        get => BrainCloudManager.Singleton.IsDedicatedServer;
+    }
+
     public void Awake()
     {
         canShoot = false;
@@ -30,7 +35,7 @@ public class EnemyAgent : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
-        if (IsServer)
+        if (IsDedicatedServer)
         {
             canShoot = false;
             if (score == 100)
@@ -50,7 +55,7 @@ public class EnemyAgent : NetworkBehaviour
         base.OnNetworkDespawn();
         if (!InvadersGame.Singleton) return;
 
-        if (IsServer) InvadersGame.Singleton.UnregisterSpawnableObject(InvadersObjectType.Enemy, gameObject);
+        if (IsDedicatedServer) InvadersGame.Singleton.UnregisterSpawnableObject(InvadersObjectType.Enemy, gameObject);
         InvadersGame.Singleton.isGameOver.OnValueChanged -= OnGameOver;
     }
 
@@ -63,7 +68,7 @@ public class EnemyAgent : NetworkBehaviour
         }
         
         bool bCanShootThisFrame = false;
-        if (IsServer && canShoot)
+        if (IsDedicatedServer && canShoot)
             if (Random.Range(0, 1.0f) > k_ShootingRandomThreshold)
                 bCanShootThisFrame = true;
 
@@ -86,7 +91,7 @@ public class EnemyAgent : NetworkBehaviour
 
     private void OnTriggerEnter2D(Collider2D collider)
     {
-        if (!IsServer) return;
+        if (!IsDedicatedServer) return;
 
         var hitShield = collider.gameObject.GetComponent<Shield>();
         if (hitShield != null) Destroy(hitShield.gameObject);
