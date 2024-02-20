@@ -41,6 +41,8 @@ public class ExampleApp : MonoBehaviour
     private const string PLAYERPREFS_DEVICE_TOKEN_KEY = TOPIC_BRAINCLOUD_EXAMPLE_PUSHNOTIFICATION + "." + "FIREBASE_TOKEN_KEY";
 #elif UNITY_IOS
     private const string PLAYERPREFS_DEVICE_TOKEN_KEY = "PUSHNOTIFICATION.IOS_DEVICE_TOKEN_KEY";
+#else
+    private const string PLAYERPREFS_DEVICE_TOKEN_KEY = "PUSHNOTIFICATION_TOKEN_KEY";
 #endif
 
     // String Formats
