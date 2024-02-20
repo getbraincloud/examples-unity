@@ -261,7 +261,7 @@ public class LoggerUI : MonoBehaviour
         string json = log[(log.LastIndexOf("\n") + 1)..]; // Build JSON Response
         if (json.StartsWith("{") && json.EndsWith("}"))
         {
-            json = serverMessage + '\n' + FormatJSON(json);
+            json = serverMessage + '\n' + json.FormatJSON();
             LogMessage(json);
         }
         else
@@ -270,7 +270,12 @@ public class LoggerUI : MonoBehaviour
         }
     }
 
-    public static string FormatJSON(string json)
+    #endregion
+}
+
+public static class JSONExtension
+{
+    public static string FormatJSON(this string json)
     {
         // Consts
         const string tab = "    ";
@@ -338,6 +343,4 @@ public class LoggerUI : MonoBehaviour
 
         return sb.ToString();
     }
-
-    #endregion
 }

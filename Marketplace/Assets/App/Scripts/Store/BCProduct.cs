@@ -82,7 +82,34 @@ public class BCProduct
     }
 
 
-    public string GetProductID() => priceData.id;
+    public string GetProductID()
+    {
+#if UNITY_ANDROID
+        return priceData.id;
+#elif UNITY_IOS || UNITY_TVOS
+        if (string.IsNullOrEmpty(priceData.id))
+        {
+            string appId =
+#if UNITY_TVOS
+                "appletv";
+#else
+                UnityEngine.iOS.Device.generation.ToString().Contains("iPad") ? "ipad" : "iphone";
+#endif
+            foreach (var id in priceData.ids)
+            {
+                if (id["appId"] == appId)
+                {
+                    priceData.id = id["itunesId"];
+                    break;
+                }
+            }
+        }
+
+        return priceData.id;
+#else
+        return itemId;
+#endif
+    }
 
     public string GetLocalizedTitle() => unityProduct.metadata.localizedTitle;
 
@@ -118,6 +145,7 @@ public class BCItem
 public class BCPriceData
 {
     public string id;
+    public Dictionary<string, string>[] ids;
     public int referencePrice;
     public bool isPromotion;
 
