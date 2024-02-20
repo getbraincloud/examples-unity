@@ -64,7 +64,7 @@ public class GameScene : MonoBehaviour
 
     public void OnLogout()
     {
-        App.Bc.PlayerStateService.Logout((response, cbObject) => { App.GotoLoginScene(gameObject); });
+        App.Bc.Logout(true,(response, cbObject) => { App.GotoLoginScene(gameObject); });
         PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "false");
     }
 }

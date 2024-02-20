@@ -91,6 +91,27 @@ This example showcases how to push notifications through brainCloud using the Fi
 
 An example that showcases the **Matchmaking** and **Relay** services in brainCloud.
 
+Navigate to Global Properties in the brainCloud Portal(Design -> Cloud Data -> Global Properties)
+Relay Test App is set up to look for the word "Team" in the lobby types, so if you want to test
+Team Mode in Relay Test App, ensure your lobby type has the word "Team" in it, otherwise it will 
+use Free For All mode. 
+    Example of Lobby Types as a Global Property:
+    Set type to String.
+    Value should look like this:
+    {
+         "0":
+        {
+        "lobby": "FreeForAllParty"
+        },
+         "1":
+        {
+        "lobby": "TeamParty"
+        }
+    }
+
+Disconnect/Reconnect feature:
+In Relay Test App you can follow our demonstration on how to reconnect a user that lost connection. Just for convenience there is also disconnect buttons that can be brought up, One button will disconnect everything(RTT, Relay, and wipe any authenticated info) and then the other button is to re-initialize and re-authenticate to then join back to the same room the User was disconnected from. There is also a button to just disconnect the RTT connection and reconnect only RTT. To set this up for your app, go to your lobby settings(Design->Multiplayer->Lobbies) and add {"enableDisconnectButton":true} to the Custom Config to your lobby. 
+
 ---
 
 ## SpaceShooterWithStats

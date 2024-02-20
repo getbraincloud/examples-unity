@@ -10,7 +10,6 @@ public class StateButton : MonoBehaviour
     public void LookingForFFALobby()
     {
         GameManager.Instance.GameMode = GameMode.FreeForAll;
-        BrainCloudManager.Instance.SetPreviousLobbyType();
         StateManager.Instance.ButtonPressed_ChangeState();
     }
     
@@ -18,7 +17,6 @@ public class StateButton : MonoBehaviour
     public void LookingForTeamLobby()
     {
         GameManager.Instance.GameMode = GameMode.Team;
-        BrainCloudManager.Instance.LobbyType = RelayLobbyTypes.TeamCursorPartyV2;
         StateManager.Instance.ButtonPressed_ChangeState();
     }
 

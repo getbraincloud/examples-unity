@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
     //for updating members list of shockwaves
     public GameArea GameArea;
     public Button JoinInProgressButton;
+    public TMP_Dropdown FFADropdown;
+    public TMP_Dropdown TeamDropdown;
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public GameObject EndGameBtn;
@@ -221,7 +223,10 @@ public class GameManager : MonoBehaviour
         {
             foreach (UserEntry matchEntry in _matchEntries)
             {
-                Destroy(matchEntry.gameObject);
+                if(matchEntry != null && matchEntry.gameObject != null)
+                {
+                    Destroy(matchEntry.gameObject);                    
+                }
             }
             _matchEntries.Clear();    
         }
@@ -410,6 +415,23 @@ public class GameManager : MonoBehaviour
         }
         _userCursorsList.Clear();
     }
+    
+    public void UpdateLobbyDropdowns(List<string> in_ffaList, List<string> in_teamList)
+    {
+        FFADropdown.options.Clear();
+        TeamDropdown.options.Clear();
+        for (int i = 0; i < in_ffaList.Count; i++)
+        {
+            TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_ffaList[i]);
+            FFADropdown.options.Add(entry);            
+        }
+
+        for (int i = 0; i < in_teamList.Count; i++)
+        {
+            TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_teamList[i]);
+            TeamDropdown.options.Add(entry);
+        }
+    }
 #endregion Update Components
     
 #region Helper Functions
@@ -447,7 +469,7 @@ public class GameManager : MonoBehaviour
     public bool IsLocalUserHost()
     {
         Lobby currentLobby = StateManager.Instance.CurrentLobby;
-        return currentLobby.OwnerID == CurrentUserInfo.ID;
+        return currentLobby.OwnerID == CurrentUserInfo.ProfileID;
     }
 
     #endregion
