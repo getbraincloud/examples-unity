@@ -758,7 +758,7 @@ public class BrainCloudManager : MonoBehaviour
     
     public void Logout()
     {
-        _bcWrapper.Client.PlayerStateService.Logout();
+        _bcWrapper.Logout(false);
         StateManager.Instance.ChangeState(GameStates.SignIn);
     }
 

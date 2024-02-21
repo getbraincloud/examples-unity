@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; 
 
 public class VersionSetter : MonoBehaviour
 {
@@ -9,7 +6,7 @@ public class VersionSetter : MonoBehaviour
 
     void Start()
     {
-        string versionNum = BrainCloudManager.Instance.Wrapper.Client.BrainCloudClientVersion;
+        string versionNum = BrainCloud.Version.GetVersion();
 
         versionText.text = "Version: " + versionNum + " - dev"; 
     }
