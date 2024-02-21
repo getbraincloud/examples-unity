@@ -269,7 +269,7 @@ public class MainMenuUI : ContentUIBehaviour
         Popup.DisplayPopup(new PopupInfo("Disconnect Account?", bodyTexts, popupButtons));
     }
 
-    private void OnLogoutConfirm(bool disconnectAccount)
+    private void OnLogoutConfirm(bool forgetUser)
     {
         IsInteractable = false;
 
@@ -284,9 +284,8 @@ public class MainMenuUI : ContentUIBehaviour
 #if GOOGLE_OPENID_SDK
             Google.GoogleSignIn.DefaultInstance.SignOut();
 #endif
-            if (disconnectAccount)
+            if (forgetUser)
             {
-                UserHandler.ResetAuthenticationData();
 #if GOOGLE_OPENID_SDK
                 Google.GoogleSignIn.DefaultInstance.Disconnect();
 #endif
@@ -304,7 +303,7 @@ public class MainMenuUI : ContentUIBehaviour
             IsInteractable = true;
         });
 
-        UserHandler.HandleUserLogout(onSuccess, onFailure);
+        UserHandler.HandleUserLogout(forgetUser, onSuccess, onFailure);
     }
 
     #endregion

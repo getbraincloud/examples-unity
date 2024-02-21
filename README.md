@@ -83,13 +83,34 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 
 ## Push Notifications & Marketplace
 
-This example showcases how to push notifications through brainCloud using the Firebase Messaging plugin and how to make use of brainCloud's Marketplace features. Check out the [Marketplace README.md](./Marketplace/README.md) for more information.
+This example showcases how to push notifications through brainCloud using the Firebase Messaging plugin for Android and Apple Push Services for iOS. It also showcases brainCloud's Marketplace features for In-App Purchases. Check out the [Marketplace README.md](./Marketplace/README.md) for more information.
 
 ---
 
 ## RelayTestApp
 
 An example that showcases the **Matchmaking** and **Relay** services in brainCloud.
+
+To set up lobby types as a **Global Property**, in the [brainCloud server portal](https://portal.braincloudservers.com/), navigate to `Design > Cloud Data > Global Properties`:
+1. Press the **+** on the right side to create a new Global Property
+2. **Name** and **Category** can be set to what you prefer
+3. Ensure **Type** is set to `String`
+4. **Value** should look like the following JSON:
+```
+{
+    "0":{
+        "lobby":"FreeForAllParty"
+    },
+    "1":{
+        "lobby":"TeamParty"
+    }
+}
+```
+
+RelayTestApp is set up to look for the word **Team** in the lobby types, so if you want to test Team Mode in the example app, ensure your lobby type has the word **Team** in it. It will otherwise use **Free For All** mode by default.
+
+Disconnect/Reconnect feature:
+In Relay Test App you can follow our demonstration on how to reconnect a user that lost connection. Just for convenience there is also disconnect buttons that can be brought up, One button will disconnect everything(RTT, Relay, and wipe any authenticated info) and then the other button is to re-initialize and re-authenticate to then join back to the same room the User was disconnected from. There is also a button to just disconnect the RTT connection and reconnect only RTT. To set this up for your app, go to your lobby settings(Design->Multiplayer->Lobbies) and add {"enableDisconnectButton":true} to the Custom Config to your lobby. 
 
 ---
 

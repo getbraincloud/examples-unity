@@ -25,7 +25,9 @@ public class StateManager : MonoBehaviour
     public GameObject LobbyTeamView;
     public GameObject MatchFFAView;
     public GameObject MatchTeamView;
-    
+    public GameObject DisconnectButtonGroup;
+    //List of users to keep as reference for players that disconnect then reconnect
+    public List<UserInfo> SessionPlayers = new List<UserInfo>();
     //Network info needed
     [SerializeField]
     public Lobby CurrentLobby;
@@ -63,6 +65,7 @@ public class StateManager : MonoBehaviour
     
     private void Start()
     {
+        UpdateDisconnectButtons(false);
         ChangeState(GameStates.SignIn);
     }
 
@@ -97,7 +100,6 @@ public class StateManager : MonoBehaviour
 
     private void ResetData()
     {
-        CurrentLobby = null;
         CurrentServer = null;
         isReady = false;
         
@@ -134,14 +136,7 @@ public class StateManager : MonoBehaviour
             //Logging In...
             case GameStates.SignIn:
                 CurrentGameState = GameStates.MainMenu;
-                if (CurrentLobby != null && CurrentLobby.LobbyID.Length > 0)
-                {
-                    GameManager.Instance.ReconnectButton.gameObject.SetActive(true);
-                }
-                else
-                {
-                    GameManager.Instance.ReconnectButton.gameObject.SetActive(false);
-                }
+                CheckToEnableReconnectButton();
                 BrainCloudManager.Instance.Login();
                 LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE,false,GameStates.MainMenu);
                 break;
@@ -157,6 +152,18 @@ public class StateManager : MonoBehaviour
                 BrainCloudManager.Instance.StartGame();
                 LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false, CurrentGameState);
                 break;
+        }
+    }
+    
+    private void CheckToEnableReconnectButton()
+    {
+        if (CurrentLobby != null && CurrentLobby.LobbyID.Length > 0)
+        {
+            GameManager.Instance.ReconnectButton.gameObject.SetActive(true);
+        }
+        else
+        {
+            GameManager.Instance.ReconnectButton.gameObject.SetActive(false);
         }
     }
 
@@ -205,14 +212,45 @@ public class StateManager : MonoBehaviour
         BrainCloudManager.Instance.ReconnectUser();
     }
 
+    public void UpdateDisconnectButtons(bool isEnabled)
+    {
+        DisconnectButtonGroup.SetActive(isEnabled);
+    }
     
     public void ChangeState(GameStates newGameState)
     {
         CurrentGameState = newGameState;
         EnableCurrentGameModeScreen();
+        if(newGameState == GameStates.MainMenu)
+        {
+            CheckToEnableReconnectButton();
+        }
         foreach (GameState currentState in ListOfStates)
         {
             currentState.gameObject.SetActive(currentState.CurrentGameState == newGameState);
+        }
+    }
+        
+    public void CheckPlayerReconnecting(string in_cxId)
+    {
+        List<string> listOfIds = new List<string>();
+        for (int i = 0; i < CurrentLobby.Members.Count; i++)
+        {
+            listOfIds.Add(CurrentLobby.Members[i].cxId);
+        }
+        
+        for (int i = 0; i < SessionPlayers.Count; i++)
+        {
+            if(in_cxId.Equals(SessionPlayers[i].cxId))
+            {
+                for (int j = 0; j < CurrentLobby.Members.Count; j++)
+                {
+                    if(CurrentLobby.Members[j].cxId.Equals(in_cxId))
+                    {
+                        CurrentLobby.Members[j].IsAlive = true;
+                    }
+                }
+            }
         }
     }
 }

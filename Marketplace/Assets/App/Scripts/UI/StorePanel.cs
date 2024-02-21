@@ -1,6 +1,4 @@
-using BrainCloud.JsonFx.Json;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -161,15 +159,6 @@ public class StorePanel : MonoBehaviour
         }
 
         BrainCloudMarketplace.PurchaseProduct(product, onPurchaseFinished);
-    }
-
-    private void OnRedeemBCItem(BCItem item)
-    {
-        //App.IsInteractable = false;
-
-        // TODO: Be able to redeem currencies for items
-
-        //Debug.Log($"Redeeming {item.defId} x{item.quantity}");
     }
 
     #endregion

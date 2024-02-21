@@ -1,8 +1,10 @@
-# .gitignore for Google Integration
+# .gitignore for Marketplace
 
 GPGSIds.cs*
+GoogleService-Info.plist*
 google-services.json*
 
 /[Aa]ssets/[Pp]lugins/[Aa]ndroid/*.aar*
 /[Aa]ssets/[Pp]lugins/[Aa]ndroid/*.jar*
 /[Aa]ssets/[Ss]amples*
+/[Aa]ssets/[Ss]treaming[Aa]ssets*

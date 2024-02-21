@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
+using Cursor = UnityEngine.Cursor;
 
 /// <summary>
 /// Features:
@@ -17,7 +14,13 @@ using UnityEngine.UI;
 
 public class GameArea : MonoBehaviour
 {
-    public RectTransform LocalRectTransform;
+    public RectTransform LocalCursorRectTransform;
+    private RectTransform _gameAreaTransform;
+    public RectTransform GameAreaTransform
+    {
+        get => _gameAreaTransform;
+    }
+
     public AnimateRipple ShockwaveAnimation;
     public AnimateRipple TeammateAnimation;
     [HideInInspector] public UserCursor LocalUserCursor;
@@ -36,6 +39,7 @@ public class GameArea : MonoBehaviour
     {
         _currentGameMode = GameManager.Instance.GameMode;
         _cursorParentRectTransform = GameManager.Instance.UserCursorParent.GetComponent<RectTransform>();
+        _gameAreaTransform = GetComponent<RectTransform>();
     }
 
     // Update is called once per frame
@@ -53,37 +57,36 @@ public class GameArea : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition + _cursorOffset);
+                _localShockwavePositions.Add(_newPosition);
                 _localShockwaveCodes.Add(TeamCodes.all);
                 if (_currentGameMode == GameMode.FreeForAll)
                 {
                     //Send position of local users input for a shockwave to other users
-                    BrainCloudManager.Instance.LocalShockwave(_newPosition + _cursorOffset);    
+                    BrainCloudManager.Instance.LocalShockwave(_newPosition);
                 }
                 else
                 {
-                    BrainCloudManager.Instance.SendShockwaveToAll(_newPosition + _cursorOffset);
+                    BrainCloudManager.Instance.SendShockwaveToAll(_newPosition);
                 }
-                    
             }
             else if (Input.GetMouseButtonDown(1) && _currentGameMode == GameMode.Team)
             {
                 //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition + _cursorOffset);
+                _localShockwavePositions.Add(_newPosition);
                 _localShockwaveCodes.Add(GameManager.Instance.CurrentUserInfo.Team);
                 //Send Position to local players team
-                BrainCloudManager.Instance.SendShockwaveToTeam(_newPosition + _cursorOffset);
+                BrainCloudManager.Instance.SendShockwaveToTeam(_newPosition);
             }
             else if (Input.GetMouseButtonDown(2) && _currentGameMode == GameMode.Team)
             {
                 //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition+ _cursorOffset);
+                _localShockwavePositions.Add(_newPosition);
                 TeamCodes TeamToSend = GameManager.Instance.CurrentUserInfo.Team == TeamCodes.alpha
                     ? TeamCodes.beta
                     : TeamCodes.alpha;
                 _localShockwaveCodes.Add(TeamToSend);
                 //Send Position to opposite team
-                BrainCloudManager.Instance.SendShockwaveToOpponents(_newPosition + _cursorOffset);
+                BrainCloudManager.Instance.SendShockwaveToOpponents(_newPosition);
             }
         }
         else
@@ -100,9 +103,20 @@ public class GameArea : MonoBehaviour
 
     protected void SendMousePosition()
     {
-        LocalRectTransform.position = Input.mousePosition;
-        _newPosition = LocalRectTransform.anchoredPosition;
-        BrainCloudManager.Instance.LocalMouseMoved(_newPosition + _cursorOffset);
+        LocalCursorRectTransform.position = Input.mousePosition;
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_gameAreaTransform,
+        LocalCursorRectTransform.position, null, out var localPosition))
+        {
+            var gameAreaRect = _gameAreaTransform.rect;
+            var normalizedPosition = new Vector2
+            (
+                (localPosition.y - gameAreaRect.y) / gameAreaRect.height,
+                (localPosition.x - gameAreaRect.x) / gameAreaRect.width
+            );
+            _newPosition = normalizedPosition;
+            BrainCloudManager.Instance.LocalMouseMoved(normalizedPosition);
+        }
     }
     
     protected void OnDisable()
@@ -121,12 +135,17 @@ public class GameArea : MonoBehaviour
         {
             if (member.AllowSendTo)
             {
-                int i = 0;
-                foreach (Vector2 position in member.ShockwavePositions)
+                for(int i= 0; i < member.ShockwavePositions.Count; ++i)
                 {
-                    SetUpShockwave(position, GameManager.ReturnUserColor(member.UserGameColor), member.ShockwaveTeamCodes[i], member.InstigatorTeamCodes[i]);
-                    i++;
-                }   
+                    if(member.ShockwaveTeamCodes.Count > 0 && member.InstigatorTeamCodes.Count > 0)
+                    {
+                        SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor), member.ShockwaveTeamCodes[i], member.InstigatorTeamCodes[i]);                            
+                    }
+                    else
+                    {
+                        SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor));
+                    }
+                } 
             }
             
             //Clear the list so there's no backlog of input positions
@@ -161,7 +180,7 @@ public class GameArea : MonoBehaviour
         }
     }
 
-    protected void SetUpShockwave(Vector2 position, Color waveColor, TeamCodes team, TeamCodes instigatorTeam)
+    protected void SetUpShockwave(Vector2 position, Color waveColor, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all)
     {
         Transform shockwaveParent = GameManager.Instance.UserCursorParent.transform;
         AnimateRipple prefab = null;
@@ -199,7 +218,13 @@ public class GameArea : MonoBehaviour
             waveColor = Color.white;
         }
         newShockwave.RippleColor = waveColor;
-        UITransform.anchoredPosition = position + _shockwaveOffset;
+        RectTransform gameAreaTransform = GameManager.Instance.GameArea.GameAreaTransform;
+        Rect gameAreaRect = gameAreaTransform.rect;
+        var newPosition = new Vector2(
+            gameAreaRect.height * position.x,
+            gameAreaRect.width * -position.y
+        );
+        UITransform.anchoredPosition = newPosition + _shockwaveOffset;
         
         StateManager.Instance.Shockwaves.Add(newShockwave.gameObject);
     }
@@ -213,14 +238,21 @@ public class GameArea : MonoBehaviour
             {
                 GameManager.Instance.UpdateCursorList();
             }
-            if (GameManager.Instance.CurrentUserInfo.ID != lobby.Members[i].ID && 
-                !lobby.Members[i].UserCursor.CursorImage.enabled && 
+            if (GameManager.Instance.CurrentUserInfo.ProfileID != lobby.Members[i].ProfileID &&
+                !lobby.Members[i].UserCursor.CursorImage.enabled &&
                 lobby.Members[i].IsAlive)
             {
                 lobby.Members[i].UserCursor.AdjustVisibility(true);
             }
+            RectTransform gameAreaTransform = GameManager.Instance.GameArea.GameAreaTransform;
+            Rect gameAreaRect = gameAreaTransform.rect;
 
-            lobby.Members[i].CursorTransform.anchoredPosition = lobby.Members[i].MousePosition;
+            Vector2 newMousePosition = new Vector2(
+                gameAreaRect.height * lobby.Members[i].MousePosition.x,
+                gameAreaRect.width * -lobby.Members[i].MousePosition.y
+            );
+
+            lobby.Members[i].CursorTransform.anchoredPosition = newMousePosition;
         }
     }
     ///Returns 'true' if we touched or hovering on this gameObject.

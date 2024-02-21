@@ -119,7 +119,7 @@ public class NetworkManager : MonoBehaviour
 
     public void SignOut()
     {
-        _bcWrapper.PlayerStateService.Logout();
+        _bcWrapper.Logout(true);
     }
 
     public void UpdateEntity()
