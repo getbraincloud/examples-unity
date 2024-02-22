@@ -35,19 +35,19 @@ public class LogContentUI : ContentUIBehaviour
     [SerializeField, Range(10, 200)] private int MaxLogMessages = 32;
 
     private int logIndex = 0;
+    private List<QueuedLog> queuedLogs = default;
     private List<LogMessage> logObjects = default;
-    private List<(LogType type, string message, bool wordWrap, bool canCopy)> logMessages = default;
 
     #region Unity Messages
 
     protected override void Awake()
     {
+        queuedLogs = new();
+
         logObjects = new()
         {
             Capacity = MaxLogMessages
         };
-
-        logMessages = new();
 
         base.Awake();
     }
@@ -106,40 +106,47 @@ public class LogContentUI : ContentUIBehaviour
             }
 
             logObjects.Clear();
-            logObjects = null;
         }
 
-        if (!logMessages.IsNullOrEmpty())
+        if (!queuedLogs.IsNullOrEmpty())
         {
-            logMessages.Clear();
-            logMessages = null;
+            queuedLogs.Clear();
         }
+
+        logObjects = null;
+        queuedLogs = null;
 
         base.OnDestroy();
     }
 
     private void LateUpdate()
     {
-        if (logMessages.Count > 0)
+        if (queuedLogs.Count > 0)
         {
-            foreach (var log in logMessages)
+            foreach (var log in queuedLogs)
             {
+                if (++logIndex >= logObjects.Count)
+                {
+                    logIndex = 0;
+                }
+
                 LogMessage obj = logObjects[logIndex];
-                obj.ConfigureLogObject(log.type, log.message, log.wordWrap, log.canCopy);
+                obj.ConfigureLogObject(log.Type, log.Message, log.UsesWordWrap, log.CanCopy);
                 obj.transform.SetAsLastSibling();
                 obj.gameObject.SetName("{0}{1}{2}Object{3}", string.Empty,
-                                                             log.type == LogType.Log ? "Message" : "Log",
-                                                             log.type.ToString(),
+                                                             log.Type == LogType.Log ? "Message" : "Log",
+                                                             log.Type.ToString(),
                                                              logIndex.ToString("000"));
                 obj.gameObject.SetActive(true);
             }
 
-            if (isActiveAndEnabled)
+            if (isActiveAndEnabled && Opacity > 0.0f)
             {
+                StopCoroutine(ScrollAfterLogCreated());
                 StartCoroutine(ScrollAfterLogCreated());
             }
 
-            logMessages.Clear();
+            queuedLogs.Clear();
         }
     }
 
@@ -188,7 +195,17 @@ public class LogContentUI : ContentUIBehaviour
     {
         if (logObjects.Count < MaxLogMessages)
         {
-            CreateLogObjects();
+            logIndex = logObjects.Count;
+
+            LogMessage log;
+            for (int i = logIndex; i < MaxLogMessages; i++)
+            {
+                log = Instantiate(LogTemplate, LogContent);
+                log.gameObject.SetName("UnusedLogObject");
+                log.gameObject.SetActive(false);
+
+                logObjects.Add(log);
+            }
         }
         else
         {
@@ -198,33 +215,14 @@ public class LogContentUI : ContentUIBehaviour
         LogMessage($"{LOG_APP_HEADER} - {LOG_INITIAL_TEXT}");
     }
 
-    private void CreateLogObjects()
-    {
-        logIndex = logObjects.Count;
-
-        LogMessage log;
-        for (int i = logIndex; i < MaxLogMessages; i++)
-        {
-            log = Instantiate(LogTemplate, LogContent);
-            log.gameObject.SetName("UnusedLogObject");
-            log.gameObject.SetActive(false);
-
-            logObjects.Add(log);
-        }
-    }
-
     private void DisplayLogObject(LogType type, string message, bool wordWrap, bool canCopy)
     {
         if (logObjects.IsNullOrEmpty())
         {
             return;
         }
-        else if (++logIndex >= logObjects.Count)
-        {
-            logIndex = 0;
-        }
 
-        logMessages.Add((type, message, wordWrap, canCopy));
+        queuedLogs.Add(new(type, message, wordWrap, canCopy));
     }
 
     private IEnumerator ScrollAfterLogCreated()
@@ -283,7 +281,7 @@ public class LogContentUI : ContentUIBehaviour
         }
     }
 
-#endregion
+    #endregion
 
     #region brainCloud
 
@@ -303,6 +301,26 @@ public class LogContentUI : ContentUIBehaviour
         if (json.StartsWith("{") && json.EndsWith("}") || json.StartsWith("[") && json.EndsWith("]"))
         {
             LogMessage(json.FormatJSON(), wordWrap:false, canCopy:true);
+        }
+    }
+
+    #endregion
+
+    #region Queued Log Objects
+
+    internal readonly struct QueuedLog
+    {
+        public readonly bool CanCopy;
+        public readonly bool UsesWordWrap;
+        public readonly LogType Type;
+        public readonly string Message;
+
+        public QueuedLog(LogType type, string message, bool wordWrap, bool canCopy)
+        {
+            CanCopy = canCopy;
+            UsesWordWrap = wordWrap;
+            Type = type;
+            Message = message;
         }
     }
 

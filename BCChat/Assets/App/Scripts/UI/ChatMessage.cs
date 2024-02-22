@@ -22,6 +22,7 @@ public class ChatMessage : MonoBehaviour
     [SerializeField] private TMP_Text MessageText = default;
 
     [Header("Profile Image")]
+    [SerializeField] private GameObject ProfileImageContainer = default;
     [SerializeField] private LayoutElement UserImageLayoutElement = default;
     [SerializeField] private GameObject ImageContainer = default;
     [SerializeField] private RawImage UserImage = default;
@@ -73,6 +74,11 @@ public class ChatMessage : MonoBehaviour
         Header.SetActive(isDisplayed);
         UserImageLayoutElement.minHeight = isDisplayed ? PROFILE_DISPLAY_SIZE : 0;
         ImageContainer.SetActive(isDisplayed);
+    }
+
+    public void DisplayProfileImage(bool isDisplayed)
+    {
+        ProfileImageContainer.SetActive(isDisplayed);
     }
 
     public void DisplayFooter(bool isDisplayed)

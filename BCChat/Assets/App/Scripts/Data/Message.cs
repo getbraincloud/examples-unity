@@ -110,7 +110,7 @@ public struct Message : IJSON
         #endregion
 
         [JsonName(PROPERTY_TEXT)] public string text;
-        [JsonName(PROPERTY_RICH)] public object rich;
+        //[JsonName(PROPERTY_RICH)] public object rich;
 
         #region IJSON
 
@@ -118,13 +118,13 @@ public struct Message : IJSON
 
         public readonly Dictionary<string, object> ToJSONObject() => new()
         {
-            { PROPERTY_TEXT, text }, { PROPERTY_RICH, rich }
+            { PROPERTY_TEXT, text }//, { PROPERTY_RICH, rich }
         };
 
         public IJSON FromJSONObject(Dictionary<string, object> obj)
         {
             text = obj.GetString(PROPERTY_TEXT);
-            rich = obj[PROPERTY_RICH];
+            //rich = obj[PROPERTY_RICH];
 
             return this;
         }
