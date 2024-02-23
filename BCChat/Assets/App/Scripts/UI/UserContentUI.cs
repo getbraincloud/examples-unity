@@ -1,8 +1,6 @@
 using BrainCloud;
 using BrainCloud.JSONHelper;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -18,6 +16,7 @@ public class UserContentUI : ContentUIBehaviour
     [SerializeField] private Button PictureButton = default;
     [SerializeField] private RawImage UserImage = default;
     [SerializeField] private TMP_Text UserInitialText = default;
+    [SerializeField] private TMP_InputField PictureURLField = default;
     [SerializeField] private Button ClearButton = default;
 
     [Header("Controls")]
@@ -27,7 +26,6 @@ public class UserContentUI : ContentUIBehaviour
     [Header("Navigation")]
     [SerializeField] private MainContentUI MainContent = default;
 
-    private string currentPictureURL = string.Empty;
     private BrainCloudPlayerState playerService = null;
 
     #region Unity Messages
@@ -36,6 +34,7 @@ public class UserContentUI : ContentUIBehaviour
     {
         UsernameField.text = string.Empty;
         UserInitialText.text = string.Empty;
+        PictureURLField.text = string.Empty;
         UserImage.color = Color.white;
 
         base.Awake();
@@ -44,7 +43,8 @@ public class UserContentUI : ContentUIBehaviour
     private void OnEnable()
     {
         UsernameField.onEndEdit.AddListener((username) => CheckUsernameVerification(username));
-        PictureButton.onClick.AddListener(OnPictureButton);
+        //PictureButton.onClick.AddListener(OnPictureButton);
+        PictureURLField.onEndEdit.AddListener((url) => CheckURLVerification(url));
         ClearButton.onClick.AddListener(OnClearButton);
         SaveButton.onClick.AddListener(OnSaveButton);
         BackButton.onClick.AddListener(OnBackButton);
@@ -56,6 +56,7 @@ public class UserContentUI : ContentUIBehaviour
 
         base.Start();
 
+        PictureButton.interactable = false;
         IsInteractable = false;
         gameObject.SetActive(false);
     }
@@ -63,7 +64,8 @@ public class UserContentUI : ContentUIBehaviour
     private void OnDisable()
     {
         UsernameField.onEndEdit.RemoveAllListeners();
-        PictureButton.onClick.RemoveAllListeners();
+        //PictureButton.onClick.RemoveAllListeners();
+        PictureURLField.onEndEdit.RemoveAllListeners();
         ClearButton.onClick.RemoveAllListeners();
         SaveButton.onClick.RemoveAllListeners();
         BackButton.onClick.RemoveAllListeners();
@@ -84,28 +86,18 @@ public class UserContentUI : ContentUIBehaviour
     {
         IsInteractable = false;
 
+        UsernameField.text = string.Empty;
+        UserInitialText.text = string.Empty;
         UserImage.color = NO_PROFILE_PICTURE_COLOR;
         UserInitialText.gameObject.SetActive(true);
+        PictureURLField.text = string.Empty;
+        UserImage.color = new Color32(0, 160, 255, 255);
+        PictureURLField.gameObject.SetActive(true);
+        ClearButton.gameObject.SetActive(false);
 
-        void HandleReadUserState(string jsonResponse, object cbObject)
-        {
-            var data = jsonResponse.Deserialize("data");
-
-            UsernameField.text = data.GetString("playerName");
-            UserInitialText.text = $"{UsernameField.text.ToUpper()[0]}";
-
-            if (data.GetString("pictureUrl") is string pictureURL &&
-                !pictureURL.IsEmpty() && pictureURL != currentPictureURL)
-            {
-                StartCoroutine(DownloadProfileImage(pictureURL));
-            }
-            else
-            {
-                IsInteractable = true;
-            }
-        }
-
-        playerService.ReadUserState(HandleReadUserState, HandleFailures);
+        // Get the name and profile image of the user
+        playerService.ReadUserState(HandleReadUserState,
+                                    OnFailure("Could not read profile.", OnBackButton));
     }
 
     private IEnumerator DownloadProfileImage(string pictureURL)
@@ -116,10 +108,12 @@ public class UserContentUI : ContentUIBehaviour
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            currentPictureURL = pictureURL;
+            PictureURLField.text = pictureURL;
             UserImage.texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
             UserImage.color = Color.white;
             UserInitialText.gameObject.SetActive(false);
+            PictureURLField.gameObject.SetActive(false);
+            ClearButton.gameObject.SetActive(true);
         }
         else
         {
@@ -147,24 +141,44 @@ public class UserContentUI : ContentUIBehaviour
         return false;
     }
 
-    private void OnPictureButton()
+    private bool CheckURLVerification(string value)
     {
-        // Need to be able to upload new profile picture
+        PictureURLField.text = value.Trim();
+        if (!PictureURLField.text.IsEmpty())
+        {
+            if (PictureURLField.text.Length <= 3 || PictureURLField.text.Split('.').Length < 2)
+            {
+                PictureURLField.DisplayError();
+                Debug.LogError($"Server URL is not a proper URL or the server is offline.");
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
+
+    //private void OnPictureButton() { }
+
     private void OnClearButton()
     {
         if (UserImage.texture != null)
         {
-            currentPictureURL = string.Empty;
             UserImage.texture = null;
             UserImage.color = NO_PROFILE_PICTURE_COLOR;
             UserInitialText.gameObject.SetActive(true);
+            PictureURLField.text = string.Empty;
+            PictureURLField.gameObject.SetActive(true);
+            ClearButton.gameObject.SetActive(false);
         }
     }
 
     private void OnSaveButton()
     {
-        if(!CheckUsernameVerification(UsernameField.text))
+        if(!CheckUsernameVerification(UsernameField.text) &&
+           !PictureURLField.text.IsEmpty() &&
+           !CheckURLVerification(PictureURLField.text))
         {
             return;
         }
@@ -172,12 +186,9 @@ public class UserContentUI : ContentUIBehaviour
         IsInteractable = false;
 
         playerService.UpdateName(UsernameField.text);
-        playerService.UpdateUserPictureUrl(currentPictureURL,
-                                           (_, _) =>
-                                           {
-                                               OnBackButton();
-                                           },
-                                           HandleFailures);
+        playerService.UpdateUserPictureUrl(PictureURLField.text,
+                                           OnSuccess("Profile changes saved!", OnBackButton),
+                                           OnFailure("Could not save profile. Please try again.", () => IsInteractable = true));
     }
 
     private void OnBackButton()
@@ -193,11 +204,22 @@ public class UserContentUI : ContentUIBehaviour
 
     #region brainCloud
 
-    private void HandleFailures(int status, int reasonCode, string jsonError, object cbObject)
+    void HandleReadUserState(string jsonResponse, object cbObject)
     {
-        IsInteractable = true;
+        var data = jsonResponse.Deserialize("data");
 
-        Debug.LogError("An error occurred. Please try again.");
+        UsernameField.text = data.GetString("playerName");
+        UserInitialText.text = $"{UsernameField.text.ToUpper()[0]}";
+
+        if (data.GetString("pictureUrl") is string pictureURL &&
+            !pictureURL.IsEmpty() && pictureURL != PictureURLField.text)
+        {
+            StartCoroutine(DownloadProfileImage(pictureURL));
+        }
+        else
+        {
+            IsInteractable = true;
+        }
     }
 
     #endregion

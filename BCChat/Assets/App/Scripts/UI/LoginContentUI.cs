@@ -45,6 +45,7 @@ public class LoginContentUI : ContentUIBehaviour
 
     protected override void Start()
     {
+        // Handle automatic user login
         if (GetRememberMePref() && !UserHandler.AnonymousID.IsEmpty())
         {
             RememberMeToggle.isOn = true;

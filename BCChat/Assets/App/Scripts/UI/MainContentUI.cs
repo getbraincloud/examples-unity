@@ -3,11 +3,8 @@ using BrainCloud.JSONHelper;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using TMPro;
-using UnityEditor.VersionControl;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class MainContentUI : ContentUIBehaviour
@@ -145,20 +142,26 @@ public class MainContentUI : ContentUIBehaviour
 
     private IEnumerator HandleRTTAndSetup()
     {
+        // This will enable RTT and get our different chat channels and subscribe to the first channel
+
         IsInteractable = false;
 
         ChatField.placeholder.GetComponent<TMP_Text>().text = string.Empty;
 
-        string[] channelIds = new string[] // Need to get this from a global entity
-        {
-            "general",
-            "gaming",
-            "bitheads",
-            "braincloud"
-        };
-
         yield return null;
 
+        // Clear current channels
+        if (channelButtons.Count > 0)
+        {
+            for (int i = 0; i < channelButtons.Count; i++)
+            {
+                Destroy(channelButtons[i].gameObject);
+            }
+
+            channelButtons.Clear();
+        }
+
+        // Enable RTT if it isn't
         if (!rttService.IsRTTEnabled())
         {
             bool isSuccess = false;
@@ -179,52 +182,31 @@ public class MainContentUI : ContentUIBehaviour
             yield return new WaitUntil(() => isSuccess);
         }
 
-        if (channelButtons.Count > 0)
+        yield return null;
+
+        // Get our Global channels
+        bool getChannelsFinished = false;
+        void HandleGetSubscribedChannels(string jsonResponse, object cbObject)
         {
-            for (int i = 0; i < channelButtons.Count; i++)
+            var channels = jsonResponse.Deserialize("data").GetJSONArray<ChannelInfo>("channels");
+
+            foreach (var info in channels)
             {
-                Destroy(channelButtons[i].gameObject);
+                var channelToAdd = Instantiate(ChannelButtonTemplate, ChannelContent, false);
+                channelToAdd.SetChannelInfo(info, SetCurrentChatChannel);
+                channelButtons.Add(channelToAdd);
+
+                Debug.Log($"Added Channel: {info.name}");
             }
 
-            channelButtons.Clear();
+            getChannelsFinished = true;
         }
 
-        int channelCount = 0;
+        chatService.GetSubscribedChannels("gl",
+                                          HandleGetSubscribedChannels,
+                                          OnFailure("Cound not get subscribed channels!", () => getChannelsFinished = true));
 
-        void HandleGetChannelIDSuccess(string jsonResponse, object cbObject)
-        {
-            chatService.GetChannelInfo(jsonResponse.Deserialize("data").GetString("channelId"),
-                                       HandleGetChannelInfo,
-                                       HandleGetChannelsFailure);
-        }
-
-        void HandleGetChannelsFailure(int status, int reasonCode, string jsonError, object cbObject)
-        {
-            channelCount++;
-            Debug.LogError($"Could not get Channel ID for: {cbObject}");
-        }
-
-        void HandleGetChannelInfo(string jsonResponse, object cbObject)
-        {
-            var info = jsonResponse.Deserialize<ChannelInfo>("data");
-
-            var channelToAdd = Instantiate(ChannelButtonTemplate, ChannelContent, false);
-            channelToAdd.SetChannelInfo(info, SetCurrentChatChannel);
-            channelButtons.Add(channelToAdd);
-
-            channelCount++;
-            Debug.Log($"Added Channel: {info.name}");
-        }
-
-        for (int i = 0; i < channelIds.Length; i++)
-        {
-            chatService.GetChannelId("gl",
-                                     channelIds[i],
-                                     HandleGetChannelIDSuccess,
-                                     HandleGetChannelsFailure);
-        }
-
-        yield return new WaitUntil(() => channelCount >= channelIds.Length);
+        yield return new WaitUntil(() => getChannelsFinished);
 
         if (channelButtons.Count <= 0)
         {
@@ -234,26 +216,12 @@ public class MainContentUI : ContentUIBehaviour
             yield break;
         }
 
-        const string defaultChannel = "general";
-
-        int activeChannel = 0;
-        for (int i = 0; i < channelButtons.Count; i++)
-        {
-            if (channelButtons[i].ChannelInfo.name == defaultChannel)
-            {
-                activeChannel = i;
-                break;
-            }
-        }
-
-        yield return null;
-
         ChannelScroll.verticalNormalizedPosition = 0.0f;
 
-        channelButtons[activeChannel].ButtonAction?.Invoke(channelButtons[activeChannel].ChannelInfo);
+        SetCurrentChatChannel(channelButtons[0].ChannelInfo); // Open first chat room
     }
 
-    private void RTTChatCallback(string responseData)
+    private void RTTChatCallback(string responseData) // Deserialize our RTT chat responses
     {
         const string SERVICE = "chat", OPERATION_INCOMING = "INCOMING",
                      OPERATION_UPDATE = "UPDATE", OPERATION_DELETE = "DELETE";
@@ -342,6 +310,8 @@ public class MainContentUI : ContentUIBehaviour
 
     private void AddChatMessages(Message[] messages)
     {
+        // Add chat messages to the chat scroll view
+
         Message previous;
         if (channelChatMessages.Count > 0)
         {
@@ -406,7 +376,7 @@ public class MainContentUI : ContentUIBehaviour
             }
         }
 
-        // Reset Chat Messages
+        // Reset chat messages
         for (int i = 0; i < ChatContent.childCount; i++)
         {
             GameObject child = ChatContent.GetChild(i).gameObject;
@@ -441,6 +411,7 @@ public class MainContentUI : ContentUIBehaviour
             chatService.ChannelConnect(cbObject.ToString(), MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
         }
 
+        // Disconnect from current chat and connect to the new chat
         if (!currentChannelInfo.id.IsEmpty())
         {
             chatService.ChannelDisconnect(currentChannelInfo.id, HandleChatDisconnect, HandleFailures, info.id);
@@ -453,21 +424,16 @@ public class MainContentUI : ContentUIBehaviour
 
     private void DeleteChatMessage(Message message)
     {
-        // Need to handle chat deletion via RTT
-
         chatService.DeleteChatMessage(message.chId,
                                       message.msgId,
                                       -1,
-                                      null,
-                                      HandleFailures);
+                                      failure:HandleFailures);
 
         ClearMessageToEdit();
     }
 
     private void EditChatMessage(Message message)
     {
-        // Need to handle chat edit via RTT
-
         messageToEdit = message;
         ChatField.text = message.content.text;
 
@@ -518,7 +484,8 @@ public class MainContentUI : ContentUIBehaviour
             {"text", ChatField.text }
         };
 
-        if (!messageToEdit.msgId.IsEmpty())
+        if (!messageToEdit.msgId.IsEmpty() &&
+            messageToEdit.chId == currentChannelInfo.id)
         {
             chatService.UpdateChatMessage(messageToEdit.chId,
                                           messageToEdit.msgId,

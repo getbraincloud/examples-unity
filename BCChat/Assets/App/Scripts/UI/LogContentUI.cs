@@ -4,18 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// <para>
-/// An example of how a Logger can be used in your app. Can be useful to help debug your app on tester devices.
-/// </para>
-/// 
-/// <para>
-/// Makes use of <see cref="global::LogMessage"/> objects to be able to store data about the logs and copy them to the clipboard.
-/// </para>
-/// 
-/// <br><seealso cref="BCManager"/></br>
-/// <br><seealso cref="BrainCloud.LogCallback"/></br>
-/// </summary>
 public class LogContentUI : ContentUIBehaviour
 {
     private const string LOG_APP_HEADER = "#APP";
