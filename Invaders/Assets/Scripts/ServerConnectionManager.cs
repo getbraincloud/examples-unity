@@ -7,30 +7,32 @@ using System;
 
 public class ServerConnectionManager : NetworkBehaviour
 {
-    public bool IsDedicatedServer
-    {
-        get => BrainCloudManager.Singleton.IsDedicatedServer;
-    }
+    public bool IsDedicatedServer;
 
     public BrainCloudS2S S2SWrapper
     {
         get => BrainCloudManager.Singleton.S2SWrapper;
     }
 
-    private List<ulong> _connectedClients;
+    private Dictionary<ulong, UserInfo> _connectedClients;
     private Lobby _currentLobby;
+
+    private Coroutine _serverShutdownCR;
+
 
     private void Awake()
     {
         Debug.Log("[ServerConnectionManager - Awake()]");
 
+        IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
+
         DontDestroyOnLoad(this);
 
         if (IsDedicatedServer)
         {
-            Debug.Log("[ServerConnectionManager - Awake()] We are dedicated babayy");
+            Debug.Log("[ServerConnectionManager - Awake()] We are dedicated");
             string lobbyId = Environment.GetEnvironmentVariable("LOBBY_ID");
-            _connectedClients = new List<ulong>();
+            _connectedClients = new Dictionary<ulong, UserInfo>();
             Debug.Log("[ServerConnectionManager - Awake()] Got LobbyID? " + lobbyId );
 
             var requestJson = new Dictionary<string, object>();
@@ -43,15 +45,17 @@ public class ServerConnectionManager : NetworkBehaviour
             requestJson["data"] = requestDataJson;
 
             string jsonString = JsonWriter.Serialize(requestJson);
-            Debug.Log("[ServerConnectionManager - Awake()] Doin da S2S request");
             S2SWrapper.Request(jsonString, OnLobbyDataResponse);
         }
-        else
-        {
+    }
 
-        }
+    private void Start()
+    {
+        //connect to server
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectedCallback;
+        BrainCloudManager.Singleton.SceneTransitionHandler.OnClientLoadedScene += ClientLoadedScene;
 
-        BrainCloudManager.Singleton.SceneTransitionHandler.SetSceneState(SceneTransitionHandler.SceneStates.Connecting);
     }
 
     private void OnLobbyDataResponse(string response)
@@ -71,9 +75,6 @@ public class ServerConnectionManager : NetworkBehaviour
             {
                 Debug.Log("Member: " + user.Username);
             }
-
-            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
-            BrainCloudManager.Singleton.SceneTransitionHandler.OnClientLoadedScene += ClientLoadedScene;
 
             //Tell brainCloud we are ready with S2S call
             var requestJson = new Dictionary<string, object>();
@@ -110,7 +111,65 @@ public class ServerConnectionManager : NetworkBehaviour
         {
             Debug.Log("Client connected: " + clientId);
             Debug.Log("Owner client ID: " + OwnerClientId);
+
+            if(_serverShutdownCR != null)
+            {
+                Debug.Log("Player connected during shutdown timer, canceling shutdown");
+                StopCoroutine(_serverShutdownCR);
+                _serverShutdownCR = null;
+            }
         }
+        else
+        {
+            //Send server validation request
+            UserInfo localUserInfo = BrainCloudManager.Singleton.LocalUserInfo;
+            Debug.Log($"Sending request for cId:{clientId} pId:{localUserInfo.ProfileID} passCode:{localUserInfo.PassCode}");
+            ValidateConnectedClientServerRpc(clientId, localUserInfo.ProfileID, localUserInfo.PassCode);
+        }
+    }
+
+    private void OnClientDisconnectedCallback(ulong clientId)
+    {
+        if (IsDedicatedServer)
+        {
+            Debug.Log("Client disconnected: " + clientId);
+            Debug.Log("Owner client ID: " + OwnerClientId);
+
+            if (_connectedClients.ContainsKey(clientId))
+            {
+                _connectedClients.Remove(clientId);
+            }
+
+            CheckServerEmpty();
+        }
+    }
+
+    public void CheckServerEmpty()
+    {
+        Debug.Log($"Checking if servers empty: Players left: ${_connectedClients.Count}");
+        if (IsDedicatedServer)
+        {
+            if (_connectedClients.Count == 0)
+            {
+                if (_serverShutdownCR != null)
+                {
+                    StopCoroutine(_serverShutdownCR);
+                }
+
+                Debug.Log("All players left the server, starting shutdown timer");
+
+                _serverShutdownCR = StartCoroutine(InitServerShutdownTimer());
+            }
+        } 
+    }
+
+    private IEnumerator InitServerShutdownTimer()
+    {
+        //shut down after 15 seconds, unless a player reconnects in that time, then stop and clear this coroutine
+        yield return new WaitForSeconds(15f);
+
+        Debug.Log("Server been empty for 15 seconds. Shutting down.");
+        Application.Quit();
     }
 
     private void ClientLoadedScene(ulong clientId)
@@ -119,6 +178,64 @@ public class ServerConnectionManager : NetworkBehaviour
         {
             Debug.Log("Client loaded scene: " + clientId);
             Debug.Log("Owner client ID: " + OwnerClientId);
+        }
+    }
+
+    private void OnAllLoaded()
+    {
+        //everyone's here, allegedly.
+        //start the game
+        Debug.Log("Everyone is here let's load up the game");
+        BrainCloudManager.Singleton.SceneTransitionHandler.SwitchScene("InGame");
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void CheckAllPlayerConnectedServerRpc()
+    {
+        if(_connectedClients.Count == _currentLobby.Members.Count)
+        {
+            OnAllLoaded();
+        }
+    }
+
+    [ClientRpc]
+    public void ValidateConnectedClientClientRpc(bool isValid)
+    {
+        Debug.Log($"Received server validation. Am I valid? ${isValid}");
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ValidateConnectedClientServerRpc(ulong clientId, string playerId, string passCode)
+    {
+        Debug.Log($"Received validation request for cId:{clientId} pId:{playerId} passCode:{passCode}");
+        //match with playerId and passcode found in lobby data
+        if(_currentLobby != null)
+        {
+            UserInfo foundMember = _currentLobby.FindMemberByPlayerId(playerId);
+            if(foundMember != null)
+            {
+                //check pass code
+                if (foundMember.PassCode.Equals(passCode))
+                {
+                    //player connection is valid
+                    Debug.Log($"Player {playerId} has valid passcode");
+                    _connectedClients.Add(clientId, foundMember);
+                    CheckAllPlayerConnectedServerRpc();
+                }
+                else
+                {
+                    //player connection invalid - kick them out
+                    Debug.LogWarning($"Player {playerId} has invalid passcode");
+                }
+            }
+            else
+            {
+                //member not found in lobby data
+            }
+        }
+        else
+        {
+            //current lobby data is invalid
         }
     }
 }

@@ -54,4 +54,20 @@ public class Lobby
         string[] splits = id.Split(':');
         return splits[1];
     }
+
+    public UserInfo FindMemberByPlayerId(string playerId)
+    {
+        UserInfo memberInfo = null;
+
+        foreach(UserInfo member in Members)
+        {
+            if (member.ProfileID.Equals(playerId))
+            {
+                memberInfo = member;
+                break;
+            }
+        }
+
+        return memberInfo;
+    }
 }

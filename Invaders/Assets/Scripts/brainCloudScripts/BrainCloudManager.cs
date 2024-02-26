@@ -201,6 +201,11 @@ public class BrainCloudManager : MonoBehaviour
             //GameManager.Instance.UpdateMatchAndLobbyState();
         }
 
+        if (jsonData.ContainsKey("passcode"))
+        {
+            _localUserInfo.PassCode = jsonData["passcode"] as string;
+        }
+
         //Using the key "operation" to determine what state the lobby is in
         if (response.ContainsKey("operation"))
         {

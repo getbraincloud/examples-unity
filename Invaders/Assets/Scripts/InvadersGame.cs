@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Rendering.Universal;
 using Random = UnityEngine.Random;
 
 public enum InvadersObjectType
@@ -223,7 +224,7 @@ public class InvadersGame : NetworkBehaviour
         }
         if (IsDedicatedServer)
         {
-            m_CountdownStarted.Value = SceneTransitionHandler.sceneTransitionHandler.AllClientsAreLoaded();
+            m_CountdownStarted.Value = true;
             //While we are counting down, continually set the replicated time remaining value for clients (client should only receive the update once)
             if (m_CountdownStarted.Value && !m_ReplicatedTimeSent)
             {
@@ -291,6 +292,7 @@ public class InvadersGame : NetworkBehaviour
     private void UpdateGameTimer()
     {
         if (!ShouldStartCountDown()) return;
+
         if (!HasGameStarted() && m_TimeRemaining > 0.0f)
         {
             m_TimeRemaining -= Time.deltaTime;

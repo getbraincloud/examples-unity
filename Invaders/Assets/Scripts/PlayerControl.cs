@@ -180,8 +180,12 @@ public class PlayerControl : NetworkBehaviour
 
     private void InGameUpdate()
     {
+        //Debug.Log("[PlayerControl - InGameUpdate()]");
+        //Debug.Log($"IsLocalPlayer {IsLocalPlayer} IsOwner {IsOwner} HasGameStarted {m_HasGameStarted}");
         if (!IsLocalPlayer || !IsOwner || !m_HasGameStarted) return;
         if (!m_IsAlive) return;
+
+        
 
         var deltaX = 0;
         if (Input.GetKey(KeyCode.LeftArrow)) deltaX -= 1;
