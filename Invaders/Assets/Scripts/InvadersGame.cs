@@ -32,6 +32,13 @@ public enum GameOverReason : byte
     Max,
 }
 
+public struct UserScoreInfo
+{
+    public ulong clientID;
+    public string clientName;
+    public int clientScore;
+}
+
 public class InvadersGame : NetworkBehaviour
 {
     // The vertical offset we apply to each Enemy transform once they touch an edge
@@ -96,6 +103,12 @@ public class InvadersGame : NetworkBehaviour
     private int numberOfLogsSent;
 
     private bool IsDedicatedServer;
+
+    [SerializeField]
+    private TMP_Text m_UserGameOverPrefab;
+
+    [SerializeField]
+    private GameObject m_ListOfUsersParent;
 
     /// <summary>
     ///     Awake
@@ -208,6 +221,12 @@ public class InvadersGame : NetworkBehaviour
             // Send the RPC only to the newly connected client
             SetReplicatedTimeRemainingClientRPC(m_TimeRemaining, new ClientRpcParams {Send = new ClientRpcSendParams{TargetClientIds = new List<ulong>() {clientId}}});
         }
+
+        UserScoreInfo user = new UserScoreInfo();
+        user.clientName = BrainCloudManager.Singleton.LocalUserInfo.Username;
+        user.clientScore = 0;
+        user.clientID = clientId;
+        BrainCloudManager.Singleton.ListOfUsers.Add(user);
     }
 
     /// <summary>
@@ -430,8 +449,33 @@ public class InvadersGame : NetworkBehaviour
         if (gameOverText)
         {
             gameOverText.SetText(message);
-            gameOverText.gameObject.SetActive(true);
+            //gameOverText.gameObject.SetActive(true);
         }
+
+        var _listOfUsers = BrainCloudManager.Singleton.ListOfUsers;
+        _listOfUsers.Sort();
+        for (int i = 0; i < _listOfUsers.Count; i++)
+        {
+            TMP_Text userEntry = Instantiate(m_UserGameOverPrefab, Vector3.zero, Quaternion.identity, m_ListOfUsersParent.transform);
+            userEntry.text = _listOfUsers[i].clientName + ": " + _listOfUsers[i].clientScore;
+        }
+        gameOverText.transform.parent.gameObject.SetActive(true);
+    }
+    
+    public void UpdateClientScore(ulong clientId, int newScore)
+    {
+        var _listOfUsers = BrainCloudManager.Singleton.ListOfUsers;
+        for (int i = 0; i < _listOfUsers.Count; ++i)
+        {
+            if(_listOfUsers[i].clientID == clientId)
+            {
+                UserScoreInfo temp = _listOfUsers[i];
+                temp.clientScore = newScore;
+                _listOfUsers[i] = temp;
+            }
+        }
+
+        BrainCloudManager.Singleton.ListOfUsers = _listOfUsers;
     }
 
     public void SetGameEnd(GameOverReason reason)
@@ -621,4 +665,5 @@ public class InvadersGame : NetworkBehaviour
             startx += 1.6f;
         }
     }
+    
 }

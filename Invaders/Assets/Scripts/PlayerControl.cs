@@ -41,6 +41,8 @@ public class PlayerControl : NetworkBehaviour
 
     public bool IsAlive => m_Lives.Value > 0;
 
+    private UserInfo m_userInfo;
+
     public bool IsDedicatedServer
     {
         get => BrainCloudManager.Singleton.IsDedicatedServer;
@@ -173,9 +175,11 @@ public class PlayerControl : NetworkBehaviour
 
     private void OnScoreChanged(int previousAmount, int currentAmount)
     {
-        if (!IsOwner) return;
+        if (!IsOwner || !IsDedicatedServer) return;
         Debug.LogFormat("Score {0} ", currentAmount);
-        if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetScore(m_Score.Value);
+        if (InvadersGame.Singleton != null && IsOwner) InvadersGame.Singleton.SetScore(m_Score.Value);
+        if(IsDedicatedServer)
+            InvadersGame.Singleton.UpdateClientScore(OwnerClientId, currentAmount);
     } // ReSharper disable Unity.PerformanceAnalysis
 
     private void InGameUpdate()

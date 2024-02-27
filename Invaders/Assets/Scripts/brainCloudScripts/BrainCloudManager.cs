@@ -11,9 +11,6 @@ using System;
 
 public class BrainCloudManager : MonoBehaviour
 {
-    [SerializeField] private TMP_InputField UsernameField;
-    [SerializeField] private TMP_InputField PasswordField;
-
     [SerializeField] private SceneTransitionHandler _sceneTransitionHandler;
     private NetworkManager _netManager;
 
@@ -65,13 +62,13 @@ public class BrainCloudManager : MonoBehaviour
     private string _roomAddress = "127.0.0.1";
 
     public static BrainCloudManager Singleton { get; private set; }
+    public List<UserScoreInfo> ListOfUsers = new List<UserScoreInfo>();
     void Awake()
     {
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
 
         _netManager = GetComponent<NetworkManager>();
         _unityTransport = GetComponent<UnityTransport>();
-
         if (Singleton == null)
         {
             Singleton = this;
@@ -121,6 +118,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         LocalUserInfo.Username = in_username;
         _wrapper.AuthenticateUniversal(in_username, in_password, true, OnAuthenticateSuccess, OnFailureCallback);
+        AddUserToList(in_username);
     }
     
     private void OnAuthenticateSuccess(string jsonResponse, object cbObject)
@@ -139,6 +137,17 @@ public class BrainCloudManager : MonoBehaviour
         else
         {
             MenuControl.Singleton.SwitchMenuButtons();            
+        }
+    }
+    
+    [ServerRpc]
+    public void AddUserToList(string in_username)
+    {
+        if(IsDedicatedServer)
+        {
+            UserScoreInfo user = new UserScoreInfo();
+            user.clientName = in_username;
+            ListOfUsers.Add(user);
         }
     }
     
@@ -210,7 +219,6 @@ public class BrainCloudManager : MonoBehaviour
             {
                 MenuControl.Singleton.IsLoading = false;
             }
-            //GameManager.Instance.UpdateMatchAndLobbyState();
         }
 
         if (jsonData.ContainsKey("passcode"))
@@ -268,6 +276,8 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> extra = new Dictionary<string, object>();
         _wrapper.LobbyService.UpdateReady(_currentLobby.LobbyID, true, extra);
     }
+    
+
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
