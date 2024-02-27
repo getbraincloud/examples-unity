@@ -114,9 +114,6 @@ public class SceneTransitionHandler : NetworkBehaviour
             {
                 Debug.Log("Loading Server Connection Scene");
                 SceneManager.LoadScene("Connecting");
-                Debug.Log("Starting NetCode Server");
-                NetworkManager.Singleton.StartServer();
-
             }
         }
         

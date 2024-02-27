@@ -62,6 +62,8 @@ public class BrainCloudManager : MonoBehaviour
         set => _localUserInfo = value;
     }
 
+    private string _roomAddress = "127.0.0.1";
+
     public static BrainCloudManager Singleton { get; private set; }
     void Awake()
     {
@@ -94,6 +96,16 @@ public class BrainCloudManager : MonoBehaviour
         {
             _wrapper = GetComponent<BrainCloudWrapper>();
             _wrapper.Init();
+        }
+    }
+
+    private void Start()
+    {
+        if (IsDedicatedServer)
+        {
+            Debug.Log("Starting NetCode Server");
+            _unityTransport.SetConnectionData("0.0.0.0", 7777);
+            _netManager.StartServer();
         }
     }
 
@@ -206,6 +218,8 @@ public class BrainCloudManager : MonoBehaviour
             _localUserInfo.PassCode = jsonData["passcode"] as string;
         }
 
+        
+
         //Using the key "operation" to determine what state the lobby is in
         if (response.ContainsKey("operation"))
         {
@@ -214,28 +228,34 @@ public class BrainCloudManager : MonoBehaviour
             {
                 case "MEMBER_JOIN":
                 case "MEMBER_UPDATE":
-                    if(LobbyControl.Singleton != null)
+                    if (LobbyControl.Singleton != null)
                     {
-                        LobbyControl.Singleton.GenerateUserStatsForLobby();                        
+                        LobbyControl.Singleton.GenerateUserStatsForLobby();
                     }
                     break;
-                    
+
                 case "DISBANDED":
-                {
-                    var reason = jsonData["reason"] as Dictionary<string, object>;
-                    if ((int) reason["code"] != ReasonCodes.RTT_ROOM_READY)
                     {
-                        // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                        //CloseGame(true);
+                        var reason = jsonData["reason"] as Dictionary<string, object>;
+                        if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
+                        {
+                            // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
+                            //CloseGame(true);
+                        }
+                        break;
                     }
-                    break;
-                }
                 case "STARTING":
                     break;
+                case "ROOM_ASSIGNED":
+                    Dictionary<string, object> connectData = jsonData["connectData"] as Dictionary<string, object>;
+                    _roomAddress = connectData["address"] as string;
+                    break;
                 case "ROOM_READY":
+
+                    //get connection info
                     SceneTransitionHandler.SwitchScene("Connecting");
-                    _unityTransport.ConnectionData.Address = "127.0.0.1";
-                    _unityTransport.ConnectionData.Port = 7777;
+                    _unityTransport.ConnectionData.Address = _roomAddress;
+                    _unityTransport.ConnectionData.Port = 9000;
                     _netManager.StartClient();
                     //open in game level and then connect to server
                     break;

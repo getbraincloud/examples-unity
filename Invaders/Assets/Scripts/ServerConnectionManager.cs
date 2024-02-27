@@ -92,11 +92,11 @@ public class ServerConnectionManager : NetworkBehaviour
 
             string jsonString = JsonWriter.Serialize(requestJson);
             S2SWrapper.Request(jsonString, OnLobbyReadyResponse);
-
         }
         else
         {
-            Debug.Log("Couldn't find lobby data in response");
+            Debug.Log("Invalid lobby, shutting down server");
+            Application.Quit();
         }
     }
 
