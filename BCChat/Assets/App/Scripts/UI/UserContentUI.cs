@@ -6,6 +6,15 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+/// <summary>
+/// <para>
+/// This showcases a couple features of the Player State service on brainCloud
+/// to be able to change the user's name and profile picture.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudPlayerState"/>
+/// </summary>
+/// API Link: https://docs.braincloudservers.com/api/capi/playerstate
 public class UserContentUI : ContentUIBehaviour
 {
     private const int MINIMUM_USERNAME_LENGTH = 4;

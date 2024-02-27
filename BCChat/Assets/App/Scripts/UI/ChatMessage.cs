@@ -5,6 +5,9 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+/// <summary>
+/// Displays the content of brainCloud's <see cref="Message"/> in a Prefab.
+/// </summary>
 public class ChatMessage : MonoBehaviour
 {
     private const int PROFILE_DISPLAY_SIZE = 100;

@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Displays the content of brainCloud's <see cref="ChannelInfo"/> in a Prefab.
+/// </summary>
 public class ChannelButton : MonoBehaviour
 {
     [SerializeField] private Button OpenButton = default;

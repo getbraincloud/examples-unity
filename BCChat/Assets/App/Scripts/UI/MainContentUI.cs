@@ -7,6 +7,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// <para>
+/// This showcases the use of the Chat service on brainCloud
+/// and utilizes RTT for a real-time chat application.
+/// </para>
+/// 
+/// <seealso cref="BrainCloudChat"/>
+/// <seealso cref="BrainCloudRTT"/>
+/// </summary>
+/// API Link: https://docs.braincloudservers.com/api/capi/chat
 public class MainContentUI : ContentUIBehaviour
 {
     private const string USER_ENTERED_MESSAGE = "<i><USER> has entered chat.</i>";
@@ -140,288 +150,6 @@ public class MainContentUI : ContentUIBehaviour
         StartCoroutine(HandleRTTAndSetup());
     }
 
-    private IEnumerator HandleRTTAndSetup()
-    {
-        // This will enable RTT and get our different chat channels and subscribe to the first channel
-
-        IsInteractable = false;
-
-        ChatField.placeholder.GetComponent<TMP_Text>().text = string.Empty;
-
-        yield return null;
-
-        // Clear current channels
-        if (channelButtons.Count > 0)
-        {
-            for (int i = 0; i < channelButtons.Count; i++)
-            {
-                Destroy(channelButtons[i].gameObject);
-            }
-
-            channelButtons.Clear();
-        }
-
-        // Enable RTT if it isn't
-        if (!rttService.IsRTTEnabled())
-        {
-            bool isSuccess = false;
-            void HandleRTTEnableSuccess(string jsonResponse, object cbObject)
-            {
-                isSuccess = true;
-            }
-
-            void HandleRTTEnableFailure(int status, int reasonCode, string jsonError, object cbObject)
-            {
-                Debug.LogError("Unable to enable RTT! Cannot use BC Chat.");
-
-                StopCoroutine(HandleRTTAndSetup());
-            }
-
-            rttService.EnableRTT(RTTConnectionType.WEBSOCKET, HandleRTTEnableSuccess, HandleRTTEnableFailure);
-
-            yield return new WaitUntil(() => isSuccess);
-        }
-
-        yield return null;
-
-        // Get our Global channels
-        bool getChannelsFinished = false;
-        void HandleGetSubscribedChannels(string jsonResponse, object cbObject)
-        {
-            var channels = jsonResponse.Deserialize("data").GetJSONArray<ChannelInfo>("channels");
-
-            foreach (var info in channels)
-            {
-                var channelToAdd = Instantiate(ChannelButtonTemplate, ChannelContent, false);
-                channelToAdd.SetChannelInfo(info, SetCurrentChatChannel);
-                channelButtons.Add(channelToAdd);
-
-                Debug.Log($"Added Channel: {info.name}");
-            }
-
-            getChannelsFinished = true;
-        }
-
-        chatService.GetSubscribedChannels("gl",
-                                          HandleGetSubscribedChannels,
-                                          OnFailure("Cound not get subscribed channels!", () => getChannelsFinished = true));
-
-        yield return new WaitUntil(() => getChannelsFinished);
-
-        if (channelButtons.Count <= 0)
-        {
-            IsInteractable = true;
-            Debug.LogWarning("No chat channels found.");
-
-            yield break;
-        }
-
-        ChannelScroll.verticalNormalizedPosition = 0.0f;
-
-        SetCurrentChatChannel(channelButtons[0].ChannelInfo); // Open first chat room
-    }
-
-    private void RTTChatCallback(string responseData) // Deserialize our RTT chat responses
-    {
-        const string SERVICE = "chat", OPERATION_INCOMING = "INCOMING",
-                     OPERATION_UPDATE = "UPDATE", OPERATION_DELETE = "DELETE";
-
-        var data = responseData.Deserialize();
-        if (data.GetString("service") == SERVICE)
-        {
-            string op = data.GetString("operation");
-            if (op == OPERATION_INCOMING)   
-            {
-                Message incoming = data.GetJSONObject<Message>("data");
-                if (incoming.chId != currentChannelInfo.id)
-                {
-                    return;
-                }
-
-                if (incoming.content.text == USER_ENTERED_MESSAGE)
-                {
-                    incoming.content.text = USER_ENTERED_MESSAGE.Replace("<USER>", incoming.from.name);
-                    incoming.from.id = string.Empty;
-                    incoming.date = DateTime.UnixEpoch;
-
-                    AddChatMessages(new Message[] { incoming });
-
-                    var chatMessage = channelChatMessages[^1];
-                    chatMessage.DeleteAction = null;
-                    chatMessage.EditAction = null;
-                    chatMessage.DisplayHeader(false);
-                    chatMessage.DisplayProfileImage(false);
-                    chatMessage.DisplayFooter(false);
-                }
-                else
-                {
-                    AddChatMessages(new Message[] { incoming });
-                }
-            }
-            else if(op == OPERATION_UPDATE)
-            {
-                Message updated = data.GetJSONObject<Message>("data");
-                if (updated.chId != currentChannelInfo.id)
-                {
-                    return;
-                }
-
-                for (int i = 0; i < channelChatMessages.Count; i++)
-                {
-                    if (updated.msgId == channelChatMessages[i].Message.msgId)
-                    {
-                        channelChatMessages[i].SetChatContents(updated);
-                        break;
-                    }
-                }
-            }
-            else if(op == OPERATION_DELETE)
-            {
-                data = data.GetJSONObject("data");
-                if (data.GetString("chId") != currentChannelInfo.id)
-                {
-                    return;
-                }
-
-                string msgId = data.GetString("msgId");
-                for (int i = 0; i < channelChatMessages.Count; i++)
-                {
-                    if (msgId == channelChatMessages[i].Message.msgId)
-                    {
-                        Destroy(channelChatMessages[i].gameObject);
-                        channelChatMessages[i] = null;
-                        channelChatMessages.RemoveAt(i);
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                Debug.LogError($"Unknown chat operation: {op}");
-            }
-
-            StartCoroutine(ScrollChatToBottom());
-        }
-        else
-        {
-            Debug.LogError($"Unknown service: {data.GetString("service")}");
-        }
-    }
-
-    private void AddChatMessages(Message[] messages)
-    {
-        // Add chat messages to the chat scroll view
-
-        Message previous;
-        if (channelChatMessages.Count > 0)
-        {
-            previous = channelChatMessages[^1].Message;
-        }
-        else
-        {
-            previous.from.id = string.Empty;
-            previous.date = DateTime.UnixEpoch;
-        }
-
-        foreach (Message message in messages)
-        {
-            var chatMessageToAdd = Instantiate(ChatMessageTemplate, ChatContent, false);
-            chatMessageToAdd.SetChatContents(message);
-            chatMessageToAdd.DeleteAction = DeleteChatMessage;
-            chatMessageToAdd.EditAction = EditChatMessage;
-
-            if (previous.from.id == message.from.id &&
-                (message.date - previous.date).TotalMinutes < 1.0)
-            {
-                chatMessageToAdd.DisplayHeader(false);
-            }
-
-            if (!previous.from.id.IsEmpty() &&
-                (previous.from.id != message.from.id ||
-                (message.date - previous.date).TotalMinutes >= 1.0))
-            {
-                Instantiate(MessageSpacer, ChatContent, false);
-                chatMessageToAdd.transform.SetAsLastSibling();
-            }
-
-            previous = message;
-            channelChatMessages.Add(chatMessageToAdd);
-        }
-    }
-
-    private void SetCurrentChatChannel(ChannelInfo info)
-    {
-        // Check to make sure channel isn't already open
-        for (int i = 0; i < channelButtons.Count; i++)
-        {
-            if (channelButtons[i].IsActiveChannel &&
-                channelButtons[i].ChannelInfo.id == info.id)
-            {
-                return;
-            }
-        }
-
-        IsInteractable = false;
-        ChatField.text = string.Empty;
-
-        for (int i = 0; i < channelButtons.Count; i++)
-        {
-            if (channelButtons[i].ChannelInfo.id == info.id)
-            {
-                channelButtons[i].IsActiveChannel = true;
-            }
-            else
-            {
-                channelButtons[i].IsActiveChannel = false;
-            }
-        }
-
-        // Reset chat messages
-        for (int i = 0; i < ChatContent.childCount; i++)
-        {
-            GameObject child = ChatContent.GetChild(i).gameObject;
-            if (child.GetComponent<ChatMessage>() is ChatMessage chatMessage &&
-                channelChatMessages.Contains(chatMessage))
-            {
-                channelChatMessages[channelChatMessages.IndexOf(chatMessage)] = null;
-            }
-
-            Destroy(ChatContent.GetChild(i).gameObject);
-        }
-
-        channelChatMessages.Clear();
-
-        void HandleGetRecentChatMessages(string jsonResponse, object cbObject)
-        {
-            AddChatMessages(jsonResponse.Deserialize("data").GetJSONArray<Message>("messages"));
-
-            chatService.PostChatMessageSimple(info.id, USER_ENTERED_MESSAGE, false);
-
-            currentChannelInfo = info;
-            ChatField.placeholder.GetComponent<TMP_Text>().text = $"Message #{info.name}";
-            ChatField.interactable = true;
-
-            IsInteractable = true;
-
-            StartCoroutine(ScrollChatToBottom());
-        }
-
-        void HandleChatDisconnect(string jsonResponse, object cbObject)
-        {
-            chatService.ChannelConnect(cbObject.ToString(), MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
-        }
-
-        // Disconnect from current chat and connect to the new chat
-        if (!currentChannelInfo.id.IsEmpty())
-        {
-            chatService.ChannelDisconnect(currentChannelInfo.id, HandleChatDisconnect, HandleFailures, info.id);
-        }
-        else
-        {
-            chatService.ChannelConnect(info.id, MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
-        }
-    }
-
     private void DeleteChatMessage(Message message)
     {
         chatService.DeleteChatMessage(message.chId,
@@ -522,6 +250,290 @@ public class MainContentUI : ContentUIBehaviour
     #endregion
 
     #region brainCloud
+
+    // Enable RTT and get the chat channels and subscribe to the first channel
+    private IEnumerator HandleRTTAndSetup()
+    {
+        IsInteractable = false;
+
+        ChatField.placeholder.GetComponent<TMP_Text>().text = string.Empty;
+
+        yield return null;
+
+        // Clear current channels
+        if (channelButtons.Count > 0)
+        {
+            for (int i = 0; i < channelButtons.Count; i++)
+            {
+                Destroy(channelButtons[i].gameObject);
+            }
+
+            channelButtons.Clear();
+        }
+
+        // Enable RTT if it isn't
+        if (!rttService.IsRTTEnabled())
+        {
+            bool isSuccess = false;
+            void HandleRTTEnableSuccess(string jsonResponse, object cbObject)
+            {
+                isSuccess = true;
+            }
+
+            void HandleRTTEnableFailure(int status, int reasonCode, string jsonError, object cbObject)
+            {
+                Debug.LogError("Unable to enable RTT! Cannot use BC Chat.");
+
+                StopCoroutine(HandleRTTAndSetup());
+            }
+
+            rttService.EnableRTT(RTTConnectionType.WEBSOCKET, HandleRTTEnableSuccess, HandleRTTEnableFailure);
+
+            yield return new WaitUntil(() => isSuccess);
+        }
+
+        yield return null;
+
+        // Get our Global channels
+        bool getChannelsFinished = false;
+        void HandleGetSubscribedChannels(string jsonResponse, object cbObject)
+        {
+            var channels = jsonResponse.Deserialize("data").GetJSONArray<ChannelInfo>("channels");
+
+            foreach (var info in channels)
+            {
+                var channelToAdd = Instantiate(ChannelButtonTemplate, ChannelContent, false);
+                channelToAdd.SetChannelInfo(info, SetCurrentChatChannel);
+                channelButtons.Add(channelToAdd);
+
+                Debug.Log($"Added Channel: {info.name}");
+            }
+
+            getChannelsFinished = true;
+        }
+
+        chatService.GetSubscribedChannels("gl",
+                                          HandleGetSubscribedChannels,
+                                          OnFailure("Cound not get subscribed channels!", () => getChannelsFinished = true));
+
+        yield return new WaitUntil(() => getChannelsFinished);
+
+        if (channelButtons.Count <= 0)
+        {
+            IsInteractable = true;
+            Debug.LogWarning("No chat channels found.");
+
+            yield break;
+        }
+
+        ChannelScroll.verticalNormalizedPosition = 0.0f;
+
+        SetCurrentChatChannel(channelButtons[0].ChannelInfo); // Open first chat room
+    }
+
+    // This deserialized our RTT chat responses; this callback is integral to using the Chat service
+    private void RTTChatCallback(string responseData)
+    {
+        const string SERVICE = "chat",
+                     OPERATION_INCOMING = "INCOMING",
+                     OPERATION_UPDATE = "UPDATE",
+                     OPERATION_DELETE = "DELETE";
+
+        var data = responseData.Deserialize();
+        if (data.GetString("service") == SERVICE)
+        {
+            string op = data.GetString("operation");
+            if (op == OPERATION_INCOMING)
+            {
+                Message incoming = data.GetJSONObject<Message>("data");
+                if (incoming.chId != currentChannelInfo.id)
+                {
+                    return;
+                }
+
+                if (incoming.content.text == USER_ENTERED_MESSAGE)
+                {
+                    incoming.content.text = USER_ENTERED_MESSAGE.Replace("<USER>", incoming.from.name);
+                    incoming.from.id = string.Empty;
+                    incoming.date = DateTime.UnixEpoch;
+
+                    AddChatMessages(new Message[] { incoming });
+
+                    var chatMessage = channelChatMessages[^1];
+                    chatMessage.DeleteAction = null;
+                    chatMessage.EditAction = null;
+                    chatMessage.DisplayHeader(false);
+                    chatMessage.DisplayProfileImage(false);
+                    chatMessage.DisplayFooter(false);
+                }
+                else
+                {
+                    AddChatMessages(new Message[] { incoming });
+                }
+            }
+            else if (op == OPERATION_UPDATE)
+            {
+                Message updated = data.GetJSONObject<Message>("data");
+                if (updated.chId != currentChannelInfo.id)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < channelChatMessages.Count; i++)
+                {
+                    if (updated.msgId == channelChatMessages[i].Message.msgId)
+                    {
+                        channelChatMessages[i].SetChatContents(updated);
+                        break;
+                    }
+                }
+            }
+            else if (op == OPERATION_DELETE)
+            {
+                data = data.GetJSONObject("data");
+                if (data.GetString("chId") != currentChannelInfo.id)
+                {
+                    return;
+                }
+
+                string msgId = data.GetString("msgId");
+                for (int i = 0; i < channelChatMessages.Count; i++)
+                {
+                    if (msgId == channelChatMessages[i].Message.msgId)
+                    {
+                        Destroy(channelChatMessages[i].gameObject);
+                        channelChatMessages[i] = null;
+                        channelChatMessages.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError($"Unknown chat operation: {op}");
+            }
+
+            StartCoroutine(ScrollChatToBottom());
+        }
+        else
+        {
+            Debug.LogError($"Unknown service: {data.GetString("service")}");
+        }
+    }
+
+    // Adds chat messages to the chat scroll view
+    private void AddChatMessages(Message[] messages)
+    {
+        Message previous;
+        if (channelChatMessages.Count > 0)
+        {
+            previous = channelChatMessages[^1].Message;
+        }
+        else
+        {
+            previous.from.id = string.Empty;
+            previous.date = DateTime.UnixEpoch;
+        }
+
+        foreach (Message message in messages)
+        {
+            var chatMessageToAdd = Instantiate(ChatMessageTemplate, ChatContent, false);
+            chatMessageToAdd.SetChatContents(message);
+            chatMessageToAdd.DeleteAction = DeleteChatMessage;
+            chatMessageToAdd.EditAction = EditChatMessage;
+
+            if (previous.from.id == message.from.id &&
+                (message.date - previous.date).TotalMinutes < 1.0)
+            {
+                chatMessageToAdd.DisplayHeader(false);
+            }
+
+            if (!previous.from.id.IsEmpty() &&
+                (previous.from.id != message.from.id ||
+                (message.date - previous.date).TotalMinutes >= 1.0))
+            {
+                Instantiate(MessageSpacer, ChatContent, false);
+                chatMessageToAdd.transform.SetAsLastSibling();
+            }
+
+            previous = message;
+            channelChatMessages.Add(chatMessageToAdd);
+        }
+    }
+
+    // Handles channel connection and disconnections
+    private void SetCurrentChatChannel(ChannelInfo info)
+    {
+        // Check to make sure channel isn't already open
+        for (int i = 0; i < channelButtons.Count; i++)
+        {
+            if (channelButtons[i].IsActiveChannel &&
+                channelButtons[i].ChannelInfo.id == info.id)
+            {
+                return;
+            }
+        }
+
+        IsInteractable = false;
+        ChatField.text = string.Empty;
+
+        for (int i = 0; i < channelButtons.Count; i++)
+        {
+            if (channelButtons[i].ChannelInfo.id == info.id)
+            {
+                channelButtons[i].IsActiveChannel = true;
+            }
+            else
+            {
+                channelButtons[i].IsActiveChannel = false;
+            }
+        }
+
+        // Reset chat messages
+        for (int i = 0; i < ChatContent.childCount; i++)
+        {
+            GameObject child = ChatContent.GetChild(i).gameObject;
+            if (child.GetComponent<ChatMessage>() is ChatMessage chatMessage &&
+                channelChatMessages.Contains(chatMessage))
+            {
+                channelChatMessages[channelChatMessages.IndexOf(chatMessage)] = null;
+            }
+
+            Destroy(ChatContent.GetChild(i).gameObject);
+        }
+
+        channelChatMessages.Clear();
+
+        void HandleGetRecentChatMessages(string jsonResponse, object cbObject)
+        {
+            AddChatMessages(jsonResponse.Deserialize("data").GetJSONArray<Message>("messages"));
+
+            chatService.PostChatMessageSimple(info.id, USER_ENTERED_MESSAGE, false);
+
+            currentChannelInfo = info;
+            ChatField.placeholder.GetComponent<TMP_Text>().text = $"Message #{info.name}";
+            ChatField.interactable = true;
+
+            IsInteractable = true;
+
+            StartCoroutine(ScrollChatToBottom());
+        }
+
+        void HandleChatDisconnect(string jsonResponse, object cbObject)
+        {
+            chatService.ChannelConnect(cbObject.ToString(), MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
+        }
+
+        // Disconnect from current chat and connect to the new chat
+        if (!currentChannelInfo.id.IsEmpty())
+        {
+            chatService.ChannelDisconnect(currentChannelInfo.id, HandleChatDisconnect, HandleFailures, info.id);
+        }
+        else
+        {
+            chatService.ChannelConnect(info.id, MaxChatMessages, HandleGetRecentChatMessages, HandleFailures);
+        }
+    }
 
     private void HandleUserLogoutSuccess(string jsonResponse, object cbObject)
     {

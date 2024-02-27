@@ -5,6 +5,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Allows a user to log into the app via a Universal ID.
+/// </summary>
 public class LoginContentUI : ContentUIBehaviour
 {
     // User Input Restrictions

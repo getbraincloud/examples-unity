@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Displays Unity logs and brainCloud logs in-app.
+/// </summary>
 public class LogContentUI : ContentUIBehaviour
 {
     private const string LOG_APP_HEADER = "#APP";
