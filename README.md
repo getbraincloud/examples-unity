@@ -117,7 +117,7 @@ You can follow the example code on how to reconnect a user that lost connection.
 - Logout and disconnect everything (RTT, Relay, and wipe any authenticated info)
 - Re-initialize and Re-authenticate to then join back to the same room the User was disconnected from
 
-There is also a button to just disconnect the RTT connection and reconnect only RTT. To set this up for your app, go to your lobby settings under `Design> Multiplayer > Lobbies` and add `{"enableDisconnectButton":true}` to the **Custom Config** to your lobby.
+There is also a button to just disconnect the RTT connection and reconnect only RTT. To set this up for your app, go to your lobby settings under `Design > Multiplayer > Lobbies` and add `{"enableDisconnectButton":true}` to the **Custom Config** for your lobby.
 
 ---
 
