@@ -118,7 +118,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         LocalUserInfo.Username = in_username;
         _wrapper.AuthenticateUniversal(in_username, in_password, true, OnAuthenticateSuccess, OnFailureCallback);
-        AddUserToList(in_username);
+        AddUserToList(in_username, NetworkManager.Singleton.LocalClientId);
     }
     
     private void OnAuthenticateSuccess(string jsonResponse, object cbObject)
@@ -141,16 +141,17 @@ public class BrainCloudManager : MonoBehaviour
     }
     
     [ServerRpc]
-    public void AddUserToList(string in_username)
+    public void AddUserToList(string in_username, ulong in_clientID)
     {
         if(IsDedicatedServer)
         {
             UserScoreInfo user = new UserScoreInfo();
             user.clientName = in_username;
+            user.clientID = in_clientID;
             ListOfUsers.Add(user);
         }
     }
-    
+
     private void OnUpdateName(string jsonResponse, object cbObject)
     {
         MenuControl.Singleton.SwitchMenuButtons();
@@ -227,7 +228,6 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         
-
         //Using the key "operation" to determine what state the lobby is in
         if (response.ContainsKey("operation"))
         {
@@ -269,6 +269,19 @@ public class BrainCloudManager : MonoBehaviour
                     break;
             }
         }
+    }
+
+    [ServerRpc]
+    public string GetPlayerNameServerRpc(ulong clientID)
+    {
+        for (int i = 0; i < ListOfUsers.Count; i++)
+        {
+            if(ListOfUsers[i].clientID == clientID)
+            {
+                return ListOfUsers[i].clientName;
+            }
+        }
+        return "";
     }
     
     public void UpdateReady()

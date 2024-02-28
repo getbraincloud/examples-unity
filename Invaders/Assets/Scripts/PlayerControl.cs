@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
@@ -37,12 +38,16 @@ public class PlayerControl : NetworkBehaviour
 
     [SerializeField]
     private SpriteRenderer m_PlayerVisual;
-    private NetworkVariable<int> m_Score = new NetworkVariable<int>(0);
+    public NetworkVariable<int> m_Score = new NetworkVariable<int>(0);
 
     public bool IsAlive => m_Lives.Value > 0;
 
-    private UserInfo m_userInfo;
-
+    private string m_playerName;
+    public string PlayerName
+    {
+        get => m_playerName;
+        set => m_playerName = value;
+    }
     public bool IsDedicatedServer
     {
         get => BrainCloudManager.Singleton.IsDedicatedServer;
@@ -127,7 +132,8 @@ public class PlayerControl : NetworkBehaviour
             InvadersGame.OnSingletonReady += SubscribeToDelegatesAndUpdateValues;
         else
             SubscribeToDelegatesAndUpdateValues();
-        
+
+        PlayerName = BrainCloudManager.Singleton.GetPlayerNameServerRpc(NetworkManager.Singleton.LocalClientId);
         SceneTransitionHandler.sceneTransitionHandler.OnSceneStateChanged += SceneTransitionHandler_sceneStateChanged;
         UpdateColor();
     }
@@ -178,8 +184,6 @@ public class PlayerControl : NetworkBehaviour
         if (!IsOwner || !IsDedicatedServer) return;
         Debug.LogFormat("Score {0} ", currentAmount);
         if (InvadersGame.Singleton != null && IsOwner) InvadersGame.Singleton.SetScore(m_Score.Value);
-        if(IsDedicatedServer)
-            InvadersGame.Singleton.UpdateClientScore(OwnerClientId, currentAmount);
     } // ReSharper disable Unity.PerformanceAnalysis
 
     private void InGameUpdate()
@@ -233,6 +237,7 @@ public class PlayerControl : NetworkBehaviour
             m_MoveX.Value = 0;
             m_Lives.Value = 0;
             InvadersGame.Singleton.SetGameEnd(GameOverReason.Death);
+
             NotifyGameOverClientRpc(GameOverReason.Death, m_OwnerRPCParams);
             Instantiate(m_ExplosionParticleSystem, transform.position, quaternion.identity);
 
@@ -247,11 +252,11 @@ public class PlayerControl : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void NotifyGameOverClientRpc(GameOverReason reason, ClientRpcParams clientParams)
+    private void NotifyGameOverClientRpc(GameOverReason reason, ClientRpcParams clientParams )
     {
         NotifyGameOver(reason);
     }
-
+    
     /// <summary>
     /// This should only be called locally, either through NotifyGameOverClientRpc or through the InvadersGame.BroadcastGameOverReason
     /// </summary>

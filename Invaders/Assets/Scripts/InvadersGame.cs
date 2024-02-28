@@ -32,11 +32,18 @@ public enum GameOverReason : byte
     Max,
 }
 
-public struct UserScoreInfo
+[Serializable]
+public struct UserScoreInfo : INetworkSerializable
 {
     public ulong clientID;
     public string clientName;
     public int clientScore;
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref clientName);
+        serializer.SerializeValue(ref clientID);
+        serializer.SerializeValue(ref clientScore);
+    }
 }
 
 public class InvadersGame : NetworkBehaviour
@@ -105,7 +112,7 @@ public class InvadersGame : NetworkBehaviour
     private bool IsDedicatedServer;
 
     [SerializeField]
-    private TMP_Text m_UserGameOverPrefab;
+    private GameObject m_UserGameOverPrefab;
 
     [SerializeField]
     private GameObject m_ListOfUsersParent;
@@ -221,12 +228,6 @@ public class InvadersGame : NetworkBehaviour
             // Send the RPC only to the newly connected client
             SetReplicatedTimeRemainingClientRPC(m_TimeRemaining, new ClientRpcParams {Send = new ClientRpcSendParams{TargetClientIds = new List<ulong>() {clientId}}});
         }
-
-        UserScoreInfo user = new UserScoreInfo();
-        user.clientName = BrainCloudManager.Singleton.LocalUserInfo.Username;
-        user.clientScore = 0;
-        user.clientID = clientId;
-        BrainCloudManager.Singleton.ListOfUsers.Add(user);
     }
 
     /// <summary>
@@ -452,30 +453,15 @@ public class InvadersGame : NetworkBehaviour
             //gameOverText.gameObject.SetActive(true);
         }
 
-        var _listOfUsers = BrainCloudManager.Singleton.ListOfUsers;
-        _listOfUsers.Sort();
-        for (int i = 0; i < _listOfUsers.Count; i++)
+        var _listOfUsers = FindObjectsByType<PlayerControl>(FindObjectsSortMode.None);
+        
+        for (int i = 0; i < _listOfUsers.Length; i++)
         {
-            TMP_Text userEntry = Instantiate(m_UserGameOverPrefab, Vector3.zero, Quaternion.identity, m_ListOfUsersParent.transform);
-            userEntry.text = _listOfUsers[i].clientName + ": " + _listOfUsers[i].clientScore;
+            GameObject userGO = Instantiate(m_UserGameOverPrefab, Vector3.zero, Quaternion.identity, m_ListOfUsersParent.transform);
+            TMP_Text userEntry = userGO.transform.GetChild(0).GetComponent<TMP_Text>();
+            userEntry.text = _listOfUsers[i].PlayerName + ": " + _listOfUsers[i].m_Score;
         }
         gameOverText.transform.parent.gameObject.SetActive(true);
-    }
-    
-    public void UpdateClientScore(ulong clientId, int newScore)
-    {
-        var _listOfUsers = BrainCloudManager.Singleton.ListOfUsers;
-        for (int i = 0; i < _listOfUsers.Count; ++i)
-        {
-            if(_listOfUsers[i].clientID == clientId)
-            {
-                UserScoreInfo temp = _listOfUsers[i];
-                temp.clientScore = newScore;
-                _listOfUsers[i] = temp;
-            }
-        }
-
-        BrainCloudManager.Singleton.ListOfUsers = _listOfUsers;
     }
 
     public void SetGameEnd(GameOverReason reason)
