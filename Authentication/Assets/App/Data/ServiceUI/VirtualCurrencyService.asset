@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2dd0f747ddd6df94b8598f9bed2a0fde, type: 3}
-  m_Name: CurrencyService
+  m_Name: VirtualCurrencyService
   m_EditorClassIdentifier: 
   ServiceName: Virtual Currency
   ServiceDescription: "The Virtual Currency service manages virtual currency balances
@@ -20,5 +20,5 @@ MonoBehaviour:
     methods are callable from the client \u2013 use Cloud Code for the rest\r\n\u2022
     We have cleaned up the responses a bit, removing unnecessary fields like createdAt,
     updatedAt and profileId"
-  ServiceAPILink: https://getbraincloud.com/apidocs/apiref/?csharp#capi-virtualcurrency
+  ServiceAPILink: https://docs.braincloudservers.com/api/capi/virtualcurrency
   ServicePrefab: {fileID: 955278741173811123, guid: 6c3c926aeee19f84a92803edac799891, type: 3}
