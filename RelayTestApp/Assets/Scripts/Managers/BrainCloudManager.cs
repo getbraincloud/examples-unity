@@ -627,6 +627,11 @@ public class BrainCloudManager : MonoBehaviour
                 case "MEMBER_JOIN":
                     var lobby = jsonData["lobby"] as Dictionary<string, object>;
                     var lobbyTypeDef = lobby["lobbyTypeDef"] as Dictionary<string, object>;
+                    if (lobbyTypeDef == null || !lobbyTypeDef.ContainsKey("roomConfig"))
+                    {
+                        StateManager.Instance.UpdateDisconnectButtons(false);
+                        return;
+                    }
                     var roomConfig = lobbyTypeDef["roomConfig"] as Dictionary<string, object>;
                     
                     //These buttons are for testing a disconnect from internet scenario.
@@ -758,7 +763,7 @@ public class BrainCloudManager : MonoBehaviour
     
     public void Logout()
     {
-        _bcWrapper.Client.PlayerStateService.Logout();
+        _bcWrapper.Logout(false);
         StateManager.Instance.ChangeState(GameStates.SignIn);
     }
 
