@@ -1606,12 +1606,10 @@ namespace BrainCloudUNETExample.Game
         public void RpcSpawnPlayer(string in_profileId)
         {
             Vector3 spawnPoint = Vector3.zero;
-            spawnPoint.z = 22;
-            int playerTeam = 0;
+            spawnPoint.z = 22.0f;
             LobbyMemberInfo member = BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(in_profileId);
 
-            playerTeam = member.Team == "green" ? 1 : 2;
-
+            int playerTeam = member.Team == "green" ? 1 : 2;
             if (playerTeam == 1)
             {
                 spawnPoint.x = Random.Range(m_team1SpawnBounds.bounds.center.x - m_team1SpawnBounds.bounds.size.x / 2, m_team1SpawnBounds.bounds.center.x + m_team1SpawnBounds.bounds.size.x / 2) - 10;
@@ -1623,7 +1621,7 @@ namespace BrainCloudUNETExample.Game
                 spawnPoint.y = Random.Range(m_team2SpawnBounds.bounds.center.y - m_team2SpawnBounds.bounds.size.y / 2, m_team2SpawnBounds.bounds.center.y + m_team2SpawnBounds.bounds.size.y / 2);
             }
 
-            GameObject playerPlane = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/Game/PlayerController"), spawnPoint, Quaternion.LookRotation(Vector3.forward, (new Vector3(0, 0, 22))));
+            GameObject playerPlane = Instantiate(Resources.Load<GameObject>("Prefabs/Game/PlayerController"), spawnPoint, Quaternion.LookRotation(Vector3.forward, new Vector3(0, 0, 22.0f)));
 
             BombersPlayerController controller = playerPlane.GetComponent<BombersPlayerController>();
             if (playerTeam == 1)
@@ -1650,13 +1648,13 @@ namespace BrainCloudUNETExample.Game
         public void RpcSpawnPlayer(string in_profileId, Vector3 in_spawnPoint)
         {
             Vector3 spawnPoint = new Vector3(in_spawnPoint.x, in_spawnPoint.y, in_spawnPoint.z);
-            int playerTeam = 0;
             LobbyMemberInfo member = BombersNetworkManager.LobbyInfo.GetMemberWithProfileId(in_profileId);
-            playerTeam = member.Team == "green" ? 1 : 2;
 
-            GameObject playerPlane = (GameObject)Instantiate((GameObject)Resources.Load("Prefabs/Game/PlayerController"), spawnPoint, Quaternion.LookRotation(Vector3.forward, (new Vector3(0, 0, 22))));
+            GameObject playerPlane = Instantiate(Resources.Load<GameObject>("Prefabs/Game/PlayerController"), spawnPoint, Quaternion.LookRotation(Vector3.forward, new Vector3(0, 0, 22.0f)));
 
             BombersPlayerController controller = playerPlane.GetComponent<BombersPlayerController>();
+
+            int playerTeam = member.Team == "green" ? 1 : 2;
             if (playerTeam == 1)
             {
                 playerPlane.layer = 8;
