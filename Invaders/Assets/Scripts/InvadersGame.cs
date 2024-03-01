@@ -124,7 +124,7 @@ public class InvadersGame : NetworkBehaviour
     private void Awake()
     {
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
-
+        gameOverText.transform.parent.gameObject.SetActive(false);
         Assert.IsNull(Singleton, $"Multiple instances of {nameof(InvadersGame)} detected. This should not happen.");
         Singleton = this;
         
@@ -452,16 +452,20 @@ public class InvadersGame : NetworkBehaviour
             gameOverText.SetText(message);
             //gameOverText.gameObject.SetActive(true);
         }
-
-        var _listOfUsers = FindObjectsByType<PlayerControl>(FindObjectsSortMode.None);
         
-        for (int i = 0; i < _listOfUsers.Length; i++)
+        if(!gameOverText.transform.parent.gameObject.activeInHierarchy)
         {
-            GameObject userGO = Instantiate(m_UserGameOverPrefab, Vector3.zero, Quaternion.identity, m_ListOfUsersParent.transform);
-            TMP_Text userEntry = userGO.transform.GetChild(0).GetComponent<TMP_Text>();
-            userEntry.text = _listOfUsers[i].PlayerName + ": " + _listOfUsers[i].m_Score;
+            var _listOfUsers = FindObjectsByType<PlayerControl>(FindObjectsSortMode.None);
+        
+            for (int i = 0; i < _listOfUsers.Length; i++)
+            {
+                GameObject userGO = Instantiate(m_UserGameOverPrefab, Vector3.zero, Quaternion.identity, m_ListOfUsersParent.transform);
+                TMP_Text userEntryText = userGO.transform.GetChild(0).GetComponent<TMP_Text>();
+                string playerName = BrainCloudManager.Singleton.CurrentLobby.Members[i].Username;
+                userEntryText.text = playerName + ": " + _listOfUsers[i].Score;
+            }
+            gameOverText.transform.parent.gameObject.SetActive(true);
         }
-        gameOverText.transform.parent.gameObject.SetActive(true);
     }
 
     public void SetGameEnd(GameOverReason reason)

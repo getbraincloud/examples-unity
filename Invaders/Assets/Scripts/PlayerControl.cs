@@ -38,7 +38,11 @@ public class PlayerControl : NetworkBehaviour
 
     [SerializeField]
     private SpriteRenderer m_PlayerVisual;
-    public NetworkVariable<int> m_Score = new NetworkVariable<int>(0);
+    private NetworkVariable<int> m_Score = new NetworkVariable<int>(0);
+    public int Score
+    {
+        get => m_Score.Value;
+    }
 
     public bool IsAlive => m_Lives.Value > 0;
 
@@ -133,7 +137,6 @@ public class PlayerControl : NetworkBehaviour
         else
             SubscribeToDelegatesAndUpdateValues();
 
-        PlayerName = BrainCloudManager.Singleton.GetPlayerNameServerRpc(NetworkManager.Singleton.LocalClientId);
         SceneTransitionHandler.sceneTransitionHandler.OnSceneStateChanged += SceneTransitionHandler_sceneStateChanged;
         UpdateColor();
     }
@@ -181,15 +184,13 @@ public class PlayerControl : NetworkBehaviour
 
     private void OnScoreChanged(int previousAmount, int currentAmount)
     {
-        if (!IsOwner || !IsDedicatedServer) return;
+        if (!IsOwner) return;
         Debug.LogFormat("Score {0} ", currentAmount);
-        if (InvadersGame.Singleton != null && IsOwner) InvadersGame.Singleton.SetScore(m_Score.Value);
+        if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetScore(m_Score.Value);
     } // ReSharper disable Unity.PerformanceAnalysis
 
     private void InGameUpdate()
     {
-        //Debug.Log("[PlayerControl - InGameUpdate()]");
-        //Debug.Log($"IsLocalPlayer {IsLocalPlayer} IsOwner {IsOwner} HasGameStarted {m_HasGameStarted}");
         if (!IsLocalPlayer || !IsOwner || !m_HasGameStarted) return;
         if (!m_IsAlive) return;
 

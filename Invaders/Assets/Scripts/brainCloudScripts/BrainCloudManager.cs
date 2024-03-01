@@ -118,7 +118,6 @@ public class BrainCloudManager : MonoBehaviour
     {
         LocalUserInfo.Username = in_username;
         _wrapper.AuthenticateUniversal(in_username, in_password, true, OnAuthenticateSuccess, OnFailureCallback);
-        AddUserToList(in_username, NetworkManager.Singleton.LocalClientId);
     }
     
     private void OnAuthenticateSuccess(string jsonResponse, object cbObject)
@@ -265,6 +264,7 @@ public class BrainCloudManager : MonoBehaviour
                     _unityTransport.ConnectionData.Address = _roomAddress;
                     _unityTransport.ConnectionData.Port = 9000;
                     _netManager.StartClient();
+                    AddUserToList(_localUserInfo.Username, NetworkManager.Singleton.LocalClientId);
                     //open in game level and then connect to server
                     break;
             }
