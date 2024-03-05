@@ -93,9 +93,12 @@ public class Leaderboard : ResourcesManager
                                 ["data"] as Dictionary<string, object>)
                                 ["leaderboard"] as Dictionary<string, object>[];
 
-        foreach (Dictionary<string, object> score in leaderboardData)
+        if (leaderboardData != null && leaderboardData.Length > 0)
         {
-            scores.Add(new PlayerInfo(score));
+            foreach (Dictionary<string, object> score in leaderboardData)
+            {
+                scores.Add(new PlayerInfo(score));
+            }
         }
     }
 
