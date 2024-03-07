@@ -188,7 +188,7 @@ public class JenkinsBuild
 #elif UNITY_STANDALONE_OSX
             return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.app";
 #elif UNITY_WEBGL
-            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()};
+            return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}";
 #else
             return $"{projectName}_{environmentString}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
 #endif

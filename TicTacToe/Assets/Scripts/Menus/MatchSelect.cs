@@ -114,9 +114,12 @@ public class MatchSelect : ResourcesManager
                             ["data"] as Dictionary<string, object>)
                             ["matchesFound"] as Dictionary<string, object>[];
 
-        foreach (Dictionary<string, object> match in matchesData)
+        if (matchesData != null && matchesData.Length > 0)
         {
-            matchedProfiles.Add(new PlayerInfo(match));
+            foreach (Dictionary<string, object> match in matchesData)
+            {
+                matchedProfiles.Add(new PlayerInfo(match));
+            }
         }
 
         // After, fetch our game list from Braincloud

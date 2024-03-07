@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 #if UNITY_EDITOR	
 using UnityEditor;
 #endif
@@ -95,23 +95,23 @@ namespace AssetBundles
         /// Returns true if certain asset bundle has been downloaded without checking
         /// whether the dependencies have been loaded.
         /// </summary>
-        static public bool IsAssetBundleDownloaded(string assetBundleName)
-        {
-#if UNITY_PS4
-            return true;
-#else 
-    #if UNITY_EDITOR
-            if (SimulateAssetBundleInEditor) return true;
-    #endif
-            Log(LogType.Warning, assetBundleName + " : " + m_AssetBundleManifest.GetAssetBundleHash(assetBundleName));
-            Log(LogType.Warning, "menuIcons : " + m_AssetBundleManifest.GetAssetBundleHash("menuIcons"));
-            string URL = m_BaseDownloadingURL + assetBundleName;
-
-            return Caching.IsVersionCached(URL, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName)) ||
-                m_LoadedAssetBundles.ContainsKey(assetBundleName);
-#endif
-
-        }
+//        static public bool IsAssetBundleDownloaded(string assetBundleName)
+//        {
+//#if UNITY_PS4
+//            return true;
+//#else 
+//    #if UNITY_EDITOR
+//            if (SimulateAssetBundleInEditor) return true;
+//    #endif
+//            Log(LogType.Warning, assetBundleName + " : " + m_AssetBundleManifest.GetAssetBundleHash(assetBundleName));
+//            Log(LogType.Warning, "menuIcons : " + m_AssetBundleManifest.GetAssetBundleHash("menuIcons"));
+//            string URL = m_BaseDownloadingURL + assetBundleName;
+//
+//            return Caching.IsVersionCached(URL, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName)) ||
+//                m_LoadedAssetBundles.ContainsKey(assetBundleName);
+//#endif
+//
+//        }
 
 
         [System.Diagnostics.Conditional("DEBUG_LOG_ENABLED")]
