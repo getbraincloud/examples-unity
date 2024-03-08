@@ -395,9 +395,20 @@ public class NetworkManager : MonoBehaviour
                     streamInfo.PlaybackStreamID = streams[0]["playbackStreamId"] as string;
                     if (streams[0]["summary"] is Dictionary<string, object> summary)
                     {
-                        streamInfo.SlayCount = (int) summary["slayCount"];
-                        streamInfo.DefeatedTroops = (int) summary["defeatedTroops"];
-                        streamInfo.DidInvadersWin = (bool) summary["didInvadersWin"];
+                        if (summary.ContainsKey("slayCount"))
+                        {
+                            streamInfo.SlayCount = (int) summary["slayCount"];
+                        }
+
+                        if (summary.ContainsKey("defeatedTroops"))
+                        {
+                            streamInfo.DefeatedTroops = (int) summary["defeatedTroops"];
+                        }
+
+                        if (summary.ContainsKey("didInvadersWin"))
+                        {
+                            streamInfo.DidInvadersWin = (bool) summary["didInvadersWin"];
+                        }
                     }
                 }
             }
