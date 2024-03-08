@@ -1,5 +1,11 @@
 # brainCloud Clashers
 
+<p align="center">
+    <img  src="../_screenshots/x_clashers.png?raw=true">
+</p>
+
+---
+
 This example describes an approach for implementing a Clash of Clans, Boom Beach, etc., type of game using brainCloud's **One-Way Match** service.
 
 There are many ways to solve this functionality but in this example project, the player will create **ReadOnly User Entities** to define their defense and invasion information and then record specific events during gameplay to replay the raid. This example will only save one playback stream ID but it is possible to do this for more than one playback stream.

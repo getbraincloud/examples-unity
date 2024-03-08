@@ -33,7 +33,7 @@ Create a new app using a template of one of these examples:
 </p>
 
 5. After creating the new app, you can review the imported data on the brainCloud dashboard
-    - The SpaceShooter example imports stats which can be viewed on the `Design > Statistics Rules > User Statistics` [page](https://portal.braincloudservers.com/admin/dashboard?custom=null#/development/stats-player)
+    - The SpaceShooter example imports stats which can be viewed on the `Design > Cloud Data > User Statistics` page
 
 <p align="center">
     <img  src="./_screenshots/3_bcStats.png?raw=true">
@@ -80,6 +80,12 @@ This form of hosting requires our **plus** plans, so to entirely run the example
 - `DEBUG_LOG_ENABLED` - Enable logs via GDebug Class
 - `STEAMWORKS_ENABLED` - Enable Steam SDK integration, must have the steam client open on a desktop to use via the editor
 - `BUY_CURRENCY_ENABLED` - Enable store product purchasing – PC / Mac / Standalone builds require the `STEAMWORKS_ENABLED` flag
+
+---
+
+## Invaders
+
+New example showcasing how to use brainCloud to faciliate connections between users and a server. Check out the [Invaders README.md](./Invaders/README.md) for more information.
 
 ---
 
