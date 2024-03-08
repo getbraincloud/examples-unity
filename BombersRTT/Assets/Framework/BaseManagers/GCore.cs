@@ -60,7 +60,9 @@ namespace Gameframework
                 m_wrapper.WrapperName = "mainWrapper";
                 m_wrapper.InitWithApps();
                 go.transform.SetParent(transform);
-
+#if UNITY_WEBGL
+                BrainCloudLobby.UseHttps = true;
+#endif
 #if BC_DEBUG_LOG_ENABLED
                 m_wrapper.Client.EnableLogging(true);
 #endif
