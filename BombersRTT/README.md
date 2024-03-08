@@ -2,7 +2,7 @@
 
 <p align="center">
     <img  src="../_screenshots/x_bombers.png?raw=true">
-    Lobby, chat, presence and RTT multiplayer example.
+    Lobby, Chat, Presence, and RTT Multiplayer
 </p>
 
 ---

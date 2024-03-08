@@ -2,7 +2,7 @@
 
 <p align="center">
     <img  src="../_screenshots/x_ttt.png?raw=true">
-    Async multiplayer, cloud code and RTT example. 
+    Async Multiplayer, Cloud Code, Gamification, and RTT
 </p>
 
 ---
