@@ -57,7 +57,7 @@ Be sure to enable RTT on your app in brainCloud in order to test the example pro
 
 ## BCClashers
 
-This example showcases the **One-Way Match** and **Playback Stream** services in brainCloud. Check out the [Clashers README.md](./brainCloud%20Clashers/README.md) for more information.
+This example showcases the **One-Way Match** and **Playback Stream** services in brainCloud. Check out the [Clashers README.md](./BCClashers/README.md) for more information.
 
 ---
 
