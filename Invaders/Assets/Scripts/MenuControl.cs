@@ -110,35 +110,4 @@ public class MenuControl : MonoBehaviour
         LoginInputFields.SetActive(false);
         MainMenuButtons.SetActive(true);
     }
-    
-    public void StartClient()
-    {
-        /*var utpTransport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
-        if (utpTransport)
-        {
-            //ToDo: Need to replace the set connection data to IP address from brainCloud
-            utpTransport.SetConnectionData(Sanitize(m_IPAddressText.text), 7777);
-        }
-        if (!NetworkManager.Singleton.StartClient())
-        {
-            Debug.LogError("Failed to start client.");
-        }*/
-
-    }
-    
-    public void StartServer()
-    {
-        NetworkManager.Singleton.StartServer();
-    }
-    
-    public void StartHost()
-    {
-        NetworkManager.Singleton.StartHost();
-    }
-    
-    static string Sanitize(string dirtyString)
-    {
-        // sanitize the input for the ip address
-        return Regex.Replace(dirtyString, "[^A-Za-z0-9.]", "");
-    }
 }

@@ -247,18 +247,26 @@ public class BrainCloudManager : MonoBehaviour
                         if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
                         {
                             // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                            //CloseGame(true);
+                            LobbyControl.Singleton.SetupPopupPanel($"Received an error message while launching room: {reason["desc"]}");
                         }
                         break;
                     }
                 case "STARTING":
                     break;
                 case "ROOM_ASSIGNED":
+                    if(LobbyControl.Singleton != null)
+                    {
+                        LobbyControl.Singleton.LoadingIndicatorMessage = "Server room is assigned";
+                    }
                     Dictionary<string, object> connectData = jsonData["connectData"] as Dictionary<string, object>;
                     _roomAddress = connectData["address"] as string;
                     break;
                 case "ROOM_READY":
-
+                    if(LobbyControl.Singleton != null)
+                    {
+                        LobbyControl.Singleton.LoadingIndicatorMessage = "Room is ready";
+                        LobbyControl.Singleton.IsLoading = false;
+                    }
                     //get connection info
                     SceneTransitionHandler.SwitchScene("Connecting");
                     _unityTransport.ConnectionData.Address = _roomAddress;
@@ -271,19 +279,6 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-    [ServerRpc]
-    public string GetPlayerNameServerRpc(ulong clientID)
-    {
-        for (int i = 0; i < ListOfUsers.Count; i++)
-        {
-            if(ListOfUsers[i].clientID == clientID)
-            {
-                return ListOfUsers[i].clientName;
-            }
-        }
-        return "";
-    }
-    
     public void UpdateReady()
     {
         Dictionary<string, object> extra = new Dictionary<string, object>();
@@ -294,6 +289,10 @@ public class BrainCloudManager : MonoBehaviour
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
+        if(LobbyControl.Singleton != null)
+        {
+            LobbyControl.Singleton.SetupPopupPanel($"Failure Callback received, error message: {statusMessage}");
+        }
         Debug.Log("Error: " + statusMessage);
     }
 
