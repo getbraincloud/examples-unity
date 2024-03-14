@@ -48,19 +48,6 @@ public class MenuControl : MonoBehaviour
         LoadingIndicator.gameObject.SetActive(false);
         LoginInputFields.gameObject.SetActive(true);
         MainMenuButtons.gameObject.SetActive(false);
-#if UNITY_SERVER && !UNITY_EDITOR
-        NetworkManager.Singleton.OnServerStarted += () =>
-        {
-            //Debug.Log("Server Started Successfully !");
-        };
-
-        NetworkManager.Singleton.OnClientConnectedCallback += clientID =>
-        {
-            SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
-            SceneTransitionHandler.sceneTransitionHandler.SwitchScene(m_LobbySceneName);
-        };
-        StartServer();
-#endif
     }
     
     public void JoinGame()
