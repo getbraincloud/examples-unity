@@ -1,6 +1,9 @@
 # Bombers RTT
 
-Lobby, chat, presence and RTT multiplayer example.
+<p align="center">
+    <img  src="../_screenshots/x_bombers.png?raw=true">
+    Lobby, Chat, Presence, and RTT Multiplayer
+</p>
 
 ---
 
