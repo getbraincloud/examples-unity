@@ -59,7 +59,7 @@ public class MenuControl : MonoBehaviour
             SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
             SceneTransitionHandler.sceneTransitionHandler.SwitchScene(m_LobbySceneName);
         };
-        StartServer();
+        NetworkManager.Singleton.StartServer();
 #endif
     }
     
