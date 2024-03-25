@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using System;
+using System.Net;
 
 public class ServerConnectionManager : NetworkBehaviour
 {
@@ -18,11 +19,14 @@ public class ServerConnectionManager : NetworkBehaviour
     private Lobby _currentLobby;
 
     private Coroutine _serverShutdownCR;
+    private string _publicIP;
 
 
     private void Awake()
     {
         Debug.Log("[ServerConnectionManager - Awake()]");
+
+        StartCoroutine(GetPublicIP());
 
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
 
@@ -84,7 +88,7 @@ public class ServerConnectionManager : NetworkBehaviour
             var requestDataJson = new Dictionary<string, object>();
             requestDataJson["lobbyId"] = _currentLobby.LobbyID;
             var requestConnectDataJson = new Dictionary<string, object>();
-            requestConnectDataJson["address"] = BrainCloudManager.Singleton.UnityTransport.ConnectionData.Address;
+            requestConnectDataJson["address"] = _publicIP;
             requestConnectDataJson["port"] = BrainCloudManager.Singleton.UnityTransport.ConnectionData.Port;
             requestDataJson["connectInfo"] = requestConnectDataJson;
 
@@ -97,6 +101,28 @@ public class ServerConnectionManager : NetworkBehaviour
         {
             Debug.Log("Invalid lobby, shutting down server");
             Application.Quit();
+        }
+    }
+
+    private IEnumerator GetPublicIP()
+    {
+        using (WebClient client = new WebClient())
+        {
+            // Make a request to the ipify API
+            string response = null;
+            try
+            {
+                response = client.DownloadString("https://api.ipify.org");
+            }
+            catch (WebException e)
+            {
+                Debug.LogError("Error getting public IP: " + e.Message);
+                yield break;
+            }
+
+            // Parse and print the public IP address
+            _publicIP = response.Trim();
+            Debug.Log("Public IP Address: " + _publicIP);
         }
     }
 
