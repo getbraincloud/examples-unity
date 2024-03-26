@@ -489,12 +489,13 @@ public class InvadersGame : NetworkBehaviour
         
         if(!gameOverText.transform.parent.gameObject.activeInHierarchy)
         {
-            for (int i = 0; i < _players.Length; i++)
+            var players = FindObjectsOfType<PlayerControl>();
+            for (int i = 0; i < players.Length; i++)
             {
                 GameObject userGO = Instantiate(m_UserGameOverPrefab, Vector3.zero, Quaternion.identity, m_ListOfUsersParent.transform);
                 TMP_Text userEntryText = userGO.transform.GetChild(0).GetComponent<TMP_Text>();
                 string playerName = BrainCloudManager.Singleton.CurrentLobby.Members[i].Username;
-                userEntryText.text = playerName + ": " + _players[i].Score;
+                userEntryText.text = playerName + ": " + players[i].Score;
             }
             gameOverText.transform.parent.gameObject.SetActive(true);
         }
@@ -515,11 +516,12 @@ public class InvadersGame : NetworkBehaviour
         foreach (NetworkClient networkedClient in NetworkManager.Singleton.ConnectedClientsList)
         {
             var playerObject = networkedClient.PlayerObject;
-            if(playerObject == null) continue;
-            
-            // We should just early out if any of the player's are still alive
-            if (playerObject.GetComponent<PlayerControl>().IsAlive)
-                return;
+            if(playerObject != null)
+            {
+                // We should just early out if any of the player's are still alive
+                if (playerObject.GetComponent<PlayerControl>().IsAlive)
+                    return;
+            }
         }
         
         this.isGameOver.Value = true;

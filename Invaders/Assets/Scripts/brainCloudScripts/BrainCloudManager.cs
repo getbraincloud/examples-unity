@@ -115,6 +115,14 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        if(_wrapper.Client.Authenticated)
+        {
+            //_wrapper.Client.LogoutOnApplicationQuit();
+        }
+    }
+
     public void AuthenticateWithBrainCloud(string in_username, string in_password)
     {
         LocalUserInfo.Username = in_username;
