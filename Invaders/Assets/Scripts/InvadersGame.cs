@@ -117,6 +117,8 @@ public class InvadersGame : NetworkBehaviour
     [SerializeField]
     private GameObject m_ListOfUsersParent;
 
+    private PlayerControl []_players;
+
     /// <summary>
     ///     Awake
     ///     A good time to initialize server side values
@@ -161,6 +163,17 @@ public class InvadersGame : NetworkBehaviour
 
         //If we are a connected client, then don't update the enemies (server side only)
         if (!IsDedicatedServer) return;
+
+        //Check to see if all players are currently alive in game
+        if (!ArePlayersAlive())
+        {
+            isGameOver.Value = true;
+            for (int i = 0; i < _players.Length; i++)
+            {
+                _players[i].NotifyGameOverClientRpc(GameOverReason.Death);
+            }
+            SetGameEnd(GameOverReason.Death);
+        }
 
         //If we are the server and the game has started, then update the enemies
         if (HasGameStarted()) UpdateEnemies();
@@ -290,6 +303,26 @@ public class InvadersGame : NetworkBehaviour
             return isGameOver.Value;
         return m_ClientGameOver;
     }
+    
+    private bool ArePlayersAlive()
+    {
+        int playersAlive = 0;
+        if(_players.Length > 0)
+        {
+            for (int i = 0; i < _players.Length; i++)
+            {
+                if (_players[i].IsAlive)
+                {
+                    playersAlive++;
+                } 
+            }
+        }
+        if(playersAlive == 0)
+        {
+            return false;
+        }
+        return true;
+    }
 
     /// <summary>
     ///     HasGameStarted
@@ -334,6 +367,7 @@ public class InvadersGame : NetworkBehaviour
     /// </summary>
     private void OnGameStarted()
     {
+        _players = FindObjectsByType<PlayerControl>(FindObjectsSortMode.None);
         gameTimerText.gameObject.SetActive(false);
         CreateEnemies();
         CreateShields();
@@ -455,14 +489,13 @@ public class InvadersGame : NetworkBehaviour
         
         if(!gameOverText.transform.parent.gameObject.activeInHierarchy)
         {
-            var _listOfUsers = FindObjectsByType<PlayerControl>(FindObjectsSortMode.None);
-        
-            for (int i = 0; i < _listOfUsers.Length; i++)
+            var players = FindObjectsOfType<PlayerControl>();
+            for (int i = 0; i < players.Length; i++)
             {
                 GameObject userGO = Instantiate(m_UserGameOverPrefab, Vector3.zero, Quaternion.identity, m_ListOfUsersParent.transform);
                 TMP_Text userEntryText = userGO.transform.GetChild(0).GetComponent<TMP_Text>();
                 string playerName = BrainCloudManager.Singleton.CurrentLobby.Members[i].Username;
-                userEntryText.text = playerName + ": " + _listOfUsers[i].Score;
+                userEntryText.text = playerName + ": " + players[i].Score;
             }
             gameOverText.transform.parent.gameObject.SetActive(true);
         }
@@ -483,11 +516,12 @@ public class InvadersGame : NetworkBehaviour
         foreach (NetworkClient networkedClient in NetworkManager.Singleton.ConnectedClientsList)
         {
             var playerObject = networkedClient.PlayerObject;
-            if(playerObject == null) continue;
-            
-            // We should just early out if any of the player's are still alive
-            if (playerObject.GetComponent<PlayerControl>().IsAlive)
-                return;
+            if(playerObject != null)
+            {
+                // We should just early out if any of the player's are still alive
+                if (playerObject.GetComponent<PlayerControl>().IsAlive)
+                    return;
+            }
         }
         
         this.isGameOver.Value = true;

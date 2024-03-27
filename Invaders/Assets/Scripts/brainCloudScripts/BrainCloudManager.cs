@@ -59,7 +59,8 @@ public class BrainCloudManager : MonoBehaviour
         set => _localUserInfo = value;
     }
 
-    private string _roomAddress = "127.0.0.1";
+    private string _roomAddress;
+    private int _roomPort;
 
     public static BrainCloudManager Singleton { get; private set; }
     public List<UserScoreInfo> ListOfUsers = new List<UserScoreInfo>();
@@ -85,7 +86,7 @@ public class BrainCloudManager : MonoBehaviour
             string appId = Environment.GetEnvironmentVariable("APP_ID");
             string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
             string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
-            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.internal.braincloudservers.com/s2sdispatcher");
+            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.braincloudservers.com/s2sdispatcher");
             //_bcS2S.Authenticate();
             _bcS2S.LoggingEnabled = true;
         }
@@ -111,6 +112,14 @@ public class BrainCloudManager : MonoBehaviour
         if (IsDedicatedServer)
         {
             _bcS2S.RunCallbacks();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        if(_wrapper.Client.Authenticated)
+        {
+            //_wrapper.Client.LogoutOnApplicationQuit();
         }
     }
 
@@ -260,6 +269,8 @@ public class BrainCloudManager : MonoBehaviour
                     }
                     Dictionary<string, object> connectData = jsonData["connectData"] as Dictionary<string, object>;
                     _roomAddress = connectData["address"] as string;
+                    Dictionary<string, object> ports = connectData["ports"] as Dictionary<string, object>;
+                    _roomPort = (int)ports["7777/tcp"];
                     break;
                 case "ROOM_READY":
                     if(LobbyControl.Singleton != null)
@@ -267,10 +278,9 @@ public class BrainCloudManager : MonoBehaviour
                         LobbyControl.Singleton.LoadingIndicatorMessage = "Room is ready";
                         LobbyControl.Singleton.IsLoading = false;
                     }
-                    //get connection info
                     SceneTransitionHandler.SwitchScene("Connecting");
                     _unityTransport.ConnectionData.Address = _roomAddress;
-                    _unityTransport.ConnectionData.Port = 9000;
+                    _unityTransport.ConnectionData.Port = (ushort)_roomPort;
                     _netManager.StartClient();
                     AddUserToList(_localUserInfo.Username, NetworkManager.Singleton.LocalClientId);
                     //open in game level and then connect to server
