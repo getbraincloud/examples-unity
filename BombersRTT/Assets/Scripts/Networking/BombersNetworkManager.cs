@@ -609,7 +609,7 @@ namespace BrainCloudUNETExample
             else
             {
                 GStateManager.Instance.EnableLoadingSpinner(true);
-                GCore.Wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnEnableRTTSuccess, OnEnableRTTFailed);
+                GCore.Wrapper.RTTService.EnableRTT(OnEnableRTTSuccess, OnEnableRTTFailed);
             }
         }
         private void onRSConnectErrorHandle()
@@ -1152,7 +1152,7 @@ namespace BrainCloudUNETExample
 
             GStateManager.Instance.EnableLoadingSpinner(true);
             GCore.Wrapper.RTTService.DisableRTT();
-            GCore.Wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnEnableRTTSuccess, OnEnableRTTFailed);
+            GCore.Wrapper.RTTService.EnableRTT(OnEnableRTTSuccess, OnEnableRTTFailed);
         }
 
         public bool AllMembersJoined()
@@ -1365,6 +1365,11 @@ namespace BrainCloudUNETExample
 
         public override void OnApplicationQuit()
         {
+            if(GCore.Wrapper.Client.Authenticated)
+            {
+                GCore.Wrapper.Client.LogoutOnApplicationQuit();    
+            }
+            
             DisconnectGlobalChat();
 
             // force whatever is aroudn to be sent out

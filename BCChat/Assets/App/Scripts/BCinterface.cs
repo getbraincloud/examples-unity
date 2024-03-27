@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using BrainCloud.JsonFx.Json;
@@ -62,6 +63,14 @@ public class BCinterface : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        if(_bc.Client.Authenticated)
+        {
+            _bc.Client.LogoutOnApplicationQuit();
+        }
+    }
+
     //click authentication button
     public void AuthenticateBC()
     {
@@ -94,7 +103,7 @@ public class BCinterface : MonoBehaviour
             SetResponseText("RTT is enabled..", Color.red);
             return;
         }
-        _bc.RTTService.EnableRTT(BrainCloud.RTTConnectionType.WEBSOCKET, EnableRTTSuccessCallback, EnableRTTErrorCallback);
+        _bc.RTTService.EnableRTT(EnableRTTSuccessCallback, EnableRTTErrorCallback);
         _bc.RTTService.RegisterRTTChatCallback(RTTCallback);
     }
     

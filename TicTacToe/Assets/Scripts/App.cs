@@ -66,7 +66,12 @@ public class App : MonoBehaviour
         // 
         // Given we are using a game Object. Leave _bc.Update commented out.
     //}
-    
+
+    private void OnApplicationQuit()
+    {
+        Bc.Client.LogoutOnApplicationQuit();
+    }
+
     //Callback used for "Play Again?" scenario
     public void RTTEventCallback(string json)
     {

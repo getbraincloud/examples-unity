@@ -46,8 +46,16 @@ public class MenuControl : MonoBehaviour
             Destroy(gameObject);
         }
         LoadingIndicator.gameObject.SetActive(false);
-        LoginInputFields.gameObject.SetActive(true);
-        MainMenuButtons.gameObject.SetActive(false);
+        if(BrainCloudManager.Singleton.BCWrapper.Client.Authenticated) 
+        {
+            LoginInputFields.gameObject.SetActive(false);
+            MainMenuButtons.gameObject.SetActive(true);       
+        }
+        else
+        {
+            LoginInputFields.gameObject.SetActive(true);
+            MainMenuButtons.gameObject.SetActive(false);            
+        }
     }
     
     public void JoinGame()

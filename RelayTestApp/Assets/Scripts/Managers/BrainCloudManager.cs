@@ -84,6 +84,14 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        if(_bcWrapper.Client.Authenticated)
+        {
+            _bcWrapper.Client.LogoutOnApplicationQuit();
+        }
+    }
+
     public void InitializeBC()
     {
         _bcWrapper.Init();
@@ -213,7 +221,7 @@ public class BrainCloudManager : MonoBehaviour
         _isReconnecting = false;
         // Enable RTT
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
-        _bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnRTTDisconnected);
+        _bcWrapper.RTTService.EnableRTT(OnRTTConnected, OnRTTDisconnected);
     }
 
     // Cleanly close the game. Go back to main menu but don't log
@@ -262,7 +270,7 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         _isReconnecting = true;
         //Continue doing reconnection stuff.....
-        _bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, RTTReconnect, OnRTTDisconnected);
+        _bcWrapper.RTTService.EnableRTT(RTTReconnect, OnRTTDisconnected);
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
     }
 
@@ -753,7 +761,7 @@ public class BrainCloudManager : MonoBehaviour
     
     private void OnReAuthenticateSuccess(string response, object cbObject)
     {
-        _bcWrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnReEnableRTT, LogErrorThenPopUpWindow);
+        _bcWrapper.RTTService.EnableRTT(OnReEnableRTT, LogErrorThenPopUpWindow);
     }
     
     private void OnReEnableRTT(string response, object cbObject)

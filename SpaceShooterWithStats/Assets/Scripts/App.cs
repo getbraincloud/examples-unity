@@ -16,4 +16,12 @@ public class App : MonoBehaviour
         
         Bc.Client.EnableLogging(true);
     }
+
+    private void OnApplicationQuit()
+    {
+        if(Bc.Client.Authenticated)
+        {
+            Bc.Client.LogoutOnApplicationQuit();
+        }
+    }
 }

@@ -118,6 +118,14 @@ public class ExampleApp : MonoBehaviour
         BC = null;
     }
 
+    private void OnApplicationQuit()
+    {
+        if(BC.Client.Authenticated)
+        {
+            BC.Client.LogoutOnApplicationQuit();
+        }
+    }
+
     #endregion
 
     private IEnumerator InitializeApp()

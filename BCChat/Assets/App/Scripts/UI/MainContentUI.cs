@@ -287,7 +287,7 @@ public class MainContentUI : ContentUIBehaviour
                 StopCoroutine(HandleRTTAndSetup());
             }
 
-            rttService.EnableRTT(RTTConnectionType.WEBSOCKET, HandleRTTEnableSuccess, HandleRTTEnableFailure);
+            rttService.EnableRTT(HandleRTTEnableSuccess, HandleRTTEnableFailure);
 
             yield return new WaitUntil(() => isSuccess);
         }

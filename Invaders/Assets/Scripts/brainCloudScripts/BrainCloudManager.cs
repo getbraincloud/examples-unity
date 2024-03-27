@@ -15,6 +15,10 @@ public class BrainCloudManager : MonoBehaviour
     private NetworkManager _netManager;
 
     private BrainCloudWrapper _wrapper;
+    public BrainCloudWrapper BCWrapper
+    {
+        get => _wrapper;
+    }
     private BrainCloudS2S _bcS2S = new BrainCloudS2S();
     private Lobby _currentLobby;
     public Lobby CurrentLobby
@@ -119,7 +123,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         if(_wrapper.Client.Authenticated)
         {
-            //_wrapper.Client.LogoutOnApplicationQuit();
+            _wrapper.Client.LogoutOnApplicationQuit();
         }
     }
 
@@ -168,7 +172,7 @@ public class BrainCloudManager : MonoBehaviour
     public void FindOrCreateLobby()
     {
         _wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent); 
-        _wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnFailureCallback);
+        _wrapper.RTTService.EnableRTT(OnRTTConnected, OnFailureCallback);
     }
     
     void OnRTTConnected(string jsonResponse, object cbObject)

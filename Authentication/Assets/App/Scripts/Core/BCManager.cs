@@ -166,6 +166,10 @@ public class BCManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        if(Wrapper.Client.Authenticated)
+        {
+            Wrapper.Client.LogoutOnApplicationQuit();
+        }
         _isInstanced = false;
     }
 
