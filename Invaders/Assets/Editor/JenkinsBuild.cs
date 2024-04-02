@@ -181,6 +181,7 @@ public class JenkinsBuild {
         var buildPlayerOptions = new BuildPlayerOptions()
         {
             subtarget = (int) StandaloneBuildSubtarget.Server,
+            scenes = EnabledScenes,
             target = BuildTarget.LinuxHeadlessSimulation,
             options = BuildOptions.Development
         };
@@ -197,6 +198,9 @@ public class JenkinsBuild {
         {
             System.Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
         }
+        
+        if (buildReport.summary.totalErrors > 0)
+            EditorApplication.Exit(1);
     }
  
     private class Args
