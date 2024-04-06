@@ -87,7 +87,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DeathFX: {fileID: 0}
-  StartingHealth: 100
+  StartingHealth: 90
   EntityID: 0
   EnemyType: 2
   RotationSpeed: 70
@@ -760,6 +760,10 @@ PrefabInstance:
     - target: {fileID: 307187168581042271, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
       propertyPath: m_Name
       value: HealthBar-Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 307187168581042271, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 307187169054372840, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
       propertyPath: m_AnchorMax.x

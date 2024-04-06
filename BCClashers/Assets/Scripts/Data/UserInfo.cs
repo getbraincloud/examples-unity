@@ -9,6 +9,7 @@ public class UserInfo
     public int Rating = 0;
     public int MatchesPlayed = 0;
     public int ShieldTime = 0;
+    public int GoldAmount = 0;
     public ArmyDivisionRank InvaderSelected = 0;
     public ArmyDivisionRank DefendersSelected = 0;
     public string EntityId;

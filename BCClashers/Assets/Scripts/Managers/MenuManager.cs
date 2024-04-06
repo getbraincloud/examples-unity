@@ -35,6 +35,10 @@ public class MenuManager : MonoBehaviour
     public TMP_Text SlayCountText;
     public TMP_Text DefeatedTroopsText;
     public TMP_Text BrainCloudVersionText;
+    public TMP_Text GoldAmountText;
+    public TMP_Text OpponentSelectedText;
+    public TMP_Text LobbyHintText;
+    public TMP_Text LobbyAttackButtonText;
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
 
@@ -43,11 +47,26 @@ public class MenuManager : MonoBehaviour
     public RectTransform DefenderButtonBorder;
     public PlayerCardLobby PlayerCardRef;
     public GameObject LobbyListParent;
+    public Image DefenderPreview;
+    public List<Sprite> DefenderPreviews;
+    public Image LobbyPlayerDefensePreview;
+    public TMP_Text LobbyUsernameText;
+    public TMP_Text LobbyGoldText;
+    public GameObject LobbyAttackCantAffordGroup;
+    public GameObject LobbyAttackSelectTargetGroup;
+    public Button LobbyAttackButton;
 
     private UserInfo _opponent;
     private readonly List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
     private EventSystem _eventSystem;
-    private readonly List<float> _selectionXPlacement = new List<float> {-169,-3.7f, 160};
+    private readonly List<float> _selectionDefenderXPlacement = new List<float> {-169, -3.7f, 160};
+    private readonly List<float> _selectionInvaderYPlacement = new List<float> {192f, 4f, -186f};
+    private readonly List<int> _priceOfInvaders = new List<int> {100000, 200000, 400000};
+
+    public List<int> PriceOfInvaders
+    {
+        get => _priceOfInvaders;
+    }
     private const string LOGGING_IN_MESSAGE = "Logging in...";
     private const string LOOKING_FOR_PLAYERS_MESSAGE = "Looking for players...";
     
@@ -65,6 +84,10 @@ public class MenuManager : MonoBehaviour
             Destroy(gameObject);
         }
         _eventSystem = EventSystem.current;
+        if (LobbyAttackCantAffordGroup)
+        {
+            LobbyAttackCantAffordGroup.SetActive(false);
+        }
     }
 
     private void Start()
@@ -129,9 +152,60 @@ public class MenuManager : MonoBehaviour
             //Looking for players...
             case MenuStates.MainMenu:
                 CurrentMenuState = MenuStates.Lobby;
+                SetupLobbyScreenSelections();
                 NetworkManager.Instance.LookForPlayers();
                 LoadingMenuState.ConnectStatesWithLoading(LOOKING_FOR_PLAYERS_MESSAGE, true, MenuStates.Lobby);
                 break;
+        }
+    }
+
+    private void SetupLobbyScreenSelections()
+    {
+        LobbyHintText.enabled = true;
+        var color = LobbyPlayerDefensePreview.color;
+        color.a = 0;
+        LobbyPlayerDefensePreview.color = color;
+        LobbyUsernameText.text = "";
+        GameManager.Instance.OpponentUserInfo = new UserInfo();
+        LobbyAttackButton.enabled = false;
+        LobbyAttackSelectTargetGroup.SetActive(true);
+        LobbyAttackButtonText.gameObject.SetActive(false);
+        LobbyAttackCantAffordGroup.SetActive(false);
+        GameManager.Instance.CurrentUserInfo.InvaderSelected = ArmyDivisionRank.Easy;
+        UpdateButtonSelectorPosition(ArmyType.Invader);
+    }
+
+    public void ValidateShieldButton()
+    {
+        int gold = GameManager.Instance.CurrentUserInfo.GoldAmount;
+        UserInfo user = GameManager.Instance.CurrentUserInfo;
+        if (gold >= 100000 && user.ShieldTime == 0)
+        {
+            ShieldButton.enabled = true;
+        }
+        else
+        {
+            ShieldButton.enabled = false;
+        }
+    }
+
+    public void ValidateInvaderSelection()
+    {
+        if (GameManager.Instance.OpponentUserInfo.Username.IsNullOrEmpty()) return;
+
+        int invaderSelected = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+        int gold = GameManager.Instance.CurrentUserInfo.GoldAmount;
+        if (gold >= _priceOfInvaders[invaderSelected])
+        {
+            LobbyAttackCantAffordGroup.SetActive(false);
+            LobbyAttackButtonText.gameObject.SetActive(true);
+            LobbyAttackButton.enabled = true;
+        }
+        else
+        {
+            LobbyAttackCantAffordGroup.SetActive(true);
+            LobbyAttackButtonText.gameObject.SetActive(false);
+            LobbyAttackButton.enabled = false;
         }
     }
 
@@ -166,16 +240,17 @@ public class MenuManager : MonoBehaviour
     {
         string username = GameManager.Instance.CurrentUserInfo.Username;
         PlayerPrefs.SetString(Settings.UsernameKey, username);
-        LoggedInNameText.text = $"User: {username}";
-        
+        LobbyUsernameText.text = LoggedInNameText.text = $"User: {username}";
+
         int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
-        Vector2 posI = DefenderButtonBorder.anchoredPosition; 
-        posI.x = _selectionXPlacement[defenderIndex];
+        Vector2 posI = DefenderButtonBorder.anchoredPosition;
+        posI.x = _selectionDefenderXPlacement[defenderIndex];
+        DefenderPreview.sprite = DefenderPreviews[defenderIndex];
         DefenderButtonBorder.anchoredPosition = posI;
         
         int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
-        Vector2 posD = InvaderButtonBorder.anchoredPosition; 
-        posD.x = _selectionXPlacement[invaderIndex];
+        Vector2 posD = InvaderButtonBorder.anchoredPosition;
+        posD.y = _selectionInvaderYPlacement[invaderIndex];
         InvaderButtonBorder.anchoredPosition = posD;
     }
 
@@ -214,7 +289,7 @@ public class MenuManager : MonoBehaviour
             {
                 int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
                 Vector2 posD = InvaderButtonBorder.anchoredPosition;
-                posD.x = _selectionXPlacement[invaderIndex];
+                posD.y = _selectionInvaderYPlacement[invaderIndex];
                 InvaderButtonBorder.anchoredPosition = posD;
                 break;
             }
@@ -222,11 +297,33 @@ public class MenuManager : MonoBehaviour
             {
                 int defenderIndex = (int) GameManager.Instance.CurrentUserInfo.DefendersSelected;
                 Vector2 posI = DefenderButtonBorder.anchoredPosition;
-                posI.x = _selectionXPlacement[defenderIndex];
+                posI.x = _selectionDefenderXPlacement[defenderIndex];
+                DefenderPreview.sprite = DefenderPreviews[defenderIndex];
                 DefenderButtonBorder.anchoredPosition = posI;
                 break;
             }
         }
+    }
+
+    public void UpdateGoldAmount()
+    {
+        LobbyGoldText.text = GoldAmountText.text = $"Gold: {GameManager.Instance.CurrentUserInfo.GoldAmount}";
+    }
+
+    public void UpdateSelectedPlayerDefense(int defenseIndex)
+    {
+        if (LobbyPlayerDefensePreview.color.a == 0)
+        {
+            var color = LobbyPlayerDefensePreview.color;
+            color.a = 255;
+            LobbyPlayerDefensePreview.color = color;
+            LobbyHintText.enabled = false;
+        }
+
+        LobbyPlayerDefensePreview.sprite = DefenderPreviews[defenseIndex];
+        OpponentSelectedText.text = GameManager.Instance.OpponentUserInfo.Username;
+        LobbyAttackSelectTargetGroup.SetActive(false);
+        ValidateInvaderSelection();
     }
     
     public void AbortToSignIn(string errorMessage)

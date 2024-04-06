@@ -33,6 +33,9 @@ public class NetworkManager : MonoBehaviour
     private bool _didInvadersWin;
     private string _invadedPlaybackID;
 
+    private static string _currencyType = "gold";
+    private static int _startingGold = 100000;
+
     public bool DidInvadersWin
     {
         get => _didInvadersWin;
@@ -235,7 +238,55 @@ public class NetworkManager : MonoBehaviour
                 OnLoggedIn(null, null);
             }
         }
+
+        _bcWrapper.EntityService.GetSingleton(_currencyType, OnGetSingleton, OnFailureCallback);
     }
+
+    private void OnGetSingleton(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+        if (data == null)
+        {
+            GameManager.Instance.CurrentUserInfo.GoldAmount = _startingGold;
+            MenuManager.Instance.UpdateGoldAmount();
+            string jsonEntityData = CreateJsonCurrencyEntityData();
+            _bcWrapper.EntityService.UpdateSingleton(_currencyType, jsonEntityData, CreateACLJson(0), -1);
+            return;
+        }
+
+        var entityData = data["data"] as Dictionary<string, object>;
+        var gold = (int) entityData["gold"];
+        GameManager.Instance.CurrentUserInfo.GoldAmount = gold;
+        MenuManager.Instance.UpdateGoldAmount();
+    }
+
+    public void IncreaseGoldAmount()
+    {
+        GameManager.Instance.CurrentUserInfo.GoldAmount += 100000;
+        MenuManager.Instance.UpdateGoldAmount();
+        MenuManager.Instance.ValidateInvaderSelection();
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+
+    public void DecreaseGoldAmountForShield()
+    {
+        GameManager.Instance.CurrentUserInfo.GoldAmount -= 100000;
+        MenuManager.Instance.UpdateGoldAmount();
+        MenuManager.Instance.ValidateInvaderSelection();
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+
+    public void DecreaseGoldAmountForInvaderSelection()
+    {
+        var invaderSelection = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+        var decrementAmount = MenuManager.Instance.PriceOfInvaders[invaderSelection];
+        GameManager.Instance.CurrentUserInfo.GoldAmount -= decrementAmount;
+        MenuManager.Instance.UpdateGoldAmount();
+        MenuManager.Instance.ValidateInvaderSelection();
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+    
     
     // Go back to login screen, with an error message
     private void OnFailureCallback(int status, int reasonCode, string jsonError, object cbObject)
@@ -466,9 +517,10 @@ public class NetworkManager : MonoBehaviour
             (ArmyDivisionRank) entityData["defenderSelection"],
             entities[0]["entityId"] as string
         );
-        
-        //Set up pop up window for confirmation to invade user
-        MenuManager.Instance.confirmPopUpMessageState.SetUpConfirmationForMatch();
+
+        MenuManager.Instance.UpdateSelectedPlayerDefense((int) GameManager.Instance.OpponentUserInfo.DefendersSelected);
+
+        MenuManager.Instance.ValidateInvaderSelection();
     }
 
     public void GameCompleted(bool in_didPlayerWin)
@@ -545,6 +597,7 @@ public class NetworkManager : MonoBehaviour
 
     public void StartMatch()
     {
+        DecreaseGoldAmountForInvaderSelection();
         var opponentId = GameManager.Instance.OpponentUserInfo.ProfileId;
         _bcWrapper.OneWayMatchService.StartMatch(opponentId, _findPlayersRange, OnStartMatchSuccess, OnFailureCallback);
     }
@@ -687,6 +740,7 @@ public class NetworkManager : MonoBehaviour
     public void TurnOnShield()
     {
         if (_shieldActive) return;
+        DecreaseGoldAmountForShield();
         GameManager.Instance.CurrentUserInfo.ShieldTime = 60;
         _bcWrapper.MatchMakingService.TurnShieldOnFor(60, OnTurnOnShieldSuccess);
     }
@@ -805,10 +859,18 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    private string CreateACLJson()
+    private string CreateJsonCurrencyEntityData()
+    {
+        Dictionary<string, object> entityInfo = new Dictionary<string, object>();
+        entityInfo.Add("gold", GameManager.Instance.CurrentUserInfo.GoldAmount);
+        string value = JsonWriter.Serialize(entityInfo);
+        return value;
+    }
+
+    private string CreateACLJson(int aclLevel = 2)
     {
         Dictionary<string, object> aclInfo = new Dictionary<string, object>();
-        aclInfo.Add("other", 2);
+        aclInfo.Add("other", aclLevel);
         string value = JsonWriter.Serialize(aclInfo);
         return value;
     }
