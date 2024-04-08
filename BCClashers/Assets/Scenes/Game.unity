@@ -654,8 +654,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 132.8, y: 0}
-  m_SizeDelta: {x: 140, y: 135}
+  m_AnchoredPosition: {x: 148.9, y: 0}
+  m_SizeDelta: {x: 160, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &359079977
 MonoBehaviour:
@@ -1740,10 +1740,6 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
       objectReference: {fileID: 0}
@@ -1761,11 +1757,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 133
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 127
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1815,18 +1811,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2027818021377560843, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -21.113281
-      objectReference: {fileID: 0}
-    - target: {fileID: 2802519049368623992, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
-      propertyPath: m_text
-      value: Grunt
-      objectReference: {fileID: 0}
     - target: {fileID: 8275216547862225074, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_Name
       value: SummonSelectorButton
       objectReference: {fileID: 0}
+    - target: {fileID: 8746289079048306213, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 62dbd9e95f3242443b3b4a76445688a6, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2024,10 +2016,6 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
       objectReference: {fileID: 0}
@@ -2045,11 +2033,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 133
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 127
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2099,22 +2087,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2027818021377560843, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -21.113281
-      objectReference: {fileID: 0}
     - target: {fileID: 2802519049368623992, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_text
-      value: Shooter
+      value: Soldier
       objectReference: {fileID: 0}
     - target: {fileID: 6083361996445713210, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: EnemyTypeSelection
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8275216547862225074, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_Name
       value: SummonSelectorButton (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8746289079048306213, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 134076ef832b6234fb34852395228594, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2455,7 +2443,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 265, y: -255}
+  m_AnchoredPosition: {x: 265, y: -348}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1022257449
@@ -3041,7 +3029,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 271, y: -366}
+  m_AnchoredPosition: {x: 265, y: -277.7}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1264879956
@@ -4035,7 +4023,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Stop Stream
+  m_text: Stop Replay
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4476,11 +4464,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 133
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 127
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 1125423419645570260, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4536,16 +4524,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2802519049368623992, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_text
-      value: Soldier
+      value: Guncube
       objectReference: {fileID: 0}
     - target: {fileID: 6083361996445713210, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: EnemyTypeSelection
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8275216547862225074, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
       propertyPath: m_Name
       value: SummonSelectorButton (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8746289079048306213, guid: 96a4820866529a8499e52ee0f2f3a6b7, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e0886fbeb55ec8a468bb9266bec39ed6, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4613,7 +4605,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Play Stream
+  m_text: Replay
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4728,7 +4720,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 87.6}
-  m_SizeDelta: {x: 400, y: 150}
+  m_SizeDelta: {x: 450, y: 175}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2101780966
 MonoBehaviour:

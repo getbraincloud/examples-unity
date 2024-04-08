@@ -241,7 +241,7 @@ public class MenuManager : MonoBehaviour
     {
         string username = GameManager.Instance.CurrentUserInfo.Username;
         PlayerPrefs.SetString(Settings.UsernameKey, username);
-        LobbyUsernameText.text = LoggedInNameText.text = $"User: {username}";
+        LobbyUsernameText.text = LoggedInNameText.text = $"{username}";
 
         int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
         Vector2 posI = DefenderButtonBorder.anchoredPosition;
@@ -258,8 +258,8 @@ public class MenuManager : MonoBehaviour
     public void UpdateMatchMakingInfo()
     {
         UserInfo user = GameManager.Instance.CurrentUserInfo;
-        RatingText.text = $"Rating: {user.Rating}";
-        MatchesPlayedText.text = $"Matches Played: {user.MatchesPlayed}";
+        RatingText.text = $"Rating: {user.Rating.ToString("#,#")}";
+        MatchesPlayedText.text = $"Matches Played: {user.MatchesPlayed.ToString("#,#")}";
         ShieldButton.interactable = user.ShieldTime <= 0;
         ShieldTimerText.text = user.ShieldTime > 1 ? $"Shield is active for {user.ShieldTime} minutes" : "Shield Timer: Off";
 
@@ -308,7 +308,7 @@ public class MenuManager : MonoBehaviour
 
     public void UpdateGoldAmount()
     {
-        LobbyGoldText.text = GoldAmountText.text = $"Gold: {GameManager.Instance.CurrentUserInfo.GoldAmount}";
+        LobbyGoldText.text = GoldAmountText.text = $"Gold: {GameManager.Instance.CurrentUserInfo.GoldAmount.ToString("#,#")}";
     }
 
     public void UpdateSelectedPlayerDefense(int defenseIndex)

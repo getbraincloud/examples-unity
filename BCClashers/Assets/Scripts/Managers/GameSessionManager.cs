@@ -23,8 +23,8 @@ public class GameSessionManager : MonoBehaviour
     public GameObject StopStreamButton;
     public GameObject TroopView;
     public RectTransform ButtonBorder;
-    
-    private readonly List<float> _selectionXPlacement = new List<float> {-134, 132, 0};
+
+    private readonly List<float> _selectionXPlacement = new List<float> {-149, 0.5f, 149};
     private float _startTime;
     private float _gameSessionTimer;
     private float _value;

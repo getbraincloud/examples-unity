@@ -281,9 +281,9 @@ public class GameManager : MonoBehaviour
 
             _gameOverScreenRef.WinStatusText.text = "Recording finished !";
         }
-        
-        _gameOverScreenRef.InvadersDefeatedText.text = $"Number of slayed troops: {slayCount}";
-        _gameOverScreenRef.DefendersDefeatedText.text = $"Number of defeated troop: {counterAttackCount}";
+
+        _gameOverScreenRef.InvadersDefeatedText.text = $"Slain Troops: {slayCount}";
+        _gameOverScreenRef.DefendersDefeatedText.text = $"Troops Lost: {counterAttackCount}";
         
         //clean up projectiles
         if (_projectiles.Count > 0)
