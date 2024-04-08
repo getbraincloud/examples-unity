@@ -97,6 +97,7 @@ public class MenuManager : MonoBehaviour
         if (NetworkManager.Instance.IsSessionValid())
         {
             UpdateMatchMakingInfo();
+            UpdateGoldAmount();
             UpdateMainMenu();
             ChangeState(MenuStates.MainMenu);
         }
@@ -191,7 +192,7 @@ public class MenuManager : MonoBehaviour
 
     public void ValidateInvaderSelection()
     {
-        if (GameManager.Instance.OpponentUserInfo.Username.IsNullOrEmpty()) return;
+        if (GameManager.Instance.OpponentUserInfo == null || GameManager.Instance.OpponentUserInfo.Username.IsNullOrEmpty()) return;
 
         int invaderSelected = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
         int gold = GameManager.Instance.CurrentUserInfo.GoldAmount;
