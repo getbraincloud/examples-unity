@@ -219,10 +219,10 @@ public class GameManager : MonoBehaviour
         SetUpSpawners();
         
         PlaybackStreamManager.Instance.StructuresList.Clear();
-        for (int i = 0; i < _defenderStructParent.childCount; i++)
+        for (int i = 0; i < _defenderStructParent.GetChild(0).childCount; i++)
         {
-            GameObject structure = _defenderStructParent.GetChild(i).gameObject;
-            BaseHealthBehavior healthScript = structure.GetComponent<BaseHealthBehavior>(); 
+            GameObject structure = _defenderStructParent.GetChild(0).GetChild(i).gameObject;
+            BaseHealthBehavior healthScript = structure.GetComponent<BaseHealthBehavior>();
             healthScript.EntityID = i;
             PlaybackStreamManager.Instance.StructuresList.Add(healthScript);
         }
@@ -269,9 +269,13 @@ public class GameManager : MonoBehaviour
                 _gameOverScreenRef.WinStatusText.text = "Your troops are defeated";
             }
 
-
-            NetworkManager.Instance?.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
-            NetworkManager.Instance?.GameCompleted(in_didInvaderWin);    
+            if (NetworkManager.Instance)
+            {
+                NetworkManager.Instance.IncreaseGoldFromGameStats(slayCount, _invaderTroopCount);
+                NetworkManager.Instance.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
+                NetworkManager.Instance.GameCompleted(in_didInvaderWin);
+            }
+    
         }
         else
         {
@@ -320,7 +324,7 @@ public class GameManager : MonoBehaviour
     public bool CheckIfGameOver()
     {
         if (!_isGameActive) return true;
-        if (_defenderStructParent.childCount == 0 ||
+        if (_defenderStructParent.GetChild(0).childCount == 0 ||
             _invaderTroopCount == 0)
         {
             GameOver(_invaderTroopCount > 0);

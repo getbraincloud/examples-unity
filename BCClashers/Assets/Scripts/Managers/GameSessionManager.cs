@@ -16,7 +16,7 @@ using UnityEngine.UI;
 public class GameSessionManager : MonoBehaviour
 {
     public float RoundDuration;
-    public Image ClockFillImage;
+    public TMPro.TMP_Text CountdownText; 
     public int CheckInterval = 60;
     public GameOverScreen GameOverScreen;
     public GameObject ConfirmPopUp;
@@ -27,7 +27,6 @@ public class GameSessionManager : MonoBehaviour
     private readonly List<float> _selectionXPlacement = new List<float> {-149, 0.5f, 149};
     private float _startTime;
     private float _gameSessionTimer;
-    private float _value;
     private int _frameId;
     private bool _replayMode;
 
@@ -46,6 +45,10 @@ public class GameSessionManager : MonoBehaviour
     {
         ConfirmPopUp.SetActive(false);
         StopStreamButton.SetActive(false);
+
+        float minutes = Mathf.FloorToInt(RoundDuration / 60);
+        float seconds = Mathf.FloorToInt(RoundDuration % 60);
+        CountdownText.text = $"{minutes:00}:{seconds:00}";
     }
 
     // Start is called before the first frame update
@@ -59,14 +62,14 @@ public class GameSessionManager : MonoBehaviour
         if (!GameManager.Instance.IsInPlaybackMode)
         {
             GameManager.Instance.GameSetup();
-            ClockFillImage.transform.parent.gameObject.SetActive(true);
-            ClockFillImage.fillAmount = 1;
+            //ClockFillImage.transform.parent.gameObject.SetActive(true);
+            //ClockFillImage.fillAmount = 1;
             TroopView.SetActive(true);
             StartCoroutine(Timer(RoundDuration)); 
         }
         else
         {
-            ClockFillImage.transform.parent.gameObject.SetActive(false);
+            //ClockFillImage.transform.parent.gameObject.SetActive(false);
             StopStreamButton.SetActive(true);
             TroopView.SetActive(false);
         }
@@ -118,13 +121,13 @@ public class GameSessionManager : MonoBehaviour
     {
         _startTime = Time.time;
         _gameSessionTimer = duration;
-        _value = 1;
 
         while (Time.time - _startTime < duration)
         {
             _gameSessionTimer -= Time.deltaTime;
-            _value = _gameSessionTimer / duration;
-            ClockFillImage.fillAmount = _value;
+            float minutes = Mathf.FloorToInt(_gameSessionTimer / 60);
+            float seconds = Mathf.FloorToInt(_gameSessionTimer % 60);
+            CountdownText.text = $"{minutes:00}:{seconds:00}";
 
             //Check every x frames if game over conditions have been met
             if (Time.frameCount % CheckInterval == 0)

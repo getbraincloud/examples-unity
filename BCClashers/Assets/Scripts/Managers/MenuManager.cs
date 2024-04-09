@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine.EventSystems;
@@ -261,8 +262,14 @@ public class MenuManager : MonoBehaviour
         RatingText.text = $"Rating: {user.Rating.ToString("#,#")}";
         MatchesPlayedText.text = $"Matches Played: {user.MatchesPlayed.ToString("#,#")}";
         ShieldButton.interactable = user.ShieldTime <= 0;
-        ShieldTimerText.text = user.ShieldTime > 1 ? $"Shield is active for {user.ShieldTime} minutes" : "Shield Timer: Off";
-
+        if (user.ShieldTime > 0)
+        {
+            StartCoroutine(ShieldTimerCountdown(user.ShieldTime * 60));
+        }
+        else
+        {
+            ShieldTimerText.text = "Shield Timer: Off";
+        }
         PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
 
         StreamInfo invaderInfo = GameManager.Instance.InvadedStreamInfo;
@@ -280,6 +287,24 @@ public class MenuManager : MonoBehaviour
             SlayCountText.text = "";
             DefeatedTroopsText.text = "";
         }
+    }
+
+    private IEnumerator ShieldTimerCountdown(float duration)
+    {
+        float startTime = Time.time;
+        float shieldTimer = duration;
+
+        while (Time.time - startTime < duration)
+        {
+            shieldTimer -= Time.deltaTime;
+            float minutes = Mathf.FloorToInt(shieldTimer / 60);
+            float seconds = Mathf.FloorToInt(shieldTimer % 60);
+            ShieldTimerText.text = $"Shield Timer: {minutes:00}:{seconds:00}";
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        ShieldTimerText.text = "Shield Timer: Off";
     }
 
     public void UpdateButtonSelectorPosition(ArmyType in_type)

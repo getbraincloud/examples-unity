@@ -269,6 +269,13 @@ public class NetworkManager : MonoBehaviour
         _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
     }
 
+    public void IncreaseGoldFromGameStats(int slayCount, int troopsSurvived)
+    {
+        int goldGained = (slayCount * 10000) + (troopsSurvived * 10000);
+        GameManager.Instance.CurrentUserInfo.GoldAmount += goldGained;
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+
     public void DecreaseGoldAmountForShield()
     {
         GameManager.Instance.CurrentUserInfo.GoldAmount -= 100000;
@@ -598,6 +605,12 @@ public class NetworkManager : MonoBehaviour
     public void StartMatch()
     {
         DecreaseGoldAmountForInvaderSelection();
+        if (_shieldActive)
+        {
+            _bcWrapper.MatchMakingService.TurnShieldOff();
+            _shieldActive = false;
+            GameManager.Instance.CurrentUserInfo.ShieldTime = 0;
+        }
         var opponentId = GameManager.Instance.OpponentUserInfo.ProfileId;
         _bcWrapper.OneWayMatchService.StartMatch(opponentId, _findPlayersRange, OnStartMatchSuccess, OnFailureCallback);
     }
