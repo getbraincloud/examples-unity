@@ -41,15 +41,24 @@ public class NetworkManager : MonoBehaviour
         get => _didInvadersWin;
     }
     //Summary info
-    private int invaderKillCount;
+    private int _invaderKillCount;
     public int SlayCount
     {
-        get => invaderKillCount;
+        get => _invaderKillCount;
     }
-    private int defenderKillCount;
+
+    private int _defenderKillCount;
     public int DefeatedTroops
     {
-        get => defenderKillCount;
+        get => _defenderKillCount;
+    }
+
+    private int _structureKillCount;
+
+    public int StructureKillCount
+    {
+        get => _structureKillCount;
+        set => _structureKillCount = value;
     }
     private float timeLeft;
     public float TimeLeft
@@ -263,6 +272,7 @@ public class NetworkManager : MonoBehaviour
 
     public void IncreaseGoldAmount()
     {
+        GameManager.Instance.CurrentUserInfo.PreviousGoldAmount = GameManager.Instance.CurrentUserInfo.GoldAmount;
         GameManager.Instance.CurrentUserInfo.GoldAmount += 100000;
         MenuManager.Instance.UpdateGoldAmount();
         MenuManager.Instance.ValidateInvaderSelection();
@@ -271,7 +281,7 @@ public class NetworkManager : MonoBehaviour
 
     public void IncreaseGoldFromGameStats(int slayCount, int troopsSurvived)
     {
-        int goldGained = (slayCount * 10000) + (troopsSurvived * 10000);
+        int goldGained = (slayCount * 10000) + (troopsSurvived * 10000) + (_structureKillCount * 10000);
         GameManager.Instance.CurrentUserInfo.GoldAmount += goldGained;
         _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
     }
@@ -655,8 +665,8 @@ public class NetworkManager : MonoBehaviour
 
         if (summary != null && summary.Count > 0)
         {
-            invaderKillCount = (int) summary["invaderKillCount"];
-            defenderKillCount = (int) summary["defenderKillCount"];
+            _invaderKillCount = (int) summary["invaderKillCount"];
+            _defenderKillCount = (int) summary["defenderKillCount"];
             timeLeft = (float)(double)summary["timeLeft"];
             _didInvadersWin = (bool) summary["didInvadersWin"];
         }
@@ -765,16 +775,16 @@ public class NetworkManager : MonoBehaviour
 
     public void SummaryInfo(int in_slayCount, int in_defeatedTroops, float in_timeLeft)
     {
-        invaderKillCount = in_slayCount;
-        defenderKillCount = in_defeatedTroops;
+        _invaderKillCount = in_slayCount;
+        _defenderKillCount = in_defeatedTroops;
         timeLeft = in_timeLeft;
     }
 
     private string CreateEndGameSummaryData()
     {
         Dictionary<string, object> summaryData = new Dictionary<string, object>();
-        summaryData.Add("invaderKillCount", invaderKillCount);
-        summaryData.Add("defenderKillCount", defenderKillCount);
+        summaryData.Add("invaderKillCount", _invaderKillCount);
+        summaryData.Add("defenderKillCount", _defenderKillCount);
         summaryData.Add("timeLeft", timeLeft);
         summaryData.Add("didInvadersWin", _didInvadersWin);
         string value = JsonWriter.Serialize(summaryData);

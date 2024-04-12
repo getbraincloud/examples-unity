@@ -128,7 +128,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e969ba466ba23bd4189a9438753666fd, type: 2}
+  - {fileID: 2100000, guid: a748f667f3005bd438c3caa6d15c33df, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -205,6 +205,10 @@ PrefabInstance:
     - target: {fileID: 5904163088892923123, guid: 40978ae1373a5b246a40ca97210a4bc8, type: 3}
       propertyPath: m_Name
       value: Medium-House
+      objectReference: {fileID: 0}
+    - target: {fileID: 8748289228987498152, guid: 40978ae1373a5b246a40ca97210a4bc8, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8748289230298195390, guid: 40978ae1373a5b246a40ca97210a4bc8, type: 3}
       propertyPath: m_AnchorMax.x

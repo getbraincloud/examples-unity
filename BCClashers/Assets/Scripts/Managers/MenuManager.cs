@@ -57,6 +57,7 @@ public class MenuManager : MonoBehaviour
     public GameObject LobbyAttackSelectTargetGroup;
     public Button LobbyAttackButton;
 
+    private float _tweenTime = 0.001f;
     private UserInfo _opponent;
     private readonly List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
     private EventSystem _eventSystem;
@@ -222,6 +223,9 @@ public class MenuManager : MonoBehaviour
             _listOfPlayers.Clear();
         }
 
+        in_listOfPlayers.Sort(delegate (UserInfo userA, UserInfo userB) { return userA.Rating.CompareTo(userB.Rating); });
+        in_listOfPlayers.Reverse();
+
         for (int i = 0; i < in_listOfPlayers.Count; ++i)
         {
             PlayerCardLobby user = Instantiate(PlayerCardRef, LobbyListParent.transform);
@@ -259,8 +263,8 @@ public class MenuManager : MonoBehaviour
     public void UpdateMatchMakingInfo()
     {
         UserInfo user = GameManager.Instance.CurrentUserInfo;
-        RatingText.text = $"Rating: {user.Rating.ToString("#,#")}";
-        MatchesPlayedText.text = $"Matches Played: {user.MatchesPlayed.ToString("#,#")}";
+        RatingText.text = $"{user.Rating.ToString("#,#")}";
+        MatchesPlayedText.text = $"{user.MatchesPlayed.ToString("#,#")}";
         ShieldButton.interactable = user.ShieldTime <= 0;
         if (user.ShieldTime > 0)
         {
@@ -268,7 +272,7 @@ public class MenuManager : MonoBehaviour
         }
         else
         {
-            ShieldTimerText.text = "Shield Timer: Off";
+            ShieldTimerText.text = "Off";
         }
         PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
 
@@ -297,14 +301,21 @@ public class MenuManager : MonoBehaviour
         while (Time.time - startTime < duration)
         {
             shieldTimer -= Time.deltaTime;
-            float minutes = Mathf.FloorToInt(shieldTimer / 60);
-            float seconds = Mathf.FloorToInt(shieldTimer % 60);
-            ShieldTimerText.text = $"Shield Timer: {minutes:00}:{seconds:00}";
+            if (shieldTimer >= 0)
+            {
+                float minutes = Mathf.FloorToInt(shieldTimer / 60);
+                float seconds = Mathf.FloorToInt(shieldTimer % 60);
+                ShieldTimerText.text = $"{minutes:00}:{seconds:00}";
+            }
+            else
+            {
+                ShieldTimerText.text = "0:00";
+            }
 
             yield return new WaitForFixedUpdate();
         }
 
-        ShieldTimerText.text = "Shield Timer: Off";
+        ShieldTimerText.text = "Off";
     }
 
     public void UpdateButtonSelectorPosition(ArmyType in_type)
@@ -333,7 +344,28 @@ public class MenuManager : MonoBehaviour
 
     public void UpdateGoldAmount()
     {
-        LobbyGoldText.text = GoldAmountText.text = $"Gold: {GameManager.Instance.CurrentUserInfo.GoldAmount.ToString("#,#")}";
+        if (GameManager.Instance.CurrentUserInfo.PreviousGoldAmount == 0)
+        {
+            LobbyGoldText.text = GoldAmountText.text = $"{GameManager.Instance.CurrentUserInfo.GoldAmount.ToString("#,#")}";
+        }
+        else
+        {
+            StartCoroutine(TweenGoldText());
+        }
+    }
+
+    IEnumerator TweenGoldText()
+    {
+        int previousGoldAmount = GameManager.Instance.CurrentUserInfo.PreviousGoldAmount;
+        int goldAmount = GameManager.Instance.CurrentUserInfo.GoldAmount;
+        while (previousGoldAmount < goldAmount)
+        {
+            previousGoldAmount += 100;
+            LobbyGoldText.text = GoldAmountText.text = $"{previousGoldAmount.ToString("#,#")}";
+            yield return new WaitForSeconds(_tweenTime);
+        }
+
+        GameManager.Instance.CurrentUserInfo.PreviousGoldAmount = 0;
     }
 
     public void UpdateSelectedPlayerDefense(int defenseIndex)
