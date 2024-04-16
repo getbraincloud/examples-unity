@@ -24,7 +24,7 @@ public class StreamInfo
     public int SlayCount;
     public int DefeatedTroops;
     public bool DidInvadersWin;
-    public string InvaderPlayerName;
+    public float DurationOfInvasion;
 
     public StreamInfo() { }
 }

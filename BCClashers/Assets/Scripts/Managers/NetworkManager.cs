@@ -463,19 +463,25 @@ public class NetworkManager : MonoBehaviour
                     streamInfo.PlaybackStreamID = streams[0]["playbackStreamId"] as string;
                     if (streams[0]["summary"] is Dictionary<string, object> summary)
                     {
-                        if (summary.ContainsKey("slayCount"))
+                        if (summary.ContainsKey("defenderKillCount"))
                         {
-                            streamInfo.SlayCount = (int) summary["slayCount"];
+                            streamInfo.SlayCount = (int) summary["defenderKillCount"];
                         }
 
-                        if (summary.ContainsKey("defeatedTroops"))
+                        if (summary.ContainsKey("invaderKillCount"))
                         {
-                            streamInfo.DefeatedTroops = (int) summary["defeatedTroops"];
+                            streamInfo.DefeatedTroops = (int) summary["invaderKillCount"];
                         }
 
                         if (summary.ContainsKey("didInvadersWin"))
                         {
                             streamInfo.DidInvadersWin = (bool) summary["didInvadersWin"];
+                        }
+
+                        if (summary.ContainsKey("timeLeft"))
+                        {
+                            var timeLeft = (double) summary["timeLeft"];
+                            streamInfo.DurationOfInvasion = (float) (180f - timeLeft);
                         }
                     }
                 }
@@ -647,6 +653,11 @@ public class NetworkManager : MonoBehaviour
             LoadID();
         }
         _bcWrapper.PlaybackStreamService.ReadStream(_playbackStreamId, OnReadStreamSuccess, OnFailureCallback);
+    }
+
+    public void ReadInvasionStream()
+    {
+        _bcWrapper.PlaybackStreamService.ReadStream(GameManager.Instance.InvadedStreamInfo.PlaybackStreamID, OnReadStreamSuccess, OnFailureCallback);
     }
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)

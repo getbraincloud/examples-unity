@@ -23,6 +23,7 @@ public class GameSessionManager : MonoBehaviour
     public GameObject StopStreamButton;
     public GameObject TroopView;
     public RectTransform ButtonBorder;
+    public GameObject SurrenderButton;
 
     private readonly List<float> _selectionXPlacement = new List<float> {-149, 0.5f, 149};
     private float _startTime;
@@ -61,15 +62,18 @@ public class GameSessionManager : MonoBehaviour
     {
         if (!GameManager.Instance.IsInPlaybackMode)
         {
+            SurrenderButton.SetActive(true);
             GameManager.Instance.GameSetup();
             TroopView.SetActive(true);
-            StartCoroutine(Timer(RoundDuration)); 
         }
         else
         {
+            SurrenderButton.SetActive(false);
             StopStreamButton.SetActive(true);
             TroopView.SetActive(false);
         }
+
+        StartCoroutine(Timer(RoundDuration)); 
     }
 
     public void UpdateBorderPosition(int index)

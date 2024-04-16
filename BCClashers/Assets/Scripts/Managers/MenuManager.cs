@@ -35,6 +35,7 @@ public class MenuManager : MonoBehaviour
     public TMP_Text LastInvasionStatusText;
     public TMP_Text SlayCountText;
     public TMP_Text DefeatedTroopsText;
+    public TMP_Text InvasionDurationText;
     public TMP_Text BrainCloudVersionText;
     public TMP_Text GoldAmountText;
     public TMP_Text OpponentSelectedText;
@@ -283,6 +284,10 @@ public class MenuManager : MonoBehaviour
             LastInvasionStatusText.text = invaderInfo.DidInvadersWin ? "Last Invasion: Defeated" : "Last Invasion: Victorious";
             SlayCountText.text = $"You lost {invaderInfo.SlayCount} troops";
             DefeatedTroopsText.text = $"You killed {invaderInfo.DefeatedTroops} troops";
+            float minuteDuration =  Mathf.FloorToInt(invaderInfo.DurationOfInvasion / 60);
+            float secondsDuration =  Mathf.FloorToInt(invaderInfo.DurationOfInvasion % 60);
+
+            InvasionDurationText.text = $"Duration: {minuteDuration:00}:{secondsDuration:00} / 3:00";
         }
         else
         {
@@ -291,6 +296,21 @@ public class MenuManager : MonoBehaviour
             SlayCountText.text = "";
             DefeatedTroopsText.text = "";
         }
+    }
+
+    public void BeginMatch()
+    {
+        NetworkManager.Instance.StartMatch();
+    }
+
+    public void AwardCurrency()
+    {
+        NetworkManager.Instance.IncreaseGoldAmount();
+    }
+
+    public void ReadInvasionStream()
+    {
+        NetworkManager.Instance.ReadInvasionStream();
     }
 
     private IEnumerator ShieldTimerCountdown(float duration)

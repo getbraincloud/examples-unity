@@ -246,7 +246,7 @@ public class GameManager : MonoBehaviour
     {
         if (!_isGameActive) return;
         _isGameActive = false;
-
+        int structureKillCount = 0;
         var slayCount = 0;
         var counterAttackCount = 0;
         if (!IsInPlaybackMode)
@@ -262,15 +262,16 @@ public class GameManager : MonoBehaviour
             }
             else if(in_didInvaderWin)
             {
-                _gameOverScreenRef.WinStatusText.text = "Victories !";
+                _gameOverScreenRef.WinStatusText.text = "Victory !";
             }
             else
             {
-                _gameOverScreenRef.WinStatusText.text = "Defeated";
+                _gameOverScreenRef.WinStatusText.text = "Defeated...";
             }
 
             if (NetworkManager.Instance)
             {
+                structureKillCount = NetworkManager.Instance.StructureKillCount;
                 NetworkManager.Instance.IncreaseGoldFromGameStats(slayCount, _invaderTroopCount);
                 NetworkManager.Instance.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
                 NetworkManager.Instance.GameCompleted(in_didInvaderWin);
@@ -284,8 +285,6 @@ public class GameManager : MonoBehaviour
 
             _gameOverScreenRef.WinStatusText.text = "Recording finished !";
         }
-
-        int structureKillCount = NetworkManager.Instance.StructureKillCount;
 
         _gameOverScreenRef.StructuresDefeatedText.text = $"Structures Destroyed: {structureKillCount}";
         _gameOverScreenRef.InvadersDefeatedText.text = $"Slain Troops: {slayCount}";
