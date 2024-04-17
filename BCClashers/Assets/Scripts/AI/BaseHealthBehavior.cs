@@ -9,6 +9,7 @@ public class BaseHealthBehavior : MonoBehaviour
     protected HealthBar _healthBar;
     protected int _currentHealth;
     private float _delayBeforeDestruction = 1;
+    private bool _isAStructure;
 
     private void Start()
     {
@@ -18,6 +19,8 @@ public class BaseHealthBehavior : MonoBehaviour
         {
             _healthBar.SetMaxHealth(_currentHealth);
         }
+
+        _isAStructure = gameObject.name.Contains("House");
     }
 
     public  void Damage(int damageTaken)
@@ -52,9 +55,13 @@ public class BaseHealthBehavior : MonoBehaviour
             Instantiate(DeathFX, transform.position, Quaternion.identity);
         }
 
-        if (!GameManager.Instance.IsInPlaybackMode)
+        if (!GameManager.Instance.IsInPlaybackMode && NetworkManager.Instance != null)
         {
-            NetworkManager.Instance?.RecordTargetDestroyed(EntityID, -1);    
+            NetworkManager.Instance?.RecordTargetDestroyed(EntityID, -1);
+            if (_isAStructure)
+            {
+                NetworkManager.Instance.StructureKillCount++;
+            }
         }
         
         Destroy(gameObject);

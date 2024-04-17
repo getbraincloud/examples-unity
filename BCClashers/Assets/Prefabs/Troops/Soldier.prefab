@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -207}
-  m_SizeDelta: {x: 200, y: 200}
+  m_SizeDelta: {x: 300, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2437656383499948643
 CanvasRenderer:
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e9e78351e5e105c47ac5f76abbd24fe7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7333d76bb07d4b649a35d8a7b4f6d3df, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -175,7 +175,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 696e62c2da9722349bc10840a5b1d715, type: 2}
+  - {fileID: 2100000, guid: 170d7a4177bbbd04eab714265417d818, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -477,6 +477,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4751204289795170793}
     m_Modifications:
+    - target: {fileID: 307187168221817086, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 307187168581042257, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
       propertyPath: m_PresetInfoIsWorld
       value: 1
@@ -568,6 +572,10 @@ PrefabInstance:
     - target: {fileID: 307187168581042271, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
       propertyPath: m_Name
       value: HealthBar-Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 307187168581042271, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 307187169054372840, guid: 2ec0c88cb68bd95458d03af965e9a53d, type: 3}
       propertyPath: m_AnchorMax.x

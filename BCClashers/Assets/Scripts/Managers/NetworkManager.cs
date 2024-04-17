@@ -33,20 +33,32 @@ public class NetworkManager : MonoBehaviour
     private bool _didInvadersWin;
     private string _invadedPlaybackID;
 
+    private static string _currencyType = "gold";
+    private static int _startingGold = 100000;
+
     public bool DidInvadersWin
     {
         get => _didInvadersWin;
     }
     //Summary info
-    private int invaderKillCount;
+    private int _invaderKillCount;
     public int SlayCount
     {
-        get => invaderKillCount;
+        get => _invaderKillCount;
     }
-    private int defenderKillCount;
+
+    private int _defenderKillCount;
     public int DefeatedTroops
     {
-        get => defenderKillCount;
+        get => _defenderKillCount;
+    }
+
+    private int _structureKillCount;
+
+    public int StructureKillCount
+    {
+        get => _structureKillCount;
+        set => _structureKillCount = value;
     }
     private float timeLeft;
     public float TimeLeft
@@ -235,7 +247,63 @@ public class NetworkManager : MonoBehaviour
                 OnLoggedIn(null, null);
             }
         }
+
+        _bcWrapper.EntityService.GetSingleton(_currencyType, OnGetSingleton, OnFailureCallback);
     }
+
+    private void OnGetSingleton(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+        if (data == null)
+        {
+            GameManager.Instance.CurrentUserInfo.GoldAmount = _startingGold;
+            MenuManager.Instance.UpdateGoldAmount();
+            string jsonEntityData = CreateJsonCurrencyEntityData();
+            _bcWrapper.EntityService.UpdateSingleton(_currencyType, jsonEntityData, CreateACLJson(0), -1);
+            return;
+        }
+
+        var entityData = data["data"] as Dictionary<string, object>;
+        var gold = (int) entityData["gold"];
+        GameManager.Instance.CurrentUserInfo.GoldAmount = gold;
+        MenuManager.Instance.UpdateGoldAmount();
+    }
+
+    public void IncreaseGoldAmount()
+    {
+        GameManager.Instance.CurrentUserInfo.PreviousGoldAmount = GameManager.Instance.CurrentUserInfo.GoldAmount;
+        GameManager.Instance.CurrentUserInfo.GoldAmount += 100000;
+        MenuManager.Instance.UpdateGoldAmount();
+        MenuManager.Instance.ValidateInvaderSelection();
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+
+    public void IncreaseGoldFromGameStats(int slayCount, int troopsSurvived)
+    {
+        int goldGained = (slayCount * 10000) + (troopsSurvived * 10000) + (_structureKillCount * 10000);
+        GameManager.Instance.CurrentUserInfo.GoldAmount += goldGained;
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+
+    public void DecreaseGoldAmountForShield()
+    {
+        GameManager.Instance.CurrentUserInfo.GoldAmount -= 100000;
+        MenuManager.Instance.UpdateGoldAmount();
+        MenuManager.Instance.ValidateInvaderSelection();
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+
+    public void DecreaseGoldAmountForInvaderSelection()
+    {
+        var invaderSelection = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+        var decrementAmount = MenuManager.Instance.PriceOfInvaders[invaderSelection];
+        GameManager.Instance.CurrentUserInfo.GoldAmount -= decrementAmount;
+        MenuManager.Instance.UpdateGoldAmount();
+        MenuManager.Instance.ValidateInvaderSelection();
+        _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
+    }
+    
     
     // Go back to login screen, with an error message
     private void OnFailureCallback(int status, int reasonCode, string jsonError, object cbObject)
@@ -395,19 +463,25 @@ public class NetworkManager : MonoBehaviour
                     streamInfo.PlaybackStreamID = streams[0]["playbackStreamId"] as string;
                     if (streams[0]["summary"] is Dictionary<string, object> summary)
                     {
-                        if (summary.ContainsKey("slayCount"))
+                        if (summary.ContainsKey("defenderKillCount"))
                         {
-                            streamInfo.SlayCount = (int) summary["slayCount"];
+                            streamInfo.SlayCount = (int) summary["defenderKillCount"];
                         }
 
-                        if (summary.ContainsKey("defeatedTroops"))
+                        if (summary.ContainsKey("invaderKillCount"))
                         {
-                            streamInfo.DefeatedTroops = (int) summary["defeatedTroops"];
+                            streamInfo.DefeatedTroops = (int) summary["invaderKillCount"];
                         }
 
                         if (summary.ContainsKey("didInvadersWin"))
                         {
                             streamInfo.DidInvadersWin = (bool) summary["didInvadersWin"];
+                        }
+
+                        if (summary.ContainsKey("timeLeft"))
+                        {
+                            var timeLeft = (double) summary["timeLeft"];
+                            streamInfo.DurationOfInvasion = (float) (180f - timeLeft);
                         }
                     }
                 }
@@ -466,9 +540,10 @@ public class NetworkManager : MonoBehaviour
             (ArmyDivisionRank) entityData["defenderSelection"],
             entities[0]["entityId"] as string
         );
-        
-        //Set up pop up window for confirmation to invade user
-        MenuManager.Instance.confirmPopUpMessageState.SetUpConfirmationForMatch();
+
+        MenuManager.Instance.UpdateSelectedPlayerDefense((int) GameManager.Instance.OpponentUserInfo.DefendersSelected);
+
+        MenuManager.Instance.ValidateInvaderSelection();
     }
 
     public void GameCompleted(bool in_didPlayerWin)
@@ -545,6 +620,13 @@ public class NetworkManager : MonoBehaviour
 
     public void StartMatch()
     {
+        DecreaseGoldAmountForInvaderSelection();
+        if (_shieldActive)
+        {
+            _bcWrapper.MatchMakingService.TurnShieldOff();
+            _shieldActive = false;
+            GameManager.Instance.CurrentUserInfo.ShieldTime = 0;
+        }
         var opponentId = GameManager.Instance.OpponentUserInfo.ProfileId;
         _bcWrapper.OneWayMatchService.StartMatch(opponentId, _findPlayersRange, OnStartMatchSuccess, OnFailureCallback);
     }
@@ -573,6 +655,11 @@ public class NetworkManager : MonoBehaviour
         _bcWrapper.PlaybackStreamService.ReadStream(_playbackStreamId, OnReadStreamSuccess, OnFailureCallback);
     }
 
+    public void ReadInvasionStream()
+    {
+        _bcWrapper.PlaybackStreamService.ReadStream(GameManager.Instance.InvadedStreamInfo.PlaybackStreamID, OnReadStreamSuccess, OnFailureCallback);
+    }
+
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
         GameManager.Instance.ReplayRecords.Clear();
@@ -589,8 +676,8 @@ public class NetworkManager : MonoBehaviour
 
         if (summary != null && summary.Count > 0)
         {
-            invaderKillCount = (int) summary["invaderKillCount"];
-            defenderKillCount = (int) summary["defenderKillCount"];
+            _invaderKillCount = (int) summary["invaderKillCount"];
+            _defenderKillCount = (int) summary["defenderKillCount"];
             timeLeft = (float)(double)summary["timeLeft"];
             _didInvadersWin = (bool) summary["didInvadersWin"];
         }
@@ -687,6 +774,7 @@ public class NetworkManager : MonoBehaviour
     public void TurnOnShield()
     {
         if (_shieldActive) return;
+        DecreaseGoldAmountForShield();
         GameManager.Instance.CurrentUserInfo.ShieldTime = 60;
         _bcWrapper.MatchMakingService.TurnShieldOnFor(60, OnTurnOnShieldSuccess);
     }
@@ -698,16 +786,16 @@ public class NetworkManager : MonoBehaviour
 
     public void SummaryInfo(int in_slayCount, int in_defeatedTroops, float in_timeLeft)
     {
-        invaderKillCount = in_slayCount;
-        defenderKillCount = in_defeatedTroops;
+        _invaderKillCount = in_slayCount;
+        _defenderKillCount = in_defeatedTroops;
         timeLeft = in_timeLeft;
     }
 
     private string CreateEndGameSummaryData()
     {
         Dictionary<string, object> summaryData = new Dictionary<string, object>();
-        summaryData.Add("invaderKillCount", invaderKillCount);
-        summaryData.Add("defenderKillCount", defenderKillCount);
+        summaryData.Add("invaderKillCount", _invaderKillCount);
+        summaryData.Add("defenderKillCount", _defenderKillCount);
         summaryData.Add("timeLeft", timeLeft);
         summaryData.Add("didInvadersWin", _didInvadersWin);
         string value = JsonWriter.Serialize(summaryData);
@@ -805,10 +893,18 @@ public class NetworkManager : MonoBehaviour
         return value;
     }
 
-    private string CreateACLJson()
+    private string CreateJsonCurrencyEntityData()
+    {
+        Dictionary<string, object> entityInfo = new Dictionary<string, object>();
+        entityInfo.Add("gold", GameManager.Instance.CurrentUserInfo.GoldAmount);
+        string value = JsonWriter.Serialize(entityInfo);
+        return value;
+    }
+
+    private string CreateACLJson(int aclLevel = 2)
     {
         Dictionary<string, object> aclInfo = new Dictionary<string, object>();
-        aclInfo.Add("other", 2);
+        aclInfo.Add("other", aclLevel);
         string value = JsonWriter.Serialize(aclInfo);
         return value;
     }
