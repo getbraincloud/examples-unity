@@ -140,11 +140,6 @@ public class GameManager : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
         _currentUserInfo = Settings.LoadPlayerInfo();
-        if(MenuManager.Instance != null)
-        {
-            MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
-            MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
-        }
     }
 
     public bool IsEntityIdValid()
