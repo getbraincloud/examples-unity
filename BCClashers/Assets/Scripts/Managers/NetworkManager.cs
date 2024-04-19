@@ -266,7 +266,6 @@ public class NetworkManager : MonoBehaviour
 
         if (!MenuManager.Instance.RememberMeToggle.isOn)
         {
-            _bcWrapper.ResetStoredAnonymousId();
             _bcWrapper.ResetStoredProfileId();
         }
 

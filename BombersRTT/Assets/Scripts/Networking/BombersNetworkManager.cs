@@ -109,7 +109,7 @@ namespace BrainCloudUNETExample
             Dictionary<string, object> playerExtra = new Dictionary<string, object>();
             playerExtra.Add("cxId", GCore.Wrapper.Client.RTTConnectionID);
             playerExtra.Add(GBomberRTTConfigManager.JSON_GOLD_WINGS, GPlayerMgr.Instance.GetCurrencyBalance(GBomberRTTConfigManager.CURRENCY_GOLD_WINGS) > 0 ? true : false);
-            
+
             Dictionary<string, object> algo = new Dictionary<string, object>();
 
             float[] arry = { 10.0f, 20.5f, 80.0f };
@@ -146,7 +146,7 @@ namespace BrainCloudUNETExample
                compoundedRangeData.Add(newData);
            }
            algo[CompoundRanges] = compoundedRangeData.ToArray();
-           
+
             /*
                    // ranged percent strategy
                    algo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyRangedPercent.Value;
@@ -205,7 +205,7 @@ namespace BrainCloudUNETExample
                     {
                         bWaitForMatch = true;
                     }
-                    // if they are readied up 
+                    // if they are readied up
                     if (member.LobbyReadyUp) cxIds.Add(member.CXId);
                 }
 
@@ -476,7 +476,7 @@ namespace BrainCloudUNETExample
 #endif
                 switch (rsConnectionType)
                 {
-                    //web socket 
+                    //web socket
                     case 0:
                         {
                             if (!ports.ContainsKey("ws"))
@@ -490,7 +490,7 @@ namespace BrainCloudUNETExample
                         }
                         break;
 
-                    // TCP 
+                    // TCP
                     case 1:
                         {
                             RoomServerInfo.Port = (int)ports["tcp"];
@@ -1367,9 +1367,9 @@ namespace BrainCloudUNETExample
         {
             if(GCore.Wrapper.Client.Authenticated)
             {
-                GCore.Wrapper.Client.LogoutOnApplicationQuit();    
+                GCore.Wrapper.LogoutOnApplicationQuit(false);
             }
-            
+
             DisconnectGlobalChat();
 
             // force whatever is aroudn to be sent out

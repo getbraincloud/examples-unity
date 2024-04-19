@@ -149,8 +149,9 @@ public class BrainCloudManager : MonoBehaviour
         
         if(!GameManager.Instance.RememberMeToggle.isOn)
         {
+            var profileID = _bcWrapper.GetStoredProfileId();
             _bcWrapper.ResetStoredProfileId();
-            _bcWrapper.ResetStoredAnonymousId();
+            _bcWrapper.Client.AuthenticationService.ProfileId = profileID;
         }
     }
     
