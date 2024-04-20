@@ -79,7 +79,7 @@ public static class UserHandler
     /// Allows the user to log out of the app during a session.
     /// </summary>
     public static void HandleUserLogout(SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
-        BCManager.PlayerStateService.Logout(onSuccess, onFailure, cbObject);
+        BCManager.Wrapper.Logout(true, onSuccess, onFailure, cbObject);
 
     /// <summary>
     /// Reset the authentication data stored on the user's device.
