@@ -8,7 +8,7 @@ public class BrainCloudConnectScene : MonoBehaviour
 
     private Vector2 m_scrollPosition;
     private string m_authStatus = "Welcome to brainCloud";
-
+    private bool rememberMeToggle = true;
     void Start()
     {
 		///////////////////////////////////////////////////////////////////
@@ -23,8 +23,12 @@ public class BrainCloudConnectScene : MonoBehaviour
         // Stores the password in plain text directly in the unity store.
         // This is obviously not secure but speeds up debugging/testing.
 		m_password = PlayerPrefs.GetString("password");
+        if(App.Bc.CanReconnect())
+        {
+            App.Bc.Reconnect(OnSuccess_Authenticate, OnError_Authenticate);
+        }
     }
-    
+
     void Update()
     {
     }
@@ -54,19 +58,20 @@ public class BrainCloudConnectScene : MonoBehaviour
 
 		GUILayout.Label ("Password");
 		m_password = GUILayout.PasswordField (m_password, '*', GUILayout.MinWidth (100));
-
 		GUILayout.Space (10);
+
+        rememberMeToggle = GUI.Toggle(new Rect(170, 175, 100, 30), rememberMeToggle, "Remember me");
 
 		GUILayout.BeginHorizontal ();
         GUILayout.FlexibleSpace();
 
-		if (GUILayout.Button ("Authenticate", GUILayout.MinHeight (30), GUILayout.MinWidth (100))) 
+		if (GUILayout.Button ("Authenticate", GUILayout.MinHeight (30), GUILayout.MinWidth (100)))
 		{
 			if( m_username.Length == 0 || m_password.Length == 0 )
             {
                 AppendLog("Username/password can't be empty");
             }
-			else 
+			else
 			{
                 AppendLog("Attempting to authenticate...");
 				PlayerPrefs.SetString("username", m_username);
@@ -114,10 +119,18 @@ public class BrainCloudConnectScene : MonoBehaviour
 
     public void OnSuccess_Authenticate(string responseData, object cbObject)
     {
+        if(!rememberMeToggle)
+        {
+            App.Bc.ResetStoredProfileId();
+        }
+        else
+        {
+            Debug.Log("Remember is set true");
+        }
         AppendLog("Authenticate successful!");
         SceneManager.LoadScene("Game");
     }
-    
+
     public void OnError_Authenticate(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
 		AppendLog("Authenticate failed: " + statusMessage);
