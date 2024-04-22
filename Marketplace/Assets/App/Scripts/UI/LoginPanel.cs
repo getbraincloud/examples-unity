@@ -24,6 +24,10 @@ public class LoginPanel : MonoBehaviour
         App = FindObjectOfType<ExampleApp>();
 
         StartCoroutine(GetBrainCloudWrapper());
+        if(BC.CanReconnect())
+        {
+            HandleAutomaticLogin();
+        }
     }
 
     private void OnDisable()
@@ -64,16 +68,9 @@ public class LoginPanel : MonoBehaviour
 
     private void OnLoginButton()
     {
-        if (App.GetStoredUserIDs())
-        {
-            HandleAutomaticLogin();
-        }
-        else
-        {
-            BC.AuthenticateAnonymous(OnAuthenticationSuccess,
-                                     OnAuthenticationFailure,
-                                     this);
-        }
+        BC.AuthenticateAnonymous(OnAuthenticationSuccess,
+            OnAuthenticationFailure,
+            this);
     }
 
     private void OnAuthenticationSuccess(string jsonResponse, object cbObject)
@@ -82,7 +79,10 @@ public class LoginPanel : MonoBehaviour
 
         App.ChangePanelState(PanelState.Main);
         App.IsInteractable = true;
-
+        if(!App.RememberMeIsOn)
+        {
+            BC.ResetStoredProfileId();
+        }
         App.GetStoredUserIDs();
         Debug.Log($"User Profile ID: {BC.GetStoredProfileId()}");
         Debug.Log($"User Anonymous ID: {BC.GetStoredAnonymousId()}");
