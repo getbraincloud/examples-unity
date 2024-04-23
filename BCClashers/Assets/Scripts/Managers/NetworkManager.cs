@@ -4,6 +4,7 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.XR;
 
 /// <summary>
 /// This class demonstrates how to communicate with BrainCloud services.
@@ -20,6 +21,11 @@ using UnityEngine.SceneManagement;
 public class NetworkManager : MonoBehaviour
 {
     private BrainCloudWrapper _bcWrapper;
+
+    public BrainCloudWrapper Wrapper
+    {
+        get => _bcWrapper;
+    }
     public static NetworkManager Instance;
     private bool _isNewPlayer;
     private int _defaultRating = 1200;
@@ -95,6 +101,10 @@ public class NetworkManager : MonoBehaviour
     {
         if (_bcWrapper != null)
         {
+            if (_bcWrapper.Client.Authenticated)
+            {
+                _bcWrapper.LogoutOnApplicationQuit(false);
+            }
             _bcWrapper.Client.ShutDown();
         }
     }
@@ -129,8 +139,14 @@ public class NetworkManager : MonoBehaviour
         _bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, OnFailureCallback);
     }
 
+    public void Reconnect()
+    {
+        _bcWrapper.Reconnect(HandlePlayerState, OnFailureCallback);
+    }
+
     public void SignOut()
     {
+        PlayerPrefs.DeleteAll();
         _bcWrapper.Logout(true);
     }
 
@@ -246,6 +262,11 @@ public class NetworkManager : MonoBehaviour
             {
                 OnLoggedIn(null, null);
             }
+        }
+
+        if (!MenuManager.Instance.RememberMeToggle.isOn)
+        {
+            _bcWrapper.ResetStoredProfileId();
         }
 
         _bcWrapper.EntityService.GetSingleton(_currencyType, OnGetSingleton, OnFailureCallback);
@@ -490,7 +511,7 @@ public class NetworkManager : MonoBehaviour
             GameManager.Instance.InvadedStreamInfo = streamInfo;
         }
 
-        MenuManager.Instance.UpdateMatchMakingInfo();
+        MenuManager.Instance.UpdateMainMenu();
         MenuManager.Instance.IsLoading = false;
     }
 

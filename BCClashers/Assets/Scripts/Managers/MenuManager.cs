@@ -9,8 +9,15 @@ using TMPro;
 /// <summary>
 /// This class is specifically for Main Menu interactions with Unity's UI.
 /// </summary>
-
-public enum MenuStates {SignIn,MainMenu,Lobby,Game,Connecting}
+public enum MenuStates
+{
+    SignIn,
+    MainMenu,
+    Lobby,
+    Game,
+    Connecting,
+    Reconnect
+}
 
 public class MenuManager : MonoBehaviour
 {
@@ -43,7 +50,8 @@ public class MenuManager : MonoBehaviour
     public TMP_Text LobbyAttackButtonText;
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
-
+    public Toggle RememberMeToggle;
+    
     [Header("UI References")]
     public RectTransform InvaderButtonBorder;
     public RectTransform DefenderButtonBorder;
@@ -99,13 +107,16 @@ public class MenuManager : MonoBehaviour
         PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
         if (NetworkManager.Instance.IsSessionValid())
         {
-            UpdateMatchMakingInfo();
-            UpdateGoldAmount();
             UpdateMainMenu();
             ChangeState(MenuStates.MainMenu);
         }
+        else if (NetworkManager.Instance.Wrapper.CanReconnect())
+        {
+            ButtonPressChangeState(MenuStates.Reconnect);
+        }
         else
         {
+            RememberMeToggle.isOn = true;
             ChangeState(MenuStates.SignIn);    
         }
     }
@@ -147,7 +158,13 @@ public class MenuManager : MonoBehaviour
         //User is in this state and moving onto the next
         switch (CurrentMenuState)
         {
-            //Logging In...
+            //Reconnecting user...
+            case MenuStates.Reconnect:
+                CurrentMenuState = MenuStates.MainMenu;
+                NetworkManager.Instance.Reconnect();
+                LoadingMenuState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE, false, MenuStates.MainMenu);
+                break;
+            //Logging In using input fields..
             case MenuStates.SignIn:
                 CurrentMenuState = MenuStates.MainMenu;
                 NetworkManager.Instance.Login();
@@ -259,6 +276,9 @@ public class MenuManager : MonoBehaviour
         Vector2 posD = InvaderButtonBorder.anchoredPosition;
         posD.y = _selectionInvaderYPlacement[invaderIndex];
         InvaderButtonBorder.anchoredPosition = posD;
+
+        UpdateMatchMakingInfo();
+        UpdateGoldAmount();
     }
 
     public void UpdateMatchMakingInfo()
@@ -423,6 +443,8 @@ public class MenuManager : MonoBehaviour
 
     public void SignOutPressed()
     {
+        UsernameInputField.text = "";
+        PasswordInputField.text = "";
         NetworkManager.Instance.SignOut();
         ChangeState(MenuStates.SignIn);
     }

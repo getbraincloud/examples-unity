@@ -6,6 +6,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MenuControl : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class MenuControl : MonoBehaviour
     private string _dotsForLoadingIndicator;
     private int _numberOfDots;
     
+    public Toggle RememberMeToggle;
     public static MenuControl Singleton { get; private set; }
 
     private void Start()
@@ -56,6 +58,12 @@ public class MenuControl : MonoBehaviour
             LoginInputFields.gameObject.SetActive(true);
             MainMenuButtons.gameObject.SetActive(false);            
         }
+    }
+    
+    public void Logout()
+    {
+        BrainCloudManager.Singleton.Logout();
+        BackToLogin();  
     }
     
     public void JoinGame()
@@ -104,5 +112,14 @@ public class MenuControl : MonoBehaviour
     {
         LoginInputFields.SetActive(false);
         MainMenuButtons.SetActive(true);
+    }
+    
+    private void BackToLogin()
+    {
+        UsernameInputField.text = "";
+        PasswordInputField.text = "";
+        RememberMeToggle.isOn = true;
+        LoginInputFields.SetActive(true);
+        MainMenuButtons.SetActive(false);
     }
 }

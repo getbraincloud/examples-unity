@@ -38,6 +38,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text AppIdText;
     public TMP_Text LobbyIdText;
     public Button ReconnectButton;
+    public Toggle RememberMeToggle;
     //for updating members list of shockwaves
     public GameArea GameArea;
     public Button JoinInProgressButton;
@@ -115,8 +116,6 @@ public class GameManager : MonoBehaviour
     private void LoadPlayerSettings()
     {
         _currentUserInfo = Settings.LoadPlayerInfo();
-        UsernameInputField.text = _currentUserInfo.Username;
-        PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
     }
     
     public void UpdateMainMenuText()

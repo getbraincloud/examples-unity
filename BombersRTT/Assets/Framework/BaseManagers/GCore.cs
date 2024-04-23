@@ -11,6 +11,7 @@ namespace Gameframework
     public class GCore : SingletonBehaviour<GCore>
     {
         public static bool IsFreshLaunch = true;
+        public bool RememberUser;
         public static BrainCloudWrapper Wrapper
         {
             get { return Instance.m_wrapper; }
@@ -28,7 +29,7 @@ namespace Gameframework
             if (Input.GetKeyUp(KeyCode.Escape))
             {
                 if (GStateManager.Instance.IsLoadingState ||
-                    GStateManager.Instance.IsLoadingSubState || 
+                    GStateManager.Instance.IsLoadingSubState ||
                     GStateManager.Instance.CurrentStateId == BrainCloudUNETExample.SplashState.STATE_NAME) return;
 
                 if (GStateManager.Instance.CurrentSubStateId != GStateManager.UNDEFINED_STATE)
@@ -135,6 +136,10 @@ namespace Gameframework
         {
             base.OnApplicationQuit();
             ApplicationIsQuitting = true;
+            if(!RememberUser)
+            {
+                GPlayerMgr.Instance.ResetBrainCloudAuth();
+            }
             GSettingsMgr.Save();
         }
 

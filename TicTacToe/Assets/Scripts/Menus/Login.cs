@@ -2,6 +2,7 @@ using BrainCloud.JsonFx.Json;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Login : GameScene
 {
@@ -15,6 +16,7 @@ public class Login : GameScene
     [SerializeField] public TextMeshProUGUI InfoBox;
     [SerializeField] public TextMeshProUGUI ErrorMessage;
     [SerializeField] public GameObject ErrorMessageBox;
+    [SerializeField] public Toggle RememberMeToggle;
 
     // Use this for initialization
     private void Start()
@@ -90,7 +92,7 @@ public class Login : GameScene
         #region Reconnect
         // Use Reconnect for re-authentication. It uses an GUID (anonymousId) to authenticate the user
         // Don't save the Username and Password locally for re-authentication! This is bad practice!
-        if (!_isConnecting && PlayerPrefs.GetString(App.WrapperName + "_hasAuthenticated", "false").Equals("true"))
+        if (App.Bc.CanReconnect() && !_isConnecting && PlayerPrefs.GetString(App.WrapperName + "_hasAuthenticated", "false").Equals("true"))
         {
             _isConnecting = true;
             Spinner.gameObject.SetActive(true);
@@ -118,7 +120,14 @@ public class Login : GameScene
         App.ProfileId = data["profileId"].ToString();
         App.Name = data["playerName"].ToString();
 
-        PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
+        if(RememberMeToggle.isOn)
+        {
+            PlayerPrefs.SetString(App.WrapperName + "_hasAuthenticated", "true");
+        }
+        else
+        {
+            PlayerPrefs.DeleteAll();
+        }
 
         // brainCloud gives us a newUser value to indicate if this account was just created.
         bool isNewUser = data["newUser"].ToString().Equals("true");

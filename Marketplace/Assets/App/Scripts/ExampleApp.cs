@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Core;
 using UnityEngine;
+using UnityEngine.UI;
 
 #if UNITY_ANDROID
 using Firebase;
@@ -57,6 +58,7 @@ public class ExampleApp : MonoBehaviour
     [SerializeField] private TMP_Text UserInfoText = default;
     [SerializeField] private TMP_Text AppInfoLabel = default;
     [SerializeField] private TMP_Text VersionInfoLabel = default;
+	[SerializeField] private Toggle RememberMeToggle;
 
     [Header("Panels")]
     [SerializeField] private LoginPanel LoginPanel = default;
@@ -68,6 +70,11 @@ public class ExampleApp : MonoBehaviour
     [SerializeField] private string NotificationSubtitle = "Subtitle Goes Here";
     [SerializeField] private string NotificationBody = "Hello World from brainCloud!";
     [SerializeField] private string NotificationImageURL = string.Empty;
+
+    public bool RememberMeIsOn
+    {
+        get => RememberMeToggle.isOn;
+    }
 
     public bool IsInteractable
     {
@@ -122,7 +129,7 @@ public class ExampleApp : MonoBehaviour
     {
         if(BC.Client.Authenticated)
         {
-            BC.Client.LogoutOnApplicationQuit();
+            BC.LogoutOnApplicationQuit(false);
         }
     }
 
@@ -211,7 +218,7 @@ public class ExampleApp : MonoBehaviour
     public void ChangePanelState(PanelState state)
     {
         Debug.Log($"Changing panel state to <b>{state}</b>.");
-
+        RememberMeToggle.transform.parent.gameObject.SetActive(state == PanelState.Login);
         switch (state)
         {
             case PanelState.Login:

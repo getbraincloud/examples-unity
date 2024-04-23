@@ -51,6 +51,7 @@ public class BrainCloudManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        InitializeBC();
     }
 
     //Called from Unity Button, attempting to login
@@ -70,9 +71,13 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         GameManager.Instance.CurrentUserInfo.Username = username;
-        InitializeBC();
         // Authenticate with brainCloud
         _bcWrapper.AuthenticateUniversal(username, password, true, HandlePlayerState, LogErrorThenPopUpWindow, "Login Failed");
+    }
+    
+    public void AuthenticateReconnect()
+    {
+        _bcWrapper.Reconnect(HandlePlayerState, LogErrorThenPopUpWindow);
     }
 
     private void FixedUpdate()
@@ -88,7 +93,7 @@ public class BrainCloudManager : MonoBehaviour
     {
         if(_bcWrapper.Client.Authenticated)
         {
-            _bcWrapper.Client.LogoutOnApplicationQuit();
+            _bcWrapper.LogoutOnApplicationQuit(false);
         }
     }
 
@@ -111,7 +116,6 @@ public class BrainCloudManager : MonoBehaviour
     void OnLoggedIn()
     {
         GameManager.Instance.UpdateMainMenuText();
-        PlayerPrefs.SetString(Settings.PasswordKey,GameManager.Instance.PasswordInputField.text);
         StateManager.Instance.isLoading = false;
     }
     
@@ -142,6 +146,13 @@ public class BrainCloudManager : MonoBehaviour
                 "Failed to update username to braincloud");
         }
         GameManager.Instance.CurrentUserInfo = userInfo;
+        
+        if(!GameManager.Instance.RememberMeToggle.isOn)
+        {
+            var profileID = _bcWrapper.GetStoredProfileId();
+            _bcWrapper.ResetStoredProfileId();
+            _bcWrapper.Client.AuthenticationService.ProfileId = profileID;
+        }
     }
     
     private void OnUpdateName(string jsonResponse, object cbObject)
@@ -265,7 +276,7 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.RelayService.EndMatch(json);
     }
 
-    public void ReconnectUser()
+    public void ReconnectUserToLobby()
     {
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         _isReconnecting = true;
@@ -771,7 +782,10 @@ public class BrainCloudManager : MonoBehaviour
     
     public void Logout()
     {
-        _bcWrapper.Logout(false);
+        _bcWrapper.Logout(true);
+        GameManager.Instance.UsernameInputField.text = "";
+        GameManager.Instance.PasswordInputField.text = "";
+        PlayerPrefs.DeleteAll();
         StateManager.Instance.ChangeState(GameStates.SignIn);
     }
 

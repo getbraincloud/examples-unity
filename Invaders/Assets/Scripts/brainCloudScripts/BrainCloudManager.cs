@@ -8,6 +8,7 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
 
 public class BrainCloudManager : MonoBehaviour
 {
@@ -109,6 +110,10 @@ public class BrainCloudManager : MonoBehaviour
             _unityTransport.SetConnectionData("0.0.0.0", 7777);
             _netManager.StartServer();
         }
+        else if(_wrapper.CanReconnect())
+        {
+            _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);            
+        }
     }
 
     private void Update()
@@ -123,8 +128,13 @@ public class BrainCloudManager : MonoBehaviour
     {
         if(_wrapper.Client.Authenticated)
         {
-            _wrapper.Client.LogoutOnApplicationQuit();
+            _wrapper.LogoutOnApplicationQuit(false);
         }
+    }
+    
+    public void Logout()
+    {
+        _wrapper.LogoutOnApplicationQuit(true);
     }
 
     public void AuthenticateWithBrainCloud(string in_username, string in_password)
@@ -149,6 +159,11 @@ public class BrainCloudManager : MonoBehaviour
         else
         {
             MenuControl.Singleton.SwitchMenuButtons();            
+        }
+        if(!MenuControl.Singleton.RememberMeToggle.isOn)
+        {
+            _wrapper.ResetStoredProfileId();
+            _wrapper.Client.AuthenticationService.ProfileId = _localUserInfo.ProfileID;
         }
     }
     
