@@ -34,6 +34,7 @@ public class PlayerControl : NetworkBehaviour
     private NetworkVariable<int> m_MoveX = new NetworkVariable<int>(0);
 
     private GameObject m_MyBullet;
+    private GameObject m_OtherBullet;
     private ClientRpcParams m_OwnerRPCParams;
 
     [SerializeField]
@@ -57,9 +58,13 @@ public class PlayerControl : NetworkBehaviour
         get => BrainCloudManager.Singleton.IsDedicatedServer;
     }
 
+    private PlaybackStreamRecord record;
+    private int currentRecordFrame = 0;
+
     private void Awake()
     {
         m_HasGameStarted = false;
+        record = new PlaybackStreamRecord();
     }
 
     private void Update()
@@ -72,6 +77,12 @@ public class PlayerControl : NetworkBehaviour
                 break;
             }
         }
+    }
+
+    private void FixedUpdate()
+    {
+        record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
+        currentRecordFrame += 1;
     }
 
     private void LateUpdate()
@@ -179,6 +190,7 @@ public class PlayerControl : NetworkBehaviour
         if (m_Lives.Value <= 0)
         {
             m_IsAlive = false;
+            record.totalFrameCount = currentRecordFrame;
         }
     }
 
@@ -194,11 +206,10 @@ public class PlayerControl : NetworkBehaviour
         if (!IsLocalPlayer || !IsOwner || !m_HasGameStarted) return;
         if (!m_IsAlive) return;
 
-        
-
         var deltaX = 0;
         if (Input.GetKey(KeyCode.LeftArrow)) deltaX -= 1;
         if (Input.GetKey(KeyCode.RightArrow)) deltaX += 1;
+        record.GetLatestFrame().xDelta += deltaX;
 
         if (deltaX != 0)
         {
@@ -215,13 +226,21 @@ public class PlayerControl : NetworkBehaviour
     {
         if (!m_IsAlive)
             return;
+        if (m_MyBullet != null)
+            return;
+        record.GetLatestFrame().createBullet = true;
 
-        if (m_MyBullet == null)
-        {
-            m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
-            m_MyBullet.GetComponent<PlayerBullet>().owner = this;
-            m_MyBullet.GetComponent<NetworkObject>().Spawn();
-        }
+        m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
+        m_MyBullet.GetComponent<PlayerBullet>().owner = this;
+        m_MyBullet.GetComponent<NetworkObject>().Spawn();
+    }
+
+    [ServerRpc]
+    public void ShootServerRPC(Vector3 pos)
+    {
+        m_OtherBullet = Instantiate(bulletPrefab, pos + Vector3.up, Quaternion.identity);
+        m_OtherBullet.GetComponent<PlayerBullet>().owner = this;
+        m_OtherBullet.GetComponent<NetworkObject>().Spawn();
     }
 
     public void HitByBullet()
@@ -282,5 +301,10 @@ public class PlayerControl : NetworkBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(reason), reason, null);
         }
+    }
+
+    public PlaybackStreamRecord GetRecord()
+    {
+        return record;
     }
 }

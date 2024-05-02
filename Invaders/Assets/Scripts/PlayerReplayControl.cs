@@ -63,6 +63,7 @@ public class PlayerReplayControl : NetworkBehaviour
 
     private void RetreatShip()
     {
-        GetComponent<Rigidbody>().velocity = Vector2.down;
+        GetComponent<Rigidbody2D>().velocity = 2 * Vector2.down;
+        Destroy(gameObject, 5.0f);
     }
 }
