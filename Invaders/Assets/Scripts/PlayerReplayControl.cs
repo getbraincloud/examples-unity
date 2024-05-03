@@ -34,8 +34,8 @@ public class PlayerReplayControl : NetworkBehaviour
             if (_actionReplayRecords.frames[replayIndex].xDelta != 0)
                 MoveShip(_actionReplayRecords.frames[replayIndex].xDelta);
 
-            if (_actionReplayRecords.frames[replayIndex].createBullet)
-                ShootServerRPC();
+            //if (_actionReplayRecords.frames[replayIndex].createBullet)
+                //ShootBullet();
 
             replayIndex += 1;
             yield return new WaitForFixedUpdate();
@@ -43,22 +43,17 @@ public class PlayerReplayControl : NetworkBehaviour
         RetreatShip();
     }
 
-    [ServerRpc]
-    private void ShootServerRPC()
-    {
-        if (m_MyBullet == null)
-        {
-            m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
-            m_MyBullet.GetComponent<PlayerBullet>().owner = creditedPlayer;
-            m_MyBullet.GetComponent<NetworkObject>().Spawn();
-        }
-    }
-
     private void MoveShip(float deltaX)
     {
         var newMovement = new Vector3(deltaX, 0, 0);
         Transform t = transform;
         t.position = Vector3.MoveTowards(t.position, t.position + newMovement, m_MoveSpeed * Time.deltaTime);
+    }
+
+    private void ShootBullet()
+    {
+        m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
+        m_MyBullet.GetComponent<PlayerBullet>().enabled = true;
     }
 
     private void RetreatShip()

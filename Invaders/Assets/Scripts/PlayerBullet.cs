@@ -48,9 +48,10 @@ public class PlayerBullet : NetworkBehaviour
             return;
 
         var hitEnemy = collider.gameObject.GetComponent<EnemyAgent>();
-        if (hitEnemy != null && owner != null)
+        if (hitEnemy != null)
         {
-            owner.IncreasePlayerScore(hitEnemy.score);
+            if(owner != null)
+                owner.IncreasePlayerScore(hitEnemy.score);
 
             // Only the server can despawn a NetworkObject
             hitEnemy.NetworkObject.Despawn();

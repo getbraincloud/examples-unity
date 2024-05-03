@@ -235,14 +235,6 @@ public class PlayerControl : NetworkBehaviour
         m_MyBullet.GetComponent<NetworkObject>().Spawn();
     }
 
-    [ServerRpc]
-    public void ShootServerRPC(Vector3 pos)
-    {
-        m_OtherBullet = Instantiate(bulletPrefab, pos + Vector3.up, Quaternion.identity);
-        m_OtherBullet.GetComponent<PlayerBullet>().owner = this;
-        m_OtherBullet.GetComponent<NetworkObject>().Spawn();
-    }
-
     public void HitByBullet()
     {
         Assert.IsTrue(IsDedicatedServer, "HitByBullet must be called server-side only!");
