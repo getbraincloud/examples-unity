@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2577463361084716463}
   - component: {fileID: 8303540700821626563}
   - component: {fileID: 463849294562631123}
+  - component: {fileID: 1983624760718281389}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -110,7 +111,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc5a6fd2da47f464b8de49fc9f364d5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UsernameField: {fileID: 0}
-  PasswordField: {fileID: 0}
   _sceneTransitionHandler: {fileID: 0}
   IsDedicatedServer: 0
+  ListOfUsers: []
+--- !u!114 &1983624760718281389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2577463361084716459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 257992fd218276a4eb09ffff4938b143, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

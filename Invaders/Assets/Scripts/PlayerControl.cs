@@ -79,6 +79,12 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
+    // This is the only function that is garunteed to be called client side when the game ends. Other functions are inconsistently called.
+    private void OnDestroy()
+    {
+        NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
+    }
+
     private void FixedUpdate()
     {
         record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
@@ -207,8 +213,8 @@ public class PlayerControl : NetworkBehaviour
         if (!m_IsAlive) return;
 
         var deltaX = 0;
-        if (Input.GetKey(KeyCode.LeftArrow)) deltaX -= 1;
-        if (Input.GetKey(KeyCode.RightArrow)) deltaX += 1;
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) deltaX -= 1;
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) deltaX += 1;
         record.GetLatestFrame().xDelta += deltaX;
 
         if (deltaX != 0)
@@ -218,7 +224,7 @@ public class PlayerControl : NetworkBehaviour
                 transform.position + newMovement, m_MoveSpeed * Time.deltaTime);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space)) ShootServerRPC();
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)) ShootServerRPC();
     }
 
     [ServerRpc]
