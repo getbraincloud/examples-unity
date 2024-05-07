@@ -65,6 +65,7 @@ public class PlayerControl : NetworkBehaviour
     {
         m_HasGameStarted = false;
         record = new PlaybackStreamRecord();
+        record.frames.Add(new PlaybackStreamFrame(0));
     }
 
     private void Update()
@@ -80,14 +81,24 @@ public class PlayerControl : NetworkBehaviour
     }
 
     // This is the only function that is garunteed to be called client side when the game ends. Other functions are inconsistently called.
-    private void OnDestroy()
+    override public void OnDestroy()
     {
-        NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
+        if (IsLocalPlayer)
+        {
+            if (record.totalFrameCount == -2)
+            {
+                record.totalFrameCount = currentRecordFrame;
+            }
+            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
+        }
+        base.OnDestroy();
     }
 
     private void FixedUpdate()
     {
-        record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
+        if (!IsLocalPlayer) return;
+
+        //record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
         currentRecordFrame += 1;
     }
 
@@ -215,7 +226,7 @@ public class PlayerControl : NetworkBehaviour
         var deltaX = 0;
         if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) deltaX -= 1;
         if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) deltaX += 1;
-        record.GetLatestFrame().xDelta += deltaX;
+        if (IsClient) record.GetLatestFrame().xDelta += deltaX;
 
         if (deltaX != 0)
         {
@@ -234,12 +245,23 @@ public class PlayerControl : NetworkBehaviour
             return;
         if (m_MyBullet != null)
             return;
-        record.GetLatestFrame().createBullet = true;
 
         m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
         m_MyBullet.GetComponent<PlayerBullet>().owner = this;
         m_MyBullet.GetComponent<NetworkObject>().Spawn();
     }
+
+    //[ServerRpc]
+    //private void ShootServerRPC(Vector3 pos)
+    //{
+    //    if (!m_IsAlive)
+    //        return;
+    //    record.GetLatestFrame().createBullet = true;
+
+    //    m_OtherBullet = Instantiate(bulletPrefab, pos + Vector3.up, Quaternion.identity);
+    //    m_OtherBullet.GetComponent<PlayerBullet>().owner = this;
+    //    m_OtherBullet.GetComponent<NetworkObject>().Spawn();
+    //}
 
     public void HitByBullet()
     {

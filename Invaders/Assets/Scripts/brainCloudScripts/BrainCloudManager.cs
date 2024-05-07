@@ -91,7 +91,7 @@ public class BrainCloudManager : MonoBehaviour
             string appId = Environment.GetEnvironmentVariable("APP_ID");
             string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
             string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
-            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.braincloudservers.com/s2sdispatcher");
+            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.internal.braincloudservers.com/s2sdispatcher");
             //_bcS2S.Authenticate();
             _bcS2S.LoggingEnabled = true;
         }

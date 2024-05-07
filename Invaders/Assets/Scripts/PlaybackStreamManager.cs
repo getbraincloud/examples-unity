@@ -31,14 +31,14 @@ public class PlaybackStreamManager : NetworkBehaviour
 
     private void Start()
     {
-        //if (!IsDedicatedServer) return;
+        if (!IsDedicatedServer) return;
 
         records.Add(GenerateFakeRecord());
 
         foreach (PlaybackStreamRecord record in records)
         {
             ghostInstanceRef = Instantiate(playerGhost, playerSpawnPoint.position, Quaternion.identity);
-            //ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
+            ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
             ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(FindObjectOfType<PlayerControl>(), record);
         }
     }

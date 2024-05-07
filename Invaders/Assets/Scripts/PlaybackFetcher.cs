@@ -17,8 +17,9 @@ public class PlaybackFetcher : MonoBehaviour
         get => _bcWrapper;
     }
 
-    private string createdRecordId;
+    private string createdRecordId = "";
     private int previousHighScore = -1;
+    private string previousRecordId = "";
 
     private void Awake()
     {
@@ -33,11 +34,6 @@ public class PlaybackFetcher : MonoBehaviour
 
         string message = cbObject as string;
         Debug.Log($"Failure: {message} |||| JSON: {jsonError}");
-
-        //if (!SceneManager.GetActiveScene().name.Contains("Game"))
-        //{
-        //    MenuManager.Instance.AbortToSignIn($"Message: {message} |||| JSON: {jsonError}");
-        //}
     }
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
@@ -72,13 +68,21 @@ public class PlaybackFetcher : MonoBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object> score = data["score"] as Dictionary<string, object>;
+        Dictionary<string, object> scoreData = score["data"] as Dictionary<string, object>;
         previousHighScore = (int)score["score"];
-        Debug.Log(previousHighScore);
+        previousRecordId = scoreData["replay"] as string;
     }
 
     private void OnGetPlayerScoreFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
         previousHighScore = 0;
+    }
+
+    private void AddEvents(string replayId, int duration, PlaybackStreamRecord record)
+    {
+        string eventData = "{\"movement\":0}";
+        string summaryData = "{\"framecount\":" + duration + "}";
+        _bcWrapper.PlaybackStreamService.AddEvent(replayId, eventData, summaryData, null, OnFailureCallback);
     }
 
     public void StartSubmittingRecord(int newScore, PlaybackStreamRecord newRecord)
@@ -100,24 +104,16 @@ public class PlaybackFetcher : MonoBehaviour
         yield return new WaitUntil(() => createdRecordId != "");
 
         string createdRecordIdJson = string.Concat("{\"replay\":\"", createdRecordId, "\"}");
+        Debug.Log(createdRecordIdJson + " ["+ createdRecordId + "]" + (createdRecordId != ""));
         _bcWrapper.LeaderboardService.PostScoreToLeaderboard("InvaderHighScore", newScore, createdRecordIdJson, null, OnFailureCallback);
         Debug.Log(newScore + " new score");
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(2f);
 
+        _bcWrapper.PlaybackStreamService.DeleteStream(previousRecordId, null, OnFailureCallback);
         _bcWrapper.PlaybackStreamService.EndStream(createdRecordId, null, OnFailureCallback);
         createdRecordId = "";
         previousHighScore = newScore;
+        previousRecordId = createdRecordId;
         yield break;
-    }
-
-    private IEnumerator TestDelay()
-    {
-        Debug.Log("TestDelay");
-        yield return new WaitForSeconds(2f);
-        Debug.Log("TestDelay");
-        yield return new WaitForSeconds(2f);
-        Debug.Log("TestDelay");
-        yield return new WaitForSeconds(2f);
-        Debug.Log("TestDelay");
     }
 }

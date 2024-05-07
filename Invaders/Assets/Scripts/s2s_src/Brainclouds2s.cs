@@ -30,7 +30,7 @@ public class BrainCloudS2S
 {
     private static int NO_PACKET_EXPECTED = -1;
     private static int SERVER_SESSION_EXPIRED = 40365;
-    private static string DEFAULT_S2S_URL = "https://api.braincloudservers.com/s2sdispatcher";
+    private static string DEFAULT_S2S_URL = "https://api.internal.braincloudservers.com/s2sdispatcher";
     public string ServerURL
     {
         get; private set;
