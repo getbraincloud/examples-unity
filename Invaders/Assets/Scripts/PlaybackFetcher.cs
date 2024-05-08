@@ -20,6 +20,8 @@ public class PlaybackFetcher : MonoBehaviour
     private string createdRecordId = "";
     private int previousHighScore = -1;
     private string previousRecordId = "";
+    private bool finishedAddingEvents = false;
+    private int eventsAdded = 0;
 
     private void Awake()
     {
@@ -78,11 +80,43 @@ public class PlaybackFetcher : MonoBehaviour
         previousHighScore = 0;
     }
 
-    private void AddEvents(string replayId, int duration, PlaybackStreamRecord record)
+    private void OnAddEventSuccess(string in_jsonResponse, object cbObject)
     {
-        string eventData = "{\"movement\":0}";
-        string summaryData = "{\"framecount\":" + duration + "}";
-        _bcWrapper.PlaybackStreamService.AddEvent(replayId, eventData, summaryData, null, OnFailureCallback);
+        eventsAdded += 1;
+    }
+
+    private IEnumerator AddEvents(string replayId, PlaybackStreamRecord record)
+    {
+        List<int> runLengths = new List<int>() { 1 };
+        for(int ii = 1; ii < record.totalFrameCount; ii++)
+        {
+            if (record.frames[ii].createBullet) runLengths.Add(1);
+            else if (Mathf.Abs(record.frames[ii].xDelta - record.frames[ii - 1].xDelta) > 0.05f) runLengths.Add(1);
+            else runLengths[^1] += 1;
+        }
+
+        const string MOVEMENT = "{\"movement\":";
+        const string SHOOT = ",\"shoot\":";
+        const string RUNLENGTH = ",\"runlength\":";
+        const string ID = ",\"id\":";
+        const string END = "}";
+        string summaryData = "{\"framecount\":" + record.totalFrameCount + END;
+        int index = 0;
+        string eventData = "";
+
+        Debug.Log(summaryData + record.frames[index].xDelta);
+        for(int ii = 0; ii < runLengths.Count; ii++)
+        {
+            eventData = MOVEMENT + record.frames[index].xDelta + SHOOT + (record.frames[index].createBullet ? 1 : 0) + 
+                RUNLENGTH + runLengths[ii] + ID + record.frames[index].frameID + END;
+            _bcWrapper.PlaybackStreamService.AddEvent(replayId, eventData, summaryData, OnAddEventSuccess, OnFailureCallback);
+            index += runLengths[ii];
+            yield return new WaitUntil(() => eventsAdded == ii + 1);
+        }
+
+        finishedAddingEvents = true;
+        eventsAdded = 0;
+        yield break;
     }
 
     public void StartSubmittingRecord(int newScore, PlaybackStreamRecord newRecord)
@@ -98,20 +132,19 @@ public class PlaybackFetcher : MonoBehaviour
             yield return new WaitUntil(() => previousHighScore != -1);
         }
 
-        Debug.Log(previousHighScore + " previous score");
         if (previousHighScore > newScore) yield break;
         _bcWrapper.PlaybackStreamService.StartStream(BrainCloudManager.Singleton.LocalUserInfo.ProfileID, false, OnStartStreamSuccess, OnFailureCallback);
         yield return new WaitUntil(() => createdRecordId != "");
 
         string createdRecordIdJson = string.Concat("{\"replay\":\"", createdRecordId, "\"}");
-        Debug.Log(createdRecordIdJson + " ["+ createdRecordId + "]" + (createdRecordId != ""));
         _bcWrapper.LeaderboardService.PostScoreToLeaderboard("InvaderHighScore", newScore, createdRecordIdJson, null, OnFailureCallback);
-        Debug.Log(newScore + " new score");
-        yield return new WaitForSeconds(2f);
+        StartCoroutine(AddEvents(createdRecordId, newRecord));
+        yield return new WaitUntil(() => finishedAddingEvents);
 
         _bcWrapper.PlaybackStreamService.DeleteStream(previousRecordId, null, OnFailureCallback);
         _bcWrapper.PlaybackStreamService.EndStream(createdRecordId, null, OnFailureCallback);
         createdRecordId = "";
+        finishedAddingEvents = false;
         previousHighScore = newScore;
         previousRecordId = createdRecordId;
         yield break;

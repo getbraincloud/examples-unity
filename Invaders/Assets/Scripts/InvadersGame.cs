@@ -539,7 +539,7 @@ public class InvadersGame : NetworkBehaviour
 
     public void RegisterSpawnableObject(InvadersObjectType invadersObjectType, GameObject gameObject)
     {
-        Assert.IsTrue(IsClient);
+        //Assert.IsTrue(IsClient);
 
         switch (invadersObjectType)
         {

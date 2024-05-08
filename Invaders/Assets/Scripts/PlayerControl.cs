@@ -60,6 +60,7 @@ public class PlayerControl : NetworkBehaviour
 
     private PlaybackStreamRecord record;
     private int currentRecordFrame = 0;
+    private float previousPos = 0;
 
     private void Awake()
     {
@@ -80,7 +81,7 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
-    // This is the only function that is garunteed to be called client side when the game ends. Other functions are inconsistently called.
+    // This is the only function that is guarunteed to be called client side when the game ends. Other functions are inconsistently called.
     override public void OnDestroy()
     {
         if (IsLocalPlayer)
@@ -96,10 +97,13 @@ public class PlayerControl : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (!IsLocalPlayer) return;
-
-        //record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
-        currentRecordFrame += 1;
+        if (IsLocalPlayer)
+        {
+            record.GetLatestFrame().xDelta = Mathf.Sign(transform.position.x - previousPos);
+            record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
+            currentRecordFrame += 1;
+        }
+        previousPos = transform.position.x;
     }
 
     private void LateUpdate()
@@ -226,7 +230,6 @@ public class PlayerControl : NetworkBehaviour
         var deltaX = 0;
         if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) deltaX -= 1;
         if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) deltaX += 1;
-        if (IsClient) record.GetLatestFrame().xDelta += deltaX;
 
         if (deltaX != 0)
         {
@@ -235,16 +238,22 @@ public class PlayerControl : NetworkBehaviour
                 transform.position + newMovement, m_MoveSpeed * Time.deltaTime);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)) ShootServerRPC();
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        {
+            if (AbleToShoot() && IsLocalPlayer) record.GetLatestFrame().createBullet = true;
+            ShootServerRPC();
+        }
+    }
+
+    private bool AbleToShoot()
+    {
+        return m_IsAlive && (m_MyBullet == null);
     }
 
     [ServerRpc]
     private void ShootServerRPC()
     {
-        if (!m_IsAlive)
-            return;
-        if (m_MyBullet != null)
-            return;
+        if (!AbleToShoot()) return;
 
         m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
         m_MyBullet.GetComponent<PlayerBullet>().owner = this;
