@@ -34,13 +34,19 @@ public class PlayerReplayControl : NetworkBehaviour
             if (_actionReplayRecords.frames[replayIndex].xDelta != 0)
                 MoveShip(_actionReplayRecords.frames[replayIndex].xDelta);
 
-            //if (_actionReplayRecords.frames[replayIndex].createBullet)
-                //ShootBullet();
+            if (_actionReplayRecords.frames[replayIndex].createBullet)
+                ShootBullet();
 
             replayIndex += 1;
             yield return new WaitForFixedUpdate();
         }
-        RetreatShip();
+        Transform t = transform;
+        while (t.position.y > -10)
+        {
+            t.position = Vector3.MoveTowards(t.position, t.position + Vector3.down, m_MoveSpeed * Time.deltaTime);
+            yield return 0;
+        }
+        Destroy(gameObject);
     }
 
     private void MoveShip(float deltaX)
@@ -53,12 +59,6 @@ public class PlayerReplayControl : NetworkBehaviour
     private void ShootBullet()
     {
         m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
-        m_MyBullet.GetComponent<PlayerBullet>().enabled = true;
-    }
-
-    private void RetreatShip()
-    {
-        GetComponent<Rigidbody2D>().velocity = 2 * Vector2.down;
-        Destroy(gameObject, 5.0f);
+        m_MyBullet.GetComponent<NetworkObject>().Spawn();
     }
 }

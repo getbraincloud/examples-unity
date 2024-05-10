@@ -92,6 +92,9 @@ public class PlayerControl : NetworkBehaviour
             }
             NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
         }
+        //string log = "";
+        //for (int ii = 1; ii < record.totalFrameCount; ii++) { log += (record.frames[ii].xDelta) + " "; }
+        //Debug.Log(log);
         base.OnDestroy();
     }
 
@@ -99,7 +102,8 @@ public class PlayerControl : NetworkBehaviour
     {
         if (IsLocalPlayer)
         {
-            record.GetLatestFrame().xDelta = Mathf.Sign(transform.position.x - previousPos);
+            if (Mathf.Abs(transform.position.x - previousPos) < 0.01f) record.GetLatestFrame().xDelta = 0;
+            else record.GetLatestFrame().xDelta = Math.Sign(transform.position.x - previousPos);
             record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
             currentRecordFrame += 1;
         }
@@ -259,18 +263,6 @@ public class PlayerControl : NetworkBehaviour
         m_MyBullet.GetComponent<PlayerBullet>().owner = this;
         m_MyBullet.GetComponent<NetworkObject>().Spawn();
     }
-
-    //[ServerRpc]
-    //private void ShootServerRPC(Vector3 pos)
-    //{
-    //    if (!m_IsAlive)
-    //        return;
-    //    record.GetLatestFrame().createBullet = true;
-
-    //    m_OtherBullet = Instantiate(bulletPrefab, pos + Vector3.up, Quaternion.identity);
-    //    m_OtherBullet.GetComponent<PlayerBullet>().owner = this;
-    //    m_OtherBullet.GetComponent<NetworkObject>().Spawn();
-    //}
 
     public void HitByBullet()
     {

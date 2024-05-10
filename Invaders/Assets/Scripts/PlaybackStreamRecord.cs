@@ -15,7 +15,7 @@ public class PlaybackStreamFrame
     {
         frameID = newFrameID;
     }
-    public float xDelta = 0f;
+    public int xDelta = 0;
     public bool createBullet = false;
     public int frameID = -2;
 }
