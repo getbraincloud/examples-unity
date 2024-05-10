@@ -40,6 +40,11 @@ public class PlayerBullet : NetworkBehaviour
         }
     }
 
+    public void SetSpeedToZero()
+    {
+        m_TravelSpeed = 0;
+    }
+
     private void OnTriggerEnter2D(Collider2D collider)
     {
         // several OnTriggerEnter2D calls may be invoked in the same frame (for different Colliders), so we check if

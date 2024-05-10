@@ -6,16 +6,23 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class PlaybackFetcher : MonoBehaviour
 {
     private bool _dead;
+    private bool IsDedicatedServer;
 
     private BrainCloudWrapper _bcWrapper;
 
     public BrainCloudWrapper Wrapper
     {
         get => _bcWrapper;
+    }
+
+    public BrainCloudS2S S2SWrapper
+    {
+        get => BrainCloudManager.Singleton.S2SWrapper;
     }
 
     private string createdRecordId = "";
@@ -26,9 +33,14 @@ public class PlaybackFetcher : MonoBehaviour
 
     private List<PlaybackStreamRecord> storedRecords = new List<PlaybackStreamRecord>();
 
+    [SerializeField]
+    private GameObject ghost;
+    private GameObject obj;
+
     private void Awake()
     {
         _bcWrapper = GetComponent<BrainCloudWrapper>();
+        IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
     }
 
     private void Start()
@@ -38,7 +50,39 @@ public class PlaybackFetcher : MonoBehaviour
 
     private void AddInvader30Test()
     {
-        _bcWrapper.PlaybackStreamService.ReadStream("00c2f480-f116-454e-b3b9-2e0d1627b8fb", OnReadStreamSuccess, OnGenericFailure);
+        if (IsDedicatedServer)
+        {
+            var requestJson = new Dictionary<string, object>();
+            requestJson["service"] = "playbackStream";
+            requestJson["operation"] = "READ_STREAM";
+
+            var requestDataJson = new Dictionary<string, object>();
+            requestDataJson["playbackStreamId"] = "00c2f480-f116-454e-b3b9-2e0d1627b8fb";
+
+            requestJson["data"] = requestDataJson;
+
+            string jsonString = JsonWriter.Serialize(requestJson);
+            S2SWrapper.Request(jsonString, OnReadStream);
+        }
+        else
+        {
+            _bcWrapper.PlaybackStreamService.ReadStream("00c2f480-f116-454e-b3b9-2e0d1627b8fb", OnReadStreamSuccess, OnGenericFailure);
+        }
+    }
+
+    /// <summary>
+    /// Tells the server to create a stamp. The debug ghost stamp does not move.
+    /// </summary>
+    /// <param name="y">The height of the stamp.</param>
+    private void AddDebugGhost(float y = 2.0f)
+    {
+        if (!IsDedicatedServer) return;
+
+        obj = Instantiate(ghost);
+        DontDestroyOnLoad(obj);
+        obj.transform.parent = transform;
+        obj.transform.position = new Vector3(Random.Range(-3.0f, 3.0f), y, 2.0f);
+        obj.GetComponent<NetworkObject>().Spawn();
     }
 
     private void OnGenericFailure(int status, int reasonCode, string jsonError, object cbObject)
@@ -51,6 +95,22 @@ public class PlaybackFetcher : MonoBehaviour
         Debug.Log($"Failure: {message} |||| JSON: {jsonError}");
     }
 
+    private void OnReadStream(string response)
+    {
+        Dictionary<string, object> responseJson = JsonReader.Deserialize<Dictionary<string, object>>(response);
+        Dictionary<string, object> jsonData = responseJson["data"] as Dictionary<string, object>;
+
+        AddDebugGhost();
+        if ((int)responseJson["status"] == 200)
+        {
+
+        }
+        else //ERROR
+        {
+            AddDebugGhost(5);
+        }
+    }
+
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
         PlaybackStreamRecord output = new PlaybackStreamRecord();
@@ -61,11 +121,13 @@ public class PlaybackFetcher : MonoBehaviour
 
         if (events == null || events.Length == 0)
         {
+            AddDebugGhost(4);
             Debug.LogWarning("No events were retrieved...");
             return;
         }
         if (summary == null || summary.Count == 0)
         {
+            AddDebugGhost(4);
             Debug.LogWarning("No summary was retrieved...");
             return;
         }
@@ -183,7 +245,7 @@ public class PlaybackFetcher : MonoBehaviour
     {
         List<PlaybackStreamRecord> output = new List<PlaybackStreamRecord>();
         foreach(PlaybackStreamRecord ii in storedRecords) output.Add(ii);
-        storedRecords.Clear();
+        //storedRecords.Clear();
         return output;
     }
 }

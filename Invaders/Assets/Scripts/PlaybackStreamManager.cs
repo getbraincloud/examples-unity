@@ -15,6 +15,7 @@ public class PlaybackStreamManager : NetworkBehaviour
     public static PlaybackStreamManager Instance => _instance;
 
     private bool IsDedicatedServer;
+    private PlayerControl leadingPlayer;
 
     [SerializeField]
     private GameObject playerGhost;
@@ -31,18 +32,35 @@ public class PlaybackStreamManager : NetworkBehaviour
 
     private void Start()
     {
-        if (!IsDedicatedServer) return;
+        if (IsDedicatedServer) return;
 
+        leadingPlayer = FindObjectOfType<PlayerControl>();
+
+        FindRecords();
+        CreateGhostsFromRecords();
+    }
+
+    private void FindRecords()
+    {
         records = NetworkManager.Singleton.GetComponent<PlaybackFetcher>().GetStoredRecords();
         records.Add(GenerateFakeRecord());
+    }
 
+    private void CreateGhostsFromRecords()
+    {
         foreach (PlaybackStreamRecord record in records)
         {
-            ghostInstanceRef = Instantiate(playerGhost, playerSpawnPoint.position, Quaternion.identity);
-            ghostInstanceRef.transform.Rotate(0, 0, 45 * records.Count);
-            ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
-            ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(FindObjectOfType<PlayerControl>(), record);
+            Debug.Log("Creating ghost from record!!!");
+            InstantiateGhostServerRPC(record);
         }
+    }
+
+    [ServerRpc]
+    private void InstantiateGhostServerRPC(PlaybackStreamRecord record)
+    {
+        ghostInstanceRef = Instantiate(playerGhost, playerSpawnPoint.position, Quaternion.identity);
+        ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(leadingPlayer, record);
+        ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
     }
 
     private PlaybackStreamRecord GenerateFakeRecord()
