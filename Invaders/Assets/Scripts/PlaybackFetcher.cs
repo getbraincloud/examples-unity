@@ -31,11 +31,10 @@ public class PlaybackFetcher : MonoBehaviour
     private bool finishedAddingEvents = false;
     private int eventsAdded = 0;
 
-    private List<PlaybackStreamRecord> storedRecords = new List<PlaybackStreamRecord>();
+    private List<PlaybackStreamReadData> storedRecords = new List<PlaybackStreamReadData>();
 
     [SerializeField]
     private GameObject ghost;
-    private GameObject obj;
 
     private void Awake()
     {
@@ -78,6 +77,7 @@ public class PlaybackFetcher : MonoBehaviour
     {
         if (!IsDedicatedServer) return;
 
+        GameObject obj;
         obj = Instantiate(ghost);
         DontDestroyOnLoad(obj);
         obj.transform.parent = transform;
@@ -138,13 +138,11 @@ public class PlaybackFetcher : MonoBehaviour
         {
             for(int ii = 0; ii < (int)eventObj["runlength"]; ii++)
             {
-                output.frames.Add(new PlaybackStreamFrame((int)eventObj["id"] + ii));
-                output.GetLatestFrame().xDelta = (int)eventObj["movement"];
-                output.GetLatestFrame().createBullet = (int)eventObj["shoot"] == 1;
+                output.frames.Add(new PlaybackStreamFrame((int)eventObj["movement"], (int)eventObj["shoot"] == 1, (int)eventObj["id"] + ii));
             }
         }
 
-        storedRecords.Add(output);
+        storedRecords.Add(new PlaybackStreamReadData(output));
         Debug.Log("Records: " + storedRecords.Count);
     }
 
@@ -153,7 +151,6 @@ public class PlaybackFetcher : MonoBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         createdRecordId = (string)data["playbackStreamId"];
-        Debug.Log(createdRecordId);
     }
 
     private void OnGetPlayerScoreSuccess(string in_jsonResponse, object cbObject)
@@ -241,10 +238,10 @@ public class PlaybackFetcher : MonoBehaviour
         yield break;
     }
 
-    public List<PlaybackStreamRecord> GetStoredRecords()
+    public List<PlaybackStreamReadData> GetStoredRecords()
     {
-        List<PlaybackStreamRecord> output = new List<PlaybackStreamRecord>();
-        foreach(PlaybackStreamRecord ii in storedRecords) output.Add(ii);
+        List<PlaybackStreamReadData> output = new List<PlaybackStreamReadData>();
+        foreach(PlaybackStreamReadData ii in storedRecords) output.Add(ii);
         //storedRecords.Clear();
         return output;
     }

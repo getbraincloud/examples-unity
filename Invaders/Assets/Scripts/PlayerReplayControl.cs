@@ -13,31 +13,31 @@ public class PlayerReplayControl : NetworkBehaviour
     private float m_MoveSpeed = 3.5f;
 
     private GameObject m_MyBullet;
-    private PlayerControl creditedPlayer;
 
     private int replayIndex;
-    private PlaybackStreamRecord _actionReplayRecords;
+    private PlaybackStreamReadData _actionReplayRecords;
 
-    public void StartStream(PlayerControl player, PlaybackStreamRecord record)
+    private void FixedUpdate()
     {
-        Debug.Log("Starting ghost replay");
-        creditedPlayer = player;
+        
+    }
+
+    public void StartStream(PlaybackStreamReadData record)
+    {
         _actionReplayRecords = record;
         StartCoroutine(StartPlayBack());
     }
 
     private IEnumerator StartPlayBack()
     {
-        replayIndex = 0;
-        while(replayIndex < _actionReplayRecords.totalFrameCount)
+        for(int ii = 0; ii < _actionReplayRecords.totalFrameCount; ii++)
         {
-            if (_actionReplayRecords.frames[replayIndex].xDelta != 0)
-                MoveShip(_actionReplayRecords.frames[replayIndex].xDelta);
+            if (_actionReplayRecords.frames[ii].xDelta != 0)
+                MoveShip(_actionReplayRecords.frames[ii].xDelta);
 
-            if (_actionReplayRecords.frames[replayIndex].createBullet)
+            if (_actionReplayRecords.frames[ii].createBullet)
                 ShootBullet();
 
-            replayIndex += 1;
             yield return new WaitForFixedUpdate();
         }
         Transform t = transform;

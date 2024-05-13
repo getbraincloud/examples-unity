@@ -6,6 +6,7 @@ using BrainCloud.JsonFx.Json;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
+using Random = UnityEngine.Random;
 
 public class PlaybackStreamManager : NetworkBehaviour
 {
@@ -23,7 +24,7 @@ public class PlaybackStreamManager : NetworkBehaviour
     [SerializeField]
     private Transform playerSpawnPoint;
 
-    private List<PlaybackStreamRecord> records = new List<PlaybackStreamRecord>();
+    private List<PlaybackStreamReadData> records = new List<PlaybackStreamReadData>();
 
     private void Awake()
     {
@@ -48,36 +49,46 @@ public class PlaybackStreamManager : NetworkBehaviour
 
     private void CreateGhostsFromRecords()
     {
-        foreach (PlaybackStreamRecord record in records)
+        foreach (PlaybackStreamReadData record in records)
         {
             Debug.Log("Creating ghost from record!!!");
+            InstantiateGhostServerRPC();
             InstantiateGhostServerRPC(record);
         }
     }
 
-    [ServerRpc]
-    private void InstantiateGhostServerRPC(PlaybackStreamRecord record)
+    [ServerRpc(RequireOwnership = false)]
+    private void InstantiateGhostServerRPC(PlaybackStreamReadData record)
     {
+        if(!IsDedicatedServer) return;
+
         ghostInstanceRef = Instantiate(playerGhost, playerSpawnPoint.position, Quaternion.identity);
-        ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(leadingPlayer, record);
+        ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(record);
         ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
     }
 
-    private PlaybackStreamRecord GenerateFakeRecord()
+    [ServerRpc(RequireOwnership = false)]
+    private void InstantiateGhostServerRPC()
+    {
+        if (!IsDedicatedServer) return;
+
+        ghostInstanceRef = Instantiate(playerGhost, playerSpawnPoint.position + Vector3.up, Quaternion.identity);
+        ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(GenerateFakeRecord());
+        ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
+    }
+
+    private PlaybackStreamReadData GenerateFakeRecord()
     {
         PlaybackStreamRecord output = new PlaybackStreamRecord();
         for (int ii = 0; ii < 150; ii++)
         {
-            output.frames.Add(new PlaybackStreamFrame(ii));
-            output.GetLatestFrame().xDelta = 0;
+            output.frames.Add(new PlaybackStreamFrame(0, false, ii));
         }
         for (int ii = 0; ii < 600; ii++)
         {
-            output.frames.Add(new PlaybackStreamFrame(ii));
-            output.GetLatestFrame().xDelta = (ii % 100 < 50) ? 1 : -1;
-            output.GetLatestFrame().createBullet = ii % 60 == 0;
+            output.frames.Add(new PlaybackStreamFrame((ii % 100 < 50) ? 1 : -1, ii % 60 == 0, ii));
         }
         output.totalFrameCount = 750;
-        return output;
+        return new PlaybackStreamReadData(output);
     }
 }

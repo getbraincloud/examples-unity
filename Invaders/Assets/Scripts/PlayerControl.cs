@@ -34,7 +34,7 @@ public class PlayerControl : NetworkBehaviour
     private NetworkVariable<int> m_MoveX = new NetworkVariable<int>(0);
 
     private GameObject m_MyBullet;
-    private GameObject m_OtherBullet;
+    private bool shotRecently = false;
     private ClientRpcParams m_OwnerRPCParams;
 
     [SerializeField]
@@ -102,9 +102,12 @@ public class PlayerControl : NetworkBehaviour
     {
         if (IsLocalPlayer)
         {
-            if (Mathf.Abs(transform.position.x - previousPos) < 0.01f) record.GetLatestFrame().xDelta = 0;
-            else record.GetLatestFrame().xDelta = Math.Sign(transform.position.x - previousPos);
-            record.frames.Add(new PlaybackStreamFrame(currentRecordFrame));
+            int dx;
+            if (Mathf.Abs(transform.position.x - previousPos) < 0.01f) dx = 0;
+            else dx = Math.Sign(transform.position.x - previousPos);
+
+            record.frames.Add(new PlaybackStreamFrame(dx, shotRecently, currentRecordFrame));
+            shotRecently = false;
             currentRecordFrame += 1;
         }
         previousPos = transform.position.x;
@@ -244,7 +247,7 @@ public class PlayerControl : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
         {
-            if (AbleToShoot() && IsLocalPlayer) record.GetLatestFrame().createBullet = true;
+            if (AbleToShoot() && IsLocalPlayer) shotRecently = true;
             ShootServerRPC();
         }
     }
