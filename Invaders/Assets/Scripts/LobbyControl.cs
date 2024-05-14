@@ -24,6 +24,11 @@ public class LobbyControl : NetworkBehaviour
     public TMP_Text LobbyText;
     private bool m_AllPlayersInLobby;
 
+    [SerializeField]
+    private TMP_Text playbackCounter;
+    [HideInInspector]
+    public int playbackCount = 0;
+
     private Dictionary<ulong, bool> m_ClientsInLobby;
     private string m_UserLobbyStatusText;
     private bool _isLoading;
@@ -138,5 +143,15 @@ public class LobbyControl : NetworkBehaviour
         ReadyButton.enabled = false;
         ErrorMessage.text = errorMessage;
         ErrorPanel.SetActive(true);
+    }
+
+    public void SendTestSignal()
+    {
+        BrainCloudManager.Singleton.SendTestSignal();
+    }
+
+    public void UpdatePlaybackCount()
+    {
+        playbackCounter.text = "BACK UP - " + playbackCount.ToString();
     }
 }

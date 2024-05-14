@@ -233,6 +233,7 @@ public class BrainCloudManager : MonoBehaviour
     
     void OnLobbyEvent(string jsonResponse)
     {
+        Debug.Log("LOBBY EVENT " + jsonResponse);
         Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
 
@@ -304,6 +305,13 @@ public class BrainCloudManager : MonoBehaviour
                     AddUserToList(_localUserInfo.Username, NetworkManager.Singleton.LocalClientId);
                     //open in game level and then connect to server
                     break;
+                case "SIGNAL":
+                    if (LobbyControl.Singleton != null)
+                    {
+                        LobbyControl.Singleton.playbackCount += 1;
+                        LobbyControl.Singleton.UpdatePlaybackCount();
+                    }
+                    break;
             }
         }
     }
@@ -314,7 +322,12 @@ public class BrainCloudManager : MonoBehaviour
         _wrapper.LobbyService.UpdateReady(_currentLobby.LobbyID, true, extra);
     }
     
-
+    public void SendTestSignal()
+    {
+        Dictionary<string, object> testData = new Dictionary<string, object>();
+        testData.Add("my_data", "my_data_value");
+        _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, testData, null, OnFailureCallback);
+    }
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
