@@ -2,9 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class PlayerReplayControl : NetworkBehaviour
 {
+    [Header("Health")]
+    private int lives = 3;
+    private bool alive = true;
+    [SerializeField]
+    private ParticleSystem m_ExplosionParticleSystem;
+    [SerializeField]
+    private ParticleSystem m_HitParticleSystem;
+
     [Header("Weapon Settings")]
     public GameObject bulletPrefab;
 
@@ -17,11 +26,6 @@ public class PlayerReplayControl : NetworkBehaviour
     private int replayIndex;
     private PlaybackStreamReadData _actionReplayRecords;
 
-    private void FixedUpdate()
-    {
-        
-    }
-
     public void StartStream(PlaybackStreamReadData record)
     {
         _actionReplayRecords = record;
@@ -30,7 +34,7 @@ public class PlayerReplayControl : NetworkBehaviour
 
     private IEnumerator StartPlayBack()
     {
-        for(int ii = 0; ii < _actionReplayRecords.totalFrameCount; ii++)
+        for(int ii = 0; ii < _actionReplayRecords.frames.Length; ii++)
         {
             if (_actionReplayRecords.frames[ii].xDelta != 0)
                 MoveShip(_actionReplayRecords.frames[ii].xDelta);
@@ -60,5 +64,33 @@ public class PlayerReplayControl : NetworkBehaviour
     {
         m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
         m_MyBullet.GetComponent<NetworkObject>().Spawn();
+    }
+
+    public void HitByBullet()
+    {
+        if (!alive) return;
+
+        lives -= 1;
+
+        if (lives <= 0)
+        {
+            alive = false;
+            StopAllCoroutines();
+            SpawnVFXClientRpc(0, transform.position);
+            NetworkObject.Despawn();
+        }
+        else
+        {
+            SpawnVFXClientRpc(1, transform.position);
+        }
+    }
+
+    [ClientRpc]
+    void SpawnVFXClientRpc(int vfxType, Vector3 spawnPosition)
+    {
+        if (vfxType == 0)
+            Instantiate(m_ExplosionParticleSystem, spawnPosition, Quaternion.identity);
+        else if (vfxType == 1)
+            Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
     }
 }

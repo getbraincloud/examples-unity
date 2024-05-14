@@ -61,6 +61,7 @@ public class PlayerControl : NetworkBehaviour
     private PlaybackStreamRecord record;
     private int currentRecordFrame = 0;
     private float previousPos = 0;
+    private bool finishedRecording = false;
 
     private void Awake()
     {
@@ -84,17 +85,7 @@ public class PlayerControl : NetworkBehaviour
     // This is the only function that is guarunteed to be called client side when the game ends. Other functions are inconsistently called.
     override public void OnDestroy()
     {
-        if (IsLocalPlayer)
-        {
-            if (record.totalFrameCount == -2)
-            {
-                record.totalFrameCount = currentRecordFrame;
-            }
-            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
-        }
-        //string log = "";
-        //for (int ii = 1; ii < record.totalFrameCount; ii++) { log += (record.frames[ii].xDelta) + " "; }
-        //Debug.Log(log);
+        EndRecording();
         base.OnDestroy();
     }
 
@@ -116,6 +107,22 @@ public class PlayerControl : NetworkBehaviour
     private void LateUpdate()
     {
         HandleCameraMovement();
+    }
+
+    private void EndRecording()
+    {
+        if (IsLocalPlayer && !finishedRecording)
+        {
+            finishedRecording = true;
+            if (record.totalFrameCount == -2)
+            {
+                record.totalFrameCount = currentRecordFrame;
+            }
+            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
+        }
+        //string log = "";
+        //for (int ii = 1; ii < record.totalFrameCount; ii++) { log += (record.frames[ii].xDelta) + " "; }
+        //Debug.Log(log);
     }
 
     private void HandleCameraMovement()
@@ -218,7 +225,7 @@ public class PlayerControl : NetworkBehaviour
         if (m_Lives.Value <= 0)
         {
             m_IsAlive = false;
-            record.totalFrameCount = currentRecordFrame;
+            EndRecording();
         }
     }
 
@@ -282,7 +289,7 @@ public class PlayerControl : NetworkBehaviour
             m_Lives.Value = 0;
             //InvadersGame.Singleton.SetGameEnd(GameOverReason.Death);
             //NotifyGameOverClientRpc(GameOverReason.Death, m_OwnerRPCParams);
-            Instantiate(m_ExplosionParticleSystem, transform.position, quaternion.identity);
+            SpawnVFXClientRpc(0, transform.position);
 
             // Hide graphics of this player object server-side. Note we don't want to destroy the object as it
             // may stop the RPC's from reaching on the other side, as there is only one player controlled object
@@ -290,7 +297,7 @@ public class PlayerControl : NetworkBehaviour
         }
         else
         {
-            Instantiate(m_HitParticleSystem, transform.position, quaternion.identity);
+            SpawnVFXClientRpc(1, transform.position);
         }
     }
 
@@ -330,5 +337,14 @@ public class PlayerControl : NetworkBehaviour
     public PlaybackStreamRecord GetRecord()
     {
         return record;
+    }
+
+    [ClientRpc]
+    void SpawnVFXClientRpc(int vfxType, Vector3 spawnPosition)
+    {
+        if(vfxType == 0)
+            Instantiate(m_ExplosionParticleSystem, spawnPosition, Quaternion.identity);
+        else if(vfxType == 1)
+            Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
     }
 }

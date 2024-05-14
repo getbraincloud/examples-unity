@@ -39,6 +39,7 @@ public struct PlaybackStreamReadData : INetworkSerializable
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref totalFrameCount);
+        serializer.SerializeValue(ref frames);
         foreach (PlaybackStreamFrame ii in frames)
         {
             ii.NetworkSerialize(serializer);

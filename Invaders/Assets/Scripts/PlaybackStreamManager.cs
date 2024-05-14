@@ -37,14 +37,8 @@ public class PlaybackStreamManager : NetworkBehaviour
 
         leadingPlayer = FindObjectOfType<PlayerControl>();
 
-        FindRecords();
-        CreateGhostsFromRecords();
-    }
-
-    private void FindRecords()
-    {
         records = NetworkManager.Singleton.GetComponent<PlaybackFetcher>().GetStoredRecords();
-        records.Add(GenerateFakeRecord());
+        CreateGhostsFromRecords();
     }
 
     private void CreateGhostsFromRecords()
@@ -52,7 +46,6 @@ public class PlaybackStreamManager : NetworkBehaviour
         foreach (PlaybackStreamReadData record in records)
         {
             Debug.Log("Creating ghost from record!!!");
-            InstantiateGhostServerRPC();
             InstantiateGhostServerRPC(record);
         }
     }
@@ -64,16 +57,6 @@ public class PlaybackStreamManager : NetworkBehaviour
 
         ghostInstanceRef = Instantiate(playerGhost, playerSpawnPoint.position, Quaternion.identity);
         ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(record);
-        ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void InstantiateGhostServerRPC()
-    {
-        if (!IsDedicatedServer) return;
-
-        ghostInstanceRef = Instantiate(playerGhost, playerSpawnPoint.position + Vector3.up, Quaternion.identity);
-        ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(GenerateFakeRecord());
         ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
     }
 

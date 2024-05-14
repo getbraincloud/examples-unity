@@ -138,7 +138,11 @@ public class PlaybackFetcher : MonoBehaviour
         {
             for(int ii = 0; ii < (int)eventObj["runlength"]; ii++)
             {
-                output.frames.Add(new PlaybackStreamFrame((int)eventObj["movement"], (int)eventObj["shoot"] == 1, (int)eventObj["id"] + ii));
+                output.frames.Add(new PlaybackStreamFrame(
+                    (int)eventObj["movement"], 
+                    (int)eventObj["shoot"] == 1 && ii == 0,
+                    (int)eventObj["id"] + ii)
+                    );
             }
         }
 
@@ -242,7 +246,7 @@ public class PlaybackFetcher : MonoBehaviour
     {
         List<PlaybackStreamReadData> output = new List<PlaybackStreamReadData>();
         foreach(PlaybackStreamReadData ii in storedRecords) output.Add(ii);
-        //storedRecords.Clear();
+        storedRecords.Clear();
         return output;
     }
 }

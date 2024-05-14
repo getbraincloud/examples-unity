@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3415629157
+  GlobalObjectIdHash: 3476526093
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
@@ -193,6 +193,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4fbd5f17d3b9ba49a775f64862d6c1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ExplosionParticleSystem: {fileID: 2274621649305592229, guid: ec112e6134d95a142843eb069eeb6d2e,
+    type: 3}
+  m_HitParticleSystem: {fileID: 2274621649305592229, guid: 4bf8467f048bdca478f6702a5286ef53,
+    type: 3}
   bulletPrefab: {fileID: 100000, guid: 6dfb311828493c3409e0f7973872052e, type: 3}
   m_MoveSpeed: 4.5
 --- !u!114 &8267016667146715661
