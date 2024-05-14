@@ -47,6 +47,15 @@ public class JenkinsBuild {
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
     }
     
+    // called from Jenkins
+    public static void BuildDedicatedServer()
+    {
+        var args = FindArgs();
+        args.GetEnviroVariables();
+        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        BuildServer(fullPathAndName);
+    }
+    
     //WIP, doesn't work on Mac but works fine in Windows..
     private static void SetRemoteBuildSettings()
     {
@@ -166,23 +175,61 @@ public class JenkinsBuild {
             System.Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
         }
     }
+
+    private static void BuildServer(string targetDir)
+    {
+        var buildPlayerOptions = new BuildPlayerOptions()
+        {
+            subtarget = (int) StandaloneBuildSubtarget.Server,
+            scenes = EnabledScenes,
+            target = BuildTarget.LinuxHeadlessSimulation,
+            options = BuildOptions.Development
+        };
+        buildPlayerOptions.locationPathName = targetDir;
+        // https://docs.unity3d.com/ScriptReference/BuildPipeline.BuildPlayer.html
+        //BuildReport buildReport = BuildPipeline.BuildPlayer(scenes, targetDir, buildTarget, buildOptions);
+        BuildReport buildReport = BuildPipeline.BuildPlayer(buildPlayerOptions);
+        BuildSummary buildSummary = buildReport.summary;
+        if (buildSummary.result == BuildResult.Succeeded)
+        {
+            System.Console.WriteLine("[JenkinsBuild] Build Success: Time:" + buildSummary.totalTime + " Size:" + buildSummary.totalSize + " bytes");
+        }
+        else
+        {
+            System.Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
+        }
+        
+        if (buildReport.summary.totalErrors > 0)
+            EditorApplication.Exit(1);
+    }
  
     private class Args
     {
         public string appName;
         public string targetDir;
         public string buildNumber;
+        public string environment;
 
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
+            appName = GetProjectName();
+            environment = BrainCloud.Plugin.Interface.DispatcherURL.Contains("internal") ? "Internal" : "Prod";
 #if UNITY_STANDALONE_WIN
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{appName}_{environment}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
 #elif UNITY_STANDALONE_OSX
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+            return $"{appName}_{environment}_clientVersion.{BrainCloud.Version.GetVersion()}.app";
 #else
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{appName}_{environment}_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
 #endif
+        }
+        
+        public string GetProjectName()
+        {
+            string[] s = Application.dataPath.Split('/');
+            string projectName = s[s.Length - 2];
+            Debug.Log("project = " + projectName);
+            return projectName;
         }
         
         public void GetEnviroVariables()
