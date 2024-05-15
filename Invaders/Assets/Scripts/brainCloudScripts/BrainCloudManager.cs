@@ -306,10 +306,11 @@ public class BrainCloudManager : MonoBehaviour
                     //open in game level and then connect to server
                     break;
                 case "SIGNAL":
+                    var signal = jsonData["signalData"] as Dictionary<string, object>;
                     if (LobbyControl.Singleton != null)
                     {
-                        LobbyControl.Singleton.playbackCount += 1;
-                        LobbyControl.Singleton.UpdatePlaybackCount();
+                        if(signal.ContainsKey("add_id"))
+                            LobbyControl.Singleton.AddIdToList((string)signal["add_id"]);
                     }
                     break;
             }
@@ -322,11 +323,10 @@ public class BrainCloudManager : MonoBehaviour
         _wrapper.LobbyService.UpdateReady(_currentLobby.LobbyID, true, extra);
     }
     
-    public void SendTestSignal()
+    public void SendNewIdSignal(string newId)
     {
-        Dictionary<string, object> testData = new Dictionary<string, object>();
-        testData.Add("my_data", "my_data_value");
-        _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, testData, null, OnFailureCallback);
+        Dictionary<string, object> sendData = new Dictionary<string, object> { { "add_id", newId } };
+        _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, sendData, null, OnFailureCallback);
     }
 
     public void GetFeaturedUser()

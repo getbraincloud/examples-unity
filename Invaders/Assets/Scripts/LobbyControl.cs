@@ -26,8 +26,7 @@ public class LobbyControl : NetworkBehaviour
 
     [SerializeField]
     private TMP_Text playbackCounter;
-    [HideInInspector]
-    public int playbackCount = 0;
+    private int playbackCount = 0;
     [SerializeField]
     private List<PlaybackSelector> leaderBoardSelectors;
     [SerializeField]
@@ -48,6 +47,8 @@ public class LobbyControl : NetworkBehaviour
     }
     public static LobbyControl Singleton { get; private set; }
 
+    private List<string> addedUserIds = new List<string>();
+
     private void Awake()
     {
         if(Singleton == null)
@@ -59,6 +60,7 @@ public class LobbyControl : NetworkBehaviour
             Destroy(gameObject);
         }
 
+        UpdatePlaybackCount();
         GenerateUserStatsForLobby();
         ServerStatusText.gameObject.SetActive(false);
         ReadyButton.gameObject.SetActive(true);
@@ -150,14 +152,15 @@ public class LobbyControl : NetworkBehaviour
         ErrorPanel.SetActive(true);
     }
 
-    public void SendTestSignal()
+    public void AddNewPlayerIdSignal(string newId)
     {
-        BrainCloudManager.Singleton.SendTestSignal();
+        BrainCloudManager.Singleton.SendNewIdSignal(newId);
     }
 
     public void UpdatePlaybackCount()
     {
-        playbackCounter.text = "BACK UP - " + playbackCount.ToString();
+        if (playbackCount == 0) playbackCounter.text = "ADD BACK UP";
+        else playbackCounter.text = "BACK UP  +" + playbackCount.ToString();
     }
 
     public void UpdateFeaturedSelector(string newId, string newName, int newScore)
@@ -170,5 +173,24 @@ public class LobbyControl : NetworkBehaviour
     {
         leaderBoardSelectors[rank - 1].InitValues(newId, newName, newScore);
         leaderBoardSelectors[rank - 1].UpdateLabels();
+    }
+
+    public void AddIdToList(string newId)
+    {
+        if(addedUserIds.Contains(newId)) return;
+
+        HideUsedPlaybacks(newId);
+        addedUserIds.Add(newId);
+        playbackCount = addedUserIds.Count;
+        UpdatePlaybackCount();
+    }
+
+    private void HideUsedPlaybacks(string newId)
+    {
+        foreach(PlaybackSelector ii in leaderBoardSelectors)
+        {
+            if (ii.playerId == newId) ii.HideButton();
+        }
+        if(featuredSelector.playerId == newId) featuredSelector.HideButton();
     }
 }

@@ -38,9 +38,9 @@ public class PlaybackSelector : MonoBehaviour
         scoreText.text = playerScore.ToString();
     }
 
-    public void AddRecord()
+    public void AddPlayerId()
     {
-        lobbyControl.SendTestSignal();
+        lobbyControl.AddNewPlayerIdSignal(playerId);
     }
 
     public void HideButton()

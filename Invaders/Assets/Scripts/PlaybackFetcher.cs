@@ -44,7 +44,7 @@ public class PlaybackFetcher : MonoBehaviour
 
     private void Start()
     {
-        AddInvader30Test();
+        //AddInvader30Test();
     }
 
     private void AddInvader30Test()
