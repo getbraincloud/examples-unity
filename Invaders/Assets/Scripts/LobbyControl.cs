@@ -28,6 +28,10 @@ public class LobbyControl : NetworkBehaviour
     private TMP_Text playbackCounter;
     [HideInInspector]
     public int playbackCount = 0;
+    [SerializeField]
+    private List<PlaybackSelector> leaderBoardSelectors;
+    [SerializeField]
+    private PlaybackSelector featuredSelector;
 
     private Dictionary<ulong, bool> m_ClientsInLobby;
     private string m_UserLobbyStatusText;
@@ -59,6 +63,7 @@ public class LobbyControl : NetworkBehaviour
         ServerStatusText.gameObject.SetActive(false);
         ReadyButton.gameObject.SetActive(true);
         ErrorPanel.SetActive(false);
+        BrainCloudManager.Singleton.GetFeaturedUser();
     }
 
     private void OnGUI()
@@ -153,5 +158,17 @@ public class LobbyControl : NetworkBehaviour
     public void UpdatePlaybackCount()
     {
         playbackCounter.text = "BACK UP - " + playbackCount.ToString();
+    }
+
+    public void UpdateFeaturedSelector(string newId, string newName, int newScore)
+    {
+        featuredSelector.InitValues(newId, newName, newScore);
+        featuredSelector.UpdateLabels();
+    }
+
+    public void UpdateLeaderBoardSelector(int rank, string newId, string newName, int newScore)
+    {
+        leaderBoardSelectors[rank - 1].InitValues(newId, newName, newScore);
+        leaderBoardSelectors[rank - 1].UpdateLabels();
     }
 }

@@ -69,22 +69,6 @@ public class PlaybackFetcher : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Tells the server to create a stamp. The debug ghost stamp does not move.
-    /// </summary>
-    /// <param name="y">The height of the stamp.</param>
-    private void AddDebugGhost(float y = 2.0f)
-    {
-        if (!IsDedicatedServer) return;
-
-        GameObject obj;
-        obj = Instantiate(ghost);
-        DontDestroyOnLoad(obj);
-        obj.transform.parent = transform;
-        obj.transform.position = new Vector3(Random.Range(-3.0f, 3.0f), y, 2.0f);
-        obj.GetComponent<NetworkObject>().Spawn();
-    }
-
     private void OnGenericFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
         if (_dead) return;
@@ -100,14 +84,13 @@ public class PlaybackFetcher : MonoBehaviour
         Dictionary<string, object> responseJson = JsonReader.Deserialize<Dictionary<string, object>>(response);
         Dictionary<string, object> jsonData = responseJson["data"] as Dictionary<string, object>;
 
-        AddDebugGhost();
         if ((int)responseJson["status"] == 200)
         {
 
         }
         else //ERROR
         {
-            AddDebugGhost(5);
+
         }
     }
 
@@ -121,13 +104,11 @@ public class PlaybackFetcher : MonoBehaviour
 
         if (events == null || events.Length == 0)
         {
-            AddDebugGhost(4);
             Debug.LogWarning("No events were retrieved...");
             return;
         }
         if (summary == null || summary.Count == 0)
         {
-            AddDebugGhost(4);
             Debug.LogWarning("No summary was retrieved...");
             return;
         }

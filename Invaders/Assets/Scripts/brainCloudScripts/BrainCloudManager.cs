@@ -328,6 +328,21 @@ public class BrainCloudManager : MonoBehaviour
         testData.Add("my_data", "my_data_value");
         _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, testData, null, OnFailureCallback);
     }
+
+    public void GetFeaturedUser()
+    {
+        List<string> featuredUser = new List<string> { "572837a5-7b46-4e72-914d-70f193e94094" };
+        _wrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", featuredUser, OnFeaturedUserInfoSuccess, OnFailureCallback);
+    }
+
+    private void OnFeaturedUserInfoSuccess(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
+        Dictionary<string, object> userData = leaderboard[0];
+        LobbyControl.Singleton.UpdateFeaturedSelector((string)userData["playerId"], (string)userData["playerName"], (int)userData["score"]);
+    }
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
