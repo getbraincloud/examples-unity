@@ -182,7 +182,7 @@ public class PlaybackFetcher : MonoBehaviour
         for(int ii = 1; ii < record.totalFrameCount; ii++)
         {
             if (record.frames[ii].createBullet) runLengths.Add(0);
-            else if (record.frames[ii].xDelta.Equals(record.frames[ii - 1].xDelta)) runLengths.Add(0);
+            else if (record.frames[ii].xDelta != record.frames[ii - 1].xDelta) runLengths.Add(0);
             else runLengths[^1] += 1;
         }
 
@@ -195,7 +195,6 @@ public class PlaybackFetcher : MonoBehaviour
         int index = 0;
         string eventData = "";
 
-        Debug.Log(summaryData + record.frames[index].xDelta);
         for(int ii = 0; ii < runLengths.Count; ii++)
         {
             eventData = MOVEMENT + record.frames[index].xDelta + SHOOT + (record.frames[index].createBullet ? 1 : 0) + 

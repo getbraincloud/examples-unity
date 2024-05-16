@@ -58,19 +58,4 @@ public class PlaybackStreamManager : NetworkBehaviour
         ghostInstanceRef.GetComponent<PlayerReplayControl>().StartStream(record);
         ghostInstanceRef.GetComponent<NetworkObject>().Spawn();
     }
-
-    private PlaybackStreamReadData GenerateFakeRecord()
-    {
-        PlaybackStreamRecord output = new PlaybackStreamRecord();
-        for (int ii = 0; ii < 150; ii++)
-        {
-            output.frames.Add(new PlaybackStreamFrame(0, false, ii));
-        }
-        for (int ii = 0; ii < 600; ii++)
-        {
-            output.frames.Add(new PlaybackStreamFrame((ii % 100 < 50) ? 1 : -1, ii % 60 == 0, ii));
-        }
-        output.totalFrameCount = 750;
-        return new PlaybackStreamReadData(output);
-    }
 }
