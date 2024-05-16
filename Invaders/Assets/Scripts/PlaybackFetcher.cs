@@ -1,3 +1,4 @@
+using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections;
@@ -33,9 +34,6 @@ public class PlaybackFetcher : MonoBehaviour
 
     private List<PlaybackStreamReadData> storedRecords = new List<PlaybackStreamReadData>();
 
-    [SerializeField]
-    private GameObject ghost;
-
     private void Awake()
     {
         _bcWrapper = GetComponent<BrainCloudWrapper>();
@@ -44,10 +42,15 @@ public class PlaybackFetcher : MonoBehaviour
 
     private void Start()
     {
-        //AddInvader30Test();
+        
     }
 
-    private void AddInvader30Test()
+    public void AddRecordsFromUsers(List<string> userIds)
+    {
+        _bcWrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", userIds, OnGetPlayerSocialLeaderboardSuccess, OnGenericFailure);
+    }
+
+    private void AddReplayFromId(string replayId)
     {
         if (IsDedicatedServer)
         {
@@ -56,16 +59,16 @@ public class PlaybackFetcher : MonoBehaviour
             requestJson["operation"] = "READ_STREAM";
 
             var requestDataJson = new Dictionary<string, object>();
-            requestDataJson["playbackStreamId"] = "00c2f480-f116-454e-b3b9-2e0d1627b8fb";
+            requestDataJson["playbackStreamId"] = replayId;
 
             requestJson["data"] = requestDataJson;
 
             string jsonString = JsonWriter.Serialize(requestJson);
-            S2SWrapper.Request(jsonString, OnReadStream);
+            S2SWrapper.Request(jsonString, OnServerReadStream);
         }
         else
         {
-            _bcWrapper.PlaybackStreamService.ReadStream("00c2f480-f116-454e-b3b9-2e0d1627b8fb", OnReadStreamSuccess, OnGenericFailure);
+            _bcWrapper.PlaybackStreamService.ReadStream(replayId, OnReadStreamSuccess, OnGenericFailure);
         }
     }
 
@@ -79,7 +82,7 @@ public class PlaybackFetcher : MonoBehaviour
         Debug.Log($"Failure: {message} |||| JSON: {jsonError}");
     }
 
-    private void OnReadStream(string response)
+    private void OnServerReadStream(string response)
     {
         Dictionary<string, object> responseJson = JsonReader.Deserialize<Dictionary<string, object>>(response);
         Dictionary<string, object> jsonData = responseJson["data"] as Dictionary<string, object>;
@@ -88,9 +91,25 @@ public class PlaybackFetcher : MonoBehaviour
         {
 
         }
-        else //ERROR
+        else
         {
 
+        }
+    }
+
+    private void OnGetPlayerSocialLeaderboardSuccess(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
+        Dictionary<string, object> userData;
+        Dictionary<string, object> playbackId;
+
+        foreach (Dictionary<string, object> ii in leaderboard)
+        {
+            userData = ii;
+            playbackId = userData["data"] as Dictionary<string, object>;
+            AddReplayFromId((string)playbackId["replay"]);
         }
     }
 
@@ -117,7 +136,7 @@ public class PlaybackFetcher : MonoBehaviour
 
         foreach (Dictionary<string, object> eventObj in events)
         {
-            for(int ii = 0; ii < (int)eventObj["runlength"]; ii++)
+            for(int ii = 0; ii <= (int)eventObj["runlength"]; ii++)
             {
                 output.frames.Add(new PlaybackStreamFrame(
                     (int)eventObj["movement"], 
@@ -128,7 +147,6 @@ public class PlaybackFetcher : MonoBehaviour
         }
 
         storedRecords.Add(new PlaybackStreamReadData(output));
-        Debug.Log("Records: " + storedRecords.Count);
     }
 
     private void OnStartStreamSuccess(string in_jsonResponse, object cbObject)
@@ -163,8 +181,8 @@ public class PlaybackFetcher : MonoBehaviour
         List<int> runLengths = new List<int>() { 0 };
         for(int ii = 1; ii < record.totalFrameCount; ii++)
         {
-            if (record.frames[ii].createBullet) runLengths.Add(1);
-            else if (Mathf.Abs(record.frames[ii].xDelta - record.frames[ii - 1].xDelta) > 0.05f) runLengths.Add(0);
+            if (record.frames[ii].createBullet) runLengths.Add(0);
+            else if (record.frames[ii].xDelta.Equals(record.frames[ii - 1].xDelta)) runLengths.Add(0);
             else runLengths[^1] += 1;
         }
 

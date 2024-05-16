@@ -45,7 +45,6 @@ public class PlaybackStreamManager : NetworkBehaviour
     {
         foreach (PlaybackStreamReadData record in records)
         {
-            Debug.Log("Creating ghost from record!!!");
             InstantiateGhostServerRPC(record);
         }
     }

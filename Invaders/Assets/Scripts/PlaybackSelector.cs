@@ -30,6 +30,7 @@ public class PlaybackSelector : MonoBehaviour
         playerId = newId;
         playerName = newName;
         playerScore = newScore;
+        addButton.SetActive(true);
     }
 
     public void UpdateLabels()

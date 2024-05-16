@@ -297,6 +297,7 @@ public class BrainCloudManager : MonoBehaviour
                     {
                         LobbyControl.Singleton.LoadingIndicatorMessage = "Room is ready";
                         LobbyControl.Singleton.IsLoading = false;
+                        LobbyControl.Singleton.FetchPlaybacks();
                     }
                     SceneTransitionHandler.SwitchScene("Connecting");
                     _unityTransport.ConnectionData.Address = _roomAddress;
@@ -306,7 +307,7 @@ public class BrainCloudManager : MonoBehaviour
                     //open in game level and then connect to server
                     break;
                 case "SIGNAL":
-                    var signal = jsonData["signalData"] as Dictionary<string, object>;
+                    Dictionary<string, object> signal = jsonData["signalData"] as Dictionary<string, object>;
                     if (LobbyControl.Singleton != null)
                     {
                         if(signal.ContainsKey("add_id"))
@@ -342,6 +343,24 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
         Dictionary<string, object> userData = leaderboard[0];
         LobbyControl.Singleton.UpdateFeaturedSelector((string)userData["playerId"], (string)userData["playerName"], (int)userData["score"]);
+    }
+
+    public void GetTopUsers(int amount)
+    {
+        BrainCloudSocialLeaderboard.SortOrder order = BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW;
+        _wrapper.LeaderboardService.GetGlobalLeaderboardPage("InvaderHighScore", order, 0, amount - 1, OnTopUserInfoSuccess, OnFailureCallback);
+    }
+
+    private void OnTopUserInfoSuccess(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
+        
+        foreach (Dictionary<string, object> userData in leaderboard)
+        {
+            LobbyControl.Singleton.UpdateLeaderBoardSelector((int)userData["rank"], (string)userData["playerId"], (string)userData["name"], (int)userData["score"]);
+        }
     }
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)

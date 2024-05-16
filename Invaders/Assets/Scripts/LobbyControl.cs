@@ -66,6 +66,7 @@ public class LobbyControl : NetworkBehaviour
         ReadyButton.gameObject.SetActive(true);
         ErrorPanel.SetActive(false);
         BrainCloudManager.Singleton.GetFeaturedUser();
+        BrainCloudManager.Singleton.GetTopUsers(3);
     }
 
     private void OnGUI()
@@ -192,5 +193,10 @@ public class LobbyControl : NetworkBehaviour
             if (ii.playerId == newId) ii.HideButton();
         }
         if(featuredSelector.playerId == newId) featuredSelector.HideButton();
+    }
+
+    public void FetchPlaybacks()
+    {
+        NetworkManager.Singleton.GetComponent<PlaybackFetcher>().AddRecordsFromUsers(addedUserIds);
     }
 }
