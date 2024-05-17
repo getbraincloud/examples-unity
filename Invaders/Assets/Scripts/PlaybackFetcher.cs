@@ -47,7 +47,9 @@ public class PlaybackFetcher : MonoBehaviour
 
     public void AddRecordsFromUsers(List<string> userIds)
     {
-        _bcWrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", userIds, OnGetPlayerSocialLeaderboardSuccess, OnGenericFailure);
+        //This function will quit the session if the list is empty...
+        if (userIds.Count > 0)
+            _bcWrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", userIds, OnGetPlayerSocialLeaderboardSuccess, OnGenericFailure);
     }
 
     private void AddReplayFromId(string replayId)

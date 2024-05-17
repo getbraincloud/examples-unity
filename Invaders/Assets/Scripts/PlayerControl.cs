@@ -219,7 +219,7 @@ public class PlayerControl : NetworkBehaviour
             m_PlayerVisual.enabled = false;
 
         if (!IsOwner) return;
-        Debug.LogFormat("Lives {0} ", currentAmount);
+        //Debug.LogFormat("Lives {0} ", currentAmount);
         if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetLives(m_Lives.Value);
 
         if (m_Lives.Value <= 0)
@@ -232,7 +232,7 @@ public class PlayerControl : NetworkBehaviour
     private void OnScoreChanged(int previousAmount, int currentAmount)
     {
         if (!IsOwner) return;
-        Debug.LogFormat("Score {0} ", currentAmount);
+        //Debug.LogFormat("Score {0} ", currentAmount);
         if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetScore(m_Score.Value);
     } // ReSharper disable Unity.PerformanceAnalysis
 

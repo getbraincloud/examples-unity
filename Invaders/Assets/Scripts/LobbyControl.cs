@@ -65,7 +65,7 @@ public class LobbyControl : NetworkBehaviour
         ServerStatusText.gameObject.SetActive(false);
         ReadyButton.gameObject.SetActive(true);
         ErrorPanel.SetActive(false);
-        BrainCloudManager.Singleton.GetFeaturedUser();
+        BrainCloudManager.Singleton.StartGetFeaturedUser();
         BrainCloudManager.Singleton.GetTopUsers(3);
     }
 

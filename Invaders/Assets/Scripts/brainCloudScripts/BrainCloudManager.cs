@@ -69,6 +69,8 @@ public class BrainCloudManager : MonoBehaviour
 
     public static BrainCloudManager Singleton { get; private set; }
     public List<UserScoreInfo> ListOfUsers = new List<UserScoreInfo>();
+    private List<string> featuredUser = new List<string>();
+
     void Awake()
     {
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
@@ -233,7 +235,6 @@ public class BrainCloudManager : MonoBehaviour
     
     void OnLobbyEvent(string jsonResponse)
     {
-        Debug.Log("LOBBY EVENT " + jsonResponse);
         Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
 
@@ -330,10 +331,25 @@ public class BrainCloudManager : MonoBehaviour
         _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, sendData, null, OnFailureCallback);
     }
 
-    public void GetFeaturedUser()
+    public void StartGetFeaturedUser()
     {
-        List<string> featuredUser = new List<string> { "572837a5-7b46-4e72-914d-70f193e94094" };
+        StartCoroutine(GetFeaturedUser());
+    }
+
+    private IEnumerator GetFeaturedUser()
+    {
+        _wrapper.GlobalEntityService.ReadEntity("219b77d3-340a-4c13-b700-8cd279c0dd60", OnFindFeaturedUser, OnFailureCallback);
+        yield return new WaitUntil(() => featuredUser.Count == 1);
         _wrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", featuredUser, OnFeaturedUserInfoSuccess, OnFailureCallback);
+        yield break;
+    }
+
+    private void OnFindFeaturedUser(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object> entityData = data["data"] as Dictionary<string, object>;
+        featuredUser.Add((string)entityData["user"]);
     }
 
     private void OnFeaturedUserInfoSuccess(string in_jsonResponse, object cbObject)
@@ -343,6 +359,7 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
         Dictionary<string, object> userData = leaderboard[0];
         LobbyControl.Singleton.UpdateFeaturedSelector((string)userData["playerId"], (string)userData["playerName"], (int)userData["score"]);
+        featuredUser.Clear();
     }
 
     public void GetTopUsers(int amount)
