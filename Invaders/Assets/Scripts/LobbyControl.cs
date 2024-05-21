@@ -155,7 +155,8 @@ public class LobbyControl : NetworkBehaviour
 
     public void AddNewPlayerIdSignal(string newId)
     {
-        BrainCloudManager.Singleton.SendNewIdSignal(newId);
+        List<string> userIds = new List<string>(addedUserIds) { newId };
+        BrainCloudManager.Singleton.SendNewIdSignal(userIds.ToArray());
     }
 
     public void UpdatePlaybackCount()
@@ -197,6 +198,9 @@ public class LobbyControl : NetworkBehaviour
 
     public void FetchPlaybacks()
     {
-        NetworkManager.Singleton.GetComponent<PlaybackFetcher>().AddRecordsFromUsers(addedUserIds);
+        //This prevents every member of a lobby creating from creating copies of the replays
+        //Exactly one user should create the replays
+        if(BrainCloudManager.Singleton.isLobbyOwner)
+            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().AddRecordsFromUsers(addedUserIds);
     }
 }

@@ -9,6 +9,7 @@ using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using System;
 using UnityEngine.UI;
+using System.Linq;
 
 public class BrainCloudManager : MonoBehaviour
 {
@@ -62,6 +63,10 @@ public class BrainCloudManager : MonoBehaviour
     {
         get => _localUserInfo;
         set => _localUserInfo = value;
+    }
+    public bool isLobbyOwner
+    {
+        get => LocalUserInfo.ProfileID == CurrentLobby.OwnerID;
     }
 
     private string _roomAddress;
@@ -237,13 +242,15 @@ public class BrainCloudManager : MonoBehaviour
     {
         Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object> lobby;
+        Dictionary<string, object> settings;
+        string[] replayUserIds;
 
         // If there is a lobby object present in the message, update our lobby
         // state with it.
-        if (jsonData.ContainsKey("lobby"))
+        if (jsonData.ContainsKey("lobby") && (string)response["operation"] != "SETTINGS_UPDATE")
         {
-            _currentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>,
-                jsonData["lobbyId"] as string);
+            _currentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>, jsonData["lobbyId"] as string);
                 
             if (MenuControl.Singleton.IsLoading)
             {
@@ -264,23 +271,30 @@ public class BrainCloudManager : MonoBehaviour
             switch (operation)
             {
                 case "MEMBER_JOIN":
-                case "MEMBER_UPDATE":
                     if (LobbyControl.Singleton != null)
                     {
                         LobbyControl.Singleton.GenerateUserStatsForLobby();
                     }
-                    break;
-
-                case "DISBANDED":
+                    lobby = jsonData["lobby"] as Dictionary<string, object>;
+                    settings = lobby["settings"] as Dictionary<string, object>;
+                    if (!settings.ContainsKey("replay_users")) break;
+                    replayUserIds = settings["replay_users"] as string[];
+                    foreach (string ii in replayUserIds)
                     {
-                        var reason = jsonData["reason"] as Dictionary<string, object>;
-                        if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
-                        {
-                            // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                            LobbyControl.Singleton.SetupPopupPanel($"Received an error message while launching room: {reason["desc"]}");
-                        }
-                        break;
+                        LobbyControl.Singleton.AddIdToList(ii);
                     }
+                    break;
+                case "MEMBER_UPDATE":
+                    if (LobbyControl.Singleton != null) LobbyControl.Singleton.GenerateUserStatsForLobby();
+                    break;
+                case "DISBANDED":
+                    var reason = jsonData["reason"] as Dictionary<string, object>;
+                    if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
+                    {
+                        // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
+                        LobbyControl.Singleton.SetupPopupPanel($"Received an error message while launching room: {reason["desc"]}");
+                    }
+                    break;
                 case "STARTING":
                     break;
                 case "ROOM_ASSIGNED":
@@ -307,13 +321,11 @@ public class BrainCloudManager : MonoBehaviour
                     AddUserToList(_localUserInfo.Username, NetworkManager.Singleton.LocalClientId);
                     //open in game level and then connect to server
                     break;
-                case "SIGNAL":
-                    Dictionary<string, object> signal = jsonData["signalData"] as Dictionary<string, object>;
-                    if (LobbyControl.Singleton != null)
-                    {
-                        if(signal.ContainsKey("add_id"))
-                            LobbyControl.Singleton.AddIdToList((string)signal["add_id"]);
-                    }
+                case "SETTINGS_UPDATE":
+                    lobby = jsonData["lobby"] as Dictionary<string, object>;
+                    settings = lobby["settings"] as Dictionary<string, object>;
+                    replayUserIds = settings["replay_users"] as string[];
+                    LobbyControl.Singleton.AddIdToList(replayUserIds[^1]);
                     break;
             }
         }
@@ -325,10 +337,11 @@ public class BrainCloudManager : MonoBehaviour
         _wrapper.LobbyService.UpdateReady(_currentLobby.LobbyID, true, extra);
     }
     
-    public void SendNewIdSignal(string newId)
+    public void SendNewIdSignal(string[] newIds)
     {
-        Dictionary<string, object> sendData = new Dictionary<string, object> { { "add_id", newId } };
-        _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, sendData, null, OnFailureCallback);
+        Dictionary<string, object> replayUsers = new Dictionary<string, object> { { "replay_users",  newIds} };
+        Dictionary<string, object> temp = new Dictionary<string, object>();
+        _wrapper.LobbyService.UpdateSettings(CurrentLobby.LobbyID, replayUsers, null, OnFailureCallback);
     }
 
     public void StartGetFeaturedUser()
