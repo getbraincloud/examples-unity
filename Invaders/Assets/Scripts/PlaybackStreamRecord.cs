@@ -8,6 +8,7 @@ public class PlaybackStreamRecord
     public List<PlaybackStreamFrame> frames = new List<PlaybackStreamFrame>();
     public int totalFrameCount = -2;
     public float startPosition = 0;
+    public string username = string.Empty;
     public PlaybackStreamFrame GetLatestFrame() { return frames[^1]; }
 }
 
@@ -16,12 +17,14 @@ public struct PlaybackStreamReadData : INetworkSerializable
     public PlaybackStreamFrame[] frames;
     public int totalFrameCount;
     public float startPosition;
+    public string username;
 
-    public PlaybackStreamReadData(PlaybackStreamFrame[] newFrames, int newFrameCount, float newStartPosition)
+    public PlaybackStreamReadData(PlaybackStreamFrame[] newFrames, int newFrameCount, float newStartPosition, string newUsername)
     {
         frames = newFrames;
         totalFrameCount = newFrameCount;
         startPosition = newStartPosition;
+        username = newUsername;
     }
 
     public PlaybackStreamReadData(PlaybackStreamRecord copyRecord)
@@ -29,10 +32,12 @@ public struct PlaybackStreamReadData : INetworkSerializable
         frames = copyRecord.frames.ToArray();
         totalFrameCount = copyRecord.totalFrameCount;
         startPosition = copyRecord.startPosition;
+        username = copyRecord.username;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
+        serializer.SerializeValue(ref username);
         serializer.SerializeValue(ref startPosition);
         serializer.SerializeValue(ref totalFrameCount);
         serializer.SerializeValue(ref frames);

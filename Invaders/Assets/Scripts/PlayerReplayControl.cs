@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 
 public class PlayerReplayControl : NetworkBehaviour
 {
@@ -13,6 +15,8 @@ public class PlayerReplayControl : NetworkBehaviour
     private ParticleSystem m_ExplosionParticleSystem;
     [SerializeField]
     private ParticleSystem m_HitParticleSystem;
+    [SerializeField]
+    private TextMeshPro usernameText;
 
     [Header("Weapon Settings")]
     public GameObject bulletPrefab;
