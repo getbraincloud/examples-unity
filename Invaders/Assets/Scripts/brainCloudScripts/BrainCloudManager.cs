@@ -75,6 +75,8 @@ public class BrainCloudManager : MonoBehaviour
     public static BrainCloudManager Singleton { get; private set; }
     public List<UserScoreInfo> ListOfUsers = new List<UserScoreInfo>();
     private List<string> featuredUser = new List<string>();
+    private bool foundTopUserInfo = false;
+    private bool foundFeaturedUserInfo = false;
 
     void Awake()
     {
@@ -279,10 +281,7 @@ public class BrainCloudManager : MonoBehaviour
                     settings = lobby["settings"] as Dictionary<string, object>;
                     if (!settings.ContainsKey("replay_users")) break;
                     replayUserIds = settings["replay_users"] as string[];
-                    foreach (string ii in replayUserIds)
-                    {
-                        LobbyControl.Singleton.AddIdToList(ii);
-                    }
+                    StartCoroutine(DelayAddIdToList(replayUserIds));
                     break;
                 case "MEMBER_UPDATE":
                     if (LobbyControl.Singleton != null) LobbyControl.Singleton.GenerateUserStatsForLobby();
@@ -331,6 +330,16 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
+    private IEnumerator DelayAddIdToList(string[] userIds)
+    {
+        yield return new WaitUntil(() => foundTopUserInfo && foundFeaturedUserInfo);
+        foreach (string userId in userIds)
+        {
+            LobbyControl.Singleton.AddIdToList(userId);
+        }
+        yield break;
+    }
+
     public void UpdateReady()
     {
         Dictionary<string, object> extra = new Dictionary<string, object>();
@@ -373,6 +382,7 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> userData = leaderboard[0];
         LobbyControl.Singleton.UpdateFeaturedSelector((string)userData["playerId"], (string)userData["playerName"], (int)userData["score"]);
         featuredUser.Clear();
+        foundFeaturedUserInfo = true;
     }
 
     public void GetTopUsers(int amount)
@@ -391,6 +401,7 @@ public class BrainCloudManager : MonoBehaviour
         {
             LobbyControl.Singleton.UpdateLeaderBoardSelector((int)userData["rank"], (string)userData["playerId"], (string)userData["name"], (int)userData["score"]);
         }
+        foundTopUserInfo = true;
     }
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
