@@ -7,37 +7,33 @@ public class PlaybackStreamRecord
 {
     public List<PlaybackStreamFrame> frames = new List<PlaybackStreamFrame>();
     public int totalFrameCount = -2;
+    public float startPosition = 0;
     public PlaybackStreamFrame GetLatestFrame() { return frames[^1]; }
-
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref totalFrameCount);
-        foreach(PlaybackStreamFrame ii in frames)
-        {
-            ii.NetworkSerialize(serializer);
-        }
-    }
 }
 
 public struct PlaybackStreamReadData : INetworkSerializable
 {
     public PlaybackStreamFrame[] frames;
     public int totalFrameCount;
+    public float startPosition;
 
-    public PlaybackStreamReadData(PlaybackStreamFrame[] newFrames, int newFrameCount)
+    public PlaybackStreamReadData(PlaybackStreamFrame[] newFrames, int newFrameCount, float newStartPosition)
     {
         frames = newFrames;
         totalFrameCount = newFrameCount;
+        startPosition = newStartPosition;
     }
 
     public PlaybackStreamReadData(PlaybackStreamRecord copyRecord)
     {
         frames = copyRecord.frames.ToArray();
         totalFrameCount = copyRecord.totalFrameCount;
+        startPosition = copyRecord.startPosition;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
+        serializer.SerializeValue(ref startPosition);
         serializer.SerializeValue(ref totalFrameCount);
         serializer.SerializeValue(ref frames);
         foreach (PlaybackStreamFrame ii in frames)

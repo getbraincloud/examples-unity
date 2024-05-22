@@ -135,6 +135,7 @@ public class PlaybackFetcher : MonoBehaviour
         }
 
         output.totalFrameCount = summary["framecount"] as int? ?? -2;
+        output.startPosition = summary["startpos"] as float? ?? 0.0f;
 
         foreach (Dictionary<string, object> eventObj in events)
         {
@@ -193,7 +194,7 @@ public class PlaybackFetcher : MonoBehaviour
         const string RUNLENGTH = ",\"runlength\":";
         const string ID = ",\"id\":";
         const string END = "}";
-        string summaryData = "{\"framecount\":" + record.totalFrameCount + END;
+        string summaryData = "{\"framecount\":" + record.totalFrameCount + ",\"startpos\":" + 0 + END;
         int index = 0;
         string eventData = "";
 
@@ -233,7 +234,7 @@ public class PlaybackFetcher : MonoBehaviour
         StartCoroutine(AddEvents(createdRecordId, newRecord));
         yield return new WaitUntil(() => finishedAddingEvents);
 
-        _bcWrapper.PlaybackStreamService.DeleteStream(previousRecordId, null, OnGenericFailure);
+        if(previousRecordId != "") _bcWrapper.PlaybackStreamService.DeleteStream(previousRecordId, null, OnGenericFailure);
         _bcWrapper.PlaybackStreamService.EndStream(createdRecordId, null, OnGenericFailure);
         createdRecordId = "";
         finishedAddingEvents = false;

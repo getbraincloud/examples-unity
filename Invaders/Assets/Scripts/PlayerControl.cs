@@ -67,6 +67,7 @@ public class PlayerControl : NetworkBehaviour
     {
         m_HasGameStarted = false;
         record = new PlaybackStreamRecord();
+        record.startPosition = transform.position.x;
         record.frames.Add(new PlaybackStreamFrame(0));
     }
 
@@ -120,9 +121,6 @@ public class PlayerControl : NetworkBehaviour
             }
             NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
         }
-        //string log = "";
-        //for (int ii = 1; ii < record.totalFrameCount; ii++) { log += (record.frames[ii].xDelta) + " "; }
-        //Debug.Log(log);
     }
 
     private void HandleCameraMovement()
@@ -204,6 +202,7 @@ public class PlayerControl : NetworkBehaviour
     public void IncreasePlayerScore(int amount)
     {
         Assert.IsTrue(IsDedicatedServer, "IncreasePlayerScore should be called server-side only");
+        if (finishedRecording) return;
         m_Score.Value += amount;
     }
 
@@ -232,7 +231,7 @@ public class PlayerControl : NetworkBehaviour
     private void OnScoreChanged(int previousAmount, int currentAmount)
     {
         if (!IsOwner) return;
-        //Debug.LogFormat("Score {0} ", currentAmount);
+        if (finishedRecording) return;
         if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetScore(m_Score.Value);
     } // ReSharper disable Unity.PerformanceAnalysis
 
@@ -332,6 +331,7 @@ public class PlayerControl : NetworkBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(reason), reason, null);
         }
+        EndRecording();
     }
 
     public PlaybackStreamRecord GetRecord()
