@@ -284,7 +284,10 @@ public class BrainCloudManager : MonoBehaviour
                     StartCoroutine(DelayAddIdToList(replayUserIds));
                     break;
                 case "MEMBER_UPDATE":
-                    if (LobbyControl.Singleton != null) LobbyControl.Singleton.GenerateUserStatsForLobby();
+                    if (LobbyControl.Singleton != null)
+                    {
+                        LobbyControl.Singleton.GenerateUserStatsForLobby();
+                    }
                     break;
                 case "DISBANDED":
                     var reason = jsonData["reason"] as Dictionary<string, object>;
@@ -326,6 +329,11 @@ public class BrainCloudManager : MonoBehaviour
                     replayUserIds = settings["replay_users"] as string[];
                     LobbyControl.Singleton.AddIdToList(replayUserIds[^1]);
                     break;
+                case "SIGNAL":
+                    if (!isLobbyOwner) break;
+                    Dictionary<string, object> signal = jsonData["signalData"] as Dictionary<string, object>;
+                    _wrapper.LobbyService.UpdateSettings(CurrentLobby.LobbyID, signal, null, OnFailureCallback);
+                    break;
             }
         }
     }
@@ -349,8 +357,10 @@ public class BrainCloudManager : MonoBehaviour
     public void SendNewIdSignal(string[] newIds)
     {
         Dictionary<string, object> replayUsers = new Dictionary<string, object> { { "replay_users",  newIds} };
-        Dictionary<string, object> temp = new Dictionary<string, object>();
-        _wrapper.LobbyService.UpdateSettings(CurrentLobby.LobbyID, replayUsers, null, OnFailureCallback);
+        if (isLobbyOwner)
+            _wrapper.LobbyService.UpdateSettings(CurrentLobby.LobbyID, replayUsers, null, OnFailureCallback);
+        else
+            _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, replayUsers, null, OnFailureCallback);
     }
 
     public void StartGetFeaturedUser()
