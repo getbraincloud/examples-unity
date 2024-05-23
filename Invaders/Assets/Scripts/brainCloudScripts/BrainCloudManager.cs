@@ -370,7 +370,7 @@ public class BrainCloudManager : MonoBehaviour
 
     private IEnumerator GetFeaturedUser()
     {
-        _wrapper.GlobalEntityService.ReadEntity("219b77d3-340a-4c13-b700-8cd279c0dd60", OnFindFeaturedUser, OnFailureCallback);
+        _wrapper.GlobalAppService.ReadSelectedProperties(new string[] { "FeaturedPlayer" }, OnFindFeaturedUser, OnFailureCallback);
         yield return new WaitUntil(() => featuredUser.Count == 1);
         _wrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", featuredUser, OnFeaturedUserInfoSuccess, OnFailureCallback);
         yield break;
@@ -380,8 +380,8 @@ public class BrainCloudManager : MonoBehaviour
     {
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
-        Dictionary<string, object> entityData = data["data"] as Dictionary<string, object>;
-        featuredUser.Add((string)entityData["user"]);
+        Dictionary<string, object> property = data["FeaturedPlayer"] as Dictionary<string, object>;
+        featuredUser.Add((string)property["value"]);
     }
 
     private void OnFeaturedUserInfoSuccess(string in_jsonResponse, object cbObject)

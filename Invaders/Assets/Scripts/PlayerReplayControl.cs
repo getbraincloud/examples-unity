@@ -33,12 +33,15 @@ public class PlayerReplayControl : NetworkBehaviour
     public void StartStream(PlaybackStreamReadData record)
     {
         _actionReplayRecords = record;
+        if(_actionReplayRecords.username != string.Empty) usernameText.text = _actionReplayRecords.username;
         StartCoroutine(StartPlayBack());
     }
 
     private IEnumerator StartPlayBack()
     {
-        for(int ii = 0; ii < _actionReplayRecords.frames.Length; ii++)
+        Transform t = transform;
+        t.position = Vector3.right * _actionReplayRecords.startPosition;
+        for (int ii = 0; ii < _actionReplayRecords.frames.Length; ii++)
         {
             if (_actionReplayRecords.frames[ii].xDelta != 0)
                 MoveShip(_actionReplayRecords.frames[ii].xDelta);
@@ -48,7 +51,6 @@ public class PlayerReplayControl : NetworkBehaviour
 
             yield return new WaitForFixedUpdate();
         }
-        Transform t = transform;
         while (t.position.y > -10)
         {
             t.position = Vector3.MoveTowards(t.position, t.position + Vector3.down, m_MoveSpeed * Time.deltaTime);

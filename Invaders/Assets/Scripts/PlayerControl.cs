@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering.VirtualTexturing;
+using Random = UnityEngine.Random;
 
 public class PlayerControl : NetworkBehaviour
 {
@@ -67,8 +68,13 @@ public class PlayerControl : NetworkBehaviour
     {
         m_HasGameStarted = false;
         record = new PlaybackStreamRecord();
-        record.startPosition = transform.position.x;
         record.frames.Add(new PlaybackStreamFrame(0));
+    }
+
+    private void Start()
+    {
+        transform.position = Vector3.right * Random.Range(-40, 40) / 10f;
+        record.startPosition = transform.position.x;
     }
 
     private void Update()

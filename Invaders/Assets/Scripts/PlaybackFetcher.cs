@@ -136,6 +136,8 @@ public class PlaybackFetcher : MonoBehaviour
 
         output.totalFrameCount = summary["framecount"] as int? ?? -2;
         output.startPosition = summary["startpos"] as float? ?? 0.0f;
+        if (summary.ContainsKey("username")) output.username = summary["username"] as string;
+        else output.username = string.Empty;
 
         foreach (Dictionary<string, object> eventObj in events)
         {
@@ -194,7 +196,10 @@ public class PlaybackFetcher : MonoBehaviour
         const string RUNLENGTH = ",\"runlength\":";
         const string ID = ",\"id\":";
         const string END = "}";
-        string summaryData = "{\"framecount\":" + record.totalFrameCount + ",\"startpos\":" + 0 + END;
+        string summaryData = 
+            "{\"framecount\":" + record.totalFrameCount + 
+            ",\"startpos\":" + record.startPosition + 
+            ",\"username\":" + record.username + END;
         int index = 0;
         string eventData = "";
 
