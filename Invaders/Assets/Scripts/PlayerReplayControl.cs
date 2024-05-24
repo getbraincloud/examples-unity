@@ -24,11 +24,17 @@ public class PlayerReplayControl : NetworkBehaviour
     [Header("Movement Settings")]
     [SerializeField]
     private float m_MoveSpeed = 3.5f;
+    private Transform t;
 
     private GameObject m_MyBullet;
 
     private int replayIndex;
     private PlaybackStreamReadData _actionReplayRecords;
+
+    private void Awake()
+    {
+        t = transform;
+    }
 
     public void StartStream(PlaybackStreamReadData record)
     {
@@ -39,7 +45,6 @@ public class PlayerReplayControl : NetworkBehaviour
 
     private IEnumerator StartPlayBack()
     {
-        Transform t = transform;
         t.position = Vector3.right * _actionReplayRecords.startPosition;
         for (int ii = 0; ii < _actionReplayRecords.frames.Length; ii++)
         {
@@ -51,6 +56,17 @@ public class PlayerReplayControl : NetworkBehaviour
 
             yield return new WaitForFixedUpdate();
         }
+        StartRetreat();
+    }
+
+    public void StartRetreat()
+    {
+        StopAllCoroutines();
+        StartCoroutine(Retreat());
+    }
+
+    private IEnumerator Retreat()
+    {
         while (t.position.y > -10)
         {
             t.position = Vector3.MoveTowards(t.position, t.position + Vector3.down, m_MoveSpeed * Time.deltaTime);
@@ -62,7 +78,6 @@ public class PlayerReplayControl : NetworkBehaviour
     private void MoveShip(float deltaX)
     {
         var newMovement = new Vector3(deltaX, 0, 0);
-        Transform t = transform;
         t.position = Vector3.MoveTowards(t.position, t.position + newMovement, m_MoveSpeed * Time.deltaTime);
     }
 

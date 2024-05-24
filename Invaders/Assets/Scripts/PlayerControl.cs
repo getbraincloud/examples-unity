@@ -73,8 +73,10 @@ public class PlayerControl : NetworkBehaviour
 
     private void Start()
     {
+        PlayerName = BrainCloudManager.Singleton.LocalUserInfo.Username;
         transform.position = Vector3.right * Random.Range(-40, 40) / 10f;
         record.startPosition = transform.position.x;
+        record.username = PlayerName;
     }
 
     private void Update()
@@ -259,8 +261,11 @@ public class PlayerControl : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
         {
-            if (AbleToShoot() && IsLocalPlayer) shotRecently = true;
-            ShootServerRPC();
+            if (AbleToShoot())
+            {
+                shotRecently = true;
+                ShootServerRPC();
+            }
         }
     }
 
@@ -272,8 +277,6 @@ public class PlayerControl : NetworkBehaviour
     [ServerRpc]
     private void ShootServerRPC()
     {
-        if (!AbleToShoot()) return;
-
         m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
         m_MyBullet.GetComponent<PlayerBullet>().owner = this;
         m_MyBullet.GetComponent<NetworkObject>().Spawn();

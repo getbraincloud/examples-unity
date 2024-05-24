@@ -196,17 +196,20 @@ public class PlaybackFetcher : MonoBehaviour
         const string RUNLENGTH = ",\"runlength\":";
         const string ID = ",\"id\":";
         const string END = "}";
-        string summaryData = 
-            "{\"framecount\":" + record.totalFrameCount + 
-            ",\"startpos\":" + record.startPosition + 
-            ",\"username\":" + record.username + END;
+        string summaryData = string.Concat(
+            "{\"framecount\":", record.totalFrameCount, 
+            ",\"startpos\":", record.startPosition, 
+            ",\"username\":", record.username, END);
         int index = 0;
         string eventData = "";
 
         for(int ii = 0; ii < runLengths.Count; ii++)
         {
-            eventData = MOVEMENT + record.frames[index].xDelta + SHOOT + (record.frames[index].createBullet ? 1 : 0) + 
-                RUNLENGTH + runLengths[ii] + ID + record.frames[index].frameID + END;
+            eventData = string.Concat(
+                MOVEMENT, record.frames[index].xDelta, 
+                SHOOT, (record.frames[index].createBullet ? 1 : 0), 
+                RUNLENGTH, runLengths[ii], 
+                ID, record.frames[index].frameID, END);
             _bcWrapper.PlaybackStreamService.AddEvent(replayId, eventData, summaryData, OnAddEventSuccess, OnGenericFailure);
             index += runLengths[ii] + 1;
             yield return new WaitUntil(() => eventsAdded == ii + 1);
