@@ -15,6 +15,7 @@ public class BrainCloudManager : MonoBehaviour
 {
     [SerializeField] private SceneTransitionHandler _sceneTransitionHandler;
     private NetworkManager _netManager;
+    [SerializeField] private bool isInternal = false;
 
     private BrainCloudWrapper _wrapper;
     public BrainCloudWrapper BCWrapper
@@ -93,6 +94,7 @@ public class BrainCloudManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+        string serverUrl = isInternal ? "https://api.internal.braincloudservers.com/s2sdispatcher" : "https://api.braincloudservers.com/s2sdispatcher";
         if (IsDedicatedServer)
         {       
             Debug.Log("Initializing S2S on server");
@@ -100,7 +102,7 @@ public class BrainCloudManager : MonoBehaviour
             string appId = Environment.GetEnvironmentVariable("APP_ID");
             string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
             string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
-            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.internal.braincloudservers.com/s2sdispatcher");
+            _bcS2S.Init(appId, serverName, serverSecret, true, serverUrl);
             //_bcS2S.Authenticate();
             _bcS2S.LoggingEnabled = true;
         }

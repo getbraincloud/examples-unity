@@ -1,10 +1,10 @@
 using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using Unity.Netcode;
 using UnityEngine;
-using System;
-using System.Net;
 
 public class ServerConnectionManager : NetworkBehaviour
 {
