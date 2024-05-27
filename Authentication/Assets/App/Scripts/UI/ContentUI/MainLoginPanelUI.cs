@@ -10,7 +10,7 @@ using UnityEngine.UI;
 /// <para>
 /// An example on how User Authentication can he handled in your app.
 /// </para>
-/// 
+///
 /// <br><seealso cref="BCManager"/></br>
 /// <br><seealso cref="UserHandler"/></br>
 /// </summary>
@@ -130,10 +130,15 @@ public class MainLoginPanelUI : ContentUIBehaviour
     }
 
     public bool GetRememberMePref() =>
-        PlayerPrefs.GetInt(PREFS_REMEMBER_ME) > 0;
+        BCManager.Wrapper.CanReconnect();
 
-    public void SetRememberMePref(bool value) =>
-        PlayerPrefs.SetInt(PREFS_REMEMBER_ME, value ? int.MaxValue : 0);
+    public void SetRememberMePref(bool value)
+    {
+        if(!value)
+        {
+            BCManager.Wrapper.ResetStoredProfileId();
+        }
+    }
 
     public void DisplayError(string error, Selectable problemSelectable = null)
     {
@@ -417,13 +422,13 @@ public class MainLoginPanelUI : ContentUIBehaviour
         FailureCallback onFailure = OnFailure("Automatic Login Failed", () =>
         {
             LoginContent.IsInteractable = true;
-        
+
             DisplayError("Automatic Login Failed\nPlease try logging in manually.");
-        
+
             RememberMeToggle.isOn = false;
             SetRememberMePref(false);
         });
-        
+
         UserHandler.HandleUserReconnect(OnSuccess("Automatically Logging In...", OnAuthenticationSuccess), onFailure);
     }
 

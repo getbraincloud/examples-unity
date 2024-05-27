@@ -1,4 +1,3 @@
-﻿using BrainCloud.Internal;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -43,14 +42,24 @@ namespace Gameframework
 
         protected IEnumerator LoadIcon(string in_url, ImageDownloadedCallBack success = null)
         {
-            using (UnityWebRequest www = new UnityWebRequest(in_url))
+            yield return new WaitForEndOfFrame();
+
+            UnityWebRequest request = UnityWebRequestTexture.GetTexture(in_url);
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
             {
-                www.SetRequestHeader("Access-Control-Allow-Origin", "*");
-                www.downloadHandler = new DownloadHandlerTexture();
-                yield return www.SendWebRequest();
-                RawImage.texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
+                RawImage.texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+
                 if (success != null)
+                {
                     success(in_url);
+                }
+            }
+            else
+            {
+                Debug.LogError(request.error);
             }
         }
 

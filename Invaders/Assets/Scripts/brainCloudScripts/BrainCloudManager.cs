@@ -8,6 +8,7 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
 
 public class BrainCloudManager : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class BrainCloudManager : MonoBehaviour
     private NetworkManager _netManager;
 
     private BrainCloudWrapper _wrapper;
+    public BrainCloudWrapper BCWrapper
+    {
+        get => _wrapper;
+    }
     private BrainCloudS2S _bcS2S = new BrainCloudS2S();
     private Lobby _currentLobby;
     public Lobby CurrentLobby
@@ -59,7 +64,8 @@ public class BrainCloudManager : MonoBehaviour
         set => _localUserInfo = value;
     }
 
-    private string _roomAddress = "127.0.0.1";
+    private string _roomAddress;
+    private int _roomPort;
 
     public static BrainCloudManager Singleton { get; private set; }
     public List<UserScoreInfo> ListOfUsers = new List<UserScoreInfo>();
@@ -85,7 +91,7 @@ public class BrainCloudManager : MonoBehaviour
             string appId = Environment.GetEnvironmentVariable("APP_ID");
             string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
             string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
-            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.internal.braincloudservers.com/s2sdispatcher");
+            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.braincloudservers.com/s2sdispatcher");
             //_bcS2S.Authenticate();
             _bcS2S.LoggingEnabled = true;
         }
@@ -104,6 +110,10 @@ public class BrainCloudManager : MonoBehaviour
             _unityTransport.SetConnectionData("0.0.0.0", 7777);
             _netManager.StartServer();
         }
+        else if(_wrapper.CanReconnect())
+        {
+            _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);            
+        }
     }
 
     private void Update()
@@ -112,6 +122,19 @@ public class BrainCloudManager : MonoBehaviour
         {
             _bcS2S.RunCallbacks();
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        if(_wrapper.Client.Authenticated)
+        {
+            _wrapper.LogoutOnApplicationQuit(false);
+        }
+    }
+    
+    public void Logout()
+    {
+        _wrapper.LogoutOnApplicationQuit(true);
     }
 
     public void AuthenticateWithBrainCloud(string in_username, string in_password)
@@ -137,6 +160,11 @@ public class BrainCloudManager : MonoBehaviour
         {
             MenuControl.Singleton.SwitchMenuButtons();            
         }
+        if(!MenuControl.Singleton.RememberMeToggle.isOn)
+        {
+            _wrapper.ResetStoredProfileId();
+            _wrapper.Client.AuthenticationService.ProfileId = _localUserInfo.ProfileID;
+        }
     }
     
     [ServerRpc]
@@ -159,7 +187,7 @@ public class BrainCloudManager : MonoBehaviour
     public void FindOrCreateLobby()
     {
         _wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent); 
-        _wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnFailureCallback);
+        _wrapper.RTTService.EnableRTT(OnRTTConnected, OnFailureCallback);
     }
     
     void OnRTTConnected(string jsonResponse, object cbObject)
@@ -247,22 +275,31 @@ public class BrainCloudManager : MonoBehaviour
                         if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
                         {
                             // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                            //CloseGame(true);
+                            LobbyControl.Singleton.SetupPopupPanel($"Received an error message while launching room: {reason["desc"]}");
                         }
                         break;
                     }
                 case "STARTING":
                     break;
                 case "ROOM_ASSIGNED":
+                    if(LobbyControl.Singleton != null)
+                    {
+                        LobbyControl.Singleton.LoadingIndicatorMessage = "Server room is assigned";
+                    }
                     Dictionary<string, object> connectData = jsonData["connectData"] as Dictionary<string, object>;
                     _roomAddress = connectData["address"] as string;
+                    Dictionary<string, object> ports = connectData["ports"] as Dictionary<string, object>;
+                    _roomPort = (int)ports["7777/tcp"];
                     break;
                 case "ROOM_READY":
-
-                    //get connection info
+                    if(LobbyControl.Singleton != null)
+                    {
+                        LobbyControl.Singleton.LoadingIndicatorMessage = "Room is ready";
+                        LobbyControl.Singleton.IsLoading = false;
+                    }
                     SceneTransitionHandler.SwitchScene("Connecting");
                     _unityTransport.ConnectionData.Address = _roomAddress;
-                    _unityTransport.ConnectionData.Port = 9000;
+                    _unityTransport.ConnectionData.Port = (ushort)_roomPort;
                     _netManager.StartClient();
                     AddUserToList(_localUserInfo.Username, NetworkManager.Singleton.LocalClientId);
                     //open in game level and then connect to server
@@ -271,19 +308,6 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
-    [ServerRpc]
-    public string GetPlayerNameServerRpc(ulong clientID)
-    {
-        for (int i = 0; i < ListOfUsers.Count; i++)
-        {
-            if(ListOfUsers[i].clientID == clientID)
-            {
-                return ListOfUsers[i].clientName;
-            }
-        }
-        return "";
-    }
-    
     public void UpdateReady()
     {
         Dictionary<string, object> extra = new Dictionary<string, object>();
@@ -294,6 +318,10 @@ public class BrainCloudManager : MonoBehaviour
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
+        if(LobbyControl.Singleton != null)
+        {
+            LobbyControl.Singleton.SetupPopupPanel($"Failure Callback received, error message: {statusMessage}");
+        }
         Debug.Log("Error: " + statusMessage);
     }
 

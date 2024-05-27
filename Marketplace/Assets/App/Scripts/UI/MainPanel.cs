@@ -83,7 +83,7 @@ public class MainPanel : MonoBehaviour
             App.GetStoredUserIDs();
         }
 
-        BC.Logout(false, onSuccess, onFailure, this);
+        BC.Logout(true, onSuccess, onFailure, this);
     }
 
     private void OnSendPushButton()

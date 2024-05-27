@@ -63,7 +63,7 @@ public class MatchSelect : ResourcesManager
         // Only Enable RTT if its not already started
         if (!App.Bc.RTTService.IsRTTEnabled())
         {
-            App.Bc.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+            App.Bc.RTTService.EnableRTT(onRTTEnabled, onRTTFailure);
             App.Bc.RTTService.RegisterRTTEventCallback(App.RTTEventCallback);
         }
         else
@@ -114,9 +114,12 @@ public class MatchSelect : ResourcesManager
                             ["data"] as Dictionary<string, object>)
                             ["matchesFound"] as Dictionary<string, object>[];
 
-        foreach (Dictionary<string, object> match in matchesData)
+        if (matchesData != null && matchesData.Length > 0)
         {
-            matchedProfiles.Add(new PlayerInfo(match));
+            foreach (Dictionary<string, object> match in matchesData)
+            {
+                matchedProfiles.Add(new PlayerInfo(match));
+            }
         }
 
         // After, fetch our game list from Braincloud

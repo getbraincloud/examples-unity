@@ -16,18 +16,18 @@ using UnityEngine.UI;
 public class GameSessionManager : MonoBehaviour
 {
     public float RoundDuration;
-    public Image ClockFillImage;
+    public TMPro.TMP_Text CountdownText; 
     public int CheckInterval = 60;
     public GameOverScreen GameOverScreen;
     public GameObject ConfirmPopUp;
     public GameObject StopStreamButton;
     public GameObject TroopView;
     public RectTransform ButtonBorder;
-    
-    private readonly List<float> _selectionXPlacement = new List<float> {-134, 132, 0};
+    public GameObject SurrenderButton;
+
+    private readonly List<float> _selectionXPlacement = new List<float> {-149, 0.5f, 149};
     private float _startTime;
     private float _gameSessionTimer;
-    private float _value;
     private int _frameId;
     private bool _replayMode;
 
@@ -46,6 +46,10 @@ public class GameSessionManager : MonoBehaviour
     {
         ConfirmPopUp.SetActive(false);
         StopStreamButton.SetActive(false);
+
+        float minutes = Mathf.FloorToInt(RoundDuration / 60);
+        float seconds = Mathf.FloorToInt(RoundDuration % 60);
+        CountdownText.text = $"{minutes:00}:{seconds:00}";
     }
 
     // Start is called before the first frame update
@@ -58,18 +62,18 @@ public class GameSessionManager : MonoBehaviour
     {
         if (!GameManager.Instance.IsInPlaybackMode)
         {
+            SurrenderButton.SetActive(true);
             GameManager.Instance.GameSetup();
-            ClockFillImage.transform.parent.gameObject.SetActive(true);
-            ClockFillImage.fillAmount = 1;
             TroopView.SetActive(true);
-            StartCoroutine(Timer(RoundDuration)); 
         }
         else
         {
-            ClockFillImage.transform.parent.gameObject.SetActive(false);
+            SurrenderButton.SetActive(false);
             StopStreamButton.SetActive(true);
             TroopView.SetActive(false);
         }
+
+        StartCoroutine(Timer(RoundDuration)); 
     }
 
     public void UpdateBorderPosition(int index)
@@ -88,6 +92,11 @@ public class GameSessionManager : MonoBehaviour
         }
     }
 
+    public void Surrender()
+    {
+        GameManager.Instance.GameOver(false);
+    }
+
     public void OpenConfirmPopUp()
     {
         ConfirmPopUp.SetActive(true);
@@ -97,7 +106,9 @@ public class GameSessionManager : MonoBehaviour
     {
         if (_gameSessionTimer > 0.0f)
         {
-            GameOverScreen.TimerText.text = $"Time Remaining: {(int)_gameSessionTimer} seconds";
+            float minutes = Mathf.FloorToInt(_gameSessionTimer / 60);
+            float seconds = Mathf.FloorToInt(_gameSessionTimer % 60);
+            GameOverScreen.TimerText.text = $"Time Remaining: {minutes:00}:{seconds:00}";
         }
         else
         {
@@ -118,14 +129,22 @@ public class GameSessionManager : MonoBehaviour
     {
         _startTime = Time.time;
         _gameSessionTimer = duration;
-        _value = 1;
 
         while (Time.time - _startTime < duration)
         {
             _gameSessionTimer -= Time.deltaTime;
-            _value = _gameSessionTimer / duration;
-            ClockFillImage.fillAmount = _value;
-
+            if (_gameSessionTimer <= 0)
+            {
+                _gameSessionTimer = 0;
+                CountdownText.text = $"0:00";
+            }
+            else
+            {
+                float minutes = Mathf.FloorToInt(_gameSessionTimer / 60);
+                float seconds = Mathf.FloorToInt(_gameSessionTimer % 60);
+                CountdownText.text = $"{minutes:00}:{seconds:00}";
+            }
+            
             //Check every x frames if game over conditions have been met
             if (Time.frameCount % CheckInterval == 0)
             {

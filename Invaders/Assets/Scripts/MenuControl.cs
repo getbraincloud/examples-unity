@@ -6,6 +6,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MenuControl : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class MenuControl : MonoBehaviour
     private string _dotsForLoadingIndicator;
     private int _numberOfDots;
     
+    public Toggle RememberMeToggle;
     public static MenuControl Singleton { get; private set; }
 
     private void Start()
@@ -46,21 +48,22 @@ public class MenuControl : MonoBehaviour
             Destroy(gameObject);
         }
         LoadingIndicator.gameObject.SetActive(false);
-        LoginInputFields.gameObject.SetActive(true);
-        MainMenuButtons.gameObject.SetActive(false);
-#if UNITY_SERVER && !UNITY_EDITOR
-        NetworkManager.Singleton.OnServerStarted += () =>
+        if(BrainCloudManager.Singleton.BCWrapper.Client.Authenticated) 
         {
-            //Debug.Log("Server Started Successfully !");
-        };
-
-        NetworkManager.Singleton.OnClientConnectedCallback += clientID =>
+            LoginInputFields.gameObject.SetActive(false);
+            MainMenuButtons.gameObject.SetActive(true);       
+        }
+        else
         {
-            SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
-            SceneTransitionHandler.sceneTransitionHandler.SwitchScene(m_LobbySceneName);
-        };
-        StartServer();
-#endif
+            LoginInputFields.gameObject.SetActive(true);
+            MainMenuButtons.gameObject.SetActive(false);            
+        }
+    }
+    
+    public void Logout()
+    {
+        BrainCloudManager.Singleton.Logout();
+        BackToLogin();  
     }
     
     public void JoinGame()
@@ -111,34 +114,12 @@ public class MenuControl : MonoBehaviour
         MainMenuButtons.SetActive(true);
     }
     
-    public void StartClient()
+    private void BackToLogin()
     {
-        /*var utpTransport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
-        if (utpTransport)
-        {
-            //ToDo: Need to replace the set connection data to IP address from brainCloud
-            utpTransport.SetConnectionData(Sanitize(m_IPAddressText.text), 7777);
-        }
-        if (!NetworkManager.Singleton.StartClient())
-        {
-            Debug.LogError("Failed to start client.");
-        }*/
-
-    }
-    
-    public void StartServer()
-    {
-        NetworkManager.Singleton.StartServer();
-    }
-    
-    public void StartHost()
-    {
-        NetworkManager.Singleton.StartHost();
-    }
-    
-    static string Sanitize(string dirtyString)
-    {
-        // sanitize the input for the ip address
-        return Regex.Replace(dirtyString, "[^A-Za-z0-9.]", "");
+        UsernameInputField.text = "";
+        PasswordInputField.text = "";
+        RememberMeToggle.isOn = true;
+        LoginInputFields.SetActive(true);
+        MainMenuButtons.SetActive(false);
     }
 }

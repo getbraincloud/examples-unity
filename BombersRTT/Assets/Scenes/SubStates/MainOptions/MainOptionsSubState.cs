@@ -343,6 +343,7 @@ namespace BrainCloudUNETExample
         private void onLogout()
         {
             GCore.Wrapper.RTTService.DisableRTT();
+            GCore.Wrapper.ResetStoredAnonymousId();
             GCore.Wrapper.Logout(true, onPlayerLoggedOut, BombersNetworkManager.Instance.OnEnableRTTFailed);
         }
 

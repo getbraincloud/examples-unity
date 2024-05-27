@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class App : MonoBehaviour
-{    
+{
     public static BrainCloudWrapper Bc;
 
     [SerializeField] public string WrapperName;
@@ -12,8 +12,16 @@ public class App : MonoBehaviour
         DontDestroyOnLoad(this); // on an Object that won't be destroyed on Scene Changes
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
-        Bc.Init(); // Required: Initialize the Wrapper   
-        
+        Bc.Init(); // Required: Initialize the Wrapper
+
         Bc.Client.EnableLogging(true);
+    }
+
+    private void OnApplicationQuit()
+    {
+        if(Bc.Client.Authenticated)
+        {
+            Bc.LogoutOnApplicationQuit(false);
+        }
     }
 }

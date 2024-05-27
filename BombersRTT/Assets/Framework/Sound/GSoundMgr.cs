@@ -494,12 +494,13 @@ namespace Gameframework
 
         public IEnumerator LoadSoundConfigRoutine(string in_assetBundle, string in_fileName)
         {
+#if ENABLE_ASSET_BUNDLES
             yield return StartCoroutine(GEntityFactory.Instance.LoadObjectFromAssetBundle<TextAsset>(in_assetBundle, in_fileName));
 
             TextAsset asset = GEntityFactory.Instance.GetObjectFromAssetBundle<TextAsset>(in_assetBundle, in_fileName);
             if (asset != null)
                 LoadSoundConfig(asset.text);
-
+#endif
             yield return null;
         }
 

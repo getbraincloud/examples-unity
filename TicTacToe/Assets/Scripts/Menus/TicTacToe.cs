@@ -169,7 +169,7 @@ public class TicTacToe : GameScene
         // Only Enable RTT if its not already started
         if (!App.Bc.RTTService.IsRTTEnabled())
         {
-            App.Bc.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+            App.Bc.RTTService.EnableRTT(onRTTEnabled, onRTTFailure);
             App.Bc.RTTService.RegisterRTTEventCallback(App.RTTEventCallback);
         }
         else
