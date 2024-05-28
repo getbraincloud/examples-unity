@@ -10,8 +10,6 @@ using Random = UnityEngine.Random;
 
 public class PlaybackStreamManager : NetworkBehaviour
 {
-    
-
     private static PlaybackStreamManager _instance;
     public static PlaybackStreamManager Instance => _instance;
 

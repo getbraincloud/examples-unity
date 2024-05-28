@@ -9,7 +9,7 @@ using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
-public class PlaybackFetcher : MonoBehaviour
+public class PlaybackFetcher : NetworkBehaviour
 {
     private bool _dead;
     private bool IsDedicatedServer;
@@ -52,7 +52,16 @@ public class PlaybackFetcher : MonoBehaviour
             _bcWrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", userIds, OnGetPlayerSocialLeaderboardSuccess, OnGenericFailure);
     }
 
-    private void AddReplayFromId(string replayId)
+    [ServerRpc(RequireOwnership = false)]
+    private void AddAllReplaysFromIdsServerRPC(string[] ids)
+    {
+        foreach (string id in ids)
+        {
+            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().AddReplayFromId(id);
+        }
+    }
+
+    public void AddReplayFromId(string replayId)
     {
         if (IsDedicatedServer)
         {
@@ -87,15 +96,15 @@ public class PlaybackFetcher : MonoBehaviour
     private void OnServerReadStream(string response)
     {
         Dictionary<string, object> responseJson = JsonReader.Deserialize<Dictionary<string, object>>(response);
-        Dictionary<string, object> jsonData = responseJson["data"] as Dictionary<string, object>;
+        string jsonData = responseJson["data"] as string;
 
         if ((int)responseJson["status"] == 200)
         {
-
+            ParseStreamData(jsonData);
         }
         else
         {
-
+            Debug.LogWarning("Error on server read stream.");
         }
     }
 
@@ -106,19 +115,28 @@ public class PlaybackFetcher : MonoBehaviour
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
         Dictionary<string, object> userData;
         Dictionary<string, object> playbackId;
+        List<string> ids = new List<string>();
 
         foreach (Dictionary<string, object> ii in leaderboard)
         {
             userData = ii;
             playbackId = userData["data"] as Dictionary<string, object>;
-            AddReplayFromId((string)playbackId["replay"]);
+            //AddReplayFromId((string)playbackId["replay"]);
+            ids.Add((string)playbackId["replay"]);
         }
+
+        AddAllReplaysFromIdsServerRPC(ids.ToArray());
     }
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
+        ParseStreamData(in_jsonResponse);
+    }
+
+    private void ParseStreamData(string jsonResponse)
+    {
         PlaybackStreamRecord output = new PlaybackStreamRecord();
-        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] events = data["events"] as Dictionary<string, object>[];
         Dictionary<string, object> summary = data["summary"] as Dictionary<string, object>;
@@ -141,10 +159,10 @@ public class PlaybackFetcher : MonoBehaviour
 
         foreach (Dictionary<string, object> eventObj in events)
         {
-            for(int ii = 0; ii <= (int)eventObj["runlength"]; ii++)
+            for (int ii = 0; ii <= (int)eventObj["runlength"]; ii++)
             {
                 output.frames.Add(new PlaybackStreamFrame(
-                    (int)eventObj["movement"], 
+                    (int)eventObj["movement"],
                     (int)eventObj["shoot"] == 1 && ii == 0,
                     (int)eventObj["id"] + ii)
                     );
