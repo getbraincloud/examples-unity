@@ -127,7 +127,7 @@ public class PlayerControl : NetworkBehaviour
             {
                 record.totalFrameCount = currentRecordFrame;
             }
-            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().StartSubmittingRecord(Score, record);
+            PlaybackFetcher.Singleton.StartSubmittingRecord(Score, record);
         }
     }
 

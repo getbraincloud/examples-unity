@@ -14,12 +14,9 @@ public class PlaybackFetcher : NetworkBehaviour
     private bool _dead;
     private bool IsDedicatedServer;
 
-    private BrainCloudWrapper _bcWrapper;
+    public static PlaybackFetcher Singleton { get; private set; }
 
-    public BrainCloudWrapper Wrapper
-    {
-        get => _bcWrapper;
-    }
+    private BrainCloudWrapper _bcWrapper;
 
     public BrainCloudS2S S2SWrapper
     {
@@ -36,7 +33,8 @@ public class PlaybackFetcher : NetworkBehaviour
 
     private void Awake()
     {
-        _bcWrapper = GetComponent<BrainCloudWrapper>();
+        if(Singleton == null) Singleton = this;
+        _bcWrapper = BrainCloudManager.Singleton.GetComponent<BrainCloudWrapper>();
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
     }
 
@@ -47,15 +45,14 @@ public class PlaybackFetcher : NetworkBehaviour
 
     public void AddRecordsFromUsers(List<string> userIds)
     {
-        //This function will quit the session if the list is empty...
-        if (userIds.Count > 0)
-            _bcWrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", userIds, OnGetPlayerSocialLeaderboardSuccess, OnGenericFailure);
+        if (userIds.Count == 0) return;
+        _bcWrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", userIds, OnGetPlayerSocialLeaderboardSuccess, OnGenericFailure);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void AddAllReplaysFromIdsServerRPC(string[] ids)
+    private void AddAllReplaysFromIdsServerRPC(NetworkStringArray ids)
     {
-        foreach (string id in ids)
+        foreach (string id in ids.elements)
         {
             NetworkManager.Singleton.GetComponent<PlaybackFetcher>().AddReplayFromId(id);
         }
@@ -125,7 +122,7 @@ public class PlaybackFetcher : NetworkBehaviour
             ids.Add((string)playbackId["replay"]);
         }
 
-        AddAllReplaysFromIdsServerRPC(ids.ToArray());
+        AddAllReplaysFromIdsServerRPC(new NetworkStringArray(ids));
     }
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)

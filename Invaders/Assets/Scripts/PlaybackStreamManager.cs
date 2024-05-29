@@ -14,7 +14,6 @@ public class PlaybackStreamManager : NetworkBehaviour
     public static PlaybackStreamManager Instance => _instance;
 
     private bool IsDedicatedServer;
-    private PlayerControl leadingPlayer;
 
     [SerializeField]
     private GameObject playerGhost;
@@ -33,9 +32,7 @@ public class PlaybackStreamManager : NetworkBehaviour
     {
         if (IsDedicatedServer) return;
 
-        leadingPlayer = FindObjectOfType<PlayerControl>();
-
-        records = NetworkManager.Singleton.GetComponent<PlaybackFetcher>().GetStoredRecords();
+        records = PlaybackFetcher.Singleton.GetStoredRecords();
         CreateGhostsFromRecords();
     }
 

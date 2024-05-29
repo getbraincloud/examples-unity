@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7252697243398217677}
   - component: {fileID: 7857474068376859988}
   - component: {fileID: 507777786196115695}
+  - component: {fileID: 1355525219483760632}
   m_Layer: 0
   m_Name: ConnectionManager
   m_TagString: Untagged
@@ -45,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3530610309
+  GlobalObjectIdHash: 91304596
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
@@ -63,5 +64,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1a19f1ca5d539ce48a41952578e1c5ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsDedicatedServer: 0
+--- !u!114 &1355525219483760632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2207734892908993119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 257992fd218276a4eb09ffff4938b143, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

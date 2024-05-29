@@ -201,6 +201,6 @@ public class LobbyControl : NetworkBehaviour
         //This prevents every member of a lobby creating from creating copies of the replays
         //Exactly one user should create the replays
         if(BrainCloudManager.Singleton.isLobbyOwner)
-            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().AddRecordsFromUsers(addedUserIds);
+            PlaybackFetcher.Singleton.AddRecordsFromUsers(addedUserIds);
     }
 }
