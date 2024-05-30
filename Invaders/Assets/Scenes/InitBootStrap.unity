@@ -157,17 +157,17 @@ PrefabInstance:
     - target: {fileID: 7252697243398217677, guid: 77ba6491ac803cb47ad9905d2cc698fa,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 578.48334
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7252697243398217677, guid: 77ba6491ac803cb47ad9905d2cc698fa,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 333.40942
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7252697243398217677, guid: 77ba6491ac803cb47ad9905d2cc698fa,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.597595
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7252697243398217677, guid: 77ba6491ac803cb47ad9905d2cc698fa,
         type: 3}
@@ -296,6 +296,11 @@ PrefabInstance:
         type: 3}
       propertyPath: LogLevel
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2577463361084716463, guid: a33721e9ba3981444b972ae70c494d73,
+        type: 3}
+      propertyPath: NetworkConfig.EnableSceneManagement
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8303540700821626563, guid: a33721e9ba3981444b972ae70c494d73,
         type: 3}

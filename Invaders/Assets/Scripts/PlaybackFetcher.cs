@@ -33,14 +33,21 @@ public class PlaybackFetcher : NetworkBehaviour
 
     private void Awake()
     {
-        if(Singleton == null) Singleton = this;
-        _bcWrapper = BrainCloudManager.Singleton.GetComponent<BrainCloudWrapper>();
+        if (Singleton == null)
+        {
+            Singleton = this;
+            DontDestroyOnLoad(this);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
     }
 
     private void Start()
     {
-        
+        _bcWrapper = BrainCloudManager.Singleton.GetComponent<BrainCloudWrapper>();
     }
 
     public void AddRecordsFromUsers(List<string> userIds)
