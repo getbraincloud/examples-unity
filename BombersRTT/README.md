@@ -1,7 +1,7 @@
 # Bombers RTT
 
 <p align="center">
-    <img  src="../_screenshots/x_bombers.png?raw=true">
+    <img  src="../_screenshots/x_BombersRTT.png?raw=true">
     Lobby, Chat, Presence, and RTT Multiplayer
 </p>
 
