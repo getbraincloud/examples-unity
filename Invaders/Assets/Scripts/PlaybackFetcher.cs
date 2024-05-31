@@ -3,6 +3,7 @@ using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -11,6 +12,7 @@ using Random = UnityEngine.Random;
 
 public class PlaybackFetcher : NetworkBehaviour
 {
+    public NetworkVariable<int> m_Variable = new NetworkVariable<int>();
     private bool _dead;
     private bool IsDedicatedServer;
 
@@ -29,6 +31,7 @@ public class PlaybackFetcher : NetworkBehaviour
     private bool finishedAddingEvents = false;
     private int eventsAdded = 0;
 
+    private NetworkStringArray storedIds;
     private List<PlaybackStreamReadData> storedRecords = new List<PlaybackStreamReadData>();
 
     private void Awake()
@@ -48,6 +51,7 @@ public class PlaybackFetcher : NetworkBehaviour
     private void Start()
     {
         _bcWrapper = BrainCloudManager.Singleton.GetComponent<BrainCloudWrapper>();
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
     }
 
     public void AddRecordsFromUsers(List<string> userIds)
@@ -61,7 +65,7 @@ public class PlaybackFetcher : NetworkBehaviour
     {
         foreach (string id in ids.elements)
         {
-            NetworkManager.Singleton.GetComponent<PlaybackFetcher>().AddReplayFromId(id);
+            AddReplayFromId(id);
         }
     }
 
@@ -71,10 +75,11 @@ public class PlaybackFetcher : NetworkBehaviour
         {
             var requestJson = new Dictionary<string, object>();
             requestJson["service"] = "playbackStream";
-            requestJson["operation"] = "READ_STREAM";
+            requestJson["operation"] = "SYS_READ_STREAM";
 
             var requestDataJson = new Dictionary<string, object>();
             requestDataJson["playbackStreamId"] = replayId;
+            requestDataJson["ccCall"] = false;
 
             requestJson["data"] = requestDataJson;
 
@@ -97,18 +102,18 @@ public class PlaybackFetcher : NetworkBehaviour
         Debug.Log($"Failure: {message} |||| JSON: {jsonError}");
     }
 
-    private void OnServerReadStream(string response)
+    private void OnServerReadStream(string responseJson)
     {
-        Dictionary<string, object> responseJson = JsonReader.Deserialize<Dictionary<string, object>>(response);
-        string jsonData = responseJson["data"] as string;
+        Dictionary<string, object> response = JsonReader.Deserialize(responseJson) as Dictionary<string, object>;
+        int status = (int)response["status"];
 
-        if ((int)responseJson["status"] == 200)
+        if (status == 200)
         {
-            ParseStreamData(jsonData);
+            ParseStreamData(responseJson);
         }
         else
         {
-            Debug.LogWarning("Error on server read stream.");
+            m_Variable.Value = status; //status is 500
         }
     }
 
@@ -117,19 +122,17 @@ public class PlaybackFetcher : NetworkBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
-        Dictionary<string, object> userData;
         Dictionary<string, object> playbackId;
         List<string> ids = new List<string>();
 
         foreach (Dictionary<string, object> ii in leaderboard)
         {
-            userData = ii;
-            playbackId = userData["data"] as Dictionary<string, object>;
-            //AddReplayFromId((string)playbackId["replay"]);
+            playbackId = ii["data"] as Dictionary<string, object>;
             ids.Add((string)playbackId["replay"]);
         }
 
-        AddAllReplaysFromIdsServerRPC(new NetworkStringArray(ids));
+        storedIds = new NetworkStringArray(ids);
+        //AddAllReplaysFromIdsServerRPC(new NetworkStringArray(ids));
     }
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
@@ -172,8 +175,8 @@ public class PlaybackFetcher : NetworkBehaviour
                     );
             }
         }
-
         storedRecords.Add(new PlaybackStreamReadData(output));
+        m_Variable.Value = storedRecords.Count;
     }
 
     private void OnStartStreamSuccess(string in_jsonResponse, object cbObject)
@@ -278,6 +281,18 @@ public class PlaybackFetcher : NetworkBehaviour
         List<PlaybackStreamReadData> output = new List<PlaybackStreamReadData>();
         foreach(PlaybackStreamReadData ii in storedRecords) output.Add(ii);
         storedRecords.Clear();
+        m_Variable.Value = output.Count;
         return output;
+    }
+
+    private void OnClientConnectedCallback(ulong clientId)
+    {
+        if(!IsDedicatedServer)
+        {
+            if(storedIds.elements.Length > 0)
+            {
+                AddAllReplaysFromIdsServerRPC(storedIds);
+            }
+        }
     }
 }

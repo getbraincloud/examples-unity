@@ -30,7 +30,7 @@ public class PlaybackStreamManager : NetworkBehaviour
 
     private void Start()
     {
-        if (IsDedicatedServer) return;
+        if (!IsDedicatedServer) return;
 
         records = PlaybackFetcher.Singleton.GetStoredRecords();
         CreateGhostsFromRecords();

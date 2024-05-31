@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -15,9 +16,16 @@ public struct NetworkStringArray : INetworkSerializable
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
-        for(int ii = 0; ii < elements.Length; ii++)
-        {
-            serializer.SerializeValue(ref elements[ii]);
-        }
+        var length = 0;
+        if (!serializer.IsReader)
+            length = elements.Length;
+
+        serializer.SerializeValue(ref length);
+
+        if (serializer.IsReader)
+            elements = new string[length];
+
+        for (var n = 0; n < length; ++n)
+            serializer.SerializeValue(ref elements[n]);
     }
 }
