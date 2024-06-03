@@ -55,6 +55,7 @@ public class PlaybackFetcher : NetworkBehaviour
     private void OnClientConnectedCallback(ulong clientId)
     {
         if (IsDedicatedServer) return;
+        if (storedIds.elements == null) return;
 
         if (storedIds.elements.Length > 0)
         {
@@ -219,10 +220,11 @@ public class PlaybackFetcher : NetworkBehaviour
         string summaryData = string.Concat(
             "{\"framecount\":", record.totalFrameCount, 
             ",\"startpos\":", record.startPosition, 
-            ",\"username\":", record.username, END);
+            ",\"username\":\"", record.username, "\"", END);
         int index = 0;
         string eventData = "";
 
+        Debug.Log(summaryData);
         for(int ii = 0; ii < runLengths.Count; ii++)
         {
             eventData = string.Concat(

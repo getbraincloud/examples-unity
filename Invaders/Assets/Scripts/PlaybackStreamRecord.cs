@@ -12,43 +12,7 @@ public class PlaybackStreamRecord
     public PlaybackStreamFrame GetLatestFrame() { return frames[^1]; }
 }
 
-public struct PlaybackStreamReadData : INetworkSerializable
-{
-    public PlaybackStreamFrame[] frames;
-    public int totalFrameCount;
-    public float startPosition;
-    public string username;
-
-    public PlaybackStreamReadData(PlaybackStreamFrame[] newFrames, int newFrameCount, float newStartPosition, string newUsername)
-    {
-        frames = newFrames;
-        totalFrameCount = newFrameCount;
-        startPosition = newStartPosition;
-        username = newUsername;
-    }
-
-    public PlaybackStreamReadData(PlaybackStreamRecord copyRecord)
-    {
-        frames = copyRecord.frames.ToArray();
-        totalFrameCount = copyRecord.totalFrameCount;
-        startPosition = copyRecord.startPosition;
-        username = copyRecord.username;
-    }
-
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref username);
-        serializer.SerializeValue(ref startPosition);
-        serializer.SerializeValue(ref totalFrameCount);
-        serializer.SerializeValue(ref frames);
-        foreach (PlaybackStreamFrame ii in frames)
-        {
-            ii.NetworkSerialize(serializer);
-        }
-    }
-}
-
-public struct PlaybackStreamFrame : INetworkSerializable
+public struct PlaybackStreamFrame
 {
     public int xDelta;
     public bool createBullet;
@@ -66,12 +30,5 @@ public struct PlaybackStreamFrame : INetworkSerializable
         xDelta = newxDelta;
         createBullet = newCreateBullet;
         frameID = newFrameID;
-    }
-
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref xDelta);
-        serializer.SerializeValue(ref createBullet);
-        serializer.SerializeValue(ref frameID);
     }
 }
