@@ -8,17 +8,16 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
-using Random = UnityEngine.Random;
 
 public class PlaybackFetcher : NetworkBehaviour
 {
-    public NetworkVariable<int> m_Variable = new NetworkVariable<int>();
     private bool _dead;
     private bool IsDedicatedServer;
 
     public static PlaybackFetcher Singleton { get; private set; }
 
     private BrainCloudWrapper _bcWrapper;
+    private GhostSpawner ghostSpawner;
 
     public BrainCloudS2S S2SWrapper
     {
@@ -32,7 +31,6 @@ public class PlaybackFetcher : NetworkBehaviour
     private int eventsAdded = 0;
 
     private NetworkStringArray storedIds;
-    private List<PlaybackStreamReadData> storedRecords = new List<PlaybackStreamReadData>();
 
     private void Awake()
     {
@@ -54,6 +52,16 @@ public class PlaybackFetcher : NetworkBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
     }
 
+    private void OnClientConnectedCallback(ulong clientId)
+    {
+        if (IsDedicatedServer) return;
+
+        if (storedIds.elements.Length > 0)
+        {
+            AddAllReplaysFromIdsServerRPC(storedIds);
+        }
+    }
+
     public void AddRecordsFromUsers(List<string> userIds)
     {
         if (userIds.Count == 0) return;
@@ -71,25 +79,17 @@ public class PlaybackFetcher : NetworkBehaviour
 
     public void AddReplayFromId(string replayId)
     {
-        if (IsDedicatedServer)
-        {
-            var requestJson = new Dictionary<string, object>();
-            requestJson["service"] = "playbackStream";
-            requestJson["operation"] = "SYS_READ_STREAM";
+        var requestJson = new Dictionary<string, object>();
+        requestJson["service"] = "playbackStream";
+        requestJson["operation"] = "SYS_READ_STREAM";
 
-            var requestDataJson = new Dictionary<string, object>();
-            requestDataJson["playbackStreamId"] = replayId;
-            requestDataJson["ccCall"] = false;
+        var requestDataJson = new Dictionary<string, object>();
+        requestDataJson["playbackStreamId"] = replayId;
+        requestDataJson["ccCall"] = false;
+        requestJson["data"] = requestDataJson;
 
-            requestJson["data"] = requestDataJson;
-
-            string jsonString = JsonWriter.Serialize(requestJson);
-            S2SWrapper.Request(jsonString, OnServerReadStream);
-        }
-        else
-        {
-            _bcWrapper.PlaybackStreamService.ReadStream(replayId, OnReadStreamSuccess, OnGenericFailure);
-        }
+        string jsonString = JsonWriter.Serialize(requestJson);
+        S2SWrapper.Request(jsonString, OnServerReadStream);
     }
 
     private void OnGenericFailure(int status, int reasonCode, string jsonError, object cbObject)
@@ -113,7 +113,7 @@ public class PlaybackFetcher : NetworkBehaviour
         }
         else
         {
-            m_Variable.Value = status; //status is 500
+            
         }
     }
 
@@ -132,12 +132,6 @@ public class PlaybackFetcher : NetworkBehaviour
         }
 
         storedIds = new NetworkStringArray(ids);
-        //AddAllReplaysFromIdsServerRPC(new NetworkStringArray(ids));
-    }
-
-    private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
-    {
-        ParseStreamData(in_jsonResponse);
     }
 
     private void ParseStreamData(string jsonResponse)
@@ -175,8 +169,14 @@ public class PlaybackFetcher : NetworkBehaviour
                     );
             }
         }
-        storedRecords.Add(new PlaybackStreamReadData(output));
-        m_Variable.Value = storedRecords.Count;
+
+        InstantiatePlaybackGhost(output);
+    }
+
+    private void InstantiatePlaybackGhost(PlaybackStreamRecord record)
+    {
+        if (ghostSpawner == null) ghostSpawner = FindAnyObjectByType<GhostSpawner>();
+        ghostSpawner.InstantiateGhost(record);
     }
 
     private void OnStartStreamSuccess(string in_jsonResponse, object cbObject)
@@ -199,11 +199,6 @@ public class PlaybackFetcher : NetworkBehaviour
     private void OnGetPlayerScoreFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
         previousHighScore = 0;
-    }
-
-    private void OnAddEventSuccess(string in_jsonResponse, object cbObject)
-    {
-        eventsAdded += 1;
     }
 
     private IEnumerator AddEvents(string replayId, PlaybackStreamRecord record)
@@ -245,6 +240,11 @@ public class PlaybackFetcher : NetworkBehaviour
         yield break;
     }
 
+    private void OnAddEventSuccess(string in_jsonResponse, object cbObject)
+    {
+        eventsAdded += 1;
+    }
+
     public void StartSubmittingRecord(int newScore, PlaybackStreamRecord newRecord)
     {
         StartCoroutine(SubmitRecord(newScore, newRecord));
@@ -252,47 +252,35 @@ public class PlaybackFetcher : NetworkBehaviour
 
     private IEnumerator SubmitRecord(int newScore, PlaybackStreamRecord newRecord)
     {
-        if(previousHighScore == -1)
+        //Get the player's previous high score and attached record ID
+        if (previousHighScore == -1)
         {
             _bcWrapper.LeaderboardService.GetPlayerScore("InvaderHighScore", -1, OnGetPlayerScoreSuccess, OnGetPlayerScoreFailure);
             yield return new WaitUntil(() => previousHighScore != -1);
         }
+        if (previousHighScore > newScore) yield break; //Early return if allowed
 
-        if (previousHighScore > newScore) yield break;
+        //Start a new stream and grab its ID
         _bcWrapper.PlaybackStreamService.StartStream(BrainCloudManager.Singleton.LocalUserInfo.ProfileID, false, OnStartStreamSuccess, OnGenericFailure);
         yield return new WaitUntil(() => createdRecordId != "");
 
+        //Post the high score to the leaderboard and attach the record ID
         string createdRecordIdJson = string.Concat("{\"replay\":\"", createdRecordId, "\"}");
         _bcWrapper.LeaderboardService.PostScoreToLeaderboard("InvaderHighScore", newScore, createdRecordIdJson, null, OnGenericFailure);
+
+        //Add the recorded data to the stream
         StartCoroutine(AddEvents(createdRecordId, newRecord));
         yield return new WaitUntil(() => finishedAddingEvents);
 
+        //Clean up the previous stream and close the recently created stream
         if(previousRecordId != "") _bcWrapper.PlaybackStreamService.DeleteStream(previousRecordId, null, OnGenericFailure);
         _bcWrapper.PlaybackStreamService.EndStream(createdRecordId, null, OnGenericFailure);
+
+        //Reset the variables to be used again
         createdRecordId = "";
         finishedAddingEvents = false;
         previousHighScore = newScore;
         previousRecordId = createdRecordId;
         yield break;
-    }
-
-    public List<PlaybackStreamReadData> GetStoredRecords()
-    {
-        List<PlaybackStreamReadData> output = new List<PlaybackStreamReadData>();
-        foreach(PlaybackStreamReadData ii in storedRecords) output.Add(ii);
-        storedRecords.Clear();
-        m_Variable.Value = output.Count;
-        return output;
-    }
-
-    private void OnClientConnectedCallback(ulong clientId)
-    {
-        if(!IsDedicatedServer)
-        {
-            if(storedIds.elements.Length > 0)
-            {
-                AddAllReplaysFromIdsServerRPC(storedIds);
-            }
-        }
     }
 }

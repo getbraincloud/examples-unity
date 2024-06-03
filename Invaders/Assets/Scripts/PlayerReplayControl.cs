@@ -29,24 +29,24 @@ public class PlayerReplayControl : NetworkBehaviour
     private GameObject m_MyBullet;
 
     private int replayIndex;
-    private PlaybackStreamReadData _actionReplayRecords;
+    private PlaybackStreamRecord _actionReplayRecords;
 
     private void Awake()
     {
         t = transform;
     }
 
-    public void StartStream(PlaybackStreamReadData record)
+    public void StartStream(PlaybackStreamRecord record, int skippedFrames = 0)
     {
         _actionReplayRecords = record;
         if(_actionReplayRecords.username != string.Empty) usernameText.text = _actionReplayRecords.username;
-        StartCoroutine(StartPlayBack());
+        t.position = Vector3.right * _actionReplayRecords.startPosition;
+        StartCoroutine(StartPlayBack(skippedFrames));
     }
 
-    private IEnumerator StartPlayBack()
+    private IEnumerator StartPlayBack(int startFrame)
     {
-        t.position = Vector3.right * _actionReplayRecords.startPosition;
-        for (int ii = 0; ii < _actionReplayRecords.frames.Length; ii++)
+        for (int ii = startFrame; ii < _actionReplayRecords.frames.Count; ii++)
         {
             if (_actionReplayRecords.frames[ii].xDelta != 0)
                 MoveShip(_actionReplayRecords.frames[ii].xDelta);
