@@ -11,6 +11,10 @@ public class PlayerControl : NetworkBehaviour
 {
     [Header("Weapon Settings")]
     public GameObject bulletPrefab;
+    private GameObject m_MyBullet;
+    private bool shotRecently = false;
+    private float timeSinceShot = 0.0f;
+    private readonly float shootCooldown = 0.5f;
 
     [Header("Movement Settings")]
     [SerializeField]
@@ -34,8 +38,6 @@ public class PlayerControl : NetworkBehaviour
 
     private NetworkVariable<int> m_MoveX = new NetworkVariable<int>(0);
 
-    private GameObject m_MyBullet;
-    private bool shotRecently = false;
     private ClientRpcParams m_OwnerRPCParams;
 
     [SerializeField]
@@ -110,6 +112,8 @@ public class PlayerControl : NetworkBehaviour
             shotRecently = false;
             currentRecordFrame += 1;
         }
+
+        timeSinceShot += 1.0f * Time.deltaTime;
         previousPos = transform.position.x;
     }
 
@@ -261,25 +265,24 @@ public class PlayerControl : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
         {
-            if (AbleToShoot())
+            if (timeSinceShot >= shootCooldown)
             {
+                timeSinceShot = 0;
                 shotRecently = true;
                 ShootServerRPC();
             }
         }
     }
 
-    private bool AbleToShoot()
-    {
-        return m_IsAlive && (m_MyBullet == null);
-    }
-
     [ServerRpc]
     private void ShootServerRPC()
     {
+        if (timeSinceShot < shootCooldown) return;
+
         m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
         m_MyBullet.GetComponent<PlayerBullet>().owner = this;
         m_MyBullet.GetComponent<NetworkObject>().Spawn();
+        timeSinceShot = 0;
     }
 
     public void HitByBullet()
@@ -314,7 +317,7 @@ public class PlayerControl : NetworkBehaviour
     {
         NotifyGameOver(reason);
     }
-    
+
     /// <summary>
     /// This should only be called locally, either through NotifyGameOverClientRpc or through the InvadersGame.BroadcastGameOverReason
     /// </summary>
@@ -351,9 +354,9 @@ public class PlayerControl : NetworkBehaviour
     [ClientRpc]
     void SpawnVFXClientRpc(int vfxType, Vector3 spawnPosition)
     {
-        if(vfxType == 0)
+        if (vfxType == 0)
             Instantiate(m_ExplosionParticleSystem, spawnPosition, Quaternion.identity);
-        else if(vfxType == 1)
+        else if (vfxType == 1)
             Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
     }
 }

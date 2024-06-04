@@ -155,7 +155,7 @@ public class PlaybackFetcher : NetworkBehaviour
         }
 
         output.totalFrameCount = summary["framecount"] as int? ?? -2;
-        output.startPosition = summary["startpos"] as float? ?? 0.0f;
+        output.startPosition = Convert.ToSingle(summary["startpos"]);
         if (summary.ContainsKey("username")) output.username = summary["username"] as string;
         else output.username = string.Empty;
 

@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 6052549347362046683}
   - component: {fileID: 6605228438250229389}
   - component: {fileID: 115744798109350777}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Username
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -306,8 +306,8 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 764760053
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &115744798109350777
@@ -339,8 +339,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 3684671391
-  m_fontColor: {r: 0.62352943, g: 0.62352943, b: 0.62352943, a: 0.85882354}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -357,13 +357,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 10
-  m_fontSizeBase: 10
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535

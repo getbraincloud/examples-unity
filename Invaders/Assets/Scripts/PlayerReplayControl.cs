@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -28,7 +29,6 @@ public class PlayerReplayControl : NetworkBehaviour
 
     private GameObject m_MyBullet;
 
-    private int replayIndex;
     private PlaybackStreamRecord _actionReplayRecords;
 
     private void Awake()
@@ -36,10 +36,16 @@ public class PlayerReplayControl : NetworkBehaviour
         t = transform;
     }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (_actionReplayRecords != null)
+            ChangeUsernameClientRpc(_actionReplayRecords.username);
+    }
+
     public void StartStream(PlaybackStreamRecord record, int skippedFrames = 0)
     {
         _actionReplayRecords = record;
-        if(_actionReplayRecords.username != string.Empty) usernameText.text = _actionReplayRecords.username;
         t.position = Vector3.right * _actionReplayRecords.startPosition;
         StartCoroutine(StartPlayBack(skippedFrames));
     }
@@ -107,11 +113,20 @@ public class PlayerReplayControl : NetworkBehaviour
     }
 
     [ClientRpc]
-    void SpawnVFXClientRpc(int vfxType, Vector3 spawnPosition)
+    private void SpawnVFXClientRpc(int vfxType, Vector3 spawnPosition)
     {
         if (vfxType == 0)
             Instantiate(m_ExplosionParticleSystem, spawnPosition, Quaternion.identity);
         else if (vfxType == 1)
             Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
+    }
+
+    [ClientRpc]
+    private void ChangeUsernameClientRpc(string newName)
+    {
+        if (newName == null) return;
+        if (newName.Length == 0) return;
+
+        usernameText.text = newName;
     }
 }
