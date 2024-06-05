@@ -7,10 +7,6 @@ using System;
 
 public class PlaybackSelector : MonoBehaviour
 {
-    public string playerId;
-    private string playerName;
-    private int playerScore;
-
     [SerializeField]
     private TMP_Text nameText;
     [SerializeField]
@@ -18,12 +14,10 @@ public class PlaybackSelector : MonoBehaviour
     [SerializeField]
     private GameObject addButton;
 
-    private LobbyControl lobbyControl;
-
-    private void Start()
-    {
-        lobbyControl = LobbyControl.Singleton;
-    }
+    [HideInInspector]
+    public string playerId;
+    private string playerName;
+    private int playerScore;
 
     public void InitValues(string newId, string newName, int newScore)
     {
@@ -41,7 +35,7 @@ public class PlaybackSelector : MonoBehaviour
 
     public void AddPlayerId()
     {
-        lobbyControl.AddNewPlayerIdSignal(playerId);
+        LobbyControl.Singleton.AddNewPlayerIdSignal(playerId);
     }
 
     public void HideButton()

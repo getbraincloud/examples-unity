@@ -29,7 +29,7 @@ public class PlayerReplayControl : NetworkBehaviour
 
     private GameObject m_MyBullet;
 
-    private PlaybackStreamRecord _actionReplayRecords;
+    private PlaybackStreamRecord actionReplayRecord;
 
     private void Awake()
     {
@@ -39,25 +39,25 @@ public class PlayerReplayControl : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        if (_actionReplayRecords != null)
-            ChangeUsernameClientRpc(_actionReplayRecords.username);
+        if (actionReplayRecord != null)
+            ChangeUsernameClientRpc(actionReplayRecord.username);
     }
 
     public void StartStream(PlaybackStreamRecord record, int skippedFrames = 0)
     {
-        _actionReplayRecords = record;
-        t.position = Vector3.right * _actionReplayRecords.startPosition;
-        StartCoroutine(StartPlayBack(skippedFrames));
+        actionReplayRecord = record;
+        t.position = Vector3.right * actionReplayRecord.startPosition;
+        StartCoroutine(ActPlayBack(skippedFrames));
     }
 
-    private IEnumerator StartPlayBack(int startFrame)
+    private IEnumerator ActPlayBack(int startFrame)
     {
-        for (int ii = startFrame; ii < _actionReplayRecords.frames.Count; ii++)
+        for (int ii = startFrame; ii < actionReplayRecord.frames.Count; ii++)
         {
-            if (_actionReplayRecords.frames[ii].xDelta != 0)
-                MoveShip(_actionReplayRecords.frames[ii].xDelta);
+            if (actionReplayRecord.frames[ii].xDelta != 0)
+                MoveShip(actionReplayRecord.frames[ii].xDelta);
 
-            if (_actionReplayRecords.frames[ii].createBullet)
+            if (actionReplayRecord.frames[ii].createBullet)
                 ShootBullet();
 
             yield return new WaitForFixedUpdate();
@@ -115,10 +115,17 @@ public class PlayerReplayControl : NetworkBehaviour
     [ClientRpc]
     private void SpawnVFXClientRpc(int vfxType, Vector3 spawnPosition)
     {
-        if (vfxType == 0)
-            Instantiate(m_ExplosionParticleSystem, spawnPosition, Quaternion.identity);
-        else if (vfxType == 1)
-            Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
+        switch (vfxType)
+        {
+            case 0:
+                Instantiate(m_ExplosionParticleSystem, spawnPosition, Quaternion.identity);
+                break;
+            case 1:
+                Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
+                break;
+            default:
+                break;
+        }
     }
 
     [ClientRpc]
