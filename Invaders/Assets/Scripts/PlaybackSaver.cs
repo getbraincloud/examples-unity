@@ -37,12 +37,12 @@ public class PlaybackSaver : MonoBehaviour
             Destroy(this.gameObject);
         }
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
-        profileId = BrainCloudManager.Singleton.LocalUserInfo.ProfileID;
     }
 
     private void Start()
     {
         _bcWrapper = BrainCloudManager.Singleton.GetComponent<BrainCloudWrapper>();
+        profileId = BrainCloudManager.Singleton.LocalUserInfo.ProfileID;
     }
 
     private void OnGenericFailure(int status, int reasonCode, string jsonError, object cbObject)

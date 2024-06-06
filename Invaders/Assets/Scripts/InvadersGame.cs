@@ -163,6 +163,7 @@ public class InvadersGame : NetworkBehaviour
 
         //If we are a connected client, then don't update the enemies (server side only)
         if (!IsDedicatedServer) return;
+        if (!HasGameStarted()) return;
 
         //Check to see if all players are currently alive in game
         if (!ArePlayersAlive())
@@ -176,7 +177,7 @@ public class InvadersGame : NetworkBehaviour
         }
 
         //If we are the server and the game has started, then update the enemies
-        if (HasGameStarted()) UpdateEnemies();
+        UpdateEnemies();
     }
 
     public override void OnNetworkDespawn()

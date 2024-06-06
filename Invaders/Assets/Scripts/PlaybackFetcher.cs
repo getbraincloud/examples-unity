@@ -82,7 +82,7 @@ public class PlaybackFetcher : NetworkBehaviour
         }
     }
 
-    public void AddReplayFromId(string replayId)
+    private void AddReplayFromId(string replayId)
     {
         var requestDataJson = new Dictionary<string, object>();
         requestDataJson["playbackStreamId"] = replayId;
@@ -102,14 +102,7 @@ public class PlaybackFetcher : NetworkBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(responseJson) as Dictionary<string, object>;
         int status = (int)response["status"];
 
-        if (status == 200)
-        {
-            ParseStreamData(responseJson);
-        }
-        else
-        {
-
-        }
+        if (status == 200) ParseStreamData(responseJson);
     }
 
     private void OnGetPlayerSocialLeaderboardSuccess(string in_jsonResponse, object cbObject)
