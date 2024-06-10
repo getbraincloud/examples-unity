@@ -76,33 +76,35 @@ public class PlaybackFetcher : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void AddAllReplaysFromIdsServerRPC(NetworkStringArray ids)
     {
-        foreach (string id in ids.elements)
-        {
-            AddReplayFromId(id);
-        }
-    }
+        var scriptArgs = new Dictionary<string, object>();
+        scriptArgs["stream_ids"] = ids.elements;
 
-    private void AddReplayFromId(string replayId)
-    {
         var requestDataJson = new Dictionary<string, object>();
-        requestDataJson["playbackStreamId"] = replayId;
-        requestDataJson["ccCall"] = false;
+        requestDataJson["scriptName"] = "/ReadMultipleStreams";
+        requestDataJson["scriptData"] = scriptArgs;
 
         var requestJson = new Dictionary<string, object>();
-        requestJson["service"] = "playbackStream";
-        requestJson["operation"] = "SYS_READ_STREAM";
+        requestJson["service"] = "script";
+        requestJson["operation"] = "RUN";
         requestJson["data"] = requestDataJson;
-
-        string jsonString = JsonWriter.Serialize(requestJson);
-        S2SWrapper.Request(jsonString, OnServerReadStream);
+        S2SWrapper.Request(JsonWriter.Serialize(requestJson), OnServerReadStreams);
     }
 
-    private void OnServerReadStream(string responseJson)
+    private void OnServerReadStreams(string responseJson)
     {
-        Dictionary<string, object> response = JsonReader.Deserialize(responseJson) as Dictionary<string, object>;
-        int status = (int)response["status"];
+        Dictionary<string, object> message = JsonReader.Deserialize(responseJson) as Dictionary<string, object>;
+        int status = (int)message["status"];
 
-        if (status == 200) ParseStreamData(responseJson);
+        if (status == 200)
+        {
+            Dictionary<string, object> data = message["data"] as Dictionary<string, object>;
+            Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
+            Dictionary<string, object>[] streams = response["streams"] as Dictionary<string, object>[];
+            foreach(Dictionary<string, object> stream in streams)
+            {
+                ParseStreamData(stream);
+            }
+        }
     }
 
     private void OnGetPlayerSocialLeaderboardSuccess(string in_jsonResponse, object cbObject)
@@ -122,11 +124,9 @@ public class PlaybackFetcher : NetworkBehaviour
         storedIds = new NetworkStringArray(ids);
     }
 
-    private void ParseStreamData(string jsonResponse)
+    private void ParseStreamData(Dictionary<string, object> data)
     {
         PlaybackStreamRecord output = new PlaybackStreamRecord();
-        Dictionary<string, object> response = JsonReader.Deserialize(jsonResponse) as Dictionary<string, object>;
-        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] events = data["events"] as Dictionary<string, object>[];
         Dictionary<string, object> summary = data["summary"] as Dictionary<string, object>;
 
