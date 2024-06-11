@@ -161,6 +161,7 @@ public class LobbyControl : NetworkBehaviour
 
     public void UpdatePlaybackCount()
     {
+        playbackCount = addedUserIds.Count;
         if (playbackCount == 0) playbackCounter.text = "ADD BACK UP";
         else playbackCounter.text = "BACK UP  +" + playbackCount.ToString();
     }
@@ -181,10 +182,9 @@ public class LobbyControl : NetworkBehaviour
     {
         if(addedUserIds.Contains(newId)) return;
 
-        HideUsedPlaybacks(newId);
         addedUserIds.Add(newId);
-        playbackCount = addedUserIds.Count;
         UpdatePlaybackCount();
+        HideUsedPlaybacks(newId);
     }
 
     private void HideUsedPlaybacks(string newId)
@@ -198,8 +198,6 @@ public class LobbyControl : NetworkBehaviour
 
     public void FetchPlaybacks()
     {
-        //This prevents every member of a lobby creating from creating copies of the replays
-        //Exactly one user should create the replays
         if(BrainCloudManager.Singleton.isLobbyOwner)
             PlaybackFetcher.Singleton.AddRecordsFromUsers(addedUserIds);
     }

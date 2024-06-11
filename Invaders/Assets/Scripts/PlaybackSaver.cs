@@ -42,7 +42,6 @@ public class PlaybackSaver : MonoBehaviour
     private void Start()
     {
         _bcWrapper = BrainCloudManager.Singleton.GetComponent<BrainCloudWrapper>();
-        profileId = BrainCloudManager.Singleton.LocalUserInfo.ProfileID;
     }
 
     private void OnGenericFailure(int status, int reasonCode, string jsonError, object cbObject)
@@ -123,6 +122,7 @@ public class PlaybackSaver : MonoBehaviour
 
     public void StartSubmittingRecord(int newScore, PlaybackStreamRecord newRecord)
     {
+        profileId = BrainCloudManager.Singleton.LocalUserInfo.ProfileID;
         StartCoroutine(SubmitRecord(newScore, newRecord));
     }
 

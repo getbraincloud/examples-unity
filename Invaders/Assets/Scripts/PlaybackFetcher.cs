@@ -60,11 +60,9 @@ public class PlaybackFetcher : NetworkBehaviour
     {
         if (IsDedicatedServer) return;
         if (storedIds.elements == null) return;
+        if (storedIds.elements.Length == 0) return;
 
-        if (storedIds.elements.Length > 0)
-        {
-            AddAllReplaysFromIdsServerRPC(storedIds);
-        }
+        AddAllReplaysFromIdsServerRPC(storedIds);
     }
 
     public void AddRecordsFromUsers(List<string> userIds)

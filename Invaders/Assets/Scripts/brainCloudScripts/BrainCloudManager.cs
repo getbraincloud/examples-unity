@@ -279,11 +279,14 @@ public class BrainCloudManager : MonoBehaviour
                     {
                         LobbyControl.Singleton.GenerateUserStatsForLobby();
                     }
+
                     lobby = jsonData["lobby"] as Dictionary<string, object>;
                     settings = lobby["settings"] as Dictionary<string, object>;
-                    if (!settings.ContainsKey("replay_users")) break;
-                    replayUserIds = settings["replay_users"] as string[];
-                    StartCoroutine(DelayAddIdToList(replayUserIds));
+                    if (settings.ContainsKey("replay_users"))
+                    {
+                        replayUserIds = settings["replay_users"] as string[];
+                        StartCoroutine(DelayAddIdToList(replayUserIds));
+                    }
                     break;
                 case "MEMBER_UPDATE":
                     if (LobbyControl.Singleton != null)
@@ -292,6 +295,7 @@ public class BrainCloudManager : MonoBehaviour
                     }
                     break;
                 case "DISBANDED":
+                    ResetReplayFlags();
                     var reason = jsonData["reason"] as Dictionary<string, object>;
                     if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
                     {
@@ -318,6 +322,7 @@ public class BrainCloudManager : MonoBehaviour
                         LobbyControl.Singleton.IsLoading = false;
                         LobbyControl.Singleton.FetchPlaybacks();
                     }
+                    ResetReplayFlags();
                     SceneTransitionHandler.SwitchScene("Connecting");
                     _unityTransport.ConnectionData.Address = _roomAddress;
                     _unityTransport.ConnectionData.Port = (ushort)_roomPort;
@@ -411,7 +416,12 @@ public class BrainCloudManager : MonoBehaviour
         
         foreach (Dictionary<string, object> userData in leaderboard)
         {
-            LobbyControl.Singleton.UpdateLeaderBoardSelector((int)userData["rank"], (string)userData["playerId"], (string)userData["name"], (int)userData["score"]);
+            LobbyControl.Singleton.UpdateLeaderBoardSelector(
+                (int)userData["rank"], 
+                (string)userData["playerId"], 
+                (string)userData["name"], 
+                (int)userData["score"]
+                );
         }
         foundTopUserInfo = true;
     }
@@ -425,4 +435,10 @@ public class BrainCloudManager : MonoBehaviour
         Debug.Log("Error: " + statusMessage);
     }
 
+    private void ResetReplayFlags()
+    {
+        foundTopUserInfo = false;
+        foundFeaturedUserInfo = false;
+        featuredUser.Clear();
+    }
 }
