@@ -75,7 +75,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public static BrainCloudManager Singleton { get; private set; }
     public List<UserScoreInfo> ListOfUsers = new List<UserScoreInfo>();
-    private List<string> featuredUser = new List<string>();
+    private string featuredUser = string.Empty;
     private bool foundTopUserInfo = false;
     private bool foundFeaturedUserInfo = false;
 
@@ -377,9 +377,12 @@ public class BrainCloudManager : MonoBehaviour
 
     private IEnumerator GetFeaturedUser()
     {
-        _wrapper.GlobalAppService.ReadSelectedProperties(new string[] { "FeaturedPlayer" }, OnFindFeaturedUser, OnFailureCallback);
-        yield return new WaitUntil(() => featuredUser.Count == 1);
-        _wrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", featuredUser, OnFeaturedUserInfoSuccess, OnFailureCallback);
+        string[] property = new string[] { "FeaturedPlayer" };
+        _wrapper.GlobalAppService.ReadSelectedProperties(property, OnFindFeaturedUser, OnFailureCallback);
+        yield return new WaitUntil(() => featuredUser != string.Empty);
+
+        string[] featuredUserArray = new string[] { featuredUser };
+        _wrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", featuredUserArray, OnFeaturedUserInfoSuccess, OnFailureCallback);
         yield break;
     }
 
@@ -388,7 +391,7 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object> property = data["FeaturedPlayer"] as Dictionary<string, object>;
-        featuredUser.Add((string)property["value"]);
+        featuredUser = (string)property["value"];
     }
 
     private void OnFeaturedUserInfoSuccess(string in_jsonResponse, object cbObject)
@@ -397,8 +400,13 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
         Dictionary<string, object> userData = leaderboard[0];
-        LobbyControl.Singleton.UpdateFeaturedSelector((string)userData["playerId"], (string)userData["playerName"], (int)userData["score"]);
-        featuredUser.Clear();
+
+        LobbyControl.Singleton.UpdateFeaturedSelector(
+            (string)userData["playerId"], 
+            (string)userData["playerName"], 
+            (int)userData["score"]
+            );
+        featuredUser = string.Empty;
         foundFeaturedUserInfo = true;
     }
 
@@ -439,6 +447,5 @@ public class BrainCloudManager : MonoBehaviour
     {
         foundTopUserInfo = false;
         foundFeaturedUserInfo = false;
-        featuredUser.Clear();
     }
 }

@@ -123,8 +123,6 @@ public class PlayerReplayControl : NetworkBehaviour
             case 1:
                 Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
                 break;
-            default:
-                break;
         }
     }
 
