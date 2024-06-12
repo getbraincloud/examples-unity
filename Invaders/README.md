@@ -29,9 +29,9 @@ In the Invaders game, players are only allowed to move along the horizontal axis
 
 First we create a new object to hold the data we want to record each frame:
 
- - xDelta represents the direction the player moved each frame: left, right, or staying still.
- - createBullet represents whether or not the player shot out a bullet this frame.
- - frameID starts at 0 and increases by 1 every frame. This can be used for debugging. 
+ - `xDelta` represents the direction the player moved each frame: left, right, or staying still.
+ - `createBullet` represents whether or not the player shot out a bullet this frame.
+ - `frameID` starts at `0` and increases by `1` every frame. This can be used for debugging. 
 
 We also create an object that holds some general information about the recording:
 
