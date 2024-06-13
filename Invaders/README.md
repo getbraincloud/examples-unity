@@ -48,7 +48,7 @@ Now we need to keep track of which actions happen every frame. We do this in Fix
  - We detect whether the player shot or not using shotRecently. This boolean is set to true when the player shoots and is reset back to false at the end of every frame. 
  - *__Note__: We also want to keep track of the player’s score during gameplay to post to the leaderboard. In this demo, a player’s score is increased whenever they destroy an alien.* 
 
-When the gameplay is over, we grab the score and record and move on to the next step. The gameplay could end for multiple reasons such as the player dying or the enemies reaching the bottom of the screen. To catch all of the different cases, the function can be called from OnDestroy().
+When the gameplay is over, we grab the score and record and move on to the next step. The gameplay could end for multiple reasons such as the player dying or the enemies reaching the bottom of the screen. To catch all of the different cases, the function can be called from `OnDestroy()`.  
 ![EndAndSubmitRecording](../_screenshots/_invadersReplay/_8_EndAndSubmitRecording.png)
 ![RecordingOnDestroy](../_screenshots/_invadersReplay/_9_RecordingOnDestroy.png)
 
@@ -75,11 +75,11 @@ We also need to add the gameplay that we recorded to the stream that was just cr
  - Players can only ever create a bullet for one frame at a time, so we will consider the frame a bullet was created to be similar to the immediately following frames. We must remember that only one bullet was created per event when we retrieve the stream from brainCloud later!
  - *__Note:__ This type of compression may not be as effective for every type of gameplay. An effective compression algorithm takes advantage of expected patterns and assumptions in its data.*
 
-After calculating which frames will be grouped into events, we format the data and send the events to brainCloud. They must be written in JSON format.
+After calculating which frames will be grouped into events, we format the data and send the events to brainCloud. They must be written in JSON format.  
 ![AddEventsStrings](../_screenshots/_invadersReplay/_17_AddEventsStrings.png)
 ![AddEventsSendToCloud](../_screenshots/_invadersReplay/_18_AddEventsSendToCloud.png)
 ![AddEventsCounter](../_screenshots/_invadersReplay/_19_AddEventsCounter.png)
- - Each event will look like the following on the brainCloud portal: 
+ - Each event will look like the following on the brainCloud portal:  
 ![EventExample](../_screenshots/_invadersReplay/_20_EventExample.png)
 
 Now that we have created our stream and sent all of our recorded gameplay to brainCloud, we end the stream and delete the stream that was previously attached to the leaderboard. 
@@ -96,7 +96,7 @@ To find the recordings and their events go to the User tab and browse for your d
 When the app needs to retrieve a recording, we use the ReadStream operation from the Playback Stream service to get the data from brainCloud. We need to have the ID of the replay that will be read from. The Invaders demo gets the stream IDs by letting players select from leaderboard entries on a menu in the lobby before the game begins. Keep in mind that the way your recordings are selected is a design choice that will be unique to your app or game’s purpose. 
  - *__Note:__ An example of a different way to get replay IDs would be through the* `GetRecentStreamsForInitiatingPlayer()` *operation.*
 
-The server will be in charge of instantiating the actors that play out the recordings, so we will read the stream data on the server. We send the replay IDs to the server using an RPC function. 
+The server will be in charge of instantiating the actors that play out the recordings, so we will read the stream data on the server. We send the replay IDs to the server using an RPC function.  
 ![SendReplayIdsToServer](../_screenshots/_invadersReplay/_23_SendReplayIdsToServer.png)
  - If your game uses peer to peer multiplayer or is singleplayer, this can be done client-side instead. 
 
@@ -135,12 +135,12 @@ We hand the data that we parsed out to the next step, where it will be used to i
 ## Act Out The Recording
 After instantiating the prefab that will act out the recording, we pass the recording it will act out as well as how much time has passed since the start of the game. 
 ![InstantiateActor](../_screenshots/_invadersReplay/_33_InstantiateActor.png)
- - The cloud may take a few milliseconds to respond to our requests, which will delay the instantiation of the ghost. We will compensate for this by keeping track of how many frames have passed and skipping those frames while acting. 
+ - The cloud may take a few milliseconds to respond to our requests, which will delay the instantiation of the ghost. We will compensate for this by keeping track of how many frames have passed and skipping those frames while acting.  
 ![AccountForActorDelay](../_screenshots/_invadersReplay/_34_AccountForActorDelay.png)
  - Fortunately, in the Invaders demo the first 150 frames will always be dedicated to waiting for the 3 second countdown to pass. This is plenty of time to ensure the delay will never affect gameplay. 
  - *__Note:__ Your game or app should also take into consideration a small amount of delay from cloud responses. This might be done via a loading screen or making predictions on the client.*
 
-There are two variables we can immediately use: startPosition and username. We also start a coroutine which will handle acting out each of the frames. 
+There are two variables we can immediately use: startPosition and username. We also start a coroutine which will handle acting out each of the frames.  
 ![StartActing](../_screenshots/_invadersReplay/_35_StartActing.png)
 ![SetActorUsername](../_screenshots/_invadersReplay/_36_SetActorUsername.png)
  - Unity’s Netcode for GameObjects includes a component that automatically syncs the transform of the prefab. We apply the start position before the prefab is spawned on the network to avoid seeing the position interpolated. 
