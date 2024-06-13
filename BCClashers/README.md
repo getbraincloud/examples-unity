@@ -1,7 +1,7 @@
 # brainCloud Clashers
 
 <p align="center">
-    <img  src="../_screenshots/x_clashers.png?raw=true">
+    <img  src="../_screenshots/x_BCClashers.png?raw=true">
     One-Way Multiplayer and Playback Streams
 </p>
 
