@@ -19,10 +19,10 @@ In our demonstration, each player’s personal best is saved, with the best player
 ![SelectorMenuPreview](../_screenshots/_invadersReplay/_1_SelectorMenuPreview.png)
 
 There are 4 essential steps in this Playback Stream implementation:
-1. Record player gameplay
-2. Send the recording to brainCloud for later use
-3. Retrieve the recording when it is needed
-4. Act out the recording during the game to create a teammate
+1. [Record player gameplay](#record-player-gameplay)
+2. [Send the recording to brainCloud for later use](#send-the-recording-to-braincloud)
+3. [Retrieve the recording when it is needed](#retrieve-the-recording)
+4. [Act out the recording during the game to create a teammate](#act-out-the-recording)
 
 ![ActorGetsDestroyed](../_screenshots/_invadersReplay/_2_ActorGetsDestroyed.gif)
 
