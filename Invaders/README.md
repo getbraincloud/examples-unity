@@ -8,6 +8,12 @@
 
 For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).
 
+---
+
+To change this demo's version label, navigate to **Edit** > **Project Settings...** > **Player** > **Version**. 
+
+---
+
 # Using brainCloud’s Replay System to Add Virtual Teammates or Opponent Ghosts to Any Multiplayer Game
 
 In the Invaders demo, recordings of player gameplay are saved to brainCloud, and then played back in future games to provide assistance to the live players. This gives the player the benefit of help from co-op multiplayer teammates even when no other players are readily available. 
