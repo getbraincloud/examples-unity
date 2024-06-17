@@ -76,6 +76,14 @@ public class EnemyBullet : NetworkBehaviour
             return;
         }
 
+        var hitGhost = collider.gameObject.GetComponent<PlayerReplayControl>();
+        if (hitGhost != null)
+        {
+            NetworkObject.Despawn();
+            hitGhost.HitByBullet();
+            return;
+        }
+
         var hitShield = collider.gameObject.GetComponent<Shield>();
         if (hitShield != null)
         {

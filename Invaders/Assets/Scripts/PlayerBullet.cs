@@ -40,6 +40,11 @@ public class PlayerBullet : NetworkBehaviour
         }
     }
 
+    public void SetSpeedToZero()
+    {
+        m_TravelSpeed = 0;
+    }
+
     private void OnTriggerEnter2D(Collider2D collider)
     {
         // several OnTriggerEnter2D calls may be invoked in the same frame (for different Colliders), so we check if
@@ -48,9 +53,10 @@ public class PlayerBullet : NetworkBehaviour
             return;
 
         var hitEnemy = collider.gameObject.GetComponent<EnemyAgent>();
-        if (hitEnemy != null && owner != null)
+        if (hitEnemy != null)
         {
-            owner.IncreasePlayerScore(hitEnemy.score);
+            if(owner != null)
+                owner.IncreasePlayerScore(hitEnemy.score);
 
             // Only the server can despawn a NetworkObject
             hitEnemy.NetworkObject.Despawn();
