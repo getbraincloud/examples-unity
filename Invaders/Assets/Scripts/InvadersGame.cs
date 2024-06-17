@@ -108,6 +108,7 @@ public class InvadersGame : NetworkBehaviour
     public NetworkVariable<bool> isGameOver { get; } = new NetworkVariable<bool>(false);
 
     private int numberOfLogsSent;
+    private bool enableLogging;
 
     private bool IsDedicatedServer;
 
@@ -125,6 +126,7 @@ public class InvadersGame : NetworkBehaviour
     /// </summary>
     private void Awake()
     {
+        enableLogging = BrainCloud.Plugin.Interface.EnableLogging;
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
         gameOverText.transform.parent.gameObject.SetActive(false);
         Assert.IsNull(Singleton, $"Multiple instances of {nameof(InvadersGame)} detected. This should not happen.");
@@ -145,7 +147,8 @@ public class InvadersGame : NetworkBehaviour
         else
         {
             //We do a check for the client side value upon instantiating the class (should be zero)
-            //Debug.LogFormat("Client side we started with a timer value of {0}", m_TimeRemaining);
+            if(enableLogging)
+                Debug.LogFormat("Client side we started with a timer value of {0}", m_TimeRemaining);
         }
     }
 
@@ -205,20 +208,23 @@ public class InvadersGame : NetworkBehaviour
             m_CountdownStarted.OnValueChanged += (oldValue, newValue) =>
             {
                 m_ClientStartCountdown = newValue;
-                //Debug.LogFormat("Client side we were notified the start count down state was {0}", newValue);
+                if (enableLogging) 
+                    Debug.LogFormat("Client side we were notified the start count down state was {0}", newValue);
             };
 
             hasGameStarted.OnValueChanged += (oldValue, newValue) =>
             {
                 m_ClientGameStarted = newValue;
                 gameTimerText.gameObject.SetActive(!m_ClientGameStarted);
-                //Debug.LogFormat("Client side we were notified the game started state was {0}", newValue);
+                if (enableLogging)
+                    Debug.LogFormat("Client side we were notified the game started state was {0}", newValue);
             };
 
             isGameOver.OnValueChanged += (oldValue, newValue) =>
             {
                 m_ClientGameOver = newValue;
-                //Debug.LogFormat("Client side we were notified the game over state was {0}", newValue);
+                if (enableLogging)
+                    Debug.LogFormat("Client side we were notified the game over state was {0}", newValue);
             };
         }
 
@@ -284,12 +290,14 @@ public class InvadersGame : NetworkBehaviour
         // See the ShouldStartCountDown method for when the server updates the value
         if (m_TimeRemaining == 0)
         {
-            //Debug.LogFormat("Client side our first timer update value is {0}", delayedStartTime);
             m_TimeRemaining = delayedStartTime;
+            if (enableLogging)
+                Debug.LogFormat("Client side our first timer update value is {0}", delayedStartTime);
         }
         else
         {
-            //Debug.LogFormat("Client side we got an update for a timer value of {0} when we shouldn't", delayedStartTime);
+            if (enableLogging)
+                Debug.LogFormat("Client side we got an update for a timer value of {0} when we shouldn't", delayedStartTime);
         }
     }
 

@@ -230,8 +230,8 @@ public class PlayerControl : NetworkBehaviour
             m_PlayerVisual.enabled = false;
 
         if (!IsOwner) return;
-        //Debug.LogFormat("Lives {0} ", currentAmount);
         if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetLives(m_Lives.Value);
+        if(BrainCloud.Plugin.Interface.EnableLogging) Debug.LogFormat("Lives {0} ", currentAmount);
 
         if (m_Lives.Value <= 0)
         {

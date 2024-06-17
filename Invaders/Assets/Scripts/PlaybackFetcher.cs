@@ -52,8 +52,11 @@ public class PlaybackFetcher : NetworkBehaviour
         _bcWrapper.Client.ResetCommunication();
         _dead = true;
 
-        string message = cbObject as string;
-        Debug.Log($"Failure: {message} |||| JSON: {jsonError}");
+        if (BrainCloud.Plugin.Interface.EnableLogging)
+        {
+            string message = cbObject as string;
+            Debug.Log($"Failure: {message} |||| JSON: {jsonError}");
+        }
     }
 
     private void OnClientConnectedCallback(ulong clientId)
