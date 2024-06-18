@@ -1,10 +1,13 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI.Extensions.Tweens;
 
 public class TicTacToe : GameScene
 {
@@ -274,9 +277,19 @@ public class TicTacToe : GameScene
 
     private void AddToken(int index, string token)
     {
-        GridObjList.Add(Instantiate(token == "X" ? PlayerX : PlayerO, _tokenPositions[index],
-            Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f))));
-        GridObjList.Last().transform.parent = gameObject.transform;
+        GameObject newPiece = Instantiate(token == "X" ? PlayerX : PlayerO, transform);
+        newPiece.transform.position = _tokenPositions[index];
+        //newPiece.transform.rotation = Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f));
+
+        if (GridObjDict.ContainsKey(index))
+        {
+            
+        }
+        else
+        {
+            newPiece.GetComponent<DropScript>().Drop();
+            GridObjDict.Add(index, newPiece);
+        }
         BoardUtility.Grid[index] = token == "X" ? 1 : 2;
     }
 
@@ -319,16 +332,6 @@ public class TicTacToe : GameScene
         updateHud(false);
     }
 
-    private void ClearTokens()
-    {
-        //Clear logical grid
-        for (var i = 0; i < BoardUtility.Grid.Length; i++) BoardUtility.Grid[i] = 0;
-
-        //Clear instanciated game objects
-        foreach (var obj in GridObjList) Destroy(obj);
-        GridObjList.Clear();
-    }
-
     public bool AvailableSlot(int index)
     {
         if (_turnPlayed) return false;
@@ -338,9 +341,10 @@ public class TicTacToe : GameScene
     
     private void BuildBoardFromState(string boardState)
     {
-        ClearTokens();
+        for (var i = 0; i < BoardUtility.Grid.Length; i++) BoardUtility.Grid[i] = 0;
         var j = 0;
-        foreach (var c in boardState)
+
+        foreach (char c in boardState)
         {
             if (c != '#') AddToken(j, c.ToString());
             ++j;
@@ -440,18 +444,19 @@ public class TicTacToe : GameScene
     #region private variables 
 
     private List<GameObject> GridObjList = new List<GameObject>();
+    private Dictionary<int, GameObject> GridObjDict = new Dictionary<int, GameObject>();
     
     private readonly Vector3[] _tokenPositions =
     {
-        new Vector3(-2.1f, 12, 2.1f),
-        new Vector3(0, 12, 2.1f),
-        new Vector3(2.1f, 12, 2.1f),
-        new Vector3(-2.1f, 12, 0),
-        new Vector3(0, 12, 0),
-        new Vector3(2.1f, 12, 0),
-        new Vector3(-2.1f, 12, -2.1f),
-        new Vector3(0, 12, -2.1f),
-        new Vector3(2.1f, 12, -2.1f)
+        new Vector3(-2.1f, 0.7f, 2.1f),
+        new Vector3(0, 0.7f, 2.1f),
+        new Vector3(2.1f, 0.7f, 2.1f),
+        new Vector3(-2.1f, 0.7f, 0),
+        new Vector3(0, 0.7f, 0),
+        new Vector3(2.1f, 0.7f, 0),
+        new Vector3(-2.1f, 0.7f, -2.1f),
+        new Vector3(0, 0.7f, -2.1f),
+        new Vector3(2.1f, 0.7f, -2.1f)
     };
 
     private List<string> _history;
