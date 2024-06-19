@@ -9,6 +9,7 @@ public class DropScript : MonoBehaviour
 
     public void Drop()
     {
+        transform.position = new Vector3(transform.position.x, 4.7f, transform.position.z);
         doDrop = true;
         dropTime = 0.0f;
     }
@@ -21,7 +22,7 @@ public class DropScript : MonoBehaviour
 
             transform.position = new Vector3(
                 transform.position.x,
-                Mathf.Max(0, -10*(dropTime - 0.7f)*(dropTime - 1.3f), -8*Mathf.Pow(dropTime, 2) + 4) + 0.7f,
+                CalculateHeight(dropTime),
                 transform.position.z
                 );
 
@@ -31,5 +32,13 @@ public class DropScript : MonoBehaviour
                 transform.position = new Vector3(transform.position.x, 0.7f, transform.position.z);
             }
         }
+    }
+
+    private float CalculateHeight(float time)
+    {
+        float parabola1 = -8 * Mathf.Pow(time, 2) + 4;
+        float parabola2 = -10 * (time - 0.7f) * (time - 1.3f);
+        return Mathf.Max(0, parabola1, parabola2) + 0.7f;
+        //Two parabolas to simulate gravity and a bounce
     }
 }
