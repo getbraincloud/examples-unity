@@ -1,4 +1,5 @@
-﻿using TMPro;
+using TMPro;
+using UnityEngine;
 
 namespace Gameframework
 {
@@ -7,9 +8,13 @@ namespace Gameframework
         public const string VERSION_TEXT_FILE = "version";
         public TextMeshProUGUI VersionText = null;
 
+        [SerializeField]
+        private bool showAppVersion = false;
+
         void Start()
         {
-            VersionText.text = $"v: {BrainCloud.Version.GetVersion()}";
+            if (showAppVersion) VersionText.text = $"Bombers {Application.version}";
+            else VersionText.text = $"brainCloud {BrainCloud.Version.GetVersion()}";
 
             DontDestroyOnLoad(gameObject);
         }
