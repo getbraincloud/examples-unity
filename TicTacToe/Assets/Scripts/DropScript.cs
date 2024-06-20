@@ -20,11 +20,7 @@ public class DropScript : MonoBehaviour
         {
             dropTime += Time.deltaTime;
 
-            transform.position = new Vector3(
-                transform.position.x,
-                CalculateHeight(dropTime),
-                transform.position.z
-                );
+            transform.position = new Vector3(transform.position.x, CalculateHeight(dropTime), transform.position.z);
 
             if(dropTime >= 1.3f)
             {
