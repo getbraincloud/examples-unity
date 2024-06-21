@@ -1,5 +1,9 @@
 # Authentication
 
+<p align="center">
+    <img  src="../_screenshots/x_Authentication.png?raw=true">
+</p>
+
 This showcases the use of the [Authentication](https://docs.braincloudservers.com/api/capi/authentication/) service available on [brainCloud](https://getbraincloud.com/) as well as several other services that brainCloud supports.
 
 ---
