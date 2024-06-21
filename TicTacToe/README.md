@@ -1,7 +1,7 @@
 # TicTacToe
 
 <p align="center">
-    <img  src="../_screenshots/x_ttt.png?raw=true">
+    <img  src="../_screenshots/x_TicTacToe.png?raw=true">
     Async Multiplayer, Cloud Code, Gamification, and RTT
 </p>
 
