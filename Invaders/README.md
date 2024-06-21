@@ -1,7 +1,7 @@
 # Invaders
 
 <p align="center">
-    <img  src="../_screenshots/x_invaders.png?raw=true">
+    <img  src="../_screenshots/x_Invaders.png?raw=true">
 </p>
 
 ---
