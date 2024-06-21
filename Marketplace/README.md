@@ -1,5 +1,9 @@
 # Push Notifications & Marketplace
 
+<p align="center">
+    <img  src="../_screenshots/x_Marketplace.png?raw=true">
+</p>
+
 This showcases the use of the [Push Notification](https://docs.braincloudservers.com/api/capi/pushnotification/) and [App Store](https://docs.braincloudservers.com/api/capi/appstore/) services available on [brainCloud](https://getbraincloud.com/).
 
 Push Notifications and In-App Purchases are set up differently for both Android and iOS so be sure to pay attention to the instructions for the platform you want to make use of.
