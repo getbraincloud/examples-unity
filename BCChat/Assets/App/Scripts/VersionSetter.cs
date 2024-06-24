@@ -16,6 +16,6 @@ public class VersionSetter : MonoBehaviour
         if(showAppVersion)
             versionText.text = $"v{Application.version}";
         else
-            versionText.text = $"{BrainCloud.Version.GetVersion()}";
+            versionText.text = $"v{BrainCloud.Version.GetVersion()}";
     }
 }
