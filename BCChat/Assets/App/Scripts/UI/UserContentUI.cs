@@ -218,7 +218,10 @@ public class UserContentUI : ContentUIBehaviour
         var data = jsonResponse.Deserialize("data");
 
         UsernameField.text = data.GetString("playerName");
-        UserInitialText.text = $"{UsernameField.text.ToUpper()[0]}";
+        if (UsernameField.text.Length > 0)
+            UserInitialText.text = $"{UsernameField.text.ToUpper()[0]}";
+        else
+            UserInitialText.text = string.Empty;
 
         if (data.GetString("pictureUrl") is string pictureURL &&
             !pictureURL.IsEmpty() && pictureURL != PictureURLField.text)
