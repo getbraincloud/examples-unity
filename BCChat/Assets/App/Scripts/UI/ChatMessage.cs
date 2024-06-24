@@ -105,7 +105,10 @@ public class ChatMessage : MonoBehaviour
         ContentLayout.reverseArrangement = !isActiveUser;
         MessageBox.color = isActiveUser ? ACTIVE_USER_COLOR : OTHER_USER_COLOR;
         UserImage.color = isActiveUser ? ACTIVE_USER_COLOR : OTHER_USER_COLOR;
-        UserInitialText.text = $"{message.from.name.ToUpper()[0]}";
+        if (message.from.name.Length > 0)
+            UserInitialText.text = $"{message.from.name.ToUpper()[0]}";
+        else
+            UserInitialText.text = string.Empty;
 
         DisplayFooter(isActiveUser);
 
