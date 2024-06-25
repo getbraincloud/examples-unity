@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7490276375294053961}
   - component: {fileID: 7916672781056279498}
   - component: {fileID: 4912059928842928112}
-  - component: {fileID: 874051749}
+  - component: {fileID: 8312629635492665886}
   m_Layer: 5
   m_Name: Generic-Paint-Image
   m_TagString: Untagged
@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 85, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7916672781056279498
 CanvasRenderer:
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &874051749
+--- !u!114 &8312629635492665886
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,7 +85,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8886045845526611327}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e13572a5917f9d04fac28d6fc848b9c8, type: 3}
+  m_Script: {fileID: 11500000, guid: df5bcfe7798629e46a52b95328e1ca9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _image: {fileID: 4912059928842928112}
+  _image: {fileID: 0}

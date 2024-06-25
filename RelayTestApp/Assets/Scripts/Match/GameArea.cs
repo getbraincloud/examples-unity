@@ -21,8 +21,8 @@ public class GameArea : MonoBehaviour
         get => _gameAreaTransform;
     }
 
-    public AnimateRipple ShockwaveAnimation;
-    public AnimateRipple TeammateAnimation;
+    public GameObject ShockwaveAnimation;
+    public GameObject TeammateAnimation;
     [HideInInspector] public UserCursor LocalUserCursor;
     protected Vector2 _cursorOffset = new Vector2(12, -22);
     protected Vector2 _shockwaveOffset = new Vector2(-35, 30);
@@ -183,7 +183,7 @@ public class GameArea : MonoBehaviour
     protected void SetUpShockwave(Vector2 position, Color waveColor, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all)
     {
         Transform shockwaveParent = GameManager.Instance.UserCursorParent.transform;
-        AnimateRipple prefab = null;
+        GameObject prefab = null;
         if (team == TeamCodes.all)
         {
             prefab = ShockwaveAnimation;
@@ -198,18 +198,17 @@ public class GameArea : MonoBehaviour
             {
                 prefab = ShockwaveAnimation;
             }
-            
         }
-        var newShockwave = Instantiate
+        GameObject newShockwave = Instantiate
         (
             prefab,
             Vector3.zero,
             Quaternion.identity,
             shockwaveParent
         );
+        newShockwave.transform.SetAsFirstSibling();
         RectTransform UITransform = newShockwave.GetComponent<RectTransform>();
         Vector2 minMax = new Vector2(0, 1);
-        
         UITransform.anchorMin = minMax;
         UITransform.anchorMax = minMax;
         UITransform.pivot = new Vector2(0.5f, 0.5f);;
@@ -217,7 +216,7 @@ public class GameArea : MonoBehaviour
         {
             waveColor = Color.white;
         }
-        newShockwave.RippleColor = waveColor;
+        newShockwave.GetComponent<AnimateSplatter>().SplatterColor = waveColor;
         RectTransform gameAreaTransform = GameManager.Instance.GameArea.GameAreaTransform;
         Rect gameAreaRect = gameAreaTransform.rect;
         var newPosition = new Vector2(
