@@ -220,7 +220,7 @@ public class GameArea : MonoBehaviour
         {
             waveColor = Color.white;
         }
-        newShockwave.GetComponent<AnimateSplatter>().SplatterColor = waveColor;
+        newShockwave.GetComponent<AnimateSplatter>().SetColour(waveColor);
         RectTransform gameAreaTransform = GameManager.Instance.GameArea.GameAreaTransform;
         Rect gameAreaRect = gameAreaTransform.rect;
         var newPosition = new Vector2(

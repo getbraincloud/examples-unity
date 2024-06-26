@@ -11,14 +11,9 @@ public class AnimateSplatter : MonoBehaviour
     private RectTransform _rectTransform;
 
     private float lifespan = -1.0f;
-    private float splatterDuration = 0.2f;
-    private float fadeDuration = 1.5f;
-
-    public Color SplatterColor
-    {
-        get => _image.color;
-        set => _image.color = value;
-    }
+    private float splatterDuration = 0.13f;
+    private float overSplat = 0.4f;
+    private float fadeDuration = 15f;
 
     private void OnEnable()
     {
@@ -32,13 +27,18 @@ public class AnimateSplatter : MonoBehaviour
         StartCoroutine(AppearAnimation());
     }
 
+    public void SetColour(Color newColour)
+    {
+        _image.color = AlterColour(newColour);
+    }
+
     private IEnumerator AppearAnimation()
     {
         float age = 0.0f;
         while(age <= splatterDuration)
         {
             age += Time.deltaTime;
-            _rectTransform.localScale = Vector3.one * (age / splatterDuration);
+            _rectTransform.localScale = Vector3.one * SplatSizeOverTime(age, splatterDuration, overSplat);
             _image.color = SetAlpha(_image.color, Mathf.Max(age / splatterDuration, 0.25f));
             yield return null;
         }
@@ -67,5 +67,23 @@ public class AnimateSplatter : MonoBehaviour
     private Color SetAlpha(Color oldColor, float newAlpha)
     {
         return new Color(oldColor.r, oldColor.g, oldColor.b, newAlpha);
+    }
+
+    private Color AlterColour(Color oldColor)
+    {
+        float alt = 0.07f;
+        return new Color(
+            oldColor.r * (1 + Random.Range(-alt, alt)), 
+            oldColor.g * (1 + Random.Range(-alt, alt)), 
+            oldColor.b * (1 + Random.Range(-alt, alt)),
+            oldColor.a
+            );
+    }
+
+    private float SplatSizeOverTime(float t, float a, float b)
+    {
+        float grow = (1 + b) * t / a;
+        float shrink = -(((1 + b) * t) - ((2 + b) * a)) / a;
+        return Mathf.Min(grow, shrink);
     }
 }
