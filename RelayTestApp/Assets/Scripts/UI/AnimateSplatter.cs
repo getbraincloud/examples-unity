@@ -11,8 +11,8 @@ public class AnimateSplatter : MonoBehaviour
     private RectTransform _rectTransform;
 
     private float lifespan = -1.0f;
-    private float splatterDuration = 0.3f;
-    private float fadeDuration = 2.0f;
+    private float splatterDuration = 0.2f;
+    private float fadeDuration = 1.5f;
 
     public Color SplatterColor
     {
@@ -39,13 +39,13 @@ public class AnimateSplatter : MonoBehaviour
         {
             age += Time.deltaTime;
             _rectTransform.localScale = Vector3.one * (age / splatterDuration);
-            _image.color = SetAlpha(_image.color, Mathf.RoundToInt(Mathf.Max(age / splatterDuration, 0.5f) * 255));
+            _image.color = SetAlpha(_image.color, Mathf.Max(age / splatterDuration, 0.25f));
             yield return null;
         }
         _rectTransform.localScale = Vector3.one;
         _image.color = SetAlpha(_image.color, 255);
 
-        if(lifespan > 0)
+        if(lifespan >= 0)
         {
             yield return new WaitForSeconds(lifespan);
             StartCoroutine(DisappearAnimation());
@@ -58,12 +58,13 @@ public class AnimateSplatter : MonoBehaviour
         while(age <= fadeDuration)
         {
             age += Time.deltaTime;
+            _image.color = SetAlpha(_image.color, 1.0f - (age / fadeDuration));
             yield return null;
         }
         Destroy(this.gameObject);
     }
 
-    private Color SetAlpha(Color oldColor, int newAlpha)
+    private Color SetAlpha(Color oldColor, float newAlpha)
     {
         return new Color(oldColor.r, oldColor.g, oldColor.b, newAlpha);
     }

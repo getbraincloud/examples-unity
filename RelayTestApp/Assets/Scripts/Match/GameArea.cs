@@ -21,20 +21,26 @@ public class GameArea : MonoBehaviour
         get => _gameAreaTransform;
     }
 
-    public GameObject ShockwaveAnimation;
-    public GameObject TeammateAnimation;
+    [SerializeField]
+    private GameObject ShockwaveAnimation;
+    [SerializeField]
+    private GameObject TeammateAnimation;
+
     [HideInInspector] public UserCursor LocalUserCursor;
-    protected Vector2 _cursorOffset = new Vector2(12, -22);
-    protected Vector2 _shockwaveOffset = new Vector2(-35, 30);
+    protected Vector2 _cursorOffset = new Vector2(30, -30);
+    protected Vector2 _shockwaveOffset = new Vector2(15, -6);
     //local to network is for shockwave input specifically
     protected Vector2 _newPosition;
-    protected ParticleSystem.MainModule _shockwaveParticle;
+
+    [SerializeField]
+    private Transform shockwaveParent;
     protected GameObject _newShockwave;
     protected List<Vector2> _localShockwavePositions = new List<Vector2>();
     protected List<TeamCodes> _localShockwaveCodes = new List<TeamCodes>();
     protected Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
     private GameMode _currentGameMode;
     private RectTransform _cursorParentRectTransform;
+
     private void OnEnable()
     {
         _currentGameMode = GameManager.Instance.GameMode;
@@ -182,7 +188,6 @@ public class GameArea : MonoBehaviour
 
     protected void SetUpShockwave(Vector2 position, Color waveColor, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all)
     {
-        Transform shockwaveParent = GameManager.Instance.UserCursorParent.transform;
         GameObject prefab = null;
         if (team == TeamCodes.all)
         {
@@ -206,12 +211,11 @@ public class GameArea : MonoBehaviour
             Quaternion.identity,
             shockwaveParent
         );
-        newShockwave.transform.SetAsFirstSibling();
         RectTransform UITransform = newShockwave.GetComponent<RectTransform>();
         Vector2 minMax = new Vector2(0, 1);
         UITransform.anchorMin = minMax;
         UITransform.anchorMax = minMax;
-        UITransform.pivot = new Vector2(0.5f, 0.5f);;
+        UITransform.pivot = new Vector2(0.5f, 0.5f);
         if (_currentGameMode == GameMode.Team && team == TeamCodes.all)
         {
             waveColor = Color.white;
@@ -251,7 +255,7 @@ public class GameArea : MonoBehaviour
                 gameAreaRect.width * -lobby.Members[i].MousePosition.y
             );
 
-            lobby.Members[i].CursorTransform.anchoredPosition = newMousePosition;
+            lobby.Members[i].CursorTransform.anchoredPosition = newMousePosition + _cursorOffset;
         }
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
