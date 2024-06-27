@@ -1,3 +1,5 @@
+using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,8 +25,6 @@ public class GameArea : MonoBehaviour
 
     [SerializeField]
     private GameObject ShockwaveAnimation;
-    [SerializeField]
-    private GameObject TeammateAnimation;
 
     [HideInInspector] public UserCursor LocalUserCursor;
     protected Vector2 _cursorOffset = new Vector2(30, -30);
@@ -40,12 +40,19 @@ public class GameArea : MonoBehaviour
     protected Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
     private GameMode _currentGameMode;
     private RectTransform _cursorParentRectTransform;
+    private float shockwaveLifespan = -1.0f;
+    private float shockwaveAppear = 1.0f;
+    private float shockwaveDisappear = 1.0f;
 
     private void OnEnable()
     {
         _currentGameMode = GameManager.Instance.GameMode;
         _cursorParentRectTransform = GameManager.Instance.UserCursorParent.GetComponent<RectTransform>();
         _gameAreaTransform = GetComponent<RectTransform>();
+        string[] properties = new string[] { "PaintLifespan" };
+        BrainCloudManager.Instance.Wrapper.GlobalAppService.ReadSelectedProperties(properties, OnGetLifespanCallback, null);
+        properties = new string[] { "AppearDuration", "DisappearDuration" };
+        BrainCloudManager.Instance.Wrapper.GlobalAppService.ReadSelectedProperties(properties, OnGetAnimDurationsCallback, null);
     }
 
     // Update is called once per frame
@@ -188,25 +195,9 @@ public class GameArea : MonoBehaviour
 
     protected void SetUpShockwave(Vector2 position, Color waveColor, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all)
     {
-        GameObject prefab = null;
-        if (team == TeamCodes.all)
-        {
-            prefab = ShockwaveAnimation;
-        }
-        else 
-        {
-            if (instigatorTeam == team)
-            {
-                prefab = TeammateAnimation;
-            }
-            else
-            {
-                prefab = ShockwaveAnimation;
-            }
-        }
         GameObject newShockwave = Instantiate
         (
-            prefab,
+            ShockwaveAnimation,
             Vector3.zero,
             Quaternion.identity,
             shockwaveParent
@@ -216,11 +207,6 @@ public class GameArea : MonoBehaviour
         UITransform.anchorMin = minMax;
         UITransform.anchorMax = minMax;
         UITransform.pivot = new Vector2(0.5f, 0.5f);
-        if (_currentGameMode == GameMode.Team && team == TeamCodes.all)
-        {
-            waveColor = Color.white;
-        }
-        newShockwave.GetComponent<AnimateSplatter>().SetColour(waveColor);
         RectTransform gameAreaTransform = GameManager.Instance.GameArea.GameAreaTransform;
         Rect gameAreaRect = gameAreaTransform.rect;
         var newPosition = new Vector2(
@@ -228,7 +214,16 @@ public class GameArea : MonoBehaviour
             gameAreaRect.width * -position.y
         );
         UITransform.anchoredPosition = newPosition + _shockwaveOffset;
-        
+
+        if (_currentGameMode == GameMode.Team && team == TeamCodes.all)
+        {
+            waveColor = Color.white;
+        }
+        AnimateSplatter anim = newShockwave.GetComponent<AnimateSplatter>();
+        anim.SetColour(waveColor);
+        anim.SetLifespan(shockwaveLifespan);
+        anim.SetAnimationDurations(shockwaveAppear, shockwaveDisappear);
+
         StateManager.Instance.Shockwaves.Add(newShockwave.gameObject);
     }
     
@@ -282,5 +277,28 @@ public class GameArea : MonoBehaviour
         List<RaycastResult> raysastResults = new List<RaycastResult>();
         EventSystem.current.RaycastAll( eventData, raysastResults );
         return raysastResults;
+    }
+
+    private void OnGetLifespanCallback(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+        var property = data["PaintLifespan"] as Dictionary<string, object>;
+        float value = Convert.ToSingle(property["value"]);
+        shockwaveLifespan = value;
+    }
+
+    private void OnGetAnimDurationsCallback(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+
+        var property = data["AppearDuration"] as Dictionary<string, object>;
+        float value = Convert.ToSingle(property["value"]);
+        shockwaveAppear = value;
+
+        property = data["DisappearDuration"] as Dictionary<string, object>;
+        value = Convert.ToSingle(property["value"]);
+        shockwaveDisappear = value;
     }
 }

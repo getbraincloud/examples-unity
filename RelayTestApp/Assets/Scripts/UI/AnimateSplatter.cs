@@ -13,7 +13,7 @@ public class AnimateSplatter : MonoBehaviour
     private float lifespan = -1.0f;
     private float splatterDuration = 0.13f;
     private float overSplat = 0.4f;
-    private float fadeDuration = 15f;
+    private float fadeDuration = 16f;
 
     private void OnEnable()
     {
@@ -30,6 +30,17 @@ public class AnimateSplatter : MonoBehaviour
     public void SetColour(Color newColour)
     {
         _image.color = AlterColour(newColour);
+    }
+
+    public void SetLifespan(float newLifespan)
+    {
+        lifespan = newLifespan;
+    }
+
+    public void SetAnimationDurations(float appearDuration, float disappearDuration)
+    {
+        splatterDuration = appearDuration;
+        fadeDuration = disappearDuration;
     }
 
     private IEnumerator AppearAnimation()
@@ -58,7 +69,7 @@ public class AnimateSplatter : MonoBehaviour
         while(age <= fadeDuration)
         {
             age += Time.deltaTime;
-            _image.color = SetAlpha(_image.color, 1.0f - (age / fadeDuration));
+            _image.color = SetAlpha(_image.color, 1.0f - Mathf.Pow(age / fadeDuration, 2));
             yield return null;
         }
         Destroy(this.gameObject);
