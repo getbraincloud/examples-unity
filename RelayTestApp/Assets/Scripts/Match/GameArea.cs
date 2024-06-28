@@ -27,8 +27,8 @@ public class GameArea : MonoBehaviour
     private GameObject SplatterAnimation;
 
     [HideInInspector] public UserCursor LocalUserCursor;
-    protected Vector2 _cursorOffset = new Vector2(30, -30);
-    protected Vector2 _splatterOffset = new Vector2(15, -6);
+    protected Vector2 _cursorOffset = new Vector2(23, -35);
+    protected Vector2 _splatterOffset = new Vector2(5, -3);
     //local to network is for splatter input specifically
     protected Vector2 _newPosition;
 

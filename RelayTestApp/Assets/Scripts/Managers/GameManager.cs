@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// - Holds info needed for the current user and other connected users
@@ -14,7 +15,7 @@ using UnityEngine.UI;
 /// 
 /// </summary>
 
-public enum GameColors{Black,Purple,Grey,Orange,Blue,Green,Yellow,Cyan,White}
+public enum GameColors{Blue,Purple,Red,Orange,Cyan,Green,Yellow,White,Rainbow}
 public enum GameMode {FreeForAll, Team}
 
 public class GameManager : MonoBehaviour
@@ -444,22 +445,24 @@ public class GameManager : MonoBehaviour
     {
         switch (newColor)
         {
-            case GameColors.Black:
-                return Color.black;
-            case GameColors.Purple:
-                return new Color(0.33f,0.25f,0.37f);
-            case GameColors.Grey:
-                return new Color(0.4f,0.4f,0.4f);
-            case GameColors.Orange:
-                return new Color(0.85f, 0.4f, 0.04f);
             case GameColors.Blue:
-                return new Color(0.31f,0.54f,0.84f);
-            case GameColors.Green:
-                return new Color(0.39f,0.72f,0.39f);
-            case GameColors.Yellow:
-                return new Color(0.9f,0.78f,0.43f);
+                return new Color32(9, 20, 140, 255);
+            case GameColors.Purple:
+                return new Color32(172, 50, 179, 255);
+            case GameColors.Red:
+                return new Color32(247, 60, 41, 255);
+            case GameColors.Orange:
+                return new Color32(255, 146, 19, 255);
             case GameColors.Cyan:
-                return new Color(0.86f,0.96f,1);
+                return new Color32(99, 172, 245, 255);
+            case GameColors.Green:
+                return new Color32(87, 219, 111, 255);
+            case GameColors.Yellow:
+                return new Color32(249, 255, 139, 255);
+            case GameColors.White:
+                return new Color(0.86f, 0.96f, 1);
+            case GameColors.Rainbow:
+                return new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         }
             
         return Color.white;

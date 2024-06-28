@@ -59,7 +59,7 @@ public class UserInfo
         {
             if (Team == TeamCodes.alpha)
             {
-                UserGameColor = GameColors.Blue;
+                UserGameColor = GameColors.Cyan;
             }
             else
             {
