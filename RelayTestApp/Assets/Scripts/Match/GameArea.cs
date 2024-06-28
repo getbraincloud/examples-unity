@@ -9,7 +9,7 @@ using Cursor = UnityEngine.Cursor;
 /// Features:
 /// - How to use brain cloud lobby members to translate for gameplay
 /// - Update game area in runtime for network and local users
-/// - Create shockwave gameobjects from both local and network user inputs
+/// - Create splatter gameobjects from both local and network user inputs
 /// - Update Cursor locations from both local and network users inputs
 /// - Offsets are due to the spacing difference from Node js example found at this link -> http://getbraincloud.com/devdemos/relaytestapp
 /// </summary>
@@ -24,25 +24,25 @@ public class GameArea : MonoBehaviour
     }
 
     [SerializeField]
-    private GameObject ShockwaveAnimation;
+    private GameObject SplatterAnimation;
 
     [HideInInspector] public UserCursor LocalUserCursor;
     protected Vector2 _cursorOffset = new Vector2(30, -30);
-    protected Vector2 _shockwaveOffset = new Vector2(15, -6);
-    //local to network is for shockwave input specifically
+    protected Vector2 _splatterOffset = new Vector2(15, -6);
+    //local to network is for splatter input specifically
     protected Vector2 _newPosition;
 
     [SerializeField]
-    private Transform shockwaveParent;
-    protected GameObject _newShockwave;
-    protected List<Vector2> _localShockwavePositions = new List<Vector2>();
-    protected List<TeamCodes> _localShockwaveCodes = new List<TeamCodes>();
+    private Transform splatterParent;
+    protected GameObject _newSplatter;
+    protected List<Vector2> _localSplatterPositions = new List<Vector2>();
+    protected List<TeamCodes> _localSplatterCodes = new List<TeamCodes>();
     protected Vector2 bottomLeftPositionGameArea = new Vector2(920, 300);
     private GameMode _currentGameMode;
     private RectTransform _cursorParentRectTransform;
-    private float shockwaveLifespan = -1.0f;
-    private float shockwaveAppear = 1.0f;
-    private float shockwaveDisappear = 1.0f;
+    private float splatterLifespan = -1.0f;
+    private float splatterAppear = 1.0f;
+    private float splatterDisappear = 1.0f;
 
     private void OnEnable()
     {
@@ -69,37 +69,37 @@ public class GameArea : MonoBehaviour
             SendMousePosition();
             if (Input.GetMouseButtonDown(0))
             {
-                //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition);
-                _localShockwaveCodes.Add(TeamCodes.all);
+                //Save position locally for us to spawn in UpdateAllSplatters()
+                _localSplatterPositions.Add(_newPosition);
+                _localSplatterCodes.Add(TeamCodes.all);
                 if (_currentGameMode == GameMode.FreeForAll)
                 {
-                    //Send position of local users input for a shockwave to other users
-                    BrainCloudManager.Instance.LocalShockwave(_newPosition);
+                    //Send position of local users input for a splatter to other users
+                    BrainCloudManager.Instance.LocalSplatter(_newPosition);
                 }
                 else
                 {
-                    BrainCloudManager.Instance.SendShockwaveToAll(_newPosition);
+                    BrainCloudManager.Instance.SendSplatterToAll(_newPosition);
                 }
             }
             else if (Input.GetMouseButtonDown(1) && _currentGameMode == GameMode.Team)
             {
-                //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition);
-                _localShockwaveCodes.Add(GameManager.Instance.CurrentUserInfo.Team);
+                //Save position locally for us to spawn in UpdateAllSplatters()
+                _localSplatterPositions.Add(_newPosition);
+                _localSplatterCodes.Add(GameManager.Instance.CurrentUserInfo.Team);
                 //Send Position to local players team
-                BrainCloudManager.Instance.SendShockwaveToTeam(_newPosition);
+                BrainCloudManager.Instance.SendSplatterToTeam(_newPosition);
             }
             else if (Input.GetMouseButtonDown(2) && _currentGameMode == GameMode.Team)
             {
-                //Save position locally for us to spawn in UpdateAllShockwaves()
-                _localShockwavePositions.Add(_newPosition);
+                //Save position locally for us to spawn in UpdateAllSplatters()
+                _localSplatterPositions.Add(_newPosition);
                 TeamCodes TeamToSend = GameManager.Instance.CurrentUserInfo.Team == TeamCodes.alpha
                     ? TeamCodes.beta
                     : TeamCodes.alpha;
-                _localShockwaveCodes.Add(TeamToSend);
+                _localSplatterCodes.Add(TeamToSend);
                 //Send Position to opposite team
-                BrainCloudManager.Instance.SendShockwaveToOpponents(_newPosition);
+                BrainCloudManager.Instance.SendSplatterToOpponents(_newPosition);
             }
         }
         else
@@ -111,7 +111,7 @@ public class GameArea : MonoBehaviour
             }
         }
         UpdateAllCursorsMovement();
-        UpdateAllShockwaves();
+        UpdateAllSplatters();
     }
 
     protected void SendMousePosition()
@@ -140,7 +140,7 @@ public class GameArea : MonoBehaviour
         }
     }
     
-    protected void UpdateAllShockwaves()
+    protected void UpdateAllSplatters()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
         
@@ -148,24 +148,24 @@ public class GameArea : MonoBehaviour
         {
             if (member.AllowSendTo)
             {
-                for(int i= 0; i < member.ShockwavePositions.Count; ++i)
+                for(int i= 0; i < member.SplatterPositions.Count; ++i)
                 {
-                    if(member.ShockwaveTeamCodes.Count > 0 && member.InstigatorTeamCodes.Count > 0)
+                    if(member.SplatterTeamCodes.Count > 0 && member.InstigatorTeamCodes.Count > 0)
                     {
-                        SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor), member.ShockwaveTeamCodes[i], member.InstigatorTeamCodes[i]);                            
+                        SetUpSplatter(member.SplatterPositions[i], GameManager.ReturnUserColor(member.UserGameColor), member.SplatterTeamCodes[i], member.InstigatorTeamCodes[i]);                            
                     }
                     else
                     {
-                        SetUpShockwave(member.ShockwavePositions[i], GameManager.ReturnUserColor(member.UserGameColor));
+                        SetUpSplatter(member.SplatterPositions[i], GameManager.ReturnUserColor(member.UserGameColor));
                     }
                 } 
             }
             
             //Clear the list so there's no backlog of input positions
-            if (member.ShockwavePositions.Count > 0)
+            if (member.SplatterPositions.Count > 0)
             {
-                member.ShockwavePositions.Clear();    
-                member.ShockwaveTeamCodes.Clear();
+                member.SplatterPositions.Clear();    
+                member.SplatterTeamCodes.Clear();
                 member.InstigatorTeamCodes.Clear();
             }
         }
@@ -173,36 +173,36 @@ public class GameArea : MonoBehaviour
         if (GameManager.Instance.CurrentUserInfo.AllowSendTo)
         {
             int i = 0;
-            foreach (var pos in _localShockwavePositions)
+            foreach (var pos in _localSplatterPositions)
             {
-                SetUpShockwave
+                SetUpSplatter
                 (
                     pos,
                     GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor),
-                    _localShockwaveCodes[i],
+                    _localSplatterCodes[i],
                     GameManager.Instance.CurrentUserInfo.Team
                 );  
                 i++;
             }   
         }
         //Clear the list so there's no backlog of input positions
-        if (_localShockwavePositions.Count > 0)
+        if (_localSplatterPositions.Count > 0)
         {
-            _localShockwavePositions.Clear();
-            _localShockwaveCodes.Clear();
+            _localSplatterPositions.Clear();
+            _localSplatterCodes.Clear();
         }
     }
 
-    protected void SetUpShockwave(Vector2 position, Color waveColor, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all)
+    protected void SetUpSplatter(Vector2 position, Color waveColor, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all)
     {
-        GameObject newShockwave = Instantiate
+        GameObject newSplatter = Instantiate
         (
-            ShockwaveAnimation,
+            SplatterAnimation,
             Vector3.zero,
             Quaternion.identity,
-            shockwaveParent
+            splatterParent
         );
-        RectTransform UITransform = newShockwave.GetComponent<RectTransform>();
+        RectTransform UITransform = newSplatter.GetComponent<RectTransform>();
         Vector2 minMax = new Vector2(0, 1);
         UITransform.anchorMin = minMax;
         UITransform.anchorMax = minMax;
@@ -213,18 +213,18 @@ public class GameArea : MonoBehaviour
             gameAreaRect.height * position.x,
             gameAreaRect.width * -position.y
         );
-        UITransform.anchoredPosition = newPosition + _shockwaveOffset;
+        UITransform.anchoredPosition = newPosition + _splatterOffset;
 
         if (_currentGameMode == GameMode.Team && team == TeamCodes.all)
         {
             waveColor = Color.white;
         }
-        AnimateSplatter anim = newShockwave.GetComponent<AnimateSplatter>();
+        AnimateSplatter anim = newSplatter.GetComponent<AnimateSplatter>();
         anim.SetColour(waveColor);
-        anim.SetLifespan(shockwaveLifespan);
-        anim.SetAnimationDurations(shockwaveAppear, shockwaveDisappear);
+        anim.SetLifespan(splatterLifespan);
+        anim.SetAnimationDurations(splatterAppear, splatterDisappear);
 
-        StateManager.Instance.Shockwaves.Add(newShockwave.gameObject);
+        StateManager.Instance.Splatters.Add(newSplatter.gameObject);
     }
     
     protected void UpdateAllCursorsMovement()
@@ -285,7 +285,7 @@ public class GameArea : MonoBehaviour
         var data = response["data"] as Dictionary<string, object>;
         var property = data["PaintLifespan"] as Dictionary<string, object>;
         float value = Convert.ToSingle(property["value"]);
-        shockwaveLifespan = value;
+        splatterLifespan = value;
     }
 
     private void OnGetAnimDurationsCallback(string jsonResponse, object cbObject)
@@ -295,10 +295,10 @@ public class GameArea : MonoBehaviour
 
         var property = data["AppearDuration"] as Dictionary<string, object>;
         float value = Convert.ToSingle(property["value"]);
-        shockwaveAppear = value;
+        splatterAppear = value;
 
         property = data["DisappearDuration"] as Dictionary<string, object>;
         value = Convert.ToSingle(property["value"]);
-        shockwaveDisappear = value;
+        splatterDisappear = value;
     }
 }

@@ -13,7 +13,7 @@ public class UserInfo
     public string ProfileID;
     //Used for displaying and identifying users
     public string Username;
-    //if this user should show shockwaves locally
+    //if this user should show splatters locally
     public bool AllowSendTo = true;
     //Is this user still connected
     public bool IsAlive;
@@ -21,10 +21,10 @@ public class UserInfo
     public GameColors UserGameColor;
     //Current Mouse Position to display
     public Vector2 MousePosition;
-    //Shockwaves are created based on each location given from list
-    public List<Vector2> ShockwavePositions = new List<Vector2>();
-    //Shockwaves that take different shapes base on team code
-    public List<TeamCodes> ShockwaveTeamCodes = new List<TeamCodes>();
+    //Splatters are created based on each location given from list
+    public List<Vector2> SplatterPositions = new List<Vector2>();
+    //Splatters that take different shapes base on team code
+    public List<TeamCodes> SplatterTeamCodes = new List<TeamCodes>();
     public List<TeamCodes> InstigatorTeamCodes = new List<TeamCodes>();
     //Class to handle each user's cursor
     public UserCursor UserCursor;

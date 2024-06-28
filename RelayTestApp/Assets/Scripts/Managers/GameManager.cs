@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text LobbyIdText;
     public Button ReconnectButton;
     public Toggle RememberMeToggle;
-    //for updating members list of shockwaves
+    //for updating members list of splatters
     public GameArea GameArea;
     public Button JoinInProgressButton;
     public TMP_Dropdown FFADropdown;
@@ -387,7 +387,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void AdjustUserShockwaveMask(string username,bool isVisible)
+    public void AdjustUserSplatterMask(string username,bool isVisible)
     {
         //populate user entries based on members in lobby
         Lobby lobby = StateManager.Instance.CurrentLobby;

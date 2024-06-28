@@ -348,23 +348,23 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    // Local User summoned a shockwave in the play area
-    public void LocalShockwave(Vector2 pos)
+    // Local User summoned a splatter in the play area
+    public void LocalSplatter(Vector2 pos)
     {
         SendWithSpecificCompression
         (
-            CreateShockwaveJson(pos, TeamCodes.all),
+            CreateSplatterJson(pos, TeamCodes.all),
             true,
             false,
             Settings.GetChannel()
         );
     }
 
-    public void SendShockwaveToAll(Vector2 pos)
+    public void SendSplatterToAll(Vector2 pos)
     {
         SendToSpecificTeamWithCompression
         (
-            CreateShockwaveJson(pos, TeamCodes.all),
+            CreateSplatterJson(pos, TeamCodes.all),
             TeamCodes.all,
             true,
             false,
@@ -372,12 +372,12 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    public void SendShockwaveToTeam(Vector2 pos)
+    public void SendSplatterToTeam(Vector2 pos)
     {
         TeamCodes teamToSend = GameManager.Instance.CurrentUserInfo.Team;
         SendToSpecificTeamWithCompression
         (
-            CreateShockwaveJson(pos, teamToSend),
+            CreateSplatterJson(pos, teamToSend),
             teamToSend,
             true,
             false,
@@ -385,14 +385,14 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    public void SendShockwaveToOpponents(Vector2 pos)
+    public void SendSplatterToOpponents(Vector2 pos)
     {
         TeamCodes TeamToSend = GameManager.Instance.CurrentUserInfo.Team == TeamCodes.alpha
             ? TeamCodes.beta
             : TeamCodes.alpha;
         SendToSpecificTeamWithCompression
         (
-            CreateShockwaveJson(pos, TeamToSend),
+            CreateSplatterJson(pos, TeamToSend),
             TeamToSend,
             true,
             false,
@@ -400,7 +400,7 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    private Dictionary<string, object> CreateShockwaveJson(Vector2 pos, TeamCodes intendedTeam)
+    private Dictionary<string, object> CreateSplatterJson(Vector2 pos, TeamCodes intendedTeam)
     {
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
@@ -574,11 +574,11 @@ public class BrainCloudManager : MonoBehaviour
                             Vector2 position;
                             position.x = (float)Convert.ToDouble(data["x"]);
                             position.y = (float)Convert.ToDouble(data["y"]);
-                            member.ShockwavePositions.Add(position);
+                            member.SplatterPositions.Add(position);
                             if(data.ContainsKey("teamCode"))
                             {
-                                TeamCodes shockwaveCode = (TeamCodes) data["teamCode"];
-                                member.ShockwaveTeamCodes.Add(shockwaveCode);
+                                TeamCodes splatterCode = (TeamCodes) data["teamCode"];
+                                member.SplatterTeamCodes.Add(splatterCode);
 
                                 TeamCodes instigatorCode = (TeamCodes) data["instigator"];
                                 member.InstigatorTeamCodes.Add(instigatorCode);   
@@ -602,10 +602,10 @@ public class BrainCloudManager : MonoBehaviour
                             Vector2 position;
                             position.x = (float)Convert.ToDouble(json["x"]);
                             position.y = (float)-Convert.ToDouble(json["y"]);
-                            member.ShockwavePositions.Add(position);
+                            member.SplatterPositions.Add(position);
 
-                            TeamCodes shockwaveCode = (TeamCodes) json["teamCode"];
-                            member.ShockwaveTeamCodes.Add(shockwaveCode);
+                            TeamCodes splatterCode = (TeamCodes) json["teamCode"];
+                            member.SplatterTeamCodes.Add(splatterCode);
 
                             TeamCodes instigatorCode = (TeamCodes) json["instigator"];
                             member.InstigatorTeamCodes.Add(instigatorCode);

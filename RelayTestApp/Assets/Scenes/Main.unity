@@ -3622,7 +3622,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 7.1499634}
+  m_AnchoredPosition: {x: 0, y: 7.1499023}
   m_SizeDelta: {x: -760, y: -510.30002}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &323839226
@@ -6638,10 +6638,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LocalCursorRectTransform: {fileID: 1030046958}
-  ShockwaveAnimation: {fileID: 8886045845526611327, guid: 189af28c3b864ed498f6a854b5cb29e9, type: 3}
-  TeammateAnimation: {fileID: 8886045845526611327, guid: 189af28c3b864ed498f6a854b5cb29e9, type: 3}
+  SplatterAnimation: {fileID: 8886045845526611327, guid: 189af28c3b864ed498f6a854b5cb29e9, type: 3}
   LocalUserCursor: {fileID: 0}
-  shockwaveParent: {fileID: 2069678124}
+  splatterParent: {fileID: 2069678124}
 --- !u!114 &571176153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10923,7 +10922,7 @@ MonoBehaviour:
     LobbyId: 
   isReady: 0
   isLoading: 0
-  Shockwaves: []
+  Splatters: []
 --- !u!114 &856249133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10968,8 +10967,8 @@ MonoBehaviour:
     IsAlive: 0
     UserGameColor: 0
     MousePosition: {x: 0, y: 0}
-    ShockwavePositions: []
-    ShockwaveTeamCodes: 
+    SplatterPositions: []
+    SplatterTeamCodes: 
     InstigatorTeamCodes: 
     UserCursor: {fileID: 0}
     cxId: 
