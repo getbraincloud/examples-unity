@@ -1,5 +1,7 @@
+using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -24,6 +26,7 @@ public class GameManager : MonoBehaviour
     public UserEntry UserEntryLobbyPrefab;
     public UserEntry UserEntryMatchPrefab;
     public UserCursor UserCursorPrefab;
+
     [Header("Parent Transforms")]
     public GameObject UserEntryLobbyParentFFA;
     public GameObject UserEntryMatchParentFFA;
@@ -32,6 +35,7 @@ public class GameManager : MonoBehaviour
     public GameObject UserEntryMatchParentTeamAlpha;
     public GameObject UserEntryMatchParentTeamBeta;
     public GameObject UserCursorParent;
+
     [Header("UI References")]
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
@@ -40,17 +44,20 @@ public class GameManager : MonoBehaviour
     public TMP_Text LobbyIdText;
     public Button ReconnectButton;
     public Toggle RememberMeToggle;
+
     //for updating members list of splatters
     public GameArea GameArea;
     public Button JoinInProgressButton;
     public TMP_Dropdown FFADropdown;
     public TMP_Dropdown TeamDropdown;
+
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public GameObject EndGameBtn;
     public TMP_Text LobbyLocalUserText;
     public TMP_Dropdown CompressionDropdown;
     private EventSystem _eventSystem;
+
     //List references for clean up when game closes
     private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
     private readonly List<UserCursor> _userCursorsList = new List<UserCursor>();
@@ -73,7 +80,9 @@ public class GameManager : MonoBehaviour
         get => _currentUserInfo;
         set => _currentUserInfo = value;
     }
-    
+
+    private static List<Color> colours = new List<Color>();
+
     private void Awake()
     {
         if (!_instance)
@@ -91,6 +100,7 @@ public class GameManager : MonoBehaviour
         LoadPlayerSettings();
         LobbyIdText.enabled = false;
         AppIdText.text = $"App ID: {BrainCloud.Plugin.Interface.AppId}";
+        BrainCloudManager.Instance.Wrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback, null);
     }
 
     // Update is called once per frame
@@ -446,21 +456,21 @@ public class GameManager : MonoBehaviour
         switch (newColor)
         {
             case GameColors.Blue:
-                return new Color32(9, 20, 140, 255);
+                return colours[0];
             case GameColors.Purple:
-                return new Color32(172, 50, 179, 255);
+                return colours[1];
             case GameColors.Red:
-                return new Color32(247, 60, 41, 255);
+                return colours[2];
             case GameColors.Orange:
-                return new Color32(255, 146, 19, 255);
+                return colours[3];
             case GameColors.Cyan:
-                return new Color32(99, 172, 245, 255);
+                return colours[4];
             case GameColors.Green:
-                return new Color32(87, 219, 111, 255);
+                return colours[5];
             case GameColors.Yellow:
-                return new Color32(249, 255, 139, 255);
+                return colours[6];
             case GameColors.White:
-                return new Color(0.86f, 0.96f, 1);
+                return colours[7];
             case GameColors.Rainbow:
                 return new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         }
@@ -475,5 +485,33 @@ public class GameManager : MonoBehaviour
     }
 
     #endregion
+
+    private void OnGetColoursCallback(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+        var property = data["Colours"] as Dictionary<string, object>;
+
+        var value = property["value"] as string;
+        //"081175,902a96,cf3222,d67b10,5390ce,49b85d,d1d675,b8ced6"
+        string[] hexValues = value.Split(',');
+
+        colours.Clear();
+        foreach(string hex in hexValues)
+        {
+            colours.Add(ColourFromHex(hex));
+        }
+    }
+
+    private Color ColourFromHex(string hexColour)
+    {
+        int hexNumber = Convert.ToInt32(hexColour, 16);
+        int b = hexNumber % 256;
+        hexNumber = (hexNumber - b) / 256;
+        int g = hexNumber % 256;
+        hexNumber = (hexNumber - g) / 256;
+        int r = hexNumber;
+        return new Color(r/255f, g/255f, b/255f);
+    }
 }
 
