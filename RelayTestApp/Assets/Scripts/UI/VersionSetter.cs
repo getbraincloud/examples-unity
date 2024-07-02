@@ -6,8 +6,8 @@ public class VersionSetter : MonoBehaviour
 
     void Start()
     {
-        string versionNum = BrainCloud.Version.GetVersion();
+        string versionNum = Application.version;
 
-        versionText.text = "Version: " + versionNum + " - dev"; 
+        versionText.text = "Version: " + versionNum; 
     }
 }

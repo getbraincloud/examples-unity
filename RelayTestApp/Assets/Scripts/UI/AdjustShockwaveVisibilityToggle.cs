@@ -10,6 +10,6 @@ public class AdjustShockwaveVisibilityToggle : MonoBehaviour
     //Called from Unity's Toggle Value Change
     public void OnValueChange()
     {
-        GameManager.Instance.AdjustUserShockwaveMask(Username.text,Toggle.isOn);
+        GameManager.Instance.AdjustUserSplatterMask(Username.text,Toggle.isOn);
     }
 }
