@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class ColorAssignedButton : MonoBehaviour
 {
-    public GameColors ButtonColor;
+    [SerializeField, Range(0, 7)]
+    private int ButtonColor;
 
     public void Start()
     {

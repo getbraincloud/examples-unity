@@ -18,7 +18,7 @@ public class UserInfo
     //Is this user still connected
     public bool IsAlive;
     //Current user color to display
-    public GameColors UserGameColor;
+    public int UserGameColor;
     //Current Mouse Position to display
     public Vector2 MousePosition;
     //Splatters are created based on each location given from list
@@ -45,6 +45,7 @@ public class UserInfo
         IsReady = (bool)userJson["isReady"];
         string teamValue = userJson["team"] as string;
         Enum.TryParse(teamValue, out Team);
+
         if (GameManager.Instance.GameMode == GameMode.FreeForAll)
         {
             Dictionary<string, object> extra = userJson["extra"] as Dictionary<string, object>;
@@ -53,19 +54,13 @@ public class UserInfo
             {
                 colorIndex = (int)extra["colorIndex"];
             }
-            UserGameColor = (GameColors) colorIndex;
+            UserGameColor = colorIndex;
         }
         else if(GameManager.Instance.GameMode == GameMode.Team)
         {
-            if (Team == TeamCodes.alpha)
-            {
-                UserGameColor = GameColors.Cyan;
-            }
-            else
-            {
-                UserGameColor = GameColors.Orange;
-            }
+            UserGameColor = (Team == TeamCodes.alpha) ? 4 : 3;
         }
+
         if (userJson.ContainsKey("presentSinceStart"))
         {
             PresentSinceStart = (bool)userJson["presentSinceStart"];

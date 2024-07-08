@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 /// <summary>
 /// - Holds info needed for the current user and other connected users
@@ -17,7 +16,6 @@ using Random = UnityEngine.Random;
 /// 
 /// </summary>
 
-public enum GameColors{Blue,Purple,Red,Orange,Cyan,Green,Yellow,White,Rainbow}
 public enum GameMode {FreeForAll, Team}
 
 public class GameManager : MonoBehaviour
@@ -136,7 +134,7 @@ public class GameManager : MonoBehaviour
     }
     
     //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callback OnLobbyEvent()
-    public void UpdateLocalColorChange(GameColors newColor)
+    public void UpdateLocalColorChange(int newColor)
     {
         _currentUserInfo.UserGameColor = newColor;
         //Apply in game color changes
@@ -451,31 +449,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="newColor"> if the color needs to be changed</param>
     /// <returns></returns>
-    public static Color ReturnUserColor(GameColors newColor = GameColors.White)
+    public static Color ReturnUserColor(int newColor = 0)
     {
-        switch (newColor)
-        {
-            case GameColors.Blue:
-                return colours[0];
-            case GameColors.Purple:
-                return colours[1];
-            case GameColors.Red:
-                return colours[2];
-            case GameColors.Orange:
-                return colours[3];
-            case GameColors.Cyan:
-                return colours[4];
-            case GameColors.Green:
-                return colours[5];
-            case GameColors.Yellow:
-                return colours[6];
-            case GameColors.White:
-                return colours[7];
-            case GameColors.Rainbow:
-                return new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-        }
-            
-        return Color.white;
+        return colours[newColor];
     }
 
     public bool IsLocalUserHost()
