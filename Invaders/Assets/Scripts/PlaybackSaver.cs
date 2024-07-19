@@ -137,7 +137,7 @@ public class PlaybackSaver : MonoBehaviour
             _bcWrapper.LeaderboardService.GetPlayerScore("InvaderHighScore", -1, OnGetPlayerScoreSuccess, OnGetPlayerScoreFailure);
             yield return new WaitUntil(() => previousHighScore != -1);
         }
-        if (previousHighScore > newScore) yield break; //Early return if allowed
+        if (previousHighScore > newScore || newScore == 0) yield break; //Early return if allowed
 
         //Start a new stream and grab its ID
         _bcWrapper.PlaybackStreamService.StartStream(profileId, false, OnStartStreamSuccess, OnGenericFailure);

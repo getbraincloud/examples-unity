@@ -74,10 +74,10 @@ Now that we know we want to save this stream, we create it on brainCloud using `
 ![StartStreamAndPostScore](../_screenshots/_invadersReplay/_13_StartStreamAndPostScore.png)
 ![StartStream](../_screenshots/_invadersReplay/_14_StartStream.png)
 
-We also need to add the gameplay that we recorded to the stream that was just created. To minimize the amount of data sent to branCloud, we will compress multiple similar frames into one event. 
+We also need to add the gameplay that we recorded to the stream that was just created. To minimize the amount of data sent to brainCloud, we will compress multiple similar frames into one event. 
 ![StartAddEvevnts](../_screenshots/_invadersReplay/_15_StartAddEvevnts.png)
 ![AddEventsCompression](../_screenshots/_invadersReplay/_16_AddEventsCompression.png)
- - The list runLengths will keep track of how many consecutive frames are similar to each other. 
+ - The list `runLengths` will keep track of how many consecutive frames are similar to each other. 
  - Players can only ever create a bullet for one frame at a time, so we will consider the frame a bullet was created to be similar to the immediately following frames. We must remember that only one bullet was created per event when we retrieve the stream from brainCloud later!
  - *__Note:__ This type of compression may not be as effective for every type of gameplay. An effective compression algorithm takes advantage of expected patterns and assumptions in its data.*
 
@@ -116,7 +116,7 @@ To make a cloud script navigate to Design > Cloud Code > Scripts and press the ‘
 ![CreateCloudScript](../_screenshots/_invadersReplay/_25_CreateCloudScript.png)
 ![CloudScriptSettings](../_screenshots/_invadersReplay/_26_CloudScriptSettings.png)
 
-Cloud scripts access the parameters that were sent to them using properties of ‘data’. In our cloud script ‘data.stream_ids’ is the array of IDs that will be turned into streams. The function ‘main()’ returns ‘response’, which is the JSON that our app will receive. We add each stream to the response under the key “streams”. 
+Cloud scripts access the parameters that were sent to them using properties of ‘data’. In our cloud script `data.stream_ids` is the array of IDs that will be turned into streams. The function `main()` returns `response`, which is the JSON that our app will receive. We add each stream to the response under the key “streams”. 
 ![CloudScript](../_screenshots/_invadersReplay/_27_CloudScript.png)
  - This script uses `sysReadStream()` instead of `readStream()` because it is called from the server. Only operations that are supported by S2S can be called in cloud scripts that are run from a server. 
 
@@ -132,7 +132,7 @@ Here we will start parsing the data to transform it from JSON to something usabl
 
 We fill out the general data from the summary first, then add in all of the frames from the events.
 ![ParseStreamDecompression](../_screenshots/_invadersReplay/_31_ParseStreamDecompression.png)
- - Within each stream is multiple events, and within each event is multiple frames. The quantity of frames in an event is determined by runLength. This is why the function includes one loop nested inside another. 
+ - Within each stream is multiple events, and within each event is multiple frames. The quantity of frames in an event is determined by `runLength`. This is why the function includes one loop nested inside another. 
  - A frame only creates a bullet when it is the first of its run length group, expressed here as `ii == 0`. This is one of the assumptions we made for higher compression in the previous step. 
 
 We hand the data that we parsed out to the next step, where it will be used to instantiate a "ghost actor".
@@ -146,7 +146,7 @@ After instantiating the prefab that will act out the recording, we pass the reco
  - Fortunately, in the Invaders demo the first 150 frames will always be dedicated to waiting for the 3 second countdown to pass. This is plenty of time to ensure the delay will never affect gameplay. 
  - *__Note:__ Your game or app should also take into consideration a small amount of delay from cloud responses. This might be done via a loading screen or making predictions on the client.*
 
-There are two variables we can immediately use: startPosition and username. We also start a coroutine which will handle acting out each of the frames.  
+There are two variables we can immediately use: `startPosition` and `username`. We also start a coroutine which will handle acting out each of the frames.  
 ![StartActing](../_screenshots/_invadersReplay/_35_StartActing.png)
 ![SetActorUsername](../_screenshots/_invadersReplay/_36_SetActorUsername.png)
  - Unity’s Netcode for GameObjects includes a component that automatically syncs the transform of the prefab. We apply the start position before the prefab is spawned on the network to avoid seeing the position interpolated. 
