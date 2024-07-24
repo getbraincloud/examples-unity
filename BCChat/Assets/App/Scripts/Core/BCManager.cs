@@ -33,6 +33,20 @@ public class BCManager : MonoBehaviour
 
     [SerializeField] private bool InitFromBCSettings = true;
 
+    private static bool _rememberMeSetting = false;
+
+    public static bool RememberMeSetting
+    {
+        get
+        {
+            return _rememberMeSetting;
+        }
+        private set
+        {
+            _rememberMeSetting = value;
+        }
+    }
+
     #region Wrapper Properties
 
     /// <summary>
@@ -173,6 +187,11 @@ public class BCManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         _isInstanced = false;
+        //if logged in, log out and delete profile ID and anonymous ID if remember me was selected
+        if (Client.Authenticated)
+        {
+            Wrapper.LogoutOnApplicationQuit(!RememberMeSetting);
+        }
     }
 
     private void OnDestroy()
@@ -189,6 +208,10 @@ public class BCManager : MonoBehaviour
 
     #endregion
 
+    public static void UpdateRememberMeSetting(bool value)
+    {
+        RememberMeSetting = value;
+    }
     public static void SetupClient(string serverURL, string appID, string appSecret, string version, Dictionary<string, string> childApps = null)
     {
         if (!_isInstanced)
