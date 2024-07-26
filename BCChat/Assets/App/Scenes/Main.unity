@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2888,7 +2887,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 452610436}
   m_HandleRect: {fileID: 452610435}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3411,7 +3410,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3444806324557721556, guid: 39ea6f1a1c6006642ac7e5abbaae7d7e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -31.00003
+      value: -31.000061
       objectReference: {fileID: 0}
     - target: {fileID: 3444806324667115854, guid: 39ea6f1a1c6006642ac7e5abbaae7d7e, type: 3}
       propertyPath: m_text
@@ -3554,7 +3553,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 541313927}
   m_HandleRect: {fileID: 541313926}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -6467,6 +6466,7 @@ MonoBehaviour:
   ChannelButtonTemplate: {fileID: 8254043573866891610, guid: c6c391eaf427ba649adb64e175911a3d, type: 3}
   ChatMessageTemplate: {fileID: 1882669028450444515, guid: 6e7e2b68e7a536940ac0142920a7fa4e, type: 3}
   MessageSpacer: {fileID: 6368141183402936771, guid: 9c2c968ed5feaed4caf6c74be580be8e, type: 3}
+  ModalUIContent: {fileID: 7351377993375346572, guid: 2505e9793c285be4cb1bdd2892a53768, type: 3}
 --- !u!1 &1872506500
 GameObject:
   m_ObjectHideFlags: 0
@@ -7907,7 +7907,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8877004762269044171}
   m_HandleRect: {fileID: 5637868039479464064}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
