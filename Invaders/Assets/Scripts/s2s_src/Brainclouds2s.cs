@@ -265,7 +265,7 @@ public class BrainCloudS2S
     {
         string packet = CreatePacket(dataPacket);                   //create data packet of the data with packetId info
 
-        //LogString("Sending Request: " + packet);
+        LogString("Sending Request: " + packet + " to url " + request.url);
 
         byte[] byteArray = Encoding.UTF8.GetBytes(packet);          //convert data packet to byte[]
         request.uploadHandler = new UploadHandlerRaw(byteArray);    //prepare data
@@ -353,7 +353,6 @@ public class BrainCloudS2S
             string unityResponse = null;
             if(activeRequest.request.downloadHandler.isDone)
             {
-                LogString("Sending Request: " + activeRequest.request);
                 unityResponse = activeRequest.request.downloadHandler.text;
             }
             if(!string.IsNullOrEmpty(activeRequest.request.error))
