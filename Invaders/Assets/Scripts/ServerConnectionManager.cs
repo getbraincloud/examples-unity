@@ -1,10 +1,10 @@
 using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using Unity.Netcode;
 using UnityEngine;
-using System;
-using System.Net;
 
 public class ServerConnectionManager : NetworkBehaviour
 {
@@ -215,15 +215,6 @@ public class ServerConnectionManager : NetworkBehaviour
         BrainCloudManager.Singleton.SceneTransitionHandler.SwitchScene("InGame");
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void CheckAllPlayerConnectedServerRpc()
-    {
-        if(_connectedClients.Count == _currentLobby.Members.Count)
-        {
-            OnAllLoaded();
-        }
-    }
-
     [ClientRpc]
     public void ValidateConnectedClientClientRpc(bool isValid)
     {
@@ -246,7 +237,13 @@ public class ServerConnectionManager : NetworkBehaviour
                     //player connection is valid
                     Debug.Log($"Player {playerId} has valid passcode");
                     _connectedClients.Add(clientId, foundMember);
-                    CheckAllPlayerConnectedServerRpc();
+
+                    Debug.Log("Connected Players: " + _connectedClients.Count + "/" + _currentLobby.Members.Count);
+
+                    if (_connectedClients.Count == _currentLobby.Members.Count)
+                    {
+                        OnAllLoaded();
+                    }
                 }
                 else
                 {

@@ -1,10 +1,12 @@
 using BrainCloud;
+using BrainCloud.Common;
 using BrainCloud.JSONHelper;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -45,8 +47,11 @@ public class MainContentUI : ContentUIBehaviour
     [SerializeField] private ChatMessage ChatMessageTemplate = default;
     [SerializeField] private GameObject MessageSpacer = default;
 
+    [Header("Modal Prefab")]
+    [SerializeField] private ModalUI ModalUIContent = default;
+
     private Message messageToEdit;
-    private ChannelInfo currentChannelInfo;
+    private ChannelInfo currentChannelInfo, reconnectChannelInfo;
     private BrainCloudRTT rttService = null;
     private BrainCloudChat chatService = null;
     private List<ChannelButton> channelButtons = null;
@@ -247,9 +252,64 @@ public class MainContentUI : ContentUIBehaviour
         ChatScroll.verticalNormalizedPosition = 0.0f;
     }
 
+    private void SpawnModal(string title, string text, string yesText, string noText = null,
+        Action onYesClicked = null, Action onNoClicked = null)
+    {
+        IsInteractable = true;
+        ModalUI modal = Instantiate(ModalUIContent, this.transform);
+        modal.InitModal(title, text, yesText, noText, onYesClicked, onNoClicked);
+    }
     #endregion
 
     #region brainCloud
+    /*
+     * Debug function to test the RTT disconnected modal and reconnect feature
+     * 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            rttService.DisableRTT();
+            BCManager.Wrapper.LogoutOnApplicationQuit(false);
+
+            SpawnModal("ERROR", "You have been disconnected from RTT. Please reconnect to use BC Chat", "Reconnect", "Cancel",
+                    OnReconnectClicked, OnReconnectCancelClicked);
+        }
+    }
+    */
+
+    private void OnReconnectClicked()
+    {
+        //re authenticate then re-initialize this UI view
+        reconnectChannelInfo = currentChannelInfo;
+        IsInteractable = false;
+        FailureCallback onFailure = OnFailure("Automatic Login Failed", () =>
+        {
+            IsInteractable = true;
+            SpawnModal("ERROR", "Could not re-authenticate", "Ok", null, () =>
+            {
+                //go back to login screen
+                OnReconnectCancelClicked();
+            });
+            
+        });
+
+        void OnAuthenticationSuccess()
+        {
+            InitializeUI();
+        }
+
+        UserHandler.HandleUserReconnect(OnSuccess("Automatically Logging In...", OnAuthenticationSuccess), onFailure); 
+    }
+
+    private void OnReconnectCancelClicked()
+    {
+        //go back to login screen
+        LoginContent.IsInteractable = true;
+        LoginContent.gameObject.SetActive(true);
+
+        gameObject.SetActive(false);
+    }
 
     // Enable RTT and get the chat channels and subscribe to the first channel
     private IEnumerator HandleRTTAndSetup()
@@ -283,6 +343,9 @@ public class MainContentUI : ContentUIBehaviour
             void HandleRTTEnableFailure(int status, int reasonCode, string jsonError, object cbObject)
             {
                 Debug.LogError("Unable to enable RTT! Cannot use BC Chat.");
+
+                SpawnModal("ERROR", "You were disconnected from RTT:" + reasonCode + ": " + jsonError, "Reconnect", "Cancel",
+                        OnReconnectClicked, OnReconnectCancelClicked);
 
                 StopCoroutine(HandleRTTAndSetup());
             }
@@ -328,7 +391,14 @@ public class MainContentUI : ContentUIBehaviour
 
         ChannelScroll.verticalNormalizedPosition = 0.0f;
 
-        SetCurrentChatChannel(channelButtons[0].ChannelInfo); // Open first chat room
+        if(!string.IsNullOrEmpty(reconnectChannelInfo.code))
+        {
+            SetCurrentChatChannel(reconnectChannelInfo); // Open channel we want to reconnect to
+        }
+        else
+        {
+            SetCurrentChatChannel(channelButtons[0].ChannelInfo); // Open first chat room
+        }
     }
 
     // This deserialized our RTT chat responses; this callback is integral to using the Chat service
@@ -537,7 +607,6 @@ public class MainContentUI : ContentUIBehaviour
 
     private void HandleUserLogoutSuccess(string jsonResponse, object cbObject)
     {
-        LoginContent.SetRememberMePref(false);
         LoginContent.IsInteractable = true;
         LoginContent.gameObject.SetActive(true);
 

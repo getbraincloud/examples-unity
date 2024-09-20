@@ -9,6 +9,7 @@ public class App : MonoBehaviour
 
     // Setup a couple stuff into our TicTacToe scene
     public string BoardState = "#########";
+    public string OldBoardState = "#########";
 
     public string MatchId;
     public ulong MatchVersion;
