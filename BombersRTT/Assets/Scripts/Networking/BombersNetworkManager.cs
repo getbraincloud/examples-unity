@@ -18,6 +18,8 @@ namespace BrainCloudUNETExample
         public static BombersPlayerController LocalPlayer { get { return m_localPlayer; } set { m_localPlayer = value; if (value != null) { m_localPlayer.ProfileId = GCore.Wrapper.Client.ProfileId; } } }
         private static BombersPlayerController m_localPlayer;
 
+        private static string currentEntryId;
+
         private readonly string LobbyStrategy = "strategy";
         private readonly string StrategyAbsolute = "absolute";
         private readonly string StrategyCompound = "compound";
@@ -159,7 +161,15 @@ namespace BrainCloudUNETExample
                     algo[OperationParam.LobbyAlignment.Value] = OperationParam.AlignmentCenter.Value;
                     algo[OperationParam.LobbyRanges.Value] = arry;
                     */
-            GCore.Wrapper.LobbyService.FindOrCreateLobbyWithPingData(m_lastSelectedRegionType, 76, 2, algo, s_matchOptions, 1, false, playerExtra, "", s_matchOptions, in_otherCxIds);
+
+            GCore.Wrapper.LobbyService.FindOrCreateLobbyWithPingData(m_lastSelectedRegionType, 76, 2, algo, s_matchOptions, false, playerExtra, "", s_matchOptions, in_otherCxIds, FindLobbyCallback);
+        }
+
+        private void FindLobbyCallback(string in_response, object cbObject)
+        {
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
+            Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+            currentEntryId = data["entryId"] as string;
         }
 
         private string m_lastSelectedRegionType = "4v4_can";
@@ -170,7 +180,7 @@ namespace BrainCloudUNETExample
 
         public void CancelFindRequest()
         {
-            GCore.Wrapper.LobbyService.CancelFindRequest(m_lastSelectedRegionType);
+            GCore.Wrapper.LobbyService.CancelFindRequest(m_lastSelectedRegionType, currentEntryId);
         }
 
         private void updateLobbyInfo(ulong in_unetId)
