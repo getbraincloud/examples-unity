@@ -90,23 +90,16 @@ public static class IOSPostBuild
 
     private static string GetExportOptionsPlistContents()
     {
-        // Adjust settings as needed (e.g., "development" or "app-store" for method)
+        // Here we set `signingStyle` to `automatic` and remove teamID and provisioning profiles.
         return @"
 <?xml version=""1.0"" encoding=""UTF-8""?>
 <!DOCTYPE plist PUBLIC ""-//Apple//DTD PLIST 1.0//EN"" ""http://www.apple.com/DTDs/PropertyList-1.0.dtd"">
 <plist version=""1.0"">
 <dict>
     <key>method</key>
-    <string>development</string>
-    <key>teamID</key>
-    <string>YOUR_TEAM_ID</string>
+    <string>development</string> <!-- Change to `app-store` for release builds -->
     <key>signingStyle</key>
-    <string>manual</string>
-    <key>provisioningProfiles</key>
-    <dict>
-        <key>YOUR_BUNDLE_ID</key>
-        <string>YOUR_PROVISIONING_PROFILE</string>
-    </dict>
+    <string>automatic</string>
 </dict>
 </plist>";
     }
