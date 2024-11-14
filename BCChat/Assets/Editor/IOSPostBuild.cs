@@ -1,4 +1,4 @@
-#if UNITY_IOS && APPLE_SDK
+#if UNITY_IOS
 
 using System;
 using System.Diagnostics;
