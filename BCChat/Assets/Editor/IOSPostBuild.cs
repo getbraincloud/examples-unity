@@ -13,10 +13,10 @@ public static class IOSPostBuild
     [PostProcessBuildAttribute(100)]
     public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
     {
-        Debug.Log("[On Post-Process Build()]");
+        UnityEngine.Debug.Log("[On Post-Process Build()]");
         if (target != BuildTarget.iOS)
         {
-            Debug.LogError("IOSPostBuild should only be run on iOS builds.");
+            UnityEngine.Debug.LogError("IOSPostBuild should only be run on iOS builds.");
             return;
         }
 
@@ -36,7 +36,7 @@ public static class IOSPostBuild
             manager.AddSignInWithAppleWithCompatibility(project.GetUnityFrameworkTargetGuid());
             manager.WriteToFile();
 
-            Debug.Log("Added ProjectCapabilityManager to Xcode Project.");
+            UnityEngine.Debug.Log("Added ProjectCapabilityManager to Xcode Project.");
             string bNum = PlayerSettings.bundleVersion.Split('.')[2];
 
             SetBundleVersionPlist(pathToBuiltProject, bNum);
@@ -46,7 +46,7 @@ public static class IOSPostBuild
         }
         catch (Exception e)
         {
-            Debug.LogError("Error in iOS post-build process: " + e);
+            UnityEngine.Debug.LogError("Error in iOS post-build process: " + e);
         }
     }
 
@@ -66,7 +66,7 @@ public static class IOSPostBuild
         // Run xcodebuild export to create .ipa
         RunShellCommand("xcodebuild", $"-exportArchive -archivePath {archivePath} -exportPath {exportPath} -exportOptionsPlist {exportOptionsPlist}");
 
-        Debug.Log("iOS build and .ipa creation complete.");
+        UnityEngine.Debug.Log("iOS build and .ipa creation complete.");
     }
 
     private static void SetBundleVersionPlist(string pathToBuiltProject, string bundleVersion)
@@ -84,7 +84,7 @@ public static class IOSPostBuild
         // Save the updated Info.plist file
         plist.WriteToFile(plistPath);
 
-        Debug.Log("Info.plist modified: CFBundleVersion set to " + bundleVersion);
+        UnityEngine.Debug.Log("Info.plist modified: CFBundleVersion set to " + bundleVersion);
     }
 
     private static void RunShellCommand(string command, string args)
