@@ -13,6 +13,7 @@ public static class IOSPostBuild
     [PostProcessBuildAttribute(100)]
     public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
     {
+        Debug.Log("[On Post-Process Build()]");
         if (target != BuildTarget.iOS)
         {
             Debug.LogError("IOSPostBuild should only be run on iOS builds.");
