@@ -1,5 +1,4 @@
 #if UNITY_IOS
-
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -33,7 +32,7 @@ public static class IOSPostBuild
                 null,
                 project.GetUnityMainTargetGuid()
             );
-            manager.AddSignInWithAppleWithCompatibility(project.GetUnityFrameworkTargetGuid());
+            manager.AddSignInWithApple();
             manager.WriteToFile();
 
             UnityEngine.Debug.Log("Added ProjectCapabilityManager to Xcode Project.");
@@ -96,8 +95,8 @@ public static class IOSPostBuild
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
 
-        process.OutputDataReceived += (sender, e) => Debug.Log(e.Data);
-        process.ErrorDataReceived += (sender, e) => Debug.LogError(e.Data);
+        process.OutputDataReceived += (sender, e) => UnityEngine.Debug.Log(e.Data);
+        process.ErrorDataReceived += (sender, e) => UnityEngine.Debug.LogError(e.Data);
 
         process.Start();
         process.BeginOutputReadLine();
