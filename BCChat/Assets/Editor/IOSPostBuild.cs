@@ -32,7 +32,7 @@ public static class IOSPostBuild
                 null,
                 project.GetUnityMainTargetGuid()
             );
-            manager.AddSignInWithApple();
+            //manager.AddSignInWithApple();
             manager.WriteToFile();
 
             UnityEngine.Debug.Log("Added ProjectCapabilityManager to Xcode Project.");
