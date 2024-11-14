@@ -41,7 +41,7 @@ public static class IOSPostBuild
             SetBundleVersionPlist(pathToBuiltProject, bNum);
 
             // Build and Export to .ipa
-            //CreateIpaFromXcodeProject(pathToBuiltProject);
+            CreateIpaFromXcodeProject(pathToBuiltProject);
         }
         catch (Exception e)
         {
@@ -60,12 +60,12 @@ public static class IOSPostBuild
         File.WriteAllText(exportOptionsPlist, GetExportOptionsPlistContents());
 
         // Run xcodebuild archive
-        RunShellCommand("xcodebuild", $"-project {xcodeProjectPath}/Unity-iPhone.xcodeproj -scheme Unity-iPhone -archivePath {archivePath} archive");
+        //RunShellCommand("xcodebuild", $"-project {xcodeProjectPath}/Unity-iPhone.xcodeproj -scheme Unity-iPhone -archivePath {archivePath} archive");
 
         // Run xcodebuild export to create .ipa
-        RunShellCommand("xcodebuild", $"-exportArchive -archivePath {archivePath} -exportPath {exportPath} -exportOptionsPlist {exportOptionsPlist}");
+        //RunShellCommand("xcodebuild", $"-exportArchive -archivePath {archivePath} -exportPath {exportPath} -exportOptionsPlist {exportOptionsPlist}");
 
-        UnityEngine.Debug.Log("iOS build and .ipa creation complete.");
+        UnityEngine.Debug.Log("iOS build and .ipa process ready to begin");
     }
 
     private static void SetBundleVersionPlist(string pathToBuiltProject, string bundleVersion)
