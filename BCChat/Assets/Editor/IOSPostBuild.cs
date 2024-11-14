@@ -10,7 +10,7 @@ using UnityEngine;
 
 public static class IOSPostBuild
 {
-    [PostProcessBuild(100)]
+    [PostProcessBuildAttribute(100)]
     public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
     {
         if (target != BuildTarget.iOS)
