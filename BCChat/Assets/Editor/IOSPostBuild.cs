@@ -41,7 +41,7 @@ public static class IOSPostBuild
             SetBundleVersionPlist(pathToBuiltProject, bNum);
 
             // Build and Export to .ipa
-            CreateIpaFromXcodeProject(pathToBuiltProject);
+            //CreateIpaFromXcodeProject(pathToBuiltProject);
         }
         catch (Exception e)
         {
