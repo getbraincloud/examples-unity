@@ -273,7 +273,7 @@ function main() {
         var FeaturedPlayerID = postResult.data.FeaturedPlayer.value;
         bridge.logInfo(`FeaturedPlayerID: ${FeaturedPlayerID}`);
 
-        if (FeaturedPlayerID in arrProfileIds) {
+        if (arrProfileIds.indexOf(FeaturedPlayerID) !== -1) {
             response.featuredProtectCount = 0;
         } else {
             bridge.logInfo(
