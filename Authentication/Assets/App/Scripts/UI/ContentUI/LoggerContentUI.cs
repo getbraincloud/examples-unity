@@ -89,13 +89,13 @@ public class LoggerContentUI : ContentUIBehaviour
 
     #region UI
 
-    public void LogMessage(string message, bool wordWrap = true, bool canCopy = false) =>
+    public void LogMessage(string message, bool wordWrap = true, bool canCopy = true) =>
         DisplayLogObject(LogType.Log, message, wordWrap, canCopy);
 
-    public void LogWarning(string warning, bool wordWrap = true, bool canCopy = false) =>
+    public void LogWarning(string warning, bool wordWrap = true, bool canCopy = true) =>
         DisplayLogObject(LogType.Warning, warning, wordWrap, canCopy);
 
-    public void LogError(string error, bool wordWrap = true, bool canCopy = false) =>
+    public void LogError(string error, bool wordWrap = true, bool canCopy = true) =>
         DisplayLogObject(LogType.Error, error, wordWrap, canCopy);
 
     public void ClearLogs()

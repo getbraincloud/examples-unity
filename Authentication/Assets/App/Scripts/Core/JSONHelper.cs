@@ -2,10 +2,20 @@ using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.Text;
 using UnityEngine;
 
 namespace BrainCloud.JSONHelper
 {
+    public struct JWT
+    {
+        public string header;
+        public string payload;
+        public string signature;
+    }
+
+
     /// <summary>
     /// An interface to help with serializing and deserializing JSON data.
     /// </summary>
@@ -299,6 +309,47 @@ namespace BrainCloud.JSONHelper
             }
 
             return default;
+        }
+
+        /// <summary>
+        /// Decodes a JWT string
+        /// </summary>
+        public static JWT DecodeJWT(string jwt)
+        {
+            string[] parts = jwt.Split('.');
+            if (parts.Length != 3)
+            {
+                Debug.LogError("Invalid JWT format.");
+                return default;
+            }
+
+            JWT result = new JWT();
+            string header = DecodeBase64Url(parts[0]);
+            Debug.Log("Header: " + header);
+
+            string payload = DecodeBase64Url(parts[1]);
+            Debug.Log("Payload: " + payload);
+
+            Debug.Log("Signature (Base64 URL Encoded): " + parts[2]);
+
+            result.header = header;
+            result.payload = payload;
+            result.signature = parts[2];
+
+            return result;
+        }
+
+        private static string DecodeBase64Url(string base64Url)
+        {
+            string paddedBase64 = base64Url.Replace('-', '+').Replace('_', '/');
+            switch (paddedBase64.Length % 4)
+            {
+                case 2: paddedBase64 += "=="; break;
+                case 3: paddedBase64 += "="; break;
+            }
+
+            byte[] bytes = Convert.FromBase64String(paddedBase64);
+            return Encoding.UTF8.GetString(bytes);
         }
     }
 }

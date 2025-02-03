@@ -1,9 +1,17 @@
 using BrainCloud;
 using BrainCloud.JSONHelper;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if ENABLE_WINMD_SUPPORT
+using System.Threading.Tasks;
+using Windows.Services.Store;
+using Windows.System;
+using System;
+#endif
 
 /// <summary>
 /// <para>
@@ -50,6 +58,10 @@ public class CurrencyServiceUI : ContentUIBehaviour
     private BrainCloudPlayerStatistics statsService = default;
     private BrainCloudVirtualCurrency currencyService = default;
 
+#if ENABLE_WINMD_SUPPORT
+    private StoreContext storeContext;
+#endif
+
     #region Unity Messages
 
     protected override void Awake()
@@ -74,7 +86,11 @@ public class CurrencyServiceUI : ContentUIBehaviour
         IncrementXPField.onEndEdit.AddListener((value) => ClampAwardAmount(IncrementXPField, value));
         IncrementXPButton.onClick.AddListener(OnIncrementXPButton);
         AwardGemsField.onEndEdit.AddListener((value) => ClampAwardAmount(AwardGemsField, value));
+#if ENABLE_WINMD_SUPPORT
+        AwardGemsButton.onClick.AddListener(OnAwardGemsButtonUWP);
+#else
         AwardGemsButton.onClick.AddListener(OnAwardGemsButton);
+#endif
         ConsumeGemsField.onEndEdit.AddListener((value) => ClampAwardAmount(ConsumeGemsField, value));
         ConsumeGemsButton.onClick.AddListener(OnConsumeGemsButton);
     }
@@ -89,6 +105,12 @@ public class CurrencyServiceUI : ContentUIBehaviour
         InitializeUI();
 
         base.Start();
+
+#if ENABLE_WINMD_SUPPORT
+        storeContext = StoreContext.GetDefault();
+
+        FetchProductsUWP();
+#endif
     }
 
     private void OnDisable()
@@ -112,7 +134,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
         base.OnDestroy();
     }
 
-    #endregion
+#endregion
 
     #region UI
 
@@ -176,8 +198,82 @@ public class CurrencyServiceUI : ContentUIBehaviour
         }
     }
 
+    private async void FetchProductsUWP()
+    {
+#if ENABLE_WINMD_SUPPORT
+        //try fetching active account details
+        var users = await User.FindAllAsync();
+        foreach (var user in users)
+        {
+            var userName = await user.GetPropertyAsync(KnownUserProperties.AccountName);
+            Debug.Log($"Signed-in user: {userName}");
+        }
+
+        try
+        {
+            // Define product filters (only Add-ons in this case)
+            var productKinds = new List<string> { "Durable", "Consumable" };
+            var productIds = new List<string> { "9PJK64T36TPK" };
+
+            // Fetch product details
+            StoreProductQueryResult result = await storeContext.GetAssociatedStoreProductsAsync(productKinds);
+
+            if (result.ExtendedError != null)
+            {
+                Debug.LogError($"Error fetching products: {result.ExtendedError.Message}");
+                return;
+            }
+
+            // Iterate over the products and log their details
+            foreach (KeyValuePair<string, StoreProduct> product in result.Products)
+            {
+                Debug.Log($"Product ID: {product.Key}");
+                Debug.Log($"Title: {product.Value.Title}");
+                Debug.Log($"Description: {product.Value.Description}");
+                Debug.Log($"Price: {product.Value.Price.FormattedPrice}");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Error fetching product list: {ex.Message}");
+        }
+#endif
+    }
+
+    private async void OnAwardGemsButtonUWP()
+    {
+#if ENABLE_WINMD_SUPPORT
+        try
+        {
+            StorePurchaseResult result = await storeContext.RequestPurchaseAsync("testcurrency");
+            switch (result.Status)
+            {
+                case StorePurchaseStatus.Succeeded:
+                    Debug.Log("Purchase successful!");
+                    // Unlock the purchased feature/item here
+                    break;
+                case StorePurchaseStatus.NotPurchased:
+                    Debug.Log("Purchase canceled.");
+                    Debug.Log($"Extended Error: {result.ExtendedError?.Message}");
+                    break;
+                case StorePurchaseStatus.NetworkError:
+                case StorePurchaseStatus.ServerError:
+                    Debug.Log("Network or server error.");
+                    Debug.Log($"Extended Error: {result.ExtendedError?.Message}");
+                    break;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Error purchasing product: {ex.Message}");
+        }
+#endif
+    }
+
     private void OnAwardGemsButton()
     {
+
+
         if (int.TryParse(AwardGemsField.text, out int amount) && amount > 0)
         {
             IsInteractable = false;
@@ -228,7 +324,7 @@ public class CurrencyServiceUI : ContentUIBehaviour
                                 OnFailure("ResetCurrency Script Failed", () => IsInteractable = true));
     }
 
-    #endregion
+#endregion
 
     #region brainCloud
 
