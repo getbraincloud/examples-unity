@@ -179,6 +179,17 @@ public class InvadersGame : NetworkBehaviour
             SetGameEnd(GameOverReason.Death);
         }
 
+        //Check to see if all players are currently alive in game
+        if (!ArePlayersAlive())
+        {
+            isGameOver.Value = true;
+            for (int i = 0; i < _players.Length; i++)
+            {
+                _players[i].NotifyGameOverClientRpc(GameOverReason.Death);
+            }
+            SetGameEnd(GameOverReason.Death);
+        }
+
         //If we are the server and the game has started, then update the enemies
         UpdateEnemies();
     }

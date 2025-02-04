@@ -451,7 +451,14 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     public static Color ReturnUserColor(int newColor = 0)
     {
-        return colours[newColor];
+        if(newColor >= 0 && newColor < colours.Count)
+        {
+            return colours[newColor];
+        }
+        else
+        {
+            return colours[0];
+        }
     }
 
     public bool IsLocalUserHost()
