@@ -39,6 +39,8 @@ public class BrainCloudManager : MonoBehaviour
     private string _currentFFALobby;
     private string _currentTeamLobby;
     
+    private string currentEntryId;
+    
     private void Awake()
     {
         _logger = FindObjectOfType<LogErrors>();
@@ -158,6 +160,10 @@ public class BrainCloudManager : MonoBehaviour
     private void OnUpdateName(string jsonResponse, object cbObject)
     {
         _bcWrapper.GlobalAppService.ReadProperties(OnReadProperties, LogErrorThenPopUpWindow);
+        
+        // Enable RTT
+        _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RTTService.EnableRTT(null, OnRTTDisconnected);
     }
     
     private void OnReadProperties(string jsonResponse, object cbObject)
@@ -171,25 +177,28 @@ public class BrainCloudManager : MonoBehaviour
             OnLoggedIn();
             return;
         }
-        Dictionary<string, object> objectContainer = new Dictionary<string, object>();
-        Dictionary<string, object> lobby = new Dictionary<string, object>();
+        var value = new Dictionary<string, object>();
         for (int i = 0; i < data.Count; i++)
         {
             var item = data.ElementAt(i);
-            objectContainer[item.Key] = ((Dictionary<string, object>) item.Value)["value"];
-            var lobbyData = JsonReader.Deserialize<Dictionary<string, object>>((string) objectContainer["AllLobbyTypes"]);
-            for (int j = 0; j < lobbyData.Count; j++)
+            value[item.Key] = ((Dictionary<string, object>) item.Value)["value"];
+        }
+        
+        Dictionary<string, object> lobby = new Dictionary<string, object>();
+        var lobbyData = JsonReader.Deserialize<Dictionary<string, object>>((string) value["AllLobbyTypes"]);
+        _teamLobbyTypesList.Clear();
+        _ffaLobbyTypesList.Clear();
+        for (int j = 0; j < lobbyData.Count; j++)
+        {
+            lobby = lobbyData[j.ToString()] as Dictionary<string, object>;
+            string lobbyType = lobby["lobby"].ToString();
+            if(lobbyType.Contains("Team"))
             {
-                lobby = lobbyData[j.ToString()] as Dictionary<string, object>;
-                string lobbyType = lobby["lobby"].ToString();
-                if(lobbyType.Contains("Team"))
-                {
-                    _teamLobbyTypesList.Add(lobbyType);
-                }
-                else
-                {
-                    _ffaLobbyTypesList.Add(lobbyType);
-                }
+                _teamLobbyTypesList.Add(lobbyType);
+            }
+            else
+            {
+                _ffaLobbyTypesList.Add(lobbyType);
             }
         }
         GameManager.Instance.UpdateLobbyDropdowns(_ffaLobbyTypesList, _teamLobbyTypesList);
@@ -230,9 +239,7 @@ public class BrainCloudManager : MonoBehaviour
         StateManager.Instance.Protocol = protocol;
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         _isReconnecting = false;
-        // Enable RTT
-        _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
-        _bcWrapper.RTTService.EnableRTT(OnRTTConnected, OnRTTDisconnected);
+        OnRTTConnected("", null);
     }
 
     // Cleanly close the game. Go back to main menu but don't log
@@ -242,8 +249,8 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
 
-        _bcWrapper.RTTService.DeregisterAllRTTCallbacks();
-        _bcWrapper.RTTService.DisableRTT();
+        //_bcWrapper.RTTService.DeregisterAllRTTCallbacks();
+        //_bcWrapper.RTTService.DisableRTT();
 
         if (changeState)
         {
@@ -854,20 +861,12 @@ public class BrainCloudManager : MonoBehaviour
         var settings = new Dictionary<string, object>();
 
         string teamCode = GameManager.Instance.GameMode == GameMode.FreeForAll ? "all" : "";
-        string lobbyType = "";
-        if (GameManager.Instance.GameMode == GameMode.FreeForAll)
-        {
-            lobbyType = _currentFFALobby;
-        }
-        else
-        {
-            lobbyType = _currentTeamLobby;
-        }
+
 
         //
         _bcWrapper.LobbyService.FindOrCreateLobby
         (
-            lobbyType,
+            GetLobbyType(),
             0, // rating
             1, // max steps
             algo, // algorithm
@@ -878,9 +877,38 @@ public class BrainCloudManager : MonoBehaviour
             teamCode, // team code
             settings, // settings
             null, // other users
-            null, // Success of lobby found will be in the event onLobbyEvent
+            FindLobbyCallback, 
             LogErrorThenPopUpWindow, "Failed to find lobby"
         );
+    }
+    
+    private string GetLobbyType()
+    {
+        string lobbyType = "";
+        if (GameManager.Instance.GameMode == GameMode.FreeForAll)
+        {
+            lobbyType = _currentFFALobby;
+        }
+        else
+        {
+            lobbyType = _currentTeamLobby;
+        }
+
+        return lobbyType;
+    }
+
+
+    
+    private void FindLobbyCallback(string in_response, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        currentEntryId = data["entryId"] as string;
+    }
+    
+    public void CancelFindRequest()
+    {
+        _bcWrapper.LobbyService.CancelFindRequest(GetLobbyType(), currentEntryId);
     }
 
     void OnRTTDisconnected(int status, int reasonCode, string jsonError, object cbObject)
