@@ -41,6 +41,8 @@ public class BrainCloudManager : MonoBehaviour
     
     private string currentEntryId;
     
+    private static List<Color> colours = new List<Color>();
+    
     private void Awake()
     {
         _logger = FindObjectOfType<LogErrors>();
@@ -119,6 +121,37 @@ public class BrainCloudManager : MonoBehaviour
     {
         GameManager.Instance.UpdateMainMenuText();
         StateManager.Instance.isLoading = false;
+        _bcWrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback);
+    }
+    
+    private void OnGetColoursCallback(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+        var property = data["Colours"] as Dictionary<string, object>;
+
+        var value = property["value"] as string;
+        //"081175,902a96,cf3222,d67b10,5390ce,49b85d,d1d675,b8ced6"
+        string[] hexValues = value.Split(',');
+
+        colours.Clear();
+        foreach(string hex in hexValues)
+        {
+            colours.Add(ColourFromHex(hex));
+        }
+        
+        GameManager.Instance.UpdateColorList(colours);
+    }
+    
+    private Color ColourFromHex(string hexColour)
+    {
+        int hexNumber = Convert.ToInt32(hexColour, 16);
+        int b = hexNumber % 256;
+        hexNumber = (hexNumber - b) / 256;
+        int g = hexNumber % 256;
+        hexNumber = (hexNumber - g) / 256;
+        int r = hexNumber;
+        return new Color(r/255f, g/255f, b/255f);
     }
     
     // User authenticated, handle the result
