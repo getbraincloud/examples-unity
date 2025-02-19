@@ -27,6 +27,10 @@ public class ConnectingGameState : GameState
         if (currentState != GameStates.SignIn)
         {
             StateManager.Instance.ChangeState(CancelNextState ? StateManager.Instance.CurrentGameState - 1  : _gameStateToOpen);    
+            if(CancelNextState)
+            {
+                BrainCloudManager.Instance.CancelFindRequest();
+            }
         }
         else
         {
@@ -54,7 +58,7 @@ public class ConnectingGameState : GameState
             yield return new WaitForFixedUpdate();
         }
 
-        yield return new WaitForSeconds(2);
+        yield return new WaitForFixedUpdate();
         CloseWindow();
     }
 }
