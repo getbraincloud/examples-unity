@@ -169,6 +169,7 @@ public class BrainCloudManager : MonoBehaviour
         }
         else
         {
+            LocalUserInfo.Username = playerName;
             MenuControl.Singleton.SwitchMenuButtons();            
         }
         if(!MenuControl.Singleton.RememberMeToggle.isOn)
@@ -176,6 +177,8 @@ public class BrainCloudManager : MonoBehaviour
             _wrapper.ResetStoredProfileId();
             _wrapper.Client.AuthenticationService.ProfileId = _localUserInfo.ProfileID;
         }
+
+        MenuControl.Singleton.DisplayUsername(_localUserInfo.Username);
 
         EnableRTTAndLobbyCallbacks();
     }
