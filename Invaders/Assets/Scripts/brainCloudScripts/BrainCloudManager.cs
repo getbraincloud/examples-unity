@@ -239,7 +239,6 @@ public class BrainCloudManager : MonoBehaviour
             1, // max steps
             algo, // algorithm
             filters, // filters
-            0, // Timeout
             false, // ready
             extra, // extra
             teamCode, // team code
