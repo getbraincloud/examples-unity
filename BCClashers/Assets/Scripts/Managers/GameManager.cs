@@ -140,11 +140,6 @@ public class GameManager : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
         _currentUserInfo = Settings.LoadPlayerInfo();
-        if(MenuManager.Instance != null)
-        {
-            MenuManager.Instance.UsernameInputField.text = _currentUserInfo.Username;
-            MenuManager.Instance.PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
-        }
     }
 
     public bool IsEntityIdValid()
@@ -219,10 +214,10 @@ public class GameManager : MonoBehaviour
         SetUpSpawners();
         
         PlaybackStreamManager.Instance.StructuresList.Clear();
-        for (int i = 0; i < _defenderStructParent.childCount; i++)
+        for (int i = 0; i < _defenderStructParent.GetChild(0).childCount; i++)
         {
-            GameObject structure = _defenderStructParent.GetChild(i).gameObject;
-            BaseHealthBehavior healthScript = structure.GetComponent<BaseHealthBehavior>(); 
+            GameObject structure = _defenderStructParent.GetChild(0).GetChild(i).gameObject;
+            BaseHealthBehavior healthScript = structure.GetComponent<BaseHealthBehavior>();
             healthScript.EntityID = i;
             PlaybackStreamManager.Instance.StructuresList.Add(healthScript);
         }
@@ -246,7 +241,7 @@ public class GameManager : MonoBehaviour
     {
         if (!_isGameActive) return;
         _isGameActive = false;
-
+        int structureKillCount = 0;
         var slayCount = 0;
         var counterAttackCount = 0;
         if (!IsInPlaybackMode)
@@ -262,16 +257,20 @@ public class GameManager : MonoBehaviour
             }
             else if(in_didInvaderWin)
             {
-                _gameOverScreenRef.WinStatusText.text = "You Win !";
+                _gameOverScreenRef.WinStatusText.text = "Victory !";
             }
             else
             {
-                _gameOverScreenRef.WinStatusText.text = "Your troops are defeated";
+                _gameOverScreenRef.WinStatusText.text = "Defeated...";
             }
 
-
-            NetworkManager.Instance?.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
-            NetworkManager.Instance?.GameCompleted(in_didInvaderWin);    
+            if (NetworkManager.Instance)
+            {
+                structureKillCount = NetworkManager.Instance.StructureKillCount;
+                NetworkManager.Instance.IncreaseGoldFromGameStats(slayCount, _invaderTroopCount);
+                NetworkManager.Instance.SummaryInfo(slayCount, counterAttackCount, GetSessionManager().GameSessionTimer);
+                NetworkManager.Instance.GameCompleted(in_didInvaderWin);
+            }
         }
         else
         {
@@ -281,9 +280,13 @@ public class GameManager : MonoBehaviour
 
             _gameOverScreenRef.WinStatusText.text = "Recording finished !";
         }
-        
-        _gameOverScreenRef.InvadersDefeatedText.text = $"Number of slayed troops: {slayCount}";
-        _gameOverScreenRef.DefendersDefeatedText.text = $"Number of defeated troop: {counterAttackCount}";
+
+        _gameOverScreenRef.StructuresDefeatedText.text = $"Structures Destroyed: {structureKillCount}";
+        _gameOverScreenRef.InvadersDefeatedText.text = $"Slain Troops: {slayCount}";
+        _gameOverScreenRef.DefendersDefeatedText.text = $"Troops Lost: {counterAttackCount}";
+
+        int goldGained = (slayCount * 10000) + (_invaderTroopCount * 10000) + (structureKillCount * 10000);
+        _gameOverScreenRef.GoldEarnedText.text = "Gold earned: " + goldGained.ToString("#,#");
         
         //clean up projectiles
         if (_projectiles.Count > 0)
@@ -320,7 +323,7 @@ public class GameManager : MonoBehaviour
     public bool CheckIfGameOver()
     {
         if (!_isGameActive) return true;
-        if (_defenderStructParent.childCount == 0 ||
+        if (_defenderStructParent.GetChild(0).childCount == 0 ||
             _invaderTroopCount == 0)
         {
             GameOver(_invaderTroopCount > 0);

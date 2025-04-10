@@ -13,6 +13,7 @@ namespace BrainCloudUNETExample
 
         public TMP_InputField UsernameBox = null;
         public TMP_InputField PasswordBox = null;
+        public Toggle RememberMeToggle;
 
         public Sprite IconEmail = null;
         public Sprite IconPilot = null;
@@ -82,6 +83,7 @@ namespace BrainCloudUNETExample
         #region Public
         public void OnLoginButton()
         {
+            GCore.Instance.RememberUser = RememberMeToggle.isOn;
             if (ValidateUserName())
             {
                 if (m_defaultAuthType == AuthenticationType.Universal)
@@ -172,6 +174,12 @@ namespace BrainCloudUNETExample
             {
                 GPlayerMgr.Instance.PlayerData.UniversalId = UsernameBox.text;
                 GCore.Wrapper.Client.PlayerStateService.UpdateName(UsernameBox.text);
+            }
+            if(!RememberMeToggle.isOn)
+            {
+                var profileID = GCore.Wrapper.GetStoredProfileId();
+                GCore.Wrapper.ResetStoredProfileId();
+                GCore.Wrapper.Client.AuthenticationService.ProfileId = profileID;
             }
             GCore.Instance.ProcessRetryQueue();
             onCompleteConnectingSubState();
@@ -284,7 +292,7 @@ namespace BrainCloudUNETExample
                 GSteamAuthManager.Instance.AttachSteamAccount(true, onAttachSteamAccount, onAuthFail);
                 m_lastAuthType = AuthenticationType.Steam;
             }
-            else 
+            else
 #endif
             if (GPlayerMgr.Instance.IsUniversalIdAttached())
             {
@@ -301,14 +309,26 @@ namespace BrainCloudUNETExample
 
         private void OnMergeIdentity()
         {
-            GStateManager.Instance.EnableLoadingSpinner(true);
+            if(!RememberMeToggle.isOn)
+            {
+                var profileID = GCore.Wrapper.GetStoredProfileId();
+                GCore.Wrapper.ResetStoredProfileId();
+                GCore.Wrapper.Client.AuthenticationService.ProfileId = profileID;
+                GPlayerMgr.Instance.PlayerData.PlayerName = UsernameBox.text;
+                GStateManager.Instance.EnableLoadingSpinner(false);
+                onCompleteConnectingSubState();
+            }
+            else
+            {
+                GStateManager.Instance.EnableLoadingSpinner(true);
+                if (m_lastAuthType == AuthenticationType.Universal)
+                    GCore.Wrapper.IdentityService.MergeUniversalIdentity(UsernameBox.text, PasswordBox.text, onMergeIdentitySuccess, onAuthFail);
+                else if (m_lastAuthType == AuthenticationType.Email)
+                    GCore.Wrapper.IdentityService.MergeEmailIdentity(UsernameBox.text, PasswordBox.text, onMergeIdentitySuccess, onAuthFail);
+                else if (m_lastAuthType == AuthenticationType.Steam)
+                    GSteamAuthManager.Instance.MergeSteamAccount(onMergeIdentitySuccess, onAuthFail);
+            }
 
-            if (m_lastAuthType == AuthenticationType.Universal)
-                GCore.Wrapper.IdentityService.MergeUniversalIdentity(UsernameBox.text, PasswordBox.text, onMergeIdentitySuccess, onAuthFail);
-            else if (m_lastAuthType == AuthenticationType.Email)
-                GCore.Wrapper.IdentityService.MergeEmailIdentity(UsernameBox.text, PasswordBox.text, onMergeIdentitySuccess, onAuthFail);
-            else if (m_lastAuthType == AuthenticationType.Steam)
-                GSteamAuthManager.Instance.MergeSteamAccount(onMergeIdentitySuccess, onAuthFail);
 
             // Add support for other Authentication types here
         }

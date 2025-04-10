@@ -20,7 +20,7 @@ using UnityEngine;
 /// While all of BrainCloudClient's services are accessible thorugh here, it is recommended to cache
 /// references to whichever service you need in the script for faster accessing in the IL/CPP source.
 /// </para>
-/// 
+///
 /// <br><seealso cref="BrainCloudWrapper"/></br>
 /// <br><seealso cref="BrainCloudClient"/></br>
 /// <br><seealso cref="UserHandler"/></br>
@@ -166,6 +166,10 @@ public class BCManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        if(Wrapper.Client.Authenticated)
+        {
+            Wrapper.LogoutOnApplicationQuit(false);
+        }
         _isInstanced = false;
     }
 

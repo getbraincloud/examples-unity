@@ -18,6 +18,8 @@ namespace BrainCloudUNETExample
         public static BombersPlayerController LocalPlayer { get { return m_localPlayer; } set { m_localPlayer = value; if (value != null) { m_localPlayer.ProfileId = GCore.Wrapper.Client.ProfileId; } } }
         private static BombersPlayerController m_localPlayer;
 
+        private static string currentEntryId;
+
         private readonly string LobbyStrategy = "strategy";
         private readonly string StrategyAbsolute = "absolute";
         private readonly string StrategyCompound = "compound";
@@ -109,7 +111,7 @@ namespace BrainCloudUNETExample
             Dictionary<string, object> playerExtra = new Dictionary<string, object>();
             playerExtra.Add("cxId", GCore.Wrapper.Client.RTTConnectionID);
             playerExtra.Add(GBomberRTTConfigManager.JSON_GOLD_WINGS, GPlayerMgr.Instance.GetCurrencyBalance(GBomberRTTConfigManager.CURRENCY_GOLD_WINGS) > 0 ? true : false);
-            
+
             Dictionary<string, object> algo = new Dictionary<string, object>();
 
             float[] arry = { 10.0f, 20.5f, 80.0f };
@@ -146,7 +148,7 @@ namespace BrainCloudUNETExample
                compoundedRangeData.Add(newData);
            }
            algo[CompoundRanges] = compoundedRangeData.ToArray();
-           
+
             /*
                    // ranged percent strategy
                    algo[OperationParam.LobbyStrategy.Value] = OperationParam.StrategyRangedPercent.Value;
@@ -159,7 +161,15 @@ namespace BrainCloudUNETExample
                     algo[OperationParam.LobbyAlignment.Value] = OperationParam.AlignmentCenter.Value;
                     algo[OperationParam.LobbyRanges.Value] = arry;
                     */
-            GCore.Wrapper.LobbyService.FindOrCreateLobbyWithPingData(m_lastSelectedRegionType, 76, 2, algo, s_matchOptions, 1, false, playerExtra, "", s_matchOptions, in_otherCxIds);
+
+            GCore.Wrapper.LobbyService.FindOrCreateLobbyWithPingData(m_lastSelectedRegionType, 76, 2, algo, s_matchOptions, false, playerExtra, "", s_matchOptions, in_otherCxIds, FindLobbyCallback);
+        }
+
+        private void FindLobbyCallback(string in_response, object cbObject)
+        {
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
+            Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+            currentEntryId = data["entryId"] as string;
         }
 
         private string m_lastSelectedRegionType = "4v4_can";
@@ -170,7 +180,7 @@ namespace BrainCloudUNETExample
 
         public void CancelFindRequest()
         {
-            GCore.Wrapper.LobbyService.CancelFindRequest(m_lastSelectedRegionType);
+            GCore.Wrapper.LobbyService.CancelFindRequest(m_lastSelectedRegionType, currentEntryId);
         }
 
         private void updateLobbyInfo(ulong in_unetId)
@@ -205,7 +215,7 @@ namespace BrainCloudUNETExample
                     {
                         bWaitForMatch = true;
                     }
-                    // if they are readied up 
+                    // if they are readied up
                     if (member.LobbyReadyUp) cxIds.Add(member.CXId);
                 }
 
@@ -476,7 +486,7 @@ namespace BrainCloudUNETExample
 #endif
                 switch (rsConnectionType)
                 {
-                    //web socket 
+                    //web socket
                     case 0:
                         {
                             if (!ports.ContainsKey("ws"))
@@ -490,7 +500,7 @@ namespace BrainCloudUNETExample
                         }
                         break;
 
-                    // TCP 
+                    // TCP
                     case 1:
                         {
                             RoomServerInfo.Port = (int)ports["tcp"];
@@ -609,7 +619,7 @@ namespace BrainCloudUNETExample
             else
             {
                 GStateManager.Instance.EnableLoadingSpinner(true);
-                GCore.Wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnEnableRTTSuccess, OnEnableRTTFailed);
+                GCore.Wrapper.RTTService.EnableRTT(OnEnableRTTSuccess, OnEnableRTTFailed);
             }
         }
         private void onRSConnectErrorHandle()
@@ -1152,7 +1162,7 @@ namespace BrainCloudUNETExample
 
             GStateManager.Instance.EnableLoadingSpinner(true);
             GCore.Wrapper.RTTService.DisableRTT();
-            GCore.Wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnEnableRTTSuccess, OnEnableRTTFailed);
+            GCore.Wrapper.RTTService.EnableRTT(OnEnableRTTSuccess, OnEnableRTTFailed);
         }
 
         public bool AllMembersJoined()
@@ -1365,6 +1375,11 @@ namespace BrainCloudUNETExample
 
         public override void OnApplicationQuit()
         {
+            if(GCore.Wrapper.Client.Authenticated)
+            {
+                GCore.Wrapper.LogoutOnApplicationQuit(false);
+            }
+
             DisconnectGlobalChat();
 
             // force whatever is aroudn to be sent out

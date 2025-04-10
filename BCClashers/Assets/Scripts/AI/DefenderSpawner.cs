@@ -3,7 +3,10 @@ using UnityEngine;
 
 public class DefenderSpawner : MonoBehaviour
 {
-    public Transform[] SpawnPoints;
+    private Transform[] SpawnPoints;
+    public Transform[] EasySpawnPoints;
+    public Transform[] MediumSpawnPoints;
+    public Transform[] HardSpawnPoints;
     public Transform StructureSpawnPoint;
     public SpawnData DefenderSpawnData;
     
@@ -33,6 +36,20 @@ public class DefenderSpawner : MonoBehaviour
 
     public void SpawnDefenderSetup()
     {
+        switch (GameManager.Instance.DefenderRank)
+        {
+            case ArmyDivisionRank.Easy:
+                SpawnPoints = EasySpawnPoints;
+                break;
+            case ArmyDivisionRank.Medium:
+                SpawnPoints = MediumSpawnPoints;
+                break;
+            case ArmyDivisionRank.Hard:
+            case ArmyDivisionRank.Test:
+                SpawnPoints = HardSpawnPoints;
+                break;
+        }
+    
         _addOffsetToLocation = false;
         _spawnPointIndex = 0;
         GameManager.Instance.DefenderTroopCount = 0;
@@ -58,7 +75,7 @@ public class DefenderSpawner : MonoBehaviour
                 if (GameManager.Instance.IsInPlaybackMode)
                 {
                     //Assign the ID
-                    troop.EntityID = GameManager.Instance.DefenderIDs[i];
+                    troop.EntityID = GameManager.Instance.DefenderIDs[GameManager.Instance.DefenderTroopCount];
                     troop.IsInPlaybackMode = true;
                     PlaybackStreamManager.Instance.DefendersList.Add(troop);
                 }

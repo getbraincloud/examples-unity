@@ -163,7 +163,6 @@ public class Achievements : ResourcesManager
 
     public class AchievementInfo
     {
-        public const string HOSTED_WEB_ROOT = "http://apps.braincloudservers.com/tictactoe-internal";
         public string Status;
         public string UnlockedText;
         public string UnlockText;
@@ -175,11 +174,7 @@ public class Achievements : ResourcesManager
             UnlockText = extraData["TODO"].ToString();
             UnlockedText = extraData["DONE"].ToString();
             Status = data["status"].ToString();
-#if UNITY_WEBGL
-            ImageURL = HOSTED_WEB_ROOT + extraData["webRelativeURL"].ToString();
-#else
             ImageURL = data["imageUrl"].ToString();
-#endif
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using BrainCloud.JsonFx.Json;
@@ -19,7 +20,7 @@ public class BCinterface : MonoBehaviour
     private InputField _titleMessage;
     private InputField _message;
     private EventSystem _eventSystem;
-    
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -28,7 +29,7 @@ public class BCinterface : MonoBehaviour
         _bc.Init();
         _eventSystem = EventSystem.current;
     }
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,7 +38,7 @@ public class BCinterface : MonoBehaviour
         _channelCode = GameObject.Find("channelid").GetComponent<InputField>();
         _titleMessage = GameObject.Find("title").GetComponent<InputField>();
         _message = GameObject.Find("message").GetComponent<InputField>();
-        
+
         _bcResponseText = GameObject.Find("brainCloudResponse-Text").GetComponent<Text>();
         _versionText = GameObject.Find("Version - Text").GetComponent<Text>();
         _versionText.text = $"Version: {_bc.Client.BrainCloudClientVersion}";
@@ -48,7 +49,7 @@ public class BCinterface : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-         
+
             if (next)
             {
                 InputField inputfield = next.GetComponent<InputField>();
@@ -62,6 +63,14 @@ public class BCinterface : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        if(_bc.Client.Authenticated)
+        {
+            _bc.LogoutOnApplicationQuit(false);
+        }
+    }
+
     //click authentication button
     public void AuthenticateBC()
     {
@@ -70,7 +79,7 @@ public class BCinterface : MonoBehaviour
             SetResponseText("Both User Name and Password fields need to be filled", Color.red);
             return;
         }
-        
+
         _bc.AuthenticateUniversal
             (
                 _username.text,
@@ -80,7 +89,7 @@ public class BCinterface : MonoBehaviour
                 AuthErrorCallback
             );
     }
-    
+
     //click enableRTT Button
     public void EnableRTT()
     {
@@ -94,10 +103,10 @@ public class BCinterface : MonoBehaviour
             SetResponseText("RTT is enabled..", Color.red);
             return;
         }
-        _bc.RTTService.EnableRTT(BrainCloud.RTTConnectionType.WEBSOCKET, EnableRTTSuccessCallback, EnableRTTErrorCallback);
+        _bc.RTTService.EnableRTT(EnableRTTSuccessCallback, EnableRTTErrorCallback);
         _bc.RTTService.RegisterRTTChatCallback(RTTCallback);
     }
-    
+
     //click disableRTT Button
     public void DisableRTT()
     {
@@ -109,8 +118,8 @@ public class BCinterface : MonoBehaviour
         _bc.RTTService.DisableRTT();
         SetResponseText("Disabling RTT...", Color.white);
     }
-    
-    //click post message button 
+
+    //click post message button
     public void PostMessage()
     {
         //Check to ensure everything is set up to post message to brainCloud
@@ -120,7 +129,7 @@ public class BCinterface : MonoBehaviour
             SetResponseText("Need to fill both 'Title of message' and 'Message' fields", Color.red);
             return;
         }
-        
+
         //Creating a message json for PostChatMessage call
         Dictionary<string, object> messageContent = new Dictionary<string, object>
         {
@@ -139,23 +148,23 @@ public class BCinterface : MonoBehaviour
         };
         messageContent.Add("custom", messageCustom);
         string json = JsonWriter.Serialize(messageContent);
-        
+
         // Creating our channelId to send to brainCloud. Note: gl = global channel
         string channelId = _bc.Client.AppId + ":gl:" + _channelCode.text;
         _bc.ChatService.PostChatMessage(channelId, json, true, PostMessageSuccessCallback, PostMessageErrorCallback);
     }
-    
+
     //click connect channel Button
     public void ConnectChannel()
     {
         if (!CanButtonExecute()) return;
-        
+
         string channelId = _bc.Client.AppId + ":gl:" + _channelCode.text;
         int maxReturn = 25;
 
         _bc.ChatService.ChannelConnect(channelId, maxReturn, ChannelSuccessCallback, EnableRTTErrorCallback);
     }
-    
+
     private void AuthSuccessCallback(string responseData, object cbObject)
     {
         SetResponseText("Authenticate Successful \n " + responseData, Color.white);
@@ -202,7 +211,7 @@ public class BCinterface : MonoBehaviour
         string display = "";
         foreach (KeyValuePair<string, object> message in jsonData)
         {
-            display += message.Key +" : "+ JsonWriter.Serialize(message.Value) + "\r\n"; 
+            display += message.Key +" : "+ JsonWriter.Serialize(message.Value) + "\r\n";
         }
 
         SetResponseText("Successfully Enabled RTT \n " + display, Color.white);
@@ -224,7 +233,7 @@ public class BCinterface : MonoBehaviour
             SetResponseText("No messages available to display, try Posting a Message", Color.white);
             return;
         }
-        
+
         string display = "";
         foreach (Dictionary<string, object> message in messages)
         {
@@ -233,7 +242,7 @@ public class BCinterface : MonoBehaviour
                 display += item.Key + " : " + JsonWriter.Serialize(item.Value) + "\r\n";
             }
         }
-        
+
         SetResponseText("Channel Successfully Connected \n " + display, Color.white);
     }
 

@@ -13,7 +13,7 @@ using BrainCloud;
 ///     - Info about Server and Lobby
 /// </summary>
 
-public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting}
+public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting,Reconnecting}
 public class StateManager : MonoBehaviour
 {
     //Game States
@@ -40,7 +40,7 @@ public class StateManager : MonoBehaviour
     public bool isLoading;
     
     //Used to clean up objects when game is finished
-    public List<GameObject> Shockwaves = new List<GameObject>();
+    public List<GameObject> Splatters = new List<GameObject>();
     
     //Messages for loading screen
     private const string LOGGING_IN_MESSAGE = "Logging in...";
@@ -66,7 +66,14 @@ public class StateManager : MonoBehaviour
     private void Start()
     {
         UpdateDisconnectButtons(false);
-        ChangeState(GameStates.SignIn);
+        if(BrainCloudManager.Instance.Wrapper.CanReconnect())
+        {
+            ButtonPressed_ChangeState(GameStates.Reconnecting);
+        }
+        else
+        {
+            ChangeState(GameStates.SignIn);           
+        }
     }
 
     public void AbortToSignIn(string errorMessage)
@@ -103,14 +110,14 @@ public class StateManager : MonoBehaviour
         CurrentServer = null;
         isReady = false;
         
-        foreach (GameObject shockwave in Shockwaves)
+        foreach (GameObject splatter in Splatters)
         {
-            if (shockwave != null)
+            if (splatter != null)
             {
-                Destroy(shockwave);    
+                Destroy(splatter);    
             }
         }
-        Shockwaves = new List<GameObject>();
+        Splatters = new List<GameObject>();
         GameManager.Instance.EmptyCursorList();
         GameManager.Instance.CurrentUserInfo.IsAlive = false;
         GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
@@ -128,11 +135,21 @@ public class StateManager : MonoBehaviour
         {
             CurrentGameState = newState;
         }
-        EnableCurrentGameModeScreen();
+        if(newState == GameStates.Lobby || newState == GameStates.Match)
+        {
+            EnableCurrentGameModeScreen();
+        }
+        
         isLoading = true;
         //User is in this state and moving onto the next
         switch (CurrentGameState)
         {
+            case GameStates.Reconnecting:
+                BrainCloudManager.Instance.AuthenticateReconnect();
+                CheckToEnableReconnectButton();
+                CurrentGameState = GameStates.MainMenu;
+                LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE,false,GameStates.MainMenu);
+                break;
             //Logging In...
             case GameStates.SignIn:
                 CurrentGameState = GameStates.MainMenu;
@@ -209,7 +226,7 @@ public class StateManager : MonoBehaviour
         isLoading = true;
         LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
 
-        BrainCloudManager.Instance.ReconnectUser();
+        BrainCloudManager.Instance.ReconnectUserToLobby();
     }
 
     public void UpdateDisconnectButtons(bool isEnabled)
@@ -220,10 +237,14 @@ public class StateManager : MonoBehaviour
     public void ChangeState(GameStates newGameState)
     {
         CurrentGameState = newGameState;
-        EnableCurrentGameModeScreen();
+        
         if(newGameState == GameStates.MainMenu)
         {
             CheckToEnableReconnectButton();
+        }
+        if(newGameState == GameStates.Lobby || newGameState == GameStates.Match)
+        {
+            EnableCurrentGameModeScreen();
         }
         foreach (GameState currentState in ListOfStates)
         {

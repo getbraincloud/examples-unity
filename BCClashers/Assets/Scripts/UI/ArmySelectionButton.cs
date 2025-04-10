@@ -10,6 +10,7 @@ public class ArmySelectionButton : MonoBehaviour
         if (ArmyType is ArmyType.Invader)
         {
             GameManager.Instance.OnReadSetInvaderList(ArmyRank);
+            MenuManager.Instance.ValidateInvaderSelection();
         }
         else if (ArmyType is ArmyType.Defense)
         {

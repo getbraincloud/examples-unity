@@ -9,14 +9,15 @@ public class App : MonoBehaviour
 
     // Setup a couple stuff into our TicTacToe scene
     public string BoardState = "#########";
-    
+    public string OldBoardState = "#########";
+
     public string MatchId;
     public ulong MatchVersion;
     public string OwnerId;
     public MatchSelect.MatchInfo CurrentMatch;
     public PlayerInfo PlayerInfoO = new PlayerInfo();
     public PlayerInfo PlayerInfoX = new PlayerInfo();
-    
+
     public PlayerInfo WhosTurn;
     public string Name;
     public string ProfileId;
@@ -30,11 +31,11 @@ public class App : MonoBehaviour
     [SerializeField] public GameObject TicTacToeO;
 
     // Variables for handling local multiplayer
-    [SerializeField] public int Offset;   
+    [SerializeField] public int Offset;
     [SerializeField] public Rect ViewportRect;
     [SerializeField] public int WindowId;
     [SerializeField] public string WrapperName;
-    
+
     public PlayerInfo OpponentInfo;
     public bool IsAskingToRematch;
     public int Winner;
@@ -42,7 +43,7 @@ public class App : MonoBehaviour
     public PlayerInfo LoserInfo = null;
     private TicTacToe _localTicTacToe;
     private MatchSelect _localMatchSelect;
-    
+
     private void Start()
     {
         var playerOneObject = new GameObject(WrapperName);
@@ -52,7 +53,7 @@ public class App : MonoBehaviour
 
         Bc.WrapperName = WrapperName; // Optional: Add a WrapperName
         Bc.Init(); // Required: Initialize the Wrapper.
-        
+
         // Now that brainCloud is setup. Let's go to the Login Scene
         var loginObject = Instantiate(Login, playerOneObject.transform);
         loginObject.GetComponentInChildren<GameScene>().App = this;
@@ -63,10 +64,18 @@ public class App : MonoBehaviour
         // If you aren't attaching brainCloud as a Component to a gameObject,
         // you must manually update it with this call.
         // _bc.Update();
-        // 
+        //
         // Given we are using a game Object. Leave _bc.Update commented out.
     //}
-    
+
+    private void OnApplicationQuit()
+    {
+        if(Bc.Client.Authenticated)
+        {
+            Bc.LogoutOnApplicationQuit(false);
+        }
+    }
+
     //Callback used for "Play Again?" scenario
     public void RTTEventCallback(string json)
     {
@@ -78,7 +87,7 @@ public class App : MonoBehaviour
             if (eventData.ContainsKey("isReady"))
             {
                 AskedToRematch = (bool)eventData["isReady"];
-            
+
                 //Enable play again screen to the asked user
                 if (!IsAskingToRematch && AskedToRematch)
                 {
@@ -96,7 +105,7 @@ public class App : MonoBehaviour
                     }
                     if (_localTicTacToe)
                     {
-                        _localTicTacToe.AskToRematchScreen.SetActive(true);    
+                        _localTicTacToe.AskToRematchScreen.SetActive(true);
                     }
                     else if (_localMatchSelect)
                     {
@@ -109,13 +118,13 @@ public class App : MonoBehaviour
                     {
                         GotoMatchSelectScene(_localTicTacToe.gameObject);
                     }
-                }    
+                }
             }
             else if (eventData.ContainsKey("gameConcluded"))
             {
                 CurrentMatch.scoreSubmitted = true;
             }
-            
+
             string eventID = (string)data["evId"];
             Bc.EventService.DeleteIncomingEvent(eventID);
         }
@@ -185,7 +194,7 @@ public class App : MonoBehaviour
         }
         Destroy(previousScene.transform.parent.gameObject);
     }
-    
+
     //************Match Handling**********************
     public void OnCompleteGame()
     {
@@ -249,7 +258,7 @@ public class App : MonoBehaviour
                                   "playAgain",
                                   JsonWriter.Serialize(data));
     }
-    
+
     // ***********Leaderboards Submission*****************
     // Both players will be updated to the leaderboard from the winner user
     public void PostToLeaderboard()
@@ -269,7 +278,7 @@ public class App : MonoBehaviour
     {
         Debug.Log($"RESPONSE : {responseData}");
     }
-    
+
     // **************Achievements**********************
     public void CheckAchievements()
     {
@@ -294,7 +303,7 @@ public class App : MonoBehaviour
     {
         Debug.Log($"Stat Incremented");
     }
-    
+
     private void FailureCallback(int status, int code, string error, object cbObject)
     {
         Debug.Log($"FAILURE RESPONSE: {error}");

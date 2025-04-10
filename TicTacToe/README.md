@@ -1,7 +1,11 @@
 # TicTacToe
 
-Async multiplayer, cloud code and RTT example. 
+<p align="center">
+    <img  src="../_screenshots/x_TicTacToe.png?raw=true">
+    Async Multiplayer, Cloud Code, Gamification, and RTT
+</p>
 
+---
 
 [MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs)  | Find players to match against
 ```csharp
@@ -112,7 +116,7 @@ Up to date and previous versions of Tic Tac Toe are available here. Tic Tac Toe,
 https://github.com/getbraincloud/examples-unity/tree/master/TicTacToe
 
 ## Enable RTT
-From the brainCloud Portal, select the app you wish to add RTT to. Select the Real-time Tech (RTT) Enabled checkbox from **Design | Core App Info | [Advanced Settings](https://sharedprod.braincloudservers.com/admin/dashboard#/development/core-settings-advanced-settings )**. 
+From the brainCloud Portal, select the app you wish to add RTT to. Select the Real-time Tech (RTT) Enabled checkbox from **Design | Core App Info | [Advanced Settings](https://api.braincloudservers.com/admin/dashboard#/development/core-settings-advanced-settings )**. 
 
 
 [MatchSelect.cs](https://github.com/getbraincloud/examples-unity/blob/master/TicTacToe/Assets/Scripts/Menus/MatchSelect.cs) | Set up RTT

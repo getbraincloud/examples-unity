@@ -1,6 +1,9 @@
 using BrainCloud;
 using BrainCloud.Common;
+using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,8 +51,16 @@ public class LoginContentUI : ContentUIBehaviour
 
     protected override void Start()
     {
+        RememberMeToggle.onValueChanged.AddListener(OnRememberMeToggled);
+
+        if (BCManager.Wrapper.CanReconnect())
+        {
+            RememberMeToggle.isOn = true;
+            HandleAutomaticLogin();
+        }
+        /*
         // Handle automatic user login
-        if (GetRememberMePref() && !UserHandler.AnonymousID.IsEmpty())
+        if (GetRememberMePref())
         {
             RememberMeToggle.isOn = true;
             HandleAutomaticLogin();
@@ -59,7 +70,7 @@ public class LoginContentUI : ContentUIBehaviour
             RememberMeToggle.isOn = false;
             SetRememberMePref(false);
         }
-
+        */
         base.Start();
     }
 
@@ -74,7 +85,10 @@ public class LoginContentUI : ContentUIBehaviour
     #endregion
 
     #region UI
-
+    public void OnRememberMeToggled(bool value)
+    {
+        BCManager.UpdateRememberMeSetting(value);
+    }
     public void InitRememberMePref()
     {
         if (!PlayerPrefs.HasKey(PREFS_REMEMBER_ME))
@@ -82,12 +96,6 @@ public class LoginContentUI : ContentUIBehaviour
             PlayerPrefs.SetInt(PREFS_REMEMBER_ME, 0);
         }
     }
-
-    public bool GetRememberMePref() =>
-        PlayerPrefs.GetInt(PREFS_REMEMBER_ME) > 0;
-
-    public void SetRememberMePref(bool value) =>
-        PlayerPrefs.SetInt(PREFS_REMEMBER_ME, value ? int.MaxValue : 0);
 
     public void DisplayError(string error, Selectable problemSelectable = null)
     {
@@ -176,26 +184,26 @@ public class LoginContentUI : ContentUIBehaviour
 
     #region brainCloud
 
-    private void HandleAutomaticLogin()
+    public void HandleAutomaticLogin()
     {
         IsInteractable = false;
 
         FailureCallback onFailure = OnFailure("Automatic Login Failed", () =>
         {
             IsInteractable = true;
-        
+
             DisplayError("Automatic Login Failed\nPlease try logging in manually.");
-        
-            RememberMeToggle.isOn = false;
-            SetRememberMePref(false);
         });
-        
+
         UserHandler.HandleUserReconnect(OnSuccess("Automatically Logging In...", OnAuthenticationSuccess), onFailure);
     }
 
-    private void OnAuthenticationSuccess()
+    private void OnAuthenticationSuccess(string jsonResponse, object cbObject)
     {
-        SetRememberMePref(RememberMeToggle.isOn);
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = response["data"] as Dictionary<string, object>;
+
+        //BCManager.Wrapper.SetStoredProfileId(data["profileId"] as string);
 
         BCManager.Wrapper.SetStoredAuthenticationType(AuthenticationType.Universal.ToString());
 
@@ -212,7 +220,6 @@ public class LoginContentUI : ContentUIBehaviour
         MainContent.gameObject.SetActive(true);
         MainContent.ResetUI();
 
-        RememberMeToggle.isOn = false;
         gameObject.SetActive(false);
     }
 
