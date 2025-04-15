@@ -11,8 +11,8 @@ public class StorePanel : MonoBehaviour
     private const string ERROR_STORE_TEXT = "Error trying to receive products.";
 
     [Header("UI Elements")]
-    [SerializeField] private TMP_Text CurrencyInfoText = default;
     [SerializeField] private Button CloseStoreButton = default;
+    [SerializeField] private ScrollRect IAPScroll = default;
     [SerializeField] private Transform IAPContent = default;
     [SerializeField] private TMP_Text StoreInfoText = default;
 
@@ -60,7 +60,7 @@ public class StorePanel : MonoBehaviour
 
         yield return new WaitUntil(() =>
         {
-            BC = BC ?? FindObjectOfType<BrainCloudWrapper>();
+            BC = BC == null ? FindObjectOfType<BrainCloudWrapper>() : BC;
 
             return BC != null && BC.Client != null && BC.Client.IsInitialized();
         });
@@ -76,7 +76,6 @@ public class StorePanel : MonoBehaviour
     {
         App.IsInteractable = false;
 
-        CurrencyInfoText.text = "---";
         StoreInfoText.gameObject.SetActive(true);
         StoreInfoText.text = OPENING_STORE_TEXT;
 
@@ -105,16 +104,12 @@ public class StorePanel : MonoBehaviour
                 }
             }
 
-            UpdateUserData();
+            IAPScroll.verticalNormalizedPosition = 1.0f;
+
             StoreInfoText.gameObject.SetActive(false);
         }
 
         BrainCloudMarketplace.FetchProducts(onFetchProducts);
-    }
-
-    private void UpdateUserData()
-    {
-        CurrencyInfoText.text = "---";
     }
 
     private void OnCloseStoreButton()
