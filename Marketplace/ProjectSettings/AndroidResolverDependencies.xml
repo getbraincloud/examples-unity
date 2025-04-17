@@ -1,22 +1,27 @@
 <dependencies>
   <packages>
-    <package>com.google.android.gms:play-services-base:18.2.0</package>
-    <package>com.google.firebase:firebase-analytics:21.3.0</package>
-    <package>com.google.firebase:firebase-app-unity:11.3.0</package>
-    <package>com.google.firebase:firebase-common:20.3.3</package>
+    <package>com.google.android.gms:play-services-base:18.6.0</package>
+    <package>com.google.firebase:firebase-analytics:22.4.0</package>
+    <package>com.google.firebase:firebase-app-unity:12.8.0</package>
+    <package>com.google.firebase:firebase-common:21.0.0</package>
     <package>com.google.firebase:firebase-iid:21.1.0</package>
-    <package>com.google.firebase:firebase-messaging:23.2.0</package>
-    <package>com.google.firebase:firebase-messaging-unity:11.3.0</package>
+    <package>com.google.firebase:firebase-messaging:24.1.1</package>
+    <package>com.google.firebase:firebase-messaging-unity:12.8.0</package>
     <package>com.google.flatbuffers:flatbuffers-java:1.12.0</package>
   </packages>
-  <files />
+  <files>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-app-unity/12.8.0/firebase-app-unity-12.8.0.aar</file>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-app-unity/12.8.0/firebase-app-unity-12.8.0.pom</file>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-messaging-unity/12.8.0/firebase-messaging-unity-12.8.0.aar</file>
+    <file>Assets/GeneratedLocalRepo/Firebase/m2repository/com/google/firebase/firebase-messaging-unity/12.8.0/firebase-messaging-unity-12.8.0.pom</file>
+  </files>
   <settings>
     <setting name="androidAbis" value="arm64-v8a,armeabi-v7a" />
     <setting name="bundleId" value="com.brainCloud.Authentication2021" />
     <setting name="explodeAars" value="True" />
     <setting name="gradleBuildEnabled" value="True" />
-    <setting name="gradlePropertiesTemplateEnabled" value="False" />
-    <setting name="gradleTemplateEnabled" value="False" />
+    <setting name="gradlePropertiesTemplateEnabled" value="True" />
+    <setting name="gradleTemplateEnabled" value="True" />
     <setting name="installAndroidPackages" value="True" />
     <setting name="localMavenRepoDir" value="Assets/GeneratedLocalRepo" />
     <setting name="packageDir" value="Assets/Plugins/Android" />
