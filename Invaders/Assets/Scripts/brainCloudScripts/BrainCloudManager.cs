@@ -101,7 +101,7 @@ public class BrainCloudManager : MonoBehaviour
             string appId = Environment.GetEnvironmentVariable("APP_ID");
             string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
             string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
-            string serverUrl = isInternal ? "https://api.internal.braincloudservers.com/s2sdispatcher" : "https://api.braincloudservers.com/s2sdispatcher";
+            string serverUrl = "https://api.braincloudservers.com/s2sdispatcher";
             _bcS2S.Init(appId, serverName, serverSecret, true, serverUrl);
             //_bcS2S.Authenticate();
             _bcS2S.LoggingEnabled = true;
@@ -176,6 +176,8 @@ public class BrainCloudManager : MonoBehaviour
             _wrapper.ResetStoredProfileId();
             _wrapper.Client.AuthenticationService.ProfileId = _localUserInfo.ProfileID;
         }
+
+        EnableRTTAndLobbyCallbacks();
     }
     
     [ServerRpc]
@@ -194,15 +196,19 @@ public class BrainCloudManager : MonoBehaviour
     {
         MenuControl.Singleton.SwitchMenuButtons();
     }
-    
-    public void FindOrCreateLobby()
+
+    public void EnableRTTAndLobbyCallbacks()
     {
-        _wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent); 
+        _wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         _wrapper.RTTService.EnableRTT(OnRTTConnected, OnFailureCallback);
     }
     
-    void OnRTTConnected(string jsonResponse, object cbObject)
+    public void FindOrCreateLobby()
     {
+        if (!_wrapper.RTTService.IsRTTEnabled())
+            return;
+
+
         // Find lobby
         var algo = new Dictionary<string, object>();
         algo["strategy"] = "ranged-absolute";
@@ -210,7 +216,7 @@ public class BrainCloudManager : MonoBehaviour
         List<int> ranges = new List<int>();
         ranges.Add(1000);
         algo["ranges"] = ranges;
-        
+
         //
         var filters = new Dictionary<string, object>();
 
@@ -237,9 +243,14 @@ public class BrainCloudManager : MonoBehaviour
             settings, // settings
             null, // other users
             null, // Success of lobby found will be in the event onLobbyEvent
-            OnFailureCallback, 
+            OnFailureCallback,
             "Failed to find lobby"
         );
+    }
+    
+    void OnRTTConnected(string jsonResponse, object cbObject)
+    {
+        
     }
     
     void OnLobbyEvent(string jsonResponse)
@@ -399,15 +410,19 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
-        Dictionary<string, object> userData = leaderboard[0];
 
-        LobbyControl.Singleton.UpdateFeaturedSelector(
-            (string)userData["playerId"], 
-            (string)userData["playerName"], 
-            (int)userData["score"]
-            );
-        featuredUser = string.Empty;
-        foundFeaturedUserInfo = true;
+        if(leaderboard.Count() != 0)
+        {
+            Dictionary<string, object> userData = leaderboard[0];
+
+            LobbyControl.Singleton.UpdateFeaturedSelector(
+                (string)userData["playerId"],
+                (string)userData["playerName"],
+                (int)userData["score"]
+                );
+            featuredUser = string.Empty;
+            foundFeaturedUserInfo = true;
+        }
     }
 
     public void GetTopUsers(int amount)

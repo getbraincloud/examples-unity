@@ -1,5 +1,6 @@
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -93,17 +94,20 @@ public class PlaybackFetcher : NetworkBehaviour
 
     private void OnServerReadStreams(string responseJson)
     {
-        Dictionary<string, object> message = JsonReader.Deserialize(responseJson) as Dictionary<string, object>;
+        //Dictionary<string, object> message = JsonReader.Deserialize(responseJson) as Dictionary<string, object>;
+        JObject message = JObject.Parse(responseJson);
         int status = (int)message["status"];
-
         if (status == 200)
         {
-            Dictionary<string, object> data = message["data"] as Dictionary<string, object>;
-            Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
-            Dictionary<string, object>[] streams = response["streams"] as Dictionary<string, object>[];
-            foreach(Dictionary<string, object> stream in streams)
+            JObject data = message["data"] as JObject;
+            JObject response = data["response"] as JObject;
+            JArray streams = response["streams"] as JArray;
+            foreach(var stream in streams)
             {
-                ParseStreamData(stream);
+                bool validStream = stream != null && stream.Type != JTokenType.Null;
+
+                if(validStream)
+                    ParseStreamData(stream as JObject);
             }
         }
     }
@@ -125,13 +129,13 @@ public class PlaybackFetcher : NetworkBehaviour
         storedIds = new NetworkStringArray(ids);
     }
 
-    private void ParseStreamData(Dictionary<string, object> data)
+    private void ParseStreamData(JObject data)
     {
         PlaybackStreamRecord output = new PlaybackStreamRecord();
-        Dictionary<string, object>[] events = data["events"] as Dictionary<string, object>[];
-        Dictionary<string, object> summary = data["summary"] as Dictionary<string, object>;
-
-        if (events == null || events.Length == 0)
+        JArray events = data["events"] as JArray;
+        JObject summary = data["summary"] as JObject;
+         
+        if (events == null || events.Count == 0)
         {
             Debug.LogWarning("No events were retrieved...");
             return;
@@ -142,12 +146,11 @@ public class PlaybackFetcher : NetworkBehaviour
             return;
         }
 
-        output.totalFrameCount = summary["framecount"] as int? ?? -2;
-        output.startPosition = Convert.ToSingle(summary["startpos"]);
-        if (summary.ContainsKey("username")) output.username = summary["username"] as string;
-        else output.username = string.Empty;
+        output.totalFrameCount = summary.ContainsKey("framecount") ? (int)summary["framecount"] : -2;
+        output.startPosition = Convert.ToSingle((string)summary["startpos"]);
+        output.username = summary.ContainsKey("username") ? (string) summary["username"] : string.Empty;
 
-        foreach (Dictionary<string, object> eventObj in events)
+        foreach (JObject eventObj in events)
         {
             for (int ii = 0; ii <= (int)eventObj["runlength"]; ii++)
             {

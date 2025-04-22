@@ -30,7 +30,7 @@ public class BrainCloudS2S
 {
     private static int NO_PACKET_EXPECTED = -1;
     private static int SERVER_SESSION_EXPIRED = 40365;
-    private static string DEFAULT_S2S_URL = "https://api.internal.braincloudservers.com/s2sdispatcher";
+    private static string DEFAULT_S2S_URL = "https://api.braincloudservers.com/s2sdispatcher";
     public string ServerURL
     {
         get; private set;
@@ -265,7 +265,7 @@ public class BrainCloudS2S
     {
         string packet = CreatePacket(dataPacket);                   //create data packet of the data with packetId info
 
-        //LogString("Sending Request: " + packet);
+        LogString("Sending Request: " + packet + " to url " + request.url);
 
         byte[] byteArray = Encoding.UTF8.GetBytes(packet);          //convert data packet to byte[]
         request.uploadHandler = new UploadHandlerRaw(byteArray);    //prepare data
@@ -353,7 +353,6 @@ public class BrainCloudS2S
             string unityResponse = null;
             if(activeRequest.request.downloadHandler.isDone)
             {
-                LogString("Sending Request: " + activeRequest.request);
                 unityResponse = activeRequest.request.downloadHandler.text;
             }
             if(!string.IsNullOrEmpty(activeRequest.request.error))
