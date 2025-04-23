@@ -1,4 +1,7 @@
+using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,9 +34,9 @@ public class HistoryPanel : MonoBehaviour
     {
         BackButton.onClick.AddListener(OnBackButton);
 
-        if (BrainCloudMarketplace.IsInitialized)
+        if (App != null)
         {
-            GetTransactionHistory();
+            GetUserItemHistory();
         }
     }
 
@@ -70,14 +73,23 @@ public class HistoryPanel : MonoBehaviour
 
         yield return null;
 
-        App.IsInteractable = true;
+        GetUserItemHistory();
     }
 
     #region UI
 
-    private void GetTransactionHistory()
+    private void GetUserItemHistory()
     {
-        //App.IsInteractable = false;
+        const string APP_STORE =
+#if UNITY_ANDROID
+            "googlePlay";
+#elif UNITY_IOS
+            "itunes";
+#else
+            "";
+#endif
+
+    App.IsInteractable = false;
 
         HistoryContent.gameObject.SetActive(false);
         HistoryInfoText.gameObject.SetActive(true);
@@ -85,7 +97,7 @@ public class HistoryPanel : MonoBehaviour
 
         void onGetTransactionHistory(BCProduct[] inventory)
         {
-            App.IsInteractable = true;
+            
             //if (inventory == null || inventory.Length < 0 || BrainCloudMarketplace.HasErrorOccurred)
             //{
             //    HistoryInfoText.text = BrainCloudMarketplace.HasErrorOccurred ? ERROR_HISTORY_TEXT : NO_TRANSACTION_HISTORY_TEXT;
@@ -110,11 +122,51 @@ public class HistoryPanel : MonoBehaviour
             //
             //UpdateUserData();
             //HistoryInfoText.gameObject.SetActive(false);
+
+            HistoryScroll.verticalNormalizedPosition = 1.0f;
+
+            App.IsInteractable = true;
         }
 
-        //BrainCloudMarketplace.FetchProducts(onFetchProducts);
+        void onSuccess(string jsonResponse, object cbObject)
+        {
+            onGetTransactionHistory(null);
+        }
 
-        HistoryScroll.verticalNormalizedPosition = 1.0f;
+        void onFailure(int status, int reasonCode, string jsonError, object cbObject)
+        {
+            onGetTransactionHistory(null);
+        }
+
+        BC.ScriptService.RunScript("GetTransactionHistory",
+                                   JsonWriter.Serialize(new Dictionary<string, object>()
+                                   {
+                                       {
+                                           "pagination", new Dictionary<string, object>()
+                                            {
+                                                { "rowsPerPage", 50 },
+                                                { "pageNumber", 1 }
+                                            }
+                                       },
+                                       {
+                                            "searchCriteria", new Dictionary<string, object>()
+                                            {
+                                                { "profileId", BC.GetStoredProfileId() },
+                                                { "type", APP_STORE },
+                                                { "pending", true }
+                                            }
+                                       },
+                                       {
+                                            "sortCriteria", new Dictionary<string, object>()
+                                            {
+                                                { "createdAt", -1 }
+                                            }
+                                       }
+                                   }),
+                                   onSuccess,
+                                   onFailure);
+
+        onGetTransactionHistory(null);
     }
 
     private void UpdateUserData()

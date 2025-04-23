@@ -81,7 +81,6 @@ public class StorePanel : MonoBehaviour
 
         void onFetchProducts(BCProduct[] inventory)
         {
-            App.IsInteractable = true;
             if (inventory == null || inventory.Length < 0 || BrainCloudMarketplace.HasErrorOccurred)
             {
                 StoreInfoText.text = BrainCloudMarketplace.HasErrorOccurred ? ERROR_STORE_TEXT : NO_PRODUCTS_STORE_TEXT;
@@ -104,9 +103,9 @@ public class StorePanel : MonoBehaviour
                 }
             }
 
-            IAPScroll.verticalNormalizedPosition = 1.0f;
-
             StoreInfoText.gameObject.SetActive(false);
+            IAPScroll.verticalNormalizedPosition = 1.0f;
+            App.IsInteractable = true;
         }
 
         BrainCloudMarketplace.FetchProducts(onFetchProducts);
