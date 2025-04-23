@@ -17,9 +17,9 @@ public class LobbyControl : NetworkBehaviour
 
     public TMP_Text ServerStatusText;
     public Button ReadyButton;
+    public Button BackButton;
 
-    public TMP_Text ErrorMessage;
-    public GameObject ErrorPanel;
+    public ErrorPopUp ErrorPopUp;
     
     public TMP_Text LobbyText;
     private bool m_AllPlayersInLobby;
@@ -64,7 +64,7 @@ public class LobbyControl : NetworkBehaviour
         GenerateUserStatsForLobby();
         ServerStatusText.gameObject.SetActive(false);
         ReadyButton.gameObject.SetActive(true);
-        ErrorPanel.SetActive(false);
+        BackButton.interactable = true;
         BrainCloudManager.Singleton.StartGetFeaturedUser();
         BrainCloudManager.Singleton.GetTopUsers(leaderBoardSelectors.Count);
     }
@@ -113,6 +113,7 @@ public class LobbyControl : NetworkBehaviour
     public void PlayerIsReady()
     {
         ReadyButton.gameObject.SetActive(false);
+        BackButton.interactable = false;
         _loadingIndicatorMessage = ServerStatusText.text = "Waiting for server";
         ServerStatusText.gameObject.SetActive(true);
         _isLoading = true;
@@ -144,13 +145,13 @@ public class LobbyControl : NetworkBehaviour
     public void ReturnToMainMenu()
     {
         SceneTransitionHandler.sceneTransitionHandler.SwitchScene("StartMenu");
+        BrainCloudManager.Singleton.LeaveLobby();
     }
     
     public void SetupPopupPanel(string errorMessage)
     {
         ReadyButton.enabled = false;
-        ErrorMessage.text = errorMessage;
-        ErrorPanel.SetActive(true);
+        ErrorPopUp.SetupPopupPanel(errorMessage);
     }
 
     public void AddNewPlayerIdSignal(string newId)

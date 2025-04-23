@@ -30,6 +30,8 @@ public class MenuControl : MonoBehaviour
     [SerializeField] private TMP_InputField UsernameInputField;
     [SerializeField] private TMP_InputField PasswordInputField;
     [SerializeField] private TMP_Text AuthenticatedUserLabel;
+    
+    [SerializeField] private ErrorPopUp ErrorPopUp;
 
     private string _loadingIndicatorMessage = "Looking for a server";
     private string _dotsForLoadingIndicator;
@@ -37,6 +39,11 @@ public class MenuControl : MonoBehaviour
     
     public Toggle RememberMeToggle;
     public static MenuControl Singleton { get; private set; }
+    
+    public void SetupPopupPanel(string message)
+    {
+        ErrorPopUp.SetupPopupPanel(message);
+    }
 
     private void Start()
     {
