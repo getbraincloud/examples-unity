@@ -221,6 +221,59 @@ public class BrainCloudMarketplace : IDetailedStoreListener
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="onGetHistory"></param>
+    /// <param name="pageNumber"></param>
+    /// <param name="numPerPage"></param>
+    /// <param name="sortCriteria"></param>
+    public static void GetTransactionHistory(Action<bool, BCTransactionPage> onGetHistory,
+                                             int pageNumber = 1, int numPerPage = 50,
+                                             Dictionary<string, object> sortCriteria = null)
+    {
+        const string SCRIPT_NAME = "GetTransactionHistory";
+
+        sortCriteria ??= new Dictionary<string, object>()
+        {
+            { "createdAt", -1 }
+        };
+
+        void onSuccess(string jsonResponse, object _)
+        {
+            var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)
+                ["response"] as Dictionary<string, object>;
+
+            if (data.ContainsKey("success") && data["success"] is bool success && success)
+            {
+                var history = JsonReader.Deserialize<BCTransactionPage>(JsonWriter.Serialize(data["transactionPage"]));
+
+                if (history.count <= 0)
+                {
+                    Debug.Log("User has no transaction history.");
+                }
+
+                onGetHistory(true, history);
+                return;
+            }
+
+            Debug.Log("Was unable to retreive transaction history for user.");
+            onGetHistory(false, null);
+        }
+
+        bc.ScriptService
+          .RunScript(SCRIPT_NAME,
+                     JsonWriter.Serialize(new Dictionary<string, object>()
+                     {
+                         { "pagination",     new Dictionary<string, object>() {{ "rowsPerPage", numPerPage }, { "pageNumber",  pageNumber }}},
+                         { "searchCriteria", new Dictionary<string, object>() {{ "type", APP_STORE }}},
+                         { "sortCriteria",   sortCriteria }
+                     }),
+                     onSuccess,
+                     OnBrainCloudFailure("Unable to get transaction history from brainCloud!",
+                                         () => onGetHistory(false, null)));
+    }
+
+    /// <summary>
     /// Get any store extensions that are associated with the <b>Google Play Store</b>.
     /// </summary>
     public static T GetExtension<T>() where T : IStoreExtension
