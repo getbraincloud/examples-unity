@@ -221,13 +221,19 @@ public class BrainCloudMarketplace : IDetailedStoreListener
     }
 
     /// <summary>
-    /// 
+    /// Calls the Cloud Code script <b>GetTransactionHistory</b> to get the logged in user's transaction history to display them.
+    ///
+    /// <para>
+    /// <b>Note:</b> This script is included in this example project under <b>Assets > App > CloudCode > GetTransactionHistory.js</b>.
+    /// <br>Upload this script to your brainCloud app for proper functionality.</br>
+    /// </para>
     /// </summary>
-    /// <param name="onGetHistory"></param>
-    /// <param name="pageNumber"></param>
-    /// <param name="numPerPage"></param>
-    /// <param name="sortCriteria"></param>
-    public static void GetTransactionHistory(Action<bool, BCTransactionPage> onGetHistory,
+    /// <param name="onGetHistory">A callback that will process the <see cref="BCTransactionPage"/> JSON data.</param>
+    /// <param name="pageNumber">Which page to retreived, which is based on how many entries fill per-page.</param>
+    /// <param name="numPerPage">How many transaction entries that should be displayed on a page.</param>
+    /// <param name="sortCriteria">MongoDB-style context for how to sort the history.
+    ///                            If <b>null</b> it will sort by newest first by default.</param>
+    public static void GetTransactionHistory(Action<BCTransactionPage> onGetHistory,
                                              int pageNumber = 1, int numPerPage = 50,
                                              Dictionary<string, object> sortCriteria = null)
     {
@@ -252,12 +258,14 @@ public class BrainCloudMarketplace : IDetailedStoreListener
                     Debug.Log("User has no transaction history.");
                 }
 
-                onGetHistory(true, history);
+                HasErrorOccurred = false;
+                onGetHistory(history);
                 return;
             }
 
             Debug.Log("Was unable to retreive transaction history for user.");
-            onGetHistory(false, null);
+            HasErrorOccurred = true;
+            onGetHistory(null);
         }
 
         bc.ScriptService
@@ -270,7 +278,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
                      }),
                      onSuccess,
                      OnBrainCloudFailure("Unable to get transaction history from brainCloud!",
-                                         () => onGetHistory(false, null)));
+                                         () => { HasErrorOccurred = true; onGetHistory(null); }));
     }
 
     /// <summary>

@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 
 /// <summary>
-/// 
+/// <see cref="BrainCloudMarketplace.GetTransactionHistory(Action{bool, BCTransactionPage}, int, int, Dictionary{string, object})"/>
+/// calls Cloud Code that will retreive JSON from brainCloud for the logged in user's transaction data.
+/// This JSON data can be deserialized into this class.
 /// 
 /// <br><seealso cref="BrainCloud.BrainCloudAppStore"/></br>
 /// </summary>

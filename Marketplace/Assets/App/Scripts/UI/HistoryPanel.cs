@@ -87,8 +87,10 @@ public class HistoryPanel : MonoBehaviour
         HistoryInfoText.gameObject.SetActive(true);
         HistoryInfoText.text = GET_HISTORY_TEXT;
 
-        void onGetTransactionHistory(bool success, BCTransactionPage page)
+        void onGetTransactionHistory(BCTransactionPage page)
         {
+            bool isSuccess = !BrainCloudMarketplace.HasErrorOccurred;
+
             if (page != null && page.count > 0)
             {
                 foreach (var item in page.items)
@@ -100,10 +102,10 @@ public class HistoryPanel : MonoBehaviour
             }
             else if (HistoryContent.childCount <= baseContentCount)
             {
-                HistoryInfoText.text = success ? NO_TRANSACTION_HISTORY_TEXT : ERROR_HISTORY_TEXT;
+                HistoryInfoText.text = isSuccess ? NO_TRANSACTION_HISTORY_TEXT : ERROR_HISTORY_TEXT;
             }
 
-            if (success && page.moreAfter)
+            if (isSuccess && page.moreAfter)
             {
                 BrainCloudMarketplace.GetTransactionHistory(onGetTransactionHistory, ++pageNum);
             }
