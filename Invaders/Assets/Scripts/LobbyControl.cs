@@ -64,7 +64,7 @@ public class LobbyControl : NetworkBehaviour
         GenerateUserStatsForLobby();
         ServerStatusText.gameObject.SetActive(false);
         ReadyButton.gameObject.SetActive(true);
-        BackButton.interactable = true;
+        BackButton.gameObject.SetActive(true);
         BrainCloudManager.Singleton.StartGetFeaturedUser();
         BrainCloudManager.Singleton.GetTopUsers(leaderBoardSelectors.Count);
     }
@@ -113,7 +113,7 @@ public class LobbyControl : NetworkBehaviour
     public void PlayerIsReady()
     {
         ReadyButton.gameObject.SetActive(false);
-        BackButton.interactable = false;
+        BackButton.gameObject.SetActive(false);
         _loadingIndicatorMessage = ServerStatusText.text = "Waiting for server";
         ServerStatusText.gameObject.SetActive(true);
         _isLoading = true;
