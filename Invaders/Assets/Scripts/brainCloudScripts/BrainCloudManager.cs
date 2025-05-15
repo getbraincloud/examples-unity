@@ -146,6 +146,8 @@ public class BrainCloudManager : MonoBehaviour
     public void Logout()
     {
         _wrapper.LogoutOnApplicationQuit(true);
+        _wrapper.RTTService.DisableRTT();
+        _wrapper.RTTService.DeregisterAllRTTCallbacks();
     }
 
     public void AuthenticateWithBrainCloud(string in_username, string in_password)
@@ -169,6 +171,7 @@ public class BrainCloudManager : MonoBehaviour
         }
         else
         {
+            LocalUserInfo.Username = playerName;
             MenuControl.Singleton.SwitchMenuButtons();            
         }
         if(!MenuControl.Singleton.RememberMeToggle.isOn)
@@ -176,6 +179,8 @@ public class BrainCloudManager : MonoBehaviour
             _wrapper.ResetStoredProfileId();
             _wrapper.Client.AuthenticationService.ProfileId = _localUserInfo.ProfileID;
         }
+
+        MenuControl.Singleton.DisplayUsername(_localUserInfo.Username);
 
         EnableRTTAndLobbyCallbacks();
     }
@@ -236,7 +241,6 @@ public class BrainCloudManager : MonoBehaviour
             1, // max steps
             algo, // algorithm
             filters, // filters
-            0, // Timeout
             false, // ready
             extra, // extra
             teamCode, // team code
@@ -246,6 +250,11 @@ public class BrainCloudManager : MonoBehaviour
             OnFailureCallback,
             "Failed to find lobby"
         );
+    }
+    
+    public void LeaveLobby()
+    {
+        _wrapper.LobbyService.LeaveLobby(_currentLobby.LobbyID, null, OnFailureCallback);
     }
     
     void OnRTTConnected(string jsonResponse, object cbObject)
@@ -451,11 +460,58 @@ public class BrainCloudManager : MonoBehaviour
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
+        string genericMessage = "An error has been received, please restart the game and try again. For more details check the editor console for logs.";
+        Debug.Log("Error: " + statusMessage);
         if(LobbyControl.Singleton != null)
         {
-            LobbyControl.Singleton.SetupPopupPanel($"Failure Callback received, error message: {statusMessage}");
+            if(reasonCode == ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT)
+            {
+                LobbyControl.Singleton.SetupPopupPanel("Connection interrupted. Please check your internet connection and try again.");
+                return;
+            }
+            if(reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
+            {
+                MenuControl.Singleton.SetupPopupPanel("This account was logged into a new location. This session has ended.");
+                MenuControl.Singleton.Logout();
+                return;
+            }
+            if(reasonCode == -1 && statusCode == 400)
+            {
+                if(statusMessage.Contains("RTT Connection has been closed.") ||
+                   statusMessage.Contains("Re-Enable RTT to re-establish connection"))
+                {
+                    _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
+                    return;
+                }
+            }
+            
+            LobbyControl.Singleton.SetupPopupPanel(genericMessage);
         }
-        Debug.Log("Error: " + statusMessage);
+        else if(MenuControl.Singleton != null)
+        {
+            if(reasonCode == ReasonCodes.TOKEN_DOES_NOT_MATCH_USER)
+            {
+                MenuControl.Singleton.SetupPopupPanel("You've entered your password incorrectly. Please try again.");
+                return;
+            }
+            if(reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
+            {
+                MenuControl.Singleton.SetupPopupPanel("This account was logged into a new location. This session has ended.");
+                MenuControl.Singleton.Logout();
+                return;
+            }
+            if(reasonCode == -1 && statusCode == 400)
+            {
+                if(statusMessage.Contains("RTT Connection has been closed.") ||
+                   statusMessage.Contains("Re-Enable RTT to re-establish connection"))
+                {
+                    _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
+                    return;
+                }
+            }
+            
+            MenuControl.Singleton.SetupPopupPanel(genericMessage);
+        }
     }
 
     private void ResetReplayFlags()
