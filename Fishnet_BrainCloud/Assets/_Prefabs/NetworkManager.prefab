@@ -70,7 +70,7 @@ MonoBehaviour:
   _objectPool: {fileID: 0}
   _persistence: 0
   _logging: {fileID: 0}
-  _spawnablePrefabs: {fileID: 11400000, guid: f6af6fafed6cf0c40aa0f7ff8d9f6cde, type: 2}
+  _spawnablePrefabs: {fileID: 11400000, guid: 5211ff2e7d5cf4c0a8f8d8aceea08f88, type: 2}
 --- !u!114 &1945243864228770544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,7 +80,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 179767225066983326}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c78d92e308936e4d893414a3581a65c, type: 3}
+  m_Script: {fileID: 11500000, guid: b0f05f9031e6f4e06b1e410033c74996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _serverBindAddress: 127.0.0.1
@@ -88,6 +88,8 @@ MonoBehaviour:
   _maximumClients: 10
   _peerToPeer: 0
   _clientAddress: 
+  _roomAddress: 
+  _roomPort: 
 --- !u!114 &3095710141976803124
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -29,7 +29,7 @@ namespace FishyBrainCloud
         #endregion
 
         #region Private Fields.
-        private BrainCloudWrapper _brainCloud;
+        private BrainCloudWrapper _brainCloud = null;
         private bool _isServer = false;
         private Transport _transport;
         
@@ -116,7 +116,7 @@ namespace FishyBrainCloud
 
         public override LocalConnectionState GetConnectionState(bool server)
         {
-            if (_brainCloud.RelayService.IsConnected())
+            if (_brainCloud != null && _brainCloud.RelayService.IsConnected())
             {
                 return LocalConnectionState.Started;
             }
@@ -303,7 +303,7 @@ namespace FishyBrainCloud
         #region Sending.
         public override void SendToServer(byte channelId, ArraySegment<byte> segment)
         {
-            if (GetConnectionState(_isServer) != LocalConnectionState.Started)
+            if (_brainCloud == null || GetConnectionState(_isServer) != LocalConnectionState.Started)
                 return;
             if (!_brainCloud.Client.IsAuthenticated())
                 return;
@@ -383,7 +383,7 @@ namespace FishyBrainCloud
             Debug.Log("[FishyBrainCloud] StartConnection IsServer: " + server);
             _isServer = server;
 
-            if (!_brainCloud.Client.IsAuthenticated())
+            if (_brainCloud != null && !_brainCloud.Client.IsAuthenticated())
             {
                 Debug.Log("[FishyBrainCloud] Waiting for authentication...");
                 return false;
@@ -396,10 +396,10 @@ namespace FishyBrainCloud
 
             
             RelayConnectOptions connectionOptions = new RelayConnectOptions(true,
-                _clientAddress,//_brainCloud.RoomAddress, // should this be room address?
-                _port,//_brainCloud.RoomPort,
-                _relayPasscode,//_brainCloud.RelayPasscode,
-                _currentLobbyId//_brainCloud.CurrentLobbyId
+                _clientAddress, // should this be room address?
+                _port,
+                _relayPasscode,
+                _currentLobbyId
             );
 
             SuccessCallback successCallback = (responseData, cbObject) =>

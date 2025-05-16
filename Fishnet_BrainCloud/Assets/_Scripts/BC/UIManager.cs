@@ -271,7 +271,7 @@ public class UIManager : MonoBehaviour
                         //load game scene
                         UnityEngine.SceneManagement.SceneManager.sceneLoaded += BCManager.Instance.OnGameSceneLoaded;
 
-                        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+                        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
 
                         break;
                     case "JOIN_FAIL":
@@ -304,9 +304,25 @@ public class UIManager : MonoBehaviour
             }
         });
     }
+
     public void LoginP2()
     {
         BCManager.Instance.AuthenticateUser("player2", "player2", (success) =>
+        {
+            if (success)
+            {
+                OnAuthSuccess();
+            }
+            else
+            {
+                Debug.LogError("There was an error authenticating");
+            }
+        });
+    }
+
+    public void LoginP3()
+    {
+        BCManager.Instance.AuthenticateUser("player3", "player3", (success) =>
         {
             if (success)
             {
