@@ -14,7 +14,7 @@ namespace FishNet.Editing
 
         private const string SHOWED_GETTING_STARTED = "ShowedFishNetGettingStarted";
 
-        [MenuItem("Tools/Fish-Networking/Getting Started")]
+        [MenuItem("Tools/Fish-Networking/Getting Started",isValidateFunction: false, 9999)]
         public static void GettingStartedMenu()
         {
             FishNetGettingStartedEditor window = (FishNetGettingStartedEditor)EditorWindow.GetWindow(typeof(FishNetGettingStartedEditor));
@@ -50,54 +50,19 @@ namespace FishNet.Editing
             window._reviewButtonStyle.normal.textColor = new(1, 1, 1, 1);
         }
 
-        private static bool _subscribed;
-        private static int _updatedCount;
-
-        [InitializeOnLoadMethod]
-        private static void Initialize()
+        internal static bool ShowGettingStarted()
         {
-            SubscribeToUpdate();
-        }
-
-        private static void SubscribeToUpdate()
-        {
-            if (Application.isBatchMode)
-                return;
-
-            if (!_subscribed && !EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                _subscribed = true;
-                EditorApplication.update += OnEditorUpdate;
-            }
-        }
-
-        private static void OnEditorUpdate()
-        {
-            ShowGettingStarted();
-            LogFeedbackLink();
-            
-            _updatedCount++;
-            if (_updatedCount == 20)
-                EditorApplication.update -= OnEditorUpdate;
-        }
-
-        private static void ShowGettingStarted()
-        {
-            if (_updatedCount != 0)
-                return;
-
             bool shown = EditorPrefs.GetBool(SHOWED_GETTING_STARTED, false);
             if (!shown)
             {
                 EditorPrefs.SetBool(SHOWED_GETTING_STARTED, true);
                 ReviewReminderEditor.ResetDateTimeReminded();
                 GettingStartedMenu();
+
+                return true;
             }
-            //If was already shown then check review reminder instead.
-            else
-            {
-                ReviewReminderEditor.CheckRemindToReview();
-            }
+
+            return false;
         }
 
         private void OnGUI()
@@ -168,16 +133,7 @@ namespace FishNet.Editing
             backgroundTexture.Apply();
             return backgroundTexture;
         }
-
-        private static void LogFeedbackLink()
-        {
-            if (_updatedCount != 15 || Time.realtimeSinceStartup > 10f)
-                return;
-
-            //Only log the link when editor opens.
-            string msg = @"Thank you for using Fish-Networking! If you have any feedback - whether it's suggestions, documentation, or performance-related - please let us know through our anonymous <a href=https://forms.gle/1g13VY4KKMnEqpkp6>Google feedback form!</a>";
-            Debug.Log(msg);
-        }
+        
     }
 }
 #endif

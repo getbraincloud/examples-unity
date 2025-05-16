@@ -123,10 +123,9 @@ namespace FishNet.Object.Synchronizing
         #region Constructors.
         public SyncDictionary(SyncTypeSettings settings = new()) : this(CollectionCaches<TKey, TValue>.RetrieveDictionary(), settings) { }
 
-        public SyncDictionary(Dictionary<TKey, TValue> objects, SyncTypeSettings settings = new()) : base(settings)
+        public SyncDictionary(Dictionary<TKey, TValue> collection, SyncTypeSettings settings = new()) : base(settings)
         {
-            Collection = objects;
-
+            Collection = (collection == null) ? CollectionCaches<TKey, TValue>.RetrieveDictionary() : collection;
             _initialValues = CollectionCaches<TKey, TValue>.RetrieveDictionary();
             _changed = CollectionCaches<ChangeData>.RetrieveList();
             _serverOnChanges = CollectionCaches<CachedOnChange>.RetrieveList();
@@ -393,9 +392,7 @@ namespace FishNet.Object.Synchronizing
         {
             base.ResetState(asServer);
 
-            bool canReset = base.IsInitialized && (asServer || !base.IsReadAsClientHost(asServer));
-
-            if (canReset)
+            if (base.CanReset(asServer))
             {
                 _sendAll = false;
                 _changed.Clear();

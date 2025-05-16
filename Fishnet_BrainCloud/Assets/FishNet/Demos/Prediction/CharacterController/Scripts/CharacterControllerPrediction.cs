@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !FISHNET_STABLE_REPLICATESTATES
+using System;
 using FishNet.Component.Prediction;
 using FishNet.Connection;
 using FishNet.Object;
@@ -17,6 +18,9 @@ namespace FishNet.Demo.Prediction.CharacterControllers
         /// </summary>
         public struct OneTimeInput
         {
+            /// <summary>
+            /// True to jump.
+            /// </summary>
             public bool Jump;
 
             /// <summary>
@@ -57,7 +61,10 @@ namespace FishNet.Demo.Prediction.CharacterControllers
             /// </summary>
             private uint _tick;
 
-            public void Dispose() { }
+            public void Dispose() 
+            {
+                OneTimeInputs.ResetState();
+            }
 
             public uint GetTick() => _tick;
             public void SetTick(uint value) => _tick = value;
@@ -137,10 +144,6 @@ namespace FishNet.Demo.Prediction.CharacterControllers
         /// Last data which was supplied during replicate outside of reconcile.
         /// </summary>
         private ReplicateData _lastTickedReplicateData = default;
-        /// <summary>
-        /// Collider cache for performance.
-        /// </summary>
-        private Collider[] _colliderCache = new Collider[10];
         /// <summary>
         /// Current platform the player is on.
         /// </summary>
@@ -257,7 +260,7 @@ namespace FishNet.Demo.Prediction.CharacterControllers
 
         [Replicate]
         private void PerformReplicate(ReplicateData rd, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
-        {
+        {            
             //Always use the tickDelta as your delta when performing actions inside replicate.
             float delta = (float)base.TimeManager.TickDelta;
             bool useDefaultForces = false;
@@ -299,9 +302,8 @@ namespace FishNet.Demo.Prediction.CharacterControllers
                  * wrong. If you do however predict wrong often smoothing will cover up the mistake. */
                 else if (state.IsFuture())
                 {
-                    /* Predict up to whatever interpolation is on the PredictionManager. This is the safest way to protect against
-                     * graphical jitter by not predicting beyond global interpolation. */
-                    if (rd.GetTick() - _lastTickedReplicateData.GetTick() >= base.PredictionManager.StateInterpolation)
+                    /* Predict up to 1 tick more. */
+                    if (rd.GetTick() - _lastTickedReplicateData.GetTick() > 1)
                     {
                         useDefaultForces = true;
                     }
@@ -482,3 +484,4 @@ namespace FishNet.Demo.Prediction.CharacterControllers
         }
     }
 }
+#endif

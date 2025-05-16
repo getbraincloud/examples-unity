@@ -5,8 +5,6 @@ using FishNet.CodeGenerating.Helping.Extension;
 using FishNet.CodeGenerating.Processing;
 using FishNet.CodeGenerating.Processing.Rpc;
 using FishNet.Configuring;
-using FishNet.Editing.Upgrading;
-using FishNet.Serializing.Helping;
 using MonoFN.Cecil;
 using MonoFN.Cecil.Cil;
 using System;
@@ -48,7 +46,9 @@ namespace FishNet.CodeGenerating.ILCore
             bool referencesFishNet = FishNetILPP.IsFishNetAssembly(compiledAssembly) || compiledAssembly.References.Any(filePath => Path.GetFileNameWithoutExtension(filePath) == RUNTIME_ASSEMBLY_NAME);
             return referencesFishNet;
         }
+
         public override ILPostProcessor GetInstance() => this;
+
         public override ILPostProcessResult Process(ICompiledAssembly compiledAssembly)
         {
             AssemblyDefinition assemblyDef = ILCoreHelper.GetAssemblyDefinition(compiledAssembly);
@@ -64,7 +64,7 @@ namespace FishNet.CodeGenerating.ILCore
                 return null;
 
             
-            
+
             bool modified = false;
 
             bool fnAssembly = IsFishNetAssembly(compiledAssembly);
@@ -120,8 +120,6 @@ namespace FishNet.CodeGenerating.ILCore
             }
             else
             {
-                TryLogV3ToV4Helpers(session);
-
                 MemoryStream pe = new();
                 MemoryStream pdb = new();
                 WriterParameters writerParameters = new()
@@ -134,25 +132,7 @@ namespace FishNet.CodeGenerating.ILCore
                 return new(new(pe.ToArray(), pdb.ToArray()), session.Diagnostics);
             }
         }
-
-        /// <summary>
-        /// Logs warning if v3 to v4 helpers are enabled.
-        /// </summary>
-        private void TryLogV3ToV4Helpers(CodegenSession session)
-        {
-#if !FISHNET_DISABLE_V3TOV4_HELPERS
-            /* There is no way to check if this has run already once per codegen
-             * so the only option is to print per session, which means
-             * a print will occur every time an assembly compiles. This means
-             * several prints will potentially occur per script change.
-             * 
-             * However, these warnings typically only print when all errors are gone.
-             * When this is true the user may go ahead and disable this warning
-             * as instructed. */
-            session.LogWarning(UpgradeFromV3ToV4Menu.EnabledWarning);
-#endif
-        }
-
+        
 
         /// <summary>
         /// Makees methods public scope which use CodegenMakePublic attribute.
@@ -163,6 +143,14 @@ namespace FishNet.CodeGenerating.ILCore
             string makePublicTypeFullName = typeof(MakePublicAttribute).FullName;
             foreach (TypeDefinition td in session.Module.Types)
             {
+                foreach (CustomAttribute tdCustomAttribute in td.CustomAttributes)
+                {
+                    if (tdCustomAttribute.AttributeType.FullName == makePublicTypeFullName)
+                    {
+                        td.Attributes &= ~TypeAttributes.NotPublic;
+                        td.Attributes |= TypeAttributes.Public;
+                    }
+                } 
                 foreach (MethodDefinition md in td.Methods)
                 {
                     foreach (CustomAttribute ca in md.CustomAttributes)
@@ -179,6 +167,7 @@ namespace FishNet.CodeGenerating.ILCore
             //There is always at least one modified.
             return true;
         }
+
         /// <summary>
         /// Creates delegates for user declared serializers.
         /// </summary>
@@ -236,7 +225,7 @@ namespace FishNet.CodeGenerating.ILCore
 
             return modified;
         }
-        
+
         /// <summary>
         /// Creates serializers for types that use IncludeSerialization attribute.
         /// </summary>
@@ -273,7 +262,6 @@ namespace FishNet.CodeGenerating.ILCore
 
             return modified;
         }
-
 
         /// <summary>
         /// Creaters serializers and calls for IBroadcast.
@@ -312,7 +300,6 @@ namespace FishNet.CodeGenerating.ILCore
                     climbTd = climbTd.GetNextBaseTypeDefinition(session);
                     //this + name check 40ms
                 } while (climbTd != null);
-
             }
 
 
@@ -364,9 +351,7 @@ namespace FishNet.CodeGenerating.ILCore
         private bool CreateNetworkBehaviours(CodegenSession session)
         {
             //Get all network behaviours to process.
-            List<TypeDefinition> networkBehaviourTypeDefs = session.Module.Types
-                .Where(td => td.IsSubclassOf(session, session.GetClass<NetworkBehaviourHelper>().FullName))
-                .ToList();
+            List<TypeDefinition> networkBehaviourTypeDefs = session.Module.Types.Where(td => td.IsSubclassOf(session, session.GetClass<NetworkBehaviourHelper>().FullName)).ToList();
 
             /* Remove types which are inherited. This gets the child most networkbehaviours.
              * Since processing iterates upward from each child there is no reason
@@ -436,6 +421,5 @@ namespace FishNet.CodeGenerating.ILCore
         internal static bool IsFishNetAssembly(ICompiledAssembly assembly) => (assembly.Name == FishNetILPP.RUNTIME_ASSEMBLY_NAME);
         internal static bool IsFishNetAssembly(CodegenSession session) => (session.Module.Assembly.Name.Name == FishNetILPP.RUNTIME_ASSEMBLY_NAME);
         internal static bool IsFishNetAssembly(ModuleDefinition moduleDef) => (moduleDef.Assembly.Name.Name == FishNetILPP.RUNTIME_ASSEMBLY_NAME);
-
     }
 }

@@ -320,6 +320,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NetworkManager
       objectReference: {fileID: 0}
+    - target: {fileID: 4967413246380215358, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: _spawnablePrefabs
+      value: 
+      objectReference: {fileID: 11400000, guid: 5211ff2e7d5cf4c0a8f8d8aceea08f88, type: 2}
     - target: {fileID: 5756548576839540900, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -360,11 +364,39 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1945243864228770544, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 179767225066983326, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4748696498797586672}
   m_SourcePrefab: {fileID: 100100000, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+--- !u!1 &4748696498797586671 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 179767225066983326, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+  m_PrefabInstance: {fileID: 4748696498797586670}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4748696498797586672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4748696498797586671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0f05f9031e6f4e06b1e410033c74996, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _serverBindAddress: 127.0.0.1
+  _port: 7770
+  _maximumClients: 10
+  _peerToPeer: 0
+  _clientAddress: 
+  _roomAddress: 
+  _roomPort: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

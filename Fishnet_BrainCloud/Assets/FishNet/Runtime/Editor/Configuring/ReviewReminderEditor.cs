@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System;
+using FishNet.Configuring;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,10 +23,6 @@ namespace FishNet.Editing
 
         internal static void CheckRemindToReview()
         {
-            //Do not show if virtual player.
-            if (Application.dataPath.ToLower().Contains("library/vp/"))
-                return;
-
             bool reminderEnabled = EditorPrefs.GetBool(IS_ENABLED, true);
             if (!reminderEnabled)
                 return;
@@ -92,7 +89,7 @@ namespace FishNet.Editing
             _window.position = pos;
         }
 
-        private static void StyleWindow()
+        static void StyleWindow()
         {
             InitializeWindow();
             _window._fishnetLogo = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/FishNet/Runtime/Editor/Textures/UI/Logo_With_Text.png", typeof(Texture));
@@ -118,7 +115,7 @@ namespace FishNet.Editing
 
         }
 
-        private void OnGUI()
+        void OnGUI()
         {
             float thisWidth = this.position.width;
             StyleWindow();

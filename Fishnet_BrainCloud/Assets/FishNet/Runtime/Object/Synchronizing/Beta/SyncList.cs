@@ -121,7 +121,7 @@ namespace FishNet.Object.Synchronizing
         public SyncList(List<T> collection, IEqualityComparer<T> comparer = null, SyncTypeSettings settings = new()) : base(settings)
         {
             _comparer = (comparer == null) ? EqualityComparer<T>.Default : comparer;
-            Collection = collection;
+            Collection = (collection == null) ? CollectionCaches<T>.RetrieveList() : collection;
 
             _initialValues = CollectionCaches<T>.RetrieveList();
             _changed = CollectionCaches<ChangeData>.RetrieveList();
@@ -424,10 +424,8 @@ namespace FishNet.Object.Synchronizing
         protected internal override void ResetState(bool asServer)
         {
             base.ResetState(asServer);
-
-            bool canReset = base.IsInitialized && (asServer || !base.IsReadAsClientHost(asServer));
-
-            if (canReset)
+            
+            if (base.CanReset(asServer))
             {
                 _sendAll = false;
                 _changed.Clear();

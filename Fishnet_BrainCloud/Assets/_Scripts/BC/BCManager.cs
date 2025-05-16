@@ -8,9 +8,8 @@ using System.Collections.Generic;
 using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using FishyBrainCloud;
 
-namespace FishyBrainCloud
-{
     public class BCManager : MonoBehaviour
     {
         private BrainCloudWrapper _bc;
@@ -70,8 +69,6 @@ namespace FishyBrainCloud
             {
                 SuccessCallback success = (responseData, cbObject) =>
                 {
-
-
                     OnSuccess();
                 };
                 _bc.RTTService.EnableRTT(success, OnRTTFailed);
@@ -141,27 +138,28 @@ namespace FishyBrainCloud
 
         private IEnumerator DelayedConnect()
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.05f);
 
-            FishyBrainCloud fishyBrainCloud = FindObjectOfType<FishyBrainCloud>();
+            FishyBrainCloudTransport fishyBrainCloud = FindObjectOfType<FishyBrainCloudTransport>();
+            fishyBrainCloud.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort);
 
             if (fishyBrainCloud != null)
             {
-                Debug.Log("Found fishybrainCloud");
+                Debug.Log("Found FishyBrainCloudTransport");
                 bool isServer = LobbyOwnerId == bc.Client.ProfileId;
 
-                fishyBrainCloud.SetClientAddress(RoomAddress);
-                fishyBrainCloud.SetPort(RoomPort);
+                //fishyBrainCloud.SetClientAddress(RoomAddress);
+                //fishyBrainCloud.SetPort(RoomPort);
 
                 if (fishyBrainCloud.GetConnectionState(isServer) == LocalConnectionState.Stopped)
                 {
                     fishyBrainCloud.SetServerBindAddress(RoomAddress, IPAddressType.IPv4);
-                    fishyBrainCloud.SetPort(RoomPort);
+                    //fishyBrainCloud.SetPort(RoomPort);
                     fishyBrainCloud.StartConnection(isServer);
                 }
                 else
                 {
-                    fishyBrainCloud.SetClientAddress(RoomAddress);
+                    //fishyBrainCloud.SetClientAddress(RoomAddress);
                     fishyBrainCloud.StartConnection(isServer);//Start Client
                 }
             }
@@ -169,4 +167,3 @@ namespace FishyBrainCloud
         }
 
     }
-}
