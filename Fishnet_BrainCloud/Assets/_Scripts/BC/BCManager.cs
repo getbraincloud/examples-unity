@@ -124,20 +124,21 @@ using FishyBrainCloud;
         public void QuickFindLobby(Action<string> OnEntryId)
         {
             var lobbyParams = CreateLobbyParams(OnEntryId);
-/*
+            
             _bc.LobbyService.FindOrCreateLobby(
                 "CursorPartyV2_Ire",
                 0,
                 1,
-                false,
                 lobbyParams.algo,
                 lobbyParams.filters,
+                false,
                 lobbyParams.extra,
                 "all",
-                null, // settings
+                lobbyParams.settings,
+                null,
                 lobbyParams.success
             );
-            */
+            
         }
 
         private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
@@ -151,6 +152,7 @@ using FishyBrainCloud;
 
             var filters = new Dictionary<string, object>();
             var extra = new Dictionary<string, object>();
+            var settings = new Dictionary<string, object>();
 
             SuccessCallback success = (in_response, cbObject) =>
             {
@@ -166,23 +168,16 @@ using FishyBrainCloud;
                 algo = algo,
                 filters = filters,
                 extra = extra,
-                success = success
+                success = success,
+                settings = settings
             };
         }
 
         public void CreateLobby(Action<string> OnSuccess)
         {
-            var extra = new Dictionary<string, object>();
-            var settings = new Dictionary<string, object>();
+            var lobbyParams = CreateLobbyParams(OnSuccess);
 
-            SuccessCallback success = (in_response, cbObject) =>
-            {
-                OnSuccess(in_response);
-            };
-
-            LobbyOwnerId = bc.Client.ProfileId;
-
-            _bc.LobbyService.CreateLobby("CursorPartyV2_Ire", 0, false, extra, "all", settings, null, success);
+            _bc.LobbyService.CreateLobby("CursorPartyV2_Ire", 0, false, lobbyParams.extra, "all", lobbyParams.settings, null, lobbyParams.success);
         }
 
         public void OnGameSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
@@ -221,4 +216,5 @@ using FishyBrainCloud;
         public Dictionary<string, object> filters;
         public Dictionary<string, object> extra;
         public SuccessCallback success;
+        public Dictionary<string, object> settings;
     }

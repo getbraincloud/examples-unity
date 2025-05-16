@@ -446,7 +446,7 @@ namespace FishyBrainCloud
 
         private void OnRelaySystemCallback(string json)
         {
-            //Debug.Log($"[FishyBrainCloud] OnSystemCallback: {json}");
+            Debug.Log($"[FishyBrainCloud] OnSystemCallback: {json}");
 
             // Parse the base event to check the operation type
             var systemEvent = JsonUtility.FromJson<RelaySystemEvent>(json);

@@ -617,19 +617,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 148693218}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2067239567}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &148693218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6350,6 +6338,7 @@ MonoBehaviour:
   _createLobbyButton: {fileID: 613370561}
   _findLobbyButton: {fileID: 1723355688}
   _cancelMatchmakingButton: {fileID: 904433834}
+  _findCreateLobbyButton: {fileID: 148693217}
   _lobbyIdText: {fileID: 382299761}
   _lobbyStatusText: {fileID: 2097231663}
   _readyUpButton: {fileID: 894164234}

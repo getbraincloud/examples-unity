@@ -31,7 +31,7 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private TMP_Text _mainStatus;
     [SerializeField]
-    private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton;
+    private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
 
     private string _currentLobbyId;
     private string _currentEntryId;
@@ -92,6 +92,7 @@ public class UIManager : MonoBehaviour
         _createLobbyButton.onClick.AddListener(OnCreateLobbyClicked);
         _findLobbyButton.onClick.AddListener(OnFindLobbyClicked);
         _cancelMatchmakingButton.onClick.AddListener(OnCancelMatchmakingClicked);
+        _findCreateLobbyButton.onClick.AddListener(OnQuickFind);
 
         //lobby
         _readyUpButton.onClick.AddListener(OnReadyUpClicked);
@@ -121,11 +122,12 @@ public class UIManager : MonoBehaviour
         BCManager.Instance.bc.LobbyService.CancelFindRequest("CursorPartyV2_Ire", _currentEntryId);
         _findLobbyButton.gameObject.SetActive(true);
         _createLobbyButton.gameObject.SetActive(true);
+        _findCreateLobbyButton.gameObject.SetActive(true);
 
         _mainStatus.text = string.Empty;
     }
 
-    public void OnQuickFind()
+    private void OnQuickFind()
     {
         _mainStatus.text = "Quick Finding lobby...";
 
@@ -135,7 +137,9 @@ public class UIManager : MonoBehaviour
             //temp disable lobby buttons
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
+            _findCreateLobbyButton.gameObject.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
+            
         });
     }
     private void OnFindLobbyClicked()
@@ -148,6 +152,7 @@ public class UIManager : MonoBehaviour
             //temp disable lobby buttons
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
+            _findCreateLobbyButton.gameObject.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
         });
     }
@@ -223,7 +228,18 @@ public class UIManager : MonoBehaviour
             if (jsonData.ContainsKey("lobby"))
             {
                 lobbyData = jsonData["lobby"] as Dictionary<string, object>;
+
+                string ownerCxId = lobbyData["ownerCxId"] as string;
+                if (!string.IsNullOrEmpty(ownerCxId))
+                {
+                    string[] parts = ownerCxId.Split(':');
+                    if (parts.Length >= 3)
+                    {
+                        BCManager.Instance.LobbyOwnerId = parts[1]; // This is the profileID of the owner
+                    }
+                }
             }
+
             if (jsonData.ContainsKey("member"))
             {
                 memberData = jsonData["member"] as Dictionary<string, object>;
@@ -233,6 +249,9 @@ public class UIManager : MonoBehaviour
             if (response.ContainsKey("operation"))
             {
                 var operation = response["operation"] as string;
+
+                if (_mainStatus != null) _mainStatus.text = "Lobby Operation: " + operation;
+                if (_lobbyStatusText != null) _lobbyStatusText.text = "Lobby Operation: " + operation;
                 switch (operation)
                 {
                     case "MEMBER_JOIN":
@@ -250,7 +269,6 @@ public class UIManager : MonoBehaviour
                             BCManager.Instance.CurrentLobbyId = _currentLobbyId;
 
                             _lobbyIdText.text = _currentLobbyId;
-                            _lobbyStatusText.text = lobbyData["state"] as string;
                         }
                         break;
                     case "MEMBER_UPDATE":
@@ -278,12 +296,10 @@ public class UIManager : MonoBehaviour
                     case "STARTING":
                         {
                             // Save our picked color index
-                            _lobbyStatusText.text = "Starting";
                         }
                         break;
                     case "ROOM_READY":
                         {
-                            _lobbyStatusText.text = "Room ready";
                             //get pass code
                             if (jsonData.ContainsKey("passcode"))
                             {
@@ -303,9 +319,9 @@ public class UIManager : MonoBehaviour
                         break;
                     case "JOIN_FAIL":
                         {
-                            _mainStatus.text = "Failed to find lobby";
                             _findLobbyButton.gameObject.SetActive(true);
                             _createLobbyButton.gameObject.SetActive(true);
+                            _findCreateLobbyButton.gameObject.SetActive(true);
                             _cancelMatchmakingButton.gameObject.SetActive(false);
                         }
                         break;
