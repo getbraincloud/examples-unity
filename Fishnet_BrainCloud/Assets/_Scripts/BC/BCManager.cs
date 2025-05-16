@@ -158,9 +158,12 @@ using FishyBrainCloud;
             {
                 var response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
                 var data = response["data"] as Dictionary<string, object>;
-                var entryId = data["entryId"] as string;
+                if (data.ContainsKey("entryId"))
+                {
+                    var entryId = data["entryId"] as string;
 
-                OnEntryId?.Invoke(entryId);
+                    OnEntryId?.Invoke(entryId);
+                }
             };
 
             return new LobbyParams
