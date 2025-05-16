@@ -65,26 +65,6 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        OnStateChanged();
-
-        //login
-        //check if authenticated
-        if (BCManager.Instance.bc.Client.IsAuthenticated())
-        {
-            UpdateState(State.Main);
-        }
-        else
-        {
-            if (BCManager.Instance.bc.CanReconnect())
-            {
-                SuccessCallback success = (response, cbObject) =>
-                {
-                    OnAuthSuccess();
-                };
-                //BCManager.Instance.bc.Reconnect(success);
-            }
-        }
-
         _loginButton.onClick.AddListener(OnLoginClicked);
 
         //main menu
@@ -98,6 +78,33 @@ public class UIManager : MonoBehaviour
         _readyUpButton.onClick.AddListener(OnReadyUpClicked);
         _leaveLobbyButon.onClick.AddListener(OnLeaveLobbyClicked);
 
+        //login
+        //check if authenticated
+        if (BCManager.Instance.bc.Client.IsAuthenticated())
+        {
+            OnAuthSuccess();
+        }
+    }
+
+    void OnEnable()
+    {
+        OnStateChanged();
+    }
+
+    void OnDestroy()
+    {
+        BCManager.Instance.bc.RTTService.DeregisterRTTLobbyCallback();
+        _loginButton.onClick.RemoveListener(OnLoginClicked);
+
+        //main menu
+        _createLobbyButton.onClick.RemoveListener(OnCreateLobbyClicked);
+        _findLobbyButton.onClick.RemoveListener(OnFindLobbyClicked);
+        _cancelMatchmakingButton.onClick.RemoveListener(OnCancelMatchmakingClicked);
+        _findCreateLobbyButton.onClick.RemoveListener(OnQuickFind);
+
+        //lobby
+        _readyUpButton.onClick.RemoveListener(OnReadyUpClicked);
+        _leaveLobbyButon.onClick.RemoveListener(OnLeaveLobbyClicked);
     }
 
     private void OnLeaveLobbyClicked()
@@ -403,15 +410,25 @@ public class UIManager : MonoBehaviour
 
     private void OnAuthSuccess()
     {
-        BCManager.Instance.EnableRTT(true, () =>
+        if (!BCManager.Instance.bc.RTTService.IsRTTEnabled())
+        {
+            BCManager.Instance.EnableRTT(true, () =>        
+            {
+                BCManager.Instance.bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+                UpdateState(State.Main);
+            });
+        }
+        else
         {
             BCManager.Instance.bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
             UpdateState(State.Main);
-        });
+        }
     }
 
     public void UpdateState(State state)
     {
+        Debug.Log("update State " + state);
+        
         if(_curState != state)
         {
             _curState = state;
@@ -421,6 +438,8 @@ public class UIManager : MonoBehaviour
 
     private void OnStateChanged()
     {
+
+        Debug.Log("OnStateChanged " + _curState);
         switch (_curState) { 
             case State.Login:
                 _mainView.SetActive(false);
@@ -443,6 +462,7 @@ public class UIManager : MonoBehaviour
 
                 _findLobbyButton.gameObject.SetActive(true);
                 _createLobbyButton.gameObject.SetActive(true);
+                _findCreateLobbyButton.gameObject.SetActive(true);
                 _cancelMatchmakingButton.gameObject.SetActive(false);
 
                 _lobbyMembersContainer.DestroyChildren();
