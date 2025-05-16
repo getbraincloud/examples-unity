@@ -12,19 +12,37 @@ using FishyBrainCloud;
 
     public class BCManager : MonoBehaviour
     {
-        private BrainCloudWrapper _bc;
-
-        public BrainCloudWrapper bc
+        private static BCManager _instance;
+        public static BCManager Instance
         {
             get
             {
-                return _bc;
+                if (_instance == null)
+                {
+                    // Look for an existing instance
+                    _instance = FindObjectOfType<BCManager>();
+
+                    if (_instance == null)
+                    {
+                        // Create new GameObject to attach the manager to
+                        GameObject managerObject = new GameObject("BCManager");
+                        _instance = managerObject.AddComponent<BCManager>();
+                        DontDestroyOnLoad(managerObject);
+                    }
+                }
+
+                return _instance;
+            }
+            private set
+            {
+                _instance = value;
             }
         }
-        // Start is called before the first frame update
-        private bool _bcInitialized = false;
 
-        public static BCManager Instance { get; private set; }
+    private BrainCloudWrapper _bc;
+    public BrainCloudWrapper bc => _bc;
+
+    private bool _bcInitialized = false;
 
         public string RelayPasscode;
         public string CurrentLobbyId;
@@ -87,31 +105,69 @@ using FishyBrainCloud;
 
         public void FindLobby(Action<string> OnEntryId)
         {
-            var algo = new Dictionary<string, object>();
-            algo["strategy"] = "ranged-absolute";
-            algo["alignment"] = "center";
-            List<int> ranges = new List<int>();
-            ranges.Add(1000);
-            algo["ranges"] = ranges;
+            var lobbyParams = CreateLobbyParams(OnEntryId);
 
-            var extra = new Dictionary<string, object>();
+            _bc.LobbyService.FindLobby(
+                "CursorPartyV2_Ire",
+                0,
+                1,
+                lobbyParams.algo,
+                lobbyParams.filters,
+                false,
+                lobbyParams.extra,
+                "all",
+                null,
+                lobbyParams.success
+            );
+        }
 
-            //
+        public void QuickFindLobby(Action<string> OnEntryId)
+        {
+            var lobbyParams = CreateLobbyParams(OnEntryId);
+/*
+            _bc.LobbyService.FindOrCreateLobby(
+                "CursorPartyV2_Ire",
+                0,
+                1,
+                false,
+                lobbyParams.algo,
+                lobbyParams.filters,
+                lobbyParams.extra,
+                "all",
+                null, // settings
+                lobbyParams.success
+            );
+            */
+        }
+
+        private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
+        {
+            var algo = new Dictionary<string, object>
+            {
+                ["strategy"] = "ranged-absolute",
+                ["alignment"] = "center",
+                ["ranges"] = new List<int> { 1000 }
+            };
+
             var filters = new Dictionary<string, object>();
-
-            //
-            var settings = new Dictionary<string, object>();
+            var extra = new Dictionary<string, object>();
 
             SuccessCallback success = (in_response, cbObject) =>
             {
-                Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
-                Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
-                string entryId = data["entryId"] as string;
+                var response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
+                var data = response["data"] as Dictionary<string, object>;
+                var entryId = data["entryId"] as string;
 
-                OnEntryId(entryId);
+                OnEntryId?.Invoke(entryId);
             };
 
-            _bc.LobbyService.FindLobby("CursorPartyV2_Ire", 0, 1, algo, filters, false, extra, "all", null, success);
+            return new LobbyParams
+            {
+                algo = algo,
+                filters = filters,
+                extra = extra,
+                success = success
+            };
         }
 
         public void CreateLobby(Action<string> OnSuccess)
@@ -148,22 +204,21 @@ using FishyBrainCloud;
                 Debug.Log("Found FishyBrainCloudTransport");
                 bool isServer = LobbyOwnerId == bc.Client.ProfileId;
 
-                //fishyBrainCloud.SetClientAddress(RoomAddress);
-                //fishyBrainCloud.SetPort(RoomPort);
-
                 if (fishyBrainCloud.GetConnectionState(isServer) == LocalConnectionState.Stopped)
                 {
                     fishyBrainCloud.SetServerBindAddress(RoomAddress, IPAddressType.IPv4);
-                    //fishyBrainCloud.SetPort(RoomPort);
-                    fishyBrainCloud.StartConnection(isServer);
                 }
-                else
-                {
-                    //fishyBrainCloud.SetClientAddress(RoomAddress);
-                    fishyBrainCloud.StartConnection(isServer);//Start Client
-                }
+                
+                fishyBrainCloud.StartConnection(isServer);//Start Client
             }
 
         }
+    }
 
+    public class LobbyParams
+    {
+        public Dictionary<string, object> algo;
+        public Dictionary<string, object> filters;
+        public Dictionary<string, object> extra;
+        public SuccessCallback success;
     }

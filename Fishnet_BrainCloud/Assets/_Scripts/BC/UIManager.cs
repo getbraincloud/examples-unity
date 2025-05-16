@@ -50,7 +50,7 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Transform _lobbyMembersContainer;
 
-    private Dictionary<string, LobbyMemberItem> _members;
+    private Dictionary<string, LobbyMemberItem> _members = new Dictionary<string, LobbyMemberItem>();
     #endregion
 
     public enum State
@@ -125,6 +125,19 @@ public class UIManager : MonoBehaviour
         _mainStatus.text = string.Empty;
     }
 
+    public void OnQuickFind()
+    {
+        _mainStatus.text = "Quick Finding lobby...";
+
+        BCManager.Instance.QuickFindLobby((entryId) =>
+        {
+            _currentEntryId = entryId;
+            //temp disable lobby buttons
+            _findLobbyButton.gameObject.SetActive(false);
+            _createLobbyButton.gameObject.SetActive(false);
+            _cancelMatchmakingButton.gameObject.SetActive(true);
+        });
+    }
     private void OnFindLobbyClicked()
     {
         _mainStatus.text = "Finding lobby...";
@@ -163,8 +176,15 @@ public class UIManager : MonoBehaviour
         }
 
         LobbyMemberItem lobbyMember = Instantiate(_lobbyMemberRowPrefab, _lobbyMembersContainer);
-        lobbyMember.SetPlayerName(memberData["name"] as string);
-        lobbyMember.UpdateReady((bool)memberData["isReady"]);
+        lobbyMember.Config(
+            memberData["name"] as string,
+            (bool)memberData["isReady"],
+            memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null,
+            memberData.ContainsKey("netId") ? System.Convert.ToInt16(memberData["netId"]) : (short)0,
+            memberData.ContainsKey("rating") ? System.Convert.ToInt32(memberData["rating"]) : 0,
+            memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
+            memberData.ContainsKey("extraData") ? memberData["extraData"] as Dictionary<string, object> : null
+        );
         
         _members.Add(memberId, lobbyMember);
     }
@@ -181,7 +201,7 @@ public class UIManager : MonoBehaviour
     {
         if (_members.ContainsKey(id))
         {
-            Destroy(_members[id].gameObject);
+            if (_members[id] != null) Destroy(_members[id].gameObject);
             _members.Remove(id);
         }
     }
@@ -190,13 +210,14 @@ public class UIManager : MonoBehaviour
     {
         try
         {
+            Debug.Log("OnLobbyEvent : " +json);
+
             Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(json);
             Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
 
             Dictionary<string, object> lobbyData = new Dictionary<string, object>();
             Dictionary<string, object> memberData = new Dictionary<string, object>();
             
-
             string joiningMemberId = string.Empty;
 
             if (jsonData.ContainsKey("lobby"))
@@ -215,31 +236,34 @@ public class UIManager : MonoBehaviour
                 switch (operation)
                 {
                     case "MEMBER_JOIN":
-
-                        if(!string.IsNullOrEmpty(joiningMemberId) && joiningMemberId == BCManager.Instance.bc.Client.ProfileId)
                         {
-                            //we just joined this lobby
-                            UpdateState(State.Lobby);
+                            if(!string.IsNullOrEmpty(joiningMemberId) && joiningMemberId == BCManager.Instance.bc.Client.ProfileId)
+                            {
+                                //we just joined this lobby
+                                UpdateState(State.Lobby);
+                            }
+
+                            Dictionary<string, object>[] membersData = lobbyData["members"] as Dictionary<string, object>[];
+                            FillMemberRows(membersData);
+
+                            _currentLobbyId = jsonData["lobbyId"] as string;
+                            BCManager.Instance.CurrentLobbyId = _currentLobbyId;
+
+                            _lobbyIdText.text = _currentLobbyId;
+                            _lobbyStatusText.text = lobbyData["state"] as string;
                         }
-
-                        Dictionary<string, object>[] membersData = lobbyData["members"] as Dictionary<string, object>[];
-                        FillMemberRows(membersData);
-
-                        _currentLobbyId = jsonData["lobbyId"] as string;
-                        BCManager.Instance.CurrentLobbyId = _currentLobbyId;
-
-                        _lobbyIdText.text = _currentLobbyId;
-                        _lobbyStatusText.text = lobbyData["state"] as string;
-
                         break;
                     case "MEMBER_UPDATE":
+                        {
+                            bool memberReady = (bool)memberData["isReady"];
 
-                        bool memberReady = (bool)memberData["isReady"];
-
-                        UpdateMemberReady(joiningMemberId, memberReady);
+                            UpdateMemberReady(joiningMemberId, memberReady);  
+                        }
                         break;
                     case "MEMBER_LEFT":
-                        RemoveMember(joiningMemberId);
+                        {
+                            RemoveMember(joiningMemberId);
+                        }
                         break;
                     case "DISBANDED":
                         {
@@ -249,44 +273,48 @@ public class UIManager : MonoBehaviour
                                 // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
                                 UpdateState(State.Main);
                             }
-                            break;
                         }
+                        break;
                     case "STARTING":
-                        // Save our picked color index
-                        _lobbyStatusText.text = "Starting";
+                        {
+                            // Save our picked color index
+                            _lobbyStatusText.text = "Starting";
+                        }
                         break;
                     case "ROOM_READY":
-                        _lobbyStatusText.text = "Room ready";
-                        //get pass code
-                        if (jsonData.ContainsKey("passcode"))
                         {
-                            string passCode = jsonData["passcode"] as string;
-                            BCManager.Instance.RelayPasscode = passCode;
+                            _lobbyStatusText.text = "Room ready";
+                            //get pass code
+                            if (jsonData.ContainsKey("passcode"))
+                            {
+                                string passCode = jsonData["passcode"] as string;
+                                BCManager.Instance.RelayPasscode = passCode;
+                            }
+                            Dictionary<string, object> roomData = jsonData["connectData"] as Dictionary<string, object>;
+                            BCManager.Instance.RoomAddress = roomData["address"] as string;
+                            Dictionary<string, object> portsData = roomData["ports"] as Dictionary<string, object>;
+                            BCManager.Instance.RoomPort = (ushort)int.Parse(portsData["udp"].ToString());
+
+                            //load game scene
+                            UnityEngine.SceneManagement.SceneManager.sceneLoaded += BCManager.Instance.OnGameSceneLoaded;
+
+                            UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
                         }
-                        Dictionary<string, object> roomData = jsonData["connectData"] as Dictionary<string, object>;
-                        BCManager.Instance.RoomAddress = roomData["address"] as string;
-                        Dictionary<string, object> portsData = roomData["ports"] as Dictionary<string, object>;
-                        BCManager.Instance.RoomPort = (ushort)int.Parse(portsData["udp"].ToString());
-
-                        //load game scene
-                        UnityEngine.SceneManagement.SceneManager.sceneLoaded += BCManager.Instance.OnGameSceneLoaded;
-
-                        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
-
                         break;
                     case "JOIN_FAIL":
-                        _mainStatus.text = "Failed to find lobby";
-                        _findLobbyButton.gameObject.SetActive(true);
-                        _createLobbyButton.gameObject.SetActive(true);
-                        _cancelMatchmakingButton.gameObject.SetActive(false);
-
+                        {
+                            _mainStatus.text = "Failed to find lobby";
+                            _findLobbyButton.gameObject.SetActive(true);
+                            _createLobbyButton.gameObject.SetActive(true);
+                            _cancelMatchmakingButton.gameObject.SetActive(false);
+                        }
                         break;
                 }
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[BrainCloud] OnLobbyEvent - Exception occurred: {ex.Message}");
+            Debug.LogWarning($"[BrainCloud] OnLobbyEvent - Exception occurred: {ex.Message}");
         }
     }
 
@@ -402,14 +430,7 @@ public class UIManager : MonoBehaviour
                 _cancelMatchmakingButton.gameObject.SetActive(false);
 
                 _lobbyMembersContainer.DestroyChildren();
-                if(_members == null)
-                {
-                    _members = new Dictionary<string, LobbyMemberItem>();
-                }
-                else
-                {
-                    _members.Clear();
-                }
+                _members.Clear();
                 break;
 
             case State.InGame:

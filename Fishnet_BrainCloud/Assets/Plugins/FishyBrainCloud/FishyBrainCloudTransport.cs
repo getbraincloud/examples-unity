@@ -413,7 +413,7 @@ namespace FishyBrainCloud
 
             FailureCallback failureCallback = (statusMessage, code, error, cbObject) =>
             {
-                Debug.LogError($"RelayService Connection Failure - statusMessage: {statusMessage} code: {code} error: {error}");
+                Debug.LogWarning($"RelayService Connection Failure - statusMessage: {statusMessage} code: {code} error: {error}");
             };
 
             _brainCloud.RelayService.Connect(RelayConnectionType.UDP, connectionOptions, successCallback, failureCallback);
@@ -675,7 +675,7 @@ namespace FishyBrainCloud
             if (_shutdownCalled) return;
             _shutdownCalled = true;
             StopConnection(false);
-            //StopConnection(true);
+            //StopConnection(true);//_isServer ?
         }
         #endregion
 
