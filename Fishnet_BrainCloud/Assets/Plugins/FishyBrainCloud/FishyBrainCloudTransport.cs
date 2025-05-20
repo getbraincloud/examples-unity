@@ -41,7 +41,7 @@ namespace FishyBrainCloud
         private int[] _mtus;
         private const int MTU = 1012;
 
-        private List<int> _connectedClients;
+        private List<int> _connectedClients = new List<int>();
 
         private ConcurrentQueue<Packet> _incomingPackets = new();
         private ConcurrentQueue<Packet> _incomingLocalPackets = new();
@@ -77,8 +77,10 @@ namespace FishyBrainCloud
         {
             base.Initialize(networkManager, transportIndex);
             _transport = this;
+            Debug.Log("FBCT: Initialize");
 
-            _connectedClients = new List<int>();
+            _connectedClients.Clear();
+            
             CreateChannelData();
         }
 
