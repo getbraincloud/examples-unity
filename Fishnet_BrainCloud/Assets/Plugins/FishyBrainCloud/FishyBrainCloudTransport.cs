@@ -689,6 +689,8 @@ namespace FishyBrainCloud
             {
                 _brainCloud.RelayService.Disconnect();
             }
+
+            StopClient();
         }
     }
 }

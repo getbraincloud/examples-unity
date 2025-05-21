@@ -194,6 +194,8 @@ using FishyBrainCloud;
         {
             yield return new WaitForSeconds(0.05f);
 
+            Debug.Log("[FishyBrainCloud] DelayedConnect called");
+
             FishyBrainCloudTransport fishyBrainCloud = FindObjectOfType<FishyBrainCloudTransport>();
             fishyBrainCloud.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort);
 

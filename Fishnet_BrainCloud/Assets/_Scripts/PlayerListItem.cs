@@ -15,10 +15,10 @@ public class PlayerListItem : NetworkBehaviour
     private Image _bgImage;
 
     [SerializeField]
-    private TMP_Text _userText;
+    private TMP_Text _userText, _localText;
 
     [SerializeField]
-    private GameObject _playerCursorPrefab;
+    private GameObject _playerCursorPrefab, _hostIcon;
 
     private Button _testButton;
     private NetworkManager _networkManager;
@@ -39,6 +39,8 @@ public class PlayerListItem : NetworkBehaviour
             transform.SetParent(targetParent.transform);
             transform.localScale = Vector3.one;
         }
+        
+        _localText.gameObject.SetActive(IsOwner);
 
         if (base.IsOwner)
         {
@@ -97,6 +99,14 @@ public class PlayerListItem : NetworkBehaviour
         Randomize();
 
         StartTest();
+
+        UpdateIsHost(IsServerInitialized && IsOwner);
+    }
+
+    [ObserversRpc]
+    private void UpdateIsHost(bool isHost)
+    {
+        _hostIcon.SetActive(isHost);
     }
 
     [ObserversRpc]
