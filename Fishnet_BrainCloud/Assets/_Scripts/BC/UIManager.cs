@@ -341,9 +341,13 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private const string P_PRE_FIX = "";
+    private const string P1_STR = P_PRE_FIX + "player1";
+    private const string P2_STR = P_PRE_FIX + "player2";
+    private const string P3_STR = P_PRE_FIX + "player3";
     public void LoginP1()
     {
-        BCManager.Instance.AuthenticateUser("player1", "player1", (success) =>
+        BCManager.Instance.AuthenticateUser(P1_STR, P1_STR, (success) =>
         {
             if (success)
             {
@@ -358,7 +362,7 @@ public class UIManager : MonoBehaviour
 
     public void LoginP2()
     {
-        BCManager.Instance.AuthenticateUser("player2", "player2", (success) =>
+        BCManager.Instance.AuthenticateUser(P2_STR, P2_STR, (success) =>
         {
             if (success)
             {
@@ -373,7 +377,7 @@ public class UIManager : MonoBehaviour
 
     public void LoginP3()
     {
-        BCManager.Instance.AuthenticateUser("player3", "player3", (success) =>
+        BCManager.Instance.AuthenticateUser(P3_STR, P3_STR, (success) =>
         {
             if (success)
             {

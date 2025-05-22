@@ -24,8 +24,6 @@ public class PlayerListItem : NetworkBehaviour
     private NetworkManager _networkManager;
     private PlayerCursor _currentCursor;
 
-    private float _testInterval = .5f;
-
     public override void OnStartClient()
     {
         base.OnStartClient();

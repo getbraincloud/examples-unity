@@ -42,7 +42,6 @@ using FishyBrainCloud;
     private BrainCloudWrapper _bc;
     public BrainCloudWrapper bc => _bc;
 
-    private bool _bcInitialized = false;
 
         public string RelayPasscode;
         public string CurrentLobbyId;
@@ -62,7 +61,6 @@ using FishyBrainCloud;
             _bc.Init();
 
             Debug.Log("BrainCloud client version: " + _bc.Client.BrainCloudClientVersion);
-            _bcInitialized = true;
         }
 
         public void AuthenticateUser(string username, string password, Action<bool> callback)
