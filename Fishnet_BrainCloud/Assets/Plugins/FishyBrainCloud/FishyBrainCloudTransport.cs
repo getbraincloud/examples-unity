@@ -602,6 +602,7 @@ namespace FishyBrainCloud
         /// <param name="immediately">True to abrutly stp the client socket without waiting socket thread.</param>
         private bool StopClient(int connectionId, bool immediately)
         {
+            RemoveConnection(connectionId);
 
             Debug.Log($"[FishyBrainCloud] StopClient called");
             _brainCloud.RelayService.DeregisterRelayCallback();
@@ -627,6 +628,9 @@ namespace FishyBrainCloud
         /// </summary>
         private bool StopClient()
         {
+            int currentNetId = (int)_brainCloud.RelayService.GetNetIdForProfileId(_brainCloud.Client.ProfileId);
+            RemoveConnection(currentNetId);
+
             _brainCloud.RelayService.DeregisterRelayCallback();
             _brainCloud.RelayService.Disconnect();
             HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
@@ -661,10 +665,13 @@ namespace FishyBrainCloud
             if (_shutdownCalled) return;
             _shutdownCalled = true;
             StopConnection(false);
-            if (_isServer)
+
+            // no one else left, shut it down
+            if (_connectedClients.Count == 0)
             {
-                StopConnection(true);//_isServer ?
+                StopConnection(true);
             }
+            
         }
         #endregion
 
