@@ -98,7 +98,7 @@ public class PlayerListItem : NetworkBehaviour
 
         Randomize();
 
-        StartTest();
+        //StartTest();
 
         UpdateIsHost(IsServerInitialized && IsOwner);
     }
