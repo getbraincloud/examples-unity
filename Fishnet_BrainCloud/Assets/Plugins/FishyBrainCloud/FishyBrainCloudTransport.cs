@@ -485,24 +485,14 @@ namespace FishyBrainCloud
 
                         int disconnectedNetId = _brainCloud.RelayService.GetNetIdForCxId(disconnectEvent.cxId);
 
-                        RemoveConnection(disconnectedNetId);
-                        if (isLocal)
-                        {
-                            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
-                            _clientConnected = false;
-                        }
-
-                        if (_isServer)
-                        {
-                            HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Stopped, disconnectedNetId, Index));
-                        }
+                        StopClient(disconnectedNetId, true);
                     }
                     break;
 
                 case "MIGRATE_OWNER":
                     {
                         //receiving this as the server socket means the client host has disconnected and the host status has been given to the next connected client
-                            
+
                         var migrateEvent = JsonUtility.FromJson<RelaySystemMigrateOwner>(json);
                         Debug.Log($"[FishyBrainCloud] Received request to migrate owner to {migrateEvent.cxId}");
                         string newHostProfileId = migrateEvent.cxId.Split(':')[1];
@@ -513,9 +503,14 @@ namespace FishyBrainCloud
                         Debug.Log($"[FishyBrainCloud] New Host netId: {hostId}");
 
                         _isServer = isLocal;
-
-                        AddConnectionHelper(hostId, isLocal, true);
-
+                        if (isLocal)
+                        {
+                            Debug.Log($"[FishyBrainCloud] This client is now becoming the server host");
+                            _isServer = true;
+                            HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Started, Index));
+                            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
+                            HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, hostId, Index));
+                        }
                     }
                     break;
                 case "NET_ID":
@@ -602,13 +597,24 @@ namespace FishyBrainCloud
         /// <param name="immediately">True to abrutly stp the client socket without waiting socket thread.</param>
         private bool StopClient(int connectionId, bool immediately)
         {
-            RemoveConnection(connectionId);
+            if (RemoveConnection(connectionId))
+            {
+                string connectedProfileId = _brainCloud.RelayService.GetProfileIdForNetId((short)connectionId);
+                
+                if (connectedProfileId == _brainCloud.Client.ProfileId)
+                {
+                    _brainCloud.RelayService.DeregisterRelayCallback();
+                    _brainCloud.RelayService.Disconnect();
+                    HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
+                    _clientConnected = false;
+                }
 
-            Debug.Log($"[FishyBrainCloud] StopClient called");
-            _brainCloud.RelayService.DeregisterRelayCallback();
-            _brainCloud.RelayService.Disconnect();
-            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
-            _clientConnected = false;
+                if (_isServer)
+                {
+                    HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Stopped, connectionId, Index));
+                }
+            }
+
             return true;
         }
 
@@ -629,12 +635,7 @@ namespace FishyBrainCloud
         private bool StopClient()
         {
             int currentNetId = (int)_brainCloud.RelayService.GetNetIdForProfileId(_brainCloud.Client.ProfileId);
-            RemoveConnection(currentNetId);
-
-            _brainCloud.RelayService.DeregisterRelayCallback();
-            _brainCloud.RelayService.Disconnect();
-            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
-            _clientConnected = false;
+            StopClient(currentNetId, true);
 
             return true;
         }
@@ -651,12 +652,16 @@ namespace FishyBrainCloud
             return connectionAdded;
         }
 
-        private void RemoveConnection(int netId)
+        private bool RemoveConnection(int netId)
         {
+            Debug.Log($"[FishyBrainCloud] RemoveConnection {netId}");
+            bool connectionRemoved = false;
             if (_connectedClients.Contains(netId))
             {
                 _connectedClients.Remove(netId);
+                connectionRemoved = true;
             }
+            return connectionRemoved;
         }
 
         public override void Shutdown()
