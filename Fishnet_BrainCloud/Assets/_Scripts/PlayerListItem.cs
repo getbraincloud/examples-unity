@@ -59,10 +59,13 @@ public class PlayerListItem : NetworkBehaviour
 
     public void OnTestButtonClicked()
     {
-        string newName = GenerateRandomString();
-        Color newColor = GenerateRandomColor();
+        if (base.IsOwner)
+        {
+            string newName = GenerateRandomString();
+            Color newColor = GenerateRandomColor();
 
-        TestChangeServer(newName, newColor);
+            TestChangeServer(newName, newColor);
+        }
     }
 
     private string GenerateRandomString()
