@@ -55,6 +55,8 @@ public class UIManager : MonoBehaviour
 
     public enum State
     {
+        None,
+        Loading,
         Login,
         Main,
         Lobby,
@@ -84,6 +86,21 @@ public class UIManager : MonoBehaviour
         {
             OnAuthSuccess();
         }
+#if P1 || P2 || P3
+        else
+        {
+#if P1
+            LoginP1();
+
+#elif P2
+            LoginP2();
+
+#elif P3
+            LoginP3();
+
+#endif
+        }
+#endif
     }
 
     void OnEnable()
@@ -146,7 +163,7 @@ public class UIManager : MonoBehaviour
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
-            
+
         });
     }
     private void OnFindLobbyClicked()
@@ -173,7 +190,7 @@ public class UIManager : MonoBehaviour
 
     private void FillMemberRows(Dictionary<string, object>[] data)
     {
-        foreach(Dictionary<string, object> row in data)
+        foreach (Dictionary<string, object> row in data)
         {
             AddMemberRow(row);
         }
@@ -197,7 +214,7 @@ public class UIManager : MonoBehaviour
             memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
             memberData.ContainsKey("extraData") ? memberData["extraData"] as Dictionary<string, object> : null
         );
-        
+
         _members.Add(memberId, lobbyMember);
     }
 
@@ -222,14 +239,14 @@ public class UIManager : MonoBehaviour
     {
         try
         {
-            Debug.Log("OnLobbyEvent : " +json);
+            Debug.Log("OnLobbyEvent : " + json);
 
             Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(json);
             Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
 
             Dictionary<string, object> lobbyData = new Dictionary<string, object>();
             Dictionary<string, object> memberData = new Dictionary<string, object>();
-            
+
             string joiningMemberId = string.Empty;
 
             if (jsonData.ContainsKey("lobby"))
@@ -263,7 +280,7 @@ public class UIManager : MonoBehaviour
                 {
                     case "MEMBER_JOIN":
                         {
-                            if(!string.IsNullOrEmpty(joiningMemberId) && joiningMemberId == BCManager.Instance.bc.Client.ProfileId)
+                            if (!string.IsNullOrEmpty(joiningMemberId) && joiningMemberId == BCManager.Instance.bc.Client.ProfileId)
                             {
                                 //we just joined this lobby
                                 UpdateState(State.Lobby);
@@ -282,7 +299,7 @@ public class UIManager : MonoBehaviour
                         {
                             bool memberReady = (bool)memberData["isReady"];
 
-                            UpdateMemberReady(joiningMemberId, memberReady);  
+                            UpdateMemberReady(joiningMemberId, memberReady);
                         }
                         break;
                     case "MEMBER_LEFT":
@@ -341,13 +358,15 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private const string P_PRE_FIX = "";
+    private const string P_PRE_FIX = "SMRJ_";
     private const string P1_STR = P_PRE_FIX + "player1";
     private const string P2_STR = P_PRE_FIX + "player2";
     private const string P3_STR = P_PRE_FIX + "player3";
-    public void LoginP1()
+    
+    private void LoginHelper(string str, string pwd)
     {
-        BCManager.Instance.AuthenticateUser(P1_STR, P1_STR, (success) =>
+        UpdateState(State.Main);
+        BCManager.Instance.AuthenticateUser(str, pwd, (success) =>
         {
             if (success)
             {
@@ -358,36 +377,21 @@ public class UIManager : MonoBehaviour
                 Debug.LogError("There was an error authenticating");
             }
         });
+    }
+    public void LoginP1()
+    {
+        LoginHelper(P1_STR, P1_STR);
     }
 
     public void LoginP2()
     {
-        BCManager.Instance.AuthenticateUser(P2_STR, P2_STR, (success) =>
-        {
-            if (success)
-            {
-                OnAuthSuccess();
-            }
-            else
-            {
-                Debug.LogError("There was an error authenticating");
-            }
-        });
+        LoginHelper(P2_STR, P2_STR);
     }
 
     public void LoginP3()
     {
-        BCManager.Instance.AuthenticateUser(P3_STR, P3_STR, (success) =>
-        {
-            if (success)
-            {
-                OnAuthSuccess();
-            }
-            else
-            {
-                Debug.LogError("There was an error authenticating");
-            }
-        });
+        
+        LoginHelper(P3_STR, P3_STR);
     }
 
 
@@ -416,7 +420,7 @@ public class UIManager : MonoBehaviour
     {
         if (!BCManager.Instance.bc.RTTService.IsRTTEnabled())
         {
-            BCManager.Instance.EnableRTT(true, () =>        
+            BCManager.Instance.EnableRTT(true, () =>
             {
                 BCManager.Instance.bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
                 UpdateState(State.Main);
@@ -432,8 +436,8 @@ public class UIManager : MonoBehaviour
     public void UpdateState(State state)
     {
         Debug.Log("update State " + state);
-        
-        if(_curState != state)
+
+        if (_curState != state)
         {
             _curState = state;
             OnStateChanged();
@@ -442,39 +446,56 @@ public class UIManager : MonoBehaviour
 
     private void OnStateChanged()
     {
-
         Debug.Log("OnStateChanged " + _curState);
-        switch (_curState) { 
+        switch (_curState)
+        {
+            case State.Loading:
+                {
+
+                    _mainView.SetActive(false);
+                    _lobbyView.SetActive(false);
+                    _loginView.SetActive(false);
+                }
+                break;
+
             case State.Login:
-                _mainView.SetActive(false);
-                _lobbyView.SetActive(false);
-                _loginView.SetActive(true);
+                {
+                    _mainView.SetActive(false);
+                    _lobbyView.SetActive(false);
+                    _loginView.SetActive(true);
+                }
                 break;
 
             case State.Main:
-                _mainView.SetActive(true);
-                _lobbyView.SetActive(false);
-                _loginView.SetActive(false);
+                {
+                    _mainView.SetActive(true);
+                    _lobbyView.SetActive(false);
+                    _loginView.SetActive(false);
 
-                _mainStatus.text = string.Empty;
+                    _mainStatus.text = string.Empty;
+                }
                 break;
 
             case State.Lobby:
-                _mainView.SetActive(false);
-                _lobbyView.SetActive(true);
-                _loginView.SetActive(false);
+                {
+                    _mainView.SetActive(false);
+                    _lobbyView.SetActive(true);
+                    _loginView.SetActive(false);
 
-                _findLobbyButton.gameObject.SetActive(true);
-                _createLobbyButton.gameObject.SetActive(true);
-                _findCreateLobbyButton.gameObject.SetActive(true);
-                _cancelMatchmakingButton.gameObject.SetActive(false);
+                    _findLobbyButton.gameObject.SetActive(true);
+                    _createLobbyButton.gameObject.SetActive(true);
+                    _findCreateLobbyButton.gameObject.SetActive(true);
+                    _cancelMatchmakingButton.gameObject.SetActive(false);
 
-                _lobbyMembersContainer.DestroyChildren();
-                _members.Clear();
+                    _lobbyMembersContainer.DestroyChildren();
+                    _members.Clear();
+                }
                 break;
 
             case State.InGame:
-                //load game scene
+                {
+                    //load game scene
+                }
                 break;
         }
 
