@@ -495,6 +495,8 @@ namespace FishyBrainCloud
 
                         var migrateEvent = JsonUtility.FromJson<RelaySystemMigrateOwner>(json);
                         Debug.Log($"[FishyBrainCloud] Received request to migrate owner to {migrateEvent.cxId}");
+                        int previousHostId = hostId;
+                        
                         string newHostProfileId = migrateEvent.cxId.Split(':')[1];
                         isLocal = localProfileId == newHostProfileId;
 
@@ -503,13 +505,23 @@ namespace FishyBrainCloud
                         Debug.Log($"[FishyBrainCloud] New Host netId: {hostId}");
 
                         _isServer = isLocal;
-                        if (isLocal)
+                        if (_isServer)
                         {
                             Debug.Log($"[FishyBrainCloud] This client is now becoming the server host");
-                            _isServer = true;
                             HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Started, Index));
                             HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
-                            HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, hostId, Index));
+                            //HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, hostId, Index));
+
+                            // do we also handle all the other remotes as the server and their net id?
+                            for (int i = 0; i < _connectedClients.Count; ++i)
+                            {
+                                HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started,
+                                    _connectedClients[i], Index));                                
+                            }
+                        }
+                        else
+                        {
+                            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
                         }
                     }
                     break;
@@ -570,6 +582,7 @@ namespace FishyBrainCloud
                     HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
                     _clientConnected = true;
                 }
+                AddConnection(connectedNetId);
             }
         }
 
@@ -603,6 +616,7 @@ namespace FishyBrainCloud
                 
                 if (connectedProfileId == _brainCloud.Client.ProfileId)
                 {
+                    Debug.Log($"[FishyBrainCloud] StopClient local {connectionId}");
                     _brainCloud.RelayService.DeregisterRelayCallback();
                     _brainCloud.RelayService.Disconnect();
                     HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
@@ -611,6 +625,7 @@ namespace FishyBrainCloud
 
                 if (_isServer)
                 {
+                    Debug.Log($"[FishyBrainCloud] StopClient server {connectionId}");
                     HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Stopped, connectionId, Index));
                 }
             }
@@ -654,13 +669,13 @@ namespace FishyBrainCloud
 
         private bool RemoveConnection(int netId)
         {
-            Debug.Log($"[FishyBrainCloud] RemoveConnection {netId}");
             bool connectionRemoved = false;
             if (_connectedClients.Contains(netId))
             {
                 _connectedClients.Remove(netId);
                 connectionRemoved = true;
             }
+            Debug.Log($"[FishyBrainCloud] RemoveConnection {netId}, {connectionRemoved}");
             return connectionRemoved;
         }
 
