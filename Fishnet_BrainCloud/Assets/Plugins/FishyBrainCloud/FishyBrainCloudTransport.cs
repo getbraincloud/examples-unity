@@ -550,7 +550,7 @@ namespace FishyBrainCloud
         private void AddConnectionHelper(int connectedNetId, bool isLocal, bool skipAddConnectionCheck)
         {
             short currentNetId = _brainCloud.RelayService.GetNetIdForProfileId(_brainCloud.Client.ProfileId);
-            Debug.Log($"[FishyBrainCloud] AddConnectionHelper HOST: {hostId}, inId:{connectedNetId}, local:{isLocal}, myId:{currentNetId}");
+            Debug.Log($"[FishyBrainCloud] AddConnectionHelper HOST: {hostId}, inId:{connectedNetId}, local:{isLocal}, myId:{currentNetId}, skipAddConnectionCheck{skipAddConnectionCheck}");
             if (hostId != INVALID_HOST_ID && (skipAddConnectionCheck || AddConnection(connectedNetId)))
             {
                 if (isLocal && !_clientConnected)
@@ -581,8 +581,8 @@ namespace FishyBrainCloud
                     Debug.Log($"[FishyBrainCloud] CONNECTING LOCAL {currentNetId} AFTER server {connectedNetId}");
                     HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
                     _clientConnected = true;
+                    AddConnection(currentNetId);
                 }
-                AddConnection(connectedNetId);
             }
         }
 
