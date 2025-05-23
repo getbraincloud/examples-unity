@@ -4,6 +4,7 @@ using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System;
 using UnityEngine;
+using FishNet.Object;
 using FishNet.Serializing;
 using FishNet.Connection;
 using FishNet.Utility.Performance;
@@ -308,7 +309,7 @@ namespace FishyBrainCloud
                                 {
                                     if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
                                     {
-                                        if (signalData.TryGetValue("remoteClientId", out object remoteClientIdObj) && remoteClientIdObj is int remoteClientId)
+                                        if (signalData.TryGetValue(REMOTE_CLIENT_ID, out object remoteClientIdObj) && remoteClientIdObj is int remoteClientId)
                                         {
                                             Debug.Log("remoteClientId: " + remoteClientId);
 
@@ -557,15 +558,16 @@ namespace FishyBrainCloud
                             HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Started, Index));
                             HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
                             HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, hostId, Index));
+                        
                         }
                         else
                         {
                             Debug.Log($"[FishyBrainCloud] CLIENT SENT {localClientId}");
                             HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
 
-                            
+                            //
                             Dictionary<string, object> signalData = new Dictionary<string, object>();
-                            signalData["remoteClientId"] = localClientId;
+                            signalData[REMOTE_CLIENT_ID] = localClientId;
                             _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
                         }
                     }
@@ -592,6 +594,7 @@ namespace FishyBrainCloud
         }
 
         private bool _clientConnected = false;
+        private const string REMOTE_CLIENT_ID = "remoteClientId";
         private void AddConnectionHelper(int connectedNetId, bool isLocal, bool skipAddConnectionCheck)
         {
             short currentNetId = _brainCloud.RelayService.GetNetIdForProfileId(_brainCloud.Client.ProfileId);
