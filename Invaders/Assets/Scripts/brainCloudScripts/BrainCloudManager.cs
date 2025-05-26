@@ -8,13 +8,20 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
+using System.Linq;
 
 public class BrainCloudManager : MonoBehaviour
 {
     [SerializeField] private SceneTransitionHandler _sceneTransitionHandler;
     private NetworkManager _netManager;
+    [SerializeField] private bool isInternal = false;
 
     private BrainCloudWrapper _wrapper;
+    public BrainCloudWrapper BCWrapper
+    {
+        get => _wrapper;
+    }
     private BrainCloudS2S _bcS2S = new BrainCloudS2S();
     private Lobby _currentLobby;
     public Lobby CurrentLobby
@@ -58,12 +65,20 @@ public class BrainCloudManager : MonoBehaviour
         get => _localUserInfo;
         set => _localUserInfo = value;
     }
+    public bool isLobbyOwner
+    {
+        get => LocalUserInfo.ProfileID == CurrentLobby.OwnerID;
+    }
 
     private string _roomAddress;
     private int _roomPort;
 
     public static BrainCloudManager Singleton { get; private set; }
     public List<UserScoreInfo> ListOfUsers = new List<UserScoreInfo>();
+    private string featuredUser = string.Empty;
+    private bool foundTopUserInfo = false;
+    private bool foundFeaturedUserInfo = false;
+
     void Awake()
     {
         IsDedicatedServer = Application.isBatchMode && !Application.isEditor;
@@ -105,6 +120,10 @@ public class BrainCloudManager : MonoBehaviour
             _unityTransport.SetConnectionData("0.0.0.0", 7777);
             _netManager.StartServer();
         }
+        else if(_wrapper.CanReconnect())
+        {
+            _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);            
+        }
     }
 
     private void Update()
@@ -113,6 +132,21 @@ public class BrainCloudManager : MonoBehaviour
         {
             _bcS2S.RunCallbacks();
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        if(_wrapper.Client.Authenticated)
+        {
+            _wrapper.LogoutOnApplicationQuit(false);
+        }
+    }
+    
+    public void Logout()
+    {
+        _wrapper.LogoutOnApplicationQuit(true);
+        _wrapper.RTTService.DisableRTT();
+        _wrapper.RTTService.DeregisterAllRTTCallbacks();
     }
 
     public void AuthenticateWithBrainCloud(string in_username, string in_password)
@@ -136,8 +170,18 @@ public class BrainCloudManager : MonoBehaviour
         }
         else
         {
+            LocalUserInfo.Username = playerName;
             MenuControl.Singleton.SwitchMenuButtons();            
         }
+        if(!MenuControl.Singleton.RememberMeToggle.isOn)
+        {
+            _wrapper.ResetStoredProfileId();
+            _wrapper.Client.AuthenticationService.ProfileId = _localUserInfo.ProfileID;
+        }
+
+        MenuControl.Singleton.DisplayUsername(_localUserInfo.Username);
+
+        EnableRTTAndLobbyCallbacks();
     }
     
     [ServerRpc]
@@ -156,15 +200,19 @@ public class BrainCloudManager : MonoBehaviour
     {
         MenuControl.Singleton.SwitchMenuButtons();
     }
+
+    public void EnableRTTAndLobbyCallbacks()
+    {
+        _wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _wrapper.RTTService.EnableRTT(OnRTTConnected, OnFailureCallback);
+    }
     
     public void FindOrCreateLobby()
     {
-        _wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent); 
-        _wrapper.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, OnRTTConnected, OnFailureCallback);
-    }
-    
-    void OnRTTConnected(string jsonResponse, object cbObject)
-    {
+        if (!_wrapper.RTTService.IsRTTEnabled())
+            return;
+
+
         // Find lobby
         var algo = new Dictionary<string, object>();
         algo["strategy"] = "ranged-absolute";
@@ -172,7 +220,7 @@ public class BrainCloudManager : MonoBehaviour
         List<int> ranges = new List<int>();
         ranges.Add(1000);
         algo["ranges"] = ranges;
-        
+
         //
         var filters = new Dictionary<string, object>();
 
@@ -192,29 +240,40 @@ public class BrainCloudManager : MonoBehaviour
             1, // max steps
             algo, // algorithm
             filters, // filters
-            0, // Timeout
             false, // ready
             extra, // extra
             teamCode, // team code
             settings, // settings
             null, // other users
             null, // Success of lobby found will be in the event onLobbyEvent
-            OnFailureCallback, 
+            OnFailureCallback,
             "Failed to find lobby"
         );
+    }
+    
+    public void LeaveLobby()
+    {
+        _wrapper.LobbyService.LeaveLobby(_currentLobby.LobbyID, null, OnFailureCallback);
+    }
+    
+    void OnRTTConnected(string jsonResponse, object cbObject)
+    {
+        
     }
     
     void OnLobbyEvent(string jsonResponse)
     {
         Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object> lobby;
+        Dictionary<string, object> settings;
+        string[] replayUserIds;
 
         // If there is a lobby object present in the message, update our lobby
         // state with it.
-        if (jsonData.ContainsKey("lobby"))
+        if (jsonData.ContainsKey("lobby") && (string)response["operation"] != "SETTINGS_UPDATE")
         {
-            _currentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>,
-                jsonData["lobbyId"] as string);
+            _currentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>, jsonData["lobbyId"] as string);
                 
             if (MenuControl.Singleton.IsLoading)
             {
@@ -235,23 +294,34 @@ public class BrainCloudManager : MonoBehaviour
             switch (operation)
             {
                 case "MEMBER_JOIN":
+                    if (LobbyControl.Singleton != null)
+                    {
+                        LobbyControl.Singleton.GenerateUserStatsForLobby();
+                    }
+
+                    lobby = jsonData["lobby"] as Dictionary<string, object>;
+                    settings = lobby["settings"] as Dictionary<string, object>;
+                    if (settings.ContainsKey("replay_users"))
+                    {
+                        replayUserIds = settings["replay_users"] as string[];
+                        StartCoroutine(DelayAddIdToList(replayUserIds));
+                    }
+                    break;
                 case "MEMBER_UPDATE":
                     if (LobbyControl.Singleton != null)
                     {
                         LobbyControl.Singleton.GenerateUserStatsForLobby();
                     }
                     break;
-
                 case "DISBANDED":
+                    ResetReplayFlags();
+                    var reason = jsonData["reason"] as Dictionary<string, object>;
+                    if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
                     {
-                        var reason = jsonData["reason"] as Dictionary<string, object>;
-                        if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
-                        {
-                            // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                            LobbyControl.Singleton.SetupPopupPanel($"Received an error message while launching room: {reason["desc"]}");
-                        }
-                        break;
+                        // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
+                        LobbyControl.Singleton.SetupPopupPanel($"Received an error message while launching room: {reason["desc"]}");
                     }
+                    break;
                 case "STARTING":
                     break;
                 case "ROOM_ASSIGNED":
@@ -269,7 +339,9 @@ public class BrainCloudManager : MonoBehaviour
                     {
                         LobbyControl.Singleton.LoadingIndicatorMessage = "Room is ready";
                         LobbyControl.Singleton.IsLoading = false;
+                        LobbyControl.Singleton.FetchPlaybacks();
                     }
+                    ResetReplayFlags();
                     SceneTransitionHandler.SwitchScene("Connecting");
                     _unityTransport.ConnectionData.Address = _roomAddress;
                     _unityTransport.ConnectionData.Port = (ushort)_roomPort;
@@ -277,8 +349,29 @@ public class BrainCloudManager : MonoBehaviour
                     AddUserToList(_localUserInfo.Username, NetworkManager.Singleton.LocalClientId);
                     //open in game level and then connect to server
                     break;
+                case "SETTINGS_UPDATE":
+                    lobby = jsonData["lobby"] as Dictionary<string, object>;
+                    settings = lobby["settings"] as Dictionary<string, object>;
+                    replayUserIds = settings["replay_users"] as string[];
+                    LobbyControl.Singleton.AddIdToList(replayUserIds[^1]);
+                    break;
+                case "SIGNAL":
+                    if (!isLobbyOwner) break;
+                    Dictionary<string, object> signal = jsonData["signalData"] as Dictionary<string, object>;
+                    _wrapper.LobbyService.UpdateSettings(CurrentLobby.LobbyID, signal, null, OnFailureCallback);
+                    break;
             }
         }
+    }
+
+    private IEnumerator DelayAddIdToList(string[] userIds)
+    {
+        yield return new WaitUntil(() => foundTopUserInfo && foundFeaturedUserInfo);
+        foreach (string userId in userIds)
+        {
+            LobbyControl.Singleton.AddIdToList(userId);
+        }
+        yield break;
     }
 
     public void UpdateReady()
@@ -287,15 +380,142 @@ public class BrainCloudManager : MonoBehaviour
         _wrapper.LobbyService.UpdateReady(_currentLobby.LobbyID, true, extra);
     }
     
+    public void SendNewIdSignal(string[] newIds)
+    {
+        Dictionary<string, object> replayUsers = new Dictionary<string, object> { { "replay_users",  newIds} };
+        if (isLobbyOwner)
+            _wrapper.LobbyService.UpdateSettings(CurrentLobby.LobbyID, replayUsers, null, OnFailureCallback);
+        else
+            _wrapper.LobbyService.SendSignal(CurrentLobby.LobbyID, replayUsers, null, OnFailureCallback);
+    }
 
+    public void StartGetFeaturedUser()
+    {
+        StartCoroutine(GetFeaturedUser());
+    }
+
+    private IEnumerator GetFeaturedUser()
+    {
+        string[] property = new string[] { "FeaturedPlayer" };
+        _wrapper.GlobalAppService.ReadSelectedProperties(property, OnFindFeaturedUser, OnFailureCallback);
+        yield return new WaitUntil(() => featuredUser != string.Empty);
+
+        string[] featuredUserArray = new string[] { featuredUser };
+        _wrapper.LeaderboardService.GetPlayersSocialLeaderboard("InvaderHighScore", featuredUserArray, OnFeaturedUserInfoSuccess, OnFailureCallback);
+        yield break;
+    }
+
+    private void OnFindFeaturedUser(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object> property = data["FeaturedPlayer"] as Dictionary<string, object>;
+        featuredUser = (string)property["value"];
+    }
+
+    private void OnFeaturedUserInfoSuccess(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
+
+        if(leaderboard.Count() != 0)
+        {
+            Dictionary<string, object> userData = leaderboard[0];
+
+            LobbyControl.Singleton.UpdateFeaturedSelector(
+                (string)userData["playerId"],
+                (string)userData["playerName"],
+                (int)userData["score"]
+                );
+            featuredUser = string.Empty;
+            foundFeaturedUserInfo = true;
+        }
+    }
+
+    public void GetTopUsers(int amount)
+    {
+        BrainCloudSocialLeaderboard.SortOrder order = BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW;
+        _wrapper.LeaderboardService.GetGlobalLeaderboardPage("InvaderHighScore", order, 0, amount - 1, OnTopUserInfoSuccess, OnFailureCallback);
+    }
+
+    private void OnTopUserInfoSuccess(string in_jsonResponse, object cbObject)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
+        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
+        Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
+        
+        foreach (Dictionary<string, object> userData in leaderboard)
+        {
+            LobbyControl.Singleton.UpdateLeaderBoardSelector(
+                (int)userData["rank"], 
+                (string)userData["playerId"], 
+                (string)userData["name"], 
+                (int)userData["score"]
+                );
+        }
+        foundTopUserInfo = true;
+    }
     
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
+        string genericMessage = "An error has been received, please restart the game and try again. For more details check the editor console for logs.";
+        Debug.Log("Error: " + statusMessage);
         if(LobbyControl.Singleton != null)
         {
-            LobbyControl.Singleton.SetupPopupPanel($"Failure Callback received, error message: {statusMessage}");
+            if(reasonCode == ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT)
+            {
+                LobbyControl.Singleton.SetupPopupPanel("Connection interrupted. Please check your internet connection and try again.");
+                return;
+            }
+            if(reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
+            {
+                MenuControl.Singleton.SetupPopupPanel("This account was logged into a new location. This session has ended.");
+                MenuControl.Singleton.Logout();
+                return;
+            }
+            if(reasonCode == -1 && statusCode == 400)
+            {
+                if(statusMessage.Contains("RTT Connection has been closed.") ||
+                   statusMessage.Contains("Re-Enable RTT to re-establish connection"))
+                {
+                    _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
+                    return;
+                }
+            }
+            
+            LobbyControl.Singleton.SetupPopupPanel(genericMessage);
         }
-        Debug.Log("Error: " + statusMessage);
+        else if(MenuControl.Singleton != null)
+        {
+            if(reasonCode == ReasonCodes.TOKEN_DOES_NOT_MATCH_USER)
+            {
+                MenuControl.Singleton.SetupPopupPanel("You've entered your password incorrectly. Please try again.");
+                return;
+            }
+            if(reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
+            {
+                MenuControl.Singleton.SetupPopupPanel("This account was logged into a new location. This session has ended.");
+                MenuControl.Singleton.Logout();
+                return;
+            }
+            if(reasonCode == -1 && statusCode == 400)
+            {
+                if(statusMessage.Contains("RTT Connection has been closed.") ||
+                   statusMessage.Contains("Re-Enable RTT to re-establish connection"))
+                {
+                    _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
+                    return;
+                }
+            }
+            
+            MenuControl.Singleton.SetupPopupPanel(genericMessage);
+        }
     }
 
+    private void ResetReplayFlags()
+    {
+        foundTopUserInfo = false;
+        foundFeaturedUserInfo = false;
+    }
 }

@@ -17,12 +17,20 @@ public class LobbyControl : NetworkBehaviour
 
     public TMP_Text ServerStatusText;
     public Button ReadyButton;
+    public Button BackButton;
 
-    public TMP_Text ErrorMessage;
-    public GameObject ErrorPanel;
+    public ErrorPopUp ErrorPopUp;
     
     public TMP_Text LobbyText;
     private bool m_AllPlayersInLobby;
+
+    [SerializeField]
+    private TMP_Text playbackCounter;
+    private int playbackCount = 0;
+    [SerializeField]
+    private List<PlaybackSelector> leaderBoardSelectors;
+    [SerializeField]
+    private PlaybackSelector featuredSelector;
 
     private Dictionary<ulong, bool> m_ClientsInLobby;
     private string m_UserLobbyStatusText;
@@ -39,6 +47,8 @@ public class LobbyControl : NetworkBehaviour
     }
     public static LobbyControl Singleton { get; private set; }
 
+    private List<string> addedUserIds = new List<string>();
+
     private void Awake()
     {
         if(Singleton == null)
@@ -50,10 +60,13 @@ public class LobbyControl : NetworkBehaviour
             Destroy(gameObject);
         }
 
+        UpdatePlaybackCount();
         GenerateUserStatsForLobby();
         ServerStatusText.gameObject.SetActive(false);
         ReadyButton.gameObject.SetActive(true);
-        ErrorPanel.SetActive(false);
+        BackButton.gameObject.SetActive(true);
+        BrainCloudManager.Singleton.StartGetFeaturedUser();
+        BrainCloudManager.Singleton.GetTopUsers(leaderBoardSelectors.Count);
     }
 
     private void OnGUI()
@@ -100,6 +113,7 @@ public class LobbyControl : NetworkBehaviour
     public void PlayerIsReady()
     {
         ReadyButton.gameObject.SetActive(false);
+        BackButton.gameObject.SetActive(false);
         _loadingIndicatorMessage = ServerStatusText.text = "Waiting for server";
         ServerStatusText.gameObject.SetActive(true);
         _isLoading = true;
@@ -131,12 +145,61 @@ public class LobbyControl : NetworkBehaviour
     public void ReturnToMainMenu()
     {
         SceneTransitionHandler.sceneTransitionHandler.SwitchScene("StartMenu");
+        BrainCloudManager.Singleton.LeaveLobby();
     }
     
     public void SetupPopupPanel(string errorMessage)
     {
         ReadyButton.enabled = false;
-        ErrorMessage.text = errorMessage;
-        ErrorPanel.SetActive(true);
+        ErrorPopUp.SetupPopupPanel(errorMessage);
+    }
+
+    public void AddNewPlayerIdSignal(string newId)
+    {
+        List<string> userIds = new List<string>(addedUserIds) { newId };
+        BrainCloudManager.Singleton.SendNewIdSignal(userIds.ToArray());
+    }
+
+    public void UpdatePlaybackCount()
+    {
+        playbackCount = addedUserIds.Count;
+        if (playbackCount == 0) playbackCounter.text = "ADD BACK UP";
+        else playbackCounter.text = "BACK UP  +" + playbackCount.ToString();
+    }
+
+    public void UpdateFeaturedSelector(string newId, string newName, int newScore)
+    {
+        featuredSelector.InitValues(newId, newName, newScore);
+        featuredSelector.UpdateLabels();
+    }
+
+    public void UpdateLeaderBoardSelector(int rank, string newId, string newName, int newScore)
+    {
+        leaderBoardSelectors[rank - 1].InitValues(newId, newName, newScore);
+        leaderBoardSelectors[rank - 1].UpdateLabels();
+    }
+
+    public void AddIdToList(string newId)
+    {
+        if(addedUserIds.Contains(newId)) return;
+
+        addedUserIds.Add(newId);
+        UpdatePlaybackCount();
+        HideUsedPlaybacks(newId);
+    }
+
+    private void HideUsedPlaybacks(string newId)
+    {
+        foreach(PlaybackSelector ii in leaderBoardSelectors)
+        {
+            if (ii.playerId == newId) ii.HideButton();
+        }
+        if(featuredSelector.playerId == newId) featuredSelector.HideButton();
+    }
+
+    public void FetchPlaybacks()
+    {
+        if(BrainCloudManager.Singleton.isLobbyOwner)
+            PlaybackFetcher.Singleton.AddRecordsFromUsers(addedUserIds);
     }
 }

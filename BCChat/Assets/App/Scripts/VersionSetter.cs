@@ -6,10 +6,16 @@ using UnityEngine;
 /// </summary>
 public class VersionSetter : MonoBehaviour
 {
+    [SerializeField]
+    private bool showAppVersion = false;
+
     private void Start()
     {
         TextMeshProUGUI versionText = GetComponent<TextMeshProUGUI>();
 
-        versionText.text = $"v{BrainCloud.Version.GetVersion()}";
+        if(showAppVersion)
+            versionText.text = $"v{Application.version}";
+        else
+            versionText.text = $"v{BrainCloud.Version.GetVersion()}";
     }
 }

@@ -9,6 +9,7 @@ public class MainPanel : MonoBehaviour
     [SerializeField] private Button LogoutButton = default;
     [SerializeField] private Button SendPushButton = default;
     [SerializeField] private Button OpenStoreButton = default;
+    [SerializeField] private Button HistoryButton = default;
 
     private ExampleApp App = null;
     private BrainCloudWrapper BC = null;
@@ -20,6 +21,7 @@ public class MainPanel : MonoBehaviour
         LogoutButton.onClick.AddListener(OnLogoutButton);
         SendPushButton.onClick.AddListener(OnSendPushButton);
         OpenStoreButton.onClick.AddListener(OnOpenStoreButton);
+        HistoryButton.onClick.AddListener(OnHistoryButton);
     }
 
     private void Start()
@@ -34,6 +36,7 @@ public class MainPanel : MonoBehaviour
         LogoutButton.onClick.RemoveAllListeners();
         SendPushButton.onClick.RemoveAllListeners();
         OpenStoreButton.onClick.RemoveAllListeners();
+        HistoryButton.onClick.RemoveAllListeners();
     }
 
     private void OnDestroy()
@@ -50,7 +53,7 @@ public class MainPanel : MonoBehaviour
 
         yield return new WaitUntil(() =>
         {
-            BC = BC ?? FindObjectOfType<BrainCloudWrapper>();
+            BC = BC == null ? FindObjectOfType<BrainCloudWrapper>() : BC;
 
             return BC != null && BC.Client != null && BC.Client.IsInitialized();
         });
@@ -62,28 +65,7 @@ public class MainPanel : MonoBehaviour
 
     private void OnLogoutButton()
     {
-        App.IsInteractable = false;
-
-        void onSuccess(string jsonResponse, object cbObject)
-        {
-            Debug.Log($"Logout success!");
-
-            App.ChangePanelState(PanelState.Login);
-            App.GetStoredUserIDs();
-            App.IsInteractable = true;
-        };
-
-        void onFailure(int status, int reason, string jsonError, object cbObject)
-        {
-            App.OnBrainCloudError(status, reason, jsonError, cbObject);
-
-            Debug.LogError($"Logout failed!");
-            Debug.LogError($"Try restarting the app...");
-
-            App.GetStoredUserIDs();
-        }
-
-        BC.Logout(false, onSuccess, onFailure, this);
+        App.ChangePanelState(PanelState.Logout);
     }
 
     private void OnSendPushButton()
@@ -100,5 +82,10 @@ public class MainPanel : MonoBehaviour
     private void OnOpenStoreButton()
     {
         App.ChangePanelState(PanelState.Store);
+    }
+
+    private void OnHistoryButton()
+    {
+        App.ChangePanelState(PanelState.History);
     }
 }

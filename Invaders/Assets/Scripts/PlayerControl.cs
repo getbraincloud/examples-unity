@@ -5,11 +5,16 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering.VirtualTexturing;
+using Random = UnityEngine.Random;
 
 public class PlayerControl : NetworkBehaviour
 {
     [Header("Weapon Settings")]
     public GameObject bulletPrefab;
+    private GameObject m_MyBullet;
+    private bool shotRecently = false;
+    private float timeSinceShot = 0.0f;
+    private readonly float shootCooldown = 0.5f;
 
     [Header("Movement Settings")]
     [SerializeField]
@@ -33,7 +38,6 @@ public class PlayerControl : NetworkBehaviour
 
     private NetworkVariable<int> m_MoveX = new NetworkVariable<int>(0);
 
-    private GameObject m_MyBullet;
     private ClientRpcParams m_OwnerRPCParams;
 
     [SerializeField]
@@ -57,9 +61,24 @@ public class PlayerControl : NetworkBehaviour
         get => BrainCloudManager.Singleton.IsDedicatedServer;
     }
 
+    private PlaybackStreamRecord record;
+    private int currentRecordFrame = 0;
+    private float previousPos = 0;
+    private bool finishedRecording = false;
+
     private void Awake()
     {
         m_HasGameStarted = false;
+        record = new PlaybackStreamRecord();
+        record.frames.Add(new PlaybackStreamFrame(0));
+    }
+
+    private void Start()
+    {
+        PlayerName = BrainCloudManager.Singleton.LocalUserInfo.Username;
+        transform.position = Vector3.right * Random.Range(-40, 40) / 10f;
+        record.startPosition = transform.position.x;
+        record.username = PlayerName;
     }
 
     private void Update()
@@ -74,9 +93,46 @@ public class PlayerControl : NetworkBehaviour
         }
     }
 
+    // This is the only function that is guarunteed to be called client side when the game ends. Other functions are inconsistently called.
+    override public void OnDestroy()
+    {
+        EndRecording();
+        base.OnDestroy();
+    }
+
+    private void FixedUpdate()
+    {
+        if (IsLocalPlayer)
+        {
+            int dx;
+            if (Mathf.Abs(transform.position.x - previousPos) < 0.01f) dx = 0;
+            else dx = Math.Sign(transform.position.x - previousPos);
+
+            record.frames.Add(new PlaybackStreamFrame(dx, shotRecently, currentRecordFrame));
+            shotRecently = false;
+            currentRecordFrame += 1;
+        }
+
+        timeSinceShot += 1.0f * Time.deltaTime;
+        previousPos = transform.position.x;
+    }
+
     private void LateUpdate()
     {
         HandleCameraMovement();
+    }
+
+    private void EndRecording()
+    {
+        if (IsLocalPlayer && !finishedRecording)
+        {
+            finishedRecording = true;
+            if (record.totalFrameCount == -2)
+            {
+                record.totalFrameCount = currentRecordFrame;
+            }
+            PlaybackSaver.Singleton.StartSubmittingRecord(Score, record);
+        }
     }
 
     private void HandleCameraMovement()
@@ -158,6 +214,7 @@ public class PlayerControl : NetworkBehaviour
     public void IncreasePlayerScore(int amount)
     {
         Assert.IsTrue(IsDedicatedServer, "IncreasePlayerScore should be called server-side only");
+        if (finishedRecording) return;
         m_Score.Value += amount;
     }
 
@@ -173,19 +230,20 @@ public class PlayerControl : NetworkBehaviour
             m_PlayerVisual.enabled = false;
 
         if (!IsOwner) return;
-        Debug.LogFormat("Lives {0} ", currentAmount);
         if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetLives(m_Lives.Value);
+        if(BrainCloud.Plugin.Interface.EnableLogging) Debug.LogFormat("Lives {0} ", currentAmount);
 
         if (m_Lives.Value <= 0)
         {
             m_IsAlive = false;
+            EndRecording();
         }
     }
 
     private void OnScoreChanged(int previousAmount, int currentAmount)
     {
         if (!IsOwner) return;
-        Debug.LogFormat("Score {0} ", currentAmount);
+        if (finishedRecording) return;
         if (InvadersGame.Singleton != null) InvadersGame.Singleton.SetScore(m_Score.Value);
     } // ReSharper disable Unity.PerformanceAnalysis
 
@@ -194,11 +252,9 @@ public class PlayerControl : NetworkBehaviour
         if (!IsLocalPlayer || !IsOwner || !m_HasGameStarted) return;
         if (!m_IsAlive) return;
 
-        
-
         var deltaX = 0;
-        if (Input.GetKey(KeyCode.LeftArrow)) deltaX -= 1;
-        if (Input.GetKey(KeyCode.RightArrow)) deltaX += 1;
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) deltaX -= 1;
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) deltaX += 1;
 
         if (deltaX != 0)
         {
@@ -207,21 +263,26 @@ public class PlayerControl : NetworkBehaviour
                 transform.position + newMovement, m_MoveSpeed * Time.deltaTime);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space)) ShootServerRPC();
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        {
+            if (timeSinceShot >= shootCooldown)
+            {
+                timeSinceShot = 0;
+                shotRecently = true;
+                ShootServerRPC();
+            }
+        }
     }
 
     [ServerRpc]
     private void ShootServerRPC()
     {
-        if (!m_IsAlive)
-            return;
+        if (timeSinceShot < shootCooldown) return;
 
-        if (m_MyBullet == null)
-        {
-            m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
-            m_MyBullet.GetComponent<PlayerBullet>().owner = this;
-            m_MyBullet.GetComponent<NetworkObject>().Spawn();
-        }
+        m_MyBullet = Instantiate(bulletPrefab, transform.position + Vector3.up, Quaternion.identity);
+        m_MyBullet.GetComponent<PlayerBullet>().owner = this;
+        m_MyBullet.GetComponent<NetworkObject>().Spawn();
+        timeSinceShot = 0;
     }
 
     public void HitByBullet()
@@ -237,10 +298,9 @@ public class PlayerControl : NetworkBehaviour
             m_IsAlive = false;
             m_MoveX.Value = 0;
             m_Lives.Value = 0;
-            InvadersGame.Singleton.SetGameEnd(GameOverReason.Death);
-
-            NotifyGameOverClientRpc(GameOverReason.Death, m_OwnerRPCParams);
-            Instantiate(m_ExplosionParticleSystem, transform.position, quaternion.identity);
+            //InvadersGame.Singleton.SetGameEnd(GameOverReason.Death);
+            //NotifyGameOverClientRpc(GameOverReason.Death, m_OwnerRPCParams);
+            SpawnVFXClientRpc(0, transform.position);
 
             // Hide graphics of this player object server-side. Note we don't want to destroy the object as it
             // may stop the RPC's from reaching on the other side, as there is only one player controlled object
@@ -248,16 +308,16 @@ public class PlayerControl : NetworkBehaviour
         }
         else
         {
-            Instantiate(m_HitParticleSystem, transform.position, quaternion.identity);
+            SpawnVFXClientRpc(1, transform.position);
         }
     }
 
     [ClientRpc]
-    private void NotifyGameOverClientRpc(GameOverReason reason, ClientRpcParams clientParams )
+    public void NotifyGameOverClientRpc(GameOverReason reason)
     {
         NotifyGameOver(reason);
     }
-    
+
     /// <summary>
     /// This should only be called locally, either through NotifyGameOverClientRpc or through the InvadersGame.BroadcastGameOverReason
     /// </summary>
@@ -283,5 +343,20 @@ public class PlayerControl : NetworkBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(reason), reason, null);
         }
+        EndRecording();
+    }
+
+    public PlaybackStreamRecord GetRecord()
+    {
+        return record;
+    }
+
+    [ClientRpc]
+    void SpawnVFXClientRpc(int vfxType, Vector3 spawnPosition)
+    {
+        if (vfxType == 0)
+            Instantiate(m_ExplosionParticleSystem, spawnPosition, Quaternion.identity);
+        else if (vfxType == 1)
+            Instantiate(m_HitParticleSystem, spawnPosition, Quaternion.identity);
     }
 }

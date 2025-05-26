@@ -8,6 +8,7 @@ public class LoginPanel : MonoBehaviour
 {
     [Header("UI Elements")]
     [SerializeField] private Button LoginButton = default;
+    [SerializeField] private Toggle RememberMeToggle = default;
 
     private ExampleApp App = null;
     private BrainCloudWrapper BC = null;
@@ -43,12 +44,17 @@ public class LoginPanel : MonoBehaviour
     {
         yield return new WaitUntil(() =>
         {
-            BC = BC ?? FindObjectOfType<BrainCloudWrapper>();
+            BC = BC == null ? FindObjectOfType<BrainCloudWrapper>() : BC;
 
             return BC != null && BC.Client != null && BC.Client.IsInitialized();
         });
 
         yield return null;
+
+        if (BC.CanReconnect())
+        {
+            HandleAutomaticLogin();
+        }
     }
 
     private void HandleAutomaticLogin()
@@ -64,16 +70,9 @@ public class LoginPanel : MonoBehaviour
 
     private void OnLoginButton()
     {
-        if (App.GetStoredUserIDs())
-        {
-            HandleAutomaticLogin();
-        }
-        else
-        {
-            BC.AuthenticateAnonymous(OnAuthenticationSuccess,
-                                     OnAuthenticationFailure,
-                                     this);
-        }
+        BC.AuthenticateAnonymous(OnAuthenticationSuccess,
+                                 OnAuthenticationFailure,
+                                 this);
     }
 
     private void OnAuthenticationSuccess(string jsonResponse, object cbObject)
@@ -83,8 +82,22 @@ public class LoginPanel : MonoBehaviour
         App.ChangePanelState(PanelState.Main);
         App.IsInteractable = true;
 
+        if(!RememberMeToggle.isOn)
+        {
+            BC.ResetStoredProfileId();
+        }
+
         App.GetStoredUserIDs();
-        Debug.Log($"User Profile ID: {BC.GetStoredProfileId()}");
+
+        if (BC.GetStoredProfileId() is string id && !string.IsNullOrEmpty(id))
+        {
+            Debug.Log($"User Profile ID: {id}");
+        }
+        else
+        {
+            Debug.Log("NOTE: BC Profile ID is not being stored since Remember Me is False.");
+        }
+
         Debug.Log($"User Anonymous ID: {BC.GetStoredAnonymousId()}");
 
         Debug.Log("Authentication success! You are now logged into your app on brainCloud.");

@@ -36,7 +36,7 @@ public class TicTacToe : GameScene
         parent.GetComponentInChildren<Camera>().rect = App.ViewportRect;
         
         // Read the state and assembly the board
-        BuildBoardFromState(App.BoardState);
+        BuildBoardFromState(App.BoardState, App.OldBoardState);
         
         _isActive = true;
         ErrorMessageScreen.SetActive(false);
@@ -169,7 +169,7 @@ public class TicTacToe : GameScene
         // Only Enable RTT if its not already started
         if (!App.Bc.RTTService.IsRTTEnabled())
         {
-            App.Bc.RTTService.EnableRTT(RTTConnectionType.WEBSOCKET, onRTTEnabled, onRTTFailure);
+            App.Bc.RTTService.EnableRTT(onRTTEnabled, onRTTFailure);
             App.Bc.RTTService.RegisterRTTEventCallback(App.RTTEventCallback);
         }
         else
@@ -221,6 +221,7 @@ public class TicTacToe : GameScene
                     App.MatchVersion = (ulong)newVersion;
 
                     // Setup a couple stuff into our TicTacToe scene
+                    App.OldBoardState = App.BoardState;
                     App.BoardState = (string)(data["matchState"] as Dictionary<string, object>)["board"];
                     App.PlayerInfoX = match.playerXInfo;
                     App.PlayerInfoO = match.playerOInfo;
@@ -229,7 +230,7 @@ public class TicTacToe : GameScene
                     App.MatchId = match.matchId;
                     
                     //Checking if game is completed to assign winner and loser info
-                    BuildBoardFromState(App.BoardState);
+                    BuildBoardFromState(App.BoardState, App.OldBoardState);
                     App.Winner = BoardUtility.CheckForWinner();
                     if (App.Winner != 0)
                     {
@@ -272,12 +273,15 @@ public class TicTacToe : GameScene
         }
     }
 
-    private void AddToken(int index, string token)
+    private void AddToken(int index, string token, bool animate)
     {
-        GridObjList.Add(Instantiate(token == "X" ? PlayerX : PlayerO, _tokenPositions[index],
-            Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f))));
-        GridObjList.Last().transform.parent = gameObject.transform;
-        BoardUtility.Grid[index] = token == "X" ? 1 : 2;
+        GameObject newPiece = Instantiate(token == "X" ? PlayerX : PlayerO, transform);
+        newPiece.transform.position = _tokenPositions[index];
+        //newPiece.transform.rotation = Quaternion.Euler(Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f), Random.Range(-7.0f, 7.0f));
+        if (animate) newPiece.GetComponent<DropScript>().Drop();
+
+        GridObjDict.Add(index, newPiece);
+        BoardUtility.Grid[index] = (token == "X" ? 1 : 2);
     }
 
     public void PlayTurn(int index, PlayerInfo player)
@@ -286,10 +290,11 @@ public class TicTacToe : GameScene
         _turnPlayed = true;
 
         var token = player == App.PlayerInfoX ? "X" : "O";
-        AddToken(index, token);
+        AddToken(index, token, true);
         // Modify the boardState
         var boardStateBuilder = new StringBuilder(App.BoardState);
         boardStateBuilder[index] = token[0];
+        App.OldBoardState = App.BoardState;
         App.BoardState = boardStateBuilder.ToString();
 
         // send the info off
@@ -322,11 +327,11 @@ public class TicTacToe : GameScene
     private void ClearTokens()
     {
         //Clear logical grid
-        for (var i = 0; i < BoardUtility.Grid.Length; i++) BoardUtility.Grid[i] = 0;
+        for (int i = 0; i < BoardUtility.Grid.Length; i++) BoardUtility.Grid[i] = 0;
 
-        //Clear instanciated game objects
-        foreach (var obj in GridObjList) Destroy(obj);
-        GridObjList.Clear();
+        //Clear instantiated game objects
+        foreach (GameObject i in GridObjDict.Values) Destroy(i);
+        GridObjDict.Clear();
     }
 
     public bool AvailableSlot(int index)
@@ -336,14 +341,16 @@ public class TicTacToe : GameScene
         return false;
     }
     
-    private void BuildBoardFromState(string boardState)
+    private void BuildBoardFromState(string boardState, string oldBoardState = "#########")
     {
         ClearTokens();
-        var j = 0;
-        foreach (var c in boardState)
+
+        for(int ii = 0; ii < boardState.Length; ii++)
         {
-            if (c != '#') AddToken(j, c.ToString());
-            ++j;
+            if (boardState[ii] != '#')
+            {
+                AddToken(ii, boardState[ii].ToString(), boardState[ii] != oldBoardState[ii]);
+            }
         }
     }
 
@@ -397,7 +404,7 @@ public class TicTacToe : GameScene
         if (_replayTurnIndex <= 0) _replayTurnIndex = 1;
 
         AfterGameDisplay.transform.Find("TurnCycleButton").Find("Text (TMP)").GetComponent<TextMeshProUGUI>().text = "TURN " + (_replayTurnIndex);
-        BuildBoardFromState(_history[_replayTurnIndex]);
+        BuildBoardFromState(_history[_replayTurnIndex], _history[_replayTurnIndex - 1]);
     }
 
     public void onCompleteGame()
@@ -439,19 +446,19 @@ public class TicTacToe : GameScene
     
     #region private variables 
 
-    private List<GameObject> GridObjList = new List<GameObject>();
+    private Dictionary<int, GameObject> GridObjDict = new Dictionary<int, GameObject>();
     
     private readonly Vector3[] _tokenPositions =
     {
-        new Vector3(-2.1f, 12, 2.1f),
-        new Vector3(0, 12, 2.1f),
-        new Vector3(2.1f, 12, 2.1f),
-        new Vector3(-2.1f, 12, 0),
-        new Vector3(0, 12, 0),
-        new Vector3(2.1f, 12, 0),
-        new Vector3(-2.1f, 12, -2.1f),
-        new Vector3(0, 12, -2.1f),
-        new Vector3(2.1f, 12, -2.1f)
+        new Vector3(-2.1f, 0.7f, 2.1f),
+        new Vector3(0, 0.7f, 2.1f),
+        new Vector3(2.1f, 0.7f, 2.1f),
+        new Vector3(-2.1f, 0.7f, 0),
+        new Vector3(0, 0.7f, 0),
+        new Vector3(2.1f, 0.7f, 0),
+        new Vector3(-2.1f, 0.7f, -2.1f),
+        new Vector3(0, 0.7f, -2.1f),
+        new Vector3(2.1f, 0.7f, -2.1f)
     };
 
     private List<string> _history;

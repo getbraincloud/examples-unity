@@ -1,5 +1,7 @@
+using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -14,7 +16,6 @@ using UnityEngine.UI;
 /// 
 /// </summary>
 
-public enum GameColors{Black,Purple,Grey,Orange,Blue,Green,Yellow,Cyan,White}
 public enum GameMode {FreeForAll, Team}
 
 public class GameManager : MonoBehaviour
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     public UserEntry UserEntryLobbyPrefab;
     public UserEntry UserEntryMatchPrefab;
     public UserCursor UserCursorPrefab;
+
     [Header("Parent Transforms")]
     public GameObject UserEntryLobbyParentFFA;
     public GameObject UserEntryMatchParentFFA;
@@ -31,6 +33,7 @@ public class GameManager : MonoBehaviour
     public GameObject UserEntryMatchParentTeamAlpha;
     public GameObject UserEntryMatchParentTeamBeta;
     public GameObject UserCursorParent;
+
     [Header("UI References")]
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
@@ -38,17 +41,21 @@ public class GameManager : MonoBehaviour
     public TMP_Text AppIdText;
     public TMP_Text LobbyIdText;
     public Button ReconnectButton;
-    //for updating members list of shockwaves
+    public Toggle RememberMeToggle;
+
+    //for updating members list of splatters
     public GameArea GameArea;
     public Button JoinInProgressButton;
     public TMP_Dropdown FFADropdown;
     public TMP_Dropdown TeamDropdown;
+
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public GameObject EndGameBtn;
     public TMP_Text LobbyLocalUserText;
     public TMP_Dropdown CompressionDropdown;
     private EventSystem _eventSystem;
+
     //List references for clean up when game closes
     private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
     private readonly List<UserCursor> _userCursorsList = new List<UserCursor>();
@@ -71,7 +78,9 @@ public class GameManager : MonoBehaviour
         get => _currentUserInfo;
         set => _currentUserInfo = value;
     }
-    
+
+    private static List<Color> colours = new List<Color>();
+
     private void Awake()
     {
         if (!_instance)
@@ -112,11 +121,15 @@ public class GameManager : MonoBehaviour
     }
     
 #region Update Components
+    public void UpdateColorList(List<Color> listOfColors)
+    {
+        colours.Clear();
+        colours = listOfColors;
+    }
+    
     private void LoadPlayerSettings()
     {
         _currentUserInfo = Settings.LoadPlayerInfo();
-        UsernameInputField.text = _currentUserInfo.Username;
-        PasswordInputField.text = PlayerPrefs.GetString(Settings.PasswordKey);
     }
     
     public void UpdateMainMenuText()
@@ -126,7 +139,7 @@ public class GameManager : MonoBehaviour
     }
     
     //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callback OnLobbyEvent()
-    public void UpdateLocalColorChange(GameColors newColor)
+    public void UpdateLocalColorChange(int newColor)
     {
         _currentUserInfo.UserGameColor = newColor;
         //Apply in game color changes
@@ -388,7 +401,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void AdjustUserShockwaveMask(string username,bool isVisible)
+    public void AdjustUserSplatterMask(string username,bool isVisible)
     {
         //populate user entries based on members in lobby
         Lobby lobby = StateManager.Instance.CurrentLobby;
@@ -441,29 +454,16 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="newColor"> if the color needs to be changed</param>
     /// <returns></returns>
-    public static Color ReturnUserColor(GameColors newColor = GameColors.White)
+    public static Color ReturnUserColor(int newColor = 0)
     {
-        switch (newColor)
+        if(newColor >= 0 && newColor < colours.Count)
         {
-            case GameColors.Black:
-                return Color.black;
-            case GameColors.Purple:
-                return new Color(0.33f,0.25f,0.37f);
-            case GameColors.Grey:
-                return new Color(0.4f,0.4f,0.4f);
-            case GameColors.Orange:
-                return new Color(0.85f, 0.4f, 0.04f);
-            case GameColors.Blue:
-                return new Color(0.31f,0.54f,0.84f);
-            case GameColors.Green:
-                return new Color(0.39f,0.72f,0.39f);
-            case GameColors.Yellow:
-                return new Color(0.9f,0.78f,0.43f);
-            case GameColors.Cyan:
-                return new Color(0.86f,0.96f,1);
+            return colours[newColor];
         }
-            
-        return Color.white;
+        else
+        {
+            return colours[0];
+        }
     }
 
     public bool IsLocalUserHost()

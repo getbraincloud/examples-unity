@@ -6,6 +6,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MenuControl : MonoBehaviour
 {
@@ -28,12 +29,21 @@ public class MenuControl : MonoBehaviour
 
     [SerializeField] private TMP_InputField UsernameInputField;
     [SerializeField] private TMP_InputField PasswordInputField;
+    [SerializeField] private TMP_Text AuthenticatedUserLabel;
+    
+    [SerializeField] private ErrorPopUp ErrorPopUp;
 
     private string _loadingIndicatorMessage = "Looking for a server";
     private string _dotsForLoadingIndicator;
     private int _numberOfDots;
     
+    public Toggle RememberMeToggle;
     public static MenuControl Singleton { get; private set; }
+    
+    public void SetupPopupPanel(string message)
+    {
+        ErrorPopUp.SetupPopupPanel(message);
+    }
 
     private void Start()
     {
@@ -46,8 +56,24 @@ public class MenuControl : MonoBehaviour
             Destroy(gameObject);
         }
         LoadingIndicator.gameObject.SetActive(false);
-        LoginInputFields.gameObject.SetActive(true);
-        MainMenuButtons.gameObject.SetActive(false);
+        if(BrainCloudManager.Singleton.BCWrapper.Client.Authenticated) 
+        {
+            LoginInputFields.gameObject.SetActive(false);
+            MainMenuButtons.gameObject.SetActive(true);
+            DisplayUsername(BrainCloudManager.Singleton.LocalUserInfo.Username);
+        }
+        else
+        {
+            LoginInputFields.gameObject.SetActive(true);
+            AuthenticatedUserLabel.gameObject.SetActive(false);
+            MainMenuButtons.gameObject.SetActive(false);            
+        }
+    }
+    
+    public void Logout()
+    {
+        BrainCloudManager.Singleton.Logout();
+        BackToLogin();  
     }
     
     public void JoinGame()
@@ -91,10 +117,27 @@ public class MenuControl : MonoBehaviour
         }
         BrainCloudManager.Singleton.AuthenticateWithBrainCloud(UsernameInputField.text, PasswordInputField.text);
     }
-    
+
+    public void DisplayUsername(string username)
+    {
+        AuthenticatedUserLabel.gameObject.SetActive(true);
+        AuthenticatedUserLabel.text = username;
+    }
+
     public void SwitchMenuButtons()
     {
         LoginInputFields.SetActive(false);
         MainMenuButtons.SetActive(true);
+    }
+    
+    private void BackToLogin()
+    {
+        AuthenticatedUserLabel.text = "";
+        UsernameInputField.text = "";
+        PasswordInputField.text = "";
+        RememberMeToggle.isOn = true;
+        AuthenticatedUserLabel.gameObject.SetActive(false);
+        LoginInputFields.SetActive(true);
+        MainMenuButtons.SetActive(false);
     }
 }
