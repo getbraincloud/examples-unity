@@ -5,7 +5,6 @@ using FishNet.Transporting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using FishyBrainCloud;
@@ -39,6 +38,7 @@ using FishyBrainCloud;
             }
         }
 
+    public static string LOBBY_ID = "CursorPartyV2_Ire";
     private BrainCloudWrapper _bc;
     public BrainCloudWrapper bc => _bc;
 
@@ -106,7 +106,7 @@ using FishyBrainCloud;
             var lobbyParams = CreateLobbyParams(OnEntryId);
 
             _bc.LobbyService.FindLobby(
-                "CursorPartyV2_Ire",
+                BCManager.LOBBY_ID,
                 0,
                 1,
                 lobbyParams.algo,
@@ -124,7 +124,7 @@ using FishyBrainCloud;
             var lobbyParams = CreateLobbyParams(OnEntryId);
             
             _bc.LobbyService.FindOrCreateLobby(
-                "CursorPartyV2_Ire",
+                BCManager.LOBBY_ID,
                 0,
                 1,
                 lobbyParams.algo,
@@ -178,7 +178,7 @@ using FishyBrainCloud;
         {
             var lobbyParams = CreateLobbyParams(OnSuccess);
 
-            _bc.LobbyService.CreateLobby("CursorPartyV2_Ire", 0, false, lobbyParams.extra, "all", lobbyParams.settings, null, lobbyParams.success);
+            _bc.LobbyService.CreateLobby(BCManager.LOBBY_ID, 0, false, lobbyParams.extra, "all", lobbyParams.settings, null, lobbyParams.success);
         }
 
         public void OnGameSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)

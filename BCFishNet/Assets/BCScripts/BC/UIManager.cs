@@ -143,7 +143,7 @@ public class UIManager : MonoBehaviour
 
     private void OnCancelMatchmakingClicked()
     {
-        BCManager.Instance.bc.LobbyService.CancelFindRequest("CursorPartyV2_Ire", _currentEntryId);
+        BCManager.Instance.bc.LobbyService.CancelFindRequest(BCManager.LOBBY_ID, _currentEntryId);
         _findLobbyButton.gameObject.SetActive(true);
         _createLobbyButton.gameObject.SetActive(true);
         _findCreateLobbyButton.gameObject.SetActive(true);

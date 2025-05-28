@@ -157,10 +157,10 @@ RectTransform:
   - {fileID: 1530363694}
   m_Father: {fileID: 4748696498797586671}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -688.93, y: 389}
-  m_SizeDelta: {x: 160, y: 60}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 159.05, y: -164.2}
+  m_SizeDelta: {x: 145, y: 35}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &401072783
 MonoBehaviour:
@@ -599,6 +599,22 @@ PrefabInstance:
     - target: {fileID: 179767225066983326, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
       propertyPath: m_Name
       value: NetworkManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 672774146520545676, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3683886554198168458, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4895077354511884981, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4943590452894931337, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4967413246380215358, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
       propertyPath: _dontDestroyOnLoad
