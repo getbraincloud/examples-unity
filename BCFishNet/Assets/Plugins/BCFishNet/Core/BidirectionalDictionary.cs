@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FishyBrainCloud
+namespace BCFishNet
 {
     public class BidirectionalDictionary<T1, T2> : IEnumerable
     {

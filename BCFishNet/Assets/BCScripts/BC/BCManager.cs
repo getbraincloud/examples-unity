@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using FishyBrainCloud;
+using BCFishNet;
 
     public class BCManager : MonoBehaviour
     {
@@ -192,22 +192,22 @@ using FishyBrainCloud;
         {
             yield return new WaitForSeconds(0.05f);
 
-            Debug.Log("[FishyBrainCloud] DelayedConnect called");
+            Debug.Log("[BCFishNet] DelayedConnect called");
 
-            FishyBrainCloudTransport fishyBrainCloud = FindObjectOfType<FishyBrainCloudTransport>();
-            fishyBrainCloud.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort);
+            BCFishNetTransport BCFishNet = FindObjectOfType<BCFishNetTransport>();
+            BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort);
 
-            if (fishyBrainCloud != null)
+            if (BCFishNet != null)
             {
-                Debug.Log("Found FishyBrainCloudTransport");
+                Debug.Log("Found BCFishNetTransport");
                 bool isServer = LobbyOwnerId == bc.Client.ProfileId;
 
-                if (fishyBrainCloud.GetConnectionState(isServer) == LocalConnectionState.Stopped)
+                if (BCFishNet.GetConnectionState(isServer) == LocalConnectionState.Stopped)
                 {
-                    fishyBrainCloud.SetServerBindAddress(RoomAddress, IPAddressType.IPv4);
+                    BCFishNet.SetServerBindAddress(RoomAddress, IPAddressType.IPv4);
                 }
                 
-                fishyBrainCloud.StartConnection(isServer);//Start Client
+                BCFishNet.StartConnection(isServer);//Start Client
             }
 
         }

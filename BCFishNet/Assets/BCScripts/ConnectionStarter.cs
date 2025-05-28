@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace FishyBrainCloud
+namespace BCFishNet
 {
     public class ConnectionStarter : MonoBehaviour
     {

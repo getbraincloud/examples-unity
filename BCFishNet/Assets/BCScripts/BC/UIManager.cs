@@ -3,7 +3,7 @@ using BrainCloud.JsonFx.Json;
 using FishNet.Managing.Scened;
 using FishNet.Managing.Timing;
 using FishNet.Serializing;
-using FishyBrainCloud;
+using BCFishNet;
 using GameKit.Dependencies.Utilities;
 using System;
 using System.Collections;

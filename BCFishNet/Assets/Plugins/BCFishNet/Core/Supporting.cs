@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace FishyBrainCloud
+namespace BCFishNet
 {
     #region Packets
     /*

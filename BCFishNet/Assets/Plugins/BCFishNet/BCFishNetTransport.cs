@@ -15,9 +15,9 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 
-namespace FishyBrainCloud
+namespace BCFishNet
 {
-    public class FishyBrainCloudTransport : Transport
+    public class BCFishNetTransport : Transport
     {
         #region Serialized Fields.
         [SerializeField] private string _serverBindAddress = "127.0.0.1";
@@ -147,13 +147,13 @@ namespace FishyBrainCloud
 
         public override void HandleServerConnectionState(ServerConnectionStateArgs args)
         {
-            Debug.Log($"[FishyBrainCloud] HandleServerConnectionState - connection state changed: State: {args.ConnectionState}");
+            Debug.Log($"[BCFishNet] HandleServerConnectionState - connection state changed: State: {args.ConnectionState}");
             OnServerConnectionState?.Invoke(args);
         }
 
         public override void HandleRemoteConnectionState(RemoteConnectionStateArgs args)
         {
-            Debug.Log($"[FishyBrainCloud] HandleRemoteConnectionState - Remote connection state changed for ConnectionId: {args.ConnectionId}, State: {args.ConnectionState}");
+            Debug.Log($"[BCFishNet] HandleRemoteConnectionState - Remote connection state changed for ConnectionId: {args.ConnectionId}, State: {args.ConnectionState}");
             OnRemoteConnectionState?.Invoke(args);
         }
 
@@ -183,7 +183,7 @@ namespace FishyBrainCloud
                 while (_incomingServerPackets.TryDequeue(out Packet incoming))
                 {
                     ArraySegment<byte> segment = incoming.GetArraySegment();
-                    //Debug.Log($"[FishyBrainCloud] IterateIncoming SERVER packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
+                    //Debug.Log($"[BCFishNet] IterateIncoming SERVER packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
 
                     ServerReceivedDataArgs dataArgs = new(
                     incoming.GetArraySegment(),
@@ -200,7 +200,7 @@ namespace FishyBrainCloud
                 while (_incomingLocalPackets.TryDequeue(out Packet incoming))
                 {
                     ArraySegment<byte> segment = incoming.GetArraySegment();
-                    //Debug.Log($"[FishyBrainCloud] IterateIncoming LOCAL packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
+                    //Debug.Log($"[BCFishNet] IterateIncoming LOCAL packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
 
                     ClientReceivedDataArgs dataArgs = new(
                     incoming.GetArraySegment(),
@@ -217,7 +217,7 @@ namespace FishyBrainCloud
                 while (_incomingPackets.TryDequeue(out Packet incoming))
                 {
                     ArraySegment<byte> segment = incoming.GetArraySegment();
-                    //Debug.Log($"[FishyBrainCloud] IterateIncoming packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
+                    //Debug.Log($"[BCFishNet] IterateIncoming packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
 
                     ClientReceivedDataArgs dataArgs = new(
                     incoming.GetArraySegment(),
@@ -339,7 +339,7 @@ namespace FishyBrainCloud
 
         public override void HandleServerReceivedDataArgs(ServerReceivedDataArgs args)
         {
-            //Debug.Log($"[FishyBrainCloud] HandleServerReceivedDataArgs From Connection: {args.ConnectionId}");
+            //Debug.Log($"[BCFishNet] HandleServerReceivedDataArgs From Connection: {args.ConnectionId}");
 
             OnServerReceivedData?.Invoke(args);
         }
@@ -354,7 +354,7 @@ namespace FishyBrainCloud
                 return;
 
             Packet packet = new Packet(localClientId, hostId, segment, channelId, MTU);
-            //Debug.Log($"[FishyBrainCloud] Sending packetId {packet.GetPacketId()} HEX: {packet.GetHexString()} to Server ");
+            //Debug.Log($"[BCFishNet] Sending packetId {packet.GetPacketId()} HEX: {packet.GetHexString()} to Server ");
             if (_isServer)
             {
                 //we are the client host sending this packet to ourselves, so just process it instead of actually sending over the network
@@ -372,7 +372,7 @@ namespace FishyBrainCloud
             {
                 //we only send packets to clients if we are the host
                 Packet packet = new Packet(localClientId, connectionId, segment, channelId, MTU);
-                //Debug.Log($"[FishyBrainCloud] Sending packetId {packet.GetPacketId()} HEX: {packet.GetHexString()} to Client {packet.RecipientId}");
+                //Debug.Log($"[BCFishNet] Sending packetId {packet.GetPacketId()} HEX: {packet.GetHexString()} to Client {packet.RecipientId}");
                 if (connectionId == hostId)
                 {
                     //we are trying to send to the client host as the server so just process it
@@ -425,12 +425,12 @@ namespace FishyBrainCloud
         #region Start and Stop.
         public override bool StartConnection(bool server)
         {
-            Debug.Log("[FishyBrainCloud] StartConnection IsServer: " + server);
+            Debug.Log("[BCFishNet] StartConnection IsServer: " + server);
             _isServer = server;
 
             if (_brainCloud != null && !_brainCloud.Client.IsAuthenticated())
             {
-                Debug.Log("[FishyBrainCloud] Waiting for authentication...");
+                Debug.Log("[BCFishNet] Waiting for authentication...");
                 return false;
             }
 
@@ -471,7 +471,7 @@ namespace FishyBrainCloud
             if (data == null || data.Length == 0) return;
 
             string hexString = BitConverter.ToString(data, 0, data.Length).Replace("-", "");
-            //Debug.Log($"[FishyBrainCloud] RECEIVED PACKET HEX: {hexString}");
+            //Debug.Log($"[BCFishNet] RECEIVED PACKET HEX: {hexString}");
 
             ArraySegment<byte> segment = new ArraySegment<byte>(data);
 
@@ -491,7 +491,7 @@ namespace FishyBrainCloud
 
         private void OnRelaySystemCallback(string json)
         {
-            Debug.Log($"[FishyBrainCloud] OnSystemCallback: {json}");
+            Debug.Log($"[BCFishNet] OnSystemCallback: {json}");
 
             // Parse the base event to check the operation type
             var systemEvent = JsonUtility.FromJson<RelaySystemEvent>(json);
@@ -540,7 +540,7 @@ namespace FishyBrainCloud
                         //receiving this as the server socket means the client host has disconnected and the host status has been given to the next connected client
 
                         var migrateEvent = JsonUtility.FromJson<RelaySystemMigrateOwner>(json);
-                        Debug.Log($"[FishyBrainCloud] Received request to migrate owner to {migrateEvent.cxId}");
+                        Debug.Log($"[BCFishNet] Received request to migrate owner to {migrateEvent.cxId}");
                         int previousHostId = hostId;
 
                         string newHostProfileId = migrateEvent.cxId.Split(':')[1];
@@ -548,12 +548,12 @@ namespace FishyBrainCloud
 
                         hostId = _brainCloud.RelayService.GetNetIdForCxId(migrateEvent.cxId);
 
-                        Debug.Log($"[FishyBrainCloud] New Host netId: {hostId}");
+                        Debug.Log($"[BCFishNet] New Host netId: {hostId}");
 
                         _isServer = isLocal;
                         if (_isServer)
                         {
-                            Debug.Log($"[FishyBrainCloud] This client is now becoming the server host");
+                            Debug.Log($"[BCFishNet] This client is now becoming the server host");
                             HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Started, Index));
                             HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
                             HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, hostId, Index));
@@ -561,7 +561,7 @@ namespace FishyBrainCloud
                         }
                         else
                         {
-                            Debug.Log($"[FishyBrainCloud] CLIENT SENT {localClientId}");
+                            Debug.Log($"[BCFishNet] CLIENT SENT {localClientId}");
                             HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
 
                             //
@@ -586,7 +586,7 @@ namespace FishyBrainCloud
                     break;
                 default:
                     {
-                        Debug.LogError("[FishyBrainCloud]  - OnSystemCallback Unknown system event: " + systemEvent.op);
+                        Debug.LogError("[BCFishNet]  - OnSystemCallback Unknown system event: " + systemEvent.op);
                     }
                     break;
             }
@@ -597,14 +597,14 @@ namespace FishyBrainCloud
         private void AddConnectionHelper(int connectedNetId, bool isLocal, bool skipAddConnectionCheck)
         {
             short currentNetId = _brainCloud.RelayService.GetNetIdForProfileId(_brainCloud.Client.ProfileId);
-            bool validConnectedHost = hostId != INVALID_HOST_ID;// && _connectedClients.Contains(hostId);
-            Debug.Log($"[FishyBrainCloud] AddConnectionHelper HOST: {hostId}, inId:{connectedNetId}, local:{isLocal}, myId:{currentNetId}, skipAddConnectionCheck{skipAddConnectionCheck}");
+            bool validConnectedHost = hostId != INVALID_HOST_ID && (_connectedClients.Contains(hostId) || connectedNetId  == hostId);
+            Debug.Log($"[BCFishNet] AddConnectionHelper HOST: {hostId}, inId:{connectedNetId}, local:{isLocal}, myId:{currentNetId}, skipAddConnectionCheck{skipAddConnectionCheck}");
             if (validConnectedHost && (skipAddConnectionCheck || AddConnection(connectedNetId)))
             {
                 if (isLocal && !_clientConnected)
                 {
                     localClientId = connectedNetId;
-                    Debug.Log($"[FishyBrainCloud] CONNECTING LOCAL {connectedNetId}");
+                    Debug.Log($"[BCFishNet] CONNECTING LOCAL {connectedNetId}");
 
                     //if we are a client and are not yet marked as connected, mark as connected
                     HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
@@ -613,7 +613,7 @@ namespace FishyBrainCloud
 
                 if (_isServer)
                 {
-                    Debug.Log($"[FishyBrainCloud] CONNECTING Remote {connectedNetId}");
+                    Debug.Log($"[BCFishNet] CONNECTING Remote {connectedNetId}");
 
                     HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, connectedNetId, Index));
                 }
@@ -623,7 +623,7 @@ namespace FishyBrainCloud
                 // we may want to connect afterwards
                 if (!_clientConnected && currentNetId != INVALID_HOST_ID && !isLocal && connectedNetId == hostId)
                 {
-                    Debug.Log($"[FishyBrainCloud] CONNECTING LOCAL {currentNetId} AFTER server {connectedNetId}");
+                    Debug.Log($"[BCFishNet] CONNECTING LOCAL {currentNetId} AFTER server {connectedNetId}");
                     HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
                     AddConnection(currentNetId);
                     _clientConnected = true;
@@ -661,7 +661,7 @@ namespace FishyBrainCloud
 
                 if (connectedProfileId == _brainCloud.Client.ProfileId)
                 {
-                    Debug.Log($"[FishyBrainCloud] StopClient local {connectionId}");
+                    Debug.Log($"[BCFishNet] StopClient local {connectionId}");
                     _brainCloud.RelayService.DeregisterRelayCallback();
                     _brainCloud.RelayService.Disconnect();
                     _brainCloud.LobbyService.LeaveLobby(_currentLobbyId);
@@ -674,7 +674,7 @@ namespace FishyBrainCloud
 
                 if (_isServer)
                 {
-                    Debug.Log($"[FishyBrainCloud] StopClient server {connectionId}");
+                    Debug.Log($"[BCFishNet] StopClient server {connectionId}");
                     HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Stopped, connectionId, Index));
                 }
             }
@@ -684,7 +684,7 @@ namespace FishyBrainCloud
 
         private bool StopServer()
         {
-            Debug.Log($"[FishyBrainCloud] StopServer called");
+            Debug.Log($"[BCFishNet] StopServer called");
 
             _brainCloud.RelayService.DeregisterRelayCallback();
             _brainCloud.RelayService.Disconnect();
@@ -706,7 +706,7 @@ namespace FishyBrainCloud
 
         private bool AddConnection(int netId)
         {
-            Debug.Log($"[FishyBrainCloud] AddConnection {netId}");
+            Debug.Log($"[BCFishNet] AddConnection {netId}");
             bool connectionAdded = false;
             if (!_connectedClients.Contains(netId))
             {
@@ -724,13 +724,13 @@ namespace FishyBrainCloud
                 _connectedClients.Remove(netId);
                 connectionRemoved = true;
             }
-            Debug.Log($"[FishyBrainCloud] RemoveConnection {netId}, {connectionRemoved}");
+            Debug.Log($"[BCFishNet] RemoveConnection {netId}, {connectionRemoved}");
             return connectionRemoved;
         }
 
         public override void Shutdown()
         {
-            Debug.Log($"[FishyBrainCloud] Shutdown called");
+            Debug.Log($"[BCFishNet] Shutdown called");
             if (_shutdownCalled) return;
             _shutdownCalled = true;
             StopConnection(false);
