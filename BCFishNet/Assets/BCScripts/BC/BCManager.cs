@@ -9,215 +9,215 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using BCFishNet;
 
-    public class BCManager : MonoBehaviour
+public class BCManager : MonoBehaviour
+{
+    private static BCManager _instance;
+    public static BCManager Instance
     {
-        private static BCManager _instance;
-        public static BCManager Instance
+        get
         {
-            get
+            if (_instance == null)
             {
+                // Look for an existing instance
+                _instance = FindObjectOfType<BCManager>();
+
                 if (_instance == null)
                 {
-                    // Look for an existing instance
-                    _instance = FindObjectOfType<BCManager>();
-
-                    if (_instance == null)
-                    {
-                        // Create new GameObject to attach the manager to
-                        GameObject managerObject = new GameObject("BCManager");
-                        _instance = managerObject.AddComponent<BCManager>();
-                        DontDestroyOnLoad(managerObject);
-                    }
+                    // Create new GameObject to attach the manager to
+                    GameObject managerObject = new GameObject("BCManager");
+                    _instance = managerObject.AddComponent<BCManager>();
+                    DontDestroyOnLoad(managerObject);
                 }
+            }
 
-                return _instance;
-            }
-            private set
-            {
-                _instance = value;
-            }
+            return _instance;
         }
+        private set
+        {
+            _instance = value;
+        }
+    }
 
     public static string LOBBY_ID = "CursorPartyV2_Ire";
     private BrainCloudWrapper _bc;
     public BrainCloudWrapper bc => _bc;
 
 
-        public string RelayPasscode;
-        public string CurrentLobbyId;
+    public string RelayPasscode;
+    public string CurrentLobbyId;
 
-        public string RoomAddress;
-        public ushort RoomPort;
+    public string RoomAddress;
+    public ushort RoomPort;
 
-        public string LobbyOwnerId;
+    public string LobbyOwnerId;
 
-        private void Awake()
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+
+        Instance = this;
+
+        _bc = gameObject.AddComponent<BrainCloudWrapper>();
+        _bc.Init();
+
+        Debug.Log("BrainCloud client version: " + _bc.Client.BrainCloudClientVersion);
+    }
+
+    public void AuthenticateUser(string username, string password, Action<bool> callback)
+    {
+        SuccessCallback success = (responseData, cbObject) =>
         {
-            DontDestroyOnLoad(gameObject);
+            //on auth success
+            callback(true);
+        };
 
-            Instance = this;
+        FailureCallback failure = (statusMessage, code, error, cbObject) =>
+        {
+            callback(false);
+        };
 
-            _bc = gameObject.AddComponent<BrainCloudWrapper>();
-            _bc.Init();
+        _bc.AuthenticateUniversal(username, password, true, success, failure);
+    }
 
-            Debug.Log("BrainCloud client version: " + _bc.Client.BrainCloudClientVersion);
-        }
-
-        public void AuthenticateUser(string username, string password, Action<bool> callback)
+    public void EnableRTT(bool enabled, Action OnSuccess)
+    {
+        if (enabled)
         {
             SuccessCallback success = (responseData, cbObject) =>
             {
-                //on auth success
-                callback(true);
+                OnSuccess();
             };
-
-            FailureCallback failure = (statusMessage, code, error, cbObject) =>
-            {
-                callback(false);
-            };
-
-            _bc.AuthenticateUniversal(username, password, true, success, failure);
+            _bc.RTTService.EnableRTT(success, OnRTTFailed);
         }
-
-        public void EnableRTT(bool enabled, Action OnSuccess)
+        else
         {
-            if (enabled)
-            {
-                SuccessCallback success = (responseData, cbObject) =>
-                {
-                    OnSuccess();
-                };
-                _bc.RTTService.EnableRTT(success, OnRTTFailed);
-            }
-            else
-            {
-                _bc.RTTService.DisableRTT();
-            }
-        }
-
-        private void OnRTTFailed(int statusCode, int reasonCode, string statusMessage, object cbObject)
-        {
-            Debug.LogError($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
-            // Error handling logic
-        }
-
-        public void FindLobby(Action<string> OnEntryId)
-        {
-            var lobbyParams = CreateLobbyParams(OnEntryId);
-
-            _bc.LobbyService.FindLobby(
-                BCManager.LOBBY_ID,
-                0,
-                1,
-                lobbyParams.algo,
-                lobbyParams.filters,
-                false,
-                lobbyParams.extra,
-                "all",
-                null,
-                lobbyParams.success
-            );
-        }
-
-        public void QuickFindLobby(Action<string> OnEntryId)
-        {
-            var lobbyParams = CreateLobbyParams(OnEntryId);
-            
-            _bc.LobbyService.FindOrCreateLobby(
-                BCManager.LOBBY_ID,
-                0,
-                1,
-                lobbyParams.algo,
-                lobbyParams.filters,
-                false,
-                lobbyParams.extra,
-                "all",
-                lobbyParams.settings,
-                null,
-                lobbyParams.success
-            );
-            
-        }
-
-        private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
-        {
-            var algo = new Dictionary<string, object>
-            {
-                ["strategy"] = "ranged-absolute",
-                ["alignment"] = "center",
-                ["ranges"] = new List<int> { 1000 }
-            };
-
-            var filters = new Dictionary<string, object>();
-            var extra = new Dictionary<string, object>();
-            var settings = new Dictionary<string, object>();
-
-            SuccessCallback success = (in_response, cbObject) =>
-            {
-                var response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
-                var data = response["data"] as Dictionary<string, object>;
-                if (data.ContainsKey("entryId"))
-                {
-                    var entryId = data["entryId"] as string;
-
-                    OnEntryId?.Invoke(entryId);
-                }
-            };
-
-            return new LobbyParams
-            {
-                algo = algo,
-                filters = filters,
-                extra = extra,
-                success = success,
-                settings = settings
-            };
-        }
-
-        public void CreateLobby(Action<string> OnSuccess)
-        {
-            var lobbyParams = CreateLobbyParams(OnSuccess);
-
-            _bc.LobbyService.CreateLobby(BCManager.LOBBY_ID, 0, false, lobbyParams.extra, "all", lobbyParams.settings, null, lobbyParams.success);
-        }
-
-        public void OnGameSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
-        {
-            StartCoroutine(DelayedConnect());
-            
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnGameSceneLoaded;
-        }
-
-        private IEnumerator DelayedConnect()
-        {
-            yield return new WaitForSeconds(0.05f);
-
-            Debug.Log("[BCFishNet] DelayedConnect called");
-
-            BCFishNetTransport BCFishNet = FindObjectOfType<BCFishNetTransport>();
-            BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort);
-
-            if (BCFishNet != null)
-            {
-                Debug.Log("Found BCFishNetTransport");
-                bool isServer = LobbyOwnerId == bc.Client.ProfileId;
-
-                if (BCFishNet.GetConnectionState(isServer) == LocalConnectionState.Stopped)
-                {
-                    BCFishNet.SetServerBindAddress(RoomAddress, IPAddressType.IPv4);
-                }
-                
-                BCFishNet.StartConnection(isServer);//Start Client
-            }
-
+            _bc.RTTService.DisableRTT();
         }
     }
 
-    public class LobbyParams
+    private void OnRTTFailed(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        public Dictionary<string, object> algo;
-        public Dictionary<string, object> filters;
-        public Dictionary<string, object> extra;
-        public SuccessCallback success;
-        public Dictionary<string, object> settings;
+        Debug.LogError($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
+        // Error handling logic
     }
+
+    public void FindLobby(Action<string> OnEntryId)
+    {
+        var lobbyParams = CreateLobbyParams(OnEntryId);
+
+        _bc.LobbyService.FindLobby(
+            BCManager.LOBBY_ID,
+            0,
+            1,
+            lobbyParams.algo,
+            lobbyParams.filters,
+            false,
+            lobbyParams.extra,
+            "all",
+            null,
+            lobbyParams.success
+        );
+    }
+
+    public void QuickFindLobby(Action<string> OnEntryId)
+    {
+        var lobbyParams = CreateLobbyParams(OnEntryId);
+
+        _bc.LobbyService.FindOrCreateLobby(
+            BCManager.LOBBY_ID,
+            0,
+            1,
+            lobbyParams.algo,
+            lobbyParams.filters,
+            false,
+            lobbyParams.extra,
+            "all",
+            lobbyParams.settings,
+            null,
+            lobbyParams.success
+        );
+
+    }
+
+    private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
+    {
+        var algo = new Dictionary<string, object>
+        {
+            ["strategy"] = "ranged-absolute",
+            ["alignment"] = "center",
+            ["ranges"] = new List<int> { 1000 }
+        };
+
+        var filters = new Dictionary<string, object>();
+        var extra = new Dictionary<string, object>();
+        var settings = new Dictionary<string, object>();
+
+        SuccessCallback success = (in_response, cbObject) =>
+        {
+            var response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
+            var data = response["data"] as Dictionary<string, object>;
+            if (data.ContainsKey("entryId"))
+            {
+                var entryId = data["entryId"] as string;
+
+                OnEntryId?.Invoke(entryId);
+            }
+        };
+
+        return new LobbyParams
+        {
+            algo = algo,
+            filters = filters,
+            extra = extra,
+            success = success,
+            settings = settings
+        };
+    }
+
+    public void CreateLobby(Action<string> OnSuccess)
+    {
+        var lobbyParams = CreateLobbyParams(OnSuccess);
+
+        _bc.LobbyService.CreateLobby(BCManager.LOBBY_ID, 0, false, lobbyParams.extra, "all", lobbyParams.settings, null, lobbyParams.success);
+    }
+
+    public void OnGameSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
+    {
+        StartCoroutine(DelayedConnect());
+
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnGameSceneLoaded;
+    }
+
+    private IEnumerator DelayedConnect()
+    {
+        yield return new WaitForSeconds(0.05f);
+
+        Debug.Log("[BCFishNet] DelayedConnect called");
+
+        BCFishNetTransport BCFishNet = FindObjectOfType<BCFishNetTransport>();
+        BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort);
+
+        if (BCFishNet != null)
+        {
+            Debug.Log("Found BCFishNetTransport");
+            bool isServer = LobbyOwnerId == bc.Client.ProfileId;
+
+            if (BCFishNet.GetConnectionState(isServer) == LocalConnectionState.Stopped)
+            {
+                BCFishNet.SetServerBindAddress(RoomAddress, IPAddressType.IPv4);
+            }
+
+            BCFishNet.StartConnection(isServer);//Start Client
+        }
+
+    }
+}
+
+public class LobbyParams
+{
+    public Dictionary<string, object> algo;
+    public Dictionary<string, object> filters;
+    public Dictionary<string, object> extra;
+    public SuccessCallback success;
+    public Dictionary<string, object> settings;
+}

@@ -538,37 +538,21 @@ namespace BCFishNet
                 case "MIGRATE_OWNER":
                     {
                         //receiving this as the server socket means the client host has disconnected and the host status has been given to the next connected client
-
                         var migrateEvent = JsonUtility.FromJson<RelaySystemMigrateOwner>(json);
                         Debug.Log($"[BCFishNet] Received request to migrate owner to {migrateEvent.cxId}");
+
                         int previousHostId = hostId;
-
                         string newHostProfileId = migrateEvent.cxId.Split(':')[1];
+                        
                         isLocal = localProfileId == newHostProfileId;
-
                         hostId = _brainCloud.RelayService.GetNetIdForCxId(migrateEvent.cxId);
-
                         Debug.Log($"[BCFishNet] New Host netId: {hostId}");
 
                         _isServer = isLocal;
-                        if (_isServer)
-                        {
-                            Debug.Log($"[BCFishNet] This client is now becoming the server host");
-                            HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Started, Index));
-                            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
-                            HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, hostId, Index));
-                        
-                        }
-                        else
-                        {
-                            Debug.Log($"[BCFishNet] CLIENT SENT {localClientId}");
-                            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
 
-                            //
-                            Dictionary<string, object> signalData = new Dictionary<string, object>();
-                            signalData[REMOTE_CLIENT_ID] = localClientId;
-                            _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
-                        }
+                        // Start a coroutine to handle the shutdown + promotion
+                        StartCoroutine(HandleMigrateOwnerCoroutine(_isServer, hostId));
+                        
                     }
                     break;
                 case "NET_ID":
@@ -591,6 +575,28 @@ namespace BCFishNet
                     break;
             }
         }
+        private IEnumerator HandleMigrateOwnerCoroutine( bool isNowServer, int newHostId)
+        {
+            // Now promote the new host or configure as client
+            if (isNowServer)
+            {
+                Debug.Log("[BCFishNet] This client is now becoming the server host");
+                HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Started, Index));
+                HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
+                HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, newHostId, Index));
+            }
+            else
+            {
+                Debug.Log($"[BCFishNet] CLIENT SENT {localClientId}");
+                HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
+
+                Dictionary<string, object> signalData = new Dictionary<string, object>();
+                signalData[REMOTE_CLIENT_ID] = localClientId;
+                //_brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
+            }
+            yield return new WaitForSeconds(5f); // Allow time for shutdown
+        }
+
 
         private bool _clientConnected = false;
         private const string REMOTE_CLIENT_ID = "remoteClientId";
@@ -725,6 +731,17 @@ namespace BCFishNet
                 connectionRemoved = true;
             }
             Debug.Log($"[BCFishNet] RemoveConnection {netId}, {connectionRemoved}");
+            
+            if (NetworkManager.ServerManager.Clients.TryGetValue(netId, out NetworkConnection conn))
+            {
+                Debug.Log($"Kicking client {netId}");
+                conn.Disconnect(true); // Disconnect gracefully
+            }
+            else
+            {
+                Debug.LogWarning($"Client {netId} not found.");
+            }
+
             return connectionRemoved;
         }
 

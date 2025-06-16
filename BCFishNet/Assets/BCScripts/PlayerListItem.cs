@@ -98,16 +98,16 @@ public class PlayerListItem : NetworkBehaviour
     IEnumerator DelayedSpawnCursor()
     {
         yield return new WaitForSeconds(0.6f);
-        if(_currentCursor == null)
+        if (_currentCursor == null)
             SpawnCursor(Owner);
     }
 
-    [ServerRpc(RequireOwnership =false)]
+    [ServerRpc(RequireOwnership = false)]
     public void SpawnCursor(NetworkConnection conn)
     {
         NetworkObject nob = _networkManager.GetPooledInstantiated(_playerCursorPrefab, transform.parent.parent, true);
         _networkManager.ServerManager.Spawn(nob, conn);
-        
+
         SetCursorRef(nob);
 
         Randomize();

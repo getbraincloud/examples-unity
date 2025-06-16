@@ -395,9 +395,10 @@ MonoBehaviour:
   WasActiveDuringEdit_Set1: 1
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
-  <PredictedOwner>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 6668050232191403436}
   NetworkBehaviours:
   - {fileID: 7446911924876238580}
+  - {fileID: 6668050232191403436}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -422,7 +423,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 0
+  <PrefabId>k__BackingField: 13
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 17784569725986974788
   <SceneId>k__BackingField: 0
@@ -443,7 +444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c71fd7f855ec523429999fc4e14a1928, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _overrideType: 3
+  _overrideType: 2
   _updateHostVisibility: 1
   _observerConditions: []
 --- !u!114 &8203742142977680
@@ -484,9 +485,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03002f7d324007e41b10a9dc87ed3c38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 6364839027811336031}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6364839027811336031}
   _allowTakeOwnership: 1
 --- !u!1 &7435201849778761346
 GameObject:
