@@ -602,7 +602,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 672774146520545676, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 672774146520545676, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 4748696498797586672}
+    - target: {fileID: 672774146520545676, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnClick_Client
+      objectReference: {fileID: 0}
+    - target: {fileID: 672774146520545676, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FishNet.Example.NetworkHudCanvases, FishNet.Demos
+      objectReference: {fileID: 0}
+    - target: {fileID: 672774146520545676, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 3683886554198168458, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
       propertyPath: m_IsActive
@@ -610,7 +626,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4895077354511884981, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4895077354511884981, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 4748696498797586672}
+    - target: {fileID: 4895077354511884981, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnClick_Server
+      objectReference: {fileID: 0}
+    - target: {fileID: 4895077354511884981, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FishNet.Example.NetworkHudCanvases, FishNet.Demos
+      objectReference: {fileID: 0}
+    - target: {fileID: 4895077354511884981, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 4943590452894931337, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
       propertyPath: m_IsActive
@@ -677,6 +709,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4895077353995745809, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
   m_PrefabInstance: {fileID: 4748696498797586670}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4748696498797586672 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4895077353995745805, guid: 923d2887053cb3f419b2f6d17a705559, type: 3}
+  m_PrefabInstance: {fileID: 4748696498797586670}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d3606bfdac5a4743890fc1a5ecd8f24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -23,6 +23,9 @@ public class PlayerListItem : NetworkBehaviour
     private Button _testButton;
     private NetworkManager _networkManager;
     private PlayerCursor _currentCursor;
+    private string _playerName = "";
+    private Color _playerColor;
+    private bool _hasInitialized = false;
 
     public override void OnStartClient()
     {
@@ -37,7 +40,7 @@ public class PlayerListItem : NetworkBehaviour
             transform.SetParent(targetParent.transform);
             transform.localScale = Vector3.one;
         }
-        
+
         _localText.gameObject.SetActive(IsOwner);
 
         if (base.IsOwner)
@@ -54,6 +57,16 @@ public class PlayerListItem : NetworkBehaviour
         else
         {
             GetComponent<PlayerListItem>().enabled = false;
+            RequestStateSyncServerRpc(); // Ask server to resend state
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestStateSyncServerRpc()
+    {
+        if (_hasInitialized)
+        {
+            TestChange(_playerName, _playerColor); // Send current state to the reconnecting observer
         }
     }
 
@@ -120,6 +133,10 @@ public class PlayerListItem : NetworkBehaviour
     [ServerRpc]
     public void TestChangeServer(string playerName, Color newColor)
     {
+        _playerName = playerName;
+        _playerColor = newColor;
+        _hasInitialized = true;
+
         TestChange(playerName, newColor);
     }
 
