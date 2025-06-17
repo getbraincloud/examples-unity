@@ -575,8 +575,14 @@ namespace BCFishNet
                     break;
             }
         }
-        private IEnumerator HandleMigrateOwnerCoroutine( bool isNowServer, int newHostId)
+        private IEnumerator HandleMigrateOwnerCoroutine(bool isNowServer, int newHostId)
         {
+            StopConnection(false);
+
+            yield return null;
+            StartConnection(isNowServer);
+
+            /*
             // Now promote the new host or configure as client
             if (isNowServer)
             {
@@ -595,6 +601,7 @@ namespace BCFishNet
                 //_brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
             }
             yield return new WaitForSeconds(5f); // Allow time for shutdown
+            */
         }
 
 
@@ -670,7 +677,7 @@ namespace BCFishNet
                     Debug.Log($"[BCFishNet] StopClient local {connectionId}");
                     _brainCloud.RelayService.DeregisterRelayCallback();
                     _brainCloud.RelayService.Disconnect();
-                    _brainCloud.LobbyService.LeaveLobby(_currentLobbyId);
+                    //_brainCloud.LobbyService.LeaveLobby(_currentLobbyId);
 
                     _brainCloud.RTTService.DeregisterRTTLobbyCallback();
 
@@ -706,6 +713,7 @@ namespace BCFishNet
         {
             int currentNetId = (int)_brainCloud.RelayService.GetNetIdForProfileId(_brainCloud.Client.ProfileId);
             StopClient(currentNetId, true);
+            _connectedClients.Clear();
 
             return true;
         }

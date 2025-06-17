@@ -38,7 +38,7 @@ public class BCManager : MonoBehaviour
         }
     }
 
-    public static string LOBBY_ID = "CursorPartyV2_Ire";
+    public static string LOBBY_ID = "CursorParty_V3";
     private BrainCloudWrapper _bc;
     public BrainCloudWrapper bc => _bc;
 
