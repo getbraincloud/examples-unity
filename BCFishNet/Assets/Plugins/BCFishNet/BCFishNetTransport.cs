@@ -4,6 +4,7 @@ using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System;
 using UnityEngine;
+using FishNet;
 using FishNet.Object;
 using FishNet.Serializing;
 using FishNet.Connection;
@@ -623,6 +624,12 @@ namespace BCFishNet
                 signalData[REMOTE_CLIENT_ID] = localClientId;
                 _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
             }
+            ResyncPlayerListItems();
+        }
+        
+        private void ResyncPlayerListItems()
+        {
+            PlayerListEvents.RaiseResyncPlayerList();
         }
 
         private const string REMOTE_CLIENT_ID = "remoteClientId";
@@ -676,6 +683,7 @@ namespace BCFishNet
                     _brainCloud.RTTService.DeregisterRTTLobbyCallback();
 
                     HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
+                    PlayerListEvents.RaiseClearAllPlayerList();
 
                     _connectedClients.Clear();
                 }
@@ -756,7 +764,6 @@ namespace BCFishNet
             {
                 StopConnection(true);
             }
-
         }
         #endregion
 

@@ -4,27 +4,20 @@ using FishNet.Managing;
 using FishNet.Object;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerListItem : NetworkBehaviour
 {
-    [SerializeField]
-    private Image _bgImage;
-
-    [SerializeField]
-    private TMP_Text _userText, _localText;
-
-    [SerializeField]
-    private GameObject _playerCursorPrefab, _hostIcon;
+    [SerializeField] private Image _bgImage;
+    [SerializeField] private TMP_Text _userText, _localText;
+    [SerializeField] private GameObject _playerCursorPrefab, _hostIcon;
 
     private Button _testButton;
     private NetworkManager _networkManager;
     private PlayerCursor _currentCursor;
-    private string _playerName = "";
-    private Color _playerColor;
+    private PlayerData _playerData;
     private bool _hasInitialized = false;
 
     public override void OnStartClient()
@@ -43,16 +36,15 @@ public class PlayerListItem : NetworkBehaviour
 
         _localText.gameObject.SetActive(IsOwner);
 
+        PlayerListItemManager.Instance.RegisterPlayerListItem(Owner.ClientId, this);
+
         if (base.IsOwner)
         {
             _testButton = GetComponent<Button>();
             _testButton.onClick.AddListener(OnTestButtonClicked);
 
-            //spawn cursor
             if (_currentCursor == null)
-            {
                 StartCoroutine(DelayedSpawnCursor());
-            }
         }
         else
         {
@@ -66,8 +58,8 @@ public class PlayerListItem : NetworkBehaviour
     {
         if (_hasInitialized)
         {
-            TestChange(_playerName, _playerColor); // Send current state to the reconnecting observer
-            UpdateIsHost(Owner.IsHost); // Also sync host icon state
+            TestChange(_playerData.Name, _playerData.Color);
+            UpdateIsHost(Owner.IsHost);
         }
     }
 
@@ -98,7 +90,7 @@ public class PlayerListItem : NetworkBehaviour
 
     IEnumerator DelayedSpawnCursor()
     {
-        yield return new WaitForSeconds(0.6f);
+        yield return new WaitForSeconds(0.1f);
         if (_currentCursor == null)
             SpawnCursor(Owner);
     }
@@ -111,15 +103,22 @@ public class PlayerListItem : NetworkBehaviour
 
         SetCursorRef(nob);
 
-        Randomize();
+        if (PlayerListItemManager.Instance.TryGetPlayerData(conn.ClientId, out var data))
+        {
+            Debug.Log($"[PlayerListItem] Reusing saved data for client {conn.ClientId}, {data.Name}, {data.Color} ");
+            TestChange(data.Name, data.Color);
+        }
+        else
+        {
+            Debug.Log($"[PlayerListItem] No data for client {conn.ClientId}, randomizing");
+            Randomize();
+        }
 
-        //StartTest();
-
-        UpdateIsHost(Owner.IsHost);
+        UpdateIsHost(conn.IsHost);
     }
 
     [ObserversRpc]
-    private void UpdateIsHost(bool isHost)
+    public void UpdateIsHost(bool isHost)
     {
         _hostIcon.SetActive(isHost);
     }
@@ -127,18 +126,19 @@ public class PlayerListItem : NetworkBehaviour
     [ObserversRpc]
     private void SetCursorRef(NetworkObject nob)
     {
-        Debug.Log("Set cursor ref for client " + Owner.ClientId);
+        Debug.Log($"Set cursor ref for client {Owner.ClientId}");
         _currentCursor = nob.GetComponent<PlayerCursor>();
     }
 
     [ServerRpc]
     public void TestChangeServer(string playerName, Color newColor)
     {
-        _playerName = playerName;
-        _playerColor = newColor;
+        _playerData = new PlayerData { Name = playerName, Color = newColor };
         _hasInitialized = true;
 
-        TestChange(playerName, newColor);
+        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData.Name, _playerData.Color);
+
+        TestChange(_playerData.Name, _playerData.Color);
     }
 
     [ObserversRpc]
@@ -158,16 +158,20 @@ public class PlayerListItem : NetworkBehaviour
         while (this.enabled)
         {
             OnTestButtonClicked();
-            yield return new WaitForSeconds(.5f);
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
     [ObserversRpc]
     public void TestChange(string playerName, Color newColor)
     {
+        _playerData = new PlayerData { Name = playerName, Color = newColor };
         _userText.text = playerName;
         _bgImage.color = newColor;
         _currentCursor?.ChangeColor(newColor);
+        _hasInitialized = true;
+
+        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData.Name, _playerData.Color);
     }
 
     public void InitializePlayer()
