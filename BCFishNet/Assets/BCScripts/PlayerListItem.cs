@@ -11,8 +11,8 @@ using UnityEngine.UI;
 public class PlayerListItem : NetworkBehaviour
 {
     [SerializeField] private Image _bgImage;
-    [SerializeField] private TMP_Text _userText, _localText;
-    [SerializeField] private GameObject _playerCursorPrefab, _hostIcon;
+    [SerializeField] private TMP_Text _userText;
+    [SerializeField] private GameObject _playerCursorPrefab, _hostIcon, _highlightHolder;
 
     private Button _testButton;
     private NetworkManager _networkManager;
@@ -34,7 +34,7 @@ public class PlayerListItem : NetworkBehaviour
             transform.localScale = Vector3.one;
         }
 
-        _localText.gameObject.SetActive(IsOwner);
+        _highlightHolder.SetActive(IsOwner);
 
         PlayerListItemManager.Instance.RegisterPlayerListItem(Owner.ClientId, this);
 
@@ -90,7 +90,7 @@ public class PlayerListItem : NetworkBehaviour
 
     IEnumerator DelayedSpawnCursor()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return null;
         if (_currentCursor == null)
             SpawnCursor(Owner);
     }
