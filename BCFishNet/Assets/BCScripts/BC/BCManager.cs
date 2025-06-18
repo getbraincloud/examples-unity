@@ -136,8 +136,21 @@ public class BCManager : MonoBehaviour
             null,
             lobbyParams.success
         );
-
     }
+
+    public void JoinLobby(string lobbyId, Action<string> OnEntryId)
+    {
+        var lobbyParams = CreateLobbyParams(OnEntryId);
+    
+        _bc.LobbyService.JoinLobby(lobbyId,
+            true,
+            lobbyParams.extra,
+            "all",
+            null,
+            lobbyParams.success
+        );
+    }
+
 
     private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
     {
@@ -159,7 +172,6 @@ public class BCManager : MonoBehaviour
             if (data.ContainsKey("entryId"))
             {
                 var entryId = data["entryId"] as string;
-
                 OnEntryId?.Invoke(entryId);
             }
         };

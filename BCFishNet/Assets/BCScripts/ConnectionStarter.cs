@@ -32,11 +32,13 @@ namespace BCFishNet
             if(TryGetComponent(out Tugboat t))
             {
                 _t = t;
+            #if UNITY_EDITOR && SNR
                 if (ParrelSync.ClonesManager.IsClone())
                 {
                     _t.StartConnection(false);
                 }
                 else
+            #endif
                 {
                     _t.StartConnection(true);
                     _t.StartConnection(false);
