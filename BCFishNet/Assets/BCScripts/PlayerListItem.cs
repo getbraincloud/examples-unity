@@ -67,6 +67,7 @@ public class PlayerListItem : NetworkBehaviour
         if (_hasInitialized)
         {
             TestChange(_playerName, _playerColor); // Send current state to the reconnecting observer
+            UpdateIsHost(Owner.IsHost); // Also sync host icon state
         }
     }
 
@@ -114,7 +115,7 @@ public class PlayerListItem : NetworkBehaviour
 
         //StartTest();
 
-        UpdateIsHost(IsServerInitialized && IsOwner);
+        UpdateIsHost(Owner.IsHost);
     }
 
     [ObserversRpc]

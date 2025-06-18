@@ -481,7 +481,6 @@ namespace BCFishNet
                 Debug.LogWarning($"RelayService Connection Failure - statusMessage: {statusMessage} code: {code} error: {error}");
             };
 
-            
             _brainCloud.RelayService.Connect(RelayConnectionType.UDP, connectionOptions, successCallback, failureCallback);
 
             return true;
@@ -707,8 +706,7 @@ namespace BCFishNet
         /// </summary>
         private bool StopClient()
         {
-            //int currentNetId = (int)_brainCloud.RelayService.GetNetIdForProfileId(_brainCloud.Client.ProfileId);
-            return StopClient(localClientId, true);;
+            return StopClient(localClientId, true);
         }
 
         private bool AddConnection(int netId)
