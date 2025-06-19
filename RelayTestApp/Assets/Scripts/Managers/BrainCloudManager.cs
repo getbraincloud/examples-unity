@@ -121,7 +121,6 @@ public class BrainCloudManager : MonoBehaviour
     {
         GameManager.Instance.UpdateMainMenuText();
         StateManager.Instance.isLoading = false;
-        _bcWrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback);
     }
     
     private void OnGetColoursCallback(string jsonResponse, object cbObject)
@@ -193,10 +192,8 @@ public class BrainCloudManager : MonoBehaviour
     private void OnUpdateName(string jsonResponse, object cbObject)
     {
         _bcWrapper.GlobalAppService.ReadProperties(OnReadProperties, LogErrorThenPopUpWindow);
-        
-        // Enable RTT
-        _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
-        _bcWrapper.RTTService.EnableRTT(null, OnRTTDisconnected);
+        _bcWrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback);
+
     }
     
     private void OnReadProperties(string jsonResponse, object cbObject)
@@ -207,7 +204,10 @@ public class BrainCloudManager : MonoBehaviour
         {   
             Debug.LogWarning("Need to set up lobby types as a global properties in brainCloud portal. " +
                              "Refer to the README.md for an example under Relay Test App.");
-            OnLoggedIn();
+            
+            // Enable RTT
+            _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+            _bcWrapper.RTTService.EnableRTT(OnEnableRTT, OnRTTDisconnected);
             return;
         }
         var value = new Dictionary<string, object>();
@@ -235,6 +235,14 @@ public class BrainCloudManager : MonoBehaviour
             }
         }
         GameManager.Instance.UpdateLobbyDropdowns(_ffaLobbyTypesList, _teamLobbyTypesList);
+        
+        // Enable RTT
+        _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RTTService.EnableRTT(OnEnableRTT, OnRTTDisconnected);
+    }
+    
+    private void OnEnableRTT(string jsonResponse, object cbObject)
+    {
         OnLoggedIn();
     }
 
@@ -822,6 +830,9 @@ public class BrainCloudManager : MonoBehaviour
     
     public void Logout()
     {
+        _bcWrapper.RTTService.DisableRTT();
+        _bcWrapper.RTTService.DeregisterAllRTTCallbacks();
+        
         _bcWrapper.Logout(true);
         GameManager.Instance.UsernameInputField.text = "";
         GameManager.Instance.PasswordInputField.text = "";
