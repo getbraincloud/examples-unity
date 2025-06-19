@@ -49,6 +49,7 @@ public class PlayerListItem : NetworkBehaviour
             GetComponent<PlayerListItem>().enabled = false;
             RequestStateSyncServerRpc(); // Ask server to resend state
         }
+        _highlightHolder.SetActive(base.IsOwner);
     }
 
     [ServerRpc(RequireOwnership = false)]

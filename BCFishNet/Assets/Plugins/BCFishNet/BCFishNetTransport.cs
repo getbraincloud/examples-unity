@@ -2,19 +2,20 @@
 using FishNet.Transporting;
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
-using System;
-using UnityEngine;
 using FishNet;
 using FishNet.Object;
 using FishNet.Serializing;
 using FishNet.Connection;
 using FishNet.Utility.Performance;
+using System;
 using System.Collections;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace BCFishNet
 {
@@ -306,41 +307,41 @@ namespace BCFishNet
                         switch (operation)
                         {
                             case "MEMBER_LEFT":
-                            {
-                                if (jsonData.ContainsKey("member") && jsonData["member"] is Dictionary<string, object> memberData)
                                 {
-                                    if (memberData.ContainsKey("cxId") && memberData["cxId"] is string cxid)
+                                    if (jsonData.ContainsKey("member") && jsonData["member"] is Dictionary<string, object> memberData)
                                     {
-                                        Debug.Log("MEMBER_LEFT: " + cxid);
+                                        if (memberData.ContainsKey("cxId") && memberData["cxId"] is string cxid)
+                                        {
+                                            Debug.Log("MEMBER_LEFT: " + cxid);
 
-                                        int disconnectedNetId = _brainCloud.RelayService.GetNetIdForCxId(cxid);
+                                            int disconnectedNetId = _brainCloud.RelayService.GetNetIdForCxId(cxid);
 
-                                        Debug.Log("STOPPING: " + cxid);
-                                        StopClient(disconnectedNetId, true);
+                                            Debug.Log("STOPPING: " + cxid);
+                                            StopClient(disconnectedNetId, true);
+                                        }
                                     }
                                 }
-                            }
-                            break;
+                                break;
 
                             case "SIGNAL":
-                            {
-                                if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
                                 {
-                                    if (signalData.TryGetValue(REMOTE_CLIENT_ID, out object remoteClientIdObj) && remoteClientIdObj is int remoteClientId)
+                                    if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
                                     {
-                                        Debug.Log("remoteClientId: " + remoteClientId);
+                                        if (signalData.TryGetValue(REMOTE_CLIENT_ID, out object remoteClientIdObj) && remoteClientIdObj is int remoteClientId)
+                                        {
+                                            Debug.Log("remoteClientId: " + remoteClientId);
 
-                                        // Example usage
-                                        HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started,
-                                            remoteClientId, Index));
-                                    }
-                                    else
-                                    {
-                                        Debug.LogWarning("remoteClientId not found or invalid.");
+                                            // Example usage
+                                            HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started,
+                                                remoteClientId, Index));
+                                        }
+                                        else
+                                        {
+                                            Debug.LogWarning("remoteClientId not found or invalid.");
+                                        }
                                     }
                                 }
-                            }
-                            break;
+                                break;
                         }
                     }
                 }
@@ -472,7 +473,7 @@ namespace BCFishNet
                 {
                     HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Started, Index));
                 }
-                
+
                 // connect as a client
                 HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
             };
@@ -480,6 +481,11 @@ namespace BCFishNet
             FailureCallback failureCallback = (statusMessage, code, error, cbObject) =>
             {
                 Debug.LogWarning($"RelayService Connection Failure - statusMessage: {statusMessage} code: {code} error: {error}");
+
+                // 
+                // there was a failure lets go back to the main screen and closing things down
+                Debug.LogWarning($"Going Back to the main menu to allow rejoining - Display connection error message");
+                SceneManager.LoadScene("Main");
             };
 
             _brainCloud.RelayService.Connect(RelayConnectionType.UDP, connectionOptions, successCallback, failureCallback);
@@ -526,13 +532,13 @@ namespace BCFishNet
                     {
                         var connectEvent = JsonUtility.FromJson<RelaySystemConnect>(json);
                         Debug.Log($"OnSystemCallback connectEvent: {connectEvent.op} ownerCxId: {connectEvent.ownerCxId} cxId: {connectEvent.cxId} netId:{connectEvent.netId} version: {connectEvent.version}");
-                    
+
                         string connectedProfileId = _brainCloud.RelayService.GetProfileIdForNetId((short)int.Parse(connectEvent.netId));
                         hostCxId = connectEvent.ownerCxId;
 
                         hostId = _brainCloud.RelayService.GetNetIdForCxId(hostCxId);
                         int connectedNetId = int.Parse(connectEvent.netId);
-                        
+
 
                         isHost = hostCxId == connectEvent.cxId;
                         isLocal = connectedProfileId == localProfileId;
@@ -566,7 +572,7 @@ namespace BCFishNet
 
                         int previousHostId = hostId;
                         string newHostProfileId = migrateEvent.cxId.Split(':')[1];
-                        
+
                         isLocal = localProfileId == newHostProfileId;
                         hostId = _brainCloud.RelayService.GetNetIdForCxId(migrateEvent.cxId);
                         Debug.Log($"[BCFishNet] New Host netId: {hostId}");
@@ -575,7 +581,7 @@ namespace BCFishNet
 
                         // Start a coroutine to handle the shutdown + promotion
                         StartCoroutine(HandleMigrateOwnerCoroutine(_isServer, hostId));
-                        
+
                     }
                     break;
                 case "NET_ID":
@@ -626,7 +632,7 @@ namespace BCFishNet
             }
             ResyncPlayerListItems();
         }
-        
+
         private void ResyncPlayerListItems()
         {
             PlayerListEvents.RaiseResyncPlayerList();
@@ -738,7 +744,7 @@ namespace BCFishNet
                 connectionRemoved = true;
             }
             Debug.Log($"[BCFishNet] RemoveConnection {netId}, {connectionRemoved}");
-            
+
             if (NetworkManager.ServerManager.Clients.TryGetValue(netId, out NetworkConnection conn))
             {
                 Debug.Log($"Kicking client {netId}");
