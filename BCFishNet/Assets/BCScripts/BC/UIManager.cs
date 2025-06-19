@@ -362,6 +362,7 @@ public class UIManager : MonoBehaviour
     private const string P1_STR = P_PRE_FIX + "player1";
     private const string P2_STR = P_PRE_FIX + "player2";
     private const string P3_STR = P_PRE_FIX + "player3";
+    private const string P4_STR = P_PRE_FIX + "player4";
     
     private void LoginHelper(string str, string pwd)
     {
@@ -390,8 +391,12 @@ public class UIManager : MonoBehaviour
 
     public void LoginP3()
     {
-        
         LoginHelper(P3_STR, P3_STR);
+    }
+
+    public void LoginP4()
+    {
+        LoginHelper(P4_STR, P4_STR);
     }
 
 

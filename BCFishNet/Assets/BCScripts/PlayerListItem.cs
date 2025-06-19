@@ -34,8 +34,6 @@ public class PlayerListItem : NetworkBehaviour
             transform.localScale = Vector3.one;
         }
 
-        _highlightHolder.SetActive(IsOwner);
-
         PlayerListItemManager.Instance.RegisterPlayerListItem(Owner.ClientId, this);
 
         if (base.IsOwner)
@@ -90,7 +88,10 @@ public class PlayerListItem : NetworkBehaviour
 
     IEnumerator DelayedSpawnCursor()
     {
+        // If the clients, let's delay a bit, to let the server get there and we can echo back to it
         yield return null;
+        if (!Owner.IsHost) yield return new WaitForSeconds(0.5f);
+
         if (_currentCursor == null)
             SpawnCursor(Owner);
     }
