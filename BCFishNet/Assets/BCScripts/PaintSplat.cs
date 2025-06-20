@@ -29,7 +29,6 @@ public class PaintSplat : NetworkBehaviour
         OnColorChanged(Color.clear, _color.Value, false);
         OnPositionChanged(Vector2.zero, _anchoredPosition.Value, false);
 
-
         StartCoroutine(WaitAndReparent());
     }
 
