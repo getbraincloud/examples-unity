@@ -16,6 +16,8 @@ public class PlayerListItem : NetworkBehaviour
 
     private Button _testButton;
     private NetworkManager _networkManager;
+
+    public PlayerCursor PlayerCursor => _currentCursor;
     private PlayerCursor _currentCursor;
     private PlayerData _playerData;
     private bool _hasInitialized = false;
@@ -109,6 +111,10 @@ public class PlayerListItem : NetworkBehaviour
         {
             Debug.Log($"[PlayerListItem] Reusing saved data for client {conn.ClientId}, {data.Name}, {data.Color} ");
             TestChange(data.Name, data.Color);
+
+             // Restore PaintSplats on the server for this player
+             // Start coroutine to wait for PlayerCursor
+             StartCoroutine(PlayerListItemManager.Instance.WaitForPlayerCursorAndRestore(conn.ClientId, this));
         }
         else
         {

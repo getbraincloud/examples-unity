@@ -8,6 +8,8 @@ public class PaintSplat : NetworkBehaviour
 {
     [SerializeField] private Image _image;
     private RectTransform _rect;
+    public RectTransform RectTransform => _rect;
+    public Color Color => _color.Value;
 
     private readonly SyncVar<Color> _color = new SyncVar<Color>();
     private readonly SyncVar<Vector2> _anchoredPosition = new SyncVar<Vector2>();
@@ -46,6 +48,10 @@ public class PaintSplat : NetworkBehaviour
                 {
                     transform.SetParent(cursor.Container, false);
                     Debug.Log($"[PaintSplat] Reparented to PlayerCursor {cursor.clientId}");
+
+                    // Save paint data server side for persistence
+                    PlayerListItemManager.Instance.SavePlayerPaintData(Owner.ClientId, this);
+
                     yield break;
                 }
             }

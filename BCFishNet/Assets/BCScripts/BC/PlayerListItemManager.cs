@@ -4,6 +4,7 @@ using FishNet;
 using FishNet.Managing;
 using FishNet.Connection;
 using BCFishNet;
+using System.Collections;
 
 public class PlayerListItemManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class PlayerListItemManager : MonoBehaviour
 
     private Dictionary<int, PlayerData> _playerData = new Dictionary<int, PlayerData>();
     private Dictionary<int, PlayerListItem> _playerItems = new Dictionary<int, PlayerListItem>();
+    private Dictionary<int, List<PaintSplatData>> _playerPaintData = new Dictionary<int, List<PaintSplatData>>();
 
     private void Awake()
     {
@@ -46,27 +48,52 @@ public class PlayerListItemManager : MonoBehaviour
 
         foreach (NetworkConnection conn in InstanceFinder.NetworkManager.ServerManager.Clients.Values)
         {
-            Debug.Log($"[PlayerListItemManager] Checking client {conn.ClientId}");
-
             if (TryGetPlayerData(conn.ClientId, out var data))
             {
                 var playerListItem = FindPlayerListItemByConnection(conn);
                 if (playerListItem != null)
                 {
-                    Debug.Log($"[PlayerListItemManager] Resyncing PlayerListItem for client {conn.ClientId} with name '{data.Name}' and color {data.Color}");
                     playerListItem.TestChange(data.Name, data.Color);
                     playerListItem.UpdateIsHost(conn.IsHost);
+
+                    Debug.Log("[PlayerListItemManager] complete for new item...");
                 }
-                else
-                {
-                    Debug.LogWarning($"[PlayerListItemManager] No PlayerListItem found for client {conn.ClientId}.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning($"[PlayerListItemManager] No saved PlayerData found for client {conn.ClientId}.");
             }
         }
+    }
+
+    public IEnumerator WaitForPlayerCursorAndRestore(int clientId, PlayerListItem playerListItem)
+    {
+        float timeout = 3f;
+        float elapsed = 0f;
+        float retryInterval = 0.1f;
+        Debug.LogWarning($"[PlayerListItemManager] Starting {clientId} after {timeout} seconds.");
+
+        while (elapsed < timeout)
+        {
+            if (playerListItem.PlayerCursor != null)
+            {
+                Debug.Log("[PlayerListItemManager] PlayerCursor found, restoring paint splats.");
+                playerListItem.PlayerCursor.RestorePaintSplatsForPlayer(clientId);
+                yield break;
+            }
+
+            elapsed += retryInterval;
+            yield return new WaitForSeconds(retryInterval);
+        }
+
+        Debug.LogWarning($"[PlayerListItemManager] Failed to find PlayerCursor for client {clientId} after {timeout} seconds.");
+    }
+
+    private PlayerCursor FindPlayerCursorByClientId(int clientId)
+    {
+        PlayerCursor[] cursors = Object.FindObjectsOfType<PlayerCursor>();
+        foreach (var cursor in cursors)
+        {
+            if (cursor.clientId == clientId)
+                return cursor;
+        }
+        return null;
     }
 
     public void RegisterPlayerListItem(int clientId, PlayerListItem item)
@@ -81,6 +108,26 @@ public class PlayerListItemManager : MonoBehaviour
     
         _playerData[clientId] = new PlayerData { Name = name, Color = color };
         Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{name}', Color={color}");
+    }
+
+    public void SavePlayerPaintData(int clientId, PaintSplat splat)
+    {
+        if (!_playerPaintData.ContainsKey(clientId))
+            _playerPaintData[clientId] = new List<PaintSplatData>();
+
+        var dataList = _playerPaintData[clientId];
+
+        var newData = new PaintSplatData(splat.RectTransform.anchoredPosition, splat.Color);
+        dataList.Add(newData);
+
+        Debug.Log($"[PlayerListItemManager] Saved paint splat for client {clientId}");
+    }
+
+    public List<PaintSplatData> GetPlayerPaintData(int clientId)
+    {
+        if (_playerPaintData.TryGetValue(clientId, out var dataList))
+            return dataList;
+        return new List<PaintSplatData>();
     }
 
     public bool TryGetPlayerData(int clientId, out PlayerData data)
@@ -111,4 +158,16 @@ public struct PlayerData
 {
     public string Name;
     public Color Color;
+}
+
+public struct PaintSplatData
+{
+    public Vector2 anchoredPosition;
+    public Color color;
+
+    public PaintSplatData(Vector2 pos, Color col)
+    {
+        anchoredPosition = pos;
+        color = col;
+    }
 }

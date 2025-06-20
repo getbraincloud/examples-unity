@@ -46,24 +46,40 @@ public class PlayerCursor : NetworkBehaviour
         _rect = GetComponent<RectTransform>();
         _container = transform.parent.gameObject.GetComponent<RectTransform>();
     }
-    // Update is called once per frame
+    private float _paintSpawnCooldown = 0.025f; // Adjust delay between spawns (in seconds)
+    private float _timeSinceLastPaint = 0f;
+
     void Update()
+{
+    if (IsOwner)
     {
-        if (IsOwner)
+        Vector2 mousePos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_container, Input.mousePosition, null, out mousePos);
+
+        _rect.anchoredPosition = mousePos;
+
+        if (Input.GetMouseButton(0))  // GetMouseButton for holding
         {
-            Vector2 mousePos;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(_container, Input.mousePosition, null, out mousePos);
-
-            _rect.anchoredPosition = mousePos;
-
-            if (Input.GetMouseButtonDown(0))
+            _timeSinceLastPaint += Time.deltaTime;
+            if (_timeSinceLastPaint >= _paintSpawnCooldown)
             {
-                //spawn shockwave
-                SpawnShockwaveServer(mousePos);
-                SpawnPaintServer(mousePos); // new
+                _timeSinceLastPaint = 0f;
+
+                SpawnPaintServer(mousePos);
             }
         }
+        else
+        {
+            _timeSinceLastPaint = _paintSpawnCooldown; // Reset timer when not painting
+        }
+
+        // spawn shockwave only on initial click
+        if (Input.GetMouseButtonDown(0))
+        {
+            SpawnShockwaveServer(mousePos);
+        }
     }
+}
 
     [ServerRpc]
     public void SpawnShockwaveServer(Vector2 position)
@@ -86,6 +102,23 @@ public class PlayerCursor : NetworkBehaviour
         paint.Initialize(position, _cursorImage.color);
 
         Spawn(paint.gameObject, Owner); // Syncs to all clients
+    }
+
+    // Called on server to respawn saved splats for a client
+    [ServerRpc]
+    public void RestorePaintSplatsForPlayer(int clientId)
+    {
+        var paintDataList = PlayerListItemManager.Instance.GetPlayerPaintData(clientId);
+            Debug.Log("[player cursor] RestorePaintSplatsForPlayer...");
+        
+        foreach (var data in paintDataList)
+        {
+            PaintSplat paint = Instantiate(_paintPrefab, _container);
+            paint.Initialize(data.anchoredPosition, data.color);
+            Spawn(paint.gameObject, Owner);
+
+            Debug.Log("[PlayerListItemManager] RestorePaintSplatsForPlayer...");
+        }
     }
 
     [ObserversRpc]
