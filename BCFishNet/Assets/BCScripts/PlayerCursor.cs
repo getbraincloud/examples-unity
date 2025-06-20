@@ -12,9 +12,13 @@ public class PlayerCursor : NetworkBehaviour
     private RectTransform _rect;
     private RectTransform _container;
 
+    public RectTransform Container => _container;
+
     [SerializeField]
     private Shockwave _shockwavePrefab;
 
+    [SerializeField]
+    private PaintSplat _paintPrefab;
     public bool areWeOwner;
     public int clientId;
 
@@ -56,6 +60,7 @@ public class PlayerCursor : NetworkBehaviour
             {
                 //spawn shockwave
                 SpawnShockwaveServer(mousePos);
+                SpawnPaintServer(mousePos); // new
             }
         }
     }
@@ -72,6 +77,15 @@ public class PlayerCursor : NetworkBehaviour
         Shockwave shockwave = Instantiate(_shockwavePrefab, _container);
         shockwave.SetColor(color);
         shockwave.SetPosition(position);
+    }
+
+    [ServerRpc]
+    private void SpawnPaintServer(Vector2 position)
+    {
+        PaintSplat paint = Instantiate(_paintPrefab, _container);
+        paint.Initialize(position, _cursorImage.color);
+
+        Spawn(paint.gameObject, Owner); // Syncs to all clients
     }
 
     [ObserversRpc]

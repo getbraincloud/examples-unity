@@ -3,32 +3,29 @@
 > 🚧 **Under active development** – Features and behaviors may change.
 
 ## 🔍 Overview
+Target Audience: Game developers familiar with Unity and multiplayer networking
 
 This project demonstrates a complete multiplayer game flow using **FishNet** for network object synchronization and **brainCloud** for user authentication, matchmaking, lobby management, and real-time relay transport.
 
 The core integration focuses on replacing FishNet's default transport with brainCloud's relay service, allowing you to write multiplayer logic with FishNet while offloading matchmaking and relay connectivity to brainCloud.
 
----
+## ✅ Getting Started
 
-## 📁 Folder Structure & Analysis
+### Requirements
+- Unity 2021+
+- FishNet Unity package
+- brainCloud Unity SDK
+- Valid brainCloud App ID and Secret (configured in Unity Inspector)
 
-### `Assets/Plugins/BCFishNet`
-This folder contains the **FishNet transport plugin implementation** for brainCloud:
+### Steps
+1. Clone this repo and open the Unity project.
+2. Go to the `Main` scene and run it in editor.
 
-- `BrainCloudTransport.cs`
-  - Implements FishNet's `Transport` abstract class.
-  - Uses brainCloud's `RelayComms` system to send and receive network messages.
-  - Buffers incoming data packets and dispatches them via FishNet's receive mechanism.
-  - Provides connection lifecycle methods (`StartClient`, `StartServer`, `StopConnection`).
-  - Handles Host Migration
+###As a Player
 
-### Purpose
-This folder provides a **drop-in FishNet Transport backend** powered by brainCloud. By simply plugging in the `BrainCloudTransport` script in your `NetworkManager`, your multiplayer game will automatically use brainCloud's relay infrastructure for real-time communication. 
-
----
-
-### `Assets/BCScripts`
-This folder holds the **game logic and UI scripts** tied to user flow.
+3. Authenticate and reach the Lobby.
+4. Choose a lobby option and ready up.
+5. Game scene will load when all players are ready.
 
 ---
 
@@ -80,32 +77,7 @@ This folder holds the **game logic and UI scripts** tied to user flow.
    - Players see each other in real-time.
    - Movement, actions (shockwave), and player properties are synced via FishNet.
 
----
-
-## ✅ Getting Started
-
-### Requirements
-- Unity 2021+
-- FishNet Unity package
-- brainCloud Unity SDK
-- Valid brainCloud App ID and Secret (configured in Unity Inspector)
-
-### Steps
-1. Clone this repo and open the Unity project.
-2. Go to the `Main` scene and run it in editor.
-3. Authenticate and reach the Lobby.
-4. Choose a lobby option and ready up.
-5. Game scene will load when all players are ready.
-
----
-
-## 📊 Useful Files for Reference
-| Script | Purpose |
-|--------|---------|
-| `BrainCloudTransport.cs` | Custom transport layer for FishNet using brainCloud relay |
-
----
-
+—
 ## 🧱 For Developers
 
 If you're new to Unity networking:
@@ -115,13 +87,45 @@ If you're new to Unity networking:
 
 > You get matchmaking, relay connectivity, and real-time sync all handled for you using a plug-in approach. Focus your time on **game logic** and **player experience**.
 
+
+## 📊 Useful Files for Reference
+| Script | Purpose |
+|--------|---------|
+| `BrainCloudTransport.cs` | Custom transport layer for FishNet using brainCloud relay |
+
+—
+
+## 📁 Folder Structure & Analysis
+
+### `Assets/Plugins/BCFishNet`
+This folder contains the **FishNet transport plugin implementation** for brainCloud:
+
+- `BrainCloudTransport.cs`
+  - Implements FishNet's `Transport` abstract class.
+  - Uses brainCloud's `RelayComms` system to send and receive network messages.
+  - Buffers incoming data packets and dispatches them via FishNet's receive mechanism.
+  - Provides connection lifecycle methods (`StartClient`, `StartServer`, `StopConnection`).
+  - Handles Host Migration
+
+### Purpose
+This folder provides a **drop-in FishNet Transport backend** powered by brainCloud. By simply plugging in the `BrainCloudTransport` script in your `NetworkManager`, your multiplayer game will automatically use brainCloud's relay infrastructure for real-time communication. 
+
+---
+
+### `Assets/BCScripts`
+This folder holds the **game logic and UI scripts** tied to user flow.
+
+
+
 ---
 
 ## 🚀 Future Improvements
-
-_TODO: Document upcoming features, such as server authority or dedicated hosting support._
+    - Persistent Level for new people joining and migrating hosts to that solution
+    - Time Counting how long it takes to get into a hosted and launched server
 
 ---
 
 For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).
+
+
 
