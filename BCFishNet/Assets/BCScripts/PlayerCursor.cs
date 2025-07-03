@@ -40,7 +40,7 @@ public class PlayerCursor : NetworkBehaviour
         InitCursor();
         ResetPosition();
 
-        if (IsServer)
+        if (IsHost)
         {
             RestoreGlobalPaintMap();
         }
@@ -123,6 +123,8 @@ public class PlayerCursor : NetworkBehaviour
         var paintDataList = PlayerListItemManager.Instance.GetGlobalPaintData();
         Transform container = UIContainerCache.GetCursorContainer();
 
+        //PlayerListItemManager.Instance.ClearGlobalPaintData(); // Clear after fetching so we dont duplicate 
+
         Debug.Log($"[PlayerCursor] Restoring {paintDataList.Count} global paint splats");
 
         foreach (var data in paintDataList)
@@ -134,6 +136,7 @@ public class PlayerCursor : NetworkBehaviour
             //yield return null;//new WaitForSeconds(0.02f); // Prevent packet flooding
         }
         yield return null;
+        
         _enabled = true; // Re-enable cursor updates after restoring paint
     }
 

@@ -26,8 +26,6 @@ public class PlayerListItemManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         Debug.Log("[PlayerListItemManager] Initialized and subscribed to events.");
-
-        PlayerListEvents.OnResyncPlayerList += ResyncPlayerListItems;
         PlayerListEvents.OnClearAllPlayerList += ClearAll;
     }
 
@@ -36,38 +34,8 @@ public class PlayerListItemManager : MonoBehaviour
         if (Instance == this)
         {
             PlayerListEvents.OnClearAllPlayerList -= ClearAll;
-            PlayerListEvents.OnResyncPlayerList -= ResyncPlayerListItems;
 
             Debug.Log("[PlayerListItemManager] Destroyed and unsubscribed from events.");
-        }
-    }
-
-    private void ResyncPlayerListItems()
-    {
-        Debug.Log("[PlayerListItemManager] Resyncing player list items...");
-
-        foreach (NetworkConnection conn in InstanceFinder.NetworkManager.ServerManager.Clients.Values)
-        {
-            if (TryGetPlayerData(conn.ClientId, out var data))
-            {
-                var playerListItem = FindPlayerListItemByConnection(conn);
-                if (playerListItem != null)
-                {
-                    playerListItem.TestChange(data.Name, data.Color);
-                    playerListItem.UpdateIsHost(conn.IsHost);
-
-                    Debug.Log("[PlayerListItemManager] complete for new item...");
-                }
-
-                //if (conn.IsHost)
-                {
-                    var cursor = FindPlayerCursorByClientId(conn.ClientId);
-                    if (cursor != null)
-                    {
-                        cursor.RestoreGlobalPaintMap();
-                    }
-                }
-            }
         }
     }
 
@@ -126,10 +94,18 @@ public class PlayerListItemManager : MonoBehaviour
         return item;
     }
 
+    public void ClearGlobalPaintData()
+    {
+        Debug.Log("[PlayerListItemManager] Clearing global paint data.");
+        _globalPaintData.Clear();
+    }
+    
     public void ClearAll()
     {
         Debug.Log("[PlayerListItemManager] Clearing all player data and item references.");
         _playerData.Clear();
+        _globalPaintData.Clear();
+        _playerItems.Clear();
     }
     public List<int> GetAllPlayerIds()
     {
@@ -143,6 +119,7 @@ public class PlayerListItemManager : MonoBehaviour
         }
         return playerIds;
     }
+    
 }
 
 public struct PlayerData

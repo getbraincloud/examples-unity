@@ -32,6 +32,12 @@ public class PaintSplat : NetworkBehaviour
         OnPositionChanged(Vector2.zero, _anchoredPosition.Value, false);
 
         StartCoroutine(WaitAndReparent());
+        
+        // Save locally when this splat spawns (client-side only)
+        if (IsClient && !IsServer)
+        {
+            PlayerListItemManager.Instance?.SaveGlobalPaintData(this);
+        }
     }
 
     private IEnumerator WaitAndReparent()
@@ -45,6 +51,7 @@ public class PaintSplat : NetworkBehaviour
             if (container != null)
             {
                 transform.SetParent(container, false);
+                
                 yield break;
             }
 
