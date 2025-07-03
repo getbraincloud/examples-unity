@@ -39,6 +39,11 @@ public class PlayerCursor : NetworkBehaviour
 
         InitCursor();
         ResetPosition();
+
+        if (IsServer)
+        {
+            RestoreGlobalPaintMap();
+        }
     }
 
     public void InitCursor()
@@ -48,10 +53,11 @@ public class PlayerCursor : NetworkBehaviour
     }
     private float _paintSpawnCooldown = 0.025f; // Adjust delay between spawns (in seconds)
     private float _timeSinceLastPaint = 0f;
+    private bool _enabled = true;
 
     void Update()
 {
-    if (IsOwner)
+    if (IsOwner && _enabled)
     {
         Vector2 mousePos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_container, Input.mousePosition, null, out mousePos);
@@ -101,24 +107,34 @@ public class PlayerCursor : NetworkBehaviour
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, _cursorImage.color);
 
-        Spawn(paint.gameObject, Owner); // Syncs to all clients
+        Spawn(paint.gameObject);
+
+        PlayerListItemManager.Instance.SaveGlobalPaintData(paint);
     }
 
-    // Called on server to respawn saved splats for a client
-    [ServerRpc]
-    public void RestorePaintSplatsForPlayer(int clientId)
+    public void RestoreGlobalPaintMap()
     {
-        var paintDataList = PlayerListItemManager.Instance.GetPlayerPaintData(clientId);
-            Debug.Log("[player cursor] RestorePaintSplatsForPlayer...");
-        
+        _enabled = false; // Disable cursor updates while restoring paint
+        StartCoroutine(RestoreGlobalPaintCoroutine());
+    }
+
+    private IEnumerator RestoreGlobalPaintCoroutine()
+    {
+        var paintDataList = PlayerListItemManager.Instance.GetGlobalPaintData();
+        Transform container = UIContainerCache.GetCursorContainer();
+
+        Debug.Log($"[PlayerCursor] Restoring {paintDataList.Count} global paint splats");
+
         foreach (var data in paintDataList)
         {
-            PaintSplat paint = Instantiate(_paintPrefab, _container);
+            PaintSplat paint = Instantiate(_paintPrefab, container);
             paint.Initialize(data.anchoredPosition, data.color);
-            Spawn(paint.gameObject, Owner);
+            Spawn(paint.gameObject); // Spawned by server with no owner
 
-            Debug.Log("[PlayerListItemManager] RestorePaintSplatsForPlayer...");
+            //yield return null;//new WaitForSeconds(0.02f); // Prevent packet flooding
         }
+        yield return null;
+        _enabled = true; // Re-enable cursor updates after restoring paint
     }
 
     [ObserversRpc]

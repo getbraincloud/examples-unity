@@ -41,19 +41,11 @@ public class PaintSplat : NetworkBehaviour
 
         while (elapsed < timeout)
         {
-            PlayerCursor[] cursors = FindObjectsOfType<PlayerCursor>();
-            foreach (var cursor in cursors)
+            Transform container = UIContainerCache.GetCursorContainer();
+            if (container != null)
             {
-                if (cursor.clientId == Owner.ClientId)
-                {
-                    transform.SetParent(cursor.Container, false);
-                    Debug.Log($"[PaintSplat] Reparented to PlayerCursor {cursor.clientId}");
-
-                    // Save paint data server side for persistence
-                    PlayerListItemManager.Instance.SavePlayerPaintData(Owner.ClientId, this);
-
-                    yield break;
-                }
+                transform.SetParent(container, false);
+                yield break;
             }
 
             elapsed += 0.1f;

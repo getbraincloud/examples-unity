@@ -12,7 +12,7 @@ public class PlayerListItemManager : MonoBehaviour
 
     private Dictionary<int, PlayerData> _playerData = new Dictionary<int, PlayerData>();
     private Dictionary<int, PlayerListItem> _playerItems = new Dictionary<int, PlayerListItem>();
-    private Dictionary<int, List<PaintSplatData>> _playerPaintData = new Dictionary<int, List<PaintSplatData>>();
+    private readonly List<PaintSplatData> _globalPaintData = new List<PaintSplatData>();
 
     private void Awake()
     {
@@ -58,31 +58,17 @@ public class PlayerListItemManager : MonoBehaviour
 
                     Debug.Log("[PlayerListItemManager] complete for new item...");
                 }
+
+                //if (conn.IsHost)
+                {
+                    var cursor = FindPlayerCursorByClientId(conn.ClientId);
+                    if (cursor != null)
+                    {
+                        cursor.RestoreGlobalPaintMap();
+                    }
+                }
             }
         }
-    }
-
-    public IEnumerator WaitForPlayerCursorAndRestore(int clientId, PlayerListItem playerListItem)
-    {
-        float timeout = 3f;
-        float elapsed = 0f;
-        float retryInterval = 0.1f;
-        Debug.LogWarning($"[PlayerListItemManager] Starting {clientId} after {timeout} seconds.");
-
-        while (elapsed < timeout)
-        {
-            if (playerListItem.PlayerCursor != null)
-            {
-                Debug.Log("[PlayerListItemManager] PlayerCursor found, restoring paint splats.");
-                playerListItem.PlayerCursor.RestorePaintSplatsForPlayer(clientId);
-                yield break;
-            }
-
-            elapsed += retryInterval;
-            yield return new WaitForSeconds(retryInterval);
-        }
-
-        Debug.LogWarning($"[PlayerListItemManager] Failed to find PlayerCursor for client {clientId} after {timeout} seconds.");
     }
 
     private PlayerCursor FindPlayerCursorByClientId(int clientId)
@@ -105,30 +91,24 @@ public class PlayerListItemManager : MonoBehaviour
     public void SavePlayerData(int clientId, string name, Color color)
     {
         if (string.IsNullOrEmpty(name)) return;
-    
+
         _playerData[clientId] = new PlayerData { Name = name, Color = color };
         Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{name}', Color={color}");
-    }
+        }
 
-    public void SavePlayerPaintData(int clientId, PaintSplat splat)
+    public void SaveGlobalPaintData(PaintSplat splat)
     {
-        if (!_playerPaintData.ContainsKey(clientId))
-            _playerPaintData[clientId] = new List<PaintSplatData>();
-
-        var dataList = _playerPaintData[clientId];
-
-        var newData = new PaintSplatData(splat.RectTransform.anchoredPosition, splat.Color);
-        dataList.Add(newData);
-
-        Debug.Log($"[PlayerListItemManager] Saved paint splat for client {clientId}");
+        _globalPaintData.Add(new PaintSplatData
+        {
+            color = splat.Color,
+            anchoredPosition = splat.RectTransform.anchoredPosition
+        });
     }
 
-    public List<PaintSplatData> GetPlayerPaintData(int clientId)
+    public List<PaintSplatData> GetGlobalPaintData()
     {
-        if (_playerPaintData.TryGetValue(clientId, out var dataList))
-            return dataList;
-        return new List<PaintSplatData>();
-    }
+        return _globalPaintData;
+}
 
     public bool TryGetPlayerData(int clientId, out PlayerData data)
     {
@@ -149,8 +129,19 @@ public class PlayerListItemManager : MonoBehaviour
     public void ClearAll()
     {
         Debug.Log("[PlayerListItemManager] Clearing all player data and item references.");
-        _playerItems.Clear();
         _playerData.Clear();
+    }
+    public List<int> GetAllPlayerIds()
+    {
+        List<int> playerIds = new List<int>();
+        foreach (NetworkConnection conn in InstanceFinder.NetworkManager.ServerManager.Clients.Values)
+        {
+            if (conn != null)
+            {
+                playerIds.Add(conn.ClientId);
+            }
+        }
+        return playerIds;
     }
 }
 
