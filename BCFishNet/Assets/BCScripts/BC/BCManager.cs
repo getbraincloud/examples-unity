@@ -63,18 +63,63 @@ public class BCManager : MonoBehaviour
         Debug.Log("BrainCloud client version: " + _bc.Client.BrainCloudClientVersion);
     }
 
-    public void AuthenticateUser(string username, string password, Action<bool> callback)
+    private string _playerName;
+    public string PlayerName
+    {
+        get => _playerName;
+        set => _playerName = value;
+    }
+
+    private void OnAuthSuccess(string responseData, object cbObject, Action<bool> callback)
+    {
+        Debug.Log("Authentication successful");
+
+        try
+        {
+            var response = JsonReader.Deserialize<Dictionary<string, object>>(responseData);
+
+            if (response.TryGetValue("data", out object dataObj) &&
+                dataObj is Dictionary<string, object> data &&
+                data.TryGetValue("playerName", out object playerNameObj))
+            {
+                _playerName = playerNameObj?.ToString();
+                Debug.Log($"Stored playerName: {_playerName}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"Failed to parse playerName from response: {ex.Message}");
+        }
+
+        callback?.Invoke(true);
+    }
+
+    private void OnAuthFailure(int error, int code, string statusMessage, object cbObject, Action<bool> callback)
+    {
+        Debug.LogWarning($"Authentication failed: {statusMessage} (code: {code}, error: {error})");
+        callback?.Invoke(false);
+    }
+
+    public void AuthenticateAnonymous(Action<bool> callback)
     {
         SuccessCallback success = (responseData, cbObject) =>
         {
-            //on auth success
-            callback(true);
+            OnAuthSuccess(responseData, cbObject, callback);
         };
 
+        FailureCallback failure = (error, code, statusMessage, cbObject) =>
+            OnAuthFailure(error, code, statusMessage, cbObject, callback);
+
+        _bc.AuthenticateAnonymous(success, failure);
+    }
+
+    public void AuthenticateUser(string username, string password, Action<bool> callback)
+    {
+        SuccessCallback success = (responseData, cbObject) =>
+            OnAuthSuccess(responseData, cbObject, callback);
+
         FailureCallback failure = (statusMessage, code, error, cbObject) =>
-        {
-            callback(false);
-        };
+            OnAuthFailure(statusMessage, code, error, cbObject, callback);
 
         _bc.AuthenticateUniversal(username, password, true, success, failure);
     }

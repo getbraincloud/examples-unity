@@ -23,13 +23,13 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Button _loginButton;
     [SerializeField]
-    private TMP_InputField _usernameInput, _passwordInput;
+    private TMP_InputField _usernameInput, _passwordInput, _displayNameInput;
     #endregion
 
     #region MainMenuVars
     [Header("MainMenu Vars")]
     [SerializeField]
-    private TMP_Text _mainStatus;
+    private TMP_Text _mainStatus, _displayNameText;
     [SerializeField]
     private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
 
@@ -67,8 +67,6 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _loginButton.onClick.AddListener(OnLoginClicked);
-
         //main menu
         _mainStatus.text = string.Empty;
         _createLobbyButton.onClick.AddListener(OnCreateLobbyClicked);
@@ -82,6 +80,25 @@ public class UIManager : MonoBehaviour
 
         //login
         //check if authenticated
+        var bc = BCManager.Instance.bc;
+        var storedId = bc.GetStoredProfileId();
+        var storedAnonymousId = bc.GetStoredAnonymousId();
+
+        if (storedId != null && storedAnonymousId != null)
+        {
+            BCManager.Instance.AuthenticateAnonymous((success) =>
+            {
+                if (success)
+                {
+                    OnAuthSuccess();
+                }
+                else
+                {
+                    UpdateState(State.Login);
+                }
+            });
+        }
+        
         if (BCManager.Instance.bc.Client.IsAuthenticated())
         {
             OnAuthSuccess();
@@ -111,7 +128,6 @@ public class UIManager : MonoBehaviour
     void OnDestroy()
     {
         BCManager.Instance.bc.RTTService.DeregisterRTTLobbyCallback();
-        _loginButton.onClick.RemoveListener(OnLoginClicked);
 
         //main menu
         _createLobbyButton.onClick.RemoveListener(OnCreateLobbyClicked);
@@ -399,12 +415,25 @@ public class UIManager : MonoBehaviour
         LoginHelper(P4_STR, P4_STR);
     }
 
+    public void Logout()
+    {
+        var _wrapper = BCManager.Instance.bc;
+        _wrapper.LogoutOnApplicationQuit(false);
+        _wrapper.RTTService.DisableRTT();
+        _wrapper.RTTService.DeregisterAllRTTCallbacks();
 
-    private void OnLoginClicked()
+        UpdateState(State.Login);
+    }
+
+    public void OnLoginClicked()
     {
         if (string.IsNullOrEmpty(_usernameInput.text) || string.IsNullOrEmpty(_passwordInput.text))
         {
-            Debug.LogError("Username or password is empty, please enter correct value", this);
+            // Show error message
+            _mainStatus.text = "Username or password is empty, please enter correct value";
+            // display the username and pwd
+            
+            Debug.LogError("Username: " + _usernameInput.text + ", Password: " + _passwordInput.text, this);
             return;
         }
 
@@ -412,6 +441,21 @@ public class UIManager : MonoBehaviour
         {
             if (success)
             {
+                string displayName = _displayNameInput.text;
+
+                SuccessCallback successCallback = (response, cbObject) =>
+                {
+                    Debug.Log(string.Format("Success | {0}", response));
+                };
+                FailureCallback failureCallback = (status, code, error, cbObject) =>
+                {
+                    Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error));
+                };
+
+                BCManager.Instance.PlayerName = displayName;
+                // Update the display name in BrainCloud
+                BCManager.Instance.bc.PlayerStateService.UpdateUserName(displayName, successCallback, failureCallback);
+
                 OnAuthSuccess();
             }
             else
@@ -430,6 +474,8 @@ public class UIManager : MonoBehaviour
                 BCManager.Instance.bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
                 UpdateState(State.Main);
             });
+
+            _displayNameText.text = BCManager.Instance.PlayerName;
         }
         else
         {

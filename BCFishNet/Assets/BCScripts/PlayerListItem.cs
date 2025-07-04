@@ -63,12 +63,12 @@ public class PlayerListItem : NetworkBehaviour
             UpdateIsHost(Owner.IsHost);
         }
     }
-
+    
     public void OnTestButtonClicked()
     {
         if (base.IsOwner)
         {
-            string newName = GenerateRandomString();
+            string newName = BCManager.Instance.PlayerName;//GenerateRandomString();
             Color newColor = GenerateRandomColor();
 
             TestChangeServer(newName, newColor);

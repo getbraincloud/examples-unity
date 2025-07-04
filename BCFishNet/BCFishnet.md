@@ -46,7 +46,7 @@ The core integration focuses on replacing FishNet's default transport with brain
 - **Player Metadata Sync**
   - Players are assigned random colors and names.
   - This metadata is serialized and synced to all clients during session startup.
-  - The lobby and game session can be joined in progress, syncing the client's assigned color and name.
+  - The lobby and game session can be joined in progress, syncing the client's assigned color and name. All colours placed allowed by game session user remain, even after host migration.
 
 - **Scene Flow**
   - Login → Lobby Selection → Matchmaking → Relay Connect → Game Start.
@@ -75,7 +75,7 @@ The core integration focuses on replacing FishNet's default transport with brain
 
 5. **Multiplayer Session Begins**
    - Players see each other in real-time.
-   - Movement, actions (shockwave), and player properties are synced via FishNet.
+   - Movement, actions (shockwave), paintsplat trail and player properties are synced via FishNet.
 
 —
 ## 🧱 For Developers
