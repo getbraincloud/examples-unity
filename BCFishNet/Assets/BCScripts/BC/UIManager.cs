@@ -100,23 +100,7 @@ public class UIManager : MonoBehaviour
         var storedId = bc.GetStoredProfileId();
         var storedAnonymousId = bc.GetStoredAnonymousId();
 
-        if (storedId != null && storedAnonymousId != null && 
-        storedId != string.Empty && storedAnonymousId != string.Empty)
-        {
-            //we have a stored profile id, so we can authenticate
-            bc.AuthenticateUser(storedId, storedAnonymousId, (success) =>
-            {
-                if (success)
-                {
-                    OnAuthSuccess();
-                }
-                else
-                {
-                    UpdateState(State.Login);
-                }
-            });
-        }
-        else    
+        if (storedId != null && storedAnonymousId != null && storedId != string.Empty && storedAnonymousId != string.Empty)
         {
             BCManager.Instance.AuthenticateAnonymous((success) =>
             {
