@@ -42,7 +42,7 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private TMP_Text _lobbyIdText;
     [SerializeField]
-    private TMP_Text _lobbyStatusText;
+    private TMP_Text _lobbyStatusText, _displayNameTextLobby;
     [SerializeField]
     private Button _readyUpButton, _leaveLobbyButon;
     [SerializeField]
@@ -78,13 +78,45 @@ public class UIManager : MonoBehaviour
         _readyUpButton.onClick.AddListener(OnReadyUpClicked);
         _leaveLobbyButon.onClick.AddListener(OnLeaveLobbyClicked);
 
+        
+        if (BCManager.Instance.bc.Client.IsAuthenticated())
+        {
+            OnAuthSuccess();
+        }
+        else
+        {
+#if P1
+            LoginP1();
+
+#elif P2
+            LoginP2();
+
+#elif P3
+            LoginP3();
+#else 
         //login
         //check if authenticated
         var bc = BCManager.Instance.bc;
         var storedId = bc.GetStoredProfileId();
         var storedAnonymousId = bc.GetStoredAnonymousId();
 
-        if (storedId != null && storedAnonymousId != null)
+        if (storedId != null && storedAnonymousId != null && 
+        storedId != string.Empty && storedAnonymousId != string.Empty)
+        {
+            //we have a stored profile id, so we can authenticate
+            bc.AuthenticateUser(storedId, storedAnonymousId, (success) =>
+            {
+                if (success)
+                {
+                    OnAuthSuccess();
+                }
+                else
+                {
+                    UpdateState(State.Login);
+                }
+            });
+        }
+        else    
         {
             BCManager.Instance.AuthenticateAnonymous((success) =>
             {
@@ -98,26 +130,9 @@ public class UIManager : MonoBehaviour
                 }
             });
         }
-        
-        if (BCManager.Instance.bc.Client.IsAuthenticated())
-        {
-            OnAuthSuccess();
-        }
-#if P1 || P2 || P3
-        else
-        {
-#if P1
-            LoginP1();
-
-#elif P2
-            LoginP2();
-
-#elif P3
-            LoginP3();
-
 #endif
+
         }
-#endif
     }
 
     void OnEnable()
@@ -264,6 +279,7 @@ public class UIManager : MonoBehaviour
             Dictionary<string, object> memberData = new Dictionary<string, object>();
 
             string joiningMemberId = string.Empty;
+            string fromMemberId = string.Empty;
 
             if (jsonData.ContainsKey("lobby"))
             {
@@ -284,6 +300,11 @@ public class UIManager : MonoBehaviour
             {
                 memberData = jsonData["member"] as Dictionary<string, object>;
                 joiningMemberId = memberData["profileId"] as string;
+            }
+            if (jsonData.ContainsKey("from"))
+            {
+                var fromData = jsonData["from"] as Dictionary<string, object>;
+                fromMemberId = fromData["id"] as string;
             }
 
             if (response.ContainsKey("operation"))
@@ -309,6 +330,16 @@ public class UIManager : MonoBehaviour
                             BCManager.Instance.CurrentLobbyId = _currentLobbyId;
 
                             _lobbyIdText.text = _currentLobbyId;
+
+                            // let's echo all the lobby member item colors to the lobby
+                            foreach (var member in _members)
+                            {
+                                if (member.Value != null)
+                                {
+                                    // Send a signal to all other members in the lobby with the new color
+                                    member.Value.SendCurrentColourSignal();
+                                }
+                            }
                         }
                         break;
                     case "MEMBER_UPDATE":
@@ -365,6 +396,24 @@ public class UIManager : MonoBehaviour
                             _cancelMatchmakingButton.gameObject.SetActive(false);
                         }
                         break;
+
+                    case "SIGNAL":
+                        {
+                            if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
+                            {
+                                if (signalData.TryGetValue("color", out object colorObj) && colorObj is string hexColor)
+                                {
+                                    if (ColorUtility.TryParseHtmlString("#" + hexColor, out Color receivedColor))
+                                    {
+                                        // Apply the receivedColor to the correct object
+                                        _members[fromMemberId].ApplyColorUpdate(receivedColor);
+
+                                        Debug.Log($"Received color: {receivedColor}, for member: {fromMemberId}  ");
+                                    }
+                                }
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -419,6 +468,7 @@ public class UIManager : MonoBehaviour
     {
         var _wrapper = BCManager.Instance.bc;
         _wrapper.LogoutOnApplicationQuit(false);
+        _wrapper.Client.ResetCommunication();
         _wrapper.RTTService.DisableRTT();
         _wrapper.RTTService.DeregisterAllRTTCallbacks();
 
@@ -476,6 +526,7 @@ public class UIManager : MonoBehaviour
             });
 
             _displayNameText.text = BCManager.Instance.PlayerName;
+            _displayNameTextLobby.text = BCManager.Instance.PlayerName;
         }
         else
         {

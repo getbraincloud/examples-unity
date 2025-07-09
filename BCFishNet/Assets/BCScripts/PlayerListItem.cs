@@ -68,8 +68,8 @@ public class PlayerListItem : NetworkBehaviour
     {
         if (base.IsOwner)
         {
-            string newName = BCManager.Instance.PlayerName;//GenerateRandomString();
-            Color newColor = GenerateRandomColor();
+            string newName = BCManager.Instance.PlayerName;
+            Color newColor = GenerateRandomColor(); // TODO persist this color from lobby info
 
             TestChangeServer(newName, newColor);
         }
