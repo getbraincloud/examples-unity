@@ -11,6 +11,7 @@ public class PlayerListItemManager : MonoBehaviour
     public static PlayerListItemManager Instance { get; private set; }
 
     private Dictionary<int, PlayerData> _playerData = new Dictionary<int, PlayerData>();
+    private Dictionary<string, PlayerData> _playerDataByProfileId = new Dictionary<string, PlayerData>();
     private Dictionary<int, PlayerListItem> _playerItems = new Dictionary<int, PlayerListItem>();
     private readonly List<PaintSplatData> _globalPaintData = new List<PaintSplatData>();
 
@@ -56,13 +57,35 @@ public class PlayerListItemManager : MonoBehaviour
         Debug.Log($"[PlayerListItemManager] Registered PlayerListItem for client {clientId}");
     }
 
+    public void SaveLobbyMemberPlayerData(string profileId, string name, Color color)
+    {
+        if (string.IsNullOrEmpty(name)) return;
+
+        _playerDataByProfileId[profileId] = new PlayerData { Name = name, Color = color };
+        Debug.Log($"[PlayerListItemManager] Saved PlayerData for profile '{profileId}': Name='{name}', Color={color}");
+    }
+
+    public PlayerData GetPlayerDataByProfileId(string profileId)
+    {
+        if (_playerDataByProfileId.TryGetValue(profileId, out PlayerData data))
+        {
+            Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
+            return data;
+        }
+        else
+        {
+            Debug.LogWarning($"[PlayerListItemManager] No PlayerData found for profile '{profileId}'");
+            return default;
+        }
+    }
+
     public void SavePlayerData(int clientId, string name, Color color)
     {
         if (string.IsNullOrEmpty(name)) return;
 
         _playerData[clientId] = new PlayerData { Name = name, Color = color };
         Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{name}', Color={color}");
-        }
+    }
 
     public void SaveGlobalPaintData(PaintSplat splat)
     {
@@ -83,6 +106,13 @@ public class PlayerListItemManager : MonoBehaviour
         bool found = _playerData.TryGetValue(clientId, out data);
         if (found)
             Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for client {clientId}: Name='{data.Name}', Color={data.Color}");
+        return found;
+    }
+    public bool TryGetPlayerDataByProfileId(string profileId, out PlayerData data)
+    {
+        bool found = _playerDataByProfileId.TryGetValue(profileId, out data);
+        if (found)
+            Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
         return found;
     }
 

@@ -27,7 +27,11 @@ public class LobbyMemberItem : MonoBehaviour
         _rating = rating;
         _cXId = cXId;
         _extraData = extraData;
-    
+
+        // add the player name value and default colour to it
+        _playerData.Name =  _playerNameValue != "" ? _playerNameValue : _profileId.Substring(0, 8);
+        _playerData.Color = Color.black;
+
         UpdateUI();
     }
     void Start()
@@ -44,6 +48,7 @@ public class LobbyMemberItem : MonoBehaviour
         {
             img.color = color;
         }
+        _playerData.Color = color;
     }
     public void SendCurrentColourSignal()
     {
@@ -58,7 +63,7 @@ public class LobbyMemberItem : MonoBehaviour
             Debug.LogError("Image component not found on parent GameObject.");
         }
     }
-    
+
     // for the current lobby SendColorUpdateSignal to all other members of the color of this members image
     public void SendColorUpdateSignal(Color color)
     {
@@ -81,9 +86,11 @@ public class LobbyMemberItem : MonoBehaviour
 
     public void UpdateUI()
     {
-        playerName.text = _playerNameValue != "" ? _playerNameValue : _profileId;
+        playerName.text = _playerNameValue != "" ? _playerNameValue : _profileId.Substring(0, 8);
         readyState.text = _readyStateValue ? "Ready" : "Not Ready";
 
+        PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(_profileId, _playerNameValue, _playerData.Color);
+        
         _highlightHolder.SetActive(_profileId == BCManager.Instance.bc.Client.ProfileId);
     }
 
@@ -104,4 +111,6 @@ public class LobbyMemberItem : MonoBehaviour
     private bool _readyStateValue = false;
 
     private Dictionary<string, object> _extraData;
+    public PlayerData PlayerData => _playerData;
+    private PlayerData _playerData;
 }

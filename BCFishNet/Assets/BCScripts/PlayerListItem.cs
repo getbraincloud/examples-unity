@@ -51,6 +51,7 @@ public class PlayerListItem : NetworkBehaviour
             GetComponent<PlayerListItem>().enabled = false;
             RequestStateSyncServerRpc(); // Ask server to resend state
         }
+        
         _highlightHolder.SetActive(base.IsOwner);
     }
 
@@ -106,10 +107,15 @@ public class PlayerListItem : NetworkBehaviour
         _networkManager.ServerManager.Spawn(nob, conn);
 
         SetCursorRef(nob);
-
-        if (PlayerListItemManager.Instance.TryGetPlayerData(conn.ClientId, out var data))
+        PlayerData data;
+        if (PlayerListItemManager.Instance.TryGetPlayerData(conn.ClientId, out data))
         {
             Debug.Log($"[PlayerListItem] Reusing saved data for client {conn.ClientId}, {data.Name}, {data.Color} ");
+            TestChange(data.Name, data.Color);
+        }
+        else if (base.IsOwner && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
+        {
+            Debug.Log($"[PlayerListItem] Reusing saved data for profileid {BCManager.Instance.bc.Client.ProfileId}, {data.Name}, {data.Color} ");
             TestChange(data.Name, data.Color);
         }
         else

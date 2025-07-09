@@ -11,16 +11,13 @@ public class ColorSelector : MonoBehaviour
     public GameObject targetObject;
 
     [Header("Color Buttons")]
-    public List<Button> colorButtons; // Assign all 21 buttons in Inspector
+    public List<Button> colorButtons; // all 21 buttons in Inspector
     
 
     private void Start()
     {
         // Hide color selector initially
         colorSelectorCanvas.gameObject.SetActive(false);
-
-        // Hook up the show button
-        //showSelectorButton.onClick.AddListener(ShowColorSelector);
 
         // Hook up color buttons
         foreach (var button in colorButtons)
@@ -34,19 +31,19 @@ public class ColorSelector : MonoBehaviour
     {
         LobbyMemberItem memberItem = targetObject.GetComponent<LobbyMemberItem>();
         string localProfileId = BCManager.Instance.bc.Client.ProfileId;
-    
+
         if (memberItem == null)
         {
             Debug.LogWarning("No LobbyMemberItem on targetObject.");
             return;
         }
-    
+
         if (memberItem.ProfileId != localProfileId)
         {
             Debug.Log("Attempted to open color selector for non-local member.");
             return;
         }
-    
+
         colorSelectorCanvas.gameObject.SetActive(true);
     }
 
@@ -61,7 +58,7 @@ public class ColorSelector : MonoBehaviour
         if (targetObject == null)
             return;
 
-        // Try to apply to UI Image (2D UI)
+        // Try to apply to UI Image (2D UI) - Generic
         Image img = targetObject.GetComponent<Image>();
         if (img != null)
         {
