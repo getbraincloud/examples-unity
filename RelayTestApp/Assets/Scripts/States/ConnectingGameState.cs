@@ -13,6 +13,7 @@ using UnityEngine.UI;
 public class ConnectingGameState : GameState
 {
     public TMP_Text LoadingMessage;
+    public TMP_Text SubMessage;
     public Button CancelButton;
     public bool CancelNextState;
     private GameStates _gameStateToOpen;
@@ -41,11 +42,18 @@ public class ConnectingGameState : GameState
     }
     public void ConnectStatesWithLoading(string loadingMessage, bool cancelButtonEnabled, GameStates newGameState)
     {
+        SubMessage.enabled = false;
+        SubMessage.text = "";
         LoadingMessage.text = loadingMessage;
         CancelButton.gameObject.SetActive(cancelButtonEnabled);
         _gameStateToOpen = newGameState;
         gameObject.SetActive(true);
         StartCoroutine(WaitForResponse());
+    }
+    public void UpdateSubMessage(string subMessage)
+    {
+        SubMessage.text = subMessage;
+        SubMessage.enabled = true;
     }
     IEnumerator WaitForResponse()
     {

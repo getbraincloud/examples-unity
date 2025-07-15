@@ -25,4 +25,17 @@ public class Server
         Passcode = serverJson["passcode"] as string;
         LobbyId = serverJson["lobbyId"] as string;
     }
+    
+    public Server(Dictionary<string, object> serverJson, bool noServerSelected)
+    {
+        var connectData = serverJson["connectInfo"] as Dictionary<string, object>;
+        var ports = connectData["ports"] as Dictionary<string, object>;
+
+        Host = connectData["address"] as string;
+        WsPort = (int)ports["ws"];
+        TcpPort = (int)ports["tcp"];
+        UdpPort = (int)ports["udp"];
+        Passcode = serverJson["passcode"] as string;
+        //LobbyId = serverJson["lobbyId"] as string;
+    }
 }

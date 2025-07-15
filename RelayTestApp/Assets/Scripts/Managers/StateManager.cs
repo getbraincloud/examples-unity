@@ -82,6 +82,14 @@ public class StateManager : MonoBehaviour
         LoadingGameState.CancelNextState = true;
         ChangeState(GameStates.SignIn);
     }
+    
+    public void PopupMessageToMainMenu(string message)
+    {
+        ErrorMessage.SetUpPopUpMessage(message);
+        LoadingGameState.CancelNextState = true;
+        ChangeState(GameStates.MainMenu);
+        ResetData();
+    }
 
     public void LeaveToMainMenu()
     {
