@@ -38,7 +38,7 @@ namespace Gameframework
             // this supports stuff from the editor right away
             StartCoroutine(spinUntilManagersAreSetup());
             m_lastSelectedGameObject = FirstSelected;
-            Invoke("ActivateUpdateKeyboardMouseControls", 0.1f);
+            //Invoke("ActivateUpdateKeyboardMouseControls", 0.1f);
         }
         protected void OnEnable()
         {
@@ -151,7 +151,7 @@ namespace Gameframework
         #region Private
         private IEnumerator spinUntilManagersAreSetup()
         {
-            //while (!GCore.Instance.IsInitialized)
+            while (!GCore.Instance.IsInitialized)
             {
                 yield return YieldFactory.GetWaitForEndOfFrame();
             }
