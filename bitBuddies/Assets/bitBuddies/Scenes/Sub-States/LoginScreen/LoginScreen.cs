@@ -2,7 +2,7 @@ using Gameframework;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LoginScreen : BaseState
+public class LoginScreen : ContentUIBehaviour
 {
     [SerializeField] private Button _loginButton;
     [SerializeField] private Button _forgotPasswordButton;
@@ -13,7 +13,12 @@ public class LoginScreen : BaseState
         _loginButton.onClick.AddListener(OnLoginButtonClick);
         _forgotPasswordButton.onClick.AddListener(OnForgotPasswordButtonClick);
     }
-    
+
+    protected override void InitializeUI()
+    {
+        throw new System.NotImplementedException();
+    }
+
     private void OnLoginButtonClick()
     {
         

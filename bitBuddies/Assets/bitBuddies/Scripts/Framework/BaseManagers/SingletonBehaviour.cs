@@ -2,7 +2,7 @@
 namespace Gameframework
 {
     // this is persistent and doesn't get destroyed
-    public class SingletonBehaviour<T> : BaseBehaviour
+    public class SingletonBehaviour<T> : MonoBehaviour
         where T : Component
     {
         public static T Instance
