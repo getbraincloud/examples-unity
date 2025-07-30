@@ -461,6 +461,27 @@ public class UIManager : MonoBehaviour
         UpdateState(State.Login);
     }
 
+    public void OnDisplayNameUpdated()
+    {
+        string displayName = _displayNameInput.text;
+
+        SuccessCallback successCallback = (response, cbObject) =>
+        {
+            Debug.Log(string.Format("Success | {0}", response));
+        };
+        FailureCallback failureCallback = (status, code, error, cbObject) =>
+        {
+            Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error));
+        };
+
+        BCManager.Instance.PlayerName = displayName;
+        _displayNameText.text = displayName;
+        _displayNameTextLobby.text = displayName;
+
+        // Update the display name in BrainCloud
+        BCManager.Instance.bc.PlayerStateService.UpdateUserName(displayName, successCallback, failureCallback);
+    }
+
     public void OnLoginClicked()
     {
         if (string.IsNullOrEmpty(_usernameInput.text) || string.IsNullOrEmpty(_passwordInput.text))
@@ -468,7 +489,7 @@ public class UIManager : MonoBehaviour
             // Show error message
             _mainStatus.text = "Username or password is empty, please enter correct value";
             // display the username and pwd
-            
+
             Debug.LogError("Username: " + _usernameInput.text + ", Password: " + _passwordInput.text, this);
             return;
         }
@@ -477,20 +498,6 @@ public class UIManager : MonoBehaviour
         {
             if (success)
             {
-                string displayName = _displayNameInput.text;
-
-                SuccessCallback successCallback = (response, cbObject) =>
-                {
-                    Debug.Log(string.Format("Success | {0}", response));
-                };
-                FailureCallback failureCallback = (status, code, error, cbObject) =>
-                {
-                    Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error));
-                };
-
-                BCManager.Instance.PlayerName = displayName;
-                // Update the display name in BrainCloud
-                BCManager.Instance.bc.PlayerStateService.UpdateUserName(displayName, successCallback, failureCallback);
 
                 OnAuthSuccess();
             }
@@ -499,7 +506,7 @@ public class UIManager : MonoBehaviour
                 _authErrorText.text = "There was an error authenticating. Try again.";
                 Debug.LogError("There was an error authenticating");
             }
-            
+
             // clear the input fields
             _usernameInput.text = string.Empty;
             _passwordInput.text = string.Empty;
@@ -516,6 +523,7 @@ public class UIManager : MonoBehaviour
                 UpdateState(State.Main);
             });
 
+            _displayNameInput.text = BCManager.Instance.PlayerName;
             _displayNameText.text = BCManager.Instance.PlayerName;
             _displayNameTextLobby.text = BCManager.Instance.PlayerName;
         }
