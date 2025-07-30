@@ -16,7 +16,7 @@ using UnityEngine.SceneManagement;
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _loginView, _mainView, _lobbyView;
+    private GameObject _loginView, _mainView, _lobbyView, _topBarView;
 
     #region LoginVars
     [Header("Login Vars")]
@@ -40,7 +40,7 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private TMP_Text _lobbyIdText;
     [SerializeField]
-    private TMP_Text _lobbyStatusText, _displayNameTextLobby;
+    private TMP_Text _lobbyStatusText;
     [SerializeField]
     private Button _readyUpButton, _leaveLobbyButon;
     [SerializeField]
@@ -65,6 +65,9 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // hide the top bar view
+        _topBarView.SetActive(false);
+
         // login
         _authErrorText.text = string.Empty;
 
@@ -164,6 +167,7 @@ public class UIManager : MonoBehaviour
         _createLobbyButton.gameObject.SetActive(true);
         _findCreateLobbyButton.gameObject.SetActive(true);
 
+        _cancelMatchmakingButton.gameObject.SetActive(false);
         _mainStatus.text = string.Empty;
     }
 
@@ -476,7 +480,6 @@ public class UIManager : MonoBehaviour
 
         BCManager.Instance.PlayerName = displayName;
         _displayNameText.text = displayName;
-        _displayNameTextLobby.text = displayName;
 
         // Update the display name in BrainCloud
         BCManager.Instance.bc.PlayerStateService.UpdateUserName(displayName, successCallback, failureCallback);
@@ -525,7 +528,6 @@ public class UIManager : MonoBehaviour
 
             _displayNameInput.text = BCManager.Instance.PlayerName;
             _displayNameText.text = BCManager.Instance.PlayerName;
-            _displayNameTextLobby.text = BCManager.Instance.PlayerName;
         }
         else
         {
@@ -552,7 +554,6 @@ public class UIManager : MonoBehaviour
         {
             case State.Loading:
                 {
-
                     _mainView.SetActive(false);
                     _lobbyView.SetActive(false);
                     _loginView.SetActive(false);
@@ -564,6 +565,8 @@ public class UIManager : MonoBehaviour
                     _mainView.SetActive(false);
                     _lobbyView.SetActive(false);
                     _loginView.SetActive(true);
+
+                    _topBarView.SetActive(false);
                 }
                 break;
 
@@ -574,6 +577,8 @@ public class UIManager : MonoBehaviour
                     _loginView.SetActive(false);
 
                     _mainStatus.text = string.Empty;
+
+                    _topBarView.SetActive(true);
                 }
                 break;
 
