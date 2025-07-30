@@ -20,10 +20,8 @@ public class UIManager : MonoBehaviour
 
     #region LoginVars
     [Header("Login Vars")]
-    [SerializeField]
-    private Button _loginButton;
-    [SerializeField]
-    private TMP_InputField _usernameInput, _passwordInput, _displayNameInput;
+    [SerializeField] private TMP_InputField _usernameInput, _passwordInput, _displayNameInput;
+    [SerializeField] private TMP_Text _authErrorText;
     #endregion
 
     #region MainMenuVars
@@ -67,6 +65,9 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // login
+        _authErrorText.text = string.Empty;
+
         //main menu
         _mainStatus.text = string.Empty;
         _createLobbyButton.onClick.AddListener(OnCreateLobbyClicked);
@@ -424,6 +425,7 @@ public class UIManager : MonoBehaviour
             }
             else
             {
+                _authErrorText.text = "There was an error authenticating. Try again.";
                 Debug.LogError("There was an error authenticating");
             }
         });
@@ -451,7 +453,7 @@ public class UIManager : MonoBehaviour
     public void Logout()
     {
         var _wrapper = BCManager.Instance.bc;
-        _wrapper.LogoutOnApplicationQuit(false);
+        _wrapper.Logout(true);
         _wrapper.Client.ResetCommunication();
         _wrapper.RTTService.DisableRTT();
         _wrapper.RTTService.DeregisterAllRTTCallbacks();
@@ -494,8 +496,13 @@ public class UIManager : MonoBehaviour
             }
             else
             {
+                _authErrorText.text = "There was an error authenticating. Try again.";
                 Debug.LogError("There was an error authenticating");
             }
+            
+            // clear the input fields
+            _usernameInput.text = string.Empty;
+            _passwordInput.text = string.Empty;
         });
     }
 
