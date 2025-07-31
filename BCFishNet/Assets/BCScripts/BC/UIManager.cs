@@ -15,9 +15,8 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject _loginView, _mainView, _lobbyView, _topBarView;
-
+    [SerializeField] private GameObject _loginView, _mainView, _lobbyView, _topBarView;
+    [SerializeField] private TMP_Text _mainStatus;
     #region LoginVars
     [Header("Login Vars")]
     [SerializeField] private TMP_InputField _usernameInput, _passwordInput, _displayNameInput;
@@ -26,10 +25,8 @@ public class UIManager : MonoBehaviour
 
     #region MainMenuVars
     [Header("MainMenu Vars")]
-    [SerializeField]
-    private TMP_Text _mainStatus, _displayNameText;
-    [SerializeField]
-    private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
+    [SerializeField] private TMP_Text _displayNameText;
+    [SerializeField] private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
 
     private string _currentLobbyId;
     private string _currentEntryId;
@@ -37,16 +34,10 @@ public class UIManager : MonoBehaviour
 
     #region LobbyVars
     [Header("Lobby Vars")]
-    [SerializeField]
-    private TMP_Text _lobbyIdText;
-    [SerializeField]
-    private TMP_Text _lobbyStatusText;
-    [SerializeField]
-    private Button _readyUpButton, _leaveLobbyButon;
-    [SerializeField]
-    private LobbyMemberItem _lobbyMemberRowPrefab;
-    [SerializeField]
-    private Transform _lobbyMembersContainer;
+    [SerializeField] private TMP_Text _lobbyIdText;
+    [SerializeField] private Button _readyUpButton, _leaveLobbyButton;
+    [SerializeField] private LobbyMemberItem _lobbyMemberRowPrefab;
+    [SerializeField] private Transform _lobbyMembersContainer;
 
     private Dictionary<string, LobbyMemberItem> _members = new Dictionary<string, LobbyMemberItem>();
     #endregion
@@ -67,12 +58,13 @@ public class UIManager : MonoBehaviour
     {
         // hide the top bar view
         _topBarView.SetActive(false);
+        _mainStatus.transform.parent.gameObject.SetActive(false);
 
         // login
         _authErrorText.text = string.Empty;
 
         //main menu
-        _mainStatus.text = string.Empty;
+        _mainStatus.text = "Select an option to continue";
         _createLobbyButton.onClick.AddListener(OnCreateLobbyClicked);
         _findLobbyButton.onClick.AddListener(OnFindLobbyClicked);
         _cancelMatchmakingButton.onClick.AddListener(OnCancelMatchmakingClicked);
@@ -80,7 +72,7 @@ public class UIManager : MonoBehaviour
 
         //lobby
         _readyUpButton.onClick.AddListener(OnReadyUpClicked);
-        _leaveLobbyButon.onClick.AddListener(OnLeaveLobbyClicked);
+        _leaveLobbyButton.onClick.AddListener(OnLeaveLobbyClicked);
 
         
         if (BCManager.Instance.bc.Client.IsAuthenticated())
@@ -140,7 +132,7 @@ public class UIManager : MonoBehaviour
 
         //lobby
         _readyUpButton.onClick.RemoveListener(OnReadyUpClicked);
-        _leaveLobbyButon.onClick.RemoveListener(OnLeaveLobbyClicked);
+        _leaveLobbyButton.onClick.RemoveListener(OnLeaveLobbyClicked);
     }
 
     private void OnLeaveLobbyClicked()
@@ -168,7 +160,7 @@ public class UIManager : MonoBehaviour
         _findCreateLobbyButton.gameObject.SetActive(true);
 
         _cancelMatchmakingButton.gameObject.SetActive(false);
-        _mainStatus.text = string.Empty;
+        _mainStatus.text = "Select an option to continue";
     }
 
     private void OnQuickFind()
@@ -300,8 +292,30 @@ public class UIManager : MonoBehaviour
             {
                 var operation = response["operation"] as string;
 
-                if (_mainStatus != null) _mainStatus.text = "Lobby Operation: " + operation;
-                if (_lobbyStatusText != null) _lobbyStatusText.text = "Lobby Operation: " + operation;
+                var data = response["data"] as Dictionary<string, object>;
+                if (data.ContainsKey("reason") && data["reason"] is Dictionary<string, object> reasonData)
+                {
+                    if (reasonData.ContainsKey("desc"))
+                    {
+                        var description = reasonData["desc"] as string;
+                        if (_mainStatus != null) _mainStatus.text = description;
+                    }
+                    else
+                    {
+                        if (_mainStatus != null) _mainStatus.text = "OP:" + operation;
+                    }
+                }
+                else if (data.ContainsKey("desc")) // Fallback for older responses
+                {
+                    var description = data["desc"] as string;
+                    if (_mainStatus != null) _mainStatus.text = description;
+                }
+                else
+                {
+                    if (_mainStatus != null) _mainStatus.text = "OP:" + operation;
+                }
+
+
                 switch (operation)
                 {
                     case "MEMBER_JOIN":
@@ -490,9 +504,9 @@ public class UIManager : MonoBehaviour
         if (string.IsNullOrEmpty(_usernameInput.text) || string.IsNullOrEmpty(_passwordInput.text))
         {
             // Show error message
-            _mainStatus.text = "Username or password is empty, please enter correct value";
-            // display the username and pwd
+            _authErrorText.text = "Username or password is empty, please enter correct value.";
 
+            // display the username and pwd
             Debug.LogError("Username: " + _usernameInput.text + ", Password: " + _passwordInput.text, this);
             return;
         }
@@ -567,6 +581,8 @@ public class UIManager : MonoBehaviour
                     _loginView.SetActive(true);
 
                     _topBarView.SetActive(false);
+
+                    _mainStatus.transform.parent.gameObject.SetActive(false);
                 }
                 break;
 
@@ -576,9 +592,10 @@ public class UIManager : MonoBehaviour
                     _lobbyView.SetActive(false);
                     _loginView.SetActive(false);
 
-                    _mainStatus.text = string.Empty;
+                    _mainStatus.text = "Select an option to continue";
 
                     _topBarView.SetActive(true);
+                    _mainStatus.transform.parent.gameObject.SetActive(true);
                 }
                 break;
 
