@@ -7,8 +7,8 @@ using BrainCloud.JsonFx.Json;
 
 public class LobbyMemberItem : MonoBehaviour
 {
-    [SerializeField] private TMP_Text playerName, readyState;
-    [SerializeField] private GameObject _highlightHolder;
+    [SerializeField] private TMP_Text playerName;
+    [SerializeField] private GameObject _highlightHolder, _readyStateHolder, _notReadyStateHolder;
 
     public void Config(
         string playerNameValue,
@@ -87,7 +87,8 @@ public class LobbyMemberItem : MonoBehaviour
     public void UpdateUI()
     {
         playerName.text = _playerNameValue != "" ? _playerNameValue : _profileId.Substring(0, 8);
-        readyState.text = _readyStateValue ? "Ready" : "Not Ready";
+        _readyStateHolder.SetActive(_readyStateValue);
+        _notReadyStateHolder.SetActive(!_readyStateValue);
 
         PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(_profileId, _playerNameValue, _playerData.Color);
         

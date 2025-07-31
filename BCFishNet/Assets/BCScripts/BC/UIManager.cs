@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour
 
     #region MainMenuVars
     [Header("MainMenu Vars")]
+    [SerializeField] private GameObject _displayNamePanel;
     [SerializeField] private TMP_Text _displayNameText;
     [SerializeField] private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
 
@@ -158,6 +159,7 @@ public class UIManager : MonoBehaviour
         _findLobbyButton.gameObject.SetActive(true);
         _createLobbyButton.gameObject.SetActive(true);
         _findCreateLobbyButton.gameObject.SetActive(true);
+        _displayNamePanel.SetActive(true);
 
         _cancelMatchmakingButton.gameObject.SetActive(false);
         _mainStatus.text = "Select an option to continue";
@@ -174,6 +176,7 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+            _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
 
         });
@@ -189,6 +192,8 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+
+            _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
         });
     }
@@ -291,6 +296,7 @@ public class UIManager : MonoBehaviour
             if (response.ContainsKey("operation"))
             {
                 var operation = response["operation"] as string;
+                var service = response["service"] as string;
 
                 var data = response["data"] as Dictionary<string, object>;
                 if (data.ContainsKey("reason") && data["reason"] is Dictionary<string, object> reasonData)
@@ -312,7 +318,7 @@ public class UIManager : MonoBehaviour
                 }
                 else
                 {
-                    if (_mainStatus != null) _mainStatus.text = "OP:" + operation;
+                    if (_mainStatus != null) _mainStatus.text = "S:" + service + " OP:" + operation;
                 }
 
 
@@ -397,6 +403,8 @@ public class UIManager : MonoBehaviour
                             _createLobbyButton.gameObject.SetActive(true);
                             _findCreateLobbyButton.gameObject.SetActive(true);
                             _cancelMatchmakingButton.gameObject.SetActive(false);
+
+                            _displayNamePanel.SetActive(true);
                         }
                         break;
 
@@ -609,6 +617,8 @@ public class UIManager : MonoBehaviour
                     _createLobbyButton.gameObject.SetActive(true);
                     _findCreateLobbyButton.gameObject.SetActive(true);
                     _cancelMatchmakingButton.gameObject.SetActive(false);
+
+                    _displayNamePanel.SetActive(true);
 
                     _lobbyMembersContainer.DestroyChildren();
                     _members.Clear();
