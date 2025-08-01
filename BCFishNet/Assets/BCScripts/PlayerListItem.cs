@@ -177,7 +177,7 @@ public class PlayerListItem : NetworkBehaviour
     public void TestChange(string profileId, string playerName, Color newColor)
     {
         _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
-        _userText.text = playerName;
+        _userText.text = base.IsOwner ? playerName + " (You)" : playerName;
         _bgImage.color = newColor;
         _currentCursor?.ChangeColor(newColor);
         _hasInitialized = true;

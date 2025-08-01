@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
@@ -14,9 +15,6 @@ public class ColorSelector : MonoBehaviour
     
     private void Start()
     {
-        // Hide color selector initially
-        this.gameObject.SetActive(false);
-
         // Hook up color buttons
         foreach (var button in colorButtons)
         {
@@ -46,11 +44,42 @@ public class ColorSelector : MonoBehaviour
 
         this.gameObject.SetActive(true);
     }
+    void Update()
+    {
+        if((Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)) &&
+            !ClickingSelfOrChild())
+        {
+            // If clicked on this selector or its children
+            HideColorSelector();
+            return;
+        }
+    }
+    
+    private bool ClickingSelfOrChild()
+    {
+        RectTransform[] rectTransforms = GetComponentsInChildren<RectTransform>();
+        foreach (RectTransform rectTransform in rectTransforms)
+        {
+            if (EventSystem.current.currentSelectedGameObject == rectTransform.gameObject)
+            {
+
+                Debug.Log("Clicked on ColorSelector or its child: " + rectTransform.gameObject.name);
+                return true;
+            }
+        }
+        Debug.Log("Did not click on ColorSelector or its child.");
+        return false;
+    }
+    
+    private void HideColorSelector()
+    {
+        this.gameObject.SetActive(false);
+    }
 
     void OnColorSelected(Color selectedColor)
     {
         ApplyColorToTarget(selectedColor);
-        this.gameObject.SetActive(false);
+        HideColorSelector();
     }
 
     void ApplyColorToTarget(Color color)
