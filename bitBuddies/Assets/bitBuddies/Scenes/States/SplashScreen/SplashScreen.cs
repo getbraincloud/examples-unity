@@ -15,7 +15,7 @@ public class SplashScreen : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        throw new System.NotImplementedException();
+    
     }
 
     private IEnumerator InitializeApp()
