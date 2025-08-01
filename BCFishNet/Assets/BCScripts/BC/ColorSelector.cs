@@ -6,18 +6,16 @@ using BrainCloud.JsonFx.Json;
 public class ColorSelector : MonoBehaviour
 {
     [Header("UI References")]
-    public Canvas colorSelectorCanvas;
     public Button showSelectorButton;
     public GameObject targetObject;
 
     [Header("Color Buttons")]
     public List<Button> colorButtons; // all 21 buttons in Inspector
     
-
     private void Start()
     {
         // Hide color selector initially
-        colorSelectorCanvas.gameObject.SetActive(false);
+        this.gameObject.SetActive(false);
 
         // Hook up color buttons
         foreach (var button in colorButtons)
@@ -30,27 +28,29 @@ public class ColorSelector : MonoBehaviour
     public void ShowColorSelector()
     {
         LobbyMemberItem memberItem = targetObject.GetComponent<LobbyMemberItem>();
+        PlayerListItem playerItem = targetObject.GetComponent<PlayerListItem>();
         string localProfileId = BCManager.Instance.bc.Client.ProfileId;
 
-        if (memberItem == null)
+        if (memberItem == null && playerItem == null)
         {
-            Debug.LogWarning("No LobbyMemberItem on targetObject.");
+            Debug.LogWarning("No LobbyMemberItem or PlayerListItem on targetObject.");
             return;
         }
 
-        if (memberItem.ProfileId != localProfileId)
+        if ((memberItem != null && memberItem.ProfileId != localProfileId) ||
+            (playerItem != null && playerItem.PlayerData.ProfileId != localProfileId))
         {
             Debug.Log("Attempted to open color selector for non-local member.");
             return;
         }
 
-        colorSelectorCanvas.gameObject.SetActive(true);
+        this.gameObject.SetActive(true);
     }
 
     void OnColorSelected(Color selectedColor)
     {
         ApplyColorToTarget(selectedColor);
-        colorSelectorCanvas.gameObject.SetActive(false);
+        this.gameObject.SetActive(false);
     }
 
     void ApplyColorToTarget(Color color)
@@ -70,6 +70,13 @@ public class ColorSelector : MonoBehaviour
         if (lobbyMemberItem != null)
         {
             lobbyMemberItem.SendColorUpdateSignal(color);
+        }
+
+        // if the target is a PlayerListItem, make sure to send a player signal so all others know about the new color
+        PlayerListItem playerListItem = targetObject.GetComponent<PlayerListItem>();
+        if (playerListItem != null)
+        {
+            playerListItem.SendColorUpdateSignal(color);
         }
     }
 }

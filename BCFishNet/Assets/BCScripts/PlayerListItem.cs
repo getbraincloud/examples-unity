@@ -20,6 +20,7 @@ public class PlayerListItem : NetworkBehaviour
     public PlayerCursor PlayerCursor => _currentCursor;
     private PlayerCursor _currentCursor;
     private PlayerData _playerData;
+    public PlayerData PlayerData => _playerData;
     private bool _hasInitialized = false;
 
     public override void OnStartClient()
@@ -41,7 +42,6 @@ public class PlayerListItem : NetworkBehaviour
         if (base.IsOwner)
         {
             _testButton = GetComponent<Button>();
-            _testButton.onClick.AddListener(OnTestButtonClicked);
 
             if (_currentCursor == null)
                 StartCoroutine(DelayedSpawnCursor());
@@ -51,7 +51,7 @@ public class PlayerListItem : NetworkBehaviour
             GetComponent<PlayerListItem>().enabled = false;
             RequestStateSyncServerRpc(); // Ask server to resend state
         }
-        
+
         _highlightHolder.SetActive(base.IsOwner);
     }
 
@@ -60,19 +60,20 @@ public class PlayerListItem : NetworkBehaviour
     {
         if (_hasInitialized)
         {
-            TestChange(_playerData.Name, _playerData.Color);
+            TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
             UpdateIsHost(Owner.IsHost);
         }
     }
-    
+
     public void OnTestButtonClicked()
     {
         if (base.IsOwner)
         {
+            string profileId = BCManager.Instance.bc.Client.ProfileId;
             string newName = BCManager.Instance.PlayerName;
             Color newColor = GenerateRandomColor(); // TODO persist this color from lobby info
 
-            TestChangeServer(newName, newColor);
+            TestChangeServer(profileId, newName, newColor);
         }
     }
 
@@ -111,12 +112,12 @@ public class PlayerListItem : NetworkBehaviour
         if (PlayerListItemManager.Instance.TryGetPlayerData(conn.ClientId, out data))
         {
             Debug.Log($"[PlayerListItem] Reusing saved data for client {conn.ClientId}, {data.Name}, {data.Color} ");
-            TestChange(data.Name, data.Color);
+            TestChange(data.ProfileId, data.Name, data.Color);
         }
         else if (base.IsOwner && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
         {
             Debug.Log($"[PlayerListItem] Reusing saved data for profileid {BCManager.Instance.bc.Client.ProfileId}, {data.Name}, {data.Color} ");
-            TestChange(data.Name, data.Color);
+            TestChange(data.ProfileId, data.Name, data.Color);
         }
         else
         {
@@ -141,14 +142,14 @@ public class PlayerListItem : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void TestChangeServer(string playerName, Color newColor)
+    public void TestChangeServer(string profileId, string playerName, Color newColor)
     {
-        _playerData = new PlayerData { Name = playerName, Color = newColor };
+        _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
         _hasInitialized = true;
 
-        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData.Name, _playerData.Color);
+        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
 
-        TestChange(_playerData.Name, _playerData.Color);
+        TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
     }
 
     [ObserversRpc]
@@ -173,20 +174,28 @@ public class PlayerListItem : NetworkBehaviour
     }
 
     [ObserversRpc]
-    public void TestChange(string playerName, Color newColor)
+    public void TestChange(string profileId, string playerName, Color newColor)
     {
-        _playerData = new PlayerData { Name = playerName, Color = newColor };
+        _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
         _userText.text = playerName;
         _bgImage.color = newColor;
         _currentCursor?.ChangeColor(newColor);
         _hasInitialized = true;
 
-        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData.Name, _playerData.Color);
+        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
     }
 
     public void InitializePlayer()
     {
         _testButton = GetComponent<Button>();
-        _testButton.onClick.AddListener(OnTestButtonClicked);
     }
+
+    // for the current lobby SendColorUpdateSignal to all other members of the color of this members image
+    public void SendColorUpdateSignal(Color color)
+    {
+        string profileId = BCManager.Instance.bc.Client.ProfileId;
+        string newName = BCManager.Instance.PlayerName;
+        TestChangeServer(profileId, newName, color);
+    }
+
 }

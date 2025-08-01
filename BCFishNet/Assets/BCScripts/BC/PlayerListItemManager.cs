@@ -61,7 +61,7 @@ public class PlayerListItemManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(name)) return;
 
-        _playerDataByProfileId[profileId] = new PlayerData { Name = name, Color = color };
+        _playerDataByProfileId[profileId] = new PlayerData {ProfileId = profileId, Name = name, Color = color };
         Debug.Log($"[PlayerListItemManager] Saved PlayerData for profile '{profileId}': Name='{name}', Color={color}");
     }
 
@@ -79,12 +79,10 @@ public class PlayerListItemManager : MonoBehaviour
         }
     }
 
-    public void SavePlayerData(int clientId, string name, Color color)
+    public void SavePlayerData(int clientId, PlayerData playerData)
     {
-        if (string.IsNullOrEmpty(name)) return;
-
-        _playerData[clientId] = new PlayerData { Name = name, Color = color };
-        Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{name}', Color={color}");
+        _playerData[clientId] = playerData;
+        Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
     }
 
     public void SaveGlobalPaintData(PaintSplat splat)
@@ -154,6 +152,7 @@ public class PlayerListItemManager : MonoBehaviour
 
 public struct PlayerData
 {
+    public string ProfileId;
     public string Name;
     public Color Color;
 }

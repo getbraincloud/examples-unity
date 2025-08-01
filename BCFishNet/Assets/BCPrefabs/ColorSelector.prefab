@@ -730,10 +730,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8656135496991422382}
-  - component: {fileID: 1679562145777890058}
-  - component: {fileID: 809674598035956687}
-  - component: {fileID: 2319788227140107509}
   - component: {fileID: 9175053639904631762}
+  - component: {fileID: 5433600876650354618}
   m_Layer: 5
   m_Name: ColorSelector
   m_TagString: Untagged
@@ -761,69 +759,6 @@ RectTransform:
   m_AnchoredPosition: {x: 25, y: 60}
   m_SizeDelta: {x: 320, y: 140}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!223 &1679562145777890058
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3615984428108907640}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!114 &809674598035956687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3615984428108907640}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
---- !u!114 &2319788227140107509
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3615984428108907640}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &9175053639904631762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -836,7 +771,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f36ea4ebf628348e4b5599a2eeee6aa8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colorSelectorCanvas: {fileID: 1679562145777890058}
   showSelectorButton: {fileID: 0}
   targetObject: {fileID: 0}
   colorButtons:
@@ -861,6 +795,14 @@ MonoBehaviour:
   - {fileID: 6609566903423227333}
   - {fileID: 728693424515813464}
   - {fileID: 1941155651363354145}
+--- !u!222 &5433600876650354618
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3615984428108907640}
+  m_CullTransparentMesh: 1
 --- !u!1 &4595441558692186124
 GameObject:
   m_ObjectHideFlags: 0

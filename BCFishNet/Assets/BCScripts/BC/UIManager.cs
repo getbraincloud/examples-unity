@@ -547,15 +547,15 @@ public class UIManager : MonoBehaviour
                 BCManager.Instance.bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
                 UpdateState(State.Main);
             });
-
-            _displayNameInput.text = BCManager.Instance.PlayerName;
-            _displayNameText.text = BCManager.Instance.PlayerName;
         }
         else
         {
             BCManager.Instance.bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
             UpdateState(State.Main);
         }
+
+        _displayNameInput.text = BCManager.Instance.PlayerName;
+        _displayNameText.text = BCManager.Instance.PlayerName;
     }
 
     public void UpdateState(State state)
