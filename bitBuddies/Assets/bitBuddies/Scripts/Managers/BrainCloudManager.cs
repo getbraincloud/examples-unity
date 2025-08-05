@@ -14,11 +14,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
 
     public static BrainCloudWrapper Wrapper { get; private set; } 
-    [SerializeField] private UserInfo _userInfo;
-    private string _appParentId = "49161";
-    private string _appParentSecret = "2a5a1156-e5ab-4954-8b49-ab6baa1af8a2";
-    private string _appChildId = "49162";
-    private string _appChildSecret = "59944767-461e-4a40-996d-15baf5b7a5bf";
+    private UserInfo _userInfo;
+    public UserInfo UserInfo
+    {
+        get => _userInfo;
+        set {_userInfo = value;}
+    }
 
     private bool _isProcessing;
     public bool IsProcessingRequest
@@ -37,50 +38,40 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         return Wrapper.CanReconnect();
     }
     
-    public void AuthenticateUniversal(string username, string password)
-    {
-        Wrapper.AuthenticateUniversal
-        (
-            username, 
-            password, 
-            true, 
-            LoggedInUser, 
-            OnFailureCallback
-        );
-    }
-    
     public void ReconnectUser()
     {
         _isProcessing = true;
-        Wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
+        Wrapper.Reconnect
+        (
+            HandleSuccess("Authenticate Success", OnAuthenticateSuccess), 
+            HandleFailure("Authenticate Failed", OnFailureCallback)
+        );
     }
     
-    private void OnAuthenticateSuccess(string jsonResponse, object cbObject)
+    public void OnAuthenticateSuccess(string jsonResponse)
     {
         _isProcessing = false;
-        Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-        Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
-        _userInfo = new UserInfo();
-        _userInfo.Username = data["playerName"] as string;
-        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", _appChildId}};
-        if(data != null)
-        {
-            Wrapper.ScriptService.RunScript
-            (
-                BrainCloudConsts.GET_STATS_SCRIPT_NAME, 
-                scriptData.Serialize(), 
-                OnGetStatsSuccess, 
-                OnFailureCallback
-            );
+        var data = jsonResponse.Deserialize("data");
+        UserInfo = new UserInfo();
+        UserInfo.UpdateUsername(data["playerName"] as string); 
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.AppChildId}};
+        
+        //Get data from cloud code scripts
+        Wrapper.ScriptService.RunScript
+        (
+            BrainCloudConsts.GET_STATS_SCRIPT_NAME, 
+            scriptData.Serialize(), 
+            HandleSuccess("Stats Retrieved", OnGetStatsSuccess), 
+            HandleFailure("Getting Stats Failed", OnFailureCallback)
+        );
             
-            Wrapper.ScriptService.RunScript
-            (
-                BrainCloudConsts.GET_CURRENCIES_SCRIPT_NAME,
-                scriptData.Serialize(),
-                OnGetCurrenciesSuccess,
-                OnFailureCallback        
-            );
-        }
+        Wrapper.ScriptService.RunScript
+        (
+            BrainCloudConsts.GET_CURRENCIES_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("Get Currencies Success", OnGetCurrenciesSuccess),
+            HandleFailure("Getting Currencies Failed", OnFailureCallback)        
+        );
     }
     
     private void OnGetStatsSuccess(string jsonResponse, object cbObject)
@@ -90,8 +81,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
         
         var parentStats = response["parentStats"] as Dictionary<string, object>;
-        var statistics = parentStats["statistics"] as Dictionary<string, object>;
-        _userInfo.Level = (int) statistics["Level"];
+        var statistics = parentStats["statistics"] as Dictionary<string, object>; 
+        UserInfo.UpdateLevel((int) statistics["Level"]);
     }
     
     private void OnGetCurrenciesSuccess(string jsonResponse, object cbObject)
@@ -101,20 +92,14 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
         
         var gemsInfo = response["Gems"] as Dictionary<string, object>;
-        _userInfo.Gems = (int) gemsInfo["balance"];
+        UserInfo.UpdateGems((int) gemsInfo["balance"]);
         var coinsInfo = response["Coins"] as Dictionary<string, object>;
-        _userInfo.Coins = (int) coinsInfo["balance"];
+        UserInfo.UpdateCoins((int) coinsInfo["balance"]);
     }
     
-    private void LoggedInUser(string jsonResponse, object cbObject)
+    private void OnFailureCallback()
     {
-        OnAuthenticateSuccess(jsonResponse, cbObject);
-        StateManager.Instance.GoToBuddysRoom();
-    }
     
-    private void OnFailureCallback(int status, int reasonCode, string jsonError, object cbObject)
-    {
-        _isProcessing = false;
     }
 
     #region Callback Creation Helpers

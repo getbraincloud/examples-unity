@@ -23,7 +23,7 @@ public class StateManager : SingletonBehaviour<StateManager>
 		else
 		{
 			//Load into login screen
-			SceneManager.LoadScene(BrainCloudConsts.MAIN_MENU_SCENE_NAME);
+			SceneManager.LoadScene(BrainCloudConsts.LOGIN_SCENE_NAME);
 		}
 	}
 	
