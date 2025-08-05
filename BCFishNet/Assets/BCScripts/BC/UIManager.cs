@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private GameObject _loginView, _mainView, _lobbyView, _topBarView;
+    [SerializeField] private GameObject _loginView, _mainView, _lobbyView, _topBarView, _loadingView;
     [SerializeField] private TMP_Text _mainStatus;
     #region LoginVars
     [Header("Login Vars")]
@@ -59,6 +59,7 @@ public class UIManager : MonoBehaviour
     {
         // hide the top bar view
         _topBarView.SetActive(false);
+        _loadingView.SetActive(false);
         _mainStatus.transform.parent.gameObject.SetActive(false);
 
         // login
@@ -90,10 +91,11 @@ public class UIManager : MonoBehaviour
 
 #elif P3
             LoginP3();
-#else 
-        //login
-        //check if authenticated
-        var bc = BCManager.Instance.bc;
+#else
+/*
+            //login
+            //check if authenticated
+            var bc = BCManager.Instance.bc;
         var storedId = bc.GetStoredProfileId();
         var storedAnonymousId = bc.GetStoredAnonymousId();
 
@@ -111,6 +113,8 @@ public class UIManager : MonoBehaviour
                 }
             });
         }
+        */
+            UpdateState(State.Login);
 #endif
 
         }
@@ -162,12 +166,14 @@ public class UIManager : MonoBehaviour
         _displayNamePanel.SetActive(true);
 
         _cancelMatchmakingButton.gameObject.SetActive(false);
+        _loadingView.SetActive(false);
         _mainStatus.text = "Select an option to continue";
     }
 
     private void OnQuickFind()
     {
         _mainStatus.text = "Quick Finding lobby...";
+        _loadingView.SetActive(true);
 
         BCManager.Instance.QuickFindLobby((entryId) =>
         {
@@ -178,12 +184,12 @@ public class UIManager : MonoBehaviour
             _findCreateLobbyButton.gameObject.SetActive(false);
             _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
-
         });
     }
     private void OnFindLobbyClicked()
     {
         _mainStatus.text = "Finding lobby...";
+        _loadingView.SetActive(true);
 
         BCManager.Instance.FindLobby((entryId) =>
         {
@@ -200,6 +206,7 @@ public class UIManager : MonoBehaviour
 
     private void OnCreateLobbyClicked()
     {
+        _loadingView.SetActive(true);
         BCManager.Instance.CreateLobby((json) =>
         {
         });
@@ -318,7 +325,7 @@ public class UIManager : MonoBehaviour
                 }
                 else
                 {
-                    if (_mainStatus != null) _mainStatus.text = "S:" + service + " OP:" + operation;
+                    if (_mainStatus != null) _mainStatus.text = "Service:" + service + " Operation:" + operation;
                 }
 
 
@@ -376,6 +383,7 @@ public class UIManager : MonoBehaviour
                     case "STARTING":
                         {
                             // Save our picked color index
+                            _loadingView.SetActive(true);
                         }
                         break;
                     case "ROOM_READY":
@@ -405,6 +413,7 @@ public class UIManager : MonoBehaviour
                             _cancelMatchmakingButton.gameObject.SetActive(false);
 
                             _displayNamePanel.SetActive(true);
+                            _loadingView.SetActive(false);
                         }
                         break;
 
@@ -579,6 +588,7 @@ public class UIManager : MonoBehaviour
                     _mainView.SetActive(false);
                     _lobbyView.SetActive(false);
                     _loginView.SetActive(false);
+                    _loadingView.SetActive(true);
                 }
                 break;
 
@@ -587,6 +597,7 @@ public class UIManager : MonoBehaviour
                     _mainView.SetActive(false);
                     _lobbyView.SetActive(false);
                     _loginView.SetActive(true);
+                    _loadingView.SetActive(false);
 
                     _topBarView.SetActive(false);
 
@@ -599,6 +610,7 @@ public class UIManager : MonoBehaviour
                     _mainView.SetActive(true);
                     _lobbyView.SetActive(false);
                     _loginView.SetActive(false);
+                    _loadingView.SetActive(false);
 
                     _mainStatus.text = "Select an option to continue";
 
@@ -612,6 +624,7 @@ public class UIManager : MonoBehaviour
                     _mainView.SetActive(false);
                     _lobbyView.SetActive(true);
                     _loginView.SetActive(false);
+                    _loadingView.SetActive(false);
 
                     _findLobbyButton.gameObject.SetActive(true);
                     _createLobbyButton.gameObject.SetActive(true);
@@ -628,6 +641,7 @@ public class UIManager : MonoBehaviour
             case State.InGame:
                 {
                     //load game scene
+                    _loadingView.SetActive(true);
                 }
                 break;
         }

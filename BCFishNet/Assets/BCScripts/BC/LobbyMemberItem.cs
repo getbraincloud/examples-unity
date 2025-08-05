@@ -87,6 +87,7 @@ public class LobbyMemberItem : MonoBehaviour
     public void UpdateUI()
     {
         playerName.text = _playerNameValue != "" ? _playerNameValue : _profileId.Substring(0, 8);
+        playerName.text += _readyStateValue ? " (Ready)" : " (Not Ready)";
         _readyStateHolder.SetActive(_readyStateValue);
         _notReadyStateHolder.SetActive(!_readyStateValue);
 
