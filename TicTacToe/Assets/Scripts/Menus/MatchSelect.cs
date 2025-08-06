@@ -18,17 +18,13 @@ public class MatchSelect : ResourcesManager
     private Vector2 _scrollPos;
     private GameButtonCell _selectedCell;
     private bool isLookingForMatch = false;
+    private bool isLookingForOnlineMatch = false;
     private int index;
-    [SerializeField]
-    private RectTransform MyGamesScrollView = null;
-    [SerializeField]
-    private Button CancelButton = null;
-    [SerializeField]
-    public TextMeshProUGUI MyGames;
-    [SerializeField]
-    private Spinner Spinner = null;
-    [SerializeField]
-    public TextMeshProUGUI QuickPlayText;
+    [SerializeField] private RectTransform MyGamesScrollView = null;
+    [SerializeField] private Button CancelButton = null;
+    [SerializeField] public TextMeshProUGUI MyGames;
+    [SerializeField] private Spinner Spinner = null;
+    [SerializeField] public TextMeshProUGUI QuickPlayText, OnlinePlayersText;
     public GameObject AskToRematchScreen;
     public GameObject ErrorMessageScreen;
     public TMP_Text ErrorMessageText;
@@ -172,6 +168,7 @@ public class MatchSelect : ResourcesManager
         if (this != null)
         {
             QuickPlayText.text = "QUICKPLAY";
+            OnlinePlayersText.text = "FIND ONLINE PLAYERS";
             Spinner.gameObject.SetActive(false);
             MyGames.text = "My Games";
             RemoveAllCellsInView(m_itemCell);
@@ -237,6 +234,199 @@ public class MatchSelect : ResourcesManager
             App.Bc.ScriptService.RunScript("RankGame_AutoJoinMatch", JsonWriter.Serialize(scriptDataJson), OnCreateMatchSuccess, OnCreateMatchFailed);
         }
     }
+    private string _onlineEntryId = "";
+    private string _lobbyId = "";
+    
+    public void OnFindOnlinePlayers()
+    {
+        if (!isLookingForOnlineMatch)
+        {
+            SuccessCallback success = (responseData, cbObject) =>
+            {
+                Debug.Log("Successfully started Quick Find and Join Lobby");
+                // Register for the Lobby Callbacks
+                //
+                // Once two players are in the lobby, we will launch an Async Match between them
+                OnlinePlayersText.text = "SEARCHING FOR PLAYERS...";
+
+                // store the lobby id in the app so we can use it later
+                var data = JsonReader.Deserialize<Dictionary<string, object>>(responseData)["data"] as Dictionary<string, object>;
+                _onlineEntryId = (string)data["entryId"];
+            };
+
+            FailureCallback failure = (status, code, error, cbObject) =>
+            {
+                Debug.Log("Failed to start Quick Find and Join Lobby");
+                Debug.Log(status);
+                Debug.Log(code);
+                Debug.Log(error);
+
+                OnlinePlayersText.text = "FIND ONLINE PLAYERS";
+            };
+
+            LobbyParams lobbyParams = CreateLobbyParams();
+
+            // This will start a Quick Find and Play Online with the Lobby Match Making Service
+            // start a generic quick find and play for anyone looking for a TicTacToe match
+            App.Bc.LobbyService.FindOrCreateLobby(
+                    "TicTacToe",
+                    0,
+                    1,
+                    lobbyParams.algo,
+                    lobbyParams.filters,
+                    false,
+                    lobbyParams.extra,
+                    Random.Range(0, 100) <= 50 ? "blue" : "yellow",
+                    lobbyParams.settings,
+                    null,
+                    success,
+                    failure
+                );
+
+            isLookingForOnlineMatch = true;
+            App.Bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEventCallback);
+        }
+        else
+        {
+            CleanupOnlineLobby();
+        }
+    }
+
+    private void CleanupOnlineLobby()
+    {
+        isLookingForOnlineMatch = false;
+        // we are still looking for a match, so cancel the request
+        if (_onlineEntryId != "")
+        {
+            App.Bc.LobbyService.CancelFindRequest("TicTacToe", _onlineEntryId);
+        }
+        if (_lobbyId != "")
+        {
+            App.Bc.LobbyService.LeaveLobby(_lobbyId, null, null);
+        }
+        _onlineEntryId = "";
+        _lobbyId = "";
+        App.Bc.RTTService.DeregisterRTTLobbyCallback();
+        OnlinePlayersText.text = "FIND ONLINE PLAYERS";
+    }
+
+    private void OnLobbyEventCallback(string jsonResponse)
+    {
+        // This is where we will handle the lobby events
+        Debug.Log("Lobby Event Callback: " + jsonResponse);
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        if (response.ContainsKey("operation"))
+        {
+            var eventType = (string)response["operation"];
+            if (eventType == "MEMBER_JOIN")
+            {
+                Debug.Log("A player has joined the lobby");
+
+                // Parse the lobby data
+                if (response.ContainsKey("data"))
+                {
+                    var data = response["data"] as Dictionary<string, object>;
+                    if (data != null && data.ContainsKey("lobby"))
+                    {
+                        _lobbyId = (string)data["lobbyId"];
+                        var lobby = data["lobby"] as Dictionary<string, object>;
+                        if (lobby != null && lobby.ContainsKey("numMembers"))
+                        {
+                            int numMembers = 0;
+                            var numMembersObj = lobby["numMembers"];
+                            if (numMembersObj is int)
+                                numMembers = (int)numMembersObj;
+                            else if (numMembersObj is long)
+                                numMembers = (int)(long)numMembersObj;
+                            else if (numMembersObj is double)
+                                numMembers = (int)(double)numMembersObj;
+
+                            OnlinePlayersText.text = "PLAYERS " + numMembers;
+
+                            // Start match only if there are at least 2 members
+                            if (numMembers >= 2)
+                            {
+                                Debug.Log("Enough players in lobby, starting match...");
+                                // Parse ownerCxId and extract profileId
+                                if (lobby.ContainsKey("ownerCxId"))
+                                {
+                                    string ownerCxId = (string)lobby["ownerCxId"];
+                                    Debug.Log($"ownerCxId: {ownerCxId}");
+                                    string[] parts = ownerCxId.Split(':');
+                                    string ownerProfileId = parts.Length > 1 ? parts[1] : ownerCxId;
+                                    Debug.Log($"ownerCxId: {ownerCxId}, extracted profileId: {ownerProfileId}");
+                                    if (ownerProfileId == App.Bc.Client.ProfileId)
+                                    {
+                                        Debug.Log("We are the owner, starting match...");
+                                        // Create PlayerInfo from the other player
+                                        if (lobby.ContainsKey("members"))
+                                        {
+                                            var members = lobby["members"] as Dictionary<string, object>[];
+                                            if (members != null)
+                                            {
+                                                foreach (var member in members)
+                                                {
+                                                    string memberCxId = (string)member["cxId"];
+                                                    string[] memberParts = memberCxId.Split(':');
+                                                    string memberProfileId = memberParts.Length > 1 ? memberParts[1] :
+                                                        memberCxId;
+                                                    if (memberProfileId != App.Bc.Client.ProfileId)
+                                                    {
+                                                        var matchedProfile = new PlayerInfo(member);
+                                                        OnPickOpponent(matchedProfile, false);
+                                                        Debug.Log("Starting match with opponent: " + matchedProfile.PlayerName);
+                                                        CleanupOnlineLobby();
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        CleanupOnlineLobby();
+                                    }
+                                    else
+                                    {
+                                        Debug.Log("Waiting for more players to join the lobby...");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class LobbyParams
+    {
+        public Dictionary<string, object> algo;
+        public Dictionary<string, object> filters;
+        public Dictionary<string, object> extra;
+        public Dictionary<string, object> settings;
+    }
+
+    private LobbyParams CreateLobbyParams()
+    {
+        var algo = new Dictionary<string, object>
+        {
+            ["strategy"] = "ranged-absolute",
+            ["alignment"] = "center",
+            ["ranges"] = new List<int> { 1000 }
+        };
+
+        var filters = new Dictionary<string, object>();
+        var extra = new Dictionary<string, object>();
+        var settings = new Dictionary<string, object>();
+
+        return new LobbyParams
+        {
+            algo = algo,
+            filters = filters,
+            extra = extra,
+            settings = settings
+        };
+    }
+
     //Populates matches in progress
     private void PopulateMatchesScrollView(List<MatchInfo> in_itemItems)
     {
@@ -254,7 +444,7 @@ public class MatchSelect : ResourcesManager
             }
         }
     }
-    
+    //Callback for when a new match is created    
     private void AddNewCell(string jsonResponse, object cbObject)
     {
         var match = cbObject as MatchInfo;
@@ -270,29 +460,23 @@ public class MatchSelect : ResourcesManager
         }
         App.PlayerInfoO = match.playerOInfo;
         App.PlayerInfoX = match.playerXInfo;
-        
+
+        // before adding the cell, make sure there isn't another already defined in the list
+        for (int i = 0; i < m_itemCell.Count; ++i)
+        {
+            if (m_itemCell[i].MatchInfo.matchId == match.matchId)
+            {
+                Debug.Log("Match cell already exists.");
+                return;
+            }
+        }
+
         //Create game button cell
         GameButtonCell newItem = CreateItemCell(MyGamesScrollView, (index % 2) == 0);
         newItem.Init(match, this);
         newItem.transform.localPosition = Vector3.zero;
         index = index < matches.Count ? index++ : 0;
         m_itemCell.Add(newItem);
-        
-        //Ensuring no duplicated game button cells are created 
-        var tempList = new List<GameButtonCell>();
-        for (int i = m_itemCell.Count - 1; i > -1; i--)
-        {
-            if (tempList.Count == 0)
-            {
-                tempList.Add(m_itemCell[i]);
-                continue;
-            }
-            if (tempList[i].MatchInfo.matchId == m_itemCell[i].MatchInfo.matchId)
-            {
-                Destroy(m_itemCell[i].gameObject);
-                m_itemCell.Remove(m_itemCell[i]);
-            }
-        }
     }
 
     //Populates players to pick from for a new match
@@ -318,9 +502,9 @@ public class MatchSelect : ResourcesManager
         }
     }
 
-    public void OnPickOpponent(PlayerInfo matchedProfile)
+    public void OnPickOpponent(PlayerInfo matchedProfile, bool randomTurnFirst = true)
     {
-        var yourTurnFirst = Random.Range(0, 100) < 50;
+        var yourTurnFirst = randomTurnFirst ? Random.Range(0, 100) < 50 : true;
 
         // Setup our summary data. This is what we see when we query the list of games.
         var summaryData = new Dictionary<string, List<object>> { { "players", new List<object>() } };
@@ -368,6 +552,7 @@ public class MatchSelect : ResourcesManager
                 Debug.Log(data["response"].ToString());
 
                 isLookingForMatch = true;
+                isLookingForOnlineMatch = false;
                 return;
             }
         }
@@ -378,9 +563,15 @@ public class MatchSelect : ResourcesManager
 
         // Go to the game if it's your turn
         if (match.yourTurn)
+        {
+            Debug.Log("You are the first player, entering match");
             EnterMatch(match);
+        }
         else
+        {
+            Debug.Log("You are not the first player, waiting for opponent to play");
             App.GotoMatchSelectScene(gameObject);
+        }
     }
 
     private void OnCreateMatchFailed(int a, int b, string responseData, object cbPostObject)
@@ -412,7 +603,7 @@ public class MatchSelect : ResourcesManager
         App.BoardState = (string)(data["matchState"] as Dictionary<string, object>)["board"];
         App.PlayerInfoX = match.playerXInfo;
         App.PlayerInfoO = match.playerOInfo;
-        App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : match.playerOInfo;
+        App.WhosTurn = match.yourToken == "X" ? App.PlayerInfoX : App.PlayerInfoO;
         App.OwnerId = match.ownerId;
         App.MatchId = match.matchId;
         App.MatchVersion = (ulong)match.version;
