@@ -26,7 +26,7 @@ public class UIManager : MonoBehaviour
     #region MainMenuVars
     [Header("MainMenu Vars")]
     [SerializeField] private GameObject _displayNamePanel;
-    [SerializeField] private TMP_Text _displayNameText;
+    [SerializeField] private TMP_Text _displayNameText, _accountNameText;
     [SerializeField] private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
 
     private string _currentLobbyId;
@@ -511,6 +511,7 @@ public class UIManager : MonoBehaviour
 
         BCManager.Instance.PlayerName = displayName;
         _displayNameText.text = displayName;
+        _accountNameText.text = BCManager.Instance.ExternalId;
 
         // Update the display name in BrainCloud
         BCManager.Instance.bc.PlayerStateService.UpdateUserName(displayName, successCallback, failureCallback);
@@ -565,6 +566,26 @@ public class UIManager : MonoBehaviour
 
         _displayNameInput.text = BCManager.Instance.PlayerName;
         _displayNameText.text = BCManager.Instance.PlayerName;
+
+        SuccessCallback success = (in_response, cbObject) =>
+        {
+            var response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
+
+            if (response.TryGetValue("data", out var dataObj) && dataObj is Dictionary<string, object> dataDict)
+            {
+                if (dataDict.TryGetValue("identities", out var identitiesObj) && identitiesObj is Dictionary<string, object> identitiesDict)
+                {
+                    if (identitiesDict.TryGetValue("Universal", out var universalId))
+                    {
+                        BCManager.Instance.ExternalId = universalId?.ToString();
+                        _accountNameText.text = BCManager.Instance.ExternalId;
+                    }
+                }
+            }
+        };
+
+        BCManager.Instance.bc.Client.IdentityService.GetIdentities(success);
+            
     }
 
     public void UpdateState(State state)

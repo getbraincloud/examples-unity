@@ -69,6 +69,12 @@ public class BCManager : MonoBehaviour
         get => _playerName;
         set => _playerName = value;
     }
+    private string _externalId;
+    public string ExternalId
+    {
+        get => _externalId;
+        set => _externalId = value;
+    }
 
     private void OnAuthSuccess(string responseData, object cbObject, Action<bool> callback)
     {
