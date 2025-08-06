@@ -341,7 +341,7 @@ public class MatchSelect : ResourcesManager
                             else if (numMembersObj is double)
                                 numMembers = (int)(double)numMembersObj;
 
-                            OnlinePlayersText.text = "PLAYERS " + numMembers;
+                            OnlinePlayersText.text = "WAITING FOR PLAYERS ";
 
                             // Start match only if there are at least 2 members
                             if (numMembers >= 2)
