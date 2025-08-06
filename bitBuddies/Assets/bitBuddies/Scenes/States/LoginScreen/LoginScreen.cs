@@ -1,7 +1,9 @@
+using System;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
+using System.Net.Mail;
 using UnityEngine.UI;
 
 public class LoginScreen : ContentUIBehaviour
@@ -11,7 +13,7 @@ public class LoginScreen : ContentUIBehaviour
     [SerializeField] private Button OpenLoginButton;
     [SerializeField] private Button LoginButton;
     [SerializeField] private Button ForgotPasswordButton;
-    [SerializeField] private TMP_InputField Username;
+    [SerializeField] private TMP_InputField Email;
     [SerializeField] private TMP_InputField Password;
     private bool _createAccount;
     
@@ -36,6 +38,7 @@ public class LoginScreen : ContentUIBehaviour
         //Authenticate Anonymously but still go through the normal logging in path
         _createAccount = true;
         IsInteractable = false;
+        
         BrainCloudManager.Wrapper.AuthenticateAnonymous
         (
             OnSuccess("Anonymous Account creation successfully", OnLoggedInUser),
@@ -55,7 +58,7 @@ public class LoginScreen : ContentUIBehaviour
 
     private void OnLoginButtonClick()
     {
-        if(Username.text.IsNullOrEmpty())
+        if(Email.text.IsNullOrEmpty())
         {
             //ToDo: make a pop up
             Debug.LogError("Username is empty");
@@ -67,8 +70,35 @@ public class LoginScreen : ContentUIBehaviour
             Debug.LogError("Password is empty");
             return;
         }
+        
+        if(!IsEmailValid(Email.text))
+        {
+            //ToDo: make a pop up
+            Debug.LogError("Please enter a valid email");
+            return;
+        }
         IsInteractable = false;
-        AuthenticateUniversal(Username.text, Password.text);
+        int atSymbol = Email.text.IndexOf('@');
+        string username =  Email.text.Substring(0, atSymbol);
+        Debug.LogWarning("Username: " + username);
+        BrainCloudManager.Instance.UserInfo = new UserInfo();
+        BrainCloudManager.Instance.UserInfo.UpdateUsername(username);
+        BrainCloudManager.Instance.UserInfo.UpdateEmail(Email.text);
+        
+        AuthenticateUniversal(Email.text, Password.text);
+    }
+    
+    private static bool IsEmailValid(string in_email)
+    {
+        try
+        {
+            var address = new MailAddress(in_email);
+            return address.Address == in_email;
+        }
+        catch
+        {
+            return false;
+        }
     }
         
     private void AuthenticateUniversal(string username, string password)
@@ -83,7 +113,7 @@ public class LoginScreen : ContentUIBehaviour
         );
     }
     
-    private void OnLoggedInUser(string jsonResponse, object cbObject)
+    private void OnLoggedInUser(string jsonResponse)
     {
         IsInteractable = true;
         BrainCloudManager.Instance.OnAuthenticateSuccess(jsonResponse);

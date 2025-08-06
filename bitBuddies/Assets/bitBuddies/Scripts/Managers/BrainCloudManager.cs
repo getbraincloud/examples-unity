@@ -6,15 +6,16 @@ using System.Collections.Generic;
 using Gameframework;
 using BrainCloud;
 using BrainCloud.JsonFx.Json;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
-
+    private bool _reconnectUser;
     public static BrainCloudWrapper Wrapper { get; private set; } 
-    private UserInfo _userInfo;
+    [SerializeField] private UserInfo _userInfo;
     public UserInfo UserInfo
     {
         get => _userInfo;
@@ -41,6 +42,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     public void ReconnectUser()
     {
         _isProcessing = true;
+        _reconnectUser = true;
         Wrapper.Reconnect
         (
             HandleSuccess("Authenticate Success", OnAuthenticateSuccess), 
@@ -50,10 +52,30 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     public void OnAuthenticateSuccess(string jsonResponse)
     {
-        _isProcessing = false;
+        //Check if user manually logged in or reconnected,
+        //if reconnected then assign the values..
         var data = jsonResponse.Deserialize("data");
-        UserInfo = new UserInfo();
-        UserInfo.UpdateUsername(data["playerName"] as string); 
+
+        var username = data["playerName"] as string;
+        if(username.IsNullOrEmpty() && !UserInfo.Username.IsNullOrEmpty())
+        {
+            Wrapper.PlayerStateService.UpdateName(UserInfo.Username);
+        }
+        else
+        {
+            UserInfo.UpdateUsername(username);
+        }
+            
+        var email = data["emailAddress"] as string;
+        if(email.IsNullOrEmpty() && !UserInfo.Email.IsNullOrEmpty())
+        {
+            Wrapper.PlayerStateService.UpdateContactEmail(UserInfo.Email);
+        }
+        else 
+        {
+            UserInfo.UpdateEmail(email);
+        }
+        
         Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.AppChildId}};
         
         //Get data from cloud code scripts
@@ -83,6 +105,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var parentStats = response["parentStats"] as Dictionary<string, object>;
         var statistics = parentStats["statistics"] as Dictionary<string, object>; 
         UserInfo.UpdateLevel((int) statistics["Level"]);
+        if(UserInfo.Coins > 0)
+        {
+            _isProcessing = false;
+        }
     }
     
     private void OnGetCurrenciesSuccess(string jsonResponse, object cbObject)
@@ -95,6 +121,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         UserInfo.UpdateGems((int) gemsInfo["balance"]);
         var coinsInfo = response["Coins"] as Dictionary<string, object>;
         UserInfo.UpdateCoins((int) coinsInfo["balance"]);
+        if(UserInfo.Level > 0)
+        {
+            _isProcessing = false;
+        }
     }
     
     private void OnFailureCallback()

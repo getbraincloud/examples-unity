@@ -2,10 +2,11 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public struct UserInfo
+public class UserInfo
 {
     public int Level;
     public string Username;
+    public string Email;
     public int Coins;
     public int Gems;
     
@@ -14,9 +15,14 @@ public struct UserInfo
         Level = in_level;
     }
     
-    public void  UpdateUsername(string in_username)
+    public void UpdateUsername(string in_username)
     {
         Username = in_username;
+    }
+    
+    public void UpdateEmail(string in_email)
+    {
+        Email = in_email;
     }
     
     public void UpdateCoins(int in_coins)
