@@ -54,7 +54,6 @@ ExportedObj/
 *.pdb
 *.vs
 
-
 #*.asset
 #*.asset.meta
 *.idea
@@ -65,3 +64,7 @@ ExportedObj/
 /Logs/
 */.idea/*
 */.vs/*
+
+# Force include all files in Assets/FishNet
+!Assets/FishNet/
+!Assets/FishNet/**
