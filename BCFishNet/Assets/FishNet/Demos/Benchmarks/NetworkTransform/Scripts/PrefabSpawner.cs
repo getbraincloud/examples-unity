@@ -85,7 +85,7 @@ namespace FishNet.Demo.Benchmarks.NetworkTransforms
                 ulong serverOutAverage = bd.ServerAverages.GetAverage(inAverage: false);
 
                 float perTransformAverage = (float)serverOutAverage / _count;
-                _displayText.text += Environment.NewLine + "Average Per Transform: " + $"{NetworkTraficStatistics.FormatBytesToLargest(perTransformAverage)}/s";
+                //_displayText.text += Environment.NewLine + "Average Per Transform: " + $"{NetworkTraficStatistics.FormatBytesToLargest(perTransformAverage)}/s";
             }
         }
     }

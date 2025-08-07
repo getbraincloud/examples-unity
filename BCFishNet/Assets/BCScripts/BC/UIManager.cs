@@ -514,7 +514,7 @@ public class UIManager : MonoBehaviour
         _accountNameText.text = BCManager.Instance.ExternalId;
 
         // Update the display name in BrainCloud
-        BCManager.Instance.bc.PlayerStateService.UpdateUserName(displayName, successCallback, failureCallback);
+        BCManager.Instance.bc.PlayerStateService.UpdateName(displayName, successCallback, failureCallback);
     }
 
     public void OnLoginClicked()

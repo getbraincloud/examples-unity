@@ -149,7 +149,20 @@ public class BCManager : MonoBehaviour
     private void OnRTTFailed(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
         Debug.LogError($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
-        // Error handling logic
+
+        var activeScene = SceneManager.GetActiveScene().name;
+        if (activeScene == "MainMenu")
+        {
+            UIManager uiManager = FindObjectOfType<UIManager>();
+            if (uiManager != null)
+            {
+                uiManager.UpdateState(UIManager.State.Login);
+            }
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 
     public void FindLobby(Action<string> OnEntryId)
