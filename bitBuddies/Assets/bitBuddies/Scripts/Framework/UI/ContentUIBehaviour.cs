@@ -73,6 +73,8 @@ public abstract class ContentUIBehaviour : MonoBehaviour
     /// </summary>
     protected abstract void InitializeUI();
 
+    public void RefreshScreen() => InitializeUI();
+
     #endregion
 
     #region brainCloud Callback Helpers

@@ -665,6 +665,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3389913466606165398}
+  - component: {fileID: 3904766325182915315}
   m_Layer: 5
   m_Name: BuddyHouse
   m_TagString: Untagged
@@ -694,6 +695,18 @@ RectTransform:
   m_AnchoredPosition: {x: 960, y: 102.08069}
   m_SizeDelta: {x: 999.4, y: 729.3386}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3904766325182915315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8401272367078848721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f495bc9f6c02d34681fa8e6aa1c6ed7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &9032372899643642982
 GameObject:
   m_ObjectHideFlags: 0

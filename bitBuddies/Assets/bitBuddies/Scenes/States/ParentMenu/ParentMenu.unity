@@ -818,6 +818,9 @@ MonoBehaviour:
   LevelText: {fileID: 537411516}
   CoinsText: {fileID: 883472467}
   GemsText: {fileID: 1951100066}
+  BuddySpawnTransform: {fileID: 1790363773}
+  BuddyPrefab: {fileID: 3904766325182915315, guid: ca31aa1a26f6102448f72fd012ec25cb, type: 3}
+  MoveInPrefab: {fileID: 5714692913890273348, guid: f76d34d3e39b869428d753407629cc6c, type: 3}
 --- !u!225 &683918849
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1837,7 +1840,7 @@ GameObject:
   - component: {fileID: 1790363775}
   - component: {fileID: 1790363774}
   m_Layer: 5
-  m_Name: Content
+  m_Name: BuddyHousesTransform - Content
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

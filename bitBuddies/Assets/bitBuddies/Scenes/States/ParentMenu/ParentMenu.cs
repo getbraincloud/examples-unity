@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using TMPro;
@@ -12,7 +13,11 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private TMP_Text LevelText;
     [SerializeField] private TMP_Text CoinsText;
     [SerializeField] private TMP_Text GemsText;
-
+    [SerializeField] private Transform BuddySpawnTransform;
+    [SerializeField] private BuddyHouseInfo BuddyPrefab;
+    [SerializeField] private GameObject MoveInPrefab;
+    
+    private List<AppChildrenInfo> _appChildrenInfos;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Awake()
     {
@@ -29,6 +34,26 @@ public class ParentMenu : ContentUIBehaviour
         LevelText.text = userInfo.Level.ToString();
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();
+
+        _appChildrenInfos = BrainCloudManager.Instance.AppChildrenInfos;
+        SetupHouses();
+    }
+    
+    private void SetupHouses()
+    {
+        // Clear existing houses...
+        for (int i = 0; i < BuddySpawnTransform.transform.childCount; i++)
+        {
+            Destroy(BuddySpawnTransform.transform.GetChild(i).gameObject);
+        }
+
+        foreach (AppChildrenInfo buddyHouse in _appChildrenInfos)
+        {
+            BuddyHouseInfo buddyHouseInfo = Instantiate(BuddyPrefab, BuddySpawnTransform);
+            buddyHouseInfo.HouseInfo = buddyHouse;
+        }
+        
+        Instantiate(MoveInPrefab, BuddySpawnTransform);
     }
     
     private void OpenSettingsButtonOnClick()

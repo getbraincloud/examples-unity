@@ -10,10 +10,23 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[Serializable]
+public class AppChildrenInfo
+{
+    public string profileName { get; set; }
+    public string profileId { get; set; }
+    public Dictionary<string, object> summaryFriendData { get; set; }
+}
+
 public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
     private bool _reconnectUser;
+    private List<AppChildrenInfo> appChildrenInfos = new List<AppChildrenInfo>();
+    public List<AppChildrenInfo> AppChildrenInfos
+    {
+        get { return appChildrenInfos; }
+    }
     public static BrainCloudWrapper Wrapper { get; private set; } 
     [SerializeField] private UserInfo _userInfo;
     public UserInfo UserInfo
@@ -75,8 +88,50 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         {
             UserInfo.UpdateEmail(email);
         }
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.APP_CHILD_ID}};
+        Wrapper.ScriptService.RunScript
+        (
+            BrainCloudConsts.GET_CHILD_ACCOUNTS_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("Getting Child Accounts Success", OnGetChildAccounts),
+            HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnGetChildAccounts(string jsonResponse)
+    {
+        /*
+         * {"packetId":1,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":6885,"scriptSize":3435},
+         * "response":{"data":{"children":[{"profileName":"","profileId":"94ad75fc-bba7-4c34-a7be-083c07419a41","appId":"49162",
+         * "summaryFriendData":null}]},"status":200},"success":true,"reasonCode":null},"status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var firstData =  packet["data"] as Dictionary<string, object>;
+        var response = firstData["response"] as Dictionary<string, object>;
+        var secondData = response["data"] as Dictionary<string, object>;
+
+        appChildrenInfos = new List<AppChildrenInfo>();
+        var children = secondData["children"] as Dictionary<string, object>[];
+        foreach (var child in children)
+        {
+            var childData = new AppChildrenInfo();
+            childData.profileName = child["profileName"] as string;
+            childData.profileId = child["profileId"] as string;
+            childData.summaryFriendData = child["summaryFriendData"] as Dictionary<string, object>;
+            appChildrenInfos.Add(childData);
+        }
+
+        if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
+        {
+            Debug.LogError("Child Profile ID is missing. Cant fetch data.");
+            return;
+        }
         
-        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.AppChildId}};
+        Dictionary<string, object> scriptData = new Dictionary<string, object>
+        {
+            {"childAppId", BrainCloudConsts.APP_CHILD_ID},
+            {"childProfileId", appChildrenInfos[0].profileId}
+        };
         
         //Get data from cloud code scripts
         Wrapper.ScriptService.RunScript
@@ -107,7 +162,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         UserInfo.UpdateLevel((int) statistics["Level"]);
         if(UserInfo.Coins > 0)
         {
-            _isProcessing = false;
+            CompletedGettingCurrencies();
         }
     }
     
@@ -117,14 +172,129 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         Dictionary<string, object> data = packet["data"] as Dictionary<string, object>;
         Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
         
+        /*
+         * {"packetId":1,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":18707,"scriptSize":4017},
+         * "response":{"parentStats":{"statistics":{"Level":3}}},"success":true,"reasonCode":null},"status":200},
+         * {"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":13287,"scriptSize":3708},"response":{},
+         * "success":true,"reasonCode":null},"status":200}]}
+         */
+        
         var gemsInfo = response["Gems"] as Dictionary<string, object>;
         UserInfo.UpdateGems((int) gemsInfo["balance"]);
         var coinsInfo = response["Coins"] as Dictionary<string, object>;
         UserInfo.UpdateCoins((int) coinsInfo["balance"]);
         if(UserInfo.Level > 0)
         {
-            _isProcessing = false;
+            CompletedGettingCurrencies();
         }
+    }
+    
+    private void CompletedGettingCurrencies()
+    {
+        _isProcessing = false;
+        StateManager.Instance.RefreshScreen();
+    }
+    
+    public void RewardCoinsToParent(int in_coins)
+    {
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"increaseAmount", in_coins}};
+        Wrapper.ScriptService.RunScript
+        (
+            BrainCloudConsts.AWARD_COINS_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("RewardCoinsToParent Success", OnRewardCoinsToParent),
+            HandleFailure("RewardCoinsToParent Failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnRewardCoinsToParent(string jsonResponse, object cbObject)
+    {
+        /*
+         * {"packetId":4,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"evaluateTime":16716,"scriptSize":284,"renderTime":3},
+         * "response":{"getResult":{"data":{"currencyMap":{"Gems":{"consumed":0,"balance":160,"purchased":0,"awarded":160,"revoked":0},
+         * "Coins":{"consumed":0,"balance":200,"purchased":0,"awarded":200,"revoked":0}}},"status":200}},"success":true,"reasonCode":null},
+         * "status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var firstData =  packet["data"] as Dictionary<string, object>;
+        var response = firstData["response"] as Dictionary<string, object>;
+        var getResult = response["getResult"] as Dictionary<string, object>;
+        var secondData = getResult["data"] as Dictionary<string, object>;
+        var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
+        var coins = currencyMap["Coins"] as Dictionary<string, object>;
+        UserInfo.UpdateCoins((int) coins["balance"]);
+        StateManager.Instance.RefreshScreen();
+    }
+    
+    public void RewardGemsToParent(int in_gems)
+    {
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"increaseAmount", in_gems}};
+        Wrapper.ScriptService.RunScript
+        (
+            BrainCloudConsts.AWARD_GEMS_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("RewardGemsToParent Success", OnRewardGemsToParent),
+            HandleFailure("RewardGemsToParent Failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnRewardGemsToParent(string jsonResponse, object cbObject)
+    {
+        /*
+         * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"evaluateTime":13247,"scriptSize":283,"renderTime":4},
+         * "response":{"getResult":{"data":{"currencyMap":{"Gems":{"consumed":0,"balance":160,"purchased":0,"awarded":160,"revoked":0},
+         * "Coins":{"consumed":0,"balance":100,"purchased":0,"awarded":100,"revoked":0}}},"status":200}},"success":true,"reasonCode":null},
+         * "status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var firstData =  packet["data"] as Dictionary<string, object>;
+        var response = firstData["response"] as Dictionary<string, object>;
+        var getResult = response["getResult"] as Dictionary<string, object>;
+        var secondData = getResult["data"] as Dictionary<string, object>;
+        var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
+        var gems = currencyMap["Gems"] as Dictionary<string, object>;
+        UserInfo.UpdateGems((int) gems["balance"]);
+        StateManager.Instance.RefreshScreen();
+    }
+    
+    public void LevelUpParent()
+    {
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"Level", 1}};
+        Wrapper.PlayerStatisticsService.IncrementUserStats
+        (
+            scriptData.Serialize(), 
+            HandleSuccess("LevelUpParent Success", OnLevelUpParent),
+            HandleFailure("LevelUpParent Failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnLevelUpParent(string jsonResponse, object cbObject)
+    {
+        /*
+         * {"packetId":2,"responses":[{"data":{"rewardDetails":{},"currency":{},"rewards":{},"statistics":{"Level":3}},"status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var firstData =  packet["data"] as Dictionary<string, object>;
+        var statistics = firstData["statistics"] as Dictionary<string, object>;
+        UserInfo.UpdateLevel((int) statistics["Level"]);
+        StateManager.Instance.RefreshScreen();
+    }
+    
+    public void AddBuddy()
+    {
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.APP_CHILD_ID}};
+        Wrapper.ScriptService.RunScript
+        (
+            BrainCloudConsts.ADD_CHILD_ACCOUNT_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("Add Buddy Success", OnAddBuddy),
+            HandleFailure("Add Buddy Failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnAddBuddy(string jsonResponse)
+    {
+        
     }
     
     private void OnFailureCallback()
