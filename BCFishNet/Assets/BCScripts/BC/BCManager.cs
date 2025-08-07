@@ -153,7 +153,7 @@ public class BCManager : MonoBehaviour
         var activeScene = SceneManager.GetActiveScene().name;
         // TODO: Make Network Handling more robust
         // while in the main menu, if we are not connected show a display message and prompt to reconnect
-        if (activeScene == "MainMenu")
+        if (activeScene == "Main")
         {
             UIManager uiManager = FindObjectOfType<UIManager>();
             if (uiManager != null)
@@ -163,7 +163,7 @@ public class BCManager : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene("MainMenu");
+            SceneManager.LoadScene("Main");
         }
     }
 
