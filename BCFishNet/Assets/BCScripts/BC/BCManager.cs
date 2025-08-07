@@ -148,7 +148,7 @@ public class BCManager : MonoBehaviour
 
     private void OnRTTFailed(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
-        Debug.LogError($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
+        Debug.LogWarning($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
 
         var activeScene = SceneManager.GetActiveScene().name;
         if (activeScene == "MainMenu")
