@@ -151,6 +151,8 @@ public class BCManager : MonoBehaviour
         Debug.LogWarning($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
 
         var activeScene = SceneManager.GetActiveScene().name;
+        // TODO: Make Network Handling more robust
+        // while in the main menu, if we are not connected show a display message and prompt to reconnect
         if (activeScene == "MainMenu")
         {
             UIManager uiManager = FindObjectOfType<UIManager>();
