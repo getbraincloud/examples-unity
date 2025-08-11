@@ -57,7 +57,7 @@ public class PlayerListItem : NetworkBehaviour
     }
 
     private float _bgImageWidth = 0f;
-    private const float SQUARE_IMAGE_OFFSET = 15f;
+    private const float SQUARE_IMAGE_OFFSET = 50f;
     private void Update()
     {
         // add the sqaure at the end of the image backgound, since is resizes in the hud
@@ -92,7 +92,7 @@ public class PlayerListItem : NetworkBehaviour
     }
     public void OnClearCanvasClicked()
     {
-        if (base.IsOwner)
+        if (base.IsServer)
         {
             PlayerListItemManager.Instance.DestroyAllGlobalPaintData();
             ClearCanvasForAllClients();
