@@ -122,6 +122,22 @@ public class PlayerListItemManager : MonoBehaviour
         return item;
     }
 
+    public void DestroyAllGlobalPaintData()
+    {
+        Debug.Log("[PlayerListItemManager] Destroying all global paint data.");
+        Transform container = UIContainerCache.GetCursorContainer();
+        if (container != null)
+        {
+            // .iterate over all children in the container and destroy them
+            PaintSplat[] children = container.GetComponentsInChildren<PaintSplat>(true);
+            foreach (PaintSplat child in children)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+        ClearGlobalPaintData();
+    }
+
     public void ClearGlobalPaintData()
     {
         Debug.Log("[PlayerListItemManager] Clearing global paint data.");

@@ -10,9 +10,9 @@ using UnityEngine.UI;
 
 public class PlayerListItem : NetworkBehaviour
 {
-    [SerializeField] private Image _bgImage;
+    [SerializeField] private Image _bgImage, _squareImage;
     [SerializeField] private TMP_Text _userText;
-    [SerializeField] private GameObject _playerCursorPrefab, _hostIcon, _highlightHolder;
+    [SerializeField] private GameObject _playerCursorPrefab, _hostIcon, _highlightHolder, _clearButtonHolder;
 
     private Button _testButton;
     private NetworkManager _networkManager;
@@ -52,7 +52,21 @@ public class PlayerListItem : NetworkBehaviour
             RequestStateSyncServerRpc(); // Ask server to resend state
         }
 
+        _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
+    }
+
+    private float _bgImageWidth = 0f;
+    private const float SQUARE_IMAGE_OFFSET = 15f;
+    private void Update()
+    {
+        // add the sqaure at the end of the image backgound, since is resizes in the hud
+        float bgImageWidth = _bgImage.rectTransform.rect.width;
+        if (_bgImageWidth != bgImageWidth)
+        {
+            _bgImageWidth = bgImageWidth;
+            _squareImage.transform.localPosition = new Vector3(_bgImageWidth - _squareImage.rectTransform.rect.width - SQUARE_IMAGE_OFFSET, 0, 0);
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -75,6 +89,20 @@ public class PlayerListItem : NetworkBehaviour
 
             TestChangeServer(profileId, newName, newColor);
         }
+    }
+    public void OnClearCanvasClicked()
+    {
+        if (base.IsOwner)
+        {
+            PlayerListItemManager.Instance.DestroyAllGlobalPaintData();
+            ClearCanvasForAllClients();
+        }
+    }
+    
+    [ObserversRpc]
+    private void ClearCanvasForAllClients()
+    {
+        PlayerListItemManager.Instance.DestroyAllGlobalPaintData();
     }
 
     private string GenerateRandomString()
@@ -132,6 +160,7 @@ public class PlayerListItem : NetworkBehaviour
     public void UpdateIsHost(bool isHost)
     {
         _hostIcon.SetActive(isHost);
+        _clearButtonHolder.SetActive(isHost && base.IsOwner);
     }
 
     [ObserversRpc]
@@ -179,6 +208,7 @@ public class PlayerListItem : NetworkBehaviour
         _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
         _userText.text = base.IsOwner ? playerName + " (You)" : playerName;
         _bgImage.color = newColor;
+        _squareImage.color = newColor;
         _currentCursor?.ChangeColor(newColor);
         _hasInitialized = true;
 

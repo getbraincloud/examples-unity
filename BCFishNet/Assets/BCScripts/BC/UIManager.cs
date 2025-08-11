@@ -43,6 +43,12 @@ public class UIManager : MonoBehaviour
     private Dictionary<string, LobbyMemberItem> _members = new Dictionary<string, LobbyMemberItem>();
     #endregion
 
+    #region LoadingVars
+    [Header("Loading Vars")]
+    [SerializeField] private TMP_Text _loadingStatusText;
+
+    #endregion
+
     public enum State
     {
         None,
@@ -174,6 +180,7 @@ public class UIManager : MonoBehaviour
     {
         _mainStatus.text = "Quick Finding lobby...";
         _loadingView.SetActive(true);
+        _loadingStatusText.text = "Finding lobby...";
 
         BCManager.Instance.QuickFindLobby((entryId) =>
         {
@@ -190,6 +197,7 @@ public class UIManager : MonoBehaviour
     {
         _mainStatus.text = "Finding lobby...";
         _loadingView.SetActive(true);
+        _loadingStatusText.text = "Finding lobby...";
 
         BCManager.Instance.FindLobby((entryId) =>
         {
@@ -207,6 +215,7 @@ public class UIManager : MonoBehaviour
     private void OnCreateLobbyClicked()
     {
         _loadingView.SetActive(true);
+        _loadingStatusText.text = "Creating lobby...";
         BCManager.Instance.CreateLobby((json) =>
         {
         });
@@ -384,6 +393,7 @@ public class UIManager : MonoBehaviour
                         {
                             // Save our picked color index
                             _loadingView.SetActive(true);
+                            _loadingStatusText.text = "Launching...";
                         }
                         break;
                     case "ROOM_READY":
@@ -533,7 +543,6 @@ public class UIManager : MonoBehaviour
         {
             if (success)
             {
-
                 OnAuthSuccess();
             }
             else
@@ -566,6 +575,7 @@ public class UIManager : MonoBehaviour
 
         _displayNameInput.text = BCManager.Instance.PlayerName;
         _displayNameText.text = BCManager.Instance.PlayerName;
+        _authErrorText.text = string.Empty;
 
         SuccessCallback success = (in_response, cbObject) =>
         {
@@ -610,6 +620,7 @@ public class UIManager : MonoBehaviour
                     _lobbyView.SetActive(false);
                     _loginView.SetActive(false);
                     _loadingView.SetActive(true);
+                    _loadingStatusText.text = "Loading ...";
                 }
                 break;
 
@@ -663,6 +674,7 @@ public class UIManager : MonoBehaviour
                 {
                     //load game scene
                     _loadingView.SetActive(true);
+                    _loadingStatusText.text = "Launching...";
                 }
                 break;
         }
