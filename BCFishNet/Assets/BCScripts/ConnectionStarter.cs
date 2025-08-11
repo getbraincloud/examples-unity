@@ -14,21 +14,15 @@ namespace BCFishNet
     {
         private PlayerSpawner _playerSpawner;
 
-        [SerializeField]
-        private Transform _playerListContainer;
+        [SerializeField] private Transform _playerListContainer;
 
-        [SerializeField]
-        private GameObject _playerPrefab;
+        [SerializeField] private GameObject _playerPrefab;
 
-        [SerializeField]
-        private Button _spawnButton;
 
         private Tugboat _t;
 
         private void Start()
         {
-            _spawnButton.onClick.AddListener(OnSpawnClicked);
-
             if(TryGetComponent(out Tugboat t))
             {
                 _t = t;
@@ -59,13 +53,6 @@ namespace BCFishNet
             {
                 Debug.LogError("Couldn't get player spawner", this);
             }
-        }
-
-        private void OnSpawnClicked()
-        {
-            Debug.Log("Spawning player object");
-            GameObject go = Instantiate(_playerPrefab, _playerListContainer);
-            InstanceFinder.ServerManager.Spawn(go, InstanceFinder.ClientManager.Connection);
         }
     }
 }

@@ -130,13 +130,10 @@ public class PlayerCursor : NetworkBehaviour
             PaintSplat paint = Instantiate(_paintPrefab, container);
             paint.Initialize(data.anchoredPosition, data.color);
             Spawn(paint.gameObject); // Spawned by server with no owner
-
-            //yield return null;//new WaitForSeconds(0.02f); // Prevent packet flooding
         }
         yield return null;
 
         _enabled = true; // Re-enable cursor updates after restoring paint
-        PlayerListItemManager.Instance.ClearGlobalPaintData(); // Clear after fetching so we dont duplicate 
     }
 
     [ObserversRpc]

@@ -405,6 +405,7 @@ namespace BCFishNet
             }
         }
 
+        const bool ORDERED_BIT = false;
         void Send(int recipientId, ArraySegment<byte> segment, byte channelId)
         {
             int newSize = Math.Min(segment.Count + 1, MTU);
@@ -417,7 +418,7 @@ namespace BCFishNet
                 in_data: data,
                 to_netId: (ulong)recipientId,
                 in_reliable: isReliable,
-                in_ordered: true,
+                in_ordered: ORDERED_BIT,
                 in_channel: 0
             );
         }
@@ -432,9 +433,9 @@ namespace BCFishNet
 
             // Broadcast the message to all clients
             _brainCloud.RelayService.SendToAll(
-                data,         // The message data as a byte array
-                isReliable,                // Reliable transmission
-                true,                // Ordered delivery
+                data,               // The message data as a byte array
+                isReliable,         // Reliable transmission
+                ORDERED_BIT,        // Ordered delivery
                 0                   // Channel (0-3); use 0 for high priority
             );
         }
@@ -539,7 +540,6 @@ namespace BCFishNet
                         hostId = _brainCloud.RelayService.GetNetIdForCxId(hostCxId);
                         int connectedNetId = int.Parse(connectEvent.netId);
 
-
                         isHost = hostCxId == connectEvent.cxId;
                         isLocal = connectedProfileId == localProfileId;
 
@@ -593,6 +593,7 @@ namespace BCFishNet
                         string connectedProfileId = _brainCloud.RelayService.GetProfileIdForNetId((short)netIdEvent.netId);
 
                         isLocal = connectedProfileId == localProfileId;
+                        Debug.Log($"[BCFishNet] NET_ID: {netIdEvent.netId} connectedProfileId: {connectedProfileId} isLocal: {isLocal}");
 
                         AddConnectionHelper(netIdEvent.netId, isLocal, false);
                     }
@@ -726,6 +727,11 @@ namespace BCFishNet
         private bool AddConnection(int netId)
         {
             Debug.Log($"[BCFishNet] AddConnection {netId}");
+            if (netId == INVALID_HOST_ID)
+            {
+                Debug.LogWarning("[BCFishNet] Attempted to add an invalid NET ID.");
+                return false;
+            }
             bool connectionAdded = false;
             if (!_connectedClients.Contains(netId))
             {

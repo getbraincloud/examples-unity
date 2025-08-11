@@ -87,6 +87,13 @@ public class PlayerListItemManager : MonoBehaviour
 
     public void SaveGlobalPaintData(PaintSplat splat)
     {
+        // ensure we don't duplicate paint splats
+        if (_globalPaintData.Exists(data => data.anchoredPosition == splat.RectTransform.anchoredPosition && data.color == splat.Color))
+        {
+            Debug.LogWarning("[PlayerListItemManager] Duplicate paint splat detected, not saving.");
+            return;
+        }
+        
         _globalPaintData.Add(new PaintSplatData
         {
             color = splat.Color,
@@ -96,7 +103,7 @@ public class PlayerListItemManager : MonoBehaviour
 
     public List<PaintSplatData> GetGlobalPaintData()
     {
-        return _globalPaintData;
+        return new List<PaintSplatData>(_globalPaintData);
 }
 
     public bool TryGetPlayerData(int clientId, out PlayerData data)
