@@ -220,6 +220,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5935638712513788176}
+  - component: {fileID: 8069214444995818007}
   m_Layer: 5
   m_Name: MoveIn
   m_TagString: Untagged
@@ -248,6 +249,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 901.4031, y: 689.56}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8069214444995818007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5714692913890273348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04d6afd366438c24badb48029ac22bfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TriggerMysteryBoxButton: {fileID: 7897912494263815516}
 --- !u!1 &5814956252627180954
 GameObject:
   m_ObjectHideFlags: 0

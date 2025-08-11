@@ -74,6 +74,11 @@ public abstract class ContentUIBehaviour : MonoBehaviour
     protected abstract void InitializeUI();
 
     public void RefreshScreen() => InitializeUI();
+    
+    protected void OnCloseButton()
+    {
+        Destroy(gameObject);
+    }
 
     #endregion
 

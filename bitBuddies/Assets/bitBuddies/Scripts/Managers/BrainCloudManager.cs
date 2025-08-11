@@ -16,6 +16,8 @@ public class AppChildrenInfo
     public string profileName { get; set; }
     public string profileId { get; set; }
     public Dictionary<string, object> summaryFriendData { get; set; }
+    public int buddyBling { get; set; }
+    public int buddyLove { get; set; }
 }
 
 public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>

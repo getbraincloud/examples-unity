@@ -1,16 +1,29 @@
+using TMPro;
 using UnityEngine;
 
-public class BuddysRoom : MonoBehaviour
+public class BuddysRoom : ContentUIBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private TMP_Text _profileNameText;
+    [SerializeField] private TMP_Text _loveText;
+    [SerializeField] private TMP_Text _buddyBlingText;
+    [SerializeField] private TMP_Text _parentCoinText;
+    
+    private AppChildrenInfo _appChildrenInfo;
+ 
+    protected override void Awake()
     {
-        
+        InitializeUI();
+        base.Awake();
     }
 
-    // Update is called once per frame
-    void Update()
+    protected override void InitializeUI()
     {
+        _appChildrenInfo = GameManager.Instance.AppChildrenInfo;
         
+        _profileNameText.text = _appChildrenInfo.profileName;
+        _parentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
+        //_buddyBlingText.text =
+        //_loveText.text =  
     }
+
 }

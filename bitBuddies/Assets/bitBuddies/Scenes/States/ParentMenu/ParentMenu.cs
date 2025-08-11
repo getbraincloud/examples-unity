@@ -16,6 +16,7 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private Transform BuddySpawnTransform;
     [SerializeField] private BuddyHouseInfo BuddyPrefab;
     [SerializeField] private GameObject MoveInPrefab;
+    [SerializeField] private MysteryBoxPanelUI MysteryBoxPanelPrefab;
     
     private List<AppChildrenInfo> _appChildrenInfos;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -60,5 +61,10 @@ public class ParentMenu : ContentUIBehaviour
     {
         // what do other than open ?
         // Settings page shows: Volume slider, connect an email (attach email to anonymous account), about the app and log out
+    }
+    
+    public void OpenMysteryBoxPanel()
+    {
+        Instantiate(MysteryBoxPanelPrefab, transform);
     }
 }
