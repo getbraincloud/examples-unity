@@ -23,6 +23,8 @@ public class PlayerListItem : NetworkBehaviour
     public PlayerData PlayerData => _playerData;
     private bool _hasInitialized = false;
 
+    private Coroutine _clearCanvasCoroutine;
+
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -71,6 +73,7 @@ public class PlayerListItem : NetworkBehaviour
                 Debug.Log("[PlayerListItem] ClearedCanvasObj found and initialized.");
             }
         }
+
         if (Input.GetMouseButtonDown(0))
         {
             EnableClearedCanvasImmediately(false);
@@ -122,7 +125,11 @@ public class PlayerListItem : NetworkBehaviour
         Debug.Log("[PlayerListItem] Clearing canvas for all clients.");
         PlayerListItemManager.Instance.DestroyAllGlobalPaintData();
 
-        StartCoroutine(DisplayClearedMessage());
+        // Only start a new coroutine if one isn't already running
+        if (_clearCanvasCoroutine == null)
+        {
+            _clearCanvasCoroutine = StartCoroutine(DisplayClearedMessage());
+        }
     }
 
     private IEnumerator DisplayClearedMessage()
@@ -138,6 +145,7 @@ public class PlayerListItem : NetworkBehaviour
         _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 1";
         yield return new WaitForSeconds(1f);
         EnableClearedCanvasImmediately(false);
+        _clearCanvasCoroutine = null;
     }
 
     private void EnableClearedCanvasImmediately(bool enable)
@@ -149,6 +157,8 @@ public class PlayerListItem : NetworkBehaviour
         else
         {
             _clearedCanvasMessage.text = "";
+            StopCoroutine(_clearCanvasCoroutine);
+            _clearCanvasCoroutine = null;
         }
     }
 
