@@ -150,6 +150,8 @@ namespace FishNet.Example
                 UpdateColor(LocalConnectionState.Stopped, ref _clientIndicator);
                 _networkManager.ServerManager.OnServerConnectionState += ServerManager_OnServerConnectionState;
                 _networkManager.ClientManager.OnClientConnectionState += ClientManager_OnClientConnectionState;
+                
+                _serverIndicator.gameObject.SetActive(_serverState == LocalConnectionState.Started);
             }
 
             if (_autoStartType == AutoStartType.Host || _autoStartType == AutoStartType.Server)
@@ -194,6 +196,7 @@ namespace FishNet.Example
         private void ServerManager_OnServerConnectionState(ServerConnectionStateArgs obj)
         {
             _serverState = obj.ConnectionState;
+            _serverIndicator.gameObject.SetActive(_serverState == LocalConnectionState.Started);
             UpdateColor(obj.ConnectionState, ref _serverIndicator);
         }
 

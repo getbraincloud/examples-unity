@@ -12,7 +12,7 @@ public class PlayerListItem : NetworkBehaviour
 {
     [SerializeField] private Image _bgImage, _squareImage;
     [SerializeField] private TMP_Text _userText;
-    [SerializeField] private GameObject _playerCursorPrefab, _hostIcon, _highlightHolder, _clearButtonHolder;
+    [SerializeField] private GameObject _playerCursorPrefab, _hostIcon, _highlightHolder;
 
     private Button _testButton;
     private NetworkManager _networkManager;
@@ -48,7 +48,7 @@ public class PlayerListItem : NetworkBehaviour
         }
         else
         {
-            GetComponent<PlayerListItem>().enabled = false;
+            //GetComponent<PlayerListItem>().enabled = false;
             RequestStateSyncServerRpc(); // Ask server to resend state
         }
 
@@ -56,18 +56,35 @@ public class PlayerListItem : NetworkBehaviour
         _highlightHolder.SetActive(base.IsOwner);
     }
 
+    private TextMeshProUGUI _clearedCanvasMessage = null;
     private float _bgImageWidth = 0f;
-    private const float SQUARE_IMAGE_OFFSET = 50f;
+    private const float SQUARE_IMAGE_OFFSET = 35f;
     private void Update()
     {
+        if (_clearedCanvasMessage == null)
+        {
+            _clearedCanvasMessage = GameObject.Find("ClearedCanvasObj").GetComponent<TextMeshProUGUI>();
+            if (_clearedCanvasMessage != null)
+            {
+                _clearedCanvasMessage.text = "";
+                
+                Debug.Log("[PlayerListItem] ClearedCanvasObj found and initialized.");
+            }
+        }
+        if (Input.GetMouseButtonDown(0))
+        {
+            EnableClearedCanvasImmediately(false);
+        }
+        
         // add the sqaure at the end of the image backgound, since is resizes in the hud
         float bgImageWidth = _bgImage.rectTransform.rect.width;
         if (_bgImageWidth != bgImageWidth)
         {
             _bgImageWidth = bgImageWidth;
             _squareImage.transform.localPosition = new Vector3(_bgImageWidth - _squareImage.rectTransform.rect.width - SQUARE_IMAGE_OFFSET, 0, 0);
-        }
+        } 
     }
+    
 
     [ServerRpc(RequireOwnership = false)]
     private void RequestStateSyncServerRpc()
@@ -98,11 +115,41 @@ public class PlayerListItem : NetworkBehaviour
             ClearCanvasForAllClients();
         }
     }
-    
+
     [ObserversRpc]
     private void ClearCanvasForAllClients()
     {
+        Debug.Log("[PlayerListItem] Clearing canvas for all clients.");
         PlayerListItemManager.Instance.DestroyAllGlobalPaintData();
+
+        StartCoroutine(DisplayClearedMessage());
+    }
+
+    private IEnumerator DisplayClearedMessage()
+    {
+        EnableClearedCanvasImmediately(true);
+
+        _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 3";
+        yield return new WaitForSeconds(1f);
+
+        _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 2";
+        yield return new WaitForSeconds(1f);
+
+        _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 1";
+        yield return new WaitForSeconds(1f);
+        EnableClearedCanvasImmediately(false);
+    }
+
+    private void EnableClearedCanvasImmediately(bool enable)
+    {
+        if (enable)
+        {
+            _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 3";
+        }
+        else
+        {
+            _clearedCanvasMessage.text = "";
+        }
     }
 
     private string GenerateRandomString()
@@ -160,7 +207,6 @@ public class PlayerListItem : NetworkBehaviour
     public void UpdateIsHost(bool isHost)
     {
         _hostIcon.SetActive(isHost);
-        _clearButtonHolder.SetActive(isHost && base.IsOwner);
     }
 
     [ObserversRpc]
