@@ -164,7 +164,7 @@ namespace BCFishNet
         #region Iteration.
         public override void IterateIncoming(bool server)
         {
-            if (GetConnectionState(server) != LocalConnectionState.Started)
+            if (_brainCloud == null || !_brainCloud.RelayService.IsConnected() || GetConnectionState(server) != LocalConnectionState.Started)
                 return;
 
             //Not yet started, cannot continue.
@@ -172,6 +172,7 @@ namespace BCFishNet
             if (localState != LocalConnectionState.Started)
             {
                 ResetQueues();
+                //ResetQueues();
                 //If stopped try to kill task.
                 if (localState == LocalConnectionState.Stopped)
                 {
@@ -242,11 +243,20 @@ namespace BCFishNet
             }
             else
             {
+                // send them once we have enough data
+                if (hostId == INVALID_HOST_ID)
+                    return;
+
                 int count = _outgoingPackets.Count;
                 for (int i = 0; i < count; i++)
                 {
                     Packet outgoing = _outgoingPackets.Dequeue();
                     int recipientId = outgoing.RecipientId;
+
+                    // update all those to the host id if they were meant for the host
+                    if (recipientId == INVALID_HOST_ID)
+                        recipientId = hostId;
+
                     ArraySegment<byte> segment = outgoing.GetArraySegment();
 
                     //Send to all clients.
@@ -367,11 +377,9 @@ namespace BCFishNet
         #region Sending.
         public override void SendToServer(byte channelId, ArraySegment<byte> segment)
         {
-            if (_brainCloud == null || GetConnectionState(_isServer) != LocalConnectionState.Started)
+            if (_brainCloud == null || GetConnectionState(_isServer) != LocalConnectionState.Started || !_brainCloud.Client.IsAuthenticated())
                 return;
-            if (!_brainCloud.Client.IsAuthenticated())
-                return;
-
+            
             Packet packet = new Packet(localClientId, hostId, segment, channelId, MTU);
             //Debug.Log($"[BCFishNet] Sending packetId {packet.GetPacketId()} HEX: {packet.GetHexString()} to Server ");
             if (_isServer)
@@ -532,20 +540,24 @@ namespace BCFishNet
                 case "CONNECT":
                     {
                         var connectEvent = JsonUtility.FromJson<RelaySystemConnect>(json);
-                        Debug.Log($"OnSystemCallback connectEvent: {connectEvent.op} ownerCxId: {connectEvent.ownerCxId} cxId: {connectEvent.cxId} netId:{connectEvent.netId} version: {connectEvent.version}");
+                        //Debug.Log($"OnSystemCallback connectEvent: {connectEvent.op} ownerCxId: {connectEvent.ownerCxId} cxId: {connectEvent.cxId} netId:{connectEvent.netId} version: {connectEvent.version}");
 
-                        string connectedProfileId = _brainCloud.RelayService.GetProfileIdForNetId((short)int.Parse(connectEvent.netId));
+                        int connectedNetId = int.Parse(connectEvent.netId);
+                        string connectedProfileId = _brainCloud.RelayService.GetProfileIdForNetId((short)connectedNetId);
                         hostCxId = connectEvent.ownerCxId;
 
-                        hostId = _brainCloud.RelayService.GetNetIdForCxId(hostCxId);
-                        int connectedNetId = int.Parse(connectEvent.netId);
-
                         isHost = hostCxId == connectEvent.cxId;
+                        if (isHost)
+                        {
+                            hostId = _brainCloud.RelayService.GetNetIdForCxId(hostCxId);
+                            Debug.Log($"OnSystemCallback hostCxId: {hostCxId} hostId: {hostId} ");
+                        }
+
                         isLocal = connectedProfileId == localProfileId;
 
                         if (isLocal) localClientId = connectedNetId;
 
-                        AddConnectionHelper(connectedNetId, isLocal, false);
+                        AddConnectionHelper(connectedNetId, isLocal);
                     }
                     break;
                 case "DISCONNECT":
@@ -575,13 +587,13 @@ namespace BCFishNet
 
                         isLocal = localProfileId == newHostProfileId;
                         hostId = _brainCloud.RelayService.GetNetIdForCxId(migrateEvent.cxId);
+                        hostCxId = migrateEvent.cxId;
                         Debug.Log($"[BCFishNet] New Host netId: {hostId}");
 
                         _isServer = isLocal;
 
                         // Start a coroutine to handle the shutdown + promotion
                         StartCoroutine(HandleMigrateOwnerCoroutine(_isServer, hostId));
-
                     }
                     break;
                 case "NET_ID":
@@ -595,7 +607,7 @@ namespace BCFishNet
                         isLocal = connectedProfileId == localProfileId;
                         Debug.Log($"[BCFishNet] NET_ID: {netIdEvent.netId} connectedProfileId: {connectedProfileId} isLocal: {isLocal}");
 
-                        AddConnectionHelper(netIdEvent.netId, isLocal, false);
+                        AddConnectionHelper(netIdEvent.netId, isLocal);
                     }
                     break;
                 default:
@@ -640,8 +652,9 @@ namespace BCFishNet
         }
 
         private const string REMOTE_CLIENT_ID = "remoteClientId";
-        private void AddConnectionHelper(int connectedNetId, bool isLocal, bool skipAddConnectionCheck)
+        private void AddConnectionHelper(int connectedNetId, bool isLocal)
         {
+            Debug.Log($"[BCFishNet] AddConnectionHelper netId: {connectedNetId}, isLocal: {isLocal}");
             if (AddConnection(connectedNetId))
             {
                 if (_isServer)

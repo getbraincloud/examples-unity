@@ -60,7 +60,7 @@ public class PlayerListItem : NetworkBehaviour
 
     private TextMeshProUGUI _clearedCanvasMessage = null;
     private float _bgImageWidth = 0f;
-    private const float SQUARE_IMAGE_OFFSET = 35f;
+    private const float SQUARE_IMAGE_OFFSET = 50f;
     private void Update()
     {
         if (_clearedCanvasMessage == null)
@@ -69,7 +69,7 @@ public class PlayerListItem : NetworkBehaviour
             if (_clearedCanvasMessage != null)
             {
                 _clearedCanvasMessage.text = "";
-                
+
                 Debug.Log("[PlayerListItem] ClearedCanvasObj found and initialized.");
             }
         }
@@ -78,21 +78,21 @@ public class PlayerListItem : NetworkBehaviour
         {
             EnableClearedCanvasImmediately(false);
         }
-        
+
         // add the sqaure at the end of the image backgound, since is resizes in the hud
         float bgImageWidth = _bgImage.rectTransform.rect.width;
         if (_bgImageWidth != bgImageWidth)
         {
             _bgImageWidth = bgImageWidth;
             _squareImage.transform.localPosition = new Vector3(_bgImageWidth - _squareImage.rectTransform.rect.width - SQUARE_IMAGE_OFFSET, 0, 0);
-        } 
+        }
     }
-    
+
 
     [ServerRpc(RequireOwnership = false)]
     private void RequestStateSyncServerRpc()
     {
-        if (_hasInitialized)
+        if (_hasInitialized && base.IsOwner)
         {
             TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
             UpdateIsHost(Owner.IsHost);
@@ -104,8 +104,9 @@ public class PlayerListItem : NetworkBehaviour
         if (base.IsOwner)
         {
             string profileId = BCManager.Instance.bc.Client.ProfileId;
-            string newName = BCManager.Instance.PlayerName;
-            Color newColor = GenerateRandomColor(); // TODO persist this color from lobby info
+            string newName = GetPlayerName();
+            PlayerData playerData = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId);
+            Color newColor = playerData.Color;
 
             TestChangeServer(profileId, newName, newColor);
         }
@@ -132,18 +133,20 @@ public class PlayerListItem : NetworkBehaviour
         }
     }
 
+    private const string HOST_CLEAR_CANVAS_MESSAGE_PREFIX = "Host cleared the canvas\n\n";
     private IEnumerator DisplayClearedMessage()
     {
         EnableClearedCanvasImmediately(true);
 
-        _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 3";
+        _clearedCanvasMessage.text = HOST_CLEAR_CANVAS_MESSAGE_PREFIX + " 3";
         yield return new WaitForSeconds(1f);
 
-        _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 2";
+        _clearedCanvasMessage.text = HOST_CLEAR_CANVAS_MESSAGE_PREFIX + " 2";
         yield return new WaitForSeconds(1f);
 
-        _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 1";
+        _clearedCanvasMessage.text = HOST_CLEAR_CANVAS_MESSAGE_PREFIX + " 1";
         yield return new WaitForSeconds(1f);
+
         EnableClearedCanvasImmediately(false);
         _clearCanvasCoroutine = null;
     }
@@ -152,12 +155,12 @@ public class PlayerListItem : NetworkBehaviour
     {
         if (enable)
         {
-            _clearedCanvasMessage.text = "HOST CLEARED THE CANVAS\n\n 3";
+            _clearedCanvasMessage.text = "Host cleared the canvas\n\n 3";
         }
         else
         {
             _clearedCanvasMessage.text = "";
-            StopCoroutine(_clearCanvasCoroutine);
+            if (_clearCanvasCoroutine != null) StopCoroutine(_clearCanvasCoroutine);
             _clearCanvasCoroutine = null;
         }
     }
@@ -280,8 +283,17 @@ public class PlayerListItem : NetworkBehaviour
     public void SendColorUpdateSignal(Color color)
     {
         string profileId = BCManager.Instance.bc.Client.ProfileId;
-        string newName = BCManager.Instance.PlayerName;
+        string newName = GetPlayerName();
         TestChangeServer(profileId, newName, color);
     }
 
+    private string GetPlayerName()
+    {
+        string playerName = BCManager.Instance.PlayerName;
+        if (string.IsNullOrEmpty(playerName))
+        {
+            return "Guest_" + Owner.ClientId;
+        }
+        return playerName;
+    }
 }

@@ -228,8 +228,12 @@ public class BCManager : MonoBehaviour
         };
 
         var filters = new Dictionary<string, object>();
+        filters["appVersion"] = Application.version;
+        
         var extra = new Dictionary<string, object>();
+
         var settings = new Dictionary<string, object>();
+        settings["appVersion"] = Application.version;
 
         SuccessCallback success = (in_response, cbObject) =>
         {
@@ -287,7 +291,6 @@ public class BCManager : MonoBehaviour
 
             BCFishNet.StartConnection(isServer);//Start Client
         }
-
     }
 }
 

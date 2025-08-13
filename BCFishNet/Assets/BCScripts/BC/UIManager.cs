@@ -461,16 +461,18 @@ public class UIManager : MonoBehaviour
     
     private void LoginHelper(string str, string pwd)
     {
-        UpdateState(State.Main);
+        UpdateState(State.Loading);
         BCManager.Instance.AuthenticateUser(str, pwd, (success) =>
         {
             if (success)
             {
+                UpdateState(State.Main);
                 OnAuthSuccess();
             }
             else
             {
-                _authErrorText.text = "There was an error authenticating. Try again.";
+                UpdateState(State.Login);
+                _authErrorText.text = "Username or Password is incorrect, please try again.";
                 Debug.LogError("There was an error authenticating");
             }
         });
@@ -539,14 +541,17 @@ public class UIManager : MonoBehaviour
             return;
         }
 
+        UpdateState(State.Loading);
         BCManager.Instance.AuthenticateUser(_usernameInput.text, _passwordInput.text, (success) =>
         {
             if (success)
             {
+                UpdateState(State.Main);
                 OnAuthSuccess();
             }
             else
             {
+                UpdateState(State.Login);
                 _authErrorText.text = "There was an error authenticating. Try again.";
                 Debug.LogError("There was an error authenticating");
             }

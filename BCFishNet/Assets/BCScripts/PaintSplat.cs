@@ -58,8 +58,6 @@ public class PaintSplat : NetworkBehaviour
             elapsed += 0.1f;
             yield return new WaitForSeconds(0.1f);
         }
-
-        Debug.LogWarning($"[PaintSplat] Failed to reparent to PlayerCursor for owner {Owner.ClientId} after timeout");
     }
 
     public override void OnStopClient()
@@ -82,23 +80,17 @@ public class PaintSplat : NetworkBehaviour
         // Ensure visual update immediately on host/server
         OnColorChanged(Color.clear, color, true);
         OnPositionChanged(Vector2.zero, position, true);
-
-        Debug.Log($"[PaintSplat] Initialize");
     }
 
     private void OnColorChanged(Color oldColor, Color newColor, bool asServer)
     {
         if (_image != null)
             _image.color = newColor;
-        
-        Debug.Log($"[PaintSplat] OnColorChanged {newColor}");
     }
 
     private void OnPositionChanged(Vector2 oldPos, Vector2 newPos, bool asServer)
     {
         if (_rect != null)
             _rect.anchoredPosition = newPos;
-
-        Debug.Log($"[PaintSplat] OnPositionChanged {newPos}");
     }
 }

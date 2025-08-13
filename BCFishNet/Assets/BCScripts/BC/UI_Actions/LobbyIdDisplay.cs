@@ -8,6 +8,6 @@ public class LobbyIdDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _lobbyIdText.text = BCManager.Instance.CurrentLobbyId;
+        _lobbyIdText.text = "Lobby Name: " + BCManager.Instance.CurrentLobbyId;
     }
 }
