@@ -30,7 +30,15 @@ public class LobbyMemberItem : MonoBehaviour
 
         // add the player name value and default colour to it
         _playerData.Name =  _playerNameValue != "" ? _playerNameValue : _profileId.Substring(0, 8);
-        _playerData.Color = Color.black;
+        PlayerData data;
+        if (PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(_profileId, out data))
+        {
+            _playerData.Color = data.Color;
+        }
+        else
+        {
+            _playerData.Color = Color.black;
+        }
 
         UpdateUI();
     }
@@ -52,6 +60,7 @@ public class LobbyMemberItem : MonoBehaviour
 
         PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(_profileId, _playerNameValue, _playerData.Color);
     }
+
     public void SendCurrentColourSignal()
     {
         Image img = playerName.transform.parent.gameObject.GetComponent<Image>();
@@ -93,9 +102,8 @@ public class LobbyMemberItem : MonoBehaviour
         _readyStateHolder.SetActive(_readyStateValue);
         _notReadyStateHolder.SetActive(!_readyStateValue);
 
-        PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(_profileId, _playerNameValue, _playerData.Color);
-        
         _highlightHolder.SetActive(_profileId == BCManager.Instance.bc.Client.ProfileId);
+        ApplyColorUpdate(_playerData.Color);
     }
 
     public void UpdateReady(bool ready)

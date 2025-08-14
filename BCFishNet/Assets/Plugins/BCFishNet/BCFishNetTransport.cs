@@ -347,10 +347,6 @@ namespace BCFishNet
                                             HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started,
                                                 remoteClientId, Index));
                                         }
-                                        else
-                                        {
-                                            Debug.LogWarning("remoteClientId not found or invalid.");
-                                        }
                                     }
                                 }
                                 break;

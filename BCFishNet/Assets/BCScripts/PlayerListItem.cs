@@ -48,8 +48,11 @@ public class PlayerListItem : NetworkBehaviour
             if (_currentCursor == null)
                 StartCoroutine(DelayedSpawnCursor());
         }
+        else
+        {
+            RequestStateSyncServerRpc(); // Ask server to resend state
+        }
 
-        RequestStateSyncServerRpc(); // Ask server to resend state
 
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
@@ -211,6 +214,8 @@ public class PlayerListItem : NetworkBehaviour
         }
 
         UpdateIsHost(conn.IsHost);
+
+        RequestStateSyncServerRpc();
     }
 
     [ObserversRpc]

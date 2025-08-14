@@ -67,6 +67,13 @@ public class PlayerListItemManager : MonoBehaviour
 
     public PlayerData GetPlayerDataByProfileId(string profileId)
     {
+        // debug list all player data by profile id
+        Debug.Log("[PlayerListItemManager] Retrieving PlayerData by profile ID: " + profileId);
+        foreach (var kvp in _playerDataByProfileId)
+        {
+            Debug.Log($"[PlayerListItemManager] ProfileId: {kvp.Key}, Name: {kvp.Value.Name}, Color: {kvp.Value.Color}");
+        }
+
         if (_playerDataByProfileId.TryGetValue(profileId, out PlayerData data))
         {
             Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
@@ -115,6 +122,12 @@ public class PlayerListItemManager : MonoBehaviour
     }
     public bool TryGetPlayerDataByProfileId(string profileId, out PlayerData data)
     {
+        Debug.Log("[PlayerListItemManager] Retrieving PlayerData by profile ID: " + profileId);
+        foreach (var kvp in _playerDataByProfileId)
+        {
+            Debug.Log($"[PlayerListItemManager] ProfileId: {kvp.Key}, Name: {kvp.Value.Name}, Color: {kvp.Value.Color}");
+        }
+        
         bool found = _playerDataByProfileId.TryGetValue(profileId, out data);
         if (found)
             Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
