@@ -4,40 +4,28 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
-public class PaintSplat : NetworkBehaviour
+public class PaintSplat : MonoBehaviour
 {
     [SerializeField] private Image _image;
     private RectTransform _rect;
     public RectTransform RectTransform => _rect;
-    public Color Color => _color.Value;
-
-    private readonly SyncVar<Color> _color = new SyncVar<Color>();
-    private readonly SyncVar<Vector2> _anchoredPosition = new SyncVar<Vector2>();
+    public Color Color => _color;
+    private Color _color;
+    private Vector2 _anchoredPosition;
 
     private void Awake()
     {
         _rect = GetComponent<RectTransform>();
     }
 
-    public override void OnStartClient()
+    public void OnStart()
     {
-        base.OnStartClient();
-
-        // Register listeners
-        _color.OnChange += OnColorChanged;
-        _anchoredPosition.OnChange += OnPositionChanged;
-
-        // Apply current value (handles late joiners)
-        OnColorChanged(Color.clear, _color.Value, false);
-        OnPositionChanged(Vector2.zero, _anchoredPosition.Value, false);
-
         StartCoroutine(WaitAndReparent());
-        
-        // Save locally when this splat spawns (client-side only)
-        if (IsClient && !IsServer)
-        {
-            PlayerListItemManager.Instance?.SaveGlobalPaintData(this);
-        }
+    }
+
+    public void OnAnimComplete()
+    {
+
     }
 
     private IEnumerator WaitAndReparent()
@@ -51,7 +39,7 @@ public class PaintSplat : NetworkBehaviour
             if (container != null)
             {
                 transform.SetParent(container, false);
-                
+
                 yield break;
             }
 
@@ -60,23 +48,11 @@ public class PaintSplat : NetworkBehaviour
         }
     }
 
-    public override void OnStopClient()
-    {
-        base.OnStopClient();
-        _color.OnChange -= OnColorChanged;
-        _anchoredPosition.OnChange -= OnPositionChanged;
-    }
-
-    public void OnAnimComplete()
-    {
-
-    }
-
     public void Initialize(Vector2 position, Color color)
     {
-        _anchoredPosition.Value = position;
-        _color.Value = color;
-        
+        _anchoredPosition = position;
+        _color = color;
+
         // Ensure visual update immediately on host/server
         OnColorChanged(Color.clear, color, true);
         OnPositionChanged(Vector2.zero, position, true);

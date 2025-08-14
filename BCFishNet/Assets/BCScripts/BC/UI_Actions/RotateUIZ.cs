@@ -15,7 +15,7 @@ public class RotateUIZ : MonoBehaviour
     {
         if (_uiElement != null)
         {
-            _uiElement.transform.Rotate(0, 0, -0.15f);
+            _uiElement.transform.Rotate(0, 0, -120 * Time.deltaTime, Space.Self);
         }
     }
 

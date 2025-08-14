@@ -226,6 +226,8 @@ namespace BCFishNet
                     incoming.GetArraySegment(),
                     (Channel)incoming.Channel, Index);
 
+                    //Debug.Log($"[BCFishNet] IterateIncoming Client packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
+                    //Debug.Log($"[BCFishNet] IterateIncoming Client Segment Count: {segment.Count}, Channel: {incoming.Channel}, Index: {Index}");
                     HandleClientReceivedDataArgs(dataArgs);
 
                     incoming.Dispose();

@@ -154,7 +154,9 @@ public class PlayerListItemManager : MonoBehaviour
     public void ClearAll()
     {
         Debug.Log("[PlayerListItemManager] Clearing all player data and item references.");
+        
         _playerData.Clear();
+
         _globalPaintData.Clear();
         _playerItems.Clear();
     }

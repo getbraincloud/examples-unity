@@ -49,6 +49,8 @@ public class LobbyMemberItem : MonoBehaviour
             img.color = color;
         }
         _playerData.Color = color;
+
+        PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(_profileId, _playerNameValue, _playerData.Color);
     }
     public void SendCurrentColourSignal()
     {

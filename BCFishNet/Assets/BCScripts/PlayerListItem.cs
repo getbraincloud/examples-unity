@@ -48,11 +48,8 @@ public class PlayerListItem : NetworkBehaviour
             if (_currentCursor == null)
                 StartCoroutine(DelayedSpawnCursor());
         }
-        else
-        {
-            //GetComponent<PlayerListItem>().enabled = false;
-            RequestStateSyncServerRpc(); // Ask server to resend state
-        }
+
+        RequestStateSyncServerRpc(); // Ask server to resend state
 
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
@@ -197,14 +194,14 @@ public class PlayerListItem : NetworkBehaviour
 
         SetCursorRef(nob);
         PlayerData data;
-        if (PlayerListItemManager.Instance.TryGetPlayerData(conn.ClientId, out data))
-        {
-            Debug.Log($"[PlayerListItem] Reusing saved data for client {conn.ClientId}, {data.Name}, {data.Color} ");
-            TestChange(data.ProfileId, data.Name, data.Color);
-        }
-        else if (base.IsOwner && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
+        if (base.IsOwner && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
         {
             Debug.Log($"[PlayerListItem] Reusing saved data for profileid {BCManager.Instance.bc.Client.ProfileId}, {data.Name}, {data.Color} ");
+            TestChange(data.ProfileId, data.Name, data.Color);
+        }
+        else if (PlayerListItemManager.Instance.TryGetPlayerData(conn.ClientId, out data))
+        {
+            Debug.Log($"[PlayerListItem] Reusing saved data for client {conn.ClientId}, {data.Name}, {data.Color} ");
             TestChange(data.ProfileId, data.Name, data.Color);
         }
         else
@@ -244,21 +241,6 @@ public class PlayerListItem : NetworkBehaviour
     private void Randomize()
     {
         OnTestButtonClicked();
-    }
-
-    [ObserversRpc]
-    private void StartTest()
-    {
-        StartCoroutine(TestMessages());
-    }
-
-    private IEnumerator TestMessages()
-    {
-        while (this.enabled)
-        {
-            OnTestButtonClicked();
-            yield return new WaitForSeconds(0.5f);
-        }
     }
 
     [ObserversRpc]

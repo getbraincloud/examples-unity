@@ -437,8 +437,6 @@ public class UIManager : MonoBehaviour
                                     {
                                         // Apply the receivedColor to the correct object
                                         _members[fromMemberId].ApplyColorUpdate(receivedColor);
-
-                                        Debug.Log($"Received color: {receivedColor}, for member: {fromMemberId}  ");
                                     }
                                 }
                             }

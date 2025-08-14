@@ -51,7 +51,7 @@ public class PlayerCursor : NetworkBehaviour
         _rect = GetComponent<RectTransform>();
         _container = transform.parent.gameObject.GetComponent<RectTransform>();
     }
-    private float _paintSpawnCooldown = 0.025f; // Adjust delay between spawns (in seconds)
+    private float _paintSpawnCooldown = 0.015f; // Adjust delay between spawns (in seconds)
     private float _timeSinceLastPaint = 0f;
     private bool _enabled = true;
 
@@ -104,10 +104,22 @@ public class PlayerCursor : NetworkBehaviour
     [ServerRpc]
     private void SpawnPaintServer(Vector2 position)
     {
+        Debug.Log($"[Server] Spawning paint at {position}");
+
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, _cursorImage.color);
 
-        Spawn(paint.gameObject);
+        PlayerListItemManager.Instance.SaveGlobalPaintData(paint);
+
+        ObserversRpcSpawnPaint(position, _cursorImage.color);
+    }
+
+    [ObserversRpc]
+    private void ObserversRpcSpawnPaint(Vector3 position, Color color)
+    {
+        Debug.Log($"[Client] Spawning paint at {position}");
+        PaintSplat paint = Instantiate(_paintPrefab, _container);
+        paint.Initialize(position, color);
 
         PlayerListItemManager.Instance.SaveGlobalPaintData(paint);
     }
@@ -127,9 +139,10 @@ public class PlayerCursor : NetworkBehaviour
 
         foreach (var data in paintDataList)
         {
-            PaintSplat paint = Instantiate(_paintPrefab, container);
+            PaintSplat paint = Instantiate(_paintPrefab, _container);
             paint.Initialize(data.anchoredPosition, data.color);
-            Spawn(paint.gameObject); // Spawned by server with no owner
+
+            ObserversRpcSpawnPaint(data.anchoredPosition, data.color);
         }
         yield return null;
 
