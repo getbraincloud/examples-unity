@@ -7,7 +7,6 @@ using BrainCloud.JsonFx.Json;
 public class ColorSelector : MonoBehaviour
 {
     [Header("UI References")]
-    public Button showSelectorButton;
     public GameObject targetObject;
 
     [Header("Color Buttons")]
@@ -27,13 +26,8 @@ public class ColorSelector : MonoBehaviour
     {
         LobbyMemberItem memberItem = targetObject.GetComponent<LobbyMemberItem>();
         PlayerListItem playerItem = targetObject.GetComponent<PlayerListItem>();
-        string localProfileId = BCManager.Instance.bc.Client.ProfileId;
 
-        if (memberItem == null && playerItem == null)
-        {
-            Debug.LogWarning("No LobbyMemberItem or PlayerListItem on targetObject.");
-            return;
-        }
+        string localProfileId = BCManager.Instance.bc.Client.ProfileId;
 
         if ((memberItem != null && memberItem.ProfileId != localProfileId) ||
             (playerItem != null && playerItem.PlayerData.ProfileId != localProfileId))
@@ -92,6 +86,12 @@ public class ColorSelector : MonoBehaviour
         if (img != null)
         {
             img.color = color;
+        }
+
+        UpdatePlayerColor updateColor = targetObject.GetComponent<UpdatePlayerColor>();
+        if (updateColor != null)
+        {
+            updateColor.SaveColorUpdate();
         }
 
         // if the target is a LobbyMemberItem, make sure to send a lobby signal so all others know about the new color

@@ -89,6 +89,10 @@ public class PlayerListItemManager : MonoBehaviour
     public void SavePlayerData(int clientId, PlayerData playerData)
     {
         _playerData[clientId] = playerData;
+
+        // save it by profile id too
+        _playerDataByProfileId[playerData.ProfileId] = playerData;
+
         Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
     }
 
@@ -127,7 +131,7 @@ public class PlayerListItemManager : MonoBehaviour
         {
             Debug.Log($"[PlayerListItemManager] ProfileId: {kvp.Key}, Name: {kvp.Value.Name}, Color: {kvp.Value.Color}");
         }
-        
+
         bool found = _playerDataByProfileId.TryGetValue(profileId, out data);
         if (found)
             Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");

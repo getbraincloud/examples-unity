@@ -28,6 +28,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject _displayNamePanel;
     [SerializeField] private TMP_Text _displayNameText, _accountNameText;
     [SerializeField] private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
+    [SerializeField] private Image _playerColourImage;
 
     private string _currentLobbyId;
     private string _currentEntryId;
@@ -356,15 +357,19 @@ public class UIManager : MonoBehaviour
 
                             _lobbyIdText.text = _currentLobbyId;
 
+                            
                             // let's echo all the lobby member item colors to the lobby
                             foreach (var member in _members)
                             {
-                                if (member.Value != null)
+                                if (member.Value != null &&
+                                    member.Value.ProfileId == BCManager.Instance.bc.Client.ProfileId)
                                 {
                                     // Send a signal to all other members in the lobby with the new color
                                     member.Value.SendCurrentColourSignal();
+                                    break;
                                 }
                             }
+                            
                         }
                         break;
                     case "MEMBER_UPDATE":
@@ -518,6 +523,10 @@ public class UIManager : MonoBehaviour
         {
             Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error));
         };
+
+        Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId).Color;
+        _displayNameInput.gameObject.GetComponent<Image>().color = playerColor;
+        _playerColourImage.color = playerColor;
 
         BCManager.Instance.PlayerName = displayName;
         _displayNameText.text = displayName;

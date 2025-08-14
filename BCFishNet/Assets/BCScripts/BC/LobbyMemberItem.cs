@@ -42,6 +42,7 @@ public class LobbyMemberItem : MonoBehaviour
 
         UpdateUI();
     }
+    
     void Start()
     {
         UpdateUI();
