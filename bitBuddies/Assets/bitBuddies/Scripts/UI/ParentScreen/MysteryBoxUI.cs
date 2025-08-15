@@ -1,8 +1,12 @@
 using System.Collections.Generic;
+using BrainCloud.JSONHelper;
+using Gameframework;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
+//Mystery box template to then be displayed with different rarities and cost.
 public class MysteryBoxUI : ContentUIBehaviour
 {
     [Header("Main UI")]
@@ -15,7 +19,8 @@ public class MysteryBoxUI : ContentUIBehaviour
     [SerializeField] private Sprite[] UnlockTypeSprites;  //0 = coins, 1 = love, 2 = level
     private MysteryBoxPanelUI _mysteryBoxPanelUI;
     //Data
-    /*[SerializeField]*/ private MysteryBoxInfo _mysteryBoxInfo;
+    private MysteryBoxInfo _mysteryBoxInfo;
+    private ParentMenu _parentMenu;
     public MysteryBoxInfo MysteryBoxInfo
     {
         get { return _mysteryBoxInfo; }
@@ -32,6 +37,7 @@ public class MysteryBoxUI : ContentUIBehaviour
         OpenBoxButton.onClick.AddListener(OnOpenBox);
         BoxNameText.text = _mysteryBoxInfo.BoxName;
         _mysteryBoxPanelUI = FindAnyObjectByType<MysteryBoxPanelUI>();
+        _parentMenu = FindAnyObjectByType<ParentMenu>();
         switch (_mysteryBoxInfo.UnlockType)
         {
             case UnlockTypes.Coins:
@@ -47,7 +53,7 @@ public class MysteryBoxUI : ContentUIBehaviour
     
     private void OnOpenBox()
     {
-        //Open another screen where we Animate the box opening
+        //Goal: Open another screen where we Animate the box opening
         // After box is opened, we show another screen where the user 
         // picks the name of buddy
         _mysteryBoxPanelUI.MysteryBoxInfo = _mysteryBoxInfo;

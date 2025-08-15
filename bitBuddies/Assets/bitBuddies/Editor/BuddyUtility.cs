@@ -73,10 +73,10 @@ public class BuddyUtility : EditorWindow
                 GUI.enabled = true;
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("NewBuddy");
-                    if (GUILayout.Button("NewBuddy", GUILayout.Width(100), GUILayout.Height(40)))
+                    GUILayout.Label("AwardBling");
+                    if (GUILayout.Button("AwardBling", GUILayout.Width(100), GUILayout.Height(40)))
                     {
-                        BrainCloudManager.Instance.AddBuddy();
+                        BrainCloudManager.Instance.AwardBlingToChild(100);
                     }
                 }
             }

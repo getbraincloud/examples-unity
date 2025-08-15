@@ -19,6 +19,12 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private MysteryBoxPanelUI MysteryBoxPanelPrefab;
     
     private List<AppChildrenInfo> _appChildrenInfos;
+    private AppChildrenInfo _newAppChildrenInfo;
+    public AppChildrenInfo NewAppChildrenInfo
+    {
+        get { return _newAppChildrenInfo; }
+        set { _newAppChildrenInfo = value; }
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Awake()
     {
@@ -36,11 +42,11 @@ public class ParentMenu : ContentUIBehaviour
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();
 
-        _appChildrenInfos = BrainCloudManager.Instance.AppChildrenInfos;
+        _appChildrenInfos = GameManager.Instance.AppChildrenInfos;
         SetupHouses();
     }
     
-    private void SetupHouses()
+    public void SetupHouses()
     {
         // Clear existing houses...
         for (int i = 0; i < BuddySpawnTransform.transform.childCount; i++)

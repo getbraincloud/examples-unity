@@ -222,6 +222,7 @@ GameObject:
   - component: {fileID: 1374859306}
   - component: {fileID: 1374859307}
   - component: {fileID: 1374859308}
+  - component: {fileID: 1374859309}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -256,6 +257,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1dac553c7f51624ca3d02d4c5fcda90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _userInfo:
+    Level: 0
+    Username: 
+    Email: 
+    Coins: 0
+    Gems: 0
 --- !u!114 &1374859308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,6 +275,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0baa154eb9a6cd47a1586229cc49ac4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1374859309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1374859305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44615dcb0592ca141a72bd876666feb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BuddySprites:
+  - {fileID: 317286021673903909, guid: fbd5d3cc3a91872419f4441ac31f9468, type: 3}
+  - {fileID: -1146576515397207475, guid: c74320ada8bec6743b43c5efb76608a9, type: 3}
+  - {fileID: -5226026969492488696, guid: 8147665098032584081611ad8e3569dc, type: 3}
+  - {fileID: 2166049219749084222, guid: dd895005bb46b824fa47e91d0fb29bb2, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

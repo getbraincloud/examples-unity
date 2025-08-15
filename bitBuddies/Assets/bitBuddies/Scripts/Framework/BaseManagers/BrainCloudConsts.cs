@@ -18,8 +18,11 @@ namespace Gameframework
         public const string GET_CURRENCIES_SCRIPT_NAME = "child/fetchCurrencies";
         public const string AWARD_COINS_SCRIPT_NAME = "AwardCoinsToUser";
         public const string AWARD_GEMS_SCRIPT_NAME = "AwardGemsToUser";
+        public const string AWARD_BLING_TO_CHILD_SCRIPT_NAME = "AwardBlingToChild";
         public const string GET_CHILD_ACCOUNTS_SCRIPT_NAME = "child/getChildProfiles";
         public const string ADD_CHILD_ACCOUNT_SCRIPT_NAME = "child/addChildAccount";
+        public const string AWARD_RANDOM_LOOTBOX_SCRIPT_NAME = "child/addRandomChildAccount";
+        public const string UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME = "child/updateChildAccountName";
 
         //Stat Names
         public const string PLAYER_STAT_LEVEL_NAME = "Level";

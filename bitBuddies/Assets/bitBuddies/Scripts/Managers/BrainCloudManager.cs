@@ -1,34 +1,17 @@
 using BrainCloud;
-using BrainCloud.Entity;
 using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
 using Gameframework;
-using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-[Serializable]
-public class AppChildrenInfo
-{
-    public string profileName { get; set; }
-    public string profileId { get; set; }
-    public Dictionary<string, object> summaryFriendData { get; set; }
-    public int buddyBling { get; set; }
-    public int buddyLove { get; set; }
-}
 
 public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
     private bool _reconnectUser;
-    private List<AppChildrenInfo> appChildrenInfos = new List<AppChildrenInfo>();
-    public List<AppChildrenInfo> AppChildrenInfos
-    {
-        get { return appChildrenInfos; }
-    }
     public static BrainCloudWrapper Wrapper { get; private set; } 
     [SerializeField] private UserInfo _userInfo;
     public UserInfo UserInfo
@@ -42,6 +25,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     {
         get { return _isProcessing; }
     }
+
+    private int _childInfoIndex;
+    private bool _statsRetrieved;
+    private bool _currencyRetrieved;
 
     public override void StartUp()
     {
@@ -67,8 +54,20 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     public void OnAuthenticateSuccess(string jsonResponse)
     {
+        /*
+         * {"packetId":0,"responses":[{"data":{"abTestingId":90,"lastLogin":1755270684595,"server_time":1755270684633,
+         * "refundCount":0,"logouts":0,"timeZoneOffset":-5.0,"experiencePoints":0,"maxBundleMsgs":10,"createdAt":1754489020301,
+         * "parentProfileId":null,"emailAddress":"dude@place.com","experienceLevel":0,"countryCode":"CA","vcClaimed":0,"currency":
+         * {"Gems":{"consumed":0,"balance":170,"purchased":0,"awarded":170,"revoked":0},"Coins":{"consumed":0,"balance":300,"purchased":0,"awarded":300,
+         * "revoked":0}},"id":"ec2f4f95-ba13-4d42-b1e3-7407a86cc635","compressIfLarger":0,"amountSpent":0,"retention":
+         * {"d00":true,"d01":true,"d02":true,"d03":true,"d05":true,"d06":true,"d07":true,"d08":true,"d09":true},"previousLogin":1755270303250,
+         * "playerName":"dude","pictureUrl":null,"incoming_events":[],"failedRedemptionsTotal":0,"sessionId":"ucebku0j0iji44jga410mtjhb2",
+         * "languageCode":"en","vcPurchased":0,"isTester":false,"summaryFriendData":null,"loginCount":107,"emailVerified":true,"xpCapped":false,
+         * "profileId":"ec2f4f95-ba13-4d42-b1e3-7407a86cc635","newUser":"false","allTimeSecs":0,"playerSessionExpiry":1200,"sent_events":[],
+         * "maxKillCount":11,"rewards":{"rewardDetails":{},"currency":{},"rewards":{}},"statistics":{"Level":4}},"status":200}]}
+         */
         //Check if user manually logged in or reconnected,
-        //if reconnected then assign the values..
+        //if reconnected then assign the values.
         var data = jsonResponse.Deserialize("data");
 
         var username = data["playerName"] as string;
@@ -90,6 +89,21 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         {
             UserInfo.UpdateEmail(email);
         }
+        var currency = data["currency"] as Dictionary<string, object>;
+        if(currency != null)
+        {
+            var gems = currency["Gems"] as Dictionary<string, object>;
+            UserInfo.UpdateGems((int)gems["balance"]);
+            
+            var coins = currency["Coins"] as Dictionary<string, object>;
+            UserInfo.UpdateCoins((int)coins["balance"]);
+        }
+        var stats = data["statistics"] as Dictionary<string, object>;
+        if(stats != null)
+        {
+            UserInfo.UpdateLevel((int)stats["Level"]);
+        }
+        
         Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.APP_CHILD_ID}};
         Wrapper.ScriptService.RunScript
         (
@@ -103,36 +117,80 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     private void OnGetChildAccounts(string jsonResponse)
     {
         /*
-         * {"packetId":1,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":6885,"scriptSize":3435},
-         * "response":{"data":{"children":[{"profileName":"","profileId":"94ad75fc-bba7-4c34-a7be-083c07419a41","appId":"49162",
-         * "summaryFriendData":null}]},"status":200},"success":true,"reasonCode":null},"status":200}]}
+        {"packetId":1,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":162916,"scriptSize":6845,"renderTime":17},
+        "response":{"childEntityData":[{"childData":{"profileName":"bob","profileId":"4e046b26-7508-4b74-964c-96a7216f0136","appId":"49162"},
+        "entityData4":{"createdAt":1755280006783,"data":{"rarity":"rare","coinMultiplier":1.5,"coinPerHour":100,"maxCoinCapacity":1000,"buddyId":"Buddy03"},
+        "entityType":"buddies","_serverTime":1755280065784,"entityId":"7e67c09d-62a5-4457-b7a9-d99f54759f3c","acl":{"other":0},"version":1,
+        "updatedAt":1755280006783}}]},"success":true,"reasonCode":null},"status":200}]}
          */
         var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-        var firstData =  packet["data"] as Dictionary<string, object>;
-        var response = firstData["response"] as Dictionary<string, object>;
-        var secondData = response["data"] as Dictionary<string, object>;
-
-        appChildrenInfos = new List<AppChildrenInfo>();
-        var children = secondData["children"] as Dictionary<string, object>[];
-        foreach (var child in children)
+        var data =  packet["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
+        var childEntityData = response["childEntityData"] as Dictionary<string, object>[];
+        var appChildrenInfos = new List<AppChildrenInfo>();
+        if(childEntityData == null || childEntityData.Length == 0)
         {
-            var childData = new AppChildrenInfo();
-            childData.profileName = child["profileName"] as string;
-            childData.profileId = child["profileId"] as string;
-            childData.summaryFriendData = child["summaryFriendData"] as Dictionary<string, object>;
-            appChildrenInfos.Add(childData);
+            StateManager.Instance.RefreshScreen();
+            _isProcessing = false;
+            return;
+        }
+        for(int i = 0; i < childEntityData.Length; i++)
+        {
+            var childData =  childEntityData[i]["childData"] as Dictionary<string, object>;
+            var entityDataObject = childEntityData[i]["entityData"] as Dictionary<string, object>;
+            
+         
+            var dataInfo = new AppChildrenInfo();
+            if(childData != null)
+            {
+                //Get Child data
+                dataInfo.profileName = childData["profileName"] as string;
+                dataInfo.profileId = childData["profileId"] as string;   
+            }
+            
+            if(entityDataObject != null)
+            {
+                var entityData = entityDataObject["data"] as Dictionary<string, object>;
+                if(entityData != null)
+                {
+                    //Get Entity data
+                    dataInfo.rarity = Enum.Parse<Rarity>(entityData["rarity"] as string);
+                    dataInfo.buddyType = Enum.Parse<BuddyType>(entityData["buddyId"] as string);
+                    var multiplier = entityData["coinMultiplier"] as double?;
+                    if(multiplier != null)
+                    {
+                        dataInfo.coinMultiplier = (float) multiplier;
+                    }
+                    else
+                    {
+                        dataInfo.coinMultiplier = 1.0f;
+                    }
+                    dataInfo.coinPerHour = (int) entityData["coinPerHour"];
+                    dataInfo.maxCoinCapacity = (int) entityData["maxCoinCapacity"];   
+                }
+            }
+            
+            appChildrenInfos.Add(dataInfo);
         }
 
+        
         if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
         {
             Debug.LogError("Child Profile ID is missing. Cant fetch data.");
             return;
         }
         
+        _childInfoIndex = 0;
+        GameManager.Instance.AppChildrenInfos = appChildrenInfos;
+        GetChildStatsAndCurrencyData();
+    }
+    
+    private void GetChildStatsAndCurrencyData()
+    {
         Dictionary<string, object> scriptData = new Dictionary<string, object>
         {
             {"childAppId", BrainCloudConsts.APP_CHILD_ID},
-            {"childProfileId", appChildrenInfos[0].profileId}
+            {"childProfileId", GameManager.Instance.AppChildrenInfos[_childInfoIndex].profileId}
         };
         
         //Get data from cloud code scripts
@@ -158,10 +216,23 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         Dictionary<string, object> packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         Dictionary<string, object> data = packet["data"] as Dictionary<string, object>;
         Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
+        _statsRetrieved = true;
+        // var parentStats = response["parentStats"] as Dictionary<string, object>;
+        // var statistics = parentStats["statistics"] as Dictionary<string, object>; 
+        // UserInfo.UpdateLevel((int) statistics["Level"]);
         
-        var parentStats = response["parentStats"] as Dictionary<string, object>;
-        var statistics = parentStats["statistics"] as Dictionary<string, object>; 
-        UserInfo.UpdateLevel((int) statistics["Level"]);
+        var childStatsResponse = response["childStats"] as Dictionary<string, object>;
+        var childStatistics =  childStatsResponse["statistics"] as Dictionary<string, object>;
+        GameManager.Instance.AppChildrenInfos[_childInfoIndex].buddyLove =  (int)childStatistics["Love"];
+        
+        if(_childInfoIndex < GameManager.Instance.AppChildrenInfos.Count - 1)
+        {
+            if(_statsRetrieved && _currencyRetrieved)
+            {
+                _childInfoIndex++;
+                GetChildStatsAndCurrencyData();   
+            }
+        }
         if(UserInfo.Coins > 0)
         {
             CompletedGettingCurrencies();
@@ -180,11 +251,32 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
          * {"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":13287,"scriptSize":3708},"response":{},
          * "success":true,"reasonCode":null},"status":200}]}
          */
+        if (response == null) return;
+        // if(response.TryGetValue("Gems", out var gemValue))
+        // {
+        //     var gemsInfo = gemValue as Dictionary<string, object>;
+        //     UserInfo.UpdateGems((int) gemsInfo["balance"]);            
+        // }
+        // if(response.TryGetValue("Coins", out var coinValue))
+        // {
+        //     var coinsInfo = coinValue as Dictionary<string, object>;
+        //     UserInfo.UpdateCoins((int) coinsInfo["balance"]);   
+        // }
+        if(response.TryGetValue("buddyBling", out var blingValue))
+        {
+            var blingInfo = blingValue as Dictionary<string, object>;
+            GameManager.Instance.AppChildrenInfos[_childInfoIndex].buddyBling = (int)blingInfo["balance"];   
+        }
+        _currencyRetrieved = true;
         
-        var gemsInfo = response["Gems"] as Dictionary<string, object>;
-        UserInfo.UpdateGems((int) gemsInfo["balance"]);
-        var coinsInfo = response["Coins"] as Dictionary<string, object>;
-        UserInfo.UpdateCoins((int) coinsInfo["balance"]);
+        if(_childInfoIndex < GameManager.Instance.AppChildrenInfos.Count - 1)
+        {
+            if(_statsRetrieved && _currencyRetrieved)
+            {
+                _childInfoIndex++;
+                GetChildStatsAndCurrencyData();   
+            }
+        }
         if(UserInfo.Level > 0)
         {
             CompletedGettingCurrencies();
@@ -299,9 +391,175 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         
     }
     
+    public void AwardBlingToChild(int in_amount)
+    {
+        //Params for AwardBlingToChild(childAppId, profileId, increaseAmount)
+        Dictionary<string, object> scriptData = new Dictionary<string, object>
+        {
+            {"childAppId", BrainCloudConsts.APP_CHILD_ID},
+            {"profileId", GameManager.Instance.SelectedAppChildrenInfo.profileId},
+            {"increaseAmount", in_amount}
+        };
+        Wrapper.ScriptService.RunScript
+        (   
+            BrainCloudConsts.AWARD_BLING_TO_CHILD_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("Award Bling Successful", OnAwardBlingToChild),
+            HandleFailure("Award Bling Failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnAwardBlingToChild(string jsonResponse)
+    {
+        /*
+         * {"packetId":4,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":92353,
+         * "scriptSize":4953,"renderTime":23},"response":{"runTimeData":{"hasIncludes":false,"evaluateTime":9248,
+         * "scriptSize":289,"renderTime":1},"response":{"getResult":{"data":{"currencyMap":
+         * {"buddyBling":{"consumed":0,"balance":210,"purchased":0,"awarded":210,"revoked":0}}},"status":200}},
+         * "success":true,"reasonCode":null},"success":true,"reasonCode":null},"status":200}]
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data =  packet["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
+        var currencyMap = response["currencyMap"] as Dictionary<string, object>;
+        var buddyBling = currencyMap["buddyBling"] as Dictionary<string, object>;
+        GameManager.Instance.SelectedAppChildrenInfo.buddyBling = (int) buddyBling["balance"];
+        StateManager.Instance.RefreshScreen();
+    }
+    
     private void OnFailureCallback()
     {
     
+    }
+    
+    public void UpdateChildProfileName(string in_newName, string in_profileId)
+    {
+        if(_isProcessing) return;
+        _isProcessing = true;
+        Dictionary<string, object> scriptData = new Dictionary<string, object>
+        {
+            {"childAppId", BrainCloudConsts.APP_CHILD_ID},
+            {"newName", in_newName},
+            {"profileId", in_profileId},
+        };
+        Wrapper.ScriptService.RunScript
+        (
+            BrainCloudConsts.UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("Updated child name success", OnUpdateProfileName),
+            HandleFailure("Updated child name failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnUpdateProfileName(string jsonResponse)
+    {
+        /*
+         * {"packetId":13,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":79720,"scriptSize":4766},
+         * "response":{"userAdjusted":{"newName":"nami","profileId":"48cc33fa-b92a-4331-96a9-f2c737bd3d28"}},
+         * "success":true,"reasonCode":null},"status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data = packet["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
+        var userAdjusted = response["userAdjusted"] as Dictionary<string, object>;
+        var newName = userAdjusted["newName"] as string;
+        var profileId = userAdjusted["profileId"] as string;
+        _isProcessing = false;
+        Destroy(FindAnyObjectByType<MysteryBoxPanelUI>().gameObject);
+        var listOfChildren = GameManager.Instance.AppChildrenInfos;
+        foreach (var child in listOfChildren)
+        {
+            if(child.profileId.Equals(profileId))
+            {
+                child.profileName = newName;
+                break;
+            }
+        }
+        GameManager.Instance.AppChildrenInfos = listOfChildren;
+        StateManager.Instance.RefreshScreen();
+    }
+    
+    // public void AddRandomChildProfile(string in_childName, Rarity in_selectedLootbox)
+    // {
+    //     Dictionary<string, object> scriptData = new Dictionary<string, object>
+    //     {
+    //         {"childAppId", BrainCloudConsts.APP_CHILD_ID},
+    //         {"lootboxType", in_selectedLootbox},
+    //         {"customName", in_childName}
+    //     };
+    //     
+    //     Wrapper.ScriptService.RunScript
+    //     (
+    //         BrainCloudConsts.AWARD_RANDOM_LOOTBOX_SCRIPT_NAME,
+    //         scriptData.Serialize(),
+    //         HandleSuccess("Add Child Profile Success", OnAddRandomChildProfile),
+    //         HandleFailure("Add Child Profile Failed", OnFailureCallback)
+    //     );
+    // }
+    
+    public void OnAddRandomChildProfile(string jsonResponse)
+    {
+
+        //var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        /*{"packetId":4,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":124599,"scriptSize":8130,"renderTime":28},
+         "response":{"buddyConfig":{"rarity":"legendary","coinMultiplier":2,"coinPerHour":150,"maxCoinCapacity":1500,"buddyId":"Buddy04"},
+         "getProfileResult":{"data":{"children":[{"profileName":"sora","profileId":"abecf46c-8d5f-441d-9acf-8ecaaf665a2b","appId":"49162"},
+         {"profileName":"bob","profileId":"d58ec1f2-e465-4aa8-9906-e2dc2b153793","appId":"49162"},{"profileName":"riku",
+         "profileId":"959454d3-31f5-433a-9dc8-8e8f96a2657c","appId":"49162"}]},"status":200}},"success":true,"reasonCode":null},"status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data =  packet["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
+        var getProfileResult = response["getProfileResult"] as Dictionary<string, object>;
+        var profileChildren = getProfileResult["childEntityData"] as Dictionary<string, object>[];
+        var appChildrenInfos = new List<AppChildrenInfo>();
+        for(int i = 0; i < profileChildren.Length; i++)
+        {
+            var childData =  profileChildren[i]["childData"] as  Dictionary<string, object>;
+            var entityDataObject = profileChildren[i]["entityData"] as Dictionary<string, object>;
+             var dataInfo = new AppChildrenInfo();
+             if(childData != null)
+             {
+                 //Get Child data
+                 dataInfo.profileName = childData["profileName"] as string;
+                 dataInfo.profileId = childData["profileId"] as string;   
+             }
+            
+             if(entityDataObject != null)
+             {
+                 var entityData = entityDataObject["data"] as Dictionary<string, object>;
+                 if(entityData != null)
+                 {
+                     //Get Entity data
+                     dataInfo.rarity = Enum.Parse<Rarity>(entityData["rarity"] as string);
+                     dataInfo.buddyType = Enum.Parse<BuddyType>(entityData["buddyId"] as string);
+                     var multiplier = entityData["coinMultiplier"] as double?;
+                     if(multiplier != null)
+                     {
+                         dataInfo.coinMultiplier = (float) multiplier;
+                     }
+                     else
+                     {
+                         dataInfo.coinMultiplier = 1.0f;
+                     }
+                     dataInfo.coinPerHour = (int) entityData["coinPerHour"];
+                     dataInfo.maxCoinCapacity = (int) entityData["maxCoinCapacity"];   
+                 }
+             }
+            
+            appChildrenInfos.Add(dataInfo);
+        }
+
+        
+        if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
+        {
+            Debug.LogError("Child Profile ID is missing. Cant fetch data.");
+            return;
+        }
+        
+        _childInfoIndex = 0;
+        GameManager.Instance.AppChildrenInfos = appChildrenInfos;
+        GetChildStatsAndCurrencyData();
     }
 
     #region Callback Creation Helpers

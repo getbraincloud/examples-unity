@@ -18,7 +18,7 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnVisitButton()
 	{
 		//ToDo: Go to buddys room
-		GameManager.Instance.AppChildrenInfo = HouseInfo;
+		GameManager.Instance.SelectedAppChildrenInfo = HouseInfo;
 		StateManager.Instance.GoToBuddysRoom();
 	}
 	
