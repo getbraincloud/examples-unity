@@ -356,7 +356,6 @@ public class UIManager : MonoBehaviour
                             BCManager.Instance.CurrentLobbyId = _currentLobbyId;
 
                             _lobbyIdText.text = _currentLobbyId;
-
                             
                             // let's echo all the lobby member item colors to the lobby
                             foreach (var member in _members)
@@ -369,7 +368,6 @@ public class UIManager : MonoBehaviour
                                     break;
                                 }
                             }
-                            
                         }
                         break;
                     case "MEMBER_UPDATE":

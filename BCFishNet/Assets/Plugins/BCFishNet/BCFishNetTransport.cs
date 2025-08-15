@@ -538,21 +538,18 @@ namespace BCFishNet
                 case "CONNECT":
                     {
                         var connectEvent = JsonUtility.FromJson<RelaySystemConnect>(json);
-                        //Debug.Log($"OnSystemCallback connectEvent: {connectEvent.op} ownerCxId: {connectEvent.ownerCxId} cxId: {connectEvent.cxId} netId:{connectEvent.netId} version: {connectEvent.version}");
+                        Debug.Log($"OnSystemCallback connectEvent: {connectEvent.op} ownerCxId: {connectEvent.ownerCxId} cxId: {connectEvent.cxId} netId:{connectEvent.netId} version: {connectEvent.version}");
 
                         int connectedNetId = int.Parse(connectEvent.netId);
                         string connectedProfileId = _brainCloud.RelayService.GetProfileIdForNetId((short)connectedNetId);
                         hostCxId = connectEvent.ownerCxId;
 
                         isHost = hostCxId == connectEvent.cxId;
-                        if (isHost)
-                        {
-                            hostId = _brainCloud.RelayService.GetNetIdForCxId(hostCxId);
-                            Debug.Log($"OnSystemCallback hostCxId: {hostCxId} hostId: {hostId} ");
-                        }
+
+                        hostId = _brainCloud.RelayService.GetNetIdForCxId(hostCxId);
+                        Debug.Log($"OnSystemCallback hostCxId: {hostCxId} hostId: {hostId} ");
 
                         isLocal = connectedProfileId == localProfileId;
-
                         if (isLocal) localClientId = connectedNetId;
 
                         AddConnectionHelper(connectedNetId, isLocal);

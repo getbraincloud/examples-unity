@@ -54,7 +54,7 @@ public class PlayerListItemManager : MonoBehaviour
     public void RegisterPlayerListItem(int clientId, PlayerListItem item)
     {
         _playerItems[clientId] = item;
-        Debug.Log($"[PlayerListItemManager] Registered PlayerListItem for client {clientId}");
+        //Debug.Log($"[PlayerListItemManager] Registered PlayerListItem for client {clientId}");
     }
 
     public void SaveLobbyMemberPlayerData(string profileId, string name, Color color)
@@ -62,21 +62,21 @@ public class PlayerListItemManager : MonoBehaviour
         if (string.IsNullOrEmpty(name)) return;
 
         _playerDataByProfileId[profileId] = new PlayerData {ProfileId = profileId, Name = name, Color = color };
-        Debug.Log($"[PlayerListItemManager] Saved PlayerData for profile '{profileId}': Name='{name}', Color={color}");
+        //Debug.Log($"[PlayerListItemManager] Saved PlayerData for profile '{profileId}': Name='{name}', Color={color}");
     }
 
     public PlayerData GetPlayerDataByProfileId(string profileId)
     {
         // debug list all player data by profile id
-        Debug.Log("[PlayerListItemManager] Retrieving PlayerData by profile ID: " + profileId);
+        //Debug.Log("[PlayerListItemManager] Retrieving PlayerData by profile ID: " + profileId);
         foreach (var kvp in _playerDataByProfileId)
         {
-            Debug.Log($"[PlayerListItemManager] ProfileId: {kvp.Key}, Name: {kvp.Value.Name}, Color: {kvp.Value.Color}");
+            //Debug.Log($"[PlayerListItemManager] ProfileId: {kvp.Key}, Name: {kvp.Value.Name}, Color: {kvp.Value.Color}");
         }
 
         if (_playerDataByProfileId.TryGetValue(profileId, out PlayerData data))
         {
-            Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
+            //Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
             return data;
         }
         else
@@ -93,7 +93,7 @@ public class PlayerListItemManager : MonoBehaviour
         // save it by profile id too
         _playerDataByProfileId[playerData.ProfileId] = playerData;
 
-        Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
+        //Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
     }
 
     public void SaveGlobalPaintData(PaintSplat splat)
@@ -101,7 +101,7 @@ public class PlayerListItemManager : MonoBehaviour
         // ensure we don't duplicate paint splats
         if (_globalPaintData.Exists(data => data.anchoredPosition == splat.RectTransform.anchoredPosition && data.color == splat.Color))
         {
-            Debug.LogWarning("[PlayerListItemManager] Duplicate paint splat detected, not saving.");
+            //Debug.LogWarning("[PlayerListItemManager] Duplicate paint splat detected, not saving.");
             return;
         }
         
@@ -126,10 +126,10 @@ public class PlayerListItemManager : MonoBehaviour
     }
     public bool TryGetPlayerDataByProfileId(string profileId, out PlayerData data)
     {
-        Debug.Log("[PlayerListItemManager] Retrieving PlayerData by profile ID: " + profileId);
+        //Debug.Log("[PlayerListItemManager] Retrieving PlayerData by profile ID: " + profileId);
         foreach (var kvp in _playerDataByProfileId)
         {
-            Debug.Log($"[PlayerListItemManager] ProfileId: {kvp.Key}, Name: {kvp.Value.Name}, Color: {kvp.Value.Color}");
+            //Debug.Log($"[PlayerListItemManager] ProfileId: {kvp.Key}, Name: {kvp.Value.Name}, Color: {kvp.Value.Color}");
         }
 
         bool found = _playerDataByProfileId.TryGetValue(profileId, out data);
@@ -148,7 +148,7 @@ public class PlayerListItemManager : MonoBehaviour
 
     public void DestroyAllGlobalPaintData()
     {
-        Debug.Log("[PlayerListItemManager] Destroying all global paint data.");
+        //Debug.Log("[PlayerListItemManager] Destroying all global paint data.");
         Transform container = UIContainerCache.GetCursorContainer();
         if (container != null)
         {

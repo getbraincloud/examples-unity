@@ -104,8 +104,6 @@ public class PlayerCursor : NetworkBehaviour
     [ServerRpc]
     private void SpawnPaintServer(Vector2 position)
     {
-        Debug.Log($"[Server] Spawning paint at {position}");
-
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, _cursorImage.color);
 
@@ -117,7 +115,6 @@ public class PlayerCursor : NetworkBehaviour
     [ObserversRpc]
     private void ObserversRpcSpawnPaint(Vector3 position, Color color)
     {
-        Debug.Log($"[Client] Spawning paint at {position}");
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, color);
 

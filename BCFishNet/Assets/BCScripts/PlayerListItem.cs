@@ -48,14 +48,30 @@ public class PlayerListItem : NetworkBehaviour
             if (_currentCursor == null)
                 StartCoroutine(DelayedSpawnCursor());
         }
-        else
-        {
-            RequestStateSyncServerRpc(); // Ask server to resend state
-        }
 
-
+        // When a new PlayerListItem is created, broadcast our info to all
+        EchoPlayerInfoToAllClientsServerRpc();
+        
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
+    }
+
+    // Called by a new client to request all others to echo their info
+    [ServerRpc(RequireOwnership = false)]
+    void EchoPlayerInfoToAllClientsServerRpc()
+    {
+        // Tell all clients to echo their info
+        EchoPlayerInfoToAllClientsObserversRpc();
+    }
+
+    [ObserversRpc]
+    void EchoPlayerInfoToAllClientsObserversRpc()
+    {
+        // Each client sends their info to everyone
+        if (_hasInitialized)
+        {
+            TestChangeServer(_playerData.ProfileId, _playerData.Name, _playerData.Color);
+        }
     }
 
     private TextMeshProUGUI _clearedCanvasMessage = null;
@@ -92,11 +108,8 @@ public class PlayerListItem : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void RequestStateSyncServerRpc()
     {
-        if (_hasInitialized && base.IsOwner)
-        {
-            TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
-            UpdateIsHost(Owner.IsHost);
-        }
+        // Instead of just syncing this client, trigger all clients to echo their info
+        EchoPlayerInfoToAllClientsServerRpc();
     }
 
     public void OnTestButtonClicked()
