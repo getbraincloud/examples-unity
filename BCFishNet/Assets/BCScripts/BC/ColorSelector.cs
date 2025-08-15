@@ -49,19 +49,34 @@ public class ColorSelector : MonoBehaviour
         }
     }
     
-    private bool ClickingSelfOrChild()
+    public bool ClickingSelfOrChild()
     {
-        RectTransform[] rectTransforms = GetComponentsInChildren<RectTransform>();
-        foreach (RectTransform rectTransform in rectTransforms)
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
         {
-            if (EventSystem.current.currentSelectedGameObject == rectTransform.gameObject)
-            {
+            position = Input.mousePosition
+        };
 
-                Debug.Log("Clicked on ColorSelector or its child: " + rectTransform.gameObject.name);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        foreach (var result in results)
+        {
+            if (result.gameObject.transform.IsChildOf(transform))
+            {
+                Debug.Log("Clicked on self or child (raycast): " + result.gameObject.name);
                 return true;
             }
         }
-        Debug.Log("Did not click on ColorSelector or its child.");
+
+        // Fallback: check if mouse is within this selector's rect (handles masked/clipped UI)
+        RectTransform rectTransform = transform as RectTransform;
+        if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, null))
+        {
+            Debug.Log("Clicked on self or child (rect bounds fallback)");
+            return true;
+        }
+
+        Debug.Log("Did not click on self or child.");
         return false;
     }
     

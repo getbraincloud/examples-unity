@@ -115,7 +115,17 @@ public class PlayerListItemManager : MonoBehaviour
     public List<PaintSplatData> GetGlobalPaintData()
     {
         return new List<PaintSplatData>(_globalPaintData);
-}
+    }
+
+    public int GetPlayerCount()
+    {
+        return _playerData.Count;
+    }
+
+    public int GetSplatCount()
+    {
+        return _globalPaintData.Count;
+    }
 
     public bool TryGetPlayerData(int clientId, out PlayerData data)
     {

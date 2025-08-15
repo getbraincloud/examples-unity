@@ -36,7 +36,7 @@ public class UIManager : MonoBehaviour
 
     #region LobbyVars
     [Header("Lobby Vars")]
-    [SerializeField] private TMP_Text _lobbyIdText;
+    [SerializeField] private TMP_Text _lobbyIdText, _loadingNumMembersText;
     [SerializeField] private Button _readyUpButton, _leaveLobbyButton;
     [SerializeField] private LobbyMemberItem _lobbyMemberRowPrefab;
     [SerializeField] private Transform _lobbyMembersContainer;
@@ -250,6 +250,8 @@ public class UIManager : MonoBehaviour
         );
 
         _members.Add(memberId, lobbyMember);
+        
+        _loadingNumMembersText.text = $"Members: {_members.Count}";
     }
 
     private void UpdateMemberReady(string id, bool ready)
