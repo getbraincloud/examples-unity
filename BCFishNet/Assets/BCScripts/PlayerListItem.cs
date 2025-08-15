@@ -253,6 +253,7 @@ public class PlayerListItem : NetworkBehaviour
         PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
 
         TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
+        UpdateIsHost(Owner.IsHost);
     }
 
     [ObserversRpc]
