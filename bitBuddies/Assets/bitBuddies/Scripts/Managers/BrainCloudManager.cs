@@ -2,6 +2,7 @@ using BrainCloud;
 using BrainCloud.JSONHelper;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Gameframework;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
@@ -112,6 +113,42 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleSuccess("Getting Child Accounts Success", OnGetChildAccounts),
             HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
         );
+        string[] propertyNames = new [] {"MysteryBoxInfo"}; 
+        Wrapper.GlobalAppService.ReadSelectedProperties
+        (
+            propertyNames, 
+            HandleSuccess("Get Mystery Box Info Success", OnGetMysteryBoxInfo),
+            HandleFailure("Get Mystery Box Info Failed", OnFailureCallback)
+        );
+    }
+    
+    private void OnGetMysteryBoxInfo(string jsonResponse)
+    {
+        /*
+         * {"data":{"MysteryBoxInfo":{"name":"MysteryBoxInfo","value":"
+         * {\"CommonBox\":{\"unlockType\": \"coins\",\"unlockAmount\": 5000,\"rarity\": \"Common\",
+         * \"boxName\": \"Common Box\"},\"UncommonBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 10000,\"rarity\": \"Uncommon\",\"boxName\": \"Uncommon Box\"},\"RareBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 15000,\"rarity\": \"Rare\",\"boxName\": \"Rare Box\"},\"LegendaryBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 20000,\"rarity\": \"Legendary\",\"boxName\": \"Legendary Box\"}}"}},"status":200}]}
+         */
+        var response = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
+        var data = (Dictionary<string, object>)response["data"];
+        var mysteryBoxInfo = (Dictionary<string, object>)data["MysteryBoxInfo"];
+        string innerJson = (string)mysteryBoxInfo["value"];
+        var lootboxes = (Dictionary<string, object>)JsonReader.Deserialize(innerJson);
+        var listOfBoxInfo =  new List<MysteryBoxInfo>();
+
+        foreach (var keyValuePair in lootboxes)
+        {
+            var boxDict = (Dictionary<string, object>)keyValuePair.Value;
+            
+            MysteryBoxInfo boxInfo = new MysteryBoxInfo();
+            boxInfo.Rarity = Enum.Parse<Rarity>((string)boxDict["rarity"]);
+            boxInfo.BoxName = boxInfo.Rarity + " Box";
+            boxInfo.UnlockType = Enum.Parse<UnlockTypes>((string)boxDict["unlockType"]);
+            boxInfo.UnlockAmount = (int)boxDict["unlockAmount"];
+            
+            listOfBoxInfo.Add(boxInfo);
+        }
+        GameManager.Instance.MysteryBoxes = listOfBoxInfo;
     }
     
     private void OnGetChildAccounts(string jsonResponse)

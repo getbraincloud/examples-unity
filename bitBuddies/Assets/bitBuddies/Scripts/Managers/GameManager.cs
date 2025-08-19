@@ -45,7 +45,12 @@ public class GameManager : SingletonBehaviour<GameManager>
 		set { appChildrenInfos = value; }
 	}
 	public Sprite[] BuddySprites;
-	
+	private List<MysteryBoxInfo> _mysteryBoxes;
+	public List<MysteryBoxInfo> MysteryBoxes
+	{
+		get => _mysteryBoxes;
+		set => _mysteryBoxes = value;
+	}
 	private AppChildrenInfo _selectedAppChildrenInfo;
 	public AppChildrenInfo SelectedAppChildrenInfo
 	{
@@ -58,4 +63,16 @@ public class GameManager : SingletonBehaviour<GameManager>
 		_selectedAppChildrenInfo = new AppChildrenInfo();
 		base.Awake();
 	}
+	
+	public void OnDeleteBuddySuccess()
+	{
+		/*
+		 * Update list to remove selected child info
+		 * Refresh screen to display the current
+		 */
+		appChildrenInfos.Remove(_selectedAppChildrenInfo);
+		StateManager.Instance.RefreshScreen();
+	}
+	
+	
 }

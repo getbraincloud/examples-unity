@@ -14,7 +14,6 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	[SerializeField] private TMP_Text TitleText;
     [SerializeField] private Button CloseButton;
     [SerializeField] private Transform MysteryBoxSpawnPoint;
-	[SerializeField] private List<MysteryBoxInfo> MysteryBoxes;
 	[SerializeField] private MysteryBoxUI MysteryBoxPrefab;
 	[SerializeField] private Button DoneButton; //for page 3, closes the whole panel but captures the data input
 	[SerializeField] private TMP_InputField NameBuddyInput;	// for page 3
@@ -32,6 +31,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	{
 		set {_mysteryBoxInfo = value;}
 	}
+	private List<MysteryBoxInfo> _mysteryBoxes;
 	private int _screenIndex;
 	private ParentMenu _parentMenu;
 	//Screen Titles
@@ -59,12 +59,12 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	}
 
 	protected override void InitializeUI()
-    {
-	    foreach (MysteryBoxInfo mysteryBoxInfo in MysteryBoxes)
+	{
+		_mysteryBoxes = GameManager.Instance.MysteryBoxes;
+	    foreach (MysteryBoxInfo mysteryBoxInfo in _mysteryBoxes)
 	    {
 			var box = Instantiate(MysteryBoxPrefab, MysteryBoxSpawnPoint);
-			box.MysteryBoxInfo = mysteryBoxInfo;    
-			box.Init();
+			box.Init(mysteryBoxInfo);
 	    }
 	    _parentMenu = FindAnyObjectByType<ParentMenu>();
 	    OpenBoxButton.onClick.AddListener(OnOpenBox);
@@ -172,7 +172,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     {
 		DoneButton.onClick.RemoveAllListeners();
 		DoneButton.interactable = false;
-	    string nameValue = NameBuddyInput.text.IsNullOrEmpty() ? "bob": NameBuddyInput.text;
+	    string nameValue = NameBuddyInput.text.IsNullOrEmpty() ? DEFAULT_BUDDY_NAME: NameBuddyInput.text;
 	    BrainCloudManager.Instance.UpdateChildProfileName(nameValue, _parentMenu.NewAppChildrenInfo.profileId);
     }
     

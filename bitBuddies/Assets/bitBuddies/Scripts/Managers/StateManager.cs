@@ -23,7 +23,10 @@ public class StateManager : SingletonBehaviour<StateManager>
 		else
 		{
 			//Load into login screen
-			SceneManager.LoadScene(BrainCloudConsts.LOGIN_SCENE_NAME);
+			//SceneManager.LoadScene(BrainCloudConsts.LOGIN_SCENE_NAME);
+			SceneLoader.ShowLoadingScreen();
+			SceneLoader.LoadLevel(BrainCloudConsts.LOGIN_SCENE_NAME);
+			
 		}
 	}
 	
@@ -40,17 +43,25 @@ public class StateManager : SingletonBehaviour<StateManager>
 	private IEnumerator WaitToReconnect()
 	{
 		yield return new WaitUntil(() => !BrainCloudManager.Instance.IsProcessingRequest);
-		SceneManager.LoadScene(BrainCloudConsts.PARENT_SCENE_NAME);
+		//SceneManager.LoadScene(BrainCloudConsts.PARENT_SCENE_NAME);
+		SceneLoader.ShowLoadingScreen();
+		SceneLoader.LoadLevel(BrainCloudConsts.PARENT_SCENE_NAME);
 		yield return null;
 	}
 	
 	public void GoToParent()
 	{
-		SceneManager.LoadScene(BrainCloudConsts.PARENT_SCENE_NAME);
+		//SceneManager.LoadScene(BrainCloudConsts.PARENT_SCENE_NAME);
+		SceneLoader.ShowLoadingScreen();
+		SceneLoader.LoadLevel(BrainCloudConsts.PARENT_SCENE_NAME);
+		
 	}
 	
 	public void GoToBuddysRoom()
 	{
-		SceneManager.LoadScene(BrainCloudConsts.GAME_SCENE_NAME);
+		//SceneManager.LoadScene(BrainCloudConsts.GAME_SCENE_NAME);
+		SceneLoader.ShowLoadingScreen();
+		SceneLoader.LoadLevel(BrainCloudConsts.GAME_SCENE_NAME);
+		
 	}
 }

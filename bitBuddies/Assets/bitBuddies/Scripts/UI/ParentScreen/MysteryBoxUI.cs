@@ -14,41 +14,48 @@ public class MysteryBoxUI : ContentUIBehaviour
     [SerializeField] private TMP_Text UnlockAmountText;
     [SerializeField] private Button OpenBoxButton;
     [SerializeField] private Image UnlockTypeImage;
-    
+    [SerializeField] private Image LockIconImage;
     [Header("References")]
     [SerializeField] private Sprite[] UnlockTypeSprites;  //0 = coins, 1 = love, 2 = level
     private MysteryBoxPanelUI _mysteryBoxPanelUI;
     //Data
     private MysteryBoxInfo _mysteryBoxInfo;
-    private ParentMenu _parentMenu;
-    public MysteryBoxInfo MysteryBoxInfo
-    {
-        get { return _mysteryBoxInfo; }
-        set { _mysteryBoxInfo = value; }
-    }
 
-    public void Init()
+    public void Init(MysteryBoxInfo in_mysteryBoxInfo)
     {
+        _mysteryBoxInfo = in_mysteryBoxInfo;
         InitializeUI();
     }
 
     protected override void InitializeUI()
     {
-        OpenBoxButton.onClick.AddListener(OnOpenBox);
-        BoxNameText.text = _mysteryBoxInfo.BoxName;
-        _mysteryBoxPanelUI = FindAnyObjectByType<MysteryBoxPanelUI>();
-        _parentMenu = FindAnyObjectByType<ParentMenu>();
         switch (_mysteryBoxInfo.UnlockType)
         {
             case UnlockTypes.Coins:
                 UnlockAmountText.text = _mysteryBoxInfo.UnlockAmount.ToString("#,#");    //#,# adds commas to the string when using ints
                 UnlockTypeImage.sprite = UnlockTypeSprites[(int)UnlockTypes.Coins];
+
+                var usersCoins = BrainCloudManager.Instance.UserInfo.Coins;
+                if(_mysteryBoxInfo.UnlockAmount > usersCoins)
+                {
+                    LockIconImage.gameObject.SetActive(true);
+                    OpenBoxButton.interactable = false;
+                }
+                else
+                {
+                    LockIconImage.gameObject.SetActive(false);
+                    OpenBoxButton.onClick.AddListener(OnOpenBox);
+                }
                 break;
             case UnlockTypes.Love:
                 UnlockAmountText.text = "Needs Lvl." + _mysteryBoxInfo.UnlockAmount;
                 UnlockTypeImage.sprite = UnlockTypeSprites[(int)UnlockTypes.Love];
+                //ToDo: how do I determine this value...?
                 break;
         }
+
+        BoxNameText.text = _mysteryBoxInfo.BoxName;
+        _mysteryBoxPanelUI = FindAnyObjectByType<MysteryBoxPanelUI>();
     }
     
     private void OnOpenBox()

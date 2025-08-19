@@ -13,6 +13,7 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private TMP_Text LevelText;
     [SerializeField] private TMP_Text CoinsText;
     [SerializeField] private TMP_Text GemsText;
+    [SerializeField] private TMP_Text ChildCountText;
     [SerializeField] private Transform BuddySpawnTransform;
     [SerializeField] private BuddyHouseInfo BuddyPrefab;
     [SerializeField] private GameObject MoveInPrefab;
@@ -25,17 +26,19 @@ public class ParentMenu : ContentUIBehaviour
         get { return _newAppChildrenInfo; }
         set { _newAppChildrenInfo = value; }
     }
+
+    private const string CHILD_COUNT_TEXT = "Buddy Count: ";
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Awake()
     {
         InitializeUI();
+        OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
         base.Awake();
     }
 
     protected override void InitializeUI()
     {
-        OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
-    
         UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
         UsernameText.text = userInfo.Username;
         LevelText.text = userInfo.Level.ToString();
@@ -43,6 +46,7 @@ public class ParentMenu : ContentUIBehaviour
         GemsText.text = userInfo.Gems.ToString();
 
         _appChildrenInfos = GameManager.Instance.AppChildrenInfos;
+        ChildCountText.text = CHILD_COUNT_TEXT + _appChildrenInfos.Count;
         SetupHouses();
     }
     
@@ -58,6 +62,7 @@ public class ParentMenu : ContentUIBehaviour
         {
             BuddyHouseInfo buddyHouseInfo = Instantiate(BuddyPrefab, BuddySpawnTransform);
             buddyHouseInfo.HouseInfo = buddyHouse;
+            buddyHouseInfo.SetUpHouse();
         }
         
         Instantiate(MoveInPrefab, BuddySpawnTransform);
@@ -72,5 +77,10 @@ public class ParentMenu : ContentUIBehaviour
     public void OpenMysteryBoxPanel()
     {
         Instantiate(MysteryBoxPanelPrefab, transform);
+    }
+    
+    public void OpenConfirmDemolishPanel()
+    {
+        
     }
 }

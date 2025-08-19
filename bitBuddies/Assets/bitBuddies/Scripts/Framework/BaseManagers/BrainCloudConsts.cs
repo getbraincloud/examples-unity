@@ -23,6 +23,7 @@ namespace Gameframework
         public const string ADD_CHILD_ACCOUNT_SCRIPT_NAME = "child/addChildAccount";
         public const string AWARD_RANDOM_LOOTBOX_SCRIPT_NAME = "child/addRandomChildAccount";
         public const string UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME = "child/updateChildAccountName";
+        public const string DELETE_CHILD_PROFILE_SCRIPT_NAME = "/child/deleteChildProfile";
 
         //Stat Names
         public const string PLAYER_STAT_LEVEL_NAME = "Level";
