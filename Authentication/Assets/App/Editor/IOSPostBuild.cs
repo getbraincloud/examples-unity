@@ -1,9 +1,9 @@
 // iOS ONLY
-// This will run after an iOS build is made if APPLE_SDK is also defined.
 
-#if UNITY_IOS && APPLE_SDK
-
+#if UNITY_IOS
+#if APPLE_SDK
 using AppleAuth.Editor;
+#endif
 using System;
 using System.IO;
 using UnityEditor;
@@ -21,20 +21,30 @@ public static class IOSPostBuild
             case BuildTarget.iOS:
                 try
                 {
+#if APPLE_SDK
+                    // Add entitlements for Apple Sign-in
                     var projectPath = PBXProject.GetPBXProjectPath(pathToBuiltProject);
 
-#if UNITY_2019_3_OR_NEWER // Adds entitlement depending on the Unity version used
-                    var project = new PBXProject();
+                    PBXProject project = new PBXProject();
                     project.ReadFromString(File.ReadAllText(projectPath));
                     var manager = new ProjectCapabilityManager(projectPath, "Entitlements.entitlements", null, project.GetUnityMainTargetGuid());
-                    manager.AddSignInWithAppleWithCompatibility(project.GetUnityFrameworkTargetGuid());
-                    manager.WriteToFile();
-#else
-                    var manager = new ProjectCapabilityManager(projectPath, "Entitlements.entitlements", PBXProject.GetUnityTargetName());
                     manager.AddSignInWithAppleWithCompatibility();
                     manager.WriteToFile();
 #endif
-                    Debug.Log("Added ProjectCapabilityManager to Xcode Project.");
+                    // Update Plist
+                    var plistPath = Path.Combine(pathToBuiltProject, "Info.plist");
+                    var plist = new PlistDocument();
+                    plist.ReadFromString(File.ReadAllText(plistPath));
+
+                    PlistElementDict rootDict = plist.root;
+
+                    // Add values here as needed
+                    rootDict.SetBoolean("ITSAppUsesNonExemptEncryption", false);
+                    rootDict.SetString("NSUserTrackingUsageDescription", "Facebook Logins");
+
+                    File.WriteAllText(plistPath, plist.WriteToString());
+
+                    Debug.Log("Updated Xcode project.");
                 }
                 catch (Exception e)
                 {
