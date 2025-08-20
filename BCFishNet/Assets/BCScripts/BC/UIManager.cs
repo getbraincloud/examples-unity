@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
@@ -21,6 +22,7 @@ public class UIManager : MonoBehaviour
     [Header("Login Vars")]
     [SerializeField] private TMP_InputField _usernameInput, _passwordInput, _displayNameInput;
     [SerializeField] private TMP_Text _authErrorText;
+    [SerializeField] private Button _loginButton;
     #endregion
 
     #region MainMenuVars
@@ -130,6 +132,40 @@ public class UIManager : MonoBehaviour
     void OnEnable()
     {
         OnStateChanged();
+    }
+
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            SelectNextField();
+        }
+    }
+
+    void SelectNextField()
+    {
+        var current = EventSystem.current.currentSelectedGameObject;
+        if (current != null)
+        {
+            var selectable = current.GetComponent<Selectable>();
+            if (selectable != null)
+            {
+                var next = selectable.FindSelectableOnDown();
+                if (next != null)
+                {
+                    EventSystem.current.SetSelectedGameObject(next.gameObject);
+                    return;
+                }
+            }
+        }
+        // fallback: select the first input field
+        if (_usernameInput != null && _usernameInput.gameObject.activeInHierarchy)
+            _usernameInput.Select();
+        else if (_passwordInput != null && _passwordInput.gameObject.activeInHierarchy)
+            _passwordInput.Select();
+        else if (_displayNameInput != null && _displayNameInput.gameObject.activeInHierarchy)
+            _displayNameInput.Select();
     }
 
     void OnDestroy()
@@ -524,7 +560,10 @@ public class UIManager : MonoBehaviour
             Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error));
         };
 
-        Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId).Color;
+        string profileId = BCManager.Instance.bc.Client.ProfileId;
+        Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId).Color;
+        Debug.Log($"Updating display name to: {displayName} with color: {playerColor}, ProfileId: {profileId}");
+    
         _displayNameInput.gameObject.GetComponent<Image>().color = playerColor;
         _playerColourImage.color = playerColor;
 

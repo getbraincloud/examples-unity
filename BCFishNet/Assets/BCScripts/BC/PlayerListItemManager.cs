@@ -59,8 +59,6 @@ public class PlayerListItemManager : MonoBehaviour
 
     public void SaveLobbyMemberPlayerData(string profileId, string name, Color color)
     {
-        if (string.IsNullOrEmpty(name)) return;
-
         _playerDataByProfileId[profileId] = new PlayerData {ProfileId = profileId, Name = name, Color = color };
         //Debug.Log($"[PlayerListItemManager] Saved PlayerData for profile '{profileId}': Name='{name}', Color={color}");
     }
@@ -81,7 +79,7 @@ public class PlayerListItemManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[PlayerListItemManager] No PlayerData found for profile '{profileId}'");
+            //Debug.LogWarning($"[PlayerListItemManager] No PlayerData found for profile '{profileId}'");
             return default;
         }
     }

@@ -982,6 +982,10 @@ PrefabInstance:
       propertyPath: showSelectorButton
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2465498492556599994, guid: cbffea2bd7d58a84b91946326db8c78e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3267169634081433387, guid: cbffea2bd7d58a84b91946326db8c78e, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0.5
@@ -1024,7 +1028,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6102751457582422057, guid: cbffea2bd7d58a84b91946326db8c78e, type: 3}
       propertyPath: m_text
-      value: Host Icon -->
+      value: '             Host -->'
       objectReference: {fileID: 0}
     - target: {fileID: 6234257405523474409, guid: cbffea2bd7d58a84b91946326db8c78e, type: 3}
       propertyPath: m_Color.b

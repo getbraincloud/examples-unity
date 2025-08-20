@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 public class UpdatePlayerColor : MonoBehaviour
 {
-    public Image targetObject;
-    public Image sourceComponent;
+    [SerializeField] private Image targetObject;
+    [SerializeField] private Image sourceComponent;
+    [SerializeField] private ColorSelector colorSelector;
 
     void Start()
     {
@@ -30,8 +31,22 @@ public class UpdatePlayerColor : MonoBehaviour
         }
         else
         {
-            // .get another colour
+            // Choose from the ColorSelector
             Color randomColor = new Color(Random.value, Random.value, Random.value);
+            
+            // Choose from the ColorSelector
+            if (colorSelector != null)
+            {
+                // get the children images and select one of them
+                List<Image> colorImages = new List<Image>(colorSelector.colorButtons.ConvertAll(button => button.GetComponent<Image>()));
+                if (colorImages.Count > 0)
+                {
+                    int randomIndex = Random.Range(0, colorImages.Count);
+                    randomColor = colorImages[randomIndex].color;
+
+                }
+            }
+            
             sourceComponent.color = randomColor;
             SaveColorUpdate();
         }
@@ -55,6 +70,7 @@ public class UpdatePlayerColor : MonoBehaviour
 
         // update it
         targetObject.color = sourceComponent.color;
+        Debug.Log($"Saving color update for player {playerId} ({playerName}): {sourceComponent.color}");
         PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(playerId, playerName, sourceComponent.color);
     }
     

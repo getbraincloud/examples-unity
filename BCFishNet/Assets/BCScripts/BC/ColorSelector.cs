@@ -63,7 +63,6 @@ public class ColorSelector : MonoBehaviour
         {
             if (result.gameObject.transform.IsChildOf(transform))
             {
-                Debug.Log("Clicked on self or child (raycast): " + result.gameObject.name);
                 return true;
             }
         }
@@ -72,11 +71,9 @@ public class ColorSelector : MonoBehaviour
         RectTransform rectTransform = transform as RectTransform;
         if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, null))
         {
-            Debug.Log("Clicked on self or child (rect bounds fallback)");
             return true;
         }
 
-        Debug.Log("Did not click on self or child.");
         return false;
     }
     
