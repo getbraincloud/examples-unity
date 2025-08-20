@@ -19,20 +19,16 @@ public class ScrollViewMaxSize : MonoBehaviour
 
         if (contentHeight > newHeight)
         {
-            Debug.LogWarning($"Content height {contentHeight} exceeds max height {maxHeight}. Adjusting to max height.");
-
+            
             Vector2 size = viewport.sizeDelta;
             size.y = 0;
             viewport.sizeDelta = size;
-            Debug.Log($"Setting viewport height to: 0 (due to content exceeding max height)");
         }
         else
         {
-
             Vector2 size = viewport.sizeDelta;
             size.y = newHeight;
             viewport.sizeDelta = size;
-            Debug.Log($"Setting viewport height to: {newHeight}");
         }
 
         layoutElement.preferredHeight = Mathf.Max(newHeight, MIN_HEIGHT);

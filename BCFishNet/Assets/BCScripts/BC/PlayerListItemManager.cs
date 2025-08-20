@@ -91,7 +91,7 @@ public class PlayerListItemManager : MonoBehaviour
         // save it by profile id too
         _playerDataByProfileId[playerData.ProfileId] = playerData;
 
-        //Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
+        Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
     }
 
     public void SaveGlobalPaintData(PaintSplat splat)
@@ -145,6 +145,14 @@ public class PlayerListItemManager : MonoBehaviour
             Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
         return found;
     }
+
+    public PlayerListItem FindPlayerListItemByClientId(int clientId)
+    {
+        bool found = _playerItems.TryGetValue(clientId, out PlayerListItem item);
+        if (found)
+            Debug.Log($"[PlayerListItemManager] Found PlayerListItem for client {clientId}");
+        return item;
+    }   
 
     public PlayerListItem FindPlayerListItemByConnection(NetworkConnection conn)
     {

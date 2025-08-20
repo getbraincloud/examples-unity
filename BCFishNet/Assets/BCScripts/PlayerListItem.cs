@@ -70,13 +70,14 @@ public class PlayerListItem : NetworkBehaviour
         // Each client sends their info to everyone
         if (_hasInitialized)
         {
-            TestChangeServer(_playerData.ProfileId, _playerData.Name, _playerData.Color);
+            string playerName = string.IsNullOrEmpty(_playerData.Name) ? "Guest_" + _playerData.ProfileId.Substring(0, 8) : _playerData.Name;
+            TestChangeServer(_playerData.ProfileId, playerName, _playerData.Color);
         }
     }
 
     private TextMeshProUGUI _clearedCanvasMessage = null;
     private float _bgImageWidth = 0f;
-    private const float SQUARE_IMAGE_OFFSET = 50f;
+    private const float SQUARE_IMAGE_OFFSET = 20f;
     private void Update()
     {
         if (_clearedCanvasMessage == null)
@@ -266,7 +267,7 @@ public class PlayerListItem : NetworkBehaviour
     public void TestChange(string profileId, string playerName, Color newColor)
     {
         _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
-        _userText.text = base.IsOwner ? playerName + " (You)" : playerName;
+        _userText.text = base.IsOwner ? GetPlayerName() + " (You)" : playerName;
         _bgImage.color = newColor;
         _squareImage.color = newColor;
         _currentCursor?.ChangeColor(newColor);
@@ -293,7 +294,8 @@ public class PlayerListItem : NetworkBehaviour
         string playerName = BCManager.Instance.PlayerName;
         if (string.IsNullOrEmpty(playerName))
         {
-            return "Guest_" + Owner.ClientId;
+            string profileId = BCManager.Instance.bc.Client.ProfileId;
+            return "Guest_" + profileId.Substring(0, 8);
         }
         return playerName;
     }
