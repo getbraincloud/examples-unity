@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Core;
 using UnityEngine;
-using UnityEngine.UI;
 
 #if UNITY_ANDROID
 using Firebase;
@@ -32,8 +31,10 @@ public class ExampleApp : MonoBehaviour
     {
         None,
         Login,
+        Logout,
         Main,
-        Store
+        Store,
+        History
     }
 
     // Messaging
@@ -58,23 +59,19 @@ public class ExampleApp : MonoBehaviour
     [SerializeField] private TMP_Text UserInfoText = default;
     [SerializeField] private TMP_Text AppInfoLabel = default;
     [SerializeField] private TMP_Text VersionInfoLabel = default;
-	[SerializeField] private Toggle RememberMeToggle;
 
     [Header("Panels")]
     [SerializeField] private LoginPanel LoginPanel = default;
+    [SerializeField] private LogoutPanel LogoutPanel = default;
     [SerializeField] private MainPanel MainPanel = default;
     [SerializeField] private StorePanel StorePanel = default;
+    [SerializeField] private HistoryPanel HistoryPanel = default;
 
-    [Header("Firebase Messaging")]
+    [Header("Notification Messaging")]
     [SerializeField] private string NotificationTitle = "Marketplace Example";
     [SerializeField] private string NotificationSubtitle = "Subtitle Goes Here";
     [SerializeField] private string NotificationBody = "Hello World from brainCloud!";
     [SerializeField] private string NotificationImageURL = string.Empty;
-
-    public bool RememberMeIsOn
-    {
-        get => RememberMeToggle.isOn;
-    }
 
     public bool IsInteractable
     {
@@ -84,7 +81,7 @@ public class ExampleApp : MonoBehaviour
 
     private BrainCloudWrapper BC = null; // How we will interact with the brainCloud client
 
-#if UNITY_ANDROID
+#if !UNITY_EDITOR && UNITY_ANDROID
     private FirebaseApp Firebase = null;
 #endif
 
@@ -116,7 +113,7 @@ public class ExampleApp : MonoBehaviour
 
     private void OnDestroy()
     {
-#if UNITY_ANDROID
+#if !UNITY_EDITOR && UNITY_ANDROID
         FirebaseMessaging.MessageReceived -= OnFirebaseMessageReceived;
         FirebaseMessaging.TokenReceived -= OnFirebaseTokenReceived;
         Firebase?.Dispose();
@@ -143,7 +140,7 @@ public class ExampleApp : MonoBehaviour
         yield return new WaitUntil(() => BC.Client != null && BC.Client.IsInitialized());
 
 #if UNITY_EDITOR
-        Debug.Log("Skipping device token registration in the editor.");
+        Debug.Log("NOTE: App is running in the Unity Editor; cannot register a notification token.");
 #elif UNITY_ANDROID
         // Initialize Firebase Messaging
         DependencyStatus status = (DependencyStatus)(-1);
@@ -218,29 +215,51 @@ public class ExampleApp : MonoBehaviour
     public void ChangePanelState(PanelState state)
     {
         Debug.Log($"Changing panel state to <b>{state}</b>.");
-        RememberMeToggle.transform.parent.gameObject.SetActive(state == PanelState.Login);
+
         switch (state)
         {
             case PanelState.Login:
                 LoginPanel.gameObject.SetActive(true);
+                LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(false);
+                HistoryPanel.gameObject.SetActive(false);
+                break;
+            case PanelState.Logout:
+                LoginPanel.gameObject.SetActive(false);
+                LogoutPanel.gameObject.SetActive(true);
+                MainPanel.gameObject.SetActive(false);
+                StorePanel.gameObject.SetActive(false);
+                HistoryPanel.gameObject.SetActive(false);
                 break;
             case PanelState.Main:
                 LoginPanel.gameObject.SetActive(false);
+                LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(true);
                 StorePanel.gameObject.SetActive(false);
+                HistoryPanel.gameObject.SetActive(false);
                 break;
             case PanelState.Store:
                 LoginPanel.gameObject.SetActive(false);
+                LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(true);
+                HistoryPanel.gameObject.SetActive(false);
+                break;
+            case PanelState.History:
+                LoginPanel.gameObject.SetActive(false);
+                LogoutPanel.gameObject.SetActive(false);
+                MainPanel.gameObject.SetActive(false);
+                StorePanel.gameObject.SetActive(false);
+                HistoryPanel.gameObject.SetActive(true);
                 break;
             case PanelState.None:
             default:
                 LoginPanel.gameObject.SetActive(false);
+                LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(false);
+                HistoryPanel.gameObject.SetActive(false);
                 break;
         }
     }

@@ -221,6 +221,67 @@ public class BrainCloudMarketplace : IDetailedStoreListener
     }
 
     /// <summary>
+    /// Calls the Cloud Code script <b>GetTransactionHistory</b> to get the logged in user's transaction history to display them.
+    ///
+    /// <para>
+    /// <b>Note:</b> This script is included in this example project under <b>Assets > App > CloudCode > GetTransactionHistory.js</b>.
+    /// <br>Upload this script to your brainCloud app for proper functionality.</br>
+    /// </para>
+    /// </summary>
+    /// <param name="onGetHistory">A callback that will process the <see cref="BCTransactionPage"/> JSON data.</param>
+    /// <param name="pageNumber">Which page to retreived, which is based on how many entries fill per-page.</param>
+    /// <param name="numPerPage">How many transaction entries that should be displayed on a page.</param>
+    /// <param name="sortCriteria">MongoDB-style context for how to sort the history.
+    ///                            If <b>null</b> it will sort by newest first by default.</param>
+    public static void GetTransactionHistory(Action<BCTransactionPage> onGetHistory,
+                                             int pageNumber = 1, int numPerPage = 50,
+                                             Dictionary<string, object> sortCriteria = null)
+    {
+        const string SCRIPT_NAME = "GetTransactionHistory";
+
+        sortCriteria ??= new Dictionary<string, object>()
+        {
+            { "createdAt", -1 }
+        };
+
+        void onSuccess(string jsonResponse, object _)
+        {
+            var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)
+                ["response"] as Dictionary<string, object>;
+
+            if (data.ContainsKey("success") && data["success"] is bool success && success)
+            {
+                var history = JsonReader.Deserialize<BCTransactionPage>(JsonWriter.Serialize(data["transactionPage"]));
+
+                if (history.count <= 0)
+                {
+                    Debug.Log("User has no transaction history.");
+                }
+
+                HasErrorOccurred = false;
+                onGetHistory(history);
+                return;
+            }
+
+            Debug.Log("Was unable to retreive transaction history for user.");
+            HasErrorOccurred = true;
+            onGetHistory(null);
+        }
+
+        bc.ScriptService
+          .RunScript(SCRIPT_NAME,
+                     JsonWriter.Serialize(new Dictionary<string, object>()
+                     {
+                         { "pagination",     new Dictionary<string, object>() {{ "rowsPerPage", numPerPage }, { "pageNumber",  pageNumber }}},
+                         { "searchCriteria", new Dictionary<string, object>() {{ "type", APP_STORE }}},
+                         { "sortCriteria",   sortCriteria }
+                     }),
+                     onSuccess,
+                     OnBrainCloudFailure("Unable to get transaction history from brainCloud!",
+                                         () => { HasErrorOccurred = true; onGetHistory(null); }));
+    }
+
+    /// <summary>
     /// Get any store extensions that are associated with the <b>Google Play Store</b>.
     /// </summary>
     public static T GetExtension<T>() where T : IStoreExtension
