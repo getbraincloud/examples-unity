@@ -5,6 +5,9 @@ using UnityEngine;
 
 #if FACEBOOK_SDK
 using Facebook.Unity;
+#if UNITY_IOS
+using Unity.Advertisement.IosSupport;
+#endif
 #endif
 
 #if GOOGLE_SDK
@@ -144,6 +147,13 @@ public class ExternalAuthPanel : ContentUIBehaviour
     protected override void InitializeUI()
     {
 #if FACEBOOK_SDK
+#if UNITY_IOS
+        if (ATTrackingStatusBinding.GetAuthorizationTrackingStatus() !=
+            ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED)
+        {
+            ATTrackingStatusBinding.RequestAuthorizationTracking();
+        }
+#endif
         void OnInitComplete()
         {
             if (FB.IsInitialized)
@@ -186,33 +196,44 @@ public class ExternalAuthPanel : ContentUIBehaviour
                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
 #elif UNITY_IOS
-        PopupInfoButton[] buttons = new PopupInfoButton[]
-        { new PopupInfoButton("Facebook Standard", PopupInfoButton.Color.Blue, () =>
-            {
-                selectedAuthenticationType = AuthenticationType.Facebook;
-                UserHandler.AuthenticateFacebook(true,
-                                                 OnSuccess("Authentication Success", OnAuthenticationSuccess),
-                                                 OnFailure("Authentication Failed", OnAuthenticationFailure));
-            }),
-            new PopupInfoButton("Facebook Limited", PopupInfoButton.Color.Blue, () =>
-            {
-                selectedAuthenticationType = AuthenticationType.FacebookLimited;
-                UserHandler.AuthenticateFacebookLimited(true,
-                                                        OnSuccess("Authentication Success", OnAuthenticationSuccess),
-                                                        OnFailure("Authentication Failed", OnAuthenticationFailure));
-            }),
-            new PopupInfoButton("Cancel", PopupInfoButton.Color.Red, () =>
-            {
-                selectedAuthenticationType = AuthenticationType.Unknown;
-                LoginContent.IsInteractable = true;
-            })
-        };
+        if (ATTrackingStatusBinding.GetAuthorizationTrackingStatus() ==
+            ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED)
+        {
+            PopupInfoButton[] buttons = new PopupInfoButton[]
+            { new PopupInfoButton("Facebook Standard", PopupInfoButton.Color.Blue, () =>
+                {
+                    selectedAuthenticationType = AuthenticationType.Facebook;
+                    UserHandler.AuthenticateFacebook(true,
+                                                     OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                     OnFailure("Authentication Failed", OnAuthenticationFailure));
+                }),
+                new PopupInfoButton("Facebook Limited", PopupInfoButton.Color.Blue, () =>
+                {
+                    selectedAuthenticationType = AuthenticationType.FacebookLimited;
+                    UserHandler.AuthenticateFacebookLimited(true,
+                                                            OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                            OnFailure("Authentication Failed", OnAuthenticationFailure));
+                }),
+                new PopupInfoButton("Cancel", PopupInfoButton.Color.Red, () =>
+                {
+                    selectedAuthenticationType = AuthenticationType.Unknown;
+                    LoginContent.IsInteractable = true;
+                })
+            };
 
-        Popup.DisplayPopup(new PopupInfo("Facebook Login Preference",
-                                     new PopupInfoBody[] { new PopupInfoBody("Would you like to log into Facebook in Standard or Limited mode?", PopupInfoBody.Type.Centered),
-                                                           new PopupInfoBody("Note: Limited mode does not allow you to use Facebook's Graph API features.", PopupInfoBody.Type.Centered)},
-                                     buttons,
-                                     false));
+            Popup.DisplayPopup(new PopupInfo("Facebook Login Preference",
+                                            new PopupInfoBody[] { new PopupInfoBody("Would you like to log into Facebook in Standard or Limited mode?", PopupInfoBody.Type.Centered),
+                                                                  new PopupInfoBody("Note: Limited mode does not allow you to use Facebook's Graph API features.", PopupInfoBody.Type.Centered)},
+                                            buttons,
+                                            false));
+        }
+        else // If user Denies or Blocks Tracking then we default to FacebookLimited
+        {
+            selectedAuthenticationType = AuthenticationType.FacebookLimited;
+            UserHandler.AuthenticateFacebookLimited(true,
+                                                    OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                    OnFailure("Authentication Failed", OnAuthenticationFailure));
+        }
 #endif
     }
 #endif
