@@ -7,8 +7,6 @@ using UnityEngine.SceneManagement;
 
 public static class SceneLoader
 {
-	private static string LOADING_SCENE_NAME = "LoadingScreen";
-	
 	public static bool IsLoading()
 	{
 		return SceneManager.GetSceneByName(BrainCloudConsts.LOADING_SCREEN_SCENE_NAME).IsValid();

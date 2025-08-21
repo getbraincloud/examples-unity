@@ -79,19 +79,19 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		//Open another screen where we Animate the box opening
 		// After box is opened, we show another screen where the user 
 		// picks the name of buddy
+
+		
 		Dictionary<string, object> scriptData = new Dictionary<string, object>
 		{
-			{"childAppId", BrainCloudConsts.APP_CHILD_ID},
-			{"lootboxType", _mysteryBoxInfo.Rarity}
+			{"childAppId", BrainCloudConsts.APP_CHILD_ID}
 		};
 		BrainCloudManager.Wrapper.ScriptService.RunScript
 		(
-			BrainCloudConsts.AWARD_RANDOM_LOOTBOX_SCRIPT_NAME,
+			BrainCloudConsts.AWARD_BASIC_LOOTBOX_SCRIPT_NAME,
 			scriptData.Serialize(),
 			BrainCloudManager.HandleSuccess("Award new buddy Success", OnGetLootboxInfo),
 			BrainCloudManager.HandleFailure("Award new buddy Failure", OnFailureCallback)
 		);
-		
 	}
 	
 	private void OnGetLootboxInfo(string jsonResponse)
@@ -108,22 +108,19 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 			var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
 			var data =  packet["data"] as Dictionary<string, object>;
 			var response = data["response"] as Dictionary<string, object>;
-			var getProfileResult = response["getProfileResult"] as Dictionary<string, object>;
-			var profileChildren = getProfileResult["childEntityData"] as Dictionary<string, object>[];
+			var profileChildren = response["children"] as Dictionary<string, object>[];
 			if(profileChildren != null)
 			{
 				for (int i = 0; i < profileChildren.Length; i++)
 				{
-					var childData = profileChildren[i]["childData"] as Dictionary<string, object>;
-					var childName = childData["profileName"] as string;
+					var childName = profileChildren[i]["profileName"] as string;
 					if(childName.IsNullOrEmpty())
 					{
-						var entityData = profileChildren[i]["entityData"] as Dictionary<string, object>;
-						var entityInfo = entityData["data"] as Dictionary<string, object>;
-						_parentMenu.NewAppChildrenInfo.rarity = Enum.Parse<Rarity>(entityInfo["rarity"] as string);
-						_parentMenu.NewAppChildrenInfo.coinPerHour = (int) entityInfo["coinPerHour"];
-						_parentMenu.NewAppChildrenInfo.maxCoinCapacity = (int) entityInfo["maxCoinCapacity"];
-						var multiplier = entityInfo["coinMultiplier"] as double?;
+						var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
+						_parentMenu.NewAppChildrenInfo.rarity = summaryData["rarity"] as string;
+						_parentMenu.NewAppChildrenInfo.coinPerHour = (int) summaryData["coinPerHour"];
+						_parentMenu.NewAppChildrenInfo.maxCoinCapacity = (int) summaryData["maxCoinCapacity"];
+						var multiplier = summaryData["coinMultiplier"] as double?;
 						if(multiplier.HasValue)
 						{
 							_parentMenu.NewAppChildrenInfo.coinMultiplier = (float) multiplier;	

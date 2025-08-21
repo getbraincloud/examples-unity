@@ -141,7 +141,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             var boxDict = (Dictionary<string, object>)keyValuePair.Value;
             
             MysteryBoxInfo boxInfo = new MysteryBoxInfo();
-            boxInfo.Rarity = Enum.Parse<Rarity>((string)boxDict["rarity"]);
+            boxInfo.Rarity = boxDict["rarity"] as string;
             boxInfo.BoxName = boxInfo.Rarity + " Box";
             boxInfo.UnlockType = Enum.Parse<UnlockTypes>((string)boxDict["unlockType"]);
             boxInfo.UnlockAmount = (int)boxDict["unlockAmount"];
@@ -163,48 +163,45 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var data =  packet["data"] as Dictionary<string, object>;
         var response = data["response"] as Dictionary<string, object>;
-        var childEntityData = response["childEntityData"] as Dictionary<string, object>[];
+        var getChildAccountObject = response["getChildProfiles"] as Dictionary<string, object>;
+        var data2 = getChildAccountObject["data"] as Dictionary<string, object>;
+        var children = data2["children"] as Dictionary<string, object>[];
         var appChildrenInfos = new List<AppChildrenInfo>();
-        if(childEntityData == null || childEntityData.Length == 0)
+        if(children == null || children.Length == 0)
         {
             StateManager.Instance.RefreshScreen();
             _isProcessing = false;
             return;
         }
-        for(int i = 0; i < childEntityData.Length; i++)
+        for(int i = 0; i < children.Length; i++)
         {
-            var childData =  childEntityData[i]["childData"] as Dictionary<string, object>;
-            var entityDataObject = childEntityData[i]["entityData"] as Dictionary<string, object>;
+            var summaryFriendData = children[i]["summaryFriendData"] as Dictionary<string, object>;
             
          
             var dataInfo = new AppChildrenInfo();
-            if(childData != null)
+            if(children != null)
             {
                 //Get Child data
-                dataInfo.profileName = childData["profileName"] as string;
-                dataInfo.profileId = childData["profileId"] as string;   
+                dataInfo.profileName = children[i]["profileName"] as string;
+                dataInfo.profileId = children[i]["profileId"] as string;   
             }
             
-            if(entityDataObject != null)
+            if(summaryFriendData != null)
             {
-                var entityData = entityDataObject["data"] as Dictionary<string, object>;
-                if(entityData != null)
+                //Get Summary data
+                dataInfo.rarity = summaryFriendData["rarity"] as string;
+                dataInfo.buddyType = BuddyType.Buddy01;
+                var multiplier = summaryFriendData["coinMultiplier"] as double?;
+                if(multiplier != null)
                 {
-                    //Get Entity data
-                    dataInfo.rarity = Enum.Parse<Rarity>(entityData["rarity"] as string);
-                    dataInfo.buddyType = Enum.Parse<BuddyType>(entityData["buddyId"] as string);
-                    var multiplier = entityData["coinMultiplier"] as double?;
-                    if(multiplier != null)
-                    {
-                        dataInfo.coinMultiplier = (float) multiplier;
-                    }
-                    else
-                    {
-                        dataInfo.coinMultiplier = 1.0f;
-                    }
-                    dataInfo.coinPerHour = (int) entityData["coinPerHour"];
-                    dataInfo.maxCoinCapacity = (int) entityData["maxCoinCapacity"];   
+                    dataInfo.coinMultiplier = (float) multiplier;
                 }
+                else
+                {
+                    dataInfo.coinMultiplier = 1.0f;
+                }
+                dataInfo.coinPerHour = (int) summaryFriendData["coinPerHour"];
+                dataInfo.maxCoinCapacity = (int) summaryFriendData["maxCoinCapacity"];   
             }
             
             appChildrenInfos.Add(dataInfo);
@@ -213,13 +210,20 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         
         if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
         {
-            Debug.LogError("Child Profile ID is missing. Cant fetch data.");
-            return;
+            //Debug.LogError("Child Profile ID is missing. Cant fetch data.");
+            //return;
         }
         
         _childInfoIndex = 0;
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;
-        GetChildStatsAndCurrencyData();
+        if(appChildrenInfos.Count > 0)
+        {
+            GetChildStatsAndCurrencyData();   
+        }
+        else
+        {
+            CompletedGettingCurrencies();
+        }
     }
     
     private void GetChildStatsAndCurrencyData()
@@ -547,6 +551,63 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var data =  packet["data"] as Dictionary<string, object>;
         var response = data["response"] as Dictionary<string, object>;
+        var profileChildren = response["children"] as Dictionary<string, object>[];
+        var appChildrenInfos = new List<AppChildrenInfo>();
+        for(int i = 0; i < profileChildren.Length; i++)
+        {
+            var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
+             var dataInfo = new AppChildrenInfo();
+             //Get Child data
+             dataInfo.profileName = profileChildren[i]["profileName"] as string;
+             dataInfo.profileId = profileChildren[i]["profileId"] as string;
+            
+             if(summaryData != null)
+             {
+                 //Get Entity data
+                 dataInfo.rarity = summaryData["rarity"] as string;
+                 dataInfo.buddyType = BuddyType.Buddy01;
+                 var multiplier = summaryData["coinMultiplier"] as double?;
+                 if(multiplier != null)
+                 {
+                     dataInfo.coinMultiplier = (float) multiplier;
+                 }
+                 else
+                 {
+                     dataInfo.coinMultiplier = 1.0f;
+                 }
+                 dataInfo.coinPerHour = (int) summaryData["coinPerHour"];
+                 dataInfo.maxCoinCapacity = (int) summaryData["maxCoinCapacity"];
+                 dataInfo.buddyLevel = (int) summaryData["level"];
+             }
+            
+            appChildrenInfos.Add(dataInfo);
+        }
+
+        
+        if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
+        {
+            Debug.LogError("Child Profile ID is missing. Cant fetch data.");
+            return;
+        }
+        
+        _childInfoIndex = 0;
+        GameManager.Instance.AppChildrenInfos = appChildrenInfos;
+        GetChildStatsAndCurrencyData();
+    }
+    
+        public void OnAddBasicChildProfile(string jsonResponse)
+    {
+
+        //var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        /*{"packetId":4,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":124599,"scriptSize":8130,"renderTime":28},
+         "response":{"buddyConfig":{"rarity":"legendary","coinMultiplier":2,"coinPerHour":150,"maxCoinCapacity":1500,"buddyId":"Buddy04"},
+         "getProfileResult":{"data":{"children":[{"profileName":"sora","profileId":"abecf46c-8d5f-441d-9acf-8ecaaf665a2b","appId":"49162"},
+         {"profileName":"bob","profileId":"d58ec1f2-e465-4aa8-9906-e2dc2b153793","appId":"49162"},{"profileName":"riku",
+         "profileId":"959454d3-31f5-433a-9dc8-8e8f96a2657c","appId":"49162"}]},"status":200}},"success":true,"reasonCode":null},"status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data =  packet["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
         var getProfileResult = response["getProfileResult"] as Dictionary<string, object>;
         var profileChildren = getProfileResult["childEntityData"] as Dictionary<string, object>[];
         var appChildrenInfos = new List<AppChildrenInfo>();
@@ -568,7 +629,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                  if(entityData != null)
                  {
                      //Get Entity data
-                     dataInfo.rarity = Enum.Parse<Rarity>(entityData["rarity"] as string);
+                     dataInfo.rarity = entityData["rarity"] as string;
                      dataInfo.buddyType = Enum.Parse<BuddyType>(entityData["buddyId"] as string);
                      var multiplier = entityData["coinMultiplier"] as double?;
                      if(multiplier != null)

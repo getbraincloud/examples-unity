@@ -12,14 +12,6 @@ public enum BuddyType
 	Buddy04,
 }
 
-public enum Rarity
-{
-	common,
-	uncommon,
-	rare,
-	legendary,
-}
-
 [Serializable]
 public class AppChildrenInfo
 {
@@ -33,7 +25,8 @@ public class AppChildrenInfo
 	public int coinPerHour { get; set; }
 	public int maxCoinCapacity {get; set;}
 	public BuddyType buddyType { get; set; }
-	public Rarity rarity { get; set; }
+	public string rarity { get; set; }
+	public int buddyLevel { get; set; }
 }
 
 public class GameManager : SingletonBehaviour<GameManager>
