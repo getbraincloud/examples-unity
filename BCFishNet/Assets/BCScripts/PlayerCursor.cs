@@ -133,10 +133,11 @@ public class PlayerCursor : NetworkBehaviour
     }
 }
     }
-    
+
     public void UpdateSplatScale(float scale)
     {
         _splatScale = scale;
+        this.transform.localScale = Vector3.one * scale;
     }
 
     [ServerRpc]
