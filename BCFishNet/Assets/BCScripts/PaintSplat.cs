@@ -48,7 +48,7 @@ public class PaintSplat : MonoBehaviour
         }
     }
 
-    public void Initialize(Vector2 position, Color color)
+    public void Initialize(Vector2 position, Color color, float rotation = 0f, float scale = 1f)
     {
         _anchoredPosition = position;
         _color = color;
@@ -56,6 +56,14 @@ public class PaintSplat : MonoBehaviour
         // Ensure visual update immediately on host/server
         OnColorChanged(Color.clear, color, true);
         OnPositionChanged(Vector2.zero, position, true);
+
+        // Apply rotation and scale
+        var rect = GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.localRotation = Quaternion.Euler(0, 0, rotation);
+            rect.localScale = Vector3.one * scale;
+        }
     }
 
     private void OnColorChanged(Color oldColor, Color newColor, bool asServer)

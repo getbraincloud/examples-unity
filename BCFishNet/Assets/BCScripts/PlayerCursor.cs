@@ -55,37 +55,48 @@ public class PlayerCursor : NetworkBehaviour
     private float _timeSinceLastPaint = 0f;
     private bool _enabled = true;
 
+    private Vector2 _lastPaintPosition = Vector2.positiveInfinity;
     void Update()
-{
-    if (IsOwner && _enabled)
     {
-        Vector2 mousePos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(_container, Input.mousePosition, null, out mousePos);
-
-        _rect.anchoredPosition = mousePos;
-
-        if (Input.GetMouseButton(0))  // GetMouseButton for holding
+        if (IsOwner && _enabled)
         {
-            _timeSinceLastPaint += Time.deltaTime;
-            if (_timeSinceLastPaint >= _paintSpawnCooldown)
-            {
-                _timeSinceLastPaint = 0f;
+            Vector2 mousePos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(_container, Input.mousePosition, null, out mousePos);
 
-                SpawnPaintServer(mousePos);
+            _rect.anchoredPosition = mousePos;
+
+            if (Input.GetMouseButton(0))  // GetMouseButton for holding
+            {
+                _timeSinceLastPaint += Time.deltaTime;
+                if (_timeSinceLastPaint >= _paintSpawnCooldown)
+                {
+                    // Only spawn if mouse position is different from last spawn
+                    if (_lastPaintPosition != mousePos)
+                    {
+                        _timeSinceLastPaint = 0f;
+                        SpawnPaintServer(mousePos);
+                        _lastPaintPosition = mousePos;
+                    }
+                    else
+                    {
+                        // Mouse hasn't moved, reset timer as usual
+                        _timeSinceLastPaint = _paintSpawnCooldown;
+                    }
+                }
+            }
+            else
+            {
+                _timeSinceLastPaint = _paintSpawnCooldown; // Reset timer when not painting
+                _lastPaintPosition = Vector2.positiveInfinity;
+            }
+
+            // spawn shockwave only on initial click
+            if (Input.GetMouseButtonDown(0))
+            {
+                SpawnShockwaveServer(mousePos);
             }
         }
-        else
-        {
-            _timeSinceLastPaint = _paintSpawnCooldown; // Reset timer when not painting
-        }
-
-        // spawn shockwave only on initial click
-        if (Input.GetMouseButtonDown(0))
-        {
-            SpawnShockwaveServer(mousePos);
-        }
     }
-}
 
     [ServerRpc]
     public void SpawnShockwaveServer(Vector2 position)
@@ -101,22 +112,31 @@ public class PlayerCursor : NetworkBehaviour
         shockwave.SetPosition(position);
     }
 
+
     [ServerRpc]
     private void SpawnPaintServer(Vector2 position)
     {
+        float rotation = Random.Range(0f, 360f);
+        float scale = 1f;
+
         PaintSplat paint = Instantiate(_paintPrefab, _container);
-        paint.Initialize(position, _cursorImage.color);
+        paint.Initialize(position, _cursorImage.color, rotation, scale);
 
         PlayerListItemManager.Instance.SaveGlobalPaintData(paint);
 
-        ObserversRpcSpawnPaint(position, _cursorImage.color);
+        ObserversRpcSpawnPaint(position, _cursorImage.color, rotation, scale);
     }
 
+
     [ObserversRpc]
-    private void ObserversRpcSpawnPaint(Vector3 position, Color color)
+    private void ObserversRpcSpawnPaint(Vector3 position, Color color, float rotation, float scale)
     {
+        // Prevent duplicate spawn on server (which already spawned it)
+        if (IsServer)
+            return;
+
         PaintSplat paint = Instantiate(_paintPrefab, _container);
-        paint.Initialize(position, color);
+        paint.Initialize(position, color, rotation, scale);
 
         PlayerListItemManager.Instance.SaveGlobalPaintData(paint);
     }
@@ -136,10 +156,16 @@ public class PlayerCursor : NetworkBehaviour
 
         foreach (var data in paintDataList)
         {
-            PaintSplat paint = Instantiate(_paintPrefab, _container);
-            paint.Initialize(data.anchoredPosition, data.color);
-
-            ObserversRpcSpawnPaint(data.anchoredPosition, data.color);
+            float rotation = Random.Range(0f, 360f);
+            float scale = 1f;
+            var colorSelector = FindObjectOfType<ColorSelector>();
+            if (colorSelector != null && colorSelector.targetObject != null)
+            {
+                var scaleField = colorSelector.targetObject.GetComponent<RectTransform>();
+                if (scaleField != null)
+                    scale = scaleField.localScale.x;
+            }
+            ObserversRpcSpawnPaint(data.anchoredPosition, data.color, rotation, scale);
         }
         yield return null;
 
