@@ -75,6 +75,18 @@ public class ColorSelector : MonoBehaviour
             position = Input.mousePosition
         };
 
+        // .Check if its in any of the color buttons
+        foreach (var button in colorButtons)
+        {
+            RectTransform rectTransform = button.transform as RectTransform;
+        
+            if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, null))
+            {
+                OnColorSelected(button.GetComponent<Image>().color);
+                return true;
+            }
+        }
+
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(pointerData, results);
 
@@ -87,8 +99,8 @@ public class ColorSelector : MonoBehaviour
         }
 
         // Fallback: check if mouse is within this selector's rect (handles masked/clipped UI)
-        RectTransform rectTransform = transform as RectTransform;
-        if (rectTransform != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, null))
+        RectTransform rectTransformMain = transform as RectTransform;
+        if (rectTransformMain != null && RectTransformUtility.RectangleContainsScreenPoint(rectTransformMain, Input.mousePosition, null))
         {
             return true;
         }
