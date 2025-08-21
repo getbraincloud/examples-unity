@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class PlayerCursor : NetworkBehaviour
 {
@@ -56,46 +57,86 @@ public class PlayerCursor : NetworkBehaviour
     private bool _enabled = true;
 
     private Vector2 _lastPaintPosition = Vector2.positiveInfinity;
+    private float _splatScale = 1f;
     void Update()
     {
         if (IsOwner && _enabled)
+{
+    Vector2 localMousePos;
+    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        _container,
+        Input.mousePosition,
+        null,
+        out localMousePos
+    );
+
+    // 1. Check if inside the container rect
+    bool insideContainer = RectTransformUtility.RectangleContainsScreenPoint(
+        _container,
+        Input.mousePosition,
+        null
+    );
+
+    // Always move the cursor to the mouse position (local)
+    _rect.anchoredPosition = localMousePos;
+
+    // 2. Check if container is the topmost element under mouse
+    bool hitContainerTopMost = false;
+    if (insideContainer)
+    {
+        PointerEventData pointer = new PointerEventData(EventSystem.current)
         {
-            Vector2 mousePos;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(_container, Input.mousePosition, null, out mousePos);
+            position = Input.mousePosition
+        };
 
-            _rect.anchoredPosition = mousePos;
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointer, results);
 
-            if (Input.GetMouseButton(0))  // GetMouseButton for holding
+        // container is "valid" only if the first raycast hit is the container itself
+        if (results.Count > 0 && results[0].gameObject.transform == _container)
+        {
+            hitContainerTopMost = true;
+        }
+    }
+
+    // ---- Painting ----
+    if (Input.GetMouseButton(0) && hitContainerTopMost)
+    {
+        _timeSinceLastPaint += Time.deltaTime;
+
+        if (_timeSinceLastPaint >= _paintSpawnCooldown)
+        {
+            if (_lastPaintPosition != localMousePos)
             {
-                _timeSinceLastPaint += Time.deltaTime;
-                if (_timeSinceLastPaint >= _paintSpawnCooldown)
-                {
-                    // Only spawn if mouse position is different from last spawn
-                    if (_lastPaintPosition != mousePos)
-                    {
-                        _timeSinceLastPaint = 0f;
-                        SpawnPaintServer(mousePos);
-                        _lastPaintPosition = mousePos;
-                    }
-                    else
-                    {
-                        // Mouse hasn't moved, reset timer as usual
-                        _timeSinceLastPaint = _paintSpawnCooldown;
-                    }
-                }
+                _timeSinceLastPaint = 0f;
+                SpawnPaintServer(localMousePos, _splatScale);
+                _lastPaintPosition = localMousePos;
             }
             else
             {
-                _timeSinceLastPaint = _paintSpawnCooldown; // Reset timer when not painting
-                _lastPaintPosition = Vector2.positiveInfinity;
-            }
-
-            // spawn shockwave only on initial click
-            if (Input.GetMouseButtonDown(0))
-            {
-                SpawnShockwaveServer(mousePos);
+                // No movement → keep cooldown maxed
+                _timeSinceLastPaint = _paintSpawnCooldown;
             }
         }
+    }
+    else
+    {
+        // Reset timer if not actively painting
+        _timeSinceLastPaint = _paintSpawnCooldown;
+        _lastPaintPosition = Vector2.positiveInfinity;
+    }
+
+    // ---- Shockwave ----
+    if (Input.GetMouseButtonDown(0) && hitContainerTopMost)
+    {
+        SpawnShockwaveServer(localMousePos);
+    }
+}
+    }
+    
+    public void UpdateSplatScale(float scale)
+    {
+        _splatScale = scale;
     }
 
     [ServerRpc]
@@ -114,10 +155,9 @@ public class PlayerCursor : NetworkBehaviour
 
 
     [ServerRpc]
-    private void SpawnPaintServer(Vector2 position)
+    private void SpawnPaintServer(Vector2 position, float scale)
     {
         float rotation = Random.Range(0f, 360f);
-        float scale = 1f;
 
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, _cursorImage.color, rotation, scale);
@@ -156,15 +196,9 @@ public class PlayerCursor : NetworkBehaviour
 
         foreach (var data in paintDataList)
         {
-            float rotation = Random.Range(0f, 360f);
-            float scale = 1f;
-            var colorSelector = FindObjectOfType<ColorSelector>();
-            if (colorSelector != null && colorSelector.targetObject != null)
-            {
-                var scaleField = colorSelector.targetObject.GetComponent<RectTransform>();
-                if (scaleField != null)
-                    scale = scaleField.localScale.x;
-            }
+            // Use saved rotation and scale if available, otherwise fallback
+            float rotation = data.rotation != 0f ? data.rotation : Random.Range(0f, 360f);
+            float scale = data.scale != 0f ? data.scale : 1f;
             ObserversRpcSpawnPaint(data.anchoredPosition, data.color, rotation, scale);
         }
         yield return null;

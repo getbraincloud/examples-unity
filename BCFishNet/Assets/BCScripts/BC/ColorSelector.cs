@@ -38,6 +38,25 @@ public class ColorSelector : MonoBehaviour
 
         this.gameObject.SetActive(true);
     }
+    
+    // Current scale value for splats, default to 1
+    [HideInInspector]
+    public float currentScale = 1f;
+
+    // Call this from the UI slider's OnValueChanged event
+    public void OnScaleSliderChanged(Slider slider)
+    {
+        float value = slider.value;
+        currentScale = value;
+        PlayerListItem playerListItem = targetObject.GetComponent<PlayerListItem>();
+        if (playerListItem != null)
+        {
+            playerListItem.UpdateSplatScale(value);
+        }
+        
+        Debug.Log($"ColorSelector scale set to {value}");
+    }
+
     void Update()
     {
         if((Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)) &&

@@ -86,6 +86,7 @@ public class PlayerListItem : NetworkBehaviour
             if (_clearedCanvasMessage != null)
             {
                 _clearedCanvasMessage.text = "";
+                EnableClearedCanvasImmediately(false);
 
                 Debug.Log("[PlayerListItem] ClearedCanvasObj found and initialized.");
             }
@@ -167,6 +168,8 @@ public class PlayerListItem : NetworkBehaviour
 
     private void EnableClearedCanvasImmediately(bool enable)
     {
+        _clearedCanvasMessage.transform.localScale = enable ? Vector3.one : Vector3.zero;
+
         if (enable)
         {
             _clearedCanvasMessage.text = "Host cleared the canvas\n\n 3";
@@ -287,6 +290,11 @@ public class PlayerListItem : NetworkBehaviour
         string profileId = BCManager.Instance.bc.Client.ProfileId;
         string newName = GetPlayerName();
         TestChangeServer(profileId, newName, color);
+    }
+
+    public void UpdateSplatScale(float scale)
+    {
+        _currentCursor?.UpdateSplatScale(scale);
     }
 
     private string GetPlayerName()

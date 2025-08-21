@@ -96,17 +96,12 @@ public class PlayerListItemManager : MonoBehaviour
 
     public void SaveGlobalPaintData(PaintSplat splat)
     {
-        // ensure we don't duplicate paint splats
-        if (_globalPaintData.Exists(data => data.anchoredPosition == splat.RectTransform.anchoredPosition && data.color == splat.Color))
-        {
-            //Debug.LogWarning("[PlayerListItemManager] Duplicate paint splat detected, not saving.");
-            return;
-        }
-        
         _globalPaintData.Add(new PaintSplatData
         {
             color = splat.Color,
-            anchoredPosition = splat.RectTransform.anchoredPosition
+            anchoredPosition = splat.RectTransform.anchoredPosition,
+            rotation = splat.RectTransform.eulerAngles.z,
+            scale = splat.RectTransform.localScale.x
         });
     }
 
@@ -219,10 +214,14 @@ public struct PaintSplatData
 {
     public Vector2 anchoredPosition;
     public Color color;
+    public float rotation;
+    public float scale;
 
-    public PaintSplatData(Vector2 pos, Color col)
+    public PaintSplatData(Vector2 pos, Color col, float rot, float scl)
     {
         anchoredPosition = pos;
         color = col;
+        rotation = rot;
+        scale = scl;
     }
 }

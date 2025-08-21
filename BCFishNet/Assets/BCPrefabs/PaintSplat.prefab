@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4893256090848861770}
   - component: {fileID: 5942355995908979125}
   - component: {fileID: 283679997147973677}
-  - component: {fileID: 6130529882120924977}
   - component: {fileID: 1420346512307584701}
   m_Layer: 5
   m_Name: PaintSplat
@@ -77,27 +76,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!95 &6130529882120924977
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8634221413482736387}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: f8746191eaa4e4e9ebc4be479d9cfd38, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &1420346512307584701
 MonoBehaviour:
   m_ObjectHideFlags: 0

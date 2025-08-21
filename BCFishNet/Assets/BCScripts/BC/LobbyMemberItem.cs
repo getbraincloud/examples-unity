@@ -29,7 +29,7 @@ public class LobbyMemberItem : MonoBehaviour
         _extraData = extraData;
 
         // add the player name value and default colour to it
-        _playerData.Name =  !string.IsNullOrEmpty(_playerNameValue) ? _playerNameValue : "Guest_" + _profileId.Substring(0, 8);
+        _playerData.Name =  !string.IsNullOrEmpty(_playerNameValue) ? _playerNameValue : "Guest_" + _profileId.Substring(0, 4);
         PlayerData data;
         if (PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(_profileId, out data))
         {
@@ -98,7 +98,7 @@ public class LobbyMemberItem : MonoBehaviour
 
     public void UpdateUI()
     {
-        playerName.text = !string.IsNullOrEmpty(_playerNameValue) ? _playerNameValue : "Guest_" + _profileId.Substring(0, 8);
+        playerName.text = !string.IsNullOrEmpty(_playerNameValue) ? _playerNameValue : "Guest_" + _profileId.Substring(0, 4);
         playerName.text += _readyStateValue ? "\n(Ready)" : "\n(Not Ready)";
         _readyStateHolder.SetActive(_readyStateValue);
         _notReadyStateHolder.SetActive(!_readyStateValue);

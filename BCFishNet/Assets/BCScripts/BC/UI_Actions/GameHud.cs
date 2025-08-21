@@ -38,8 +38,6 @@ public class GameHud : MonoBehaviour
 
     public void UpdateSplatCount(int count)
     {
-        // .debug count the PaintSplat objects in the scene
-        int paintSplatCount = FindObjectsOfType<PaintSplat>().Length;
-        numSplatsText.text = $"Splats: {count:N0}, ({paintSplatCount:N0} total)";
+        numSplatsText.text = $"Splats: {count:N0}";
     }
 }
