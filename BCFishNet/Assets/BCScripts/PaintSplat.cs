@@ -63,7 +63,7 @@ public class PaintSplat : MonoBehaviour
         {
             rect.localRotation = Quaternion.Euler(0, 0, rotation);
             rect.localScale = Vector3.one * scale;
-            Debug.Log($"Initialized PaintSplat at {position} with color {color}, rotation {rotation}, scale {scale}");
+            //Debug.Log($"Initialized PaintSplat at {position} with color {color}, rotation {rotation}, scale {scale}");
         }
     }
 

@@ -22,7 +22,7 @@ public class GameHud : MonoBehaviour
         {
             // Here you can add logic to update the main status text
             // For example, you might want to show the current game state or other relevant information
-            yield return new WaitForSeconds(1f); // Update every second
+            yield return new WaitForSeconds(0.15f); 
             // find all players and splats
             int playerCount = PlayerListItemManager.Instance.GetPlayerCount();
             int splatCount = PlayerListItemManager.Instance.GetSplatCount();
