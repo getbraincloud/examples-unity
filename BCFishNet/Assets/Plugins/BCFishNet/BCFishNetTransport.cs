@@ -169,15 +169,9 @@ namespace BCFishNet
 
             //Not yet started, cannot continue.
             LocalConnectionState localState = GetConnectionState(server);
-            if (localState != LocalConnectionState.Started)
+            if (localState == LocalConnectionState.Stopped)
             {
-                ResetQueues();
-                //ResetQueues();
-                //If stopped try to kill task.
-                if (localState == LocalConnectionState.Stopped)
-                {
-                    return;
-                }
+                return;
             }
 
             if (server)
@@ -339,9 +333,9 @@ namespace BCFishNet
                                 {
                                     if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
                                     {
-                                        if ((hostId != localClientId) && signalData.TryGetValue(REMOTE_HOST_ID, out object remoteClientIdObjHost) && remoteClientIdObjHost is int remoteHostId)
+                                        if ((!_isServer) && signalData.TryGetValue(REMOTE_HOST_ID, out object remoteClientIdObjHost) && remoteClientIdObjHost is int remoteHostId)
                                         {
-                                            Debug.Log("remoteHostId: " + remoteHostId);
+                                            Debug.Log("remoteHOSTId: " + remoteHostId);
 
                                             // Now tell the server that we should connect as well
                                             // if it is the server then just ignore it and resync
@@ -648,18 +642,6 @@ namespace BCFishNet
                 signalData[REMOTE_HOST_ID] = localClientId;
                 _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
             }
-            /* // doing this in the response of the host id signal
-            else
-            {
-                Debug.Log("[BCFishNet] This client is reconnecting to the new host " + newHostId + " as " + localClientId);
-                HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
-
-                Dictionary<string, object> signalData = new Dictionary<string, object>();
-                signalData[REMOTE_CLIENT_ID] = localClientId;
-                _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
-            }
-            ResyncPlayerListItems();
-            */
         }
 
         private void ResyncPlayerListItems()
@@ -740,6 +722,7 @@ namespace BCFishNet
             PlayerListEvents.RaiseClearAllPlayerList();
 
             _connectedClients.Clear();
+            ResetQueues();
         }
         
         private bool StopServer()
