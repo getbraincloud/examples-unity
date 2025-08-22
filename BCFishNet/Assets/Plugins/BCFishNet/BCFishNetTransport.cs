@@ -592,7 +592,7 @@ namespace BCFishNet
                         var migrateEvent = JsonUtility.FromJson<RelaySystemMigrateOwner>(json);
                         Debug.Log($"[BCFishNet] Received request to migrate owner to {migrateEvent.cxId}");
 
-                        previousHostId = hostId;
+                        int previousHostId = hostId;
                         string newHostProfileId = migrateEvent.cxId.Split(':')[1];
 
                         isLocal = localProfileId == newHostProfileId;
