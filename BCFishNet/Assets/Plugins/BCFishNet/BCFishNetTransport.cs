@@ -304,7 +304,7 @@ namespace BCFishNet
 
         private void OnLobbyEvent(string json)
         {
-            if (_isServer)
+            //if (_isServer)
             {
                 Debug.Log("OnLobbyEvent : " + json);
 
@@ -339,11 +339,25 @@ namespace BCFishNet
                                 {
                                     if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
                                     {
-                                        if (signalData.TryGetValue(REMOTE_CLIENT_ID, out object remoteClientIdObj) && remoteClientIdObj is int remoteClientId)
+                                        if ((hostId != localClientId) && signalData.TryGetValue(REMOTE_HOST_ID, out object remoteClientIdObjHost) && remoteClientIdObjHost is int remoteHostId)
+                                        {
+                                            Debug.Log("remoteHostId: " + remoteHostId);
+
+                                            // Now tell the server that we should connect as well
+                                            // if it is the server then just ignore it and resync
+                                            Debug.Log("[BCFishNet] This client is reconnecting to the new host " + hostId + " as " + localClientId + " remoteHostId " + remoteHostId);
+                                            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
+
+                                            Dictionary<string, object> signalDataRemoteClient = new Dictionary<string, object>();
+                                            signalDataRemoteClient[REMOTE_CLIENT_ID] = localClientId;
+                                            _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalDataRemoteClient);
+                                            ResyncPlayerListItems();
+                                        }
+                                        else if (_isServer && signalData.TryGetValue(REMOTE_CLIENT_ID, out object remoteClientIdObj) && remoteClientIdObj is int remoteClientId)
                                         {
                                             Debug.Log("remoteClientId: " + remoteClientId);
 
-                                            // Example usage
+                                            // Now the server will connect that person
                                             HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started,
                                                 remoteClientId, Index));
                                         }
@@ -578,7 +592,7 @@ namespace BCFishNet
                         var migrateEvent = JsonUtility.FromJson<RelaySystemMigrateOwner>(json);
                         Debug.Log($"[BCFishNet] Received request to migrate owner to {migrateEvent.cxId}");
 
-                        int previousHostId = hostId;
+                        previousHostId = hostId;
                         string newHostProfileId = migrateEvent.cxId.Split(':')[1];
 
                         isLocal = localProfileId == newHostProfileId;
@@ -629,7 +643,12 @@ namespace BCFishNet
                 HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
 
                 HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, newHostId, Index));
+
+                Dictionary<string, object> signalData = new Dictionary<string, object>();
+                signalData[REMOTE_HOST_ID] = localClientId;
+                _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
             }
+            /* // doing this in the response of the host id signal
             else
             {
                 Debug.Log("[BCFishNet] This client is reconnecting to the new host " + newHostId + " as " + localClientId);
@@ -640,6 +659,7 @@ namespace BCFishNet
                 _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
             }
             ResyncPlayerListItems();
+            */
         }
 
         private void ResyncPlayerListItems()
@@ -648,6 +668,7 @@ namespace BCFishNet
         }
 
         private const string REMOTE_CLIENT_ID = "remoteClientId";
+        private const string REMOTE_HOST_ID = "remoteHostId";
         private void AddConnectionHelper(int connectedNetId, bool isLocal)
         {
             Debug.Log($"[BCFishNet] AddConnectionHelper netId: {connectedNetId}, isLocal: {isLocal}");
