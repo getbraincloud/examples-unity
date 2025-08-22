@@ -20,14 +20,12 @@ public class PlayerCursor : NetworkBehaviour
 
     [SerializeField]
     private PaintSplat _paintPrefab;
-    public bool areWeOwner;
     public int clientId;
 
     public override void OnStartClient()
     {
         base.OnStartClient();
 
-        areWeOwner = IsOwner;
         clientId = Owner.ClientId;
 
         Transform parentObject = transform.parent;
@@ -163,9 +161,14 @@ public class PlayerCursor : NetworkBehaviour
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, _cursorImage.color, rotation, scale);
 
-        PlayerListItemManager.Instance.SaveGlobalPaintData(paint);
-
-        ObserversRpcSpawnPaint(position, _cursorImage.color, rotation, scale);
+        if (PlayerListItemManager.Instance.SaveGlobalPaintData(paint))
+        {
+            ObserversRpcSpawnPaint(position, _cursorImage.color, rotation, scale);
+        }
+        else
+        {
+            Destroy(paint.gameObject);
+        }
     }
 
 
@@ -176,10 +179,19 @@ public class PlayerCursor : NetworkBehaviour
         if (IsServer)
             return;
 
-        PaintSplat paint = Instantiate(_paintPrefab, _container);
-        paint.Initialize(position, color, rotation, scale);
+        PaintSplatData paintSplatData = new PaintSplatData
+        {
+            color = color,
+            anchoredPosition = position,
+            rotation = rotation,
+            scale = scale
+        };
 
-        PlayerListItemManager.Instance.SaveGlobalPaintData(paint);
+        if (PlayerListItemManager.Instance.SaveGlobalPaintData(paintSplatData))
+        {
+            PaintSplat paint = Instantiate(_paintPrefab, _container);
+            paint.Initialize(position, color, rotation, scale);
+        }
     }
 
     public void RestoreGlobalPaintMap()

@@ -12,6 +12,7 @@ public class BackBehavior : MonoBehaviour
             // Call OnDestroy or a custom shutdown if available
             // This will trigger the transport's shutdown logic
             bcFishNetTransport.Shutdown();
+            Debug.Log("Closing down the scene");
         }
         // Give time for disconnect to process
         Invoke("ToMainMenu", 5.25f);

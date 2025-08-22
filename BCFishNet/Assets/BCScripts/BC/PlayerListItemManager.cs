@@ -94,15 +94,43 @@ public class PlayerListItemManager : MonoBehaviour
         Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
     }
 
-    public void SaveGlobalPaintData(PaintSplat splat)
+    public bool SaveGlobalPaintData(PaintSplatData paintSplatData)
     {
-        _globalPaintData.Add(new PaintSplatData
+        bool savedSplat = false;
+
+        // Check for duplicate by comparing color, position, rotation, and scale
+        bool isDuplicate = false;
+        foreach (var existing in _globalPaintData)
+        {
+            if (existing.color == paintSplatData.color &&
+                existing.anchoredPosition == paintSplatData.anchoredPosition &&
+                Mathf.Approximately(existing.rotation, paintSplatData.rotation) &&
+                Mathf.Approximately(existing.scale, paintSplatData.scale))
+            {
+                isDuplicate = true;
+                break;
+            }
+        }
+
+        if (!isDuplicate)
+        {
+            _globalPaintData.Add(paintSplatData);
+            savedSplat = true;
+        }
+
+        return savedSplat;
+    }
+
+    public bool SaveGlobalPaintData(PaintSplat splat)
+    {
+        PaintSplatData paintSplatData = new PaintSplatData
         {
             color = splat.Color,
             anchoredPosition = splat.RectTransform.anchoredPosition,
             rotation = splat.RectTransform.eulerAngles.z,
             scale = splat.RectTransform.localScale.x
-        });
+        };
+        return SaveGlobalPaintData(paintSplatData);
     }
 
     public List<PaintSplatData> GetGlobalPaintData()

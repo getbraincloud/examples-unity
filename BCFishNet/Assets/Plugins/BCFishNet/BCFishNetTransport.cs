@@ -493,6 +493,7 @@ namespace BCFishNet
                 // there was a failure lets go back to the main screen and closing things down
                 Debug.LogWarning($"Going Back to the main menu to allow rejoining - Display connection error message");
                 SceneManager.LoadScene("Main");
+                
             };
 
             _brainCloud.RelayService.Connect(RelayConnectionType.UDP, connectionOptions, successCallback, failureCallback);
@@ -691,16 +692,10 @@ namespace BCFishNet
                 if (connectedProfileId == _brainCloud.Client.ProfileId)
                 {
                     Debug.Log($"[BCFishNet] StopClient local {connectionId}");
-                    _brainCloud.RelayService.DeregisterRelayCallback();
-                    _brainCloud.RelayService.Disconnect();
-                    _brainCloud.LobbyService.LeaveLobby(_currentLobbyId);
-
-                    _brainCloud.RTTService.DeregisterRTTLobbyCallback();
 
                     HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
-                    PlayerListEvents.RaiseClearAllPlayerList();
 
-                    _connectedClients.Clear();
+                    CleanupConnection();
                 }
 
                 if (_isServer)
@@ -713,13 +708,24 @@ namespace BCFishNet
             return true;
         }
 
+        private void CleanupConnection()
+        {
+            _brainCloud.RelayService.DeregisterRelayCallback();
+            _brainCloud.RelayService.Disconnect();
+            _brainCloud.LobbyService.LeaveLobby(_currentLobbyId);
+
+            _brainCloud.RTTService.DeregisterRTTLobbyCallback();
+
+            PlayerListEvents.RaiseClearAllPlayerList();
+
+            _connectedClients.Clear();
+        }
+        
         private bool StopServer()
         {
             Debug.Log($"[BCFishNet] StopServer called");
+            CleanupConnection();
 
-            _brainCloud.RelayService.DeregisterRelayCallback();
-            _brainCloud.RelayService.Disconnect();
-            _connectedClients.Clear();
             HandleServerConnectionState(new ServerConnectionStateArgs(LocalConnectionState.Stopped, Index));
             return true;
         }
