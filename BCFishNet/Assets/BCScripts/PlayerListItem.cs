@@ -25,6 +25,8 @@ public class PlayerListItem : NetworkBehaviour
 
     private Coroutine _clearCanvasCoroutine;
 
+    private int localClientId = -1;
+
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -39,8 +41,8 @@ public class PlayerListItem : NetworkBehaviour
             transform.localScale = Vector3.one;
         }
 
-        PlayerListItemManager.Instance.RegisterPlayerListItem(Owner.ClientId, this);
-
+        localClientId = Owner.ClientId;
+        PlayerListItemManager.Instance.RegisterPlayerListItem(localClientId, this);
         if (base.IsOwner)
         {
             _testButton = GetComponent<Button>();
@@ -51,7 +53,7 @@ public class PlayerListItem : NetworkBehaviour
 
         // When a new PlayerListItem is created, broadcast our info to all
         EchoPlayerInfoToAllClientsServerRpc();
-        
+
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
     }
@@ -187,6 +189,11 @@ public class PlayerListItem : NetworkBehaviour
         return Guid.NewGuid().ToString("N").Substring(0, 8);
     }
 
+    void OnDestroy()
+    {
+        PlayerListItemManager.Instance.UnregisterPlayerListItem(Owner.ClientId);
+    }
+
     private Color GenerateRandomColor()
     {
         string hex = Guid.NewGuid().ToString("N").Substring(0, 6);
@@ -200,7 +207,7 @@ public class PlayerListItem : NetworkBehaviour
     {
         // If the clients, let's delay a bit, to let the server get there and we can echo back to it
         yield return null;
-        if (!Owner.IsHost) yield return new WaitForSeconds(0.5f);
+        if (!Owner.IsHost) yield return new WaitForSeconds(0.15f);
 
         if (_currentCursor == null)
             SpawnCursor(Owner);
@@ -303,7 +310,7 @@ public class PlayerListItem : NetworkBehaviour
         if (string.IsNullOrEmpty(playerName))
         {
             string profileId = BCManager.Instance.bc.Client.ProfileId;
-            return "Guest_" + profileId.Substring(0, 8);
+            return "Guest_" + profileId.Substring(0, 4);
         }
         return playerName;
     }

@@ -57,9 +57,22 @@ public class PlayerListItemManager : MonoBehaviour
         //Debug.Log($"[PlayerListItemManager] Registered PlayerListItem for client {clientId}");
     }
 
+    public bool UnregisterPlayerListItem(int clientId)
+    {
+        int keyToRemove = clientId;
+        Debug.Log($"[PlayerListItemManager] UnregisterPlayerListItem PlayerListItem for client {clientId}");
+        if (keyToRemove != -1)
+        {
+             _playerData.Remove(keyToRemove);
+            _playerItems.Remove(keyToRemove);
+            return true;
+        }
+        return false;
+    }
+
     public void SaveLobbyMemberPlayerData(string profileId, string name, Color color)
     {
-        _playerDataByProfileId[profileId] = new PlayerData {ProfileId = profileId, Name = name, Color = color };
+        _playerDataByProfileId[profileId] = new PlayerData { ProfileId = profileId, Name = name, Color = color };
         //Debug.Log($"[PlayerListItemManager] Saved PlayerData for profile '{profileId}': Name='{name}', Color={color}");
     }
 

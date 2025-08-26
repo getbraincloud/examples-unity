@@ -38,6 +38,6 @@ public class GameHud : MonoBehaviour
 
     public void UpdateSplatCount(int count)
     {
-        numSplatsText.text = $"Splats: {count:N0}";
+        numSplatsText.text = $"Canvas Load: {count:N0}";
     }
 }
