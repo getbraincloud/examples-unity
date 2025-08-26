@@ -635,13 +635,7 @@ namespace BCFishNet
         private IEnumerator HandleMigrateOwnerCoroutine(bool isNowServer, int newHostId)
         {
             // stop previous connect
-            LocalConnectionState localState = GetConnectionState(false);
-            if (localState != LocalConnectionState.Stopped)
-            {
-
-                Debug.Log("[BCFishNet] STOPPED CLIENT");
-                HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
-            }
+            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
 
             yield return new WaitForSeconds(SIGNAL_DELAY);
 
@@ -717,12 +711,7 @@ namespace BCFishNet
 
                 if (connectedProfileId == _brainCloud.Client.ProfileId)
                 {
-                    LocalConnectionState localState = GetConnectionState(false);
-                    if (localState != LocalConnectionState.Stopped)
-                    {
-                        Debug.Log($"[BCFishNet] StopClient local {connectionId}");
-                        HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
-                    }
+                    HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
 
                     CleanupConnection();
                 }
