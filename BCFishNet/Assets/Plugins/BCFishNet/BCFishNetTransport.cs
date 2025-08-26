@@ -337,19 +337,11 @@ namespace BCFishNet
                                         {
                                             Debug.Log("remoteHOSTId: " + remoteHostId);
 
-                                            // Now tell the server that we should connect as well
-                                            // if it is the server then just ignore it and resync
-                                            Debug.Log("[BCFishNet] This client is reconnecting to the new host " + hostId + " as " + localClientId + " remoteHostId " + remoteHostId);
-                                            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
-
-                                            Dictionary<string, object> signalDataRemoteClient = new Dictionary<string, object>();
-                                            signalDataRemoteClient[REMOTE_CLIENT_ID] = localClientId;
-                                            _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalDataRemoteClient);
-                                            ResyncPlayerListItems();
+                                            Invoke("SendClientConnectMigrate", SIGNAL_DELAY);
                                         }
                                         else if (_isServer && signalData.TryGetValue(REMOTE_CLIENT_ID, out object remoteClientIdObj) && remoteClientIdObj is int remoteClientId)
                                         {
-                                            Debug.Log("remoteClientId: " + remoteClientId);
+                                            Debug.Log($"remoteClientId: {remoteClientId} at {DateTime.Now:HH:mm:ss.fff}");
 
                                             // Now the server will connect that person
                                             HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started,
@@ -362,8 +354,27 @@ namespace BCFishNet
                     }
                 }
             }
-
         }
+
+        private void SendClientConnectMigrate()
+        {
+            // this will send to the server to connect
+            Debug.Log($"[BCFishNet][{DateTime.Now:HH:mm:ss.fff}] SendClientConnectMigrate");
+            Dictionary<string, object> signalDataRemoteClient = new Dictionary<string, object>();
+            signalDataRemoteClient[REMOTE_CLIENT_ID] = localClientId;
+            _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalDataRemoteClient);
+
+            Invoke("DelayedConnect", SIGNAL_DELAY);
+        }
+
+        private void DelayedConnect()
+        {
+            // Now tell the server that we should connect as well
+            // if it is the server then just ignore it and resync
+            Debug.Log($"[BCFishNet][{DateTime.Now:HH:mm:ss.fff}] This client is reconnecting to the new host {hostId} as {localClientId}");
+            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
+        }
+
         public override void HandleClientReceivedDataArgs(ClientReceivedDataArgs args)
         {
             if (args.Data.Count == 0)
@@ -624,9 +635,15 @@ namespace BCFishNet
         private IEnumerator HandleMigrateOwnerCoroutine(bool isNowServer, int newHostId)
         {
             // stop previous connect
-            HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
+            LocalConnectionState localState = GetConnectionState(false);
+            if (localState != LocalConnectionState.Stopped)
+            {
 
-            yield return null;
+                Debug.Log("[BCFishNet] STOPPED CLIENT");
+                HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
+            }
+
+            yield return new WaitForSeconds(SIGNAL_DELAY);
 
             if (isNowServer)
             {
@@ -638,10 +655,15 @@ namespace BCFishNet
 
                 HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, newHostId, Index));
 
-                Dictionary<string, object> signalData = new Dictionary<string, object>();
-                signalData[REMOTE_HOST_ID] = localClientId;
-                _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
+                Invoke("SendHostJoinedMigrate", SIGNAL_DELAY);
             }
+        }
+
+        private void SendHostJoinedMigrate()
+        {
+            Dictionary<string, object> signalData = new Dictionary<string, object>();
+            signalData[REMOTE_HOST_ID] = localClientId;
+            _brainCloud.LobbyService.SendSignal(_currentLobbyId, signalData);
         }
 
         private void ResyncPlayerListItems()
@@ -649,6 +671,7 @@ namespace BCFishNet
             PlayerListEvents.RaiseResyncPlayerList();
         }
 
+        private const float SIGNAL_DELAY = 0.05f;
         private const string REMOTE_CLIENT_ID = "remoteClientId";
         private const string REMOTE_HOST_ID = "remoteHostId";
         private void AddConnectionHelper(int connectedNetId, bool isLocal)
@@ -694,9 +717,12 @@ namespace BCFishNet
 
                 if (connectedProfileId == _brainCloud.Client.ProfileId)
                 {
-                    Debug.Log($"[BCFishNet] StopClient local {connectionId}");
-
-                    HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
+                    LocalConnectionState localState = GetConnectionState(false);
+                    if (localState != LocalConnectionState.Stopped)
+                    {
+                        Debug.Log($"[BCFishNet] StopClient local {connectionId}");
+                        HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
+                    }
 
                     CleanupConnection();
                 }
