@@ -637,7 +637,7 @@ namespace BCFishNet
             // stop previous connect
             HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Stopped, Index));
 
-            yield return new WaitForSeconds(SIGNAL_DELAY);
+            yield return new WaitForSeconds(SIGNAL_SHORT_DELAY);
 
             if (isNowServer)
             {
@@ -649,7 +649,7 @@ namespace BCFishNet
 
                 HandleRemoteConnectionState(new RemoteConnectionStateArgs(RemoteConnectionState.Started, newHostId, Index));
 
-                Invoke("SendHostJoinedMigrate", SIGNAL_DELAY);
+                Invoke("SendHostJoinedMigrate", SIGNAL_SHORT_DELAY);
             }
         }
 
@@ -665,7 +665,8 @@ namespace BCFishNet
             PlayerListEvents.RaiseResyncPlayerList();
         }
 
-        private const float SIGNAL_DELAY = 0.05f;
+        private const float SIGNAL_DELAY = 0.33f;
+        private const float SIGNAL_SHORT_DELAY = 0.05f;
         private const string REMOTE_CLIENT_ID = "remoteClientId";
         private const string REMOTE_HOST_ID = "remoteHostId";
         private void AddConnectionHelper(int connectedNetId, bool isLocal)
