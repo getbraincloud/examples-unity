@@ -41,9 +41,6 @@ public class PlayerListItem : NetworkBehaviour
             transform.localScale = Vector3.one;
         }
 
-        localClientId = Owner.ClientId;
-        PlayerListItemManager.Instance.RegisterPlayerListItem(localClientId, this);
-
         // Host sets authoritative server start time if not already set
         if (base.IsHost && PlayerListItemManager.Instance.ServerStartTime < 0)
         {
@@ -60,6 +57,12 @@ public class PlayerListItem : NetworkBehaviour
 
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
+    }
+
+    void Start()
+    {
+        localClientId = Owner.ClientId;
+        PlayerListItemManager.Instance.RegisterPlayerListItem(localClientId, this);
     }
 
     // Called by a client to request the authoritative server start time from the host
@@ -133,17 +136,34 @@ public class PlayerListItem : NetworkBehaviour
         }
 
         // Periodically echo player info to all clients
-        if (base.IsOwner && _hasInitialized)
+        if (base.IsOwner)
         {
             _echoTimer += Time.deltaTime;
+
             if (_echoTimer >= ECHO_INTERVAL)
             {
-                EchoPlayerInfoToAllClientsServerRpc();
+                PlayerData data;
+                if (!_hasInitialized && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
+                {
+                    TestChange(data.ProfileId, data.Name, data.Color);
+                }
+
+                if (base.IsHost && PlayerListItemManager.Instance.ServerStartTime < 0)
+                {
+                    double now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
+                    PlayerListItemManager.Instance.SetServerStartTime(now);
+                    SyncServerStartTimeObserversRpc(now);
+                }
+
+                if (_hasInitialized)
+                {
+                    EchoPlayerInfoToAllClientsServerRpc();
+                }
+                
                 _echoTimer = 0f;
             }
         }
     }
-
 
     [ServerRpc(RequireOwnership = false)]
     private void RequestStateSyncServerRpc()
@@ -373,6 +393,6 @@ public class PlayerListItem : NetworkBehaviour
     private const float SHORT_DELAY = 0.05f;
     
     private float _echoTimer = 0f;
-    private const float ECHO_INTERVAL = 3f; // secondss
+    private const float ECHO_INTERVAL = DELAY * 5; // secondss
         
 }
