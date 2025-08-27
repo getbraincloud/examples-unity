@@ -10,6 +10,15 @@ public class PlayerListItemManager : MonoBehaviour
 {
     public static PlayerListItemManager Instance { get; private set; }
 
+    // Authoritative server session start time (network time, set by host, synced to all clients)
+    private double _serverStartTime = -1;
+    public double ServerStartTime => _serverStartTime;
+    public void SetServerStartTime(double time)
+    {
+        _serverStartTime = time;
+        Debug.Log($"[PlayerListItemManager] ServerStartTime set to {time}");
+    }
+
     private Dictionary<int, PlayerData> _playerData = new Dictionary<int, PlayerData>();
     private Dictionary<string, PlayerData> _playerDataByProfileId = new Dictionary<string, PlayerData>();
     private Dictionary<int, PlayerListItem> _playerItems = new Dictionary<int, PlayerListItem>();
@@ -57,9 +66,22 @@ public class PlayerListItemManager : MonoBehaviour
         //Debug.Log($"[PlayerListItemManager] Registered PlayerListItem for client {clientId}");
     }
 
+    public bool UnregisterPlayerListItem(int clientId)
+    {
+        int keyToRemove = clientId;
+        Debug.Log($"[PlayerListItemManager] UnregisterPlayerListItem PlayerListItem for client {clientId}");
+        if (keyToRemove != -1)
+        {
+             _playerData.Remove(keyToRemove);
+            _playerItems.Remove(keyToRemove);
+            return true;
+        }
+        return false;
+    }
+
     public void SaveLobbyMemberPlayerData(string profileId, string name, Color color)
     {
-        _playerDataByProfileId[profileId] = new PlayerData {ProfileId = profileId, Name = name, Color = color };
+        _playerDataByProfileId[profileId] = new PlayerData { ProfileId = profileId, Name = name, Color = color };
         //Debug.Log($"[PlayerListItemManager] Saved PlayerData for profile '{profileId}': Name='{name}', Color={color}");
     }
 
@@ -210,12 +232,14 @@ public class PlayerListItemManager : MonoBehaviour
     public void ClearAll()
     {
         Debug.Log("[PlayerListItemManager] Clearing all player data and item references.");
-        
+
+        _serverStartTime = -1;
         _playerData.Clear();
 
         _globalPaintData.Clear();
         _playerItems.Clear();
     }
+    
     public List<int> GetAllPlayerIds()
     {
         List<int> playerIds = new List<int>();

@@ -25,6 +25,8 @@ public class PlayerListItem : NetworkBehaviour
 
     private Coroutine _clearCanvasCoroutine;
 
+    private int localClientId = -1;
+
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -39,21 +41,49 @@ public class PlayerListItem : NetworkBehaviour
             transform.localScale = Vector3.one;
         }
 
-        PlayerListItemManager.Instance.RegisterPlayerListItem(Owner.ClientId, this);
+        localClientId = Owner.ClientId;
+        PlayerListItemManager.Instance.RegisterPlayerListItem(localClientId, this);
 
+        // Host sets authoritative server start time if not already set
+        if (base.IsHost && PlayerListItemManager.Instance.ServerStartTime < 0)
+        {
+            double now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
+            PlayerListItemManager.Instance.SetServerStartTime(now);
+            SyncServerStartTimeObserversRpc(now);
+        }
         if (base.IsOwner)
         {
             _testButton = GetComponent<Button>();
-
             if (_currentCursor == null)
                 StartCoroutine(DelayedSpawnCursor());
         }
 
-        // When a new PlayerListItem is created, broadcast our info to all
-        EchoPlayerInfoToAllClientsServerRpc();
-        
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
+    }
+
+    // Called by a client to request the authoritative server start time from the host
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestServerStartTimeServerRpc()
+    {
+        // Only the host should respond
+        if (base.IsHost)
+        {
+            double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
+            SyncServerStartTimeObserversRpc(serverStartTime);
+        }
+    }
+
+    [ObserversRpc]
+    public void SyncServerStartTimeObserversRpc(double serverStartTime)
+    {
+        SyncServerStartTime(serverStartTime);
+    }
+
+    // Called on all clients to update their local server start time
+    public void SyncServerStartTime(double serverStartTime)
+    {
+        PlayerListItemManager.Instance.SetServerStartTime(serverStartTime);
     }
 
     // Called by a new client to request all others to echo their info
@@ -75,9 +105,6 @@ public class PlayerListItem : NetworkBehaviour
         }
     }
 
-    private TextMeshProUGUI _clearedCanvasMessage = null;
-    private float _bgImageWidth = 0f;
-    private const float SQUARE_IMAGE_OFFSET = 20f;
     private void Update()
     {
         if (_clearedCanvasMessage == null)
@@ -103,6 +130,17 @@ public class PlayerListItem : NetworkBehaviour
         {
             _bgImageWidth = bgImageWidth;
             _squareImage.transform.localPosition = new Vector3(_bgImageWidth - _squareImage.rectTransform.rect.width - SQUARE_IMAGE_OFFSET, 0, 0);
+        }
+
+        // Periodically echo player info to all clients
+        if (base.IsOwner && _hasInitialized)
+        {
+            _echoTimer += Time.deltaTime;
+            if (_echoTimer >= ECHO_INTERVAL)
+            {
+                EchoPlayerInfoToAllClientsServerRpc();
+                _echoTimer = 0f;
+            }
         }
     }
 
@@ -187,6 +225,11 @@ public class PlayerListItem : NetworkBehaviour
         return Guid.NewGuid().ToString("N").Substring(0, 8);
     }
 
+    void OnDestroy()
+    {
+        PlayerListItemManager.Instance.UnregisterPlayerListItem(Owner.ClientId);
+    }
+
     private Color GenerateRandomColor()
     {
         string hex = Guid.NewGuid().ToString("N").Substring(0, 6);
@@ -200,7 +243,7 @@ public class PlayerListItem : NetworkBehaviour
     {
         // If the clients, let's delay a bit, to let the server get there and we can echo back to it
         yield return null;
-        if (!Owner.IsHost) yield return new WaitForSeconds(0.5f);
+        if (!Owner.IsHost) yield return new WaitForSeconds(DELAY);
 
         if (_currentCursor == null)
             SpawnCursor(Owner);
@@ -213,6 +256,13 @@ public class PlayerListItem : NetworkBehaviour
         _networkManager.ServerManager.Spawn(nob, conn);
 
         SetCursorRef(nob);
+        StartCoroutine(UpdateData(conn));
+    }
+
+    IEnumerator UpdateData(NetworkConnection conn)
+    {
+        yield return new WaitForSeconds(SHORT_DELAY);
+
         PlayerData data;
         if (base.IsOwner && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
         {
@@ -231,6 +281,12 @@ public class PlayerListItem : NetworkBehaviour
         }
 
         UpdateIsHost(conn.IsHost);
+
+        // If joining client, request the server start time from the host
+        RequestServerStartTimeServerRpc();
+
+        // When a new PlayerListItem is created, broadcast our info to all
+        EchoPlayerInfoToAllClientsServerRpc();
 
         RequestStateSyncServerRpc();
     }
@@ -303,8 +359,20 @@ public class PlayerListItem : NetworkBehaviour
         if (string.IsNullOrEmpty(playerName))
         {
             string profileId = BCManager.Instance.bc.Client.ProfileId;
-            return "Guest_" + profileId.Substring(0, 8);
+            return "Guest_" + profileId.Substring(0, 4);
         }
         return playerName;
     }
+
+
+    private TextMeshProUGUI _clearedCanvasMessage = null;
+    private float _bgImageWidth = 0f;
+    private const float SQUARE_IMAGE_OFFSET = 20f;
+
+    private const float DELAY = 0.15f;
+    private const float SHORT_DELAY = 0.05f;
+    
+    private float _echoTimer = 0f;
+    private const float ECHO_INTERVAL = 3f; // secondss
+        
 }

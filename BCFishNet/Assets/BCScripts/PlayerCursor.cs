@@ -59,77 +59,77 @@ public class PlayerCursor : NetworkBehaviour
     void Update()
     {
         if (IsOwner && _enabled)
-{
-    Vector2 localMousePos;
-    RectTransformUtility.ScreenPointToLocalPointInRectangle(
-        _container,
-        Input.mousePosition,
-        null,
-        out localMousePos
-    );
-
-    // 1. Check if inside the container rect
-    bool insideContainer = RectTransformUtility.RectangleContainsScreenPoint(
-        _container,
-        Input.mousePosition,
-        null
-    );
-
-    // Always move the cursor to the mouse position (local)
-    _rect.anchoredPosition = localMousePos;
-
-    // 2. Check if container is the topmost element under mouse
-    bool hitContainerTopMost = false;
-    if (insideContainer)
-    {
-        PointerEventData pointer = new PointerEventData(EventSystem.current)
         {
-            position = Input.mousePosition
-        };
-
-        var results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointer, results);
-
-        // container is "valid" only if the first raycast hit is the container itself
-        if (results.Count > 0 && results[0].gameObject.transform == _container)
-        {
-            hitContainerTopMost = true;
-        }
-    }
-
-    // ---- Painting ----
-    if (Input.GetMouseButton(0) && hitContainerTopMost)
-    {
-        _timeSinceLastPaint += Time.deltaTime;
-
-        if (_timeSinceLastPaint >= _paintSpawnCooldown)
-        {
-            if (_lastPaintPosition != localMousePos)
+            Vector2 localMousePos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _container,
+                Input.mousePosition,
+                null,
+                out localMousePos
+            );
+        
+            // 1. Check if inside the container rect
+            bool insideContainer = RectTransformUtility.RectangleContainsScreenPoint(
+                _container,
+                Input.mousePosition,
+                null
+            );
+        
+            // Always move the cursor to the mouse position (local)
+            _rect.anchoredPosition = localMousePos;
+        
+            // 2. Check if container is the topmost element under mouse
+            bool hitContainerTopMost = false;
+            if (insideContainer)
             {
-                _timeSinceLastPaint = 0f;
-                SpawnPaintServer(localMousePos, _splatScale);
-                _lastPaintPosition = localMousePos;
+                PointerEventData pointer = new PointerEventData(EventSystem.current)
+                {
+                    position = Input.mousePosition
+                };
+        
+                var results = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(pointer, results);
+        
+                // container is "valid" only if the first raycast hit is the container itself
+                if (results.Count > 0 && results[0].gameObject.transform == _container)
+                {
+                    hitContainerTopMost = true;
+                }
+            }
+        
+            // ---- Painting ----
+            if (Input.GetMouseButton(0) && hitContainerTopMost)
+            {
+                _timeSinceLastPaint += Time.deltaTime;
+        
+                if (_timeSinceLastPaint >= _paintSpawnCooldown)
+                {
+                    if (_lastPaintPosition != localMousePos)
+                    {
+                        _timeSinceLastPaint = 0f;
+                        SpawnPaintServer(localMousePos, _splatScale);
+                        _lastPaintPosition = localMousePos;
+                    }
+                    else
+                    {
+                        // No movement → keep cooldown maxed
+                        _timeSinceLastPaint = _paintSpawnCooldown;
+                    }
+                }
             }
             else
             {
-                // No movement → keep cooldown maxed
+                // Reset timer if not actively painting
                 _timeSinceLastPaint = _paintSpawnCooldown;
+                _lastPaintPosition = Vector2.positiveInfinity;
+            }
+        
+            // ---- Shockwave ----
+            if (Input.GetMouseButtonDown(0) && hitContainerTopMost)
+            {
+                SpawnShockwaveServer(localMousePos);
             }
         }
-    }
-    else
-    {
-        // Reset timer if not actively painting
-        _timeSinceLastPaint = _paintSpawnCooldown;
-        _lastPaintPosition = Vector2.positiveInfinity;
-    }
-
-    // ---- Shockwave ----
-    if (Input.GetMouseButtonDown(0) && hitContainerTopMost)
-    {
-        SpawnShockwaveServer(localMousePos);
-    }
-}
     }
 
     public void UpdateSplatScale(float scale)
@@ -207,12 +207,18 @@ public class PlayerCursor : NetworkBehaviour
 
         Debug.Log($"[PlayerCursor] Restoring {paintDataList.Count} global paint splats");
 
+        int count = 0;
         foreach (var data in paintDataList)
         {
             // Use saved rotation and scale if available, otherwise fallback
             float rotation = data.rotation != 0f ? data.rotation : Random.Range(0f, 360f);
             float scale = data.scale != 0f ? data.scale : 1f;
             ObserversRpcSpawnPaint(data.anchoredPosition, data.color, rotation, scale);
+            count++;
+            if (count % 200 == 0)
+            {
+                yield return null;
+            }
         }
         yield return null;
 
