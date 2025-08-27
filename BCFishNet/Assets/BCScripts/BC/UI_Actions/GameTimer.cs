@@ -1,10 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 using FishNet;
 using FishNet.Connection;
 using TMPro;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class GameTimer : MonoBehaviour
 {
@@ -22,10 +22,21 @@ public class GameTimer : MonoBehaviour
     {
         float clientUptime = 0f;
         float serverUptime = 0f;
+        double serverStartTime = -1;
         if (_networkManager != null && _networkManager.TimeManager != null)
         {
             clientUptime = _networkManager.TimeManager.ClientUptime;
-            serverUptime = _networkManager.TimeManager.ServerUptime;
+            // Use authoritative server start time if available
+            serverStartTime = PlayerListItemManager.Instance != null ? PlayerListItemManager.Instance.ServerStartTime : -1;
+            double now = GetCurrentTime();
+            if (serverStartTime >= 0)
+            {
+                serverUptime = (float)(now - serverStartTime);
+            }
+            else
+            {
+                serverUptime = _networkManager.TimeManager.ServerUptime;
+            }
         }
         else
         {
@@ -39,15 +50,9 @@ public class GameTimer : MonoBehaviour
         }
     }
 
-    private double GetCurrentNetworkTime()
+    private double GetCurrentTime()
     {
-        // Use FishNet's TimeManager if available
-        var nm = FishNet.InstanceFinder.NetworkManager;
-        if (nm != null && nm.TimeManager != null)
-        {
-            return nm.TimeManager.ServerUptime;
-        }
-        // Fallback to local time if not available
-        return Time.timeAsDouble;
+        // Use epoch time in seconds (with millisecond precision) to match PlayerListItem
+        return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
     }
 }
