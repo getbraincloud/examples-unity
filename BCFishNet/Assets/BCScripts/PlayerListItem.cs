@@ -58,10 +58,35 @@ public class PlayerListItem : NetworkBehaviour
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
     }
+    
     void Start()
     {
         localClientId = Owner.ClientId;
         PlayerListItemManager.Instance.RegisterPlayerListItem(localClientId, this);
+    }
+
+    // Called by a client to request the authoritative server start time from the host
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestServerStartTimeServerRpc()
+    {
+        // Only the host should respond
+        if (base.IsHost)
+        {
+            double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
+            SyncServerStartTimeObserversRpc(serverStartTime);
+        }
+    }
+
+    [ObserversRpc]
+    public void SyncServerStartTimeObserversRpc(double serverStartTime)
+    {
+        SyncServerStartTime(serverStartTime);
+    }
+
+    // Called on all clients to update their local server start time
+    public void SyncServerStartTime(double serverStartTime)
+    {
+        PlayerListItemManager.Instance.SetServerStartTime(serverStartTime);
     }
 
     // Called by a client to request the authoritative server start time from the host
