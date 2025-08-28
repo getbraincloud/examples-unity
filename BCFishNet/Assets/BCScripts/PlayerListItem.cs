@@ -141,8 +141,23 @@ public class PlayerListItem : NetworkBehaviour
             Color newColor = playerData.Color;
 
             TestChangeServer(profileId, newName, newColor);
+
+            // If this client is also the server, echo the server time to all clients
+            if (base.IsServer)
+            {
+                double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
+                SyncServerTimeToAllClients(serverStartTime);
+            }
         }
     }
+
+    [ObserversRpc]
+    void SyncServerTimeToAllClients(double serverStartTime)
+    {
+        SyncServerStartTime(serverStartTime);
+    
+    }
+
     public void OnClearCanvasClicked()
     {
         if (base.IsServer)
