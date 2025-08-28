@@ -41,6 +41,8 @@ public class PlayerListItem : NetworkBehaviour
             transform.localScale = Vector3.one;
         }
 
+        localClientId = Owner.ClientId;
+
         // Host sets authoritative server start time if not already set
         if (base.IsHost && PlayerListItemManager.Instance.ServerStartTime < 0)
         {
@@ -142,19 +144,6 @@ public class PlayerListItem : NetworkBehaviour
 
             if (_echoTimer >= ECHO_INTERVAL)
             {
-                PlayerData data;
-                if (!_hasInitialized && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
-                {
-                    TestChange(data.ProfileId, data.Name, data.Color);
-                }
-
-                if (base.IsHost && PlayerListItemManager.Instance.ServerStartTime < 0)
-                {
-                    double now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
-                    PlayerListItemManager.Instance.SetServerStartTime(now);
-                    SyncServerStartTimeObserversRpc(now);
-                }
-
                 if (_hasInitialized)
                 {
                     EchoPlayerInfoToAllClientsServerRpc();
@@ -247,7 +236,7 @@ public class PlayerListItem : NetworkBehaviour
 
     void OnDestroy()
     {
-        PlayerListItemManager.Instance.UnregisterPlayerListItem(Owner.ClientId);
+        PlayerListItemManager.Instance.UnregisterPlayerListItem(localClientId);
     }
 
     private Color GenerateRandomColor()
@@ -262,8 +251,7 @@ public class PlayerListItem : NetworkBehaviour
     IEnumerator DelayedSpawnCursor()
     {
         // If the clients, let's delay a bit, to let the server get there and we can echo back to it
-        yield return null;
-        if (!Owner.IsHost) yield return new WaitForSeconds(DELAY);
+        yield return new WaitForSeconds(SHORT_DELAY);
 
         if (_currentCursor == null)
             SpawnCursor(Owner);
@@ -320,7 +308,7 @@ public class PlayerListItem : NetworkBehaviour
     [ObserversRpc]
     private void SetCursorRef(NetworkObject nob)
     {
-        Debug.Log($"Set cursor ref for client {Owner.ClientId}");
+        Debug.Log($"Set cursor ref for client {localClientId}");
         _currentCursor = nob.GetComponent<PlayerCursor>();
     }
 
@@ -330,7 +318,7 @@ public class PlayerListItem : NetworkBehaviour
         _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
         _hasInitialized = true;
 
-        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
+        PlayerListItemManager.Instance.SavePlayerData(localClientId, _playerData);
 
         TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
         UpdateIsHost(Owner.IsHost);

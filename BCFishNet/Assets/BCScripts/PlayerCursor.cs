@@ -1,4 +1,5 @@
 using FishNet;
+using FishNet.Connection;
 using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
@@ -41,7 +42,8 @@ public class PlayerCursor : NetworkBehaviour
 
         if (IsServer)
         {
-            RestoreGlobalPaintMap();
+            // Only send the paint map to the joining client
+            RestoreGlobalPaintMap(Owner);
         }
     }
 
@@ -50,6 +52,7 @@ public class PlayerCursor : NetworkBehaviour
         _rect = GetComponent<RectTransform>();
         _container = transform.parent.gameObject.GetComponent<RectTransform>();
     }
+
     private float _paintSpawnCooldown = 0.015f; // Adjust delay between spawns (in seconds)
     private float _timeSinceLastPaint = 0f;
     private bool _enabled = true;
@@ -179,6 +182,8 @@ public class PlayerCursor : NetworkBehaviour
         if (IsServer)
             return;
 
+        Debug.Log($"[PlayerCursor] ObserversRpcSpawnPaint");
+
         PaintSplatData paintSplatData = new PaintSplatData
         {
             color = color,
@@ -194,10 +199,14 @@ public class PlayerCursor : NetworkBehaviour
         }
     }
 
-    public void RestoreGlobalPaintMap()
+
+    public void RestoreGlobalPaintMap(NetworkConnection conn = null)
     {
         _enabled = false; // Disable cursor updates while restoring paint
-        StartCoroutine(RestoreGlobalPaintCoroutine());
+        if (conn != null)
+            StartCoroutine(RestoreGlobalPaintCoroutine_Target(conn));
+        else
+            StartCoroutine(RestoreGlobalPaintCoroutine());
     }
 
     private IEnumerator RestoreGlobalPaintCoroutine()
@@ -223,6 +232,50 @@ public class PlayerCursor : NetworkBehaviour
         yield return null;
 
         _enabled = true; // Re-enable cursor updates after restoring paint
+    }
+
+    private IEnumerator RestoreGlobalPaintCoroutine_Target(NetworkConnection conn)
+    {
+        var paintDataList = PlayerListItemManager.Instance.GetGlobalPaintData();
+        Transform container = UIContainerCache.GetCursorContainer();
+
+        Debug.Log($"[PlayerCursor] Restoring {paintDataList.Count} global paint splats to joining client");
+
+        int count = 0;
+        foreach (var data in paintDataList)
+        {
+            float rotation = data.rotation != 0f ? data.rotation : Random.Range(0f, 360f);
+            float scale = data.scale != 0f ? data.scale : 1f;
+            TargetRpcSpawnPaint(conn, data.anchoredPosition, data.color, rotation, scale);
+            count++;
+            if (count % 200 == 0)
+            {
+                yield return null;
+            }
+        }
+        yield return null;
+
+        _enabled = true;
+    }
+
+    [TargetRpc]
+    private void TargetRpcSpawnPaint(NetworkConnection conn, Vector3 position, Color color, float rotation, float scale)
+    {
+
+        Debug.Log($"[PlayerCursor] Restoring TargetRpcSpawnPaint");
+        PaintSplatData paintSplatData = new PaintSplatData
+        {
+            color = color,
+            anchoredPosition = position,
+            rotation = rotation,
+            scale = scale
+        };
+
+        if (PlayerListItemManager.Instance.SaveGlobalPaintData(paintSplatData))
+        {
+            PaintSplat paint = Instantiate(_paintPrefab, _container);
+            paint.Initialize(position, color, rotation, scale);
+        }
     }
 
     [ObserversRpc]
