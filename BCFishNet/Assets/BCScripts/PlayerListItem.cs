@@ -48,7 +48,6 @@ public class PlayerListItem : NetworkBehaviour
         {
             double now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
             PlayerListItemManager.Instance.SetServerStartTime(now);
-            SyncServerStartTimeObserversRpc(now);
         }
         if (base.IsOwner)
         {
@@ -67,20 +66,21 @@ public class PlayerListItem : NetworkBehaviour
         PlayerListItemManager.Instance.RegisterPlayerListItem(localClientId, this);
     }
 
+
     // Called by a client to request the authoritative server start time from the host
     [ServerRpc(RequireOwnership = false)]
-    public void RequestServerStartTimeServerRpc()
+    public void RequestServerStartTimeServerRpc(NetworkConnection conn = null)
     {
         // Only the host should respond
-        if (base.IsHost)
+        if (base.IsHost && conn != null)
         {
             double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
-            SyncServerStartTimeObserversRpc(serverStartTime);
+            TargetServerStartTime(conn, serverStartTime);
         }
     }
 
-    [ObserversRpc]
-    public void SyncServerStartTimeObserversRpc(double serverStartTime)
+    [TargetRpc]
+    private void TargetServerStartTime(NetworkConnection conn, double serverStartTime)
     {
         SyncServerStartTime(serverStartTime);
     }
@@ -91,24 +91,6 @@ public class PlayerListItem : NetworkBehaviour
         PlayerListItemManager.Instance.SetServerStartTime(serverStartTime);
     }
 
-    // Called by a new client to request all others to echo their info
-    [ServerRpc(RequireOwnership = false)]
-    void EchoPlayerInfoToAllClientsServerRpc()
-    {
-        // Tell all clients to echo their info
-        EchoPlayerInfoToAllClientsObserversRpc();
-    }
-
-    [ObserversRpc]
-    void EchoPlayerInfoToAllClientsObserversRpc()
-    {
-        // Each client sends their info to everyone
-        if (_hasInitialized)
-        {
-            string playerName = string.IsNullOrEmpty(_playerData.Name) ? "Guest_" + _playerData.ProfileId.Substring(0, 8) : _playerData.Name;
-            TestChangeServer(_playerData.ProfileId, playerName, _playerData.Color);
-        }
-    }
 
     private void Update()
     {
@@ -137,28 +119,16 @@ public class PlayerListItem : NetworkBehaviour
             _squareImage.transform.localPosition = new Vector3(_bgImageWidth - _squareImage.rectTransform.rect.width - SQUARE_IMAGE_OFFSET, 0, 0);
         }
 
-        // Periodically echo player info to all clients
+        // Periodically update local player info
         if (base.IsOwner)
         {
             _echoTimer += Time.deltaTime;
-
             if (_echoTimer >= ECHO_INTERVAL)
             {
-                if (_hasInitialized)
-                {
-                    EchoPlayerInfoToAllClientsServerRpc();
-                }
-                
+                OnTestButtonClicked();
                 _echoTimer = 0f;
             }
         }
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void RequestStateSyncServerRpc()
-    {
-        // Instead of just syncing this client, trigger all clients to echo their info
-        EchoPlayerInfoToAllClientsServerRpc();
     }
 
     public void OnTestButtonClicked()
@@ -291,12 +261,7 @@ public class PlayerListItem : NetworkBehaviour
         UpdateIsHost(conn.IsHost);
 
         // If joining client, request the server start time from the host
-        RequestServerStartTimeServerRpc();
-
-        // When a new PlayerListItem is created, broadcast our info to all
-        EchoPlayerInfoToAllClientsServerRpc();
-
-        RequestStateSyncServerRpc();
+        RequestServerStartTimeServerRpc(conn);
     }
 
     [ObserversRpc]
@@ -340,7 +305,7 @@ public class PlayerListItem : NetworkBehaviour
         _currentCursor?.ChangeColor(newColor);
         _hasInitialized = true;
 
-        PlayerListItemManager.Instance.SavePlayerData(localClientId, _playerData);
+        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
     }
 
     public void InitializePlayer()
