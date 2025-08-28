@@ -205,7 +205,7 @@ public class BCManager : MonoBehaviour
             UIManager uiManager = FindObjectOfType<UIManager>();
             if (uiManager != null)
             {
-                uiManager.OnFindLobbyFromPrevious();
+                //uiManager.OnFindLobbyFromPrevious();
             }
         }
     }

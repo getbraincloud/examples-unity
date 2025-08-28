@@ -211,6 +211,8 @@ public class PlayerCursor : NetworkBehaviour
 
     private IEnumerator RestoreGlobalPaintCoroutine()
     {
+        yield return new WaitForSeconds(0.15f);
+
         var paintDataList = PlayerListItemManager.Instance.GetGlobalPaintData();
         Transform container = UIContainerCache.GetCursorContainer();
 
@@ -236,6 +238,8 @@ public class PlayerCursor : NetworkBehaviour
 
     private IEnumerator RestoreGlobalPaintCoroutine_Target(NetworkConnection conn)
     {
+        yield return new WaitForSeconds(0.15f);
+
         var paintDataList = PlayerListItemManager.Instance.GetGlobalPaintData();
         Transform container = UIContainerCache.GetCursorContainer();
 

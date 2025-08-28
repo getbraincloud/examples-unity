@@ -256,23 +256,8 @@ public class PlayerListItem : NetworkBehaviour
     {
         yield return new WaitForSeconds(SHORT_DELAY);
 
-        PlayerData data;
-        if (base.IsOwner && PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(BCManager.Instance.bc.Client.ProfileId, out data))
-        {
-            Debug.Log($"[PlayerListItem] Reusing saved data for profileid {BCManager.Instance.bc.Client.ProfileId}, {data.Name}, {data.Color} ");
-            TestChange(data.ProfileId, data.Name, data.Color);
-        }
-        else if (PlayerListItemManager.Instance.TryGetPlayerData(conn.ClientId, out data))
-        {
-            Debug.Log($"[PlayerListItem] Reusing saved data for client {conn.ClientId}, {data.Name}, {data.Color} ");
-            TestChange(data.ProfileId, data.Name, data.Color);
-        }
-        else
-        {
-            Debug.Log($"[PlayerListItem] No data for client {conn.ClientId}, randomizing");
-            Randomize();
-        }
-
+        OnTestButtonClicked();
+        
         UpdateIsHost(conn.IsHost);
 
         // If joining client, request the server start time from the host
