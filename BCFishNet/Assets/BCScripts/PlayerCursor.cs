@@ -174,7 +174,6 @@ public class PlayerCursor : NetworkBehaviour
         }
     }
 
-
     [ObserversRpc]
     private void ObserversRpcSpawnPaint(Vector3 position, Color color, float rotation, float scale)
     {
