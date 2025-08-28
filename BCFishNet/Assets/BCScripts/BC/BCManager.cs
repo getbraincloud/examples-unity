@@ -167,6 +167,49 @@ public class BCManager : MonoBehaviour
         }
     }
 
+    private List<string> listToJoinWith = new List<string>();
+    public void OnRelayFailure(int statusCode, int reasonCode, string statusMessage, object cbObject)
+    {
+        Debug.LogWarning($"RelayService Connection Failure - statusMessage: {statusCode} code: {reasonCode} error: {statusMessage}");
+
+        listToJoinWith.Clear();
+
+        List<PlayerData> tempList = PlayerListItemManager.Instance.GetAllPlayerDataByProfileId();
+        // Output the contents of listToJoinWith for debugging
+        if (listToJoinWith != null && tempList.Count > 0)
+        {
+            foreach (var player in tempList)
+            {
+                listToJoinWith.Add(player.ProfileId);
+                Debug.Log($"[BCManager] listToJoinWith: ProfileId={player.ProfileId}, Name={player.Name}, Color={player.Color}");
+            }
+        }
+        else
+        {
+            Debug.Log("[BCManager] listToJoinWith is empty or null.");
+        }
+
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnMainSceneLoadedFromGameError;
+        SceneManager.LoadScene("Main");
+    }
+
+    public void OnMainSceneLoadedFromGameError(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
+    {
+
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnMainSceneLoadedFromGameError;
+
+        // this may include themselves
+        if (listToJoinWith.Count > 1)
+        {
+            // find the UI manager, and call the quick find
+            UIManager uiManager = FindObjectOfType<UIManager>();
+            if (uiManager != null)
+            {
+                uiManager.OnFindLobbyFromPrevious();
+            }
+        }
+    }
+
     public void FindLobby(Action<string> OnEntryId)
     {
         var lobbyParams = CreateLobbyParams(OnEntryId);
@@ -216,6 +259,25 @@ public class BCManager : MonoBehaviour
             lobbyParams.success
         );
     }
+    
+    public void QuickFindLobbyWithPreviousMembers(Action<string> OnEntryId)
+    {
+        var lobbyParams = CreateLobbyParams(OnEntryId);
+
+        _bc.LobbyService.FindOrCreateLobby(
+            BCManager.LOBBY_ID,
+            0,
+            1,
+            lobbyParams.algo,
+            lobbyParams.filters,
+            false,
+            lobbyParams.extra,
+            "all",
+            lobbyParams.settings,
+            listToJoinWith.ToArray(), // list of strings
+            lobbyParams.success
+        );
+    }
 
 
     private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
@@ -229,7 +291,7 @@ public class BCManager : MonoBehaviour
 
         var filters = new Dictionary<string, object>();
         filters["appVersion"] = Application.version;
-        
+
         var extra = new Dictionary<string, object>();
 
         var settings = new Dictionary<string, object>();
@@ -277,7 +339,7 @@ public class BCManager : MonoBehaviour
         Debug.Log("[BCFishNet] DelayedConnect called");
 
         BCFishNetTransport BCFishNet = FindObjectOfType<BCFishNetTransport>();
-        BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort);
+        BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort, OnRelayFailure);
 
         if (BCFishNet != null)
         {

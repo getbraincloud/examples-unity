@@ -41,6 +41,8 @@ public class PlayerListItem : NetworkBehaviour
             transform.localScale = Vector3.one;
         }
 
+        localClientId = Owner.ClientId;
+
         // Host sets authoritative server start time if not already set
         if (base.IsHost && PlayerListItemManager.Instance.ServerStartTime < 0)
         {
@@ -247,7 +249,7 @@ public class PlayerListItem : NetworkBehaviour
 
     void OnDestroy()
     {
-        PlayerListItemManager.Instance.UnregisterPlayerListItem(Owner.ClientId);
+        PlayerListItemManager.Instance.UnregisterPlayerListItem(localClientId);
     }
 
     private Color GenerateRandomColor()
@@ -320,7 +322,7 @@ public class PlayerListItem : NetworkBehaviour
     [ObserversRpc]
     private void SetCursorRef(NetworkObject nob)
     {
-        Debug.Log($"Set cursor ref for client {Owner.ClientId}");
+        Debug.Log($"Set cursor ref for client {localClientId}");
         _currentCursor = nob.GetComponent<PlayerCursor>();
     }
 
@@ -330,7 +332,7 @@ public class PlayerListItem : NetworkBehaviour
         _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
         _hasInitialized = true;
 
-        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
+        PlayerListItemManager.Instance.SavePlayerData(localClientId, _playerData);
 
         TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
         UpdateIsHost(Owner.IsHost);
@@ -352,7 +354,7 @@ public class PlayerListItem : NetworkBehaviour
         _currentCursor?.ChangeColor(newColor);
         _hasInitialized = true;
 
-        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
+        PlayerListItemManager.Instance.SavePlayerData(localClientId, _playerData);
     }
 
     public void InitializePlayer()

@@ -23,27 +23,17 @@ namespace BCFishNet
     {
         #region Serialized Fields.
         [SerializeField] private string _serverBindAddress = "127.0.0.1";
-        [SerializeField] private ushort _port = 7770;
-        [SerializeField] private ushort _maximumClients = 10;
         [SerializeField] private string _clientAddress = string.Empty;
         [SerializeField] private string _roomAddress = string.Empty;
         [SerializeField] private string _roomPort = string.Empty;
+        [SerializeField] private ushort _port = 7770;
+        [SerializeField] private ushort _maximumClients = 10;
         #endregion
 
         #region Private Fields.
         private BrainCloudWrapper _brainCloud = null;
-        private bool _isServer = false;
         private Transport _transport;
-
-        private int hostId = INVALID_HOST_ID;
-        private int localClientId = 0;
-        private string hostCxId = string.Empty;
-
-        private bool _shutdownCalled = false;
-        private int[] _mtus;
-        private const int MTU = 1012;
-
-        private const int INVALID_HOST_ID = 40;
+        private FailureCallback relayFailureCallback = null; 
 
         private List<int> _connectedClients = new List<int>();
 
@@ -51,6 +41,17 @@ namespace BCFishNet
         private ConcurrentQueue<Packet> _incomingLocalPackets = new();
         private ConcurrentQueue<Packet> _incomingServerPackets = new();
         private Queue<Packet> _outgoingPackets = new();
+
+        private int[] _mtus;
+        private int hostId = INVALID_HOST_ID;
+        private int localClientId = 0;
+        private const int MTU = 1012;
+        private const int INVALID_HOST_ID = 40;
+        
+        private bool _shutdownCalled = false;
+        private bool _isServer = false;
+
+        private string hostCxId = string.Empty;
 
         #endregion
 
@@ -63,9 +64,10 @@ namespace BCFishNet
         #endregion
 
         #region Initialization.
-        public void Config(BrainCloudWrapper bcWrapper, string address, string relayPasscode, string currentLobbyId, ushort port)
+        public void Config(BrainCloudWrapper bcWrapper, string address, string relayPasscode, string currentLobbyId, ushort port, FailureCallback failureCallback)
         {
             _brainCloud = bcWrapper;
+            relayFailureCallback = failureCallback;
             SetClientAddress(address);
             SetRelayPasscode(relayPasscode);
             SetCurrentLobbyId(currentLobbyId);
@@ -504,18 +506,8 @@ namespace BCFishNet
                 HandleClientConnectionState(new ClientConnectionStateArgs(LocalConnectionState.Started, Index));
             };
 
-            FailureCallback failureCallback = (statusMessage, code, error, cbObject) =>
-            {
-                Debug.LogWarning($"RelayService Connection Failure - statusMessage: {statusMessage} code: {code} error: {error}");
-
-                // 
-                // there was a failure lets go back to the main screen and closing things down
-                Debug.LogWarning($"Going Back to the main menu to allow rejoining - Display connection error message");
-                SceneManager.LoadScene("Main");
-                
-            };
-
-            _brainCloud.RelayService.Connect(RelayConnectionType.UDP, connectionOptions, successCallback, failureCallback);
+            // pass this over
+            _brainCloud.RelayService.Connect(RelayConnectionType.UDP, connectionOptions, successCallback, relayFailureCallback);
 
             return true;
         }
