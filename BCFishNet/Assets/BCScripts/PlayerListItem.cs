@@ -340,7 +340,7 @@ public class PlayerListItem : NetworkBehaviour
         _currentCursor?.ChangeColor(newColor);
         _hasInitialized = true;
 
-        PlayerListItemManager.Instance.SavePlayerData(Owner.ClientId, _playerData);
+        PlayerListItemManager.Instance.SavePlayerData(localClientId, _playerData);
     }
 
     public void InitializePlayer()

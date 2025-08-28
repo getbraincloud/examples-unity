@@ -70,13 +70,25 @@ public class PlayerListItemManager : MonoBehaviour
     {
         int keyToRemove = clientId;
         Debug.Log($"[PlayerListItemManager] UnregisterPlayerListItem PlayerListItem for client {clientId}");
-        if (keyToRemove != -1)
+
+        // find the key first, confirm its not the currently active player
+        PlayerData data;
+        if (TryGetPlayerData(clientId, out data) && data.ProfileId != BCManager.Instance.bc.Client.ProfileId)
         {
-             _playerData.Remove(keyToRemove);
-            _playerItems.Remove(keyToRemove);
-            return true;
+            if (keyToRemove != -1)
+            {
+                _playerData.Remove(keyToRemove);
+                _playerItems.Remove(keyToRemove);
+                return true;
+            }
         }
+        
         return false;
+    }
+
+    public List<PlayerData> GetAllPlayerDataByProfileId()
+    {
+        return new List<PlayerData>(_playerDataByProfileId.Values);
     }
 
     public void SaveLobbyMemberPlayerData(string profileId, string name, Color color)
@@ -177,6 +189,7 @@ public class PlayerListItemManager : MonoBehaviour
             Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for client {clientId}: Name='{data.Name}', Color={data.Color}");
         return found;
     }
+    
     public bool TryGetPlayerDataByProfileId(string profileId, out PlayerData data)
     {
         //Debug.Log("[PlayerListItemManager] Retrieving PlayerData by profile ID: " + profileId);
@@ -189,22 +202,6 @@ public class PlayerListItemManager : MonoBehaviour
         if (found)
             Debug.Log($"[PlayerListItemManager] Retrieved PlayerData for profile '{profileId}': Name='{data.Name}', Color={data.Color}");
         return found;
-    }
-
-    public PlayerListItem FindPlayerListItemByClientId(int clientId)
-    {
-        bool found = _playerItems.TryGetValue(clientId, out PlayerListItem item);
-        if (found)
-            Debug.Log($"[PlayerListItemManager] Found PlayerListItem for client {clientId}");
-        return item;
-    }   
-
-    public PlayerListItem FindPlayerListItemByConnection(NetworkConnection conn)
-    {
-        bool found = _playerItems.TryGetValue(conn.ClientId, out PlayerListItem item);
-        if (found)
-            Debug.Log($"[PlayerListItemManager] Found PlayerListItem for client {conn.ClientId}");
-        return item;
     }
 
     public void DestroyAllGlobalPaintData()
@@ -228,7 +225,7 @@ public class PlayerListItemManager : MonoBehaviour
         Debug.Log("[PlayerListItemManager] Clearing global paint data.");
         _globalPaintData.Clear();
     }
-    
+
     public void ClearAll()
     {
         Debug.Log("[PlayerListItemManager] Clearing all player data and item references.");
@@ -238,6 +235,21 @@ public class PlayerListItemManager : MonoBehaviour
 
         _globalPaintData.Clear();
         _playerItems.Clear();
+
+        // remove all except the current player so the colours don't change
+        string myProfileId = BCManager.Instance.bc.Client.ProfileId;
+        var keysToRemove = new List<string>();
+        foreach (var kvp in _playerDataByProfileId)
+        {
+            if (kvp.Key != myProfileId)
+            {
+                keysToRemove.Add(kvp.Key);
+            }
+        }
+        foreach (var key in keysToRemove)
+        {
+            _playerDataByProfileId.Remove(key);
+        }
     }
     
     public List<int> GetAllPlayerIds()

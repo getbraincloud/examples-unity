@@ -13,6 +13,8 @@ public class GameTimer : MonoBehaviour
 
     private FishNet.Managing.NetworkManager _networkManager;
 
+    private float MAX_UP_TIME = 120.0f;// Should we get this from the 
+
     void Start()
     {
         _networkManager = FishNet.InstanceFinder.NetworkManager;
@@ -20,12 +22,10 @@ public class GameTimer : MonoBehaviour
 
     void Update()
     {
-        float clientUptime = 0f;
         float serverUptime = 0f;
         double serverStartTime = -1;
         if (_networkManager != null && _networkManager.TimeManager != null)
         {
-            clientUptime = _networkManager.TimeManager.ClientUptime;
             // Use authoritative server start time if available
             serverStartTime = PlayerListItemManager.Instance != null ? PlayerListItemManager.Instance.ServerStartTime : -1;
             double now = GetCurrentTime();
@@ -41,12 +41,23 @@ public class GameTimer : MonoBehaviour
         else
         {
             // Fallback to local time if TimeManager is not available
-            clientUptime = serverUptime = (float)Time.timeAsDouble;
+            serverUptime = (float)Time.timeAsDouble;
         }
 
+        float timeLeft = MAX_UP_TIME - serverUptime;
         if (countdownString != null)
         {
-            countdownString.text = $"{TimerUtils.FormatTime(clientUptime)} / {TimerUtils.FormatTime(serverUptime)}";
+            if (timeLeft > 0)
+            {
+                countdownString.color = Color.white;
+                countdownString.text = TimerUtils.FormatTime(Mathf.Max(0, timeLeft));
+            }
+            else
+            {
+                countdownString.color = Color.red;
+                float overtime = -timeLeft;
+                countdownString.text = $"Server will shutdown soon: {TimerUtils.FormatTime(overtime)}";
+            }
         }
     }
 

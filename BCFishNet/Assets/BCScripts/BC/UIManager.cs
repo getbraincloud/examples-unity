@@ -230,6 +230,7 @@ public class UIManager : MonoBehaviour
             _cancelMatchmakingButton.gameObject.SetActive(true);
         });
     }
+
     private void OnFindLobbyClicked()
     {
         _mainStatus.text = "Finding lobby...";
@@ -238,6 +239,27 @@ public class UIManager : MonoBehaviour
 
         BCManager.Instance.FindLobby((entryId) =>
         {
+            _currentEntryId = entryId;
+            //temp disable lobby buttons
+            _findLobbyButton.gameObject.SetActive(false);
+            _createLobbyButton.gameObject.SetActive(false);
+            _findCreateLobbyButton.gameObject.SetActive(false);
+
+            _displayNamePanel.SetActive(false);
+            _cancelMatchmakingButton.gameObject.SetActive(true);
+        });
+    }
+
+    public void OnFindLobbyFromPrevious()
+    {
+        _mainStatus.text = "Finding lobby...";
+        _loadingView.SetActive(true);
+        _loadingStatusText.text = "Finding lobby...";
+
+        BCManager.Instance.QuickFindLobbyWithPreviousMembers((entryId) =>
+        {
+            _mainStatus.text = "Found Lobby with Previous Members";
+            _loadingStatusText.text = "Found Lobby with Previous Members";
             _currentEntryId = entryId;
             //temp disable lobby buttons
             _findLobbyButton.gameObject.SetActive(false);
