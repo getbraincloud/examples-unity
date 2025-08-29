@@ -44,12 +44,38 @@ public class BCManager : MonoBehaviour
 
 
     public string RelayPasscode;
-    public string CurrentLobbyId;
+    public string CurrentLobbyId = "";
 
     public string RoomAddress;
     public ushort RoomPort;
 
     public string LobbyOwnerId;
+
+    public List<LobbyMemberData> LobbyMembersData => new List<LobbyMemberData>(memberData);
+    private List<LobbyMemberData> memberData = new List<LobbyMemberData>();
+
+    public void AddMember(LobbyMemberData member)
+    {
+        int index = memberData.FindIndex(m => m.ProfileId == member.ProfileId);
+        if (index >= 0)
+        {
+            memberData[index] = member;
+        }
+        else
+        {
+            memberData.Add(member);
+        }
+    }
+
+    public void RemoveMember(LobbyMemberData member)
+    {
+        memberData.Remove(member);
+    }
+
+    public void ClearMembers()
+    {
+        memberData.Clear();
+    }
 
     private void Awake()
     {
@@ -74,6 +100,14 @@ public class BCManager : MonoBehaviour
     {
         get => _externalId;
         set => _externalId = value;
+    }
+
+    public void LeaveCurrentLobby()
+    {
+        bc.LobbyService.LeaveLobby(CurrentLobbyId);
+        CurrentLobbyId = "";
+
+        PlayerListItemManager.Instance.ClearAll();
     }
 
     private void OnAuthSuccess(string responseData, object cbObject, Action<bool> callback)

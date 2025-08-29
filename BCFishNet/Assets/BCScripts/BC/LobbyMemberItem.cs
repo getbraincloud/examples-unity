@@ -10,30 +10,19 @@ public class LobbyMemberItem : MonoBehaviour
     [SerializeField] private TMP_Text playerName;
     [SerializeField] private GameObject _highlightHolder, _readyStateHolder, _notReadyStateHolder;
 
-    public void Config(
-        string playerNameValue,
-        bool readyStateValue,
-        string profileId,
-        short netId,
-        int rating,
-        string cXId,
-        Dictionary<string, object> extraData
-    )
+    private LobbyMemberData _data;
+    public LobbyMemberData Data => _data;
+
+    public void Config(LobbyMemberData data)
     {
-        _playerNameValue = playerNameValue;
-        _readyStateValue = readyStateValue;
-        _profileId = profileId;
-        _netId = netId;
-        _rating = rating;
-        _cXId = cXId;
-        _extraData = extraData;
+        _data = data;
 
         // add the player name value and default colour to it
-        _playerData.Name =  !string.IsNullOrEmpty(_playerNameValue) ? _playerNameValue : "Guest_" + _profileId.Substring(0, 4);
-        PlayerData data;
-        if (PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(_profileId, out data))
+        _playerData.Name = !string.IsNullOrEmpty(_data.PlayerNameValue) ? _data.PlayerNameValue : "Guest_" + _data.ProfileId.Substring(0, 4);
+        PlayerData pdata;
+        if (PlayerListItemManager.Instance.TryGetPlayerDataByProfileId(_data.ProfileId, out pdata))
         {
-            _playerData.Color = data.Color;
+            _playerData.Color = pdata.Color;
         }
         else
         {
@@ -42,7 +31,7 @@ public class LobbyMemberItem : MonoBehaviour
 
         UpdateUI();
     }
-    
+
     void Start()
     {
         UpdateUI();
@@ -59,7 +48,7 @@ public class LobbyMemberItem : MonoBehaviour
         }
         _playerData.Color = color;
 
-        PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(_profileId, _playerNameValue, _playerData.Color);
+        PlayerListItemManager.Instance.SaveLobbyMemberPlayerData(_data.ProfileId, _data.PlayerNameValue, _playerData.Color);
     }
 
     public void SendCurrentColourSignal()
@@ -98,32 +87,46 @@ public class LobbyMemberItem : MonoBehaviour
 
     public void UpdateUI()
     {
-        playerName.text = !string.IsNullOrEmpty(_playerNameValue) ? _playerNameValue : "Guest_" + _profileId.Substring(0, 4);
-        playerName.text += _readyStateValue ? "\n(Ready)" : "\n(Not Ready)";
-        _readyStateHolder.SetActive(_readyStateValue);
-        _notReadyStateHolder.SetActive(!_readyStateValue);
+        playerName.text = !string.IsNullOrEmpty(_data.PlayerNameValue) ? _data.PlayerNameValue : "Guest_" + _data.ProfileId.Substring(0, 4);
+        playerName.text += _data.ReadyStateValue ? "\n(Ready)" : "\n(Not Ready)";
+        _readyStateHolder.SetActive(_data.ReadyStateValue);
+        _notReadyStateHolder.SetActive(!_data.ReadyStateValue);
 
-        _highlightHolder.SetActive(_profileId == BCManager.Instance.bc.Client.ProfileId);
+        _highlightHolder.SetActive(_data.ProfileId == BCManager.Instance.bc.Client.ProfileId);
         ApplyColorUpdate(_playerData.Color);
     }
 
     public void UpdateReady(bool ready)
     {
-        _readyStateValue = ready;
+        if (_data != null)
+        {
+            _data.ReadyStateValue = ready;
+        }
         UpdateUI();
     }
-    public string ProfileId => _profileId;
-    private string _profileId;
-    private string _playerNameValue = "";
-
-    private string _cXId;
-
-    private int _rating;
-    private short _netId;
-
-    private bool _readyStateValue = false;
-
-    private Dictionary<string, object> _extraData;
+    public string ProfileId => _data?.ProfileId;
     public PlayerData PlayerData => _playerData;
     private PlayerData _playerData;
+}
+
+public class LobbyMemberData
+{
+    public string PlayerNameValue;
+    public bool ReadyStateValue;
+    public string ProfileId;
+    public short NetId;
+    public int Rating;
+    public string CXId;
+    public Dictionary<string, object> ExtraData;
+
+    public LobbyMemberData(string playerNameValue, bool readyStateValue, string profileId, short netId, int rating, string cXId, Dictionary<string, object> extraData)
+    {
+        PlayerNameValue = playerNameValue;
+        ReadyStateValue = readyStateValue;
+        ProfileId = profileId;
+        NetId = netId;
+        Rating = rating;
+        CXId = cXId;
+        ExtraData = extraData;
+    }
 }

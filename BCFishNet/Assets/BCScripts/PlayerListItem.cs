@@ -4,6 +4,7 @@ using FishNet.Managing;
 using FishNet.Object;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -54,6 +55,10 @@ public class PlayerListItem : NetworkBehaviour
             _testButton = GetComponent<Button>();
             if (_currentCursor == null)
                 StartCoroutine(DelayedSpawnCursor());
+        }
+        else
+        {
+            this.enabled = false;
         }
 
         _squareImage.gameObject.SetActive(base.IsOwner);
@@ -141,13 +146,6 @@ public class PlayerListItem : NetworkBehaviour
             Color newColor = playerData.Color;
 
             TestChangeServer(profileId, newName, newColor);
-
-            // If this client is also the server, echo the server time to all clients
-            if (base.IsServer)
-            {
-                double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
-                SyncServerTimeToAllClients(serverStartTime);
-            }
         }
     }
 
@@ -287,6 +285,35 @@ public class PlayerListItem : NetworkBehaviour
 
         TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
         UpdateIsHost(Owner.IsHost);
+
+        // check game over
+        CheckGameOver();
+    }
+
+    private bool _gameOver = false;
+    private void CheckGameOver()
+    {
+        // If this client is also the server, echo the server time to all clients
+        if (base.IsHost && !_gameOver)
+        {
+            double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
+            SyncServerTimeToAllClients(serverStartTime);
+            if (serverStartTime > 0)
+            {
+                double now = TimeUtils.GetCurrentTime();
+                float serverUptime = (float)(now - serverStartTime);
+                float timeLeft = TimeUtils.MAX_UP_TIME - serverUptime;
+                if (timeLeft < 0)
+                {
+                    // this should boot all the clients
+                    Dictionary<string, object> payload = new Dictionary<string, object>();
+                    BCManager.Instance.bc.RelayService.EndMatch(payload);
+                    _gameOver = true;
+
+                    Debug.Log("EndMatch Sent");
+                }
+            }
+        }
     }
 
     [ObserversRpc]

@@ -617,6 +617,12 @@ namespace BCFishNet
                         AddConnectionHelper(netIdEvent.netId, isLocal);
                     }
                     break;
+                case "END_MATCH":
+                    {
+                        Shutdown();
+                    }
+                    break;
+
                 default:
                     {
                         Debug.LogError("[BCFishNet]  - OnSystemCallback Unknown system event: " + systemEvent.op);
@@ -721,9 +727,9 @@ namespace BCFishNet
 
         private void CleanupConnection()
         {
+            Debug.Log("CleanupConnection ");
             _brainCloud.RelayService.DeregisterRelayCallback();
             _brainCloud.RelayService.Disconnect();
-            _brainCloud.LobbyService.LeaveLobby(_currentLobbyId);
 
             _brainCloud.RTTService.DeregisterRTTLobbyCallback();
 

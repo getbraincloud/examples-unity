@@ -18,8 +18,7 @@ public class ScrollViewMaxSize : MonoBehaviour
         float newHeight = Mathf.Min(contentHeight, maxHeight);
 
         if (contentHeight > newHeight)
-        {
-            
+        {   
             Vector2 size = viewport.sizeDelta;
             size.y = 0;
             viewport.sizeDelta = size;
