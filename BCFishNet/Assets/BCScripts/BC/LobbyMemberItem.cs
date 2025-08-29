@@ -30,6 +30,11 @@ public class LobbyMemberItem : MonoBehaviour
         }
 
         UpdateUI();
+
+        if (data.ProfileId == BCManager.Instance.bc.Client.ProfileId)
+        {
+            Invoke("SendCurrentColourSignal", 0.05f);
+        }
     }
 
     void Start()

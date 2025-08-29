@@ -412,6 +412,7 @@ public class UIManager : MonoBehaviour
                     if (_mainStatus != null) _mainStatus.text = "Service:" + service + " Operation:" + operation;
                 }
 
+                _lobbyIdText.text = BCManager.Instance.CurrentLobbyId;
 
                 switch (operation)
                 {
@@ -428,14 +429,6 @@ public class UIManager : MonoBehaviour
                             FillMemberRows(membersData);
 
                             BCManager.Instance.CurrentLobbyId = jsonData["lobbyId"] as string;
-
-                            _lobbyIdText.text = BCManager.Instance.CurrentLobbyId;
-
-                            LobbyMemberItem tempItem = GetLobbyMemberItem(BCManager.Instance.bc.Client.ProfileId);
-                            if (tempItem != null)
-                            {
-                                tempItem.SendCurrentColourSignal();
-                            }
                         }
                         break;
                     case "MEMBER_UPDATE":
@@ -512,6 +505,7 @@ public class UIManager : MonoBehaviour
                                             // Apply the receivedColor to the correct object
                                             tempItem.ApplyColorUpdate(receivedColor);
                                         }
+
                                     }
                                 }
                             }
