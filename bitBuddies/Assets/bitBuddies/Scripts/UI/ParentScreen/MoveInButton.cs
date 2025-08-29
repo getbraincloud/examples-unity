@@ -11,7 +11,7 @@ public class MoveInButton : MonoBehaviour
     private void Awake()
     {
         TriggerMysteryBoxButton.onClick.AddListener(OnTriggerMysteryBoxButton);
-        _parentMenu = FindObjectOfType<ParentMenu>();
+        _parentMenu = FindFirstObjectByType<ParentMenu>();
     }
     
     private void OnTriggerMysteryBoxButton()

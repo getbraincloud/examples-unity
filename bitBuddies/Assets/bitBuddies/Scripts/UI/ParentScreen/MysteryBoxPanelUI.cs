@@ -83,11 +83,11 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		
 		Dictionary<string, object> scriptData = new Dictionary<string, object>
 		{
-			{"childAppId", BrainCloudConsts.APP_CHILD_ID}
+			{"childAppId", BitBuddiesConsts.APP_CHILD_ID}
 		};
 		BrainCloudManager.Wrapper.ScriptService.RunScript
 		(
-			BrainCloudConsts.AWARD_BASIC_LOOTBOX_SCRIPT_NAME,
+			BitBuddiesConsts.AWARD_BASIC_LOOTBOX_SCRIPT_NAME,
 			scriptData.Serialize(),
 			BrainCloudManager.HandleSuccess("Award new buddy Success", OnGetLootboxInfo),
 			BrainCloudManager.HandleFailure("Award new buddy Failure", OnFailureCallback)

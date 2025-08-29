@@ -12,7 +12,6 @@ using UnityEngine;
 public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
-    private bool _reconnectUser;
     public static BrainCloudWrapper Wrapper { get; private set; } 
     [SerializeField] private UserInfo _userInfo;
     public UserInfo UserInfo
@@ -20,6 +19,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         get => _userInfo;
         set {_userInfo = value;}
     }
+    
+    public bool IsEmailAuthenticated { get; set; }
 
     private bool _isProcessing;
     public bool IsProcessingRequest
@@ -45,7 +46,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     public void ReconnectUser()
     {
         _isProcessing = true;
-        _reconnectUser = true;
         Wrapper.Reconnect
         (
             HandleSuccess("Authenticate Success", OnAuthenticateSuccess), 
@@ -85,9 +85,15 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         if(email.IsNullOrEmpty() && !UserInfo.Email.IsNullOrEmpty())
         {
             Wrapper.PlayerStateService.UpdateContactEmail(UserInfo.Email);
+            IsEmailAuthenticated = true;
+        }
+        else if(email.IsNullOrEmpty() && UserInfo.Email.IsNullOrEmpty())
+        {
+            IsEmailAuthenticated = false;
         }
         else 
         {
+            IsEmailAuthenticated = true;
             UserInfo.UpdateEmail(email);
         }
         var currency = data["currency"] as Dictionary<string, object>;
@@ -105,10 +111,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             UserInfo.UpdateLevel((int)stats["Level"]);
         }
         
-        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.APP_CHILD_ID}};
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BitBuddiesConsts.APP_CHILD_ID}};
         Wrapper.ScriptService.RunScript
         (
-            BrainCloudConsts.GET_CHILD_ACCOUNTS_SCRIPT_NAME,
+            BitBuddiesConsts.GET_CHILD_ACCOUNTS_SCRIPT_NAME,
             scriptData.Serialize(),
             HandleSuccess("Getting Child Accounts Success", OnGetChildAccounts),
             HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
@@ -218,6 +224,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;
         if(appChildrenInfos.Count > 0)
         {
+            _statsRetrieved = false;
+            _currencyRetrieved = false;
             GetChildStatsAndCurrencyData();   
         }
         else
@@ -230,14 +238,14 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     {
         Dictionary<string, object> scriptData = new Dictionary<string, object>
         {
-            {"childAppId", BrainCloudConsts.APP_CHILD_ID},
+            {"childAppId", BitBuddiesConsts.APP_CHILD_ID},
             {"childProfileId", GameManager.Instance.AppChildrenInfos[_childInfoIndex].profileId}
         };
         
         //Get data from cloud code scripts
         Wrapper.ScriptService.RunScript
         (
-            BrainCloudConsts.GET_STATS_SCRIPT_NAME, 
+            BitBuddiesConsts.GET_STATS_SCRIPT_NAME, 
             scriptData.Serialize(), 
             HandleSuccess("Stats Retrieved", OnGetStatsSuccess), 
             HandleFailure("Getting Stats Failed", OnFailureCallback)
@@ -245,7 +253,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             
         Wrapper.ScriptService.RunScript
         (
-            BrainCloudConsts.GET_CURRENCIES_SCRIPT_NAME,
+            BitBuddiesConsts.GET_CURRENCIES_SCRIPT_NAME,
             scriptData.Serialize(),
             HandleSuccess("Get Currencies Success", OnGetCurrenciesSuccess),
             HandleFailure("Getting Currencies Failed", OnFailureCallback)        
@@ -335,7 +343,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         Dictionary<string, object> scriptData = new Dictionary<string, object> {{"increaseAmount", in_coins}};
         Wrapper.ScriptService.RunScript
         (
-            BrainCloudConsts.AWARD_COINS_SCRIPT_NAME,
+            BitBuddiesConsts.AWARD_COINS_SCRIPT_NAME,
             scriptData.Serialize(),
             HandleSuccess("RewardCoinsToParent Success", OnRewardCoinsToParent),
             HandleFailure("RewardCoinsToParent Failed", OnFailureCallback)
@@ -366,7 +374,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         Dictionary<string, object> scriptData = new Dictionary<string, object> {{"increaseAmount", in_gems}};
         Wrapper.ScriptService.RunScript
         (
-            BrainCloudConsts.AWARD_GEMS_SCRIPT_NAME,
+            BitBuddiesConsts.AWARD_GEMS_SCRIPT_NAME,
             scriptData.Serialize(),
             HandleSuccess("RewardGemsToParent Success", OnRewardGemsToParent),
             HandleFailure("RewardGemsToParent Failed", OnFailureCallback)
@@ -417,10 +425,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     public void AddBuddy()
     {
-        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BrainCloudConsts.APP_CHILD_ID}};
+        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BitBuddiesConsts.APP_CHILD_ID}};
         Wrapper.ScriptService.RunScript
         (
-            BrainCloudConsts.ADD_CHILD_ACCOUNT_SCRIPT_NAME,
+            BitBuddiesConsts.ADD_CHILD_ACCOUNT_SCRIPT_NAME,
             scriptData.Serialize(),
             HandleSuccess("Add Buddy Success", OnAddBuddy),
             HandleFailure("Add Buddy Failed", OnFailureCallback)
@@ -437,13 +445,13 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         //Params for AwardBlingToChild(childAppId, profileId, increaseAmount)
         Dictionary<string, object> scriptData = new Dictionary<string, object>
         {
-            {"childAppId", BrainCloudConsts.APP_CHILD_ID},
+            {"childAppId", BitBuddiesConsts.APP_CHILD_ID},
             {"profileId", GameManager.Instance.SelectedAppChildrenInfo.profileId},
             {"increaseAmount", in_amount}
         };
         Wrapper.ScriptService.RunScript
         (   
-            BrainCloudConsts.AWARD_BLING_TO_CHILD_SCRIPT_NAME,
+            BitBuddiesConsts.AWARD_BLING_TO_CHILD_SCRIPT_NAME,
             scriptData.Serialize(),
             HandleSuccess("Award Bling Successful", OnAwardBlingToChild),
             HandleFailure("Award Bling Failed", OnFailureCallback)
@@ -479,13 +487,13 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         _isProcessing = true;
         Dictionary<string, object> scriptData = new Dictionary<string, object>
         {
-            {"childAppId", BrainCloudConsts.APP_CHILD_ID},
+            {"childAppId", BitBuddiesConsts.APP_CHILD_ID},
             {"newName", in_newName},
             {"profileId", in_profileId},
         };
         Wrapper.ScriptService.RunScript
         (
-            BrainCloudConsts.UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME,
+            BitBuddiesConsts.UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME,
             scriptData.Serialize(),
             HandleSuccess("Updated child name success", OnUpdateProfileName),
             HandleFailure("Updated child name failed", OnFailureCallback)
@@ -658,6 +666,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         _childInfoIndex = 0;
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;
         GetChildStatsAndCurrencyData();
+    }
+    
+    public void ClearDataForLogout()
+    {
+        UserInfo = new UserInfo();
+        IsEmailAuthenticated = false;
     }
 
     #region Callback Creation Helpers

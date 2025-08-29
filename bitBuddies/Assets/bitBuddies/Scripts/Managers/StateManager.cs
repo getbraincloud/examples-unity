@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class StateManager : SingletonBehaviour<StateManager>
 {
+	[SerializeField] private PopUpUI _genericPopUpUI;
+
 	public override void Awake()
 	{
 		base.Awake();
@@ -25,9 +27,21 @@ public class StateManager : SingletonBehaviour<StateManager>
 			//Load into login screen
 			//SceneManager.LoadScene(BrainCloudConsts.LOGIN_SCENE_NAME);
 			SceneLoader.ShowLoadingScreen();
-			SceneLoader.LoadLevel(BrainCloudConsts.LOGIN_SCENE_NAME);
+			SceneLoader.LoadLevel(BitBuddiesConsts.LOGIN_SCENE_NAME);
 			
 		}
+	}
+	
+	public void OpenInfoPopUp(string in_title, string in_body)
+	{
+		var popUp = Instantiate(_genericPopUpUI);
+		popUp.SetUpInfoPopup(in_title, in_body);
+	}
+	
+	public void OpenConfirmPopUp(string in_title, string in_body, Action buttonCallback)
+	{
+		var popUp = Instantiate(_genericPopUpUI);
+		popUp.SetupConfirmPopup(in_title, in_body, buttonCallback);
 	}
 	
 	//The idea here is to use InitializeUI to re-assign the UI elements to the updated variables. 
@@ -45,23 +59,28 @@ public class StateManager : SingletonBehaviour<StateManager>
 		yield return new WaitUntil(() => !BrainCloudManager.Instance.IsProcessingRequest);
 		//SceneManager.LoadScene(BrainCloudConsts.PARENT_SCENE_NAME);
 		SceneLoader.ShowLoadingScreen();
-		SceneLoader.LoadLevel(BrainCloudConsts.PARENT_SCENE_NAME);
+		SceneLoader.LoadLevel(BitBuddiesConsts.PARENT_SCENE_NAME);
 		yield return null;
 	}
 	
 	public void GoToParent()
 	{
-		//SceneManager.LoadScene(BrainCloudConsts.PARENT_SCENE_NAME);
+		//SceneManager.LoadScene(BitBuddiesConsts.PARENT_SCENE_NAME);
 		SceneLoader.ShowLoadingScreen();
-		SceneLoader.LoadLevel(BrainCloudConsts.PARENT_SCENE_NAME);
-		
+		SceneLoader.LoadLevel(BitBuddiesConsts.PARENT_SCENE_NAME);
+	}
+	
+	public void GoToLogin()
+	{
+		SceneLoader.ShowLoadingScreen();
+		SceneLoader.LoadLevel(BitBuddiesConsts.LOGIN_SCENE_NAME);
 	}
 	
 	public void GoToBuddysRoom()
 	{
 		//SceneManager.LoadScene(BrainCloudConsts.GAME_SCENE_NAME);
 		SceneLoader.ShowLoadingScreen();
-		SceneLoader.LoadLevel(BrainCloudConsts.GAME_SCENE_NAME);
+		SceneLoader.LoadLevel(BitBuddiesConsts.GAME_SCENE_NAME);
 		
 	}
 }

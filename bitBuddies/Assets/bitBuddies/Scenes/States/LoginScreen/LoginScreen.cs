@@ -38,7 +38,7 @@ public class LoginScreen : ContentUIBehaviour
         //Authenticate Anonymously but still go through the normal logging in path
         _createAccount = true;
         IsInteractable = false;
-        
+        BrainCloudManager.Instance.UserInfo = new UserInfo();
         BrainCloudManager.Wrapper.AuthenticateAnonymous
         (
             OnSuccess("Anonymous Account creation successfully", OnLoggedInUser),

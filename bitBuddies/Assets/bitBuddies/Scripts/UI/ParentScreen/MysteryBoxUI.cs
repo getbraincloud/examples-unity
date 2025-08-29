@@ -63,6 +63,8 @@ public class MysteryBoxUI : ContentUIBehaviour
         //Goal: Open another screen where we Animate the box opening
         // After box is opened, we show another screen where the user 
         // picks the name of buddy
+        Dictionary<string, object> scriptData =  new Dictionary<string, object> {{"amountToConsume", _mysteryBoxInfo.UnlockAmount}};
+        BrainCloudManager.Wrapper.ScriptService.RunScript(BitBuddiesConsts.CONSUME_PARENT_COINS_SCRIPT_NAME, scriptData.Serialize());
         _mysteryBoxPanelUI.MysteryBoxInfo = _mysteryBoxInfo;
         _mysteryBoxPanelUI.NextPage();
     }

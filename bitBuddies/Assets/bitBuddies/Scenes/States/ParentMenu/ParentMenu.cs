@@ -40,7 +40,7 @@ public class ParentMenu : ContentUIBehaviour
     protected override void InitializeUI()
     {
         UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
-        UsernameText.text = userInfo.Username;
+        UsernameText.text = userInfo.Username.IsNullOrEmpty() ? "New User" : userInfo.Username;
         LevelText.text = userInfo.Level.ToString();
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();

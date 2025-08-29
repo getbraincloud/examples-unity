@@ -67,5 +67,10 @@ public class GameManager : SingletonBehaviour<GameManager>
 		StateManager.Instance.RefreshScreen();
 	}
 	
+	public void ClearDataForLogout()
+	{
+		appChildrenInfos.Clear();
+		_selectedAppChildrenInfo = null;
+	}
 	
 }

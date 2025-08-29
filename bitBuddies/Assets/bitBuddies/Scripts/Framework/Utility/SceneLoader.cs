@@ -9,13 +9,13 @@ public static class SceneLoader
 {
 	public static bool IsLoading()
 	{
-		return SceneManager.GetSceneByName(BrainCloudConsts.LOADING_SCREEN_SCENE_NAME).IsValid();
+		return SceneManager.GetSceneByName(BitBuddiesConsts.LOADING_SCREEN_SCENE_NAME).IsValid();
 	}
 	
 	public static void LoadLevel(string in_levelName)
 	{
 		LoadingScreen.Tasks.Push(CO_LoadLevel(in_levelName));
-		UnloadAllLevelsExcept(BrainCloudConsts.LOADING_SCREEN_SCENE_NAME);
+		UnloadAllLevelsExcept(BitBuddiesConsts.LOADING_SCREEN_SCENE_NAME);
 		SceneManager.LoadSceneAsync(in_levelName);
 	}
 	
@@ -28,13 +28,13 @@ public static class SceneLoader
 	{
 		if(!IsLoading() && LoadingScreen.Tasks.Count > 0)
 		{
-			SceneManager.LoadSceneAsync(BrainCloudConsts.LOADING_SCREEN_SCENE_NAME, LoadSceneMode.Additive);
+			SceneManager.LoadSceneAsync(BitBuddiesConsts.LOADING_SCREEN_SCENE_NAME, LoadSceneMode.Additive);
 		}
 	}
 	
 	public static void RemoveLoadingScreen()
 	{
-		SceneManager.UnloadSceneAsync(BrainCloudConsts.LOADING_SCREEN_SCENE_NAME);
+		SceneManager.UnloadSceneAsync(BitBuddiesConsts.LOADING_SCREEN_SCENE_NAME);
 		
 	}
 	
@@ -48,7 +48,6 @@ public static class SceneLoader
 		{
 			yield return operation.progress;
 		}
-
 	}
 	
 	//CO = Coroutine
@@ -60,7 +59,7 @@ public static class SceneLoader
 		{
 			Scene currentScene = SceneManager.GetSceneAt(i);
 			if(in_sceneNames.Any(sceneNames => currentScene.name.Equals(sceneNames)) || 
-			   currentScene.name.Equals(BrainCloudConsts.LOADING_SCREEN_SCENE_NAME))
+			   currentScene.name.Equals(BitBuddiesConsts.LOADING_SCREEN_SCENE_NAME))
 			{
 				continue;
 			}
