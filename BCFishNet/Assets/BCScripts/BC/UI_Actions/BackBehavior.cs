@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class BackBehavior : MonoBehaviour
 {
-    public void OnMainMenu()
+    public void OnMainMenu(bool leaveLobby)
     {
         // Gracefully disconnect using BCFishNetTransport
         var bcFishNetTransport = FindObjectOfType<BCFishNet.BCFishNetTransport>();
@@ -14,12 +14,15 @@ public class BackBehavior : MonoBehaviour
             bcFishNetTransport.Shutdown();
             Debug.Log("Closing down the scene");
 
-            PlayerListItemManager.Instance.ClearAll();
+            if (leaveLobby) BCManager.Instance.LeaveCurrentLobby();
+            else
+                PlayerListItemManager.Instance.ClearAll();
         }
         
         // Give time for disconnect to process
         Invoke("ToMainMenu", 0.5f);
     }
+    
     private void ToMainMenu()
     {
         SceneManager.LoadScene("Main");

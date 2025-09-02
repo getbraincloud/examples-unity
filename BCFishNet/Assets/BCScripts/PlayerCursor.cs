@@ -51,6 +51,16 @@ public class PlayerCursor : NetworkBehaviour
     {
         _rect = GetComponent<RectTransform>();
         _container = transform.parent.gameObject.GetComponent<RectTransform>();
+
+        if (IsOwner)
+        {
+            // local player grab the correct colour from PlayerListItemManager
+            PlayerData pdata;
+            if (PlayerListItemManager.Instance.TryGetPlayerData(clientId, out pdata))
+            {
+                _cursorImage.color = pdata.Color;
+            }
+        }
     }
 
     private float _paintSpawnCooldown = 0.015f; // Adjust delay between spawns (in seconds)
@@ -181,8 +191,6 @@ public class PlayerCursor : NetworkBehaviour
         if (IsServer)
             return;
 
-        Debug.Log($"[PlayerCursor] ObserversRpcSpawnPaint");
-
         PaintSplatData paintSplatData = new PaintSplatData
         {
             color = color,
@@ -201,11 +209,14 @@ public class PlayerCursor : NetworkBehaviour
 
     public void RestoreGlobalPaintMap(NetworkConnection conn = null)
     {
-        _enabled = false; // Disable cursor updates while restoring paint
-        if (conn != null)
-            StartCoroutine(RestoreGlobalPaintCoroutine_Target(conn));
-        else
-            StartCoroutine(RestoreGlobalPaintCoroutine());
+        if (base.IsHost)
+        {
+            _enabled = false; // Disable cursor updates while restoring paint
+            if (conn != null)
+                StartCoroutine(RestoreGlobalPaintCoroutine_Target(conn));
+            else
+                StartCoroutine(RestoreGlobalPaintCoroutine());
+        }
     }
 
     private IEnumerator RestoreGlobalPaintCoroutine()
@@ -264,8 +275,6 @@ public class PlayerCursor : NetworkBehaviour
     [TargetRpc]
     private void TargetRpcSpawnPaint(NetworkConnection conn, Vector3 position, Color color, float rotation, float scale)
     {
-
-        Debug.Log($"[PlayerCursor] Restoring TargetRpcSpawnPaint");
         PaintSplatData paintSplatData = new PaintSplatData
         {
             color = color,

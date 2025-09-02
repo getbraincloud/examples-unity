@@ -94,6 +94,7 @@ public class ColorSelector : MonoBehaviour
         {
             if (result.gameObject.transform.IsChildOf(transform))
             {
+                Debug.Log("Clicked on ColorSelector or its child.");
                 return true;
             }
         }
