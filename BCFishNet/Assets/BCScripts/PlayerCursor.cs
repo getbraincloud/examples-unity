@@ -275,8 +275,6 @@ public class PlayerCursor : NetworkBehaviour
     [TargetRpc]
     private void TargetRpcSpawnPaint(NetworkConnection conn, Vector3 position, Color color, float rotation, float scale)
     {
-
-        Debug.Log($"[PlayerCursor] Restoring TargetRpcSpawnPaint");
         PaintSplatData paintSplatData = new PaintSplatData
         {
             color = color,

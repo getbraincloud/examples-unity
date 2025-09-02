@@ -27,7 +27,7 @@ namespace BCFishNet
         [SerializeField] private string _roomAddress = string.Empty;
         [SerializeField] private string _roomPort = string.Empty;
         [SerializeField] private ushort _port = 7770;
-        [SerializeField] private ushort _maximumClients = 10;
+        [SerializeField] private ushort _maximumClients = 40;
         #endregion
 
         #region Private Fields.
@@ -222,7 +222,7 @@ namespace BCFishNet
                     incoming.GetArraySegment(),
                     (Channel)incoming.Channel, Index);
 
-                    //Debug.Log($"[BCFishNet] IterateIncoming Client packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
+                    Debug.Log($"[BCFishNet] IterateIncoming Client packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
                     //Debug.Log($"[BCFishNet] IterateIncoming Client Segment Count: {segment.Count}, Channel: {incoming.Channel}, Index: {Index}");
                     HandleClientReceivedDataArgs(dataArgs);
 
@@ -237,7 +237,7 @@ namespace BCFishNet
             if (GetConnectionState(server) != LocalConnectionState.Started)
             {
                 //Not started, clear outgoing.
-                ClearPacketQueue(ref _outgoingPackets);
+                //ClearPacketQueue(ref _outgoingPackets);
             }
             else
             {
@@ -256,6 +256,7 @@ namespace BCFishNet
                         recipientId = hostId;
 
                     ArraySegment<byte> segment = outgoing.GetArraySegment();
+                    Debug.Log($"[BCFishNet] IterateOutgoing packetId {outgoing.GetPacketId()} HEX: {outgoing.GetHexString()} to RecipientId: {recipientId} Length: {segment.Count} Channel: {outgoing.Channel}");
 
                     //Send to all clients.
                     if (recipientId == NetworkConnection.UNSET_CLIENTID_VALUE)// -1 to sendToAll
@@ -619,7 +620,7 @@ namespace BCFishNet
                     break;
                 case "END_MATCH":
                     {
-                        Shutdown();
+                        StopClient();
                     }
                     break;
 
