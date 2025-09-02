@@ -201,11 +201,14 @@ public class PlayerCursor : NetworkBehaviour
 
     public void RestoreGlobalPaintMap(NetworkConnection conn = null)
     {
-        _enabled = false; // Disable cursor updates while restoring paint
-        if (conn != null)
-            StartCoroutine(RestoreGlobalPaintCoroutine_Target(conn));
-        else
-            StartCoroutine(RestoreGlobalPaintCoroutine());
+        if (base.IsHost)
+        {
+            _enabled = false; // Disable cursor updates while restoring paint
+            if (conn != null)
+                StartCoroutine(RestoreGlobalPaintCoroutine_Target(conn));
+            else
+                StartCoroutine(RestoreGlobalPaintCoroutine());
+        }
     }
 
     private IEnumerator RestoreGlobalPaintCoroutine()

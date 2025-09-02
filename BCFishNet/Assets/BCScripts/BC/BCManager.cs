@@ -69,7 +69,7 @@ public class BCManager : MonoBehaviour
 
     public void RemoveMember(LobbyMemberData member)
     {
-        memberData.Remove(member);
+        int removedCount = memberData.RemoveAll(m => m != null && m.ProfileId == member.ProfileId);
     }
 
     public void ClearMembers()

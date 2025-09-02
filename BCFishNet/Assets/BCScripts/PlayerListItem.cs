@@ -128,7 +128,7 @@ public class PlayerListItem : NetworkBehaviour
         if (base.IsOwner)
         {
             _echoTimer += Time.deltaTime;
-            if (_echoTimer >= ECHO_INTERVAL)
+            if (_echoTimer >= TimeUtils.ECHO_INTERVAL)
             {
                 OnTestButtonClicked();
                 _echoTimer = 0f;
@@ -234,7 +234,7 @@ public class PlayerListItem : NetworkBehaviour
     IEnumerator DelayedSpawnCursor()
     {
         // If the clients, let's delay a bit, to let the server get there and we can echo back to it
-        yield return new WaitForSeconds(SHORT_DELAY);
+        yield return new WaitForSeconds(TimeUtils.SHORT_DELAY);
 
         if (_currentCursor == null)
             SpawnCursor(Owner);
@@ -252,7 +252,7 @@ public class PlayerListItem : NetworkBehaviour
 
     IEnumerator UpdateData(NetworkConnection conn)
     {
-        yield return new WaitForSeconds(SHORT_DELAY);
+        yield return new WaitForSeconds(TimeUtils.SHORT_DELAY);
 
         OnTestButtonClicked();
         
@@ -368,11 +368,7 @@ public class PlayerListItem : NetworkBehaviour
     private TextMeshProUGUI _clearedCanvasMessage = null;
     private float _bgImageWidth = 0f;
     private const float SQUARE_IMAGE_OFFSET = 20f;
-
-    private const float DELAY = 0.15f;
-    private const float SHORT_DELAY = 0.05f;
     
     private float _echoTimer = 0f;
-    private const float ECHO_INTERVAL = DELAY * 5; // secondss
         
 }

@@ -75,7 +75,7 @@ public class GameTimer : MonoBehaviour
     private bool _shutdownTriggered = false;
     private IEnumerator ShutdownSequence()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(TimeUtils.SHUT_DOWN_TIME);
 
         BackBehavior back = FindObjectOfType<BackBehavior>();
         if (back != null)

@@ -8,7 +8,7 @@ using BrainCloud.JsonFx.Json;
 public class LobbyMemberItem : MonoBehaviour
 {
     [SerializeField] private TMP_Text playerName;
-    [SerializeField] private GameObject _highlightHolder, _readyStateHolder, _notReadyStateHolder;
+    [SerializeField] private GameObject _highlightHolder, _readyStateHolder, _notReadyStateHolder, _hostIconHolder;
 
     private LobbyMemberData _data;
     public LobbyMemberData Data => _data;
@@ -33,13 +33,20 @@ public class LobbyMemberItem : MonoBehaviour
 
         if (data.ProfileId == BCManager.Instance.bc.Client.ProfileId)
         {
-            Invoke("SendCurrentColourSignal", 0.05f);
+            Invoke("SendCurrentColourSignal", TimeUtils.SHORT_DELAY);
+            InvokeRepeating("UpdateReadyState", TimeUtils.SHORT_DELAY, TimeUtils.ECHO_INTERVAL * 5.0f);
         }
     }
 
     void Start()
-    {
+    {   
         UpdateUI();
+    }
+
+    void UpdateReadyState()
+    {
+        Dictionary<string, object> extra = new Dictionary<string, object>();
+        BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, _data.ReadyStateValue, extra);
     }
 
     // Apply Color Update
@@ -93,11 +100,16 @@ public class LobbyMemberItem : MonoBehaviour
     public void UpdateUI()
     {
         playerName.text = !string.IsNullOrEmpty(_data.PlayerNameValue) ? _data.PlayerNameValue : "Guest_" + _data.ProfileId.Substring(0, 4);
-        playerName.text += _data.ReadyStateValue ? "\n(Ready)" : "\n(Not Ready)";
+        if (_data.ProfileId == BCManager.Instance.bc.Client.ProfileId)
+        {
+            playerName.text += " (You)";
+        }
+        playerName.text += _data.ReadyStateValue ? "\n[Ready]" : "\n[Not Ready]";
         _readyStateHolder.SetActive(_data.ReadyStateValue);
         _notReadyStateHolder.SetActive(!_data.ReadyStateValue);
 
         _highlightHolder.SetActive(_data.ProfileId == BCManager.Instance.bc.Client.ProfileId);
+        _hostIconHolder.SetActive(BCManager.Instance.LobbyOwnerId == _data.ProfileId);
         ApplyColorUpdate(_playerData.Color);
     }
 
