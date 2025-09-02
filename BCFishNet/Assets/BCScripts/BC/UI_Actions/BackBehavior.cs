@@ -15,6 +15,8 @@ public class BackBehavior : MonoBehaviour
             Debug.Log("Closing down the scene");
 
             if (leaveLobby) BCManager.Instance.LeaveCurrentLobby();
+            else
+                PlayerListItemManager.Instance.ClearAll();
         }
         
         // Give time for disconnect to process

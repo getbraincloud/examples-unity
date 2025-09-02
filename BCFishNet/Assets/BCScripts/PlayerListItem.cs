@@ -125,7 +125,7 @@ public class PlayerListItem : NetworkBehaviour
         }
 
         // Periodically update local player info
-        if (base.IsOwner)
+        if (base.IsOwner && _hasInitialized)
         {
             _echoTimer += Time.deltaTime;
             if (_echoTimer >= TimeUtils.ECHO_INTERVAL)
@@ -235,6 +235,8 @@ public class PlayerListItem : NetworkBehaviour
     {
         // If the clients, let's delay a bit, to let the server get there and we can echo back to it
         yield return new WaitForSeconds(TimeUtils.SHORT_DELAY);
+
+        OnTestButtonClicked();
 
         if (_currentCursor == null)
             SpawnCursor(Owner);

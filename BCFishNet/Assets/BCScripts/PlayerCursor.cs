@@ -51,6 +51,16 @@ public class PlayerCursor : NetworkBehaviour
     {
         _rect = GetComponent<RectTransform>();
         _container = transform.parent.gameObject.GetComponent<RectTransform>();
+
+        if (IsOwner)
+        {
+            // local player grab the correct colour from PlayerListItemManager
+            PlayerData pdata;
+            if (PlayerListItemManager.Instance.TryGetPlayerData(clientId, out pdata))
+            {
+                _cursorImage.color = pdata.Color;
+            }
+        }
     }
 
     private float _paintSpawnCooldown = 0.015f; // Adjust delay between spawns (in seconds)
@@ -180,8 +190,6 @@ public class PlayerCursor : NetworkBehaviour
         // Prevent duplicate spawn on server (which already spawned it)
         if (IsServer)
             return;
-
-        Debug.Log($"[PlayerCursor] ObserversRpcSpawnPaint");
 
         PaintSplatData paintSplatData = new PaintSplatData
         {

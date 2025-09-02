@@ -400,29 +400,32 @@ public class UIManager : MonoBehaviour
                 var operation = response["operation"] as string;
                 var service = response["service"] as string;
 
-                var data = response["data"] as Dictionary<string, object>;
-                if (operation != "SIGNAL" && data.ContainsKey("reason") && data["reason"] is Dictionary<string, object> reasonData)
-                {
-                    if (reasonData.ContainsKey("desc"))
+                    if (operation != "SIGNAL" && operation != "MEMBER_UPDATE")
                     {
-                        var description = reasonData["desc"] as string;
+                        var data = response["data"] as Dictionary<string, object>;
+                    if (data.ContainsKey("reason") && data["reason"] is Dictionary<string, object> reasonData)
+                    {
+                        if (reasonData.ContainsKey("desc"))
+                        {
+                            var description = reasonData["desc"] as string;
+                            if (_mainStatus != null) _mainStatus.text = description;
+                        }
+                        else
+                        {
+                            if (_mainStatus != null) _mainStatus.text = "OP:" + operation;
+                        }
+                    }
+                    else if (data.ContainsKey("desc")) // Fallback for older responses
+                    {
+                        var description = data["desc"] as string;
                         if (_mainStatus != null) _mainStatus.text = description;
                     }
                     else
                     {
-                        if (_mainStatus != null) _mainStatus.text = "OP:" + operation;
+                        if (_mainStatus != null) _mainStatus.text = "Service:" + service + " Operation:" + operation;
                     }
                 }
-                else if (data.ContainsKey("desc")) // Fallback for older responses
-                {
-                    var description = data["desc"] as string;
-                    if (_mainStatus != null) _mainStatus.text = description;
-                }
-                else
-                {
-                    if (_mainStatus != null) _mainStatus.text = "Service:" + service + " Operation:" + operation;
-                }
-
+                
                 // try and always read it
                 if (lobbyData.ContainsKey("members"))
                 {
@@ -491,16 +494,21 @@ public class UIManager : MonoBehaviour
                             {
                                 Debug.Log("OnLobbyEvent : " + json);
                                 
-                                // say we aren't ready
-                                Dictionary<string, object> extra = new Dictionary<string, object>();
-                                BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, false, extra);
-                                
                                 //get pass code
                                 if (jsonData.ContainsKey("passcode"))
                                 {
                                     string passCode = jsonData["passcode"] as string;
                                     BCManager.Instance.RelayPasscode = passCode;
                                 }
+
+                                // iterate over all BCManager.Instance.LobbyMembersData and set them all to not ready
+                                foreach (var member in BCManager.Instance.LobbyMembersData)
+                                {
+                                    member.ReadyStateValue = false;
+                                }
+
+                                Dictionary<string, object> extra = new Dictionary<string, object>();
+                                BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, false, extra);
                                 
                                 Dictionary<string, object> roomData = jsonData["connectData"] as Dictionary<string, object>;
                                 BCManager.Instance.RoomAddress = roomData["address"] as string;

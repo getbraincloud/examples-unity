@@ -185,6 +185,9 @@ public class BCManager : MonoBehaviour
         Debug.LogWarning($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
 
         var activeScene = SceneManager.GetActiveScene().name;
+
+        PlayerListItemManager.Instance.ClearAll();
+        
         // TODO: Make Network Handling more robust
         // while in the main menu, if we are not connected show a display message and prompt to reconnect
         if (activeScene == "Main")
@@ -206,42 +209,9 @@ public class BCManager : MonoBehaviour
     {
         Debug.LogWarning($"RelayService Connection Failure - statusMessage: {statusCode} code: {reasonCode} error: {statusMessage}");
 
-        listToJoinWith.Clear();
+        PlayerListItemManager.Instance.ClearAll();
 
-        List<PlayerData> tempList = PlayerListItemManager.Instance.GetAllPlayerDataByProfileId();
-        // Output the contents of listToJoinWith for debugging
-        if (listToJoinWith != null && tempList.Count > 0)
-        {
-            foreach (var player in tempList)
-            {
-                listToJoinWith.Add(player.ProfileId);
-                Debug.Log($"[BCManager] listToJoinWith: ProfileId={player.ProfileId}, Name={player.Name}, Color={player.Color}");
-            }
-        }
-        else
-        {
-            Debug.Log("[BCManager] listToJoinWith is empty or null.");
-        }
-
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnMainSceneLoadedFromGameError;
         SceneManager.LoadScene("Main");
-    }
-
-    public void OnMainSceneLoadedFromGameError(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
-    {
-
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnMainSceneLoadedFromGameError;
-
-        // this may include themselves
-        if (listToJoinWith.Count > 1)
-        {
-            // find the UI manager, and call the quick find
-            UIManager uiManager = FindObjectOfType<UIManager>();
-            if (uiManager != null)
-            {
-                //uiManager.OnFindLobbyFromPrevious();
-            }
-        }
     }
 
     public void FindLobby(Action<string> OnEntryId)
