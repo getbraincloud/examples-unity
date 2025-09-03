@@ -64,7 +64,9 @@ namespace BCFishNet
         #endregion
 
         #region Initialization.
-        public void Config(BrainCloudWrapper bcWrapper, string address, string relayPasscode, string currentLobbyId, ushort port, FailureCallback failureCallback)
+        public void Config(BrainCloudWrapper bcWrapper,
+                        string address, string relayPasscode, string currentLobbyId,
+                        ushort port, FailureCallback failureCallback, RTTCallback lobbyCallback)
         {
             _brainCloud = bcWrapper;
             relayFailureCallback = failureCallback;
@@ -73,7 +75,7 @@ namespace BCFishNet
             SetCurrentLobbyId(currentLobbyId);
             SetPort(port);
 
-            _brainCloud.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+            _brainCloud.RTTService.RegisterRTTLobbyCallback(lobbyCallback + OnLobbyEvent);
         }
 
         public override void Initialize(NetworkManager networkManager, int transportIndex)
@@ -222,7 +224,7 @@ namespace BCFishNet
                     incoming.GetArraySegment(),
                     (Channel)incoming.Channel, Index);
 
-                    Debug.Log($"[BCFishNet] IterateIncoming Client packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
+                    //Debug.Log($"[BCFishNet] IterateIncoming Client packetId: {incoming.GetPacketId()} Length: {incoming.Length} HEX: {incoming.GetHexString()}");
                     //Debug.Log($"[BCFishNet] IterateIncoming Client Segment Count: {segment.Count}, Channel: {incoming.Channel}, Index: {Index}");
                     HandleClientReceivedDataArgs(dataArgs);
 
@@ -256,7 +258,7 @@ namespace BCFishNet
                         recipientId = hostId;
 
                     ArraySegment<byte> segment = outgoing.GetArraySegment();
-                    Debug.Log($"[BCFishNet] IterateOutgoing packetId {outgoing.GetPacketId()} HEX: {outgoing.GetHexString()} to RecipientId: {recipientId} Length: {segment.Count} Channel: {outgoing.Channel}");
+                    //Debug.Log($"[BCFishNet] IterateOutgoing packetId {outgoing.GetPacketId()} HEX: {outgoing.GetHexString()} to RecipientId: {recipientId} Length: {segment.Count} Channel: {outgoing.Channel}");
 
                     //Send to all clients.
                     if (recipientId == NetworkConnection.UNSET_CLIENTID_VALUE)// -1 to sendToAll

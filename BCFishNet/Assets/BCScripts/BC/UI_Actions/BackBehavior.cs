@@ -20,7 +20,7 @@ public class BackBehavior : MonoBehaviour
         }
         
         // Give time for disconnect to process
-        Invoke("ToMainMenu", 0.5f);
+        Invoke("ToMainMenu", TimeUtils.DELAY);
     }
     
     private void ToMainMenu()

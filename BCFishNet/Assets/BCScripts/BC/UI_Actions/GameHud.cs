@@ -33,7 +33,7 @@ public class GameHud : MonoBehaviour
     }
     public void UpdatePlayerCount(int count)
     {
-        numPlayersText.text = $"Players: {count:N0}";
+        numPlayersText.text = $"Players: {count:N0} / {TimeUtils.MAX_PLAYERS:N0}";
     }
 
     public void UpdateSplatCount(int count)

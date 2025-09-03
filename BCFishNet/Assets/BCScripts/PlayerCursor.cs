@@ -29,6 +29,15 @@ public class PlayerCursor : NetworkBehaviour
 
         clientId = Owner.ClientId;
 
+        if (IsServer)
+        {
+            // Only send the paint map to the joining client
+            RestoreGlobalPaintMap(Owner);
+        }
+        _enabled = true;
+    }
+    void Start()
+    {
         Transform parentObject = transform.parent;
         if (parentObject == null || parentObject.name != "CursorContainer")
         {
@@ -39,12 +48,6 @@ public class PlayerCursor : NetworkBehaviour
 
         InitCursor();
         ResetPosition();
-
-        if (IsServer)
-        {
-            // Only send the paint map to the joining client
-            RestoreGlobalPaintMap(Owner);
-        }
     }
 
     public void InitCursor()
@@ -54,18 +57,18 @@ public class PlayerCursor : NetworkBehaviour
 
         if (IsOwner)
         {
-            // local player grab the correct colour from PlayerListItemManager
-            PlayerData pdata;
-            if (PlayerListItemManager.Instance.TryGetPlayerData(clientId, out pdata))
-            {
-                _cursorImage.color = pdata.Color;
-            }
+            string profileId = BCManager.Instance.bc.Client.ProfileId;
+            PlayerData playerData = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId);
+            Color newColor = playerData.Color;
+            _cursorImage.color = newColor;
+            Debug.Log($"[PlayerCursor] InitCursor for local player {profileId} with color {newColor}");
+            
         }
     }
 
     private float _paintSpawnCooldown = 0.015f; // Adjust delay between spawns (in seconds)
     private float _timeSinceLastPaint = 0f;
-    private bool _enabled = true;
+    private bool _enabled = false;
 
     private Vector2 _lastPaintPosition = Vector2.positiveInfinity;
     private float _splatScale = 1f;
@@ -147,6 +150,7 @@ public class PlayerCursor : NetworkBehaviour
 
     public void UpdateSplatScale(float scale)
     {
+        Debug.Log($"[PlayerCursor] UpdateSplatScale: {scale}");
         _splatScale = scale;
         this.transform.localScale = Vector3.one * scale;
     }
@@ -170,6 +174,10 @@ public class PlayerCursor : NetworkBehaviour
     private void SpawnPaintServer(Vector2 position, float scale)
     {
         float rotation = Random.Range(0f, 360f);
+        if (_cursorImage.color == Color.white)
+        {
+            return;
+        }
 
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, _cursorImage.color, rotation, scale);
@@ -298,6 +306,6 @@ public class PlayerCursor : NetworkBehaviour
 
     public void ResetPosition()
     {
-        _rect.anchoredPosition = Vector2.zero;
+        _rect.anchoredPosition = Vector2.one * 10000f; // Move offscreen
     }
 }
