@@ -12,14 +12,8 @@ using UnityEngine;
 public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
-    public static BrainCloudWrapper Wrapper { get; private set; } 
-    [SerializeField] private UserInfo _userInfo;
-    public UserInfo UserInfo
-    {
-        get => _userInfo;
-        set {_userInfo = value;}
-    }
-    
+    public static BrainCloudWrapper Wrapper { get; private set; }
+    public UserInfo UserInfo { get; set ; }
     public bool IsEmailAuthenticated { get; set; }
 
     private bool _isProcessing;
@@ -34,6 +28,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
     public override void StartUp()
     {
+	    UserInfo = new UserInfo();
         Wrapper = gameObject.AddComponent<BrainCloudWrapper>();
         Wrapper.Init();
     }
@@ -76,7 +71,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         {
             Wrapper.PlayerStateService.UpdateName(UserInfo.Username);
         }
-        else
+        else if(!username.IsNullOrEmpty())
         {
             UserInfo.UpdateUsername(username);
         }

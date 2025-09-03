@@ -25,7 +25,11 @@ public class SettingsPanelUI : MonoBehaviour
         _attachEmailInputField.interactable = !BrainCloudManager.Instance.IsEmailAuthenticated;
         _passwordInputField.interactable = !BrainCloudManager.Instance.IsEmailAuthenticated;
 
-        int value = PlayerPrefs.GetInt(BitBuddiesConsts.VOLUME_SLIDER_KEY);
+        float value = PlayerPrefs.GetFloat(BitBuddiesConsts.VOLUME_SLIDER_KEY, -1.0f);
+        if(value == -1)
+        {
+            value = 0.5f;
+        }
         
         //ToDo: Hook up this value to the main audio source component if we get one..
         _volumeSlider.value = value;

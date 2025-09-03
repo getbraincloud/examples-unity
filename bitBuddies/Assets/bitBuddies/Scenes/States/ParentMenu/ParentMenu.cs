@@ -18,6 +18,7 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private BuddyHouseInfo BuddyPrefab;
     [SerializeField] private GameObject MoveInPrefab;
     [SerializeField] private MysteryBoxPanelUI MysteryBoxPanelPrefab;
+    [SerializeField] private SettingsPanelUI SettingsPanelUIPrefab;
     
     private List<AppChildrenInfo> _appChildrenInfos;
     private AppChildrenInfo _newAppChildrenInfo;
@@ -72,6 +73,7 @@ public class ParentMenu : ContentUIBehaviour
     {
         // what do other than open ?
         // Settings page shows: Volume slider, connect an email (attach email to anonymous account), about the app and log out
+        Instantiate(SettingsPanelUIPrefab, transform);
     }
     
     public void OpenMysteryBoxPanel()
