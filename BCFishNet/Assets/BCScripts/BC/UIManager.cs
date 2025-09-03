@@ -169,7 +169,6 @@ public class UIManager : MonoBehaviour
         {
             UpdateState(State.Main);
             PlayerListItemManager.Instance.ClearAll();
-            BCManager.Instance.ClearMembers();
         };
 
         BCManager.Instance.bc.LobbyService.LeaveLobby(BCManager.Instance.CurrentLobbyId, success);
@@ -269,14 +268,7 @@ public class UIManager : MonoBehaviour
             AddMemberRow(row);
         }
     }
-
-    private void FillMemberRows(Dictionary<string, object>[] data)
-    {
-        foreach (Dictionary<string, object> row in data)
-        {
-            AddMemberRow(row);
-        }
-    }
+    
 
     private void AddMemberRow(LobbyMemberData lobbyMemberData)
     {
@@ -315,22 +307,6 @@ public class UIManager : MonoBehaviour
             }
         }
         return null;
-    }
-
-    private void AddMemberRow(Dictionary<string, object> memberData)
-    {
-        // Parse member data into LobbyMemberData
-        var lobbyMemberData = new LobbyMemberData(
-            memberData["name"] as string,
-            (bool)memberData["isReady"],
-            memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null,
-            memberData.ContainsKey("netId") ? System.Convert.ToInt16(memberData["netId"]) : (short)0,
-            memberData.ContainsKey("rating") ? System.Convert.ToInt32(memberData["rating"]) : 0,
-            memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
-            memberData.ContainsKey("extraData") ? memberData["extraData"] as Dictionary<string, object> : null
-        );
-
-        AddMemberRow(lobbyMemberData);
     }
 
     private void UpdateMemberReady(string id, bool ready)
@@ -425,23 +401,7 @@ public class UIManager : MonoBehaviour
                         if (_mainStatus != null) _mainStatus.text = "Service:" + service + " Operation:" + operation;
                     }
                 }
-                
-                // try and always read it
-                if (lobbyData.ContainsKey("members"))
-                {
-                    Dictionary<string, object>[] membersData = lobbyData["members"] as Dictionary<string, object>[];
-                    FillMemberRows(membersData);
-                }
-                else if (jsonData.ContainsKey("members"))
-                {
-                    Dictionary<string, object>[] membersData2 = jsonData["members"] as Dictionary<string, object>[];
-                    FillMemberRows(membersData2);
-                }
 
-                if (jsonData.ContainsKey("lobbyId"))
-                {
-                    BCManager.Instance.CurrentLobbyId = jsonData["lobbyId"] as string;
-                }
                 _lobbyIdText.text = BCManager.Instance.CurrentLobbyId;
 
                 switch (operation)
@@ -454,7 +414,7 @@ public class UIManager : MonoBehaviour
                                     //we just joined this lobby
                                     UpdateState(State.Lobby);
                                 }
-                                AddMemberRow(memberData);
+                                FillCurrentMemberRows();
                             }
                             break;
                         case "MEMBER_UPDATE":
@@ -689,7 +649,8 @@ public class UIManager : MonoBehaviour
         PlayerListItemManager.Instance.ClearAll();
 
         BCManager bcm = BCManager.Instance;
-        bcm.bc.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        RTTCallback lobbyCallback = (json) => { bcm.OnLobbyEvent(json); OnLobbyEvent(json); };
+        bcm.bc.RTTService.RegisterRTTLobbyCallback(lobbyCallback);
 
         UpdateState(State.Main);
 

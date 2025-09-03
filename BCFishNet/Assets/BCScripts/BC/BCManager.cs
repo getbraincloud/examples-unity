@@ -72,6 +72,11 @@ public class BCManager : MonoBehaviour
         int removedCount = memberData.RemoveAll(m => m != null && m.ProfileId == member.ProfileId);
     }
 
+    public void RemoveMember(string profileId)
+    {
+        int removedCount = memberData.RemoveAll(m => m != null && m.ProfileId == profileId);
+    }
+
     public void ClearMembers()
     {
         memberData.Clear();
@@ -100,6 +105,123 @@ public class BCManager : MonoBehaviour
     {
         get => _externalId;
         set => _externalId = value;
+    }
+
+    private void FillMemberRows(Dictionary<string, object>[] data)
+    {
+        foreach (Dictionary<string, object> row in data)
+        {
+            AddMemberRow(row);
+        }
+    }
+
+
+    private void AddMemberRow(Dictionary<string, object> memberData)
+    {
+        // Parse member data into LobbyMemberData
+        var lobbyMemberData = new LobbyMemberData(
+            memberData["name"] as string,
+            (bool)memberData["isReady"],
+            memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null,
+            memberData.ContainsKey("netId") ? System.Convert.ToInt16(memberData["netId"]) : (short)0,
+            memberData.ContainsKey("rating") ? System.Convert.ToInt32(memberData["rating"]) : 0,
+            memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
+            memberData.ContainsKey("extraData") ? memberData["extraData"] as Dictionary<string, object> : null
+        );
+
+        BCManager.Instance.AddMember(lobbyMemberData);
+    }
+
+    public void OnLobbyEvent(string json)
+    {
+        try
+        {
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(json);
+            Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
+
+            Dictionary<string, object> lobbyData = new Dictionary<string, object>();
+            Dictionary<string, object> memberData = new Dictionary<string, object>();
+
+            string joiningMemberId = string.Empty;
+            string fromMemberId = string.Empty;
+
+            if (jsonData.ContainsKey("lobby"))
+            {
+                lobbyData = jsonData["lobby"] as Dictionary<string, object>;
+
+                string ownerCxId = lobbyData["ownerCxId"] as string;
+                if (!string.IsNullOrEmpty(ownerCxId))
+                {
+                    string[] parts = ownerCxId.Split(':');
+                    if (parts.Length >= 3)
+                    {
+                        BCManager.Instance.LobbyOwnerId = parts[1]; // This is the profileID of the owner
+                    }
+                }
+            }
+
+            if (jsonData.ContainsKey("member"))
+            {
+                memberData = jsonData["member"] as Dictionary<string, object>;
+                joiningMemberId = memberData["profileId"] as string;
+            }
+            if (jsonData.ContainsKey("from"))
+            {
+                var fromData = jsonData["from"] as Dictionary<string, object>;
+                fromMemberId = fromData["id"] as string;
+            }
+
+            if (response.ContainsKey("operation"))
+            {
+                // try and always read it
+                if (lobbyData.ContainsKey("members"))
+                {
+                    Dictionary<string, object>[] membersData = lobbyData["members"] as Dictionary<string, object>[];
+                    FillMemberRows(membersData);
+                }
+                else if (jsonData.ContainsKey("members"))
+                {
+                    Dictionary<string, object>[] membersData2 = jsonData["members"] as Dictionary<string, object>[];
+                    FillMemberRows(membersData2);
+                }
+
+                if (jsonData.ContainsKey("lobbyId"))
+                {
+                    BCManager.Instance.CurrentLobbyId = jsonData["lobbyId"] as string;
+                }
+
+                var operation = response["operation"] as string;
+
+                switch (operation)
+                {
+                    case "MEMBER_JOIN":
+                        {
+                            var lobbyMemberData = new LobbyMemberData(
+                                memberData["name"] as string,
+                                (bool)memberData["isReady"],
+                                memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null,
+                                memberData.ContainsKey("netId") ? System.Convert.ToInt16(memberData["netId"]) : (short)0,
+                                memberData.ContainsKey("rating") ? System.Convert.ToInt32(memberData["rating"]) : 0,
+                                memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
+                                memberData.ContainsKey("extraData") ? memberData["extraData"] as Dictionary<string, object> : null
+                            );
+
+                            AddMember(lobbyMemberData);
+                        }
+                        break;
+                    case "MEMBER_LEFT":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+                            RemoveMember(joiningMemberId);
+                        }
+                        break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[BrainCloud] OnLobbyEvent - Exception occurred: {ex.Message}");
+        }
     }
 
     public void LeaveCurrentLobby()
@@ -343,7 +465,7 @@ public class BCManager : MonoBehaviour
         Debug.Log("[BCFishNet] DelayedConnect called");
 
         BCFishNetTransport BCFishNet = FindObjectOfType<BCFishNetTransport>();
-        BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort, OnRelayFailure);
+        BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort, OnRelayFailure, OnLobbyEvent);
 
         if (BCFishNet != null)
         {

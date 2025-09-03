@@ -33,8 +33,8 @@ public class LobbyMemberItem : MonoBehaviour
 
         if (data.ProfileId == BCManager.Instance.bc.Client.ProfileId)
         {
-            Invoke("SendCurrentColourSignal", TimeUtils.SHORT_DELAY);
-            InvokeRepeating("UpdateReadyState", TimeUtils.SHORT_DELAY, TimeUtils.ECHO_INTERVAL * 5.0f);
+            InvokeRepeating("SendCurrentColourSignal", TimeUtils.SHORT_DELAY, TimeUtils.ECHO_INTERVAL);
+            //InvokeRepeating("UpdateReadyState", TimeUtils.SHORT_DELAY);
         }
     }
 
