@@ -165,13 +165,9 @@ public class UIManager : MonoBehaviour
 
     public void OnLeaveLobbyClicked()
     {
-        SuccessCallback success = (response, cbObject) =>
-        {
-            UpdateState(State.Main);
-            PlayerListItemManager.Instance.ClearAll();
-        };
+        BCManager.Instance.LeaveCurrentLobby();
 
-        BCManager.Instance.bc.LobbyService.LeaveLobby(BCManager.Instance.CurrentLobbyId, success);
+        UpdateState(State.Main);
     }
 
     public void OnReadyUpClicked()
@@ -275,7 +271,7 @@ public class UIManager : MonoBehaviour
         // Store the data in the manager
         BCManager.Instance.AddMember(lobbyMemberData);
 
-        _loadingNumMembersText.text = $"Members: {BCManager.Instance.LobbyMembersData.Count}";
+        _loadingNumMembersText.text = $"Players: {BCManager.Instance.LobbyMembersData.Count} / {TimeUtils.MAX_PLAYERS:N0}";
 
         LobbyMemberItem item = GetLobbyMemberItem(lobbyMemberData.ProfileId);
         // if we can't find it create it

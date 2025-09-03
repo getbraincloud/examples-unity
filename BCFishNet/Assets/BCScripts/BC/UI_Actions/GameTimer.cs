@@ -49,18 +49,23 @@ public class GameTimer : MonoBehaviour
         float timeLeft = TimeUtils.MAX_UP_TIME - serverUptime;
         if (countdownString != null)
         {
-            if (timeLeft > 0)
+            if (timeLeft > TimeUtils.ENDING_SOON_TIME)
             {
                 countdownString.color = Color.white;
                 countdownString.text = TimerUtils.FormatTime(Mathf.Max(0, timeLeft));
+            }
+            else if (timeLeft > 0)
+            {
+                countdownString.color = Color.yellow;
+                countdownString.text = $"Game Ending Soon: {TimerUtils.FormatTime(timeLeft)}";
             }
             else
             {
                 countdownString.color = Color.red;
                 float overtime = -timeLeft;
-                countdownString.text = $"Server will shutdown soon: {TimerUtils.FormatTime(overtime)}";
+                countdownString.text = $"Server is shutting down: {TimerUtils.FormatTime(overtime)}";
 
-                joinObject.SetActive(true);
+                //joinObject.SetActive(true);
 
                 if (!_shutdownTriggered)
                 {

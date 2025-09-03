@@ -155,7 +155,7 @@ public class BCManager : MonoBehaviour
                     string[] parts = ownerCxId.Split(':');
                     if (parts.Length >= 3)
                     {
-                        BCManager.Instance.LobbyOwnerId = parts[1]; // This is the profileID of the owner
+                        LobbyOwnerId = parts[1]; // This is the profileID of the owner
                     }
                 }
             }
@@ -177,17 +177,19 @@ public class BCManager : MonoBehaviour
                 if (lobbyData.ContainsKey("members"))
                 {
                     Dictionary<string, object>[] membersData = lobbyData["members"] as Dictionary<string, object>[];
+                    ClearMembers();
                     FillMemberRows(membersData);
                 }
                 else if (jsonData.ContainsKey("members"))
                 {
                     Dictionary<string, object>[] membersData2 = jsonData["members"] as Dictionary<string, object>[];
+                    ClearMembers();
                     FillMemberRows(membersData2);
                 }
 
                 if (jsonData.ContainsKey("lobbyId"))
                 {
-                    BCManager.Instance.CurrentLobbyId = jsonData["lobbyId"] as string;
+                    CurrentLobbyId = jsonData["lobbyId"] as string;
                 }
 
                 var operation = response["operation"] as string;
@@ -227,9 +229,11 @@ public class BCManager : MonoBehaviour
     public void LeaveCurrentLobby()
     {
         bc.LobbyService.LeaveLobby(CurrentLobbyId);
+        Debug.Log("Left current lobby " + CurrentLobbyId);
         CurrentLobbyId = "";
 
         PlayerListItemManager.Instance.ClearAll();
+        ClearMembers();
     }
 
     private void OnAuthSuccess(string responseData, object cbObject, Action<bool> callback)
@@ -308,7 +312,6 @@ public class BCManager : MonoBehaviour
 
         var activeScene = SceneManager.GetActiveScene().name;
 
-        PlayerListItemManager.Instance.ClearAll();
         
         // TODO: Make Network Handling more robust
         // while in the main menu, if we are not connected show a display message and prompt to reconnect
@@ -322,6 +325,7 @@ public class BCManager : MonoBehaviour
         }
         else
         {
+            //LeaveCurrentLobby();
             SceneManager.LoadScene("Main");
         }
     }

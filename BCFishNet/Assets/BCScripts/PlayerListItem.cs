@@ -14,6 +14,7 @@ public class PlayerListItem : NetworkBehaviour
     [SerializeField] private Image _bgImage, _squareImage;
     [SerializeField] private TMP_Text _userText;
     [SerializeField] private GameObject _playerCursorPrefab, _hostIcon, _highlightHolder;
+    [SerializeField] private ColorSelector _colorSelector;
 
     private Button _testButton;
     private NetworkManager _networkManager;
@@ -128,7 +129,14 @@ public class PlayerListItem : NetworkBehaviour
         if (base.IsOwner && _hasInitialized)
         {
             _echoTimer += Time.deltaTime;
-            if (_echoTimer >= TimeUtils.ECHO_INTERVAL)
+
+            // reset echo timer if the colour hud is up
+            if (_colorSelector.gameObject.activeInHierarchy)
+            {
+                _echoTimer = 0f;
+            }
+            
+            if (_echoTimer >= TimeUtils.ECHO_INTERVAL * 2.0f)
             {
                 OnTestButtonClicked();
                 _echoTimer = 0f;
