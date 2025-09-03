@@ -311,7 +311,6 @@ public class BCManager : MonoBehaviour
         Debug.LogWarning($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
 
         var activeScene = SceneManager.GetActiveScene().name;
-
         
         // TODO: Make Network Handling more robust
         // while in the main menu, if we are not connected show a display message and prompt to reconnect
@@ -325,7 +324,8 @@ public class BCManager : MonoBehaviour
         }
         else
         {
-            //LeaveCurrentLobby();
+            LeaveCurrentLobby();
+
             SceneManager.LoadScene("Main");
         }
     }
@@ -337,7 +337,7 @@ public class BCManager : MonoBehaviour
 
         PlayerListItemManager.Instance.ClearAll();
 
-        SceneManager.LoadScene("Main");
+        //SceneManager.LoadScene("Main");
     }
 
     public void FindLobby(Action<string> OnEntryId)

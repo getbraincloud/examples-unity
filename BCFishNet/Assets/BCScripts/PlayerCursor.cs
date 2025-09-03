@@ -29,6 +29,15 @@ public class PlayerCursor : NetworkBehaviour
 
         clientId = Owner.ClientId;
 
+        if (IsServer)
+        {
+            // Only send the paint map to the joining client
+            RestoreGlobalPaintMap(Owner);
+        }
+        _enabled = true;
+    }
+    void Start()
+    {
         Transform parentObject = transform.parent;
         if (parentObject == null || parentObject.name != "CursorContainer")
         {
@@ -39,12 +48,6 @@ public class PlayerCursor : NetworkBehaviour
 
         InitCursor();
         ResetPosition();
-
-        if (IsServer)
-        {
-            // Only send the paint map to the joining client
-            RestoreGlobalPaintMap(Owner);
-        }
     }
 
     public void InitCursor()
@@ -59,7 +62,7 @@ public class PlayerCursor : NetworkBehaviour
             Color newColor = playerData.Color;
             _cursorImage.color = newColor;
             Debug.Log($"[PlayerCursor] InitCursor for local player {profileId} with color {newColor}");
-            _enabled = true;
+            
         }
     }
 
@@ -143,22 +146,6 @@ public class PlayerCursor : NetworkBehaviour
                 SpawnShockwaveServer(localMousePos);
             }
         }
-    }
-
-    // Sync scale to all clients
-    public void SetSplatScale(float scale)
-    {
-        if (IsOwner)
-        {
-            UpdateSplatScale(scale);
-            ObserversRpcUpdateSplatScale(scale);
-        }
-    }
-
-    [ObserversRpc]
-    public void ObserversRpcUpdateSplatScale(float scale)
-    {
-        UpdateSplatScale(scale);
     }
 
     public void UpdateSplatScale(float scale)
@@ -319,6 +306,6 @@ public class PlayerCursor : NetworkBehaviour
 
     public void ResetPosition()
     {
-        _rect.anchoredPosition = Vector2.zero;
+        _rect.anchoredPosition = Vector2.one * 10000f; // Move offscreen
     }
 }

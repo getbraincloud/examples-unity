@@ -360,6 +360,19 @@ public class PlayerListItem : NetworkBehaviour
 
     public void UpdateSplatScale(float scale)
     {
+        if (base.IsOwner)
+        {
+            UpdateSplatScaleObservers(scale);
+        }
+        else
+        {
+            _currentCursor?.UpdateSplatScale(scale);
+        }
+    }
+
+    [ObserversRpc]
+    private void UpdateSplatScaleObservers(float scale)
+    {
         _currentCursor?.UpdateSplatScale(scale);
     }
 
