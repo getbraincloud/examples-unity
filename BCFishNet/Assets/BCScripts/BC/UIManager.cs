@@ -172,7 +172,7 @@ public class UIManager : MonoBehaviour
 
     public void OnReadyUpClicked()
     {
-        Dictionary<string, object> extra = new Dictionary<string, object>();
+        Dictionary<string, object> extra = BCManager.Instance.GetLobbyExtraData();
         Debug.Log($"[Lobby] OnReadyUpClicked -> Setting Ready = true | LobbyId = {BCManager.Instance.CurrentLobbyId}");
 
         BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, true, extra);
@@ -463,7 +463,8 @@ public class UIManager : MonoBehaviour
                                     member.ReadyStateValue = false;
                                 }
 
-                                Dictionary<string, object> extra = new Dictionary<string, object>();
+                                Dictionary<string, object> extra = BCManager.Instance.GetLobbyExtraData();
+
                                 BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, false, extra);
                                 
                                 Dictionary<string, object> roomData = jsonData["connectData"] as Dictionary<string, object>;

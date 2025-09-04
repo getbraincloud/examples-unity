@@ -24,6 +24,19 @@ public class LobbyMemberItem : MonoBehaviour
         {
             _playerData.Color = pdata.Color;
         }
+        else if (_data.ExtraData != null && _data.ExtraData.ContainsKey("colour"))
+        {
+            string hexColor = _data.ExtraData["colour"] as string;
+            Color color;
+            if (ColorUtility.TryParseHtmlString("#" + hexColor, out color))
+            {
+                _playerData.Color = color;
+            }
+            else
+            {
+                _playerData.Color = Color.black;
+            }
+        }
         else
         {
             _playerData.Color = Color.black;
@@ -33,8 +46,7 @@ public class LobbyMemberItem : MonoBehaviour
 
         if (data.ProfileId == BCManager.Instance.bc.Client.ProfileId)
         {
-            InvokeRepeating("SendCurrentColourSignal", TimeUtils.SHORT_DELAY, TimeUtils.ECHO_INTERVAL);
-            //InvokeRepeating("UpdateReadyState", TimeUtils.SHORT_DELAY);
+            Invoke("SendCurrentColourSignal", TimeUtils.SHORT_DELAY);
         }
     }
 
@@ -45,7 +57,7 @@ public class LobbyMemberItem : MonoBehaviour
 
     void UpdateReadyState()
     {
-        Dictionary<string, object> extra = new Dictionary<string, object>();
+        Dictionary<string, object> extra = BCManager.Instance.GetLobbyExtraData();
         BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, _data.ReadyStateValue, extra);
     }
 

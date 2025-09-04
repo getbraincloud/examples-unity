@@ -126,10 +126,10 @@ public class BCManager : MonoBehaviour
             memberData.ContainsKey("netId") ? System.Convert.ToInt16(memberData["netId"]) : (short)0,
             memberData.ContainsKey("rating") ? System.Convert.ToInt32(memberData["rating"]) : 0,
             memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
-            memberData.ContainsKey("extraData") ? memberData["extraData"] as Dictionary<string, object> : null
+            memberData.ContainsKey("extra") ? memberData["extra"] as Dictionary<string, object> : null
         );
 
-        BCManager.Instance.AddMember(lobbyMemberData);
+        AddMember(lobbyMemberData);
     }
 
     public void OnLobbyEvent(string json)
@@ -337,7 +337,7 @@ public class BCManager : MonoBehaviour
 
         PlayerListItemManager.Instance.ClearAll();
 
-        //SceneManager.LoadScene("Main");
+        SceneManager.LoadScene("Main");
     }
 
     public void FindLobby(Action<string> OnEntryId)
@@ -409,7 +409,15 @@ public class BCManager : MonoBehaviour
         );
     }
 
-
+    public Dictionary<string, object> GetLobbyExtraData()
+    {
+        var extra = new Dictionary<string, object>();
+        string profileId = BCManager.Instance.bc.Client.ProfileId;
+        Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId).Color;
+        extra["colour"] = ColorUtility.ToHtmlStringRGB(playerColor);
+        return extra;
+    }
+    
     private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
     {
         var algo = new Dictionary<string, object>
@@ -422,7 +430,7 @@ public class BCManager : MonoBehaviour
         var filters = new Dictionary<string, object>();
         filters["appVersion"] = Application.version;
 
-        var extra = new Dictionary<string, object>();
+        Dictionary<string, object> extra = GetLobbyExtraData();
 
         var settings = new Dictionary<string, object>();
         settings["appVersion"] = Application.version;
