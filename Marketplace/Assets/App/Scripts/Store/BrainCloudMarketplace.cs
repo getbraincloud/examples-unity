@@ -140,12 +140,12 @@ public class BrainCloudMarketplace : IDetailedStoreListener
                 controller.InitiatePurchase(iapProduct);
             }
 
-            bc.AppStoreService.CachePurchaseContext(APP_STORE,
-                                                    id,
-                                                    payload,
-                                                    onCacheSuccess,
-                                                    OnBrainCloudFailure("Unable to cache the purchase payload context on brainCloud!",
-                                                                        () => InternalInvokeCallback(null)));
+            bc.AppStoreService.CachePurchasePayloadContext(APP_STORE,
+                                                           id,
+                                                           payload,
+                                                           onCacheSuccess,
+                                                           OnBrainCloudFailure("Unable to cache the purchase payload context on brainCloud!",
+                                                                               () => InternalInvokeCallback(null)));
         }
         else
         {
