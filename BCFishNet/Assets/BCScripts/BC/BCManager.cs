@@ -91,7 +91,7 @@ public class BCManager : MonoBehaviour
         _bc = gameObject.AddComponent<BrainCloudWrapper>();
         _bc.Init();
 
-        Debug.Log("BrainCloud client version: " + _bc.Client.BrainCloudClientVersion);
+        Debug.Log("brainCloud client version: " + _bc.Client.BrainCloudClientVersion);
     }
 
     private string _playerName;
@@ -222,7 +222,7 @@ public class BCManager : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogWarning($"[BrainCloud] OnLobbyEvent - Exception occurred: {ex.Message}");
+            Debug.LogWarning($"[brainCloud] OnLobbyEvent - Exception occurred: {ex.Message}");
         }
     }
 
