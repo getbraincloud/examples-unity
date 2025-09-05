@@ -106,14 +106,6 @@ public class BrainCloudManager : MonoBehaviour
     public void InitializeBC()
     {
         _bcWrapper.Init();
-        //_bcWrapper.Init
-        //(
-        //    "https://api.internal.braincloudservers.com/dispatcherv2",
-        //    "a754a2c0-72d9-46ce-9fdf-18e9c19a556c",
-        //    "23649",
-        //    "1.2.0" 
-        //);
-        //_bcWrapper.Client.EnableLogging(true);
     }
     // Uninitialize brainCloud
     void UninitializeBC()
@@ -891,7 +883,7 @@ public class BrainCloudManager : MonoBehaviour
             _bcWrapper.RelayService.Connect
             (
                 StateManager.Instance.Protocol,
-                new RelayConnectOptions(false, server.Host, port, server.Passcode, "", serverId),
+                new RelayConnectOptions(false, server.Host, port, server.Passcode, serverId), // .this had a "" in the fifth param, are we missing something [smrj]
                 null,
                 LogErrorThenPopUpWindow,
                 "Failed to connect to server"
