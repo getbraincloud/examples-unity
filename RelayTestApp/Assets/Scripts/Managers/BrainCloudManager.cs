@@ -106,14 +106,7 @@ public class BrainCloudManager : MonoBehaviour
     public void InitializeBC()
     {
         _bcWrapper.Init();
-        //_bcWrapper.Init
-        //(
-        //    "https://api.internal.braincloudservers.com/dispatcherv2",
-        //    "a754a2c0-72d9-46ce-9fdf-18e9c19a556c",
-        //    "23649",
-        //    "1.2.0" 
-        //);
-        //_bcWrapper.Client.EnableLogging(true);
+        _bcWrapper.Client.EnableLogging(true);
     }
     // Uninitialize brainCloud
     void UninitializeBC()
@@ -327,39 +320,17 @@ public class BrainCloudManager : MonoBehaviour
     // Ready up and signals RTT service we can start the game
     public void StartGame()
     {
+        if (StateManager.Instance.isReady) return;
+        
         StateManager.Instance.isReady = true;
 
-        if(_noServerSelected && GameManager.Instance.IsLocalUserHost())
-        {
-            //   "members": [
-            //     {
-            //       "cxId": "23649:05b379b4-d366-4748-9424-750d77bbc428:nodufh0g6c45qbunfri8raiov1",
-            //       "passcode": "12345"
-            //     }
-            List<string> memberScriptData = new List<string>();
-            var listOfMembers = StateManager.Instance.CurrentLobby.Members;
-            for (int i = 0; i < listOfMembers.Count; i++)
-            {
-                memberScriptData.Add(listOfMembers[i].cxId);
-            }
-            
-            Dictionary<string, object> scriptData = new Dictionary<string, object>();
-            
-            scriptData.Add("members", memberScriptData);
-            scriptData.Add("ownerCxId", StateManager.Instance.CurrentLobby.OwnerCxID);
-             
-            _bcWrapper.ScriptService.RunScript("ConnectPlayer", JsonWriter.Serialize(scriptData));
-        }
-        else if(!StateManager.Instance.CurrentLobby.LobbyID.IsNullOrEmpty())
-        {
-            //Setting up a update to send to brain cloud about local users color
-            var extra = new Dictionary<string, object>();
-            extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
-            extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
+        //Setting up a update to send to brain cloud about local users color
+        var extra = new Dictionary<string, object>();
+        extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
+        extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
+        //
+        _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);   
 
-            //
-            _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);   
-        }
     }
 
     public void EndMatch()
@@ -781,6 +752,27 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 }
                 case "STARTING":
+                    if(_noServerSelected && GameManager.Instance.IsLocalUserHost())
+                    {
+                        //   "members": [
+                        //     {
+                        //       "cxId": "23649:05b379b4-d366-4748-9424-750d77bbc428:nodufh0g6c45qbunfri8raiov1",
+                        //       "passcode": "12345"
+                        //     }
+                        List<string> memberScriptData = new List<string>();
+                        var listOfMembers = StateManager.Instance.CurrentLobby.Members;
+                        for (int i = 0; i < listOfMembers.Count; i++)
+                        {
+                            memberScriptData.Add(listOfMembers[i].cxId);
+                        }
+            
+                        Dictionary<string, object> scriptData = new Dictionary<string, object>();
+            
+                        scriptData.Add("members", memberScriptData);
+                        scriptData.Add("ownerCxId", StateManager.Instance.CurrentLobby.OwnerCxID);
+             
+                        _bcWrapper.ScriptService.RunScript("ConnectPlayer", JsonWriter.Serialize(scriptData));
+                    }
                     // Save our picked color index
                     _presentWhileStarted = true;
                     GameManager.Instance.UpdatePresentSinceStart();
@@ -888,6 +880,7 @@ public class BrainCloudManager : MonoBehaviour
         Server server = StateManager.Instance.CurrentServer;
         if(_noServerSelected)
         {
+            //Directly connect to server using serverId
             _bcWrapper.RelayService.Connect
             (
                 StateManager.Instance.Protocol,
