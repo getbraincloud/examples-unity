@@ -1,12 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Steamworks;
 using System.Text;
 using System;
 
+#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
+#define DISABLESTEAMWORKS
+#endif
+
+#if !DISABLESTEAMWORKS
+using Steamworks;
+#endif
+
 public class SteamUtils : MonoBehaviour
 {
+#if !DISABLESTEAMWORKS
     // Start is called before the first frame update
     private static byte[] m_ticket = new byte[1024];
     private static uint m_ticketSize;
@@ -77,6 +85,5 @@ public class SteamUtils : MonoBehaviour
         authTicketCallback = callback;
         HAuthTicket ticket = SteamUser.GetAuthTicketForWebApi("brainCloud");
     }
-
-
+#endif
 }
