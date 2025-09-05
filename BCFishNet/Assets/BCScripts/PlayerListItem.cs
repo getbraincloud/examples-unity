@@ -97,7 +97,6 @@ public class PlayerListItem : NetworkBehaviour
         PlayerListItemManager.Instance.SetServerStartTime(serverStartTime);
     }
 
-
     private void Update()
     {
         if (_clearedCanvasMessage == null)
@@ -161,7 +160,6 @@ public class PlayerListItem : NetworkBehaviour
     void SyncServerTimeToAllClients(double serverStartTime)
     {
         SyncServerStartTime(serverStartTime);
-    
     }
 
     public void OnClearCanvasClicked()
@@ -206,6 +204,11 @@ public class PlayerListItem : NetworkBehaviour
 
     private void EnableClearedCanvasImmediately(bool enable)
     {
+        if (_clearedCanvasMessage == null)
+        {
+            _clearedCanvasMessage = GameObject.Find("ClearedCanvasObj").GetComponent<TextMeshProUGUI>();
+        }
+
         _clearedCanvasMessage.transform.localScale = enable ? Vector3.one : Vector3.zero;
 
         if (enable)
@@ -295,7 +298,7 @@ public class PlayerListItem : NetworkBehaviour
 
         TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
         UpdateIsHost(Owner.IsHost);
-
+        
         // check game over
         CheckGameOver();
     }
@@ -360,19 +363,6 @@ public class PlayerListItem : NetworkBehaviour
 
     public void UpdateSplatScale(float scale)
     {
-        if (base.IsOwner)
-        {
-            UpdateSplatScaleObservers(scale);
-        }
-        else
-        {
-            _currentCursor?.UpdateSplatScale(scale);
-        }
-    }
-
-    [ObserversRpc]
-    private void UpdateSplatScaleObservers(float scale)
-    {
         _currentCursor?.UpdateSplatScale(scale);
     }
 
@@ -386,7 +376,6 @@ public class PlayerListItem : NetworkBehaviour
         }
         return playerName;
     }
-
 
     private TextMeshProUGUI _clearedCanvasMessage = null;
     private float _bgImageWidth = 0f;

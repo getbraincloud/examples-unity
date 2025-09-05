@@ -1,6 +1,7 @@
 using FishNet;
 using FishNet.Connection;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -34,6 +35,7 @@ public class PlayerCursor : NetworkBehaviour
             // Only send the paint map to the joining client
             RestoreGlobalPaintMap(Owner);
         }
+        _splatScale.OnChange += OnSplatScaleChanged;
         _enabled = true;
     }
     void Start()
@@ -71,7 +73,7 @@ public class PlayerCursor : NetworkBehaviour
     private bool _enabled = false;
 
     private Vector2 _lastPaintPosition = Vector2.positiveInfinity;
-    private float _splatScale = 1f;
+    private readonly SyncVar<float> _splatScale = new SyncVar<float>(1f);
     void Update()
     {
         if (IsOwner && _enabled)
@@ -123,7 +125,7 @@ public class PlayerCursor : NetworkBehaviour
                     if (_lastPaintPosition != localMousePos)
                     {
                         _timeSinceLastPaint = 0f;
-                        SpawnPaintServer(localMousePos, _splatScale);
+                        SpawnPaintServer(localMousePos, _splatScale.Value);
                         _lastPaintPosition = localMousePos;
                     }
                     else
@@ -148,11 +150,24 @@ public class PlayerCursor : NetworkBehaviour
         }
     }
 
+    private void OnSplatScaleChanged(float oldValue, float newValue, bool asServer)
+    {
+        this.transform.localScale = Vector3.one * newValue;
+    }
+
     public void UpdateSplatScale(float scale)
     {
-        Debug.Log($"[PlayerCursor] UpdateSplatScale: {scale}");
-        _splatScale = scale;
-        this.transform.localScale = Vector3.one * scale;
+        if (IsOwner)
+        {
+            CmdSetSplatScale(scale);
+        }
+    }
+
+    [ServerRpc]
+    private void CmdSetSplatScale(float scale)
+    {
+        _splatScale.Value = scale;
+        // The event will update the transform on all clients
     }
 
     [ServerRpc]
