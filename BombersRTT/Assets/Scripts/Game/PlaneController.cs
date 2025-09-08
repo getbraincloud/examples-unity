@@ -292,7 +292,7 @@ namespace BrainCloudUNETExample.Game
                 return;
             }
 
-            Vector3 direction = m_rigidBody.velocity;
+            Vector3 direction = m_rigidBody.linearVelocity;
 
             if (direction == Vector3.zero)
             {
@@ -354,9 +354,9 @@ namespace BrainCloudUNETExample.Game
         public void Accelerate(float aAcceleration, float aSpeedMultiplier)
         {
             m_rigidBody.AddForce(transform.up * aAcceleration * aSpeedMultiplier);
-            if (m_rigidBody.velocity.magnitude > m_velocityMaxMagnitude * aSpeedMultiplier)
+            if (m_rigidBody.linearVelocity.magnitude > m_velocityMaxMagnitude * aSpeedMultiplier)
             {
-                m_rigidBody.velocity = m_rigidBody.velocity.normalized * m_velocityMaxMagnitude * aSpeedMultiplier;
+                m_rigidBody.linearVelocity = m_rigidBody.linearVelocity.normalized * m_velocityMaxMagnitude * aSpeedMultiplier;
             }
         }
 
@@ -374,7 +374,7 @@ namespace BrainCloudUNETExample.Game
                 m_lastPositions[i] = m_lastPositions[i + 1];
             }
 
-            Vector3 direction = m_rigidBody.velocity;
+            Vector3 direction = m_rigidBody.linearVelocity;
 
             if (direction == Vector3.zero)
             {

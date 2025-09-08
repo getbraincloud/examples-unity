@@ -23,7 +23,7 @@ public class ProjectileMovement : MonoBehaviour
 
     private void OnEnable()
     {
-        _rigidbody.velocity = transform.forward * Speed;
+        _rigidbody.linearVelocity = transform.forward * Speed;
         StartCoroutine(DelayToDestroy());
     }
 

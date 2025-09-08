@@ -178,9 +178,9 @@ namespace Gameframework
 
             if (rigidBody != null && !rigidBody.isKinematic)
             {
-                ref_dict[VELOCITY_X] = ConvertToShort(rigidBody.velocity.x);
-                ref_dict[VELOCITY_Y] = ConvertToShort(rigidBody.velocity.y);
-                ref_dict[VELOCITY_Z] = ConvertToShort(rigidBody.velocity.z);
+                ref_dict[VELOCITY_X] = ConvertToShort(rigidBody.linearVelocity.x);
+                ref_dict[VELOCITY_Y] = ConvertToShort(rigidBody.linearVelocity.y);
+                ref_dict[VELOCITY_Z] = ConvertToShort(rigidBody.linearVelocity.z);
             }
         }
         #endregion
@@ -220,7 +220,7 @@ namespace Gameframework
             // Velocity
             {
                 Rigidbody rigidBody = GetComponent<Rigidbody>();
-                rigidBody.velocity = m_networkVelocity; // Don't lerp velocity, we don't have to go that deep
+                rigidBody.linearVelocity = m_networkVelocity; // Don't lerp velocity, we don't have to go that deep
             }
 
             // Position

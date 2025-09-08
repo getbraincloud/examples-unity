@@ -23,7 +23,7 @@ namespace BrainCloudUNETExample.Game
 
         void LateUpdate()
         {
-            transform.rotation = Quaternion.LookRotation(GetComponent<Rigidbody>().velocity.normalized, transform.up);
+            transform.rotation = Quaternion.LookRotation(GetComponent<Rigidbody>().linearVelocity.normalized, transform.up);
         }
 
         void OnCollisionEnter(Collision aCollision)
