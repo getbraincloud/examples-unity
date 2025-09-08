@@ -6,6 +6,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
+#define DISABLESTEAMWORKS
+#endif
+
 /// <summary>
 /// <para>
 /// An example on how User Authentication can he handled in your app.
@@ -80,11 +84,15 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
         AuthenticationType authenticationType = UserHandler.AuthenticationType;
 
+#if !DISABLESTEAMWORKS
         if (SteamUtils.IsSteamInitialized())
         {
             authenticationType = AuthenticationType.Steam;
             SteamUtils.SetupSteamManager();
         }
+#else
+        SteamRadio.gameObject.SetActive(false);
+#endif
 
         if (authenticationType == AuthenticationType.Universal)
         {
@@ -427,7 +435,9 @@ public class MainLoginPanelUI : ContentUIBehaviour
         }
         else if (SteamRadio.isOn)
         {
+#if !DISABLESTEAMWORKS
             string authTicketString = SteamUtils.GetSteamAuthTicket(OnAuthTicketReceived);
+#endif
         }
         else // Anonymous login
         {
@@ -438,11 +448,13 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
     public void OnAuthTicketReceived(string ticket)
     {
+#if !DISABLESTEAMWORKS
         Debug.Log("We got ticket: " + ticket);
         string userSteamId = SteamUtils.GetSteamID().ToString();
         UserHandler.AuthenticateSteam(userSteamId.ToString(), ticket, true,
                                               OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                               OnFailure("Authentication Failed", OnAuthenticationFailure));
+#endif
     }
 
     #endregion
