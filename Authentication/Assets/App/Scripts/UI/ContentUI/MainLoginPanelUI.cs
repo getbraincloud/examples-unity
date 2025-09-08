@@ -1,3 +1,7 @@
+#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
+#define DISABLESTEAMWORKS
+#endif
+
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JSONHelper;
@@ -5,10 +9,6 @@ using System.Net.Mail;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
-#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
-#define DISABLESTEAMWORKS
-#endif
 
 /// <summary>
 /// <para>

@@ -48,8 +48,8 @@ public class LogMessageUI : MonoBehaviour
     /// </summary>
     public bool WordWrapText
     {
-        get => LogText.enableWordWrapping;
-        set => LogText.enableWordWrapping = value;
+        get => LogText.textWrappingMode == TextWrappingModes.Normal;
+        set => LogText.textWrappingMode = value ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
     }
 
     /// <summary>
