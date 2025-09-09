@@ -1827,10 +1827,10 @@ namespace BrainCloudUNETExample.Game
             combinedPings *= 0.5f; // Ping are round trip, here we only care about the one way time.
 
             // Shorter life based, faster velocity. So we process the same distance, in a shorter time
-            var originalTravelDistance = (rigidbody.velocity * bulletLifeTime).magnitude;
-            var truncatedTravelDistance = originalTravelDistance - (rigidbody.velocity * combinedPings).magnitude;
+            var originalTravelDistance = (rigidbody.linearVelocity * bulletLifeTime).magnitude;
+            var truncatedTravelDistance = originalTravelDistance - (rigidbody.linearVelocity * combinedPings).magnitude;
             bulletControler.setLifeTimeOffset(-combinedPings);
-            rigidbody.velocity *= originalTravelDistance / truncatedTravelDistance;
+            rigidbody.linearVelocity *= originalTravelDistance / truncatedTravelDistance;
         }
 
         //[ClientRpc]
