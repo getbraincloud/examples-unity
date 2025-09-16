@@ -20,12 +20,13 @@ public class BCProduct
     public string title;
     public string description;
     public string imageUrl;
+    public string payload;
     public Dictionary<string, int> currency;
     public Dictionary<string, BCItem> items;
     public Dictionary<string, object> data;
     public BCPriceData priceData;
 
-    public Product unityProduct { get; private set; }
+    public Product UnityProduct { get; private set; }
 
     public BCProduct() { }
 
@@ -111,19 +112,19 @@ public class BCProduct
 #endif
     }
 
-    public string GetLocalizedTitle() => unityProduct.metadata.localizedTitle;
+    public string GetLocalizedTitle() => UnityProduct.metadata.localizedTitle;
 
-    public string GetLocalizedDescription() => unityProduct.metadata.localizedDescription;
+    public string GetLocalizedDescription() => UnityProduct.metadata.localizedDescription;
 
-    public decimal GetLocalizedPrice() => unityProduct.metadata.localizedPrice;
+    public decimal GetLocalizedPrice() => UnityProduct.metadata.localizedPrice;
 
-    public string GetLocalizedPriceString() => unityProduct.metadata.localizedPriceString;
+    public string GetLocalizedPriceString() => UnityProduct.metadata.localizedPriceString;
 
-    public string GetLocalizedISOCurrencyCode() => unityProduct.metadata.isoCurrencyCode;
+    public string GetLocalizedISOCurrencyCode() => UnityProduct.metadata.isoCurrencyCode;
 
-    public ProductMetadata GetProductMetaData() => unityProduct.metadata;
+    public ProductMetadata GetProductMetaData() => UnityProduct.metadata;
 
-    public void SetUnityProduct(Product product) => unityProduct = product;
+    public void SetUnityProduct(Product product) => UnityProduct = product;
 }
 
 /// <summary>

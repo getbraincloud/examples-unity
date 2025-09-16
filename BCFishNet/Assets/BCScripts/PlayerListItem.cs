@@ -4,6 +4,7 @@ using FishNet.Managing;
 using FishNet.Object;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ public class PlayerListItem : NetworkBehaviour
     [SerializeField] private Image _bgImage, _squareImage;
     [SerializeField] private TMP_Text _userText;
     [SerializeField] private GameObject _playerCursorPrefab, _hostIcon, _highlightHolder;
+    [SerializeField] private ColorSelector _colorSelector;
 
     private Button _testButton;
     private NetworkManager _networkManager;
@@ -55,6 +57,10 @@ public class PlayerListItem : NetworkBehaviour
             if (_currentCursor == null)
                 StartCoroutine(DelayedSpawnCursor());
         }
+        else
+        {
+            this.enabled = false;
+        }
 
         _squareImage.gameObject.SetActive(base.IsOwner);
         _highlightHolder.SetActive(base.IsOwner);
@@ -91,7 +97,6 @@ public class PlayerListItem : NetworkBehaviour
         PlayerListItemManager.Instance.SetServerStartTime(serverStartTime);
     }
 
-
     private void Update()
     {
         if (_clearedCanvasMessage == null)
@@ -120,10 +125,17 @@ public class PlayerListItem : NetworkBehaviour
         }
 
         // Periodically update local player info
-        if (base.IsOwner)
+        if (base.IsOwner && _hasInitialized)
         {
             _echoTimer += Time.deltaTime;
-            if (_echoTimer >= ECHO_INTERVAL)
+
+            // reset echo timer if the colour hud is up
+            if (_colorSelector.gameObject.activeInHierarchy)
+            {
+                _echoTimer = 0f;
+            }
+            
+            if (_echoTimer >= TimeUtils.ECHO_INTERVAL * 2.0f)
             {
                 OnTestButtonClicked();
                 _echoTimer = 0f;
@@ -141,13 +153,6 @@ public class PlayerListItem : NetworkBehaviour
             Color newColor = playerData.Color;
 
             TestChangeServer(profileId, newName, newColor);
-
-            // If this client is also the server, echo the server time to all clients
-            if (base.IsServer)
-            {
-                double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
-                SyncServerTimeToAllClients(serverStartTime);
-            }
         }
     }
 
@@ -155,7 +160,6 @@ public class PlayerListItem : NetworkBehaviour
     void SyncServerTimeToAllClients(double serverStartTime)
     {
         SyncServerStartTime(serverStartTime);
-    
     }
 
     public void OnClearCanvasClicked()
@@ -200,6 +204,11 @@ public class PlayerListItem : NetworkBehaviour
 
     private void EnableClearedCanvasImmediately(bool enable)
     {
+        if (_clearedCanvasMessage == null)
+        {
+            _clearedCanvasMessage = GameObject.Find("ClearedCanvasObj").GetComponent<TextMeshProUGUI>();
+        }
+
         _clearedCanvasMessage.transform.localScale = enable ? Vector3.one : Vector3.zero;
 
         if (enable)
@@ -236,7 +245,9 @@ public class PlayerListItem : NetworkBehaviour
     IEnumerator DelayedSpawnCursor()
     {
         // If the clients, let's delay a bit, to let the server get there and we can echo back to it
-        yield return new WaitForSeconds(SHORT_DELAY);
+        yield return new WaitForSeconds(TimeUtils.SHORT_DELAY);
+
+        OnTestButtonClicked();
 
         if (_currentCursor == null)
             SpawnCursor(Owner);
@@ -254,7 +265,7 @@ public class PlayerListItem : NetworkBehaviour
 
     IEnumerator UpdateData(NetworkConnection conn)
     {
-        yield return new WaitForSeconds(SHORT_DELAY);
+        yield return new WaitForSeconds(TimeUtils.SHORT_DELAY);
 
         OnTestButtonClicked();
         
@@ -287,6 +298,35 @@ public class PlayerListItem : NetworkBehaviour
 
         TestChange(_playerData.ProfileId, _playerData.Name, _playerData.Color);
         UpdateIsHost(Owner.IsHost);
+        
+        // check game over
+        CheckGameOver();
+    }
+
+    private bool _gameOver = false;
+    private void CheckGameOver()
+    {
+        // If this client is also the server, echo the server time to all clients
+        if (base.IsHost && !_gameOver)
+        {
+            double serverStartTime = PlayerListItemManager.Instance.ServerStartTime;
+            SyncServerTimeToAllClients(serverStartTime);
+            if (serverStartTime > 0)
+            {
+                double now = TimeUtils.GetCurrentTime();
+                float serverUptime = (float)(now - serverStartTime);
+                float timeLeft = TimeUtils.MAX_UP_TIME - serverUptime;
+                if (timeLeft < 0)
+                {
+                    // this should boot all the clients
+                    Dictionary<string, object> payload = new Dictionary<string, object>();
+                    BCManager.Instance.bc.RelayService.EndMatch(payload);
+                    _gameOver = true;
+
+                    Debug.Log("EndMatch Sent");
+                }
+            }
+        }
     }
 
     [ObserversRpc]
@@ -337,15 +377,10 @@ public class PlayerListItem : NetworkBehaviour
         return playerName;
     }
 
-
     private TextMeshProUGUI _clearedCanvasMessage = null;
     private float _bgImageWidth = 0f;
     private const float SQUARE_IMAGE_OFFSET = 20f;
-
-    private const float DELAY = 0.15f;
-    private const float SHORT_DELAY = 0.05f;
     
     private float _echoTimer = 0f;
-    private const float ECHO_INTERVAL = DELAY * 5; // secondss
         
 }

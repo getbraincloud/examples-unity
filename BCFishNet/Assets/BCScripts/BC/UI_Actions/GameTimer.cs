@@ -10,14 +10,16 @@ public class GameTimer : MonoBehaviour
 {
     // display this as a timer counting UP
     [SerializeField] private TMP_Text countdownString;
+    [SerializeField] private GameObject joinObject;
+
 
     private FishNet.Managing.NetworkManager _networkManager;
 
-    private float MAX_UP_TIME = 120.0f;// Should we get this from the 
 
     void Start()
     {
         _networkManager = FishNet.InstanceFinder.NetworkManager;
+        joinObject.SetActive(false);
     }
 
     void Update()
@@ -28,7 +30,7 @@ public class GameTimer : MonoBehaviour
         {
             // Use authoritative server start time if available
             serverStartTime = PlayerListItemManager.Instance != null ? PlayerListItemManager.Instance.ServerStartTime : -1;
-            double now = GetCurrentTime();
+            double now = TimeUtils.GetCurrentTime();
             if (serverStartTime >= 0)
             {
                 serverUptime = (float)(now - serverStartTime);
@@ -44,26 +46,51 @@ public class GameTimer : MonoBehaviour
             serverUptime = (float)Time.timeAsDouble;
         }
 
-        float timeLeft = MAX_UP_TIME - serverUptime;
+        float timeLeft = TimeUtils.MAX_UP_TIME - serverUptime;
         if (countdownString != null)
         {
-            if (timeLeft > 0)
+            if (timeLeft > TimeUtils.ENDING_SOON_TIME)
             {
                 countdownString.color = Color.white;
                 countdownString.text = TimerUtils.FormatTime(Mathf.Max(0, timeLeft));
+            }
+            else if (timeLeft > 0)
+            {
+                countdownString.color = Color.yellow;
+                countdownString.text = $"Game Ending Soon: {TimerUtils.FormatTime(timeLeft)}";
             }
             else
             {
                 countdownString.color = Color.red;
                 float overtime = -timeLeft;
-                countdownString.text = $"Server will shutdown soon: {TimerUtils.FormatTime(overtime)}";
+                countdownString.text = $"Server is shutting down: {TimerUtils.FormatTime(overtime)}";
+
+                //joinObject.SetActive(true);
+
+                if (!_shutdownTriggered)
+                {
+                    _shutdownTriggered = true;
+                    StartCoroutine(ShutdownSequence());
+                }
+
             }
         }
     }
 
-    private double GetCurrentTime()
+    private bool _shutdownTriggered = false;
+    private IEnumerator ShutdownSequence()
     {
-        // Use epoch time in seconds (with millisecond precision) to match PlayerListItem
-        return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
+        yield return new WaitForSeconds(TimeUtils.SHUT_DOWN_TIME);
+
+        BackBehavior back = FindObjectOfType<BackBehavior>();
+        if (back != null)
+        {
+            Debug.Log("[GameTimer] Triggering BackBehavior.OnMainMenu(false) after shutdown delay.");
+            back.OnMainMenu(false);
+        }
+        else
+        {
+            Debug.LogWarning("[GameTimer] No BackBehavior found in scene!");
+        }
     }
 }

@@ -16,7 +16,7 @@ public class PlayerListItemManager : MonoBehaviour
     public void SetServerStartTime(double time)
     {
         _serverStartTime = time;
-        Debug.Log($"[PlayerListItemManager] ServerStartTime set to {time}");
+        //Debug.Log($"[PlayerListItemManager] ServerStartTime set to {time}");
     }
 
     private Dictionary<int, PlayerData> _playerData = new Dictionary<int, PlayerData>();
@@ -44,8 +44,6 @@ public class PlayerListItemManager : MonoBehaviour
         if (Instance == this)
         {
             PlayerListEvents.OnClearAllPlayerList -= ClearAll;
-
-            Debug.Log("[PlayerListItemManager] Destroyed and unsubscribed from events.");
         }
     }
 
@@ -125,7 +123,7 @@ public class PlayerListItemManager : MonoBehaviour
         // save it by profile id too
         _playerDataByProfileId[playerData.ProfileId] = playerData;
 
-        Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
+        //Debug.Log($"[PlayerListItemManager] Saved PlayerData for client {clientId}: Name='{playerData.Name}', Color={playerData.Color}");
     }
 
     public bool SaveGlobalPaintData(PaintSplatData paintSplatData)

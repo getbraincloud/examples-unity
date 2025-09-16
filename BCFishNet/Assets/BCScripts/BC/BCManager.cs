@@ -44,12 +44,43 @@ public class BCManager : MonoBehaviour
 
 
     public string RelayPasscode;
-    public string CurrentLobbyId;
+    public string CurrentLobbyId = "";
 
     public string RoomAddress;
     public ushort RoomPort;
 
     public string LobbyOwnerId;
+
+    public List<LobbyMemberData> LobbyMembersData => new List<LobbyMemberData>(memberData);
+    private List<LobbyMemberData> memberData = new List<LobbyMemberData>();
+
+    public void AddMember(LobbyMemberData member)
+    {
+        int index = memberData.FindIndex(m => m.ProfileId == member.ProfileId);
+        if (index >= 0)
+        {
+            memberData[index] = member;
+        }
+        else
+        {
+            memberData.Add(member);
+        }
+    }
+
+    public void RemoveMember(LobbyMemberData member)
+    {
+        int removedCount = memberData.RemoveAll(m => m != null && m.ProfileId == member.ProfileId);
+    }
+
+    public void RemoveMember(string profileId)
+    {
+        int removedCount = memberData.RemoveAll(m => m != null && m.ProfileId == profileId);
+    }
+
+    public void ClearMembers()
+    {
+        memberData.Clear();
+    }
 
     private void Awake()
     {
@@ -60,7 +91,7 @@ public class BCManager : MonoBehaviour
         _bc = gameObject.AddComponent<BrainCloudWrapper>();
         _bc.Init();
 
-        Debug.Log("BrainCloud client version: " + _bc.Client.BrainCloudClientVersion);
+        Debug.Log("brainCloud client version: " + _bc.Client.BrainCloudClientVersion);
     }
 
     private string _playerName;
@@ -74,6 +105,135 @@ public class BCManager : MonoBehaviour
     {
         get => _externalId;
         set => _externalId = value;
+    }
+
+    private void FillMemberRows(Dictionary<string, object>[] data)
+    {
+        foreach (Dictionary<string, object> row in data)
+        {
+            AddMemberRow(row);
+        }
+    }
+
+
+    private void AddMemberRow(Dictionary<string, object> memberData)
+    {
+        // Parse member data into LobbyMemberData
+        var lobbyMemberData = new LobbyMemberData(
+            memberData["name"] as string,
+            (bool)memberData["isReady"],
+            memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null,
+            memberData.ContainsKey("netId") ? System.Convert.ToInt16(memberData["netId"]) : (short)0,
+            memberData.ContainsKey("rating") ? System.Convert.ToInt32(memberData["rating"]) : 0,
+            memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
+            memberData.ContainsKey("extra") ? memberData["extra"] as Dictionary<string, object> : null
+        );
+
+        AddMember(lobbyMemberData);
+    }
+
+    public void OnLobbyEvent(string json)
+    {
+        try
+        {
+            Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(json);
+            Dictionary<string, object> jsonData = response["data"] as Dictionary<string, object>;
+
+            Dictionary<string, object> lobbyData = new Dictionary<string, object>();
+            Dictionary<string, object> memberData = new Dictionary<string, object>();
+
+            string joiningMemberId = string.Empty;
+            string fromMemberId = string.Empty;
+
+            if (jsonData.ContainsKey("lobby"))
+            {
+                lobbyData = jsonData["lobby"] as Dictionary<string, object>;
+
+                string ownerCxId = lobbyData["ownerCxId"] as string;
+                if (!string.IsNullOrEmpty(ownerCxId))
+                {
+                    string[] parts = ownerCxId.Split(':');
+                    if (parts.Length >= 3)
+                    {
+                        LobbyOwnerId = parts[1]; // This is the profileID of the owner
+                    }
+                }
+            }
+
+            if (jsonData.ContainsKey("member"))
+            {
+                memberData = jsonData["member"] as Dictionary<string, object>;
+                joiningMemberId = memberData["profileId"] as string;
+            }
+            if (jsonData.ContainsKey("from"))
+            {
+                var fromData = jsonData["from"] as Dictionary<string, object>;
+                fromMemberId = fromData["id"] as string;
+            }
+
+            if (response.ContainsKey("operation"))
+            {
+                // try and always read it
+                if (lobbyData.ContainsKey("members"))
+                {
+                    Dictionary<string, object>[] membersData = lobbyData["members"] as Dictionary<string, object>[];
+                    ClearMembers();
+                    FillMemberRows(membersData);
+                }
+                else if (jsonData.ContainsKey("members"))
+                {
+                    Dictionary<string, object>[] membersData2 = jsonData["members"] as Dictionary<string, object>[];
+                    ClearMembers();
+                    FillMemberRows(membersData2);
+                }
+
+                if (jsonData.ContainsKey("lobbyId"))
+                {
+                    CurrentLobbyId = jsonData["lobbyId"] as string;
+                }
+
+                var operation = response["operation"] as string;
+
+                switch (operation)
+                {
+                    case "MEMBER_JOIN":
+                        {
+                            var lobbyMemberData = new LobbyMemberData(
+                                memberData["name"] as string,
+                                (bool)memberData["isReady"],
+                                memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null,
+                                memberData.ContainsKey("netId") ? System.Convert.ToInt16(memberData["netId"]) : (short)0,
+                                memberData.ContainsKey("rating") ? System.Convert.ToInt32(memberData["rating"]) : 0,
+                                memberData.ContainsKey("cxId") ? memberData["cxId"] as string : null,
+                                memberData.ContainsKey("extraData") ? memberData["extraData"] as Dictionary<string, object> : null
+                            );
+
+                            AddMember(lobbyMemberData);
+                        }
+                        break;
+                    case "MEMBER_LEFT":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+                            RemoveMember(joiningMemberId);
+                        }
+                        break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[brainCloud] OnLobbyEvent - Exception occurred: {ex.Message}");
+        }
+    }
+
+    public void LeaveCurrentLobby()
+    {
+        bc.LobbyService.LeaveLobby(CurrentLobbyId);
+        Debug.Log("Left current lobby " + CurrentLobbyId);
+        CurrentLobbyId = "";
+
+        PlayerListItemManager.Instance.ClearAll();
+        ClearMembers();
     }
 
     private void OnAuthSuccess(string responseData, object cbObject, Action<bool> callback)
@@ -151,6 +311,7 @@ public class BCManager : MonoBehaviour
         Debug.LogWarning($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
 
         var activeScene = SceneManager.GetActiveScene().name;
+        
         // TODO: Make Network Handling more robust
         // while in the main menu, if we are not connected show a display message and prompt to reconnect
         if (activeScene == "Main")
@@ -163,6 +324,8 @@ public class BCManager : MonoBehaviour
         }
         else
         {
+            LeaveCurrentLobby();
+
             SceneManager.LoadScene("Main");
         }
     }
@@ -172,42 +335,9 @@ public class BCManager : MonoBehaviour
     {
         Debug.LogWarning($"RelayService Connection Failure - statusMessage: {statusCode} code: {reasonCode} error: {statusMessage}");
 
-        listToJoinWith.Clear();
+        PlayerListItemManager.Instance.ClearAll();
 
-        List<PlayerData> tempList = PlayerListItemManager.Instance.GetAllPlayerDataByProfileId();
-        // Output the contents of listToJoinWith for debugging
-        if (listToJoinWith != null && tempList.Count > 0)
-        {
-            foreach (var player in tempList)
-            {
-                listToJoinWith.Add(player.ProfileId);
-                Debug.Log($"[BCManager] listToJoinWith: ProfileId={player.ProfileId}, Name={player.Name}, Color={player.Color}");
-            }
-        }
-        else
-        {
-            Debug.Log("[BCManager] listToJoinWith is empty or null.");
-        }
-
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnMainSceneLoadedFromGameError;
         SceneManager.LoadScene("Main");
-    }
-
-    public void OnMainSceneLoadedFromGameError(UnityEngine.SceneManagement.Scene scene, LoadSceneMode loadMode)
-    {
-
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnMainSceneLoadedFromGameError;
-
-        // this may include themselves
-        if (listToJoinWith.Count > 1)
-        {
-            // find the UI manager, and call the quick find
-            UIManager uiManager = FindObjectOfType<UIManager>();
-            if (uiManager != null)
-            {
-                //uiManager.OnFindLobbyFromPrevious();
-            }
-        }
     }
 
     public void FindLobby(Action<string> OnEntryId)
@@ -279,7 +409,15 @@ public class BCManager : MonoBehaviour
         );
     }
 
-
+    public Dictionary<string, object> GetLobbyExtraData()
+    {
+        var extra = new Dictionary<string, object>();
+        string profileId = BCManager.Instance.bc.Client.ProfileId;
+        Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId).Color;
+        extra["colour"] = ColorUtility.ToHtmlStringRGB(playerColor);
+        return extra;
+    }
+    
     private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
     {
         var algo = new Dictionary<string, object>
@@ -292,7 +430,7 @@ public class BCManager : MonoBehaviour
         var filters = new Dictionary<string, object>();
         filters["appVersion"] = Application.version;
 
-        var extra = new Dictionary<string, object>();
+        Dictionary<string, object> extra = GetLobbyExtraData();
 
         var settings = new Dictionary<string, object>();
         settings["appVersion"] = Application.version;
@@ -339,7 +477,7 @@ public class BCManager : MonoBehaviour
         Debug.Log("[BCFishNet] DelayedConnect called");
 
         BCFishNetTransport BCFishNet = FindObjectOfType<BCFishNetTransport>();
-        BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort, OnRelayFailure);
+        BCFishNet.Config(_bc, RoomAddress, RelayPasscode, CurrentLobbyId, RoomPort, OnRelayFailure, OnLobbyEvent);
 
         if (BCFishNet != null)
         {

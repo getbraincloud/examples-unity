@@ -1,6 +1,7 @@
 using FishNet;
 using FishNet.Connection;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,6 +30,16 @@ public class PlayerCursor : NetworkBehaviour
 
         clientId = Owner.ClientId;
 
+        if (IsServer)
+        {
+            // Only send the paint map to the joining client
+            RestoreGlobalPaintMap(Owner);
+        }
+        _splatScale.OnChange += OnSplatScaleChanged;
+        _enabled = true;
+    }
+    void Start()
+    {
         Transform parentObject = transform.parent;
         if (parentObject == null || parentObject.name != "CursorContainer")
         {
@@ -39,26 +50,30 @@ public class PlayerCursor : NetworkBehaviour
 
         InitCursor();
         ResetPosition();
-
-        if (IsServer)
-        {
-            // Only send the paint map to the joining client
-            RestoreGlobalPaintMap(Owner);
-        }
     }
 
     public void InitCursor()
     {
         _rect = GetComponent<RectTransform>();
         _container = transform.parent.gameObject.GetComponent<RectTransform>();
+
+        if (IsOwner)
+        {
+            string profileId = BCManager.Instance.bc.Client.ProfileId;
+            PlayerData playerData = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId);
+            Color newColor = playerData.Color;
+            _cursorImage.color = newColor;
+            Debug.Log($"[PlayerCursor] InitCursor for local player {profileId} with color {newColor}");
+            
+        }
     }
 
     private float _paintSpawnCooldown = 0.015f; // Adjust delay between spawns (in seconds)
     private float _timeSinceLastPaint = 0f;
-    private bool _enabled = true;
+    private bool _enabled = false;
 
     private Vector2 _lastPaintPosition = Vector2.positiveInfinity;
-    private float _splatScale = 1f;
+    private readonly SyncVar<float> _splatScale = new SyncVar<float>(1f);
     void Update()
     {
         if (IsOwner && _enabled)
@@ -110,7 +125,7 @@ public class PlayerCursor : NetworkBehaviour
                     if (_lastPaintPosition != localMousePos)
                     {
                         _timeSinceLastPaint = 0f;
-                        SpawnPaintServer(localMousePos, _splatScale);
+                        SpawnPaintServer(localMousePos, _splatScale.Value);
                         _lastPaintPosition = localMousePos;
                     }
                     else
@@ -135,10 +150,24 @@ public class PlayerCursor : NetworkBehaviour
         }
     }
 
+    private void OnSplatScaleChanged(float oldValue, float newValue, bool asServer)
+    {
+        this.transform.localScale = Vector3.one * newValue;
+    }
+
     public void UpdateSplatScale(float scale)
     {
-        _splatScale = scale;
-        this.transform.localScale = Vector3.one * scale;
+        if (IsOwner)
+        {
+            CmdSetSplatScale(scale);
+        }
+    }
+
+    [ServerRpc]
+    private void CmdSetSplatScale(float scale)
+    {
+        _splatScale.Value = scale;
+        // The event will update the transform on all clients
     }
 
     [ServerRpc]
@@ -160,6 +189,10 @@ public class PlayerCursor : NetworkBehaviour
     private void SpawnPaintServer(Vector2 position, float scale)
     {
         float rotation = Random.Range(0f, 360f);
+        if (_cursorImage.color == Color.white)
+        {
+            return;
+        }
 
         PaintSplat paint = Instantiate(_paintPrefab, _container);
         paint.Initialize(position, _cursorImage.color, rotation, scale);
@@ -181,8 +214,6 @@ public class PlayerCursor : NetworkBehaviour
         if (IsServer)
             return;
 
-        Debug.Log($"[PlayerCursor] ObserversRpcSpawnPaint");
-
         PaintSplatData paintSplatData = new PaintSplatData
         {
             color = color,
@@ -201,11 +232,14 @@ public class PlayerCursor : NetworkBehaviour
 
     public void RestoreGlobalPaintMap(NetworkConnection conn = null)
     {
-        _enabled = false; // Disable cursor updates while restoring paint
-        if (conn != null)
-            StartCoroutine(RestoreGlobalPaintCoroutine_Target(conn));
-        else
-            StartCoroutine(RestoreGlobalPaintCoroutine());
+        if (base.IsHost)
+        {
+            _enabled = false; // Disable cursor updates while restoring paint
+            if (conn != null)
+                StartCoroutine(RestoreGlobalPaintCoroutine_Target(conn));
+            else
+                StartCoroutine(RestoreGlobalPaintCoroutine());
+        }
     }
 
     private IEnumerator RestoreGlobalPaintCoroutine()
@@ -264,8 +298,6 @@ public class PlayerCursor : NetworkBehaviour
     [TargetRpc]
     private void TargetRpcSpawnPaint(NetworkConnection conn, Vector3 position, Color color, float rotation, float scale)
     {
-
-        Debug.Log($"[PlayerCursor] Restoring TargetRpcSpawnPaint");
         PaintSplatData paintSplatData = new PaintSplatData
         {
             color = color,
@@ -289,6 +321,6 @@ public class PlayerCursor : NetworkBehaviour
 
     public void ResetPosition()
     {
-        _rect.anchoredPosition = Vector2.zero;
+        _rect.anchoredPosition = Vector2.one * 10000f; // Move offscreen
     }
 }

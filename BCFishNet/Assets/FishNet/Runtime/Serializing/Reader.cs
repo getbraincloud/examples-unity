@@ -345,7 +345,7 @@ namespace FishNet.Serializing
         {
             if (count < 0)
             {
-                NetworkManager.Log($"ArraySegment count cannot be less than 0.");
+                NetworkManager.Log($"ArraySegment count cannot be less than 0." + count);
                 // Purge renaming and return default.
                 Position += Remaining;
                 return default;

@@ -272,7 +272,7 @@ public class TroopAI : BaseHealthBehavior
 
         if (_rigidbodyComp)
         {
-            _rigidbodyComp.velocity = Vector3.zero;    
+            _rigidbodyComp.linearVelocity = Vector3.zero;    
         }
         _isAttacking = false;
         _homeLocation = Vector3.zero;
@@ -338,7 +338,7 @@ public class TroopAI : BaseHealthBehavior
     private IEnumerator DelayToResumeMovement()
     {
         yield return new WaitForSeconds(_delayBeforeResume);
-        _rigidbodyComp.velocity = Vector3.zero;
+        _rigidbodyComp.linearVelocity = Vector3.zero;
         _stunCoroutine = null;
         _isKnockedBack = false;
         if (_navMeshAgent.isActiveAndEnabled)

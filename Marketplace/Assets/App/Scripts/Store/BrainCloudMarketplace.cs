@@ -128,14 +128,24 @@ public class BrainCloudMarketplace : IDetailedStoreListener
         }
 
         InternalSetCallback(onPurchaseFinished);
-        string id = product.GetProductID();
+        string id = product.GetProductID(), payload = product.payload;
         var iapProduct = controller.products.WithID(id);
 
         if (iapProduct != null && iapProduct.availableToPurchase)
         {
             Debug.Log($"Purchasing: {product.title} (ID: {id} | Price: {product.GetLocalizedPrice()} | Type: {product.IAPProductType})");
 
-            controller.InitiatePurchase(iapProduct);
+            void onCacheSuccess(string jsonResponse, object cbObject)
+            {
+                controller.InitiatePurchase(iapProduct);
+            }
+
+            bc.AppStoreService.CachePurchasePayloadContext(APP_STORE,
+                                                           id,
+                                                           payload,
+                                                           onCacheSuccess,
+                                                           OnBrainCloudFailure("Unable to cache the purchase payload context on brainCloud!",
+                                                                               () => InternalInvokeCallback(null)));
         }
         else
         {
