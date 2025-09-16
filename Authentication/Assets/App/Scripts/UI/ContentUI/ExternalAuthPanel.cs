@@ -70,7 +70,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #if APPLE_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
             AuthenticationType.Apple.ToString(),
 #endif
-#if GAME_CENTER_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
+#if GAMECENTER_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
             AuthenticationType.GameCenter.ToString(),
 #endif
 #if FACEBOOK_SDK && (UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID)
@@ -249,6 +249,15 @@ public class ExternalAuthPanel : ContentUIBehaviour
             UserHandler.AuthenticateApple(true,
                                           OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                           OnFailure("Authentication Failed", OnAuthenticationFailure));
+            return;
+#endif
+        }
+        else if (type == AuthenticationType.GameCenter)
+        {
+#if GAMECENTER_SDK
+            UserHandler.AuthenticateGameCenter(true,
+                                               OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                               OnFailure("Authentication Failed", OnAuthenticationFailure));
             return;
 #endif
         }
