@@ -191,7 +191,15 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             {
                 //Get Summary data
                 dataInfo.rarity = summaryFriendData["rarity"] as string;
-                dataInfo.buddyType = BuddyType.Buddy01;
+                if(summaryFriendData.ContainsKey("buddySpritePath"))
+                {
+                    dataInfo.buddySpritePath =  summaryFriendData["buddySpritePath"] as string;
+                }
+                else
+                {
+                    dataInfo.buddySpritePath = BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY;
+                }
+ 
                 var multiplier = summaryFriendData["coinMultiplier"] as double?;
                 if(multiplier != null)
                 {
@@ -556,37 +564,40 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var response = data["response"] as Dictionary<string, object>;
         var profileChildren = response["children"] as Dictionary<string, object>[];
         var appChildrenInfos = new List<AppChildrenInfo>();
-        for(int i = 0; i < profileChildren.Length; i++)
+        if (profileChildren != null)
         {
-            var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
-             var dataInfo = new AppChildrenInfo();
-             //Get Child data
-             dataInfo.profileName = profileChildren[i]["profileName"] as string;
-             dataInfo.profileId = profileChildren[i]["profileId"] as string;
-            
-             if(summaryData != null)
-             {
-                 //Get Entity data
-                 dataInfo.rarity = summaryData["rarity"] as string;
-                 dataInfo.buddyType = BuddyType.Buddy01;
-                 var multiplier = summaryData["coinMultiplier"] as double?;
-                 if(multiplier != null)
-                 {
-                     dataInfo.coinMultiplier = (float) multiplier;
-                 }
-                 else
-                 {
-                     dataInfo.coinMultiplier = 1.0f;
-                 }
-                 dataInfo.coinPerHour = (int) summaryData["coinPerHour"];
-                 dataInfo.maxCoinCapacity = (int) summaryData["maxCoinCapacity"];
-                 dataInfo.buddyLevel = (int) summaryData["level"];
-             }
-            
-            appChildrenInfos.Add(dataInfo);
+            for (int i = 0; i < profileChildren.Length; i++)
+            {
+                var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
+                var dataInfo = new AppChildrenInfo();
+                //Get Child data
+                dataInfo.profileName = profileChildren[i]["profileName"] as string;
+                dataInfo.profileId = profileChildren[i]["profileId"] as string;
+
+                if (summaryData != null)
+                {
+                    //Get Entity data
+                    dataInfo.rarity = summaryData["rarity"] as string;
+                    dataInfo.buddySpritePath = summaryData["buddySpritePath"] as string;
+                    var multiplier = summaryData["coinMultiplier"] as double?;
+                    if (multiplier != null)
+                    {
+                        dataInfo.coinMultiplier = (float) multiplier;
+                    }
+                    else
+                    {
+                        dataInfo.coinMultiplier = 1.0f;
+                    }
+
+                    dataInfo.coinPerHour = (int) summaryData["coinPerHour"];
+                    dataInfo.maxCoinCapacity = (int) summaryData["maxCoinCapacity"];
+                    dataInfo.buddyLevel = (int) summaryData["level"];
+                }
+
+                appChildrenInfos.Add(dataInfo);
+            }
         }
 
-        
         if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
         {
             Debug.LogError("Child Profile ID is missing. Cant fetch data.");
@@ -598,7 +609,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         GetChildStatsAndCurrencyData();
     }
     
-        public void OnAddBasicChildProfile(string jsonResponse)
+    public void OnAddBasicChildProfile(string jsonResponse)
     {
 
         //var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
@@ -633,7 +644,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                  {
                      //Get Entity data
                      dataInfo.rarity = entityData["rarity"] as string;
-                     dataInfo.buddyType = Enum.Parse<BuddyType>(entityData["buddyId"] as string);
+                     dataInfo.buddySpritePath = entityData["buddySpritePath"] as string;
                      var multiplier = entityData["coinMultiplier"] as double?;
                      if(multiplier != null)
                      {

@@ -37,6 +37,9 @@ namespace Gameframework
         //Player Prefs Keys
         public const string VOLUME_SLIDER_KEY = "volume"; 
         
+        //Default sprite path for buddies
+        public const string DEFAULT_SPRITE_PATH_FOR_BUDDY = "Assets/Resources/BuddySprites/buddy-1.png";
+        
         //Pop Up messages
             //Buddys Room
         public const string GO_BUDDYS_ROOM_TITLE = "Enter Buddy's Room?";

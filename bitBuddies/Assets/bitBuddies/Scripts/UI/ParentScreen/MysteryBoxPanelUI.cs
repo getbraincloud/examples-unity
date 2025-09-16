@@ -180,9 +180,12 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	    CoinPerHourText.text = COIN_GAIN_TEXT + childAppInfo.coinPerHour + COIN_PER_HOUR_TEXT;
 	    CoinCapacityText.text = COIN_CAPACITY_TEXT + childAppInfo.maxCoinCapacity;
 	    RarityText.text = childAppInfo.rarity.ToString();
-	    BuddyTypeNameText.text = childAppInfo.buddyType.ToString();
-	    int buddyIndex = (int)childAppInfo.buddyType;
-	    BuddyImage.sprite = GameManager.Instance.BuddySprites[buddyIndex];
+	    BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
+	    BuddyImage.sprite = Resources.Load<Sprite>(childAppInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : childAppInfo.buddySpritePath);
+	    if(childAppInfo.buddySpritePath.IsNullOrEmpty())
+	    {
+		    Debug.LogWarning("Buddy sprite was missing for: "+ childAppInfo.profileName + " child");
+	    }
     }
     
 }

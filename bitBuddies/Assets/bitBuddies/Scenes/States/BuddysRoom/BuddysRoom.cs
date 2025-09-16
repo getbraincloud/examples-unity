@@ -1,3 +1,5 @@
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
+using Gameframework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,7 +36,11 @@ public class BuddysRoom : ContentUIBehaviour
         _parentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
         _buddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
         _loveText.text =  _appChildrenInfo.buddyLove.ToString();
-        _buddySprite.sprite = GameManager.Instance.BuddySprites[(int)_appChildrenInfo.buddyType];
+        _buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
+        if(_appChildrenInfo.buddySpritePath.IsNullOrEmpty())
+        {
+            Debug.LogWarning("Buddy sprite was missing for: "+ _appChildrenInfo.profileName + " child");
+        }
     }
 
     private void OnExitButton()

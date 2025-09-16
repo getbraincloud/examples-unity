@@ -22,7 +22,7 @@ public class BuddyHouseInfo : MonoBehaviour
 		_visitButton.onClick.AddListener(OnVisitButton);
 		_deleteButton.onClick.AddListener(OnDeleteButton);
 		_parentTransform = FindAnyObjectByType<ParentMenu>().transform;
-		_buddySprite.sprite = GameManager.Instance.BuddySprites[(int)HouseInfo.buddyType];
+		_buddySprite.sprite = Resources.Load<Sprite>(HouseInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : HouseInfo.buddySpritePath);
 		_buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName + "'s Home";
 	}
 	
