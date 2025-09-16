@@ -6,11 +6,13 @@ public class Lobby
 {
     public string LobbyID;
     public string OwnerID;
+    public string OwnerCxID;
     public List<UserInfo> Members = new List<UserInfo>();
 
     public Lobby(Dictionary<string, object> lobbyJson, string in_lobbyId)
     {
         LobbyID = in_lobbyId;
+        OwnerCxID =  lobbyJson["ownerCxId"] as string;
         OwnerID = FormatOwnerID(lobbyJson["ownerCxId"] as string);
         
         var jsonMembers = lobbyJson["members"] as Dictionary<string, object>[];

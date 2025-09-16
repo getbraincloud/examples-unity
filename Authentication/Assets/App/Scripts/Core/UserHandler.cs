@@ -85,6 +85,12 @@ public static class UserHandler
         BCManager.Wrapper.AuthenticateAnonymous(onSuccess, onFailure, cbObject);
 
     /// <summary>
+    /// Authenticate the user through Steam
+    /// </summary>
+    public static void AuthenticateSteam(string userid, string sessionTicket, bool forceCreate, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
+        BCManager.Wrapper.AuthenticateSteam(userid, sessionTicket, forceCreate, onSuccess, onFailure, cbObject);
+
+    /// <summary>
     /// Authenticate the user in a way that can be customized. Allows you to send user inputted information with <paramref name="extraJSON"/>.
     /// <b>AdvancedAuthPostHook</b> will be called on brainCloud to make use of the <paramref name="extraJSON"/>.
     /// <br>Note: This example only accepts <see cref="UserData"/> for the JSON. This will create a user entity for the user.</br>
