@@ -85,6 +85,9 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #if GOOGLE_OPENID_SDK && (UNITY_ANDROID || UNITY_IOS)
             AuthenticationType.GoogleOpenId.ToString(),
 #endif
+#if STEAMWORKS_NET && UNITY_STANDALONE
+            AuthenticationType.Steam.ToString(),
+#endif
         };
 
         authButtons = new List<ButtonContent>();
@@ -185,6 +188,15 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #if GOOGLE_SDK
         PlayGamesPlatform.DebugLogEnabled = true;
 #endif
+
+#if STEAMWORKS_NET && UNITY_STANDALONE
+        BCManager.GameObject.AddComponent<SteamManager>();
+
+        if (SteamUtils.IsSteamInitialized())
+        {
+            SteamUtils.SetupSteamManager();
+        }
+#endif
     }
 
 #if FACEBOOK_SDK
@@ -238,6 +250,24 @@ public class ExternalAuthPanel : ContentUIBehaviour
     }
 #endif
 
+#if STEAMWORKS_NET
+    private void HandleSteamAuthenticationButton()
+    {
+        void onSteamAuthTicketReceived(string ticket)
+        {
+            Debug.Log($"Steam Auth Ticket: {ticket}");
+
+            string userSteamId = SteamUtils.GetSteamID().ToString();
+
+            UserHandler.AuthenticateSteam(userSteamId, ticket, true,
+                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
+        }
+
+        SteamUtils.GetSteamAuthTicket(onSteamAuthTicketReceived);
+    }
+#endif
+
     private void OnExternalAuthentication(AuthenticationType type)
     {
         LoginContent.IsInteractable = false;
@@ -284,6 +314,13 @@ public class ExternalAuthPanel : ContentUIBehaviour
             UserHandler.AuthenticateGoogleOpenId(true,
                                                  OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                                  OnFailure("Authentication Failed", OnAuthenticationFailure));
+            return;
+#endif
+        }
+        else if (type == AuthenticationType.Steam)
+        {
+#if STEAMWORKS_NET
+            HandleSteamAuthenticationButton();
             return;
 #endif
         }

@@ -1,7 +1,3 @@
-#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
-#define DISABLESTEAMWORKS
-#endif
-
 using BrainCloud;
 using BrainCloud.Common;
 using BrainCloud.JSONHelper;
@@ -31,7 +27,6 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
     [Header("Main")]
     [SerializeField] private Toggle EmailRadio = default;
-    [SerializeField] private Toggle SteamRadio = default;
     [SerializeField] private Toggle UniversalRadio = default;
     [SerializeField] private Toggle AnonymousRadio = default;
     [SerializeField] private TMP_InputField EmailField = default;
@@ -66,7 +61,6 @@ public class MainLoginPanelUI : ContentUIBehaviour
     private void OnEnable()
     {
         EmailRadio.onValueChanged.AddListener(OnEmailRadio);
-        SteamRadio.onValueChanged.AddListener(OnSteamRadio);
         UniversalRadio.onValueChanged.AddListener(OnUniversalRadio);
         AnonymousRadio.onValueChanged.AddListener(OnAnonymousRadio);
         EmailField.onEndEdit.AddListener((email) => CheckEmailVerification(email));
@@ -84,16 +78,6 @@ public class MainLoginPanelUI : ContentUIBehaviour
 
         AuthenticationType authenticationType = UserHandler.AuthenticationType;
 
-#if !DISABLESTEAMWORKS
-        if (SteamUtils.IsSteamInitialized())
-        {
-            authenticationType = AuthenticationType.Steam;
-            SteamUtils.SetupSteamManager();
-        }
-#else
-        SteamRadio.gameObject.SetActive(false);
-#endif
-
         if (authenticationType == AuthenticationType.Universal)
         {
             UniversalRadio.isOn = true;
@@ -104,11 +88,6 @@ public class MainLoginPanelUI : ContentUIBehaviour
             AnonymousRadio.isOn = true;
             OnEmailRadio(true);
             OnAnonymousRadio(true);
-        }
-        else if (authenticationType == AuthenticationType.Steam)
-        {
-            SteamRadio.isOn = true;
-            OnSteamRadio(true);
         }
         else // Email is default
         {
@@ -128,7 +107,6 @@ public class MainLoginPanelUI : ContentUIBehaviour
     private void OnDisable()
     {
         EmailRadio.onValueChanged.RemoveAllListeners();
-        SteamRadio.onValueChanged.RemoveAllListeners();
         UniversalRadio.onValueChanged.RemoveAllListeners();
         AnonymousRadio.onValueChanged.RemoveAllListeners();
         EmailField.onEndEdit.RemoveAllListeners();
@@ -188,12 +166,6 @@ public class MainLoginPanelUI : ContentUIBehaviour
         ErrorLabel.text = string.Empty;
     }
 
-    private void OnSteamRadio(bool value)
-    {
-        EmailField.gameObject.SetActive(!value);
-        UsernameField.gameObject.SetActive(!value);
-        PasswordField.gameObject.SetActive(!value);
-    }
     private void OnEmailRadio(bool value)
     {
         if (value)
@@ -363,7 +335,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
         string inputAge = AgeField.text;
 
         ErrorLabel.text = string.Empty;
-        if (!AnonymousRadio.isOn && !SteamRadio.isOn && (!CheckPasswordVerification(inputPassword) ||
+        if (!AnonymousRadio.isOn && (!CheckPasswordVerification(inputPassword) ||
             !(CheckEmailVerification(inputEmail) || CheckUsernameVerification(inputUser))))
         {
             if (EmailRadio.isOn && inputEmail.IsEmpty())
@@ -433,28 +405,11 @@ public class MainLoginPanelUI : ContentUIBehaviour
                                               OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                               OnFailure("Authentication Failed", OnAuthenticationFailure));
         }
-        else if (SteamRadio.isOn)
-        {
-#if !DISABLESTEAMWORKS
-            string authTicketString = SteamUtils.GetSteamAuthTicket(OnAuthTicketReceived);
-#endif
-        }
         else // Anonymous login
         {
             UserHandler.AuthenticateAnonymous(OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                               OnFailure("Authentication Failed", OnAuthenticationFailure));
         }
-    }
-
-    public void OnAuthTicketReceived(string ticket)
-    {
-#if !DISABLESTEAMWORKS
-        Debug.Log("We got ticket: " + ticket);
-        string userSteamId = SteamUtils.GetSteamID().ToString();
-        UserHandler.AuthenticateSteam(userSteamId.ToString(), ticket, true,
-                                              OnSuccess("Authentication Success", OnAuthenticationSuccess),
-                                              OnFailure("Authentication Failed", OnAuthenticationFailure));
-#endif
     }
 
     #endregion

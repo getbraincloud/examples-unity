@@ -89,12 +89,6 @@ public static class UserHandler
         BCManager.Wrapper.AuthenticateAnonymous(onSuccess, onFailure, cbObject);
 
     /// <summary>
-    /// Authenticate the user through Steam
-    /// </summary>
-    public static void AuthenticateSteam(string userid, string sessionTicket, bool forceCreate, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null) =>
-        BCManager.Wrapper.AuthenticateSteam(userid, sessionTicket, forceCreate, onSuccess, onFailure, cbObject);
-
-    /// <summary>
     /// Authenticate the user in a way that can be customized. Allows you to send user inputted information with <paramref name="extraJSON"/>.
     /// <b>AdvancedAuthPostHook</b> will be called on brainCloud to make use of the <paramref name="extraJSON"/>.
     /// <br>Note: This example only accepts <see cref="UserData"/> for the JSON. This will create a user entity for the user.</br>
@@ -440,6 +434,22 @@ public static class UserHandler
 #else
         Debug.LogError("AuthenticateGoogleOpenID is not available on this platform. Check your scripting defines. Returning with error...");
         onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateGoogleOpenID</b> is not available on this platform."), cbObject);
+#endif
+    }
+#endif
+
+#if STEAMWORKS_NET
+    /// <summary>
+    /// Authenticate the user through Steam their Styeam account
+    /// </summary>
+    /// Steamworks.NET Plugin: https://github.com/rlabrecque/Steamworks.NET
+    public static void AuthenticateSteam(string userid, string sessionTicket, bool forceCreate, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_STANDALONE
+        BCManager.Wrapper.AuthenticateSteam(userid, sessionTicket, forceCreate, onSuccess, onFailure, cbObject);
+#else
+        Debug.LogError("AuthenticateSteam is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateSteam</b> is not available on this platform."), cbObject);
 #endif
     }
 #endif

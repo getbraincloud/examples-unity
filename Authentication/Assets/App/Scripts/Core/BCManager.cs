@@ -25,6 +25,7 @@ using UnityEngine;
 /// <br><seealso cref="BrainCloudClient"/></br>
 /// <br><seealso cref="UserHandler"/></br>
 /// </summary>
+[DisallowMultipleComponent]
 public class BCManager : MonoBehaviour
 {
     private static bool _isInstanced = false; // To keep track if BCManager has been Instantiated or not
