@@ -12,7 +12,7 @@
 
 You can follow one of the different menthods of installation on the [Steamworks.NET installation guide](https://steamworks.github.io/installation/).
 
-Installing the plugin automatically adds `STEAMWORKS_NET` to your scipting define symbols.
+Installing the plugin automatically adds `STEAMWORKS_NET` to your scipting define symbols on standalone platforms.
 
 ### brainCloud Configuration
 
