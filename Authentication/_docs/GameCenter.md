@@ -16,6 +16,14 @@ Once both plugins are installed, add `GAMECENTER_SDK` to your **Scripting Define
 
 These packages will add **Apple Build Settings** to your Player Settings. Give it a review to make sure everything applies to your project as expected.
 
+You'll need to ensure that your app on App Store Connect also has Game Center entitlements. If everything looks to be set up properly but it hangs upon authentication, you might need to add Achievements and/or a default Leaderboard as Game Center doesn't seem to initialize fully if your app on App Store Connect doesn't have these configured.
+
+### brainCloud Configuration
+
+1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
+2. Click **Configure Apple**
+3. Fill out the **Bundle Id** and **Signin Client Id** fields using the Identifier attached to your app from the Apple Developer portal.
+
 ---
 
 #### Read More
