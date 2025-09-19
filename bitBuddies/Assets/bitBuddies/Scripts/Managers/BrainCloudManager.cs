@@ -272,22 +272,29 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         // var parentStats = response["parentStats"] as Dictionary<string, object>;
         // var statistics = parentStats["statistics"] as Dictionary<string, object>; 
         // UserInfo.UpdateLevel((int) statistics["Level"]);
-        
-        var childStatsResponse = response["childStats"] as Dictionary<string, object>;
-        var childStatistics =  childStatsResponse["statistics"] as Dictionary<string, object>;
-        GameManager.Instance.AppChildrenInfos[_childInfoIndex].buddyLove =  (int)childStatistics["Love"];
-        
-        if(_childInfoIndex < GameManager.Instance.AppChildrenInfos.Count - 1)
-        {
-            if(_statsRetrieved && _currencyRetrieved)
-            {
-                _childInfoIndex++;
-                GetChildStatsAndCurrencyData();   
-            }
-        }
-        if(UserInfo.Coins > 0)
+        if(response == null)
         {
             CompletedGettingCurrencies();
+            return;
+        }
+        if(response.ContainsKey("childStats"))
+        {
+            var childStatsResponse = response["childStats"] as Dictionary<string, object>;
+            var childStatistics =  childStatsResponse["statistics"] as Dictionary<string, object>;
+            GameManager.Instance.AppChildrenInfos[_childInfoIndex].buddyLove =  (int)childStatistics["Love"];
+        
+            if(_childInfoIndex < GameManager.Instance.AppChildrenInfos.Count - 1)
+            {
+                if(_statsRetrieved && _currencyRetrieved)
+                {
+                    _childInfoIndex++;
+                    GetChildStatsAndCurrencyData();   
+                }
+            }
+            if(UserInfo.Coins > 0)
+            {
+                CompletedGettingCurrencies();
+            }   
         }
     }
     

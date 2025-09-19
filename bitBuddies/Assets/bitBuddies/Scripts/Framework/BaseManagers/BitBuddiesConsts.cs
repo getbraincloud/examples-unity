@@ -32,7 +32,7 @@ namespace Gameframework
         //Stat Names
         public const string PLAYER_STAT_LEVEL_NAME = "Level";
 
-        public const string APP_CHILD_ID = "49162";
+        public const string APP_CHILD_ID = "50974";
 
         //Player Prefs Keys
         public const string VOLUME_SLIDER_KEY = "volume"; 

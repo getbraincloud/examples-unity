@@ -5,6 +5,7 @@ using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -180,8 +181,9 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	    CoinPerHourText.text = COIN_GAIN_TEXT + childAppInfo.coinPerHour + COIN_PER_HOUR_TEXT;
 	    CoinCapacityText.text = COIN_CAPACITY_TEXT + childAppInfo.maxCoinCapacity;
 	    RarityText.text = childAppInfo.rarity.ToString();
-	    BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
-	    BuddyImage.sprite = Resources.Load<Sprite>(childAppInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : childAppInfo.buddySpritePath);
+	    //BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
+	    //BuddyImage.sprite = Resources.Load<Sprite>(childAppInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : childAppInfo.buddySpritePath);
+	    BuddyImage.sprite = (Sprite) AssetDatabase.LoadAssetAtPath(childAppInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : childAppInfo.buddySpritePath, typeof(Sprite));
 	    if(childAppInfo.buddySpritePath.IsNullOrEmpty())
 	    {
 		    Debug.LogWarning("Buddy sprite was missing for: "+ childAppInfo.profileName + " child");
