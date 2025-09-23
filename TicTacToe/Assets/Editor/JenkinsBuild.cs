@@ -179,11 +179,12 @@ public class JenkinsBuild
         {
             GetEnviroVariables();
 #if UNITY_STANDALONE_WIN
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{Application.productName}_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
 #elif UNITY_STANDALONE_OSX
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+            return $"{Application.productName}_Internal_clientVersion.{BrainCloud.Version.GetVersion()}";
 #else
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            string environment = BrainCloud.Plugin.Interface.DispatcherURL.Contains("internal") ? "internal" : "prodBaas";
+            return $"{Application.productName}_{environment}_clientVersion.{BrainCloud.Version.GetVersion()}";
 #endif
         }
 
