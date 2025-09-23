@@ -183,8 +183,7 @@ public class JenkinsBuild
 #elif UNITY_STANDALONE_OSX
             return $"{Application.productName}_Internal_clientVersion.{BrainCloud.Version.GetVersion()}";
 #else
-            string environment = BrainCloud.Plugin.Interface.DispatcherURL.Contains("internal") ? "internal" : "prodBaas";
-            return $"{Application.productName}_{environment}_clientVersion.{BrainCloud.Version.GetVersion()}";
+            return $"TicTacToe";
 #endif
         }
 
