@@ -83,11 +83,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _serverBindAddress: 127.0.0.1
-  _port: 7770
-  _maximumClients: 10
   _clientAddress: 
   _roomAddress: 
   _roomPort: 
+  _port: 7770
+  _maximumClients: 10
 --- !u!114 &3095710141976803124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -184,8 +184,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 509521d5b1ffd4d95b09d8213e97a6dc, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -390,7 +390,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 502945015720744728}
   m_HandleRect: {fileID: 5835044234292203395}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -590,6 +590,7 @@ GameObject:
   - component: {fileID: 2922788794089151644}
   - component: {fileID: 7574103293627565552}
   - component: {fileID: 2465447230117983767}
+  - component: {fileID: 1603479830213494744}
   m_Layer: 5
   m_Name: BG
   m_TagString: Untagged
@@ -637,7 +638,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -654,6 +655,26 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1603479830213494744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5945117666589976269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bc3255addcf94de5a3e7fc44853bc32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GradientType: 0
+  Offset: 0
+  StartColor:
+    serializedVersion: 2
+    rgba: 4282264335
+  EndColor:
+    serializedVersion: 2
+    rgba: 4281672973
 --- !u!1 &6121717150661143213
 GameObject:
   m_ObjectHideFlags: 0
@@ -774,7 +795,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4221305061642028790}
   m_HandleRect: {fileID: 2933420075689721086}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -888,7 +909,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00010490326}
+  m_AnchoredPosition: {x: 0, y: -0.000041337862}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &7351603925935388722
