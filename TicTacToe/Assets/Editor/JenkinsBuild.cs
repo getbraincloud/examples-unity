@@ -18,7 +18,7 @@ public class JenkinsBuild
         var args = FindArgs();
         args.GetEnviroVariables();
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
-        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.None);
+        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.Development);
     }
 
     // called from Jenkins
