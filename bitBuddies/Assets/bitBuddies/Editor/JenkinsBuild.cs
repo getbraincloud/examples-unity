@@ -213,11 +213,11 @@ public class JenkinsBuild {
         {
             GetEnviroVariables();
 #if UNITY_STANDALONE_WIN
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{Application.productName}_Internal_WindowsStandalone.exe";
 #elif UNITY_STANDALONE_OSX
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+            return $"{Application.productName}_Internal_MacOS.app";
 #else
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{Application.productName}_Internal";
 #endif
         }
         
