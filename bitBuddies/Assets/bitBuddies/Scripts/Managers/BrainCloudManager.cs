@@ -94,10 +94,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var currency = data["currency"] as Dictionary<string, object>;
         if(currency != null)
         {
-            var gems = currency["Gems"] as Dictionary<string, object>;
+            var gems = currency["gems"] as Dictionary<string, object>;
             UserInfo.UpdateGems((int)gems["balance"]);
             
-            var coins = currency["Coins"] as Dictionary<string, object>;
+            var coins = currency["coins"] as Dictionary<string, object>;
             UserInfo.UpdateCoins((int)coins["balance"]);
         }
         var stats = data["statistics"] as Dictionary<string, object>;
@@ -348,6 +348,27 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         StateManager.Instance.RefreshScreen();
     }
     
+    public void OnConsumeCoins(string jsonResponse)
+    {
+        /*
+         * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,
+         * "compileTime":1476,"scriptSize":285,"renderTime":4,"executeTime":10346},
+         * "response":{"consumeCurrencyResult":{"data":{"currencyMap":{"gems":{"consumed":0,
+         * "balance":500,"purchased":0,"awarded":500,"revoked":0},"coins":{"consumed":65000,
+         * "balance":0,"purchased":0,"awarded":65000,"revoked":0}}},"status":200}},
+         * "success":true,"reasonCode":null},"status":200}]}
+         */
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var firstData =  packet["data"] as Dictionary<string, object>;
+        var response = firstData["response"] as Dictionary<string, object>;
+        var result = response["consumeCurrencyResult"] as Dictionary<string, object>;
+        var secondData = result["data"] as Dictionary<string, object>;
+        var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
+        var coins = currencyMap["coins"] as Dictionary<string, object>;
+        UserInfo.UpdateCoins((int) coins["balance"]);
+        StateManager.Instance.RefreshScreen();
+    }
+    
     public void RewardCoinsToParent(int in_coins)
     {
         Dictionary<string, object> scriptData = new Dictionary<string, object> {{"increaseAmount", in_coins}};
@@ -374,7 +395,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var getResult = response["getResult"] as Dictionary<string, object>;
         var secondData = getResult["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
-        var coins = currencyMap["Coins"] as Dictionary<string, object>;
+        var coins = currencyMap["coins"] as Dictionary<string, object>;
         UserInfo.UpdateCoins((int) coins["balance"]);
         StateManager.Instance.RefreshScreen();
     }
@@ -405,7 +426,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var getResult = response["getResult"] as Dictionary<string, object>;
         var secondData = getResult["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
-        var gems = currencyMap["Gems"] as Dictionary<string, object>;
+        var gems = currencyMap["gems"] as Dictionary<string, object>;
         UserInfo.UpdateGems((int) gems["balance"]);
         StateManager.Instance.RefreshScreen();
     }

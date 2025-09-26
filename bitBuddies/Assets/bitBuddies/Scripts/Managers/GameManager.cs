@@ -12,7 +12,6 @@ public class AppChildrenInfo
 	public Dictionary<string, object> summaryFriendData { get; set; }
 	public int buddyBling { get; set; }
 	public int buddyLove { get; set; }
-	public int buddySpriteIndex { get; set; }
 	public float coinMultiplier { get; set; }
 	public int coinPerHour { get; set; }
 	public int maxCoinCapacity {get; set;}
@@ -23,6 +22,10 @@ public class AppChildrenInfo
 
 public class GameManager : SingletonBehaviour<GameManager>
 {
+	[Tooltip("Debug")]
+	[SerializeField] public bool Debug;
+	
+	[Tooltip("App Info")]
 	private List<AppChildrenInfo> appChildrenInfos = new List<AppChildrenInfo>();
 	public List<AppChildrenInfo> AppChildrenInfos
 	{

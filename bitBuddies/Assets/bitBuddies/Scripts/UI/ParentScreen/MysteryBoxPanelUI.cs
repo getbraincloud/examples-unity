@@ -121,6 +121,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 						_parentMenu.NewAppChildrenInfo.rarity = summaryData["rarity"] as string;
 						_parentMenu.NewAppChildrenInfo.coinPerHour = (int) summaryData["coinPerHour"];
 						_parentMenu.NewAppChildrenInfo.maxCoinCapacity = (int) summaryData["maxCoinCapacity"];
+						_parentMenu.NewAppChildrenInfo.buddySpritePath = summaryData["buddySpritePath"] as string;
 						var multiplier = summaryData["coinMultiplier"] as double?;
 						if(multiplier.HasValue)
 						{
@@ -182,8 +183,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	    CoinCapacityText.text = COIN_CAPACITY_TEXT + childAppInfo.maxCoinCapacity;
 	    RarityText.text = childAppInfo.rarity.ToString();
 	    //BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
-	    //BuddyImage.sprite = Resources.Load<Sprite>(childAppInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : childAppInfo.buddySpritePath);
-	    BuddyImage.sprite = (Sprite) AssetDatabase.LoadAssetAtPath(childAppInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : childAppInfo.buddySpritePath, typeof(Sprite));
+	    BuddyImage.sprite = AssetLoader.LoadSprite(childAppInfo.buddySpritePath);
 	    if(childAppInfo.buddySpritePath.IsNullOrEmpty())
 	    {
 		    Debug.LogWarning("Buddy sprite was missing for: "+ childAppInfo.profileName + " child");

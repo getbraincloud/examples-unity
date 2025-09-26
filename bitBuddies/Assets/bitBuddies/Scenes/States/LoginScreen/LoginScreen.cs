@@ -13,6 +13,8 @@ public class LoginScreen : ContentUIBehaviour
     [SerializeField] private Button OpenLoginButton;
     [SerializeField] private Button LoginButton;
     [SerializeField] private Button ForgotPasswordButton;
+    [SerializeField] private TMP_Text _gameVersionText;
+    [SerializeField] private TMP_Text _bcClientVersionText;
     [SerializeField] private TMP_InputField Email;
     [SerializeField] private TMP_InputField Password;
     private bool _createAccount;
@@ -31,6 +33,9 @@ public class LoginScreen : ContentUIBehaviour
         OpenCreateAccountButton.onClick.AddListener(OnOpenCreateAccountButtonClick);
         LoginButton.onClick.AddListener(OnLoginButtonClick);
         ForgotPasswordButton.onClick.AddListener(OnForgotPasswordButtonClick);
+        
+        _gameVersionText.text = $"Game Version: {Application.version}";
+        _bcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
     }
     
     private void OnQuickCreateButtonClick()

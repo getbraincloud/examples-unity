@@ -1,7 +1,9 @@
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class BuddysRoom : ContentUIBehaviour
@@ -11,6 +13,8 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private TMP_Text _buddyBlingText;
     [SerializeField] private TMP_Text _parentCoinText;
     [SerializeField] private Image _buddySprite;
+    [SerializeField] private TMP_Text _gameVersionText;
+    [SerializeField] private TMP_Text _bcClientVersionText;
 
     [SerializeField] private Button _exitButton;
     [SerializeField] private Button _shopButton;
@@ -30,13 +34,16 @@ public class BuddysRoom : ContentUIBehaviour
         _shopButton.onClick.AddListener(OnShopButton);
         _statsButton.onClick.AddListener(OnStatsButton);
         
+        _gameVersionText.text = $"Game Version: {Application.version}";
+        _bcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
         _appChildrenInfo = GameManager.Instance.SelectedAppChildrenInfo;
         
         _profileNameText.text = _appChildrenInfo.profileName;
         _parentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
         _buddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
         _loveText.text =  _appChildrenInfo.buddyLove.ToString();
-        _buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
+        //_buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
+        _buddySprite.sprite = AssetLoader.LoadSprite(_appChildrenInfo.buddySpritePath);
         if(_appChildrenInfo.buddySpritePath.IsNullOrEmpty())
         {
             Debug.LogWarning("Buddy sprite was missing for: "+ _appChildrenInfo.profileName + " child");
@@ -57,5 +64,4 @@ public class BuddysRoom : ContentUIBehaviour
     {
         
     }
-
 }

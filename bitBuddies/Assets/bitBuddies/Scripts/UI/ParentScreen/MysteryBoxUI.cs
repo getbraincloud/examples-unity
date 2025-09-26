@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using Gameframework;
 using UnityEngine;
@@ -64,8 +65,20 @@ public class MysteryBoxUI : ContentUIBehaviour
         // After box is opened, we show another screen where the user 
         // picks the name of buddy
         Dictionary<string, object> scriptData =  new Dictionary<string, object> {{"amountToConsume", _mysteryBoxInfo.UnlockAmount}};
-        BrainCloudManager.Wrapper.ScriptService.RunScript(BitBuddiesConsts.CONSUME_PARENT_COINS_SCRIPT_NAME, scriptData.Serialize());
+        BrainCloudManager.Wrapper.ScriptService.RunScript
+        (
+            BitBuddiesConsts.CONSUME_PARENT_COINS_SCRIPT_NAME, 
+            scriptData.Serialize(), 
+            BrainCloudManager.HandleSuccess("Consume Coins Success", BrainCloudManager.Instance.OnConsumeCoins),
+            BrainCloudManager.HandleFailure("Consume Coins Failure", OnFailureCallback)
+        );
+            
         _mysteryBoxPanelUI.MysteryBoxInfo = _mysteryBoxInfo;
         _mysteryBoxPanelUI.NextPage();
+    }
+    
+    private void OnFailureCallback()
+    {
+        
     }
 }

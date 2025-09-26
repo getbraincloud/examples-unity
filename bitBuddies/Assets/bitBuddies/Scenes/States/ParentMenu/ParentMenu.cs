@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
@@ -19,7 +21,15 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private GameObject MoveInPrefab;
     [SerializeField] private MysteryBoxPanelUI MysteryBoxPanelPrefab;
     [SerializeField] private SettingsPanelUI SettingsPanelUIPrefab;
+    [SerializeField] private TMP_Text GameVersionText;
+    [SerializeField] private TMP_Text BcClientVersionText;
     
+    //Debug Buttons
+    [SerializeField] private Button IncreaseCoinsButton;
+    [SerializeField] private Button IncreaseGemsButton;
+    [SerializeField] private Button IncreaseLevelButton;
+    [SerializeField] private GameObject DebugButtonGroup;
+    private bool isWaitingForResponse = false;
     private List<AppChildrenInfo> _appChildrenInfos;
     private AppChildrenInfo _newAppChildrenInfo;
     public AppChildrenInfo NewAppChildrenInfo
@@ -45,12 +55,31 @@ public class ParentMenu : ContentUIBehaviour
         LevelText.text = userInfo.Level.ToString();
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();
+        GameVersionText.text = $"Game Version: {Application.version}";
+        BcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
+
+        bool debug = GameManager.Instance.Debug;
+        if(debug)
+        {
+            IncreaseCoinsButton.onClick.AddListener(OnIncreaseCoins);
+            IncreaseGemsButton.onClick.AddListener(OnIncreaseGems);
+            IncreaseLevelButton.onClick.AddListener(OnIncreaseLevel);
+        }
+        DebugButtonGroup.SetActive(debug);
 
         _appChildrenInfos = GameManager.Instance.AppChildrenInfos;
         ChildCountText.text = CHILD_COUNT_TEXT + _appChildrenInfos.Count;
         SetupHouses();
     }
-    
+
+    private void OnDisable()
+    {
+        IncreaseCoinsButton.onClick.RemoveAllListeners();
+        IncreaseGemsButton.onClick.RemoveAllListeners();
+        IncreaseLevelButton.onClick.RemoveAllListeners();
+        OpenSettingsButton.onClick.RemoveAllListeners();
+    }
+
     public void SetupHouses()
     {
         // Clear existing houses...
@@ -84,5 +113,33 @@ public class ParentMenu : ContentUIBehaviour
     public void OpenConfirmDemolishPanel()
     {
         
+    }
+    
+    private void OnIncreaseCoins()
+    {
+        if (isWaitingForResponse) return;
+        BrainCloudManager.Instance.RewardCoinsToParent(1000);
+        StartCoroutine(WaitAbitForResponse());
+    }
+    
+    private void OnIncreaseGems()
+    {
+        if (isWaitingForResponse) return;
+        BrainCloudManager.Instance.RewardGemsToParent(100);
+        StartCoroutine(WaitAbitForResponse());
+    }
+    
+    private void OnIncreaseLevel()
+    {
+        if (isWaitingForResponse) return;
+        BrainCloudManager.Instance.LevelUpParent();
+        StartCoroutine(WaitAbitForResponse());
+    }
+    
+    IEnumerator WaitAbitForResponse()
+    {
+        isWaitingForResponse = true;
+        yield return new WaitForSeconds(0.5f);
+        isWaitingForResponse = false;
     }
 }

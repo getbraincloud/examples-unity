@@ -23,7 +23,8 @@ public class BuddyHouseInfo : MonoBehaviour
 		_visitButton.onClick.AddListener(OnVisitButton);
 		_deleteButton.onClick.AddListener(OnDeleteButton);
 		_parentTransform = FindAnyObjectByType<ParentMenu>().transform;
-		_buddySprite.sprite = (Sprite) AssetDatabase.LoadAssetAtPath(HouseInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : HouseInfo.buddySpritePath, typeof(Sprite)); 
+		//_buddySprite.sprite = (Sprite) AssetDatabase.LoadAssetAtPath(HouseInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : HouseInfo.buddySpritePath, typeof(Sprite));
+		_buddySprite.sprite = AssetLoader.LoadSprite(HouseInfo.buddySpritePath); 
 		//Resources.Load<Sprite>(HouseInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : HouseInfo.buddySpritePath);
 		_buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName + "'s Home";
 	}
