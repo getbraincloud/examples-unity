@@ -74,7 +74,7 @@ public class MessagingUnityPlayerActivity extends UnityPlayerActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     if (mUnityPlayer != null) {
-      mUnityPlayer.quit();
+      mUnityPlayer.destroy();
       mUnityPlayer = null;
     }
     super.onCreate(savedInstanceState);

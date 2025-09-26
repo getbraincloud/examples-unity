@@ -513,7 +513,7 @@ public class BrainCloudMarketplace : IDetailedStoreListener
     {
 #if UNITY_EDITOR || UNITY_ANDROID || UNITY_IOS
         instance = new();
-        bc = UnityEngine.Object.FindObjectOfType<BrainCloudWrapper>();
+        bc = UnityEngine.Object.FindFirstObjectByType<BrainCloudWrapper>();
 
         if (bc == null || bc.Client == null || !bc.Client.IsInitialized())
         {

@@ -40,7 +40,7 @@ public class HistoryPanel : MonoBehaviour
 
     private void Start()
     {
-        App = FindObjectOfType<ExampleApp>();
+        App = FindFirstObjectByType<ExampleApp>();
 
         baseContentCount = HistoryContent.childCount;
 
@@ -66,7 +66,7 @@ public class HistoryPanel : MonoBehaviour
 
         yield return new WaitUntil(() =>
         {
-            BC = BC == null ? FindObjectOfType<BrainCloudWrapper>() : BC;
+            BC = BC == null ? FindFirstObjectByType<BrainCloudWrapper>() : BC;
 
             return BC != null && BC.Client != null && BC.Client.IsInitialized();
         });

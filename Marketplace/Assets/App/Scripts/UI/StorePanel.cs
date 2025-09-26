@@ -36,7 +36,7 @@ public class StorePanel : MonoBehaviour
 
     private void Start()
     {
-        App = FindObjectOfType<ExampleApp>();
+        App = FindFirstObjectByType<ExampleApp>();
 
         StartCoroutine(GetBrainCloudWrapper());
     }
@@ -60,7 +60,7 @@ public class StorePanel : MonoBehaviour
 
         yield return new WaitUntil(() =>
         {
-            BC = BC == null ? FindObjectOfType<BrainCloudWrapper>() : BC;
+            BC = BC == null ? FindFirstObjectByType<BrainCloudWrapper>() : BC;
 
             return BC != null && BC.Client != null && BC.Client.IsInitialized();
         });
