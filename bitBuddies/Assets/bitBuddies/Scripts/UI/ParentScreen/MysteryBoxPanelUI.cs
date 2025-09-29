@@ -83,13 +83,31 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 
 		if (isOpeningBox) return;
 		isOpeningBox = true;
+
+		string scriptName = "";
+		switch (_mysteryBoxInfo.RarityEnum)
+		{
+			case Rarity.Basic:
+				scriptName = BitBuddiesConsts.AWARD_BASIC_LOOTBOX_SCRIPT_NAME;
+				break;
+			case Rarity.Rare:
+				scriptName = BitBuddiesConsts.AWARD_RARE_LOOTBOX_SCRIPT_NAME;
+				break;
+			case Rarity.SuperRare:
+				scriptName = BitBuddiesConsts.AWARD_SUPER_RARE_LOOTBOX_SCRIPT_NAME;
+				break;
+			case Rarity.Legendary:
+				scriptName = BitBuddiesConsts.AWARD_LEGENDARY_LOOTBOX_SCRIPT_NAME;
+				break;
+		}
+		
 		Dictionary<string, object> scriptData = new Dictionary<string, object>
 		{
 			{"childAppId", BitBuddiesConsts.APP_CHILD_ID}
 		};
 		BrainCloudManager.Wrapper.ScriptService.RunScript
 		(
-			BitBuddiesConsts.AWARD_BASIC_LOOTBOX_SCRIPT_NAME,
+			scriptName,
 			scriptData.Serialize(),
 			BrainCloudManager.HandleSuccess("Award new buddy Success", OnGetLootboxInfo),
 			BrainCloudManager.HandleFailure("Award new buddy Failure", OnFailureCallback)

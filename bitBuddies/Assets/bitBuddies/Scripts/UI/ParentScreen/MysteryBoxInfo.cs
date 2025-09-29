@@ -9,6 +9,14 @@ public enum UnlockTypes
 	Level
 }
 
+public enum Rarity
+{
+	Basic,
+	Rare,
+	SuperRare,
+	Legendary
+}
+
 [Serializable]
 public struct MysteryBoxInfo
 {
@@ -16,5 +24,6 @@ public struct MysteryBoxInfo
 	public UnlockTypes UnlockType;
 	public int UnlockAmount;
 	public string Rarity;
+	public Rarity RarityEnum;
 
 }
