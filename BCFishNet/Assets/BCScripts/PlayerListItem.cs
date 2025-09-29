@@ -338,8 +338,13 @@ public class PlayerListItem : NetworkBehaviour
     [ObserversRpc]
     public void TestChange(string profileId, string playerName, Color newColor)
     {
+        if (base.IsOwner)
+        {
+            _userText.color = Color.black;
+            _userText.transform.parent.GetComponent<Image>().color = Color.white;
+        }
         _playerData = new PlayerData { ProfileId = profileId, Name = playerName, Color = newColor };
-        _userText.text = base.IsOwner ? GetPlayerName() + " (You)" : playerName;
+        _userText.text = base.IsOwner ? GetPlayerName() : playerName;
         _bgImage.color = newColor;
         _squareImage.color = newColor;
         _currentCursor?.ChangeColor(newColor);
