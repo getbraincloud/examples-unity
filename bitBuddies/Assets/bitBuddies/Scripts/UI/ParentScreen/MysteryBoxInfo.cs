@@ -11,10 +11,11 @@ public enum UnlockTypes
 
 public enum Rarity
 {
-	Basic,
-	Rare,
-	SuperRare,
-	Legendary
+	starter,
+	basic,
+	rare,
+	superRare,
+	legendary
 }
 
 [Serializable]

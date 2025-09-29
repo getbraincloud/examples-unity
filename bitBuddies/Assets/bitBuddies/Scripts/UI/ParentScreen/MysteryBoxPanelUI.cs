@@ -51,28 +51,28 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	protected override void Awake()
 	{
 		InitializeUI();
+		foreach (MysteryBoxInfo mysteryBoxInfo in _mysteryBoxes)
+		{
+			var box = Instantiate(MysteryBoxPrefab, MysteryBoxSpawnPoint);
+			box.Init(mysteryBoxInfo);
+		}
 		for (int i = 0; i < _mysteryScreens.Count; i++)
 		{
 			_mysteryScreens[i].SetActive(false);
 		}
+		_parentMenu = FindAnyObjectByType<ParentMenu>();
 		_mysteryScreens[0].SetActive(true);
+		TitleText.text = LIST_BOXES_TEXT_TITLE;
+		_screenIndex = 0;
+		OpenBoxButton.onClick.AddListener(OnOpenBox);
+		CloseButton.onClick.AddListener(OnCloseButton);
+		DoneButton.onClick.AddListener(OnDoneButton);
 		base.Awake();
 	}
 
 	protected override void InitializeUI()
 	{
 		_mysteryBoxes = GameManager.Instance.MysteryBoxes;
-	    foreach (MysteryBoxInfo mysteryBoxInfo in _mysteryBoxes)
-	    {
-			var box = Instantiate(MysteryBoxPrefab, MysteryBoxSpawnPoint);
-			box.Init(mysteryBoxInfo);
-	    }
-	    _parentMenu = FindAnyObjectByType<ParentMenu>();
-	    OpenBoxButton.onClick.AddListener(OnOpenBox);
-	    CloseButton.onClick.AddListener(OnCloseButton);
-	    DoneButton.onClick.AddListener(OnDoneButton);
-	    TitleText.text = LIST_BOXES_TEXT_TITLE;
-	    _screenIndex = 0;
     }
     
 	private void OnOpenBox()
@@ -87,16 +87,19 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		string scriptName = "";
 		switch (_mysteryBoxInfo.RarityEnum)
 		{
-			case Rarity.Basic:
+			case Rarity.starter:
+				scriptName = BitBuddiesConsts.AWARD_STARTER_BUDDY_SCRIPT_NAME;
+				break;
+			case Rarity.basic:
 				scriptName = BitBuddiesConsts.AWARD_BASIC_LOOTBOX_SCRIPT_NAME;
 				break;
-			case Rarity.Rare:
+			case Rarity.rare:
 				scriptName = BitBuddiesConsts.AWARD_RARE_LOOTBOX_SCRIPT_NAME;
 				break;
-			case Rarity.SuperRare:
+			case Rarity.superRare:
 				scriptName = BitBuddiesConsts.AWARD_SUPER_RARE_LOOTBOX_SCRIPT_NAME;
 				break;
-			case Rarity.Legendary:
+			case Rarity.legendary:
 				scriptName = BitBuddiesConsts.AWARD_LEGENDARY_LOOTBOX_SCRIPT_NAME;
 				break;
 		}

@@ -24,6 +24,7 @@ namespace Gameframework
         public const string GET_CHILD_ACCOUNTS_SCRIPT_NAME = "child/getChildProfiles";
         public const string ADD_CHILD_ACCOUNT_SCRIPT_NAME = "child/addChildAccount";
         public const string AWARD_RANDOM_LOOTBOX_SCRIPT_NAME = "child/addRandomChildAccount";
+        public const string AWARD_STARTER_BUDDY_SCRIPT_NAME = "child/addStarterChildAccount";
         public const string AWARD_BASIC_LOOTBOX_SCRIPT_NAME = "child/addBasicChildAccount";
         public const string AWARD_RARE_LOOTBOX_SCRIPT_NAME = "child/addRareChildAccount";
         public const string AWARD_SUPER_RARE_LOOTBOX_SCRIPT_NAME = "child/addSuperRareChildAccount";
