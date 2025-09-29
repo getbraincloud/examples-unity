@@ -46,7 +46,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	private const string COIN_GAIN_TEXT = "Idle Coin Gains ";
 	private const string COIN_PER_HOUR_TEXT = "/hr";
 	private const string COIN_CAPACITY_TEXT = "Idle Coins Capacity ";
-	
+	private bool isOpeningBox = false;
 
 	protected override void Awake()
 	{
@@ -81,7 +81,8 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		// After box is opened, we show another screen where the user 
 		// picks the name of buddy
 
-		
+		if (isOpeningBox) return;
+		isOpeningBox = true;
 		Dictionary<string, object> scriptData = new Dictionary<string, object>
 		{
 			{"childAppId", BitBuddiesConsts.APP_CHILD_ID}
