@@ -143,6 +143,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             
             MysteryBoxInfo boxInfo = new MysteryBoxInfo();
             boxInfo.Rarity = boxDict["rarity"] as string;
+            boxInfo.RarityEnum = Enum.Parse<Rarity>(boxDict["rarity"] as string);
             boxInfo.BoxName = boxInfo.Rarity + " Box";
             boxInfo.UnlockType = Enum.Parse<UnlockTypes>((string)boxDict["unlockType"]);
             boxInfo.UnlockAmount = (int)boxDict["unlockAmount"];
