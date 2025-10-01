@@ -31,6 +31,7 @@ namespace Gameframework
         public const string AWARD_LEGENDARY_LOOTBOX_SCRIPT_NAME = "child/addLegendaryChildAccount";
         public const string UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME = "child/updateChildAccountName";
         public const string DELETE_CHILD_PROFILE_SCRIPT_NAME = "child/deleteChildProfile";
+        public const string INCREASE_XP_SCRIPT_NAME = "child/increaseChildBuddyExperience";
 
 
         //Stat Names

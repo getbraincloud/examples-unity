@@ -23,6 +23,7 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private SettingsPanelUI SettingsPanelUIPrefab;
     [SerializeField] private TMP_Text GameVersionText;
     [SerializeField] private TMP_Text BcClientVersionText;
+    [SerializeField] private Slider LevelSlider;
     
     //Debug Buttons
     [SerializeField] private Button IncreaseCoinsButton;

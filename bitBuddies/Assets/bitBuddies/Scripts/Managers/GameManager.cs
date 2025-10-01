@@ -11,13 +11,14 @@ public class AppChildrenInfo
 	public string profileId { get; set; }
 	public Dictionary<string, object> summaryFriendData { get; set; }
 	public int buddyBling { get; set; }
-	public int buddyLove { get; set; }
 	public float coinMultiplier { get; set; }
 	public int coinPerHour { get; set; }
 	public int maxCoinCapacity {get; set;}
 	public string buddySpritePath { get; set; }
 	public string rarity { get; set; }
 	public int buddyLevel { get; set; }
+	public int nextLevelUp { get; set; }
+	public int currentXP { get; set; }
 }
 
 public class GameManager : SingletonBehaviour<GameManager>

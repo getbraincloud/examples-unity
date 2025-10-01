@@ -5,6 +5,8 @@ using UnityEngine;
 public class UserInfo
 {
     public int Level;
+    public int CurrentXP;
+    public int NextLevelUp;
     public string Username;
     public string Email;
     public int Coins;
@@ -13,6 +15,16 @@ public class UserInfo
     public void UpdateLevel(int in_level)
     {
         Level = in_level;
+    }
+    
+    public void UpdateXP(int in_xp)
+    {
+        CurrentXP = in_xp;
+    }
+    
+    public void UpdateNextLevelUp(int in_nextLevel)
+    {
+        NextLevelUp = in_nextLevel;
     }
     
     public void UpdateUsername(string in_username)

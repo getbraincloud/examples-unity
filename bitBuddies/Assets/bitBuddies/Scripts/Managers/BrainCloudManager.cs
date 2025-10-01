@@ -103,7 +103,21 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var stats = data["statistics"] as Dictionary<string, object>;
         if(stats != null)
         {
-            UserInfo.UpdateLevel((int)stats["Level"]);
+            //UserInfo.UpdateLevel((int)stats["Level"]);
+        }
+        
+        var summaryFriendData = data["summaryFriendData"] as Dictionary<string, object>;
+        if(summaryFriendData != null)
+        {
+            int nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];
+            if(nextLevelUp != 0)
+            {
+                UserInfo.UpdateNextLevelUp(nextLevelUp);
+            }
+        }
+        else
+        {
+            Wrapper.PlayerStatisticsService.GetNextExperienceLevel(HandleSuccess("GetNextXP Success", OnGetNextLevelUp));
         }
         
         Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BitBuddiesConsts.APP_CHILD_ID}};
@@ -121,6 +135,23 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleSuccess("Get Mystery Box Info Success", OnGetMysteryBoxInfo),
             HandleFailure("Get Mystery Box Info Failed", OnFailureCallback)
         );
+    }
+    
+    private void OnGetNextLevelUp(string jsonResponse)
+    {
+        var data = jsonResponse.Deserialize("data");
+        var xpDetails = data["xp_level"] as Dictionary<string, object>;
+        if(xpDetails != null)
+        {
+            int nextLevelUp =  (int) xpDetails["experience"];
+            if(nextLevelUp != 0)
+            {
+                UserInfo.UpdateNextLevelUp(nextLevelUp);
+                Dictionary<string, object> scriptData = new Dictionary<string, object>();
+                scriptData.Add("nextLevelUpXP", nextLevelUp);
+                Wrapper.PlayerStateService.UpdateSummaryFriendData(scriptData.Serialize());
+            }
+        }
     }
     
     private void OnGetMysteryBoxInfo(string jsonResponse)
@@ -282,7 +313,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         {
             var childStatsResponse = response["childStats"] as Dictionary<string, object>;
             var childStatistics =  childStatsResponse["statistics"] as Dictionary<string, object>;
-            GameManager.Instance.AppChildrenInfos[_childInfoIndex].buddyLove =  (int)childStatistics["Love"];
         
             if(_childInfoIndex < GameManager.Instance.AppChildrenInfos.Count - 1)
             {
@@ -602,6 +632,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 //Get Child data
                 dataInfo.profileName = profileChildren[i]["profileName"] as string;
                 dataInfo.profileId = profileChildren[i]["profileId"] as string;
+                dataInfo.buddyLevel = (int) profileChildren[i]["experienceLevel"];
+                dataInfo.currentXP = (int) profileChildren[i]["experiencePoints"];
 
                 if (summaryData != null)
                 {
@@ -620,7 +652,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
                     dataInfo.coinPerHour = (int) summaryData["coinPerHour"];
                     dataInfo.maxCoinCapacity = (int) summaryData["maxCoinCapacity"];
-                    dataInfo.buddyLevel = (int) summaryData["level"];
+                    dataInfo.nextLevelUp = (int) summaryData["nextLevelUpXP"];
                 }
 
                 appChildrenInfos.Add(dataInfo);

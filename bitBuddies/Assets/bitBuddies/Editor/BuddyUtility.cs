@@ -31,10 +31,10 @@ public class BuddyUtility : EditorWindow
                 GUI.enabled = true;
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("Increase Coins 1000");
-                    if (GUILayout.Button("Increase Coins", GUILayout.Width(100), GUILayout.Height(40)))
+                    GUILayout.Label("Increase XP for buddy");
+                    if (GUILayout.Button("Increase XP for buddy", GUILayout.Width(100), GUILayout.Height(40)))
                     {
-                        BrainCloudManager.Instance.RewardCoinsToParent(1000);
+                        FindAnyObjectByType<BuddysRoom>().IncreaseXP(5);
                     }
                 }
             }
