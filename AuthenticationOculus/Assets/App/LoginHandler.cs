@@ -42,6 +42,12 @@ public class LoginHandler : MonoBehaviour
 
     private void Start()
     {
+#if UNITY_EDITOR
+        DisplayError("This will not run properly in the Unity Editor.");
+        DisplayError("Please build as an Android app or Windows executable.");
+        return;
+#endif
+#pragma warning disable CS0162 // Unreachable code detected
         VersionLabel.text = BrainCloud.Version.GetVersion();
 
         Core.AsyncInitialize().OnComplete((msg) =>
@@ -66,6 +72,7 @@ public class LoginHandler : MonoBehaviour
                 });
             }
         });
+#pragma warning restore CS0162 // Unreachable code detected
     }
 
     private void OnDisable()
@@ -121,7 +128,7 @@ public class LoginHandler : MonoBehaviour
 
         yield return new WaitUntil(() => isSuccess);
 
-        // And nonce from the proof
+        // And nonce from the user proof
         isSuccess = false;
         string nonce = string.Empty;
 
@@ -186,7 +193,8 @@ public class LoginHandler : MonoBehaviour
         LogInContent.SetActive(false);
         InfoContent.SetActive(false);
         ErrorMessage.gameObject.SetActive(true);
-        ErrorMessage.text = string.IsNullOrWhiteSpace(ErrorMessage.text) ? ErrorMessage.text
-                          : ErrorMessage.text + $"\n\n{msg}";
+
+        ErrorMessage.text = string.IsNullOrWhiteSpace(ErrorMessage.text) ? msg
+                          : ErrorMessage.text + $"\n{msg}";
     }
 }
