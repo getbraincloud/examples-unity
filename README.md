@@ -2,7 +2,7 @@
 
 This repository contains example Unity projects that make use of the [brainCloud client](https://github.com/getbraincloud/braincloud-csharp) — an excellent place to start learning how the various [brainCloud APIs](https://getbraincloud.com/) are used!
 
-These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code. All projects, unless stated otherwise, make use of **Unity 6000.0.46f1**.
+These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code. All projects, unless stated otherwise, make use of **Unity 6000.0.58f1**.
 
 Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform backend, such as the Google Play console or Apple Developer portal.
 
