@@ -22,7 +22,7 @@ For your own projects you will need to add several Meta XR plugins from the Unit
 
 This example already incorporates these plugins.
 
-In your Unity Project you will also need to make sure your project has the **XR Plugin Management** installed under `Project Settings > XR Plugin Management`. Then, after it is installed, you will need to make sure that **OpenXR** is enabled for either your **Windows** platform or **Android/Meta Quest** platform (or both if your app is meant to run on both platforms).
+In your Unity Project you will also need to make sure your project has the **XR Plugin Management** installed under `Project Settings > XR Plugin Management`. Then, after it is installed, you will need to make sure that **OpenXR** is enabled for either your **Windows** platform or **Android / Meta Quest** platform (or both if your app is meant to run on both platforms).
 
 <p align="center">
     <img  src="../_screenshots/_authOculus/XRPluginManagement.png?raw=true">
