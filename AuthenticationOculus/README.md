@@ -1,4 +1,4 @@
-# Meta Horizon Authentication
+# Meta Quest / Oculus Authentication
 
 <p align="center">
     <img  src="../_screenshots/x_AuthOculus.png?raw=true">
@@ -11,10 +11,10 @@ This example app is only able to authenticate on real Meta Quest devices on thes
 - Windows (Meta Quest Link) via Rift app
 
 For your own projects you will need to add several Meta XR plugins from the Unity Asset Store:
-- [https://assetstore.unity.com/packages/tools/integration/meta-xr-core-sdk-269169](Meta XR Core SDK)
-- [https://assetstore.unity.com/packages/tools/integration/meta-xr-interaction-sdk-265014](Meta XR Interaction ​SDK)
-- [https://assetstore.unity.com/packages/tools/integration/meta-xr-platform-sdk-262366](Meta XR Platform SDK)
-- [https://assetstore.unity.com/packages/tools/integration/meta-xr-simulator-266732](Meta XR Simulator)
+- [Meta XR Core SDK](https://assetstore.unity.com/packages/tools/integration/meta-xr-core-sdk-269169)
+- [Meta XR Interaction ​SDK](https://assetstore.unity.com/packages/tools/integration/meta-xr-interaction-sdk-265014)
+- [Meta XR Platform SDK](https://assetstore.unity.com/packages/tools/integration/meta-xr-platform-sdk-262366)
+- [Meta XR Simulator](https://assetstore.unity.com/packages/tools/integration/meta-xr-simulator-266732)
 
 <p align="center">
     <img  src="../_screenshots/_authOculus/UnityPackage.png?raw=true">
@@ -22,7 +22,7 @@ For your own projects you will need to add several Meta XR plugins from the Unit
 
 This example already incorporates these plugins.
 
-In your Unity Project you will also need to make sure your project has the **XR Plugin Management** installed under `Project Settiongs > XR Plugin Management`. Then, after it is installed, you will need to make sure that **OpenXR** is enabled for either your **Windows** platform or **Android/Meta Quest** plaform (or both if your app is meant to run on both platforms).
+In your Unity Project you will also need to make sure your project has the **XR Plugin Management** installed under `Project Settings > XR Plugin Management`. Then, after it is installed, you will need to make sure that **OpenXR** is enabled for either your **Windows** platform or **Android/Meta Quest** platform (or both if your app is meant to run on both platforms).
 
 <p align="center">
     <img  src="../_screenshots/_authOculus/XRPluginManagement.png?raw=true">
@@ -30,7 +30,7 @@ In your Unity Project you will also need to make sure your project has the **XR 
 
 For more in-depth information to expand on your Meta Quest app in Unity, you should check out the [Meta Horizon Develop Unity documentation](https://developers.meta.com/horizon/develop/unity).
 
-If you are downloading this example app to test out this process yourself you will need to follow the instructions below in order to get everything set up with the Meta Horizon Developer Dashboard in order to get the User ID required for authentication.
+If you are downloading this example app to test out this process yourself you will need to follow the instructions below in order to get everything set up with the **Meta Horizon Developer Dashboard** in order to get the User ID required for authentication.
 
 ### Meta Horizon Developer Dashboard Configuration
 
@@ -40,8 +40,8 @@ Make sure you have downloaded the [Oculus Platform Utility](https://developers.m
 
 In order to be able to retrieve the the User ID with the Meta XR Platform SDK for your app there are several steps that need to be done:
 
-Before you build your app make sure you have created an app already on the **Meta Horizon Developer Dashboard** so that you can retrieve the Application ID for your **OculusPlatformSettings** file in Unity
-    - Again, if this app is for both Meta Horizon Store and Rift you will need to create seperate apps for them to retrieve seperate App IDs
+- Before you build your app make sure you have created an app already on the **Meta Horizon Developer Dashboard** so that you can retrieve the Application ID for your **OculusPlatformSettings** file in Unity
+    - Again, if this app is for both Meta Horizon Store and Rift you will need to create separate apps for them to retrieve separate App IDs
     - For Android / Meta Quest build platforms:
         - Under `Project Settings > Player > Android Settings > Other Settings` make sure you have set a unique **Package Name** for your app; remember you CANNOT change this once you've uploaded a build!
         - Under `Project Settings > Player > Android Settings > Publishing Settings` you will also need to create/use an existing **Custom Keystore**; this CANNOT be changed as well and MUST be used for every Android / Meta Quest build made!
@@ -61,7 +61,6 @@ Once the **OculusPlatformSettings** has the correct Application IDs set and you 
 
 2. Under `Requirements > Data Use Checkup`, you will need to submit a **Request to Access Platform Features** certification
     - You will need to submit one for both **User ID** and **User Profile**
-    - Also fill out any others here that is relevant to your app
     - Follow the steps and answer every question truthfully; the more details the better
     - It will take time for the certification to be reviewed and approved
     - Once approved, you will see `Active` next to the Platform Feature
@@ -108,7 +107,7 @@ You can find the App ID and App Secret for your app on the Meta Horizon Develope
 
 ---
 
-If everything is set up properly you should hopefully see yourself log in once you tap the LOG IN button! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
+If everything is set up properly you should hopefully see yourself log in once you tap the **LOG IN** button! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
 ---
 
