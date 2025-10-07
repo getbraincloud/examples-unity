@@ -49,7 +49,7 @@ Authentication has been updated with a new look! Check out the [Authentication R
 
 ## AuthenticationOculus
 
-This example showcases how to set up your Unity project to be able to enable Meta XR Platform features to be able to retreive the User ID and nonce required for brainCloud authentication for Meta Horizon Store apps and Rift apps. Check out the [AuthenticationOculus README.md](./AuthenticationOculus/README.md).
+This example showcases how to set up your Unity project to be able to enable Meta XR Platform features. These features are required to retreive the User ID and nonce needed for brainCloud authentication for Meta Horizon Store apps and Rift apps. Check out the [AuthenticationOculus README.md](./AuthenticationOculus/README.md) for more in-depth information.
 
 ---
 
