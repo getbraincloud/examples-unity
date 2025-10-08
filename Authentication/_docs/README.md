@@ -11,3 +11,8 @@ Currently integrated external authentication methods:
 | [AuthenticateGoogle](./Google.md)             | `GOOGLE_SDK`            |
 | [AuthenticateGoogleOpenId](./GoogleOpenId.md) | `GOOGLE_OPENID_SDK`     |
 | [AuthenticateSteam](./Steam.md)               | `STEAMWORKS_NET`        |
+
+#### AuthenticateOculus
+
+We have a separate example that showcases authentication via Meta apps on the Meta Horizon Store and Rift. You can find that example here:
+- [AuthenticateOculus](../../AuthenticationOculus/README.md)

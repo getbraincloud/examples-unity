@@ -82,6 +82,11 @@ Currently integrated external authentication methods:
 | [AuthenticateGoogleOpenId](./_docs/GoogleOpenId.md) | `GOOGLE_OPENID_SDK`     |
 | [AuthenticateSteam](./_docs/Steam.md)               | `STEAMWORKS_NET`        |
 
+#### AuthenticateOculus
+
+We have a separate example that showcases authentication via Meta apps on the Meta Horizon Store and Rift. You can find that example here:
+- [AuthenticateOculus](../AuthenticationOculus/README.md)
+
 ---
 
 For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).

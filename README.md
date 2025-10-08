@@ -2,7 +2,7 @@
 
 This repository contains example Unity projects that make use of the [brainCloud client](https://github.com/getbraincloud/braincloud-csharp) — an excellent place to start learning how the various [brainCloud APIs](https://getbraincloud.com/) are used!
 
-These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code. All projects, unless stated otherwise, make use of **Unity 6000.0.46f1**.
+These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code. All projects, unless stated otherwise, make use of **Unity 6000.0.58f1**.
 
 Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform backend, such as the Google Play console or Apple Developer portal.
 
@@ -47,6 +47,12 @@ Authentication has been updated with a new look! Check out the [Authentication R
 
 ---
 
+## AuthenticationOculus
+
+This example showcases how to set up your Unity project to be able to enable Meta XR Platform features. These features are required to retreive the User ID and nonce needed for brainCloud authentication for Meta Horizon Store apps and Rift apps. Check out the [AuthenticationOculus README.md](./AuthenticationOculus/README.md) for more in-depth information.
+
+---
+
 ## BCChat
 
 An example demonstrating the **Chat** service on brainCloud, which works on apps making use of brainCloud RTT.
@@ -58,6 +64,12 @@ Be sure to enable RTT on your app in brainCloud in order to test the example pro
 ## BCClashers
 
 This example showcases the **One-Way Match** and **Playback Stream** services in brainCloud. Check out the [Clashers README.md](./BCClashers/README.md) for more information.
+
+---
+
+## BCFishNet
+
+This example showcases a complete multiplayer game flow using **FishNet** for network object synchronization and **brainCloud** for user authentication, matchmaking, lobby management, and real-time relay transport. Check out [BCFishNet](./BCFishNet/README.md) for more information.
 
 ---
 
@@ -124,16 +136,6 @@ You can follow the example code on how to reconnect a user that lost connection.
 - Re-initialize and Re-authenticate to then join back to the same room the User was disconnected from
 
 There is also a button to just disconnect the RTT connection and reconnect only RTT. To set this up for your app, go to your lobby settings under `Design > Multiplayer > Lobbies` and add `{"enableDisconnectButton":true}` to the **Custom Config** for your lobby.
-
----
-
-## SpaceShooterWithStats
-
-The _Getting Started With Unity_ video uses the Space Shooter example as a backing project.
-
-Go to the **BrainCloudConnect** scene and run the game to test it out in the editor!
-
-Find more information, including the video itself, here: https://docs.braincloudservers.com/learn/sdk-tutorials/unity-tutorials/unity-getting-started/
 
 ---
 
