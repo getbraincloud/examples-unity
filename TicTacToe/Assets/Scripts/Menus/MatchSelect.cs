@@ -276,7 +276,7 @@ public class MatchSelect : ResourcesManager
                     lobbyParams.filters,
                     false,
                     lobbyParams.extra,
-                    Random.Range(0, 100) <= 50 ? "blue" : "yellow",
+                    null,
                     lobbyParams.settings,
                     null,
                     success,
