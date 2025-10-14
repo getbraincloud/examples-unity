@@ -126,7 +126,7 @@ namespace BrainCloudUNETExample.Game
 
                 m_targetingReticule.GetComponent<MeshRenderer>().enabled = m_playerPlane.IsLocalPlayer;
                 Vector3 position = m_playerPlane.transform.position;
-                Vector3 planeVelocity = m_playerPlane.GetComponent<Rigidbody>().velocity;
+                Vector3 planeVelocity = m_playerPlane.GetComponent<Rigidbody>().linearVelocity;
                 Vector3 velocity = planeVelocity;
                 count = 1;
                 Vector3 lastPos = m_playerPlane.transform.position;
@@ -214,7 +214,7 @@ namespace BrainCloudUNETExample.Game
         {
             if (m_bombs > 0)
             {
-                GetComponent<BombersPlayerController>().SpawnBombCommand(new BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, GetComponent<BombersPlayerController>().NetId, m_playerPlane.GetComponent<Rigidbody>().velocity).GetJson());
+                GetComponent<BombersPlayerController>().SpawnBombCommand(new BombInfo(m_playerPlane.transform.position, m_playerPlane.transform.up, GetComponent<BombersPlayerController>().NetId, m_playerPlane.GetComponent<Rigidbody>().linearVelocity).GetJson());
             }
         }
 
@@ -227,7 +227,7 @@ namespace BrainCloudUNETExample.Game
                 m_bulletSpawnPoint = m_playerPlane.m_bulletSpawnPoint;
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
-                m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
+                m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().linearVelocity;
                 GetComponent<BombersPlayerController>().FireBulletCommand(new BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, GetComponent<BombersPlayerController>().NetId, m_bulletVelocity).GetJson());
                 yield return new WaitForSeconds(GConfigManager.GetFloatValue("MultishotBurstDelay"));
             }
@@ -250,7 +250,7 @@ namespace BrainCloudUNETExample.Game
                 m_bulletSpawnPoint = m_playerPlane.m_bulletSpawnPoint;
                 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
                 m_bulletVelocity *= m_bulletSpeed;
-                m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
+                m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().linearVelocity;
                 GetComponent<BombersPlayerController>().FireBulletCommand(new BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, GetComponent<BombersPlayerController>().NetId, m_bulletVelocity).GetJson());
             }
         }
@@ -294,7 +294,7 @@ namespace BrainCloudUNETExample.Game
             }
 
             GameObject bomb = (GameObject)Instantiate((BombersPlayerController.GetPlayer(aBombInfo.m_shooter).m_team == 1) ? m_bombPrefab1 : m_bombPrefab2, aBombInfo.m_startPosition, Quaternion.LookRotation(aBombInfo.m_startDirection, -Vector3.forward));
-            bomb.GetComponent<Rigidbody>().velocity = aBombInfo.m_startVelocity;
+            bomb.GetComponent<Rigidbody>().linearVelocity = aBombInfo.m_startVelocity;
             bomb.GetComponent<BombController>().BombInfo = aBombInfo;
             return bomb;
         }
@@ -329,7 +329,7 @@ namespace BrainCloudUNETExample.Game
             }
             int team = player.GetComponent<BombersPlayerController>().m_team;
             GameObject bullet = (GameObject)Instantiate((team == 1) ? m_bullet1Prefab : m_bullet2Prefab, aBulletInfo.m_startPosition, Quaternion.LookRotation(aBulletInfo.m_startDirection, -Vector3.forward));
-            bullet.GetComponent<Rigidbody>().velocity = aBulletInfo.m_startVelocity;
+            bullet.GetComponent<Rigidbody>().linearVelocity = aBulletInfo.m_startVelocity;
             bullet.GetComponent<BulletController>().SetBulletInfo(aBulletInfo);
 
             return bullet;

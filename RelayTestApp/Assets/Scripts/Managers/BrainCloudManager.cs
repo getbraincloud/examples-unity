@@ -10,6 +10,7 @@ using UnityEngine;
 using BrainCloud;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using TMPro;
+using Object = System.Object;
 
 public enum RelayCompressionTypes {JsonString, KeyValuePairString, DataStreamByte }
 
@@ -42,6 +43,7 @@ public class BrainCloudManager : MonoBehaviour
     private string currentEntryId;
     
     private static List<Color> colours = new List<Color>();
+    private bool _noServerSelected;
     
     private void Awake()
     {
@@ -207,6 +209,7 @@ public class BrainCloudManager : MonoBehaviour
             
             // Enable RTT
             _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+            _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
             _bcWrapper.RTTService.EnableRTT(OnEnableRTT, OnRTTDisconnected);
             return;
         }
@@ -234,10 +237,13 @@ public class BrainCloudManager : MonoBehaviour
                 _ffaLobbyTypesList.Add(lobbyType);
             }
         }
+
+        _noServerSelected = false;
         GameManager.Instance.UpdateLobbyDropdowns(_ffaLobbyTypesList, _teamLobbyTypesList);
         
         // Enable RTT
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
         _bcWrapper.RTTService.EnableRTT(OnEnableRTT, OnRTTDisconnected);
     }
     
@@ -269,6 +275,16 @@ public class BrainCloudManager : MonoBehaviour
         Debug.Log($"MESSAGE: {message}");
         StateManager.Instance.AbortToSignIn($"Message: {message} |||| JSON: {jsonError}");
 
+    }
+    
+    void OnRoomLaunchFailure()
+    {
+        if (_dead) return;
+
+        _dead = true;
+        _bcWrapper.RelayService.DeregisterRelayCallback();
+        _bcWrapper.RelayService.DeregisterSystemCallback();
+        StateManager.Instance.PopupMessageToMainMenu("Something went wrong with launching the server. Please try again.");
     }
 #endregion BC Callbacks
 
@@ -305,13 +321,37 @@ public class BrainCloudManager : MonoBehaviour
     {
         StateManager.Instance.isReady = true;
 
-        //Setting up a update to send to brain cloud about local users color
-        var extra = new Dictionary<string, object>();
-        extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
-        extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
+        if(_noServerSelected && GameManager.Instance.IsLocalUserHost())
+        {
+            //   "members": [
+            //     {
+            //       "cxId": "23649:05b379b4-d366-4748-9424-750d77bbc428:nodufh0g6c45qbunfri8raiov1",
+            //       "passcode": "12345"
+            //     }
+            List<string> memberScriptData = new List<string>();
+            var listOfMembers = StateManager.Instance.CurrentLobby.Members;
+            for (int i = 0; i < listOfMembers.Count; i++)
+            {
+                memberScriptData.Add(listOfMembers[i].cxId);
+            }
+            
+            Dictionary<string, object> scriptData = new Dictionary<string, object>();
+            
+            scriptData.Add("members", memberScriptData);
+            scriptData.Add("ownerCxId", StateManager.Instance.CurrentLobby.OwnerCxID);
+             
+            _bcWrapper.ScriptService.RunScript("ConnectPlayer", JsonWriter.Serialize(scriptData));
+        }
+        else if(!StateManager.Instance.CurrentLobby.LobbyID.IsNullOrEmpty())
+        {
+            //Setting up a update to send to brain cloud about local users color
+            var extra = new Dictionary<string, object>();
+            extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
+            extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
 
-        //
-        _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
+            //
+            _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);   
+        }
     }
 
     public void EndMatch()
@@ -331,6 +371,7 @@ public class BrainCloudManager : MonoBehaviour
         //Continue doing reconnection stuff.....
         _bcWrapper.RTTService.EnableRTT(RTTReconnect, OnRTTDisconnected);
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
     }
 
     public void JoinMatch()
@@ -725,6 +766,10 @@ public class BrainCloudManager : MonoBehaviour
                         // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
                         CloseGame(true);
                     }
+                    else
+                    {
+                        OnRoomLaunchFailure();
+                    }
                     break;
                 }
                 case "STARTING":
@@ -756,11 +801,65 @@ public class BrainCloudManager : MonoBehaviour
         }
     }
 
+    private string serverId;
+    private void OnEventCallback(string jsonResponse)
+    {
+        Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+
+        //Using the key "operation" to determine what state the lobby is in
+        if (response.ContainsKey("operation") && response["data"] is Dictionary<string, object> jsonData)
+        {
+            var operation = response["operation"] as string;
+            if(operation == "GET_EVENTS")
+            {
+                string incomingEventType = jsonData["eventType"] as string;
+                Dictionary<string, object> eventData = jsonData["eventData"] as Dictionary<string, object>;
+                switch (incomingEventType)
+                {
+                    case "launchStart":
+                        // Save our picked color index
+                        _presentWhileStarted = true;
+                        GameManager.Instance.UpdatePresentSinceStart();
+                        Settings.SetPlayerPrefColor(GameManager.Instance.CurrentUserInfo.UserGameColor);
+                        //Set up loading screen
+                        if (!GameManager.Instance.IsLocalUserHost())
+                        {
+                            StateManager.Instance.ButtonPressed_ChangeState(GameStates.Lobby);
+                        }
+                        //Save server info
+                        if(eventData != null)
+                        {
+                            serverId = eventData["serverId"] as string;                            
+                        }
+                        break;
+                    case "roomProgressUpdate":
+                        if(eventData != null)
+                        {
+                            string progressUpdate = eventData["description"] as string;
+                            StateManager.Instance.LoadingGameState.UpdateSubMessage(progressUpdate);   
+                        }
+                        break;
+                    case "roomAssigned":
+                        StateManager.Instance.CurrentServer = new Server(eventData, true);
+                        break;
+                    case "roomReady":
+                        GameManager.Instance.UpdateMatchAndLobbyState();
+                        GameManager.Instance.UpdateCursorList();
+                        //Check to see if a user joined the lobby before the match started or after.
+                        //If a user joins while match is in progress, you will only receive MEMBER_JOIN & ROOM_READY RTT updates.
+                        ConnectRelay();
+                        break;
+                }
+            }
+        }
+    }
+
     // Connect to the Relay server and start the game
     public void ConnectRelay()
     {
         _presentWhileStarted = false;
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+        _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
         _bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
         _bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
@@ -779,14 +878,28 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         Server server = StateManager.Instance.CurrentServer;
-        _bcWrapper.RelayService.Connect
-        (
-            StateManager.Instance.Protocol,
-            new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
-            null,
-            LogErrorThenPopUpWindow,
-            "Failed to connect to server"
-        );
+        if(_noServerSelected)
+        {
+            _bcWrapper.RelayService.Connect
+            (
+                StateManager.Instance.Protocol,
+                new RelayConnectOptions(false, server.Host, port, server.Passcode, serverId), // .this had a "" in the fifth param, are we missing something [smrj]
+                null,
+                LogErrorThenPopUpWindow,
+                "Failed to connect to server"
+            );
+        }
+        else
+        {
+            _bcWrapper.RelayService.Connect
+            (
+                StateManager.Instance.Protocol,
+                new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
+                null,
+                LogErrorThenPopUpWindow,
+                "Failed to connect to server"
+            );            
+        }
     }
     
     public void DisconnectFromEverything()
@@ -915,7 +1028,6 @@ public class BrainCloudManager : MonoBehaviour
             1, // max steps
             algo, // algorithm
             filters, // filters
-            0, // Timeout
             false, // ready
             extra, // extra
             teamCode, // team code
@@ -1107,11 +1219,13 @@ public class BrainCloudManager : MonoBehaviour
     {
         if(in_gameMode == GameMode.Team)
         {
-            _currentTeamLobby = _teamLobbyTypesList[index];            
+            _currentTeamLobby = _teamLobbyTypesList[index];           
+            _noServerSelected = _currentTeamLobby.Contains("NoRoomServer");
         }
         else
         {
-            _currentFFALobby = _ffaLobbyTypesList[index];            
+            _currentFFALobby = _ffaLobbyTypesList[index];
+            _noServerSelected = _currentFFALobby.Contains("NoRoomServer");
         }
     }
 }

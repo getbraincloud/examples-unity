@@ -6,8 +6,8 @@ Currently integrated external authentication methods:
 | Instructions                                  | Scripting Define Symbol |
 | --------------------------------------------- | :---------------------: |
 | [AuthenticateApple](./Apple.md)               | `APPLE_SDK`             |
+| [AuthenticateGameCenter](./GameCenter.md)     | `GAMECENTER_SDK`        |
 | [AuthenticateFacebook](./Facebook.md)         | `FACEBOOK_SDK`          |
 | [AuthenticateGoogle](./Google.md)             | `GOOGLE_SDK`            |
 | [AuthenticateGoogleOpenId](./GoogleOpenId.md) | `GOOGLE_OPENID_SDK`     |
-
-More external authentication methods to come!
+| [AuthenticateSteam](./Steam.md)               | `STEAMWORKS_NET`        |

@@ -77,6 +77,7 @@ public class MainLoginPanelUI : ContentUIBehaviour
         RememberMeToggle.isOn = rememberUserToggle && !UserHandler.AnonymousID.IsEmpty();
 
         AuthenticationType authenticationType = UserHandler.AuthenticationType;
+
         if (authenticationType == AuthenticationType.Universal)
         {
             UniversalRadio.isOn = true;

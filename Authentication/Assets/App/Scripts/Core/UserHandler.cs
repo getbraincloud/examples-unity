@@ -13,6 +13,10 @@ using AppleAuth.Native;
 using AppleAuth.Interfaces;
 #endif
 
+#if GAMECENTER_SDK
+using Apple.GameKit;
+#endif
+
 #if FACEBOOK_SDK
 using Facebook.Unity;
 #endif
@@ -193,6 +197,56 @@ public static class UserHandler
 #else
         Debug.LogError("AuthenticateApple is not available on this platform. Check your scripting defines. Returning with error...");
         onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateApple</b> is not available on this platform."), cbObject);
+#endif
+    }
+#endif
+
+#if GAMECENTER_SDK
+    /// <summary>
+    /// Authenticate the user using their Game Center account.
+    /// </summary>
+    /// Apple Unity Plug-Ins (Apple.Core & Apple.GameKit Required): https://github.com/apple/unityplugins
+    public static void AuthenticateGameCenter(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_STANDALONE_OSX || UNITY_IOS
+        IEnumerator WaitForGKLocalPlayerAuthenticated()
+        {
+            DateTime stop = DateTime.UtcNow.AddSeconds(60.0f);
+            while (DateTime.UtcNow < stop &&
+                   (GKLocalPlayer.Local == null || !GKLocalPlayer.Local.IsAuthenticated || GKLocalPlayer.Local.GamePlayerId.IsEmpty()))
+            {
+                yield return null;
+            }
+
+            if (GKLocalPlayer.Local != null && GKLocalPlayer.Local.IsAuthenticated && !GKLocalPlayer.Local.GamePlayerId.IsEmpty())
+            {
+                Debug.Log($"GamePlayerId: {GKLocalPlayer.Local.GamePlayerId}");
+                BCManager.Wrapper.AuthenticateGameCenter(GKLocalPlayer.Local.GamePlayerId,
+                                                         forceCreate, onSuccess, onFailure, cbObject);
+            }
+            else
+            {
+                onFailure(0, 0, ErrorResponse.CreateGeneric("An error has occured. Please try again."), cbObject);
+            }
+        }
+
+        if (GKLocalPlayer.Local == null || !GKLocalPlayer.Local.IsAuthenticated)
+        {
+            BCManager.Wrapper.StartCoroutine(WaitForGKLocalPlayerAuthenticated());
+            GKLocalPlayer.Authenticate();
+        }
+        else if (!GKLocalPlayer.Local.GamePlayerId.IsEmpty())
+        {
+            BCManager.Wrapper.AuthenticateGameCenter(GKLocalPlayer.Local.GamePlayerId,
+                                                     forceCreate, onSuccess, onFailure, cbObject);
+        }
+        else
+        {
+            onFailure(0, 0, ErrorResponse.CreateGeneric("An error has occured. Please try again."), cbObject);
+        }
+#else
+        Debug.LogError("AuthenticateGameCenter is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateGameCenter</b> is not available on this platform."), cbObject);
 #endif
     }
 #endif
@@ -380,6 +434,22 @@ public static class UserHandler
 #else
         Debug.LogError("AuthenticateGoogleOpenID is not available on this platform. Check your scripting defines. Returning with error...");
         onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateGoogleOpenID</b> is not available on this platform."), cbObject);
+#endif
+    }
+#endif
+
+#if STEAMWORKS_NET
+    /// <summary>
+    /// Authenticate the user through Steam their Styeam account
+    /// </summary>
+    /// Steamworks.NET Plugin: https://github.com/rlabrecque/Steamworks.NET
+    public static void AuthenticateSteam(string userid, string sessionTicket, bool forceCreate, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_STANDALONE
+        BCManager.Wrapper.AuthenticateSteam(userid, sessionTicket, forceCreate, onSuccess, onFailure, cbObject);
+#else
+        Debug.LogError("AuthenticateSteam is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateSteam</b> is not available on this platform."), cbObject);
 #endif
     }
 #endif

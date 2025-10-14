@@ -213,7 +213,7 @@ namespace BrainCloudUNETExample.Game
             //m_playerPlane.GetComponent<PlaneController>().enabled = false;
             m_playerPlane.transform.GetChild(0).gameObject.SetActive(false);
             m_playerPlane.transform.GetChild(1).gameObject.SetActive(false);
-            m_playerPlane.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            m_playerPlane.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
             m_playerPlane.GetComponent<AudioSource>().Stop();
             m_playerPlane.GetComponent<Collider>().enabled = false;
         }
@@ -610,7 +610,7 @@ namespace BrainCloudUNETExample.Game
             Transform m_bulletSpawnPoint = m_playerPlane.m_bulletSpawnPoint;
             Vector3 m_bulletVelocity = m_bulletSpawnPoint.forward.normalized;
             m_bulletVelocity *= WeaponController.m_bulletSpeed;
-            m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().velocity;
+            m_bulletVelocity += m_playerPlane.GetComponent<Rigidbody>().linearVelocity;
             BulletInfo aBulletInfo = new BulletInfo(m_bulletSpawnPoint.position, m_bulletSpawnPoint.forward.normalized, NetId, m_bulletVelocity, id);
             GameObject bullet = WeaponController.SpawnBullet(aBulletInfo);
             m_gMan.AddBulletInfo(aBulletInfo);
