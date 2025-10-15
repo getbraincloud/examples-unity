@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.Serialization;
 
 //Mystery box template to then be displayed with different rarities and cost.
 public class MysteryBoxUI : ContentUIBehaviour
@@ -16,8 +17,12 @@ public class MysteryBoxUI : ContentUIBehaviour
     [SerializeField] private Button OpenBoxButton;
     [SerializeField] private Image UnlockTypeImage;
     [SerializeField] private Image LockIconImage;
+    [SerializeField] private Image BoxSpriteImage;
     [Header("References")]
     [SerializeField] private Sprite[] UnlockTypeSprites;  //0 = coins, 1 = love, 2 = level
+
+    [SerializeField] private Sprite[] OpenBoxTypeSprites;
+    [SerializeField] private Sprite[] ClosedBoxTypeSprites;
     private MysteryBoxPanelUI _mysteryBoxPanelUI;
     //Data
     private MysteryBoxInfo _mysteryBoxInfo;
@@ -41,10 +46,13 @@ public class MysteryBoxUI : ContentUIBehaviour
                 {
                     LockIconImage.gameObject.SetActive(true);
                     OpenBoxButton.interactable = false;
+                    BoxSpriteImage.sprite = ClosedBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
                 }
                 else
                 {
+                    BoxSpriteImage.sprite = OpenBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
                     LockIconImage.gameObject.SetActive(false);
+                    OpenBoxButton.interactable = true;
                     OpenBoxButton.onClick.AddListener(OnOpenBox);
                 }
                 break;
@@ -54,7 +62,8 @@ public class MysteryBoxUI : ContentUIBehaviour
                 //ToDo: how do I determine this value...?
                 break;
         }
-
+        
+        
         BoxNameText.text = _mysteryBoxInfo.BoxName;
         _mysteryBoxPanelUI = FindAnyObjectByType<MysteryBoxPanelUI>();
     }

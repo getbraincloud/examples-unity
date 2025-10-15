@@ -31,7 +31,7 @@ public class BuddyUtility : EditorWindow
                 GUI.enabled = true;
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("Increase XP for buddy");
+                    GUILayout.Label("++ child XP ");
                     if (GUILayout.Button("Increase XP for buddy", GUILayout.Width(100), GUILayout.Height(40)))
                     {
                         FindAnyObjectByType<BuddysRoom>().IncreaseXP(5);
@@ -45,7 +45,7 @@ public class BuddyUtility : EditorWindow
                 GUI.enabled = true;
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("Increase Gems 100");
+                    GUILayout.Label("++ Gems 100");
                     if (GUILayout.Button("Increase Gems", GUILayout.Width(100), GUILayout.Height(40)))
                     {
                         BrainCloudManager.Instance.RewardGemsToParent(100);
@@ -59,21 +59,7 @@ public class BuddyUtility : EditorWindow
                 GUI.enabled = true;
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("Level Up Parent by 1");
-                    if (GUILayout.Button("LevelUpParent", GUILayout.Width(100), GUILayout.Height(40)))
-                    {
-                        BrainCloudManager.Instance.LevelUpParent();
-                    }
-                }
-            }
-            //Button 4
-            {
-                GUILayout.Space(12); // Left Padding
-
-                GUI.enabled = true;
-                using (new GUILayout.VerticalScope())
-                {
-                    GUILayout.Label("AwardBling 100");
+                    GUILayout.Label("++ BuddyBling");
                     if (GUILayout.Button("AwardBling", GUILayout.Width(100), GUILayout.Height(40)))
                     {
                         BrainCloudManager.Instance.AwardBlingToChild(100);

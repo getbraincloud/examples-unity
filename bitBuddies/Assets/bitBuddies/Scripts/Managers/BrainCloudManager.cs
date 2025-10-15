@@ -100,20 +100,22 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             var coins = currency["coins"] as Dictionary<string, object>;
             UserInfo.UpdateCoins((int)coins["balance"]);
         }
-        var stats = data["statistics"] as Dictionary<string, object>;
-        if(stats != null)
-        {
-            //UserInfo.UpdateLevel((int)stats["Level"]);
-        }
+        
+        UserInfo.UpdateLevel((int) data["experienceLevel"]);
+        UserInfo.UpdateXP((int) data["experiencePoints"]);
         
         var summaryFriendData = data["summaryFriendData"] as Dictionary<string, object>;
         if(summaryFriendData != null)
         {
             int nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];
-            if(nextLevelUp != 0)
+            if(nextLevelUp > UserInfo.CurrentXP)
             {
                 UserInfo.UpdateNextLevelUp(nextLevelUp);
             }
+            else
+            {
+                Wrapper.PlayerStatisticsService.GetNextExperienceLevel(HandleSuccess("GetNextXP Success", OnGetNextLevelUp));
+            }            
         }
         else
         {
@@ -222,7 +224,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             if(summaryFriendData != null)
             {
                 //Get Summary data
-                dataInfo.rarity = summaryFriendData["rarity"] as string;
+                if(summaryFriendData.ContainsKey("rarity"))
+                {
+                    dataInfo.rarity = summaryFriendData["rarity"] as string;   
+                }
                 if(summaryFriendData.ContainsKey("buddySpritePath"))
                 {
                     dataInfo.buddySpritePath =  summaryFriendData["buddySpritePath"] as string;
@@ -464,24 +469,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     public void LevelUpParent()
     {
-        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"Level", 1}};
-        Wrapper.PlayerStatisticsService.IncrementUserStats
-        (
-            scriptData.Serialize(), 
-            HandleSuccess("LevelUpParent Success", OnLevelUpParent),
-            HandleFailure("LevelUpParent Failed", OnFailureCallback)
-        );
+
     }
     
     private void OnLevelUpParent(string jsonResponse, object cbObject)
     {
-        /*
-         * {"packetId":2,"responses":[{"data":{"rewardDetails":{},"currency":{},"rewards":{},"statistics":{"Level":3}},"status":200}]}
-         */
-        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-        var firstData =  packet["data"] as Dictionary<string, object>;
-        var statistics = firstData["statistics"] as Dictionary<string, object>;
-        UserInfo.UpdateLevel((int) statistics["Level"]);
+        //UserInfo.UpdateLevel(/*(int) statistics["Level"]*/);
         StateManager.Instance.RefreshScreen();
     }
     
@@ -632,13 +625,15 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 //Get Child data
                 dataInfo.profileName = profileChildren[i]["profileName"] as string;
                 dataInfo.profileId = profileChildren[i]["profileId"] as string;
-                dataInfo.buddyLevel = (int) profileChildren[i]["experienceLevel"];
-                dataInfo.currentXP = (int) profileChildren[i]["experiencePoints"];
+                //ToDo FL: need to get this from summary friend data
+                //dataInfo.buddyLevel = (int) profileChildren[i]["experienceLevel"];
+                //dataInfo.currentXP = (int) profileChildren[i]["experiencePoints"];
 
                 if (summaryData != null)
                 {
+                    dataInfo.summaryFriendData = summaryData;
                     //Get Entity data
-                    dataInfo.rarity = summaryData["rarity"] as string;
+                    dataInfo.rarity = "basic";//summaryData["rarity"] as string;
                     dataInfo.buddySpritePath = summaryData["buddySpritePath"] as string;
                     var multiplier = summaryData["coinMultiplier"] as double?;
                     if (multiplier != null)

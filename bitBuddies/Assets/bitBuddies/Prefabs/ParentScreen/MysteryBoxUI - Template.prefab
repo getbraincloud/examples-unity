@@ -140,7 +140,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 938ca4b84954d1348a2d067871520093, type: 3}
+  m_Sprite: {fileID: 8369359535824903520, guid: 2d8fd0d519b9b4b1690703b246e1ae09, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -253,7 +253,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 0.5943396, g: 0.5943396, b: 0.5943396, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -267,7 +267,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 80071288909464613}
   m_OnClick:
     m_PersistentCalls:
@@ -419,10 +419,23 @@ MonoBehaviour:
   OpenBoxButton: {fileID: 4479182092947711674}
   UnlockTypeImage: {fileID: 3647312229093349777}
   LockIconImage: {fileID: 2511155198154397116}
+  BoxSpriteImage: {fileID: 3152332974618648431}
   UnlockTypeSprites:
   - {fileID: -3338749442709606003, guid: 045ab00fd62a5f1449e969c649aac95f, type: 3}
   - {fileID: -205270267638800340, guid: 3ce7c6e630b5d1241bb884dea24fb7da, type: 3}
   - {fileID: 4815476061570213978, guid: 919cc0b4bc77c4e40ba2545b87859268, type: 3}
+  OpenBoxTypeSprites:
+  - {fileID: 8369359535824903520, guid: 2d8fd0d519b9b4b1690703b246e1ae09, type: 3}
+  - {fileID: 8369359535824903520, guid: 2d8fd0d519b9b4b1690703b246e1ae09, type: 3}
+  - {fileID: 1754801811389002229, guid: abf3e4fd64fcb4281999b1304593ef75, type: 3}
+  - {fileID: 1754801811389002229, guid: abf3e4fd64fcb4281999b1304593ef75, type: 3}
+  - {fileID: 2290831216901384722, guid: 816bda855b10246e8b283203087aea59, type: 3}
+  ClosedBoxTypeSprites:
+  - {fileID: -1190600825747284067, guid: 8b55c31d55db84f10acdb6d51fc32e7c, type: 3}
+  - {fileID: -1190600825747284067, guid: 8b55c31d55db84f10acdb6d51fc32e7c, type: 3}
+  - {fileID: 4762115868283100827, guid: db863aa6d363b4c1596968ea90ed1c14, type: 3}
+  - {fileID: 4762115868283100827, guid: db863aa6d363b4c1596968ea90ed1c14, type: 3}
+  - {fileID: -529272046633078556, guid: 7f5d97b0172434b219865576e7ad1e30, type: 3}
 --- !u!1 &6687174938366353597
 GameObject:
   m_ObjectHideFlags: 0
@@ -624,7 +637,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7629747240219182507, guid: 2e5f01a3defde764fb8ea63fcb103240, type: 3}
+  m_Sprite: {fileID: 4788905825281754130, guid: 6a335a2c796144147891f6829eec354a, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1

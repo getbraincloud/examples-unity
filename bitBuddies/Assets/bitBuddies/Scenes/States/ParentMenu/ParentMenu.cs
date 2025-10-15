@@ -53,7 +53,9 @@ public class ParentMenu : ContentUIBehaviour
     {
         UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
         UsernameText.text = userInfo.Username.IsNullOrEmpty() ? "New User" : userInfo.Username;
-        LevelText.text = userInfo.Level.ToString();
+        LevelText.text = $"Lv. {userInfo.Level}";
+        LevelSlider.value = userInfo.CurrentXP;
+        LevelSlider.maxValue = userInfo.NextLevelUp;
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();
         GameVersionText.text = $"Game Version: {Application.version}";

@@ -140,7 +140,10 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 					if(childName.IsNullOrEmpty())
 					{
 						var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
-						_parentMenu.NewAppChildrenInfo.rarity = summaryData["rarity"] as string;
+						if(summaryData.ContainsKey("rarity"))
+						{
+							_parentMenu.NewAppChildrenInfo.rarity = summaryData["rarity"] as string;
+						}
 						_parentMenu.NewAppChildrenInfo.coinPerHour = (int) summaryData["coinPerHour"];
 						_parentMenu.NewAppChildrenInfo.maxCoinCapacity = (int) summaryData["maxCoinCapacity"];
 						_parentMenu.NewAppChildrenInfo.buddySpritePath = summaryData["buddySpritePath"] as string;
@@ -203,7 +206,14 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	    CoinMultiplierText.text = COIN_PAYOUT_TEXT + childAppInfo.coinMultiplier + "x";
 	    CoinPerHourText.text = COIN_GAIN_TEXT + childAppInfo.coinPerHour + COIN_PER_HOUR_TEXT;
 	    CoinCapacityText.text = COIN_CAPACITY_TEXT + childAppInfo.maxCoinCapacity;
-	    RarityText.text = childAppInfo.rarity.ToString();
+	    if(childAppInfo.rarity != null)
+	    {
+		    RarityText.text = childAppInfo.rarity.ToString();   
+	    }
+	    else
+	    {
+		    RarityText.text = "basic";
+	    }
 	    //BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
 	    BuddyImage.sprite = AssetLoader.LoadSprite(childAppInfo.buddySpritePath);
 	    if(childAppInfo.buddySpritePath.IsNullOrEmpty())

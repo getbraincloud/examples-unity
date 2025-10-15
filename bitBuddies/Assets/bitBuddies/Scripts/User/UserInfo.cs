@@ -19,6 +19,10 @@ public class UserInfo
     
     public void UpdateXP(int in_xp)
     {
+        if(in_xp == 0)
+        {
+            in_xp = 1;
+        }
         CurrentXP = in_xp;
     }
     

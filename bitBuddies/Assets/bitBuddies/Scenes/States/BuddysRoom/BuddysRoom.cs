@@ -87,32 +87,48 @@ public class BuddysRoom : ContentUIBehaviour
     {
         var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var data =  packet["data"] as Dictionary<string, object>;
-        var currentXP = (int) data["experiencePoints"];
+        var response =  data["response"] as Dictionary<string, object>;
+        var update =  response["update"] as Dictionary<string, object>;
+        var increaseXP =  update["increaseXpResult"] as Dictionary<string, object>;
+        
+        if(update.ContainsKey("nextLevelUpXP"))
+        {
+            var nextLevelUp = (int) update["nextLevelUpXP"];
+            if(nextLevelUp != 0)
+            {
+                _appChildrenInfo.nextLevelUp = nextLevelUp;
+                _loveSlider.maxValue = nextLevelUp;
+            }            
+        }
+        
+        var currentXP = (int) increaseXP["experiencePoints"];
         if(currentXP != 0)
         {
             _appChildrenInfo.currentXP = currentXP;
+            _loveSlider.value = currentXP;
         }
         
-        var currentLevel = (int) data["experienceLevel"];
+        var currentLevel = (int) increaseXP["experienceLevel"];
         if(currentLevel != 0)
         {
             _appChildrenInfo.buddyLevel = currentLevel;
         }
 
-        var nextLevelUp = (int) data["nextLevelUpXP"];
-        if(nextLevelUp != 0)
-        {
-            _appChildrenInfo.nextLevelUp = nextLevelUp;
-        }
         
-        var currency = data["currency"] as Dictionary<string, object>;
-        if(data.ContainsValue(currency))
+        if(data.ContainsKey("currency"))
         {
-            //get the money
-            var gems = currency["coins"] as Dictionary<string, object>;
-            var balance = (int) gems["balance"];
-            _appChildrenInfo.buddyBling = balance;
-            _buddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
+            var currency = data["currency"] as Dictionary<string, object>;
+            if(data.ContainsValue(currency))
+            {
+                if(currency.ContainsKey("coins"))
+                {
+                    //get the money
+                    var gems = currency["coins"] as Dictionary<string, object>;
+                    var balance = (int) gems["balance"];
+                    _appChildrenInfo.buddyBling = balance;
+                    _buddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
+                }
+            }
         }
         
         //grab app child reference from game manager and assign new values
