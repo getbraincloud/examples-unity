@@ -1,0 +1,5 @@
+- Followed the kart settings from https://doc.photonengine.com/fusion/current/game-samples/fusion-karts#overview 
+ - Added BC Plugin To Project
+ - Create & hooked up Login Screen
+    - Modified Launch Flow 
+    - Stripped out Client Info - for brainCloud Info
