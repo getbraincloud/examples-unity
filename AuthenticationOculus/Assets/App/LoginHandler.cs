@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class LoginHandler : MonoBehaviour
 {
+    public static string MetaUserID { get; private set; }
+
     [SerializeField] private CanvasGroup MainCanvas = null;
     [SerializeField] private TMP_Text ErrorMessage = null;
 
@@ -154,7 +156,7 @@ public class LoginHandler : MonoBehaviour
                               nonce,
                               true,
                               OnAuthenticateSuccess,
-                              OnAuthenticateError,
+                              OnAuthenticateFailure,
                               null);
 
         yield return new WaitUntil(() => BC.Client != null &&
@@ -163,6 +165,9 @@ public class LoginHandler : MonoBehaviour
                                          BC.GetStoredAnonymousId() != string.Empty);
         yield return new WaitForFixedUpdate();
 
+        // We'll store the User ID here for verifying purchases
+        MetaUserID = userID;
+
         // Finally let's update the info after authentication
         AppIDLabel.text = $"BC App: {BC.Client.AppId}";
         ProfileIDLabel.text = $"Profile ID:\n{BC.GetStoredProfileId()}";
@@ -170,6 +175,12 @@ public class LoginHandler : MonoBehaviour
 
         LogInContent.SetActive(false);
         InfoContent.SetActive(true);
+
+        // Enable purchasing canvas
+        if (FindFirstObjectByType<PurchaseHandler>() is var ph && ph != null)
+        {
+            ph.enabled = true;
+        }
     }
 
     private void OnAuthenticateSuccess(string jsonResponse, object cbObject)
@@ -177,7 +188,7 @@ public class LoginHandler : MonoBehaviour
         // Normally we would want to do something with the authentication info but since we're just doing a quick demo we'll keep this empty
     }
 
-    private void OnAuthenticateError(int status, int reasonCode, string jsonError, object cbObject)
+    private void OnAuthenticateFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
         StopAllCoroutines();
 

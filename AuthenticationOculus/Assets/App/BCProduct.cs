@@ -1,0 +1,117 @@
+using Oculus.Platform;
+using Oculus.Platform.Models;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+[Serializable]
+public class BCProduct
+{
+    public string itemId;
+    public string type;
+    public string category;
+    public string title;
+    public string description;
+    public string imageUrl;
+    public string payload;
+    public Dictionary<string, int> currency;
+    public Dictionary<string, BCItem> items;
+    public Dictionary<string, object> data;
+    public BCPriceData priceData;
+
+    public Product MetaProduct { get; private set; }
+
+    public string IAPSku => MetaProduct.Sku;
+
+    public BCProduct() { }
+
+    /// <summary>
+    /// Gets the <see cref="ProductType"/> from <see cref="type"/>.
+    /// </summary>
+    public ProductType IAPProductType
+    {
+        get
+        {
+            switch(type)
+            {
+                case "Consumable":
+                    return ProductType.CONSUMABLE;
+                case "Nonconsumable":
+                    return ProductType.DURABLE;
+                case "Subscription":
+                    return ProductType.SUBSCRIPTION;
+                default:
+                    Debug.LogWarning($"BCProduct.type is null or unknown: '{type}'.");
+                    return ProductType.Unknown;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the amount of currency this <see cref="BCProduct"/> redeems.
+    /// </summary>
+    /// <param name="name">The currency as its named under the Marketplace's <b>Virtual Currencies</b>.</param>
+    public int GetCurrencyAmount(string name)
+    {
+        if (currency != null && currency.TryGetValue(name, out int amount))
+        {
+            return amount;
+        }
+    
+        Debug.LogWarning($"BCProduct.currency does not contain a value for: '{name}'. Returning 0...");
+        return 0;
+    }
+
+    /// <summary>
+    /// Gets the <see cref="BCItem"/> that this <see cref="BCProduct"/> redeems.
+    /// </summary>
+    /// <param name="name">The <see cref="BCItem"/> as its named under the Marketplace's <b>Item Catalog</b>.</param>
+    public BCItem GetItem(string name)
+    {
+        if (items != null && items.TryGetValue(name, out BCItem item))
+        {
+            return item;
+        }
+    
+        Debug.LogWarning($"BCProduct.items does not contain a value for: '{name}'. Returning default...");
+        return default;
+    }
+
+
+    public string GetProductID()
+    {
+#if UNITY_ANDROID
+        return priceData.id;
+#else
+        return itemId;
+#endif
+    }
+
+    public void SetOculusProduct(Product product) => MetaProduct = product;
+}
+
+/// <summary>
+/// <see cref="BCProduct"/> can redeem items as configured under brainCloud Marketplace's <b>Item Catalog</b>.
+/// </summary>
+[Serializable]
+public class BCItem
+{
+    public string defId;
+    public int quantity;
+
+    public BCItem() { }
+}
+
+/// <summary>
+/// <see cref="BCProduct"/> can have data for individual stores as configured under brainCloud Marketplace's <b>Products</b>.
+/// </summary>
+[Serializable]
+public class BCPriceData
+{
+    public string id;
+    public Dictionary<string, string>[] ids;
+    public int referencePrice;
+    public bool isPromotion;
+
+    public BCPriceData() { }
+}
