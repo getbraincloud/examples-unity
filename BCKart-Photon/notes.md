@@ -5,3 +5,8 @@
     - Stripped out Client Info - for brainCloud Info
     - Update User name goes to brainCloud UserName endpoint
     - Added Username non editable to profile screen, and the editable display name
+- Update PlayMode screen
+   - Quick Find, will find or create a lobby 
+   - Added BCLobbyManager to enable RTT, and create the lobby listener
+   - Removed Join screen option, instead it will just find, where quick find will find or create a lobby
+

@@ -2,6 +2,7 @@ using BrainCloud;
 using BrainCloud.Entity;
 using BrainCloud.JSONHelper;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -52,6 +53,11 @@ public class BCManager : MonoBehaviour
     /// Access brainCloud services directly. Useful if the Wrapper doesn't expose something in particular.
     /// </summary>
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
+
+    /// <summary>
+    /// Access to lobby management utilities and event listeners.
+    /// </summary>
+    public static BCLobbyManager LobbyManager { get; private set; }
 
     #endregion
 
@@ -160,9 +166,12 @@ public class BCManager : MonoBehaviour
         Wrapper.WrapperName = AppName;
         Wrapper.Init(); // Init data is taken from the brainCloud Unity Plugin
 
+        LobbyManager = new BCLobbyManager();
+
         DontDestroyOnLoad(gameObject);
 
         _isInstanced = true;
+        
     }
 
     private void OnApplicationQuit()
@@ -182,6 +191,7 @@ public class BCManager : MonoBehaviour
             _isInstanced = false;
         }
 
+        LobbyManager = null;
         Wrapper = null;
         GameObject = null;
     }

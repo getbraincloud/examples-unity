@@ -46,7 +46,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 	void UpdateDetails(GameManager manager)
 	{
-		lobbyNameText.text = "Room Code: " + manager.LobbyName;
+		lobbyNameText.text = "LobbyId: " + BCManager.LobbyManager.LobbyId; //"Room Code: " + manager.LobbyName;
 		trackNameText.text = manager.TrackName;
 		modeNameText.text = manager.ModeName;
 

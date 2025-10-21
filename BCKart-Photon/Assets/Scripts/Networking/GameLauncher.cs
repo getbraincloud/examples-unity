@@ -96,6 +96,8 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 	
 	public void LeaveSession()
 	{
+		BCManager.LobbyManager.LeaveLobby();
+		
 		if (_runner != null)
 			_runner.Shutdown();
 		else
