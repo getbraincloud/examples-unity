@@ -78,8 +78,11 @@ public struct CustomEntity : IJSON
         timeToLive = obj.GetTimeSpan(PROPERTY_TIME_TO_LIVE);
         expiresAt = obj.GetDateTime(PROPERTY_EXPIRES_AT);
         acl = obj.GetACL(PROPERTY_ACL);
+        /*
         data = entityType == HockeyStatsData.DataType ? obj.GetJSONObject<HockeyStatsData>(PROPERTY_DATA)
                                                       : obj.GetJSONObject<RPGData>(PROPERTY_DATA);
+
+                                                      */
 
         return this;
     }

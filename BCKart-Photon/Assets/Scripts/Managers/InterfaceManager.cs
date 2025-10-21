@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class InterfaceManager : MonoBehaviour
 {
-	[SerializeField] private ProfileSetupUI profileSetup;
+	[SerializeField] private LoginScreenUI login;
 
 	public UIScreen mainMenu;
 	public UIScreen pauseMenu;
@@ -13,8 +13,14 @@ public class InterfaceManager : MonoBehaviour
 
 	private void Start()
 	{
-		profileSetup.AssertProfileSetup();
+		AssertLoggedIn();
 	}
+	
+	public void AssertLoggedIn()
+    {
+        
+		login.AssertProfileLoggedAuthenticated();
+    }
 
 	public void OpenPauseMenu()
 	{

@@ -3,3 +3,5 @@
  - Create & hooked up Login Screen
     - Modified Launch Flow 
     - Stripped out Client Info - for brainCloud Info
+    - Update User name goes to brainCloud UserName endpoint
+    - Added Username non editable to profile screen, and the editable display name

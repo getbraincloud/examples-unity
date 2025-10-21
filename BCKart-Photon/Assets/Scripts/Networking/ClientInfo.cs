@@ -2,8 +2,8 @@ using UnityEngine;
 
 public static class ClientInfo {
     public static string Username {
-        get => PlayerPrefs.GetString("C_Username", string.Empty);
-        set => PlayerPrefs.SetString("C_Username", value);
+        get => LoginData.playerName;
+        set => LoginData.playerName = value;
     }
 
     public static int KartId {
@@ -17,5 +17,5 @@ public static class ClientInfo {
         set => PlayerPrefs.SetString("C_LastLobbyName", value);
     }
     
-    //public BrainCloudWrapper brainCloudWrapper = BrainCloudWrapper.
+    public static BrainCloudLoginData LoginData;
 }
