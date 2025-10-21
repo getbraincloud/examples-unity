@@ -8,5 +8,5 @@
 - Update PlayMode screen
    - Quick Find, will find or create a lobby 
    - Added BCLobbyManager to enable RTT, and create the lobby listener
-   - Removed Join screen option, instead it will just find, where quick find will find or create a lobby
+   - Added Quick Join, which is find or create, updated host and join flows
 
