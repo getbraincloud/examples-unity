@@ -122,6 +122,10 @@ public class LoginScreenUI : MonoBehaviour
         {
             UIScreen.Focus(profileSetupUI);
         }
+
+        // reset these
+        usernameInput.text = "";
+        pwdInput.text = "";
     }
 
     public void OnGetIdentitiesError(int status, int reasonCode, string jsonError, object cbObject)

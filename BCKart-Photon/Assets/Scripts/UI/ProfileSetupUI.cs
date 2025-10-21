@@ -24,6 +24,11 @@ public class ProfileSetupUI : MonoBehaviour
 		});
 		UpdateUI();
 	}
+	void OnEnable()
+	{
+		initialNickname = ClientInfo.Username;
+		UpdateUI();
+    }
 
 	public void UpdateUI()
 	{
@@ -33,20 +38,35 @@ public class ProfileSetupUI : MonoBehaviour
 			nicknameInput.text = ClientInfo.Username;
 		}
 	}
-	
+
 	public void Logout()
 	{
 		// force to forget the user this way
 		// otherwise we just auto login the last person in
-		BCManager.Wrapper.Logout(true);
+		BCManager.Wrapper.Logout(true, OnLogoutSuccess);
+	}
+
+	public void OnLogoutSuccess(string jsonResponse, object cbObject)
+	{
+		// reset these
+		nicknameInput.text = "";
+		text.text = "";
 
 		UIScreen.BackToInitial();
 		InterfaceManager.Instance.AssertLoggedIn();
-    }
+	}
 
 	public void UpdateUsername()
-    {
-		BCManager.Wrapper.PlayerStateService.UpdateName(ClientInfo.Username, OnUpdateNameSuccess, OnUpdateNameError);
+	{
+		// only update it if changed
+		if (initialNickname != ClientInfo.Username)
+		{
+			BCManager.Wrapper.PlayerStateService.UpdateName(ClientInfo.Username, OnUpdateNameSuccess, OnUpdateNameError);
+		}
+		else
+        {
+			myScreen.Back();
+        }
     }
 
 	public void OnUpdateNameSuccess(string jsonResponse, object cbObject)
@@ -63,12 +83,13 @@ public class ProfileSetupUI : MonoBehaviour
 
     }
 	private UIScreen GetMyScreen()
-    {
-        if (!myScreen)
-            myScreen = GetComponent<UIScreen>();
+	{
+		if (!myScreen)
+			myScreen = GetComponent<UIScreen>();
 
-        return myScreen;
-    }
-    
+		return myScreen;
+	}
+
+	private string initialNickname = "";
     private UIScreen myScreen;
 }
