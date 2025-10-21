@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using BrainCloud.JsonFx.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloud;
@@ -11,13 +12,15 @@ using BrainCloud;
 public class BCLobbyManager
 {
     public static string ALL_LOBBY_TYPE = "eightVall";
+    public event Action<string> OnLobbyEventReceived;
 
     public string LobbyId = "";
     public string SearchingEntryId = "";
 
     private bool quickFindLobbyAfterEnable = false;
-    public void QuickFindLobby()
+    public void QuickFindLobby(GameLauncher launcher)
     {
+        _launcher = launcher;
         if (!ConfirmRTTEnabled())
         {
             quickFindLobbyAfterEnable = true;
@@ -44,8 +47,9 @@ public class BCLobbyManager
     }
 
     private bool findLobbyAfterEnable = false;
-    public void FindLobby()
+    public void FindLobby(GameLauncher launcher)
     {
+        _launcher = launcher;
         if (!ConfirmRTTEnabled())
         {
             findLobbyAfterEnable = true;
@@ -77,6 +81,7 @@ public class BCLobbyManager
         Debug.Log("BCLobbyManager OnLeaveLobbySuccess: " + jsonResponse);
         LobbyId = "";
     }
+
     private void OnLeaveLobbyError(int status, int reasonCode, string jsonError, object cbObject)
     {
         Debug.LogError($"BCLobbyManager OnEnableRTTError: {status}, {reasonCode}, {jsonError}");
@@ -88,7 +93,7 @@ public class BCLobbyManager
         Debug.Log("BCLobbyManager OnEnableRTTSuccess: " + jsonResponse);
         if (quickFindLobbyAfterEnable)
         {
-            QuickFindLobby();
+            FindOrCreateLobby();
         }
 
         if (hostLobbyAfterEnable)
@@ -104,11 +109,98 @@ public class BCLobbyManager
         quickFindLobbyAfterEnable = false;
         hostLobbyAfterEnable = false;
         findLobbyAfterEnable = false;
+
+        BCManager.Wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+    }
+    public void OnLobbyEvent(string jsonMessage)
+    {
+        try
+        {
+            Debug.Log("BCLobbyManager OnLobbyEvent: " + jsonMessage);
+
+            // Parse top-level dictionary
+            var message = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
+
+            // Extract the service and operation type
+            string service = message.ContainsKey("service") ? message["service"] as string : null;
+            string operation = message.ContainsKey("operation") ? message["operation"] as string : null;
+
+            if (service != "lobby" || string.IsNullOrEmpty(operation))
+                return;
+
+            // Extract data payload
+            if (!message.TryGetValue("data", out object dataObj))
+                return;
+
+            var data = dataObj as Dictionary<string, object>;
+
+            // parse the ownerId
+            if (data.TryGetValue("lobby", out object lobbyObj))
+            {
+                LobbyId = data["lobbyId"] as string;
+                // confirm if we are the server or just the client
+                var lobby = lobbyObj as Dictionary<string, object>;
+                if (lobby != null && lobby.TryGetValue("ownerCxId", out object ownerCxIdObj))
+                {
+                    string ownerCxId = ownerCxIdObj as string;
+
+                    if (!string.IsNullOrEmpty(ownerCxId))
+                    {
+                        string[] parts = ownerCxId.Split(':');
+                        if (parts.Length >= 2)
+                        {
+                            string ownerProfileId = parts[1]; // second segment
+                            bool isHost = ownerProfileId == ClientInfo.LoginData.profileId;
+
+                            Debug.Log($"Lobby owner profileId = {ownerProfileId}, Our profileId = {ClientInfo.LoginData.profileId} → Host = {isHost}");
+
+                            if (_launcher != null)
+                            {
+                                if (isHost)
+                                    _launcher.SetCreateLobby();
+                                else
+                                    _launcher.SetJoinLobby();
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (operation == "MEMBER_JOIN" && data != null)
+            {
+                if (data.TryGetValue("member", out object memberObj))
+                {
+                    var member = memberObj as Dictionary<string, object>;
+                    if (member != null && member.TryGetValue("profileId", out object profileIdObj))
+                    {
+                        string joinedProfileId = profileIdObj as string;
+
+                        // Compare with our own player’s ID
+                        if (!string.IsNullOrEmpty(joinedProfileId) && joinedProfileId == ClientInfo.LoginData.profileId)
+                        {
+                            _launcher.JoinOrCreateLobby();
+                        }
+                        else
+                        {
+                            Debug.Log($"Other player joined lobby: {joinedProfileId}");
+                        }
+                    }
+                }
+            }
+
+            // Fire the event for listeners
+            OnLobbyEventReceived?.Invoke(jsonMessage);
+        }
+        
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Failed to parse lobby event: " + ex.Message);
+        }
+        
     }
 
     private void OnEnableRTTError(int status, int reasonCode, string jsonError, object cbObject)
     {
-
         Debug.LogError($"BCLobbyManager OnEnableRTTError: {status}, {reasonCode}, {jsonError}");
     }
 
@@ -141,9 +233,9 @@ public class BCLobbyManager
             "all",
             lobbyParams.settings,
             null,
-            OnLobbySuccess
+            OnLobbySuccess,
+            OnLobbyError
         );
-
     }
 
     public void CreateLobby()
@@ -156,7 +248,26 @@ public class BCLobbyManager
             "all",
             lobbyParams.settings,
             null,
-            OnLobbySuccess);
+            OnLobbySuccess,
+            OnLobbyError);
+    }
+    
+    private void FindLobby()
+    {
+        var lobbyParams = CreateLobbyParams();
+        BCManager.Wrapper.LobbyService.FindLobby(
+            ALL_LOBBY_TYPE,
+            0,
+            1,
+            lobbyParams.algo,
+            lobbyParams.filters,
+            false,
+            lobbyParams.extra,
+            "all",
+            null,
+            OnLobbySuccess,
+            OnLobbyError
+        );
     }
 
     private LobbyParams CreateLobbyParams()
@@ -193,15 +304,19 @@ public class BCLobbyManager
         if (data.ContainsKey("lobbyId"))
         {
             LobbyId = data["lobbyId"] as string;
-
-            // now join!
-            _launcher.JoinOrCreateLobby();
+            _launcher.SetCreateLobby();
         }
 
         if (data.ContainsKey("entryId"))
         {
             SearchingEntryId = data["entryId"] as string;
         }
+    }
+
+    private void OnLobbyError(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        Debug.LogError($"BCLobbyManager OnLobbyError: {status}, {reasonCode}, {jsonError}");
+        LobbyId = "";
     }
 
     private Dictionary<string, object> GetLobbyExtraData()
