@@ -1,0 +1,12 @@
+- Followed the kart settings from https://doc.photonengine.com/fusion/current/game-samples/fusion-karts#overview 
+ - Added BC Plugin To Project
+ - Create & hooked up Login Screen
+    - Modified Launch Flow 
+    - Stripped out Client Info - for brainCloud Info
+    - Update User name goes to brainCloud UserName endpoint
+    - Added Username non editable to profile screen, and the editable display name
+- Update PlayMode screen
+   - Quick Find, will find or create a lobby 
+   - Added BCLobbyManager to enable RTT, and create the lobby listener
+   - Added Quick Join, which is find or create, updated host and join flows
+
