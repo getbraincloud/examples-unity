@@ -10,3 +10,8 @@
    - Added BCLobbyManager to enable RTT, and create the lobby listener
    - Added Quick Join, which is find or create, updated host and join flows
 
+**** Additional Steps to Remove Photon Server acting as a "Room" in order to use brainCloud's Lobby
+     Logic. LobbyUI will be governed by the BCLobbyManager events. It will listen and when appropriate
+     load the game track for all users to connect. I think we can start making the connection to the photon
+     local session whenever after the events
+

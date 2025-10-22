@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using Managers;
 using UnityEngine;
@@ -17,7 +18,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	public Dropdown gameTypeDropdown;
 	public Image trackIconImage;
 
-	private static readonly Dictionary<RoomPlayer, LobbyItemUI> ListItems = new Dictionary<RoomPlayer, LobbyItemUI>();
+	private static readonly Dictionary<LobbyMember, LobbyItemUI> ListItems = new Dictionary<LobbyMember, LobbyItemUI>();
 	private static bool IsSubscribed;
 
 	private void Awake()
@@ -34,21 +35,14 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		});
 
 		GameManager.OnLobbyDetailsUpdated += UpdateDetails;
-
-		RoomPlayer.PlayerChanged += (player) =>
-		{
-			var isLeader = RoomPlayer.Local.IsLeader;
-			trackNameDropdown.interactable = isLeader;
-			gameTypeDropdown.interactable = isLeader;
-			customizeButton.interactable = !RoomPlayer.Local.IsReady;
-		};
+		//UpdateDetails(null);
 	}
 
 	void UpdateDetails(GameManager manager)
 	{
 		lobbyNameText.text = "LobbyId: " + BCManager.LobbyManager.LobbyId; //"Room Code: " + manager.LobbyName;
-		trackNameText.text = manager.TrackName;
-		modeNameText.text = manager.ModeName;
+		trackNameText.text = "Cavern Cove";// manager.TrackName;
+		modeNameText.text = "Race"; //manager.ModeName;
 
 		var tracks = ResourceManager.Instance.tracks;
 		var trackOptions = tracks.Select(x => x.trackName).ToList();
@@ -58,24 +52,22 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 		trackNameDropdown.ClearOptions();
 		trackNameDropdown.AddOptions(trackOptions);
-		trackNameDropdown.value = GameManager.Instance.TrackId;
+		trackNameDropdown.value = 0;//manager.TrackId;
 
-		trackIconImage.sprite = ResourceManager.Instance.tracks[GameManager.Instance.TrackId].trackIcon;
+		trackIconImage.sprite = ResourceManager.Instance.tracks[0/*manager.TrackId*/].trackIcon;
 
 		gameTypeDropdown.ClearOptions();
 		gameTypeDropdown.AddOptions(gameTypeOptions);
-		gameTypeDropdown.value = GameManager.Instance.GameTypeId;
+		gameTypeDropdown.value = 0;/*manager.GameTypeId;*/
 	}
 
 	public void Setup()
 	{
 		if (IsSubscribed) return;
+		BCManager.LobbyManager.PlayerJoined += AddPlayer;
+		BCManager.LobbyManager.PlayerLeft += RemovePlayer;
 
-		RoomPlayer.PlayerJoined += AddPlayer;
-		RoomPlayer.PlayerLeft += RemovePlayer;
-
-		RoomPlayer.PlayerChanged += EnsureAllPlayersReady;
-
+		BCManager.LobbyManager.PlayerChanged += EnsureAllPlayersReady;
 		readyUp.onClick.AddListener(ReadyUpListener);
 
 		IsSubscribed = true;
@@ -84,16 +76,15 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	private void OnDestroy()
 	{
 		if (!IsSubscribed) return;
-
-		RoomPlayer.PlayerJoined -= AddPlayer;
-		RoomPlayer.PlayerLeft -= RemovePlayer;
-
+		BCManager.LobbyManager.PlayerJoined -= AddPlayer;
+		BCManager.LobbyManager.PlayerLeft -= RemovePlayer;
+		
 		readyUp.onClick.RemoveListener(ReadyUpListener);
 
 		IsSubscribed = false;
 	}
-
-	private void AddPlayer(RoomPlayer player)
+	
+	private void AddPlayer(LobbyMember player)
 	{
 		if (ListItems.ContainsKey(player))
 		{
@@ -111,7 +102,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		UpdateDetails(GameManager.Instance);
 	}
 
-	private void RemovePlayer(RoomPlayer player)
+	private void RemovePlayer(LobbyMember player)
 	{
 		if (!ListItems.ContainsKey(player))
 			return;
@@ -130,24 +121,55 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 	private void ReadyUpListener()
 	{
-		var local = RoomPlayer.Local;
-        if (local && local.Object && local.Object.IsValid)
-        {
-            local.RPC_ChangeReadyState(!local.IsReady);
-        }
-	}
+		var local = BCManager.LobbyManager.Local;
 
-	private void EnsureAllPlayersReady(RoomPlayer lobbyPlayer)
+		Dictionary<string, object> extra = new Dictionary<string, object>();
+		// extra will be the players kart information
+		BCManager.Wrapper.LobbyService.UpdateReady(BCManager.LobbyManager.LobbyId, !local.isReady, extra,
+								OnUpdateReadySuccess, OnUpdateReadyError);
+	}
+	private void OnUpdateReadySuccess(string jsonResponse, object cbObject)
+    {
+        Debug.Log("LobbyUI OnUpdateReadySuccess: " + jsonResponse);
+    }
+
+	private void OnUpdateReadyError(int status, int reasonCode, string jsonError, object cbObject)
 	{
-		if (!RoomPlayer.Local.IsLeader) 
-			return;
-
-		if (IsAllReady())
-		{
-			int scene = ResourceManager.Instance.tracks[GameManager.Instance.TrackId].buildIndex;
-			LevelManager.LoadTrack(scene);
-		}
+		Debug.LogError($"LobbyUI OnUpdateReadyError: {status}, {reasonCode}, {jsonError}");
 	}
 
-	private static bool IsAllReady() => RoomPlayer.Players.Count>0 && RoomPlayer.Players.All(player => player.IsReady);
+	private void EnsureAllPlayersReady(LobbyMember lobbyPlayer)
+	{
+	    if (lobbyPlayer == BCManager.LobbyManager.Local)
+	    {
+	        var isLeader = lobbyPlayer.isHost;
+	        trackNameDropdown.interactable = isLeader;
+	        gameTypeDropdown.interactable = isLeader;
+	        customizeButton.interactable = !lobbyPlayer.isReady;
+	    }
+
+	    if (IsAllReady())
+		{
+			// join or create correctly
+			BCManager.LobbyManager.JoinOrCreateLobby();
+
+			// send signal to lock it all down
+
+			// start listening for when to try and connect to the track
+
+	        // Start coroutine to load track after 2 seconds
+	        StartCoroutine(LoadTrackWithDelay(10f));
+	    }
+	}
+
+	private IEnumerator LoadTrackWithDelay(float delay)
+	{
+	    yield return new WaitForSeconds(delay);
+
+	    int scene = ResourceManager.Instance.tracks[0].buildIndex; ///GameManager.Instance.TrackId
+	    LevelManager.LoadTrack(scene);
+	}
+
+	private static bool IsAllReady() => BCManager.LobbyManager.LobbyMembers.Count > 0 &&
+									BCManager.LobbyManager.LobbyMembers.All(player => player.Value.isReady);
 }

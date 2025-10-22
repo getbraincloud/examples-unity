@@ -15,9 +15,32 @@ public class BCLobbyManager
 
     public event Action<string> OnLobbyEventReceived;
 
+    public event Action<LobbyMember> PlayerJoined;
+	public event Action<LobbyMember> PlayerLeft;
+	public event Action<LobbyMember> PlayerChanged;
+
     public string LobbyId = "";
     public string SearchingEntryId = "";
 
+    public LobbyMember Local
+{
+    get
+    {
+        string localProfileId = BCManager.Wrapper.Client.ProfileId;
+            if (LobbyMembers.TryGetValue(localProfileId, out LobbyMember member))
+            {
+                return member;
+            }
+        
+        	Debug.Log("LobbyUI LOCAL IS NULL: ");
+        return null; // or throw exception if you prefer
+    }
+}
+    // Strong-typed lobby member list
+    public Dictionary<string, LobbyMember> LobbyMembers = new Dictionary<string, LobbyMember>();
+    private string _lobbyOwnerProfileId = null;
+
+    
     private bool quickFindLobbyAfterEnable = false;
     public void QuickFindLobby(GameLauncher launcher)
     {
@@ -113,92 +136,125 @@ public class BCLobbyManager
 
         BCManager.Wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
     }
+
     public void OnLobbyEvent(string jsonMessage)
     {
         try
         {
             Debug.Log("BCLobbyManager OnLobbyEvent: " + jsonMessage);
 
-            // Parse top-level dictionary
             var message = JsonReader.Deserialize<Dictionary<string, object>>(jsonMessage);
 
-            // Extract the service and operation type
-            string service = message.ContainsKey("service") ? message["service"] as string : null;
-            string operation = message.ContainsKey("operation") ? message["operation"] as string : null;
-
-            if (service != "lobby" || string.IsNullOrEmpty(operation))
+            if (!message.TryGetValue("service", out object serviceObj) || (string)serviceObj != "lobby")
                 return;
 
-            // Extract data payload
+            if (!message.TryGetValue("operation", out object operationObj))
+                return;
+
+            string operation = operationObj as string;
+
             if (!message.TryGetValue("data", out object dataObj))
                 return;
 
             var data = dataObj as Dictionary<string, object>;
 
-            // parse the ownerId
+            // Update lobby ID and owner
             if (data.TryGetValue("lobby", out object lobbyObj))
             {
-                LobbyId = data["lobbyId"] as string;
-                // confirm if we are the server or just the client
                 var lobby = lobbyObj as Dictionary<string, object>;
-                if (lobby != null && lobby.TryGetValue("ownerCxId", out object ownerCxIdObj))
+                if (lobby != null)
                 {
-                    string ownerCxId = ownerCxIdObj as string;
+                    LobbyId = lobby.ContainsKey("lobbyId") ? lobby["lobbyId"] as string : LobbyId;
 
-                    if (!string.IsNullOrEmpty(ownerCxId))
+                    if (lobby.TryGetValue("ownerCxId", out object ownerCxIdObj))
                     {
-                        string[] parts = ownerCxId.Split(':');
-                        if (parts.Length >= 2)
+                        string ownerCxId = ownerCxIdObj as string;
+                        if (!string.IsNullOrEmpty(ownerCxId))
                         {
-                            string ownerProfileId = parts[1]; // second segment
-                            bool isHost = ownerProfileId == ClientInfo.LoginData.profileId;
-
-                            Debug.Log($"Lobby owner profileId = {ownerProfileId}, Our profileId = {ClientInfo.LoginData.profileId} → Host = {isHost}");
-
-                            if (_launcher != null)
+                            string[] parts = ownerCxId.Split(':');
+                            if (parts.Length >= 2)
                             {
-                                if (isHost)
-                                    _launcher.SetCreateLobby();
-                                else
-                                    _launcher.SetJoinLobby();
+                                _lobbyOwnerProfileId = parts[1];
                             }
                         }
                     }
                 }
             }
 
-            if (operation == "MEMBER_JOIN" && data != null)
+            // Handle member operations
+            if (operation == "MEMBER_JOIN" || operation == "MEMBER_UPDATE" || operation == "MEMBER_LEFT")
             {
                 if (data.TryGetValue("member", out object memberObj))
                 {
-                    var member = memberObj as Dictionary<string, object>;
-                    if (member != null && member.TryGetValue("profileId", out object profileIdObj))
+                    var memberData = memberObj as Dictionary<string, object>;
+                    if (memberData != null)
                     {
-                        string joinedProfileId = profileIdObj as string;
-
-                        // Compare with our own player’s ID
-                        if (!string.IsNullOrEmpty(joinedProfileId) && joinedProfileId == ClientInfo.LoginData.profileId)
+                        string profileId = memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null;
+                        if (!string.IsNullOrEmpty(profileId))
                         {
-                            _launcher.JoinOrCreateLobby();
-                        }
-                        else
-                        {
-                            Debug.Log($"Other player joined lobby: {joinedProfileId}");
+                            if (operation == "MEMBER_JOIN")
+                            {
+                                if (!LobbyMembers.ContainsKey(profileId))
+                                {
+                                    // Only create new member if not already present
+                                    var member = new LobbyMember(memberData)
+                                    {
+                                        isHost = profileId == _lobbyOwnerProfileId
+                                    };
+                                    LobbyMembers[profileId] = member;
+                                    Debug.Log($"MEMBER_JOIN: {member.profileId}, Host={member.isHost}");
+                                    PlayerJoined?.Invoke(member);
+                                }
+                                else
+                                {
+                                    // Already exists, just update fields
+                                    LobbyMembers[profileId].UpdateFromData(memberData, _lobbyOwnerProfileId);
+                                    Debug.Log($"MEMBER_JOIN (already exists, updated): {profileId}");
+                                    PlayerChanged?.Invoke(LobbyMembers[profileId]);
+                                }
+                            }
+                            else if (operation == "MEMBER_UPDATE")
+                            {
+                                if (LobbyMembers.TryGetValue(profileId, out LobbyMember existingMember))
+                                {
+                                    existingMember.UpdateFromData(memberData, _lobbyOwnerProfileId);
+                                    Debug.Log($"MEMBER_UPDATE: {existingMember.profileId}");
+                                    PlayerChanged?.Invoke(existingMember);
+                                }
+                                else
+                                {
+                                    // If somehow update arrives before join, create the member
+                                    var member = new LobbyMember(memberData)
+                                    {
+                                        isHost = profileId == _lobbyOwnerProfileId
+                                    };
+                                    LobbyMembers[profileId] = member;
+                                    Debug.Log($"MEMBER_UPDATE (created new): {profileId}");
+                                    PlayerJoined?.Invoke(member);
+                                }
+                            }
+                            else if (operation == "MEMBER_LEFT")
+                            {
+                                if (LobbyMembers.ContainsKey(profileId))
+                                {
+                                    PlayerLeft?.Invoke(LobbyMembers[profileId]);
+                                    LobbyMembers.Remove(profileId);
+                                    Debug.Log($"MEMBER_LEFT: {profileId}");
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Fire the event for listeners
             OnLobbyEventReceived?.Invoke(jsonMessage);
         }
-        
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Debug.LogError("Failed to parse lobby event: " + ex.Message);
         }
-        
     }
+
 
     private void OnEnableRTTError(int status, int reasonCode, string jsonError, object cbObject)
     {
@@ -237,6 +293,16 @@ public class BCLobbyManager
             OnLobbySuccess,
             OnLobbyError
         );
+    }
+    
+	public void JoinOrCreateLobby()
+    {
+        if (Local.isHost)
+            _launcher.SetCreateLobby();
+        else
+            _launcher.SetJoinLobby();
+                                    
+        _launcher.JoinOrCreateLobby();
     }
 
     public void CreateLobby()
@@ -335,4 +401,81 @@ public class LobbyParams
     public Dictionary<string, object> filters;
     public Dictionary<string, object> extra;
     public Dictionary<string, object> settings;
+}
+
+[Serializable]
+public class LobbyMember
+{
+    public string profileId;
+    public string displayName;
+    public int kartId;
+    public bool isHost;
+    public bool isReady;
+
+    public LobbyMember(Dictionary<string, object> data)
+    {
+        // profileId
+        if (data.TryGetValue("profileId", out object pid))
+            profileId = pid as string;
+
+        // display name
+        if (data.TryGetValue("name", out object name))
+            displayName = name as string;
+
+        // isReady
+        if (data.TryGetValue("isReady", out object ready))
+        {
+            if (ready is bool b)
+                isReady = b;
+            else if (ready is int i)
+                isReady = i != 0;
+        }
+
+        // kartId (nested inside "extra")
+        if (data.TryGetValue("extra", out object extraObj))
+        {
+            var extra = extraObj as Dictionary<string, object>;
+            if (extra != null && extra.TryGetValue("kartId", out object kid))
+            {
+                if (kid is int k)
+                    kartId = k;
+                else if (kid is long l) // sometimes JSON numbers are long
+                    kartId = (int)l;
+            }
+        }
+
+        // default: not host
+        isHost = false;
+
+        Debug.Log($"LobbyMember created: profileId={profileId}, name={displayName}, kartId={kartId}, isReady={isReady}");
+    }
+
+    public void UpdateFromData(Dictionary<string, object> data, string lobbyOwnerProfileId)
+    {
+        if (data.TryGetValue("name", out object name))
+            displayName = name as string;
+
+        if (data.TryGetValue("isReady", out object ready))
+        {
+            if (ready is bool b)
+                isReady = b;
+            else if (ready is int i)
+                isReady = i != 0;
+        }
+
+        if (data.TryGetValue("extra", out object extraObj))
+        {
+            var extra = extraObj as Dictionary<string, object>;
+            if (extra != null && extra.TryGetValue("kartId", out object kid))
+            {
+                if (kid is int k)
+                    kartId = k;
+                else if (kid is long l)
+                    kartId = (int)l;
+            }
+        }
+
+        // Update host status
+        isHost = profileId == lobbyOwnerProfileId;
+    }
 }
