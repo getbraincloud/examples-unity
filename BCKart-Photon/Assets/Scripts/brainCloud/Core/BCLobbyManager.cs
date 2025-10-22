@@ -11,7 +11,8 @@ using BrainCloud;
 // and listening to lobby events
 public class BCLobbyManager
 {
-    public static string ALL_LOBBY_TYPE = "eightVall";
+    public static string ACTIVE_LOBBY_TYPE = "eight";
+
     public event Action<string> OnLobbyEventReceived;
 
     public string LobbyId = "";
@@ -64,7 +65,7 @@ public class BCLobbyManager
     {
         if (SearchingEntryId != "")
         {
-            BCManager.Wrapper.LobbyService.CancelFindRequest(ALL_LOBBY_TYPE, SearchingEntryId);
+            BCManager.Wrapper.LobbyService.CancelFindRequest(ACTIVE_LOBBY_TYPE, SearchingEntryId);
         }
     }
 
@@ -223,7 +224,7 @@ public class BCLobbyManager
     {
         var lobbyParams = CreateLobbyParams();
         BCManager.Wrapper.LobbyService.FindOrCreateLobby(
-            ALL_LOBBY_TYPE,
+            ACTIVE_LOBBY_TYPE,
             0,
             1,
             lobbyParams.algo,
@@ -243,7 +244,7 @@ public class BCLobbyManager
         var lobbyParams = CreateLobbyParams();
 
         BCManager.Wrapper.LobbyService.CreateLobby(
-            ALL_LOBBY_TYPE, 0, false,
+            ACTIVE_LOBBY_TYPE, 0, false,
             lobbyParams.extra,
             "all",
             lobbyParams.settings,
@@ -256,7 +257,7 @@ public class BCLobbyManager
     {
         var lobbyParams = CreateLobbyParams();
         BCManager.Wrapper.LobbyService.FindLobby(
-            ALL_LOBBY_TYPE,
+            ACTIVE_LOBBY_TYPE,
             0,
             1,
             lobbyParams.algo,
