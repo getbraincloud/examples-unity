@@ -49,6 +49,7 @@ public class CreateGameUI : MonoBehaviour
 		ServerInfo.TrackId = track.value;
 		ServerInfo.GameMode = gameMode.value;
 		ServerInfo.MaxUsers = (int)playerCountSlider.value;
+		
 	}
 
 	public void SetGameType(int gameType)
@@ -62,9 +63,30 @@ public class CreateGameUI : MonoBehaviour
 		trackImage.sprite = ResourceManager.Instance.tracks[trackId].trackIcon;
 	}
 
+	private string SetLobbyIdFromMaxUsers()
+	{
+		string lobbyType = ServerInfo.MaxUsers switch
+		{
+			1 => "one",
+			2 => "two",
+			3 => "three",
+			4 => "four",
+			5 => "five",
+			6 => "six",
+			7 => "seven",
+			8 => "eight",
+			_ => "unknown"
+		};
+
+		BCLobbyManager.ACTIVE_LOBBY_TYPE = lobbyType;
+		return lobbyType;
+	}
+	
 	public void SetPlayerCount()
 	{
-        playerCountSlider.value = ServerInfo.MaxUsers;
+		SetLobbyIdFromMaxUsers();
+
+		playerCountSlider.value = ServerInfo.MaxUsers;
 		playerCountSliderText.text = $"{ServerInfo.MaxUsers}";
 		playerCountIcon.sprite = ServerInfo.MaxUsers > 1 ? publicLobbyIcon : padlockSprite;
 	}
