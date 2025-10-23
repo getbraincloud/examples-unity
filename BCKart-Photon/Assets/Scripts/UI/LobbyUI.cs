@@ -25,24 +25,21 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	{
 		trackNameDropdown.onValueChanged.AddListener(x =>
 		{
-			var gm = GameManager.Instance;
-			if (gm != null) gm.TrackId = x;
+			BCManager.LobbyManager.TrackId = x;
 		});
 		gameTypeDropdown.onValueChanged.AddListener(x =>
-		{
-			var gm = GameManager.Instance;
-			if (gm != null) gm.GameTypeId = x;
+		{ 
+			BCManager.LobbyManager.GameTypeId = x;
 		});
 
-		GameManager.OnLobbyDetailsUpdated += UpdateDetails;
-		//UpdateDetails(null);
+		BCManager.LobbyManager.OnLobbyDetailsUpdated += UpdateDetails;
 	}
 
-	void UpdateDetails(GameManager manager)
+	void UpdateDetails(BCLobbyManager manager)
 	{
-		lobbyNameText.text = "LobbyId: " + BCManager.LobbyManager.LobbyId; //"Room Code: " + manager.LobbyName;
-		trackNameText.text = "Cavern Cove";// manager.TrackName;
-		modeNameText.text = "Race"; //manager.ModeName;
+		lobbyNameText.text = "LobbyId: " + manager.LobbyId;
+		trackNameText.text =  manager.TrackName;
+		modeNameText.text = manager.ModeName;
 
 		var tracks = ResourceManager.Instance.tracks;
 		var trackOptions = tracks.Select(x => x.trackName).ToList();
@@ -52,13 +49,13 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 		trackNameDropdown.ClearOptions();
 		trackNameDropdown.AddOptions(trackOptions);
-		trackNameDropdown.value = 0;//manager.TrackId;
+		trackNameDropdown.value = manager.TrackId;
 
-		trackIconImage.sprite = ResourceManager.Instance.tracks[0/*manager.TrackId*/].trackIcon;
+		trackIconImage.sprite = ResourceManager.Instance.tracks[manager.TrackId].trackIcon;
 
 		gameTypeDropdown.ClearOptions();
 		gameTypeDropdown.AddOptions(gameTypeOptions);
-		gameTypeDropdown.value = 0;/*manager.GameTypeId;*/
+		gameTypeDropdown.value = manager.GameTypeId;
 	}
 
 	public void Setup()
@@ -98,8 +95,6 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		obj.SetPlayer(player);
 
 		ListItems.Add(player, obj);
-		
-		UpdateDetails(GameManager.Instance);
 	}
 
 	private void RemovePlayer(LobbyMember player)
@@ -158,7 +153,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 			// start listening for when to try and connect to the track
 
 	        // Start coroutine to load track after 2 seconds
-	        StartCoroutine(LoadTrackWithDelay(10f));
+	        StartCoroutine(LoadTrackWithDelay(5f));
 	    }
 	}
 
@@ -166,7 +161,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	{
 	    yield return new WaitForSeconds(delay);
 
-	    int scene = ResourceManager.Instance.tracks[0].buildIndex; ///GameManager.Instance.TrackId
+	    int scene = ResourceManager.Instance.tracks[BCManager.LobbyManager.TrackId].buildIndex;
 	    LevelManager.LoadTrack(scene);
 	}
 
