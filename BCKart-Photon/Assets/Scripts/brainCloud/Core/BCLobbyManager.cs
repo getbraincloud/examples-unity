@@ -26,26 +26,32 @@ public class BCLobbyManager
     public int TrackId = 0;
     public string ModeName = "Race";
     public int GameTypeId = 0;
-        
 
     public LobbyMember Local
-{
-    get
     {
-        string localProfileId = BCManager.Wrapper.Client.ProfileId;
+        get
+        {
+            string localProfileId = BCManager.Wrapper.Client.ProfileId;
             if (LobbyMembers.TryGetValue(localProfileId, out LobbyMember member))
             {
                 return member;
             }
-        
-        	Debug.Log("LobbyUI LOCAL IS NULL: ");
-        return null; // or throw exception if you prefer
+            return null; // or throw exception if you prefer
+        }
     }
-}
+
     // Strong-typed lobby member list
     public Dictionary<string, LobbyMember> LobbyMembers = new Dictionary<string, LobbyMember>();
     private string _lobbyOwnerProfileId = null;
 
+    public LobbyState LobbyState
+    {
+        get
+        {
+            return _lobbyState;
+        }
+    }
+    private LobbyState _lobbyState = LobbyState.NotInLobby;
     
     private bool quickFindLobbyAfterEnable = false;
     public void QuickFindLobby(GameLauncher launcher)
@@ -165,16 +171,15 @@ public class BCLobbyManager
             var data = dataObj as Dictionary<string, object>;
 
             LobbyId = data.ContainsKey("lobbyId") ? data["lobbyId"] as string : LobbyId;
-            Debug.Log($"LobbyId: {LobbyId}");
 
             // Update lobby ID and owner
+            Dictionary<string, object> lobby = null;
             if (data.TryGetValue("lobby", out object lobbyObj))
             {
-                var lobby = lobbyObj as Dictionary<string, object>;
+                lobby = lobbyObj as Dictionary<string, object>;
                 if (lobby != null)
                 {
                     LobbyId = lobby.ContainsKey("lobbyId") ? lobby["lobbyId"] as string : LobbyId;
-                    Debug.Log($"LobbyId: {LobbyId}");
 
                     if (lobby.TryGetValue("ownerCxId", out object ownerCxIdObj))
                     {
@@ -191,7 +196,64 @@ public class BCLobbyManager
                     // Parse full members array (current lobby snapshot)
                     if (lobby.TryGetValue("members", out object membersObj))
                     {
-                        var membersList = membersObj as List<object>;
+                        var membersList = membersObj as IList;
+                        if (membersList != null)
+                        {
+                            foreach (var m in membersList)
+                            {
+                                var memberData = m as Dictionary<string, object>;
+                                if (memberData != null && memberData.TryGetValue("profileId", out object pidObj))
+                                {
+                                    string profileId = pidObj as string;
+                                    if (!string.IsNullOrEmpty(profileId))
+                                    {
+                                        if (LobbyMembers.TryGetValue(profileId, out LobbyMember existing))
+                                        {
+                                            existing.UpdateFromData(memberData, _lobbyOwnerProfileId);
+                                            PlayerChanged?.Invoke(existing);
+                                        }
+                                        else
+                                        {
+                                            var member = new LobbyMember(memberData)
+                                            {
+                                                isHost = profileId == _lobbyOwnerProfileId
+                                            };
+                                            LobbyMembers[profileId] = member;
+                                            PlayerJoined?.Invoke(member);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // handle host migration ? I don't believe it works.
+
+            // handle starting. do not disband on start
+            if (operation == "STARTING")
+            {
+                if (lobby != null)
+                {
+                    // Update lobby ID if present
+                    LobbyId = lobby.ContainsKey("lobbyId") ? lobby["lobbyId"] as string : LobbyId;
+
+                    // Optionally update owner
+                    if (lobby.TryGetValue("ownerCxId", out object ownerCxIdObj))
+                    {
+                        string ownerCxId = ownerCxIdObj as string;
+                        if (!string.IsNullOrEmpty(ownerCxId))
+                        {
+                            string[] parts = ownerCxId.Split(':');
+                            if (parts.Length >= 2)
+                                _lobbyOwnerProfileId = parts[1];
+                        }
+                    }
+
+                    // Update members list
+                    if (lobby.TryGetValue("members", out object membersObj))
+                    {
+                        var membersList = membersObj as IList; // works for ArrayList or List<object>
                         if (membersList != null)
                         {
                             foreach (var m in membersList)
@@ -222,13 +284,34 @@ public class BCLobbyManager
                         }
                     }
 
+                    // Mark the lobby as starting
+                    _lobbyState = LobbyState.Starting;
+                    Debug.Log("[Lobby] Lobby is starting with " + LobbyMembers.Count + " member(s).");
+                }
+                
+            }
+
+            // handle lobby signals like updating the track id and game type
+            if (operation == "SIGNAL")
+            {
+                if (data.TryGetValue("signalData", out object signalDataObj))
+                {
+                    var signalData = signalDataObj as Dictionary<string, object>;
+                    if (signalData != null)
+                    {
+                        int trackId = signalData.ContainsKey("TrackId") ? Convert.ToInt32(signalData["TrackId"]) : 0;
+                        int gameTypeId = signalData.ContainsKey("GameTypeId") ? Convert.ToInt32(signalData["GameTypeId"]) : 0;
+
+                        Debug.Log($"Received SIGNAL: TrackId={trackId}, GameTypeId={gameTypeId}");
+
+                        // Optional: update internal state or notify listeners
+                        TrackId = trackId;
+                        GameTypeId = gameTypeId;
+                        //OnLobbySignalReceived?.Invoke(trackId, gameTypeId);
+                    }
                 }
             }
-            // handle host migration ? I don't believe it works.
-
-            // handle starting. do not disband on start
             
-        
             // Handle member operations
             if (operation == "MEMBER_JOIN" || operation == "MEMBER_UPDATE" || operation == "MEMBER_LEFT")
             {
@@ -240,8 +323,13 @@ public class BCLobbyManager
                         string profileId = memberData.ContainsKey("profileId") ? memberData["profileId"] as string : null;
                         if (!string.IsNullOrEmpty(profileId))
                         {
+                            string localProfileId = BCManager.Wrapper.Client.ProfileId;
                             if (operation == "MEMBER_JOIN")
                             {
+                                if (localProfileId == profileId)
+                                {
+                                    _lobbyState = LobbyState.InLobby;
+                                }
                                 if (!LobbyMembers.ContainsKey(profileId))
                                 {
                                     // Only create new member if not already present
@@ -283,6 +371,11 @@ public class BCLobbyManager
                             }
                             else if (operation == "MEMBER_LEFT")
                             {
+                                if (localProfileId == profileId)
+                                {
+                                    _lobbyState = LobbyState.NotInLobby;
+                                }
+
                                 if (LobbyMembers.ContainsKey(profileId))
                                 {
                                     PlayerLeft?.Invoke(LobbyMembers[profileId]);
@@ -346,6 +439,7 @@ public class BCLobbyManager
     
 	public void JoinOrCreateLobby()
     {
+        // set the client side joining mechanism
         if (Local.isHost)
             _launcher.SetCreateLobby();
         else
@@ -527,4 +621,13 @@ public class LobbyMember
         // Update host status
         isHost = profileId == lobbyOwnerProfileId;
     }
+}
+
+public enum LobbyState
+{
+    NotInLobby,   // player not in lobby
+    InLobby,      // Player is in the lobby, waiting
+    Starting,     // Lobby is starting soon
+    InGame,       // Game is currently in progress
+    FinishedGame  // Game has finished
 }

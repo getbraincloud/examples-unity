@@ -20,25 +20,45 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 	private static readonly Dictionary<LobbyMember, LobbyItemUI> ListItems = new Dictionary<LobbyMember, LobbyItemUI>();
 	private static bool IsSubscribed;
+	private LobbyState previousLobbyState = LobbyState.NotInLobby;
 
 	private void Awake()
 	{
 		trackNameDropdown.onValueChanged.AddListener(x =>
 		{
-			BCManager.LobbyManager.TrackId = x;
+			bool wasUpdated = x != BCManager.LobbyManager.TrackId;
+			if (wasUpdated)
+            {
+                
+				BCManager.LobbyManager.TrackId = x;
+				// send a lobby event about the track change
+				SendLobbySignal();
+            }
 		});
 		gameTypeDropdown.onValueChanged.AddListener(x =>
-		{ 
-			BCManager.LobbyManager.GameTypeId = x;
+		{
+			bool wasUpdated = x != BCManager.LobbyManager.GameTypeId;
+			if (wasUpdated)
+			{
+				BCManager.LobbyManager.GameTypeId = x;
+				// send a lobby event about the GameTypeId
+				SendLobbySignal();
+			}
 		});
 
+		UpdateDetails(BCManager.LobbyManager);
 		BCManager.LobbyManager.OnLobbyDetailsUpdated += UpdateDetails;
 	}
 
 	void UpdateDetails(BCLobbyManager manager)
 	{
+		var isLeader = manager.Local.isHost;
+		trackNameDropdown.interactable = isLeader;
+		gameTypeDropdown.interactable = isLeader;
+		customizeButton.interactable = !manager.Local.isReady;
+
 		lobbyNameText.text = "LobbyId: " + manager.LobbyId;
-		trackNameText.text =  manager.TrackName;
+		trackNameText.text = manager.TrackName;
 		modeNameText.text = manager.ModeName;
 
 		var tracks = ResourceManager.Instance.tracks;
@@ -56,7 +76,25 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		gameTypeDropdown.ClearOptions();
 		gameTypeDropdown.AddOptions(gameTypeOptions);
 		gameTypeDropdown.value = manager.GameTypeId;
+
+		// we changed states between messages
+		if (previousLobbyState != manager.LobbyState)
+		{
+			// we started!
+			if (manager.LobbyState == LobbyState.Starting)
+			{
+				BCManager.LobbyManager.JoinOrCreateLobby();
+				// what signal can I listen to via photon to now launch the screen
+				// StartCoroutine(LoadTrackWithDelay(5f));
+			}
+		}
 	}
+
+	public void OnDestruction()
+	{
+		
+	}
+
 
 	public void Setup()
 	{
@@ -110,8 +148,31 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		}
 	}
 
-	public void OnDestruction()
+	private void SendLobbySignal()
 	{
+		// I'd usually put this into the lobby config
+		// but since it can change live, we are acting on 
+		// signals within the lobby of players
+		// update the state of things
+		Dictionary<string, object> signalData = new Dictionary<string, object>();
+
+		signalData["TrackId"] = BCManager.LobbyManager.TrackId; // TrackId
+		signalData["GameTypeId"] = BCManager.LobbyManager.GameTypeId;// GameTypeId
+
+		BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId,
+				signalData,
+			OnSendSignalSuccess, OnSendSignalError);
+
+	}
+	
+	private void OnSendSignalSuccess(string jsonResponse, object cbObject)
+    {
+        Debug.Log("LobbyUI OnUpdateReadySuccess: " + jsonResponse);
+    }
+
+	private void OnSendSignalError(int status, int reasonCode, string jsonError, object cbObject)
+	{
+		Debug.LogError($"LobbyUI OnUpdateReadyError: {status}, {reasonCode}, {jsonError}");
 	}
 
 	private void ReadyUpListener()
@@ -135,25 +196,14 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 	private void EnsureAllPlayersReady(LobbyMember lobbyPlayer)
 	{
-	    if (lobbyPlayer == BCManager.LobbyManager.Local)
-	    {
-	        var isLeader = lobbyPlayer.isHost;
-	        trackNameDropdown.interactable = isLeader;
-	        gameTypeDropdown.interactable = isLeader;
-	        customizeButton.interactable = !lobbyPlayer.isReady;
-	    }
-
 	    if (IsAllReady())
 		{
-			// join or create correctly
-			BCManager.LobbyManager.JoinOrCreateLobby();
-
 			// send signal to lock it all down
 
 			// start listening for when to try and connect to the track
 
 	        // Start coroutine to load track after 2 seconds
-	        StartCoroutine(LoadTrackWithDelay(5f));
+	        //StartCoroutine(LoadTrackWithDelay(5f));
 	    }
 	}
 

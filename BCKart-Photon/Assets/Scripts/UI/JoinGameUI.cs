@@ -13,12 +13,12 @@ public class JoinGameUI : MonoBehaviour {
 
 	private void Start() {
 		lobbyName.onValueChanged.AddListener(SetLobbyName);
-        lobbyName.text = ClientInfo.LobbyName;
+        lobbyName.text = BCManager.LobbyManager.LobbyId;
     }
 
     private void SetLobbyName(string lobby)
 	{
-		ClientInfo.LobbyName = lobby;
+		BCManager.LobbyManager.LobbyId = lobby;
 		//confirmButton.interactable = !string.IsNullOrEmpty(lobby);
 	}
 }

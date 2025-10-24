@@ -56,9 +56,9 @@ public class GameManager : NetworkBehaviour
 
 		if (Object.HasStateAuthority)
 		{
-			LobbyName = ServerInfo.LobbyName;
-			TrackId = ServerInfo.TrackId;
-			GameTypeId = ServerInfo.GameMode;
+			LobbyName = BCManager.LobbyManager.LobbyId;
+			TrackId = BCManager.LobbyManager.TrackId;
+			GameTypeId = BCManager.LobbyManager.GameTypeId;
 			MaxUsers = ServerInfo.MaxUsers;
 		}
 	}

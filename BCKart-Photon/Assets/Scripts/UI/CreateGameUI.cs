@@ -41,10 +41,10 @@ public class CreateGameUI : MonoBehaviour
 
 		lobbyName.onValueChanged.AddListener(x =>
 		{
-			ServerInfo.LobbyName = x;
+			BCManager.LobbyManager.LobbyId= x;
 			confirmButton.interactable = !string.IsNullOrEmpty(x);
 		});
-		lobbyName.text = ServerInfo.LobbyName = "Session" + Random.Range(0, 1000);
+		lobbyName.text = BCManager.LobbyManager.LobbyId;
 
 		ServerInfo.TrackId = track.value;
 		ServerInfo.GameMode = gameMode.value;

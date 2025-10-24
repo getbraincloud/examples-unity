@@ -70,7 +70,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		_runner.StartGame(new StartGameArgs
 		{
 			GameMode = _gameMode,
-			SessionName = _gameMode == GameMode.Host ? ServerInfo.LobbyName : ClientInfo.LobbyName,
+			SessionName = BCManager.LobbyManager.LobbyId,
 			ObjectProvider = _pool,
 			SceneManager = _levelManager,
 			PlayerCount = ServerInfo.MaxUsers,
@@ -91,6 +91,13 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		{
 			SceneManager.LoadScene(LevelManager.LOBBY_SCENE);
 			UIScreen.BackToInitial();
+		}
+
+		// now we are connected force a load track 
+		if (status == ConnectionStatus.Connected)
+		{
+			int scene = ResourceManager.Instance.tracks[BCManager.LobbyManager.TrackId].buildIndex;
+			LevelManager.LoadTrack(scene);
 		}
 	}
 	
