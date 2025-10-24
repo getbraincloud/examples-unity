@@ -84,10 +84,12 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 			if (manager.LobbyState == LobbyState.Starting)
 			{
 				BCManager.LobbyManager.JoinOrCreateLobby();
-				// what signal can I listen to via photon to now launch the screen
-				// StartCoroutine(LoadTrackWithDelay(5f));
 			}
 		}
+		previousLobbyState = manager.LobbyState;
+
+		// this will check if we should launch into the game
+		EnsureAllPlayersReady();
 	}
 
 	public void OnDestruction()
@@ -95,14 +97,11 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		
 	}
 
-
 	public void Setup()
 	{
 		if (IsSubscribed) return;
 		BCManager.LobbyManager.PlayerJoined += AddPlayer;
 		BCManager.LobbyManager.PlayerLeft += RemovePlayer;
-
-		BCManager.LobbyManager.PlayerChanged += EnsureAllPlayersReady;
 		readyUp.onClick.AddListener(ReadyUpListener);
 
 		IsSubscribed = true;
@@ -194,27 +193,15 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		Debug.LogError($"LobbyUI OnUpdateReadyError: {status}, {reasonCode}, {jsonError}");
 	}
 
-	private void EnsureAllPlayersReady(LobbyMember lobbyPlayer)
+	private void EnsureAllPlayersReady()
 	{
 	    if (IsAllReady())
 		{
-			// send signal to lock it all down
-
-			// start listening for when to try and connect to the track
-
-	        // Start coroutine to load track after 2 seconds
-	        //StartCoroutine(LoadTrackWithDelay(5f));
+			int scene = ResourceManager.Instance.tracks[BCManager.LobbyManager.TrackId].buildIndex;
+	    	LevelManager.LoadTrack(scene);
 	    }
 	}
 
-	private IEnumerator LoadTrackWithDelay(float delay)
-	{
-	    yield return new WaitForSeconds(delay);
-
-	    int scene = ResourceManager.Instance.tracks[BCManager.LobbyManager.TrackId].buildIndex;
-	    LevelManager.LoadTrack(scene);
-	}
-
 	private static bool IsAllReady() => BCManager.LobbyManager.LobbyMembers.Count > 0 &&
-									BCManager.LobbyManager.LobbyMembers.All(player => player.Value.isReady);
+									BCManager.LobbyManager.LobbyMembers.All(player => player.Value.isConnected);
 }

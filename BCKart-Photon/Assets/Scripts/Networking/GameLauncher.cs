@@ -83,8 +83,8 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		Debug.Log($"Setting connection status to {status}");
 
 		ConnectionStatus = status;
-		
-		if (!Application.isPlaying) 
+
+		if (!Application.isPlaying)
 			return;
 
 		if (status == ConnectionStatus.Disconnected || status == ConnectionStatus.Failed)
@@ -96,10 +96,22 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		// now we are connected force a load track 
 		if (status == ConnectionStatus.Connected)
 		{
-			int scene = ResourceManager.Instance.tracks[BCManager.LobbyManager.TrackId].buildIndex;
-			LevelManager.LoadTrack(scene);
-		}
+			// allow things to setup
+			SendConnectedSignal();
+        }
 	}
+	
+	private void SendConnectedSignal()
+    {
+		// send a lobby signal that we are good
+		Dictionary<string, object> signalData = new Dictionary<string, object>();
+
+		signalData["TrackId"] = BCManager.LobbyManager.TrackId; // TrackId
+		signalData["GameTypeId"] = BCManager.LobbyManager.GameTypeId;// GameTypeId
+		signalData["Connected"] = true; // this client has should be updated as connected
+
+		BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId, signalData);
+    }
 	
 	public void LeaveSession()
 	{

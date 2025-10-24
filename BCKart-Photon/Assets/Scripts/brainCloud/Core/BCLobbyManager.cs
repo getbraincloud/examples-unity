@@ -299,15 +299,34 @@ public class BCLobbyManager
                     var signalData = signalDataObj as Dictionary<string, object>;
                     if (signalData != null)
                     {
-                        int trackId = signalData.ContainsKey("TrackId") ? Convert.ToInt32(signalData["TrackId"]) : 0;
-                        int gameTypeId = signalData.ContainsKey("GameTypeId") ? Convert.ToInt32(signalData["GameTypeId"]) : 0;
+                        if (signalData.ContainsKey("TrackId"))
+                        {
+                            TrackId = Convert.ToInt32(signalData["TrackId"]);
+                        }
 
-                        Debug.Log($"Received SIGNAL: TrackId={trackId}, GameTypeId={gameTypeId}");
+                        if (signalData.ContainsKey("GameTypeId"))
+                        {
+                            GameTypeId = Convert.ToInt32(signalData["GameTypeId"]);
+                        }
+                       
+                       bool connected = signalData.ContainsKey("Connected") ? Convert.ToBoolean(signalData["Connected"]) : false;
 
-                        // Optional: update internal state or notify listeners
-                        TrackId = trackId;
-                        GameTypeId = gameTypeId;
-                        //OnLobbySignalReceived?.Invoke(trackId, gameTypeId);
+                        Debug.Log($"Received SIGNAL: TrackId={TrackId}, GameTypeId={GameTypeId}");
+
+                        // Update the member that sent this signal
+                        if (data.TryGetValue("from", out object fromObj))
+                        {
+                            var fromDict = fromObj as Dictionary<string, object>;
+                            if (fromDict != null && fromDict.TryGetValue("id", out object fromIdObj))
+                            {
+                                string profileId = fromIdObj as string;
+                                if (!string.IsNullOrEmpty(profileId) && LobbyMembers.TryGetValue(profileId, out LobbyMember member))
+                                {
+                                    member.isConnected = connected;
+                                    Debug.Log($"Member {member.displayName} Connected={connected}");
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -554,6 +573,7 @@ public class LobbyMember
     public int kartId;
     public bool isHost;
     public bool isReady;
+    public bool isConnected;
 
     public LobbyMember(Dictionary<string, object> data)
     {
@@ -589,6 +609,7 @@ public class LobbyMember
 
         // default: not host
         isHost = false;
+        isConnected = false;
 
         Debug.Log($"LobbyMember created: profileId={profileId}, name={displayName}, kartId={kartId}, isReady={isReady}");
     }
