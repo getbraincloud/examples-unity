@@ -28,8 +28,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		{
 			bool wasUpdated = x != BCManager.LobbyManager.TrackId;
 			if (wasUpdated)
-            {
-                
+            {   
 				BCManager.LobbyManager.TrackId = x;
 				// send a lobby event about the track change
 				SendLobbySignal();
@@ -52,6 +51,8 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 	void UpdateDetails(BCLobbyManager manager)
 	{
+		if (manager.Local == null)
+			return;
 		var isLeader = manager.Local.isHost;
 		trackNameDropdown.interactable = isLeader;
 		gameTypeDropdown.interactable = isLeader;

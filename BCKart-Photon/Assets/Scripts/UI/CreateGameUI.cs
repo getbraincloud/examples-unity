@@ -46,8 +46,8 @@ public class CreateGameUI : MonoBehaviour
 		});
 		lobbyName.text = BCManager.LobbyManager.LobbyId;
 
-		ServerInfo.TrackId = track.value;
-		ServerInfo.GameMode = gameMode.value;
+		BCManager.LobbyManager.TrackId = track.value;
+		BCManager.LobbyManager.GameTypeId = gameMode.value;
 		ServerInfo.MaxUsers = (int)playerCountSlider.value;
 		
 	}
@@ -97,7 +97,7 @@ public class CreateGameUI : MonoBehaviour
 
 	public void ValidateLobby()
 	{
-		_lobbyIsValid = string.IsNullOrEmpty(ServerInfo.LobbyName) == false;
+		_lobbyIsValid = true; //string.IsNullOrEmpty(ServerInfo.LobbyName) == false;
 	}
 
 	public void TryFocusScreen(UIScreen screen)
