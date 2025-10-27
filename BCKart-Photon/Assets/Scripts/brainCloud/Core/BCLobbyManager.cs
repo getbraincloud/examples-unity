@@ -27,6 +27,8 @@ public class BCLobbyManager
     public string ModeName = "Race";
     public int GameTypeId = 0;
 
+    public int KeepAliveRateSeconds = 1440;
+
     public LobbyMember Local
     {
         get
@@ -112,16 +114,23 @@ public class BCLobbyManager
         }
     }
 
+    public void LeavePhotonGameSession()
+    {
+        _launcher.LeavePhotonGameSession();
+    }
+
     private void OnLeaveLobbySuccess(string jsonResponse, object cbObject)
     {
         Debug.Log("BCLobbyManager OnLeaveLobbySuccess: " + jsonResponse);
         LobbyId = "";
+        LobbyMembers.Clear();
     }
 
     private void OnLeaveLobbyError(int status, int reasonCode, string jsonError, object cbObject)
     {
         Debug.LogError($"BCLobbyManager OnEnableRTTError: {status}, {reasonCode}, {jsonError}");
         LobbyId = "";
+        LobbyMembers.Clear();
     }
 
     private void OnEnableRTTSuccess(string jsonResponse, object cbObject)
@@ -147,6 +156,39 @@ public class BCLobbyManager
         findLobbyAfterEnable = false;
 
         BCManager.Wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+    }
+    
+    public void SendKeepAlive()
+    {
+	    var requestData = new KeepAliveRequest { lobbyId = LobbyId };
+	    string jsonPayload = JsonUtility.ToJson(requestData);
+    
+        Debug.Log("[LobbyKeepAlive] Sending keep-alive signal... " + jsonPayload);
+        BCManager.ScriptService.RunScript(
+            "KeepLobbyAlive.ccjs",
+            jsonPayload);
+    }
+
+    public void SendCompleteGame()
+    {
+        _lobbyState = LobbyState.InLobby;
+
+        // force them all to false locally, and not connected anymore
+        foreach (var member in LobbyMembers.Values)
+        {
+            member.isReady = false;
+            member.isConnected = false;
+        }
+
+        // send signal to complete the game and allow the lobby to restart
+        var requestData = new KeepAliveRequest { lobbyId = LobbyId };
+        string jsonPayload = JsonUtility.ToJson(requestData);
+        Debug.Log("[LobbyKeepAlive] Sending Complete signal... " + jsonPayload);
+        // Call the script cleanly using RunScript with a serialized payload
+        BCManager.ScriptService.RunScript(
+            "CompleteLobby.ccjs",
+               jsonPayload
+        );
     }
 
     public void OnLobbyEvent(string jsonMessage)
@@ -181,6 +223,8 @@ public class BCLobbyManager
                 {
                     LobbyId = lobby.ContainsKey("lobbyId") ? lobby["lobbyId"] as string : LobbyId;
 
+                    KeepAliveRateSeconds = lobby.ContainsKey("keepAliveRateSeconds") ? (int)lobby["keepAliveRateSeconds"]: KeepAliveRateSeconds;
+
                     if (lobby.TryGetValue("ownerCxId", out object ownerCxIdObj))
                     {
                         string ownerCxId = ownerCxIdObj as string;
@@ -210,6 +254,7 @@ public class BCLobbyManager
                                         if (LobbyMembers.TryGetValue(profileId, out LobbyMember existing))
                                         {
                                             existing.UpdateFromData(memberData, _lobbyOwnerProfileId);
+                                            Debug.Log($"MEMBER_JOIN (already exists, updated): {profileId}, ${existing.isReady}");
                                             PlayerChanged?.Invoke(existing);
                                         }
                                         else
@@ -247,40 +292,6 @@ public class BCLobbyManager
                             string[] parts = ownerCxId.Split(':');
                             if (parts.Length >= 2)
                                 _lobbyOwnerProfileId = parts[1];
-                        }
-                    }
-
-                    // Update members list
-                    if (lobby.TryGetValue("members", out object membersObj))
-                    {
-                        var membersList = membersObj as IList; // works for ArrayList or List<object>
-                        if (membersList != null)
-                        {
-                            foreach (var m in membersList)
-                            {
-                                var memberData = m as Dictionary<string, object>;
-                                if (memberData != null && memberData.TryGetValue("profileId", out object pidObj))
-                                {
-                                    string profileId = pidObj as string;
-                                    if (!string.IsNullOrEmpty(profileId))
-                                    {
-                                        if (LobbyMembers.TryGetValue(profileId, out LobbyMember existing))
-                                        {
-                                            existing.UpdateFromData(memberData, _lobbyOwnerProfileId);
-                                            PlayerChanged?.Invoke(existing);
-                                        }
-                                        else
-                                        {
-                                            var member = new LobbyMember(memberData)
-                                            {
-                                                isHost = profileId == _lobbyOwnerProfileId
-                                            };
-                                            LobbyMembers[profileId] = member;
-                                            PlayerJoined?.Invoke(member);
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
 
@@ -415,7 +426,6 @@ public class BCLobbyManager
             Debug.LogError("Failed to parse lobby event: " + ex.Message);
         }
     }
-
 
     private void OnEnableRTTError(int status, int reasonCode, string jsonError, object cbObject)
     {
@@ -651,4 +661,10 @@ public enum LobbyState
     Starting,     // Lobby is starting soon
     InGame,       // Game is currently in progress
     FinishedGame  // Game has finished
+}
+
+[System.Serializable]
+public class KeepAliveRequest
+{
+    public string lobbyId;
 }

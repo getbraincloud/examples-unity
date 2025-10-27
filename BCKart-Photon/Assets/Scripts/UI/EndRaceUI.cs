@@ -3,10 +3,11 @@ using System.Linq;
 using Managers;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class EndRaceUI : MonoBehaviour, GameUI.IGameUIComponent, IDisabledUI
 {
-  public PlayerResultItem resultItemPrefab;
+  	public PlayerResultItem resultItemPrefab;
 	public Button continueEndButton;
 	public GameObject resultsContainer;
 
@@ -16,7 +17,19 @@ public class EndRaceUI : MonoBehaviour, GameUI.IGameUIComponent, IDisabledUI
 	public void Init(KartEntity entity)
 	{
 		_kart = entity;
-		continueEndButton.onClick.AddListener(() => LevelManager.LoadMenu());
+
+		// we will stay with this lobby
+		continueEndButton.onClick.AddListener(() =>
+		{
+			BCManager.LobbyManager.LeavePhotonGameSession();
+			
+			SceneManager.LoadScene(LevelManager.LOBBY_SCENE);
+			UIScreen.BackToInitial();
+
+			// .show the lobby UI 
+			LobbyUI lobbyUI = Resources.FindObjectsOfTypeAll<LobbyUI>().FirstOrDefault();
+			UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
+		});
 	}
 
 	public void Setup()

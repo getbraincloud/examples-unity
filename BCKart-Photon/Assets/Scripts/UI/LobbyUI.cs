@@ -46,7 +46,6 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		});
 
 		UpdateDetails(BCManager.LobbyManager);
-		BCManager.LobbyManager.OnLobbyDetailsUpdated += UpdateDetails;
 	}
 
 	void UpdateDetails(BCLobbyManager manager)
@@ -94,8 +93,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	}
 
 	public void OnDestruction()
-	{
-		
+	{	
 	}
 
 	public void Setup()
@@ -104,6 +102,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		BCManager.LobbyManager.PlayerJoined += AddPlayer;
 		BCManager.LobbyManager.PlayerLeft += RemovePlayer;
 		readyUp.onClick.AddListener(ReadyUpListener);
+		BCManager.LobbyManager.OnLobbyDetailsUpdated += UpdateDetails;
 
 		IsSubscribed = true;
 	}
@@ -115,6 +114,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		BCManager.LobbyManager.PlayerLeft -= RemovePlayer;
 		
 		readyUp.onClick.RemoveListener(ReadyUpListener);
+		BCManager.LobbyManager.OnLobbyDetailsUpdated -= UpdateDetails;
 
 		IsSubscribed = false;
 	}
