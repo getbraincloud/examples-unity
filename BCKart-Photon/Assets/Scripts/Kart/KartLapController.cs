@@ -73,8 +73,10 @@ public class KartLapController : KartComponent {
 	{
 		base.OnLapCompleted(lap, isFinish);
 
-        if ( isFinish ) {
-            if ( Object.HasInputAuthority ) {
+        if (isFinish)
+        {
+            if (Object.HasInputAuthority)
+            {
                 // finished race
                 AudioManager.Play("raceFinishedSFX", AudioManager.MixerTarget.SFX);
                 Hud.ShowEndRaceScreen();
@@ -82,13 +84,14 @@ public class KartLapController : KartComponent {
 
             Kart.Controller.RoomUser.HasFinished = true;
             EndRaceTick = Runner.Tick;
-        } else
-		{
-			if (Object.HasInputAuthority)
-			{
-				AudioManager.Play("newLapSFX", AudioManager.MixerTarget.SFX);
-			}
-		}
+        }
+        else
+        {
+            if (Object.HasInputAuthority)
+            {
+                AudioManager.Play("newLapSFX", AudioManager.MixerTarget.SFX);
+            }
+        }
 
 		OnRaceCompleted?.Invoke(this);
 	}

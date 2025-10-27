@@ -41,6 +41,7 @@ public class GameUI : MonoBehaviour
 		foreach (var ui in uis) ui.Init(kart);
 
 		kart.LapController.OnLapChanged += SetLapCount;
+		SetLapCount(0, GameManager.Instance.GameType.lapCount);
 
 		var track = Track.Current;
 

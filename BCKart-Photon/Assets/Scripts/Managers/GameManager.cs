@@ -15,7 +15,7 @@ public class GameManager : NetworkBehaviour
 	public new Camera camera;
 	private ICameraController cameraController;
 
-	public GameType GameType => ResourceManager.Instance.gameTypes[GameTypeId];
+	public GameType GameType => ResourceManager.Instance.gameTypes[BCManager.LobbyManager.GameTypeId];
 
 	public static Track CurrentTrack { get; private set; }
 	public static bool IsPlaying => CurrentTrack != null;
@@ -23,11 +23,11 @@ public class GameManager : NetworkBehaviour
 	public static GameManager Instance { get; private set; }
 
 	public string TrackName => ResourceManager.Instance.tracks[TrackId].trackName;
-	public string ModeName => ResourceManager.Instance.gameTypes[GameTypeId].modeName;
+	public string ModeName => ResourceManager.Instance.gameTypes[BCManager.LobbyManager.GameTypeId].modeName;
 
 	[Networked] public NetworkString<_32> LobbyName { get; set; }
 	[Networked] public int TrackId { get; set; }
-	[Networked] public int GameTypeId { get; set; }
+	//[Networked] public int GameTypeId { get; set; }
 	[Networked] public int MaxUsers { get; set; }
 
 	private static void OnLobbyDetailsChangedCallback(GameManager changed)
@@ -58,7 +58,7 @@ public class GameManager : NetworkBehaviour
 		{
 			LobbyName = BCManager.LobbyManager.LobbyId;
 			TrackId = BCManager.LobbyManager.TrackId;
-			GameTypeId = BCManager.LobbyManager.GameTypeId;
+			//GameTypeId = BCManager.LobbyManager.GameTypeId;
 			MaxUsers = ServerInfo.MaxUsers;
 		}
 	}
@@ -71,7 +71,7 @@ public class GameManager : NetworkBehaviour
 			{
 				case nameof(LobbyName):
 				case nameof(TrackId):
-				case nameof(GameTypeId):
+				//case nameof(GameTypeId):
 				case nameof(MaxUsers):
 					OnLobbyDetailsChangedCallback(this);
 					break;
