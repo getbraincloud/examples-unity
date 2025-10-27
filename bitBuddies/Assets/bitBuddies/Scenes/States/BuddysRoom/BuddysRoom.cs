@@ -19,6 +19,7 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private TMP_Text _gameVersionText;
     [SerializeField] private TMP_Text _bcClientVersionText;
     [SerializeField] private Slider _loveSlider;
+    [SerializeField] private TMP_Text _timestampText;
 
     [SerializeField] private Button _exitButton;
     [SerializeField] private Button _shopButton;
@@ -50,6 +51,7 @@ public class BuddysRoom : ContentUIBehaviour
         _loveLevelText.text = $"Lv. {_appChildrenInfo.buddyLevel}";
         _loveSlider.value = _appChildrenInfo.currentXP;
         _loveSlider.maxValue = _appChildrenInfo.nextLevelUp;
+        _timestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
         
         //_buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
         _buddySprite.sprite = AssetLoader.LoadSprite(_appChildrenInfo.buddySpritePath);
@@ -145,5 +147,6 @@ public class BuddysRoom : ContentUIBehaviour
         //save the new values 
         GameManager.Instance.AppChildrenInfos = listOfApps;
         GameManager.Instance.SelectedAppChildrenInfo = _appChildrenInfo;
+        StateManager.Instance.RefreshScreen();
     }
 }

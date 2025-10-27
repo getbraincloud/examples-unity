@@ -6,16 +6,15 @@ using Gameframework;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class BuddyHouseInfo : MonoBehaviour
 {
 	public AppChildrenInfo HouseInfo;
-	[SerializeField] private Button _visitButton;
-	[SerializeField] private Button _deleteButton;
+	[SerializeField]private UnityEngine.UI.Button _visitButton;
+	[SerializeField]private UnityEngine.UI.Button _deleteButton;
 	[SerializeField] private PopUpUI PopUpPrefab;
 	[SerializeField] private TMP_Text _buddyNameText;
-	[SerializeField] private Image _buddySprite;
+	[SerializeField] private UnityEngine.UI.Image _buddySprite;
 	private Transform _parentTransform;
 	
 	public void SetUpHouse()
@@ -23,9 +22,7 @@ public class BuddyHouseInfo : MonoBehaviour
 		_visitButton.onClick.AddListener(OnVisitButton);
 		_deleteButton.onClick.AddListener(OnDeleteButton);
 		_parentTransform = FindAnyObjectByType<ParentMenu>().transform;
-		//_buddySprite.sprite = (Sprite) AssetDatabase.LoadAssetAtPath(HouseInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : HouseInfo.buddySpritePath, typeof(Sprite));
 		_buddySprite.sprite = AssetLoader.LoadSprite(HouseInfo.buddySpritePath); 
-		//Resources.Load<Sprite>(HouseInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : HouseInfo.buddySpritePath);
 		_buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName + "'s Home";
 	}
 	

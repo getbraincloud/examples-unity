@@ -156,6 +156,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 						{
 							_parentMenu.NewAppChildrenInfo.coinMultiplier = 1.0f;
 						}
+						_parentMenu.NewAppChildrenInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryData["lastIdleTimestamp"]).UtcDateTime;
 						
 						SetupBuddyDataDisplay();
 					}

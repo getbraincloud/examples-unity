@@ -248,8 +248,33 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 }
                 dataInfo.coinPerHour = (int) summaryFriendData["coinPerHour"];
                 dataInfo.maxCoinCapacity = (int) summaryFriendData["maxCoinCapacity"];   
+                dataInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryFriendData["lastIdleTimestamp"]).UtcDateTime;
             }
             
+            var extraData = children[i]["extraData"] as Dictionary<string, object>;
+            if(extraData != null)
+            {
+                var xpObj = extraData["xp"] as Dictionary<string, object>;
+                if(xpObj != null)
+                {
+                    dataInfo.currentXP = (int) xpObj["xpPoints"];
+                    dataInfo.buddyLevel = (int) xpObj["xpLevel"];
+                    dataInfo.nextLevelUp =  (int) xpObj["nextXpLevel"];
+                }
+                
+                var currency = extraData["currency"] as Dictionary<string, object>;
+                if(currency != null)
+                {
+                    var buddyBling = currency["buddyBling"] as Dictionary<string, object>;
+                    if(buddyBling != null)
+                    {
+                        dataInfo.buddyBling = (int) buddyBling["balance"];
+                    }
+                }
+                
+                //TODO: Add stats here when we have it populated
+                var stats = extraData["stats"] as Dictionary<string, object>;
+            }
             appChildrenInfos.Add(dataInfo);
         }
 
@@ -262,16 +287,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         
         _childInfoIndex = 0;
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;
-        if(appChildrenInfos.Count > 0)
-        {
-            _statsRetrieved = false;
-            _currencyRetrieved = false;
-            GetChildStatsAndCurrencyData();   
-        }
-        else
-        {
-            CompletedGettingCurrencies();
-        }
+        CompletedGettingCurrencies();
     }
     
     private void GetChildStatsAndCurrencyData()
@@ -476,23 +492,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     {
         //UserInfo.UpdateLevel(/*(int) statistics["Level"]*/);
         StateManager.Instance.RefreshScreen();
-    }
-    
-    public void AddBuddy()
-    {
-        Dictionary<string, object> scriptData = new Dictionary<string, object> {{"childAppId", BitBuddiesConsts.APP_CHILD_ID}};
-        Wrapper.ScriptService.RunScript
-        (
-            BitBuddiesConsts.ADD_CHILD_ACCOUNT_SCRIPT_NAME,
-            scriptData.Serialize(),
-            HandleSuccess("Add Buddy Success", OnAddBuddy),
-            HandleFailure("Add Buddy Failed", OnFailureCallback)
-        );
-    }
-    
-    private void OnAddBuddy(string jsonResponse)
-    {
-        
     }
     
     public void AwardBlingToChild(int in_amount)

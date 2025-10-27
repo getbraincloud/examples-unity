@@ -19,6 +19,7 @@ public class AppChildrenInfo
 	public int buddyLevel { get; set; }
 	public int nextLevelUp { get; set; }
 	public int currentXP { get; set; }
+	public DateTime lastIdleTimestamp { get; set; }
 }
 
 public class GameManager : SingletonBehaviour<GameManager>

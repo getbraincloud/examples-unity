@@ -157,6 +157,7 @@ namespace Gameframework
         Texture GetTextureForFile(GameObject in_obj)
         {
             Image image = in_obj.GetComponent<Image>();
+            
             if (image) return image.raycastTarget ? (Texture)AssetDatabase.LoadAssetAtPath("Assets/Framework/Icons/IconAffirmative.png", typeof(Texture)) : (Texture)AssetDatabase.LoadAssetAtPath("Assets/Framework/Icons/IconNegative.png", typeof(Texture));
 
             Text text = in_obj.GetComponent<Text>();
