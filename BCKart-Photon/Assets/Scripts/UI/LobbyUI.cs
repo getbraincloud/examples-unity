@@ -83,7 +83,12 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 			// we started!
 			if (manager.LobbyState == LobbyState.Starting)
 			{
-				BCManager.LobbyManager.JoinOrCreateLobby();
+				// the leader is going to start this
+				// .the clients are going to wait for the host leader 
+				// .to be connected before connecting to it
+
+                Debug.Log($"CONNECTED: , Host={isLeader}");
+				if (isLeader) BCManager.LobbyManager.JoinOrCreateLobby();
 			}
 		}
 		previousLobbyState = manager.LobbyState;

@@ -105,15 +105,20 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 	}
 	
 	private void SendConnectedSignal()
-    {
-		// send a lobby signal that we are good
-		Dictionary<string, object> signalData = new Dictionary<string, object>();
+	{
+		if (!BCManager.LobbyManager.Local.isConnected)
+        {
+            // send a lobby signal that we are good
+			Dictionary<string, object> signalData = new Dictionary<string, object>();
 
-		signalData["TrackId"] = BCManager.LobbyManager.TrackId; // TrackId
-		signalData["GameTypeId"] = BCManager.LobbyManager.GameTypeId;// GameTypeId
-		signalData["Connected"] = true; // this client has should be updated as connected
+			signalData["TrackId"] = BCManager.LobbyManager.TrackId; // TrackId
+			signalData["GameTypeId"] = BCManager.LobbyManager.GameTypeId;// GameTypeId
+			signalData["Connected"] = true; // this client has should be updated as connected
+			BCManager.LobbyManager.Local.isConnected = true;
 
-		BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId, signalData);
+			BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId, signalData);
+        }
+		
     }
 
 	public void LeaveSession()

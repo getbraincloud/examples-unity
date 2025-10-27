@@ -335,6 +335,15 @@ public class BCLobbyManager
                                 {
                                     member.isConnected = connected;
                                     Debug.Log($"Member {member.displayName} Connected={connected}");
+                                    // host connected, and not self
+                                    if (member.isHost && member.profileId != Local.profileId)
+                                    {
+
+                                        Debug.Log($"CONNECTED: {member.profileId}, Host={member.isHost}");
+                                    
+                                        // now we can as well
+                                        JoinOrCreateLobby();
+                                    }
                                 }
                             }
                         }
@@ -368,14 +377,12 @@ public class BCLobbyManager
                                         isHost = profileId == _lobbyOwnerProfileId
                                     };
                                     LobbyMembers[profileId] = member;
-                                    Debug.Log($"MEMBER_JOIN: {member.profileId}, Host={member.isHost}");
                                     PlayerJoined?.Invoke(member);
                                 }
                                 else
                                 {
                                     // Already exists, just update fields
                                     LobbyMembers[profileId].UpdateFromData(memberData, _lobbyOwnerProfileId);
-                                    Debug.Log($"MEMBER_JOIN (already exists, updated): {profileId}");
                                     PlayerChanged?.Invoke(LobbyMembers[profileId]);
                                 }
                             }
@@ -384,7 +391,6 @@ public class BCLobbyManager
                                 if (LobbyMembers.TryGetValue(profileId, out LobbyMember existingMember))
                                 {
                                     existingMember.UpdateFromData(memberData, _lobbyOwnerProfileId);
-                                    Debug.Log($"MEMBER_UPDATE: {existingMember.profileId}");
                                     PlayerChanged?.Invoke(existingMember);
                                 }
                                 else
@@ -395,7 +401,6 @@ public class BCLobbyManager
                                         isHost = profileId == _lobbyOwnerProfileId
                                     };
                                     LobbyMembers[profileId] = member;
-                                    Debug.Log($"MEMBER_UPDATE (created new): {profileId}");
                                     PlayerJoined?.Invoke(member);
                                 }
                             }

@@ -112,7 +112,6 @@ public class CreateGameUI : MonoBehaviour
 	{
 		if (_lobbyIsValid)
 		{
-			//launcher.JoinOrCreateLobby();
 			BCManager.LobbyManager.HostLobby(launcher);
 			_lobbyIsValid = false;
 		}
