@@ -895,7 +895,7 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.Protocol,
                 new RelayConnectOptions(false, server.Host, port, server.Passcode, serverId), // .this had a "" in the fifth param, are we missing something [smrj]
                 null,
-                OnConnectFailed,
+                (FailureCallback) OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
             );
         }
@@ -906,7 +906,7 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.Protocol,
                 new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
                 null,
-                OnConnectFailed,
+                (FailureCallback) OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
             );            
         }
