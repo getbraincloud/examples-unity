@@ -8,17 +8,20 @@ public class LobbyItemUI : MonoBehaviour {
     public Image ready;
     public Image leader;
 
-    private RoomPlayer _player;
+    private LobbyMember _player;
 
-    public void SetPlayer(RoomPlayer player) {
+    public void SetPlayer(LobbyMember player) 
+    {
         _player = player;
     }
 
-    private void Update() {
-        if (_player.Object != null && _player.Object.IsValid)
+    public void Update() 
+    {
+        if (_player != null)
         {
-            username.text = _player.Username.Value;
-            ready.gameObject.SetActive(_player.IsReady);
+            username.text = _player.displayName;
+            ready.gameObject.SetActive(_player.isReady);
+            //leader.gameObject.SetActive(_player.isHost);
         }
     }
 }

@@ -41,13 +41,13 @@ public class CreateGameUI : MonoBehaviour
 
 		lobbyName.onValueChanged.AddListener(x =>
 		{
-			ServerInfo.LobbyName = x;
+			BCManager.LobbyManager.LobbyId= x;
 			confirmButton.interactable = !string.IsNullOrEmpty(x);
 		});
-		lobbyName.text = ServerInfo.LobbyName = "Session" + Random.Range(0, 1000);
+		lobbyName.text = BCManager.LobbyManager.LobbyId;
 
-		ServerInfo.TrackId = track.value;
-		ServerInfo.GameMode = gameMode.value;
+		BCManager.LobbyManager.TrackId = track.value;
+		BCManager.LobbyManager.GameTypeId = gameMode.value;
 		ServerInfo.MaxUsers = (int)playerCountSlider.value;
 		
 	}
@@ -97,7 +97,7 @@ public class CreateGameUI : MonoBehaviour
 
 	public void ValidateLobby()
 	{
-		_lobbyIsValid = string.IsNullOrEmpty(ServerInfo.LobbyName) == false;
+		_lobbyIsValid = true; //string.IsNullOrEmpty(ServerInfo.LobbyName) == false;
 	}
 
 	public void TryFocusScreen(UIScreen screen)
@@ -112,7 +112,6 @@ public class CreateGameUI : MonoBehaviour
 	{
 		if (_lobbyIsValid)
 		{
-			//launcher.JoinOrCreateLobby();
 			BCManager.LobbyManager.HostLobby(launcher);
 			_lobbyIsValid = false;
 		}

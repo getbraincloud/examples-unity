@@ -71,7 +71,6 @@ public class FindingRoomUI : MonoBehaviour
                             // Compare with our own player’s ID
                             if (!string.IsNullOrEmpty(joinedProfileId) && joinedProfileId == ClientInfo.LoginData.profileId)
                             {
-
                                 timeSearchingText.text = "Joined lobby!";
 
                                 // Focus room and kart selection

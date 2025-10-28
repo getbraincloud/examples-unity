@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -41,6 +42,7 @@ public class GameUI : MonoBehaviour
 		foreach (var ui in uis) ui.Init(kart);
 
 		kart.LapController.OnLapChanged += SetLapCount;
+		SetLapCount(1, GameManager.Instance.GameType.lapCount); // first lap of the lap count
 
 		var track = Track.Current;
 
@@ -93,11 +95,20 @@ public class GameUI : MonoBehaviour
 			AudioManager.Play("coinSFX", AudioManager.MixerTarget.SFX);
 			coinCount.text = $"{count:00}";
 		};
+
+        _keepAliveRoutine = StartCoroutine(SendKeepAliveLoop());
 	}
 
 	private void OnDestroy()
 	{
 		Kart.LapController.OnLapChanged -= SetLapCount;
+		
+		 // Stop the loop cleanly when the object is disabled or destroyed
+        if (_keepAliveRoutine != null)
+        {
+            StopCoroutine(_keepAliveRoutine);
+            _keepAliveRoutine = null;
+        }
 	}
 	
 	public void FinishCountdown()
@@ -289,6 +300,8 @@ public class GameUI : MonoBehaviour
 	public void ShowEndRaceScreen()
 	{
 		endRaceScreen.gameObject.SetActive(true);
+
+		BCManager.LobbyManager.SendCompleteGame();
 	}
 
 	// UI Hook
@@ -297,4 +310,16 @@ public class GameUI : MonoBehaviour
 	{
 		InterfaceManager.Instance.OpenPauseMenu();
 	}
+
+    private Coroutine _keepAliveRoutine;
+	private IEnumerator SendKeepAliveLoop()
+    {
+        while (true)
+        {
+			// Wait 1440 seconds before sending again
+			yield return new WaitForSeconds((float)BCManager.LobbyManager.KeepAliveRateSeconds);
+
+			BCManager.LobbyManager.SendKeepAlive();
+        }
+    }
 }

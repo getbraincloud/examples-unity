@@ -70,7 +70,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		_runner.StartGame(new StartGameArgs
 		{
 			GameMode = _gameMode,
-			SessionName = _gameMode == GameMode.Host ? ServerInfo.LobbyName : ClientInfo.LobbyName,
+			SessionName = BCManager.LobbyManager.LobbyId,
 			ObjectProvider = _pool,
 			SceneManager = _levelManager,
 			PlayerCount = ServerInfo.MaxUsers,
@@ -78,31 +78,66 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		});
 	}
 
-	private void SetConnectionStatus(ConnectionStatus status)
+	private void SetConnectionStatus(ConnectionStatus status, bool backToStart = true)
 	{
 		Debug.Log($"Setting connection status to {status}");
 
 		ConnectionStatus = status;
-		
-		if (!Application.isPlaying) 
+
+		if (!Application.isPlaying)
 			return;
 
-		if (status == ConnectionStatus.Disconnected || status == ConnectionStatus.Failed)
+		if (backToStart &&
+				(status == ConnectionStatus.Disconnected || status == ConnectionStatus.Failed))
 		{
 			SceneManager.LoadScene(LevelManager.LOBBY_SCENE);
 			UIScreen.BackToInitial();
+			
+			BCManager.LobbyManager.LeaveLobby();
 		}
+
+		// now we are connected force a load track 
+		if (status == ConnectionStatus.Connected)
+		{
+			// allow things to setup
+			SendConnectedSignal();
+        }
 	}
 	
+	private void SendConnectedSignal()
+	{
+		if (!BCManager.LobbyManager.Local.isConnected)
+        {
+            // send a lobby signal that we are good
+			Dictionary<string, object> signalData = new Dictionary<string, object>();
+
+			signalData["TrackId"] = BCManager.LobbyManager.TrackId; // TrackId
+			signalData["GameTypeId"] = BCManager.LobbyManager.GameTypeId;// GameTypeId
+			signalData["Connected"] = true; // this client has should be updated as connected
+			BCManager.LobbyManager.Local.isConnected = true;
+
+			BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId, signalData);
+        }
+		
+    }
+
 	public void LeaveSession()
 	{
-		BCManager.LobbyManager.LeaveLobby();
-		
 		if (_runner != null)
 			_runner.Shutdown();
-		else
-			SetConnectionStatus(ConnectionStatus.Disconnected);
+		
+		SetConnectionStatus(ConnectionStatus.Disconnected, true);
 	}
+	
+	public void LeavePhotonGameSession()
+    {
+		if (_runner)
+		{
+			_runner.Shutdown();
+		}
+		
+		SetConnectionStatus(ConnectionStatus.Disconnected, false);
+    }
 	
 	public void OnConnectedToServer(NetworkRunner runner)
 	{
@@ -113,8 +148,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 	public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
 	{
 		Debug.Log("Disconnected from server");
-		LeaveSession();
-		SetConnectionStatus(ConnectionStatus.Disconnected);
+		LeavePhotonGameSession();
 	}
 	
 	public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
@@ -130,7 +164,6 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 	public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
 	{
 		Debug.Log($"Connect failed {reason}");
-		LeaveSession();
 		SetConnectionStatus(ConnectionStatus.Failed);
 		(string status, string message) = ConnectFailedReasonToHuman(reason);
 		_disconnectUI.ShowMessage(status,message);
@@ -161,10 +194,11 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
 		SetConnectionStatus(ConnectionStatus);
 	}
+
 	public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
 	{
 		Debug.Log($"OnShutdown {shutdownReason}");
-		SetConnectionStatus(ConnectionStatus.Disconnected);
+		SetConnectionStatus(ConnectionStatus.Disconnected, false);
 
 		(string status, string message) = ShutdownReasonToHuman(shutdownReason);
 		_disconnectUI.ShowMessage( status, message);
