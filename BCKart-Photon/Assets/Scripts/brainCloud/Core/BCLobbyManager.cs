@@ -1,11 +1,14 @@
-using UnityEngine;
-using UnityEngine.UI;
 
+using BrainCloud;
 using BrainCloud.JsonFx.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using BrainCloud;
+using System.Linq;
+using Managers;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 // BC Manager will hold a reference to this, which will do the accessing 
 // and listening to lobby events
@@ -308,7 +311,8 @@ public class BCLobbyManager
                 if (data.TryGetValue("signalData", out object signalDataObj))
                 {
                     var signalData = signalDataObj as Dictionary<string, object>;
-                    if (signalData != null)
+                    // regular lobby updates and connected events
+                    if (signalData != null && signalData.ContainsKey("TrackId"))
                     {
                         if (signalData.ContainsKey("TrackId"))
                         {
@@ -319,8 +323,8 @@ public class BCLobbyManager
                         {
                             GameTypeId = Convert.ToInt32(signalData["GameTypeId"]);
                         }
-                       
-                       bool connected = signalData.ContainsKey("Connected") ? Convert.ToBoolean(signalData["Connected"]) : false;
+
+                        bool connected = signalData.ContainsKey("Connected") ? Convert.ToBoolean(signalData["Connected"]) : false;
 
                         Debug.Log($"Received SIGNAL: TrackId={TrackId}, GameTypeId={GameTypeId}");
 
@@ -336,16 +340,35 @@ public class BCLobbyManager
                                     member.isConnected = connected;
                                     Debug.Log($"Member {member.displayName} Connected={connected}");
                                     // host connected, and not self
-                                    if (member.isHost && member.profileId != Local.profileId)
+                                    if (member.isConnected && member.isHost && member.profileId != Local.profileId)
                                     {
-
                                         Debug.Log($"CONNECTED: {member.profileId}, Host={member.isHost}");
-                                    
+
                                         // now we can as well
                                         JoinOrCreateLobby();
                                     }
                                 }
                             }
+                        }
+                    }
+                    else if (signalData != null && signalData.ContainsKey("continueLobbyId"))
+                    {
+                        // if this lobby id matches ours 
+                        if (signalData.ContainsKey("continueLobbyId") && 
+                            Convert.ToString(signalData["continueLobbyId"]) == LobbyId)
+                        {
+                            // the leader needs to also tell all the others to do this same thing 
+			                LeavePhotonGameSession();
+
+		                    SendCompleteGame();
+
+                            // clear the rest and go back to the lobby of players
+                            SceneManager.LoadScene(LevelManager.LOBBY_SCENE);
+			                UIScreen.BackToInitial();
+
+			                // .show the lobby UI 
+			                LobbyUI lobbyUI = Resources.FindObjectsOfTypeAll<LobbyUI>().FirstOrDefault();
+			                UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
                         }
                     }
                 }

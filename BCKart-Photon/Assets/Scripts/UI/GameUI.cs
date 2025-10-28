@@ -300,8 +300,6 @@ public class GameUI : MonoBehaviour
 	public void ShowEndRaceScreen()
 	{
 		endRaceScreen.gameObject.SetActive(true);
-
-		BCManager.LobbyManager.SendCompleteGame();
 	}
 
 	// UI Hook

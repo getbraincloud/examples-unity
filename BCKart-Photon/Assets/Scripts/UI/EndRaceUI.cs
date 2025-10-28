@@ -20,15 +20,13 @@ public class EndRaceUI : MonoBehaviour, GameUI.IGameUIComponent, IDisabledUI
 
 		// we will stay with this lobby
 		continueEndButton.onClick.AddListener(() =>
-		{
-			BCManager.LobbyManager.LeavePhotonGameSession();
-			
-			SceneManager.LoadScene(LevelManager.LOBBY_SCENE);
-			UIScreen.BackToInitial();
+		{	
+			// since only the leader can do this, 
+            // send a lobby signal that we are continuing
+			Dictionary<string, object> signalData = new Dictionary<string, object>();
 
-			// .show the lobby UI 
-			LobbyUI lobbyUI = Resources.FindObjectsOfTypeAll<LobbyUI>().FirstOrDefault();
-			UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
+			signalData["continueLobbyId"] = BCManager.LobbyManager.LobbyId;
+			BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId, signalData);
 		});
 	}
 
@@ -72,8 +70,7 @@ public class EndRaceUI : MonoBehaviour, GameUI.IGameUIComponent, IDisabledUI
     private void EnsureContinueButton(List<KartEntity> karts)
 	{
 		var allFinished = karts.Count == KartEntity.Karts.Count;
-		//if (RoomPlayer.Local.IsLeader) 
-		// everyone can all take their time here since they are still in the lobby and not ready
+		if (RoomPlayer.Local.IsLeader) 
 		{
             continueEndButton.gameObject.SetActive(allFinished);
         }

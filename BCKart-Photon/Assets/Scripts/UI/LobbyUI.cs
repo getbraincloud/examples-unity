@@ -98,9 +98,37 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	}
 
 	public void OnDestruction()
-	{	
+	{
+
 	}
 
+	void OnEnable()
+	{
+	    // Add all members from the lobby
+	    foreach (var kvp in BCManager.LobbyManager.LobbyMembers)
+	    {
+	        AddPlayer(kvp.Value);
+	    }
+	
+	    Setup();
+	}
+	
+	void OnDisable()
+	{
+	    // Create a local copy of the keys to safely iterate
+	    var members = new List<LobbyMember>(ListItems.Keys);
+	
+	    foreach (var member in members)
+	    {
+	        RemovePlayer(member);
+	    }
+	
+	    // Clear the dictionary to remove leftover references
+	    ListItems.Clear();
+	
+	    OnDestroy();
+	}
+	
 	public void Setup()
 	{
 		if (IsSubscribed) return;
