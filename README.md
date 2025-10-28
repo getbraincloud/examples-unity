@@ -149,4 +149,25 @@ For more information, see the [TicTacToe README.md](./TicTacToe/README.md) file.
 
 ---
 
+## BCFishNet
+
+Demonstrates a **multiplayer game** using **FishNet** for network object synchronization and **brainCloud** for authentication, matchmaking, lobby management, and real-time relay transport.
+
+Open the **Main** scene to test login, lobby creation, and real-time multiplayer gameplay in the Editor. Make sure to configure a brainCloud app in the Unity Inspector before running.
+
+For more information, see the [BCFishNet README.md](./BCFishNet/README.md) file.
+
+---
+
+
+## BCKart-Photon
+
+Demonstrates a **multiplayer kart game** using **Photon Fusion** for real-time object synchronization and **brainCloud** for authentication, lobby management, and matchmaking.
+
+Open the **Launch** scene to test login, lobby creation, and race flow in the Editor. Make sure to create a new app using the **BCKart-Photon template** in the brainCloud Plugin and configure your Photon Fusion AppId.
+
+For more information, see the [BCKart-Photon README.md](./BCKart-Photon/README.md) file.
+
+---
+
 For more information on brainCloud and its services, please check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).
