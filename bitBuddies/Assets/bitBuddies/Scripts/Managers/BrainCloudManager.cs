@@ -208,6 +208,9 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             _isProcessing = false;
             return;
         }
+
+        float hourInSeconds = 3600;
+        
         for(int i = 0; i < children.Length; i++)
         {
             var summaryFriendData = children[i]["summaryFriendData"] as Dictionary<string, object>;
@@ -249,6 +252,18 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 dataInfo.coinPerHour = (int) summaryFriendData["coinPerHour"];
                 dataInfo.maxCoinCapacity = (int) summaryFriendData["maxCoinCapacity"];   
                 dataInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryFriendData["lastIdleTimestamp"]).UtcDateTime;
+                TimeSpan timeDifference = DateTime.UtcNow - dataInfo.lastIdleTimestamp;
+                
+                float coinsPerSecond = dataInfo.coinPerHour / hourInSeconds;
+                int coinsEarned = Mathf.FloorToInt(coinsPerSecond * (float)timeDifference.TotalSeconds);
+                if(coinsEarned > 0 && coinsEarned < dataInfo.maxCoinCapacity)
+                {
+                    dataInfo.coinsEarnedInHolding = coinsEarned;
+                }
+                else
+                {
+                    dataInfo.coinsEarnedInHolding = dataInfo.maxCoinCapacity;
+                }
             }
             
             var extraData = children[i]["extraData"] as Dictionary<string, object>;

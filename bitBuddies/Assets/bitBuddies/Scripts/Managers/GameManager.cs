@@ -20,6 +20,7 @@ public class AppChildrenInfo
 	public int nextLevelUp { get; set; }
 	public int currentXP { get; set; }
 	public DateTime lastIdleTimestamp { get; set; }
+	public int coinsEarnedInHolding { get; set; }
 }
 
 public class GameManager : SingletonBehaviour<GameManager>

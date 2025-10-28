@@ -15,15 +15,27 @@ public class BuddyHouseInfo : MonoBehaviour
 	[SerializeField] private PopUpUI PopUpPrefab;
 	[SerializeField] private TMP_Text _buddyNameText;
 	[SerializeField] private UnityEngine.UI.Image _buddySprite;
+	[SerializeField] private UnityEngine.UI.Button _collectCoinsButton;
 	private Transform _parentTransform;
+	private int enableCollectCoinsButtonMinValue = 50;
 	
 	public void SetUpHouse()
 	{
+		_collectCoinsButton.onClick.AddListener(OnCollectCoinsButton);
 		_visitButton.onClick.AddListener(OnVisitButton);
 		_deleteButton.onClick.AddListener(OnDeleteButton);
 		_parentTransform = FindAnyObjectByType<ParentMenu>().transform;
 		_buddySprite.sprite = AssetLoader.LoadSprite(HouseInfo.buddySpritePath); 
 		_buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName + "'s Home";
+		_collectCoinsButton.gameObject.SetActive(false);
+		// if(HouseInfo.coinsEarnedInHolding >= enableCollectCoinsButtonMinValue)
+		// {
+		// 	_collectCoinsButton.gameObject.SetActive(true);
+		// }
+		// else
+		// {
+		// 	_collectCoinsButton.gameObject.SetActive(false);
+		// }
 	}
 	
 	private void OnVisitButton()
@@ -72,5 +84,27 @@ public class BuddyHouseInfo : MonoBehaviour
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
 		popUp.SetUpInfoPopup(BitBuddiesConsts.DELETE_BUDDYS_ROOM_FAILED_TITLE, BitBuddiesConsts.DELETE_BUDDYES_ROOM_FAILED_MESSAGE);
+	}
+	
+	private void OnCollectCoinsButton()
+	{
+		Dictionary<string, object> scriptData = new Dictionary<string, object>();
+		// BrainCloudManager.Wrapper.ScriptService.RunScript
+		// (
+		// 	BitBuddiesConsts.UPDATE_CHILD_COINS_COLLECTED_SCRIPT_NAME, 
+		// 	scriptData.Serialize(), 
+		// 	BrainCloudManager.HandleSuccess("Update Child Coin Timestamp Success",OnUpdateSummaryDataSuccess),
+		// 	BrainCloudManager.HandleFailure("Update Child Coin Timestamp Failed", OnUpdateSummaryDataFailure)
+		// );
+	}
+	
+	private void OnUpdateSummaryDataSuccess(string jsonResponse)
+	{
+		
+	}
+	
+	private void OnUpdateSummaryDataFailure()
+	{
+		
 	}
 }
