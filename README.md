@@ -67,12 +67,6 @@ This example showcases the **One-Way Match** and **Playback Stream** services in
 
 ---
 
-## BCFishNet
-
-This example showcases a complete multiplayer game flow using **FishNet** for network object synchronization and **brainCloud** for user authentication, matchmaking, lobby management, and real-time relay transport. Check out [BCFishNet](./BCFishNet/README.md) for more information.
-
----
-
 ## BombersRTT
 
 This example is a real-time multiplayer game implemented using brainCloud. brainCloud provides the backend services for storing data, as well as the **Matchmaking** service and brainCloud's **Relay Multiplayer** server.
