@@ -25142,9 +25142,17 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5565203122976307857, guid: f87ea1b0d58347047a1995bce4f6c7a5, type: 3}
-      propertyPath: gameTypes.Array.data[2]
+      propertyPath: gameTypes.Array.data[0]
       value: 
       objectReference: {fileID: 11400000, guid: e76840ad7bc42450dbe690fb4c6e8c59, type: 2}
+    - target: {fileID: 5565203122976307857, guid: f87ea1b0d58347047a1995bce4f6c7a5, type: 3}
+      propertyPath: gameTypes.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 6ea96cec0cb2fbd46806fd453614e2cd, type: 2}
+    - target: {fileID: 5565203122976307857, guid: f87ea1b0d58347047a1995bce4f6c7a5, type: 3}
+      propertyPath: gameTypes.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: d8dc9c5c2af431a4886c85e36215bc6e, type: 2}
     - target: {fileID: 5565203122976307858, guid: f87ea1b0d58347047a1995bce4f6c7a5, type: 3}
       propertyPath: m_Name
       value: Resource Manager

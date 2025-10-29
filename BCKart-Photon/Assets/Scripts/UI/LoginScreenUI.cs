@@ -22,13 +22,16 @@ public class LoginScreenUI : MonoBehaviour
         bool isAuthenticated = bcWrapper.Client.Authenticated;
         if (!isAuthenticated)
         {
-            UIScreen.Focus(myScreen);
             if (storedProfile != null && storedProfile != "" &&
                 storedAnonymous != null && storedAnonymous != "")
             {
                 bcWrapper.AuthenticateAnonymous(
                     OnAuthSuccess,
                     OnAuthError);
+            }
+            else
+            {
+                UIScreen.Focus(myScreen);
             }
         }  
     }

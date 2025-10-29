@@ -63,7 +63,7 @@ public class BCLobbyManager
     {
         lobbyMemberSearch = MAX_MEMBERS_SEARCH;
         ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
-                    
+        recursiveOnError = true;
         _launcher = launcher;
         if (!ConfirmRTTEnabled())
         {
@@ -93,6 +93,7 @@ public class BCLobbyManager
     private bool findLobbyAfterEnable = false;
     public void FindLobby(GameLauncher launcher)
     {
+        recursiveOnError = true;
         _launcher = launcher;
         lobbyMemberSearch = MAX_MEMBERS_SEARCH;
         ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
@@ -108,6 +109,7 @@ public class BCLobbyManager
 
     public void CancelFind()
     {
+        recursiveOnError = false;
         if (SearchingEntryId != "")
         {
             BCManager.Wrapper.LobbyService.CancelFindRequest(ACTIVE_LOBBY_TYPE, SearchingEntryId);
@@ -243,13 +245,10 @@ public class BCLobbyManager
             Dictionary<string, object> lobby = null;
             if (data.TryGetValue("lobby", out object lobbyObj))
             {
-                quickFindLobbyAfterEnable = false;
-                hostLobbyAfterEnable = false;
-                findLobbyAfterEnable = false;
-        
                 lobby = lobbyObj as Dictionary<string, object>;
                 if (lobby != null)
                 {
+                    //ServerInfo.MaxUsers 
                     LobbyId = lobby.ContainsKey("lobbyId") ? lobby["lobbyId"] as string : LobbyId;
 
                     KeepAliveRateSeconds = lobby.ContainsKey("keepAliveRateSeconds") ? (int)lobby["keepAliveRateSeconds"] : KeepAliveRateSeconds;
@@ -305,8 +304,7 @@ public class BCLobbyManager
             // handle host migration ? I don't believe it works
             // since we are not the Relay service, photon 
             // and the MEMBER_LEFT events are needed to know when a host leaves
-
-            if (operation == "JOIN_FAIL")
+            if (operation == "JOIN_FAIL" && recursiveOnError)
             {
                 --lobbyMemberSearch;
                 if (quickFindRecursive)
@@ -538,8 +536,10 @@ public class BCLobbyManager
             return quickFindRecursive;
         }
     }
-    
+
     private bool quickFindRecursive = true;
+
+    private bool recursiveOnError = true;
     private void FindOrCreateLobby()
     {
         quickFindRecursive = true;
@@ -586,9 +586,14 @@ public class BCLobbyManager
     {
         // set the client side joining mechanism
         if (Local.isHost)
+        {
+            // just force it to 8 no matter the lobby type
+            ServerInfo.MaxUsers = MAX_MEMBERS_SEARCH;
             _launcher.SetCreateLobby();
+        }
         else
             _launcher.SetJoinLobby();
+                                    
                                     
         _launcher.JoinOrCreateLobby();
     }

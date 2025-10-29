@@ -49,17 +49,16 @@ public class CreateGameUI : MonoBehaviour
 		BCManager.LobbyManager.TrackId = track.value;
 		BCManager.LobbyManager.GameTypeId = gameMode.value;
 		ServerInfo.MaxUsers = (int)playerCountSlider.value;
-		
 	}
 
 	public void SetGameType(int gameType)
 	{
-		ServerInfo.GameMode = gameType;
+		BCManager.LobbyManager.GameTypeId = gameType;
 	}
 
 	public void SetTrack(int trackId)
 	{
-		ServerInfo.TrackId = trackId;
+		BCManager.LobbyManager.TrackId = trackId;
 		trackImage.sprite = ResourceManager.Instance.tracks[trackId].trackIcon;
 	}
 
