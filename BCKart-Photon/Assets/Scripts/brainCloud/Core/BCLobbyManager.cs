@@ -226,7 +226,7 @@ public class BCLobbyManager
                 {
                     LobbyId = lobby.ContainsKey("lobbyId") ? lobby["lobbyId"] as string : LobbyId;
 
-                    KeepAliveRateSeconds = lobby.ContainsKey("keepAliveRateSeconds") ? (int)lobby["keepAliveRateSeconds"]: KeepAliveRateSeconds;
+                    KeepAliveRateSeconds = lobby.ContainsKey("keepAliveRateSeconds") ? (int)lobby["keepAliveRateSeconds"] : KeepAliveRateSeconds;
 
                     if (lobby.TryGetValue("ownerCxId", out object ownerCxIdObj))
                     {
@@ -257,7 +257,7 @@ public class BCLobbyManager
                                         if (LobbyMembers.TryGetValue(profileId, out LobbyMember existing))
                                         {
                                             existing.UpdateFromData(memberData, _lobbyOwnerProfileId);
-                                            Debug.Log($"MEMBER_JOIN (already exists, updated): {profileId}, ${existing.isReady}");
+                                            Debug.Log($"MEMBER_JOIN (already exists, updated): {profileId}, ${existing.isHost}");
                                             PlayerChanged?.Invoke(existing);
                                         }
                                         else
@@ -276,7 +276,9 @@ public class BCLobbyManager
                     }
                 }
             }
-            // handle host migration ? I don't believe it works.
+            // handle host migration ? I don't believe it works
+            // since we are not the Relay service, photon 
+            // and the MEMBER_LEFT events are needed to know when a host leaves
 
             // handle starting. do not disband on start
             if (operation == "STARTING")
@@ -358,17 +360,7 @@ public class BCLobbyManager
                             Convert.ToString(signalData["continueLobbyId"]) == LobbyId)
                         {
                             // the leader needs to also tell all the others to do this same thing 
-			                LeavePhotonGameSession();
-
-		                    SendCompleteGame();
-
-                            // clear the rest and go back to the lobby of players
-                            SceneManager.LoadScene(LevelManager.LOBBY_SCENE);
-			                UIScreen.BackToInitial();
-
-			                // .show the lobby UI 
-			                LobbyUI lobbyUI = Resources.FindObjectsOfTypeAll<LobbyUI>().FirstOrDefault();
-			                UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
+                            LeavePhotonSessionToLobbyScreen();
                         }
                     }
                 }
@@ -436,6 +428,14 @@ public class BCLobbyManager
 
                                 if (LobbyMembers.ContainsKey(profileId))
                                 {
+                                    LobbyMembers.TryGetValue(profileId, out LobbyMember existingMember);
+
+                                    // we don't try and do a migration since we don't get the message
+                                    // if we leave we don't want to change this
+                                    if (existingMember.isHost && Local.profileId != profileId)
+                                    {
+                                        LeavePhotonSessionToLobbyScreen();
+                                    }
                                     PlayerLeft?.Invoke(LobbyMembers[profileId]);
                                     LobbyMembers.Remove(profileId);
                                     Debug.Log($"MEMBER_LEFT: {profileId}");
@@ -458,6 +458,23 @@ public class BCLobbyManager
     private void OnEnableRTTError(int status, int reasonCode, string jsonError, object cbObject)
     {
         Debug.LogError($"BCLobbyManager OnEnableRTTError: {status}, {reasonCode}, {jsonError}");
+    }
+
+    private void LeavePhotonSessionToLobbyScreen()
+    {
+        
+        // the leader needs to also tell all the others to do this same thing 
+		LeavePhotonGameSession();
+
+		SendCompleteGame();
+
+        // clear the rest and go back to the lobby of players
+        SceneManager.LoadScene(LevelManager.LOBBY_SCENE);
+		UIScreen.BackToInitial();
+
+		// .show the lobby UI 
+		LobbyUI lobbyUI = Resources.FindObjectsOfTypeAll<LobbyUI>().FirstOrDefault();
+		UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
     }
 
     private void EnableRTT()

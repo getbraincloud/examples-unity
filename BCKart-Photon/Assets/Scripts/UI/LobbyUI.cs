@@ -44,8 +44,6 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 				SendLobbySignal();
 			}
 		});
-
-		UpdateDetails(BCManager.LobbyManager);
 	}
 
 	void UpdateDetails(BCLobbyManager manager)
@@ -109,23 +107,25 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	    {
 	        AddPlayer(kvp.Value);
 	    }
-	
-	    Setup();
+
+		Setup();
+		
+		UpdateDetails(BCManager.LobbyManager);
 	}
-	
+
 	void OnDisable()
 	{
 	    // Create a local copy of the keys to safely iterate
 	    var members = new List<LobbyMember>(ListItems.Keys);
-	
+
 	    foreach (var member in members)
 	    {
 	        RemovePlayer(member);
 	    }
-	
+
 	    // Clear the dictionary to remove leftover references
 	    ListItems.Clear();
-	
+
 	    OnDestroy();
 	}
 	
