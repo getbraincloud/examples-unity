@@ -1,3 +1,4 @@
+using BrainCloud.Common;
 using BrainCloud.JsonFx.Json;
 using Oculus.Platform;
 using Oculus.Platform.Models;
@@ -5,19 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PurchaseHandler : MonoBehaviour
 {
     private const string INFO_LOG_INTO_BC = "Log In to\nbrainCloud\nto start IAP";
     private const string INFO_LOADING_PURCHASING = "Loading IAP\nPurchasing...";
-
-    //private static string[] IAP_ITEMS = new string[]
-    //{
-    //    "gems_up_100",   // Consumable
-    //    "nonconsumable", // Durable
-    //    "game_pass"      // Subscription
-    //};
+    private const string INFO_IAP_AVAILABILITY = "IAP is only available on\nQuest Devices";
 
     [SerializeField] private CanvasGroup MainCanvas = null;
     [SerializeField] private TMP_Text ErrorMessage = null;
@@ -31,6 +25,11 @@ public class PurchaseHandler : MonoBehaviour
 
     private BrainCloudWrapper BC = null;
     private List<IAPItem> IAPItems = null;
+
+    // For User durables management
+    private const string ENTITY_TYPE = "inventory";
+    private string UserDurablesEntityID = string.Empty;
+    private List<string> UserDurables = null;
 
     private void Awake()
     {
@@ -48,6 +47,9 @@ public class PurchaseHandler : MonoBehaviour
 
     private void OnEnable()
     {
+#if UNITY_EDITOR || !UNITY_ANDROID
+        UpdateInfoLabel(INFO_IAP_AVAILABILITY);
+#else
         if (FindFirstObjectByType<BrainCloudWrapper>() is var bc && bc != null)
         {
             BC = bc;
@@ -57,11 +59,13 @@ public class PurchaseHandler : MonoBehaviour
         {
             StartCoroutine(GetIAPItems());
         }
+#endif
     }
 
     private void Start()
     {
         IAPItems = new();
+        UserDurables = new();
 
         enabled = false;
     }
@@ -89,12 +93,60 @@ public class PurchaseHandler : MonoBehaviour
             IAPItems.Clear();
             IAPItems = null;
         }
+
+        UserDurables?.Clear();
+        UserDurables = null;
     }
 
     private void UpdateInfoLabel(string info)
     {
         InfoLabel.text = info;
     }
+
+    private void AddIAPItem(BCProduct product)
+    {
+        var item = Instantiate(IAPItemTemplate, IAPContent, false);
+        item.InitializeIAPItem(product,
+                               (sku) => StartCoroutine(HandlePurchaseFlow(sku)));
+        item.gameObject.SetActive(true);
+
+        IAPItems.Add(item);
+    }
+
+    private Product GetMetaProduct(string sku)
+    {
+        foreach (var item in IAPItems)
+        {
+            if (sku == item.IAPSku)
+            {
+                return item.Product.MetaProduct;
+            }
+        }
+
+        return null;
+    }
+
+    private void UpdateUserDurables(string sku)
+    {
+        if (UserDurables.Contains(sku))
+        {
+            Debug.LogError($"User already owns this durable IAP: {sku}");
+            return;
+        }
+
+        List<string> tempUserDurables = new(UserDurables);
+        tempUserDurables.Add(sku);
+
+        BC.EntityService.UpdateEntity(UserDurablesEntityID,
+            ENTITY_TYPE,
+            JsonWriter.Serialize(new Dictionary<string, object> { { "durables", tempUserDurables } }),
+            ACL.None().ToJsonString(),
+            -1,
+            null,
+            OnBrainCloudFailure);
+    }
+
+    #region Flows
 
     private IEnumerator GetIAPItems()
     {
@@ -118,7 +170,10 @@ public class PurchaseHandler : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        // First lets get the IAP from brainCloud
+        // First let's get the user's current items
+        yield return GetUserInventory();
+
+        // Lets get the IAP products from brainCloud
         BC.AppStoreService.GetSalesInventory("metaHorizon",
                                              string.Empty,
                                              OnGetSalesInventorySuccess,
@@ -139,6 +194,7 @@ public class PurchaseHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("IAP.GetProductsBySKU Error:");
                 DisplayError(msg.GetError().Message);
             }
             else
@@ -151,11 +207,25 @@ public class PurchaseHandler : MonoBehaviour
                         if (item.Product.GetProductID() == iap.Sku)
                         {
                             item.Product.SetOculusProduct(iap);
+                            item.UpdatePrice();
                         }
                     }
                 }
 
                 // Remove any that aren't synced
+                List<IAPItem> toRemove = new(IAPItems.Count);
+                foreach (var item in IAPItems)
+                {
+                    if (string.IsNullOrWhiteSpace(item.IAPSku))
+                    {
+                        toRemove.Add(item);
+                    }
+                }
+
+                foreach (var item in toRemove)
+                {
+                    IAPItems.Remove(item);
+                }
 
                 isSuccess = true;
             }
@@ -170,51 +240,124 @@ public class PurchaseHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("IAP.GetViewerPurchases Error:");
                 DisplayError(msg.GetError().Message);
                 return;
             }
+            else if (msg.GetPurchaseList() != null &&
+                     msg.GetPurchaseList().Count <= 0)
+            {
+                isSuccess = true;
+            }
             else
             {
+                bool verifyPurchases = false;
                 foreach (Purchase iap in msg.GetPurchaseList())
                 {
                     foreach (IAPItem item in IAPItems)
                     {
                         if (iap.Sku == item.Product.IAPSku)
                         {
-                            BC.AppStoreService
-                              .VerifyPurchase("metaHorizon",
-                                              JsonWriter.Serialize(new Dictionary<string, object>
-                                              {
-                                                  { "userId", LoginHandler.MetaUserID },
-                                                  { "sku",    iap.Sku                 }
-                                              }),
-                                              OnVerifyPurchaseSuccess,
-                                              OnBrainCloudFailure);
+                            if (UserDurables.Contains(iap.Sku))
+                            {
+                                item.SetToPurchased();
+                            }
+                            else
+                            {
+                                verifyPurchases = true;
+
+                                BC.AppStoreService
+                                  .VerifyPurchase("metaHorizon",
+                                                  JsonWriter.Serialize(new Dictionary<string, object>
+                                                  {
+                                                      { "userId", LoginHandler.MetaUserID },
+                                                      { "sku",    iap.Sku                 }
+                                                  }),
+                                                  (jsonResponse, cbObject) =>
+                                                  {
+                                                      OnVerifyPurchaseSuccess(jsonResponse, cbObject);
+                                                      isSuccess = true;
+                                                  },
+                                                  OnBrainCloudFailure);
+                            }
+
+                            break;
                         }
                     }
                 }
 
-                isSuccess = true;
+                isSuccess = !verifyPurchases;
             }
         });
 
         yield return new WaitUntil(() => isSuccess);
         yield return new WaitForFixedUpdate();
 
-        WaitContent.SetActive(false);
-        PurchaseContent.SetActive(true);
+        if (string.IsNullOrWhiteSpace(ErrorMessage.text))
+        {
+            WaitContent.SetActive(false);
+            PurchaseContent.SetActive(true);
 
-        MainCanvas.interactable = true;
+            MainCanvas.interactable = true;
+        }
     }
 
-    private void AddIAPItem(BCProduct product)
+    private IEnumerator GetUserInventory()
     {
-        var item = Instantiate(IAPItemTemplate, IAPContent, false);
-        item.InitializeIAPItem(product,
-                               (sku) => StartCoroutine(HandlePurchaseFlow(sku)));
-        item.gameObject.SetActive(true);
+        bool isSuccess = false;
 
-        IAPItems.Add(item);
+        void onCreateUserInventory(string jsonResponse, object cbObject)
+        {
+            BC.EntityService.GetEntitiesByType(ENTITY_TYPE,
+                                               onGetEntitiesByType,
+                                               OnBrainCloudFailure);
+        }
+
+        void onGetEntitiesByType(string jsonResponse, object cbObject)
+        {
+            if (jsonResponse.Contains("durables"))
+            {
+                var entity = ((JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)
+                    ["data"] as Dictionary<string, object>)
+                    ["entities"] as Dictionary<string, object>[])[0]; // We only want one of these entities tied to the user in this example
+
+                // Get the current durables list
+                if (entity.ContainsKey("data") && entity["data"] is Dictionary<string, object> data &&
+                    data.ContainsKey("durables") && data["durables"] is object[] durables)
+                {
+                    UserDurables.Clear();
+                    if (durables != null && durables.Length > 0)
+                    {
+                        foreach (var durable in durables)
+                        {
+                            UserDurables.Add(durable.ToString());
+                        }
+                    }
+                }
+
+                if (entity.ContainsKey("entityId") && entity["entityId"] is string id)
+                {
+                    UserDurablesEntityID = id;
+                }
+
+                isSuccess = true;
+            }
+            else // If the user is new, we will create the entity before calling this again
+            {
+                BC.EntityService.CreateEntity(ENTITY_TYPE,
+                                              JsonWriter.Serialize(new Dictionary<string, object> { { "durables", UserDurables } }),
+                                              ACL.None().ToJsonString(),
+                                              onCreateUserInventory,
+                                              OnBrainCloudFailure);
+            }
+        }
+
+        BC.EntityService.GetEntitiesByType(ENTITY_TYPE,
+                                           onGetEntitiesByType,
+                                           OnBrainCloudFailure);
+
+        yield return new WaitUntil(() => isSuccess);
+        yield return new WaitForFixedUpdate();
     }
 
     private IEnumerator HandlePurchaseFlow(string sku)
@@ -241,6 +384,7 @@ public class PurchaseHandler : MonoBehaviour
                     }
                     else
                     {
+                        DisplayError("IAP.LaunchCheckoutFlow Error:");
                         DisplayError(msg.GetError().Message);
                     }
                 }
@@ -273,6 +417,10 @@ public class PurchaseHandler : MonoBehaviour
         yield return GetIAPItems();
     }
 
+    #endregion
+
+    #region brainCloud
+
     private void OnGetSalesInventorySuccess(string jsonResponse, object cbObject)
     {
         var data = (JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>)["productInventory"];
@@ -286,44 +434,51 @@ public class PurchaseHandler : MonoBehaviour
 
     private void OnVerifyPurchaseSuccess(string jsonResponse, object cbObject)
     {
+        // First let's get the transaction details from the call
         var data = ((JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)
             ["data"] as Dictionary<string, object>)
             ["transactionSummary"] as Dictionary<string, object>)
             ["transactionDetails"];
         var details = JsonReader.Deserialize<Dictionary<string, object>[]>(JsonWriter.Serialize(data));
 
+        // We'll go through our transaction details and solve for all the potential scenarios
         List<string> failedTransactions = new();
         List<BCProduct> paidProducts = new();
         foreach (var transaction in details)
         {
             string status = string.Empty;
-            string productId = transaction.ContainsKey("productId") ? transaction["productId"].ToString()   // googlePlay
-                             : transaction.ContainsKey("product_id") ? transaction["product_id"].ToString() // itunes
-                             : "UnknownProduct";
-
+            string productId = transaction["sku"].ToString();
+            
             if (transaction.ContainsKey("errorMessage") &&
                 !string.IsNullOrWhiteSpace(transaction["errorMessage"].ToString()))
             {
                 status = transaction["errorMessage"].ToString();
                 if (status.ToLower().Contains("already") && status.ToLower().Contains("processed") &&
-                    controller.products.WithID(productId) is Product product && product.hasReceipt)
+                    GetMetaProduct(productId) is Product product)
                 {
-                    controller.ConfirmPendingPurchase(product);
+                    foreach (var item in IAPItems)
+                    {
+                        if (productId == item.IAPSku)
+                        {
+                            paidProducts.Add(item.Product);
+                            status = string.Empty;
+                            break;
+                        }
+                    }
                 }
             }
             else if ((bool)transaction["processed"] == false)
             {
                 status = "Could not process.";
             }
-            else if (controller.products.WithID(productId) is Product product && product.hasReceipt)
+            else if (GetMetaProduct(productId) is Product product)
             {
                 status = "Could not confirm pruchase!";
-                foreach (var item in bcIventory)
+                foreach (var item in IAPItems)
                 {
-                    if (productId == item.GetProductID())
+                    if (productId == item.IAPSku)
                     {
-                        controller.ConfirmPendingPurchase(product);
-                        paidProducts.Add(item);
+                        paidProducts.Add(item.Product);
                         status = string.Empty;
                         break;
                     }
@@ -331,7 +486,7 @@ public class PurchaseHandler : MonoBehaviour
             }
             else
             {
-                status = "Unknown Error";
+                status = "Unknown VerifyPurchase Error";
             }
 
             if (!string.IsNullOrWhiteSpace(status))
@@ -355,11 +510,19 @@ public class PurchaseHandler : MonoBehaviour
             Debug.Log($"Purchase(s) verified with brainCloud!");
         }
 
+        // Consume products!
         foreach (var iap in paidProducts)
         {
+            IAP.ConsumePurchase(iap.IAPSku); // Note: Durables seem to be consumed immediately on purchase
 
+            if (iap.IAPProductType == ProductType.DURABLE)
+            {
+                UpdateUserDurables(iap.IAPSku);
+            }
         }
     }
+
+    #endregion
 
     private void OnBrainCloudFailure(int status, int reasonCode, string jsonError, object cbObject)
     {

@@ -21,7 +21,7 @@ public class BCProduct
 
     public Product MetaProduct { get; private set; }
 
-    public string IAPSku => MetaProduct.Sku;
+    public string IAPSku => MetaProduct != null ? MetaProduct.Sku : string.Empty;
 
     public BCProduct() { }
 

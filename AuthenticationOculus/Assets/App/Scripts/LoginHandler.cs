@@ -56,6 +56,7 @@ public class LoginHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("Core.AsyncInitialize Error:");
                 DisplayError(msg.GetError().Message);
             }
             else
@@ -64,6 +65,7 @@ public class LoginHandler : MonoBehaviour
                 {
                     if (msg.IsError)
                     {
+                        DisplayError("Entitlements.IsUserEntitledToApplication Error:");
                         DisplayError(msg.GetError().Message);
                     }
                     else
@@ -113,6 +115,7 @@ public class LoginHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("Users.GetLoggedInUser Error:");
                 DisplayError(msg.GetError().Message);
             }
             else if (msg.Data.ID <= 0 || msg.Data.ID.ToString().Length <= 1)
@@ -138,6 +141,7 @@ public class LoginHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("Users.GetUserProof Error:");
                 DisplayError(msg.GetError().Message);
             }
             else

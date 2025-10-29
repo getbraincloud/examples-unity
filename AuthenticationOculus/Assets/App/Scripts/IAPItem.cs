@@ -1,3 +1,4 @@
+using Oculus.Platform.Models;
 using System;
 using TMPro;
 using UnityEngine;
@@ -32,7 +33,7 @@ public class IAPItem : MonoBehaviour
 
     private void OnBuyButton()
     {
-        BuyButtonAction?.Invoke(Product.ItemSku);
+        BuyButtonAction?.Invoke(IAPSku);
     }
 
     public void InitializeIAPItem(BCProduct product, Action<string> onBuyButton)
@@ -40,8 +41,20 @@ public class IAPItem : MonoBehaviour
         Product = product;
         TitleLabel.text = product.title;
         DescriptionLabel.text = product.description;
-        ButtonLabel.text = product.MetaProduct.FormattedPrice;
+        ButtonLabel.text = $"${product.priceData.referencePrice}";
         BuyButtonAction = onBuyButton;
+    }
+
+    public void UpdatePrice()
+    {
+        if (Product.MetaProduct != null)
+        {
+            ButtonLabel.text = Product.MetaProduct.FormattedPrice;
+        }
+        else
+        {
+            Debug.LogError($"Cannot set to Formatted price because MetaProduct is null. BCProduct: {Product.itemId}");
+        }
     }
 
     public void SetToPurchased()
