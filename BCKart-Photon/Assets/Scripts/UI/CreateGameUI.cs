@@ -65,21 +65,8 @@ public class CreateGameUI : MonoBehaviour
 
 	private string SetLobbyIdFromMaxUsers()
 	{
-		string lobbyType = ServerInfo.MaxUsers switch
-		{
-			1 => "one",
-			2 => "two",
-			3 => "three",
-			4 => "four",
-			5 => "five",
-			6 => "six",
-			7 => "seven",
-			8 => "eight",
-			_ => "unknown"
-		};
-
-		BCLobbyManager.ACTIVE_LOBBY_TYPE = lobbyType;
-		return lobbyType;
+		BCLobbyManager.ACTIVE_LOBBY_TYPE = BCManager.LobbyManager.GetLobbyString(ServerInfo.MaxUsers);
+		return BCLobbyManager.ACTIVE_LOBBY_TYPE;
 	}
 	
 	public void SetPlayerCount()

@@ -126,9 +126,9 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	    // Clear the dictionary to remove leftover references
 	    ListItems.Clear();
 
-	    OnDestroy();
+	    OnCleanup();
 	}
-	
+
 	public void Setup()
 	{
 		if (IsSubscribed) return;
@@ -139,9 +139,9 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 		IsSubscribed = true;
 	}
-
-	private void OnDestroy()
-	{
+	
+	private void OnCleanup()
+    {
 		if (!IsSubscribed) return;
 		BCManager.LobbyManager.PlayerJoined -= AddPlayer;
 		BCManager.LobbyManager.PlayerLeft -= RemovePlayer;
@@ -150,7 +150,12 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		BCManager.LobbyManager.OnLobbyDetailsUpdated -= UpdateDetails;
 
 		IsSubscribed = false;
-	}
+    }
+
+	private void OnDestroy()
+    {
+		OnCleanup();
+    }
 	
 	private void AddPlayer(LobbyMember player)
 	{

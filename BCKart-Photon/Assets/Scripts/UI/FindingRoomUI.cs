@@ -93,9 +93,13 @@ public class FindingRoomUI : MonoBehaviour
                     string desc = reason != null && reason.TryGetValue("desc", out object descObj) ? descObj as string : "Unknown reason";
                     int code = reason != null && reason.TryGetValue("code", out object codeObj) ? Convert.ToInt32(codeObj) : 0;
 
-                    Debug.LogWarning($"Failed to join lobby: {desc} (Code {code})");
-                    timeSearchingText.text = $"Join failed: {desc}";
-                    enableTimer = false;
+                    // quick find will create one as the last step
+                    if (!BCManager.LobbyManager.IsQuickFind &&
+                        data.TryGetValue("lobbyType", out object lobbyType) && lobbyType as string == BCManager.LobbyManager.GetLobbyString(1))
+                    {
+                        timeSearchingText.text = $"Join failed: {desc}";
+                        enableTimer = false;
+                    }
                 }
                 break;
 

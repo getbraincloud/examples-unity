@@ -61,6 +61,9 @@ public class BCLobbyManager
     private bool quickFindLobbyAfterEnable = false;
     public void QuickFindLobby(GameLauncher launcher)
     {
+        lobbyMemberSearch = MAX_MEMBERS_SEARCH;
+        ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
+                    
         _launcher = launcher;
         if (!ConfirmRTTEnabled())
         {
@@ -91,6 +94,8 @@ public class BCLobbyManager
     public void FindLobby(GameLauncher launcher)
     {
         _launcher = launcher;
+        lobbyMemberSearch = MAX_MEMBERS_SEARCH;
+        ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
         if (!ConfirmRTTEnabled())
         {
             findLobbyAfterEnable = true;
@@ -160,6 +165,23 @@ public class BCLobbyManager
 
         BCManager.Wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
     }
+
+    public string GetLobbyString(int inLobbyString)
+    {
+        string lobbyType = inLobbyString switch
+        {
+            1 => "one",
+            2 => "two",
+            3 => "three",
+            4 => "four",
+            5 => "five",
+            6 => "six",
+            7 => "seven",
+            8 => "eight",
+            _ => "unknown"
+        };
+        return lobbyType;
+    }
     
     public void SendKeepAlive()
     {
@@ -221,6 +243,10 @@ public class BCLobbyManager
             Dictionary<string, object> lobby = null;
             if (data.TryGetValue("lobby", out object lobbyObj))
             {
+                quickFindLobbyAfterEnable = false;
+                hostLobbyAfterEnable = false;
+                findLobbyAfterEnable = false;
+        
                 lobby = lobbyObj as Dictionary<string, object>;
                 if (lobby != null)
                 {
@@ -279,6 +305,19 @@ public class BCLobbyManager
             // handle host migration ? I don't believe it works
             // since we are not the Relay service, photon 
             // and the MEMBER_LEFT events are needed to know when a host leaves
+
+            if (operation == "JOIN_FAIL")
+            {
+                --lobbyMemberSearch;
+                if (quickFindRecursive)
+                {
+                    FindOrCreateLobby();
+                }
+                else
+                {
+                    FindLobby();
+                }
+            }
 
             // handle starting. do not disband on start
             if (operation == "STARTING")
@@ -492,23 +531,55 @@ public class BCLobbyManager
         return isEnabled;
     }
 
+    public bool IsQuickFind
+    {
+        get
+        {
+            return quickFindRecursive;
+        }
+    }
+    
+    private bool quickFindRecursive = true;
     private void FindOrCreateLobby()
     {
+        quickFindRecursive = true;
         var lobbyParams = CreateLobbyParams();
-        BCManager.Wrapper.LobbyService.FindOrCreateLobby(
-            ACTIVE_LOBBY_TYPE,
-            0,
-            1,
-            lobbyParams.algo,
-            lobbyParams.filters,
-            false,
-            lobbyParams.extra,
-            "all",
-            lobbyParams.settings,
-            null,
-            OnLobbySuccess,
-            OnLobbyError
-        );
+        ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch);
+        if (lobbyMemberSearch == 0)
+        {
+            lobbyMemberSearch = MAX_MEMBERS_SEARCH;
+            ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
+            BCManager.Wrapper.LobbyService.FindOrCreateLobby(
+                ACTIVE_LOBBY_TYPE,
+                0,
+                1,
+                lobbyParams.algo,
+                lobbyParams.filters,
+                false,
+                lobbyParams.extra,
+                "all",
+                lobbyParams.settings,
+                null,
+                OnLobbySuccess,
+                OnLobbyError
+            );
+        }
+        else
+        {
+            BCManager.Wrapper.LobbyService.FindLobby(
+                ACTIVE_LOBBY_TYPE,
+                0,
+                1,
+                lobbyParams.algo,
+                lobbyParams.filters,
+                false,
+                lobbyParams.extra,
+                "all",
+                null,
+                OnLobbySuccess,
+                OnLobbyError
+            );
+        }
     }
     
 	public void JoinOrCreateLobby()
@@ -535,23 +606,38 @@ public class BCLobbyManager
             OnLobbySuccess,
             OnLobbyError);
     }
-    
+
+    private static int MAX_MEMBERS_SEARCH = 8;
+    private int lobbyMemberSearch = MAX_MEMBERS_SEARCH;
     private void FindLobby()
     {
+        quickFindRecursive = false;
         var lobbyParams = CreateLobbyParams();
-        BCManager.Wrapper.LobbyService.FindLobby(
-            ACTIVE_LOBBY_TYPE,
-            0,
-            1,
-            lobbyParams.algo,
-            lobbyParams.filters,
-            false,
-            lobbyParams.extra,
-            "all",
-            null,
-            OnLobbySuccess,
-            OnLobbyError
-        );
+        if (lobbyMemberSearch != 0)
+        {
+            ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch);
+            BCManager.Wrapper.LobbyService.FindLobby(
+                ACTIVE_LOBBY_TYPE,
+                0,
+                1,
+                lobbyParams.algo,
+                lobbyParams.filters,
+                false,
+                lobbyParams.extra,
+                "all",
+                null,
+                OnLobbySuccess,
+                OnLobbyError
+            );
+        }
+        else
+        {
+            lobbyMemberSearch = MAX_MEMBERS_SEARCH;
+            ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch);
+            var jsonMessage = "{\"service\":\"lobby\",\"operation\":\"JOIN_FAIL\",\"data\":{\"lobbyType\":\"one\",\"reason\":{\"code\":80200,\"desc\":\"No lobbies found matching criteria\"}}}";
+
+            OnLobbyEventReceived?.Invoke(jsonMessage);
+        }
     }
 
     private LobbyParams CreateLobbyParams()
