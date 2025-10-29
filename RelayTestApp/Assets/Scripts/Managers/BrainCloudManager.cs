@@ -760,16 +760,17 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case "DISBANDED":
                 {
-                    var reason = jsonData["reason"] as Dictionary<string, object>;
-                    if ((int) reason["code"] != ReasonCodes.RTT_ROOM_READY)
-                    {
-                        // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                        CloseGame(true);
-                    }
-                    else
-                    {
-                        OnRoomLaunchFailure();
-                    }
+                    // var reason = jsonData["reason"] as Dictionary<string, object>;
+                    // if ((int) reason["code"] != ReasonCodes.RTT_ROOM_READY)
+                    // {
+                    //     // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
+                    //     CloseGame(true);
+                    // }
+                    // else
+                    // {
+                         //OnRoomLaunchFailure();
+                    // }
+                    
                     break;
                 }
                 case "STARTING":
@@ -864,18 +865,27 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
-        switch (StateManager.Instance.Protocol)
+        
+        if(StateManager.Instance.CurrentServer.i3dPort != -1)
         {
-            case RelayConnectionType.WEBSOCKET:
-                port = StateManager.Instance.CurrentServer.WsPort;
-                break;
-            case RelayConnectionType.TCP:
-                port = StateManager.Instance.CurrentServer.TcpPort;
-                break;
-            case RelayConnectionType.UDP:
-                port = StateManager.Instance.CurrentServer.UdpPort;
-                break;
+            port = StateManager.Instance.CurrentServer.i3dPort;
         }
+        else
+        {
+            switch (StateManager.Instance.Protocol)
+            {
+                case RelayConnectionType.WEBSOCKET:
+                    port = StateManager.Instance.CurrentServer.WsPort;
+                    break;
+                case RelayConnectionType.TCP:
+                    port = StateManager.Instance.CurrentServer.TcpPort;
+                    break;
+                case RelayConnectionType.UDP:
+                    port = StateManager.Instance.CurrentServer.UdpPort;
+                    break;
+            }
+        }
+
 
         Server server = StateManager.Instance.CurrentServer;
         if(_noServerSelected)
@@ -885,7 +895,7 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.Protocol,
                 new RelayConnectOptions(false, server.Host, port, server.Passcode, serverId), // .this had a "" in the fifth param, are we missing something [smrj]
                 null,
-                LogErrorThenPopUpWindow,
+                (FailureCallback) OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
             );
         }
@@ -896,10 +906,17 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.Protocol,
                 new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
                 null,
-                LogErrorThenPopUpWindow,
+                (FailureCallback) OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
             );            
         }
+        Debug.LogWarning("Relay Connect Called");
+    }
+    
+    private void OnConnectFailed(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        Debug.LogError("Connect Error: "+ jsonError);
+        Debug.LogError($"Reason Code: {reasonCode}, Status: {status}");
     }
     
     public void DisconnectFromEverything()
