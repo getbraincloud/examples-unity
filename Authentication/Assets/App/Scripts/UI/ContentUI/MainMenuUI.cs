@@ -247,6 +247,9 @@ public class MainMenuUI : ContentUIBehaviour
     {
         MainMenuActive = false;
 
+        int rememberMePref = PlayerPrefs.GetInt(BCManager.PREFS_REMEMBER_ME);
+        bool forgetUser = rememberMePref == 0;
+
         PopupInfoBody logoutBody = new PopupInfoBody("Would you like to <b>disconnect</b> your account upon logout?", PopupInfoBody.Type.Centered);
         PopupInfoBody warningBody = new PopupInfoBody("Warning!\nYou are logged in anonymously. You will lose access to your account if you <b>disconnect!</b>", PopupInfoBody.Type.Error);
 
@@ -262,7 +265,7 @@ public class MainMenuUI : ContentUIBehaviour
 
         PopupInfoButton[] popupButtons = new PopupInfoButton[]
         {
-            new PopupInfoButton("Logout", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(false)),
+            new PopupInfoButton("Logout", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(forgetUser)),
             new PopupInfoButton("Logout and Disconnect", PopupInfoButton.Color.Plain, () => OnLogoutConfirm(true)),
         };
 

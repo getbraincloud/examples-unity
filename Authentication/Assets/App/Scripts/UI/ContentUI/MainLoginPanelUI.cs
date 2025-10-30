@@ -4,6 +4,7 @@ using BrainCloud.JSONHelper;
 using System.Net.Mail;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
 /// <summary>
@@ -136,8 +137,10 @@ public class MainLoginPanelUI : ContentUIBehaviour
     {
         if(!value)
         {
-            BCManager.Wrapper.ResetStoredProfileId();
+            //BCManager.Wrapper.ResetStoredProfileId();
         }
+        int rememberMeVal = value ? 1 : 0;
+        PlayerPrefs.SetInt(PREFS_REMEMBER_ME, rememberMeVal);
     }
 
     public void DisplayError(string error, Selectable problemSelectable = null)

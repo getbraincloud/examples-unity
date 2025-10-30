@@ -29,6 +29,8 @@ public class BCManager : MonoBehaviour
 {
     private static bool _isInstanced = false; // To keep track if BCManager has been Instantiated or not
 
+    public static string PREFS_REMEMBER_ME => AppName + ".rememberMe";
+
     #region Wrapper Properties
 
     /// <summary>
@@ -168,7 +170,9 @@ public class BCManager : MonoBehaviour
     {
         if(Wrapper.Client.Authenticated)
         {
-            Wrapper.LogoutOnApplicationQuit(false);
+            int rememberMePref = PlayerPrefs.GetInt(PREFS_REMEMBER_ME);
+            bool forgetUser = rememberMePref == 0;
+            Wrapper.LogoutOnApplicationQuit(forgetUser);
         }
         _isInstanced = false;
     }

@@ -46,8 +46,8 @@ public class IAPItem : MonoBehaviour
 
     private void OnClicked()
     {
-        itemSelected = true;
         _onSelectedAction?.Invoke(this);
+        itemSelected = true;
     }
 
     private void OnItemUpdated()

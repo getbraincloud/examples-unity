@@ -28,6 +28,8 @@ public class IAPServiceUI : ContentUIBehaviour
     private BrainCloudAppStore _appStoreService = default;
     private BrainCloudScript _scriptService = default;
 
+    private List<IAPItem> _IAPItems = new List<IAPItem>();
+
 #if ENABLE_WINMD_SUPPORT
     private StoreContext storeContext;
 #endif
@@ -41,6 +43,8 @@ public class IAPServiceUI : ContentUIBehaviour
 
 #if ENABLE_WINMD_SUPPORT
         storeContext = StoreContext.GetDefault();
+
+        Debug.Log($"User: {storeContext.User}");
 #endif
         //"https://onestore.microsoft.com/b2b/keys/create/collections"
         //https://onestore.microsoft.com
@@ -57,30 +61,23 @@ public class IAPServiceUI : ContentUIBehaviour
 
     private void GetADToken(string resource)
     {
-        //start by calling script to get AD token
         SuccessCallback successCallback = (response, cbObject) =>
         {
-            Dictionary<string, object> data = response.Deserialize("data", "response");
+            Debug.Log("Response: " + response);
+            Dictionary<string, object> data = response.Deserialize("data");
 
-            string token = data["token"] as string;
+            string token = data["response"] as string;
 
             Debug.Log("Token: " + token);
-            Debug.Log("ProfileId: " + BCManager.Client.ProfileId);
 
             GetMSStoreId(token, BCManager.Client.ProfileId);
-            
         };
         FailureCallback failureCallback = (status, code, error, cbObject) =>
         {
             Debug.Log(string.Format("Failed | {0}  {1}  {2}", status, code, error));
         };
 
-        Dictionary<string, object> scriptData = new Dictionary<string, object>();
-
-        //scriptData["resource"] = "https://onestore.microsoft.com/b2b/keys/create/collections";
-        scriptData["resource"] = resource;
-
-        _scriptService.RunScript("GetAzureADToken", scriptData.Serialize(), successCallback, failureCallback);
+        _scriptService.RunScript("GetAzureADToken", "{}", successCallback, failureCallback);
     }
 
     private async void GetMSStoreId(string ADToken, string userId)
@@ -98,6 +95,22 @@ public class IAPServiceUI : ContentUIBehaviour
 #endif
     }
 
+    private async void ConsumeUnfulfilledProduct(string productId)
+    {
+#if ENABLE_WINMD_SUPPORT
+                StoreConsumableResult result = await storeContext.GetConsumableBalanceRemainingAsync(productId);
+                if (result.Status == StoreConsumableStatus.Succeeded)
+                {
+                    Debug.Log($"Balance remaining: {result.BalanceRemaining}");
+                    if(result.BalanceRemaining > 0){
+                        //consume unfulfilled purchase
+                        Guid trackingId = Guid.NewGuid();
+                        await storeContext.ReportConsumableFulfillmentAsync(productId, result.BalanceRemaining, trackingId);
+                    }
+                }
+#endif
+    }
+
 
 
     protected override void InitializeUI()
@@ -105,6 +118,8 @@ public class IAPServiceUI : ContentUIBehaviour
         //load products
         string storeId = "windows";
         string userCurrency = "{\"userCurrency\":\"CAD\"}";
+
+        _IAPItems.Clear();
 
         SuccessCallback successCallback = (response, cbObject) =>
         {
@@ -125,7 +140,11 @@ public class IAPServiceUI : ContentUIBehaviour
                 Dictionary<string, object> priceData = (Dictionary<string, object>)data[i]["priceData"];
                 itemData.productId = priceData["id"].ToString();
 
+                ConsumeUnfulfilledProduct(itemData.productId);
+
                 UIItem.InitializeItem(itemData, OnItemSelected);
+
+                _IAPItems.Add(UIItem);
             }
         };
         FailureCallback failureCallback = (status, code, error, cbObject) =>
@@ -140,11 +159,16 @@ public class IAPServiceUI : ContentUIBehaviour
 
     private void OnItemSelected(IAPItem item)
     {
+        foreach(IAPItem iapItem in _IAPItems)
+        {
+            iapItem.itemSelected = false;
+        }
+
         _selectedItem = item;
         _buyButton.interactable = true;
     }
 
-    private async void OnBuyButtonClicked()
+    private void OnBuyButtonClicked()
     {
         if (_selectedItem == null) return;
 
@@ -162,10 +186,13 @@ public class IAPServiceUI : ContentUIBehaviour
     {
 #if ENABLE_WINMD_SUPPORT
         StorePurchaseResult result = await storeContext.RequestPurchaseAsync(productId);
+
+        Debug.Log($"Result: {result.Status}");
         switch (result.Status)
         {
             case StorePurchaseStatus.Succeeded:
                 Debug.Log("Purchase successful!");
+                
                 // get some info on the purchase
                 string[] filterList = new string[] { "Consumable", "Durable", "UnmanagedConsumable" };
 
@@ -185,11 +212,11 @@ public class IAPServiceUI : ContentUIBehaviour
                     Debug.Log("Product IsInUserCollection: " + product.IsInUserCollection);
                 }
 
+                //Get the receipt data to pass on the purchase data to brainCloud in order to verify the purchase
                 if(selectedProduct != null){
                     Debug.Log("Selected product: " + selectedProduct);
 
                     if(selectedProduct.Skus.Any()){
-                        Debug.Log("SKUs Any is true");
 
                         string jsonData = selectedProduct.Skus[0].CollectionData.ExtendedJsonData;
 
@@ -226,7 +253,6 @@ public class IAPServiceUI : ContentUIBehaviour
                         _appStoreService.VerifyPurchase("windows", receiptData.Serialize(), successCallback, failureCallback);
                     }
                 }
-
                 break;
             case StorePurchaseStatus.NotPurchased:
                 Debug.Log("Purchase canceled.");
@@ -241,8 +267,9 @@ public class IAPServiceUI : ContentUIBehaviour
 #endif
     }
 
-    private void ConsumeProductUWP(string productId, string transactionId, string userId, string msStoreId)
+    private async void ConsumeProductUWP(string productId, string transactionId, string userId, string msStoreId)
     {
+        /*
         //start by calling script to get AD token
         SuccessCallback successCallback = (response, cbObject) =>
         {
@@ -264,5 +291,27 @@ public class IAPServiceUI : ContentUIBehaviour
         scriptData["transactionId"] = transactionId;
 
         _scriptService.RunScript("ConsumeUWPProduct", scriptData.Serialize(), successCallback, failureCallback);
+        */
+#if ENABLE_WINMD_SUPPORT
+
+        Guid trackingId = Guid.NewGuid();
+        StoreConsumableResult consumeResult = await storeContext.ReportConsumableFulfillmentAsync(productId, 1, trackingId);
+        Debug.Log($"[IAP] Fulfillment result status: {consumeResult.Status}");
+                
+        if (consumeResult.Status == StoreConsumableStatus.Succeeded)
+        {
+            Debug.Log($"[IAP] Remaining balance: {consumeResult.BalanceRemaining}");
+            Debug.Log($"[IAP] Tracking ID: {consumeResult.TrackingId}");
+        }
+        else
+        {
+            Debug.LogWarning($"[IAP] Fulfillment failed. Status: {consumeResult.Status}");
+            if (consumeResult.ExtendedError != null)
+            {
+                Debug.LogError($"[IAP] Extended error: {consumeResult.ExtendedError.Message}");
+            }
+        }
+                
+#endif
     }
 }
