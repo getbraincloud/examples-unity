@@ -413,7 +413,7 @@ public class BCLobbyManager
                             Convert.ToString(signalData["continueLobbyId"]) == LobbyId)
                         {
                             // the leader needs to also tell all the others to do this same thing 
-                            LeavePhotonSessionToLobbyScreen();
+                            LeavePhotonSessionToLobbyScreen(false);
                         }
                     }
                 }
@@ -487,7 +487,7 @@ public class BCLobbyManager
                                     // if we leave we don't want to change this
                                     if (existingMember.isHost && Local.profileId != profileId)
                                     {
-                                        LeavePhotonSessionToLobbyScreen();
+                                        LeavePhotonSessionToLobbyScreen(true);
                                     }
                                     PlayerLeft?.Invoke(LobbyMembers[profileId]);
                                     LobbyMembers.Remove(profileId);
@@ -513,7 +513,7 @@ public class BCLobbyManager
         Debug.LogError($"BCLobbyManager OnEnableRTTError: {status}, {reasonCode}, {jsonError}");
     }
 
-    private void LeavePhotonSessionToLobbyScreen()
+    private void LeavePhotonSessionToLobbyScreen(bool showHostMessage)
     {
         
         // the leader needs to also tell all the others to do this same thing 
@@ -528,7 +528,7 @@ public class BCLobbyManager
 		// .show the lobby UI 
 		LobbyUI lobbyUI = Resources.FindObjectsOfTypeAll<LobbyUI>().FirstOrDefault();
         UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
-        lobbyUI.ShowLobbyDisplayMessage("Host Disconnected From Photon Session");
+        if (showHostMessage) lobbyUI.ShowLobbyDisplayMessage("Host Disconnected From Photon Session");
     }
 
     private void EnableRTT()
