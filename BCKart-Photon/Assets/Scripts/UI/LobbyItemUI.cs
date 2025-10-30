@@ -8,6 +8,7 @@ public class LobbyItemUI : MonoBehaviour {
     public Image ready;
     public Image leader;
     public Image kartDisplay;
+    public Image localUser;
 
     public Texture2D[] kartDisplayReferences;
 
@@ -28,6 +29,7 @@ public class LobbyItemUI : MonoBehaviour {
             username.text = _player.displayName;
             ready.gameObject.SetActive(_player.isReady);
             leader.gameObject.SetActive(_player.isHost);
+            localUser.gameObject.SetActive(_player.profileId == BCManager.LobbyManager.Local.profileId);
 
             // Update kart display only if changed
             if (_player.kartId != _lastKartId && 

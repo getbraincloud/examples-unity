@@ -381,6 +381,11 @@ public class BCLobbyManager
                                 {
                                     member.kartId = Convert.ToInt32(signalData["KartId"]);
                                     Debug.Log($"Member {member.displayName} KartId={member.kartId}");
+                                    // and update the rest
+                                    if (member.profileId == Local.profileId)
+                                    {
+                                        ClientInfo.KartId = member.kartId;
+                                    }
                                 }
                             }
                         }
