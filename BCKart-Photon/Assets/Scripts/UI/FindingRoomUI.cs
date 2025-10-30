@@ -94,8 +94,8 @@ public class FindingRoomUI : MonoBehaviour
                     int code = reason != null && reason.TryGetValue("code", out object codeObj) ? Convert.ToInt32(codeObj) : 0;
 
                     // quick find will create one as the last step
-                    if (!BCManager.LobbyManager.IsQuickFind &&
-                        data.TryGetValue("lobbyType", out object lobbyType) && lobbyType as string == BCManager.LobbyManager.GetLobbyString(1))
+                    //if (!BCManager.LobbyManager.IsQuickFind &&
+                    //    data.TryGetValue("lobbyType", out object lobbyType) && lobbyType as string == BCManager.LobbyManager.GetLobbyString(1))
                     {
                         timeSearchingText.text = $"Join failed: {desc}";
                         enableTimer = false;

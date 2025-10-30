@@ -63,7 +63,7 @@ public class BCLobbyManager
     {
         lobbyMemberSearch = MAX_MEMBERS_SEARCH;
         ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
-        recursiveOnError = true;
+        //recursiveOnError = true;
         _launcher = launcher;
         if (!ConfirmRTTEnabled())
         {
@@ -93,7 +93,7 @@ public class BCLobbyManager
     private bool findLobbyAfterEnable = false;
     public void FindLobby(GameLauncher launcher)
     {
-        recursiveOnError = true;
+        //recursiveOnError = true;
         _launcher = launcher;
         lobbyMemberSearch = MAX_MEMBERS_SEARCH;
         ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
@@ -109,7 +109,7 @@ public class BCLobbyManager
 
     public void CancelFind()
     {
-        recursiveOnError = false;
+        //recursiveOnError = false;
         if (SearchingEntryId != "")
         {
             BCManager.Wrapper.LobbyService.CancelFindRequest(ACTIVE_LOBBY_TYPE, SearchingEntryId);
@@ -320,6 +320,7 @@ public class BCLobbyManager
             // handle host migration ? I don't believe it works
             // since we are not the Relay service, photon 
             // and the MEMBER_LEFT events are needed to know when a host leaves
+            // disabled this at the moment, since we removed the max players 
             if (operation == "JOIN_FAIL" && recursiveOnError)
             {
                 --lobbyMemberSearch;
@@ -556,13 +557,15 @@ public class BCLobbyManager
 
     private bool quickFindRecursive = true;
 
-    private bool recursiveOnError = true;
+    private bool recursiveOnError = false;
     private void FindOrCreateLobby()
     {
-        quickFindRecursive = true;
+        //quickFindRecursive = true;
         var lobbyParams = CreateLobbyParams();
+        lobbyMemberSearch = MAX_MEMBERS_SEARCH;
         ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch);
-        if (lobbyMemberSearch == 0)
+
+        //if (lobbyMemberSearch == 0)
         {
             lobbyMemberSearch = MAX_MEMBERS_SEARCH;
             ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch); // back to eight
@@ -581,6 +584,7 @@ public class BCLobbyManager
                 OnLobbyError
             );
         }
+        /*
         else
         {
             BCManager.Wrapper.LobbyService.FindLobby(
@@ -597,6 +601,7 @@ public class BCLobbyManager
                 OnLobbyError
             );
         }
+        */
     }
     
 	public void JoinOrCreateLobby()
@@ -619,6 +624,9 @@ public class BCLobbyManager
     {
         var lobbyParams = CreateLobbyParams();
 
+        lobbyMemberSearch = MAX_MEMBERS_SEARCH;
+        ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch);
+
         BCManager.Wrapper.LobbyService.CreateLobby(
             ACTIVE_LOBBY_TYPE, 0, false,
             lobbyParams.extra,
@@ -633,10 +641,12 @@ public class BCLobbyManager
     private int lobbyMemberSearch = MAX_MEMBERS_SEARCH;
     private void FindLobby()
     {
-        quickFindRecursive = false;
+        //quickFindRecursive = false;
         var lobbyParams = CreateLobbyParams();
-        if (lobbyMemberSearch != 0)
+        //if (lobbyMemberSearch != 0)
         {
+            lobbyMemberSearch = MAX_MEMBERS_SEARCH;
+        
             ACTIVE_LOBBY_TYPE = GetLobbyString(lobbyMemberSearch);
             BCManager.Wrapper.LobbyService.FindLobby(
                 ACTIVE_LOBBY_TYPE,
@@ -652,6 +662,7 @@ public class BCLobbyManager
                 OnLobbyError
             );
         }
+        /*
         else
         {
             lobbyMemberSearch = MAX_MEMBERS_SEARCH;
@@ -660,6 +671,7 @@ public class BCLobbyManager
 
             OnLobbyEventReceived?.Invoke(jsonMessage);
         }
+        */
     }
 
     private LobbyParams CreateLobbyParams()
