@@ -22,6 +22,9 @@ public class LoginScreenUI : MonoBehaviour
         bool isAuthenticated = bcWrapper.Client.Authenticated;
         if (!isAuthenticated)
         {
+            // Un comment this section for auto login from stored credentials
+            // otherwise it will request to enter them each time.
+            /*
             if (storedProfile != null && storedProfile != "" &&
                 storedAnonymous != null && storedAnonymous != "")
             {
@@ -30,6 +33,7 @@ public class LoginScreenUI : MonoBehaviour
                     OnAuthError);
             }
             else
+            */
             {
                 UIScreen.Focus(myScreen);
             }

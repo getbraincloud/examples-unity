@@ -168,9 +168,9 @@ public class BCLobbyManager
         BCManager.Wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
     }
 
-    public string GetLobbyString(int inLobbyString)
+    public string GetLobbyString(int inLobbyInt)
     {
-        string lobbyType = inLobbyString switch
+        string lobbyType = inLobbyInt switch
         {
             1 => "one",
             2 => "two",
@@ -183,6 +183,22 @@ public class BCLobbyManager
             _ => "unknown"
         };
         return lobbyType;
+    }
+
+    public int GetLobbyInt(string inLobbyString)
+    {
+        return inLobbyString.ToLower() switch
+        {
+            "one"   => 1,
+            "two"   => 2,
+            "three" => 3,
+            "four"  => 4,
+            "five"  => 5,
+            "six"   => 6,
+            "seven" => 7,
+            "eight" => 8,
+            _       => -1 // unknown
+        };
     }
     
     public void SendKeepAlive()
@@ -511,7 +527,8 @@ public class BCLobbyManager
 
 		// .show the lobby UI 
 		LobbyUI lobbyUI = Resources.FindObjectsOfTypeAll<LobbyUI>().FirstOrDefault();
-		UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
+        UIScreen.Focus(lobbyUI.GetComponent<UIScreen>());
+        lobbyUI.ShowLobbyDisplayMessage("Host Disconnected From Photon Session");
     }
 
     private void EnableRTT()

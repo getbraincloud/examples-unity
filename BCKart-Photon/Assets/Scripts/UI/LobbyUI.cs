@@ -9,11 +9,15 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 {
 	public GameObject textPrefab;
 	public Transform parent;
+	
+	public Button leave;
 	public Button readyUp;
 	public Button customizeButton;
 	public Text trackNameText;
 	public Text modeNameText;
 	public Text lobbyNameText;
+	public Text lobbyMemberDisplayCountText;
+	public Text hostDropDisplayText;
 	public Dropdown trackNameDropdown;
 	public Dropdown gameTypeDropdown;
 	public Image trackIconImage;
@@ -50,10 +54,15 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	{
 		if (manager.Local == null)
 			return;
-		var isLeader = manager.Local.isHost;
-		trackNameDropdown.interactable = isLeader;
-		gameTypeDropdown.interactable = isLeader;
-		customizeButton.interactable = !manager.Local.isReady;
+
+		bool isHost = manager.Local.isHost;
+		bool lobbyStateStarting = manager.LobbyState == LobbyState.Starting;
+
+		trackNameDropdown.interactable = isHost && !lobbyStateStarting;
+		gameTypeDropdown.interactable = isHost && !lobbyStateStarting;
+		customizeButton.interactable = !manager.Local.isReady && !lobbyStateStarting;
+		leave.interactable = !lobbyStateStarting;
+		readyUp.interactable = !lobbyStateStarting;
 
 		lobbyNameText.text = "LobbyId: " + manager.LobbyId;
 		trackNameText.text = manager.TrackName;
@@ -84,12 +93,15 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 				// the leader is going to start this
 				// .the clients are going to wait for the host leader 
 				// .to be connected before connecting to it
-
-                Debug.Log($"CONNECTED: , Host={isLeader}");
-				if (isLeader) BCManager.LobbyManager.JoinOrCreateLobby();
+                Debug.Log($"CONNECTED: , Host={isHost}");
+				if (isHost) BCManager.LobbyManager.JoinOrCreateLobby();
+				
+				ShowLobbyDisplayMessage("Starting");
 			}
 		}
 		previousLobbyState = manager.LobbyState;
+
+		lobbyMemberDisplayCountText.text = manager.LobbyMembers.Count + "/" + manager.GetLobbyInt(BCLobbyManager.ACTIVE_LOBBY_TYPE);
 
 		// this will check if we should launch into the game
 		EnsureAllPlayersReady();
@@ -111,6 +123,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		Setup();
 		
 		UpdateDetails(BCManager.LobbyManager);
+		
 	}
 
 	void OnDisable()
@@ -139,6 +152,41 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 
 		IsSubscribed = true;
 	}
+
+    private float visibleTime = 5f;
+    private float fadeDuration = 1.5f; 
+
+    public void ShowLobbyDisplayMessage(string message)
+    {
+        hostDropDisplayText.text = message;
+        StartCoroutine(ShowAndFade());
+    }
+
+	private IEnumerator ShowAndFade()
+	{
+		hostDropDisplayText.gameObject.SetActive(true);
+
+		// reset alpha to full
+		Color color = hostDropDisplayText.color;
+		color.a = 1f;
+		hostDropDisplayText.color = color;
+
+		// wait visible time
+		yield return new WaitForSeconds(visibleTime);
+
+		float t = 0f;
+		while (t < fadeDuration)
+		{
+			t += Time.deltaTime;
+			float alpha = Mathf.Lerp(1f, 0f, t / fadeDuration);
+			color.a = alpha;
+			hostDropDisplayText.color = color;
+			yield return null;
+		}
+
+		hostDropDisplayText.gameObject.SetActive(false);
+	}
+	
 	
 	private void OnCleanup()
     {
