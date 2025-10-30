@@ -17,5 +17,6 @@ public class RoomPlayerItemUI : MonoBehaviour {
     private void Update() {
         username.text = _player.Username.Value;
         ready.gameObject.SetActive(_player.IsReady);
+        leader.gameObject.SetActive(BCManager.LobbyManager.Local.isHost);
     }
 }

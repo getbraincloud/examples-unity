@@ -8,6 +8,8 @@ public class LoginScreenUI : MonoBehaviour
     public InputField pwdInput;
     public Button confirmButton;
 
+	public Text authErrorText;
+
     public UIScreen profileSetupUI;
 
     public void AssertProfileLoggedAuthenticated()
@@ -53,6 +55,12 @@ public class LoginScreenUI : MonoBehaviour
             // disallows empty pwd to be input
             confirmButton.interactable = !string.IsNullOrEmpty(x);
         });
+        authErrorText.gameObject.SetActive(false);
+    }
+
+    void OnEnable()
+    {
+        authErrorText.gameObject.SetActive(false);
     }
 
     public void OnLogin()
@@ -72,6 +80,7 @@ public class LoginScreenUI : MonoBehaviour
 
     public void OnAuthSuccess(string jsonResponse, object cbObject)
     {
+        authErrorText.gameObject.SetActive(false);
         Debug.Log("LoginScreenUI OnAuthSuccess: " + jsonResponse);
 
         BrainCloudAuthResponse authResponse = JsonUtility.FromJson<BrainCloudAuthResponse>(jsonResponse);
@@ -103,6 +112,11 @@ public class LoginScreenUI : MonoBehaviour
                     authenticateWithBrainCloud(true);
                 }
                 break;
+            default:
+                {
+                    authErrorText.text = "Incorrect username or password, please try again.";
+                    authErrorText.gameObject.SetActive(true);
+                }break;
         }
     }
     

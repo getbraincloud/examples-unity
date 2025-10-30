@@ -19,8 +19,22 @@ public class KartSelectUI : MonoBehaviour
         if (SpotlightGroup.Search("Kart Display", out SpotlightGroup spotlight)) spotlight.FocusIndex(kartIndex);
 		ApplyStats();
 
-        if ( RoomPlayer.Local != null ) {
-            RoomPlayer.Local.RPC_SetKartId(kartIndex);
+		if (RoomPlayer.Local != null)
+		{
+			RoomPlayer.Local.RPC_SetKartId(kartIndex);
+		}
+		
+		if (BCManager.LobbyManager.Local != null)
+        {
+			ClientInfo.KartId = kartIndex;
+			BCManager.LobbyManager.Local.kartId = kartIndex;
+			// send signal update
+			
+			Dictionary<string, object> signalData = new Dictionary<string, object>();
+
+			signalData["KartId"] = BCManager.LobbyManager.Local.kartId; // kartId
+
+			BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId, signalData);
         }
 	}
 

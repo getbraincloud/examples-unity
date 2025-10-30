@@ -368,7 +368,24 @@ public class BCLobbyManager
                 {
                     var signalData = signalDataObj as Dictionary<string, object>;
                     // regular lobby updates and connected events
-                    if (signalData != null && signalData.ContainsKey("TrackId"))
+                    if (signalData != null && signalData.ContainsKey("KartId"))
+                    {
+                        // Update the member that sent this signal
+                        if (data.TryGetValue("from", out object fromObj))
+                        {
+                            var fromDict = fromObj as Dictionary<string, object>;
+                            if (fromDict != null && fromDict.TryGetValue("id", out object fromIdObj))
+                            {
+                                string profileId = fromIdObj as string;
+                                if (!string.IsNullOrEmpty(profileId) && LobbyMembers.TryGetValue(profileId, out LobbyMember member))
+                                {
+                                    member.kartId = Convert.ToInt32(signalData["KartId"]);
+                                    Debug.Log($"Member {member.displayName} KartId={member.kartId}");
+                                }
+                            }
+                        }
+                    }
+                    else if (signalData != null && signalData.ContainsKey("TrackId"))
                     {
                         if (signalData.ContainsKey("TrackId"))
                         {
