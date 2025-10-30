@@ -139,7 +139,8 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 	    // Clear the dictionary to remove leftover references
 	    ListItems.Clear();
 
-	    OnCleanup();
+		OnCleanup();
+		hostDropDisplayText.gameObject.SetActive(false);
 	}
 
 	public void Setup()

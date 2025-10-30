@@ -116,6 +116,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 			signalData["TrackId"] = BCManager.LobbyManager.TrackId; // TrackId
 			signalData["GameTypeId"] = BCManager.LobbyManager.GameTypeId;// GameTypeId
 			signalData["Connected"] = true; // this client has should be updated as connected
+			signalData["lobbyId"] = BCManager.LobbyManager.LobbyId;
 			BCManager.LobbyManager.Local.isConnected = true;
 
 			BCManager.LobbyService.SendSignal(BCManager.LobbyManager.LobbyId, signalData);
@@ -152,7 +153,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		Debug.Log("Disconnected from server");
 		LeavePhotonGameSession();
 	}
-	
+
 	public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
 	{
 		if (runner.TryGetSceneInfo(out var scene) && scene.SceneCount > 0)
@@ -163,6 +164,7 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		else
 			request.Accept();
 	}
+	
 	public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
 	{
 		Debug.Log($"Connect failed {reason}");

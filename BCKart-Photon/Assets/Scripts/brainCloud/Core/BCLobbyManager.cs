@@ -380,6 +380,11 @@ public class BCLobbyManager
                             GameTypeId = Convert.ToInt32(signalData["GameTypeId"]);
                         }
 
+                        if (signalData.ContainsKey("lobbyId"))
+                        {
+                            LobbyId = Convert.ToString(signalData["lobbyId"]);
+                        }
+
                         bool connected = signalData.ContainsKey("Connected") ? Convert.ToBoolean(signalData["Connected"]) : false;
 
                         Debug.Log($"Received SIGNAL: TrackId={TrackId}, GameTypeId={GameTypeId}");
