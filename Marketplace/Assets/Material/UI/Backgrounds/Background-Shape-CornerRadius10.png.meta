@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 14e1b758097314c6786cf49178ad25f2
+guid: 49855121c8255484c82db603e7d23426
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2909440997979129498
-    second: Background-Shape-Rounded-10-Blur-20_0
+      213: -7275912714148827320
+    second: Background-Shape-CornerRadius10_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,13 +46,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 200
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteBorder: {x: 20, y: 20, z: 20, w: 20}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -72,7 +72,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 256
+    maxTextureSize: 64
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 2
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Background-Shape-Rounded-10-Blur-20_0
+      name: Background-Shape-CornerRadius10_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 160
-        height: 160
+        width: 40
+        height: 40
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 80, y: 80, z: 80, w: 80}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 669fe74c3d69f97d0800000000000000
-      internalID: -2909440997979129498
+      spriteID: 84f29689fe3c60b90800000000000000
+      internalID: -7275912714148827320
       vertices: []
       indices: 
       edges: []
@@ -138,8 +138,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 1bda7ad70f897427f86e13bfcf84ec8b
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Background-Shape-Rounded-10-Blur-20_0: -2909440997979129498
+      Background-Shape-CornerRadius10_0: -7275912714148827320
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
