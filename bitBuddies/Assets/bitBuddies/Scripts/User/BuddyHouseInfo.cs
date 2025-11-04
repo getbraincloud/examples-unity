@@ -27,15 +27,20 @@ public class BuddyHouseInfo : MonoBehaviour
 		_parentTransform = FindAnyObjectByType<ParentMenu>().transform;
 		_buddySprite.sprite = AssetLoader.LoadSprite(HouseInfo.buddySpritePath); 
 		_buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName + "'s Home";
-		_collectCoinsButton.gameObject.SetActive(false);
-		// if(HouseInfo.coinsEarnedInHolding >= enableCollectCoinsButtonMinValue)
-		// {
-		// 	_collectCoinsButton.gameObject.SetActive(true);
-		// }
-		// else
-		// {
-		// 	_collectCoinsButton.gameObject.SetActive(false);
-		// }
+		
+		CheckCoinsButton();
+	}
+	
+	private void CheckCoinsButton()
+	{
+		if(HouseInfo.coinsEarnedInHolding >= enableCollectCoinsButtonMinValue)
+		{
+			_collectCoinsButton.gameObject.SetActive(true);
+		}
+		else
+		{
+			_collectCoinsButton.gameObject.SetActive(false);
+		}
 	}
 	
 	private void OnVisitButton()
@@ -89,18 +94,22 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnCollectCoinsButton()
 	{
 		Dictionary<string, object> scriptData = new Dictionary<string, object>();
-		// BrainCloudManager.Wrapper.ScriptService.RunScript
-		// (
-		// 	BitBuddiesConsts.UPDATE_CHILD_COINS_COLLECTED_SCRIPT_NAME, 
-		// 	scriptData.Serialize(), 
-		// 	BrainCloudManager.HandleSuccess("Update Child Coin Timestamp Success",OnUpdateSummaryDataSuccess),
-		// 	BrainCloudManager.HandleFailure("Update Child Coin Timestamp Failed", OnUpdateSummaryDataFailure)
-		// );
+		scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
+		scriptData.Add("profileId", HouseInfo.profileId);
+		scriptData.Add("summaryFriendData", HouseInfo.summaryFriendData);
+		BrainCloudManager.Wrapper.ScriptService.RunScript
+		(
+			BitBuddiesConsts.UPDATE_CHILD_COINS_COLLECTED_SCRIPT_NAME, 
+			scriptData.Serialize(), 
+			BrainCloudManager.HandleSuccess("Update Child Coin Timestamp Success",OnUpdateSummaryDataSuccess),
+			BrainCloudManager.HandleFailure("Update Child Coin Timestamp Failed", OnUpdateSummaryDataFailure)
+		);
 	}
 	
 	private void OnUpdateSummaryDataSuccess(string jsonResponse)
 	{
-		
+		HouseInfo.coinsEarnedInHolding = 0;
+		CheckCoinsButton();
 	}
 	
 	private void OnUpdateSummaryDataFailure()

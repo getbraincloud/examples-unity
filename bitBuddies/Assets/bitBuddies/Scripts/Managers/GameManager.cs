@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using BrainCloud.Plugin;
 using Gameframework;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [Serializable]
 public class AppChildrenInfo
@@ -27,7 +29,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 {
 	[Tooltip("Debug")]
 	[SerializeField] public bool Debug;
-	
+	private EventSystem _eventSystem;
 	[Tooltip("App Info")]
 	private List<AppChildrenInfo> appChildrenInfos = new List<AppChildrenInfo>();
 	public List<AppChildrenInfo> AppChildrenInfos
@@ -52,7 +54,27 @@ public class GameManager : SingletonBehaviour<GameManager>
 	public override void Awake()
 	{
 		_selectedAppChildrenInfo = new AppChildrenInfo();
+		_eventSystem = EventSystem.current;
 		base.Awake();
+	}
+	
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.Tab) && _eventSystem.currentSelectedGameObject != null)
+		{
+			Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+         
+			if (next != null)
+			{
+				InputField inputfield = next.GetComponent<InputField>();
+				if (inputfield != null)
+				{
+					//if it's an input field, also set the text caret
+					inputfield.OnPointerClick(new PointerEventData(_eventSystem));
+				}
+				_eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
+			}
+		}
 	}
 	
 	public void OnDeleteBuddySuccess()

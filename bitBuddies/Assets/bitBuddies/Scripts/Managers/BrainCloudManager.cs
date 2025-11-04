@@ -226,6 +226,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             
             if(summaryFriendData != null)
             {
+                dataInfo.summaryFriendData = summaryFriendData;
                 //Get Summary data
                 if(summaryFriendData.ContainsKey("rarity"))
                 {
