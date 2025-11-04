@@ -12,11 +12,14 @@ public class LoginScreen : ContentUIBehaviour
     [SerializeField] private Button OpenCreateAccountButton;
     [SerializeField] private Button OpenLoginButton;
     [SerializeField] private Button LoginButton;
-    [SerializeField] private Button ForgotPasswordButton;
+    [SerializeField] private Button OpenForgotPasswordButton;
+    [SerializeField] private Button SubmitEmailButton;
     [SerializeField] private TMP_Text _gameVersionText;
     [SerializeField] private TMP_Text _bcClientVersionText;
     [SerializeField] private TMP_InputField Email;
     [SerializeField] private TMP_InputField Password;
+    [SerializeField] private TMP_InputField ForgotPasswordEmailInputField;
+    [SerializeField] private GameObject ForgotPasswordPanel;
     private bool _createAccount;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -28,11 +31,13 @@ public class LoginScreen : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
+        ForgotPasswordPanel.SetActive(false);
         QuickCreateButton.onClick.AddListener(OnQuickCreateButtonClick);
         OpenLoginButton.onClick.AddListener(OnOpenLoginButtonClick);
         OpenCreateAccountButton.onClick.AddListener(OnOpenCreateAccountButtonClick);
         LoginButton.onClick.AddListener(OnLoginButtonClick);
-        ForgotPasswordButton.onClick.AddListener(OnForgotPasswordButtonClick);
+        SubmitEmailButton.onClick.AddListener(OnForgotPasswordButtonClick);
+        OpenForgotPasswordButton.onClick.AddListener(OnOpenForgotPasswordPanel);
         
         _gameVersionText.text = $"Game Version: {Application.version}";
         _bcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
@@ -54,31 +59,33 @@ public class LoginScreen : ContentUIBehaviour
     private void OnOpenCreateAccountButtonClick()
     {
         _createAccount = true;
+        OpenForgotPasswordButton.gameObject.SetActive(false);
     }
     
     private void OnOpenLoginButtonClick()
     {
         _createAccount = false;
+        OpenForgotPasswordButton.gameObject.SetActive(true);
     }
 
     private void OnLoginButtonClick()
     {
         if(Email.text.IsNullOrEmpty())
         {
-            //ToDo: make a pop up
+            StateManager.Instance.OpenInfoPopUp("Username is empty", "Please enter a username");
             Debug.LogError("Username is empty");
             return;
         }
         if(Password.text.IsNullOrEmpty())
         {
-            //ToDo: make a pop up
+            StateManager.Instance.OpenInfoPopUp("Password is empty", "Please enter a password");
             Debug.LogError("Password is empty");
             return;
         }
         
         if(!IsEmailValid(Email.text))
         {
-            //ToDo: make a pop up
+            StateManager.Instance.OpenInfoPopUp("Email entered is invalid", "Please enter a valid email");
             Debug.LogError("Please enter a valid email");
             return;
         }
@@ -90,7 +97,7 @@ public class LoginScreen : ContentUIBehaviour
         BrainCloudManager.Instance.UserInfo.UpdateUsername(username);
         BrainCloudManager.Instance.UserInfo.UpdateEmail(Email.text);
         
-        AuthenticateUniversal(Email.text, Password.text);
+        AuthenticateEmail(Email.text, Password.text);
     }
     
     private static bool IsEmailValid(string in_email)
@@ -106,9 +113,9 @@ public class LoginScreen : ContentUIBehaviour
         }
     }
         
-    private void AuthenticateUniversal(string username, string password)
+    private void AuthenticateEmail(string username, string password)
     {
-        BrainCloudManager.Wrapper.AuthenticateUniversal
+        BrainCloudManager.Wrapper.AuthenticateEmailPassword
         (
             username, 
             password, 
@@ -127,11 +134,17 @@ public class LoginScreen : ContentUIBehaviour
     
     private void OnFailureCallback()
     {
+        StateManager.Instance.OpenInfoPopUp("Something went wrong", "Please try again later");
+    }
     
+    private void OnOpenForgotPasswordPanel()
+    {
+        ForgotPasswordPanel.SetActive(true);
     }
     
     private void OnForgotPasswordButtonClick()
     {
-        
+        //No idea why but I keep getting status 202 and reason code 40209
+        BrainCloudManager.Wrapper.ResetEmailPassword(ForgotPasswordEmailInputField.text, null, OnFailure("Something went wrong", OnFailureCallback));
     }
 }
