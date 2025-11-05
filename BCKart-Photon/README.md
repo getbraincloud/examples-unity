@@ -12,11 +12,13 @@ The core integration removes Photon’s default room-based logic in favor of bra
 
 ## Known Issues
 
-- If the host leaves during gameplay, the match and lobby will be lost.  
+- If the host leaves during gameplay, the match will be lost, all remaining users will return to the brainCloud Lobby.
 
 ---
 
 ## Getting Started
+
+Mac Users, you may need to run ** xattr -r -d com.apple.quarantine ./BCKart-Photon.app ** and accept its permissions since the app is unsigned.
 
 ### Requirements
 
