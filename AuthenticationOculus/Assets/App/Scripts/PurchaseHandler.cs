@@ -9,6 +9,8 @@ using UnityEngine;
 
 public class PurchaseHandler : MonoBehaviour
 {
+    private const bool CONSUME_ON_BRAINCLOUD_VERIFY = true;
+
     private const string INFO_LOG_INTO_BC = "Log In to\nbrainCloud\nto start IAP";
     private const string INFO_LOADING_PURCHASING = "Loading IAP\nPurchasing...";
     private const string INFO_IAP_AVAILABILITY = "IAP is only available on\nQuest Devices";
@@ -28,6 +30,7 @@ public class PurchaseHandler : MonoBehaviour
 
     // For User durables management
     private const string ENTITY_TYPE = "inventory";
+    private int UpdateDurablesCount = 0;
     private string UserDurablesEntityID = string.Empty;
     private List<string> UserDurables = null;
 
@@ -72,10 +75,13 @@ public class PurchaseHandler : MonoBehaviour
 
     private void OnDisable()
     {
-        WaitContent.SetActive(true);
-        PurchaseContent.SetActive(false);
+        if (WaitContent != null && PurchaseContent != null)
+        {
+            WaitContent.SetActive(true);
+            PurchaseContent.SetActive(false);
 
-        UpdateInfoLabel(INFO_LOG_INTO_BC);
+            UpdateInfoLabel(INFO_LOG_INTO_BC);
+        }
     }
 
     private void OnDestroy()
@@ -86,7 +92,10 @@ public class PurchaseHandler : MonoBehaviour
         {
             for (int i = 0; i < IAPItems.Count; i++)
             {
-                Destroy(IAPItems[i].gameObject);
+                if (IAPItems[i] != null && IAPItems[i].gameObject != null)
+                {
+                    Destroy(IAPItems[i].gameObject);
+                }
                 IAPItems[i] = null;
             }
 
@@ -134,16 +143,17 @@ public class PurchaseHandler : MonoBehaviour
             return;
         }
 
-        List<string> tempUserDurables = new(UserDurables);
-        tempUserDurables.Add(sku);
+        UpdateDurablesCount++;
+
+        UserDurables.Add(sku);
 
         BC.EntityService.UpdateEntity(UserDurablesEntityID,
-            ENTITY_TYPE,
-            JsonWriter.Serialize(new Dictionary<string, object> { { "durables", tempUserDurables } }),
-            ACL.None().ToJsonString(),
-            -1,
-            null,
-            OnBrainCloudFailure);
+                                      ENTITY_TYPE,
+                                      JsonWriter.Serialize(new Dictionary<string, object> { { "durables", UserDurables } }),
+                                      ACL.None().ToJsonString(),
+                                      -1,
+                                      (_, __) => UpdateDurablesCount--,
+                                      OnBrainCloudFailure);
     }
 
     #region Flows
@@ -156,7 +166,7 @@ public class PurchaseHandler : MonoBehaviour
 
         yield return new WaitForFixedUpdate();
 
-        // Clear IAP if we are calling this again
+        // Clear IAPItems if we are calling this again
         if (IAPItems != null && IAPItems.Count > 0)
         {
             for (int i = 0; i < IAPItems.Count; i++)
@@ -227,6 +237,7 @@ public class PurchaseHandler : MonoBehaviour
                     IAPItems.Remove(item);
                 }
 
+                toRemove.Clear();
                 isSuccess = true;
             }
         });
@@ -236,6 +247,8 @@ public class PurchaseHandler : MonoBehaviour
 
         // Verify purchases; this will consume consumables and set durables to unpurchasable
         isSuccess = false;
+        int purchaseCount = 0;
+        bool verifyDurables = false;
         IAP.GetViewerPurchases().OnComplete((msg) =>
         {
             if (msg.IsError)
@@ -244,39 +257,51 @@ public class PurchaseHandler : MonoBehaviour
                 DisplayError(msg.GetError().Message);
                 return;
             }
-            else if (msg.GetPurchaseList() != null &&
+            else if (msg.GetPurchaseList() == null ||
                      msg.GetPurchaseList().Count <= 0)
             {
                 isSuccess = true;
             }
             else
             {
-                bool verifyPurchases = false;
-                foreach (Purchase iap in msg.GetPurchaseList())
+                foreach (Purchase purchase in msg.GetPurchaseList())
                 {
                     foreach (IAPItem item in IAPItems)
                     {
-                        if (iap.Sku == item.Product.IAPSku)
+                        if (purchase.Sku == item.Product.IAPSku)
                         {
-                            if (UserDurables.Contains(iap.Sku))
+                            Debug.Log("Got User Purchase:\n" +
+                                     $"Sku: {purchase.Sku}\n" +   // Required for AppStore.VerifyPurchase
+                                     $"Type: {purchase.Type}\n" +
+                                     $"ID: {purchase.ID}\n" +     // Required for AppStore.VerifyPurchase
+                                     $"ReportingId: {purchase.ReportingId}\n" +
+                                     $"GrantTime: {(ulong)BrainCloud.TimeUtil.UTCDateTimeToUTCMillis(purchase.GrantTime)}\n" +
+                                     $"ExpirationTime: {(ulong)BrainCloud.TimeUtil.UTCDateTimeToUTCMillis(purchase.ExpirationTime)}\n" +
+                                     $"DeveloperPayload:\n{purchase.DeveloperPayload}");
+
+                            if (item.Product.IAPProductType == ProductType.DURABLE &&
+                                UserDurables.Contains(purchase.Sku))
                             {
                                 item.SetToPurchased();
                             }
                             else
                             {
-                                verifyPurchases = true;
+                                purchaseCount++;
+                                verifyDurables = verifyDurables || item.Product.IAPProductType == ProductType.DURABLE;
 
                                 BC.AppStoreService
                                   .VerifyPurchase("metaHorizon",
                                                   JsonWriter.Serialize(new Dictionary<string, object>
                                                   {
-                                                      { "userId", LoginHandler.MetaUserID },
-                                                      { "sku",    iap.Sku                 }
+                                                      { "userId",          LoginHandler.MetaUserID      },
+                                                      { "sku",             purchase.Sku                 },
+                                                      { "transactionId",   purchase.ID                  },
+                                                      { "consumeOnVerify", CONSUME_ON_BRAINCLOUD_VERIFY }
                                                   }),
                                                   (jsonResponse, cbObject) =>
                                                   {
                                                       OnVerifyPurchaseSuccess(jsonResponse, cbObject);
-                                                      isSuccess = true;
+                                                      purchaseCount--;
                                                   },
                                                   OnBrainCloudFailure);
                             }
@@ -286,12 +311,19 @@ public class PurchaseHandler : MonoBehaviour
                     }
                 }
 
-                isSuccess = !verifyPurchases;
+                isSuccess = true;
             }
         });
 
-        yield return new WaitUntil(() => isSuccess);
+        yield return new WaitUntil(() => isSuccess && purchaseCount <= 0);
         yield return new WaitForFixedUpdate();
+
+        // If there are durables in our verify then we will restart this process to update our UserDurables list properly
+        if (verifyDurables)
+        {
+            yield return GetIAPItems();
+            yield break;
+        }
 
         if (string.IsNullOrWhiteSpace(ErrorMessage.text))
         {
@@ -304,6 +336,9 @@ public class PurchaseHandler : MonoBehaviour
 
     private IEnumerator GetUserInventory()
     {
+        // If user's durables entity is being updated we will wait until that process is done
+        yield return new WaitUntil(() => UpdateDurablesCount <= 0);
+
         bool isSuccess = false;
 
         void onCreateUserInventory(string jsonResponse, object cbObject)
@@ -335,6 +370,7 @@ public class PurchaseHandler : MonoBehaviour
                     }
                 }
 
+                // Let's store the entityId for easy updating
                 if (entity.ContainsKey("entityId") && entity["entityId"] is string id)
                 {
                     UserDurablesEntityID = id;
@@ -366,27 +402,25 @@ public class PurchaseHandler : MonoBehaviour
 
         yield return new WaitForFixedUpdate();
 
+        // Launch the Meta Horizon purchase flow and wait for its OnComplete
         bool isSuccess = false;
         IAP.LaunchCheckoutFlow(sku).OnComplete((msg) =>
         {
             if (msg.IsError)
             {
-                if (msg.GetError().Message is string message)
+                if (msg.GetError().Message.Contains("user_canceled"))
                 {
-                    if (message.Contains("user_cancelled"))
-                    {
-                        WaitContent.SetActive(true);
-                        PurchaseContent.SetActive(false);
+                    WaitContent.SetActive(true);
+                    PurchaseContent.SetActive(false);
 
-                        UpdateInfoLabel($"Purchase Cancelled");
+                    UpdateInfoLabel($"Purchase Cancelled");
 
-                        isSuccess = true;
-                    }
-                    else
-                    {
-                        DisplayError("IAP.LaunchCheckoutFlow Error:");
-                        DisplayError(msg.GetError().Message);
-                    }
+                    isSuccess = true;
+                }
+                else
+                {
+                    DisplayError("IAP.LaunchCheckoutFlow Error:");
+                    DisplayError(msg.GetError().Message);
                 }
             }
             else
@@ -399,12 +433,12 @@ public class PurchaseHandler : MonoBehaviour
                 UpdateInfoLabel($"You Purchased:\n{purchase.Sku}");
 
                 Debug.Log("Purchased Product:\n" +
-                         $"Sku: {purchase.Sku}\n" +
+                         $"Sku: {purchase.Sku}\n" +   // Required for AppStore.VerifyPurchase
                          $"Type: {purchase.Type}\n" +
-                         $"ID: {purchase.ID}\n" +
+                         $"ID: {purchase.ID}\n" +     // Required for AppStore.VerifyPurchase
                          $"ReportingId: {purchase.ReportingId}\n" +
-                         $"GrantTime: {purchase.GrantTime.ToLongDateString()} {purchase.GrantTime.ToLongTimeString()}\n" +
-                         $"ExpirationTime: {purchase.ExpirationTime.ToLongDateString()} {purchase.ExpirationTime.ToLongTimeString()}\n" +
+                         $"GrantTime: {(ulong)BrainCloud.TimeUtil.UTCDateTimeToUTCMillis(purchase.GrantTime)}\n" +
+                         $"ExpirationTime: {(ulong)BrainCloud.TimeUtil.UTCDateTimeToUTCMillis(purchase.ExpirationTime)}\n" +
                          $"DeveloperPayload:\n{purchase.DeveloperPayload}");
 
                 isSuccess = true;
@@ -453,6 +487,8 @@ public class PurchaseHandler : MonoBehaviour
                 !string.IsNullOrWhiteSpace(transaction["errorMessage"].ToString()))
             {
                 status = transaction["errorMessage"].ToString();
+
+                // If the item's already been processed by brainCloud we still need to process it on our end
                 if (status.ToLower().Contains("already") && status.ToLower().Contains("processed") &&
                     GetMetaProduct(productId) is Product product)
                 {
@@ -510,19 +546,29 @@ public class PurchaseHandler : MonoBehaviour
             Debug.Log($"Purchase(s) verified with brainCloud!");
         }
 
-        // Consume products!
         foreach (var iap in paidProducts)
         {
-            IAP.ConsumePurchase(iap.IAPSku); // Note: Durables seem to be consumed immediately on purchase
+            /*
+             * brainCloud will consume CONSUMABLEs if
+             * CONSUME_ON_BRAINCLOUD_VERIFY is set to true;
+             * if set to false we will do it here
+            */
+            if (!CONSUME_ON_BRAINCLOUD_VERIFY &&
+                iap.IAPProductType == ProductType.CONSUMABLE)
+            {
+                IAP.ConsumePurchase(iap.IAPSku);
+            }
 
+            /*
+             * We'll add DURABLEs to our user's
+             * DURABLEs list for quick referencing
+            */
             if (iap.IAPProductType == ProductType.DURABLE)
             {
                 UpdateUserDurables(iap.IAPSku);
             }
         }
     }
-
-    #endregion
 
     private void OnBrainCloudFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
@@ -532,6 +578,8 @@ public class PurchaseHandler : MonoBehaviour
 
         DisplayError($"Error Received - Status: {status} || Reason {reasonCode} || Message:\n{error["status_message"]}");
     }
+
+    #endregion
 
     private void DisplayError(string msg)
     {

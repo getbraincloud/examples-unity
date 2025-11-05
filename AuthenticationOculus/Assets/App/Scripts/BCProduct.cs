@@ -32,13 +32,18 @@ public class BCProduct
     {
         get
         {
-            switch(type)
+            if (MetaProduct != null)
             {
-                case "Consumable":
+                return MetaProduct.Type;
+            }
+
+            switch(type.ToLower())
+            {
+                case "consumable":
                     return ProductType.CONSUMABLE;
-                case "Nonconsumable":
+                case "nonconsumable":
                     return ProductType.DURABLE;
-                case "Subscription":
+                case "subscription":
                     return ProductType.SUBSCRIPTION;
                 default:
                     Debug.LogWarning($"BCProduct.type is null or unknown: '{type}'.");
