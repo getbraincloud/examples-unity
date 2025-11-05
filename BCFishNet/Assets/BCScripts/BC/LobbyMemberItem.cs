@@ -65,7 +65,7 @@ public class LobbyMemberItem : MonoBehaviour
     public void ApplyColorUpdate(Color color)
     {
         // changes this colour
-        Image img = playerName.transform.parent.gameObject.GetComponent<Image>();
+        Image img = playerName.transform.parent.parent.gameObject.GetComponent<Image>();
         if (img != null)
         {
             img.color = color;
@@ -77,7 +77,7 @@ public class LobbyMemberItem : MonoBehaviour
 
     public void SendCurrentColourSignal()
     {
-        Image img = playerName.transform.parent.gameObject.GetComponent<Image>();
+        Image img = playerName.transform.parent.parent.gameObject.GetComponent<Image>();
         if (img != null)
         {
             Color color = img.color;
@@ -112,11 +112,7 @@ public class LobbyMemberItem : MonoBehaviour
     public void UpdateUI()
     {
         playerName.text = !string.IsNullOrEmpty(_data.PlayerNameValue) ? _data.PlayerNameValue : "Guest_" + _data.ProfileId.Substring(0, 4);
-        if (_data.ProfileId == BCManager.Instance.bc.Client.ProfileId)
-        {
-            playerName.text += " (You)";
-        }
-        playerName.text += _data.ReadyStateValue ? "\n[Ready]" : "\n[Not Ready]";
+
         _readyStateHolder.SetActive(_data.ReadyStateValue);
         _notReadyStateHolder.SetActive(!_data.ReadyStateValue);
 

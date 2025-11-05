@@ -168,7 +168,7 @@ public class BrainCloudManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            _bcWrapper.PlayerStateService.UpdateName(tempUsername, OnUpdateName, LogErrorThenPopUpWindow,
+            _bcWrapper.PlayerStateService.UpdateName(tempUsername, null, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         else
@@ -178,7 +178,7 @@ public class BrainCloudManager : MonoBehaviour
             {
                 userInfo.Username = tempUsername;
             }
-            _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnUpdateName, LogErrorThenPopUpWindow,
+            _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, null, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         GameManager.Instance.CurrentUserInfo = userInfo;
@@ -189,13 +189,19 @@ public class BrainCloudManager : MonoBehaviour
             _bcWrapper.ResetStoredProfileId();
             _bcWrapper.Client.AuthenticationService.ProfileId = profileID;
         }
-    }
-    
-    private void OnUpdateName(string jsonResponse, object cbObject)
-    {
-        _bcWrapper.GlobalAppService.ReadProperties(OnReadProperties, LogErrorThenPopUpWindow);
-        _bcWrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback);
 
+        if (colours.Count == 0)
+        {
+            _bcWrapper.GlobalAppService.ReadProperties(OnReadProperties, LogErrorThenPopUpWindow);
+            _bcWrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback);
+        }
+        else
+        {
+            // Enable RTT
+            _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+            _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
+            _bcWrapper.RTTService.EnableRTT(OnEnableRTT, OnRTTDisconnected);
+        }
     }
     
     private void OnReadProperties(string jsonResponse, object cbObject)
@@ -760,16 +766,17 @@ public class BrainCloudManager : MonoBehaviour
                     break;
                 case "DISBANDED":
                 {
-                    var reason = jsonData["reason"] as Dictionary<string, object>;
-                    if ((int) reason["code"] != ReasonCodes.RTT_ROOM_READY)
-                    {
-                        // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                        CloseGame(true);
-                    }
-                    else
-                    {
-                        OnRoomLaunchFailure();
-                    }
+                    // var reason = jsonData["reason"] as Dictionary<string, object>;
+                    // if ((int) reason["code"] != ReasonCodes.RTT_ROOM_READY)
+                    // {
+                    //     // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
+                    //     CloseGame(true);
+                    // }
+                    // else
+                    // {
+                         //OnRoomLaunchFailure();
+                    // }
+                    
                     break;
                 }
                 case "STARTING":
@@ -864,18 +871,27 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
 
         int port = 0;
-        switch (StateManager.Instance.Protocol)
+        
+        if(StateManager.Instance.CurrentServer.i3dPort != -1)
         {
-            case RelayConnectionType.WEBSOCKET:
-                port = StateManager.Instance.CurrentServer.WsPort;
-                break;
-            case RelayConnectionType.TCP:
-                port = StateManager.Instance.CurrentServer.TcpPort;
-                break;
-            case RelayConnectionType.UDP:
-                port = StateManager.Instance.CurrentServer.UdpPort;
-                break;
+            port = StateManager.Instance.CurrentServer.i3dPort;
         }
+        else
+        {
+            switch (StateManager.Instance.Protocol)
+            {
+                case RelayConnectionType.WEBSOCKET:
+                    port = StateManager.Instance.CurrentServer.WsPort;
+                    break;
+                case RelayConnectionType.TCP:
+                    port = StateManager.Instance.CurrentServer.TcpPort;
+                    break;
+                case RelayConnectionType.UDP:
+                    port = StateManager.Instance.CurrentServer.UdpPort;
+                    break;
+            }
+        }
+
 
         Server server = StateManager.Instance.CurrentServer;
         if(_noServerSelected)
@@ -885,7 +901,7 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.Protocol,
                 new RelayConnectOptions(false, server.Host, port, server.Passcode, serverId), // .this had a "" in the fifth param, are we missing something [smrj]
                 null,
-                LogErrorThenPopUpWindow,
+                (FailureCallback) OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
             );
         }
@@ -896,10 +912,17 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.Protocol,
                 new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
                 null,
-                LogErrorThenPopUpWindow,
+                (FailureCallback) OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
             );            
         }
+        Debug.LogWarning("Relay Connect Called");
+    }
+    
+    private void OnConnectFailed(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        Debug.LogError("Connect Error: "+ jsonError);
+        Debug.LogError($"Reason Code: {reasonCode}, Status: {status}");
     }
     
     public void DisconnectFromEverything()

@@ -64,8 +64,6 @@ Services that this example project makes use of:
 - [Script](https://docs.braincloudservers.com/api/capi/script/)
 - [Virtual Currency](https://docs.braincloudservers.com/api/capi/virtualcurrency/)
 
-More service examples to come!
-
 ### External Dependency Manager
 
 This Unity example project by default includes Google's **External Dependency Manager** plugin to resolve dependencies on Android and iOS. When importing any plugin into the project that also includes this plugin, do not import `ExternalDependencyManager` or any files within that folder as it will conflict with the already included plugin.
@@ -78,11 +76,16 @@ Currently integrated external authentication methods:
 | Instructions                                        | Scripting Define Symbol |
 | --------------------------------------------------- | :---------------------: |
 | [AuthenticateApple](./_docs/Apple.md)               | `APPLE_SDK`             |
+| [AuthenticateGameCenter](./_docs/GameCenter.md)     | `GAMECENTER_SDK`        |
 | [AuthenticateFacebook](./_docs/Facebook.md)         | `FACEBOOK_SDK`          |
 | [AuthenticateGoogle](./_docs/Google.md)             | `GOOGLE_SDK`            |
 | [AuthenticateGoogleOpenId](./_docs/GoogleOpenId.md) | `GOOGLE_OPENID_SDK`     |
+| [AuthenticateSteam](./_docs/Steam.md)               | `STEAMWORKS_NET`        |
 
-More external authentication methods to come!
+#### AuthenticateOculus
+
+We have a separate example that showcases authentication via Meta apps on the Meta Horizon Store and Rift. You can find that example here:
+- [AuthenticateOculus](../AuthenticationOculus/README.md)
 
 ---
 
