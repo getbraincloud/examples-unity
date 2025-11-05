@@ -61,7 +61,7 @@ public class LobbyUI : MonoBehaviour, IDisabledUI
 		trackNameDropdown.interactable = isHost && !lobbyStateStarting;
 		gameTypeDropdown.interactable = isHost && !lobbyStateStarting;
 		customizeButton.interactable = !manager.Local.isReady && !lobbyStateStarting;
-		leave.interactable = !lobbyStateStarting;
+		leave.interactable = true; //lobbyStateStarting;
 		readyUp.interactable = !lobbyStateStarting;
 
 		lobbyNameText.text = "LobbyId: " + manager.LobbyId;
