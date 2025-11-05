@@ -1,0 +1,219 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1108289206993985386
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2561379882767623979}
+  - component: {fileID: 4300392026061175315}
+  m_Layer: 0
+  m_Name: Music Source
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2561379882767623979
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108289206993985386}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 7979378057915632898}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &4300392026061175315
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108289206993985386}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: -3766654540266631268, guid: 2a04437dd0b1f5245bcb64fc1bd5b927, type: 2}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!1 &4588419128648091262
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7979378057915632898}
+  - component: {fileID: 8922999186898811854}
+  m_Layer: 0
+  m_Name: Audio Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7979378057915632898
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4588419128648091262}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 2561379882767623979}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8922999186898811854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4588419128648091262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c56a8733310b168409666df29ef6d3a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  musicSource: {fileID: 4300392026061175315}
+  masterMixer: {fileID: 24100000, guid: 2a04437dd0b1f5245bcb64fc1bd5b927, type: 2}
+  sfxMixer: {fileID: 3198539281911522163, guid: 2a04437dd0b1f5245bcb64fc1bd5b927, type: 2}
+  uiMixer: {fileID: 8869713700203947161, guid: 2a04437dd0b1f5245bcb64fc1bd5b927, type: 2}
+  musicMixer: {fileID: -3766654540266631268, guid: 2a04437dd0b1f5245bcb64fc1bd5b927, type: 2}
+  defaultMixer: 0
+  soundBank:
+    kvps:
+    - Key: clickUI
+      Value: {fileID: 8300000, guid: eb76b4735d0185b419a6843f73ad3208, type: 3}
+    - Key: hoverUI
+      Value: {fileID: 8300000, guid: 9077b372ee45688408a14e4b3eb0d4c9, type: 3}
+    - Key: tickItemUI
+      Value: {fileID: 8300000, guid: a55734bdcbb46c74f907784d5d9463c4, type: 3}
+    - Key: errorSFX
+      Value: {fileID: 8300000, guid: f4b2d4f9e281aa74ca1f85be6807872b, type: 3}
+    - Key: newLapSFX
+      Value: {fileID: 8300000, guid: ee7c2657d9a5caa4a80cd814a6c6a1a5, type: 3}
+    - Key: raceFinishedSFX
+      Value: {fileID: 8300000, guid: a962942de120fb54c8915370894a8123, type: 3}
+    - Key: countdownLowSFX
+      Value: {fileID: 8300000, guid: b308b61b7e0719d4ab6b8f7d7b6a0c77, type: 3}
+    - Key: countdownHighSFX
+      Value: {fileID: 8300000, guid: d617c738d579f6b489f9b21272d58c4e, type: 3}
+    - Key: bumpSFX
+      Value: {fileID: 8300000, guid: f215b2da2b3b7eb42bd19e8c31d1c380, type: 3}
+    - Key: slipSFX
+      Value: {fileID: 8300000, guid: 05f1b4f4e7855ad4aab933820ffc431a, type: 3}
+    - Key: bananaDropSFX
+      Value: {fileID: 8300000, guid: 5b5c23666bb3d4b4ab2ed99bf611a813, type: 3}
+    - Key: coinSFX
+      Value: {fileID: 8300000, guid: f992aadffe8c55f48809ab81e79b7173, type: 3}
+    - Key: itemCollectSFX
+      Value: {fileID: 8300000, guid: f53c8183f43315b428f389ed75d52e68, type: 3}
+    - Key: itemWasteSFX
+      Value: {fileID: 8300000, guid: d827392e2b1bddb4eb629fbbe5191335, type: 3}
+  musicBank:
+    kvps:
+    - Key: menu
+      Value: {fileID: 0}
+    - Key: intro
+      Value: {fileID: 0}
+    - Key: track01
+      Value: {fileID: 0}
+    - Key: track02
+      Value: {fileID: 0}

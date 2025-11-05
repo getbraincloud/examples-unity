@@ -5,6 +5,9 @@ using UnityEngine;
 
 #if FACEBOOK_SDK
 using Facebook.Unity;
+#if UNITY_IOS
+using Unity.Advertisement.IosSupport;
+#endif
 #endif
 
 #if GOOGLE_SDK
@@ -67,7 +70,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #if APPLE_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
             AuthenticationType.Apple.ToString(),
 #endif
-#if GAME_CENTER_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
+#if GAMECENTER_SDK && (UNITY_STANDALONE_OSX || UNITY_IOS)
             AuthenticationType.GameCenter.ToString(),
 #endif
 #if FACEBOOK_SDK && (UNITY_STANDALONE || UNITY_WEBGL || UNITY_ANDROID)
@@ -81,6 +84,9 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #endif
 #if GOOGLE_OPENID_SDK && (UNITY_ANDROID || UNITY_IOS)
             AuthenticationType.GoogleOpenId.ToString(),
+#endif
+#if STEAMWORKS_NET && UNITY_STANDALONE
+            AuthenticationType.Steam.ToString(),
 #endif
         };
 
@@ -144,6 +150,13 @@ public class ExternalAuthPanel : ContentUIBehaviour
     protected override void InitializeUI()
     {
 #if FACEBOOK_SDK
+#if UNITY_IOS
+        if (ATTrackingStatusBinding.GetAuthorizationTrackingStatus() !=
+            ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED)
+        {
+            ATTrackingStatusBinding.RequestAuthorizationTracking();
+        }
+#endif
         void OnInitComplete()
         {
             if (FB.IsInitialized)
@@ -175,6 +188,15 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #if GOOGLE_SDK
         PlayGamesPlatform.DebugLogEnabled = true;
 #endif
+
+#if STEAMWORKS_NET && UNITY_STANDALONE
+        BCManager.GameObject.AddComponent<SteamManager>();
+
+        if (SteamUtils.IsSteamInitialized())
+        {
+            SteamUtils.SetupSteamManager();
+        }
+#endif
     }
 
 #if FACEBOOK_SDK
@@ -186,34 +208,63 @@ public class ExternalAuthPanel : ContentUIBehaviour
                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
 #elif UNITY_IOS
-        PopupInfoButton[] buttons = new PopupInfoButton[]
-        { new PopupInfoButton("Facebook Standard", PopupInfoButton.Color.Blue, () =>
-            {
-                selectedAuthenticationType = AuthenticationType.Facebook;
-                UserHandler.AuthenticateFacebook(true,
-                                                 OnSuccess("Authentication Success", OnAuthenticationSuccess),
-                                                 OnFailure("Authentication Failed", OnAuthenticationFailure));
-            }),
-            new PopupInfoButton("Facebook Limited", PopupInfoButton.Color.Blue, () =>
-            {
-                selectedAuthenticationType = AuthenticationType.FacebookLimited;
-                UserHandler.AuthenticateFacebookLimited(true,
-                                                        OnSuccess("Authentication Success", OnAuthenticationSuccess),
-                                                        OnFailure("Authentication Failed", OnAuthenticationFailure));
-            }),
-            new PopupInfoButton("Cancel", PopupInfoButton.Color.Red, () =>
-            {
-                selectedAuthenticationType = AuthenticationType.Unknown;
-                LoginContent.IsInteractable = true;
-            })
-        };
+        if (ATTrackingStatusBinding.GetAuthorizationTrackingStatus() ==
+            ATTrackingStatusBinding.AuthorizationTrackingStatus.AUTHORIZED)
+        {
+            PopupInfoButton[] buttons = new PopupInfoButton[]
+            { new PopupInfoButton("Facebook Standard", PopupInfoButton.Color.Blue, () =>
+                {
+                    selectedAuthenticationType = AuthenticationType.Facebook;
+                    UserHandler.AuthenticateFacebook(true,
+                                                     OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                     OnFailure("Authentication Failed", OnAuthenticationFailure));
+                }),
+                new PopupInfoButton("Facebook Limited", PopupInfoButton.Color.Blue, () =>
+                {
+                    selectedAuthenticationType = AuthenticationType.FacebookLimited;
+                    UserHandler.AuthenticateFacebookLimited(true,
+                                                            OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                            OnFailure("Authentication Failed", OnAuthenticationFailure));
+                }),
+                new PopupInfoButton("Cancel", PopupInfoButton.Color.Red, () =>
+                {
+                    selectedAuthenticationType = AuthenticationType.Unknown;
+                    LoginContent.IsInteractable = true;
+                })
+            };
 
-        Popup.DisplayPopup(new PopupInfo("Facebook Login Preference",
-                                     new PopupInfoBody[] { new PopupInfoBody("Would you like to log into Facebook in Standard or Limited mode?", PopupInfoBody.Type.Centered),
-                                                           new PopupInfoBody("Note: Limited mode does not allow you to use Facebook's Graph API features.", PopupInfoBody.Type.Centered)},
-                                     buttons,
-                                     false));
+            Popup.DisplayPopup(new PopupInfo("Facebook Login Preference",
+                                            new PopupInfoBody[] { new PopupInfoBody("Would you like to log into Facebook in Standard or Limited mode?", PopupInfoBody.Type.Centered),
+                                                                  new PopupInfoBody("Note: Limited mode does not allow you to use Facebook's Graph API features.", PopupInfoBody.Type.Centered)},
+                                            buttons,
+                                            false));
+        }
+        else // If user Denies or Blocks Tracking then we default to FacebookLimited
+        {
+            selectedAuthenticationType = AuthenticationType.FacebookLimited;
+            UserHandler.AuthenticateFacebookLimited(true,
+                                                    OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                                    OnFailure("Authentication Failed", OnAuthenticationFailure));
+        }
 #endif
+    }
+#endif
+
+#if STEAMWORKS_NET
+    private void HandleSteamAuthenticationButton()
+    {
+        void onSteamAuthTicketReceived(string ticket)
+        {
+            Debug.Log($"Steam Auth Ticket: {ticket}");
+
+            string userSteamId = SteamUtils.GetSteamID().ToString();
+
+            UserHandler.AuthenticateSteam(userSteamId, ticket, true,
+                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
+        }
+
+        SteamUtils.GetSteamAuthTicket(onSteamAuthTicketReceived);
     }
 #endif
 
@@ -228,6 +279,15 @@ public class ExternalAuthPanel : ContentUIBehaviour
             UserHandler.AuthenticateApple(true,
                                           OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                           OnFailure("Authentication Failed", OnAuthenticationFailure));
+            return;
+#endif
+        }
+        else if (type == AuthenticationType.GameCenter)
+        {
+#if GAMECENTER_SDK
+            UserHandler.AuthenticateGameCenter(true,
+                                               OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                               OnFailure("Authentication Failed", OnAuthenticationFailure));
             return;
 #endif
         }
@@ -254,6 +314,13 @@ public class ExternalAuthPanel : ContentUIBehaviour
             UserHandler.AuthenticateGoogleOpenId(true,
                                                  OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                                  OnFailure("Authentication Failed", OnAuthenticationFailure));
+            return;
+#endif
+        }
+        else if (type == AuthenticationType.Steam)
+        {
+#if STEAMWORKS_NET
+            HandleSteamAuthenticationButton();
             return;
 #endif
         }

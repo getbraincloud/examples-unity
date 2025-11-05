@@ -1,3 +1,5 @@
+#if STEAMWORKS_NET
+
 // The SteamManager is designed to work with Steamworks.NET
 // This file is released into the public domain.
 // Where that dedication is not recognized you are granted a perpetual,
@@ -5,15 +7,8 @@
 //
 // Version: 1.0.12
 
-#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
-#define DISABLESTEAMWORKS
-#endif
-
-using UnityEngine;
-#if !DISABLESTEAMWORKS
-using System.Collections;
 using Steamworks;
-#endif
+using UnityEngine;
 
 //
 // The SteamManager provides a base implementation of Steamworks.NET on which you can build upon.
@@ -22,7 +17,6 @@ using Steamworks;
 [DisallowMultipleComponent]
 public class SteamManager : MonoBehaviour
 {
-#if !DISABLESTEAMWORKS
 	protected static bool s_EverInitialized = false;
 
 	protected static SteamManager s_instance;
@@ -169,13 +163,5 @@ public class SteamManager : MonoBehaviour
 		// Run Steam client callbacks
 		SteamAPI.RunCallbacks();
 	}
-#else
-    public static bool Initialized
-    {
-        get
-        {
-            return false;
-        }
-    }
-#endif // !DISABLESTEAMWORKS
 }
+#endif

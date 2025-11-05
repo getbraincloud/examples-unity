@@ -6,8 +6,13 @@ Currently integrated external authentication methods:
 | Instructions                                  | Scripting Define Symbol |
 | --------------------------------------------- | :---------------------: |
 | [AuthenticateApple](./Apple.md)               | `APPLE_SDK`             |
+| [AuthenticateGameCenter](./GameCenter.md)     | `GAMECENTER_SDK`        |
 | [AuthenticateFacebook](./Facebook.md)         | `FACEBOOK_SDK`          |
 | [AuthenticateGoogle](./Google.md)             | `GOOGLE_SDK`            |
 | [AuthenticateGoogleOpenId](./GoogleOpenId.md) | `GOOGLE_OPENID_SDK`     |
+| [AuthenticateSteam](./Steam.md)               | `STEAMWORKS_NET`        |
 
-More external authentication methods to come!
+#### AuthenticateOculus
+
+We have a separate example that showcases authentication via Meta apps on the Meta Horizon Store and Rift. You can find that example here:
+- [AuthenticateOculus](../../AuthenticationOculus/README.md)
