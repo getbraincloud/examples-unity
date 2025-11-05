@@ -7,12 +7,12 @@
       "dependencies": {},
       "hash": "d5c4f74460d32fd0caf8ddad0a7e0276e8915842"
     },
-    "com.rlabrecque.steamworks.net": {
-      "version": "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net",
+    "com.google.external-dependency-manager": {
+      "version": "https://github.com/googlesamples/unity-jar-resolver.git?path=upm",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "55a9fc8eb4df4dd4cfc11b23003a5ea987317cae"
+      "hash": "6eee66190fb6d7182518cc3b41e3919e054699b6"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -22,18 +22,9 @@
     },
     "com.unity.ext.nunit": {
       "version": "2.0.5",
-      "depth": 1,
+      "depth": 2,
       "source": "builtin",
       "dependencies": {}
-    },
-    "com.unity.ide.rider": {
-      "version": "3.0.37",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.ext.nunit": "1.0.6"
-      },
-      "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
       "version": "2.0.23",

@@ -2,7 +2,7 @@
 
 This repository contains example Unity projects that make use of the [brainCloud client](https://github.com/getbraincloud/braincloud-csharp) — an excellent place to start learning how the various [brainCloud APIs](https://getbraincloud.com/) are used!
 
-These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code. All projects, unless stated otherwise, make use of **Unity 6000.0.46f1**.
+These projects are meant to be used as code examples and references. Feel free to use our code as an example for your own code. All projects, unless stated otherwise, make use of **Unity 6000.0.58f1**.
 
 Note: These projects will not work outside of the box without proper set-up of a brainCloud app. Additionally, several projects also require you to set up a project on a platform backend, such as the Google Play console or Apple Developer portal.
 
@@ -44,6 +44,12 @@ Create a new app using a template of one of these examples:
 ## Authentication
 
 Authentication has been updated with a new look! Check out the [Authentication README.md](./Authentication/README.md) for more information. This example will be updated as new features and authentication methods are added to brainCloud.
+
+---
+
+## AuthenticationOculus
+
+This example showcases how to set up your Unity project to be able to enable Meta XR Platform features. These features are required to retreive the User ID and nonce needed for brainCloud authentication for Meta Horizon Store apps and Rift apps. Check out the [AuthenticationOculus README.md](./AuthenticationOculus/README.md) for more in-depth information.
 
 ---
 
@@ -127,16 +133,6 @@ There is also a button to just disconnect the RTT connection and reconnect only 
 
 ---
 
-## SpaceShooterWithStats
-
-The _Getting Started With Unity_ video uses the Space Shooter example as a backing project.
-
-Go to the **BrainCloudConnect** scene and run the game to test it out in the editor!
-
-Find more information, including the video itself, here: https://docs.braincloudservers.com/learn/sdk-tutorials/unity-tutorials/unity-getting-started/
-
----
-
 ## TicTacToe
 
 Showcases brainCloud's **Async Multiplayer** and **Cloud Code** services.
@@ -144,6 +140,27 @@ Showcases brainCloud's **Async Multiplayer** and **Cloud Code** services.
 Open up the **Start - TwoPlayer** scene to see it operate in side-by-side action, or build the **Start - OnePlayer** scene and run two different instances of the game to test it out!
 
 For more information, see the [TicTacToe README.md](./TicTacToe/README.md) file.
+
+---
+
+## BCFishNet
+
+Demonstrates a **multiplayer game** using **FishNet** for network object synchronization and **brainCloud** for authentication, matchmaking, lobby management, and real-time relay transport.
+
+Open the **Main** scene to test login, lobby creation, and real-time multiplayer gameplay in the Editor. Make sure to configure a brainCloud app in the Unity Inspector before running.
+
+For more information, see the [BCFishNet README.md](./BCFishNet/README.md) file.
+
+---
+
+
+## BCKart-Photon
+
+Demonstrates a **multiplayer kart game** using **Photon Fusion** for real-time object synchronization and **brainCloud** for authentication, lobby management, and matchmaking.
+
+Open the **Launch** scene to test login, lobby creation, and race flow in the Editor. Make sure to create a new app using the **BCKart-Photon template** in the brainCloud Plugin and configure your Photon Fusion AppId.
+
+For more information, see the [BCKart-Photon README.md](./BCKart-Photon/README.md) file.
 
 ---
 

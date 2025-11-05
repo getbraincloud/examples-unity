@@ -351,7 +351,18 @@ public class UIManager : MonoBehaviour
                     string[] parts = ownerCxId.Split(':');
                     if (parts.Length >= 3)
                     {
+                        Debug.Log("BCManager.Instance.LobbyOwnerId " + parts[1]);
                         BCManager.Instance.LobbyOwnerId = parts[1]; // This is the profileID of the owner
+
+                        // 
+                        foreach (Transform child in _lobbyMembersContainer)
+                        {
+                            LobbyMemberItem item = child.GetComponent<LobbyMemberItem>();
+                            if (item != null)
+                            {
+                                item.UpdateUI();
+                            }
+                        }
                     }
                 }
             }

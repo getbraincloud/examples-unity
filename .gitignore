@@ -99,6 +99,7 @@ Thumbs.db
 *.log*
 *.idea*
 */.idea/*
+*/.utmp*
 *.lighting*
 *.keystore*
 FacebookSettings*
@@ -112,3 +113,8 @@ steam_appid*
 /BCFishNet_clone_0
 /BCFishNet_clone_1
 /BCFishNet_clone_2
+
+# --- Overrides: keep BCKArt-Photon Assets tracked ---
+#!BCKArt-Photon/Assets/
+!BCKArt-Photon/Assets/Photon/**
+BCKart-Photon/Assets/Photon/.DS_Store
