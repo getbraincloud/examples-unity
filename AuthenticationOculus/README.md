@@ -103,11 +103,54 @@ You can find the App ID and App Secret for your app on the Meta Horizon Develope
     <img  src="../_screenshots/_authOculus/MetaAPI.png?raw=true">
 </p>
 
-**Note**: For the time being, if you have both a Meta Horizon Store app and Rift app, you can only use the ID and secret from one app. Otherwise you will need to configure your project to use two different brainCloud apps. We are investigating a method to be able to use the same brainCloud app for both types of Meta Quest apps in the future.
+Make sure to fill out the proper fields. If your app on the Meta Horizon Developer Dashboard is intended for the **Meta Horizon Store** for standalone Quest devices then you will want to fill out the first two fields:
+- Meta Horizon (Quest) App ID
+- Meta Horizon (Quest) App Secret
+
+If your app is instead a **Rift app** (for the Meta Quest Link app on Windows) then you'll want to fill out the second two fields:
+- Rift App ID
+- Rift App Secret
+
+All four fields can be filled out if you have both sets of apps for your Unity project.
 
 ---
 
 If everything is set up properly you should hopefully see yourself log in once you tap the **LOG IN** button! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
+
+---
+
+## Meta Horizon Store Add-Ons
+
+brainCloud now supports [Meta Horizon Store's in-app purchasing](https://developers.meta.com/horizon/resources/add-ons/)! If you're familiar with [brainCloud's Marketplace feature](https://help.getbraincloud.com/en/articles/9120848-design-marketplace-products) for managing your IAP (especially for other third-party stores), this will be pretty simple.
+
+1. First, you will need to set up your IAP on the Meta Horizon Developer Dashboard by navigating to `Monetization > Add-ons` and then click `Create Add-on`
+    - You will need to fill out the **Details**, **Pricing**, and **Metadata** page in order to publish
+    - Under Details, the **SKU** and **Add-On Type** are important to note down
+    - Note: **Show in Store** isn't required for this but if it is enabled it may take some time before it will be published
+
+<p align="center">
+    <img  src="../_screenshots/_authOculus/MetaAddOns.png?raw=true">
+</p>
+
+2. Once your Add-ons are published, you will need to configure the **Product** on brainCloud; navigate to `Design > Marketplace > Products`; from here you can add & configure your products on brainCloud and fill out the various details and awards
+    - The idea is that you will want to create **Products** that correspond to the **Add-ons** on the Meta Horizon Store and brainCloud will manage the rewards those add-ons will give to your users
+
+3. Once a Product has been configured you will need to add the Meta Horizon Store for that product's **Price Points** platform; edit your product and click the **+** across from Price Points then click **Add Platform** and select **Meta Horizon**
+    - **Amount** is a reference price that should equal the price that you set for the Add-on in the Meta Horizon Developer Dashboard
+    - The **Meta Horizon Product ID** should match the **SKU** that you set on the Meta Horizon Developer Dashboard
+
+<p align="center">
+    <img  src="../_screenshots/_authOculus/BCProduct.png?raw=true">
+</p>
+
+### Some Notes
+- **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on. For the example, we use a very simple [List](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly reccommend you develop a much more robust inventory system for your user data.
+
+- In order to test purchases we recommend that you create a [Test user](https://developers.meta.com/horizon/resources/test-users/) and add them to your App's current Release Channel as a **Test User**. This way, you can test purchases without having to worry about spending actual money, which will happen if you use a real account!
+
+---
+
+If everything is configured properly (importantly, the **SKU** from the Meta Horizon Developer Dashboard matches the **Meta Horizon Product ID** under the Meta Horizon Price Points Platform on brainCloud), then your products should appear in the example app once you log in! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
 ---
 
