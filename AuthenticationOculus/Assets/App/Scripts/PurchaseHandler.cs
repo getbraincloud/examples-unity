@@ -30,7 +30,6 @@ public class PurchaseHandler : MonoBehaviour
 
     // For User durables management
     private const string ENTITY_TYPE = "inventory";
-    private int UpdateDurablesCount = 0;
     private string UserDurablesEntityID = string.Empty;
     private List<string> UserDurables = null;
 
@@ -143,8 +142,6 @@ public class PurchaseHandler : MonoBehaviour
             return;
         }
 
-        UpdateDurablesCount++;
-
         UserDurables.Add(sku);
 
         BC.EntityService.UpdateEntity(UserDurablesEntityID,
@@ -152,7 +149,7 @@ public class PurchaseHandler : MonoBehaviour
                                       JsonWriter.Serialize(new Dictionary<string, object> { { "durables", UserDurables } }),
                                       ACL.None().ToJsonString(),
                                       -1,
-                                      (_, __) => UpdateDurablesCount--,
+                                      null,
                                       OnBrainCloudFailure);
     }
 
@@ -245,10 +242,9 @@ public class PurchaseHandler : MonoBehaviour
         yield return new WaitUntil(() => isSuccess);
         yield return new WaitForFixedUpdate();
 
-        // Verify purchases; this will consume consumables and set durables to unpurchasable
+        // Next we need to get our confirmed Meta Horizon purchases and queue them up for brainCloud
         isSuccess = false;
-        int purchaseCount = 0;
-        bool verifyDurables = false;
+        Dictionary<BCProduct, string> cachedPurchases = new();
         IAP.GetViewerPurchases().OnComplete((msg) =>
         {
             if (msg.IsError)
@@ -280,30 +276,21 @@ public class PurchaseHandler : MonoBehaviour
                                      $"DeveloperPayload:\n{purchase.DeveloperPayload}");
 
                             if (item.Product.IAPProductType == ProductType.DURABLE &&
-                                UserDurables.Contains(purchase.Sku))
+                                UserDurables.Contains(item.Product.IAPSku))
                             {
-                                item.SetToPurchased();
+                                item.SetToPurchased(); // So the user can't purcahse again
                             }
                             else
                             {
-                                purchaseCount++;
-                                verifyDurables = verifyDurables || item.Product.IAPProductType == ProductType.DURABLE;
-
-                                BC.AppStoreService
-                                  .VerifyPurchase("metaHorizon",
-                                                  JsonWriter.Serialize(new Dictionary<string, object>
-                                                  {
-                                                      { "userId",          LoginHandler.MetaUserID      },
-                                                      { "sku",             purchase.Sku                 },
-                                                      { "transactionId",   purchase.ID                  },
-                                                      { "consumeOnVerify", CONSUME_ON_BRAINCLOUD_VERIFY }
-                                                  }),
-                                                  (jsonResponse, cbObject) =>
-                                                  {
-                                                      OnVerifyPurchaseSuccess(jsonResponse, cbObject);
-                                                      purchaseCount--;
-                                                  },
-                                                  OnBrainCloudFailure);
+                                // Cache this info to be used once we have all of our purchases
+                                cachedPurchases.Add(item.Product,
+                                                    JsonWriter.Serialize(new Dictionary<string, object>
+                                                    {
+                                                        { "userId",          LoginHandler.MetaUserID      },
+                                                        { "sku",             purchase.Sku                 },
+                                                        { "transactionId",   purchase.ID                  },
+                                                        { "consumeOnVerify", CONSUME_ON_BRAINCLOUD_VERIFY }
+                                                    }));
                             }
 
                             break;
@@ -315,8 +302,40 @@ public class PurchaseHandler : MonoBehaviour
             }
         });
 
-        yield return new WaitUntil(() => isSuccess && purchaseCount <= 0);
+        yield return new WaitUntil(() => isSuccess);
         yield return new WaitForFixedUpdate();
+
+        // Finally we will go through our purchases, cache the payloads, then verify purchases
+        bool verifyDurables = false;
+        foreach (BCProduct product in cachedPurchases.Keys)
+        {
+            isSuccess = false;
+            verifyDurables = verifyDurables || product.IAPProductType == ProductType.DURABLE;
+
+            BC.AppStoreService
+              .CachePurchasePayloadContext("metaHorizon",
+                                           product.IAPSku,
+                                           product.payload,
+                                           (_, __) => isSuccess = true,
+                                           OnBrainCloudFailure);
+
+            yield return new WaitUntil(() => isSuccess);
+            yield return new WaitForFixedUpdate();
+
+            isSuccess = false;
+            BC.AppStoreService
+              .VerifyPurchase("metaHorizon",
+                              cachedPurchases[product],
+                              (jsonResponse, cbObject) =>
+                              {
+                                  OnVerifyPurchaseSuccess(jsonResponse, cbObject);
+                                  isSuccess = true;
+                              },
+                              OnBrainCloudFailure);
+
+            yield return new WaitUntil(() => isSuccess);
+            yield return new WaitForFixedUpdate();
+        }
 
         // If there are durables in our verify then we will restart this process to update our UserDurables list properly
         if (verifyDurables)
@@ -336,9 +355,6 @@ public class PurchaseHandler : MonoBehaviour
 
     private IEnumerator GetUserInventory()
     {
-        // If user's durables entity is being updated we will wait until that process is done
-        yield return new WaitUntil(() => UpdateDurablesCount <= 0);
-
         bool isSuccess = false;
 
         void onCreateUserInventory(string jsonResponse, object cbObject)
@@ -572,8 +588,6 @@ public class PurchaseHandler : MonoBehaviour
 
     private void OnBrainCloudFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
-        StopAllCoroutines();
-
         var error = JsonReader.Deserialize(jsonError) as Dictionary<string, object>;
 
         DisplayError($"Error Received - Status: {status} || Reason {reasonCode} || Message:\n{error["status_message"]}");
@@ -583,6 +597,8 @@ public class PurchaseHandler : MonoBehaviour
 
     private void DisplayError(string msg)
     {
+        StopAllCoroutines();
+
         Debug.LogError(msg);
 
         WaitContent.SetActive(false);

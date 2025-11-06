@@ -194,8 +194,6 @@ public class LoginHandler : MonoBehaviour
 
     private void OnAuthenticateFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
-        StopAllCoroutines();
-
         var error = JsonReader.Deserialize(jsonError) as Dictionary<string, object>;
 
         DisplayError($"Error Received - Status: {status} || Reason {reasonCode} || Message:\n{error["status_message"]}");
@@ -203,6 +201,8 @@ public class LoginHandler : MonoBehaviour
 
     private void DisplayError(string msg)
     {
+        StopAllCoroutines();
+
         Debug.LogError(msg);
 
         LogInContent.SetActive(false);
