@@ -24,9 +24,9 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private Button _exitButton;
     [SerializeField] private Button _shopButton;
     [SerializeField] private Button _statsButton;
-
     private int _increaseXpAmount;
     private AppChildrenInfo _appChildrenInfo;
+    public AppChildrenInfo AppChildrenInfo { get { return _appChildrenInfo; } }
  
     protected override void Awake()
     {

@@ -13,9 +13,8 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private Button OpenSettingsButton;
     [SerializeField] private TMP_Text UsernameText;
     [SerializeField] private TMP_Text LevelText;
-    [SerializeField] private TMP_Text CoinsText;
-    [SerializeField] private TMP_Text GemsText;
-    [SerializeField] private TMP_Text ChildCountText;
+    [SerializeField] private TextMeshProUGUI CoinsText;
+    [SerializeField] private TextMeshProUGUI GemsText;
     [SerializeField] private Transform BuddySpawnTransform;
     [SerializeField] private BuddyHouseInfo BuddyPrefab;
     [SerializeField] private GameObject MoveInPrefab;
@@ -24,14 +23,18 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private TMP_Text GameVersionText;
     [SerializeField] private TMP_Text BcClientVersionText;
     [SerializeField] private Slider LevelSlider;
-    
+    [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
+
+    [SerializeField] private float textSpawnOffset = 40f;
     //Debug Buttons
     [SerializeField] private Button IncreaseCoinsButton;
     [SerializeField] private Button IncreaseGemsButton;
     [SerializeField] private Button IncreaseLevelButton;
     [SerializeField] private GameObject DebugButtonGroup;
     private bool isWaitingForResponse = false;
+    private float checkForCoinsInterval = 60;
     private List<AppChildrenInfo> _appChildrenInfos;
+    private List<BuddyHouseInfo> _listOfBuddies;
     private AppChildrenInfo _newAppChildrenInfo;
     public AppChildrenInfo NewAppChildrenInfo
     {
@@ -40,17 +43,38 @@ public class ParentMenu : ContentUIBehaviour
     }
 
     private const string CHILD_COUNT_TEXT = "Buddy Count: ";
-    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Awake()
     {
         InitializeUI();
         OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
+        BuddyHouseInfo.OnCoinsCollected += UpdateValueText;
+        StartCoroutine(LoopCheckCoins());
         base.Awake();
+    }
+    
+    IEnumerator LoopCheckCoins()
+    {
+        while(true)
+        {
+            CheckAllBuddiesCoinEarnings();
+            yield return new WaitForSeconds(checkForCoinsInterval);
+        }
+    }
+    
+    private void CheckAllBuddiesCoinEarnings()
+    {
+        for (int i = 0; i < _listOfBuddies.Count; i++)
+        {
+            _listOfBuddies[i].HouseInfo.CheckCoinsEarned();
+            _listOfBuddies[i].CheckCoinsButton();
+        }
     }
 
     protected override void InitializeUI()
     {
+        BuddyHouseInfo.OnCoinsCollected += SpawnValueAddedAnimation;
+    
         UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
         UsernameText.text = userInfo.Username.IsNullOrEmpty() ? "New User" : userInfo.Username;
         LevelText.text = $"Lv. {userInfo.Level}";
@@ -69,14 +93,14 @@ public class ParentMenu : ContentUIBehaviour
             IncreaseLevelButton.onClick.AddListener(OnIncreaseLevel);
         }
         DebugButtonGroup.SetActive(debug);
-
         _appChildrenInfos = GameManager.Instance.AppChildrenInfos;
-        ChildCountText.text = CHILD_COUNT_TEXT + _appChildrenInfos.Count;
         SetupHouses();
     }
 
     private void OnDisable()
     {
+        BuddyHouseInfo.OnCoinsCollected -= SpawnValueAddedAnimation;
+        StopAllCoroutines();
         IncreaseCoinsButton.onClick.RemoveAllListeners();
         IncreaseGemsButton.onClick.RemoveAllListeners();
         IncreaseLevelButton.onClick.RemoveAllListeners();
@@ -90,12 +114,14 @@ public class ParentMenu : ContentUIBehaviour
         {
             Destroy(BuddySpawnTransform.transform.GetChild(i).gameObject);
         }
+        _listOfBuddies = new List<BuddyHouseInfo>();
 
         foreach (AppChildrenInfo buddyHouse in _appChildrenInfos)
         {
             BuddyHouseInfo buddyHouseInfo = Instantiate(BuddyPrefab, BuddySpawnTransform);
             buddyHouseInfo.HouseInfo = buddyHouse;
             buddyHouseInfo.SetUpHouse();
+            _listOfBuddies.Add(buddyHouseInfo);
         }
         
         Instantiate(MoveInPrefab, BuddySpawnTransform);
@@ -116,6 +142,45 @@ public class ParentMenu : ContentUIBehaviour
     public void OpenConfirmDemolishPanel()
     {
         
+    }
+    
+    public void SpawnValueAddedAnimation(int amount, int typeIndex)
+    {
+        RectTransform mainTextPosition = new RectTransform();
+        Transform parent = new RectTransform();
+        switch (typeIndex)
+        {
+            //Coins
+            case 0:
+                mainTextPosition = CoinsText.rectTransform;
+                parent = CoinsText.transform.parent;
+                break;
+            //Gems
+            case 1:
+                mainTextPosition = GemsText.rectTransform;
+                parent = GemsText.transform.parent;
+                break;
+        }
+        //Set up animation
+        var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textSpawnOffset, 0f);
+        textAnimation.SetUpText(amount);
+        textAnimation.PlayBounce();
+    }
+    
+    private void UpdateValueText(int amount, int typeIndex)
+    {
+        switch (typeIndex)
+        {
+            //Coins
+            case 0:
+                CoinsText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
+                break;
+            //Gems
+            case 1:
+                GemsText.text = BrainCloudManager.Instance.UserInfo.Gems.ToString();
+                break;
+        }
     }
     
     private void OnIncreaseCoins()

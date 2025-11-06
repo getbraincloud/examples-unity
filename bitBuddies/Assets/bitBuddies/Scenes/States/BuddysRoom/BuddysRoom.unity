@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 23452034}
   - component: {fileID: 23452033}
   m_Layer: 5
-  m_Name: Value
+  m_Name: LoveEarnedValue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -386,6 +386,7 @@ MonoBehaviour:
   _exitButton: {fileID: 1136952283}
   _shopButton: {fileID: 1090454594}
   _statsButton: {fileID: 62157263}
+  _statsScreen: {fileID: 0}
 --- !u!225 &44310395
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1278,7 +1279,7 @@ GameObject:
   - component: {fileID: 551682356}
   - component: {fileID: 551682355}
   m_Layer: 5
-  m_Name: Value
+  m_Name: BuddyBlingValue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2375,7 +2376,7 @@ GameObject:
   - component: {fileID: 1065218233}
   - component: {fileID: 1065218232}
   m_Layer: 5
-  m_Name: Value
+  m_Name: LevelValue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3654,7 +3655,7 @@ GameObject:
   - component: {fileID: 1635944380}
   - component: {fileID: 1635944379}
   m_Layer: 5
-  m_Name: Value
+  m_Name: GoldEarnedValue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5547,8 +5548,8 @@ GameObject:
   - component: {fileID: 3767904950285506842}
   - component: {fileID: 393658234234543455}
   - component: {fileID: 1079549485880627605}
-  - component: {fileID: 8072520032477421465}
   - component: {fileID: 2337202430360971211}
+  - component: {fileID: 7969050557563517062}
   m_Layer: 5
   m_Name: StatsScreen
   m_TagString: Untagged
@@ -5556,7 +5557,7 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &8072520032477421465
+--- !u!114 &7969050557563517062
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5565,7 +5566,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7969050557563517061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 279603a7ff5242044bdfd5c88c2d606b, type: 3}
+  m_Script: {fileID: 11500000, guid: 1aeafb50c5cb26b4dbac027fb1d52ed4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ContentUICG: {fileID: 2337202430360971211}
@@ -5573,6 +5574,10 @@ MonoBehaviour:
   BodyText: {fileID: 0}
   CloseButton: {fileID: 2417285676511916692}
   ConfirmButton: {fileID: 0}
+  _loveEarnedText: {fileID: 23452033}
+  _coinsEarnedText: {fileID: 1635944379}
+  _levelText: {fileID: 1065218232}
+  _buddyBlingText: {fileID: 551682355}
 --- !u!114 &8144991550534304214
 MonoBehaviour:
   m_ObjectHideFlags: 0

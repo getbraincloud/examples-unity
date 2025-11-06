@@ -23,7 +23,32 @@ public class AppChildrenInfo
 	public int currentXP { get; set; }
 	public DateTime lastIdleTimestamp { get; set; }
 	public int coinsEarnedInHolding { get; set; }
+	//Love is only earned through Toy interaction in Buddys Room.
+	//Aka used as current XP for profile. 
+	public int loveEarnedInLifetime {get; set;}
+	public int coinsEarnedInLifetime {get; set;}
+	
+	private float _hourInSeconds = 3600;
+	
+	public void CheckCoinsEarned()
+	{
+		TimeSpan timeDifference = DateTime.UtcNow - lastIdleTimestamp;
+		float coinsPerSecond = coinPerHour / _hourInSeconds;
+		int coinsEarned = Mathf.FloorToInt(coinsPerSecond * (float)timeDifference.TotalSeconds);
+		if(coinsEarned > 0)
+		{
+			if(coinsEarned < maxCoinCapacity)
+			{
+				coinsEarnedInHolding = coinsEarned;
+			}
+			else
+			{
+				coinsEarnedInHolding = maxCoinCapacity;
+			}			
+		}
+	}
 }
+
 
 public class GameManager : SingletonBehaviour<GameManager>
 {
@@ -91,6 +116,15 @@ public class GameManager : SingletonBehaviour<GameManager>
 	{
 		appChildrenInfos.Clear();
 		_selectedAppChildrenInfo = null;
+	}
+	
+	public void UpdateChildAppInfo(AppChildrenInfo in_appChildrenInfo)
+	{
+		var index = appChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
+		if(index != -1)
+		{
+			appChildrenInfos[index] = in_appChildrenInfo;
+		}
 	}
 	
 }

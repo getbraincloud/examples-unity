@@ -188,13 +188,16 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     private void OnGetChildAccounts(string jsonResponse)
     {
-        /*
-        {"packetId":1,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":162916,"scriptSize":6845,"renderTime":17},
-        "response":{"childEntityData":[{"childData":{"profileName":"bob","profileId":"4e046b26-7508-4b74-964c-96a7216f0136","appId":"49162"},
-        "entityData4":{"createdAt":1755280006783,"data":{"rarity":"rare","coinMultiplier":1.5,"coinPerHour":100,"maxCoinCapacity":1000,"buddyId":"Buddy03"},
-        "entityType":"buddies","_serverTime":1755280065784,"entityId":"7e67c09d-62a5-4457-b7a9-d99f54759f3c","acl":{"other":0},"version":1,
-        "updatedAt":1755280006783}}]},"success":true,"reasonCode":null},"status":200}]}
-         */
+    /*
+     * {"packetId":1,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"scriptSize":12305,"executeTime":109561},
+     * "response":{"getChildProfiles":{"data":{"children":[{"profileName":"sanji",
+     * "profileId":"e068fdfb-f36e-4c9d-862a-d86f20d5e54b","appId":"50974",
+     * "summaryFriendData":{"coinMultiplier":1,"coinPerHour":40,"maxCoinCapacity":100,"buddySpritePath":"BuddySprites/buddy-1","
+     * rarity":"starter","level":1,"experiencePoints":0,"lastIdleTimestamp":1.762372115799E12,"nextLevelUpXP":5},
+     * "extraData":{"xp":{"xpLevel":1,"xpPoints":48,"nextXpLevel":100},
+     * "currency":{"buddyBling":{"consumed":0,"balance":100,"purchased":0,"awarded":100,"revoked":0}},
+     * "stats":{"CoinsGainedForParent":197,"LoveEarned":0}}}]},"status":200}},"success":true,"reasonCode":null},"status":200}
+     */
         var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
         var data =  packet["data"] as Dictionary<string, object>;
         var response = data["response"] as Dictionary<string, object>;
@@ -288,8 +291,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     }
                 }
                 
-                //TODO: Add stats here when we have it populated
                 var stats = extraData["stats"] as Dictionary<string, object>;
+                if(stats != null)
+                {
+                    dataInfo.coinsEarnedInLifetime = (int) stats["CoinsGainedForParent"];
+                    dataInfo.loveEarnedInLifetime = (int) stats["LoveEarned"];
+                }
             }
             appChildrenInfos.Add(dataInfo);
         }
