@@ -155,12 +155,15 @@ public class BCLobbyManager
             jsonPayload);
     }
 
-    public void FetchLeaderboardData(string leaderboardId, SuccessCallback onSuccess = null, FailureCallback onFailure = null)
+    public void FetchLeaderboardData(string leaderboardId, int startIndex = 0, int endIndex = 10,
+            SuccessCallback onSuccess = null, FailureCallback onFailure = null)
     {
         // Implement fetching leaderboard data from BCManager and updating the UI accordingly
         var requestData = new FetchScoreRequest
         {
-            leaderboardId = leaderboardId
+            leaderboardId = leaderboardId,
+            start = startIndex,
+            end = endIndex
         };
         string jsonPayload = JsonUtility.ToJson(requestData);
 
@@ -918,8 +921,10 @@ public class KeepAliveRequest
 [System.Serializable]
 public class FetchScoreRequest
 {
-    
+
     public string leaderboardId;
+    public int start;
+    public int end;
 }
 
 
