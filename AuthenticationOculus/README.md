@@ -156,6 +156,10 @@ If everything is configured properly (importantly, the **SKU** from the Meta Hor
 
 ### Some Notes
 
+- By default, the brainCloud [VerifyPurchase](https://docs.braincloudservers.com/api/capi/appstore/verifypurchase) call will consume any `metaHorizon` **Consumables**. This can be changed to have the app itself consume after the VerifyPurchase call. You can set the [CONSUME_ON_BRAINCLOUD_VERIFY const](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L12) in PurchaseHandler.cs to change this behaviour.
+
+- The Json for the `metaHorizon` store doesn't need the `consumeOnVerify` boolean as it is an optional parameter; it is included in this example just to keep you aware of how consumables function in the brainCloud VerifyPurchase call.
+
 - **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For the example, we use a very simple [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
 
 - While brainCloud supports **Subscription** purchases, you will need to track the subscription status yourself. The example uses the same [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) to track the user's subscriptions but only if they've purchased it; it's current implementation wouldn't be able to track if the subscription lapses.
