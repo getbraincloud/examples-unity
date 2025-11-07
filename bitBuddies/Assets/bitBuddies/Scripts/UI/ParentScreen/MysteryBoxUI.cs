@@ -35,11 +35,11 @@ public class MysteryBoxUI : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        switch (_mysteryBoxInfo.UnlockType)
+        switch (_mysteryBoxInfo.currencyType)
         {
-            case UnlockTypes.Coins:
+            case CurrencyTypes.Coins:
                 UnlockAmountText.text = _mysteryBoxInfo.UnlockAmount.ToString("#,#");    //#,# adds commas to the string when using ints
-                UnlockTypeImage.sprite = UnlockTypeSprites[(int)UnlockTypes.Coins];
+                UnlockTypeImage.sprite = UnlockTypeSprites[(int)CurrencyTypes.Coins];
 
                 var usersCoins = BrainCloudManager.Instance.UserInfo.Coins;
                 if(_mysteryBoxInfo.UnlockAmount > usersCoins)
@@ -56,9 +56,9 @@ public class MysteryBoxUI : ContentUIBehaviour
                     OpenBoxButton.onClick.AddListener(OnOpenBox);
                 }
                 break;
-            case UnlockTypes.Love:
+            case CurrencyTypes.Love:
                 UnlockAmountText.text = "Needs Lvl." + _mysteryBoxInfo.UnlockAmount;
-                UnlockTypeImage.sprite = UnlockTypeSprites[(int)UnlockTypes.Love];
+                UnlockTypeImage.sprite = UnlockTypeSprites[(int)CurrencyTypes.Love];
                 //ToDo: how do I determine this value...?
                 break;
         }

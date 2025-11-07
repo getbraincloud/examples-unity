@@ -1,11 +1,13 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public enum UnlockTypes
+public enum CurrencyTypes
 {
 	Coins,
 	Love,
+	BuddyBling,
 	Level
 }
 
@@ -22,7 +24,7 @@ public enum Rarity
 public struct MysteryBoxInfo
 {
 	public string BoxName;
-	public UnlockTypes UnlockType;
+	[FormerlySerializedAs("UnlockType")] public CurrencyTypes currencyType;
 	public int UnlockAmount;
 	public string Rarity;
 	public Rarity RarityEnum;
