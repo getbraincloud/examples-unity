@@ -4,7 +4,7 @@
     <img  src="../_screenshots/x_AuthOculus.png?raw=true">
 </p>
 
-#### Navigation
+### Navigation
 - [Unity Project Set Up](#unity-project-set-up)
 - [Meta Horizon Developer Dashboard Configuration](#meta-horizon-developer-dashboard-configuration)
 - [brainCloud Configuration](#brainCloud-configuration)
@@ -120,9 +120,9 @@ If your app is instead a **Rift app** (for the Meta Quest Link app on Windows) t
 
 All four fields can be filled out if you have both sets of apps for your Unity project.
 
-> If everything is set up properly you should hopefully see yourself log in once you tap the **LOG IN** button! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
-
 ---
+
+If everything is set up properly you should hopefully see yourself log in once you tap the **LOG IN** button! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
 ## Meta Horizon Store Add-Ons
 
@@ -150,6 +150,10 @@ brainCloud now supports [Meta Horizon Store's Add-ons](https://developers.meta.c
 
 Once you click **Save & Close** and you select the newly created platform as the active Price Point then you're good to start testing!
 
+---
+
+If everything is configured properly (importantly, the **SKU** from the Meta Horizon Developer Dashboard matches the **Meta Horizon Product ID** under the Meta Horizon Price Points Platform on brainCloud), then your products should appear in the example app once you log in! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
+
 ### Some Notes
 
 - **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For the example, we use a very simple [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
@@ -157,8 +161,6 @@ Once you click **Save & Close** and you select the newly created platform as the
 - While brainCloud supports **Subscription** purchases, you will need to track the subscription status yourself. The example uses the same [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) to track the user's subscriptions but only if they've purchased it; it's current implementation wouldn't be able to track if the subscription lapses.
 
 - In order to test purchases we recommend that you create a [Test user](https://developers.meta.com/horizon/resources/test-users/) and add them to your app's current Release Channel as a **Test User**. This way, you can test purchases without having to worry about spending actual money, which will happen if you use a real account!
-
-> If everything is configured properly (importantly, the **SKU** from the Meta Horizon Developer Dashboard matches the **Meta Horizon Product ID** under the Meta Horizon Price Points Platform on brainCloud), then your products should appear in the example app once you log in! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
 ---
 
