@@ -9,7 +9,7 @@
 - [Meta Horizon Developer Dashboard Configuration](#meta-horizon-developer-dashboard-configuration)
 - [brainCloud Configuration](#brainCloud-configuration)
 - [Meta Horizon Store Add-Ons](#meta-horizon-store-add-Ons)
-- [Purchasing Notes](#some-notes)
+- [Purchasing Notes](#purchasing-notes)
 
 ## Unity Project Set Up
 
@@ -154,15 +154,15 @@ Once you click **Save & Close** and you select the newly created platform as the
 
 If everything is configured properly (importantly, the **SKU** from the Meta Horizon Developer Dashboard matches the **Meta Horizon Product ID** under the Meta Horizon Price Points Platform on brainCloud), then your products should appear in the example app once you log in! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
-### Some Notes
+### Purchasing Notes
 
-- By default, the brainCloud [VerifyPurchase](https://docs.braincloudservers.com/api/capi/appstore/verifypurchase) call will consume any `metaHorizon` **Consumables**. This can be changed to have the app itself consume after the VerifyPurchase call. You can set the [CONSUME_ON_BRAINCLOUD_VERIFY const](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L12) in PurchaseHandler.cs to change this behaviour.
+- By default, the brainCloud [VerifyPurchase](https://docs.braincloudservers.com/api/capi/appstore/verifypurchase) call will consume any `metaHorizon` **Consumables**. This can be changed to have the app itself consume after the VerifyPurchase call. You can set the [CONSUME_ON_BRAINCLOUD_VERIFY const](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L12) in PurchaseHandler.cs to change this behaviour.
 
-- The Json for the `metaHorizon` store doesn't need the `consumeOnVerify` boolean as it is an optional parameter; it is included in this example just to keep you aware of how consumables function in the brainCloud VerifyPurchase call.
+- The Json for the `metaHorizon` store doesn't need the `consumeOnVerify` boolean as it is an optional parameter. It is included in this example just to keep you aware of how consumables function in the brainCloud VerifyPurchase call.
 
-- **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For the example, we use a very simple [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
+- **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For the example, we use a very simple [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
 
-- While brainCloud supports **Subscription** purchases, you will need to track the subscription status yourself. The example uses the same [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) to track the user's subscriptions but only if they've purchased it; it's current implementation wouldn't be able to track if the subscription lapses.
+- While brainCloud supports **Subscription** purchases, you will need to track the subscription status yourself. The example uses the same [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) to track the user's subscriptions but only if they've purchased it; it's current implementation wouldn't be able to track if the subscription lapses.
 
 - In order to test purchases we recommend that you create a [Test user](https://developers.meta.com/horizon/resources/test-users/) and add them to your app's current Release Channel as a **Test User**. This way, you can test purchases without having to worry about spending actual money, which will happen if you use a real account!
 
