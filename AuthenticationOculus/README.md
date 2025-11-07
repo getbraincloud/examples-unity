@@ -4,7 +4,14 @@
     <img  src="../_screenshots/x_AuthOculus.png?raw=true">
 </p>
 
-## Setting Up
+#### Navigation
+- [Unity Project Set Up](#unity-project-set-up)
+- [Meta Horizon Developer Dashboard Configuration](#meta-horizon-developer-dashboard-configuration)
+- [brainCloud Configuration](#brainCloud-configuration)
+- [Meta Horizon Store Add-Ons](#meta-horizon-store-add-Ons)
+- [Purchasing Notes](#some-notes)
+
+## Unity Project Set Up
 
 This example app is only able to authenticate on real Meta Quest devices on these platforms:
 - Android (Unity 6000.0 or older) / Meta Quest (Unity 6000.1 and newer) via Meta Horizon Store app
@@ -32,7 +39,7 @@ For more in-depth information to expand on your Meta Quest app in Unity, you sho
 
 If you are downloading this example app to test out this process yourself you will need to follow the instructions below in order to get everything set up with the **Meta Horizon Developer Dashboard** in order to get the User ID required for authentication.
 
-### Meta Horizon Developer Dashboard Configuration
+## Meta Horizon Developer Dashboard Configuration
 
 It is required that you have apps ***set up AND uploaded*** on the **Meta Horizon Developer Dashboard** in order to successfully retreive the User ID for the app. Additionally, both Meta Horizon Store apps and Rift apps will require you to go through this process. If you are making the same app for both platforms you **WILL** need to create a seperate app for both on the Meta Horizon Developer Dashboard.
 
@@ -85,7 +92,7 @@ Once the **OculusPlatformSettings** has the correct Application IDs set and you 
 
 Finally, you may need to fill out any **Tasks** that are required under `Requirements > Tasks`, such as **Organization Verification**.
 
-### brainCloud Configuration
+## brainCloud Configuration
 
 1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
 2. Click **Configure Oculus**
@@ -113,9 +120,7 @@ If your app is instead a **Rift app** (for the Meta Quest Link app on Windows) t
 
 All four fields can be filled out if you have both sets of apps for your Unity project.
 
----
-
-If everything is set up properly you should hopefully see yourself log in once you tap the **LOG IN** button! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
+> If everything is set up properly you should hopefully see yourself log in once you tap the **LOG IN** button! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
 ---
 
@@ -146,13 +151,14 @@ brainCloud now supports [Meta Horizon Store's Add-ons](https://developers.meta.c
 Once you click **Save & Close** and you select the newly created platform as the active Price Point then you're good to start testing!
 
 ### Some Notes
-- **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For the example, we use a very simple [List](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
 
-- In order to test purchases we recommend that you create a [Test user](https://developers.meta.com/horizon/resources/test-users/) and add them to your App's current Release Channel as a **Test User**. This way, you can test purchases without having to worry about spending actual money, which will happen if you use a real account!
+- **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For the example, we use a very simple [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
 
----
+- While brainCloud supports **Subscription** purchases, you will need to track the subscription status yourself. The example uses the same [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/master/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) to track the user's subscriptions but only if they've purchased it; it's current implementation wouldn't be able to track if the subscription lapses.
 
-If everything is configured properly (importantly, the **SKU** from the Meta Horizon Developer Dashboard matches the **Meta Horizon Product ID** under the Meta Horizon Price Points Platform on brainCloud), then your products should appear in the example app once you log in! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
+- In order to test purchases we recommend that you create a [Test user](https://developers.meta.com/horizon/resources/test-users/) and add them to your app's current Release Channel as a **Test User**. This way, you can test purchases without having to worry about spending actual money, which will happen if you use a real account!
+
+> If everything is configured properly (importantly, the **SKU** from the Meta Horizon Developer Dashboard matches the **Meta Horizon Product ID** under the Meta Horizon Price Points Platform on brainCloud), then your products should appear in the example app once you log in! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
 ---
 

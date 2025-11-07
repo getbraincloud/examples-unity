@@ -28,10 +28,10 @@ public class PurchaseHandler : MonoBehaviour
     private BrainCloudWrapper BC = null;
     private List<IAPItem> IAPItems = null;
 
-    // For User durables management
-    private const string ENTITY_TYPE = "inventory";
-    private string UserDurablesEntityID = string.Empty;
-    private List<string> UserDurables = null;
+    // For User purchases management
+    private const string ENTITY_TYPE = "purchases";
+    private string UserPurchasesEntityID = string.Empty;
+    private Dictionary<string, object> UserPurchases = null;
 
     private void Awake()
     {
@@ -67,7 +67,7 @@ public class PurchaseHandler : MonoBehaviour
     private void Start()
     {
         IAPItems = new();
-        UserDurables = new();
+        UserPurchases = new();
 
         enabled = false;
     }
@@ -102,8 +102,8 @@ public class PurchaseHandler : MonoBehaviour
             IAPItems = null;
         }
 
-        UserDurables?.Clear();
-        UserDurables = null;
+        UserPurchases?.Clear();
+        UserPurchases = null;
     }
 
     private void UpdateInfoLabel(string info)
@@ -134,19 +134,87 @@ public class PurchaseHandler : MonoBehaviour
         return null;
     }
 
-    private void UpdateUserDurables(string sku)
+    private bool UserPurchasesContainsDurable(string sku)
     {
-        if (UserDurables.Contains(sku))
+        if (UserPurchases.ContainsKey("durables") &&
+            UserPurchases["durables"] is object[] durables &&
+            durables != null && durables.Length > 0)
         {
-            Debug.LogError($"User already owns this durable IAP: {sku}");
-            return;
+            foreach (object durable in durables)
+            {
+                if (durable.ToString() == sku)
+                {
+                    return true;
+                }
+            }
         }
 
-        UserDurables.Add(sku);
+        return false;
+    }
 
-        BC.EntityService.UpdateEntity(UserDurablesEntityID,
+    private bool UserPurchasesContainsSubscription(string sku)
+    {
+        if (UserPurchases.ContainsKey("subscriptions") &&
+            UserPurchases["subscriptions"] is object[] subscriptions &&
+            subscriptions != null && subscriptions.Length > 0)
+        {
+            foreach (object subscription in subscriptions)
+            {
+                if (subscription.ToString() == sku)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void UpdateUserPurchases(string sku, ProductType type)
+    {
+        // Lets get the type
+        string key = string.Empty;
+        switch (type)
+        {
+            case ProductType.DURABLE:
+                key = "durables";
+                break;
+            case ProductType.SUBSCRIPTION:
+                key = "subscriptions";
+                break;
+            default:
+                Debug.LogError($"This ProductType isn't stored for the user: {type}");
+                return;
+        }
+
+        // We'll go through our purchases to see if there's a matching sku in that type list
+        if (UserPurchases.ContainsKey(key) && UserPurchases[key] is object[] skus)
+        {
+            List<string> updatedSkus = new();
+            foreach (var product in skus)
+            {
+                if (product.ToString() == sku)
+                {
+                    Debug.LogError($"User already owns SKU: {sku} ({type})");
+                    updatedSkus.Clear();
+                    updatedSkus = null;
+                    return;
+                }
+
+                updatedSkus.Add(product.ToString());
+            }
+
+            updatedSkus.Add(sku);
+            UserPurchases[key] = updatedSkus.ToArray();
+        }
+        else // If the type isn't in the purchases then it's a new purchase
+        {
+            UserPurchases.Add(key, new string[] { sku });
+        }
+
+        BC.EntityService.UpdateEntity(UserPurchasesEntityID,
                                       ENTITY_TYPE,
-                                      JsonWriter.Serialize(new Dictionary<string, object> { { "durables", UserDurables } }),
+                                      JsonWriter.Serialize(UserPurchases),
                                       ACL.None().ToJsonString(),
                                       -1,
                                       null,
@@ -275,8 +343,8 @@ public class PurchaseHandler : MonoBehaviour
                                      $"ExpirationTime: {(ulong)BrainCloud.TimeUtil.UTCDateTimeToUTCMillis(purchase.ExpirationTime)}\n" +
                                      $"DeveloperPayload:\n{purchase.DeveloperPayload}");
 
-                            if (item.Product.IAPProductType == ProductType.DURABLE &&
-                                UserDurables.Contains(item.Product.IAPSku))
+                            if (UserPurchasesContainsDurable(purchase.Sku) ||
+                                UserPurchasesContainsSubscription(purchase.Sku))
                             {
                                 item.SetToPurchased(); // So the user can't purcahse again
                             }
@@ -306,11 +374,12 @@ public class PurchaseHandler : MonoBehaviour
         yield return new WaitForFixedUpdate();
 
         // Finally we will go through our purchases, cache the payloads, then verify purchases
-        bool verifyDurables = false;
+        bool verifyLingering = false;
         foreach (BCProduct product in cachedPurchases.Keys)
         {
             isSuccess = false;
-            verifyDurables = verifyDurables || product.IAPProductType == ProductType.DURABLE;
+            verifyLingering = verifyLingering || product.IAPProductType == ProductType.DURABLE
+                                              || product.IAPProductType == ProductType.SUBSCRIPTION;
 
             BC.AppStoreService
               .CachePurchasePayloadContext("metaHorizon",
@@ -337,8 +406,9 @@ public class PurchaseHandler : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
 
-        // If there are durables in our verify then we will restart this process to update our UserDurables list properly
-        if (verifyDurables)
+        // If there are durables or subscriptions in our verify then we
+        // will restart this process to update our UserPurchases list properly
+        if (verifyLingering)
         {
             yield return GetIAPItems();
             yield break;
@@ -366,30 +436,26 @@ public class PurchaseHandler : MonoBehaviour
 
         void onGetEntitiesByType(string jsonResponse, object cbObject)
         {
-            if (jsonResponse.Contains("durables"))
+            if (jsonResponse.Contains("purchases"))
             {
                 var entity = ((JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)
                     ["data"] as Dictionary<string, object>)
                     ["entities"] as Dictionary<string, object>[])[0]; // We only want one of these entities tied to the user in this example
 
-                // Get the current durables list
-                if (entity.ContainsKey("data") && entity["data"] is Dictionary<string, object> data &&
-                    data.ContainsKey("durables") && data["durables"] is object[] durables)
+                // Get the current purchases object
+                if (entity.ContainsKey("data") &&
+                    entity["data"] is Dictionary<string, object> data &&
+                    data != null)
                 {
-                    UserDurables.Clear();
-                    if (durables != null && durables.Length > 0)
-                    {
-                        foreach (var durable in durables)
-                        {
-                            UserDurables.Add(durable.ToString());
-                        }
-                    }
+                    UserPurchases.Clear();
+                    UserPurchases = null;
+                    UserPurchases = data;
                 }
 
                 // Let's store the entityId for easy updating
                 if (entity.ContainsKey("entityId") && entity["entityId"] is string id)
                 {
-                    UserDurablesEntityID = id;
+                    UserPurchasesEntityID = id;
                 }
 
                 isSuccess = true;
@@ -397,7 +463,7 @@ public class PurchaseHandler : MonoBehaviour
             else // If the user is new, we will create the entity before calling this again
             {
                 BC.EntityService.CreateEntity(ENTITY_TYPE,
-                                              JsonWriter.Serialize(new Dictionary<string, object> { { "durables", UserDurables } }),
+                                              JsonWriter.Serialize(UserPurchases),
                                               ACL.None().ToJsonString(),
                                               onCreateUserInventory,
                                               OnBrainCloudFailure);
@@ -576,12 +642,13 @@ public class PurchaseHandler : MonoBehaviour
             }
 
             /*
-             * We'll add DURABLEs to our user's
-             * DURABLEs list for quick referencing
+             * We'll add DURABLEs & SUBSCRIPTIONs to our
+             * UserPurchases object for quick referencing
             */
-            if (iap.IAPProductType == ProductType.DURABLE)
+            if (iap.IAPProductType == ProductType.DURABLE ||
+                iap.IAPProductType == ProductType.SUBSCRIPTION)
             {
-                UpdateUserDurables(iap.IAPSku);
+                UpdateUserPurchases(iap.IAPSku, iap.IAPProductType);
             }
         }
     }
