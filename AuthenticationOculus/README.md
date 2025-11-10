@@ -68,6 +68,7 @@ Once the **OculusPlatformSettings** has the correct Application IDs set and you 
 
 2. Under `Requirements > Data Use Checkup`, you will need to submit a **Request to Access Platform Features** certification
     - You will need to submit one for both **User ID** and **User Profile**
+    - If you intend on making use of [Monetization](#meta-horizon-store-add-ons) you might also want to submit certifications for **In-App Purchases** and/or for **Subscriptions**
     - Follow the steps and answer every question truthfully; the more details the better
     - It will take time for the certification to be reviewed and approved
     - Once approved, you will see `Active` next to the Platform Feature
@@ -128,19 +129,27 @@ If everything is set up properly you should hopefully see yourself log in once y
 
 brainCloud now supports [Meta Horizon Store's Add-ons](https://developers.meta.com/horizon/resources/add-ons/)! If you're familiar with [brainCloud's Marketplace feature](https://help.getbraincloud.com/en/articles/9120848-design-marketplace-products) for managing your in-app purchasing (especially for other third-party stores), this will be pretty simple.
 
-1. First, you will need to set up your Add-ons on the Meta Horizon Developer Dashboard by navigating to `Monetization > Add-ons` and then click `Create Add-on`
+1. First things first, under `Requirements > Data Use Checkup` you will need to activate the **In-App Purchases and/or Downloadable Content** and/or **Subscriptions** platform features for your app in order to make use of Add-ons for your app.
+
+<p align="center">
+    <img  src="../_screenshots/_authOculus/MetaSetUp4.png?raw=true">
+</p>
+
+2. Next you will need to set up your Add-ons on the Meta Horizon Developer Dashboard by navigating to `Monetization > Add-ons` and then click `Create Add-on`
     - You will need to fill out the **Details**, **Pricing**, and **Metadata** pages in order to publish
     - Under Details, the **SKU** and **Add-on Type** are important to note down
     - Note: **Show in Store** isn't required for this but if it is enabled it may take some time before it will be published
+
+Note: You can also create **Subscriptions** under `Monetization > Subscriptions`. The process is similiar to Add-ons and it is important to note down the **SKU**.
 
 <p align="center">
     <img  src="../_screenshots/_authOculus/MetaAddOns.png?raw=true">
 </p>
 
-2. Once your Add-ons are published, you will need to configure the **Product** on brainCloud; navigate to `Design > Marketplace > Products`; from here you can add & configure your products on brainCloud and fill out the various details and awards
+3. When your Add-ons are published, you will need to configure the **Product** on brainCloud; navigate to `Design > Marketplace > Products`; from here you can add & configure your products on brainCloud and fill out the various details and awards
     - The idea is that you will want to create **Products** that correspond to the **Add-ons** on the Meta Horizon Store and brainCloud will manage the rewards those purchases will give to your users
 
-3. Once a product has been configured you will need to add the Meta Horizon Store for that product's **Price Points** platform; edit your product and click the **+** across from Price Points then click **Add Platform** and select **Meta Horizon**
+4. Once a product has been configured you will need to add the Meta Horizon Store for that product's **Price Points** platform; edit your product and click the **+** across from Price Points then click **Add Platform** and select **Meta Horizon**
     - **Amount** is a reference price that should equal the price that you set for the Add-on in the Meta Horizon Developer Dashboard
     - The **Meta Horizon Product ID** should match the **SKU** that you set on the Meta Horizon Developer Dashboard
 
@@ -156,13 +165,13 @@ If everything is configured properly (importantly, the **SKU** from the Meta Hor
 
 ### Purchasing Notes
 
-- By default, the brainCloud [VerifyPurchase](https://docs.braincloudservers.com/api/capi/appstore/verifypurchase) call will consume any `metaHorizon` **Consumables**. This can be changed to have the app itself consume after the VerifyPurchase call. You can set the [CONSUME_ON_BRAINCLOUD_VERIFY const](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L12) in PurchaseHandler.cs to change this behaviour.
+- By default, the brainCloud [VerifyPurchase](https://docs.braincloudservers.com/api/capi/appstore/verifypurchase) call will consume any `metaHorizon` **Consumables**. This can be changed to have the app itself consume after the VerifyPurchase call. You can set the [const bool CONSUME_ON_BRAINCLOUD_VERIFY](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L12) in PurchaseHandler.cs to change this behaviour.
 
 - The Json for the `metaHorizon` store doesn't need the `consumeOnVerify` boolean as it is an optional parameter. It is included in this example just to keep you aware of how consumables function in the brainCloud VerifyPurchase call.
 
-- **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For the example, we use a very simple [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
+- **Durables** are comparable to **Non-consumables** on brainCloud; unfortunately, due to how Meta Horizon's Add-on purchases work, there isn't a reliable way to track if a user has redeemed a Durable Add-on other than checking for if they own it. For this example, we use a very simple [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) that is synced to brainCloud via [User Entities](https://docs.braincloudservers.com/api/capi/entity/) but we highly recommend you develop a much more robust inventory system for your user data.
 
-- While brainCloud supports **Subscription** purchases, you will need to track the subscription status yourself. The example uses the same [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) to track the user's subscriptions but only if they've purchased it; it's current implementation wouldn't be able to track if the subscription lapses.
+- While brainCloud supports **Subscription** purchases, you will need to track the subscription status yourself. This example uses the same [UserPurchases dictionary](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L34) to track the user's subscriptions but only if they've purchased it; in it's current implementation it wouldn't be able to track if the subscription lapses.
 
 - In order to test purchases we recommend that you create a [Test user](https://developers.meta.com/horizon/resources/test-users/) and add them to your app's current Release Channel as a **Test User**. This way, you can test purchases without having to worry about spending actual money, which will happen if you use a real account!
 
