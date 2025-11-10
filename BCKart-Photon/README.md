@@ -8,17 +8,17 @@
 
 This project demonstrates a complete multiplayer game flow using **Photon** for network object synchronization and **brainCloud** for user authentication, lobby management, and matchmaking.  
 
-The core integration removes Photon’s default room-based logic in favor of brainCloud-managed lobbies. Photon is used locally for real-time object handling, while brainCloud manages authentication, lobby creation, and matchmaking.  
-
-## Known Issues
-
-- If the host leaves during gameplay, the match will be lost, all remaining users will return to the brainCloud Lobby.
+The core integration removes Photon’s default room-based logic in favor of brainCloud-managed lobbies. Photon is used locally for real-time object handling, while brainCloud manages authentication, lobby creation, matchmaking, and leaderboards.  If the host leaves during gameplay, the match will be lost, all remaining users will return to the brainCloud Lobby. This way the lobby remains, and while not active in the gameplay session, others will be able to join the Lobby.
 
 ---
 
 ## Getting Started
 
 Mac Users, you may need to run ** xattr -r -d com.apple.quarantine ./BCKart-Photon.app ** and accept its permissions since the app is unsigned.
+
+Please ensure that you have setup your Fusion AppId, and configure it in Unity via Tools -> Fusion -> Realtime Settings. The app will not work until you do so.
+
+It is highly recommended to manage your Fusion App Servers, with a Custom Authentication configured as the AuthenticatePhoton webhook, associated with the AuthenticatePhoton.ccjs Cloud Script File of your app.
 
 ### Requirements
 
@@ -109,6 +109,7 @@ Mac Users, you may need to run ** xattr -r -d com.apple.quarantine ./BCKart-Phot
 - **Quick Find:** Finds or creates a lobby.  
 - Added **BCLobbyManager** to enable real-time transport (RTT) and create lobby listeners.  
 - **Quick Join:** Supports find-or-create logic, updating host and join flows as needed.  
+- **Leaderboards:** Support dynamic leaderboards by use of CloudScript for viewing and posting for each track and game mode type
 
 ### EndRace UI
 
@@ -125,9 +126,8 @@ Mac Users, you may need to run ** xattr -r -d com.apple.quarantine ./BCKart-Phot
 
 ## Future Improvements
 
-- Support for clients leaving to lobby, instead of launch on host loss / migration.
 - Possible Support for persistent levels and state during host migration.  
-- Improved real-time session analytics, e.g., time to join and start the race.  About to start race.
+- Better Photon Integration for custom server authentication
 
 ---
 
