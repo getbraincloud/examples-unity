@@ -140,11 +140,11 @@ brainCloud now supports [Meta Horizon Store's Add-ons](https://developers.meta.c
     - Under Details, the **SKU** and **Add-on Type** are important to note down
     - Note: **Show in Store** isn't required for this but if it is enabled it may take some time before it will be published
 
-Note: You can also create **Subscriptions** under `Monetization > Subscriptions`. The process is similiar to Add-ons and it is important to note down the **SKU**.
-
 <p align="center">
     <img  src="../_screenshots/_authOculus/MetaAddOns.png?raw=true">
 </p>
+
+Note: You can also create **Subscriptions** under `Monetization > Subscriptions`. The process is similiar to Add-ons and it is important to note down the **SKU**.
 
 3. When your Add-ons are published, you will need to configure the **Product** on brainCloud; navigate to `Design > Marketplace > Products`; from here you can add & configure your products on brainCloud and fill out the various details and awards
     - The idea is that you will want to create **Products** that correspond to the **Add-ons** on the Meta Horizon Store and brainCloud will manage the rewards those purchases will give to your users
@@ -164,6 +164,8 @@ Once you click **Save & Close** and you select the newly created platform as the
 If everything is configured properly (importantly, the **SKU** from the Meta Horizon Developer Dashboard matches the **Meta Horizon Product ID** under the Meta Horizon Price Points Platform on brainCloud), then your products should appear in the example app once you log in! If not or if there are any questions, feel free to ask them on the [Issues](https://github.com/getbraincloud/examples-unity/issues) page.
 
 ### Purchasing Notes
+
+- Currently brainCloud **_ONLY_** supports Meta Horizon Store Monetization on Meta Horizion Store apps, NOT Rift apps. While you can still make use of Meta Horizon Add-ons for Rift apps you will have to come up with a client-side mechanism to track & award Add-on purchases for Rift apps.
 
 - By default, the brainCloud [VerifyPurchase](https://docs.braincloudservers.com/api/capi/appstore/verifypurchase) call will consume any `metaHorizon` **Consumables**. This can be changed to have the app itself consume after the VerifyPurchase call. You can set the [const bool CONSUME_ON_BRAINCLOUD_VERIFY](https://github.com/getbraincloud/examples-unity/blob/develop/AuthenticationOculus/Assets/App/Scripts/PurchaseHandler.cs#L12) in PurchaseHandler.cs to change this behaviour.
 
