@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class LoginHandler : MonoBehaviour
 {
+    public static string MetaUserID { get; private set; }
+
     [SerializeField] private CanvasGroup MainCanvas = null;
     [SerializeField] private TMP_Text ErrorMessage = null;
 
@@ -54,6 +56,7 @@ public class LoginHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("Core.AsyncInitialize Error:");
                 DisplayError(msg.GetError().Message);
             }
             else
@@ -62,6 +65,7 @@ public class LoginHandler : MonoBehaviour
                 {
                     if (msg.IsError)
                     {
+                        DisplayError("Entitlements.IsUserEntitledToApplication Error:");
                         DisplayError(msg.GetError().Message);
                     }
                     else
@@ -111,6 +115,7 @@ public class LoginHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("Users.GetLoggedInUser Error:");
                 DisplayError(msg.GetError().Message);
             }
             else if (msg.Data.ID <= 0 || msg.Data.ID.ToString().Length <= 1)
@@ -136,6 +141,7 @@ public class LoginHandler : MonoBehaviour
         {
             if (msg.IsError)
             {
+                DisplayError("Users.GetUserProof Error:");
                 DisplayError(msg.GetError().Message);
             }
             else
@@ -154,7 +160,7 @@ public class LoginHandler : MonoBehaviour
                               nonce,
                               true,
                               OnAuthenticateSuccess,
-                              OnAuthenticateError,
+                              OnAuthenticateFailure,
                               null);
 
         yield return new WaitUntil(() => BC.Client != null &&
@@ -163,6 +169,9 @@ public class LoginHandler : MonoBehaviour
                                          BC.GetStoredAnonymousId() != string.Empty);
         yield return new WaitForFixedUpdate();
 
+        // We'll store the User ID here for verifying purchases
+        MetaUserID = userID;
+
         // Finally let's update the info after authentication
         AppIDLabel.text = $"BC App: {BC.Client.AppId}";
         ProfileIDLabel.text = $"Profile ID:\n{BC.GetStoredProfileId()}";
@@ -170,6 +179,12 @@ public class LoginHandler : MonoBehaviour
 
         LogInContent.SetActive(false);
         InfoContent.SetActive(true);
+
+        // Enable purchasing canvas
+        if (FindFirstObjectByType<PurchaseHandler>() is var ph && ph != null)
+        {
+            ph.enabled = true;
+        }
     }
 
     private void OnAuthenticateSuccess(string jsonResponse, object cbObject)
@@ -177,10 +192,8 @@ public class LoginHandler : MonoBehaviour
         // Normally we would want to do something with the authentication info but since we're just doing a quick demo we'll keep this empty
     }
 
-    private void OnAuthenticateError(int status, int reasonCode, string jsonError, object cbObject)
+    private void OnAuthenticateFailure(int status, int reasonCode, string jsonError, object cbObject)
     {
-        StopAllCoroutines();
-
         var error = JsonReader.Deserialize(jsonError) as Dictionary<string, object>;
 
         DisplayError($"Error Received - Status: {status} || Reason {reasonCode} || Message:\n{error["status_message"]}");
@@ -188,6 +201,8 @@ public class LoginHandler : MonoBehaviour
 
     private void DisplayError(string msg)
     {
+        StopAllCoroutines();
+
         Debug.LogError(msg);
 
         LogInContent.SetActive(false);
