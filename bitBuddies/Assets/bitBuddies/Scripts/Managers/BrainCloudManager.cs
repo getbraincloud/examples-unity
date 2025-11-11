@@ -20,6 +20,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     public bool IsProcessingRequest
     {
         get { return _isProcessing; }
+        set { _isProcessing = value; }
     }
 
     private int _childInfoIndex;
@@ -130,11 +131,11 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleSuccess("Getting Child Accounts Success", OnGetChildAccounts),
             HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
         );
-        string[] propertyNames = new [] {"MysteryBoxInfo"}; 
+        string[] propertyNames = new [] {"MysteryBoxInfo", "ToyBenchList"}; 
         Wrapper.GlobalAppService.ReadSelectedProperties
         (
             propertyNames, 
-            HandleSuccess("Get Mystery Box Info Success", OnGetMysteryBoxInfo),
+            HandleSuccess("Get Global Properties Success", OnGetGlobalProperties),
             HandleFailure("Get Mystery Box Info Failed", OnFailureCallback)
         );
     }
@@ -156,7 +157,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         }
     }
     
-    private void OnGetMysteryBoxInfo(string jsonResponse)
+    private void OnGetGlobalProperties(string jsonResponse)
     {
         /*
          * {"data":{"MysteryBoxInfo":{"name":"MysteryBoxInfo","value":"
@@ -165,6 +166,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
          */
         var response = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
         var data = (Dictionary<string, object>)response["data"];
+        
+        //Getting mystery buddy boxes
         var mysteryBoxInfo = (Dictionary<string, object>)data["MysteryBoxInfo"];
         string innerJson = (string)mysteryBoxInfo["value"];
         var lootboxes = (Dictionary<string, object>)JsonReader.Deserialize(innerJson);
@@ -184,6 +187,29 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             listOfBoxInfo.Add(boxInfo);
         }
         GameManager.Instance.MysteryBoxes = listOfBoxInfo;
+        
+        //Getting Toy Bench info
+        var toyBenchInfo = (Dictionary<string, object>)data["ToyBenchList"];
+        string benchInnerJson = (string)toyBenchInfo["value"];
+        var benches = (Dictionary<string, object>)JsonReader.Deserialize(benchInnerJson);
+        var listOfBenchInfo =  new List<ToyBenchInfo>();
+
+        foreach (var keyValuePair in benches)
+        {
+            var benchDict = (Dictionary<string, object>)keyValuePair.Value;
+            
+            ToyBenchInfo benchInfo = new ToyBenchInfo();
+            benchInfo.BenchId = benchDict["benchId"] as string;
+            benchInfo.LevelRequirement = (int)benchDict["levelRequirement"];
+            benchInfo.LovePayout = (int)benchDict["lovePayout"];
+            benchInfo.CoinPayout = (int)benchDict["coinPayout"];
+            benchInfo.BuddyBlingPayout = (int)benchDict["buddyBlingPayout"];
+            benchInfo.UnlockCost = (int)benchDict["unlockAmount"];
+            benchInfo.Cooldown = (int)benchDict["cooldown"];
+            
+            listOfBenchInfo.Add(benchInfo);
+        }
+        GameManager.Instance.ToyBenchInfos = listOfBenchInfo;
     }
     
     private void OnGetChildAccounts(string jsonResponse)
@@ -267,6 +293,20 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 else
                 {
                     dataInfo.coinsEarnedInHolding = dataInfo.maxCoinCapacity;
+                }
+                
+                if(summaryFriendData.ContainsKey("ownedToyBenches"))
+                {
+                    dataInfo.ownedToys = new List<string>();
+                    var listOfBenches = summaryFriendData["ownedToyBenches"] as string[];
+                    foreach(var benchId in listOfBenches)
+                    {
+                        dataInfo.ownedToys.Add(benchId);
+                    }
+                }
+                else
+                {
+                    dataInfo.ownedToys = new List<string>();
                 }
             }
             

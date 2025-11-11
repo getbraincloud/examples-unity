@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 
 public class ToyBench : MonoBehaviour
 {
+	public string BenchId;
 	[SerializeField] private Transform RewardSpawnPoint;
 	[SerializeField] private RewardPickup RewardPickupPrefab;
 	[SerializeField] private GameObject ReadyIcon;
@@ -29,8 +30,6 @@ public class ToyBench : MonoBehaviour
 		_benchButton.onClick.AddListener(OnBenchButton);
 		ReadyIcon.gameObject.SetActive(false);
 		SpinnerIcon.gameObject.SetActive(false);
-		//ToDo uncomment when Toy Manager enables benches
-		//_benchButton.interactable = false;
 	}
 
 	private void OnDisable()
@@ -42,52 +41,34 @@ public class ToyBench : MonoBehaviour
 	public void EnableBench()
 	{
 		ReadyIcon.gameObject.SetActive(true);
+		if(!_benchButton)
+			_benchButton = GetComponent<Button>();
 		_benchButton.interactable = true;
+	}
+	
+	public void DisableBench()
+	{
+		SpinnerIcon.gameObject.SetActive(false);
+		ReadyIcon.gameObject.SetActive(false);
+		if(!_benchButton)
+			_benchButton = GetComponent<Button>();
+		_benchButton.interactable = false;
 	}
 
 	private void OnBenchButton()
 	{
-		for (int i = 0; i < CoinRewardsToSpawn; ++i)
-		{
-			Vector2 spawnPos = new Vector2(
-								Random.Range(_rewardSpawnRangeX.x, _rewardSpawnRangeX.y), 
-								Random.Range(_rewardSpawnRangeY.x, _rewardSpawnRangeY.y));
-			var reward = Instantiate(RewardPickupPrefab, RewardSpawnPoint);
-			reward.transform.localPosition = spawnPos;
-			int rewardValue;
-			if(CoinRewardsToSpawn > 1)
-			{
-				rewardValue = CoinRewardValueFromBench/CoinRewardsToSpawn;
-			}
-			else
-			{
-				rewardValue = CoinRewardValueFromBench;
-			}
-			reward.SetUpPickup(CurrencyTypes.Coins, rewardValue);
-		}
+		SpawnReward(CurrencyTypes.Coins, CoinRewardValueFromBench, CoinRewardsToSpawn);
 		
+		SpawnReward(CurrencyTypes.Love, LoveRewardValueFromBench, LoveRewardsToSpawn);
 		
-		for (int i = 0; i < LoveRewardsToSpawn; ++i)
-		{
-			Vector2 spawnPos = new Vector2(
-								Random.Range(_rewardSpawnRangeX.x, _rewardSpawnRangeX.y), 
-								Random.Range(_rewardSpawnRangeY.x, _rewardSpawnRangeY.y));
-			var reward = Instantiate(RewardPickupPrefab, RewardSpawnPoint);
-			reward.transform.localPosition = spawnPos;
-			int rewardValue;
-			if(LoveRewardsToSpawn > 1)
-			{
-				rewardValue = LoveRewardValueFromBench/LoveRewardsToSpawn;
-			}
-			else
-			{
-				rewardValue = LoveRewardValueFromBench;
-			}
-			reward.SetUpPickup(CurrencyTypes.Love, rewardValue);
-		}
-		
-		
-		for (int i = 0; i < BuddyBlingRewardsToSpawn; ++i)
+		SpawnReward(CurrencyTypes.BuddyBling, BuddyBlingRewardValueFromBench, BuddyBlingRewardsToSpawn);
+
+		StartCoroutine(CooldownOnBench());
+	}
+	
+	private void SpawnReward(CurrencyTypes in_currencyType, int in_rewardValue, int in_rewardSpawnNumber)
+	{
+		for (int i = 0; i < in_rewardSpawnNumber; ++i)
 		{
 			Vector2 spawnPos = new Vector2(
 				Random.Range(_rewardSpawnRangeX.x, _rewardSpawnRangeX.y), 
@@ -95,18 +76,16 @@ public class ToyBench : MonoBehaviour
 			var reward = Instantiate(RewardPickupPrefab, RewardSpawnPoint);
 			reward.transform.localPosition = spawnPos;
 			int rewardValue;
-			if(BuddyBlingRewardsToSpawn > 1)
+			if(in_rewardSpawnNumber > 1)
 			{
-				rewardValue = BuddyBlingRewardValueFromBench/BuddyBlingRewardsToSpawn;
+				rewardValue = in_rewardValue/in_rewardSpawnNumber;
 			}
 			else
 			{
-				rewardValue = BuddyBlingRewardValueFromBench;
+				rewardValue = in_rewardValue;
 			}
-			reward.SetUpPickup(CurrencyTypes.BuddyBling, rewardValue);
+			reward.SetUpPickup(in_currencyType, rewardValue);
 		}
-
-		StartCoroutine(CooldownOnBench());
 	}
 	
 	IEnumerator CooldownOnBench()

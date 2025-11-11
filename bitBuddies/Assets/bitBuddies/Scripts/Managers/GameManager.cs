@@ -6,50 +6,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-[Serializable]
-public class AppChildrenInfo
-{
-	public string profileName { get; set; }
-	public string profileId { get; set; }
-	public Dictionary<string, object> summaryFriendData { get; set; }
-	public int buddyBling { get; set; }
-	public float coinMultiplier { get; set; }
-	public int coinPerHour { get; set; }
-	public int maxCoinCapacity {get; set;}
-	public string buddySpritePath { get; set; }
-	public string rarity { get; set; }
-	public int buddyLevel { get; set; }
-	public int nextLevelUp { get; set; }
-	public int currentXP { get; set; }
-	public DateTime lastIdleTimestamp { get; set; }
-	public int coinsEarnedInHolding { get; set; }
-	//Love is only earned through Toy interaction in Buddys Room.
-	//Aka used as current XP for profile. 
-	public int loveEarnedInLifetime {get; set;}
-	public int coinsEarnedInLifetime {get; set;}
-	
-	private float _hourInSeconds = 3600;
-	
-	public void CheckCoinsEarned()
-	{
-		TimeSpan timeDifference = DateTime.UtcNow - lastIdleTimestamp;
-		float coinsPerSecond = coinPerHour / _hourInSeconds;
-		int coinsEarned = Mathf.FloorToInt(coinsPerSecond * (float)timeDifference.TotalSeconds);
-		if(coinsEarned > 0)
-		{
-			if(coinsEarned < maxCoinCapacity)
-			{
-				coinsEarnedInHolding = coinsEarned;
-			}
-			else
-			{
-				coinsEarnedInHolding = maxCoinCapacity;
-			}			
-		}
-	}
-}
-
-
 public class GameManager : SingletonBehaviour<GameManager>
 {
 	[Tooltip("Debug")]
@@ -75,7 +31,14 @@ public class GameManager : SingletonBehaviour<GameManager>
 		get { return _selectedAppChildrenInfo; }
 		set { _selectedAppChildrenInfo = value; }
 	}
-
+	
+	private List<ToyBenchInfo> _toyBenchInfos;
+	public List<ToyBenchInfo> ToyBenchInfos
+	{
+		get => _toyBenchInfos;
+		set => _toyBenchInfos = value;
+	}
+	
 	public override void Awake()
 	{
 		_selectedAppChildrenInfo = new AppChildrenInfo();

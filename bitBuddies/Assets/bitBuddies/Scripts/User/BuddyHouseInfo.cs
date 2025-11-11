@@ -158,6 +158,8 @@ public class BuddyHouseInfo : MonoBehaviour
 	
 	private void OnUpdateSummaryDataFailure()
 	{
-		
+		//Check to see if its an error saying its empty,
+		//If so then create the entity now.
 	}
+	
 }

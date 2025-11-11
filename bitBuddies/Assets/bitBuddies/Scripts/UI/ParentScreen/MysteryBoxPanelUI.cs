@@ -10,6 +10,11 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
+/// <summary>
+/// Class does 2 things
+/// Displays mystery boxes for user to select if they have the funds
+/// After a box is selected, this class handles 3 pages of dialog for a user opening a mystery box
+/// </summary>
 public class MysteryBoxPanelUI : ContentUIBehaviour
 {
 	[SerializeField] private TMP_Text TitleText;
