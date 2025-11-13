@@ -34,7 +34,7 @@ public class BuddyUtility : EditorWindow
                     GUILayout.Label("++ child XP ");
                     if (GUILayout.Button("Increase XP for buddy", GUILayout.Width(100), GUILayout.Height(40)))
                     {
-                        FindAnyObjectByType<BuddysRoom>().IncreaseXP(5);
+                        FindAnyObjectByType<BuddysRoom>().SpawnValueSubtractedAnimation(1000);
                     }
                 }
             }

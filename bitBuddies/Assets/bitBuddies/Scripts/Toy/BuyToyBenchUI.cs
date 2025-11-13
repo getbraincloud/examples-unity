@@ -14,11 +14,12 @@ public class BuyToyBenchUI : ContentUIBehaviour
     [SerializeField] private GameObject PurchasedObject;
 
     private ToyBenchInfo _toyBenchInfo;
-
+    private BuddysRoom _buddysRoom;
     public void Init(ToyBenchInfo in_toyBenchInfo)
     {
         _toyBenchInfo = in_toyBenchInfo;
         BuyButton.onClick.AddListener(OnBuyButton);
+        _buddysRoom = FindFirstObjectByType<BuddysRoom>();
         InitializeUI();
     }
 

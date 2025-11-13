@@ -1,31 +1,31 @@
-using System;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class BuddysRoom : ContentUIBehaviour
 {
-    [SerializeField] private TMP_Text _profileNameText;
-    [SerializeField] private TMP_Text _loveLevelText;
-    [SerializeField] private TMP_Text _buddyBlingText;
-    [SerializeField] private TMP_Text _parentCoinText;
-    [SerializeField] private Image _buddySprite;
-    [SerializeField] private TMP_Text _gameVersionText;
-    [SerializeField] private TMP_Text _bcClientVersionText;
-    [SerializeField] private Slider _loveSlider;
-    [SerializeField] private TMP_Text _timestampText;
+    [SerializeField] private TMP_Text ProfileNameText;
+    [SerializeField] private TMP_Text LoveLevelText;
+    [SerializeField] private TMP_Text BuddyBlingText;
+    [SerializeField] private TMP_Text ParentCoinText;
+    [SerializeField] private Image BuddySprite;
+    [SerializeField] private TMP_Text GameVersionText;
+    [SerializeField] private TMP_Text BcClientVersionText;
+    [SerializeField] private Slider LoveSlider;
+    [SerializeField] private TMP_Text TimestampText;
 
-    [SerializeField] private Button _exitButton;
-    [SerializeField] private Button _shopButton;
-    [SerializeField] private Button _statsButton;
-    [SerializeField] private ToyShop _toyShop;
+    [SerializeField] private Button ExitButton;
+    [SerializeField] private Button ShopButton;
+    [SerializeField] private Button StatsButton;
+    [SerializeField] private ToyShop ToyShop;
+    [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
+    
+    private float _textSpawnOffset = 135f;
     private int _increaseXpAmount;
     private AppChildrenInfo _appChildrenInfo;
     public AppChildrenInfo AppChildrenInfo { get { return _appChildrenInfo; } }
@@ -34,38 +34,41 @@ public class BuddysRoom : ContentUIBehaviour
     {
         InitializeUI();
         base.Awake();
+        
+        ToyManager.OnCoinsTaken += SpawnValueSubtractedAnimation;
+        
     }
 
     protected override void InitializeUI()
     {
-        _exitButton.onClick.AddListener(OnExitButton);
-        _shopButton.onClick.AddListener(OnShopButton);
-        _statsButton.onClick.AddListener(OnStatsButton);
+        ExitButton.onClick.AddListener(OnExitButton);
+        ShopButton.onClick.AddListener(OnShopButton);
+        StatsButton.onClick.AddListener(OnStatsButton);
         
-        _gameVersionText.text = $"Game Version: {Application.version}";
-        _bcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
+        GameVersionText.text = $"Game Version: {Application.version}";
+        BcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
         _appChildrenInfo = GameManager.Instance.SelectedAppChildrenInfo;
         
-        _profileNameText.text = _appChildrenInfo.profileName;
-        _parentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
-        _buddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
+        ProfileNameText.text = _appChildrenInfo.profileName;
+        ParentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
+        BuddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
 
-        _loveLevelText.text = $"Lv. {_appChildrenInfo.buddyLevel}";
+        LoveLevelText.text = $"Lv. {_appChildrenInfo.buddyLevel}";
         if(_appChildrenInfo.nextLevelUp == 0)
         {
-            _loveSlider.maxValue = 1;
-            _loveSlider.value = 1;
+            LoveSlider.maxValue = 1;
+            LoveSlider.value = 1;
         }
         else
         {
-            _loveSlider.value = _appChildrenInfo.currentXP;
-            _loveSlider.maxValue = _appChildrenInfo.nextLevelUp;
+            LoveSlider.value = _appChildrenInfo.currentXP;
+            LoveSlider.maxValue = _appChildrenInfo.nextLevelUp;
         }
 
-        _timestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
+        TimestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
         
         //_buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
-        _buddySprite.sprite = AssetLoader.LoadSprite(_appChildrenInfo.buddySpritePath);
+        BuddySprite.sprite = AssetLoader.LoadSprite(_appChildrenInfo.buddySpritePath);
         if(_appChildrenInfo.buddySpritePath.IsNullOrEmpty())
         {
             Debug.LogWarning("Buddy sprite was missing for: "+ _appChildrenInfo.profileName + " child");
@@ -79,12 +82,28 @@ public class BuddysRoom : ContentUIBehaviour
     
     private void OnShopButton()
     {
-        Instantiate(_toyShop, transform);
+        Instantiate(ToyShop, transform);
     }
     
     private void OnStatsButton()
     {
         
+    }
+    
+    public void SpawnValueSubtractedAnimation(int amount)
+    {
+        RectTransform mainTextPosition = new RectTransform();
+        Transform parent = new RectTransform();
+        mainTextPosition = ParentCoinText.rectTransform;
+        parent = ParentCoinText.transform.parent;
+        
+        //Set up animation
+        var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - _textSpawnOffset, 0f);
+        textAnimation.SetUpNegativeNumberText(amount);
+        textAnimation.PlayBounce();
+        
+        ParentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
     }
     
     public void IncreaseXP(int xpAmount)
@@ -110,7 +129,7 @@ public class BuddysRoom : ContentUIBehaviour
             if(nextLevelUp != 0)
             {
                 _appChildrenInfo.nextLevelUp = nextLevelUp;
-                _loveSlider.maxValue = nextLevelUp;
+                LoveSlider.maxValue = nextLevelUp;
             }            
         }
         
@@ -118,7 +137,7 @@ public class BuddysRoom : ContentUIBehaviour
         if(currentXP != 0)
         {
             _appChildrenInfo.currentXP = currentXP;
-            _loveSlider.value = currentXP;
+            LoveSlider.value = currentXP;
         }
         
         var currentLevel = (int) increaseXP["experienceLevel"];
@@ -139,7 +158,7 @@ public class BuddysRoom : ContentUIBehaviour
                     var gems = currency["coins"] as Dictionary<string, object>;
                     var balance = (int) gems["balance"];
                     _appChildrenInfo.buddyBling = balance;
-                    _buddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
+                    BuddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
                 }
             }
         }

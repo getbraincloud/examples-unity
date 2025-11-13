@@ -161,5 +161,4 @@ public class BuddyHouseInfo : MonoBehaviour
 		//Check to see if its an error saying its empty,
 		//If so then create the entity now.
 	}
-	
 }

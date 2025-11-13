@@ -25,6 +25,8 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	
 	
 	private string _selectedToyId;
+	
+	public static event Action<int> OnCoinsTaken;
 	public override void Awake()
 	{
 		SetUpToyBenches();
@@ -98,11 +100,10 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		 * "coins":{"consumed":31000,"balance":6619,"purchased":0,"awarded":37619,"revoked":0}}},"status":200}}
 		 * ,"success":true,"reasonCode":null},"status":200}]}
 		 */
-
-		
 		var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
 		var data =  packet["data"] as Dictionary<string, object>;
 		var response = data["response"] as Dictionary<string, object>;
+		var beforeAmount = BrainCloudManager.Instance.UserInfo.Coins;
 		
 		if(response != null && response.TryGetValue("consumeResult", out var value))
 		{
@@ -118,6 +119,8 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		CheckForAvailableBenches();
 		
 		_toyBenchUIRefreshCallback?.Invoke();
+		var totalDifference = beforeAmount - BrainCloudManager.Instance.UserInfo.Coins;
+		OnCoinsTaken?.Invoke(totalDifference);
 	}
 	
 	private void OnObtainToyFailure()

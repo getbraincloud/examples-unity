@@ -30,11 +30,20 @@ public class ValueAddedAnimation : MonoBehaviour
         rectTransform = textElement.rectTransform;
     }
 
-    public void SetUpText(int in_amount)
+    public void SetUpPositiveNumberText(int in_amount)
     {
         originalPosition = rectTransform.localPosition;
         canvasGroup.alpha = 0;
         textElement.text = $"+{in_amount}";
+        textElement.color = Color.green;
+    }
+    
+    public void SetUpNegativeNumberText(int in_amount)
+    {
+        originalPosition = rectTransform.localPosition;
+        canvasGroup.alpha = 0;
+        textElement.text = $"-{in_amount}";
+        textElement.color = Color.red;
     }
 
     public void PlayBounce()

@@ -100,6 +100,7 @@ public class ParentMenu : ContentUIBehaviour
     private void OnDisable()
     {
         BuddyHouseInfo.OnCoinsCollected -= SpawnValueAddedAnimation;
+        BuddyHouseInfo.OnCoinsCollected -= UpdateValueText;
         StopAllCoroutines();
         IncreaseCoinsButton.onClick.RemoveAllListeners();
         IncreaseGemsButton.onClick.RemoveAllListeners();
@@ -164,7 +165,7 @@ public class ParentMenu : ContentUIBehaviour
         //Set up animation
         var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
         textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textSpawnOffset, 0f);
-        textAnimation.SetUpText(amount);
+        textAnimation.SetUpPositiveNumberText(amount);
         textAnimation.PlayBounce();
     }
     
