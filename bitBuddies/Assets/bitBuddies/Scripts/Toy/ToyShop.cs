@@ -1,8 +1,46 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class ToyShop : MonoBehaviour
+public class ToyShop : ContentUIBehaviour
 {
-	/*
-	 * Manages shop specific stuff
-	 */
+	[SerializeField] private Button CloseButton;
+	[SerializeField] private Transform ToySpawnPoint;
+	[SerializeField] private BuyToyBenchUI BuyToyBenchPrefab;
+	private List<ToyBenchInfo> _toyBenchInfos;
+	private BuddysRoom _buddysRoom;
+	
+	private List<BuyToyBenchUI> _toyBenchUIs;
+
+	protected override void Awake()
+	{
+		base.Awake();
+		InitializeUI();
+	}
+
+	protected override void InitializeUI()
+	{
+		CloseButton.onClick.AddListener(OnCloseButton);
+		_toyBenchInfos = GameManager.Instance.ToyBenchInfos;
+		_toyBenchUIs = new List<BuyToyBenchUI>();
+		foreach (ToyBenchInfo toyBenchInfo in _toyBenchInfos)
+		{
+			var info = Instantiate(BuyToyBenchPrefab, ToySpawnPoint);
+			info.Init(toyBenchInfo);
+			_toyBenchUIs.Add(info);
+		}
+	}
+	
+	public void RefreshShopScreen()
+	{
+		foreach (BuyToyBenchUI toyBenchUI in _toyBenchUIs)
+		{
+			toyBenchUI.SetupToyBenchesUI();
+		}
+	}
+	
+	private void OnCloseButton()
+	{
+		Destroy(gameObject);
+	}
 }

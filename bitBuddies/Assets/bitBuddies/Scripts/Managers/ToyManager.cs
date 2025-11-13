@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using Gameframework;
 using UnityEngine;
@@ -25,33 +27,55 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	private string _selectedToyId;
 	public override void Awake()
 	{
+		SetUpToyBenches();
 		CheckForAvailableBenches();
+	}
+	
+	private void SetUpToyBenches()
+	{
+		var listOfInfo = GameManager.Instance.ToyBenchInfos;
+		for (int i = 0; i < ToyBenches.Count; i++)
+		{
+			ToyBenches[i].SetUpToyBench(listOfInfo[i]);
+		}
 	}
 	
 	private void CheckForAvailableBenches()
 	{
 		var getUserUnlockedBenches = GameManager.Instance.SelectedAppChildrenInfo.ownedToys;
-		foreach (ToyBench toyBench in ToyBenches)
+		if(getUserUnlockedBenches.Count > 0)
 		{
-			foreach (string unlockedBench in getUserUnlockedBenches)
+			foreach (ToyBench toyBench in ToyBenches)
 			{
-				if(toyBench.BenchId.ToLower().Equals(unlockedBench.ToLower()))
+				foreach(string benchId in getUserUnlockedBenches)
 				{
-					toyBench.EnableBench();
-				}
-				else
-				{
+					if(toyBench.BenchId.Equals(benchId, System.StringComparison.OrdinalIgnoreCase))
+					{
+						toyBench.EnableBench();
+						break;
+					}
+					
 					toyBench.DisableBench();
 				}
 			}
 		}
+		else
+		{
+			foreach (ToyBench toyBench in ToyBenches)
+			{
+				toyBench.DisableBench();
+			}
+		}
 	}
 
-	public void ObtainToy(string in_benchId)
+	private Action _toyBenchUIRefreshCallback;
+	public void ObtainToy(string in_benchId, Action uiCallback)
 	{
 		if (in_benchId.Equals(""))
 			return;
-		
+		if(GameManager.Instance.SelectedAppChildrenInfo.ownedToys.Contains(in_benchId))
+			return;
+		_toyBenchUIRefreshCallback = uiCallback;
 		_selectedToyId = in_benchId;
 		var scriptData = new Dictionary<string, object>();
 		scriptData.Add("toyId", in_benchId);
@@ -68,13 +92,32 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	
 	private void OnObtainToySuccess(string jsonResponse)
 	{
-		foreach (ToyBench toyBench in ToyBenches)
+		/*
+		 * {"packetId":10,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"scriptSize":12672,"executeTime":117410},
+		 * "response":{"consumeResult":{"data":{"currencyMap":{"gems":{"consumed":0,"balance":0,"purchased":0,"awarded":0,"revoked":0},
+		 * "coins":{"consumed":31000,"balance":6619,"purchased":0,"awarded":37619,"revoked":0}}},"status":200}}
+		 * ,"success":true,"reasonCode":null},"status":200}]}
+		 */
+
+		
+		var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+		var data =  packet["data"] as Dictionary<string, object>;
+		var response = data["response"] as Dictionary<string, object>;
+		
+		if(response != null && response.TryGetValue("consumeResult", out var value))
 		{
-			if(toyBench.BenchId.Equals(_selectedToyId))
-			{
-				toyBench.EnableBench();
-			}
+			var consumeResult = value as Dictionary<string, object>;
+			var currencyData = consumeResult["data"] as Dictionary<string, object>;
+			var currencyMap = currencyData["currencyMap"] as Dictionary<string, object>;
+			var coins = currencyMap["coins"] as Dictionary<string, object>;
+			BrainCloudManager.Instance.UserInfo.UpdateCoins((int) coins["balance"]);
 		}
+		
+		GameManager.Instance.SelectedAppChildrenInfo.ownedToys.Add(_selectedToyId);
+
+		CheckForAvailableBenches();
+		
+		_toyBenchUIRefreshCallback?.Invoke();
 	}
 	
 	private void OnObtainToyFailure()
@@ -86,7 +129,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	{
 		foreach (ToyBench toyBench in ToyBenches)
 		{
-			if(in_benchId.Equals(toyBench.BenchId))
+			if(in_benchId.Equals(toyBench.BenchId, System.StringComparison.OrdinalIgnoreCase))
 			{
 				//That means the user owns this bench and can enable it.
 				return toyBench;
@@ -101,7 +144,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		var benchInfo = GameManager.Instance.ToyBenchInfos;
 		foreach (ToyBenchInfo toyBenchInfo in benchInfo)
 		{
-			if(in_benchId.Equals(toyBenchInfo.BenchId))
+			if(in_benchId.Equals(toyBenchInfo.BenchId, System.StringComparison.OrdinalIgnoreCase))
 			{
 				return toyBenchInfo;
 			}

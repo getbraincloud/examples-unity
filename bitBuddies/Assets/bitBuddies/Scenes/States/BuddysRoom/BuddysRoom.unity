@@ -386,6 +386,7 @@ MonoBehaviour:
   _exitButton: {fileID: 1136952283}
   _shopButton: {fileID: 1090454594}
   _statsButton: {fileID: 62157263}
+  _toyShop: {fileID: 1670353439331415581, guid: 4fb171710e3911a4bafb171df5330621, type: 3}
 --- !u!225 &44310395
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -776,18 +777,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4334e08e7c314e4499dc7a44b6c01d3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BenchId: videoCamera
   RewardSpawnPoint: {fileID: 881017507}
   RewardPickupPrefab: {fileID: 4388558641017635400, guid: 524f4200375f8c5468be80216e7defb6, type: 3}
   ReadyIcon: {fileID: 1176420482}
   SpinnerIcon: {fileID: 2005606184}
-  CooldownTime: 3
-  CoinRewardsToSpawn: 1
-  LoveRewardsToSpawn: 1
-  BuddyBlingRewardsToSpawn: 1
-  CoinRewardValueFromBench: 1
-  LoveRewardValueFromBench: 1
-  BuddyBlingRewardValueFromBench: 1
+  CoinRewardsToSpawn: 4
+  LoveRewardsToSpawn: 4
+  BuddyBlingRewardsToSpawn: 4
 --- !u!1 &303244548
 GameObject:
   m_ObjectHideFlags: 0
@@ -3050,7 +3046,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1090454593
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3068,7 +3064,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -475.2, y: -256.34}
+  m_AnchoredPosition: {x: -741.25, y: -256.34}
   m_SizeDelta: {x: 150, y: 75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1090454594
@@ -4161,18 +4157,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4334e08e7c314e4499dc7a44b6c01d3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BenchId: FishTank
   RewardSpawnPoint: {fileID: 881017507}
   RewardPickupPrefab: {fileID: 4388558641017635400, guid: 524f4200375f8c5468be80216e7defb6, type: 3}
   ReadyIcon: {fileID: 943203683}
   SpinnerIcon: {fileID: 303244548}
-  CooldownTime: 3
-  CoinRewardsToSpawn: 1
-  LoveRewardsToSpawn: 1
-  BuddyBlingRewardsToSpawn: 1
-  CoinRewardValueFromBench: 1
-  LoveRewardValueFromBench: 1
-  BuddyBlingRewardValueFromBench: 1
+  CoinRewardsToSpawn: 2
+  LoveRewardsToSpawn: 2
+  BuddyBlingRewardsToSpawn: 2
 --- !u!1 &1439839200
 GameObject:
   m_ObjectHideFlags: 0
@@ -4205,18 +4196,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4334e08e7c314e4499dc7a44b6c01d3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BenchId: ScienceTable
   RewardSpawnPoint: {fileID: 881017507}
   RewardPickupPrefab: {fileID: 4388558641017635400, guid: 524f4200375f8c5468be80216e7defb6, type: 3}
   ReadyIcon: {fileID: 1583482413}
   SpinnerIcon: {fileID: 1129786745}
-  CooldownTime: 3
-  CoinRewardsToSpawn: 1
-  LoveRewardsToSpawn: 1
-  BuddyBlingRewardsToSpawn: 1
-  CoinRewardValueFromBench: 1
-  LoveRewardValueFromBench: 1
-  BuddyBlingRewardValueFromBench: 1
+  CoinRewardsToSpawn: 5
+  LoveRewardsToSpawn: 5
+  BuddyBlingRewardsToSpawn: 5
 --- !u!224 &1439839202
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5131,18 +5117,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4334e08e7c314e4499dc7a44b6c01d3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BenchId: DJTurntable
   RewardSpawnPoint: {fileID: 881017507}
   RewardPickupPrefab: {fileID: 4388558641017635400, guid: 524f4200375f8c5468be80216e7defb6, type: 3}
   ReadyIcon: {fileID: 1145373474}
   SpinnerIcon: {fileID: 1805136678}
-  CooldownTime: 3
-  CoinRewardsToSpawn: 1
-  LoveRewardsToSpawn: 1
-  BuddyBlingRewardsToSpawn: 1
-  CoinRewardValueFromBench: 1
-  LoveRewardValueFromBench: 1
-  BuddyBlingRewardValueFromBench: 1
+  CoinRewardsToSpawn: 3
+  LoveRewardsToSpawn: 3
+  BuddyBlingRewardsToSpawn: 3
 --- !u!1 &1960935819
 GameObject:
   m_ObjectHideFlags: 0

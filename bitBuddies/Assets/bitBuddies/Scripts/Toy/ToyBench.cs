@@ -1,35 +1,48 @@
-using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class ToyBench : MonoBehaviour
 {
-	public string BenchId;
+	public string BenchId
+	{
+		get => _benchId;
+		set => _benchId = value;
+	}
+	private string _benchId;
 	[SerializeField] private Transform RewardSpawnPoint;
 	[SerializeField] private RewardPickup RewardPickupPrefab;
 	[SerializeField] private GameObject ReadyIcon;
 	[SerializeField] private GameObject SpinnerIcon;
-	[SerializeField] private float CooldownTime;
+	
 	[SerializeField] private int CoinRewardsToSpawn;
 	[SerializeField] private int LoveRewardsToSpawn;
 	[SerializeField] private int BuddyBlingRewardsToSpawn;
-	[SerializeField] private int CoinRewardValueFromBench;
-	[SerializeField] private int LoveRewardValueFromBench;
-	[SerializeField] private int BuddyBlingRewardValueFromBench;
 	
+	private float _cooldownTime;
+	private int _coinRewardValueFromBench;
+	private int _loveRewardValueFromBench;
+	private int _buddyBlingRewardValueFromBench;
 	
 	private Vector2 _rewardSpawnRangeX = new Vector2(-440, 440);
 	private Vector2 _rewardSpawnRangeY = new Vector2(-125, 125);
 	private Button _benchButton;
+	private bool _isEnabled;
 	private void Awake()
 	{
 		_benchButton = GetComponent<Button>();
 		_benchButton.onClick.AddListener(OnBenchButton);
-		ReadyIcon.gameObject.SetActive(false);
 		SpinnerIcon.gameObject.SetActive(false);
+	}
+	
+	public void SetUpToyBench(ToyBenchInfo in_toyBenchInfo)
+	{
+		_benchId = in_toyBenchInfo.BenchId;
+		_cooldownTime = in_toyBenchInfo.Cooldown;
+		_coinRewardValueFromBench = in_toyBenchInfo.CoinPayout;
+		_loveRewardValueFromBench = in_toyBenchInfo.LovePayout;
+		_buddyBlingRewardValueFromBench = in_toyBenchInfo.BuddyBlingPayout;
 	}
 
 	private void OnDisable()
@@ -37,7 +50,6 @@ public class ToyBench : MonoBehaviour
 		StopAllCoroutines();
 	}
 	
-	//ToDo: Called from Toy Manager when it determines what benches are available
 	public void EnableBench()
 	{
 		ReadyIcon.gameObject.SetActive(true);
@@ -57,11 +69,11 @@ public class ToyBench : MonoBehaviour
 
 	private void OnBenchButton()
 	{
-		SpawnReward(CurrencyTypes.Coins, CoinRewardValueFromBench, CoinRewardsToSpawn);
+		SpawnReward(CurrencyTypes.Coins, _coinRewardValueFromBench, CoinRewardsToSpawn);
 		
-		SpawnReward(CurrencyTypes.Love, LoveRewardValueFromBench, LoveRewardsToSpawn);
+		SpawnReward(CurrencyTypes.Love, _loveRewardValueFromBench, LoveRewardsToSpawn);
 		
-		SpawnReward(CurrencyTypes.BuddyBling, BuddyBlingRewardValueFromBench, BuddyBlingRewardsToSpawn);
+		SpawnReward(CurrencyTypes.BuddyBling, _buddyBlingRewardValueFromBench, BuddyBlingRewardsToSpawn);
 
 		StartCoroutine(CooldownOnBench());
 	}
@@ -93,7 +105,7 @@ public class ToyBench : MonoBehaviour
 		_benchButton.interactable = false;
 		ReadyIcon.gameObject.SetActive(false);
 		SpinnerIcon.gameObject.SetActive(true);
-		yield return new WaitForSeconds(CooldownTime);
+		yield return new WaitForSeconds(_cooldownTime);
 		_benchButton.interactable = true;
 		ReadyIcon.gameObject.SetActive(true);
 		SpinnerIcon.gameObject.SetActive(false);

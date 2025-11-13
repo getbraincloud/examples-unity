@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
@@ -24,6 +25,7 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private Button _exitButton;
     [SerializeField] private Button _shopButton;
     [SerializeField] private Button _statsButton;
+    [SerializeField] private ToyShop _toyShop;
     private int _increaseXpAmount;
     private AppChildrenInfo _appChildrenInfo;
     public AppChildrenInfo AppChildrenInfo { get { return _appChildrenInfo; } }
@@ -49,8 +51,17 @@ public class BuddysRoom : ContentUIBehaviour
         _buddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
 
         _loveLevelText.text = $"Lv. {_appChildrenInfo.buddyLevel}";
-        _loveSlider.value = _appChildrenInfo.currentXP;
-        _loveSlider.maxValue = _appChildrenInfo.nextLevelUp;
+        if(_appChildrenInfo.nextLevelUp == 0)
+        {
+            _loveSlider.maxValue = 1;
+            _loveSlider.value = 1;
+        }
+        else
+        {
+            _loveSlider.value = _appChildrenInfo.currentXP;
+            _loveSlider.maxValue = _appChildrenInfo.nextLevelUp;
+        }
+
         _timestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
         
         //_buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
@@ -68,7 +79,7 @@ public class BuddysRoom : ContentUIBehaviour
     
     private void OnShopButton()
     {
-        
+        Instantiate(_toyShop, transform);
     }
     
     private void OnStatsButton()

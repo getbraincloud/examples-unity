@@ -299,9 +299,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 {
                     dataInfo.ownedToys = new List<string>();
                     var listOfBenches = summaryFriendData["ownedToyBenches"] as string[];
-                    foreach(var benchId in listOfBenches)
+                    if(listOfBenches != null && listOfBenches.Length > 0)
                     {
-                        dataInfo.ownedToys.Add(benchId);
+                        foreach(var benchId in listOfBenches)
+                        {
+                            dataInfo.ownedToys.Add(benchId);
+                        }
                     }
                 }
                 else
@@ -318,7 +321,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 {
                     dataInfo.currentXP = (int) xpObj["xpPoints"];
                     dataInfo.buddyLevel = (int) xpObj["xpLevel"];
-                    dataInfo.nextLevelUp =  (int) xpObj["nextXpLevel"];
+                    if(xpObj.ContainsKey( "nextXpLevel"))
+                    {
+                        dataInfo.nextLevelUp =  (int) xpObj["nextXpLevel"];                        
+                    }
                 }
                 
                 var currency = extraData["currency"] as Dictionary<string, object>;
@@ -339,13 +345,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 }
             }
             appChildrenInfos.Add(dataInfo);
-        }
-
-        
-        if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
-        {
-            //Debug.LogError("Child Profile ID is missing. Cant fetch data.");
-            //return;
         }
         
         _childInfoIndex = 0;
