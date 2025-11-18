@@ -90,4 +90,14 @@ public class GameManager : SingletonBehaviour<GameManager>
 		}
 	}
 	
+	public void UpdateSelectedAppChildrenInfo()
+	{
+		for (int i = 0; i < appChildrenInfos.Count; i++)
+		{
+			if(appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			{
+				appChildrenInfos[i] = SelectedAppChildrenInfo;
+			}
+		}
+	}
 }

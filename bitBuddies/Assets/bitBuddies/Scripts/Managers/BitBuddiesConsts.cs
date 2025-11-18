@@ -33,6 +33,7 @@ namespace Gameframework
         public const string INCREASE_XP_SCRIPT_NAME = "child/increaseChildBuddyExperience";
         public const string UPDATE_CHILD_COINS_COLLECTED_SCRIPT_NAME = "child/updateChildCoinCollected";
         public const string OBTAIN_TOY_SCRIPT_NAME = "child/obtainToy";
+        public const string TOY_REWARD_RECEIVED_SCRIPT_NAME = "child/toyRewardsReceived";
 
 
         //Stat Names

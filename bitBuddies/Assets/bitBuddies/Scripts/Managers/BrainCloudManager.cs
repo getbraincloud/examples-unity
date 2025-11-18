@@ -269,16 +269,27 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 {
                     dataInfo.buddySpritePath = BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY;
                 }
- 
-                var multiplier = summaryFriendData["coinMultiplier"] as double?;
-                if(multiplier != null)
+
+                try
                 {
-                    dataInfo.coinMultiplier = (float) multiplier;
+                    if(summaryFriendData["coinMultiplier"] is double multiplier)
+                    {
+                        dataInfo.coinMultiplier = (float) multiplier;
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    dataInfo.coinMultiplier = 1.0f;
+                    var multiplierInt = (int) summaryFriendData["coinMultiplier"];
+                    if(multiplierInt > 0)
+                    {
+                        dataInfo.coinMultiplier = multiplierInt;
+                    }
+                    else
+                    {
+                        dataInfo.coinMultiplier = 1.0f;
+                    }
                 }
+                
                 dataInfo.coinPerHour = (int) summaryFriendData["coinPerHour"];
                 dataInfo.maxCoinCapacity = (int) summaryFriendData["maxCoinCapacity"];   
                 dataInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryFriendData["lastIdleTimestamp"]).UtcDateTime;

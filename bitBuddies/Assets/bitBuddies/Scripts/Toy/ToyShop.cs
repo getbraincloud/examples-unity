@@ -15,11 +15,6 @@ public class ToyShop : ContentUIBehaviour
 	protected override void Awake()
 	{
 		base.Awake();
-		InitializeUI();
-	}
-
-	protected override void InitializeUI()
-	{
 		CloseButton.onClick.AddListener(OnCloseButton);
 		_toyBenchInfos = GameManager.Instance.ToyBenchInfos;
 		_toyBenchUIs = new List<BuyToyBenchUI>();
@@ -29,6 +24,12 @@ public class ToyShop : ContentUIBehaviour
 			info.Init(toyBenchInfo);
 			_toyBenchUIs.Add(info);
 		}
+		InitializeUI();
+	}
+
+	protected override void InitializeUI()
+	{
+		RefreshShopScreen();
 	}
 	
 	public void RefreshShopScreen()
