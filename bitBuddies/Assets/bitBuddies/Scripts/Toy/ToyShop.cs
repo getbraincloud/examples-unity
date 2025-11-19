@@ -15,6 +15,7 @@ public class ToyShop : ContentUIBehaviour
 	protected override void Awake()
 	{
 		base.Awake();
+		_buddysRoom = FindFirstObjectByType<BuddysRoom>();
 		CloseButton.onClick.AddListener(OnCloseButton);
 		_toyBenchInfos = GameManager.Instance.ToyBenchInfos;
 		_toyBenchUIs = new List<BuyToyBenchUI>();
@@ -42,6 +43,7 @@ public class ToyShop : ContentUIBehaviour
 	
 	private void OnCloseButton()
 	{
+		_buddysRoom.ShopClosed();
 		Destroy(gameObject);
 	}
 }

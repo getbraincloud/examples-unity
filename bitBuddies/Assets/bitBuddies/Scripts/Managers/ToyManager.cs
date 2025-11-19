@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using UnityEngine;
 
@@ -245,13 +246,16 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			{
 				foreach(string benchId in getUserUnlockedBenches)
 				{
-					if(toyBench.BenchId.Equals(benchId, System.StringComparison.OrdinalIgnoreCase))
+					if(!benchId.IsNullOrEmpty() && toyBench != null && !toyBench.BenchId.IsNullOrEmpty())
 					{
-						toyBench.EnableBench();
-						break;
-					}
+						if(toyBench.BenchId.Equals(benchId, System.StringComparison.OrdinalIgnoreCase))
+						{
+							toyBench.EnableBench();
+							break;
+						}
 					
-					toyBench.DisableBench();
+						toyBench.DisableBench();	
+					}
 				}
 			}
 		}

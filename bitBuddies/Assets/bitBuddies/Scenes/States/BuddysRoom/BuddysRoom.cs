@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
@@ -27,6 +28,7 @@ public class BuddysRoom : ContentUIBehaviour
     
     private float _textSpawnOffset = 135f;
     private int _increaseXpAmount;
+    private bool _isShopOpen;
     private AppChildrenInfo _appChildrenInfo;
     public AppChildrenInfo AppChildrenInfo { get { return _appChildrenInfo; } }
  
@@ -36,7 +38,6 @@ public class BuddysRoom : ContentUIBehaviour
         base.Awake();
         
         ToyManager.OnCoinsTaken += SpawnValueSubtractedAnimation;
-        
     }
 
     protected override void InitializeUI()
@@ -82,7 +83,14 @@ public class BuddysRoom : ContentUIBehaviour
     
     private void OnShopButton()
     {
+        if(_isShopOpen) return;
+        _isShopOpen = true;
         Instantiate(ToyShop, transform);
+    }
+    
+    public void ShopClosed()
+    {
+        _isShopOpen = false;
     }
     
     private void OnStatsButton()

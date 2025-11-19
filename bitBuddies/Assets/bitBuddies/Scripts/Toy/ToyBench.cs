@@ -29,11 +29,17 @@ public class ToyBench : MonoBehaviour
 	private Vector2 _rewardSpawnRangeY = new Vector2(-125, 125);
 	private Button _benchButton;
 	private bool _isEnabled;
+	private MoveBuddyAnimation _moveBuddyAnimation;
+	private RectTransform _buddyTargetPosition;
+	private int _buddyTargetPositionOffsetY = 250;
 	private void Awake()
 	{
 		_benchButton = GetComponent<Button>();
-		_benchButton.onClick.AddListener(OnBenchButton);
+		_benchButton.onClick.AddListener(StartBuddyAnimation);
 		SpinnerIcon.gameObject.SetActive(false);
+		_moveBuddyAnimation = FindFirstObjectByType<MoveBuddyAnimation>();
+		_buddyTargetPosition = gameObject.GetComponent<RectTransform>();
+
 	}
 	
 	public void SetUpToyBench(ToyBenchInfo in_toyBenchInfo)
@@ -66,8 +72,16 @@ public class ToyBench : MonoBehaviour
 			_benchButton = GetComponent<Button>();
 		_benchButton.interactable = false;
 	}
+	
+	private void StartBuddyAnimation()
+	{
+		var position =_buddyTargetPosition.localPosition; 
+		position = new Vector2(_buddyTargetPosition.localPosition.x, _buddyTargetPosition.localPosition.y + _buddyTargetPositionOffsetY);
+		Debug.Log("Position: " + position);
+		_moveBuddyAnimation.MoveBuddyToBench(position, SpawnAllRewards);
+	}
 
-	private void OnBenchButton()
+	private void SpawnAllRewards()
 	{
 		SpawnReward(CurrencyTypes.Coins, _coinRewardValueFromBench, CoinRewardsToSpawn);
 		
