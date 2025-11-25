@@ -1,7 +1,5 @@
 # brainCloud + Photon Integration (BCKart Example)
 
-> **Under active development. Features and behaviors may change.**
-
 ## Overview
 
 **Target Audience:** Unity developers familiar with multiplayer networking  
@@ -33,8 +31,8 @@ It is highly recommended to manage your Fusion App Servers, with a Custom Authen
 1. Clone this repository and open the Unity project.  
 2. Open the `Launch` scene and run it in the Unity Editor.  
 3. Use the brainCloud Plugin to add a new app from Template choosing BCKart-Photon. This way all lobbies, and associated cloud scripts are created automatically for you brainCloud team's app.
+4. Review Setting up Custom Authentication section below.
 
----
 
 ## Features
 
@@ -68,6 +66,118 @@ It is highly recommended to manage your Fusion App Servers, with a Custom Authen
 
 4. **End Race**  
    - Host signals all clients to leave the race scene and return to the lobby.  
+
+---
+
+
+## Setting Up Custom Authentication (brainCloud ↔ Photon)
+
+To complete the authentication flow between brainCloud and Photon Fusion, you must configure a brainCloud Webhook, link it in the Photon Dashboard, and ensure your Unity client sends the correct AuthenticationValues through Photon when connecting.
+
+The following assumes:
+
+  - You've already cloned this repository
+
+  - You created a new brainCloud app using the BCKart-Photon Template from the Unity Plugin
+
+  - You have working Fusion AppId settings in the Unity project
+
+### 1. Configure the AuthenticatePhoton Webhook in brainCloud
+
+1. Log into the brainCloud portal: https://portalx.braincloudservers.com
+
+2. Navigate to:
+  Design → Cloud Code → WebHooks
+  (direct link: https://portalx.braincloudservers.com/#/app/design/cloud-code/web-hooks)
+
+3. Look for an existing webhook named AuthenticatePhoton.
+  - If it already exists (the template app usually creates it automatically), you may skip to Section 2.
+
+4. If not present, create one:
+
+  - Click + New WebHook
+
+  - Name it: AuthenticatePhoton
+
+  - Point it to the Cloud Script → AuthenticatePhoton.ccjs
+
+  - Set the webhook to enforce the secret using URL parameters, not HTTP headers
+
+  - Save the webhook and copy the final generated webhook URL
+
+  - It will look something like:
+  ```https://api.braincloudservers.com/webhook/<appId>/AuthenticatePhoton/<webhookSecret>```
+
+
+This URL is what Photon will use to validate and authenticate players.
+
+### 2. Configure Photon Custom Authentication
+
+1. Log into the Photon Dashboard: https://dashboard.photonengine.com
+
+2. Select your Fusion App → Manage
+
+3. Under Authentication / Custom Authentication, set:
+
+  - Type: Custom
+
+  - URL: Paste the brainCloud webhook URL from Section 1
+  Example:
+  ```https://api.braincloudservers.com/webhook/<appId>/AuthenticatePhoton/<webhookSecret> ```
+
+
+Photon will now call your brainCloud webhook each time a client attempts to join a Fusion session.
+
+### 3. Required Unity Client Code (AuthenticationValues)
+
+The client must pass Custom Authentication to Photon using the player's active brainCloud ProfileId and SessionId.
+These values allow the Cloud Script to validate the user and attach them to the session.
+
+Below is the final code snapshot used in GameLauncher.cs:
+
+```// Create a new AuthenticationValues
+AuthenticationValues authentication = new AuthenticationValues();
+
+// Setup
+authentication.AuthType = CustomAuthenticationType.Custom;
+authentication.AddAuthParameter("user", BCManager.Wrapper.Client.ProfileId);
+authentication.AddAuthParameter("sessionId", BCManager.Wrapper.Client.SessionID);
+
+_runner.StartGame(new StartGameArgs
+{
+    GameMode = _gameMode,
+    SessionName = BCManager.LobbyManager.LobbyId,
+    ObjectProvider = _pool,
+    SceneManager = _levelManager,
+    PlayerCount = ServerInfo.MaxUsers,
+    EnableClientSessionCreation = false,
+    AuthValues = authentication // pass the AuthenticationValues
+}); 
+```
+
+### What This Does
+
+  - ProfileId identifies the brainCloud user
+
+  - SessionId validates their active authenticated session
+
+  - Photon forwards these to the AuthenticatePhoton Webhook
+
+  - The webhook runs AuthenticatePhoton.ccjs, which confirms the session and constructs the return payload Photon expects
+
+This is the required bridge between your brainCloud login and Photon Fusion server-side authentication.
+
+### 4. Summary of Flow
+
+1. Client logs into brainCloud → receives profile + session info
+
+2. Client joins Photon Fusion → passes ProfileId & SessionId via AuthenticationValues
+
+3. Photon calls brainCloud Webhook → Cloud Script validates user session
+
+4. Authentication succeeds → Photon admits user into the session
+
+5. Player joins the Fusion server and gameplay proceeds
 
 ---
 
