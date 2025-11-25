@@ -124,7 +124,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	
 	private void OnGetLootboxInfo(string jsonResponse)
 	{
-		BrainCloudManager.Instance.OnAddRandomChildProfile(jsonResponse);
+		BrainCloudManager.Instance.OnAddChildProfile(jsonResponse);
 		var listOfBuddies = GameManager.Instance.AppChildrenInfos;
 		if(listOfBuddies.Count > 0)
 		{

@@ -73,7 +73,7 @@ public class ParentMenu : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        BuddyHouseInfo.OnCoinsCollected += SpawnValueAddedAnimation;
+        BuddyHouseInfo.OnCoinsCollected += SpawnCurrencyAddedAnimation;
     
         UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
         UsernameText.text = userInfo.Username.IsNullOrEmpty() ? "New User" : userInfo.Username;
@@ -99,7 +99,7 @@ public class ParentMenu : ContentUIBehaviour
 
     private void OnDisable()
     {
-        BuddyHouseInfo.OnCoinsCollected -= SpawnValueAddedAnimation;
+        BuddyHouseInfo.OnCoinsCollected -= SpawnCurrencyAddedAnimation;
         BuddyHouseInfo.OnCoinsCollected -= UpdateValueText;
         StopAllCoroutines();
         IncreaseCoinsButton.onClick.RemoveAllListeners();
@@ -145,7 +145,7 @@ public class ParentMenu : ContentUIBehaviour
         
     }
     
-    public void SpawnValueAddedAnimation(int amount, int typeIndex)
+    public void SpawnCurrencyAddedAnimation(int amount, int typeIndex)
     {
         RectTransform mainTextPosition = new RectTransform();
         Transform parent = new RectTransform();
@@ -162,6 +162,25 @@ public class ParentMenu : ContentUIBehaviour
                 parent = GemsText.transform.parent;
                 break;
         }
+        //Set up animation
+        var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textSpawnOffset, 0f);
+        textAnimation.SetUpPositiveNumberText(amount);
+        textAnimation.PlayBounce();
+        
+        SpawnLevelIncreaseAnimation();
+    }
+    
+    public void SpawnLevelIncreaseAnimation()
+    {
+        var amount = GameManager.Instance.XpAcquiredAmount;
+        if(amount == 0) return;
+        GameManager.Instance.XpAcquiredAmount = 0;
+        RectTransform mainTextPosition = new RectTransform();
+        Transform parent = new RectTransform();
+        mainTextPosition = LevelText.rectTransform;
+        parent = LevelText.transform.parent;
+        
         //Set up animation
         var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
         textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textSpawnOffset, 0f);

@@ -38,6 +38,13 @@ public class GameManager : SingletonBehaviour<GameManager>
 		get => _toyBenchInfos;
 		set => _toyBenchInfos = value;
 	}
+
+	private float _xpAcquiredAmount;
+	public float XpAcquiredAmount
+	{
+		get => _xpAcquiredAmount;
+		set => _xpAcquiredAmount = value;
+	}
 	
 	public override void Awake()
 	{

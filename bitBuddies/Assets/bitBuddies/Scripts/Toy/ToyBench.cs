@@ -35,7 +35,7 @@ public class ToyBench : MonoBehaviour
 	private void Awake()
 	{
 		_benchButton = GetComponent<Button>();
-		_benchButton.onClick.AddListener(StartBuddyAnimation);
+		_benchButton.onClick.AddListener(MoveBuddyToBench);
 		SpinnerIcon.gameObject.SetActive(false);
 		_moveBuddyAnimation = FindFirstObjectByType<MoveBuddyAnimation>();
 		_buddyTargetPosition = gameObject.GetComponent<RectTransform>();
@@ -73,11 +73,15 @@ public class ToyBench : MonoBehaviour
 		_benchButton.interactable = false;
 	}
 	
-	private void StartBuddyAnimation()
+	public void MoveBuddyToReward(Vector2 in_position)
+	{
+		_moveBuddyAnimation.MoveBuddyToPosition(in_position);		
+	}
+	
+	private void MoveBuddyToBench()
 	{
 		var position =_buddyTargetPosition.localPosition; 
 		position = new Vector2(_buddyTargetPosition.localPosition.x, _buddyTargetPosition.localPosition.y + _buddyTargetPositionOffsetY);
-		Debug.Log("Position: " + position);
 		_moveBuddyAnimation.MoveBuddyToBench(position, SpawnAllRewards);
 	}
 
@@ -101,16 +105,17 @@ public class ToyBench : MonoBehaviour
 				Random.Range(_rewardSpawnRangeY.x, _rewardSpawnRangeY.y));
 			var reward = Instantiate(RewardPickupPrefab, RewardSpawnPoint);
 			reward.transform.localPosition = spawnPos;
-			int rewardValue;
-			if(in_rewardSpawnNumber > 1)
-			{
-				rewardValue = in_rewardValue/in_rewardSpawnNumber;
-			}
-			else
-			{
-				rewardValue = in_rewardValue;
-			}
-			reward.SetUpPickup(in_currencyType, rewardValue);
+			//Moving this to a cloud code script
+			// int rewardValue;
+			// if(in_rewardSpawnNumber > 1)
+			// {
+			// 	rewardValue = in_rewardValue/in_rewardSpawnNumber;
+			// }
+			// else
+			// {
+			// 	rewardValue = in_rewardValue;
+			// }
+			reward.SetUpPickup(in_currencyType, MoveBuddyToReward, this);
 		}
 	}
 	

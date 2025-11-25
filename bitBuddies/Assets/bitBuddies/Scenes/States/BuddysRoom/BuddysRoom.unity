@@ -785,7 +785,6 @@ MonoBehaviour:
   CoinRewardsToSpawn: 4
   LoveRewardsToSpawn: 4
   BuddyBlingRewardsToSpawn: 4
-  _buddyTargetPositionOffsetY: 10
 --- !u!1 &303244548
 GameObject:
   m_ObjectHideFlags: 0
@@ -2535,8 +2534,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -13.937, y: -78.4878}
-  m_SizeDelta: {x: 949.4286, y: 327.3944}
+  m_AnchoredPosition: {x: 5.993, y: -27.5557}
+  m_SizeDelta: {x: 1754.0087, y: 334.7758}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &888396043
 GameObject:
@@ -3854,6 +3853,8 @@ GameObject:
   - component: {fileID: 1217623522}
   - component: {fileID: 1217623523}
   - component: {fileID: 1217623524}
+  - component: {fileID: 1217623526}
+  - component: {fileID: 1217623525}
   m_Layer: 5
   m_Name: BuddySprite
   m_TagString: Untagged
@@ -3933,6 +3934,69 @@ MonoBehaviour:
   moveDuration: 0.4
   shakeDuration: 0.2
   shakeMagnitude: 10
+--- !u!50 &1217623525
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217623520}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 0.0001
+  m_LinearDamping: 0
+  m_AngularDamping: 0
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!58 &1217623526
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217623520}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 92.83
 --- !u!1 &1245120774
 GameObject:
   m_ObjectHideFlags: 0
@@ -4439,7 +4503,6 @@ MonoBehaviour:
   CoinRewardsToSpawn: 2
   LoveRewardsToSpawn: 2
   BuddyBlingRewardsToSpawn: 2
-  _buddyTargetPositionOffsetY: 10
 --- !u!1 &1439839200
 GameObject:
   m_ObjectHideFlags: 0
@@ -4479,7 +4542,6 @@ MonoBehaviour:
   CoinRewardsToSpawn: 5
   LoveRewardsToSpawn: 5
   BuddyBlingRewardsToSpawn: 5
-  _buddyTargetPositionOffsetY: 10
 --- !u!224 &1439839202
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5402,7 +5464,6 @@ MonoBehaviour:
   CoinRewardsToSpawn: 3
   LoveRewardsToSpawn: 3
   BuddyBlingRewardsToSpawn: 3
-  _buddyTargetPositionOffsetY: 10
 --- !u!1 &1960935819
 GameObject:
   m_ObjectHideFlags: 0

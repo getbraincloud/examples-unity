@@ -9,10 +9,10 @@ public class ValueAddedAnimation : MonoBehaviour
     [SerializeField] private float moveDuration = 0.2f;
     [SerializeField] private float moveDistance = 20f;
     [SerializeField] private float duration = 0.2f;
-    [SerializeField] private float fadeDuration = 0.3f; //How long the text fades out at the end
-    [SerializeField] private bool fadeOutOnFinish = true; //Whether to fade out after the bounce animation
+    [SerializeField] private float fadeDuration = 0.3f; 
     [SerializeField] private TextMeshProUGUI textElement;
     
+    private bool fadeOutOnFinish = true;
     private RectTransform rectTransform;
     private Vector3 originalPosition;
     private CanvasGroup canvasGroup;
@@ -38,6 +38,14 @@ public class ValueAddedAnimation : MonoBehaviour
         textElement.color = Color.green;
     }
     
+    public void SetUpPositiveNumberText(float in_amount)
+    {
+        originalPosition = rectTransform.localPosition;
+        canvasGroup.alpha = 0;
+        textElement.text = $"+{in_amount}";
+        textElement.color = Color.green;
+    }
+    
     public void SetUpNegativeNumberText(int in_amount)
     {
         originalPosition = rectTransform.localPosition;
@@ -49,7 +57,7 @@ public class ValueAddedAnimation : MonoBehaviour
     public void PlayBounce()
     {
         StopAllCoroutines();
-        canvasGroup.alpha = 1f; // Ensure visible
+        canvasGroup.alpha = 1f; 
         StartCoroutine(BounceAnimation());
     }
 

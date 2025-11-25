@@ -124,12 +124,31 @@ public class BuddyHouseInfo : MonoBehaviour
 		var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
 		var data =  packet["data"] as Dictionary<string, object>;
 		var response = data["response"] as Dictionary<string, object>;
+
+		try
+		{
+			var xpAcquired = (int) response["xpAwarded"];
+			if(xpAcquired > 0)
+			{
+				GameManager.Instance.XpAcquiredAmount = xpAcquired;
+			}
+		}
+		catch (Exception e)
+		{
+			var xpAcquired =  response["xpAwarded"]as double?;
+			if(xpAcquired > 0)
+			{
+				GameManager.Instance.XpAcquiredAmount = (float) xpAcquired;
+			}
+		}
+
 		
 		var currencyMap = response["currencyMap"] as Dictionary<string, object>;
 		var coinsObj = currencyMap["coins"] as Dictionary<string, object>;
 		var currentBalance = (int) coinsObj["balance"];
 		var coinsAdded = currentBalance - BrainCloudManager.Instance.UserInfo.Coins;
 		BrainCloudManager.Instance.UserInfo.Coins = currentBalance;
+		
 				
 		var summaryData = response["summaryData"] as Dictionary<string, object>;
 		

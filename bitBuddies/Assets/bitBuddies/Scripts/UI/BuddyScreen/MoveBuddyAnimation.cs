@@ -37,18 +37,41 @@ public class MoveBuddyAnimation : MonoBehaviour
         OnFinishShaking = in_onFinishShaking;
         _targetPosition = in_targetPosition;
         if (!isRunning)
-            StartCoroutine(MoveShakeReturnRoutine());
+            StartCoroutine(MoveShakeWaitForResponse());
+    }
+    
+    public void MoveBuddyToPosition(Vector2 in_targetPosition)
+    {
+        if (isRunning) return;
+        _targetPosition = in_targetPosition;
+        
+        if (!isRunning)
+            StartCoroutine(MoveToLocation());
     }
 
-    private System.Collections.IEnumerator MoveShakeReturnRoutine()
+    private System.Collections.IEnumerator MoveShakeWaitForResponse()
     {
         isRunning = true;
+        startPosition = _buddySpriteTransform.anchoredPosition;
         
         yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
         
         yield return StartCoroutine(Shake(shakeDuration, shakeMagnitude));
         
-        yield return StartCoroutine(MoveToPosition(_buddySpriteTransform.anchoredPosition, startPosition, moveDuration));
+        //ToDo: Add a wait for response yield here..
+        
+        //yield return StartCoroutine(MoveToPosition(_buddySpriteTransform.anchoredPosition, startPosition, moveDuration));
+
+        isRunning = false;
+    }
+    
+    private System.Collections.IEnumerator MoveToLocation()
+    {
+        isRunning = true;
+        
+        startPosition = _buddySpriteTransform.anchoredPosition;
+        
+        yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
 
         isRunning = false;
     }
@@ -89,5 +112,11 @@ public class MoveBuddyAnimation : MonoBehaviour
         }
 
         _buddySpriteTransform.anchoredPosition = original;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        //ToDo send stuff here..
+        Destroy(other.gameObject);
     }
 }

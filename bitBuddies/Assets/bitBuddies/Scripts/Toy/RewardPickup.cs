@@ -14,7 +14,8 @@ public class RewardPickup : MonoBehaviour
     
     public int RewardAmount { get { return _rewardAmount; } }
     public CurrencyTypes CurrencyType { get { return _currencyType; } }
-
+    private Action<Vector2> OnPickUp;
+    private ToyBench _toyBench;
     private void Awake()
     {
         _pickUpImage = GetComponent<Image>();
@@ -27,18 +28,21 @@ public class RewardPickup : MonoBehaviour
         StopAllCoroutines();
     }
 
-    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount)
+    public void SetUpPickup(CurrencyTypes in_currencyType, Action<Vector2> in_onPickUp, ToyBench in_toyBench)
     {
         _currencyType = in_currencyType;
         _pickUpImage.sprite = RewardSprites[(int)in_currencyType];
-        _rewardAmount = in_rewardAmount;
+        //_rewardAmount = in_rewardAmount;
+        _toyBench = in_toyBench;
+        OnPickUp = in_onPickUp;
     }
     
     private void OnPickUpPressed()
     {
         // Notify Toy Manager of pick up and send relevant info 
         ToyManager.Instance.AddRewardPickup(this);
-        StartCoroutine(DelayToDestroy());
+        if (OnPickUp != null) OnPickUp(transform.localPosition);
+        //StartCoroutine(DelayToDestroy());
     }
     
     private IEnumerator DelayToDestroy()
