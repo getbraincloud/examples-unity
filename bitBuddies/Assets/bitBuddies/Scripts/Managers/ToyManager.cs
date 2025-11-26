@@ -275,6 +275,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			return;
 		if(GameManager.Instance.SelectedAppChildrenInfo.ownedToys.Contains(in_benchId))
 			return;
+		
 		_toyBenchUIRefreshCallback = uiCallback;
 		_selectedToyId = in_benchId;
 		var scriptData = new Dictionary<string, object>();

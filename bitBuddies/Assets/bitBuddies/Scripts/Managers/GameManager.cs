@@ -49,28 +49,28 @@ public class GameManager : SingletonBehaviour<GameManager>
 	public override void Awake()
 	{
 		_selectedAppChildrenInfo = new AppChildrenInfo();
-		_eventSystem = EventSystem.current;
+		//_eventSystem = EventSystem.current;
 		base.Awake();
 	}
 	
-	private void Update()
-	{
-		if (Input.GetKeyDown(KeyCode.Tab) && _eventSystem.currentSelectedGameObject != null)
-		{
-			Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-         
-			if (next != null)
-			{
-				InputField inputfield = next.GetComponent<InputField>();
-				if (inputfield != null)
-				{
-					//if it's an input field, also set the text caret
-					inputfield.OnPointerClick(new PointerEventData(_eventSystem));
-				}
-				_eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
-			}
-		}
-	}
+	// private void Update()
+	// {
+	// 	if (Input.GetKeyDown(KeyCode.Tab) && _eventSystem.currentSelectedGameObject != null)
+	// 	{
+	// 		Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+ //         
+	// 		if (next != null)
+	// 		{
+	// 			InputField inputfield = next.GetComponent<InputField>();
+	// 			if (inputfield != null)
+	// 			{
+	// 				//if it's an input field, also set the text caret
+	// 				inputfield.OnPointerClick(new PointerEventData(_eventSystem));
+	// 			}
+	// 			_eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
+	// 		}
+	// 	}
+	// }
 	
 	public void OnDeleteBuddySuccess()
 	{

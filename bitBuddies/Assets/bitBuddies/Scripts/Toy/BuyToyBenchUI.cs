@@ -74,16 +74,19 @@ public class BuyToyBenchUI : ContentUIBehaviour
         }
         PurchasedObject.SetActive(false);
         var listOfOwnedToys = GameManager.Instance.SelectedAppChildrenInfo.ownedToys;
-        foreach (var value in listOfOwnedToys)
+        if(listOfOwnedToys != null && listOfOwnedToys.Count > 0)
         {
-            if(value.Equals(_toyBenchInfo.BenchId, StringComparison.OrdinalIgnoreCase))
+            foreach (var value in listOfOwnedToys)
             {
-                PurchasedObject.SetActive(true);
-                BuyButton.interactable = false;
-                break;
-            }
+                if(value.Equals(_toyBenchInfo.BenchId, StringComparison.OrdinalIgnoreCase))
+                {
+                    PurchasedObject.SetActive(true);
+                    BuyButton.interactable = false;
+                    break;
+                }
+            }   
         }
-        if(listOfOwnedToys.Count == 0)
+        if(listOfOwnedToys == null || listOfOwnedToys.Count == 0)
         {
             PurchasedObject.SetActive(false);
         }

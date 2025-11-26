@@ -36,6 +36,7 @@ public struct MysteryBoxInfo
 public struct ToyBenchInfo
 {
 	public string BenchId;
+	public string DisplayName;
 	public int LevelRequirement;
 	public int UnlockCost;
 	public int Cooldown;
@@ -69,6 +70,11 @@ public class AppChildrenInfo
 	private float _hourInSeconds = 3600;
 	
 	public List<string> ownedToys { get; set; }
+	
+	public AppChildrenInfo()
+	{
+		ownedToys = new List<string>();
+	}
 	
 	public void CheckCoinsEarned()
 	{

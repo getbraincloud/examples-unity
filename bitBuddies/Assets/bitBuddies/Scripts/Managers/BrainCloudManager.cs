@@ -234,6 +234,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var data2 = getChildAccountObject["data"] as Dictionary<string, object>;
         var children = data2["children"] as Dictionary<string, object>[];
         var appChildrenInfos = new List<AppChildrenInfo>();
+
+        //If user has no child profiles, exit out
         if(children == null || children.Length == 0)
         {
             StateManager.Instance.RefreshScreen();
@@ -308,23 +310,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 {
                     dataInfo.coinsEarnedInHolding = dataInfo.maxCoinCapacity;
                 }
-                
-                if(summaryFriendData.ContainsKey("ownedToyBenches"))
-                {
-                    dataInfo.ownedToys = new List<string>();
-                    var listOfBenches = summaryFriendData["ownedToyBenches"] as string[];
-                    if(listOfBenches != null && listOfBenches.Length > 0)
-                    {
-                        foreach(var benchId in listOfBenches)
-                        {
-                            dataInfo.ownedToys.Add(benchId);
-                        }
-                    }
-                }
-                else
-                {
-                    dataInfo.ownedToys = new List<string>();
-                }
             }
             
             if(children[i].ContainsKey("extraData"))
@@ -358,6 +343,20 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     {
                         dataInfo.coinsEarnedInLifetime = (int) stats["CoinsGainedForParent"];
                         dataInfo.loveEarnedInLifetime = (int) stats["LoveEarned"];
+                    }
+                    
+                    var items = extraData["items"] as Dictionary<string, object>[];
+                    if(items != null)
+                    {
+                        dataInfo.ownedToys = new List<string>();
+                        for (int x = 0; x < items.Length; x++)
+                        {
+                            // ToyBenchInfo item = new ToyBenchInfo();
+                            // item.BenchId = items[i]["benchId"] as string;
+                            // item.DisplayName = items[i]["displayName"] as string;
+                            // item.Cooldown = (int) items[i]["cooldown"];
+                            dataInfo.ownedToys.Add(items[x]["itemId"] as string);
+                        }
                     }
                 }
             }
@@ -720,7 +719,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 {
                     dataInfo.summaryFriendData = summaryData;
                     //Get Entity data
-                    dataInfo.rarity = "basic";//summaryData["rarity"] as string;
+                    dataInfo.rarity = summaryData["rarity"] as string;
                     dataInfo.buddySpritePath = summaryData["buddySpritePath"] as string;
                     var multiplier = summaryData["coinMultiplier"] as double?;
                     if (multiplier != null)
@@ -746,6 +745,17 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             Debug.LogError("Child Profile ID is missing. Cant fetch data.");
             return;
         }
+        
+        Dictionary<string, object> scriptData = new Dictionary<string, object>();
+        scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
+        scriptData.Add("profileId", appChildrenInfos[0].profileId);
+        Wrapper.ScriptService.RunScript
+        (
+            BitBuddiesConsts.GET_CHILD_ITEM_CATALOG_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("GetItemCatalog Success", OnGetItemCatalog),
+            HandleFailure("GetItemCatalog Failed", OnFailureCallback)
+        );
         
         _childInfoIndex = 0;
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;
