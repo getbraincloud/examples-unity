@@ -38,10 +38,11 @@ public class BuddyUtility : EditorWindow
                     {
                         Dictionary<string, object> scriptData = new Dictionary<string, object>();
                         scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
-                        scriptData.Add("profileId", "e068fdfb-f36e-4c9d-862a-d86f20d5e54b");
+                        scriptData.Add("incrementAmount", 99);
+                        scriptData.Add("profileId", "47327804-e23f-4416-bbd9-082e559054b8");
                         BrainCloudManager.Wrapper.ScriptService.RunScript
                         (
-                            BitBuddiesConsts.GET_CHILD_ITEM_CATALOG_SCRIPT_NAME,
+                            BitBuddiesConsts.INCREASE_XP_SCRIPT_NAME,
                             scriptData.Serialize()
                         );
                     }

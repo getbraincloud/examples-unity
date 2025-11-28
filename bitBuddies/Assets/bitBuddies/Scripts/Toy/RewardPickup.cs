@@ -15,7 +15,9 @@ public class RewardPickup : MonoBehaviour
     public int RewardAmount { get { return _rewardAmount; } }
     public CurrencyTypes CurrencyType { get { return _currencyType; } }
     private Action<Vector2> OnPickUp;
+    private float _lifeSpan = 7f;
     private ToyBench _toyBench;
+    private bool _isCollected;
     private void Awake()
     {
         _pickUpImage = GetComponent<Image>();
@@ -28,26 +30,35 @@ public class RewardPickup : MonoBehaviour
         StopAllCoroutines();
     }
 
-    public void SetUpPickup(CurrencyTypes in_currencyType, Action<Vector2> in_onPickUp, ToyBench in_toyBench)
+    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount, Action<Vector2> in_onPickUp, ToyBench in_toyBench)
     {
         _currencyType = in_currencyType;
         _pickUpImage.sprite = RewardSprites[(int)in_currencyType];
-        //_rewardAmount = in_rewardAmount;
+        _rewardAmount = in_rewardAmount;
         _toyBench = in_toyBench;
         OnPickUp = in_onPickUp;
+        StartCoroutine(DelayToDestroy());
     }
     
-    private void OnPickUpPressed()
+    public void OnPickUpPressed()
     {
-        // Notify Toy Manager of pick up and send relevant info 
+        if (OnPickUp != null)
+        {
+            OnPickUp(transform.localPosition);
+        }
+    }
+    
+    public void PickUpCollected()
+    {
+        ToyManager.Instance.DecrementRewardSpawnCount();
         ToyManager.Instance.AddRewardPickup(this);
-        if (OnPickUp != null) OnPickUp(transform.localPosition);
-        //StartCoroutine(DelayToDestroy());
+        StopAllCoroutines();
+        Destroy(gameObject);        
     }
     
     private IEnumerator DelayToDestroy()
     {
-        yield return new WaitForFixedUpdate();
+        yield return new WaitForSeconds(_lifeSpan);
         Destroy(gameObject);
     }
 }

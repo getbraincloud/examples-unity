@@ -25,88 +25,46 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 
 	[SerializeField] private List<ToyBench> ToyBenches;
 	
-	private const float CHECK_FOR_REWARDS_INTERVAL = 1f;
+	private const float CHECK_FOR_REWARDS_INTERVAL = 9f;
 	private string _selectedToyId;
 	private List<RewardPickup> _rewardPickups = new List<RewardPickup>();
-	
+	private bool _timerStarted;
+	private int _currentRewardSpawnAmount;
+	private string _currentRewardEntityId;
 	public static event Action<int> OnCoinsTaken;
 	public override void Awake()
 	{
 		base.Awake();
 		SetUpToyBenches();
 		CheckForAvailableBenches();
-		StartCoroutine(LoopCheckRewardsToSend());
+		
 	}
 
 	private void OnDisable()
 	{
 		StopAllCoroutines();
-		CheckForLeftoverRewards();
+	}
+	
+	public void IncrementRewardSpawnCount(int in_amount)
+	{
+		_currentRewardSpawnAmount += in_amount;
+	}
+	
+	public void DecrementRewardSpawnCount()
+	{
+		_currentRewardSpawnAmount--;
+	}
+	
+	public void SetRewardEntityId(string in_entityId)
+	{
+		_currentRewardEntityId = in_entityId;
 	}
 	
 	IEnumerator LoopCheckRewardsToSend()
 	{
-		while(true)
-		{
-			CheckForSendingRewards();
-			yield return new WaitForSeconds(CHECK_FOR_REWARDS_INTERVAL);
-		}
-	}
-	
-	private void CheckForLeftoverRewards()
-	{
-		int amountOfLoveToReward = 0;
-		int amountOfCoinsToReward = 0;
-		int amountOfBuddyBlingToReward = 0;
-		
-		//Grab what is left in the scene
-		var listOfRewards = FindObjectsByType<RewardPickup>(FindObjectsSortMode.None);
-		if(listOfRewards != null && listOfRewards.Length > 0)
-		{
-			for (int i = 0; i < listOfRewards.Length; i++)
-			{
-				switch (listOfRewards[i].CurrencyType)
-				{
-					case CurrencyTypes.Coins:
-						amountOfCoinsToReward += listOfRewards[i].RewardAmount;
-						break;
-					case CurrencyTypes.Love:
-						amountOfLoveToReward += listOfRewards[i].RewardAmount;
-						break;
-					case CurrencyTypes.BuddyBling:
-						amountOfBuddyBlingToReward += listOfRewards[i].RewardAmount;
-						break;
-				}
-			}
-		}
-		
-		if(_rewardPickups != null && _rewardPickups.Count > 0)
-		{
-			for (int i = 0; i < _rewardPickups.Count; i++)
-			{
-				switch (_rewardPickups[i].CurrencyType)
-				{
-					case CurrencyTypes.Coins:
-						amountOfCoinsToReward += _rewardPickups[i].RewardAmount;
-						break;
-					case CurrencyTypes.Love:
-						amountOfLoveToReward += _rewardPickups[i].RewardAmount;
-						break;
-					case CurrencyTypes.BuddyBling:
-						amountOfBuddyBlingToReward += _rewardPickups[i].RewardAmount;
-						break;
-				}
-			}
-			_rewardPickups.Clear();
-		}
-
-		Dictionary<string, object> scriptData = new Dictionary<string, object>();
-		scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
-		scriptData.Add("profileId", GameManager.Instance.SelectedAppChildrenInfo.profileId);
-		scriptData.Add("amountOfCoinsToGive", amountOfCoinsToReward);
-		scriptData.Add("amountOfLoveToGive", amountOfLoveToReward);
-		scriptData.Add("amountOfBuddyBlingToGive", amountOfBuddyBlingToReward);
-		BrainCloudManager.Wrapper.ScriptService.RunScript(BitBuddiesConsts.TOY_REWARD_RECEIVED_SCRIPT_NAME, scriptData.Serialize(), BrainCloudManager.HandleSuccess("Toy Reward Received Success", OnRewardsReceived));
+		yield return new WaitForSecondsRealtime(CHECK_FOR_REWARDS_INTERVAL);
+		CheckForSendingRewards();
+		_timerStarted = false;
 	}
 	
 	private void OnRewardsReceived(string jsonResponse)
@@ -148,29 +106,36 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 				}
 			}
 			
-			if(response.TryGetValue("xpLoveResult", out var xpValue))
+			if(response.TryGetValue("loveResult", out var xpValue))
 			{
 				var xpResult = xpValue as Dictionary<string, object>;
-				var xpData = xpResult["data"] as Dictionary<string, object>;
+				var xpData = xpResult["increaseXpResult"] as Dictionary<string, object>;
 				if(xpData != null)
 				{
 					selectedAppChildInfo.currentXP = (int) xpData["experiencePoints"];
 					selectedAppChildInfo.buddyLevel = (int) xpData["experienceLevel"];	
+					if(xpResult.ContainsKey("nextLevelUpXP"))
+					{
+						selectedAppChildInfo.nextLevelUp =  (int) xpResult["nextLevelUpXP"];
+					}
+					if(xpResult.ContainsKey("previousLevelUpReq"))
+					{
+						selectedAppChildInfo.previousLevelUp =  (int) xpResult["previousLevelUpReq"];
+					}
 				}
 			}
 			
-			if(response.ContainsKey("nextLevelUpXP"))
-			{
-				var nextLevelUp = (int) response["nextLevelUpXP"];
-				selectedAppChildInfo.nextLevelUp = nextLevelUp;
-			}
 			
 			if(response.TryGetValue("blingResult", out var blingValue))
 			{
 				if(blingValue != null)
 				{
 					var blingResult = blingValue as Dictionary<string, object>;
-					selectedAppChildInfo.buddyBling = (int) blingResult["balance"];	
+					var blingData = blingResult["data"] as Dictionary<string, object>;
+					var currencyMap = blingData["currencyMap"] as Dictionary<string, object>;
+					var buddyBlingData = currencyMap["buddyBling"] as Dictionary<string, object>;
+					
+					selectedAppChildInfo.buddyBling = (int) buddyBlingData["balance"];	
 				}
 			}
 		}
@@ -212,20 +177,42 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 						break;
 				}
 			}
+			if(amountOfCoinsToReward == 0 && amountOfLoveToReward == 0 && amountOfBuddyBlingToReward == 0)
+			{
+				_timerStarted = true;
+				StartCoroutine(LoopCheckRewardsToSend());
+				return;
+			}
 			_rewardPickups.Clear();
 			Dictionary<string, object> scriptData = new Dictionary<string, object>();
 			scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
 			scriptData.Add("profileId", GameManager.Instance.SelectedAppChildrenInfo.profileId);
-			scriptData.Add("amountOfCoinsToGive", amountOfCoinsToReward);
-			scriptData.Add("amountOfLoveToGive", amountOfLoveToReward);
-			scriptData.Add("amountOfBuddyBlingToGive", amountOfBuddyBlingToReward);
-			BrainCloudManager.Wrapper.ScriptService.RunScript(BitBuddiesConsts.TOY_REWARD_RECEIVED_SCRIPT_NAME, scriptData.Serialize(), BrainCloudManager.HandleSuccess("Toy Reward Received Success", OnRewardsReceived));
+			scriptData.Add("entityId", _currentRewardEntityId);
+			scriptData.Add("x", amountOfCoinsToReward);
+			scriptData.Add("z", amountOfLoveToReward);
+			scriptData.Add("y", amountOfBuddyBlingToReward);
+			BrainCloudManager.Wrapper.ScriptService.RunScript
+			(
+				BitBuddiesConsts.TOY_REWARD_RECEIVED_SCRIPT_NAME, 
+				scriptData.Serialize(), 
+				BrainCloudManager.HandleSuccess("Toy Reward Received Success", OnRewardsReceived)
+			);
 		}
 	}
 	
 	public void AddRewardPickup(RewardPickup in_rewardPickup)
 	{
 		_rewardPickups.Add(in_rewardPickup);
+		//We've picked up everything on the floor
+		if(_currentRewardSpawnAmount == 0)
+		{
+			CheckForSendingRewards();
+		}
+		else if(!_timerStarted)	//otherwise just start the timer to send reward info after timer is up
+		{
+			_timerStarted = true;
+			StartCoroutine(LoopCheckRewardsToSend());
+		}
 	}
 	
 	private void SetUpToyBenches()
@@ -304,7 +291,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		var response = data["response"] as Dictionary<string, object>;
 		var beforeAmount = BrainCloudManager.Instance.UserInfo.Coins;
 		
-		if(response != null && response.TryGetValue("consumeResult", out var value))
+		if(response != null && response.TryGetValue("consumeCurrencyResult", out var value))
 		{
 			var consumeResult = value as Dictionary<string, object>;
 			var currencyData = consumeResult["data"] as Dictionary<string, object>;
@@ -319,12 +306,15 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		
 		_toyBenchUIRefreshCallback?.Invoke();
 		var totalDifference = beforeAmount - BrainCloudManager.Instance.UserInfo.Coins;
-		OnCoinsTaken?.Invoke(totalDifference);
+		if(totalDifference > 0)
+		{
+			OnCoinsTaken?.Invoke(totalDifference);			
+		}
 	}
 	
 	private void OnObtainToyFailure()
 	{
-		
+		StateManager.Instance.OpenInfoPopUp(BitBuddiesConsts.SOMETHING_WENT_WRONG_TITLE,BitBuddiesConsts.SOMETHING_WENT_WRONG_MESSAGE);
 	}
 	
 	private ToyBench GetToyBench(string in_benchId)

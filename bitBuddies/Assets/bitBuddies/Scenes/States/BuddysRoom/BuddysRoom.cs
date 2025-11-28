@@ -62,8 +62,9 @@ public class BuddysRoom : ContentUIBehaviour
         }
         else
         {
-            LoveSlider.value = _appChildrenInfo.currentXP;
             LoveSlider.maxValue = _appChildrenInfo.nextLevelUp;
+            LoveSlider.minValue = _appChildrenInfo.previousLevelUp;
+            LoveSlider.value = _appChildrenInfo.currentXP;
         }
 
         TimestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
@@ -114,6 +115,7 @@ public class BuddysRoom : ContentUIBehaviour
         ParentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
     }
     
+    //Tester function for cloud code script
     public void IncreaseXP(int xpAmount)
     {
         Dictionary<string, object> scriptData = new Dictionary<string, object>();
@@ -123,6 +125,7 @@ public class BuddysRoom : ContentUIBehaviour
         BrainCloudManager.Wrapper.ScriptService.RunScript(BitBuddiesConsts.INCREASE_XP_SCRIPT_NAME, scriptData.Serialize(), BrainCloudManager.HandleSuccess("IncreaseXP Success", OnIncreaseXP));
     }
     
+    //Tester response function for cloud code script
     private void OnIncreaseXP(string jsonResponse)
     {
         var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);

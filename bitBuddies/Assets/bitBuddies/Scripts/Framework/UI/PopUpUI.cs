@@ -32,6 +32,11 @@ public class PopUpUI : ContentUIBehaviour
 		BodyText.text = in_body;
 	}
 	
+	public void DisableConfirmButton()
+	{
+		ConfirmButton.interactable = false;
+	}
+	
 	public void SetupConfirmPopup(string in_title, string in_body, Action in_confirmAction)
 	{
 		ConfirmButton.gameObject.SetActive(true);

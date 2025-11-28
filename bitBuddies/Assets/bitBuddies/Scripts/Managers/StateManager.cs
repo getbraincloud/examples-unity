@@ -38,9 +38,13 @@ public class StateManager : SingletonBehaviour<StateManager>
 		popUp.SetUpInfoPopup(in_title, in_body);
 	}
 	
-	public void OpenConfirmPopUp(string in_title, string in_body, Action buttonCallback)
+	public void OpenConfirmPopUp(string in_title, string in_body, Action buttonCallback, bool in_showConfirmButton = true)
 	{
 		var popUp = Instantiate(_genericPopUpUI);
+		if(!in_showConfirmButton)
+		{
+			popUp.DisableConfirmButton();
+		}
 		popUp.SetupConfirmPopup(in_title, in_body, buttonCallback);
 	}
 	

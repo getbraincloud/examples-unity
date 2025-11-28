@@ -40,9 +40,12 @@ public struct ToyBenchInfo
 	public int LevelRequirement;
 	public int UnlockCost;
 	public int Cooldown;
-	public int CoinPayout;
-	public int LovePayout;
-	public int BuddyBlingPayout;
+	public int CoinRewardAmount;
+	public int LoveRewardAmount;
+	public int BuddyBlingRewardAmount;
+	public int CoinSpawnAmount;
+	public int LoveSpawnAmount;
+	public int BuddyBlingSpawnAmount;
 }
 
 [Serializable]
@@ -59,6 +62,7 @@ public class AppChildrenInfo
 	public string rarity { get; set; }
 	public int buddyLevel { get; set; }
 	public int nextLevelUp { get; set; }
+	public int previousLevelUp { get; set; }
 	public int currentXP { get; set; }
 	public DateTime lastIdleTimestamp { get; set; }
 	public int coinsEarnedInHolding { get; set; }

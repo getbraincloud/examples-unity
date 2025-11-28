@@ -116,7 +116,10 @@ public class MoveBuddyAnimation : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        //ToDo send stuff here..
-        Destroy(other.gameObject);
+        var pickUpScript = other.GetComponent<RewardPickup>();
+        if(pickUpScript)
+        {
+            pickUpScript.PickUpCollected();
+        }
     }
 }

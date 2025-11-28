@@ -33,8 +33,9 @@ namespace Gameframework
         public const string INCREASE_XP_SCRIPT_NAME = "child/increaseChildBuddyExperience";
         public const string UPDATE_CHILD_COINS_COLLECTED_SCRIPT_NAME = "child/updateChildCoinCollected";
         public const string OBTAIN_TOY_SCRIPT_NAME = "child/obtainToy";
-        public const string TOY_REWARD_RECEIVED_SCRIPT_NAME = "child/toyRewardsReceived";
+        public const string TOY_REWARD_RECEIVED_SCRIPT_NAME = "child/consumeCurrencyFromToy";
         public const string GET_CHILD_ITEM_CATALOG_SCRIPT_NAME = "child/getChildItemCatalog";
+        public const string CONSUME_TOY_SCRIPT_NAME = "child/consumeToy";
 
 
         //Stat Names
@@ -70,6 +71,10 @@ namespace Gameframework
         public const string ARE_YOU_SURE_LOGOUT_TITLE = "Are you sure ?";
         public const string ARE_YOU_SURE_LOGOUT_MESSAGE = "Are you sure you want to logout?";
 
+        public const string CONSUME_TOY_FAILED_TITLE = "Cannot consume toy";
+        public const string CONSUME_TOY_FAILED_MESSAGE = "Something went wrong with the toy consumption.";
 
+        public const string SOMETHING_WENT_WRONG_TITLE = "Something went wrong";
+        public const string SOMETHING_WENT_WRONG_MESSAGE = "Something went wrong, please try again later.";
     }
 }

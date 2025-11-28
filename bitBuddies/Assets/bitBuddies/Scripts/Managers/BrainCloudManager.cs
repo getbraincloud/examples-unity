@@ -204,11 +204,15 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             ToyBenchInfo benchInfo = new ToyBenchInfo();
             benchInfo.BenchId = itemDict["benchId"] as string;
             benchInfo.LevelRequirement = (int)itemDict["levelRequirement"];
-            benchInfo.LovePayout = (int)itemDict["lovePayout"];
-            benchInfo.CoinPayout = (int)itemDict["coinPayout"];
-            benchInfo.BuddyBlingPayout = (int)itemDict["buddyBlingPayout"];
+            benchInfo.LoveRewardAmount = (int)itemDict["lovePayout"];
+            benchInfo.CoinRewardAmount = (int)itemDict["coinPayout"];
+            benchInfo.BuddyBlingRewardAmount = (int)itemDict["buddyBlingPayout"];
             benchInfo.UnlockCost = (int)itemDict["unlockAmount"];
             benchInfo.Cooldown = (int)itemDict["cooldown"];
+            benchInfo.CoinSpawnAmount = (int)itemDict["coinSpawnAmount"];
+            benchInfo.LoveSpawnAmount = (int)itemDict["loveSpawnAmount"];
+            benchInfo.BuddyBlingSpawnAmount = (int)itemDict["buddyBlingSpawnAmount"];
+            benchInfo.DisplayName = itemDict["displayName"] as string;
             
             listOfBenchInfo.Add(benchInfo);
         }
@@ -295,6 +299,18 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     }
                 }
                 
+                dataInfo.currentXP = (int) summaryFriendData["experiencePoints"];
+                dataInfo.buddyLevel = (int) summaryFriendData["level"];
+                dataInfo.nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];   
+                if(summaryFriendData.ContainsKey("previousLevelXP"))
+                {
+                    dataInfo.previousLevelUp =  (int) summaryFriendData["previousLevelXP"];
+                }
+                else
+                {
+                    dataInfo.previousLevelUp = 0;
+                }
+                
                 dataInfo.coinPerHour = (int) summaryFriendData["coinPerHour"];
                 dataInfo.maxCoinCapacity = (int) summaryFriendData["maxCoinCapacity"];   
                 dataInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryFriendData["lastIdleTimestamp"]).UtcDateTime;
@@ -317,17 +333,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 var extraData = children[i]["extraData"] as Dictionary<string, object>;
                 if(extraData != null)
                 {
-                    var xpObj = extraData["xp"] as Dictionary<string, object>;
-                    if(xpObj != null)
-                    {
-                        dataInfo.currentXP = (int) xpObj["xpPoints"];
-                        dataInfo.buddyLevel = (int) xpObj["xpLevel"];
-                        if(xpObj.ContainsKey( "nextXpLevel"))
-                        {
-                            dataInfo.nextLevelUp =  (int) xpObj["nextXpLevel"];                        
-                        }
-                    }
-                
                     var currency = extraData["currency"] as Dictionary<string, object>;
                     if(currency != null)
                     {
