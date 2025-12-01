@@ -25,7 +25,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 
 	[SerializeField] private List<ToyBench> ToyBenches;
 	
-	private const float CHECK_FOR_REWARDS_INTERVAL = 9f;
+	private const float CHECK_FOR_REWARDS_INTERVAL = 8.5f;
 	private string _selectedToyId;
 	private List<RewardPickup> _rewardPickups = new List<RewardPickup>();
 	private bool _timerStarted;
