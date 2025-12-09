@@ -144,7 +144,17 @@ public class LoginScreen : ContentUIBehaviour
     
     private void OnForgotPasswordButtonClick()
     {
+        StateManager.Instance.OpenConfirmPopUp("Are you sure?", "We will send you an email with a link to reset your password", OnConfirmForgotPasswordButtonClick);
+    }
+    
+    private void OnConfirmForgotPasswordButtonClick()
+    {
         //No idea why but I keep getting status 202 and reason code 40209
-        BrainCloudManager.Wrapper.ResetEmailPassword(ForgotPasswordEmailInputField.text, null, OnFailure("Something went wrong", OnFailureCallback));
+        BrainCloudManager.Wrapper.ResetEmailPassword(ForgotPasswordEmailInputField.text, OnSuccess("ForgotPasswordEmailSuccess", OnForgotPasswordSuccess), OnFailure("Something went wrong", OnFailureCallback));
+    }
+    
+    private void OnForgotPasswordSuccess(string jsonResponse)
+    {
+        StateManager.Instance.OpenInfoPopUp("Email sent", "Please check your email for a link to reset your password");
     }
 }

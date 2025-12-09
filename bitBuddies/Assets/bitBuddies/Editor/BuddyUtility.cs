@@ -42,7 +42,7 @@ public class BuddyUtility : EditorWindow
                         scriptData.Add("profileId", "47327804-e23f-4416-bbd9-082e559054b8");
                         BrainCloudManager.Wrapper.ScriptService.RunScript
                         (
-                            BitBuddiesConsts.INCREASE_XP_SCRIPT_NAME,
+                            BitBuddiesConsts.INCREASE_XP_FOR_CHILD_SCRIPT_NAME,
                             scriptData.Serialize()
                         );
                     }

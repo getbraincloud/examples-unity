@@ -17,6 +17,7 @@ namespace Gameframework
         public const string AWARD_COINS_SCRIPT_NAME = "AwardCoinsToUser";
         public const string AWARD_GEMS_SCRIPT_NAME = "AwardGemsToUser";
         public const string AWARD_BLING_TO_CHILD_SCRIPT_NAME = "AwardBlingToChild";
+        public const string INCREASE_XP_FOR_PARENT_SCRIPT_NAME = "IncreaseXPForParent";
         
         public const string GET_STATS_SCRIPT_NAME = "child/fetchStats";
         public const string GET_CURRENCIES_SCRIPT_NAME = "child/fetchCurrencies";
@@ -30,7 +31,7 @@ namespace Gameframework
         public const string AWARD_LEGENDARY_LOOTBOX_SCRIPT_NAME = "child/lootboxes/addLegendaryChildAccount";
         public const string UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME = "child/updateChildAccountName";
         public const string DELETE_CHILD_PROFILE_SCRIPT_NAME = "child/deleteChildProfile";
-        public const string INCREASE_XP_SCRIPT_NAME = "child/increaseChildBuddyExperience";
+        public const string INCREASE_XP_FOR_CHILD_SCRIPT_NAME = "child/increaseChildBuddyExperience";
         public const string UPDATE_CHILD_COINS_COLLECTED_SCRIPT_NAME = "child/updateChildCoinCollected";
         public const string OBTAIN_TOY_SCRIPT_NAME = "child/obtainToy";
         public const string TOY_REWARD_RECEIVED_SCRIPT_NAME = "child/consumeCurrencyFromToy";

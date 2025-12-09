@@ -6,6 +6,7 @@ public class UserInfo
 {
     public int Level;
     public int CurrentXP;
+    public int PreviousLevelUp;
     public int NextLevelUp;
     public string Username;
     public string Email;

@@ -113,10 +113,14 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             {
                 UserInfo.UpdateNextLevelUp(nextLevelUp);
             }
-            else
+            else if(nextLevelUp == 0)
             {
                 Wrapper.PlayerStatisticsService.GetNextExperienceLevel(HandleSuccess("GetNextXP Success", OnGetNextLevelUp));
-            }            
+            }
+            if(summaryFriendData.ContainsKey("previousLevelXP"))
+            {
+                UserInfo.PreviousLevelUp = (int) summaryFriendData["previousLevelXP"];
+            }
         }
         else
         {
@@ -149,9 +153,11 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             int nextLevelUp =  (int) xpDetails["experience"];
             if(nextLevelUp != 0)
             {
+                UserInfo.PreviousLevelUp = 0;
                 UserInfo.UpdateNextLevelUp(nextLevelUp);
                 Dictionary<string, object> scriptData = new Dictionary<string, object>();
                 scriptData.Add("nextLevelUpXP", nextLevelUp);
+                scriptData.Add("previousLevelUpXP", UserInfo.PreviousLevelUp);
                 Wrapper.PlayerStateService.UpdateSummaryFriendData(scriptData.Serialize());
             }
         }
@@ -183,6 +189,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             boxInfo.BoxName = boxInfo.Rarity + " Box";
             boxInfo.currencyType = Enum.Parse<CurrencyTypes>((string)boxDict["unlockType"]);
             boxInfo.UnlockAmount = (int)boxDict["unlockAmount"];
+            boxInfo.LevelRequirement = (int)boxDict["levelRequirement"];
             
             listOfBoxInfo.Add(boxInfo);
         }
@@ -302,9 +309,9 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 dataInfo.currentXP = (int) summaryFriendData["experiencePoints"];
                 dataInfo.buddyLevel = (int) summaryFriendData["level"];
                 dataInfo.nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];   
-                if(summaryFriendData.ContainsKey("previousLevelXP"))
+                if(summaryFriendData.ContainsKey("previousLevelUpReq"))
                 {
-                    dataInfo.previousLevelUp =  (int) summaryFriendData["previousLevelXP"];
+                    dataInfo.previousLevelUp =  (int) summaryFriendData["previousLevelUpReq"];
                 }
                 else
                 {
@@ -580,12 +587,42 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     public void LevelUpParent()
     {
-
+        var scriptData = new Dictionary<string, object>();
+        scriptData.Add("x", 50);
+        Wrapper.ScriptService.RunScript
+        (
+            BitBuddiesConsts.INCREASE_XP_FOR_PARENT_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("LevelUpParent Success", OnLevelUpParent),
+            HandleFailure("LevelUpParent Failed", OnFailureCallback)
+        );
     }
     
     private void OnLevelUpParent(string jsonResponse, object cbObject)
     {
         //UserInfo.UpdateLevel(/*(int) statistics["Level"]*/);
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data =  packet["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
+        if(response == null) return;
+
+        if(response.ContainsKey("nextLevelUpXP"))
+        {
+            UserInfo.NextLevelUp = (int) response["nextLevelUpXP"];
+        }
+        if(response.ContainsKey("previousLevelUpReq"))
+        {
+            UserInfo.PreviousLevelUp = (int) response["previousLevelUpReq"];
+        }
+        if(response.ContainsKey("experiencePoints"))
+        {
+            UserInfo.CurrentXP = (int) response["experiencePoints"];
+        }
+        if(response.ContainsKey("level"))
+        {
+            UserInfo.UpdateLevel((int) response["level"]);
+        }
+                
         StateManager.Instance.RefreshScreen();
     }
     

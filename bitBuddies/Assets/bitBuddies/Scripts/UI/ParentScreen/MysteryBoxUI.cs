@@ -18,9 +18,10 @@ public class MysteryBoxUI : ContentUIBehaviour
     [SerializeField] private Image UnlockTypeImage;
     [SerializeField] private Image LockIconImage;
     [SerializeField] private Image BoxSpriteImage;
+    [SerializeField] private GameObject LevelRequirementObject;
+    [SerializeField] private TextMeshProUGUI LevelRequirementText;
     [Header("References")]
     [SerializeField] private Sprite[] UnlockTypeSprites;  //0 = coins, 1 = love, 2 = level
-
     [SerializeField] private Sprite[] OpenBoxTypeSprites;
     [SerializeField] private Sprite[] ClosedBoxTypeSprites;
     private MysteryBoxPanelUI _mysteryBoxPanelUI;
@@ -35,34 +36,35 @@ public class MysteryBoxUI : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        switch (_mysteryBoxInfo.currencyType)
+        UnlockAmountText.text = _mysteryBoxInfo.UnlockAmount.ToString("#,#");    //#,# adds commas to the string when using ints
+        UnlockTypeImage.sprite = UnlockTypeSprites[(int)CurrencyTypes.Coins];
+        var userInfo = BrainCloudManager.Instance.UserInfo;
+        if(userInfo.Level >= _mysteryBoxInfo.LevelRequirement)
         {
-            case CurrencyTypes.Coins:
-                UnlockAmountText.text = _mysteryBoxInfo.UnlockAmount.ToString("#,#");    //#,# adds commas to the string when using ints
-                UnlockTypeImage.sprite = UnlockTypeSprites[(int)CurrencyTypes.Coins];
-
-                var usersCoins = BrainCloudManager.Instance.UserInfo.Coins;
-                if(_mysteryBoxInfo.UnlockAmount > usersCoins)
-                {
-                    LockIconImage.gameObject.SetActive(true);
-                    OpenBoxButton.interactable = false;
-                    BoxSpriteImage.sprite = ClosedBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
-                }
-                else
-                {
-                    BoxSpriteImage.sprite = OpenBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
-                    LockIconImage.gameObject.SetActive(false);
-                    OpenBoxButton.interactable = true;
-                    OpenBoxButton.onClick.AddListener(OnOpenBox);
-                }
-                break;
-            case CurrencyTypes.Love:
-                UnlockAmountText.text = "Needs Lvl." + _mysteryBoxInfo.UnlockAmount;
-                UnlockTypeImage.sprite = UnlockTypeSprites[(int)CurrencyTypes.Love];
-                //ToDo: how do I determine this value...?
-                break;
+            LevelRequirementObject.SetActive(false);
+            
+            var usersCoins = BrainCloudManager.Instance.UserInfo.Coins;
+            if(_mysteryBoxInfo.UnlockAmount > usersCoins)
+            {
+                LockIconImage.gameObject.SetActive(true);
+                OpenBoxButton.interactable = false;
+                BoxSpriteImage.sprite = ClosedBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
+            }
+            else
+            {
+                BoxSpriteImage.sprite = OpenBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
+                LockIconImage.gameObject.SetActive(false);
+                OpenBoxButton.interactable = true;
+                OpenBoxButton.onClick.AddListener(OnOpenBox);
+            }
         }
-        
+        else
+        {
+            LevelRequirementObject.SetActive(true);
+            LevelRequirementText.text = $"Lvl. {_mysteryBoxInfo.LevelRequirement}";
+            OpenBoxButton.interactable = false;
+            LockIconImage.gameObject.SetActive(true);
+        }
         
         BoxNameText.text = _mysteryBoxInfo.BoxName;
         _mysteryBoxPanelUI = FindAnyObjectByType<MysteryBoxPanelUI>();

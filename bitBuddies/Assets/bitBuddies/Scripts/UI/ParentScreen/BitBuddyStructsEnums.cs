@@ -25,8 +25,9 @@ public enum Rarity
 public struct MysteryBoxInfo
 {
 	public string BoxName;
-	[FormerlySerializedAs("UnlockType")] public CurrencyTypes currencyType;
+	public CurrencyTypes currencyType;
 	public int UnlockAmount;
+	public int LevelRequirement;
 	public string Rarity;
 	public Rarity RarityEnum;
 

@@ -122,7 +122,7 @@ public class BuddysRoom : ContentUIBehaviour
         scriptData["incrementAmount"] =  xpAmount;
         scriptData["profileId"]  = _appChildrenInfo.profileId;
         scriptData["childAppId"] = BitBuddiesConsts.APP_CHILD_ID;
-        BrainCloudManager.Wrapper.ScriptService.RunScript(BitBuddiesConsts.INCREASE_XP_SCRIPT_NAME, scriptData.Serialize(), BrainCloudManager.HandleSuccess("IncreaseXP Success", OnIncreaseXP));
+        BrainCloudManager.Wrapper.ScriptService.RunScript(BitBuddiesConsts.INCREASE_XP_FOR_CHILD_SCRIPT_NAME, scriptData.Serialize(), BrainCloudManager.HandleSuccess("IncreaseXP Success", OnIncreaseXP));
     }
     
     //Tester response function for cloud code script

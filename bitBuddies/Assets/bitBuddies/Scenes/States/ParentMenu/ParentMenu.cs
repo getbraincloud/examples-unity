@@ -11,8 +11,8 @@ using UnityEngine.UI;
 public class ParentMenu : ContentUIBehaviour
 {
     [SerializeField] private Button OpenSettingsButton;
-    [SerializeField] private TMP_Text UsernameText;
-    [SerializeField] private TMP_Text LevelText;
+    [SerializeField] private TextMeshProUGUI UsernameText;
+    [SerializeField] private TextMeshProUGUI LevelText;
     [SerializeField] private TextMeshProUGUI CoinsText;
     [SerializeField] private TextMeshProUGUI GemsText;
     [SerializeField] private Transform BuddySpawnTransform;
@@ -20,8 +20,8 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private GameObject MoveInPrefab;
     [SerializeField] private MysteryBoxPanelUI MysteryBoxPanelPrefab;
     [SerializeField] private SettingsPanelUI SettingsPanelUIPrefab;
-    [SerializeField] private TMP_Text GameVersionText;
-    [SerializeField] private TMP_Text BcClientVersionText;
+    [SerializeField] private TextMeshProUGUI GameVersionText;
+    [SerializeField] private TextMeshProUGUI BcClientVersionText;
     [SerializeField] private Slider LevelSlider;
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
 
@@ -49,6 +49,7 @@ public class ParentMenu : ContentUIBehaviour
         InitializeUI();
         OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
         BuddyHouseInfo.OnCoinsCollected += UpdateValueText;
+        BuddyHouseInfo.OnCoinsCollected += SpawnCurrencyAddedAnimation;
         StartCoroutine(LoopCheckCoins());
         base.Awake();
     }
@@ -73,13 +74,26 @@ public class ParentMenu : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        BuddyHouseInfo.OnCoinsCollected += SpawnCurrencyAddedAnimation;
-    
         UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
-        UsernameText.text = userInfo.Username.IsNullOrEmpty() ? "New User" : userInfo.Username;
+        if(userInfo.Username.IsNullOrEmpty())
+        {
+            UsernameText.text = "New User";
+        }
+        else
+        {
+            if(userInfo.Username.Length > 9)
+            {
+                UsernameText.text = userInfo.Username.Substring(0, 9) + "...";
+            }
+            else
+            {
+                UsernameText.text = userInfo.Username;
+            }
+        }
         LevelText.text = $"Lv. {userInfo.Level}";
-        LevelSlider.value = userInfo.CurrentXP;
+        LevelSlider.minValue = userInfo.PreviousLevelUp;
         LevelSlider.maxValue = userInfo.NextLevelUp;
+        LevelSlider.value = userInfo.CurrentXP;
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();
         GameVersionText.text = $"Game Version: {Application.version}";
