@@ -25,7 +25,8 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private Slider LevelSlider;
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
 
-    [SerializeField] private float textSpawnOffset = 40f;
+    private float textGoldSpawnOffset = 40f;
+    private float textLevelSpawnOffset = -40f;
     //Debug Buttons
     [SerializeField] private Button IncreaseCoinsButton;
     [SerializeField] private Button IncreaseGemsButton;
@@ -94,6 +95,13 @@ public class ParentMenu : ContentUIBehaviour
         LevelSlider.minValue = userInfo.PreviousLevelUp;
         LevelSlider.maxValue = userInfo.NextLevelUp;
         LevelSlider.value = userInfo.CurrentXP;
+        //We're max level, so just have the bar filled.
+        if(LevelSlider.minValue == 0 && LevelSlider.maxValue == 0)
+        {
+            LevelSlider.minValue = 1;
+            LevelSlider.maxValue = 2;
+            LevelSlider.value = 2;
+        }
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();
         GameVersionText.text = $"Game Version: {Application.version}";
@@ -178,7 +186,7 @@ public class ParentMenu : ContentUIBehaviour
         }
         //Set up animation
         var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
-        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textSpawnOffset, 0f);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textGoldSpawnOffset, 0f);
         textAnimation.SetUpPositiveNumberText(amount);
         textAnimation.PlayBounce();
         
@@ -187,6 +195,8 @@ public class ParentMenu : ContentUIBehaviour
     
     public void SpawnLevelIncreaseAnimation()
     {
+        if(Mathf.Approximately(LevelSlider.minValue, 1f) && Mathf.Approximately(LevelSlider.maxValue, 2f)) return; //No level increase animation (already max level)
+        
         var amount = GameManager.Instance.XpAcquiredAmount;
         if(amount == 0) return;
         GameManager.Instance.XpAcquiredAmount = 0;
@@ -197,7 +207,7 @@ public class ParentMenu : ContentUIBehaviour
         
         //Set up animation
         var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
-        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textSpawnOffset, 0f);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textLevelSpawnOffset, 0f);
         textAnimation.SetUpPositiveNumberText(amount);
         textAnimation.PlayBounce();
     }

@@ -40,8 +40,8 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	private List<MysteryBoxInfo> _mysteryBoxes;
 	private int _screenIndex;
 	private ParentMenu _parentMenu;
+	
 	//Screen Titles
-	private const string DEFAULT_BUDDY_NAME = "MyBuddy";
 	private const string LIST_BOXES_TEXT_TITLE = "Pick a mystery box";
 	private const string OPEN_BOX_TEXT_TITLE = "Open your Mystery Box";
 	private const string NEW_BUDDY_TEXT_TITLE = "New BitBuddy!";
@@ -200,10 +200,24 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     
     private void OnDoneButton()
     {
+		if(NameBuddyInput.text.IsNullOrEmpty())
+		{
+			StateManager.Instance.OpenConfirmPopUp("Name is empty", "Are you sure you want to give your buddy a default name? (default name: MyBuddy)", OnConfirmEmptyName);
+			return;
+		}
+		
 		DoneButton.onClick.RemoveAllListeners();
 		DoneButton.interactable = false;
-	    string nameValue = NameBuddyInput.text.IsNullOrEmpty() ? DEFAULT_BUDDY_NAME: NameBuddyInput.text;
+	    string nameValue = NameBuddyInput.text.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_BUDDY_NAME: NameBuddyInput.text;
 	    BrainCloudManager.Instance.UpdateChildProfileName(nameValue, _parentMenu.NewAppChildrenInfo.profileId);
+    }
+    
+    private void OnConfirmEmptyName()
+    {
+		Destroy(gameObject);
+	    DoneButton.onClick.RemoveAllListeners();
+	    DoneButton.interactable = false;
+	    StateManager.Instance.RefreshScreen();
     }
     
     private void SetupBuddyDataDisplay()

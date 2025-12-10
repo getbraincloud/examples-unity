@@ -306,7 +306,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     }
                 }
                 
-                dataInfo.currentXP = (int) summaryFriendData["experiencePoints"];
+                dataInfo.currentXP  = (int) summaryFriendData["experiencePoints"];
                 dataInfo.buddyLevel = (int) summaryFriendData["level"];
                 dataInfo.nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];   
                 if(summaryFriendData.ContainsKey("previousLevelUpReq"))
@@ -354,7 +354,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     if(stats != null)
                     {
                         dataInfo.coinsEarnedInLifetime = (int) stats["CoinsGainedForParent"];
-                        dataInfo.loveEarnedInLifetime = (int) stats["LoveEarned"];
+                        //dataInfo.loveEarnedInLifetime = (int) stats["LoveEarned"];
                     }
                     
                     var items = extraData["items"] as Dictionary<string, object>[];

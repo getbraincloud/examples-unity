@@ -50,7 +50,7 @@ public class BuddysRoom : ContentUIBehaviour
         BcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
         _appChildrenInfo = GameManager.Instance.SelectedAppChildrenInfo;
         
-        ProfileNameText.text = _appChildrenInfo.profileName;
+        ProfileNameText.text = _appChildrenInfo.profileName.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_BUDDY_NAME : _appChildrenInfo.profileName;
         ParentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
         BuddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
 

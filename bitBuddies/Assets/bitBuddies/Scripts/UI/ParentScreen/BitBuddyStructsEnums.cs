@@ -69,7 +69,6 @@ public class AppChildrenInfo
 	public int coinsEarnedInHolding { get; set; }
 	//Love is only earned through Toy interaction in Buddys Room.
 	//Aka used as current XP for profile. 
-	public int loveEarnedInLifetime {get; set;}
 	public int coinsEarnedInLifetime {get; set;}
 	
 	private float _hourInSeconds = 3600;

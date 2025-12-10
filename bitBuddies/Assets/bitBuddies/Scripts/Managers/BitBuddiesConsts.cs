@@ -52,16 +52,16 @@ namespace Gameframework
         
         //Pop Up messages
             //Buddys Room
-        public const string GO_BUDDYS_ROOM_TITLE = "Enter Buddy's Room?";
-        public const string GO_BUDDYS_ROOM_MESSAGE = "Would you like to enter buddy's room?";
-        public const string DELETE_BUDDYS_ROOM_TITLE = "Delete Buddy's Room?";
-        public const string DELETE_BUDDYS_ROOM_MESSAGE =  "Would you like to delete buddy's room?";
+        public const string GO_BUDDYS_ROOM_TITLE = "Enter ";
+        public const string GO_BUDDYS_ROOM_MESSAGE = "Would you like to enter ";
+        public const string DELETE_BUDDYS_ROOM_TITLE = "Delete ";
+        public const string DELETE_BUDDYS_ROOM_MESSAGE =  "Would you like to demolish ";
 	
         public const string DELETE_BUDDYS_ROOM_SUCCESS_TITLE = "Buddys Room Deleted";
         public const string DELETE_BUDDYS_ROOM_SUCCESS_MESSAGE = "The requested buddy's room was deleted";
         public const string DELETE_BUDDYS_ROOM_FAILED_TITLE = "Something went wrong";
         public const string DELETE_BUDDYES_ROOM_FAILED_MESSAGE = "There was an error while attempting to delete the requested buddy's room, please try again later";
-        
+        public const string DEFAULT_BUDDY_NAME = "MyBuddy";
             //Settings
         public const string ATTACH_EMAIL_SUCCESS_TITLE = "Attach Email Successful";
         public const string ATTACH_EMAIL_SUCCESS_MESSAGE = "Email address entered is now attached to this account.";

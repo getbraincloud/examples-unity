@@ -19,6 +19,7 @@ public class MysteryBoxUI : ContentUIBehaviour
     [SerializeField] private Image LockIconImage;
     [SerializeField] private Image BoxSpriteImage;
     [SerializeField] private GameObject LevelRequirementObject;
+    [SerializeField] private GameObject PriceRequirementObject;
     [SerializeField] private TextMeshProUGUI LevelRequirementText;
     [Header("References")]
     [SerializeField] private Sprite[] UnlockTypeSprites;  //0 = coins, 1 = love, 2 = level
@@ -42,6 +43,7 @@ public class MysteryBoxUI : ContentUIBehaviour
         if(userInfo.Level >= _mysteryBoxInfo.LevelRequirement)
         {
             LevelRequirementObject.SetActive(false);
+            PriceRequirementObject.SetActive(true);
             
             var usersCoins = BrainCloudManager.Instance.UserInfo.Coins;
             if(_mysteryBoxInfo.UnlockAmount > usersCoins)
@@ -61,6 +63,7 @@ public class MysteryBoxUI : ContentUIBehaviour
         else
         {
             LevelRequirementObject.SetActive(true);
+            PriceRequirementObject.SetActive(false);
             LevelRequirementText.text = $"Lvl. {_mysteryBoxInfo.LevelRequirement}";
             OpenBoxButton.interactable = false;
             LockIconImage.gameObject.SetActive(true);

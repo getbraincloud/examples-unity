@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4543326179846441247, guid: d6d0372171de9224284b021e32cbedc2, type: 3}
+  m_Sprite: {fileID: 90223923711178096, guid: bde20741a2f59df468e1a36983513387, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -160,7 +160,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4740945501338488144}
   - component: {fileID: 2767789036609496020}
-  - component: {fileID: 8953659868612900387}
   m_Layer: 5
   m_Name: LevelReqBG - Image
   m_TagString: Untagged
@@ -197,36 +196,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1559695284139020622}
   m_CullTransparentMesh: 1
---- !u!114 &8953659868612900387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1559695284139020622}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: dcdd7134398fdb0449d60e5ccfe5033f, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &3141829492219549986
 GameObject:
   m_ObjectHideFlags: 0
@@ -495,7 +464,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8089525615977210217}
   - component: {fileID: 2293205759132444519}
-  - component: {fileID: 247724560843359426}
   m_Layer: 5
   m_Name: PriceBG - Image
   m_TagString: Untagged
@@ -532,36 +500,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4581493905809331974}
   m_CullTransparentMesh: 1
---- !u!114 &247724560843359426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4581493905809331974}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: dcdd7134398fdb0449d60e5ccfe5033f, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4822750055543260575
 GameObject:
   m_ObjectHideFlags: 0
@@ -636,9 +574,10 @@ MonoBehaviour:
   LockIconImage: {fileID: 2511155198154397116}
   BoxSpriteImage: {fileID: 3152332974618648431}
   LevelRequirementObject: {fileID: 1559695284139020622}
+  PriceRequirementObject: {fileID: 4581493905809331974}
   LevelRequirementText: {fileID: 9015341661523933240}
   UnlockTypeSprites:
-  - {fileID: -3338749442709606003, guid: 045ab00fd62a5f1449e969c649aac95f, type: 3}
+  - {fileID: 90223923711178096, guid: bde20741a2f59df468e1a36983513387, type: 3}
   - {fileID: -205270267638800340, guid: 3ce7c6e630b5d1241bb884dea24fb7da, type: 3}
   - {fileID: 4815476061570213978, guid: 919cc0b4bc77c4e40ba2545b87859268, type: 3}
   OpenBoxTypeSprites:

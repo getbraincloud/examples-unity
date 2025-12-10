@@ -144,6 +144,17 @@ public class LoginScreen : ContentUIBehaviour
     
     private void OnForgotPasswordButtonClick()
     {
+        if(ForgotPasswordEmailInputField.text.IsNullOrEmpty())
+        {
+            StateManager.Instance.OpenInfoPopUp("Email is empty", "Please enter an email");
+            return;
+        }
+        if(!IsEmailValid(ForgotPasswordEmailInputField.text))
+        {
+            StateManager.Instance.OpenInfoPopUp("Email entered is invalid", "Please enter a valid email");
+            return;
+        }
+        
         StateManager.Instance.OpenConfirmPopUp("Are you sure?", "We will send you an email with a link to reset your password", OnConfirmForgotPasswordButtonClick);
     }
     

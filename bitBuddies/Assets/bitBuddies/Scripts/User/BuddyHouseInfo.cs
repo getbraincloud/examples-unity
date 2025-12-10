@@ -49,7 +49,19 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnVisitButton()
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
-		popUp.SetupConfirmPopup(BitBuddiesConsts.GO_BUDDYS_ROOM_TITLE, BitBuddiesConsts.GO_BUDDYS_ROOM_MESSAGE, GoToBuddysRoom);
+		if(HouseInfo.profileName.IsNullOrEmpty())
+		{
+			string titleMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+			string bodyMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_MESSAGE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+			popUp.SetupConfirmPopup(titleMessage, bodyMessage, GoToBuddysRoom);
+				
+		}
+		else
+		{
+			string titleMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_TITLE + HouseInfo.profileName + "'s home?";
+			string bodyMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_MESSAGE + HouseInfo.profileName + "'s home?";
+			popUp.SetupConfirmPopup(titleMessage, bodyMessage, GoToBuddysRoom);
+		}
 	}
 	
 	private void GoToBuddysRoom()
@@ -61,7 +73,18 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnDeleteButton()
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
-		popUp.SetupConfirmPopup(BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE, BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE, DeleteBuddyRoom);
+		if(HouseInfo.profileName.IsNullOrEmpty())
+		{
+			string titleMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+			string bodyMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+			popUp.SetupConfirmPopup(titleMessage, bodyMessage, DeleteBuddyRoom);
+		}
+		else
+		{
+			string titleMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + HouseInfo.profileName + "'s home?";
+			string bodyMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE + HouseInfo.profileName + "'s home?";
+			popUp.SetUpInfoPopup(titleMessage, bodyMessage);
+		}
 	}
 	
 	private void DeleteBuddyRoom()
@@ -162,10 +185,10 @@ public class BuddyHouseInfo : MonoBehaviour
 		var statistics = statData["statistics"] as Dictionary<string, object>;
 		
 		HouseInfo.coinsEarnedInLifetime = (int) statistics["CoinsGainedForParent"];
-		if(statistics.ContainsKey("LoveEarned"))
-		{
-			HouseInfo.loveEarnedInLifetime = (int) statistics["LoveEarned"];
-		}
+		// if(statistics.ContainsKey("LoveEarned"))
+		// {
+		// 	HouseInfo.loveEarnedInLifetime = (int) statistics["LoveEarned"];
+		// }
 		
 		//Fire UI event
 		if(OnCoinsCollected != null)

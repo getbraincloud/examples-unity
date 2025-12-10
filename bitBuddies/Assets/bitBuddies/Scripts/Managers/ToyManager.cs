@@ -102,7 +102,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 				if(statistics != null)
 				{
 					selectedAppChildInfo.coinsEarnedInLifetime = (int) statistics["CoinsGainedForParent"];
-					selectedAppChildInfo.loveEarnedInLifetime = (int) statistics["LoveEarned"];	
+					//selectedAppChildInfo.loveEarnedInLifetime = (int) statistics["LoveEarned"];	
 				}
 			}
 			
@@ -112,7 +112,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 				var xpData = xpResult["increaseXpResult"] as Dictionary<string, object>;
 				if(xpData != null)
 				{
-					selectedAppChildInfo.currentXP = (int) xpData["experiencePoints"];
+					selectedAppChildInfo.currentXP  = (int) xpData["experiencePoints"];
 					selectedAppChildInfo.buddyLevel = (int) xpData["experienceLevel"];	
 					if(xpResult.ContainsKey("nextLevelUpXP"))
 					{
@@ -138,10 +138,25 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 					selectedAppChildInfo.buddyBling = (int) buddyBlingData["balance"];	
 				}
 			}
+			
+			if(response.TryGetValue("increaseStatResult", out var increaseStatValue))
+			{
+				if(increaseStatValue != null)
+				{
+					var increaseStatResult = increaseStatValue as Dictionary<string, object>;
+					var increaseStatData = increaseStatResult["data"] as Dictionary<string, object>;
+					var statistics = increaseStatData["statistics"] as Dictionary<string, object>;
+					if(statistics != null)
+					{
+						selectedAppChildInfo.coinsEarnedInLifetime = (int) statistics["CoinsGainedForParent"];	
+					}
+				}
+			}
 		}
 
 		
 		var totalDifference = beforeAmount - BrainCloudManager.Instance.UserInfo.Coins;
+		
 		//ToDo Add animations for
 		/*
 		 * Coins
