@@ -77,6 +77,12 @@ public class ToyBench : MonoBehaviour
 	
 	private void OnAddButton()
 	{
+		var position = new Vector2(_buddyTargetPosition.localPosition.x, _buddyTargetPosition.localPosition.y + _buddyTargetPositionOffsetY);
+		_moveBuddyAnimation.MoveBuddyToPosition(position, OnBuddyArrivedAtBench);
+	}
+
+	private void OnBuddyArrivedAtBench()
+	{
 		var title = "Are you sure?";
 		var body = $"Buy {_toyBenchInfo.DisplayName} for {_toyBenchInfo.UnlockCost}?<br>(Must be level {_toyBenchInfo.LevelRequirement} or higher to acquire)";
 		if(_toyBenchInfo.UnlockCost == 0)
@@ -104,8 +110,7 @@ public class ToyBench : MonoBehaviour
 	
 	private void MoveBuddyToBench()
 	{
-		var position =_buddyTargetPosition.localPosition; 
-		position = new Vector2(_buddyTargetPosition.localPosition.x, _buddyTargetPosition.localPosition.y + _buddyTargetPositionOffsetY);
+		var position = new Vector2(_buddyTargetPosition.localPosition.x, _buddyTargetPosition.localPosition.y + _buddyTargetPositionOffsetY);
 		_moveBuddyAnimation.MoveBuddyToBench(position, RequestConsumeToy);
 	}
 

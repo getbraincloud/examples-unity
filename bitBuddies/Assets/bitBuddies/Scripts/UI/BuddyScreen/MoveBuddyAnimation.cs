@@ -16,7 +16,7 @@ public class MoveBuddyAnimation : MonoBehaviour
     private Vector2 _targetPosition;
     private RectTransform _buddySpriteTransform;
 
-    private Action OnFinishShaking;
+    private Action OnFinishAnimation;
     private void Awake()
     {
         if (_buddySpriteTransform == null)
@@ -34,7 +34,7 @@ public class MoveBuddyAnimation : MonoBehaviour
     public void MoveBuddyToBench(Vector2 in_targetPosition, Action in_onFinishShaking)
     {
         if (isRunning) return;
-        OnFinishShaking = in_onFinishShaking;
+        OnFinishAnimation = in_onFinishShaking;
         _targetPosition = in_targetPosition;
         if (!isRunning)
             StartCoroutine(MoveShakeWaitForResponse());
@@ -45,6 +45,15 @@ public class MoveBuddyAnimation : MonoBehaviour
         if (isRunning) return;
         _targetPosition = in_targetPosition;
         
+        if (!isRunning)
+            StartCoroutine(MoveToLocation());
+    }
+    
+    public void MoveBuddyToPosition(Vector2 in_targetPosition, Action in_onFinishAnimation)
+    {
+        if (isRunning) return;
+        _targetPosition = in_targetPosition;
+        OnFinishAnimation = in_onFinishAnimation;
         if (!isRunning)
             StartCoroutine(MoveToLocation());
     }
@@ -72,6 +81,11 @@ public class MoveBuddyAnimation : MonoBehaviour
         startPosition = _buddySpriteTransform.anchoredPosition;
         
         yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
+
+        if (OnFinishAnimation != null)
+        {
+            OnFinishAnimation();
+        }
 
         isRunning = false;
     }
@@ -106,9 +120,9 @@ public class MoveBuddyAnimation : MonoBehaviour
             yield return null;
         }
         
-        if(OnFinishShaking != null)
+        if(OnFinishAnimation != null)
         {
-            OnFinishShaking();
+            OnFinishAnimation();
         }
 
         _buddySpriteTransform.anchoredPosition = original;

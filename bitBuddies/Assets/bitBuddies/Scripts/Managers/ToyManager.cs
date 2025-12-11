@@ -232,7 +232,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	{
 		_rewardPickups.Add(in_rewardPickup);
 		//We've picked up everything on the floor
-		if(_currentRewardSpawnAmount == 0)
+		if(_currentRewardSpawnAmount <= 0)
 		{
 			CheckForSendingRewards();
 		}
