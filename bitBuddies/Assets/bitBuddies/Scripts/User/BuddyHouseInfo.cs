@@ -163,6 +163,7 @@ public class BuddyHouseInfo : MonoBehaviour
 			{
 				GameManager.Instance.XpAcquiredAmount = (float) xpAcquired;
 			}
+			Debug.Log("XpAwarded gave an exception: " + e.Message);
 		}
 
 		

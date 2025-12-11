@@ -16,7 +16,7 @@ public class ToyShop : ContentUIBehaviour
 	{
 		base.Awake();
 		_buddysRoom = FindFirstObjectByType<BuddysRoom>();
-		CloseButton.onClick.AddListener(OnCloseButton);
+		CloseButton.onClick.AddListener(OnCloseButtonPressed);
 		_toyBenchInfos = GameManager.Instance.ToyBenchInfos;
 		_toyBenchUIs = new List<BuyToyBenchUI>();
 		foreach (ToyBenchInfo toyBenchInfo in _toyBenchInfos)
@@ -41,7 +41,7 @@ public class ToyShop : ContentUIBehaviour
 		}
 	}
 	
-	private void OnCloseButton()
+	private void OnCloseButtonPressed()
 	{
 		_buddysRoom.ShopClosed();
 		Destroy(gameObject);

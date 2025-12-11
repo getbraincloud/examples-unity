@@ -304,6 +304,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     {
                         dataInfo.coinMultiplier = 1.0f;
                     }
+
+                    Debug.LogWarning("Coin Multiplier exception: " + e.Message);
                 }
                 
                 dataInfo.currentXP  = (int) summaryFriendData["experiencePoints"];

@@ -176,7 +176,6 @@ public class BuddysRoom : ContentUIBehaviour
         
         //grab app child reference from game manager and assign new values
         var listOfApps = GameManager.Instance.AppChildrenInfos;
-        var appIndex = 0;
         for (int i = 0; i < listOfApps.Count; i++)
         {
             if(_appChildrenInfo == listOfApps[i])

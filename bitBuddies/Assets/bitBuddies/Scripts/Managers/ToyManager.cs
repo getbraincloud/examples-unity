@@ -152,6 +152,19 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 					}
 				}
 			}
+			
+			if(response.TryGetValue("coinResult", out var coinValue))
+			{
+				if(coinValue != null)
+				{
+					var coinResult = coinValue as Dictionary<string, object>;
+					var coinData = coinResult["data"] as Dictionary<string, object>;
+					var currencyMap = coinData["currencyMap"] as Dictionary<string, object>;
+					var coinsData = currencyMap["coins"] as Dictionary<string, object>;
+					
+					BrainCloudManager.Instance.UserInfo.UpdateCoins((int) coinsData["balance"]);
+				}
+			}
 		}
 
 		

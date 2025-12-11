@@ -8,7 +8,6 @@ public class ValueAddedAnimation : MonoBehaviour
 
     [SerializeField] private float moveDuration = 0.2f;
     [SerializeField] private float moveDistance = 20f;
-    [SerializeField] private float duration = 0.2f;
     [SerializeField] private float fadeDuration = 0.3f; 
     [SerializeField] private TextMeshProUGUI textElement;
     
