@@ -307,10 +307,18 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
                     Debug.LogWarning("Coin Multiplier exception: " + e.Message);
                 }
-                
-                dataInfo.currentXP  = (int) summaryFriendData["experiencePoints"];
-                dataInfo.buddyLevel = (int) summaryFriendData["level"];
-                dataInfo.nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];   
+                if(summaryFriendData.ContainsKey("experiencePoints"))
+                {
+                    dataInfo.currentXP  = (int) summaryFriendData["experiencePoints"];                    
+                }
+                if(summaryFriendData.ContainsKey("level"))
+                {
+                    dataInfo.buddyLevel = (int) summaryFriendData["level"];                    
+                }
+                if(summaryFriendData.ContainsKey("nextLevelUpXP"))
+                {
+                    dataInfo.nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];                    
+                }
                 if(summaryFriendData.ContainsKey("previousLevelUpReq"))
                 {
                     dataInfo.previousLevelUp =  (int) summaryFriendData["previousLevelUpReq"];
