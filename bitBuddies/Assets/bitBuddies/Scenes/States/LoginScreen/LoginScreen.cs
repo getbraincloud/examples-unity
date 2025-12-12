@@ -135,6 +135,7 @@ public class LoginScreen : ContentUIBehaviour
     private void OnFailureCallback()
     {
         StateManager.Instance.OpenInfoPopUp("Something went wrong", "Please try again later");
+        IsInteractable = true;
     }
     
     private void OnOpenForgotPasswordPanel()

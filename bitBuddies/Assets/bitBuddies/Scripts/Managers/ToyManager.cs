@@ -5,7 +5,10 @@ using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ToyManager : SingletonBehaviour<ToyManager>
 {
@@ -22,22 +25,55 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	 * If the user leaves while having rewards still on the floor, then the manager will pick it up for them
 	 * 
 	 */
-
+	[SerializeField] private Button MoveAreaButton;
 	[SerializeField] private List<ToyBench> ToyBenches;
+	private Vector3 MoveOffsetVector = new Vector3(-950, -450, 0);
 	
+	private MoveBuddyAnimation _moveBuddyAnimation;
 	private const float CHECK_FOR_REWARDS_INTERVAL = 8.5f;
 	private string _selectedToyId;
 	private List<RewardPickup> _rewardPickups = new List<RewardPickup>();
 	private bool _timerStarted;
 	private int _currentRewardSpawnAmount;
 	private string _currentRewardEntityId;
+	private RectTransform _buttonRectTransform;
+	private Canvas canvas;
 	public static event Action<int> OnCoinsTaken;
 	public override void Awake()
 	{
 		base.Awake();
 		SetUpToyBenches();
 		CheckForAvailableBenches();
+		_moveBuddyAnimation = FindFirstObjectByType<MoveBuddyAnimation>();
+		_buttonRectTransform = MoveAreaButton.GetComponent<RectTransform>();
+		MoveAreaButton.onClick.AddListener(MoveToPosition);
+		if (canvas == null)
+			canvas = GetComponentInParent<Canvas>();
+	}
+	
+	private void MoveToPosition()
+	{
+		Vector2 position = Vector2.zero;
 		
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR
+		RectTransformUtility.ScreenPointToLocalPointInRectangle
+		(
+			_buttonRectTransform, 
+		Input.mousePosition, 
+			Camera.main, 
+			out position 
+		);
+#elif UNITY_ANDROID
+		//ToDo: Fix this for android/ios
+		// RectTransformUtility.ScreenPointToLocalPointInRectangle
+		// (
+		// 	_buttonRectTransform, 
+		// Input.mousePosition, 
+		// 	Camera.main, 
+		// 	out position 
+		// );
+#endif
+		_moveBuddyAnimation.MoveBuddyToPosition(Input.mousePosition + MoveOffsetVector);
 	}
 
 	private void OnDisable()
@@ -179,7 +215,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		
 		GameManager.Instance.SelectedAppChildrenInfo = selectedAppChildInfo;
 		GameManager.Instance.UpdateSelectedAppChildrenInfo();
-		StateManager.Instance.RefreshScreen();
+		//StateManager.Instance.RefreshScreen();
 	}
 	
 	private void CheckForSendingRewards()
@@ -199,7 +235,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 						break;
 					case CurrencyTypes.Love:
 						amountOfLoveToReward += _rewardPickups[i].RewardAmount;
-						break;
+						break;       
 					case CurrencyTypes.BuddyBling:
 						amountOfBuddyBlingToReward += _rewardPickups[i].RewardAmount;
 						break;
@@ -231,6 +267,21 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	public void AddRewardPickup(RewardPickup in_rewardPickup)
 	{
 		_rewardPickups.Add(in_rewardPickup);
+		switch (in_rewardPickup.CurrencyType)
+		{
+			case CurrencyTypes.Coins:
+			UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
+			var amount = userInfo.Coins + in_rewardPickup.RewardAmount;
+			userInfo.UpdateCoins(amount);
+				break;
+			case CurrencyTypes.Love:
+			GameManager.Instance.SelectedAppChildrenInfo.currentXP += in_rewardPickup.RewardAmount;
+				break;       
+			case CurrencyTypes.BuddyBling:
+			GameManager.Instance.SelectedAppChildrenInfo.buddyBling += in_rewardPickup.RewardAmount;
+				break;
+		}
+		StateManager.Instance.RefreshScreen();
 		//We've picked up everything on the floor
 		if(_currentRewardSpawnAmount <= 0)
 		{

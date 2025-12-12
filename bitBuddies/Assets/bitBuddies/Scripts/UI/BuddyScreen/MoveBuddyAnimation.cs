@@ -85,6 +85,7 @@ public class MoveBuddyAnimation : MonoBehaviour
         if (OnFinishAnimation != null)
         {
             OnFinishAnimation();
+            OnFinishAnimation = null;
         }
 
         isRunning = false;
@@ -123,6 +124,7 @@ public class MoveBuddyAnimation : MonoBehaviour
         if(OnFinishAnimation != null)
         {
             OnFinishAnimation();
+            OnFinishAnimation = null;
         }
 
         _buddySpriteTransform.anchoredPosition = original;

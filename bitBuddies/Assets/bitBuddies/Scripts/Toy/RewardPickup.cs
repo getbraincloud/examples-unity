@@ -22,7 +22,7 @@ public class RewardPickup : MonoBehaviour
     {
         _pickUpImage = GetComponent<Image>();
         _pickUpButton = GetComponent<Button>();
-        _pickUpButton.onClick.AddListener(OnPickUpPressed);
+        //_pickUpButton.onClick.AddListener(OnPickUpPressed);
     }
 
     private void OnDestroy()
@@ -30,22 +30,21 @@ public class RewardPickup : MonoBehaviour
         StopAllCoroutines();
     }
 
-    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount, Action<Vector2> in_onPickUp, ToyBench in_toyBench)
+    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount, ToyBench in_toyBench)
     {
         _currencyType = in_currencyType;
         _pickUpImage.sprite = RewardSprites[(int)in_currencyType];
         _rewardAmount = in_rewardAmount;
         _toyBench = in_toyBench;
-        OnPickUp = in_onPickUp;
         StartCoroutine(DelayToDestroy());
     }
     
     public void OnPickUpPressed()
     {
-        if (OnPickUp != null)
-        {
-            OnPickUp(transform.localPosition);
-        }
+        // if (OnPickUp != null)
+        // {
+        //     OnPickUp(transform.localPosition);
+        // }
     }
     
     public void PickUpCollected()

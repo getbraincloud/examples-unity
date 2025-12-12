@@ -70,11 +70,6 @@ public class ToyBench : MonoBehaviour
 		AddToyButton.gameObject.SetActive(true);
 	}
 	
-	public void MoveBuddyToReward(Vector2 in_position)
-	{
-		_moveBuddyAnimation.MoveBuddyToPosition(in_position);		
-	}
-	
 	private void OnAddButton()
 	{
 		var position = new Vector2(_buddyTargetPosition.localPosition.x, _buddyTargetPosition.localPosition.y + _buddyTargetPositionOffsetY);
@@ -180,7 +175,7 @@ public class ToyBench : MonoBehaviour
 			{
 				rewardValue = in_rewardValue;
 			}
-			reward.SetUpPickup(in_currencyType, rewardValue, MoveBuddyToReward, this);
+			reward.SetUpPickup(in_currencyType, rewardValue, this);
 		}
 		_rewardSpawnNumber += in_rewardSpawnNumber;
 	}

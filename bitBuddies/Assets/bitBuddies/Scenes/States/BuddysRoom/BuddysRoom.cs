@@ -34,18 +34,26 @@ public class BuddysRoom : ContentUIBehaviour
  
     protected override void Awake()
     {
+        ExitButton.onClick.AddListener(OnExitButton);
+        ShopButton.onClick.AddListener(OnShopButton);
+        StatsButton.onClick.AddListener(OnStatsButton);
+
         InitializeUI();
         base.Awake();
         
         ToyManager.OnCoinsTaken += SpawnValueSubtractedAnimation;
     }
 
+    private void OnDisable()
+    {
+        ExitButton.onClick.RemoveAllListeners();
+        ShopButton.onClick.RemoveAllListeners();
+        StatsButton.onClick.RemoveAllListeners();
+        ToyManager.OnCoinsTaken -= SpawnValueSubtractedAnimation;
+    }
+
     protected override void InitializeUI()
     {
-        ExitButton.onClick.AddListener(OnExitButton);
-        ShopButton.onClick.AddListener(OnShopButton);
-        StatsButton.onClick.AddListener(OnStatsButton);
-        
         GameVersionText.text = $"Game Version: {Application.version}";
         BcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
         _appChildrenInfo = GameManager.Instance.SelectedAppChildrenInfo;
