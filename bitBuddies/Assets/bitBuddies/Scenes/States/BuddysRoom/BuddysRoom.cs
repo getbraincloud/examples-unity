@@ -6,6 +6,7 @@ using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class BuddysRoom : ContentUIBehaviour
@@ -20,11 +21,14 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private Slider LoveSlider;
     [SerializeField] private TMP_Text TimestampText;
 
-    [SerializeField] private Button ExitButton;
+    [SerializeField] private Button ExitDoorButton;
+    [SerializeField] private Button ExitCornerButton;
     [SerializeField] private Button ShopButton;
     [SerializeField] private Button StatsButton;
     [SerializeField] private ToyShop ToyShop;
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
+    [SerializeField] private Button BuddyOverviewButton;
+    [SerializeField] private AdjustBuddyPanel AdjustBuddyPanelPrefab;
     
     private float _textSpawnOffset = 135f;
     private int _increaseXpAmount;
@@ -34,7 +38,9 @@ public class BuddysRoom : ContentUIBehaviour
  
     protected override void Awake()
     {
-        ExitButton.onClick.AddListener(OnExitButton);
+        ExitDoorButton.onClick.AddListener(OnExitButton);
+        ExitCornerButton.onClick.AddListener(OnExitButton);
+        BuddyOverviewButton.onClick.AddListener(OnBuddyOverviewButton);
         ShopButton.onClick.AddListener(OnShopButton);
         StatsButton.onClick.AddListener(OnStatsButton);
 
@@ -46,7 +52,9 @@ public class BuddysRoom : ContentUIBehaviour
 
     private void OnDisable()
     {
-        ExitButton.onClick.RemoveAllListeners();
+        ExitCornerButton.onClick.RemoveAllListeners();
+        ExitDoorButton.onClick.RemoveAllListeners();
+        BuddyOverviewButton.onClick.RemoveAllListeners();
         ShopButton.onClick.RemoveAllListeners();
         StatsButton.onClick.RemoveAllListeners();
         ToyManager.OnCoinsTaken -= SpawnValueSubtractedAnimation;
@@ -78,7 +86,7 @@ public class BuddysRoom : ContentUIBehaviour
         TimestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
         
         //_buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
-        BuddySprite.sprite = AssetLoader.LoadSprite(_appChildrenInfo.buddySpritePath);
+        BuddySprite.sprite = _appChildrenInfo.GetBuddySprite();
         if(_appChildrenInfo.buddySpritePath.IsNullOrEmpty())
         {
             Debug.LogWarning("Buddy sprite was missing for: "+ _appChildrenInfo.profileName + " child");
@@ -87,7 +95,18 @@ public class BuddysRoom : ContentUIBehaviour
 
     private void OnExitButton()
     {
+        StateManager.Instance.OpenConfirmPopUp("Are you sure?", "Exit to parent screen?", GoToParentMenu);
+    }
+    
+    private void GoToParentMenu()
+    {
         StateManager.Instance.GoToParent();
+    }
+    
+    private void OnBuddyOverviewButton()
+    {
+        Instantiate(AdjustBuddyPanelPrefab, transform);
+        
     }
     
     private void OnShopButton()

@@ -97,4 +97,9 @@ public class AppChildrenInfo
 			}			
 		}
 	}
+	
+	public Sprite GetBuddySprite()
+	{
+		return Resources.Load<Sprite>(buddySpritePath);
+	}
 }

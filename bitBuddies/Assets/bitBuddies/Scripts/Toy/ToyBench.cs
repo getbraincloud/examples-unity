@@ -29,7 +29,8 @@ public class ToyBench : MonoBehaviour
 	private bool _isEnabled;
 	private MoveBuddyAnimation _moveBuddyAnimation;
 	private RectTransform _buddyTargetPosition;
-	private int _buddyTargetPositionOffsetY = 250;
+	private int _buddyTargetPositionOffsetY = 300;
+	
 	private void Awake()
 	{
 		_benchButton = GetComponent<Button>();
