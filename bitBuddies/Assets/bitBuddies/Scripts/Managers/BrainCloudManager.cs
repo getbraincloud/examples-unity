@@ -135,7 +135,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleSuccess("Getting Child Accounts Success", OnGetChildAccounts),
             HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
         );
-        string[] propertyNames = new [] {"MysteryBoxInfo", "RewardPickUpLifetime"}; 
+        string[] propertyNames = new [] {"MysteryBoxInfo", "RewardPickUpLifetime", "ChildAccountMaximum"}; 
         Wrapper.GlobalAppService.ReadSelectedProperties
         (
             propertyNames, 
@@ -203,6 +203,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         else
         {
             GameManager.Instance.RewardPickupDuration = 20;
+        }
+        
+        var childAccountMaxObj = data["ChildAccountMaximum"]as Dictionary<string, object>;
+        if(int.TryParse((string) childAccountMaxObj["value"], out int value3))
+        {
+            GameManager.Instance.ChildCountMaximum = value3;
         }
     }
     

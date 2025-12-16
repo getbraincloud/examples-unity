@@ -58,6 +58,13 @@ public class GameManager : SingletonBehaviour<GameManager>
 				_rewardPickupDuration = 10f;
 		}
 	}
+
+	private int _childCountMaximum;
+	public int ChildCountMaximum
+	{
+		get => _childCountMaximum;
+		set => _childCountMaximum = value;
+	}
 	
 	public override void Awake()
 	{

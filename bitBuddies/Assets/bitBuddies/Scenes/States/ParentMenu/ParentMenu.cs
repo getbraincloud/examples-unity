@@ -146,8 +146,10 @@ public class ParentMenu : ContentUIBehaviour
             buddyHouseInfo.SetUpHouse();
             _listOfBuddies.Add(buddyHouseInfo);
         }
-        
-        Instantiate(MoveInPrefab, BuddySpawnTransform);
+        if(_listOfBuddies.Count < GameManager.Instance.ChildCountMaximum)
+        {
+            Instantiate(MoveInPrefab, BuddySpawnTransform);
+        }
     }
     
     private void OpenSettingsButtonOnClick()
