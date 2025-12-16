@@ -30,8 +30,12 @@ public class RewardPickup : MonoBehaviour
     private bool _isBlinking = false;
     private float _startTime;
     private float _blinkStartTime;
+    private Vector3 _targetPosition;
     private CanvasGroup _canvasGroup;
     private Coroutine _timerCoroutine;
+    private RectTransform _rectTransform;
+    private RectTransform _rewardRectTransform;
+    public float moveDuration = 0.2f;
     
     private void Awake()
     {
@@ -40,12 +44,17 @@ public class RewardPickup : MonoBehaviour
         _canvasGroup = GetComponent<CanvasGroup>();
     }
 
+    private void Start()
+    {
+        StartCoroutine(PerformBehavior());
+    }
+
     private void OnDestroy()
     {
         StopAllCoroutines();
     }
 
-    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount, ToyBench in_toyBench)
+    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount, ToyBench in_toyBench, Vector3 in_targetPosition)
     {
         _totalDuration = GameManager.Instance.RewardPickupDuration;
         _timeBeforeBlinkDuration = _totalDuration * (1f - _blinkThresholdPercent);
@@ -54,7 +63,8 @@ public class RewardPickup : MonoBehaviour
         _pickUpImage.sprite = RewardSprites[(int)in_currencyType];
         _rewardAmount = in_rewardAmount;
         _toyBench = in_toyBench;
-        StartCoroutine(DelayToDestroy());
+        _targetPosition = in_targetPosition;
+        _rewardRectTransform = GetComponent<RectTransform>();
     }
     
     public void PickUpCollected()
@@ -65,10 +75,14 @@ public class RewardPickup : MonoBehaviour
         Destroy(gameObject);        
     }
     
-    private IEnumerator DelayToDestroy()
+    private IEnumerator PerformBehavior()
     {
+        //Go to target location to land
+        yield return StartCoroutine(MoveToLocation());
+        
+        //Wait to start blinking
         yield return new WaitForSeconds(_timeBeforeBlinkDuration);
-
+        
         _isBlinking = true;
         yield return StartCoroutine(BlinkSequence());
         
@@ -89,6 +103,26 @@ public class RewardPickup : MonoBehaviour
             yield return StartCoroutine(FadeOut(currentFadeDuration));
             yield return StartCoroutine(FadeIn(currentFadeDuration));
         }
+    }
+    
+    private IEnumerator MoveToLocation()
+    {
+        var startPosition = _rewardRectTransform.anchoredPosition;
+        var duration = moveDuration;
+        
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            _rewardRectTransform.anchoredPosition = Vector2.Lerp(startPosition, _targetPosition, t);
+            yield return null;
+        }
+
+        _rewardRectTransform.anchoredPosition = _targetPosition;
+
     }
     
     IEnumerator FadeOut(float duration)

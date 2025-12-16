@@ -165,7 +165,7 @@ public class ToyBench : MonoBehaviour
 				Random.Range(_rewardSpawnRangeX.x, _rewardSpawnRangeX.y), 
 				Random.Range(_rewardSpawnRangeY.x, _rewardSpawnRangeY.y));
 			var reward = Instantiate(RewardPickupPrefab, RewardSpawnPoint);
-			reward.transform.localPosition = spawnPos;
+			reward.transform.localPosition = transform.localPosition + new Vector3(0, 50, 0);
 
 			int rewardValue;
 			if(in_rewardSpawnNumber > 1)
@@ -176,7 +176,7 @@ public class ToyBench : MonoBehaviour
 			{
 				rewardValue = in_rewardValue;
 			}
-			reward.SetUpPickup(in_currencyType, rewardValue, this);
+			reward.SetUpPickup(in_currencyType, rewardValue, this, spawnPos);
 		}
 		_rewardSpawnNumber += in_rewardSpawnNumber;
 	}
