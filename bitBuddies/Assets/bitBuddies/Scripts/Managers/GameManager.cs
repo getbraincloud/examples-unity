@@ -45,6 +45,19 @@ public class GameManager : SingletonBehaviour<GameManager>
 		get => _xpAcquiredAmount;
 		set => _xpAcquiredAmount = value;
 	}
+
+	private float _rewardPickupDuration;
+	public float RewardPickupDuration
+	{
+		get => _rewardPickupDuration;
+		set
+		{
+			if(value > 0)
+				_rewardPickupDuration = value;
+			else
+				_rewardPickupDuration = 10f;
+		}
+	}
 	
 	public override void Awake()
 	{

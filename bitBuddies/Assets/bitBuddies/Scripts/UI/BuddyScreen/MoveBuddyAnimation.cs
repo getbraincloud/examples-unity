@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 public class MoveBuddyAnimation : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveDuration = 0.4f;
+    public float moveDuration = 0.3f;
 
     [Header("Shake Settings")]
     public float shakeDuration = 0.2f;
@@ -79,8 +79,14 @@ public class MoveBuddyAnimation : MonoBehaviour
         isRunning = true;
         
         startPosition = _buddySpriteTransform.anchoredPosition;
-        
-        yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
+        var distance = Vector2.Distance(startPosition, _targetPosition);
+        var duration = moveDuration;
+        Debug.Log($"Distance: {distance}");
+        if(distance >= 500)
+        {
+            duration = 1;
+        }
+        yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, duration));
 
         if (OnFinishAnimation != null)
         {

@@ -135,7 +135,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleSuccess("Getting Child Accounts Success", OnGetChildAccounts),
             HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
         );
-        string[] propertyNames = new [] {"MysteryBoxInfo"}; 
+        string[] propertyNames = new [] {"MysteryBoxInfo", "RewardPickUpLifetime"}; 
         Wrapper.GlobalAppService.ReadSelectedProperties
         (
             propertyNames, 
@@ -165,11 +165,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     private void OnGetGlobalProperties(string jsonResponse)
     {
-        /*
-         * {"data":{"MysteryBoxInfo":{"name":"MysteryBoxInfo","value":"
-         * {\"CommonBox\":{\"unlockType\": \"coins\",\"unlockAmount\": 5000,\"rarity\": \"Common\",
-         * \"boxName\": \"Common Box\"},\"UncommonBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 10000,\"rarity\": \"Uncommon\",\"boxName\": \"Uncommon Box\"},\"RareBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 15000,\"rarity\": \"Rare\",\"boxName\": \"Rare Box\"},\"LegendaryBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 20000,\"rarity\": \"Legendary\",\"boxName\": \"Legendary Box\"}}"}},"status":200}]}
-         */
+
         var response = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
         var data = (Dictionary<string, object>)response["data"];
         
@@ -194,7 +190,20 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             listOfBoxInfo.Add(boxInfo);
         }
         GameManager.Instance.MysteryBoxes = listOfBoxInfo;
-        
+
+        var rewardPickUpLifetimeObj = data["RewardPickUpLifetime"]as Dictionary<string, object>;
+        if(float.TryParse((string) rewardPickUpLifetimeObj["value"], out float value))
+        {
+            GameManager.Instance.RewardPickupDuration = value;
+        }
+        else if(double.TryParse((string) rewardPickUpLifetimeObj["value"], out double value2))
+        {
+            GameManager.Instance.RewardPickupDuration = (float)value2;
+        }
+        else
+        {
+            GameManager.Instance.RewardPickupDuration = 20;
+        }
     }
     
     private void OnGetItemCatalog(string jsonResponse)

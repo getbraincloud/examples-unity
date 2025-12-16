@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7885828508658059611}
   - component: {fileID: 8938996583590066336}
   - component: {fileID: 5174162379674696757}
+  - component: {fileID: 4194373100658173124}
   m_Layer: 5
   m_Name: RewardPickup
   m_TagString: Untagged
@@ -56,6 +57,7 @@ MonoBehaviour:
   - {fileID: 90223923711178096, guid: bde20741a2f59df468e1a36983513387, type: 3}
   - {fileID: 4543326179846441247, guid: d6d0372171de9224284b021e32cbedc2, type: 3}
   - {fileID: -6338679690272225348, guid: 2ca6cc04f13f14c27b4caa4660b983e4, type: 3}
+  fadeDuration: 0.1
 --- !u!114 &825192059790379360
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,3 +176,15 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!225 &4194373100658173124
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8060707474872825359}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
