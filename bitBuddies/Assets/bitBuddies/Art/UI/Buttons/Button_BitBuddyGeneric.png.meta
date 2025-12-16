@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 32e1f6423dea2024a9bb879bf65d9a21
+guid: 638cccad93c3a46d8a469ed9d2713c41
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4733935589284223870
-    second: ChildBackground_CraftBench1_0
+      213: -3298916195374223721
+    second: Button_BitBuddyGeneric_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 256
+    maxTextureSize: 128
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 2
@@ -84,33 +84,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Switch
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: Standalone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -139,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ChildBackground_CraftBench1_0
+      name: Button_BitBuddyGeneric_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 250
-        height: 173
+        width: 110
+        height: 125
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e7b9dd4465152b140800000000000000
-      internalID: 4733935589284223870
+      spriteID: 79eafeed235e732d0800000000000000
+      internalID: -3298916195374223721
       vertices: []
       indices: 
       edges: []
@@ -174,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ChildBackground_CraftBench1_0: 4733935589284223870
+      Button_BitBuddyGeneric_0: -3298916195374223721
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
