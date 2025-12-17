@@ -18,11 +18,13 @@ public class ToyBench : MonoBehaviour
 	[SerializeField] private GameObject ReadyIcon;
 	[SerializeField] private GameObject SpinnerIcon;
 	[SerializeField] private Button AddToyButton;
+	[SerializeField] private Sprite AvailableBenchSprite;
+	[SerializeField] private Sprite UnavailableBenchSprite;
  
 	private int _rewardSpawnNumber;	//used to determine how many rewards are spawned in level	
 
 	private ToyBenchInfo _toyBenchInfo;
-	
+	private Image _toyBenchImage;
 	private Vector2 _rewardSpawnRangeX = new Vector2(-440, 440);
 	private Vector2 _rewardSpawnRangeY = new Vector2(-125, 125);
 	private Button _benchButton;
@@ -39,12 +41,14 @@ public class ToyBench : MonoBehaviour
 		SpinnerIcon.gameObject.SetActive(false);
 		_moveBuddyAnimation = FindFirstObjectByType<MoveBuddyAnimation>();
 		_buddyTargetPosition = gameObject.GetComponent<RectTransform>();
-
 	}
 	
 	public void SetUpToyBench(ToyBenchInfo in_toyBenchInfo)
 	{
 		_toyBenchInfo = in_toyBenchInfo;
+		_toyBenchImage = GetComponent<Image>();
+		if(!_benchButton)
+			_benchButton = GetComponent<Button>();
 	}
 
 	private void OnDisable()
@@ -55,20 +59,18 @@ public class ToyBench : MonoBehaviour
 	public void EnableBench()
 	{
 		ReadyIcon.gameObject.SetActive(true);
-		if(!_benchButton)
-			_benchButton = GetComponent<Button>();
 		_benchButton.interactable = true;
 		AddToyButton.gameObject.SetActive(false);
+		_toyBenchImage.sprite = AvailableBenchSprite;
 	}
 	
 	public void DisableBench()
 	{
 		SpinnerIcon.gameObject.SetActive(false);
 		ReadyIcon.gameObject.SetActive(false);
-		if(!_benchButton)
-			_benchButton = GetComponent<Button>();
 		_benchButton.interactable = false;
 		AddToyButton.gameObject.SetActive(true);
+		_toyBenchImage.sprite = UnavailableBenchSprite;
 	}
 	
 	private void OnAddButton()

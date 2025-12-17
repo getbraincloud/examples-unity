@@ -13,6 +13,7 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private Button OpenSettingsButton;
     [SerializeField] private TextMeshProUGUI UsernameText;
     [SerializeField] private TextMeshProUGUI LevelText;
+    [SerializeField] private TextMeshProUGUI LevelFillText;
     [SerializeField] private TextMeshProUGUI CoinsText;
     [SerializeField] private TextMeshProUGUI GemsText;
     [SerializeField] private Transform BuddySpawnTransform;
@@ -91,7 +92,8 @@ public class ParentMenu : ContentUIBehaviour
                 UsernameText.text = userInfo.Username;
             }
         }
-        LevelText.text = $"Lv. {userInfo.Level}";
+        LevelText.text = $"{userInfo.Level}";
+        LevelFillText.text = $"{userInfo.CurrentXP}/{userInfo.NextLevelUp}";
         LevelSlider.minValue = userInfo.PreviousLevelUp;
         LevelSlider.maxValue = userInfo.NextLevelUp;
         LevelSlider.value = userInfo.CurrentXP;

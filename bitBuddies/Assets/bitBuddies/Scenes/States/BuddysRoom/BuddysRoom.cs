@@ -13,6 +13,7 @@ public class BuddysRoom : ContentUIBehaviour
 {
     [SerializeField] private TMP_Text ProfileNameText;
     [SerializeField] private TMP_Text LoveLevelText;
+    [SerializeField] private TMP_Text LoveFillText;
     [SerializeField] private TMP_Text BuddyBlingText;
     [SerializeField] private TMP_Text ParentCoinText;
     [SerializeField] private Image BuddySprite;
@@ -70,7 +71,8 @@ public class BuddysRoom : ContentUIBehaviour
         ParentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
         BuddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
 
-        LoveLevelText.text = $"Lv. {_appChildrenInfo.buddyLevel}";
+        LoveLevelText.text = $"{_appChildrenInfo.buddyLevel}";
+        LoveFillText.text = $"{_appChildrenInfo.currentXP}/{_appChildrenInfo.nextLevelUp}";
         if(_appChildrenInfo.nextLevelUp == 0)
         {
             LoveSlider.maxValue = 1;
