@@ -9,6 +9,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Random = System.Random;
 
 /// <summary>
 /// Class does 2 things
@@ -40,6 +41,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	private List<MysteryBoxInfo> _mysteryBoxes;
 	private int _screenIndex;
 	private ParentMenu _parentMenu;
+	private string _buddyName;
 	
 	//Screen Titles
 	private const string LIST_BOXES_TEXT_TITLE = "Pick a mystery box";
@@ -202,14 +204,14 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     {
 		if(NameBuddyInput.text.IsNullOrEmpty())
 		{
-			StateManager.Instance.OpenConfirmPopUp("Name is empty", "Are you sure you want to give your buddy a default name? (default name: MyBuddy)", OnConfirmEmptyName);
+			_buddyName = BitBuddiesConsts.DEFAULT_BUDDY_NAME + UnityEngine.Random.Range(1, 1000);
+			StateManager.Instance.OpenConfirmPopUp("Name is empty", $"Are you sure you want to give your buddy a generated name? ({_buddyName})", OnConfirmEmptyName);
 			return;
 		}
 		
 		DoneButton.onClick.RemoveAllListeners();
 		DoneButton.interactable = false;
-	    string nameValue = NameBuddyInput.text.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_BUDDY_NAME: NameBuddyInput.text;
-	    BrainCloudManager.Instance.UpdateChildProfileName(nameValue, _parentMenu.NewAppChildrenInfo.profileId);
+	    BrainCloudManager.Instance.UpdateChildProfileName(NameBuddyInput.text, _parentMenu.NewAppChildrenInfo.profileId);
     }
     
     private void OnConfirmEmptyName()
@@ -217,6 +219,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		Destroy(gameObject);
 	    DoneButton.onClick.RemoveAllListeners();
 	    DoneButton.interactable = false;
+	    BrainCloudManager.Instance.UpdateChildProfileName(_buddyName, _parentMenu.NewAppChildrenInfo.profileId);
 	    StateManager.Instance.RefreshScreen();
     }
     

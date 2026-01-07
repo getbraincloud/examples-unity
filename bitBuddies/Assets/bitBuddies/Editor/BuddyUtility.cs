@@ -38,8 +38,8 @@ public class BuddyUtility : EditorWindow
                     {
                         Dictionary<string, object> scriptData = new Dictionary<string, object>();
                         scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
-                        scriptData.Add("incrementAmount", 99);
-                        scriptData.Add("profileId", "47327804-e23f-4416-bbd9-082e559054b8");
+                        scriptData.Add("incrementAmount", 40);
+                        scriptData.Add("profileId", GameManager.Instance.SelectedAppChildrenInfo.profileId);
                         BrainCloudManager.Wrapper.ScriptService.RunScript
                         (
                             BitBuddiesConsts.INCREASE_XP_FOR_CHILD_SCRIPT_NAME,

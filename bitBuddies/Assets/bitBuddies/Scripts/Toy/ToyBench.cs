@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using BrainCloud.JSONHelper;
@@ -16,13 +17,14 @@ public class ToyBench : MonoBehaviour
 	[SerializeField] private Transform RewardSpawnPoint;
 	[SerializeField] private RewardPickup RewardPickupPrefab;
 	[SerializeField] private GameObject ReadyIcon;
-	[SerializeField] private GameObject SpinnerIcon;
 	[SerializeField] private Button AddToyButton;
 	[SerializeField] private Sprite AvailableBenchSprite;
 	[SerializeField] private Sprite UnavailableBenchSprite;
+	[SerializeField] private Sprite CooldownSprite;
+	[SerializeField] private Sprite ReadySprite;
  
 	private int _rewardSpawnNumber;	//used to determine how many rewards are spawned in level	
-
+	private Image _readyStatusImage;
 	private ToyBenchInfo _toyBenchInfo;
 	private Image _toyBenchImage;
 	private Vector2 _rewardSpawnRangeX = new Vector2(-440, 440);
@@ -32,33 +34,37 @@ public class ToyBench : MonoBehaviour
 	private MoveBuddyAnimation _moveBuddyAnimation;
 	private RectTransform _buddyTargetPosition;
 	private int _buddyTargetPositionOffsetY = 300;
+	private float _currentCooldown;
 	
 	private void Awake()
 	{
 		_benchButton = GetComponent<Button>();
 		_benchButton.onClick.AddListener(MoveBuddyToBench);
 		AddToyButton.onClick.AddListener(OnAddButton);
-		SpinnerIcon.gameObject.SetActive(false);
 		_moveBuddyAnimation = FindFirstObjectByType<MoveBuddyAnimation>();
 		_buddyTargetPosition = gameObject.GetComponent<RectTransform>();
-	}
-	
-	public void SetUpToyBench(ToyBenchInfo in_toyBenchInfo)
-	{
-		_toyBenchInfo = in_toyBenchInfo;
-		_toyBenchImage = GetComponent<Image>();
-		if(!_benchButton)
-			_benchButton = GetComponent<Button>();
 	}
 
 	private void OnDisable()
 	{
 		StopAllCoroutines();
 	}
+
+	public void SetUpToyBench(ToyBenchInfo in_toyBenchInfo)
+	{
+		_toyBenchInfo = in_toyBenchInfo;
+		_toyBenchImage = GetComponent<Image>();
+		_readyStatusImage = ReadyIcon.GetComponent<Image>();
+		_readyStatusImage.fillMethod = Image.FillMethod.Vertical;
+		_readyStatusImage.type = Image.Type.Filled;
+		if(!_benchButton)
+			_benchButton = GetComponent<Button>();
+	}
 	
 	public void EnableBench()
 	{
 		ReadyIcon.gameObject.SetActive(true);
+		_readyStatusImage.sprite = ReadySprite;
 		_benchButton.interactable = true;
 		AddToyButton.gameObject.SetActive(false);
 		_toyBenchImage.sprite = AvailableBenchSprite;
@@ -66,7 +72,6 @@ public class ToyBench : MonoBehaviour
 	
 	public void DisableBench()
 	{
-		SpinnerIcon.gameObject.SetActive(false);
 		ReadyIcon.gameObject.SetActive(false);
 		_benchButton.interactable = false;
 		AddToyButton.gameObject.SetActive(true);
@@ -150,8 +155,11 @@ public class ToyBench : MonoBehaviour
 		
 		SpawnReward(CurrencyTypes.BuddyBling, _toyBenchInfo.BuddyBlingRewardAmount, _toyBenchInfo.BuddyBlingSpawnAmount);
 		ToyManager.Instance.IncrementRewardSpawnCount(_rewardSpawnNumber);
-
-		StartCoroutine(CooldownOnBench());
+		
+		if(_toyBenchInfo.Cooldown > 0)
+		{
+			StartCoroutine(CooldownBench());
+		}
 	}
 	
 	private void OnConsumeToyFailure()
@@ -183,14 +191,20 @@ public class ToyBench : MonoBehaviour
 		_rewardSpawnNumber += in_rewardSpawnNumber;
 	}
 	
-	IEnumerator CooldownOnBench()
+	private IEnumerator CooldownBench()
 	{
 		_benchButton.interactable = false;
-		ReadyIcon.gameObject.SetActive(false);
-		SpinnerIcon.gameObject.SetActive(true);
-		yield return new WaitForSeconds(_toyBenchInfo.Cooldown);
+		_readyStatusImage.sprite = CooldownSprite;
+		_readyStatusImage.fillAmount = 0f;
+		float elapsed = 0f;
+		while(elapsed < _toyBenchInfo.Cooldown)
+		{
+			elapsed += Time.deltaTime;
+			float fillAmount = elapsed / _toyBenchInfo.Cooldown;
+			_readyStatusImage.fillAmount = Mathf.Clamp01(fillAmount);
+			yield return null;
+		}
+		_readyStatusImage.sprite = ReadySprite;
 		_benchButton.interactable = true;
-		ReadyIcon.gameObject.SetActive(true);
-		SpinnerIcon.gameObject.SetActive(false);
 	}
 }

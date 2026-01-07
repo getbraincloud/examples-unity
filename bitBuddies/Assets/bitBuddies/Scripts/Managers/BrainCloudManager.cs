@@ -725,7 +725,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var newName = userAdjusted["newName"] as string;
         var profileId = userAdjusted["profileId"] as string;
         _isProcessing = false;
-        Destroy(FindAnyObjectByType<MysteryBoxPanelUI>().gameObject);
+        //Destroy(FindAnyObjectByType<MysteryBoxPanelUI>().gameObject);
         var listOfChildren = GameManager.Instance.AppChildrenInfos;
         foreach (var child in listOfChildren)
         {

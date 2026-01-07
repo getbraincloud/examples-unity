@@ -81,7 +81,7 @@ public class MoveBuddyAnimation : MonoBehaviour
         startPosition = _buddySpriteTransform.anchoredPosition;
         var distance = Vector2.Distance(startPosition, _targetPosition);
         var duration = moveDuration;
-        Debug.Log($"Distance: {distance}");
+        
         if(distance >= 500)
         {
             duration = 1;

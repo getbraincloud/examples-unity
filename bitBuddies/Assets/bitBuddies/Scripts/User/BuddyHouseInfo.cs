@@ -83,7 +83,7 @@ public class BuddyHouseInfo : MonoBehaviour
 		{
 			string titleMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + HouseInfo.profileName + "'s home?";
 			string bodyMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE + HouseInfo.profileName + "'s home?";
-			popUp.SetUpInfoPopup(titleMessage, bodyMessage);
+			popUp.SetupConfirmPopup(titleMessage, bodyMessage, DeleteBuddyRoom);
 		}
 	}
 	
