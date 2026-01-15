@@ -37,7 +37,7 @@ public class KartController : KartComponent
 	public bool HasFinishedRace => Kart.LapController.EndRaceTick != 0;
 	public bool HasStartedRace => Kart.LapController.StartRaceTick != 0;
 	public float BoostTime => BoostEndTick == -1 ? 0f : (BoostEndTick - Runner.Tick) * Runner.DeltaTime;
-	private float RealSpeed => transform.InverseTransformDirection(Rigidbody.velocity).z;
+	private float RealSpeed => transform.InverseTransformDirection(Rigidbody.linearVelocity).z;
 	public bool IsDrifting => IsDriftingLeft || IsDriftingRight;
 	public bool IsBoosting => BoostTierIndex != 0;
 	public bool IsOffroad => IsGrounded && GroundResistance >= 0.2f;
@@ -321,8 +321,8 @@ public class KartController : KartComponent
 
 		// transform.forward is not reliable when using NetworkedRigidbody - instead use: NetworkRigidbody.Rigidbody.rotation * Vector3.forward
 		var vel = (Rigidbody.rotation * Vector3.forward) * AppliedSpeed;
-		vel.y = Rigidbody.velocity.y;
-		Rigidbody.velocity = vel;
+		vel.y = Rigidbody.linearVelocity.y;
+		Rigidbody.linearVelocity = vel;
 	}
 
 
@@ -525,7 +525,7 @@ public class KartController : KartComponent
 
 	public void RefreshAppliedSpeed()
 	{
-		AppliedSpeed = transform.InverseTransformDirection(Rigidbody.velocity).z;
+		AppliedSpeed = transform.InverseTransformDirection(Rigidbody.linearVelocity).z;
 	}
 
 	// Utility functions
@@ -567,7 +567,7 @@ public class KartController : KartComponent
 
 	public void ResetControllerState()
 	{
-		Rigidbody.velocity = Vector3.zero;
+		Rigidbody.linearVelocity = Vector3.zero;
 		AppliedSpeed = 0;
 		BoostEndTick = -1;
 		BoostTierIndex = 0;
