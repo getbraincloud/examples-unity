@@ -300,6 +300,9 @@ public class GameUI : MonoBehaviour
 	public void ShowEndRaceScreen()
 	{
 		endRaceScreen.gameObject.SetActive(true);
+
+		string leaderboardId = BCManager.LobbyManager.GetLeaderboardId();
+		BCManager.LobbyManager.PostLeaderboardData(leaderboardId, Kart.LapController.GetTotalRaceTime());
 	}
 
 	// UI Hook

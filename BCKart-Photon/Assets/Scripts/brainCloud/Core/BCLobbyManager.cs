@@ -129,6 +129,61 @@ public class BCLobbyManager
         _launcher.LeavePhotonGameSession();
     }
 
+    // takes the current settings and merges them together in the pattern we want
+    public string GetLeaderboardId()
+    {  
+        var track = ResourceManager.Instance.tracks[TrackId];
+        var gameType = ResourceManager.Instance.gameTypes[GameTypeId];
+        string leaderboardId = $"{TrackId}_{GameTypeId}_Leaderboard";
+        return leaderboardId;
+    }
+
+    public void PostLeaderboardData(string leaderboardId, float time)
+    {
+        // Implement fetching leaderboard data from BCManager and updating the UI accordingly
+        var requestData = new PostScoreRequest
+        {
+            leaderboardId = leaderboardId,
+            time = time,
+            kartId = BCManager.LobbyManager.Local.kartId
+        };
+        string jsonPayload = JsonUtility.ToJson(requestData);
+
+        Debug.Log("[PostLeaderboardData] Sending score to leaderboard... " + jsonPayload);
+        BCManager.ScriptService.RunScript(
+            "PostScoreToLeaderboard.ccjs",
+            jsonPayload);
+    }
+
+    public void FetchLeaderboardData(string leaderboardId, int startIndex = 0, int endIndex = 10,
+            SuccessCallback onSuccess = null, FailureCallback onFailure = null)
+    {
+        // Implement fetching leaderboard data from BCManager and updating the UI accordingly
+        var requestData = new FetchScoreRequest
+        {
+            leaderboardId = leaderboardId,
+            start = startIndex,
+            end = endIndex
+        };
+        string jsonPayload = JsonUtility.ToJson(requestData);
+
+        Debug.Log("[PostLeaderboardData] Fetching Leaderboard data... " + jsonPayload);
+        BCManager.ScriptService.RunScript(
+            "FetchLeaderboard.ccjs",
+            jsonPayload, OnFetchLeaderboardSuccess + onSuccess, OnFetchLeaderboardError + onFailure);
+    }
+
+    private void OnFetchLeaderboardSuccess(string jsonResponse, object cbObject)
+    {
+        Debug.Log("BCLobbyManager OnFetchLeaderboardSuccess: " + jsonResponse);
+        // Handle the successful response here
+    }
+    private void OnFetchLeaderboardError(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        Debug.LogError($"BCLobbyManager OnFetchLeaderboardError: {status}, {reasonCode}, {jsonError}");
+        // Handle the error response here
+    }
+
     private void OnLeaveLobbySuccess(string jsonResponse, object cbObject)
     {
         Debug.Log("BCLobbyManager OnLeaveLobbySuccess: " + jsonResponse);
@@ -767,6 +822,8 @@ public class LobbyParams
     public Dictionary<string, object> settings;
 }
 
+
+
 [Serializable]
 public class LobbyMember
 {
@@ -859,4 +916,65 @@ public enum LobbyState
 public class KeepAliveRequest
 {
     public string lobbyId;
+}
+
+[System.Serializable]
+public class FetchScoreRequest
+{
+
+    public string leaderboardId;
+    public int start;
+    public int end;
+}
+
+
+[System.Serializable]
+public class PostScoreRequest
+{
+    public string leaderboardId;
+
+    public float time;
+    public int kartId;
+}
+
+[System.Serializable]
+public class LeaderboardRoot
+{
+    public LeaderboardData data;
+    public int status;
+}
+
+[System.Serializable]
+public class LeaderboardData
+{
+    public LeaderboardResponse response;
+}
+
+[System.Serializable]
+public class LeaderboardResponse
+{
+    public LeaderboardEntry[] leaderboardData;
+    public bool moreAfter;
+    public bool moreBefore;
+}
+
+[System.Serializable]
+public class LeaderboardEntry
+{
+    public string playerId;
+    public float score;
+    public EntryData data;
+    public long createdAt;
+    public long updatedAt;
+    public int index;
+    public int rank;
+    public string name;
+    public string summaryFriendData;
+    public string pictureUrl;
+}
+
+[System.Serializable]
+public class EntryData
+{
+    public int kartId;
 }
