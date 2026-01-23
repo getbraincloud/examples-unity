@@ -1,6 +1,7 @@
 
 namespace Gameframework
 {
+    public enum QUEST_STATUS {LOCKED, UNLOCKED, IN_PROGRESS, SATISFIED}
     public class BitBuddiesConsts
     {
         public const string JSON_DATA = "data";
@@ -18,6 +19,7 @@ namespace Gameframework
         public const string AWARD_GEMS_SCRIPT_NAME = "AwardGemsToUser";
         public const string AWARD_BLING_TO_CHILD_SCRIPT_NAME = "AwardBlingToChild";
         public const string INCREASE_XP_FOR_PARENT_SCRIPT_NAME = "IncreaseXPForParent";
+        public const string GET_QUEST_INFO_SCRIPT_NAME = "GetQuestInfo";
         
         public const string GET_STATS_SCRIPT_NAME = "child/fetchStats";
         public const string GET_CURRENCIES_SCRIPT_NAME = "child/fetchCurrencies";

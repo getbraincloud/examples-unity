@@ -142,6 +142,13 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleSuccess("Get Global Properties Success", OnGetGlobalProperties),
             HandleFailure("Get Mystery Box Info Failed", OnFailureCallback)
         );
+        Wrapper.ScriptService.RunScript
+        (
+            BitBuddiesConsts.GET_QUEST_INFO_SCRIPT_NAME,
+            "{}",
+            HandleSuccess("Getting Quest Info Success", OnGetQuestInfo),
+            HandleFailure("Getting Quest Info Failed", OnFailureCallback)
+        );
     }
     
     private void OnGetNextLevelUp(string jsonResponse)
@@ -210,6 +217,39 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         {
             GameManager.Instance.ChildCountMaximum = value3;
         }
+    }
+    
+    private void OnGetQuestInfo(string jsonResponse)
+    {
+        var data = jsonResponse.Deserialize("data");
+        if(data == null) return;
+
+        var response = data["response"] as Dictionary<string, object>;
+        var quests = response["quests"] as Dictionary<string, object>[];
+        var listOfActiveQuests =  new List<QuestInfo>();
+        var listOfLockedQuests =  new List<QuestInfo>();
+        for (int i = 0; i < quests.Length; ++i)
+        {
+            QuestInfo questInfo = new QuestInfo();
+            questInfo.QuestTitle = quests[i]["title"] as string;
+            questInfo.QuestStatToTrack = quests[i]["statToTrack"] as string;
+            questInfo.QuestId = quests[i]["questId"] as string;
+            questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
+            
+            //ToDo: Need to read in reward stuff
+            
+            if(questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || 
+                questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)
+            {
+                listOfActiveQuests.Add(questInfo);                
+            }
+            else if(questInfo.QuestStatus == QUEST_STATUS.LOCKED)
+            {
+                listOfLockedQuests.Add(questInfo);                
+            }
+        }
+        
+        GameManager.Instance.SetQuestsLists(listOfActiveQuests, listOfLockedQuests);
     }
     
     private void OnGetItemCatalog(string jsonResponse)

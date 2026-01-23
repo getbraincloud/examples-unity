@@ -9,7 +9,8 @@ public enum CurrencyTypes
 	Coins,
 	Love,
 	BuddyBling,
-	Level
+	Level,
+	Gems
 }
 
 public enum Rarity

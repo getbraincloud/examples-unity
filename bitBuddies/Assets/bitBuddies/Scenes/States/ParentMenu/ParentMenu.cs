@@ -25,6 +25,8 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private TextMeshProUGUI BcClientVersionText;
     [SerializeField] private Slider LevelSlider;
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
+    [SerializeField] private QuestPanel QuestPanelPrefab;
+    [SerializeField] private Button OpenQuestPanelButton;
 
     private float textGoldSpawnOffset = 40f;
     private float textLevelSpawnOffset = -40f;
@@ -50,6 +52,7 @@ public class ParentMenu : ContentUIBehaviour
     {
         InitializeUI();
         OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
+        OpenQuestPanelButton.onClick.AddListener(OpenQuestPanel);
         BuddyHouseInfo.OnCoinsCollected += UpdateValueText;
         BuddyHouseInfo.OnCoinsCollected += SpawnCurrencyAddedAnimation;
         StartCoroutine(LoopCheckCoins());
@@ -130,6 +133,7 @@ public class ParentMenu : ContentUIBehaviour
         IncreaseGemsButton.onClick.RemoveAllListeners();
         IncreaseLevelButton.onClick.RemoveAllListeners();
         OpenSettingsButton.onClick.RemoveAllListeners();
+        OpenQuestPanelButton.onClick.RemoveAllListeners();
     }
 
     public void SetupHouses()
@@ -161,14 +165,15 @@ public class ParentMenu : ContentUIBehaviour
         Instantiate(SettingsPanelUIPrefab, transform);
     }
     
+    private void OpenQuestPanel()
+    {
+        var questPanel = Instantiate(QuestPanelPrefab, transform);
+        questPanel.SetUpPanel();
+    }
+    
     public void OpenMysteryBoxPanel()
     {
         Instantiate(MysteryBoxPanelPrefab, transform);
-    }
-    
-    public void OpenConfirmDemolishPanel()
-    {
-        
     }
     
     public void SpawnCurrencyAddedAnimation(int amount, int typeIndex)
@@ -231,6 +236,7 @@ public class ParentMenu : ContentUIBehaviour
         }
     }
     
+    //ToDo: Remove Debug Buttons before release
     private void OnIncreaseCoins()
     {
         if (isWaitingForResponse) return;

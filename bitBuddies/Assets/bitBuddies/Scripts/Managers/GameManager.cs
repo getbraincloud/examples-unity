@@ -66,6 +66,15 @@ public class GameManager : SingletonBehaviour<GameManager>
 		set => _childCountMaximum = value;
 	}
 	
+	public List<QuestInfo> ActiveQuests { get; set; }
+	public List<QuestInfo> LockedQuests { get; set; }
+	
+	public void SetQuestsLists(List<QuestInfo> activeQuests, List<QuestInfo> lockedQuests)
+	{
+		ActiveQuests = activeQuests;
+		LockedQuests = lockedQuests;
+	}
+	
 	public override void Awake()
 	{
 		_selectedAppChildrenInfo = new AppChildrenInfo();
