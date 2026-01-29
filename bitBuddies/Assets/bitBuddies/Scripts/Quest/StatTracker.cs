@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class StatTracker : MonoBehaviour
+{
+    public static StatTracker Instance;
+
+    private Dictionary<string, int> _stats = new Dictionary<string, int>();
+
+    public static event Action<string, int> OnStatChanged;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+        Instance = this;
+        _stats.Clear();
+        
+    }
+
+    public void IncrementStat(string statName, int amount = 1)
+    {
+        if(!_stats.ContainsKey(statName))
+        {
+            _stats.Add(statName, amount);
+        }
+        _stats[statName] += amount;
+        OnStatChanged?.Invoke(statName, _stats[statName]);
+    }
+    
+    public int GetStat(string statName)
+    {
+        return _stats.ContainsKey(statName) ? _stats[statName] : 0;
+    }
+    
+    public void ResetStat(string statName)
+    {
+        _stats[statName] = 0;
+        OnStatChanged?.Invoke(statName, _stats[statName]);
+    }
+}

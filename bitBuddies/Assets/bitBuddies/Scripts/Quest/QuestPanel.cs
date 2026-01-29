@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Gameframework;
 using UnityEngine;
 
 
@@ -15,20 +17,39 @@ public class QuestPanel : MonoBehaviour
 	private QuestCard _lockedBitBuddyCard;
 	private QuestCard _lockedBitBlingCard;
 	private QuestCard _lockedGeneralCard;
-
-	private const string BITBUDDIES_QUESTID = "bitBuddyQuestLine";
 	
 	public void SetUpPanel()
 	{
-		var listOfActiveQuests = GameManager.Instance.ActiveQuests;
-		var listOfLockedQuests = GameManager.Instance.LockedQuests;
+		GameManager gameManager = GameManager.Instance;
 		
-		for (int i = 0; i < listOfActiveQuests.Count; i++)
+		SetUpQuestCard(gameManager.GeneralQuestsActive, gameManager.GeneralQuestsLocked, GeneralSpawnPoint);		
+		SetUpQuestCard(gameManager.BitBuddiesQuestsActive, gameManager.BitBuddiesQuestsLocked, BitBuddiesSpawnPoint);
+		SetUpQuestCard(gameManager.BitBlingQuestsActive, gameManager.BitBlingQuestsLocked, BitBlingSpawnPoint);
+	}
+	
+	private void SetUpQuestCard(List<QuestInfo> listOfActiveQuests, List<QuestInfo> listOfLockedQuests, Transform spawnParent)
+	{
+		//ToDo: Not sure why but a quest from bitBling line is coming back null, not sure if its lock or active
+		QuestInfo nextQuestInLine = GetNextQuestInLine(listOfLockedQuests, listOfActiveQuests[0]);
+		QuestInfo activeQuest = listOfActiveQuests[0];
+		
+		QuestCard activeQuestCard = Instantiate(QuestCardPrefab, spawnParent);
+		activeQuestCard.SetupCard(activeQuest);
+		
+		QuestCard lockedQuestCard = Instantiate(QuestCardPrefab, spawnParent);
+		lockedQuestCard.SetupCard(nextQuestInLine);
+	}
+	
+	private QuestInfo GetNextQuestInLine(List<QuestInfo> listOfLockedQuests, QuestInfo currentActiveQuest)
+	{
+		for (int i = 0; i < listOfLockedQuests.Count; i++)
 		{
-			if(listOfActiveQuests[i].QuestId == BITBUDDIES_QUESTID)
+			if(listOfLockedQuests[i].QuestLineIndex == currentActiveQuest.QuestLineIndex + 1)
 			{
-				
+				return listOfLockedQuests[i];
 			}
 		}
+
+		return new QuestInfo();
 	}
 }

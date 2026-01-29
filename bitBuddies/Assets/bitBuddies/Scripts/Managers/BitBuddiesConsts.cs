@@ -40,17 +40,34 @@ namespace Gameframework
         public const string GET_CHILD_ITEM_CATALOG_SCRIPT_NAME = "child/getChildItemCatalog";
         public const string CONSUME_TOY_SCRIPT_NAME = "child/consumeToy";
 
+        //Quest Line names
+        public const string BITBUDDIES_QUESTLINEID = "bitBuddyQuestLine";
+        public const string GENERAL_QUESTLINEID = "generalQuestLine";
+        public const string BITBLING_QUESTLINEID = "bitBlingQuestLine";
 
         //Stat Names
         public const string PLAYER_STAT_LEVEL_NAME = "Level";
+        public const string TRASHED_BUDDIES_STAT_NAME = "trashBuddies";
+        public const string BUDDIES_OWNED_STAT_NAME = "bitBuddiesOwned";
+        public const string BUDDIES_LEVELED_UP_STAT_NAME = "buddiesLeveledUp";
+        public const string BOUGHT_LEVELUP_PROMOS_STAT_NAME = "boughtLevelUpPromo";
+        public const string BOUGHT_COINS_WITH_GEMS_STAT_NAME = "boughtCoinsWithGems";
+        public const string BOUGHT_GEMS_WITH_COINS_STAT_NAME = "boughtGemsWithCash";
+        public const string USER_NAME_CHANGED_STAT_NAME = "userChangedName";
+        public const string LEVEL5_BUDDIES_STAT_NAME = "level5Buddies";
+        public const string VISIT_BUDDIES_STAT_NAME = "visitBitBuddy";
+        public const string TOYS_BOUGHT_STAT_NAME = "toysBought";
+        public const string SCIENCE_KITS_BOUGHT_STAT_NAME = "scienceKitBought";
 
         public const string APP_CHILD_ID = "50974";
 
         //Player Prefs Keys
         public const string VOLUME_SLIDER_KEY = "volume"; 
         
-        //Default sprite path for buddies
+        //Sprite Paths
         public const string DEFAULT_SPRITE_PATH_FOR_BUDDY = "Assets/Resources/BuddySprites/buddy-1.png";
+        public const string GEM_SPRITE_PATH = "Assets/Resources/RewawrdIcons/IconGem.png";
+        public const string COIN_SPRITE_PATH = "Assets/Resources/RewawrdIcons/IconCoin_Gold.png";
         
         //Pop Up messages
             //Buddys Room

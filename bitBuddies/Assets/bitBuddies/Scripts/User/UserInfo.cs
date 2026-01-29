@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using BrainCloud.JsonFx.Json;
+using Gameframework;
 using UnityEngine;
+
 
 [Serializable]
 public class UserInfo
@@ -50,5 +54,13 @@ public class UserInfo
     public void UpdateGems(int in_gems)
     {
         Gems = in_gems;
+    }
+    
+    public void UpdateStats(Dictionary<string, object> in_jsonForStats)
+    {
+        foreach (KeyValuePair<string,object> stat in in_jsonForStats)
+        {
+            StatTracker.Instance.IncrementStat(stat.Key, (int) stat.Value);
+        }
     }
 }

@@ -185,7 +185,6 @@ RectTransform:
   - {fileID: 5732619067036324611}
   - {fileID: 7334254999992161056}
   - {fileID: 185052315120843479}
-  - {fileID: 2350045841258721815}
   - {fileID: 474019669170462597}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -206,6 +205,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40f388ead69b8d84581bbc642201f4f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LockImage: {fileID: 2246875883101699553}
+  QuestIcon: {fileID: 4184483559597207731}
+  QuestTitleText: {fileID: 1793346338281097235}
+  ProgressText: {fileID: 5954592437346897627}
+  ProgressSlider: {fileID: 3698239534632354050}
+  RewardIcon: {fileID: 5188064257103837231}
+  RewardText: {fileID: 2362275658885463337}
 --- !u!1 &2553909469401045081
 GameObject:
   m_ObjectHideFlags: 0
@@ -241,7 +247,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 286.9075, y: -36.507202}
-  m_SizeDelta: {x: 320.1078, y: 50.9654}
+  m_SizeDelta: {x: 351.01, y: 50.9654}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7642243911152216071
 CanvasRenderer:
@@ -271,7 +277,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Do something 3 times
+  m_text: Do something 10 times
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 44f0725d0af084810bbfe5a55c337a37, type: 2}
   m_sharedMaterial: {fileID: 3650126635679316708, guid: 44f0725d0af084810bbfe5a55c337a37, type: 2}
@@ -298,8 +304,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.75
-  m_fontSizeBase: 29.75
+  m_fontSize: 28.2
+  m_fontSizeBase: 28.2
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -634,12 +640,13 @@ RectTransform:
   m_Children:
   - {fileID: 3945196590590627257}
   - {fileID: 8750240741917232361}
+  - {fileID: 2350045841258721815}
   m_Father: {fileID: 5066453964915480634}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 287.11053, y: -89.4}
-  m_SizeDelta: {x: 304.0168, y: 39.7545}
+  m_AnchoredPosition: {x: 287.11053, y: -90.495}
+  m_SizeDelta: {x: 304.0168, y: 57.008}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3698239534632354050
 MonoBehaviour:
@@ -840,7 +847,7 @@ GameObject:
   - component: {fileID: 3856517103981221023}
   - component: {fileID: 5954592437346897627}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: QuestProgress - Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -853,16 +860,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5086050888706335341}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5066453964915480634}
+  m_Father: {fileID: 5732619067036324611}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -107.57802, y: -50.872}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 49.6108, y: 36.204}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3856517103981221023

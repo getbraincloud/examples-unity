@@ -498,6 +498,7 @@ GameObject:
   - component: {fileID: 1374859307}
   - component: {fileID: 1374859308}
   - component: {fileID: 1374859309}
+  - component: {fileID: 1374859310}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -566,6 +567,18 @@ MonoBehaviour:
   - {fileID: 21300000, guid: bb4769d3e888aac41b10af038be13a0d, type: 3}
   - {fileID: 21300000, guid: c14bca414ce3ff34f9e6eed2e5ca5647, type: 3}
   - {fileID: 21300000, guid: 61488471d5a3fe64fb32b4d54a79c923, type: 3}
+--- !u!114 &1374859310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1374859305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cb3a713a4c125a49813e7529ff39641, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2016679292
 GameObject:
   m_ObjectHideFlags: 0

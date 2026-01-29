@@ -104,6 +104,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         
         UserInfo.UpdateLevel((int) data["experienceLevel"]);
         UserInfo.UpdateXP((int) data["experiencePoints"]);
+        UserInfo.UpdateStats(data["statistics"] as Dictionary<string, object>);
         
         var summaryFriendData = data["summaryFriendData"] as Dictionary<string, object>;
         if(summaryFriendData != null)
@@ -228,6 +229,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var quests = response["quests"] as Dictionary<string, object>[];
         var listOfActiveQuests =  new List<QuestInfo>();
         var listOfLockedQuests =  new List<QuestInfo>();
+        if(quests == null || quests.Length == 0) return;
+        
         for (int i = 0; i < quests.Length; ++i)
         {
             QuestInfo questInfo = new QuestInfo();
@@ -235,8 +238,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             questInfo.QuestStatToTrack = quests[i]["statToTrack"] as string;
             questInfo.QuestId = quests[i]["questId"] as string;
             questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
+            questInfo.QuestLineIndex = (int) quests[i]["questLineIndex"];
             
-            //ToDo: Need to read in reward stuff
+            var rewards = quests[i]["reward"] as Dictionary<string, object>;
+            string key = rewards.Keys.First();
+            questInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(char.ToUpper(key[0]) + key.Substring(1));
+            questInfo.QuestRewardAmount = (int)rewards.Values.First();
             
             if(questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || 
                 questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)

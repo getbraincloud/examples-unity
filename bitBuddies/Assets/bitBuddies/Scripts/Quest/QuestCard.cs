@@ -7,15 +7,18 @@ using UnityEngine.UI;
 [Serializable]
 public struct QuestInfo
 {
+    public int QuestLineIndex;
     public string QuestTitle;
     public string QuestIconPath;
     public string QuestStatToTrack;
     public string QuestId;
     public int QuestRequiredProgress;
     public int QuestRewardAmount;
-    public int CurrentQuestProgress;
     public QUEST_STATUS QuestStatus;
     public CurrencyTypes RewardCurrencyType;
+    
+    public int CurrentProgress => StatTracker.Instance.GetStat(QuestStatToTrack);
+    public float ProgressPercent => (float)CurrentProgress / QuestRequiredProgress;
 }
 
 public class QuestCard : MonoBehaviour
@@ -35,18 +38,36 @@ public class QuestCard : MonoBehaviour
     {
         _questInfo = in_questInfo;
         QuestTitleText.text = _questInfo.QuestTitle;
-        //ToDo: Figure out where to get the current stat for this quest
+        ProgressSlider.value = StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack);
         ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
+        ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
+        RewardText.text = $"{_questInfo.QuestRewardAmount}";
 
         switch (_questInfo.RewardCurrencyType)
         {
             case CurrencyTypes.Coins:
-            
+                RewardIcon.sprite = GetBuddySprite(BitBuddiesConsts.COIN_SPRITE_PATH);
                 break;
             
             case CurrencyTypes.Gems:
+                RewardIcon.sprite = GetBuddySprite(BitBuddiesConsts.GEM_SPRITE_PATH);
+                break;
+        }
+        
+        switch(_questInfo.QuestStatus)
+        {
+            case QUEST_STATUS.LOCKED:
+                LockImage.gameObject.SetActive(true);
+                break;
+            case QUEST_STATUS.IN_PROGRESS:
+            case QUEST_STATUS.UNLOCKED:
+                LockImage.gameObject.SetActive(false);
                 break;
         }
     }
-
+    
+    private Sprite GetBuddySprite(string path)
+    {
+        return Resources.Load<Sprite>(path);
+    }
 }

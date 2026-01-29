@@ -66,13 +66,51 @@ public class GameManager : SingletonBehaviour<GameManager>
 		set => _childCountMaximum = value;
 	}
 	
-	public List<QuestInfo> ActiveQuests { get; set; }
-	public List<QuestInfo> LockedQuests { get; set; }
+	public List<QuestInfo> BitBuddiesQuestsActive { get; set; }
+	public List<QuestInfo> BitBuddiesQuestsLocked { get; set; }
+	public List<QuestInfo> BitBlingQuestsActive { get; set; }
+	public List<QuestInfo> BitBlingQuestsLocked { get; set; }
+	public List<QuestInfo> GeneralQuestsActive { get; set; }
+	public List<QuestInfo> GeneralQuestsLocked { get; set; }
 	
 	public void SetQuestsLists(List<QuestInfo> activeQuests, List<QuestInfo> lockedQuests)
 	{
-		ActiveQuests = activeQuests;
-		LockedQuests = lockedQuests;
+		BitBuddiesQuestsActive = new List<QuestInfo>();
+		BitBlingQuestsActive = new List<QuestInfo>();
+		GeneralQuestsActive = new List<QuestInfo>();
+		for (int i = 0; i < activeQuests.Count; i++)
+		{
+			switch (activeQuests[i].QuestId)
+			{
+				case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+					BitBuddiesQuestsActive.Add(activeQuests[i]);
+					break;
+				case BitBuddiesConsts.BITBLING_QUESTLINEID:
+					BitBlingQuestsActive.Add(activeQuests[i]);
+					break;
+				case BitBuddiesConsts.GENERAL_QUESTLINEID:
+					GeneralQuestsActive.Add(activeQuests[i]);
+					break;
+			}
+		}
+		BitBuddiesQuestsLocked = new List<QuestInfo>();
+		BitBlingQuestsLocked = new List<QuestInfo>();
+		GeneralQuestsLocked = new List<QuestInfo>();
+		for (int i = 0; i < lockedQuests.Count; i++)
+		{
+			switch (lockedQuests[i].QuestId)
+			{
+				case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+					BitBuddiesQuestsLocked.Add(lockedQuests[i]);
+					break;
+				case BitBuddiesConsts.BITBLING_QUESTLINEID:
+					BitBlingQuestsLocked.Add(lockedQuests[i]);
+					break;
+				case BitBuddiesConsts.GENERAL_QUESTLINEID:
+					GeneralQuestsLocked.Add(lockedQuests[i]);
+					break;
+			}
+		}
 	}
 	
 	public override void Awake()
