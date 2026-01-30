@@ -46,11 +46,11 @@ public class QuestCard : MonoBehaviour
         switch (_questInfo.RewardCurrencyType)
         {
             case CurrencyTypes.Coins:
-                RewardIcon.sprite = GetBuddySprite(BitBuddiesConsts.COIN_SPRITE_PATH);
+                RewardIcon.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.COIN_SPRITE_PATH);
                 break;
             
             case CurrencyTypes.Gems:
-                RewardIcon.sprite = GetBuddySprite(BitBuddiesConsts.GEM_SPRITE_PATH);
+                RewardIcon.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.GEM_SPRITE_PATH);
                 break;
         }
         
@@ -64,10 +64,5 @@ public class QuestCard : MonoBehaviour
                 LockImage.gameObject.SetActive(false);
                 break;
         }
-    }
-    
-    private Sprite GetBuddySprite(string path)
-    {
-        return Resources.Load<Sprite>(path);
     }
 }

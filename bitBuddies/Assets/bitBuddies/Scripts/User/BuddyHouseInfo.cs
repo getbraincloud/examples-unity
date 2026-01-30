@@ -28,7 +28,7 @@ public class BuddyHouseInfo : MonoBehaviour
 		_visitButton.onClick.AddListener(OnVisitButton);
 		_deleteButton.onClick.AddListener(OnDeleteButton);
 		_parentTransform = FindAnyObjectByType<ParentMenu>().transform;
-		_buddySprite.sprite = AssetLoader.LoadSprite(HouseInfo.buddySpritePath); 
+		_buddySprite.sprite = AssetLoader.LoadBuddySprite(HouseInfo.buddySpritePath); 
 		_buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName + "'s Home";
 		
 		CheckCoinsButton();

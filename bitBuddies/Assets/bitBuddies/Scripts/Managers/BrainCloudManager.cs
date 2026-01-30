@@ -239,6 +239,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             questInfo.QuestId = quests[i]["questId"] as string;
             questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
             questInfo.QuestLineIndex = (int) quests[i]["questLineIndex"];
+            questInfo.QuestRequiredProgress = (int) quests[i]["thresholdRequired"];
             
             var rewards = quests[i]["reward"] as Dictionary<string, object>;
             string key = rewards.Keys.First();

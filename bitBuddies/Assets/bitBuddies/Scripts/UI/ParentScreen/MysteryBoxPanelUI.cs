@@ -238,7 +238,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		    RarityText.text = "basic";
 	    }
 	    //BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
-	    BuddyImage.sprite = AssetLoader.LoadSprite(childAppInfo.buddySpritePath);
+	    BuddyImage.sprite = AssetLoader.LoadBuddySprite(childAppInfo.buddySpritePath);
 	    if(childAppInfo.buddySpritePath.IsNullOrEmpty())
 	    {
 		    Debug.LogWarning("Buddy sprite was missing for: "+ childAppInfo.profileName + " child");

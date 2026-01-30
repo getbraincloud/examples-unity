@@ -65,9 +65,9 @@ namespace Gameframework
         public const string VOLUME_SLIDER_KEY = "volume"; 
         
         //Sprite Paths
-        public const string DEFAULT_SPRITE_PATH_FOR_BUDDY = "Assets/Resources/BuddySprites/buddy-1.png";
-        public const string GEM_SPRITE_PATH = "Assets/Resources/RewawrdIcons/IconGem.png";
-        public const string COIN_SPRITE_PATH = "Assets/Resources/RewawrdIcons/IconCoin_Gold.png";
+        public const string DEFAULT_SPRITE_PATH_FOR_BUDDY = "BuddySprites/buddy-1";
+        public const string GEM_SPRITE_PATH = "RewardIcons/IconGem";
+        public const string COIN_SPRITE_PATH = "RewardIcons/IconCoin_Gold";
         
         //Pop Up messages
             //Buddys Room
