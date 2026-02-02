@@ -51,6 +51,8 @@ public class BCManager : MonoBehaviour
 
     public string LobbyOwnerId;
 
+    public LobbyTimetable timetable = new LobbyTimetable();
+
     public List<LobbyMemberData> LobbyMembersData => new List<LobbyMemberData>(memberData);
     private List<LobbyMemberData> memberData = new List<LobbyMemberData>();
 
@@ -158,6 +160,19 @@ public class BCManager : MonoBehaviour
                         LobbyOwnerId = parts[1]; // This is the profileID of the owner
                     }
                 }
+            }
+
+
+            if (lobbyData.ContainsKey("timetable"))
+            {
+                var jsonTimeTable = lobbyData["timetable"] as Dictionary<string, object>;
+                timetable.createdAt = Convert.ToDouble(((long)jsonTimeTable["createdAt"]));
+                timetable.early = Convert.ToDouble(((long)jsonTimeTable["early"]));
+                timetable.onTime = Convert.ToDouble(((long)jsonTimeTable["onTime"]));
+                timetable.tooLate = Convert.ToDouble(((long)jsonTimeTable["tooLate"]));
+                timetable.dropDead = Convert.ToDouble(((long)jsonTimeTable["dropDead"]));
+                timetable.ignoreDropDeadUntil = Convert.ToDouble(((long)jsonTimeTable["ignoreDropDeadUntil"]));
+                UnityEngine.Debug.LogWarning($"[brainCloud] Lobby timetable updated: createdAt={timetable.createdAt}, early={timetable.early}, onTime={timetable.onTime}, tooLate={timetable.tooLate}, dropDead={timetable.dropDead}, ignoreDropDeadUntil={timetable.ignoreDropDeadUntil}");
             }
 
             if (jsonData.ContainsKey("member"))
@@ -311,7 +326,7 @@ public class BCManager : MonoBehaviour
         Debug.LogWarning($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
 
         var activeScene = SceneManager.GetActiveScene().name;
-        
+
         // TODO: Make Network Handling more robust
         // while in the main menu, if we are not connected show a display message and prompt to reconnect
         if (activeScene == "Main")
@@ -380,7 +395,7 @@ public class BCManager : MonoBehaviour
     public void JoinLobby(string lobbyId, Action<string> OnEntryId)
     {
         var lobbyParams = CreateLobbyParams(OnEntryId);
-    
+
         _bc.LobbyService.JoinLobby(lobbyId,
             true,
             lobbyParams.extra,
@@ -389,7 +404,7 @@ public class BCManager : MonoBehaviour
             lobbyParams.success
         );
     }
-    
+
     public void QuickFindLobbyWithPreviousMembers(Action<string> OnEntryId)
     {
         var lobbyParams = CreateLobbyParams(OnEntryId);
@@ -417,7 +432,7 @@ public class BCManager : MonoBehaviour
         extra["colour"] = ColorUtility.ToHtmlStringRGB(playerColor);
         return extra;
     }
-    
+
     private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
     {
         var algo = new Dictionary<string, object>
