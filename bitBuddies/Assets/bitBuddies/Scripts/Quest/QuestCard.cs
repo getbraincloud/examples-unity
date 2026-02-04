@@ -33,11 +33,17 @@ public class QuestCard : MonoBehaviour
     
 
     private QuestInfo _questInfo;
+
+    private void OnStatChange(string statName, int incremented)
+    {
+        ProgressSlider.value = incremented;
+    }
     
     public void SetupCard(QuestInfo in_questInfo)
     {
         _questInfo = in_questInfo;
         QuestTitleText.text = _questInfo.QuestTitle;
+        StatTracker.OnStatChanged += OnStatChange;
         ProgressSlider.value = StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack);
         ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
         ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";

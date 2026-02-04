@@ -79,7 +79,7 @@ public class ParentMenu : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
+        UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
         if(userInfo.Username.IsNullOrEmpty())
         {
             UsernameText.text = "New User";
@@ -227,11 +227,11 @@ public class ParentMenu : ContentUIBehaviour
         {
             //Coins
             case 0:
-                CoinsText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
+                CoinsText.text = BrainCloudManager.Instance.CurrentUserInfo.Coins.ToString();
                 break;
             //Gems
             case 1:
-                GemsText.text = BrainCloudManager.Instance.UserInfo.Gems.ToString();
+                GemsText.text = BrainCloudManager.Instance.CurrentUserInfo.Gems.ToString();
                 break;
         }
     }

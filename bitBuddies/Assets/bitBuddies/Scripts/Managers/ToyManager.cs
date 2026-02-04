@@ -117,7 +117,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
 		var data =  packet["data"] as Dictionary<string, object>;
 		var response = data["response"] as Dictionary<string, object>;
-		var beforeAmount = BrainCloudManager.Instance.UserInfo.Coins;
+		var beforeAmount = BrainCloudManager.Instance.CurrentUserInfo.Coins;
 		var selectedAppChildInfo = GameManager.Instance.SelectedAppChildrenInfo;
 		if(response != null)
 		{
@@ -126,7 +126,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 				var incrementCoinsResult = value as Dictionary<string, object>;
 				if(incrementCoinsResult != null)
 				{
-					BrainCloudManager.Instance.UserInfo.UpdateCoins((int) incrementCoinsResult["balance"]);
+					BrainCloudManager.Instance.CurrentUserInfo.UpdateCoins((int) incrementCoinsResult["balance"]);
 				}
 			}
 			
@@ -198,13 +198,13 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 					var currencyMap = coinData["currencyMap"] as Dictionary<string, object>;
 					var coinsData = currencyMap["coins"] as Dictionary<string, object>;
 					
-					BrainCloudManager.Instance.UserInfo.UpdateCoins((int) coinsData["balance"]);
+					BrainCloudManager.Instance.CurrentUserInfo.UpdateCoins((int) coinsData["balance"]);
 				}
 			}
 		}
 
 		
-		var totalDifference = beforeAmount - BrainCloudManager.Instance.UserInfo.Coins;
+		var totalDifference = beforeAmount - BrainCloudManager.Instance.CurrentUserInfo.Coins;
 		
 		//ToDo Add animations for
 		/*
@@ -270,7 +270,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		switch (in_rewardPickup.CurrencyType)
 		{
 			case CurrencyTypes.Coins:
-			UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
+			UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
 			var amount = userInfo.Coins + in_rewardPickup.RewardAmount;
 			userInfo.UpdateCoins(amount);
 				break;
@@ -368,7 +368,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
 		var data =  packet["data"] as Dictionary<string, object>;
 		var response = data["response"] as Dictionary<string, object>;
-		var beforeAmount = BrainCloudManager.Instance.UserInfo.Coins;
+		var beforeAmount = BrainCloudManager.Instance.CurrentUserInfo.Coins;
 		
 		if(response != null && response.TryGetValue("consumeCurrencyResult", out var value))
 		{
@@ -376,7 +376,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			var currencyData = consumeResult["data"] as Dictionary<string, object>;
 			var currencyMap = currencyData["currencyMap"] as Dictionary<string, object>;
 			var coins = currencyMap["coins"] as Dictionary<string, object>;
-			BrainCloudManager.Instance.UserInfo.UpdateCoins((int) coins["balance"]);
+			BrainCloudManager.Instance.CurrentUserInfo.UpdateCoins((int) coins["balance"]);
 		}
 		
 		GameManager.Instance.SelectedAppChildrenInfo.ownedToys.Add(_selectedToyId);
@@ -384,7 +384,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		CheckForAvailableBenches();
 		
 		_toyBenchUIRefreshCallback?.Invoke();
-		var totalDifference = beforeAmount - BrainCloudManager.Instance.UserInfo.Coins;
+		var totalDifference = beforeAmount - BrainCloudManager.Instance.CurrentUserInfo.Coins;
 		if(totalDifference > 0)
 		{
 			OnCoinsTaken?.Invoke(totalDifference);			

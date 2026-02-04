@@ -170,8 +170,8 @@ public class BuddyHouseInfo : MonoBehaviour
 		var currencyMap = response["currencyMap"] as Dictionary<string, object>;
 		var coinsObj = currencyMap["coins"] as Dictionary<string, object>;
 		var currentBalance = (int) coinsObj["balance"];
-		var coinsAdded = currentBalance - BrainCloudManager.Instance.UserInfo.Coins;
-		BrainCloudManager.Instance.UserInfo.Coins = currentBalance;
+		var coinsAdded = currentBalance - BrainCloudManager.Instance.CurrentUserInfo.Coins;
+		BrainCloudManager.Instance.CurrentUserInfo.Coins = currentBalance;
 		
 				
 		var summaryData = response["summaryData"] as Dictionary<string, object>;

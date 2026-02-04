@@ -92,7 +92,7 @@ public class ToyBench : MonoBehaviour
 		{
 			body = $"Get the {_toyBenchInfo.DisplayName} for free?";
 		}
-		bool canBuyToy = BrainCloudManager.Instance.UserInfo.Coins >= _toyBenchInfo.UnlockCost;
+		bool canBuyToy = BrainCloudManager.Instance.CurrentUserInfo.Coins >= _toyBenchInfo.UnlockCost;
 		if(canBuyToy)
 		{
 			canBuyToy = GameManager.Instance.SelectedAppChildrenInfo.buddyLevel >= _toyBenchInfo.LevelRequirement;

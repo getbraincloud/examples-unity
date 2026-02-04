@@ -13,7 +13,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
     public static BrainCloudWrapper Wrapper { get; private set; }
-    public UserInfo UserInfo { get; set ; }
+    public UserInfo CurrentUserInfo { get; set ; }
     public bool IsEmailAuthenticated { get; set; }
 
     private bool _isProcessing;
@@ -29,7 +29,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
     public override void StartUp()
     {
-	    UserInfo = new UserInfo();
+	    CurrentUserInfo = new UserInfo();
         Wrapper = gameObject.AddComponent<BrainCloudWrapper>();
         Wrapper.Init();
     }
@@ -68,51 +68,51 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var data = jsonResponse.Deserialize("data");
 
         var username = data["playerName"] as string;
-        if(username.IsNullOrEmpty() && !UserInfo.Username.IsNullOrEmpty())
+        if(username.IsNullOrEmpty() && !CurrentUserInfo.Username.IsNullOrEmpty())
         {
-            Wrapper.PlayerStateService.UpdateName(UserInfo.Username);
+            Wrapper.PlayerStateService.UpdateName(CurrentUserInfo.Username);
         }
         else if(!username.IsNullOrEmpty())
         {
-            UserInfo.UpdateUsername(username);
+            CurrentUserInfo.UpdateUsername(username);
         }
             
         var email = data["emailAddress"] as string;
-        if(email.IsNullOrEmpty() && !UserInfo.Email.IsNullOrEmpty())
+        if(email.IsNullOrEmpty() && !CurrentUserInfo.Email.IsNullOrEmpty())
         {
-            Wrapper.PlayerStateService.UpdateContactEmail(UserInfo.Email);
+            Wrapper.PlayerStateService.UpdateContactEmail(CurrentUserInfo.Email);
             IsEmailAuthenticated = true;
         }
-        else if(email.IsNullOrEmpty() && UserInfo.Email.IsNullOrEmpty())
+        else if(email.IsNullOrEmpty() && CurrentUserInfo.Email.IsNullOrEmpty())
         {
             IsEmailAuthenticated = false;
         }
         else 
         {
             IsEmailAuthenticated = true;
-            UserInfo.UpdateEmail(email);
+            CurrentUserInfo.UpdateEmail(email);
         }
         var currency = data["currency"] as Dictionary<string, object>;
         if(currency != null)
         {
             var gems = currency["gems"] as Dictionary<string, object>;
-            UserInfo.UpdateGems((int)gems["balance"]);
+            CurrentUserInfo.UpdateGems((int)gems["balance"]);
             
             var coins = currency["coins"] as Dictionary<string, object>;
-            UserInfo.UpdateCoins((int)coins["balance"]);
+            CurrentUserInfo.UpdateCoins((int)coins["balance"]);
         }
         
-        UserInfo.UpdateLevel((int) data["experienceLevel"]);
-        UserInfo.UpdateXP((int) data["experiencePoints"]);
-        UserInfo.UpdateStats(data["statistics"] as Dictionary<string, object>);
+        CurrentUserInfo.UpdateLevel((int) data["experienceLevel"]);
+        CurrentUserInfo.UpdateXP((int) data["experiencePoints"]);
+        CurrentUserInfo.UpdateStats(data["statistics"] as Dictionary<string, object>);
         
         var summaryFriendData = data["summaryFriendData"] as Dictionary<string, object>;
         if(summaryFriendData != null)
         {
             int nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];
-            if(nextLevelUp > UserInfo.CurrentXP)
+            if(nextLevelUp > CurrentUserInfo.CurrentXP)
             {
-                UserInfo.UpdateNextLevelUp(nextLevelUp);
+                CurrentUserInfo.UpdateNextLevelUp(nextLevelUp);
             }
             else if(nextLevelUp == 0)
             {
@@ -120,7 +120,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             }
             if(summaryFriendData.ContainsKey("previousLevelXP"))
             {
-                UserInfo.PreviousLevelUp = (int) summaryFriendData["previousLevelXP"];
+                CurrentUserInfo.PreviousLevelUp = (int) summaryFriendData["previousLevelXP"];
             }
         }
         else
@@ -161,11 +161,11 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             int nextLevelUp =  (int) xpDetails["experience"];
             if(nextLevelUp != 0)
             {
-                UserInfo.PreviousLevelUp = 0;
-                UserInfo.UpdateNextLevelUp(nextLevelUp);
+                CurrentUserInfo.PreviousLevelUp = 0;
+                CurrentUserInfo.UpdateNextLevelUp(nextLevelUp);
                 Dictionary<string, object> scriptData = new Dictionary<string, object>();
                 scriptData.Add("nextLevelUpXP", nextLevelUp);
-                scriptData.Add("previousLevelUpXP", UserInfo.PreviousLevelUp);
+                scriptData.Add("previousLevelUpXP", CurrentUserInfo.PreviousLevelUp);
                 Wrapper.PlayerStateService.UpdateSummaryFriendData(scriptData.Serialize());
             }
         }
@@ -518,7 +518,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     GetChildStatsAndCurrencyData();   
                 }
             }
-            if(UserInfo.Coins > 0)
+            if(CurrentUserInfo.Coins > 0)
             {
                 CompletedGettingCurrencies();
             }   
@@ -563,7 +563,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 GetChildStatsAndCurrencyData();   
             }
         }
-        if(UserInfo.Level > 0)
+        if(CurrentUserInfo.Level > 0)
         {
             CompletedGettingCurrencies();
         }
@@ -592,7 +592,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var secondData = result["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
         var coins = currencyMap["coins"] as Dictionary<string, object>;
-        UserInfo.UpdateCoins((int) coins["balance"]);
+        CurrentUserInfo.UpdateCoins((int) coins["balance"]);
         StateManager.Instance.RefreshScreen();
     }
     
@@ -623,7 +623,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var secondData = getResult["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
         var coins = currencyMap["coins"] as Dictionary<string, object>;
-        UserInfo.UpdateCoins((int) coins["balance"]);
+        CurrentUserInfo.UpdateCoins((int) coins["balance"]);
         StateManager.Instance.RefreshScreen();
     }
     
@@ -654,7 +654,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var secondData = getResult["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
         var gems = currencyMap["gems"] as Dictionary<string, object>;
-        UserInfo.UpdateGems((int) gems["balance"]);
+        CurrentUserInfo.UpdateGems((int) gems["balance"]);
         StateManager.Instance.RefreshScreen();
     }
     
@@ -681,19 +681,19 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
         if(response.ContainsKey("nextLevelUpXP"))
         {
-            UserInfo.NextLevelUp = (int) response["nextLevelUpXP"];
+            CurrentUserInfo.NextLevelUp = (int) response["nextLevelUpXP"];
         }
         if(response.ContainsKey("previousLevelUpReq"))
         {
-            UserInfo.PreviousLevelUp = (int) response["previousLevelUpReq"];
+            CurrentUserInfo.PreviousLevelUp = (int) response["previousLevelUpReq"];
         }
         if(response.ContainsKey("experiencePoints"))
         {
-            UserInfo.CurrentXP = (int) response["experiencePoints"];
+            CurrentUserInfo.CurrentXP = (int) response["experiencePoints"];
         }
         if(response.ContainsKey("level"))
         {
-            UserInfo.UpdateLevel((int) response["level"]);
+            CurrentUserInfo.UpdateLevel((int) response["level"]);
         }
                 
         StateManager.Instance.RefreshScreen();
@@ -739,11 +739,13 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     {
     
     }
-    
-    public void UpdateChildProfileName(string in_newName, string in_profileId)
+
+    private Action _updateNameAction;
+    public void UpdateChildProfileName(string in_newName, string in_profileId, Action OnSuccessAction)
     {
         if(_isProcessing) return;
         _isProcessing = true;
+        _updateNameAction = OnSuccessAction;
         Dictionary<string, object> scriptData = new Dictionary<string, object>
         {
             {"childAppId", BitBuddiesConsts.APP_CHILD_ID},
@@ -785,6 +787,10 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         }
         GameManager.Instance.AppChildrenInfos = listOfChildren;
         StateManager.Instance.RefreshScreen();
+        if (_updateNameAction != null)
+        {
+            _updateNameAction();
+        }
     }
     
     // public void AddRandomChildProfile(string in_childName, Rarity in_selectedLootbox)
@@ -861,6 +867,9 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             return;
         }
         
+        //Stat will be updated on the server from the cloud code script when adding a new child account
+        StatTracker.Instance.IncrementStat(BitBuddiesConsts.BUDDIES_OWNED_STAT_NAME);
+        
         Dictionary<string, object> scriptData = new Dictionary<string, object>();
         scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
         scriptData.Add("profileId", appChildrenInfos[0].profileId);
@@ -879,7 +888,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     public void ClearDataForLogout()
     {
-        UserInfo = new UserInfo();
+        CurrentUserInfo = new UserInfo();
         IsEmailAuthenticated = false;
     }
 

@@ -24,7 +24,10 @@ public class StatTracker : MonoBehaviour
         {
             _stats.Add(statName, amount);
         }
-        _stats[statName] += amount;
+        else
+        {
+            _stats[statName] += amount;
+        }
         OnStatChanged?.Invoke(statName, _stats[statName]);
     }
     

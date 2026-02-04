@@ -48,7 +48,7 @@ public class LoginScreen : ContentUIBehaviour
         //Authenticate Anonymously but still go through the normal logging in path
         _createAccount = true;
         IsInteractable = false;
-        BrainCloudManager.Instance.UserInfo = new UserInfo();
+        BrainCloudManager.Instance.CurrentUserInfo = new UserInfo();
         BrainCloudManager.Wrapper.AuthenticateAnonymous
         (
             OnSuccess("Anonymous Account creation successfully", OnLoggedInUser),
@@ -93,9 +93,9 @@ public class LoginScreen : ContentUIBehaviour
         int atSymbol = Email.text.IndexOf('@');
         string username =  Email.text.Substring(0, atSymbol);
         Debug.LogWarning("Username: " + username);
-        BrainCloudManager.Instance.UserInfo = new UserInfo();
-        BrainCloudManager.Instance.UserInfo.UpdateUsername(username);
-        BrainCloudManager.Instance.UserInfo.UpdateEmail(Email.text);
+        BrainCloudManager.Instance.CurrentUserInfo = new UserInfo();
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateUsername(username);
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateEmail(Email.text);
         
         AuthenticateEmail(Email.text, Password.text);
     }

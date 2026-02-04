@@ -62,8 +62,8 @@ public class SettingsPanelUI : MonoBehaviour
     
     private void OnAttachEmailSuccess()
     {
-        BrainCloudManager.Instance.UserInfo.UpdateEmail(_attachEmailInputField.text);
-        BrainCloudManager.Instance.UserInfo.UpdateUsername(_tempUsername);
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateEmail(_attachEmailInputField.text);
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateUsername(_tempUsername);
         BrainCloudManager.Wrapper.PlayerStateService.UpdateName(_tempUsername);
         StateManager.Instance.RefreshScreen();
         StateManager.Instance.OpenInfoPopUp(BitBuddiesConsts.ATTACH_EMAIL_SUCCESS_TITLE, BitBuddiesConsts.ATTACH_EMAIL_SUCCESS_MESSAGE);

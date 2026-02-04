@@ -60,7 +60,7 @@ public class BuyToyBenchUI : ContentUIBehaviour
         }
 
         var childInfo = GameManager.Instance.SelectedAppChildrenInfo;
-        var parentInfo = BrainCloudManager.Instance.UserInfo;
+        var parentInfo = BrainCloudManager.Instance.CurrentUserInfo;
         if(childInfo.buddyLevel >= _toyBenchInfo.LevelRequirement &&
            parentInfo.Coins >= _toyBenchInfo.UnlockCost)
         {

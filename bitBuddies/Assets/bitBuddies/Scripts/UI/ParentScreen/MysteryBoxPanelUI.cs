@@ -209,18 +209,19 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 			return;
 		}
 		
-		DoneButton.onClick.RemoveAllListeners();
-		DoneButton.interactable = false;
-	    BrainCloudManager.Instance.UpdateChildProfileName(NameBuddyInput.text, _parentMenu.NewAppChildrenInfo.profileId);
+	    BrainCloudManager.Instance.UpdateChildProfileName(NameBuddyInput.text, _parentMenu.NewAppChildrenInfo.profileId, DestroySelf);
     }
     
     private void OnConfirmEmptyName()
     {
 		Destroy(gameObject);
-	    DoneButton.onClick.RemoveAllListeners();
-	    DoneButton.interactable = false;
-	    BrainCloudManager.Instance.UpdateChildProfileName(_buddyName, _parentMenu.NewAppChildrenInfo.profileId);
+	    BrainCloudManager.Instance.UpdateChildProfileName(_buddyName, _parentMenu.NewAppChildrenInfo.profileId, DestroySelf);
 	    StateManager.Instance.RefreshScreen();
+    }
+
+    private void DestroySelf()
+    {
+	    Destroy(gameObject);
     }
     
     private void SetupBuddyDataDisplay()

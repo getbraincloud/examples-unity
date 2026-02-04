@@ -68,7 +68,7 @@ public class BuddysRoom : ContentUIBehaviour
         _appChildrenInfo = GameManager.Instance.SelectedAppChildrenInfo;
         
         ProfileNameText.text = _appChildrenInfo.profileName.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_BUDDY_NAME : _appChildrenInfo.profileName;
-        ParentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
+        ParentCoinText.text = BrainCloudManager.Instance.CurrentUserInfo.Coins.ToString();
         BuddyBlingText.text = _appChildrenInfo.buddyBling.ToString();
 
         LoveLevelText.text = $"{_appChildrenInfo.buddyLevel}";
@@ -141,7 +141,7 @@ public class BuddysRoom : ContentUIBehaviour
         textAnimation.SetUpNegativeNumberText(amount);
         textAnimation.PlayBounce();
         
-        ParentCoinText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
+        ParentCoinText.text = BrainCloudManager.Instance.CurrentUserInfo.Coins.ToString();
     }
     
     //Tester function for cloud code script

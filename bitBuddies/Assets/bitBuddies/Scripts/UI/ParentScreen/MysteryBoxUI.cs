@@ -39,13 +39,13 @@ public class MysteryBoxUI : ContentUIBehaviour
     {
         UnlockAmountText.text = _mysteryBoxInfo.UnlockAmount.ToString("#,#");    //#,# adds commas to the string when using ints
         UnlockTypeImage.sprite = UnlockTypeSprites[(int)CurrencyTypes.Coins];
-        var userInfo = BrainCloudManager.Instance.UserInfo;
+        var userInfo = BrainCloudManager.Instance.CurrentUserInfo;
         if(userInfo.Level >= _mysteryBoxInfo.LevelRequirement)
         {
             LevelRequirementObject.SetActive(false);
             PriceRequirementObject.SetActive(true);
             
-            var usersCoins = BrainCloudManager.Instance.UserInfo.Coins;
+            var usersCoins = BrainCloudManager.Instance.CurrentUserInfo.Coins;
             if(_mysteryBoxInfo.UnlockAmount > usersCoins)
             {
                 LockIconImage.gameObject.SetActive(true);
