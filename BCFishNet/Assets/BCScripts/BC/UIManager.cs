@@ -13,7 +13,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Diagnostics;
 
 public class UIManager : MonoBehaviour
 {
@@ -135,27 +134,18 @@ public class UIManager : MonoBehaviour
             SelectNextField();
         }
 
-        // if we are the owner and the current lobby pin is about to expire
-        // create another one for this lobby
-        BCManager bcm = BCManager.Instance;
-        string currentLobbyPin = bcm.CurrentLobbyPin;
-        Debug.Log("CurrentLobbyPin: " + currentLobbyPin + ", ExpiresAt: " + bcm.CurrentLobbyPinExpiresAt);
-        Debug.Log("Current Time (ms): " + (TimeUtils.GetCurrentTime() * 1000));
-        Debug.Log("Is expired? " + (TimeUtils.GetCurrentTime() * 1000 > bcm.CurrentLobbyPinExpiresAt));
-        if (currentLobbyPin != "" && currentLobbyPin != "GENERATING" && bcm.LobbyOwnerId == bcm.bc.Client.ProfileId &&
-            !string.IsNullOrEmpty(bcm.CurrentLobbyPin) && !string.IsNullOrEmpty(bcm.CurrentLobbyId) &&
-                TimeUtils.GetCurrentTime() * 1000 > bcm.CurrentLobbyPinExpiresAt)
-        {
-            bcm.GenerateLobbyPin();
-        }
 
         // when there is an active lobby
         // when there is we are less then a minute to 
         // BCManager.Instance.timetable.onTime, 
         // .the game will launch the server
         // instead of disbanding the lobby, even on a long lived lobby
+        BCManager bcm = BCManager.Instance;
         if (_curState == State.Lobby && !string.IsNullOrEmpty(bcm.CurrentLobbyId))
         {
+
+            _lobbyPinText.text = BCManager.Instance.CurrentLobbyPin;
+
             double currentTime = TimeUtils.GetCurrentTime() * 1000; // in ms
             double timeToLaunch = bcm.timetable.onTime - currentTime;
 
@@ -169,6 +159,7 @@ public class UIManager : MonoBehaviour
                 _autoLaunchText.text = string.Empty;
             }
         }
+
     }
 
     void SelectNextField()
@@ -279,7 +270,7 @@ public class UIManager : MonoBehaviour
                     {
                         string lobbyId = lobbyDataDict["lobbyId"] as string;
                         string pinCode = lobbyDataDict["pinCode"] as string;
-                        long expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToInt64(lobbyDataDict["expiresAt"]) : long.MaxValue;
+                        double expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToDouble(lobbyDataDict["expiresAt"]) : double.MaxValue;
 
                         // update the current lobby pin in the manager so it can be displayed in the lobby scene
                         BCManager.Instance.CurrentLobbyPin = pinCode;

@@ -46,7 +46,7 @@ public class BCManager : MonoBehaviour
     public string RelayPasscode;
     public string CurrentLobbyId = "";
     public string CurrentLobbyPin = "";
-    public long CurrentLobbyPinExpiresAt = long.MaxValue;
+    public double CurrentLobbyPinExpiresAt = 0;
 
     public string RoomAddress;
     public ushort RoomPort;
@@ -57,6 +57,23 @@ public class BCManager : MonoBehaviour
 
     public List<LobbyMemberData> LobbyMembersData => new List<LobbyMemberData>(memberData);
     private List<LobbyMemberData> memberData = new List<LobbyMemberData>();
+
+    private bool isGeneratingPin = false;
+    void Update()
+    {
+        // if we are the owner and the current lobby pin is about to expire
+        // create another one for this lobby
+        string currentLobbyPin = CurrentLobbyPin;
+        if (!isGeneratingPin && currentLobbyPin != "GENERATING" &&
+            LobbyOwnerId == bc.Client.ProfileId && !string.IsNullOrEmpty(CurrentLobbyId))
+        {
+            if (TimeUtils.GetCurrentTime() * 1000 > CurrentLobbyPinExpiresAt)
+            {
+                isGeneratingPin = true;
+                GenerateLobbyPin();
+            }
+        }
+    }
 
     public void AddMember(LobbyMemberData member)
     {
@@ -157,18 +174,23 @@ public class BCManager : MonoBehaviour
                     if (dataDict2.TryGetValue("lobbyData", out var lobbyObj) && lobbyObj is Dictionary<string, object> lobbyDataDict)
                     {
                         string pinCode = lobbyDataDict["pinCode"] as string;
-                        long expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToInt64(lobbyDataDict["expiresAt"]) : long.MaxValue;
+                        double expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToDouble(lobbyDataDict["expiresAt"]) : 0;
 
                         Debug.Log("Generated Lobby Pin: " + pinCode);
+                        Debug.Log("Pin expires at (ms): " + expiresAt);
+
                         CurrentLobbyPin = pinCode;
                         CurrentLobbyPinExpiresAt = expiresAt;
 
+                        Debug.Log("Time until pin expiry (ms): " + (CurrentLobbyPinExpiresAt - (TimeUtils.GetCurrentTime() * 1000)));
                         Dictionary<string, object> settings = new Dictionary<string, object>();
                         settings["pinCode"] = pinCode;
                         settings["appVersion"] = Application.version;
 
                         bc.LobbyService.UpdateSettings(CurrentLobbyId,
                             settings);
+
+                        isGeneratingPin = false;
                     }
                 }
             }
@@ -209,19 +231,10 @@ public class BCManager : MonoBehaviour
                 if (settingsTables != null)
                 {
                     CurrentLobbyPin = settingsTables.ContainsKey("pinCode") ? settingsTables["pinCode"] as string : "";
-                    CurrentLobbyPinExpiresAt = settingsTables.ContainsKey("expiresAt") ? Convert.ToInt64(settingsTables["expiresAt"]) : long.MaxValue;
+                    CurrentLobbyPinExpiresAt = settingsTables.ContainsKey("expiresAt") ? Convert.ToDouble(settingsTables["expiresAt"]) : 0;
                     UnityEngine.Debug.LogWarning($"[brainCloud] Synchronized CurrentLobbyPin: {CurrentLobbyPin}");
                 }
             }
-
-
-            // is me and no active pin
-            if (LobbyOwnerId == bc.Client.ProfileId &&
-                CurrentLobbyPin == "")
-            {
-                GenerateLobbyPin();
-            }
-
 
             if (lobbyData.ContainsKey("timetable"))
             {

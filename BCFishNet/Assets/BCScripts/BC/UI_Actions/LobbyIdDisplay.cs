@@ -11,4 +11,8 @@ public class LobbyIdDisplay : MonoBehaviour
         _lobbyIdText.text = "Lobby Name: " + BCManager.Instance.CurrentLobbyId;
         _lobbyPinText.text = "Lobby Pin: " + BCManager.Instance.CurrentLobbyPin;
     }
+    void Update()
+    {
+        _lobbyPinText.text = "Lobby Pin: " + BCManager.Instance.CurrentLobbyPin;
+    }
 }
