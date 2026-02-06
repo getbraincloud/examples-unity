@@ -45,6 +45,8 @@ public class BCManager : MonoBehaviour
 
     public string RelayPasscode;
     public string CurrentLobbyId = "";
+    public string CurrentLobbyPin = "";
+    public long CurrentLobbyPinExpiresAt = long.MaxValue;
 
     public string RoomAddress;
     public ushort RoomPort;
@@ -134,6 +136,44 @@ public class BCManager : MonoBehaviour
         AddMember(lobbyMemberData);
     }
 
+    public void GenerateLobbyPin()
+    {
+        Debug.Log("Generating new lobby pin for lobby " + CurrentLobbyId);
+        if (string.IsNullOrEmpty(CurrentLobbyId))
+        {
+            Debug.LogWarning("Cannot generate lobby pin because CurrentLobbyId is null or empty.");
+            return;
+        }
+        CurrentLobbyPin = "GENERATING";
+        // Call cloud Script to enter in the pin
+        bc.ScriptService.RunScript("lobby/CreateLobbyPin",
+        "{\"lobbyId\":\"" + CurrentLobbyId + "\"}", (response, _) =>
+        {
+            var respDict = JsonReader.Deserialize<Dictionary<string, object>>(response);
+            if (respDict != null && respDict.TryGetValue("data", out var dataObj) && dataObj is Dictionary<string, object> dataDict)
+            {
+                if (dataDict.TryGetValue("response", out var responseObj) && responseObj is Dictionary<string, object> dataDict2)
+                {
+                    if (dataDict2.TryGetValue("lobbyData", out var lobbyObj) && lobbyObj is Dictionary<string, object> lobbyDataDict)
+                    {
+                        string pinCode = lobbyDataDict["pinCode"] as string;
+                        long expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToInt64(lobbyDataDict["expiresAt"]) : long.MaxValue;
+
+                        Debug.Log("Generated Lobby Pin: " + pinCode);
+                        CurrentLobbyPin = pinCode;
+                        CurrentLobbyPinExpiresAt = expiresAt;
+
+                        Dictionary<string, object> settings = new Dictionary<string, object>();
+                        settings["pinCode"] = pinCode;
+                        settings["appVersion"] = Application.version;
+
+                        bc.LobbyService.UpdateSettings(CurrentLobbyId,
+                            settings);
+                    }
+                }
+            }
+        });
+    }
     public void OnLobbyEvent(string json)
     {
         try
@@ -160,6 +200,26 @@ public class BCManager : MonoBehaviour
                         LobbyOwnerId = parts[1]; // This is the profileID of the owner
                     }
                 }
+            }
+
+            // ensure to sync the current lobby pin when joining
+            if (lobbyData.ContainsKey("settings"))
+            {
+                var settingsTables = lobbyData["settings"] as Dictionary<string, object>;
+                if (settingsTables != null)
+                {
+                    CurrentLobbyPin = settingsTables.ContainsKey("pinCode") ? settingsTables["pinCode"] as string : "";
+                    CurrentLobbyPinExpiresAt = settingsTables.ContainsKey("expiresAt") ? Convert.ToInt64(settingsTables["expiresAt"]) : long.MaxValue;
+                    UnityEngine.Debug.LogWarning($"[brainCloud] Synchronized CurrentLobbyPin: {CurrentLobbyPin}");
+                }
+            }
+
+
+            // is me and no active pin
+            if (LobbyOwnerId == bc.Client.ProfileId &&
+                CurrentLobbyPin == "")
+            {
+                GenerateLobbyPin();
             }
 
 
@@ -246,6 +306,7 @@ public class BCManager : MonoBehaviour
         bc.LobbyService.LeaveLobby(CurrentLobbyId);
         Debug.Log("Left current lobby " + CurrentLobbyId);
         CurrentLobbyId = "";
+        CurrentLobbyPin = "";
 
         PlayerListItemManager.Instance.ClearAll();
         ClearMembers();
@@ -427,7 +488,7 @@ public class BCManager : MonoBehaviour
     public Dictionary<string, object> GetLobbyExtraData()
     {
         var extra = new Dictionary<string, object>();
-        string profileId = BCManager.Instance.bc.Client.ProfileId;
+        string profileId = bc.Client.ProfileId;
         Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId).Color;
         extra["colour"] = ColorUtility.ToHtmlStringRGB(playerColor);
         return extra;
@@ -454,7 +515,7 @@ public class BCManager : MonoBehaviour
         {
             var response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
             var data = response["data"] as Dictionary<string, object>;
-            if (data.ContainsKey("entryId"))
+            if (data != null && data.ContainsKey("entryId"))
             {
                 var entryId = data["entryId"] as string;
                 OnEntryId?.Invoke(entryId);

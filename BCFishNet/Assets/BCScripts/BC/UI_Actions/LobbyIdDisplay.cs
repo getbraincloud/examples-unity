@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class LobbyIdDisplay : MonoBehaviour
 {
-    [SerializeField] private TMPro.TMP_Text _lobbyIdText;
+    [SerializeField] private TMPro.TMP_Text _lobbyIdText, _lobbyPinText;
     // Start is called before the first frame update
     void Start()
     {
         _lobbyIdText.text = "Lobby Name: " + BCManager.Instance.CurrentLobbyId;
+        _lobbyPinText.text = "Lobby Pin: " + BCManager.Instance.CurrentLobbyPin;
     }
 }

@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Diagnostics;
 
 public class UIManager : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text _mainStatus;
     #region LoginVars
     [Header("Login Vars")]
-    [SerializeField] private TMP_InputField _usernameInput, _passwordInput, _displayNameInput;
+    [SerializeField] private TMP_InputField _usernameInput, _passwordInput, _displayNameInput, _joinLobbyInput;
     [SerializeField] private TMP_Text _authErrorText;
     [SerializeField] private Button _loginButton;
     #endregion
@@ -29,7 +30,9 @@ public class UIManager : MonoBehaviour
     [Header("MainMenu Vars")]
     [SerializeField] private GameObject _displayNamePanel;
     [SerializeField] private TMP_Text _displayNameText, _accountNameText;
-    [SerializeField] private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
+    [SerializeField]
+    private Button _createLobbyButton, _findLobbyButton,
+            _cancelMatchmakingButton, _findCreateLobbyButton, _joinLobbyButton;
     [SerializeField] private Image _playerColourImage;
 
     private string _currentEntryId;
@@ -37,7 +40,7 @@ public class UIManager : MonoBehaviour
 
     #region LobbyVars
     [Header("Lobby Vars")]
-    [SerializeField] private TMP_Text _lobbyIdText, _loadingNumMembersText, _autoLaunchText;
+    [SerializeField] private TMP_Text _lobbyIdText, _lobbyPinText, _loadingNumMembersText, _autoLaunchText;
     [SerializeField] private Button _readyUpButton, _leaveLobbyButton;
     [SerializeField] private LobbyMemberItem _lobbyMemberRowPrefab;
     [SerializeField] private Transform _lobbyMembersContainer;
@@ -132,15 +135,29 @@ public class UIManager : MonoBehaviour
             SelectNextField();
         }
 
+        // if we are the owner and the current lobby pin is about to expire
+        // create another one for this lobby
+        BCManager bcm = BCManager.Instance;
+        string currentLobbyPin = bcm.CurrentLobbyPin;
+        Debug.Log("CurrentLobbyPin: " + currentLobbyPin + ", ExpiresAt: " + bcm.CurrentLobbyPinExpiresAt);
+        Debug.Log("Current Time (ms): " + (TimeUtils.GetCurrentTime() * 1000));
+        Debug.Log("Is expired? " + (TimeUtils.GetCurrentTime() * 1000 > bcm.CurrentLobbyPinExpiresAt));
+        if (currentLobbyPin != "" && currentLobbyPin != "GENERATING" && bcm.LobbyOwnerId == bcm.bc.Client.ProfileId &&
+            !string.IsNullOrEmpty(bcm.CurrentLobbyPin) && !string.IsNullOrEmpty(bcm.CurrentLobbyId) &&
+                TimeUtils.GetCurrentTime() * 1000 > bcm.CurrentLobbyPinExpiresAt)
+        {
+            bcm.GenerateLobbyPin();
+        }
+
         // when there is an active lobby
         // when there is we are less then a minute to 
         // BCManager.Instance.timetable.onTime, 
         // .the game will launch the server
         // instead of disbanding the lobby, even on a long lived lobby
-        if (_curState == State.Lobby && !string.IsNullOrEmpty(BCManager.Instance.CurrentLobbyId))
+        if (_curState == State.Lobby && !string.IsNullOrEmpty(bcm.CurrentLobbyId))
         {
             double currentTime = TimeUtils.GetCurrentTime() * 1000; // in ms
-            double timeToLaunch = BCManager.Instance.timetable.onTime - currentTime;
+            double timeToLaunch = bcm.timetable.onTime - currentTime;
 
             if (timeToLaunch <= 60000 && timeToLaunch > 0 && _loadingView.activeInHierarchy == false)
             {
@@ -204,6 +221,7 @@ public class UIManager : MonoBehaviour
         _findLobbyButton.gameObject.SetActive(true);
         _createLobbyButton.gameObject.SetActive(true);
         _findCreateLobbyButton.gameObject.SetActive(true);
+        _joinLobbyButton.gameObject.SetActive(true);
         _displayNamePanel.SetActive(true);
 
         _cancelMatchmakingButton.gameObject.SetActive(false);
@@ -224,10 +242,71 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+            _joinLobbyButton.gameObject.SetActive(false);
             _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
         });
     }
+
+    public void OnJoinLobby()
+    {
+        _mainStatus.text = "Finding Lobby " + _joinLobbyInput.text + "...";
+        _loadingView.SetActive(true);
+        _loadingStatusText.text = "Finding lobby...";
+
+
+        //temp disable lobby buttons
+        _findLobbyButton.gameObject.SetActive(false);
+        _createLobbyButton.gameObject.SetActive(false);
+        _findCreateLobbyButton.gameObject.SetActive(false);
+        _joinLobbyButton.gameObject.SetActive(false);
+        _displayNamePanel.SetActive(false);
+        _cancelMatchmakingButton.gameObject.SetActive(true);
+
+        // Call cloud Script to enter in the pin
+        BCManager.Instance.bc.ScriptService.RunScript("lobby/FetchLobbyInfo", "{\"pinCode\":\"" + _joinLobbyInput.text + "\"}", (response, _) =>
+        {
+            Debug.Log("JoinLobbyWithPin response: " + response);
+            // if we get a lobbyid, join it right away
+            // otherwise cancel out the join
+
+            var respDict = JsonReader.Deserialize<Dictionary<string, object>>(response);
+            if (respDict != null && respDict.TryGetValue("data", out var dataObj) && dataObj is Dictionary<string, object> dataDict)
+            {
+                if (dataDict.TryGetValue("response", out var responseObj) && responseObj is Dictionary<string, object> dataDict2)
+                {
+                    if (dataDict2.TryGetValue("lobbyData", out var lobbyObj) && lobbyObj is Dictionary<string, object> lobbyDataDict)
+                    {
+                        string lobbyId = lobbyDataDict["lobbyId"] as string;
+                        string pinCode = lobbyDataDict["pinCode"] as string;
+                        long expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToInt64(lobbyDataDict["expiresAt"]) : long.MaxValue;
+
+                        // update the current lobby pin in the manager so it can be displayed in the lobby scene
+                        BCManager.Instance.CurrentLobbyPin = pinCode;
+                        BCManager.Instance.CurrentLobbyPinExpiresAt = expiresAt;
+
+                        Debug.Log("Joining Lobby with ID: " + lobbyId);
+                        BCManager.Instance.JoinLobby(lobbyId, (json) =>
+                        {
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogError("JoinLobbyWithPin failed to get lobbyId from response.");
+                        OnCancelMatchmakingClicked();
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("JoinLobbyWithPin failed to get lobbyId from response.");
+                OnCancelMatchmakingClicked();
+            }
+
+        });
+
+    }
+
 
     public void OnFindLobbyClicked()
     {
@@ -242,6 +321,7 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+            _joinLobbyButton.gameObject.SetActive(false);
 
             _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
@@ -263,6 +343,7 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+            _joinLobbyButton.gameObject.SetActive(false);
 
             _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
@@ -431,6 +512,7 @@ public class UIManager : MonoBehaviour
                 }
 
                 _lobbyIdText.text = BCManager.Instance.CurrentLobbyId;
+                _lobbyPinText.text = BCManager.Instance.CurrentLobbyPin;
 
                 switch (operation)
                 {
@@ -517,6 +599,7 @@ public class UIManager : MonoBehaviour
                             _findLobbyButton.gameObject.SetActive(true);
                             _createLobbyButton.gameObject.SetActive(true);
                             _findCreateLobbyButton.gameObject.SetActive(true);
+                            _joinLobbyButton.gameObject.SetActive(true);
                             _cancelMatchmakingButton.gameObject.SetActive(false);
 
                             _displayNamePanel.SetActive(true);
