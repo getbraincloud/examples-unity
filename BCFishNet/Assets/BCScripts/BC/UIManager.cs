@@ -285,6 +285,8 @@ public class UIManager : MonoBehaviour
                     {
                         Debug.LogError("JoinLobbyWithPin failed to get lobbyId from response.");
                         OnCancelMatchmakingClicked();
+
+                        _mainStatus.text = "Lobby does not exist or pin is incorrect.";
                     }
                 }
             }
@@ -292,6 +294,7 @@ public class UIManager : MonoBehaviour
             {
                 Debug.LogError("JoinLobbyWithPin failed to get lobbyId from response.");
                 OnCancelMatchmakingClicked();
+                _mainStatus.text = "Lobby does not exist or pin is incorrect.";
             }
 
         });
