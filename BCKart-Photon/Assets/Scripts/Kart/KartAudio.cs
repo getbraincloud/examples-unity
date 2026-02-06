@@ -43,7 +43,7 @@ public class KartAudio : KartComponent
         base.Render();
 
         var rb = Controller.Rigidbody;
-        var speed = rb.transform.InverseTransformVector(rb.velocity / Controller.maxSpeedBoosting).z;
+        var speed = rb.transform.InverseTransformVector(rb.linearVelocity / Controller.maxSpeedBoosting).z;
 
         HandleDriftAudio(speed);
         HandleOffroadAudio(speed);

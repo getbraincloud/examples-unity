@@ -168,7 +168,7 @@ public class BrainCloudManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            _bcWrapper.PlayerStateService.UpdateName(tempUsername, OnUpdateName, LogErrorThenPopUpWindow,
+            _bcWrapper.PlayerStateService.UpdateName(tempUsername, null, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         else
@@ -178,7 +178,7 @@ public class BrainCloudManager : MonoBehaviour
             {
                 userInfo.Username = tempUsername;
             }
-            _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnUpdateName, LogErrorThenPopUpWindow,
+            _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, null, LogErrorThenPopUpWindow,
                 "Failed to update username to braincloud");
         }
         GameManager.Instance.CurrentUserInfo = userInfo;
@@ -189,13 +189,19 @@ public class BrainCloudManager : MonoBehaviour
             _bcWrapper.ResetStoredProfileId();
             _bcWrapper.Client.AuthenticationService.ProfileId = profileID;
         }
-    }
-    
-    private void OnUpdateName(string jsonResponse, object cbObject)
-    {
-        _bcWrapper.GlobalAppService.ReadProperties(OnReadProperties, LogErrorThenPopUpWindow);
-        _bcWrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback);
 
+        if (colours.Count == 0)
+        {
+            _bcWrapper.GlobalAppService.ReadProperties(OnReadProperties, LogErrorThenPopUpWindow);
+            _bcWrapper.GlobalAppService.ReadSelectedProperties(new string[] { "Colours" }, OnGetColoursCallback);
+        }
+        else
+        {
+            // Enable RTT
+            _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
+            _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
+            _bcWrapper.RTTService.EnableRTT(OnEnableRTT, OnRTTDisconnected);
+        }
     }
     
     private void OnReadProperties(string jsonResponse, object cbObject)

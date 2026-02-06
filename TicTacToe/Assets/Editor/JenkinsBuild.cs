@@ -68,8 +68,6 @@ public class JenkinsBuild
             AssetDatabase.ImportAsset(path);
 
             TextAsset bcsettings = Resources.Load<TextAsset>("BCSettings");
-
-
             Debug.Log($"Successfully set the appID and appSecret to: {bcsettings}");
         }
     }
@@ -94,6 +92,7 @@ public class JenkinsBuild
             var realPos = execMethodArgPos == -1 ? -1 : i - execMethodArgPos - 2;
             if (realPos < 0)
                 continue;
+
 
             if (realPos == 0)
                 returnValue.appName = args[i];
@@ -189,7 +188,9 @@ public class JenkinsBuild
 
         public void GetEnviroVariables()
         {
-            targetDir = System.Environment.GetEnvironmentVariable("targetDirectory");
+            if (targetDir == null || targetDir.Length == 0 && 
+                (System.Environment.GetEnvironmentVariable("targetDirectory") != null))
+                targetDir = System.Environment.GetEnvironmentVariable("targetDirectory");
         }
     }
 }

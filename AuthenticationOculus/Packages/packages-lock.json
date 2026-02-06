@@ -5,17 +5,17 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "d5c4f74460d32fd0caf8ddad0a7e0276e8915842"
+      "hash": "b363aadbc7da6ff1f6b9656b472e104ebb040ecc"
     },
     "com.meta.xr.sdk.core": {
-      "version": "78.0.0",
+      "version": "83.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.meta.xr.sdk.interaction": {
-      "version": "78.0.0",
+      "version": "83.0.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -25,17 +25,17 @@
       "url": "https://packages.unity.com"
     },
     "com.meta.xr.sdk.interaction.ovr": {
-      "version": "78.0.0",
+      "version": "83.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.meta.xr.sdk.core": "78.0.0",
-        "com.meta.xr.sdk.interaction": "78.0.0"
+        "com.meta.xr.sdk.core": "83.0.1",
+        "com.meta.xr.sdk.interaction": "83.0.1"
       },
       "url": "https://packages.unity.com"
     },
     "com.meta.xr.sdk.platform": {
-      "version": "78.0.0",
+      "version": "83.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -44,7 +44,7 @@
       "url": "https://packages.unity.com"
     },
     "com.meta.xr.simulator": {
-      "version": "78.0.0",
+      "version": "81.0.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -92,11 +92,11 @@
       "dependencies": {}
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.23",
+      "version": "2.0.26",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.9"
+        "com.unity.test-framework": "1.1.33"
       },
       "url": "https://packages.unity.com"
     },
@@ -239,11 +239,10 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.management": {
-      "version": "4.5.2",
+      "version": "4.5.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.modules.vr": "1.0.0",
         "com.unity.modules.xr": "1.0.0",
         "com.unity.xr.core-utils": "2.2.1",
         "com.unity.modules.subsystems": "1.0.0",

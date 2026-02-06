@@ -4,6 +4,7 @@ using Fusion;
 using Fusion.Addons.Physics;
 using Fusion.Sockets;
 using FusionExamples.FusionHelpers;
+using Fusion.Photon.Realtime;
 using Managers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -67,6 +68,15 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 		_pool = go.AddComponent<FusionObjectPoolRoot>();
 
 		Debug.Log($"Created gameobject {go.name} - starting game");
+
+		// Create a new AuthenticationValues
+  		AuthenticationValues authentication = new AuthenticationValues();
+
+  		// Setup
+  		authentication.AuthType = CustomAuthenticationType.Custom;
+  		authentication.AddAuthParameter("user", BCManager.Wrapper.Client.ProfileId);
+        authentication.AddAuthParameter("sessionId", BCManager.Wrapper.Client.SessionID);
+
 		_runner.StartGame(new StartGameArgs
 		{
 			GameMode = _gameMode,
@@ -74,7 +84,8 @@ public class GameLauncher : MonoBehaviour, INetworkRunnerCallbacks
 			ObjectProvider = _pool,
 			SceneManager = _levelManager,
 			PlayerCount = ServerInfo.MaxUsers,
-			EnableClientSessionCreation = false
+			EnableClientSessionCreation = false,
+			AuthValues = authentication // pass the AuthenticationValues
 		});
 	}
 

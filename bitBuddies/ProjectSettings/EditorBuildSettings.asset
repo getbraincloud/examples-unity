@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/bitBuddies/Scenes/States/SplashScreen/SplashScreen.unity
+    guid: 8c00e184ad06f1e48bf719135a5cc0a8
+  - enabled: 1
+    path: Assets/bitBuddies/Scenes/States/ParentMenu/ParentMenu.unity
+    guid: db0513d9ee1485241a2227e4d23b5a75
+  - enabled: 1
+    path: Assets/bitBuddies/Scenes/States/BuddysRoom/BuddysRoom.unity
+    guid: cb319f00f9793d449be71d80dd992a67
+  - enabled: 1
+    path: Assets/bitBuddies/Scenes/Sub-States/LoadingScreen/LoadingScreen.unity
+    guid: 8d24686818c6291438ea07245dc0ecb2
+  - enabled: 1
+    path: Assets/bitBuddies/Scenes/States/LoginScreen/LoginScreen.unity
+    guid: 0ea17c1897e15644c86e86a3db890d81
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  m_UseUCBPForAssetBundles: 0
