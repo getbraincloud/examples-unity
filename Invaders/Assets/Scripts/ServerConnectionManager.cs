@@ -22,6 +22,8 @@ public class ServerConnectionManager : NetworkBehaviour
 
     private Coroutine _serverShutdownCR;
     private string _publicIP;
+    private string _lobbyId;
+    private BrainCloudS2SPrl _prl;
 
 
     private void Awake()
@@ -37,22 +39,65 @@ public class ServerConnectionManager : NetworkBehaviour
         if (IsDedicatedServer)
         {
             Debug.Log("[ServerConnectionManager - Awake()] We are dedicated");
-            string lobbyId = Environment.GetEnvironmentVariable("LOBBY_ID");
+            _lobbyId = Environment.GetEnvironmentVariable("LOBBY_ID");
             _connectedClients = new Dictionary<ulong, UserInfo>();
-            Debug.Log("[ServerConnectionManager - Awake()] Got LobbyID? " + lobbyId );
+            Debug.Log("[ServerConnectionManager - Awake()] Got LobbyID? " + _lobbyId);
 
-            var requestJson = new Dictionary<string, object>();
-            requestJson["service"] = "lobby";
-            requestJson["operation"] = "GET_LOBBY_DATA";
-            
-            var requestDataJson = new Dictionary<string, object>();
-            requestDataJson["lobbyId"] = lobbyId;
-
-            requestJson["data"] = requestDataJson;
-
-            string jsonString = JsonWriter.Serialize(requestJson);
-            S2SWrapper.Request(jsonString, OnLobbyDataResponse);
+            if (BrainCloudS2SPrl.IsPreReadyLaunch())
+            {
+                Debug.Log("[ServerConnectionManager] PRE_READY_LAUNCH mode — authenticating S2S, then starting PRL flow.");
+                _prl = new BrainCloudS2SPrl();
+                S2SWrapper.Authenticate(OnS2SAuthenticatedForPRL);
+            }
+            else
+            {
+                RequestLobbyData();
+            }
         }
+    }
+
+    private void Update()
+    {
+        _prl?.Update();
+    }
+
+    private void OnS2SAuthenticatedForPRL(string responseString)
+    {
+        if (S2SWrapper.SessionId == null)
+        {
+            Debug.LogError("[ServerConnectionManager] S2S authentication failed — cannot start PRL. Shutting down.");
+            Application.Quit();
+            return;
+        }
+        Debug.Log("[ServerConnectionManager] S2S authenticated. Starting PRL flow.");
+        _prl.Start(S2SWrapper, _lobbyId, OnPrlComplete);
+    }
+
+    private void OnPrlComplete(bool proceedWithLaunch)
+    {
+        if (!proceedWithLaunch)
+        {
+            Debug.Log("[ServerConnectionManager] PRL did not proceed — shutting down.");
+            Application.Quit();
+            return;
+        }
+        Debug.Log("[ServerConnectionManager] PRL complete — requesting lobby data.");
+        RequestLobbyData();
+    }
+
+    private void RequestLobbyData()
+    {
+        var requestJson = new Dictionary<string, object>();
+        requestJson["service"] = "lobby";
+        requestJson["operation"] = "GET_LOBBY_DATA";
+
+        var requestDataJson = new Dictionary<string, object>();
+        requestDataJson["lobbyId"] = _lobbyId;
+
+        requestJson["data"] = requestDataJson;
+
+        string jsonString = JsonWriter.Serialize(requestJson);
+        S2SWrapper.Request(jsonString, OnLobbyDataResponse);
     }
 
     private void Start()
@@ -77,7 +122,7 @@ public class ServerConnectionManager : NetworkBehaviour
                 jsonData["id"] as string);
 
             Debug.Log("Got lobby definition");
-            foreach(UserInfo user in _currentLobby.Members)
+            foreach (UserInfo user in _currentLobby.Members)
             {
                 Debug.Log("Member: " + user.Username);
             }
@@ -102,8 +147,26 @@ public class ServerConnectionManager : NetworkBehaviour
         else
         {
             Debug.Log("Invalid lobby, shutting down server");
+            OnSessionEnded();
             Application.Quit();
         }
+    }
+
+    private void OnSessionEnded()
+    {
+        //Tell brainCloud we are ready with S2S call
+        var requestJson = new Dictionary<string, object>();
+        requestJson["service"] = "roomServer";
+        requestJson["operation"] = "SYS_ROOM_SESSION_ENDED";
+
+        var requestDataJson = new Dictionary<string, object>();
+        requestDataJson["serverId"] = Environment.GetEnvironmentVariable("SERVER_ID");
+        requestDataJson["serverContext"] = new Dictionary<string, object>();//Environment.GetEnvironmentVariable("SERVER_CONTEXT");
+
+        requestJson["data"] = requestDataJson;
+
+        string jsonString = JsonWriter.Serialize(requestJson);
+        S2SWrapper.Request(jsonString, null);
     }
 
     private IEnumerator GetPublicIP()
@@ -140,7 +203,7 @@ public class ServerConnectionManager : NetworkBehaviour
             Debug.Log("Client connected: " + clientId);
             Debug.Log("Owner client ID: " + OwnerClientId);
 
-            if(_serverShutdownCR != null)
+            if (_serverShutdownCR != null)
             {
                 Debug.Log("Player connected during shutdown timer, canceling shutdown");
                 StopCoroutine(_serverShutdownCR);
@@ -188,7 +251,7 @@ public class ServerConnectionManager : NetworkBehaviour
 
                 _serverShutdownCR = StartCoroutine(InitServerShutdownTimer());
             }
-        } 
+        }
     }
 
     private IEnumerator InitServerShutdownTimer()
@@ -197,6 +260,7 @@ public class ServerConnectionManager : NetworkBehaviour
         yield return new WaitForSeconds(15f);
 
         Debug.Log("Server been empty for 15 seconds. Shutting down.");
+        OnSessionEnded();
         Application.Quit();
     }
 
@@ -228,10 +292,10 @@ public class ServerConnectionManager : NetworkBehaviour
     {
         Debug.Log($"Received validation request for cId:{clientId} pId:{playerId} passCode:{passCode}");
         //match with playerId and passcode found in lobby data
-        if(_currentLobby != null)
+        if (_currentLobby != null)
         {
             UserInfo foundMember = _currentLobby.FindMemberByPlayerId(playerId);
-            if(foundMember != null)
+            if (foundMember != null)
             {
                 //check pass code
                 if (foundMember.PassCode.Equals(passCode))

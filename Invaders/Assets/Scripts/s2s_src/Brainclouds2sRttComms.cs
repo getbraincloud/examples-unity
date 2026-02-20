@@ -27,32 +27,32 @@ public class Brainclouds2sRttComms
         NONE
     }
 
-	public enum RTTConnectionStatus
-	{
-		CONNECTED,
-		DISCONNECTED,
-		CONNECTING,
-		DISCONNECTING
-	}
+    public enum RTTConnectionStatus
+    {
+        CONNECTED,
+        DISCONNECTED,
+        CONNECTING,
+        DISCONNECTING
+    }
 
-	private struct RTTCommandResponse
-	{
-		public RTTCommandResponse(string in_service, string in_op, string in_msg)
-		{
-			Service = in_service;
-			Operation = in_op;
-			JsonMessage = in_msg;
-		}
-		public string Service { get; set; }
-		public string Operation { get; set; }
-		public string JsonMessage { get; set; }
-	}
+    private struct RTTCommandResponse
+    {
+        public RTTCommandResponse(string in_service, string in_op, string in_msg)
+        {
+            Service = in_service;
+            Operation = in_op;
+            JsonMessage = in_msg;
+        }
+        public string Service { get; set; }
+        public string Operation { get; set; }
+        public string JsonMessage { get; set; }
+    }
 
     public delegate void RTTCallback(string responseString);
     public string RTTConnectionID { get; private set; }
     public string RTTEventServer { get; private set; }
 
-	private List<RTTCommandResponse> _queuedRTTCommands = new List<RTTCommandResponse>();
+    private List<RTTCommandResponse> _queuedRTTCommands = new List<RTTCommandResponse>();
     private RTTConnectionStatus _rttConnectionStatus = RTTConnectionStatus.DISCONNECTED;
     private WebsocketStatus _webSocketStatus = WebsocketStatus.NONE;
     private TimeSpan _heartbeatRTTTime = TimeSpan.FromMilliseconds(10 * 1000);
@@ -66,7 +66,7 @@ public class Brainclouds2sRttComms
     private bool _channelConnected = false;
     private string _channelId;
     private Dictionary<string, object> _rttHeaders = new Dictionary<string, object>();
-	private Dictionary<string, object> _endpoint = null;
+    private Dictionary<string, object> _endpoint = null;
     private Dictionary<string, object> _disconnectJson = new Dictionary<string, object>();
 
 
@@ -102,7 +102,8 @@ public class Brainclouds2sRttComms
     /// <param name="callback"></param>
     public void RegisterRTTRawCallback(RTTCallback callback)
     {
-        if(_brainCloudS2S.SessionId != null)
+        if (_brainCloudS2S == null) return;
+        if (_brainCloudS2S.SessionId != null)
         {
             _registeredCallback = callback;
         }
@@ -133,7 +134,7 @@ public class Brainclouds2sRttComms
     public void EnableRTT(BrainCloudS2S.S2SCallback callback, BrainCloudS2S context)
     {
         _brainCloudS2S = context;
-        if(_brainCloudS2S.SessionId != null)
+        if (_brainCloudS2S.SessionId != null)
         {
             Dictionary<string, object> requstInfo = new Dictionary<string, object>();
             requstInfo = new Dictionary<string, object>();
@@ -145,7 +146,7 @@ public class Brainclouds2sRttComms
             _rttConnectionCallback.requestData = contextInfo;
             _brainCloudS2S.QueueRequest(contextInfo, onRTTConnectCallback);
         }
-        else if(callback != null)
+        else if (callback != null)
         {
             callback("Unable to request RTT connection without a session established, please authenticate and try again.");
         }
@@ -219,7 +220,7 @@ public class Brainclouds2sRttComms
                 //Failure callback
                 else if (_rttConnectionCallback.callback != null && toProcessResponse.Operation == "error")
                 {
-                    if(toProcessResponse.JsonMessage != null)
+                    if (toProcessResponse.JsonMessage != null)
                     {
                         _rttConnectionCallback.callback(toProcessResponse.JsonMessage);
                     }
@@ -238,10 +239,8 @@ public class Brainclouds2sRttComms
                 }
                 else
                 {
-                    if (_brainCloudS2S.LoggingEnabled)
-                    {
-                        _brainCloudS2S.LogString("WARNING no handler registered for RTT callbacks ");
-                    }
+
+                    _brainCloudS2S.LogString("WARNING no handler registered for RTT callbacks ");
                 }
 
             }
@@ -284,10 +283,8 @@ public class Brainclouds2sRttComms
             _channelId = in_channelId;
             callback(response);
             _channelConnected = true;
-            if(_brainCloudS2S.LoggingEnabled)
-            {
-                _brainCloudS2S.LogString("Channel Connected");
-            }
+
+            _brainCloudS2S.LogString("Channel Connected");
         });
     }
 
@@ -341,10 +338,8 @@ public class Brainclouds2sRttComms
         {
             if (in_bLogMessage)
             {
-                if (_brainCloudS2S.LoggingEnabled)
-                {
-                    _brainCloudS2S.LogString("RTT SEND: " + in_message);
-                }
+
+                _brainCloudS2S.LogString("RTT SEND: " + in_message);
             }
 
             // Web Socket
@@ -353,10 +348,8 @@ public class Brainclouds2sRttComms
         }
         catch (Exception socketException)
         {
-            if (_brainCloudS2S.LoggingEnabled)
-            {
-                _brainCloudS2S.LogString("send exception: " + socketException);
-            }
+
+            _brainCloudS2S.LogString("send exception: " + socketException);
             addQueueRTTResponse(new RTTCommandResponse("rttRegistration", "error", buildRTTRequestError(socketException.ToString())));
         }
 
@@ -379,10 +372,8 @@ public class Brainclouds2sRttComms
 
         if (_disconnectedWithReason == true)
         {
-            if (_brainCloudS2S.LoggingEnabled)
-            {
-                _brainCloudS2S.LogString("RTT: Disconnect: " + JsonWriter.Serialize(_disconnectJson));
-            }
+
+            _brainCloudS2S.LogString("RTT: Disconnect: " + JsonWriter.Serialize(_disconnectJson));
             if (_rttConnectionCallback.callback != null)
             {
                 _rttConnectionCallback.callback((string)_disconnectJson["reason"]);
@@ -409,7 +400,7 @@ public class Brainclouds2sRttComms
         Dictionary<string, object> jsonData = (Dictionary<string, object>)response["data"];
         Array endpoints = (Array)jsonData["endpoints"];
         _rttHeaders = (Dictionary<string, object>)jsonData["auth"];
-        _brainCloudS2S.LogString("RTT Connect Callback");
+        _brainCloudS2S.LogString("RTT Connect Callback " + _rttConnectionStatus);
 
         //   1st choice: websocket + ssl
         //   2nd: websocket
@@ -495,40 +486,35 @@ public class Brainclouds2sRttComms
     }
 
     private void setupWebSocket(string in_url)
-     {
-         _webSocket = new BrainCloudWebSocket(in_url);
-         _webSocket.OnClose += webSocket_OnClose;
-         _webSocket.OnOpen += websocket_OnOpen;
-         _webSocket.OnMessage += webSocket_OnMessage;
-         _webSocket.OnError += webSocket_OnError;
-     }
+    {
+        _brainCloudS2S.LogString("setupWebSocket: " + in_url);
+        _webSocket = new BrainCloudWebSocket(in_url);
+        _webSocket.OnClose += webSocket_OnClose;
+        _webSocket.OnOpen += websocket_OnOpen;
+        _webSocket.OnMessage += webSocket_OnMessage;
+        _webSocket.OnError += webSocket_OnError;
+    }
 
     private void webSocket_OnClose(BrainCloudWebSocket sender, int code, string reason)
     {
-        if (_brainCloudS2S.LoggingEnabled)
-        {
-            _brainCloudS2S.LogString("RTT: Connection closed: " + reason);
-        }
+
+        _brainCloudS2S.LogString("RTT: Connection closed: " + reason);
         _webSocketStatus = WebsocketStatus.CLOSED;
         addQueueRTTResponse(new RTTCommandResponse("rttRegistration", "disconnect", reason));
     }
 
     private void websocket_OnOpen(BrainCloudWebSocket accepted)
     {
-        if (_brainCloudS2S.LoggingEnabled)
-        {
-            _brainCloudS2S.LogString("RTT: WebSocket is open.");
-        }
+
+        _brainCloudS2S.LogString("RTT: WebSocket is open.");
         _webSocketStatus = WebsocketStatus.OPEN;
         addQueueRTTResponse(new RTTCommandResponse("rttRegistration", "connect", ""));
     }
 
     private void webSocket_OnError(BrainCloudWebSocket sender, string message)
     {
-        if (_brainCloudS2S.LoggingEnabled)
-        {
-            _brainCloudS2S.LogString("RTT Error: " + message);
-        }
+
+        _brainCloudS2S.LogString("RTT Error: " + message);
         _webSocketStatus = WebsocketStatus.ERROR;
         addQueueRTTResponse(new RTTCommandResponse("rttRegistration", "error", buildRTTRequestError(message)));
     }
@@ -543,10 +529,8 @@ public class Brainclouds2sRttComms
 
     private void onRecv(string in_message)
     {
-        if (_brainCloudS2S.LoggingEnabled)
-        {
-            _brainCloudS2S.LogString("RTT RECV: " + in_message);
-        }
+
+        _brainCloudS2S.LogString("RTT RECV: " + in_message);
 
         Dictionary<string, object> response = (Dictionary<string, object>)JsonReader.Deserialize(in_message);
 
@@ -567,10 +551,8 @@ public class Brainclouds2sRttComms
             {
                 heartBeat = (int)data["wsHeartbeatSecs"];
             }
-            if(_brainCloudS2S.LoggingEnabled)
-            {
-                _brainCloudS2S.LogString("RTT WebSocket Connection Established.");
-            }
+
+            _brainCloudS2S.LogString("RTT WebSocket Connection Established.");
             _heartbeatRTTTime = TimeSpan.FromMilliseconds(heartBeat * 1000);
         }
         else if (operation == "DISCONNECT")
