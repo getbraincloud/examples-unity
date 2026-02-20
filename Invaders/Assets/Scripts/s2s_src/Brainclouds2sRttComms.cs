@@ -173,8 +173,7 @@ public class Brainclouds2sRttComms
             {
                 toProcessResponse = _queuedRTTCommands[i];
 
-                //the rtt websocket has closed and RTT needs to be re-enabled. disconnect is called to fully reset connection
-                //Failure Callback
+                // WebSocket closed — tear down and bail
                 if (_webSocketStatus == WebsocketStatus.CLOSED)
                 {
                     _rttConnectionCallback.callback("RTT Connection has been closed. Re-Enable RTT to re-establish connection :" + toProcessResponse.JsonMessage);
@@ -183,63 +182,41 @@ public class Brainclouds2sRttComms
                     break;
                 }
 
-                //the rtt websocket has closed and RTT needs to be re-enabled. disconnect is called to fully reset connection
-                //Failure callback
-                if (_webSocketStatus == WebsocketStatus.CLOSED)
+                // WebSocket just opened — send the RTT CONNECT handshake to the server
+                if (_rttConnectionStatus == RTTConnectionStatus.DISCONNECTED && toProcessResponse.Operation == "connect")
                 {
-                    _rttConnectionCallback.callback("RTT Connection has been closed. Re-Enable RTT to re-establish connection : " + toProcessResponse.JsonMessage);
-                    _rttConnectionStatus = RTTConnectionStatus.DISCONNECTING;
-                    disconnect();
-                    break;
+                    _rttConnectionStatus = RTTConnectionStatus.CONNECTING;
+                    sendRTTRequest(buildConnectionRequest());
                 }
 
-                // does this go to one of our registered service listeners?
-                if (_registeredCallback != null)
-                {
-                    _registeredCallback(toProcessResponse.JsonMessage);
-                }
-
-                // are we actually connected? only pump this back, when the server says we've connected
-                //Success Callback
+                // Server acknowledged our CONNECT — RTT is now live
                 else if (_rttConnectionStatus == RTTConnectionStatus.CONNECTING && _rttConnectionCallback.callback != null && toProcessResponse.Operation == "connect")
                 {
                     _sinceLastRTTHeartbeat = DateTime.Now.TimeOfDay;
-                    _rttConnectionCallback.callback(toProcessResponse.JsonMessage);
                     _rttConnectionStatus = RTTConnectionStatus.CONNECTED;
+                    _rttConnectionCallback.callback(toProcessResponse.JsonMessage);
                 }
 
-                //if we're connected and we get a disconnect - we disconnect the comms...
-                //Failure Callback
+                // Server sent a disconnect while we were connected
                 else if (_rttConnectionStatus == RTTConnectionStatus.CONNECTED && _rttConnectionCallback.callback != null && toProcessResponse.Operation == "disconnect")
                 {
                     _rttConnectionStatus = RTTConnectionStatus.DISCONNECTING;
                     disconnect();
                 }
 
-                //If there's an error, we send back the error
-                //Failure callback
+                // RTT-level error
                 else if (_rttConnectionCallback.callback != null && toProcessResponse.Operation == "error")
                 {
-                    if (toProcessResponse.JsonMessage != null)
-                    {
-                        _rttConnectionCallback.callback(toProcessResponse.JsonMessage);
-                    }
-                    else
-                    {
-                        _rttConnectionCallback.callback("Error - No Response from Server");
-                    }
+                    _rttConnectionCallback.callback(toProcessResponse.JsonMessage ?? "Error - No Response from Server");
                 }
 
-                //if we're not connected and we're trying to connect, then start the connection
-                else if (_rttConnectionStatus == RTTConnectionStatus.DISCONNECTED && toProcessResponse.Operation == "connect")
+                // Actual data message — forward to the registered callback
+                else if (_registeredCallback != null)
                 {
-                    // first time connecting? send the server connection call
-                    _rttConnectionStatus = RTTConnectionStatus.CONNECTING;
-                    sendRTTRequest(buildConnectionRequest());
+                    _registeredCallback(toProcessResponse.JsonMessage);
                 }
                 else
                 {
-
                     _brainCloudS2S.LogString("WARNING no handler registered for RTT callbacks ");
                 }
 

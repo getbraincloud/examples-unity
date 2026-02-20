@@ -120,28 +120,18 @@ public class BrainCloudS2SPrl
         return _s2s.AppId + ":sy:_lobby_" + instanceId;
     }
 
-    // Step 1: RTT connected — subscribe to the lobby status channel via HTTP S2S
+    // Step 1: RTT connected — subscribe to the lobby status channel
     private void OnRTTConnected(string responseString)
     {
         _s2s.LogString("[PRL] RTT connected. " + responseString + " Subscribing to channel: " + BuildChannelId());
         _state = PrlState.SubscribingChannel;
-        _s2s.Request(new Dictionary<string, object>
-        {
-            { "service", "chat" },
-            { "operation", "SYS_CHANNEL_CONNECT" },
-            { "data", new Dictionary<string, object>
-                {
-                    { "channelId", BuildChannelId() },
-                    { "maxReturn", 0 }
-                }
-            }
-        }, OnChannelSubscribed);
+        _s2s.ConnectToChannel(BuildChannelId(), OnChannelSubscribed);
     }
 
     // Step 2: Channel subscribed — notify brainCloud the room session has started
     private void OnChannelSubscribed(string responseString)
     {
-        _s2s.LogString("[PRL] Channel subscribed. Notifying session started.");
+        _s2s.LogString("[PRL] Channel subscribed. Notifying session started." + responseString);
         _state = PrlState.NotifyingSessionStarted;
         _s2s.Request(new Dictionary<string, object>
         {
