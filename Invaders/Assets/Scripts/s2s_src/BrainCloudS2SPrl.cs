@@ -223,15 +223,19 @@ public class BrainCloudS2SPrl
         catch { return null; }
     }
 
-    // Parses RTT push: { "service": "lobby", "operation": "LOBBY_STATUS", "data": { "state": "...", ... } }
+    // Parses RTT push: { "service": "chat", "operation": "INCOMING", "data": { "content": { "data": { "lobby": { "state": "..." } } } } }
     private string ParseLobbyStateFromRTT(string responseString)
     {
         try
         {
             var msg = (Dictionary<string, object>)JsonReader.Deserialize(responseString);
-            if (!(msg["service"] as string).Equals("lobby")) return null;
+            if (!(msg["service"] as string).Equals("chat")) return null;
+            if (!(msg["operation"] as string).Equals("INCOMING")) return null;
             var data = (Dictionary<string, object>)msg["data"];
-            return data["state"] as string;
+            var content = (Dictionary<string, object>)data["content"];
+            var contentData = (Dictionary<string, object>)content["data"];
+            var lobby = (Dictionary<string, object>)contentData["lobby"];
+            return lobby["state"] as string;
         }
         catch { return null; }
     }
