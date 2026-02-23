@@ -102,9 +102,8 @@ public class BrainCloudManager : MonoBehaviour
             string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
             string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
 
-            Debug.Log("CALLING INIT");
             _bcS2S.LoggingEnabled = true;
-            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.internal.braincloudservers.com/s2sdispatcher");
+            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.braincloudservers.com/s2sdispatcher");
         }
         else
         {
@@ -231,7 +230,7 @@ public class BrainCloudManager : MonoBehaviour
         var extra = new Dictionary<string, object>();
 
         string teamCode = "all";
-        string lobbyType = "SteveTest";//"InvaderParty";//
+        string lobbyType = "InvaderParty";
 
         //
         _wrapper.LobbyService.FindOrCreateLobby

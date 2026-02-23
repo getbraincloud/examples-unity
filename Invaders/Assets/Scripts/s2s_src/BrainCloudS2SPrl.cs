@@ -112,7 +112,7 @@ public class BrainCloudS2SPrl
     private string BuildChannelId()
     {
         // Lobby ID format: <appId>:<instanceId>
-        // Channel format:  <appId>:sy:_lobbystatus_<instanceId>
+        // Channel format:  <appId>:sy:_lobby_<instanceId>
         string instanceId = _lobbyId;
         int colonPos = _lobbyId.IndexOf(':');
         if (colonPos >= 0)
@@ -140,8 +140,7 @@ public class BrainCloudS2SPrl
             { "data", new Dictionary<string, object>
                 {
                     { "serverId", Environment.GetEnvironmentVariable("SERVER_ID") },
-                    { "serverContext", new Dictionary<string, object>
-                         { }//Environment.GetEnvironmentVariable("SERVER_CONTEXT")
+                    { "serverContext", Environment.GetEnvironmentVariable("SERVER_CONTEXT")
                     }
                 }
             }
