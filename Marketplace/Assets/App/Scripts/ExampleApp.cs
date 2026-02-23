@@ -61,7 +61,6 @@ public class ExampleApp : MonoBehaviour
     [SerializeField] private TMP_Text VersionInfoLabel = default;
 
     [Header("Panels")]
-    [SerializeField] private LoginPanel LoginPanel = default;
     [SerializeField] private LogoutPanel LogoutPanel = default;
     [SerializeField] private MainPanel MainPanel = default;
     [SerializeField] private StorePanel StorePanel = default;
@@ -219,35 +218,30 @@ public class ExampleApp : MonoBehaviour
         switch (state)
         {
             case PanelState.Login:
-                LoginPanel.gameObject.SetActive(true);
                 LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(false);
                 HistoryPanel.gameObject.SetActive(false);
                 break;
             case PanelState.Logout:
-                LoginPanel.gameObject.SetActive(false);
                 LogoutPanel.gameObject.SetActive(true);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(false);
                 HistoryPanel.gameObject.SetActive(false);
                 break;
             case PanelState.Main:
-                LoginPanel.gameObject.SetActive(false);
                 LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(true);
                 StorePanel.gameObject.SetActive(false);
                 HistoryPanel.gameObject.SetActive(false);
                 break;
             case PanelState.Store:
-                LoginPanel.gameObject.SetActive(false);
                 LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(true);
                 HistoryPanel.gameObject.SetActive(false);
                 break;
             case PanelState.History:
-                LoginPanel.gameObject.SetActive(false);
                 LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(false);
@@ -255,7 +249,6 @@ public class ExampleApp : MonoBehaviour
                 break;
             case PanelState.None:
             default:
-                LoginPanel.gameObject.SetActive(false);
                 LogoutPanel.gameObject.SetActive(false);
                 MainPanel.gameObject.SetActive(false);
                 StorePanel.gameObject.SetActive(false);

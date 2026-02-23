@@ -12,6 +12,7 @@ using UnityEngine.Purchasing;
 /// <br><seealso cref="BrainCloudAppStore"/></br>
 /// </summary>
 [Serializable]
+
 public class BCProduct
 {
     public string itemId;

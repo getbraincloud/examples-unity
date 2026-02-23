@@ -12,8 +12,13 @@ namespace Gameframework
         public Type GradientType = Type.Vertical;
         [Range(-1.5f, 1.5f)]
         public float Offset = 0f;
+
         public Color32 StartColor = Color.white;
         public Color32 EndColor = Color.black;
+        [SerializeField]
+        private Color SColor = Color.white;
+        [SerializeField]
+        private Color EColor = Color.black;
 
         public void ForceUpdate()
         {
@@ -52,7 +57,7 @@ namespace Gameframework
                         for (int i = 0; i < helper.currentVertCount; i++)
                         {
                             helper.PopulateUIVertex(ref v, i);
-                            v.color = Color32.Lerp(EndColor, StartColor, (v.position.y - fBottomY) * fUIElementHeight - Offset);
+                            v.color = Color.Lerp(EColor, SColor, (v.position.y - fBottomY) * fUIElementHeight - Offset);
                             helper.SetUIVertex(v, i);
                         }
                     }
@@ -78,7 +83,7 @@ namespace Gameframework
                         for (int i = 0; i < helper.currentVertCount; i++)
                         {
                             helper.PopulateUIVertex(ref v, i);
-                            v.color = Color32.Lerp(EndColor, StartColor, (v.position.x - fLeftX) * fUIElementWidth - Offset);
+                            v.color = Color.Lerp(EColor, SColor, (v.position.x - fLeftX) * fUIElementWidth - Offset);
                             helper.SetUIVertex(v, i);
                         }
 
