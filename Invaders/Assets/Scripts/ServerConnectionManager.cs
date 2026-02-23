@@ -161,7 +161,7 @@ public class ServerConnectionManager : NetworkBehaviour
 
         var requestDataJson = new Dictionary<string, object>();
         requestDataJson["serverId"] = Environment.GetEnvironmentVariable("SERVER_ID");
-        requestDataJson["serverContext"] = new Dictionary<string, object>();//Environment.GetEnvironmentVariable("SERVER_CONTEXT");
+        requestDataJson["serverContext"] = BrainCloudS2SPrl.ParseServerContext();
 
         requestJson["data"] = requestDataJson;
 

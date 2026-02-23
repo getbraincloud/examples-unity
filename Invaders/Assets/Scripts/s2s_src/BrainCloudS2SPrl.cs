@@ -140,8 +140,7 @@ public class BrainCloudS2SPrl
             { "data", new Dictionary<string, object>
                 {
                     { "serverId", Environment.GetEnvironmentVariable("SERVER_ID") },
-                    { "serverContext", Environment.GetEnvironmentVariable("SERVER_CONTEXT")
-                    }
+                    { "serverContext", ParseServerContext() }
                 }
             }
         }, OnSessionStartedNotified);
@@ -237,5 +236,16 @@ public class BrainCloudS2SPrl
             return lobby["state"] as string;
         }
         catch { return null; }
+    }
+
+    public static Dictionary<string, object> ParseServerContext()
+    {
+        try
+        {
+            string val = Environment.GetEnvironmentVariable("SERVER_CONTEXT") ?? "{}";
+            val = val.Trim().Trim('\'').Replace("\\\"", "\"");
+            return JsonReader.Deserialize(val) as Dictionary<string, object> ?? new Dictionary<string, object>();
+        }
+        catch { return new Dictionary<string, object>(); }
     }
 }
