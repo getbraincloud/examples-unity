@@ -996,6 +996,16 @@ using System.Xml;
                 IDictionaryEnumerator enumerator = value.GetEnumerator() as IDictionaryEnumerator;
                 if (enumerator == null)
                 {
+                    // .NET generic Dictionary<TKey,TValue> returns a generic enumerator from
+                    // IEnumerable.GetEnumerator(), but it also implements the non-generic IDictionary
+                    // whose GetEnumerator() does return an IDictionaryEnumerator.
+                    if (value is System.Collections.IDictionary dict)
+                    {
+                        enumerator = dict.GetEnumerator();
+                    }
+                }
+                if (enumerator == null)
+                {
                     throw new JsonSerializationException(String.Format(JsonWriter.ErrorIDictionaryEnumerator, value.GetType()));
                 }
 

@@ -13,8 +13,6 @@ using System.Collections.Generic;
 using System.Text;
 #if DOT_NET
 using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Threading;
 #endif
 #if USE_WEB_REQUEST
@@ -61,6 +59,10 @@ public class BrainCloudS2S
     {
         get; set;
     }
+    public BrainCloudS2SGlobalFileV3 GlobalFileV3
+    {
+        get; private set;
+    }
 
     public enum State
     {
@@ -70,7 +72,7 @@ public class BrainCloudS2S
     }
 
     private long _packetId = 0;
-    private long _heartbeatSeconds = 1800; //Default to 30 mins  
+    private long _heartbeatSeconds = 1800; //Default to 30 mins
     private State _state = State.Disconnected;
     private bool _autoAuth = false;
     private TimeSpan _heartbeatTimer;
@@ -133,7 +135,10 @@ public class BrainCloudS2S
             _rttComms = new Brainclouds2sRttComms();
         }
 
-        LogString($"Initialized S2S AppId:{appId} ServerName:{serverName} ServerSecret:{serverSecret} ServerUrl:{serverUrl} ");
+        GlobalFileV3 = new BrainCloudS2SGlobalFileV3(this);
+        GlobalFileV3.Init(serverUrl);
+
+        LogString($"Initialized S2S AppId:{appId} ServerName:{serverName} ServerSecret:{serverSecret} ServerUrl:{serverUrl} UploadUrl:{GlobalFileV3.UploadURL}");
     }
 
     /**
@@ -205,7 +210,7 @@ public class BrainCloudS2S
 
     public void QueueRequest(string jsonRequestData, S2SCallback callback)
     {
-        Debug.Log("[S2S] Queuing request: " + jsonRequestData);
+        LogString("[S2S] Queuing request: " + jsonRequestData);
 #if DOT_NET
         //create new request
         HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(ServerURL);
@@ -215,7 +220,7 @@ public class BrainCloudS2S
         httpRequest.ContentType = "application/json; charset=utf-8";
 #endif
 #if USE_WEB_REQUEST
-        
+
         //create new request
         UnityWebRequest httpRequest = UnityWebRequest.Post(ServerURL, new Dictionary<string, string>());
 
@@ -263,7 +268,7 @@ public class BrainCloudS2S
         byte[] byteArray = Encoding.UTF8.GetBytes(packet);          //convert data packet to byte[]
 
         Stream requestStream = request.GetRequestStream();          //gets a stream to send dataPacket for request
-        requestStream.Write(byteArray, 0, byteArray.Length);        //writes dataPacket to stream and sends data with request. 
+        requestStream.Write(byteArray, 0, byteArray.Length);        //writes dataPacket to stream and sends data with request.
         request.ContentLength = byteArray.Length;
     }
 #endif
@@ -290,7 +295,7 @@ public class BrainCloudS2S
 
     public void Authenticate(S2SCallback callback)
     {
-        Debug.Log("[S2S] Authenticating");
+        LogString("[S2S] Authenticating");
         _state = State.Authenticating;
         string jsonAuthString = "{\"service\":\"authenticationV2\",\"operation\":\"AUTHENTICATE\",\"data\":{\"appId\":\"" + AppId + "\",\"serverName\":\"" + ServerName + "\",\"serverSecret\":\"" + ServerSecret + "\"}}";
         _packetId = 0;
@@ -310,7 +315,7 @@ public class BrainCloudS2S
     private string ReadResponseBody(HttpWebResponse response)
     {
         Stream receiveStream = response.GetResponseStream();                        // Get the stream associated with the response.
-        StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);   // Pipes the stream to a higher level stream reader with the required encoding format. 
+        StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);   // Pipes the stream to a higher level stream reader with the required encoding format.
         return readStream.ReadToEnd();
     }
 #endif
@@ -434,9 +439,12 @@ public class BrainCloudS2S
                         _requestQueue.RemoveAt(0);
                     }
                 }
-                activeRequest.request = null; //reset the active request so that it can move onto the next request. 
+                activeRequest.request = null; //reset the active request so that it can move onto the next request.
             }
         }
+
+        GlobalFileV3.RunCallbacks();
+
         //do a heartbeat if necessary.
         if (_state == State.Authenticated)
         {
@@ -462,6 +470,7 @@ public class BrainCloudS2S
         _state = State.Disconnected;
         SessionId = null;
         _packetId = 0;
+        GlobalFileV3.Disconnect();
         DisableRTT();
     }
 
