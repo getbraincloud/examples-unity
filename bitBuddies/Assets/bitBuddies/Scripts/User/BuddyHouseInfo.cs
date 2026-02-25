@@ -66,6 +66,11 @@ public class BuddyHouseInfo : MonoBehaviour
 	
 	private void GoToBuddysRoom()
 	{
+		//Increment stat for visited buddies
+		var statData = new Dictionary<string, object>();
+		statData.Add(BitBuddiesConsts.VISIT_BUDDIES_STAT_NAME, 1);
+		BrainCloudManager.Client.PlayerStatisticsService.IncrementUserStats(statData.Serialize());
+
 		GameManager.Instance.SelectedAppChildrenInfo = HouseInfo;
 		StateManager.Instance.GoToBuddysRoom();		
 	}
@@ -73,7 +78,11 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnDeleteButton()
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
-		if(HouseInfo.profileName.IsNullOrEmpty())
+		if (GameManager.Instance.AppChildrenInfos.Count <= 1)
+		{
+			popUp.SetUpInfoPopup(BitBuddiesConsts.CANT_DELETE_BUDDY_TITLE, BitBuddiesConsts.CANT_DELETE_BUDDY_MESSAGE);
+		}
+		else if(HouseInfo.profileName.IsNullOrEmpty())
 		{
 			string titleMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
 			string bodyMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";

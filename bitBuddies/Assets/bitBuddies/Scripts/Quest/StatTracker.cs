@@ -41,4 +41,9 @@ public class StatTracker : MonoBehaviour
         _stats[statName] = 0;
         OnStatChanged?.Invoke(statName, _stats[statName]);
     }
+
+    public void ResetAllStats()
+    {
+        _stats.Clear();
+    }
 }

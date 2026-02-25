@@ -58,6 +58,7 @@ public class UserInfo
     
     public void UpdateStats(Dictionary<string, object> in_jsonForStats)
     {
+        StatTracker.Instance.ResetAllStats();
         foreach (KeyValuePair<string,object> stat in in_jsonForStats)
         {
             StatTracker.Instance.IncrementStat(stat.Key, (int) stat.Value);

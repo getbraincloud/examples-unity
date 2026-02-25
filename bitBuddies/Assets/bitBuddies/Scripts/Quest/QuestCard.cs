@@ -38,7 +38,12 @@ public class QuestCard : MonoBehaviour
     {
         ProgressSlider.value = incremented;
     }
-    
+
+    private void OnDestroy()
+    {
+        StatTracker.OnStatChanged -= OnStatChange;
+    }
+
     public void SetupCard(QuestInfo in_questInfo)
     {
         _questInfo = in_questInfo;

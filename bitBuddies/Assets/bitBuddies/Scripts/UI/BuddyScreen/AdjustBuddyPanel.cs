@@ -86,5 +86,6 @@ public class AdjustBuddyPanel : MonoBehaviour
         StateManager.Instance.OpenInfoPopUp("Name updated successfully", $"{BuddyInputField.text} has been updated to your profile");
         GameManager.Instance.SelectedAppChildrenInfo.profileName = BuddyInputField.text;
         GameManager.Instance.UpdateChildAppInfo(GameManager.Instance.SelectedAppChildrenInfo);
+        StateManager.Instance.RefreshScreen();
     }
 }

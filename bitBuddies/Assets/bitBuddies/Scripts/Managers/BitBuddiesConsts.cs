@@ -81,6 +81,7 @@ namespace Gameframework
         public const string DELETE_BUDDYS_ROOM_FAILED_TITLE = "Something went wrong";
         public const string DELETE_BUDDYES_ROOM_FAILED_MESSAGE = "There was an error while attempting to delete the requested buddy's room, please try again later";
         public const string DEFAULT_BUDDY_NAME = "MyBuddy";
+        
             //Settings
         public const string ATTACH_EMAIL_SUCCESS_TITLE = "Attach Email Successful";
         public const string ATTACH_EMAIL_SUCCESS_MESSAGE = "Email address entered is now attached to this account.";
@@ -96,5 +97,9 @@ namespace Gameframework
 
         public const string SOMETHING_WENT_WRONG_TITLE = "Something went wrong";
         public const string SOMETHING_WENT_WRONG_MESSAGE = "Something went wrong, please try again later.";
+        
+            //Parent Screen
+        public const string CANT_DELETE_BUDDY_TITLE = "Cant Delete Buddy";
+        public const string CANT_DELETE_BUDDY_MESSAGE = "You cant have zero buddies, try again later when you have more than 1 buddy";
     }
 }
