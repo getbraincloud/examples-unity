@@ -29,12 +29,12 @@ public class BrainCloudManager : MonoBehaviour
         get => _currentLobby;
         set => _currentLobby = value;
     }
-    
+
     public int LobbyMemberCount
     {
         get => _currentLobby.Members.Count;
     }
-    
+
     public BrainCloudS2S S2SWrapper
     {
         get => _bcS2S;
@@ -95,15 +95,15 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         if (IsDedicatedServer)
-        {       
+        {
             Debug.Log("Initializing S2S on server");
-            _bcS2S = new BrainCloudS2S();
+            //_bcS2S = new BrainCloudS2S();
             string appId = Environment.GetEnvironmentVariable("APP_ID");
             string serverName = Environment.GetEnvironmentVariable("SERVER_NAME");
             string serverSecret = Environment.GetEnvironmentVariable("SERVER_SECRET");
-            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.braincloudservers.com/s2sdispatcher");
-            //_bcS2S.Authenticate();
+
             _bcS2S.LoggingEnabled = true;
+            _bcS2S.Init(appId, serverName, serverSecret, true, "https://api.braincloudservers.com/s2sdispatcher");
         }
         else
         {
@@ -120,9 +120,9 @@ public class BrainCloudManager : MonoBehaviour
             _unityTransport.SetConnectionData("0.0.0.0", 7777);
             _netManager.StartServer();
         }
-        else if(_wrapper.CanReconnect())
+        else if (_wrapper.CanReconnect())
         {
-            _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);            
+            _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
         }
     }
 
@@ -136,12 +136,12 @@ public class BrainCloudManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        if(_wrapper.Client.Authenticated)
+        if (_wrapper.Client.Authenticated)
         {
             _wrapper.LogoutOnApplicationQuit(false);
         }
     }
-    
+
     public void Logout()
     {
         _wrapper.LogoutOnApplicationQuit(true);
@@ -154,7 +154,7 @@ public class BrainCloudManager : MonoBehaviour
         LocalUserInfo.Username = in_username;
         _wrapper.AuthenticateUniversal(in_username, in_password, true, OnAuthenticateSuccess, OnFailureCallback);
     }
-    
+
     private void OnAuthenticateSuccess(string jsonResponse, object cbObject)
     {
         var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
@@ -171,9 +171,9 @@ public class BrainCloudManager : MonoBehaviour
         else
         {
             LocalUserInfo.Username = playerName;
-            MenuControl.Singleton.SwitchMenuButtons();            
+            MenuControl.Singleton.SwitchMenuButtons();
         }
-        if(!MenuControl.Singleton.RememberMeToggle.isOn)
+        if (!MenuControl.Singleton.RememberMeToggle.isOn)
         {
             _wrapper.ResetStoredProfileId();
             _wrapper.Client.AuthenticationService.ProfileId = _localUserInfo.ProfileID;
@@ -183,11 +183,11 @@ public class BrainCloudManager : MonoBehaviour
 
         EnableRTTAndLobbyCallbacks();
     }
-    
+
     [ServerRpc]
     public void AddUserToList(string in_username, ulong in_clientID)
     {
-        if(IsDedicatedServer)
+        if (IsDedicatedServer)
         {
             UserScoreInfo user = new UserScoreInfo();
             user.clientName = in_username;
@@ -206,7 +206,7 @@ public class BrainCloudManager : MonoBehaviour
         _wrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         _wrapper.RTTService.EnableRTT(OnRTTConnected, OnFailureCallback);
     }
-    
+
     public void FindOrCreateLobby()
     {
         if (!_wrapper.RTTService.IsRTTEnabled())
@@ -250,17 +250,17 @@ public class BrainCloudManager : MonoBehaviour
             "Failed to find lobby"
         );
     }
-    
+
     public void LeaveLobby()
     {
         _wrapper.LobbyService.LeaveLobby(_currentLobby.LobbyID, null, OnFailureCallback);
     }
-    
+
     void OnRTTConnected(string jsonResponse, object cbObject)
     {
-        
+
     }
-    
+
     void OnLobbyEvent(string jsonResponse)
     {
         Dictionary<string, object> response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
@@ -274,7 +274,7 @@ public class BrainCloudManager : MonoBehaviour
         if (jsonData.ContainsKey("lobby") && (string)response["operation"] != "SETTINGS_UPDATE")
         {
             _currentLobby = new Lobby(jsonData["lobby"] as Dictionary<string, object>, jsonData["lobbyId"] as string);
-                
+
             if (MenuControl.Singleton.IsLoading)
             {
                 MenuControl.Singleton.IsLoading = false;
@@ -286,7 +286,7 @@ public class BrainCloudManager : MonoBehaviour
             _localUserInfo.PassCode = jsonData["passcode"] as string;
         }
 
-        
+
         //Using the key "operation" to determine what state the lobby is in
         if (response.ContainsKey("operation"))
         {
@@ -325,7 +325,7 @@ public class BrainCloudManager : MonoBehaviour
                 case "STARTING":
                     break;
                 case "ROOM_ASSIGNED":
-                    if(LobbyControl.Singleton != null)
+                    if (LobbyControl.Singleton != null)
                     {
                         LobbyControl.Singleton.LoadingIndicatorMessage = "Server room is assigned";
                     }
@@ -335,7 +335,7 @@ public class BrainCloudManager : MonoBehaviour
                     _roomPort = (int)ports["7777/tcp"];
                     break;
                 case "ROOM_READY":
-                    if(LobbyControl.Singleton != null)
+                    if (LobbyControl.Singleton != null)
                     {
                         LobbyControl.Singleton.LoadingIndicatorMessage = "Room is ready";
                         LobbyControl.Singleton.IsLoading = false;
@@ -379,10 +379,10 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> extra = new Dictionary<string, object>();
         _wrapper.LobbyService.UpdateReady(_currentLobby.LobbyID, true, extra);
     }
-    
+
     public void SendNewIdSignal(string[] newIds)
     {
-        Dictionary<string, object> replayUsers = new Dictionary<string, object> { { "replay_users",  newIds} };
+        Dictionary<string, object> replayUsers = new Dictionary<string, object> { { "replay_users", newIds } };
         if (isLobbyOwner)
             _wrapper.LobbyService.UpdateSettings(CurrentLobby.LobbyID, replayUsers, null, OnFailureCallback);
         else
@@ -419,7 +419,7 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
 
-        if(leaderboard.Count() != 0)
+        if (leaderboard != null && leaderboard.Count() != 0)
         {
             Dictionary<string, object> userData = leaderboard[0];
 
@@ -444,71 +444,71 @@ public class BrainCloudManager : MonoBehaviour
         Dictionary<string, object> response = JsonReader.Deserialize(in_jsonResponse) as Dictionary<string, object>;
         Dictionary<string, object> data = response["data"] as Dictionary<string, object>;
         Dictionary<string, object>[] leaderboard = data["leaderboard"] as Dictionary<string, object>[];
-        
+
         foreach (Dictionary<string, object> userData in leaderboard)
         {
             LobbyControl.Singleton.UpdateLeaderBoardSelector(
-                (int)userData["rank"], 
-                (string)userData["playerId"], 
-                (string)userData["name"], 
+                (int)userData["rank"],
+                (string)userData["playerId"],
+                (string)userData["name"],
                 (int)userData["score"]
                 );
         }
         foundTopUserInfo = true;
     }
-    
+
     private void OnFailureCallback(int statusCode, int reasonCode, string statusMessage, object cbObject)
     {
         string genericMessage = "An error has been received, please restart the game and try again. For more details check the editor console for logs.";
         Debug.Log("Error: " + statusMessage);
-        if(LobbyControl.Singleton != null)
+        if (LobbyControl.Singleton != null)
         {
-            if(reasonCode == ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT)
+            if (reasonCode == ReasonCodes.CLIENT_NETWORK_ERROR_TIMEOUT)
             {
                 LobbyControl.Singleton.SetupPopupPanel("Connection interrupted. Please check your internet connection and try again.");
                 return;
             }
-            if(reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
+            if (reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
             {
                 MenuControl.Singleton.SetupPopupPanel("This account was logged into a new location. This session has ended.");
                 MenuControl.Singleton.Logout();
                 return;
             }
-            if(reasonCode == -1 && statusCode == 400)
+            if (reasonCode == -1 && statusCode == 400)
             {
-                if(statusMessage.Contains("RTT Connection has been closed.") ||
+                if (statusMessage.Contains("RTT Connection has been closed.") ||
                    statusMessage.Contains("Re-Enable RTT to re-establish connection"))
                 {
                     _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
                     return;
                 }
             }
-            
+
             LobbyControl.Singleton.SetupPopupPanel(genericMessage);
         }
-        else if(MenuControl.Singleton != null)
+        else if (MenuControl.Singleton != null)
         {
-            if(reasonCode == ReasonCodes.TOKEN_DOES_NOT_MATCH_USER)
+            if (reasonCode == ReasonCodes.TOKEN_DOES_NOT_MATCH_USER)
             {
                 MenuControl.Singleton.SetupPopupPanel("You've entered your password incorrectly. Please try again.");
                 return;
             }
-            if(reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
+            if (reasonCode == ReasonCodes.PLAYER_SESSION_LOGGED_OUT)
             {
                 MenuControl.Singleton.SetupPopupPanel("This account was logged into a new location. This session has ended.");
                 MenuControl.Singleton.Logout();
                 return;
             }
-            if(reasonCode == -1 && statusCode == 400)
+            if (reasonCode == -1 && statusCode == 400)
             {
-                if(statusMessage.Contains("RTT Connection has been closed.") ||
+                if (statusMessage.Contains("RTT Connection has been closed.") ||
                    statusMessage.Contains("Re-Enable RTT to re-establish connection"))
                 {
                     _wrapper.Reconnect(OnAuthenticateSuccess, OnFailureCallback);
                     return;
                 }
             }
-            
+
             MenuControl.Singleton.SetupPopupPanel(genericMessage);
         }
     }
