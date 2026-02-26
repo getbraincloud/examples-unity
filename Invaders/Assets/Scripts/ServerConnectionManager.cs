@@ -23,7 +23,7 @@ public class ServerConnectionManager : NetworkBehaviour
     private Coroutine _serverShutdownCR;
     private string _publicIP;
     private string _lobbyId;
-    private BrainCloudS2SPrl _prl;
+    private BrainCloudS2SPrl _prl; // Pre Ready Launch Support for custom servers launched by brainCloud
 
 
     private void Awake()
