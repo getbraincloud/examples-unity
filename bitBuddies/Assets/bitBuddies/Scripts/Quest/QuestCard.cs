@@ -30,6 +30,7 @@ public class QuestCard : MonoBehaviour
     [SerializeField] private Slider ProgressSlider;
     [SerializeField] private Image RewardIcon;
     [SerializeField] private TextMeshProUGUI RewardText;
+    [SerializeField] private Button ClaimButton;
     
 
     private QuestInfo _questInfo;
@@ -49,9 +50,23 @@ public class QuestCard : MonoBehaviour
         _questInfo = in_questInfo;
         QuestTitleText.text = _questInfo.QuestTitle;
         StatTracker.OnStatChanged += OnStatChange;
-        ProgressSlider.value = StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack);
-        ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
-        ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
+        int questValue = StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack);
+        if(questValue >= _questInfo.QuestRequiredProgress)
+        {
+            ClaimButton.gameObject.SetActive(true);
+            ProgressSlider.value = questValue;
+            ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
+            ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
+            ProgressSlider.fillRect.GetComponent<Image>().color = Color.green;            
+        }
+        else
+        {
+            ClaimButton.gameObject.SetActive(false);
+            ProgressSlider.value = questValue;
+            ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
+            ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
+        }
+
         RewardText.text = $"{_questInfo.QuestRewardAmount}";
 
         switch (_questInfo.RewardCurrencyType)
