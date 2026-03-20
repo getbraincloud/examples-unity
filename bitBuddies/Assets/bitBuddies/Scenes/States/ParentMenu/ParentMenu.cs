@@ -27,6 +27,8 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
     [SerializeField] private QuestPanel QuestPanelPrefab;
     [SerializeField] private Button OpenQuestPanelButton;
+    [SerializeField] private ParentShop ParentShopPrefab;
+    [SerializeField] private Button OpenParentShopButton;
 
     private float textGoldSpawnOffset = 40f;
     private float textLevelSpawnOffset = -40f;
@@ -53,6 +55,7 @@ public class ParentMenu : ContentUIBehaviour
         InitializeUI();
         OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
         OpenQuestPanelButton.onClick.AddListener(OpenQuestPanel);
+        OpenParentShopButton.onClick.AddListener(OpenParentShop);
         BuddyHouseInfo.OnCoinsCollected += UpdateValueText;
         BuddyHouseInfo.OnCoinsCollected += SpawnCurrencyAddedAnimation;
         StartCoroutine(LoopCheckCoins());
@@ -134,6 +137,7 @@ public class ParentMenu : ContentUIBehaviour
         IncreaseLevelButton.onClick.RemoveAllListeners();
         OpenSettingsButton.onClick.RemoveAllListeners();
         OpenQuestPanelButton.onClick.RemoveAllListeners();
+        OpenParentShopButton.onClick.RemoveAllListeners();
     }
 
     public void SetupHouses()
@@ -169,6 +173,12 @@ public class ParentMenu : ContentUIBehaviour
     {
         var questPanel = Instantiate(QuestPanelPrefab, transform);
         questPanel.SetUpPanel();
+    }
+    
+    private void OpenParentShop()
+    {
+        var parentShopPanel = Instantiate(ParentShopPrefab, transform);
+        parentShopPanel.SetupShop();
     }
     
     public void OpenMysteryBoxPanel()

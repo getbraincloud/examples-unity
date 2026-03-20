@@ -51,6 +51,18 @@ public struct ToyBenchInfo
 }
 
 [Serializable]
+public struct ParentShopInfo
+{
+	public string ShopId;
+	public string DisplayName;
+	public int BuyCost;
+	public int Payout;
+	public CurrencyTypes BuyCurrency;
+	public CurrencyTypes PayoutCurrency;
+	public Sprite ItemIcon;
+}
+
+[Serializable]
 public class AppChildrenInfo
 {
 	public string profileName { get; set; }

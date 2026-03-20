@@ -26,7 +26,7 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private Button ExitCornerButton;
     [SerializeField] private Button ShopButton;
     [SerializeField] private Button StatsButton;
-    [SerializeField] private ToyShop ToyShop;
+    [SerializeField] private Shop shop;
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
     [SerializeField] private Button BuddyOverviewButton;
     [SerializeField] private AdjustBuddyPanel AdjustBuddyPanelPrefab;
@@ -35,7 +35,6 @@ public class BuddysRoom : ContentUIBehaviour
     private int _increaseXpAmount;
     private bool _isShopOpen;
     private AppChildrenInfo _appChildrenInfo;
-    public AppChildrenInfo AppChildrenInfo { get { return _appChildrenInfo; } }
  
     protected override void Awake()
     {
@@ -115,7 +114,7 @@ public class BuddysRoom : ContentUIBehaviour
     {
         if(_isShopOpen) return;
         _isShopOpen = true;
-        Instantiate(ToyShop, transform);
+        Instantiate(shop, transform);
     }
     
     public void ShopClosed()
