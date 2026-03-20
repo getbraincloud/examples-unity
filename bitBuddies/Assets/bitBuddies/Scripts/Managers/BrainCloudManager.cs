@@ -227,8 +227,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
         var response = data["response"] as Dictionary<string, object>;
         var quests = response["quests"] as Dictionary<string, object>[];
-        var listOfActiveQuests =  new List<QuestInfo>();
-        var listOfLockedQuests =  new List<QuestInfo>();
+        var listOfQuests =  new List<QuestInfo>();
         if(quests == null || quests.Length == 0) return;
         
         for (int i = 0; i < quests.Length; ++i)
@@ -239,25 +238,17 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             questInfo.QuestId = quests[i]["questId"] as string;
             questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
             questInfo.QuestLineIndex = (int) quests[i]["questLineIndex"];
-            questInfo.QuestRequiredProgress = (int) quests[i]["thresholdRequired"];
+            questInfo.QuestRequiredProgress = Convert.ToInt32(quests[i]["thresholdRequired"]);
             
             var rewards = quests[i]["reward"] as Dictionary<string, object>;
             string key = rewards.Keys.First();
             questInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(char.ToUpper(key[0]) + key.Substring(1));
             questInfo.QuestRewardAmount = (int)rewards.Values.First();
             
-            if(questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || 
-                questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)
-            {
-                listOfActiveQuests.Add(questInfo);                
-            }
-            else if(questInfo.QuestStatus == QUEST_STATUS.LOCKED)
-            {
-                listOfLockedQuests.Add(questInfo);                
-            }
+            listOfQuests.Add(questInfo);
         }
-        
-        GameManager.Instance.SetQuestsLists(listOfActiveQuests, listOfLockedQuests);
+        listOfQuests.Sort((x, y) => x.QuestLineIndex.CompareTo(y.QuestLineIndex));
+        GameManager.Instance.SetQuestsLists(listOfQuests);
     }
     
     private void OnGetItemCatalog(string jsonResponse)

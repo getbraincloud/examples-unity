@@ -158,6 +158,19 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 					{
 						selectedAppChildInfo.previousLevelUp =  (int) xpResult["previousLevelUpReq"];
 					}
+
+					//Check for stats for UI updates
+					bool didBuddyLevelUp = (bool) xpResult["buddyLeveledUp"];
+					if(didBuddyLevelUp)
+					{
+						StatTracker.Instance.IncrementStat(BitBuddiesConsts.BUDDIES_LEVELED_UP_STAT_NAME);
+					}
+					
+					bool didBuddyLevelUpTo5 = (bool) xpResult["didCatchLevel5"];
+					if(didBuddyLevelUpTo5)
+					{
+						StatTracker.Instance.IncrementStat(BitBuddiesConsts.LEVEL5_BUDDIES_STAT_NAME);
+					}
 				}
 			}
 			
@@ -213,9 +226,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		 * Love aka xp
 		 */
 		
-		GameManager.Instance.SelectedAppChildrenInfo = selectedAppChildInfo;
-		GameManager.Instance.UpdateSelectedAppChildrenInfo();
-		//StateManager.Instance.RefreshScreen();
+		StateManager.Instance.RefreshScreen();
 	}
 	
 	private void CheckForSendingRewards()
@@ -377,6 +388,13 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			var currencyMap = currencyData["currencyMap"] as Dictionary<string, object>;
 			var coins = currencyMap["coins"] as Dictionary<string, object>;
 			BrainCloudManager.Instance.CurrentUserInfo.UpdateCoins((int) coins["balance"]);
+		}
+		
+		StatTracker.Instance.IncrementStat(BitBuddiesConsts.TOYS_BOUGHT_STAT_NAME);
+		
+		if(_selectedToyId.Equals("scienceTable"))
+		{
+			StatTracker.Instance.IncrementStat(BitBuddiesConsts.SCIENCE_KITS_BOUGHT_STAT_NAME);
 		}
 		
 		GameManager.Instance.SelectedAppChildrenInfo.ownedToys.Add(_selectedToyId);

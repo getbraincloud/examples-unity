@@ -111,7 +111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00042725, y: -67.9}
+  m_AnchoredPosition: {x: -0.00042725, y: -66.5}
   m_SizeDelta: {x: 151.5823, y: 43.3279}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8517806651240211981
@@ -335,6 +335,7 @@ MonoBehaviour:
   RewardIcon: {fileID: 5188064257103837231}
   RewardText: {fileID: 2362275658885463337}
   ClaimButton: {fileID: 557961519229323391}
+  BGImage: {fileID: 1359003458203001500}
 --- !u!1 &2553909469401045081
 GameObject:
   m_ObjectHideFlags: 0
@@ -934,7 +935,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 1, g: 1, b: 1, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -948,7 +949,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 6919512600565613142}
   m_FillRect: {fileID: 2741272573433841498}
   m_HandleRect: {fileID: 0}
@@ -1132,7 +1133,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 49.6108, y: 36.204}
+  m_SizeDelta: {x: 239.07, y: 36.204}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3856517103981221023
 CanvasRenderer:
@@ -1162,7 +1163,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0/3
+  m_text: 9999/9999
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 44f0725d0af084810bbfe5a55c337a37, type: 2}
   m_sharedMaterial: {fileID: 3650126635679316708, guid: 44f0725d0af084810bbfe5a55c337a37, type: 2}

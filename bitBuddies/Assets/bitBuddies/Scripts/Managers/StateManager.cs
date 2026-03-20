@@ -51,6 +51,7 @@ public class StateManager : SingletonBehaviour<StateManager>
 	//The idea here is to use InitializeUI to re-assign the UI elements to the updated variables. 
 	public void RefreshScreen()
 	{
+		GameManager.Instance.UpdateSelectedAppChildrenInfo();
 		var screens = FindObjectsByType<ContentUIBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 		foreach (ContentUIBehaviour screen in screens)
 		{

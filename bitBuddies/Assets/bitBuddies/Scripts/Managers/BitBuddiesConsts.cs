@@ -20,6 +20,8 @@ namespace Gameframework
         public const string AWARD_BLING_TO_CHILD_SCRIPT_NAME = "AwardBlingToChild";
         public const string INCREASE_XP_FOR_PARENT_SCRIPT_NAME = "IncreaseXPForParent";
         public const string GET_QUEST_INFO_SCRIPT_NAME = "GetQuestInfo";
+        public const string CLAIM_QUEST_SCRIPT_NAME = "ClaimQuestReward";
+
         
         public const string GET_STATS_SCRIPT_NAME = "child/fetchStats";
         public const string GET_CURRENCIES_SCRIPT_NAME = "child/fetchCurrencies";
@@ -41,9 +43,9 @@ namespace Gameframework
         public const string CONSUME_TOY_SCRIPT_NAME = "child/consumeToy";
 
         //Quest Line names
-        public const string BITBUDDIES_QUESTLINEID = "bitBuddyQuestLine";
-        public const string GENERAL_QUESTLINEID = "generalQuestLine";
-        public const string BITBLING_QUESTLINEID = "bitBlingQuestLine";
+        public const string BITBUDDIES_QUESTLINEID = "bitBuddiesQuestTier";
+        public const string GENERAL_QUESTLINEID = "generalQuestTier";
+        public const string BITBLING_QUESTLINEID = "bitBlingQuestTier";
 
         //Stat Names
         public const string PLAYER_STAT_LEVEL_NAME = "Level";

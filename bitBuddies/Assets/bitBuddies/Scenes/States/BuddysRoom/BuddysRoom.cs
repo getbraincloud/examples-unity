@@ -207,7 +207,7 @@ public class BuddysRoom : ContentUIBehaviour
         var listOfApps = GameManager.Instance.AppChildrenInfos;
         for (int i = 0; i < listOfApps.Count; i++)
         {
-            if(_appChildrenInfo == listOfApps[i])
+            if(_appChildrenInfo.profileId.Equals(listOfApps[i].profileId))
             {
                 listOfApps[i] = _appChildrenInfo;
             }

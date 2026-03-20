@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class QuestPanel : MonoBehaviour
@@ -11,74 +12,160 @@ public class QuestPanel : MonoBehaviour
 	[SerializeField] private Transform BitBuddiesSpawnPoint;
 	[SerializeField] private Transform BitBlingSpawnPoint;
 	[SerializeField] private Transform GeneralSpawnPoint;
+	[SerializeField] private Button NextPageButton;
+	[SerializeField] private Button PreviousPageButton;
+	[SerializeField] private Button CloseButton;
 	
-	private QuestCard _activeBitBuddyCard;
-	private QuestCard _activeBitBlingCard;
-	private QuestCard _activeGeneralCard;
+	private QuestCard _firstRowBitBuddyCard;
+	private QuestCard _firstRowBitBlingCard;
+	private QuestCard _firstRowGeneralCard;
 	
-	private QuestCard _lockedBitBuddyCard;
-	private QuestCard _lockedBitBlingCard;
-	private QuestCard _lockedGeneralCard;
+	private QuestCard _secondRowBitBuddyCard;
+	private QuestCard _secondRowBitBlingCard;
+	private QuestCard _secondRowGeneralCard;
+
+	private int _pageIndex;
 	
 	public void SetUpPanel()
 	{
 		GameManager gameManager = GameManager.Instance;
-		
-		SetUpQuestCard(gameManager.GeneralQuestsActive, gameManager.GeneralQuestsLocked, GeneralSpawnPoint);		
-		SetUpQuestCard(gameManager.BitBuddiesQuestsActive, gameManager.BitBuddiesQuestsLocked, BitBuddiesSpawnPoint);
-		SetUpQuestCard(gameManager.BitBlingQuestsActive, gameManager.BitBlingQuestsLocked, BitBlingSpawnPoint);
+		NextPageButton.onClick.AddListener(OnNextPageButton);
+		PreviousPageButton.onClick.AddListener(OnPreviousPageButton);
+		CloseButton.onClick.AddListener(OnCloseButtonPressed);
+		_pageIndex = 0;
+		SetUpQuestCard(gameManager.GeneralQuests, GeneralSpawnPoint);		
+		SetUpQuestCard(gameManager.BitBuddiesQuests, BitBuddiesSpawnPoint);
+		SetUpQuestCard(gameManager.BitBlingQuests, BitBlingSpawnPoint);
 	}
 	
-	private void SetUpQuestCard(List<QuestInfo> listOfActiveQuests, List<QuestInfo> listOfLockedQuests, Transform spawnParent)
+	private void UpdatePanel()
 	{
-		QuestInfo nextQuestInLine = GetNextLockedQuestInLine(listOfLockedQuests, listOfActiveQuests[0]);
-		QuestInfo activeQuest = GetLatestActiveQuestInLine(listOfActiveQuests);
+		foreach (Transform child in GeneralSpawnPoint)
+		{
+			Destroy(child.gameObject);
+		}
+		foreach (Transform child in BitBuddiesSpawnPoint)
+		{
+			Destroy(child.gameObject);
+		}
+		foreach (Transform child in BitBlingSpawnPoint)
+		{
+			 Destroy(child.gameObject);
+		}
+	
+		GameManager gameManager = GameManager.Instance;
+		SetUpQuestCard(gameManager.GeneralQuests, GeneralSpawnPoint);		
+		SetUpQuestCard(gameManager.BitBuddiesQuests, BitBuddiesSpawnPoint);
+		SetUpQuestCard(gameManager.BitBlingQuests, BitBlingSpawnPoint);
+	}
+
+	private void OnDestroy()
+	{
+		NextPageButton.onClick.RemoveAllListeners();
+		PreviousPageButton.onClick.RemoveAllListeners();
+		CloseButton.onClick.RemoveAllListeners();
+	}
+
+	private void OnNextPageButton()
+	{
+		_pageIndex++;
+		if(_pageIndex > 2)
+		{
+			_pageIndex = 0;
+		}
+		UpdatePanel();
+	}
+	
+	private void OnPreviousPageButton()
+	{
+		_pageIndex--;
+		if(_pageIndex < 0)
+		{
+			_pageIndex = 2;
+		}
+		UpdatePanel();
+	}
+	
+	
+	private void SetUpQuestCard(List<QuestInfo> listOfQuests, Transform spawnParent)
+	{
+		QuestInfo firstRowQuest = GetFirstRow(listOfQuests);
+		QuestInfo secondRowQuest = GetSecondRow(listOfQuests);
 		
-		if(activeQuest.QuestStatToTrack.IsNullOrEmpty())
+		if(secondRowQuest.QuestStatToTrack.IsNullOrEmpty())
 		{
 			Debug.Log("Quest stat to track is null or empty");
 			return;
 		}
 		QuestCard activeQuestCard = Instantiate(QuestCardPrefab, spawnParent);
-		activeQuestCard.SetupCard(activeQuest);
+		activeQuestCard.SetupCard(firstRowQuest);
 		
-		if(nextQuestInLine.QuestStatToTrack.IsNullOrEmpty())
+		if(firstRowQuest.QuestStatToTrack.IsNullOrEmpty())
 		{
 			Debug.Log("Next quest in line is null or empty");
 			return;
 		}
 		QuestCard lockedQuestCard = Instantiate(QuestCardPrefab, spawnParent);
-		lockedQuestCard.SetupCard(nextQuestInLine);
+		lockedQuestCard.SetupCard(secondRowQuest);
 	}
 	
-	private QuestInfo GetNextLockedQuestInLine(List<QuestInfo> listOfLockedQuests, QuestInfo currentActiveQuest)
+	private QuestInfo GetFirstRow(List<QuestInfo> listOfQuests)
 	{
-		for (int i = 0; i < listOfLockedQuests.Count; ++i)
+		int questIndex;
+		if(_pageIndex == 1)
 		{
-			if(listOfLockedQuests[i].QuestLineIndex == currentActiveQuest.QuestLineIndex + 1)
+			questIndex = 2;
+		}
+		else if(_pageIndex == 2)
+		{
+			questIndex = 4;
+		}
+		else
+		{
+			questIndex = 0;
+		}
+
+		for (int i = 0; i < listOfQuests.Count; i++)
+		{
+			if(listOfQuests[i].QuestLineIndex == questIndex)
 			{
-				return listOfLockedQuests[i];
+				return listOfQuests[i];
 			}
 		}
 
 		return new QuestInfo();
 	}
 	
-	private QuestInfo GetLatestActiveQuestInLine(List<QuestInfo> listOfActiveQuests)
+	private QuestInfo GetSecondRow(List<QuestInfo> listOfQuests)
 	{
-		var questInfo = listOfActiveQuests[0];
-		for (int i = 0; i < listOfActiveQuests.Count; ++i)
+		int questIndex;
+		if(_pageIndex == 1)
 		{
-			if(listOfActiveQuests[i].QuestStatus == QUEST_STATUS.UNLOCKED || 
-			   listOfActiveQuests[i].QuestStatus == QUEST_STATUS.IN_PROGRESS)
+			questIndex = 3;
+		}
+		else if(_pageIndex == 2)
+		{
+			questIndex = 5;
+		}
+		else
+		{
+			questIndex = 1;
+		}
+
+		for (int i = 0; i < listOfQuests.Count; i++)
+		{
+			if(listOfQuests[i].QuestLineIndex == questIndex)
 			{
-				if(questInfo.QuestLineIndex < listOfActiveQuests[i].QuestLineIndex)
-				{
-					questInfo = listOfActiveQuests[i];
-				}
+				return listOfQuests[i];
 			}
 		}
 
-		return questInfo;
+		return new QuestInfo();
+	}
+	
+	private void OnCloseButtonPressed()
+	{
+		Destroy(gameObject);
+		
 	}
 }

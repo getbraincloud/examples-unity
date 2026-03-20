@@ -70,6 +70,7 @@ public class BuddyHouseInfo : MonoBehaviour
 		var statData = new Dictionary<string, object>();
 		statData.Add(BitBuddiesConsts.VISIT_BUDDIES_STAT_NAME, 1);
 		BrainCloudManager.Client.PlayerStatisticsService.IncrementUserStats(statData.Serialize());
+		StatTracker.Instance.IncrementStat(BitBuddiesConsts.VISIT_BUDDIES_STAT_NAME);
 
 		GameManager.Instance.SelectedAppChildrenInfo = HouseInfo;
 		StateManager.Instance.GoToBuddysRoom();		
@@ -117,6 +118,7 @@ public class BuddyHouseInfo : MonoBehaviour
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
 		popUp.SetUpInfoPopup(BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_TITLE, BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_MESSAGE);
+		StatTracker.Instance.IncrementStat(BitBuddiesConsts.TRASHED_BUDDIES_STAT_NAME);
 		GameManager.Instance.OnDeleteBuddySuccess();
 	}
 	

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using BrainCloud.JSONHelper;
 using Gameframework;
 using TMPro;
 using UnityEngine;
@@ -31,6 +33,7 @@ public class QuestCard : MonoBehaviour
     [SerializeField] private Image RewardIcon;
     [SerializeField] private TextMeshProUGUI RewardText;
     [SerializeField] private Button ClaimButton;
+    [SerializeField] private Image BGImage;
     
 
     private QuestInfo _questInfo;
@@ -43,6 +46,37 @@ public class QuestCard : MonoBehaviour
     private void OnDestroy()
     {
         StatTracker.OnStatChanged -= OnStatChange;
+        ClaimButton.onClick.RemoveAllListeners();
+    }
+    
+    private void OnClaimButton()
+    {
+        Dictionary<string, object> scriptData = new Dictionary<string, object>();
+        scriptData.Add("questName", _questInfo.QuestTitle);
+        scriptData.Add("questIndex", _questInfo.QuestLineIndex);
+        scriptData.Add("questScore", StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack));
+        BrainCloudManager.Client.ScriptService.RunScript(BitBuddiesConsts.CLAIM_QUEST_SCRIPT_NAME, scriptData.Serialize(), BrainCloudManager.HandleSuccess("Claim Quest Success", OnClaimButtonSuccess));
+    }
+    
+    private void OnClaimButtonSuccess(string jsonResponse)
+    {
+        /*
+         * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"compileTime":2202,"scriptSize":1520,"renderTime":5,"executeTime":43529},
+         * "response":{"reward":{"coins":1000},"questLine":"generalQuestLine","questLineIndex":1.0},"success":true,"reasonCode":null},"status":200}]}
+         */
+        //Get index info
+        //Get Reward Info
+        Dictionary<string, object> data = jsonResponse.Deserialize("data");
+        Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
+        
+        var rewards = response["reward"] as Dictionary<string, object>;
+        int coinReward = (int) rewards["coins"];
+        UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
+        userInfo.UpdateCoins(coinReward + userInfo.Coins);
+        
+        //FL TODO: Complete quest locally
+        string questLineId = response["questLine"] as string;
+        int questLineIndex = (int) response["questLineIndex"];
     }
 
     public void SetupCard(QuestInfo in_questInfo)
@@ -51,17 +85,55 @@ public class QuestCard : MonoBehaviour
         QuestTitleText.text = _questInfo.QuestTitle;
         StatTracker.OnStatChanged += OnStatChange;
         int questValue = StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack);
+        ProgressText.enabled = false;
         if(questValue >= _questInfo.QuestRequiredProgress)
         {
-            ClaimButton.gameObject.SetActive(true);
-            ProgressSlider.value = questValue;
-            ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
-            ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
-            ProgressSlider.fillRect.GetComponent<Image>().color = Color.green;            
+            if(_questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || _questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)
+            {
+                ClaimButton.gameObject.SetActive(true);
+                ProgressText.enabled = true;
+                ClaimButton.onClick.AddListener(OnClaimButton);          
+                //ProgressSlider.fillRect.GetComponent<Image>().color = Color.blue;
+                
+                ProgressSlider.value = questValue;
+                ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
+                ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
+            }
+            else if(_questInfo.QuestStatus == QUEST_STATUS.SATISFIED)
+            {
+                ClaimButton.gameObject.SetActive(false);
+                ProgressSlider.fillRect.GetComponent<Image>().color = Color.green;
+                BGImage.color = Color.green;
+            }
+            else
+            {
+                ClaimButton.gameObject.SetActive(false);
+                ProgressSlider.fillRect.GetComponent<Image>().color = Color.grey;
+                BGImage.color = Color.grey;
+            }
         }
         else
         {
             ClaimButton.gameObject.SetActive(false);
+            if(_questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || _questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)
+            {
+                //ProgressSlider.fillRect.GetComponent<Image>().color = Color.blue;
+                ProgressText.enabled = true;
+                ProgressSlider.value = questValue;
+                ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
+                ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
+            }
+            else
+            {
+                ProgressSlider.fillRect.GetComponent<Image>().color = Color.grey;
+                BGImage.color = Color.grey;
+            }
+        }
+        
+        //FL ToDo: Remove this debug code before release
+        if(GameManager.Instance.Debug)
+        {
+            ProgressText.enabled = true;
             ProgressSlider.value = questValue;
             ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
             ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
@@ -87,6 +159,7 @@ public class QuestCard : MonoBehaviour
                 break;
             case QUEST_STATUS.IN_PROGRESS:
             case QUEST_STATUS.UNLOCKED:
+            case QUEST_STATUS.SATISFIED:
                 LockImage.gameObject.SetActive(false);
                 break;
         }
