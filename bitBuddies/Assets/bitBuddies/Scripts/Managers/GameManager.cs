@@ -70,6 +70,13 @@ public class GameManager : SingletonBehaviour<GameManager>
 	public List<QuestInfo> BitBlingQuests = new List<QuestInfo>();
 	public List<QuestInfo> GeneralQuests = new List<QuestInfo>();
 	
+	private List<ParentShopInfo> _parentShopInfos;
+	public List<ParentShopInfo> ParentShopInfos
+	{
+		get => _parentShopInfos;
+		set => _parentShopInfos = value;
+	}
+	
 	public void SetQuestsLists(List<QuestInfo> listOfQuests)
 	{
 		for (int i = 0; i < listOfQuests.Count; i++)

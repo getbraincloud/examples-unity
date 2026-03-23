@@ -4,9 +4,8 @@ using UnityEngine.UI;
 
 public class Shop : ContentUIBehaviour
 {
-	[SerializeField] private Button CloseButton;
-	[SerializeField] private Transform ToySpawnPoint;
-	[SerializeField] private BuyToyBenchUI BuyToyBenchPrefab;
+	[SerializeField] protected Button CloseButton;
+	[SerializeField] protected Transform ItemSpawnPoint;
 
 	protected override void Awake()
 	{

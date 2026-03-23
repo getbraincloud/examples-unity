@@ -369,7 +369,7 @@ GameObject:
   - component: {fileID: 141009505}
   - component: {fileID: 141009504}
   m_Layer: 5
-  m_Name: OpenQuestButton (1)
+  m_Name: OpenShopButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1695,8 +1695,8 @@ MonoBehaviour:
   AddedValueTextAnimationPrefab: {fileID: 2375120679506583067, guid: 4c71c18d6141bf14cb08340d82fddb9d, type: 3}
   QuestPanelPrefab: {fileID: 7870818328916385953, guid: 4c81161c2ccca194fa286d78c6e1bc66, type: 3}
   OpenQuestPanelButton: {fileID: 265111830}
-  ParentShopPrefab: {fileID: 0}
-  OpenParentShopButton: {fileID: 0}
+  ParentShopPrefab: {fileID: 4723390695103454094, guid: 59cc3ac3a47682c4589db23d9d2782a1, type: 3}
+  OpenParentShopButton: {fileID: 141009504}
   IncreaseCoinsButton: {fileID: 796703360}
   IncreaseGemsButton: {fileID: 1980966542}
   IncreaseLevelButton: {fileID: 1470565873}

@@ -100,6 +100,9 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             
             var coins = currency["coins"] as Dictionary<string, object>;
             CurrentUserInfo.UpdateCoins((int)coins["balance"]);
+            
+            var fakeMoney = currency["fakeDollars"] as Dictionary<string, object>;
+            CurrentUserInfo.UpdateFakeMoney((int)fakeMoney["balance"]);
         }
         
         CurrentUserInfo.UpdateLevel((int) data["experienceLevel"]);
@@ -228,27 +231,59 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var response = data["response"] as Dictionary<string, object>;
         var quests = response["quests"] as Dictionary<string, object>[];
         var listOfQuests =  new List<QuestInfo>();
-        if(quests == null || quests.Length == 0) return;
         
-        for (int i = 0; i < quests.Length; ++i)
+        if(quests != null || quests.Length > 0)
         {
-            QuestInfo questInfo = new QuestInfo();
-            questInfo.QuestTitle = quests[i]["title"] as string;
-            questInfo.QuestStatToTrack = quests[i]["statToTrack"] as string;
-            questInfo.QuestId = quests[i]["questId"] as string;
-            questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
-            questInfo.QuestLineIndex = (int) quests[i]["questLineIndex"];
-            questInfo.QuestRequiredProgress = Convert.ToInt32(quests[i]["thresholdRequired"]);
+            for (int i = 0; i < quests.Length; ++i)
+            {
+                QuestInfo questInfo = new QuestInfo();
+                questInfo.QuestTitle = quests[i]["title"] as string;
+                questInfo.QuestStatToTrack = quests[i]["statToTrack"] as string;
+                questInfo.QuestId = quests[i]["questId"] as string;
+                questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
+                questInfo.QuestLineIndex = (int) quests[i]["questLineIndex"];
+                questInfo.QuestRequiredProgress = Convert.ToInt32(quests[i]["thresholdRequired"]);
             
-            var rewards = quests[i]["reward"] as Dictionary<string, object>;
-            string key = rewards.Keys.First();
-            questInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(char.ToUpper(key[0]) + key.Substring(1));
-            questInfo.QuestRewardAmount = (int)rewards.Values.First();
+                var rewards = quests[i]["reward"] as Dictionary<string, object>;
+                string key = rewards.Keys.First();
+                questInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(char.ToUpper(key[0]) + key.Substring(1));
+                questInfo.QuestRewardAmount = (int)rewards.Values.First();
             
-            listOfQuests.Add(questInfo);
+                listOfQuests.Add(questInfo);
+            }
+            listOfQuests.Sort((x, y) => x.QuestLineIndex.CompareTo(y.QuestLineIndex));
+            GameManager.Instance.SetQuestsLists(listOfQuests);
         }
-        listOfQuests.Sort((x, y) => x.QuestLineIndex.CompareTo(y.QuestLineIndex));
-        GameManager.Instance.SetQuestsLists(listOfQuests);
+        
+        var shopItems = response["shopItems"] as Dictionary<string, object>[];
+        var listOfShopItems = new List<ParentShopInfo>();
+        if(shopItems != null && shopItems.Length > 0)
+        {
+            for (int i = 0; i < shopItems.Length; ++i)
+            {
+                ParentShopInfo parentShopInfo = new ParentShopInfo();
+                parentShopInfo.ShopId = shopItems[i]["itemId"] as string;
+                parentShopInfo.DisplayName = shopItems[i]["displayName"] as string;
+                parentShopInfo.ItemDescription = shopItems[i]["description"] as string;
+                parentShopInfo.RewardAmount = (int)shopItems[i]["payoutAmount"];
+                parentShopInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(shopItems[i]["payoutType"] as string, true);
+                parentShopInfo.Cooldown = (int)shopItems[i]["cooldown"];
+                
+                if(shopItems[i].ContainsKey("buyPriceValue"))
+                {
+                    parentShopInfo.BuyCost = (int)shopItems[i]["buyPriceValue"];                    
+                }
+                if(shopItems[i].ContainsKey("buyPriceType") && shopItems[i].ContainsValue("buyPriceType"))
+                {
+                    parentShopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(shopItems[i]["buyPriceType"] as string, true);
+                }
+
+                listOfShopItems.Add(parentShopInfo);
+            }
+            
+            GameManager.Instance.ParentShopInfos = listOfShopItems;
+        }
+
     }
     
     private void OnGetItemCatalog(string jsonResponse)

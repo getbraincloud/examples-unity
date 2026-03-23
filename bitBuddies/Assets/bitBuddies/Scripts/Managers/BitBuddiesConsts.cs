@@ -21,6 +21,8 @@ namespace Gameframework
         public const string INCREASE_XP_FOR_PARENT_SCRIPT_NAME = "IncreaseXPForParent";
         public const string GET_QUEST_INFO_SCRIPT_NAME = "GetQuestInfo";
         public const string CLAIM_QUEST_SCRIPT_NAME = "ClaimQuestReward";
+        public const string GET_SHOP_CATALOG_SCRIPT_NAME = "GetParentShopCatalog";
+        public const string AWARD_MONEY_SCRIPT_NAME = "AwardMoneyToUser";
 
         
         public const string GET_STATS_SCRIPT_NAME = "child/fetchStats";

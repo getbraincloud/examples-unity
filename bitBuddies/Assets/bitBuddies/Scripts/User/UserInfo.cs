@@ -16,6 +16,7 @@ public class UserInfo
     public string Email;
     public int Coins;
     public int Gems;
+    public int FakeMoney;
     
     public void UpdateLevel(int in_level)
     {
@@ -54,6 +55,11 @@ public class UserInfo
     public void UpdateGems(int in_gems)
     {
         Gems = in_gems;
+    }
+    
+    public void UpdateFakeMoney(int in_fakeMoney)
+    {
+        FakeMoney = in_fakeMoney;
     }
     
     public void UpdateStats(Dictionary<string, object> in_jsonForStats)

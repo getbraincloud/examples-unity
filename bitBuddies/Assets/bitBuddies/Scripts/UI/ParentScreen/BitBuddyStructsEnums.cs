@@ -10,7 +10,8 @@ public enum CurrencyTypes
 	Love,
 	BuddyBling,
 	Level,
-	Gems
+	Gems,
+	FakeDollars
 }
 
 public enum Rarity
@@ -55,10 +56,12 @@ public struct ParentShopInfo
 {
 	public string ShopId;
 	public string DisplayName;
+	public string ItemDescription;
 	public int BuyCost;
-	public int Payout;
+	public int RewardAmount;
+	public int Cooldown;
 	public CurrencyTypes BuyCurrency;
-	public CurrencyTypes PayoutCurrency;
+	public CurrencyTypes RewardCurrencyType;
 	public Sprite ItemIcon;
 }
 
