@@ -125,6 +125,11 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             {
                 CurrentUserInfo.PreviousLevelUp = (int) summaryFriendData["previousLevelXP"];
             }
+            if(summaryFriendData.ContainsKey("coolDownFreebieItemUntil"))
+            {
+                long freebieItemCooldownUntil = (long) summaryFriendData["coolDownFreebieItemUntil"];
+                GameManager.Instance.FreebieItemCooldownUntil = freebieItemCooldownUntil;
+            }
         }
         else
         {
@@ -273,7 +278,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 {
                     parentShopInfo.BuyCost = (int)shopItems[i]["buyPriceValue"];                    
                 }
-                if(shopItems[i].ContainsKey("buyPriceType") && shopItems[i].ContainsValue("buyPriceType"))
+                if(shopItems[i].ContainsKey("buyPriceType") && parentShopInfo.BuyCost > 0)
                 {
                     parentShopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(shopItems[i]["buyPriceType"] as string, true);
                 }

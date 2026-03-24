@@ -23,6 +23,8 @@ namespace Gameframework
         public const string CLAIM_QUEST_SCRIPT_NAME = "ClaimQuestReward";
         public const string GET_SHOP_CATALOG_SCRIPT_NAME = "GetParentShopCatalog";
         public const string AWARD_MONEY_SCRIPT_NAME = "AwardMoneyToUser";
+        public const string CLAIM_ITEM_SCRIPT_NAME = "ClaimParentShopItem";
+
 
         
         public const string GET_STATS_SCRIPT_NAME = "child/fetchStats";
@@ -72,6 +74,7 @@ namespace Gameframework
         public const string DEFAULT_SPRITE_PATH_FOR_BUDDY = "BuddySprites/buddy-1";
         public const string GEM_SPRITE_PATH = "RewardIcons/IconGem";
         public const string COIN_SPRITE_PATH = "RewardIcons/IconCoin_Gold";
+        public const string FAKE_MONEY_SPRITE_PATH = "RewardIcons/FakeMoneyStack";
         
         //Pop Up messages
             //Buddys Room

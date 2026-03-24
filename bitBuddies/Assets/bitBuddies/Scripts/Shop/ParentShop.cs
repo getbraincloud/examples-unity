@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using Gameframework;
 using TMPro;
@@ -10,15 +12,20 @@ public class ParentShop : Shop
     [SerializeField] private ParentShopItem ParentShopItemPrefab;
     [SerializeField] private TMP_Text FakeMoneyBalanceText; 
     [SerializeField] private Button GetMoreFakeMoneyButton;
+
+    private void OnEnable()
+    {
+        GetMoreFakeMoneyButton.onClick.AddListener(GetMoreFakeMoney);
+    }
     
+    public override void RefreshShopScreen()
+    {
+        base.RefreshShopScreen();
+        SetupShop();
+    }
+
     public void SetupShop()
     {
-        var shopItems = GameManager.Instance.ParentShopInfos;
-        foreach (var shopItem in shopItems)
-        {
-            var parentShopItem = Instantiate(ParentShopItemPrefab, ItemSpawnPoint.transform);
-            parentShopItem.Init(shopItem);
-        }
         var userInfo = BrainCloudManager.Instance.CurrentUserInfo;
         if(userInfo.FakeMoney > 0)
         {
@@ -28,8 +35,16 @@ public class ParentShop : Shop
         {
             FakeMoneyBalanceText.text = "$ 0";
         }
-
-        GetMoreFakeMoneyButton.onClick.AddListener(GetMoreFakeMoney);
+        
+        if (ItemSpawnPoint.transform.childCount > 0)
+            return;
+            
+        var shopItems = GameManager.Instance.ParentShopInfos;
+        foreach (var shopItem in shopItems)
+        {
+            var parentShopItem = Instantiate(ParentShopItemPrefab, ItemSpawnPoint.transform);
+            parentShopItem.Init(shopItem);
+        }
     }
 
     protected override void OnDestroy()
@@ -45,25 +60,22 @@ public class ParentShop : Shop
         BrainCloudManager.Client.ScriptService.RunScript(
             BitBuddiesConsts.AWARD_MONEY_SCRIPT_NAME, 
             scriptData.Serialize(), 
-            BrainCloudManager.HandleSuccess("Awarded money successful", OnGetMoreMoneySuccess),
-            BrainCloudManager.HandleFailure("Failed to award money", OnGetMoreMoneyFailure)
+            BrainCloudManager.HandleSuccess("Awarded money successful", OnGetMoreMoneySuccess)
         );
     }
     
     private void OnGetMoreMoneySuccess(string jsonResponse)
     {
         /*
-         * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"compileTime":1663,"scriptSize":290,
-         * "renderTime":4,"executeTime":12105},"response":{"getResult":{"data":{"currencyMap":{"gems":{"consumed":0,"balance":20,
-         * "purchased":0,"awarded":20,"revoked":0},"coins":{"consumed":156000,"balance":1778,"purchased":0,"awarded":157778,"revoked":0},
-         * "fakeDollars":{"consumed":0,"balance":10,"purchased":0,"awarded":10,"revoked":0}}},"status":200}},
+         * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"compileTime":2929,"scriptSize":324,
+         * "renderTime":3,"executeTime":13047},"response":{"fakeDollarsMap":{"consumed":0,"balance":50,"purchased":0,"awarded":50,"revoked":0}},
          * "success":true,"reasonCode":null},"status":200}]}
          */
+        Dictionary<string, object> data = jsonResponse.Deserialize("data");
+        Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
+        var fakeDollarObject = response["fakeDollarsMap"] as Dictionary<string, object>;
+        int fakeDollarBalance = (int) fakeDollarObject["balance"];
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateFakeMoney(fakeDollarBalance);
+        StateManager.Instance.RefreshScreen();
     }
-    
-    private void OnGetMoreMoneyFailure()
-    {
-        
-    }
-
 }

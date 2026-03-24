@@ -20,7 +20,7 @@ public class Shop : ContentUIBehaviour
 		RefreshShopScreen();
 	}
 	
-	public void RefreshShopScreen()
+	public virtual void RefreshShopScreen()
 	{
 		
 	}

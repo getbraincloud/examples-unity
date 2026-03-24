@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using BrainCloud.JSONHelper;
 using Gameframework;
 using TMPro;
 using UnityEngine;
@@ -13,6 +15,8 @@ public class ParentShopItem : MonoBehaviour
     [SerializeField] private TMP_Text ItemRewardText;
     [SerializeField] private Image RewardImage;
     [SerializeField] private Button BuyButton;
+
+    [SerializeField] private Image BuyImage;
     //[SerializeField] private Image ItemImage;
 
 
@@ -25,7 +29,17 @@ public class ParentShopItem : MonoBehaviour
         _parentShopInfo = in_parentShopInfo;
         ItemNameText.text = _parentShopInfo.DisplayName;
         ItemDescriptionText.text = _parentShopInfo.ItemDescription;
-        ItemPriceText.text = _parentShopInfo.BuyCost.ToString("#,#");    //#,# adds commas to the string when using ints
+        if(_parentShopInfo.BuyCost > 0)
+        {
+            ItemPriceText.text = _parentShopInfo.BuyCost.ToString("#,#");    //#,# adds commas to the string when using ints
+            BuyImage.enabled = true;
+        }
+        else
+        {
+            ItemPriceText.text = "Free";
+            BuyImage.enabled = false;
+        }
+
         ItemRewardText.text = _parentShopInfo.RewardAmount.ToString("#,#");
         
         switch (_parentShopInfo.RewardCurrencyType)
@@ -36,6 +50,19 @@ public class ParentShopItem : MonoBehaviour
             
             case CurrencyTypes.Gems:
                 RewardImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.GEM_SPRITE_PATH);
+                break;
+        }
+        
+        switch(_parentShopInfo.BuyCurrency)
+        {
+            case CurrencyTypes.Coins:
+                BuyImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.COIN_SPRITE_PATH);
+                break;
+            case CurrencyTypes.Gems:
+                BuyImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.GEM_SPRITE_PATH);
+                break;
+            case CurrencyTypes.FakeDollars:
+                BuyImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.FAKE_MONEY_SPRITE_PATH);
                 break;
         }
     }
@@ -52,7 +79,34 @@ public class ParentShopItem : MonoBehaviour
     
     private void OnBuyCallback()
     {
-        Debug.LogWarning("Yay");
+        Dictionary<string, object> scriptData = new Dictionary<string, object>();
+        scriptData.Add("itemId", _parentShopInfo.ShopId);
+        BrainCloudManager.Client.ScriptService.RunScript
+        (
+            BitBuddiesConsts.CLAIM_ITEM_SCRIPT_NAME,
+            scriptData.Serialize(),
+            BrainCloudManager.HandleSuccess("Claim Item Success", OnClaimItemSuccess),
+            BrainCloudManager.HandleFailure("Claim Item Failure", OnClaimItemFailure)
+        );
     }
     
+    private void OnClaimItemSuccess(string jsonResponse)
+    {
+        /*
+         * "response": {
+              "success": true,
+              "itemId": "freebie",
+              "coolDownUntil": 1774475149170, <--------- Need to read this in for cooldown clock for freebie if it exists
+              "payout": {
+                "currencyType": "coins",
+                "amount": 1000
+              }
+            }
+         */           
+    }
+    
+    private void OnClaimItemFailure()
+    {
+        
+    }
 }

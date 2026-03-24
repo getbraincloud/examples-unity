@@ -76,6 +76,13 @@ public class GameManager : SingletonBehaviour<GameManager>
 		get => _parentShopInfos;
 		set => _parentShopInfos = value;
 	}
+
+	private long _freebieItemCooldownUntil;
+	public long FreebieItemCooldownUntil
+	{
+		get => _freebieItemCooldownUntil;
+		set => _freebieItemCooldownUntil = value;
+	}
 	
 	public void SetQuestsLists(List<QuestInfo> listOfQuests)
 	{
