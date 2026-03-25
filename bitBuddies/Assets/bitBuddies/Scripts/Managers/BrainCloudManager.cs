@@ -125,11 +125,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             {
                 CurrentUserInfo.PreviousLevelUp = (int) summaryFriendData["previousLevelXP"];
             }
-            if(summaryFriendData.ContainsKey("coolDownFreebieItemUntil"))
-            {
-                long freebieItemCooldownUntil = (long) summaryFriendData["coolDownFreebieItemUntil"];
-                GameManager.Instance.FreebieItemCooldownUntil = freebieItemCooldownUntil;
-            }
         }
         else
         {
@@ -287,6 +282,18 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             }
             
             GameManager.Instance.ParentShopInfos = listOfShopItems;
+        }
+        
+        var cooldownUntilObject = response["freebieCooldown"] as Dictionary<string, object>;
+        if(cooldownUntilObject != null && cooldownUntilObject.Count > 0)
+        {
+            long cooldownUntil = Convert.ToInt64(cooldownUntilObject["cooldownUntil"]);
+            
+            if(cooldownUntil > 0 && CountdownTimer.GetRemainingTime(cooldownUntil) > TimeSpan.Zero)
+            {
+                GameManager.Instance.FreebieItemCooldownUntil = cooldownUntil;
+            }
+
         }
 
     }

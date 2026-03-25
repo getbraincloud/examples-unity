@@ -21,7 +21,13 @@ public class ParentShopItem : MonoBehaviour
 
 
     private ParentShopInfo _parentShopInfo;
+
+    private CountdownTimer _countdownTimer;
     
+    public void EnableBuyButton()
+    {
+        BuyButton.interactable = true;
+    }
     
     public void Init(ParentShopInfo in_parentShopInfo)
     {
@@ -65,6 +71,16 @@ public class ParentShopItem : MonoBehaviour
                 BuyImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.FAKE_MONEY_SPRITE_PATH);
                 break;
         }
+        
+        if(_parentShopInfo.ShopId == "freebie")
+        {
+            _countdownTimer = GetComponent<CountdownTimer>();
+            if(GameManager.Instance.FreebieItemCooldownUntil > 0)
+            {
+                _countdownTimer.StartCountdown(GameManager.Instance.FreebieItemCooldownUntil);
+                BuyButton.interactable = false;
+            }
+        }
     }
 
     private void OnDestroy()
@@ -103,6 +119,41 @@ public class ParentShopItem : MonoBehaviour
               }
             }
          */           
+        Dictionary<string, object> data = jsonResponse.Deserialize("data");
+        Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
+        
+        Dictionary<string, object> payoutObject = response["payout"] as Dictionary<string, object>;
+        if (payoutObject == null)
+        {
+            Debug.LogError("Payout object is null in OnClaimItemSuccess");
+            return;
+        }
+        
+        CurrencyTypes currencyType = Enum.Parse<CurrencyTypes>(payoutObject["currencyType"] as string, true);
+        int amount = (int)payoutObject["amount"];
+        UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
+        switch (currencyType)
+        {
+            case CurrencyTypes.Coins:
+                userInfo.UpdateCoins(userInfo.Coins + amount);
+                break;
+            case CurrencyTypes.Gems:
+                userInfo.UpdateGems(userInfo.Gems + amount);
+                break;
+        }
+        
+        //Check for freebie to set up cooldown clock
+        if(_parentShopInfo.ShopId == "freebie")
+        {
+            var cooldownUntil = (long)response["coolDownUntil"];
+            if(cooldownUntil > 0)
+            {
+                GameManager.Instance.FreebieItemCooldownUntil = cooldownUntil;
+                _countdownTimer.StartCountdown(cooldownUntil);
+            }
+        }
+        
+        StateManager.Instance.RefreshScreen();
     }
     
     private void OnClaimItemFailure()

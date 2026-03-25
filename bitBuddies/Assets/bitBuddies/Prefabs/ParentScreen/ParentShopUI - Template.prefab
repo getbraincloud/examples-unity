@@ -1060,6 +1060,7 @@ GameObject:
   - component: {fileID: 411386880414903802}
   - component: {fileID: 8544606240252026727}
   - component: {fileID: 1527936170387276712}
+  - component: {fileID: 6025724754906753306}
   m_Layer: 5
   m_Name: ParentShopUI - Template
   m_TagString: Untagged
@@ -1121,3 +1122,16 @@ MonoBehaviour:
   RewardImage: {fileID: 1688489786107464280}
   BuyButton: {fileID: 214113128137028493}
   BuyImage: {fileID: 89539170413461092}
+--- !u!114 &6025724754906753306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9096206092497342632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebcc43028ae80eb4aa1f3720b39dfafb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TimerLabel: {fileID: 4012329934489133564}
