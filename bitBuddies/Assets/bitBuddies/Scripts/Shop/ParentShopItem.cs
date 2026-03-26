@@ -2,101 +2,24 @@ using System;
 using System.Collections.Generic;
 using BrainCloud.JSONHelper;
 using Gameframework;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class ParentShopItem : MonoBehaviour
+public class ParentShopItem : ShopItem
 {
-
-    [SerializeField] private TMP_Text ItemNameText;
-    [SerializeField] private TMP_Text ItemDescriptionText;
-    [SerializeField] private TMP_Text ItemPriceText;
-    [SerializeField] private TMP_Text ItemRewardText;
-    [SerializeField] private Image RewardImage;
-    [SerializeField] private Button BuyButton;
-
-    [SerializeField] private Image BuyImage;
-    //[SerializeField] private Image ItemImage;
-
-
-    private ParentShopInfo _parentShopInfo;
-
-    private CountdownTimer _countdownTimer;
     
-    public void EnableBuyButton()
+    protected override void OnBuyButton()
     {
-        BuyButton.interactable = true;
-    }
-    
-    public void Init(ParentShopInfo in_parentShopInfo)
-    {
-        BuyButton.onClick.AddListener(OnBuyButton);
-        _parentShopInfo = in_parentShopInfo;
-        ItemNameText.text = _parentShopInfo.DisplayName;
-        ItemDescriptionText.text = _parentShopInfo.ItemDescription;
-        if(_parentShopInfo.BuyCost > 0)
-        {
-            ItemPriceText.text = _parentShopInfo.BuyCost.ToString("#,#");    //#,# adds commas to the string when using ints
-            BuyImage.enabled = true;
-        }
-        else
-        {
-            ItemPriceText.text = "Free";
-            BuyImage.enabled = false;
-        }
-
-        ItemRewardText.text = _parentShopInfo.RewardAmount.ToString("#,#");
-        
-        switch (_parentShopInfo.RewardCurrencyType)
-        {
-            case CurrencyTypes.Coins:
-                RewardImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.COIN_SPRITE_PATH);
-                break;
-            
-            case CurrencyTypes.Gems:
-                RewardImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.GEM_SPRITE_PATH);
-                break;
-        }
-        
-        switch(_parentShopInfo.BuyCurrency)
-        {
-            case CurrencyTypes.Coins:
-                BuyImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.COIN_SPRITE_PATH);
-                break;
-            case CurrencyTypes.Gems:
-                BuyImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.GEM_SPRITE_PATH);
-                break;
-            case CurrencyTypes.FakeDollars:
-                BuyImage.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.FAKE_MONEY_SPRITE_PATH);
-                break;
-        }
-        
-        if(_parentShopInfo.ShopId == "freebie")
-        {
-            _countdownTimer = GetComponent<CountdownTimer>();
-            if(GameManager.Instance.FreebieItemCooldownUntil > 0)
-            {
-                _countdownTimer.StartCountdown(GameManager.Instance.FreebieItemCooldownUntil);
-                BuyButton.interactable = false;
-            }
-        }
+        StateManager.Instance.OpenConfirmPopUp(
+        "Are you sure?", 
+        $"Buy {_shopInfo.DisplayName} for {_shopInfo.BuyCost} {_shopInfo.BuyCurrency.ToString()}?", 
+        OnBuyCallback
+        );
     }
 
-    private void OnDestroy()
-    {
-        BuyButton.onClick.RemoveAllListeners();
-    }
-
-    private void OnBuyButton()
-    {
-        StateManager.Instance.OpenConfirmPopUp("Are you sure?", $"Buy {_parentShopInfo.DisplayName} for {_parentShopInfo.BuyCost} {_parentShopInfo.BuyCurrency.ToString()}?", OnBuyCallback);
-    }
-    
     private void OnBuyCallback()
     {
         Dictionary<string, object> scriptData = new Dictionary<string, object>();
-        scriptData.Add("itemId", _parentShopInfo.ShopId);
+        scriptData.Add("itemId", _shopInfo.ShopId);
         BrainCloudManager.Client.ScriptService.RunScript
         (
             BitBuddiesConsts.CLAIM_ITEM_SCRIPT_NAME,
@@ -143,7 +66,7 @@ public class ParentShopItem : MonoBehaviour
         }
         
         //Check for freebie to set up cooldown clock
-        if(_parentShopInfo.ShopId == "freebie")
+        if(_shopInfo.ShopId == "freebie")
         {
             var cooldownUntil = (long)response["coolDownUntil"];
             if(cooldownUntil > 0)

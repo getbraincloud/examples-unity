@@ -74,6 +74,8 @@ namespace Gameframework
         public const string DEFAULT_SPRITE_PATH_FOR_BUDDY = "BuddySprites/buddy-1";
         public const string GEM_SPRITE_PATH = "RewardIcons/IconGem";
         public const string COIN_SPRITE_PATH = "RewardIcons/IconCoin_Gold";
+        public const string LOVE_SPRITE_PATH = "RewardIcons/IconHeart";
+        public const string BIT_BLING_SPRITE_PATH = "RewardIcons/BuddyBling";
         public const string FAKE_MONEY_SPRITE_PATH = "RewardIcons/FakeMoneyStack";
         
         //Pop Up messages

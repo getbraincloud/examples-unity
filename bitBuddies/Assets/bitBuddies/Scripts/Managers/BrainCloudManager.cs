@@ -256,29 +256,28 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         }
         
         var shopItems = response["shopItems"] as Dictionary<string, object>[];
-        var listOfShopItems = new List<ParentShopInfo>();
+        var listOfShopItems = new List<ShopInfo>();
         if(shopItems != null && shopItems.Length > 0)
         {
             for (int i = 0; i < shopItems.Length; ++i)
             {
-                ParentShopInfo parentShopInfo = new ParentShopInfo();
-                parentShopInfo.ShopId = shopItems[i]["itemId"] as string;
-                parentShopInfo.DisplayName = shopItems[i]["displayName"] as string;
-                parentShopInfo.ItemDescription = shopItems[i]["description"] as string;
-                parentShopInfo.RewardAmount = (int)shopItems[i]["payoutAmount"];
-                parentShopInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(shopItems[i]["payoutType"] as string, true);
-                parentShopInfo.Cooldown = (int)shopItems[i]["cooldown"];
+                ShopInfo shopInfo = new ShopInfo();
+                shopInfo.ShopId = shopItems[i]["itemId"] as string;
+                shopInfo.DisplayName = shopItems[i]["displayName"] as string;
+                shopInfo.ItemDescription = shopItems[i]["description"] as string;
+                shopInfo.RewardAmount = (int)shopItems[i]["payoutAmount"];
+                shopInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(shopItems[i]["payoutType"] as string, true);
                 
                 if(shopItems[i].ContainsKey("buyPriceValue"))
                 {
-                    parentShopInfo.BuyCost = (int)shopItems[i]["buyPriceValue"];                    
+                    shopInfo.BuyCost = (int)shopItems[i]["buyPriceValue"];                    
                 }
-                if(shopItems[i].ContainsKey("buyPriceType") && parentShopInfo.BuyCost > 0)
+                if(shopItems[i].ContainsKey("buyPriceType") && shopInfo.BuyCost > 0)
                 {
-                    parentShopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(shopItems[i]["buyPriceType"] as string, true);
+                    shopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(shopItems[i]["buyPriceType"] as string, true);
                 }
 
-                listOfShopItems.Add(parentShopInfo);
+                listOfShopItems.Add(shopInfo);
             }
             
             GameManager.Instance.ParentShopInfos = listOfShopItems;
@@ -295,7 +294,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             }
 
         }
-
     }
     
     private void OnGetItemCatalog(string jsonResponse)
@@ -304,27 +302,74 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var response = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
         var data = (Dictionary<string, object>)response["data"];
         var response2 = (Dictionary<string, object>)data["response"];
-        var toyBenchInfo = (Dictionary<string, object>[])response2["items"];
+        var itemInfos = (Dictionary<string, object>[])response2["items"];
         var listOfBenchInfo =  new List<ToyBenchInfo>();
+        var listOfShopInfo =  new List<ShopInfo>();
 
-        foreach (var itemDict in toyBenchInfo)
+        foreach (var itemDict in itemInfos)
         {
-            ToyBenchInfo benchInfo = new ToyBenchInfo();
-            benchInfo.BenchId = itemDict["benchId"] as string;
-            benchInfo.LevelRequirement = (int)itemDict["levelRequirement"];
-            benchInfo.LoveRewardAmount = (int)itemDict["lovePayout"];
-            benchInfo.CoinRewardAmount = (int)itemDict["coinPayout"];
-            benchInfo.BuddyBlingRewardAmount = (int)itemDict["buddyBlingPayout"];
-            benchInfo.UnlockCost = (int)itemDict["unlockAmount"];
-            benchInfo.Cooldown = (int)itemDict["cooldown"];
-            benchInfo.CoinSpawnAmount = (int)itemDict["coinSpawnAmount"];
-            benchInfo.LoveSpawnAmount = (int)itemDict["loveSpawnAmount"];
-            benchInfo.BuddyBlingSpawnAmount = (int)itemDict["buddyBlingSpawnAmount"];
-            benchInfo.DisplayName = itemDict["displayName"] as string;
+            string category = itemDict["category"] as string;
+            if(category.Equals("toys", StringComparison.OrdinalIgnoreCase))
+            {
+                ToyBenchInfo benchInfo = new ToyBenchInfo();
+                benchInfo.BenchId = itemDict["benchId"] as string;
+                benchInfo.LevelRequirement = (int)itemDict["levelRequirement"];
+                benchInfo.LoveRewardAmount = (int)itemDict["lovePayout"];
+                benchInfo.CoinRewardAmount = (int)itemDict["coinPayout"];
+                benchInfo.BuddyBlingRewardAmount = (int)itemDict["buddyBlingPayout"];
+                benchInfo.UnlockCost = (int)itemDict["unlockAmount"];
+                benchInfo.Cooldown = (int)itemDict["cooldown"];
+                benchInfo.CoinSpawnAmount = (int)itemDict["coinSpawnAmount"];
+                benchInfo.LoveSpawnAmount = (int)itemDict["loveSpawnAmount"];
+                benchInfo.BuddyBlingSpawnAmount = (int)itemDict["buddyBlingSpawnAmount"];
+                benchInfo.DisplayName = itemDict["displayName"] as string;
             
-            listOfBenchInfo.Add(benchInfo);
+                listOfBenchInfo.Add(benchInfo);                
+            }
+            else if(category.Equals("mouseMerchant", StringComparison.OrdinalIgnoreCase))
+            {
+                ShopInfo shopInfo = new ShopInfo();
+                shopInfo.ShopId = itemDict["defId"] as string;
+                shopInfo.DisplayName = itemDict["displayName"] as string;
+                shopInfo.ItemDescription = itemDict["description"] as string;
+                
+                if(itemDict.ContainsKey("buyPriceValue"))
+                {
+                    shopInfo.BuyCost = (int)itemDict["buyPriceValue"];  
+                    if(shopInfo.BuyCost > 0)
+                    {
+                        shopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(itemDict["buyPriceType"] as string, true);                        
+                    }                  
+                }
+                
+                if(itemDict.ContainsKey("multiplier"))
+                {
+                    //ToDo: Set up multiplier field for toy collection
+                    //var value = (int)itemDict["multiplier"];
+                    //if(value > 0)
+                    //{
+                    //    //do something
+                    //}
+                    //var duration = (int)itemDict["duration"];
+                    //if(duration > 0)
+                    //{
+                    //    //do something
+                    //}
+                }
+                
+                if(itemDict.ContainsKey("priceAmount"))
+                {
+                    shopInfo.BuyCost = (int)itemDict["priceAmount"];
+                    shopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(itemDict["priceType"] as string, true);                   
+                    shopInfo.RewardAmount = (int)itemDict["payoutAmount"];
+                    shopInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(itemDict["payoutType"] as string, true);                   
+                }
+                
+                listOfShopInfo.Add(shopInfo);
+            }
         }
         GameManager.Instance.ToyBenchInfos = listOfBenchInfo;
+        GameManager.Instance.ChildShopInfos = listOfShopInfo;
     }
     
     private void OnGetChildAccounts(string jsonResponse)
@@ -775,7 +820,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     private void OnFailureCallback()
     {
-    
+        //FL: ToDo: Create an error catching system where we catch reason codes and display them for the user with StateManager
     }
 
     private Action _updateNameAction;
@@ -830,24 +875,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             _updateNameAction();
         }
     }
-    
-    // public void AddRandomChildProfile(string in_childName, Rarity in_selectedLootbox)
-    // {
-    //     Dictionary<string, object> scriptData = new Dictionary<string, object>
-    //     {
-    //         {"childAppId", BrainCloudConsts.APP_CHILD_ID},
-    //         {"lootboxType", in_selectedLootbox},
-    //         {"customName", in_childName}
-    //     };
-    //     
-    //     Wrapper.ScriptService.RunScript
-    //     (
-    //         BrainCloudConsts.AWARD_RANDOM_LOOTBOX_SCRIPT_NAME,
-    //         scriptData.Serialize(),
-    //         HandleSuccess("Add Child Profile Success", OnAddRandomChildProfile),
-    //         HandleFailure("Add Child Profile Failed", OnFailureCallback)
-    //     );
-    // }
     
     public void OnAddChildProfile(string jsonResponse)
     {
@@ -908,16 +935,16 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         //Stat will be updated on the server from the cloud code script when adding a new child account
         StatTracker.Instance.IncrementStat(BitBuddiesConsts.BUDDIES_OWNED_STAT_NAME);
         
-        Dictionary<string, object> scriptData = new Dictionary<string, object>();
-        scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
-        scriptData.Add("profileId", appChildrenInfos[0].profileId);
-        Wrapper.ScriptService.RunScript
-        (
-            BitBuddiesConsts.GET_CHILD_ITEM_CATALOG_SCRIPT_NAME,
-            scriptData.Serialize(),
-            HandleSuccess("GetItemCatalog Success", OnGetItemCatalog),
-            HandleFailure("GetItemCatalog Failed", OnFailureCallback)
-        );
+        // Dictionary<string, object> scriptData = new Dictionary<string, object>();
+        // scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
+        // scriptData.Add("profileId", appChildrenInfos[0].profileId);
+        // Wrapper.ScriptService.RunScript
+        // (
+        //     BitBuddiesConsts.GET_CHILD_ITEM_CATALOG_SCRIPT_NAME,
+        //     scriptData.Serialize(),
+        //     HandleSuccess("GetItemCatalog Success", OnGetItemCatalog),
+        //     HandleFailure("GetItemCatalog Failed", OnFailureCallback)
+        // );
         
         _childInfoIndex = 0;
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;

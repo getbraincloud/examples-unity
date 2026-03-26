@@ -20,9 +20,11 @@ public class Shop : ContentUIBehaviour
 		RefreshShopScreen();
 	}
 	
+	public virtual void SetupShop() {}
+	
 	public virtual void RefreshShopScreen()
 	{
-		
+		SetupShop();
 	}
 	
 	private void OnCloseButtonPressed()

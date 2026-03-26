@@ -38,6 +38,9 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	private string _currentRewardEntityId;
 	private RectTransform _buttonRectTransform;
 	private Canvas canvas;
+	private float _loveRewardMultiplier = 1.0f;
+	private float _loveMultiplierDuration = 1.0f;
+	private const float MULTIPLIER_DEFAULT = 1.0f;
 	public static event Action<int> OnCoinsTaken;
 	public override void Awake()
 	{
@@ -55,7 +58,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	{
 		Vector2 position = Vector2.zero;
 		
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR
+#if UNITY_STANDALONE_WIN
 		RectTransformUtility.ScreenPointToLocalPointInRectangle
 		(
 			_buttonRectTransform, 
@@ -65,13 +68,13 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		);
 #elif UNITY_ANDROID
 		//ToDo: Fix this for android/ios
-		// RectTransformUtility.ScreenPointToLocalPointInRectangle
-		// (
-		// 	_buttonRectTransform, 
-		// Input.mousePosition, 
-		// 	Camera.main, 
-		// 	out position 
-		// );
+		RectTransformUtility.ScreenPointToLocalPointInRectangle
+		(
+			_buttonRectTransform, 
+			Input.mousePosition, 
+			Camera.main, 
+			out position 
+		);
 #endif
 		_moveBuddyAnimation.MoveBuddyToPosition(Input.mousePosition + MoveOffsetVector);
 	}
@@ -84,6 +87,19 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	public void IncrementRewardSpawnCount(int in_amount)
 	{
 		_currentRewardSpawnAmount += in_amount;
+	}
+	
+	public void StartLoveMultiplierCountdown(float mulitplier, float duration)
+	{
+		_loveMultiplierDuration = duration;
+		_loveRewardMultiplier = mulitplier;
+		StartCoroutine(LoveMultiplierCountdown());
+	}
+	
+	IEnumerator LoveMultiplierCountdown()
+	{
+		yield return new WaitForSecondsRealtime(_loveMultiplierDuration);
+		_loveRewardMultiplier = MULTIPLIER_DEFAULT;
 	}
 	
 	public void DecrementRewardSpawnCount()
@@ -234,7 +250,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		//Checks if we have more than 1 reward to send since last check.
 		if(_rewardPickups != null && _rewardPickups.Count > 0)
 		{
-			int amountOfLoveToReward = 0;
+			float amountOfLoveToReward = 0;
 			int amountOfCoinsToReward = 0;
 			int amountOfBuddyBlingToReward = 0;
 			for (int i = 0; i < _rewardPickups.Count; i++)
@@ -245,7 +261,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 						amountOfCoinsToReward += _rewardPickups[i].RewardAmount;
 						break;
 					case CurrencyTypes.Love:
-						amountOfLoveToReward += _rewardPickups[i].RewardAmount;
+						amountOfLoveToReward += (_rewardPickups[i].RewardAmount * _loveRewardMultiplier);
 						break;       
 					case CurrencyTypes.BuddyBling:
 						amountOfBuddyBlingToReward += _rewardPickups[i].RewardAmount;

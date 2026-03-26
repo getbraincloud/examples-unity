@@ -1059,10 +1059,10 @@ GameObject:
   m_Component:
   - component: {fileID: 411386880414903802}
   - component: {fileID: 8544606240252026727}
-  - component: {fileID: 1527936170387276712}
   - component: {fileID: 6025724754906753306}
+  - component: {fileID: -1878112960796734036}
   m_Layer: 5
-  m_Name: ParentShopUI - Template
+  m_Name: MouseMerchantShopItem - Template
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1103,25 +1103,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &1527936170387276712
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9096206092497342632}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57b7650c3495a104790139d813ae5faa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ItemNameText: {fileID: 7109903739702362660}
-  ItemDescriptionText: {fileID: 4202406262877744704}
-  ItemPriceText: {fileID: 4741450213263371535}
-  ItemRewardText: {fileID: 5246741383358296090}
-  RewardImage: {fileID: 1688489786107464280}
-  BuyButton: {fileID: 214113128137028493}
-  BuyImage: {fileID: 89539170413461092}
 --- !u!114 &6025724754906753306
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1135,3 +1116,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TimerLabel: {fileID: 4012329934489133564}
+--- !u!114 &-1878112960796734036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9096206092497342632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8f57785f8465b14080e6d983afa313f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ItemNameText: {fileID: 7109903739702362660}
+  ItemDescriptionText: {fileID: 4202406262877744704}
+  ItemPriceText: {fileID: 4741450213263371535}
+  ItemRewardText: {fileID: 5246741383358296090}
+  RewardImage: {fileID: 1688489786107464280}
+  BuyButton: {fileID: 214113128137028493}
+  BuyImage: {fileID: 89539170413461092}

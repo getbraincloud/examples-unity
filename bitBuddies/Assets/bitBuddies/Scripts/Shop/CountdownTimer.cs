@@ -8,11 +8,11 @@ public class CountdownTimer : MonoBehaviour
 
     private long _endEpochMs;
     private bool _isRunning = false;
-    private ParentShopItem _parentShopItem;
+    private ShopItem _shopItem;
 
     private void Awake()
     {
-        _parentShopItem = GetComponent<ParentShopItem>();
+        _shopItem = GetComponent<ShopItem>();
         TimerLabel.enabled = false;
     }
 
@@ -72,9 +72,9 @@ public class CountdownTimer : MonoBehaviour
     
     private void OnCooldownComplete()
     {
-        if(_parentShopItem)
+        if(_shopItem)
         {
-            _parentShopItem.EnableBuyButton();
+            _shopItem.EnableBuyButton();
         }
         GameManager.Instance.FreebieItemCooldownUntil = 0;
     }

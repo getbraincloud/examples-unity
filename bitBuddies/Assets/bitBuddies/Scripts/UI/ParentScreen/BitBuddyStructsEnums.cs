@@ -52,14 +52,13 @@ public struct ToyBenchInfo
 }
 
 [Serializable]
-public struct ParentShopInfo
+public struct ShopInfo
 {
 	public string ShopId;
 	public string DisplayName;
 	public string ItemDescription;
 	public int BuyCost;
 	public int RewardAmount;
-	public int Cooldown;
 	public CurrencyTypes BuyCurrency;
 	public CurrencyTypes RewardCurrencyType;
 	public Sprite ItemIcon;
@@ -90,6 +89,8 @@ public class AppChildrenInfo
 	private float _hourInSeconds = 3600;
 	
 	public List<string> ownedToys { get; set; }
+	
+	public long dailyCooldownUntil { get; set; } 
 	
 	public AppChildrenInfo()
 	{

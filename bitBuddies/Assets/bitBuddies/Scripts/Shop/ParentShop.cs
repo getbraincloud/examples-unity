@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 public class ParentShop : Shop
 {
-    [SerializeField] private ParentShopItem ParentShopItemPrefab;
+    [SerializeField] private ShopItem shopItemPrefab;
     [SerializeField] private TMP_Text FakeMoneyBalanceText; 
     [SerializeField] private Button GetMoreFakeMoneyButton;
 
@@ -17,14 +17,8 @@ public class ParentShop : Shop
     {
         GetMoreFakeMoneyButton.onClick.AddListener(GetMoreFakeMoney);
     }
-    
-    public override void RefreshShopScreen()
-    {
-        base.RefreshShopScreen();
-        SetupShop();
-    }
 
-    public void SetupShop()
+    public override void SetupShop()
     {
         var userInfo = BrainCloudManager.Instance.CurrentUserInfo;
         if(userInfo.FakeMoney > 0)
@@ -39,10 +33,10 @@ public class ParentShop : Shop
         if (ItemSpawnPoint.transform.childCount > 0)
             return;
             
-        var shopItems = GameManager.Instance.ParentShopInfos;
-        foreach (var shopItem in shopItems)
+        List<ShopInfo> shopItems = GameManager.Instance.ParentShopInfos;
+        foreach (ShopInfo shopItem in shopItems)
         {
-            var parentShopItem = Instantiate(ParentShopItemPrefab, ItemSpawnPoint.transform);
+            var parentShopItem = Instantiate(shopItemPrefab, ItemSpawnPoint.transform);
             parentShopItem.Init(shopItem);
         }
     }

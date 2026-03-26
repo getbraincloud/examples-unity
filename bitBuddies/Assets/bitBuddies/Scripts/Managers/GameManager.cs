@@ -18,7 +18,6 @@ public class GameManager : SingletonBehaviour<GameManager>
 		get { return appChildrenInfos; }
 		set { appChildrenInfos = value; }
 	}
-	public Sprite[] BuddySprites;
 	private List<MysteryBoxInfo> _mysteryBoxes;
 	public List<MysteryBoxInfo> MysteryBoxes
 	{
@@ -66,15 +65,39 @@ public class GameManager : SingletonBehaviour<GameManager>
 		set => _childCountMaximum = value;
 	}
 	
-	public List<QuestInfo> BitBuddiesQuests = new List<QuestInfo>();
-	public List<QuestInfo> BitBlingQuests = new List<QuestInfo>();
-	public List<QuestInfo> GeneralQuests = new List<QuestInfo>();
+	private List<QuestInfo> _bitBuddiesQuests;
+	public List<QuestInfo> BitBuddiesQuests
+	{
+		get => _bitBuddiesQuests;
+		set => _bitBuddiesQuests = value;
+	}
 	
-	private List<ParentShopInfo> _parentShopInfos;
-	public List<ParentShopInfo> ParentShopInfos
+	private List<QuestInfo> _bitBlingQuests;
+	public List<QuestInfo> BitBlingQuests
+	{
+		get => _bitBlingQuests; 
+		set => _bitBlingQuests = value;
+	}
+	
+	private List<QuestInfo> _generalQuests;
+	public List<QuestInfo> GeneralQuests
+	{
+		get => _generalQuests; 
+		set => _generalQuests = value;
+	}
+	
+	private List<ShopInfo> _parentShopInfos;
+	public List<ShopInfo> ParentShopInfos
 	{
 		get => _parentShopInfos;
 		set => _parentShopInfos = value;
+	}
+	
+	private List<ShopInfo> _childShopInfos;
+	public List<ShopInfo> ChildShopInfos
+	{
+		get => _childShopInfos;
+		set => _childShopInfos = value;
 	}
 
 	private long _freebieItemCooldownUntil;
@@ -86,6 +109,10 @@ public class GameManager : SingletonBehaviour<GameManager>
 	
 	public void SetQuestsLists(List<QuestInfo> listOfQuests)
 	{
+		_bitBlingQuests	= new List<QuestInfo>();
+		_bitBuddiesQuests = new List<QuestInfo>();
+		_generalQuests	= new List<QuestInfo>();
+	
 		for (int i = 0; i < listOfQuests.Count; i++)
 		{
 			switch (listOfQuests[i].QuestId)

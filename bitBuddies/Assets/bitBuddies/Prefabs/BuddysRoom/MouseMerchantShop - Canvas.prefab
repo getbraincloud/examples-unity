@@ -433,8 +433,9 @@ GameObject:
   - component: {fileID: 6665423050306342014}
   - component: {fileID: 2057935871350355901}
   - component: {fileID: 6356512339692990223}
+  - component: {fileID: 5898203275572868928}
   m_Layer: 5
-  m_Name: MouseShopSelection - Canvas
+  m_Name: MouseMerchantShop - Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -533,6 +534,22 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &5898203275572868928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4055724823762990299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb8d9a178cb1734a93eb266d8520e98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ContentUICG: {fileID: 6356512339692990223}
+  CloseButton: {fileID: 2408522936799784306}
+  ItemSpawnPoint: {fileID: 4663202912627007488}
+  shopItemPrefab: {fileID: -1878112960796734036, guid: a8666940519d98245ac8d037a5430139, type: 3}
 --- !u!1 &5365436490663848221
 GameObject:
   m_ObjectHideFlags: 0
