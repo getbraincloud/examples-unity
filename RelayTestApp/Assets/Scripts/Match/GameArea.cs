@@ -11,7 +11,7 @@ using Cursor = UnityEngine.Cursor;
 /// - Update game area in runtime for network and local users
 /// - Create splatter gameobjects from both local and network user inputs
 /// - Update Cursor locations from both local and network users inputs
-/// - Offsets are due to the spacing difference from Node js example found at this link -> http://getbraincloud.com/devdemos/relaytestapp
+/// - Normalized coordinates: x=0 left, x=1 right; y=0 top, y=1 bottom (matches all other clients)
 /// </summary>
 
 public class GameArea : MonoBehaviour
@@ -131,40 +131,77 @@ public class GameArea : MonoBehaviour
             BrainCloudManager.Instance.LocalMouseMoved(normalizedPosition);
         }
     }
-    
+
     protected void OnDisable()
     {
         if (!Cursor.visible)
         {
-            Cursor.visible = true;    
+            Cursor.visible = true;
         }
     }
-    
+
     protected void UpdateAllSplatters()
     {
+        // Handle canvas clear (from host clear command)
+        if (StateManager.Instance.PendingClearSplatters)
+        {
+            foreach (var go in StateManager.Instance.Splatters)
+                if (go != null) Destroy(go);
+            StateManager.Instance.Splatters.Clear();
+            StateManager.Instance.AllSplotches.Clear();
+            StateManager.Instance.PendingClearSplatters = false;
+        }
+
+        // Handle JIP splotch sync — first chunk clears canvas, then all chunks rebuild it
+        if (StateManager.Instance.PendingSyncIsFirst)
+        {
+            foreach (var go in StateManager.Instance.Splatters)
+                if (go != null) Destroy(go);
+            StateManager.Instance.Splatters.Clear();
+            StateManager.Instance.AllSplotches.Clear();
+            StateManager.Instance.PendingSyncIsFirst = false;
+        }
+        if (StateManager.Instance.PendingSyncSplotches.Count > 0)
+        {
+            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            foreach (var record in StateManager.Instance.PendingSyncSplotches)
+            {
+                float? effectiveLifespan = null;
+                if (splatterLifespan >= 0)
+                {
+                    float elapsed = (now - record.StartTimeMs) / 1000f;
+                    float remaining = splatterLifespan - elapsed;
+                    if (remaining <= 0) continue; // already expired
+                    effectiveLifespan = remaining;
+                }
+                SetUpSplatter(record.Position, record.ColorIndex, record.TeamCode, record.InstigatorCode, effectiveLifespan);
+            }
+            StateManager.Instance.PendingSyncSplotches.Clear();
+        }
+
         Lobby lobby = StateManager.Instance.CurrentLobby;
-        
+
         foreach (var member in lobby.Members)
         {
             if (member.AllowSendTo)
             {
-                for(int i= 0; i < member.SplatterPositions.Count; ++i)
+                for (int i = 0; i < member.SplatterPositions.Count; ++i)
                 {
-                    if(member.SplatterTeamCodes.Count > 0 && member.InstigatorTeamCodes.Count > 0)
+                    if (member.SplatterTeamCodes.Count > 0 && member.InstigatorTeamCodes.Count > 0)
                     {
-                        SetUpSplatter(member.SplatterPositions[i], GameManager.ReturnUserColor(member.UserGameColor), member.SplatterTeamCodes[i], member.InstigatorTeamCodes[i]);                            
+                        SetUpSplatter(member.SplatterPositions[i], member.UserGameColor, member.SplatterTeamCodes[i], member.InstigatorTeamCodes[i]);
                     }
                     else
                     {
-                        SetUpSplatter(member.SplatterPositions[i], GameManager.ReturnUserColor(member.UserGameColor));
+                        SetUpSplatter(member.SplatterPositions[i], member.UserGameColor);
                     }
-                } 
+                }
             }
-            
+
             //Clear the list so there's no backlog of input positions
             if (member.SplatterPositions.Count > 0)
             {
-                member.SplatterPositions.Clear();    
+                member.SplatterPositions.Clear();
                 member.SplatterTeamCodes.Clear();
                 member.InstigatorTeamCodes.Clear();
             }
@@ -178,12 +215,12 @@ public class GameArea : MonoBehaviour
                 SetUpSplatter
                 (
                     pos,
-                    GameManager.ReturnUserColor(GameManager.Instance.CurrentUserInfo.UserGameColor),
+                    GameManager.Instance.CurrentUserInfo.UserGameColor,
                     _localSplatterCodes[i],
                     GameManager.Instance.CurrentUserInfo.Team
-                );  
+                );
                 i++;
-            }   
+            }
         }
         //Clear the list so there's no backlog of input positions
         if (_localSplatterPositions.Count > 0)
@@ -193,7 +230,9 @@ public class GameArea : MonoBehaviour
         }
     }
 
-    protected void SetUpSplatter(Vector2 position, Color waveColor, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all)
+    // colorIndex is the palette index; team/instigatorTeam control colour override logic.
+    // lifespanOverride: null = use configured splatterLifespan; a value overrides (for JIP sync).
+    public void SetUpSplatter(Vector2 position, int colorIndex, TeamCodes team = TeamCodes.all, TeamCodes instigatorTeam = TeamCodes.all, float? lifespanOverride = null)
     {
         GameObject newSplatter = Instantiate
         (
@@ -215,18 +254,30 @@ public class GameArea : MonoBehaviour
         );
         UITransform.anchoredPosition = newPosition + _splatterOffset;
 
+        Color waveColor = GameManager.ReturnUserColor(colorIndex);
         if (_currentGameMode == GameMode.Team && team == TeamCodes.all)
         {
             waveColor = Color.white;
         }
         AnimateSplatter anim = newSplatter.GetComponent<AnimateSplatter>();
         anim.SetColour(waveColor);
-        anim.SetLifespan(splatterLifespan);
+        float effectiveLifespan = lifespanOverride.HasValue ? lifespanOverride.Value : splatterLifespan;
+        anim.SetLifespan(effectiveLifespan);
         anim.SetAnimationDurations(splatterAppear, splatterDisappear);
 
         StateManager.Instance.Splatters.Add(newSplatter.gameObject);
+
+        // Record for host-to-JIP-client sync
+        StateManager.Instance.AllSplotches.Add(new SplotchRecord
+        {
+            Position = position,
+            ColorIndex = colorIndex,
+            TeamCode = team,
+            InstigatorCode = instigatorTeam,
+            StartTimeMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        });
     }
-    
+
     protected void UpdateAllCursorsMovement()
     {
         Lobby lobby = StateManager.Instance.CurrentLobby;
@@ -259,11 +310,11 @@ public class GameArea : MonoBehaviour
         return CheckForRayCastHit(GetEventSystemRaycastResults());
     }
     ///Returns 'true' if we touched or hovering on this gameObject.
-    protected bool CheckForRayCastHit(List<RaycastResult> eventSystemRayCastResults )
+    protected bool CheckForRayCastHit(List<RaycastResult> eventSystemRayCastResults)
     {
-        for(int index = 0;  index < eventSystemRayCastResults.Count; index ++)
+        for (int index = 0; index < eventSystemRayCastResults.Count; index++)
         {
-            RaycastResult curRaysastResult = eventSystemRayCastResults [index];
+            RaycastResult curRaysastResult = eventSystemRayCastResults[index];
             if (curRaysastResult.gameObject == gameObject)
                 return true;
         }
@@ -271,11 +322,11 @@ public class GameArea : MonoBehaviour
     }
     ///Gets all event system raycast results of current mouse or touch position.
     protected static List<RaycastResult> GetEventSystemRaycastResults()
-    {   
+    {
         PointerEventData eventData = new PointerEventData(EventSystem.current);
-        eventData.position =  Input.mousePosition;
+        eventData.position = Input.mousePosition;
         List<RaycastResult> raysastResults = new List<RaycastResult>();
-        EventSystem.current.RaycastAll( eventData, raysastResults );
+        EventSystem.current.RaycastAll(eventData, raysastResults);
         return raysastResults;
     }
 
