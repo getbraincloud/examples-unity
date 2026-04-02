@@ -158,7 +158,9 @@ public class GameManager : MonoBehaviour
         (
             stManager.CurrentLobby.LobbyID,
             stManager.isReady,
-            extra
+            extra,
+            null,
+            BrainCloudManager.Instance.OnUpdateReadyFailure
         );
     }
 
@@ -177,7 +179,9 @@ public class GameManager : MonoBehaviour
         (
             stManager.CurrentLobby.LobbyID,
             stManager.isReady,
-            extra
+            extra,
+            null,
+            BrainCloudManager.Instance.OnUpdateReadyFailure
         );
     }
 
@@ -195,7 +199,9 @@ public class GameManager : MonoBehaviour
         (
             stManager.CurrentLobby.LobbyID,
             stManager.isReady,
-            extra
+            extra,
+            null,
+            BrainCloudManager.Instance.OnUpdateReadyFailure
         );
     }
 

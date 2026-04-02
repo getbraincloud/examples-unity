@@ -327,6 +327,18 @@ public class BrainCloudManager : MonoBehaviour
         OnLoggedIn();
     }
 
+    // Called when UpdateReady fails — if the lobby is already gone (e.g. disbanded on match start),
+    // just return to the main menu instead of showing a hard error.
+    public void OnUpdateReadyFailure(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        if (reasonCode == ReasonCodes.LOBBY_NOT_FOUND)
+        {
+            StateManager.Instance.PopupMessageToMainMenu("The lobby has ended. Returning to main menu.");
+            return;
+        }
+        LogErrorThenPopUpWindow(status, reasonCode, jsonError, cbObject);
+    }
+
     // Go back to login screen, with an error message
     void LogErrorThenPopUpWindow(int status, int reasonCode, string jsonError, object cbObject)
     {
@@ -429,7 +441,7 @@ public class BrainCloudManager : MonoBehaviour
             extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
 
             //
-            _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra);
+            _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra, null, OnUpdateReadyFailure);
         }
     }
 
