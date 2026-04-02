@@ -5,6 +5,7 @@ using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -39,12 +40,22 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	private RectTransform _buttonRectTransform;
 	private Canvas canvas;
 	private float _loveRewardMultiplier = 1.0f;
-	private float _loveMultiplierDuration = 1.0f;
+	private long _loveMultiplierDuration = 1;
 	private const float MULTIPLIER_DEFAULT = 1.0f;
+	private CountdownTimer _multiplierCountdownTimer;
 	public static event Action<int> OnCoinsTaken;
+	private bool _isRunning = false;
 	public override void Awake()
 	{
-		base.Awake();
+		if (m_instance == null)
+		{
+			m_instance = this;
+			this.name = this.GetType().Name;
+		}
+		else
+		{
+			Destroy(this.gameObject);
+		}
 		SetUpToyBenches();
 		CheckForAvailableBenches();
 		_moveBuddyAnimation = FindFirstObjectByType<MoveBuddyAnimation>();
@@ -52,6 +63,12 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		MoveAreaButton.onClick.AddListener(MoveToPosition);
 		if (canvas == null)
 			canvas = GetComponentInParent<Canvas>();
+		var appInfo = GameManager.Instance.SelectedAppChildrenInfo;
+		_multiplierCountdownTimer = GetComponent<CountdownTimer>();
+		if(appInfo.loveMultiplier > MULTIPLIER_DEFAULT)
+		{
+			StartLoveMultiplierCountdown(appInfo.loveMultiplier, appInfo.dailyBoosterExpiryUntil);
+		}
 	}
 	
 	private void MoveToPosition()
@@ -67,7 +84,6 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			out position 
 		);
 #elif UNITY_ANDROID
-		//ToDo: Fix this for android/ios
 		RectTransformUtility.ScreenPointToLocalPointInRectangle
 		(
 			_buttonRectTransform, 
@@ -77,6 +93,30 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		);
 #endif
 		_moveBuddyAnimation.MoveBuddyToPosition(Input.mousePosition + MoveOffsetVector);
+	}
+	
+	public void MoveToPositionWithCallback(Action callback)
+	{
+		Vector2 position = Vector2.zero;
+		
+#if UNITY_STANDALONE_WIN
+		RectTransformUtility.ScreenPointToLocalPointInRectangle
+		(
+			_buttonRectTransform, 
+			Input.mousePosition, 
+			Camera.main, 
+			out position 
+		);
+#elif UNITY_ANDROID
+		RectTransformUtility.ScreenPointToLocalPointInRectangle
+		(
+			_buttonRectTransform, 
+			Input.mousePosition, 
+			Camera.main, 
+			out position 
+		);
+#endif
+		_moveBuddyAnimation.MoveBuddyToPosition(Input.mousePosition + MoveOffsetVector, callback);
 	}
 
 	private void OnDisable()
@@ -89,17 +129,26 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 		_currentRewardSpawnAmount += in_amount;
 	}
 	
-	public void StartLoveMultiplierCountdown(float mulitplier, float duration)
+	public void StartLoveMultiplierCountdown(float multiplier, long duration)
 	{
+		if (_isRunning) return;
+		_isRunning = true;
 		_loveMultiplierDuration = duration;
-		_loveRewardMultiplier = mulitplier;
+		_loveRewardMultiplier = multiplier;
+		
+		_multiplierCountdownTimer.StartCountdown(_loveMultiplierDuration);
+		
 		StartCoroutine(LoveMultiplierCountdown());
 	}
 	
 	IEnumerator LoveMultiplierCountdown()
 	{
-		yield return new WaitForSecondsRealtime(_loveMultiplierDuration);
+		var timeSpan = CountdownTimer.GetRemainingTime(_loveMultiplierDuration);
+		float seconds = (float) timeSpan.TotalSeconds;
+		
+		yield return new WaitForSeconds(seconds);
 		_loveRewardMultiplier = MULTIPLIER_DEFAULT;
+		_isRunning = false;
 	}
 	
 	public void DecrementRewardSpawnCount()

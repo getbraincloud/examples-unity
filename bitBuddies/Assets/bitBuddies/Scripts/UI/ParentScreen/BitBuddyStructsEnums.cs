@@ -89,8 +89,11 @@ public class AppChildrenInfo
 	private float _hourInSeconds = 3600;
 	
 	public List<string> ownedToys { get; set; }
+	public List<string> ownedShopItems { get; set; }
 	
 	public long dailyCooldownUntil { get; set; } 
+	public long dailyBoosterExpiryUntil { get; set; }
+	public float loveMultiplier { get; set; }
 	
 	public AppChildrenInfo()
 	{

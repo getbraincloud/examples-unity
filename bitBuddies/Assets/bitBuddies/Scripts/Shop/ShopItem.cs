@@ -21,6 +21,7 @@ public class ShopItem : MonoBehaviour
 
 
     protected ShopInfo _shopInfo;
+    public ShopInfo ItemInfo { get { return _shopInfo; } }
 
     protected CountdownTimer _countdownTimer;
     
@@ -29,10 +30,10 @@ public class ShopItem : MonoBehaviour
         BuyButton.interactable = true;
     }
     
-    public virtual void Init(ShopInfo inShopInfo)
+    public virtual void Init(ShopInfo shopInfo)
     {
         BuyButton.onClick.AddListener(OnBuyButton);
-        _shopInfo = inShopInfo;
+        _shopInfo = shopInfo;
         ItemNameText.text = _shopInfo.DisplayName;
         ItemDescriptionText.text = _shopInfo.ItemDescription;
         if(_shopInfo.BuyCost > 0)
@@ -70,9 +71,26 @@ public class ShopItem : MonoBehaviour
         }
         else if(_shopInfo.ShopId == "dailyLoveBooster")
         {
-            BuyButton.interactable = false;
             RewardImage.sprite = GetCurrencySprite(CurrencyTypes.Love);
-            _countdownTimer = GetComponent<CountdownTimer>();
+            var appInfo = GameManager.Instance.SelectedAppChildrenInfo;
+            if(appInfo.dailyCooldownUntil > 0)
+            {
+                _countdownTimer = GetComponent<CountdownTimer>();
+                _countdownTimer.StartCountdown(appInfo.dailyCooldownUntil);
+                BuyButton.interactable = false;
+                if(CountdownTimer.GetRemainingTime(appInfo.dailyCooldownUntil) > TimeSpan.FromSeconds(3.0))
+                {
+                    ToyManager.Instance.StartLoveMultiplierCountdown(appInfo.loveMultiplier, appInfo.dailyBoosterExpiryUntil);
+                }
+            }
+        }
+        //check for instant level up, if user is maxed level
+        else if(shopInfo.ShopId.Contains("instant") || shopInfo.ShopId.Contains("LevelUp"))
+        {
+            if(GameManager.Instance.SelectedAppChildrenInfo.buddyLevel >= 10)
+            {
+                BuyButton.interactable = false;
+            }
         }
     }
     

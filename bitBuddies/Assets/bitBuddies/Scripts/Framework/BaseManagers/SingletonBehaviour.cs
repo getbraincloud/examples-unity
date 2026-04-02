@@ -57,7 +57,7 @@ namespace Gameframework
             return m_instance;
         }
 
-        private static T m_instance;
+        protected static T m_instance;
         #endregion
     }
 }

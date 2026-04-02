@@ -65,6 +65,20 @@ public class ParentShopItem : ShopItem
                 break;
         }
         
+        CurrencyTypes buyCurrencyType = _shopInfo.BuyCurrency;
+        switch (buyCurrencyType)
+        {
+            case CurrencyTypes.Gems:
+                userInfo.UpdateGems(userInfo.Gems - _shopInfo.BuyCost);
+                break;
+            case CurrencyTypes.Coins:
+                userInfo.UpdateCoins(userInfo.Coins - _shopInfo.BuyCost);
+                break;
+            case CurrencyTypes.FakeDollars:
+                userInfo.UpdateFakeMoney(userInfo.FakeMoney - _shopInfo.BuyCost);
+                break;
+        }
+        
         //Check for freebie to set up cooldown clock
         if(_shopInfo.ShopId == "freebie")
         {
@@ -73,6 +87,7 @@ public class ParentShopItem : ShopItem
             {
                 GameManager.Instance.FreebieItemCooldownUntil = cooldownUntil;
                 _countdownTimer.StartCountdown(cooldownUntil);
+                BuyButton.interactable = false;
             }
         }
         

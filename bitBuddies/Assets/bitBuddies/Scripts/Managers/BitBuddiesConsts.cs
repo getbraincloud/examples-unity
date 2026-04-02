@@ -45,6 +45,10 @@ namespace Gameframework
         public const string TOY_REWARD_RECEIVED_SCRIPT_NAME = "child/consumeCurrencyFromToy";
         public const string GET_CHILD_ITEM_CATALOG_SCRIPT_NAME = "child/getChildItemCatalog";
         public const string CONSUME_TOY_SCRIPT_NAME = "child/consumeToy";
+        public const string CLAIM_CHILD_ITEM_SCRIPT_NAME = "child/claimMouseMerchantItem";
+        public const string CLAIM_LOVE_BOOSTER_SCRIPT_NAME = "child/claimLoveBooster";
+        
+        public const string JSON_DAILY_LOVE_BOOSTER_ITEM = "dailyLoveBooster";
 
         //Quest Line names
         public const string BITBUDDIES_QUESTLINEID = "bitBuddiesQuestTier";

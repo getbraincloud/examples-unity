@@ -28,7 +28,11 @@ public class GameManager : SingletonBehaviour<GameManager>
 	public AppChildrenInfo SelectedAppChildrenInfo
 	{
 		get { return _selectedAppChildrenInfo; }
-		set { _selectedAppChildrenInfo = value; }
+		set
+		{
+			_selectedAppChildrenInfo = value;
+			UpdateSelectedAppChildrenInfo();
+		}
 	}
 	
 	private List<ToyBenchInfo> _toyBenchInfos;
@@ -190,5 +194,17 @@ public class GameManager : SingletonBehaviour<GameManager>
 				appChildrenInfos[i] = SelectedAppChildrenInfo;
 			}
 		}
+	}
+	
+	public string GetChildItemDisplayName(string itemId)
+	{
+		for (int i = 0; i < _childShopInfos.Count; i++)
+		{
+			if(_childShopInfos[i].ShopId.Equals(itemId))
+			{
+				return _childShopInfos[i].DisplayName;
+			}
+		}
+		return "";
 	}
 }

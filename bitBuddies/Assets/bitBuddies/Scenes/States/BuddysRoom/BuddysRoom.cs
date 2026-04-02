@@ -33,7 +33,6 @@ public class BuddysRoom : ContentUIBehaviour
     
     private float _textSpawnOffset = 135f;
     private int _increaseXpAmount;
-    private bool _isShopOpen;
     private AppChildrenInfo _appChildrenInfo;
  
     protected override void Awake()
@@ -72,10 +71,11 @@ public class BuddysRoom : ContentUIBehaviour
 
         LoveLevelText.text = $"{_appChildrenInfo.buddyLevel}";
         LoveFillText.text = $"{_appChildrenInfo.currentXP}/{_appChildrenInfo.nextLevelUp}";
-        if(_appChildrenInfo.nextLevelUp == 0)
+        if(_appChildrenInfo.nextLevelUp == 0 || _appChildrenInfo.buddyLevel == 10)
         {
             LoveSlider.maxValue = 1;
             LoveSlider.value = 1;
+            LoveFillText.enabled = false;
         }
         else
         {
@@ -112,14 +112,12 @@ public class BuddysRoom : ContentUIBehaviour
     
     private void OnShopButton()
     {
-        if(_isShopOpen) return;
-        _isShopOpen = true;
-        Instantiate(shop, transform);
+        ToyManager.Instance.MoveToPositionWithCallback(OnMoveToComplete);
     }
     
-    public void ShopClosed()
+    private void OnMoveToComplete()
     {
-        _isShopOpen = false;
+        Instantiate(shop, transform);
     }
     
     private void OnStatsButton()

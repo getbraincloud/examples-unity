@@ -1,4 +1,5 @@
 using System;
+using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using TMPro;
 using UnityEngine;
 
@@ -13,15 +14,14 @@ public class CountdownTimer : MonoBehaviour
     private void Awake()
     {
         _shopItem = GetComponent<ShopItem>();
-        TimerLabel.enabled = false;
+        TimerLabel.gameObject.SetActive(false);
     }
 
     public void StartCountdown(long epochMS)
     {
         _endEpochMs = epochMS;
-        _isRunning = true;
         UpdateDisplay();
-        TimerLabel.enabled = true;
+        _isRunning = true;
     }
     
     void Update()
@@ -38,11 +38,15 @@ public class CountdownTimer : MonoBehaviour
         {
             _isRunning = false;
             TimerLabel.text = "";
-            TimerLabel.enabled = false;
+            TimerLabel.gameObject.SetActive(false);
             OnCooldownComplete();
             return;
         }
-
+        
+        if(TimerLabel && TimerLabel.gameObject && !TimerLabel.gameObject.activeSelf)
+        {
+            TimerLabel.gameObject.SetActive(true);
+        }
         TimerLabel.text = FormatTime(remaining);
     }
     
@@ -60,9 +64,7 @@ public class CountdownTimer : MonoBehaviour
     
     private string FormatTime(TimeSpan t)
     {
-        //Format dynamically if time should include days, hours or just minutes/seconds.
-        if (t.TotalDays >= 1)
-            return $"{(int)t.TotalDays}d {t.Hours:D2}h {t.Minutes:D2}m {t.Seconds:D2}s";
+        //Format dynamically if time should include hours or just minutes/seconds.
 
         if (t.TotalHours >= 1)
             return $"{(int)t.TotalHours:D2}:{t.Minutes:D2}:{t.Seconds:D2}";
@@ -75,7 +77,10 @@ public class CountdownTimer : MonoBehaviour
         if(_shopItem)
         {
             _shopItem.EnableBuyButton();
+            if(!_shopItem.ItemInfo.ShopId.IsNullOrEmpty() && _shopItem.ItemInfo.ShopId == "freebie")
+            {
+                GameManager.Instance.FreebieItemCooldownUntil = 0;
+            }
         }
-        GameManager.Instance.FreebieItemCooldownUntil = 0;
     }
 }

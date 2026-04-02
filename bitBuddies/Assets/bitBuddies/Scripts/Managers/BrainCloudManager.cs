@@ -517,13 +517,31 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     if(items != null)
                     {
                         dataInfo.ownedToys = new List<string>();
+                        dataInfo.ownedShopItems = new List<string>();
                         for (int x = 0; x < items.Length; x++)
                         {
-                            // ToyBenchInfo item = new ToyBenchInfo();
-                            // item.BenchId = items[i]["benchId"] as string;
-                            // item.DisplayName = items[i]["displayName"] as string;
-                            // item.Cooldown = (int) items[i]["cooldown"];
-                            dataInfo.ownedToys.Add(items[x]["itemId"] as string);
+                            string itemCategory = items[x]["category"] as string;
+
+                            if(itemCategory.Equals("toys", StringComparison.OrdinalIgnoreCase))
+                            {
+                                dataInfo.ownedToys.Add(items[x]["itemId"] as string);
+                            }
+                            else if(itemCategory.Equals("mouseMerchant", StringComparison.OrdinalIgnoreCase))
+                            {
+                                dataInfo.ownedShopItems.Add(items[x]["itemId"] as string);
+                            }
+
+                            string itemId = items[x]["itemId"] as string;
+                            if (itemId.Equals(BitBuddiesConsts.JSON_DAILY_LOVE_BOOSTER_ITEM))
+                            {
+                                //Getting info on daily love booster item for time expirys
+                                long durationInSeconds = Convert.ToInt64(items[x]["durationInSeconds"]);
+                                long createdAt = Convert.ToInt64(items[x]["createdAt"]);
+                                dataInfo.dailyBoosterExpiryUntil = createdAt + (durationInSeconds * 1000);
+                                dataInfo.dailyCooldownUntil = Convert.ToInt64(items[x]["cooldownUntil"]);
+                                dataInfo.loveMultiplier = (int)items[x]["loveMultiplier"];
+                            }
+
                         }
                     }
                 }
