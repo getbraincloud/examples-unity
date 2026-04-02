@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +14,19 @@ using BrainCloud;
 ///     - Info about Server and Lobby
 /// </summary>
 
-public enum GameStates{SignIn,MainMenu,Lobby,Match,Connecting,Reconnecting}
+public enum GameStates { SignIn, MainMenu, Lobby, Match, Connecting, Reconnecting }
+
+/// <summary>Splotch record kept for host-to-client JIP canvas sync.</summary>
+[Serializable]
+public struct SplotchRecord
+{
+    public Vector2 Position;
+    public int ColorIndex;
+    public TeamCodes TeamCode;
+    public TeamCodes InstigatorCode;
+    public long StartTimeMs;
+}
+
 public class StateManager : MonoBehaviour
 {
     //Game States
@@ -34,23 +47,32 @@ public class StateManager : MonoBehaviour
     [SerializeField]
     public Server CurrentServer;
     internal RelayConnectionType Protocol { get; set; }
-    
+
     //Specific for loading and waiting
     public bool isReady;
     public bool isLoading;
-    
+
     //Used to clean up objects when game is finished
     public List<GameObject> Splatters = new List<GameObject>();
-    
+
+    // Full splotch history — host reads this to sync a JIP player
+    public List<SplotchRecord> AllSplotches = new List<SplotchRecord>();
+    // Pending splotches received via splotch_sync — processed by GameArea each frame
+    public List<SplotchRecord> PendingSyncSplotches = new List<SplotchRecord>();
+    // Set true on the first sync chunk so GameArea clears the canvas before rebuilding
+    public bool PendingSyncIsFirst = false;
+    // Set true when host broadcasts a canvas clear
+    public bool PendingClearSplatters = false;
+
     //Messages for loading screen
     private const string LOGGING_IN_MESSAGE = "Logging in...";
     private const string LOOKING_FOR_LOBBY_MESSAGE = "Joining Lobby...";
     private const string JOINING_MATCH_MESSAGE = "Joining Match...";
-    
+
     //Singleton
     private static StateManager _instance;
     public static StateManager Instance => _instance;
-    
+
     protected virtual void Awake()
     {
         if (!_instance)
@@ -62,17 +84,24 @@ public class StateManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    
+
     private void Start()
     {
         UpdateDisconnectButtons(false);
-        if(BrainCloudManager.Instance.Wrapper.CanReconnect())
+
+
+    }
+
+    public void AutoSignIn()
+    {
+        UnityEngine.Debug.Log("STARTED WrapperName: " + BrainCloudManager.Instance.Wrapper.WrapperName);
+        if (BrainCloudManager.Instance.Wrapper.CanReconnect())
         {
             ButtonPressed_ChangeState(GameStates.Reconnecting);
         }
         else
         {
-            ChangeState(GameStates.SignIn);           
+            ChangeState(GameStates.SignIn);
         }
     }
 
@@ -82,7 +111,7 @@ public class StateManager : MonoBehaviour
         LoadingGameState.CancelNextState = true;
         ChangeState(GameStates.SignIn);
     }
-    
+
     public void PopupMessageToMainMenu(string message)
     {
         ErrorMessage.SetUpPopUpMessage(message);
@@ -98,9 +127,11 @@ public class StateManager : MonoBehaviour
 
     IEnumerator DelayToDisconnect()
     {
+
         yield return new WaitForSeconds(0.2f);
         GameManager.Instance.LobbyIdText.enabled = false;
         BrainCloudManager.Instance.CloseGame();
+        BrainCloudManager.Instance.LeaveLobby();
         ChangeState(GameStates.MainMenu);
         ResetData();
         yield return new WaitForFixedUpdate();
@@ -113,24 +144,28 @@ public class StateManager : MonoBehaviour
         ChangeState(GameStates.SignIn);
     }
 
-    private void ResetData()
+    public void ResetData()
     {
         CurrentServer = null;
         isReady = false;
-        
+
         foreach (GameObject splatter in Splatters)
         {
             if (splatter != null)
             {
-                Destroy(splatter);    
+                Destroy(splatter);
             }
         }
         Splatters = new List<GameObject>();
+        AllSplotches.Clear();
+        PendingSyncSplotches.Clear();
+        PendingSyncIsFirst = false;
+        PendingClearSplatters = false;
         GameManager.Instance.EmptyCursorList();
         GameManager.Instance.CurrentUserInfo.IsAlive = false;
         GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
     }
-    
+
     //Takes in the current Game state to then load into the next game state
     public void ButtonPressed_ChangeState(GameStates newState = GameStates.Connecting)
     {
@@ -143,11 +178,11 @@ public class StateManager : MonoBehaviour
         {
             CurrentGameState = newState;
         }
-        if(newState == GameStates.Lobby || newState == GameStates.Match)
+        if (newState == GameStates.Lobby || newState == GameStates.Match)
         {
             EnableCurrentGameModeScreen();
         }
-        
+
         isLoading = true;
         //User is in this state and moving onto the next
         switch (CurrentGameState)
@@ -156,30 +191,30 @@ public class StateManager : MonoBehaviour
                 BrainCloudManager.Instance.AuthenticateReconnect();
                 CheckToEnableReconnectButton();
                 CurrentGameState = GameStates.MainMenu;
-                LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE,false,GameStates.MainMenu);
+                LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE, false, GameStates.MainMenu);
                 break;
             //Logging In...
             case GameStates.SignIn:
                 CurrentGameState = GameStates.MainMenu;
                 CheckToEnableReconnectButton();
                 BrainCloudManager.Instance.Login();
-                LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE,false,GameStates.MainMenu);
+                LoadingGameState.ConnectStatesWithLoading(LOGGING_IN_MESSAGE, false, GameStates.MainMenu);
                 break;
             //Looking for Lobby...
             case GameStates.MainMenu:
                 CurrentGameState = GameStates.Lobby;
                 BrainCloudManager.Instance.FindLobby(Protocol);
-                LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE,true, CurrentGameState);
+                LoadingGameState.ConnectStatesWithLoading(LOOKING_FOR_LOBBY_MESSAGE, true, CurrentGameState);
                 break;
             //Setting up Match...
             case GameStates.Lobby:
                 CurrentGameState = GameStates.Match;
                 BrainCloudManager.Instance.StartGame();
-                LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false, CurrentGameState);
+                LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE, false, CurrentGameState);
                 break;
         }
     }
-    
+
     private void CheckToEnableReconnectButton()
     {
         if (CurrentLobby != null && CurrentLobby.LobbyID.Length > 0)
@@ -194,7 +229,7 @@ public class StateManager : MonoBehaviour
 
     private void EnableCurrentGameModeScreen()
     {
-        
+
         if (CurrentGameState == GameStates.Lobby)
         {
             if (GameManager.Instance.GameMode == GameMode.FreeForAll)
@@ -229,10 +264,10 @@ public class StateManager : MonoBehaviour
         {
             state.gameObject.SetActive(false);
         }
-        
+
         CurrentGameState = GameStates.Match;
         isLoading = true;
-        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE,false,GameStates.Match);
+        LoadingGameState.ConnectStatesWithLoading(JOINING_MATCH_MESSAGE, false, GameStates.Match);
 
         BrainCloudManager.Instance.ReconnectUserToLobby();
     }
@@ -241,16 +276,16 @@ public class StateManager : MonoBehaviour
     {
         DisconnectButtonGroup.SetActive(isEnabled);
     }
-    
+
     public void ChangeState(GameStates newGameState)
     {
         CurrentGameState = newGameState;
-        
-        if(newGameState == GameStates.MainMenu)
+
+        if (newGameState == GameStates.MainMenu)
         {
             CheckToEnableReconnectButton();
         }
-        if(newGameState == GameStates.Lobby || newGameState == GameStates.Match)
+        if (newGameState == GameStates.Lobby || newGameState == GameStates.Match)
         {
             EnableCurrentGameModeScreen();
         }
@@ -259,7 +294,7 @@ public class StateManager : MonoBehaviour
             currentState.gameObject.SetActive(currentState.CurrentGameState == newGameState);
         }
     }
-        
+
     public void CheckPlayerReconnecting(string in_cxId)
     {
         List<string> listOfIds = new List<string>();
@@ -267,14 +302,14 @@ public class StateManager : MonoBehaviour
         {
             listOfIds.Add(CurrentLobby.Members[i].cxId);
         }
-        
+
         for (int i = 0; i < SessionPlayers.Count; i++)
         {
-            if(in_cxId.Equals(SessionPlayers[i].cxId))
+            if (in_cxId.Equals(SessionPlayers[i].cxId))
             {
                 for (int j = 0; j < CurrentLobby.Members.Count; j++)
                 {
-                    if(CurrentLobby.Members[j].cxId.Equals(in_cxId))
+                    if (CurrentLobby.Members[j].cxId.Equals(in_cxId))
                     {
                         CurrentLobby.Members[j].IsAlive = true;
                     }
