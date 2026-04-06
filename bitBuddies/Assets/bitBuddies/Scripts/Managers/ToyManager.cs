@@ -31,7 +31,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	private Vector3 MoveOffsetVector = new Vector3(-950, -450, 0);
 	
 	private MoveBuddyAnimation _moveBuddyAnimation;
-	private const float CHECK_FOR_REWARDS_INTERVAL = 8.5f;
+	private const float CHECK_FOR_REWARDS_INTERVAL = 7.5f;
 	private string _selectedToyId;
 	private List<RewardPickup> _rewardPickups = new List<RewardPickup>();
 	private bool _timerStarted;
@@ -310,7 +310,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 						amountOfCoinsToReward += _rewardPickups[i].RewardAmount;
 						break;
 					case CurrencyTypes.Love:
-						amountOfLoveToReward += (_rewardPickups[i].RewardAmount * _loveRewardMultiplier);
+						amountOfLoveToReward += (_rewardPickups[i].RewardAmount * (int)_loveRewardMultiplier);
 						break;       
 					case CurrencyTypes.BuddyBling:
 						amountOfBuddyBlingToReward += _rewardPickups[i].RewardAmount;
@@ -351,7 +351,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			userInfo.UpdateCoins(amount);
 				break;
 			case CurrencyTypes.Love:
-			GameManager.Instance.SelectedAppChildrenInfo.currentXP += in_rewardPickup.RewardAmount;
+			GameManager.Instance.SelectedAppChildrenInfo.currentXP += in_rewardPickup.RewardAmount * (int)_loveRewardMultiplier;
 				break;       
 			case CurrencyTypes.BuddyBling:
 			GameManager.Instance.SelectedAppChildrenInfo.buddyBling += in_rewardPickup.RewardAmount;

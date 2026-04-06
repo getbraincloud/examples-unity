@@ -207,4 +207,24 @@ public class GameManager : SingletonBehaviour<GameManager>
 		}
 		return "";
 	}
+	
+	public void CompleteQuestCard(string questId, int questIndex)
+	{
+		for (int i = 0; i < appChildrenInfos.Count; i++)
+		{
+			if(appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			{
+				switch (questId)
+				{
+					case BitBuddiesConsts.GENERAL_QUESTLINEID:
+						//BrainCloudManager.Instance.CurrentUserInfo.
+						break;
+					case BitBuddiesConsts.BITBLING_QUESTLINEID:
+						break;
+					case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+						break;
+				}
+			}
+		}
+	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
 using UnityEngine;
@@ -25,6 +26,68 @@ public class QuestPanel : MonoBehaviour
 	private QuestCard _secondRowGeneralCard;
 
 	private int _pageIndex;
+	
+	public void OnClaimButtonSuccess(string jsonResponse)
+	{
+		/*
+		 * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"compileTime":2202,"scriptSize":1520,"renderTime":5,"executeTime":43529},
+		 * "response":{"reward":{"coins":1000},"questLine":"generalQuestLine","questLineIndex":1.0},"success":true,"reasonCode":null},"status":200}]}
+		 */
+		//Get index info
+		//Get Reward Info
+		Dictionary<string, object> data = jsonResponse.Deserialize("data");
+		Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
+        
+		var rewards = response["reward"] as Dictionary<string, object>;
+		if(rewards == null) return;
+		UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
+		if(rewards.ContainsKey("coins"))
+		{
+			int coinReward = (int) rewards["coins"];
+			userInfo.UpdateCoins(coinReward + userInfo.Coins);
+			StateManager.Instance.OpenInfoPopUp("Quest Rewards", $"You have received {coinReward} coins!");	
+		}
+		else if(rewards.ContainsKey("gems"))
+		{
+			int gemReward = (int) rewards["gems"];
+			userInfo.UpdateGems(gemReward + userInfo.Gems);
+			StateManager.Instance.OpenInfoPopUp("Quest Rewards", $"You have received {gemReward} gems!");
+
+		}
+		string questLineId = response["questLine"] as string;
+		int questLineIndex = Convert.ToInt32(response["questLineIndex"]);
+		GameManager gameManager = GameManager.Instance;
+		List<QuestInfo> listOfQuests = new List<QuestInfo>();
+		switch (questLineId)
+		{
+			case BitBuddiesConsts.GENERAL_QUESTLINEID:
+				listOfQuests = gameManager.GeneralQuests;
+				break;
+			case BitBuddiesConsts.BITBLING_QUESTLINEID:
+				listOfQuests = gameManager.BitBlingQuests;
+				break;
+			case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+				listOfQuests = gameManager.BitBuddiesQuests;
+				break;
+		}
+
+		for (int i = 0; i < listOfQuests.Count; i++)
+		{
+			if(listOfQuests[i].QuestLineIndex == questLineIndex)
+			{
+				QuestInfo completedQuest = listOfQuests[i - 1];
+				completedQuest.QuestStatus = QUEST_STATUS.SATISFIED;
+				QuestInfo unlockedQuest = listOfQuests[i];
+				unlockedQuest.QuestStatus = QUEST_STATUS.IN_PROGRESS;
+
+				listOfQuests[i - 1] = completedQuest;
+				listOfQuests[i] = unlockedQuest;
+				break;
+			}
+		}
+		UpdatePanel();
+		StateManager.Instance.RefreshScreen();
+	}
 	
 	public void SetUpPanel()
 	{

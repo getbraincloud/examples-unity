@@ -122,4 +122,16 @@ public class AppChildrenInfo
 	{
 		return Resources.Load<Sprite>(buddySpritePath);
 	}
+	
+	public void UpdateLoveBoosterInfo(int in_loveMultiplier, long in_expiryTime, long in_dailyCooldownTime)
+	{
+		loveMultiplier = in_loveMultiplier;
+		dailyBoosterExpiryUntil = in_expiryTime;
+		dailyCooldownUntil = in_dailyCooldownTime;
+	}
+	
+	public void UpdateCoinBoosterInfo(int in_coinMultiplier, long in_expiryTime, long in_dailyCooldownTime)
+	{
+		coinMultiplier = in_coinMultiplier;
+	}
 }

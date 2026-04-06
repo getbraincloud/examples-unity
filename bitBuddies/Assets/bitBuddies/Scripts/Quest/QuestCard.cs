@@ -35,8 +35,13 @@ public class QuestCard : MonoBehaviour
     [SerializeField] private Button ClaimButton;
     [SerializeField] private Image BGImage;
     
-
+    private QuestPanel _questPanel;
     private QuestInfo _questInfo;
+    public QuestInfo QuestInfo
+    {
+        set { SetupCard(value); }
+        get { return _questInfo; }
+    }
 
     private void OnStatChange(string statName, int incremented)
     {
@@ -55,32 +60,17 @@ public class QuestCard : MonoBehaviour
         scriptData.Add("questName", _questInfo.QuestTitle);
         scriptData.Add("questIndex", _questInfo.QuestLineIndex);
         scriptData.Add("questScore", StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack));
-        BrainCloudManager.Client.ScriptService.RunScript(BitBuddiesConsts.CLAIM_QUEST_SCRIPT_NAME, scriptData.Serialize(), BrainCloudManager.HandleSuccess("Claim Quest Success", OnClaimButtonSuccess));
+        BrainCloudManager.Client.ScriptService.RunScript
+        (
+            BitBuddiesConsts.CLAIM_QUEST_SCRIPT_NAME, 
+            scriptData.Serialize(), 
+            BrainCloudManager.HandleSuccess("Claim Quest Success", _questPanel.OnClaimButtonSuccess)
+        );
     }
     
-    private void OnClaimButtonSuccess(string jsonResponse)
-    {
-        /*
-         * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"compileTime":2202,"scriptSize":1520,"renderTime":5,"executeTime":43529},
-         * "response":{"reward":{"coins":1000},"questLine":"generalQuestLine","questLineIndex":1.0},"success":true,"reasonCode":null},"status":200}]}
-         */
-        //Get index info
-        //Get Reward Info
-        Dictionary<string, object> data = jsonResponse.Deserialize("data");
-        Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
-        
-        var rewards = response["reward"] as Dictionary<string, object>;
-        int coinReward = (int) rewards["coins"];
-        UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
-        userInfo.UpdateCoins(coinReward + userInfo.Coins);
-        
-        //FL TODO: Complete quest locally
-        string questLineId = response["questLine"] as string;
-        int questLineIndex = (int) response["questLineIndex"];
-    }
-
     public void SetupCard(QuestInfo in_questInfo)
     {
+        _questPanel = FindAnyObjectByType<QuestPanel>();
         _questInfo = in_questInfo;
         QuestTitleText.text = _questInfo.QuestTitle;
         StatTracker.OnStatChanged += OnStatChange;
@@ -92,8 +82,7 @@ public class QuestCard : MonoBehaviour
             {
                 ClaimButton.gameObject.SetActive(true);
                 ProgressText.enabled = true;
-                ClaimButton.onClick.AddListener(OnClaimButton);          
-                //ProgressSlider.fillRect.GetComponent<Image>().color = Color.blue;
+                ClaimButton.onClick.AddListener(OnClaimButton);
                 
                 ProgressSlider.value = questValue;
                 ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
@@ -128,15 +117,6 @@ public class QuestCard : MonoBehaviour
                 ProgressSlider.fillRect.GetComponent<Image>().color = Color.grey;
                 BGImage.color = Color.grey;
             }
-        }
-        
-        //FL ToDo: Remove this debug code before release
-        if(GameManager.Instance.Debug)
-        {
-            ProgressText.enabled = true;
-            ProgressSlider.value = questValue;
-            ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
-            ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
         }
 
         RewardText.text = $"{_questInfo.QuestRewardAmount}";

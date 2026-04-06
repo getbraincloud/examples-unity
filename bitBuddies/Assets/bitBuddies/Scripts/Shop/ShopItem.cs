@@ -78,10 +78,6 @@ public class ShopItem : MonoBehaviour
                 _countdownTimer = GetComponent<CountdownTimer>();
                 _countdownTimer.StartCountdown(appInfo.dailyCooldownUntil);
                 BuyButton.interactable = false;
-                if(CountdownTimer.GetRemainingTime(appInfo.dailyCooldownUntil) > TimeSpan.FromSeconds(3.0))
-                {
-                    ToyManager.Instance.StartLoveMultiplierCountdown(appInfo.loveMultiplier, appInfo.dailyBoosterExpiryUntil);
-                }
             }
         }
         //check for instant level up, if user is maxed level

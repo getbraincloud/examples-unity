@@ -93,7 +93,7 @@ public class MouseMerchantItem : ShopItem
          }
          else
          {
-             GameManager.Instance.SelectedAppChildrenInfo.dailyCooldownUntil = coolDownUntil;
+             GameManager.Instance.SelectedAppChildrenInfo.UpdateLoveBoosterInfo(multiplier, boosterExpiryDuration, coolDownUntil);
              ToyManager.Instance.StartLoveMultiplierCountdown(multiplier, boosterExpiryDuration);
              _countdownTimer = GetComponent<CountdownTimer>();
              _countdownTimer.StartCountdown(coolDownUntil);
