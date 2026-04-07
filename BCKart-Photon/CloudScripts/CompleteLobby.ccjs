@@ -1,0 +1,20 @@
+"use strict";
+
+//https://docs.braincloudservers.com/api/capi/lobby/sysroomstopped
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+  const lobbyId = data.lobbyId;
+
+  var lobbyProxy = bridge.getLobbyServiceProxy();
+
+  var postResult = lobbyProxy.sysRoomStopped(lobbyId);
+
+  // lets also post it to the lobby that we are not ready
+  var postResult2 = lobbyProxy.updateReady(lobbyId, false, {});
+
+  return response;
+}
+
+main();

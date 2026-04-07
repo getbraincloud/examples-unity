@@ -1,0 +1,32 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  response.shopItems = [];
+  var itemCatalogProxy = bridge.getItemCatalogServiceProxy();
+  var getItemCatalogResult = itemCatalogProxy.getCatalogItemsPage({});
+  if(getItemCatalogResult.status === 200 &&
+      getItemCatalogResult.data.results.count > 0)
+  {
+    var userItems = getItemCatalogResult.data.results.items;
+    for (let i = 0; i < userItems.length; ++i)   
+    {
+      var item = {};
+      item.itemId = userItems[i].defId;
+      item.displayName = userItems[i].name;
+      item.description = userItems[i].desc;
+      item.meta = userItems[i].meta;
+      item.buyPrice = userItems[i].buyPrice;
+    
+      item.cooldown = userItems[i].coolDownSecs;
+      response.shopItems.push(item);
+    }
+  }
+
+  response.userItems = userItems;
+
+  return response;
+}
+
+main();

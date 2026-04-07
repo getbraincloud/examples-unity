@@ -1,0 +1,52 @@
+"use strict";
+bridge.include("Helpers.ccjs");
+
+// add jsdocs, 
+function main() {
+  var response = {};
+
+  const lbId = data.leaderboardId;
+  const startIndex = data.start ? data.start : 0;
+  const endIndex = data.end ? data.end : 1;
+  
+  // fetch leaderboard data from brainCloud 
+  const sortOrder = "LOW_TO_HIGH";
+  var leaderboardProxy = bridge.getLeaderboardServiceProxy();
+  
+  var postResult = leaderboardProxy.getGlobalLeaderboardPage(lbId, sortOrder, startIndex, endIndex);
+  var toReturnData = postResult.data.leaderboard;
+  
+  for (var i = 0; i < toReturnData.length; i++) {
+    var entry = toReturnData[i];
+    if (entry.score != null) {
+        entry.score = entry.score / LB_TIME_MULITPLIER;
+    }
+  }
+
+  // add an optional one to display on the screen when they are empty
+  if (toReturnData.length == 0)
+  {
+    toReturnData.push({
+        "playerId": "emptyEntry",
+        "score": 0,
+        "data": {
+          "kartId": 0
+        },
+        "createdAt": 1762436962991,
+        "updatedAt": 1762436962991,
+        "index": 0,
+        "rank": 0,
+        "name": "NO ENTRIES",
+        "summaryFriendData": null,
+        "pictureUrl": null
+      })
+  }
+  
+  response.leaderboardData = toReturnData;  
+  response.moreAfter = postResult.data.moreAfter;
+  response.moreBefore = postResult.data.moreBefore;
+
+  return response;
+}
+
+main();

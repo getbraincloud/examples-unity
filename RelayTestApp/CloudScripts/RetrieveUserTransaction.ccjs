@@ -1,0 +1,11 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  return response;
+}
+
+main();

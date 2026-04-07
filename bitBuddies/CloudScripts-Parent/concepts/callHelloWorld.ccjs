@@ -1,0 +1,99 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+/**
+ * Calls the 'HelloWorld' script in the child app profile and returns its result.
+ *
+ * @param {Object} data - The input parameters for the script.
+ * @param {string} data.childAppId - The appId of the child app to switch to for child script execution.
+ * @returns {Object} response - The result of running the HelloWorld script in the child app profile.
+ */
+function main() {
+  var response = {};
+
+  // Get identity proxy for profile switching
+  var identityProxy = bridge.getIdentityServiceProxy();
+  
+  // Switch to Child app profile using helper
+  // Uses childAppId from input data
+  const switched = switchToChildAppSafely(data.childAppId, identityProxy);
+  if (switched)
+  {
+    // Run HelloWorld script in child profile
+    const scriptProxy = bridge.getScriptServiceProxy();
+    
+    response = scriptProxy.runScript("HelloWorld", {}).data;
+  }
+
+  // Switch back to parent profile for cleanup
+  identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+
+  return response;
+}
+
+
+
+// view "boxRarity" global entity
+function addStarterChildAccount(childAppId)
+{
+  var response = {};
+  // Get identity proxy for profile switching
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var rarityTypes = null;
+  var selectedStats = {};
+  var boxType = "starter";
+
+  var globalEntityProy = bridge.getGlobalEntityServiceProxy();
+  const where = {entityType:"config"};
+  const orderBy = {createdAt:1};
+  var listOfConfigs = globalEntityProy.getList(where,orderBy,10 ).data.entityList;
+
+  for (var i = 0; i < listOfConfigs.length; ++i)
+  {
+    if (listOfConfigs[i].entityIndexedId == RARITY_TYPES)
+    {
+      rarityTypes = listOfConfigs[i].data;
+    }
+  }
+
+  // Switch to Child app profile using helper
+  // Uses childAppId from input data
+  const switched = addChildAccount(childAppId, identityProxy);
+
+  if (switched) {
+    if (rarityTypes[boxType]) 
+    {
+      selectedStats = rarityTypes[boxType];
+    }
+
+    //create data and assign stats & rarity to it to send later
+    var newBuddy = selectedStats;
+
+    //get next experience requirement to save to new buddy
+    var playerStatProxy = bridge.getPlayerStatisticsServiceProxy();
+    var getNextLevel = playerStatProxy.getNextExperienceLevel();
+    if(getNextLevel)
+    {
+      //bridge.logInfoJson("get next level up", {"data": getNextLevel.data.xp_level});
+      newBuddy.nextLevelUpXP = getNextLevel.data.xp_level.experience;
+    }
+
+    newBuddy.lastIdleTimestamp = Date.now(); 
+
+    //Save the info to child account
+    var entityProxy = bridge.getEntityServiceProxy();
+    entityProxy.updateSingleton(CHILD_BUDDY_ENTITY_TYPE, newBuddy, {"acl": 2}, -1);
+    var playerProxy = bridge.getPlayerStateServiceProxy();
+    playerProxy.updateSummaryFriendData(newBuddy);
+
+    // Switch back to parent profile for cleanup
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+
+  response = getChildProfiles(identityProxy).data;
+  response.newBuddy = newBuddy;
+  
+  return response;
+}
+
+main();

@@ -1,0 +1,92 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() {
+  var response = {};
+  response.items = [];
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var switchToChildResult = switchToChildAccount(data.profileId, data.childAppId, identityProxy);
+  if(switchToChildResult)
+  {
+    var itemCatalogProxy = bridge.getItemCatalogServiceProxy();
+    var getItemCatalogResult = itemCatalogProxy.getCatalogItemsPage({});
+    if(getItemCatalogResult.status === 200 &&
+        getItemCatalogResult.data.results.count > 0)
+    {
+      var userItems = getItemCatalogResult.data.results.items;
+      for (let i = 0; i < userItems.length; ++i)   
+      {
+        var item = {};
+        item.category = userItems[i].category;
+        if(userItems[i].category === "toys")
+        {
+          item.benchId = userItems[i].defId;
+          
+          item.levelRequirement = userItems[i].meta.levelRequirement;
+          item.lovePayout = userItems[i].meta.lovePayout;
+          item.coinPayout = userItems[i].meta.coinPayout;
+          item.buddyBlingPayout = userItems[i].meta.buddyBlingPayout;
+          item.unlockAmount = userItems[i].meta.unlockAmount;
+          item.coinSpawnAmount = userItems[i].meta.coinSpawnAmount;
+          item.loveSpawnAmount = userItems[i].meta.loveSpawnAmount;
+          item.buddyBlingSpawnAmount = userItems[i].meta.buddyBlingSpawnAmount;
+          item.displayName = userItems[i].name;
+        
+          item.cooldown = userItems[i].coolDownSecs;
+        }
+        else if(userItems[i].category === "mouseMerchant")
+        {
+          item.defId = userItems[i].defId;
+          item.displayName = userItems[i].name;
+          item.description = userItems[i].desc;
+          
+          //Assume items with buyPrice objects are wearable and one time purchases
+          
+          var buyPriceType = Object.keys(userItems[i].buyPrice) + "";
+          if(buyPriceType)
+          {
+            var jsonString = JSON.stringify(userItems[i].buyPrice);
+            var buyPriceValue = parseInt(jsonString.replace("{", "").replace("}", "").split(":")[1]);
+            item.buyPriceValue = buyPriceValue;
+            item.buyPriceType = buyPriceType;
+          }
+
+          if(userItems[i].meta)
+          {
+            //Items with meta.multiplers are the daily freebie booster
+            if(userItems[i].meta.multiplier)
+            {
+              item.multiplier = userItems[i].meta.multiplier;
+              item.duration = userItems[i].meta.durationInSeconds;
+            }
+
+            //Items with meta.priceAmount here are for consumables
+            else if(userItems[i].meta.priceAmount)
+            {
+              item.priceAmount = userItems[i].meta.priceAmount;
+              item.priceType = userItems[i].meta.priceType;
+              if(userItems[i].meta.payoutAmount)
+              {
+                item.payoutAmount = userItems[i].meta.payoutAmount;
+                item.payoutType = userItems[i].meta.payoutType;
+              }
+            }
+          }
+        }
+        
+        response.items.push(item);
+      }
+    }
+    //response.items = userItems;
+
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+  else
+  {
+    response.badSwitchResult = switchToChildResult;
+  }
+
+  return response;
+}
+
+main();

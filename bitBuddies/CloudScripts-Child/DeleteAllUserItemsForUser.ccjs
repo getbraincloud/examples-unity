@@ -1,0 +1,13 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  var userItemsProxy = bridge.getUserItemsServiceProxy();
+  var getUserItems = userItemsProxy.getUserItemsPage({}, true);
+  response.getUserItems = getUserItems;
+
+  return response;
+}
+
+main();

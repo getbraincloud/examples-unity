@@ -1,0 +1,16 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  var moneyProxy = bridge.getVirtualCurrencyServiceProxy();
+  var result = moneyProxy.awardCurrency("coins", data.increaseAmount);
+  if(result.status == 200)
+  {
+    response.getResult = result;
+  }
+
+  return response;
+}
+
+main();

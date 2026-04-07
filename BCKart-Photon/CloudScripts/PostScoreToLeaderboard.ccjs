@@ -1,0 +1,30 @@
+"use strict";
+bridge.include("Helpers.ccjs");
+
+// add jsdocs
+function main() {
+  var response = {};
+  const leaderboardId = data.leaderboardId;
+  const time = data.time * LB_TIME_MULITPLIER; // photon 24.81235
+  const kartId = data.kartId;
+
+  // fetch leaderboard data from brainCloud 
+  var lbProxy = bridge.getLeaderboardServiceProxy();
+  var scoreData = {
+    "kartId": kartId
+  };
+  var configJson = {
+      "leaderboardType": "LOW_VALUE",
+      "rotationType": "MONTHLY",
+      "retainedCount": 2,
+      "expireInMins": null
+  };
+
+  var postResult = lbProxy.postScoreToDynamicLeaderboardUsingConfig(leaderboardId, time, scoreData, configJson);
+
+  response.leaderboardData = postResult;
+
+  return response;
+}
+
+main();

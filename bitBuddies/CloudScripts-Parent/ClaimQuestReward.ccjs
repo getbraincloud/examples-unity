@@ -1,0 +1,53 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  //Grab quests
+  var getQuestInfoResult = bridge.callScript("GetQuestInfo", {});
+  
+  //Identify quest line with quest name aka using quest title
+  if(getQuestInfoResult.status === 200)
+  {
+    var questSelected = null;
+    var questThresholdRequired = 0;
+    var questLineId = "";
+    var quests = Array.from(getQuestInfoResult.data.response.quests);
+    for(var i = 0; i < quests.length; ++i)
+    {
+      if(quests[i].title === data.questName)
+      {
+        questSelected = quests[i];
+        questThresholdRequired = quests[i].thresholdRequired;
+        questLineId = quests[i].questId;
+        break;
+      }
+    }
+
+    if(questSelected != null)
+    {
+      //Check if claiming the quest is valid with questScore    
+      if(data.questScore >= questThresholdRequired && 
+          questSelected.questLineIndex === data.questIndex)
+      {
+        //increment quest number after identifying
+        var playerStatisticProxy = bridge.getPlayerStatisticsServiceProxy();
+        var statData = {};
+        statData[questLineId] = data.questIndex + 1;
+        var incrementStatResult = playerStatisticProxy.incrementUserStats(statData);
+        
+        if(incrementStatResult.status === 200)
+        {
+          //return rewards and new quest number
+          response.reward = questSelected.reward;
+          response.questLine = questLineId;
+          response.questLineIndex = data.questIndex + 1;
+        }
+      }
+    }
+  }
+  
+  return response;
+}
+
+main();

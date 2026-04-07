@@ -1,0 +1,51 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+/**
+ * Updates the username for a child account in the bitBuddies-Parent app.
+ *
+ * Switches to the specified child account, attempts to update the username,
+ * and then switches back to the parent profile. Returns the result of the operation.
+ *
+ * Expects the following properties in the global `data` object:
+ *   - profileId: The profile ID of the child account.
+ *   - childAppId: The app ID of the child account.
+ *   - newName: The new username to set for the child account.
+ */
+
+
+
+/**
+ * Main entry point for updating a child account's username.
+ * @returns {Object} Response object containing the result of the update operation.
+ */
+function main() {
+  var response = {};
+
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var switched = switchToChildAccount(data.profileId, data.childAppId, identityProxy);
+  if (switched) 
+  {
+    var updateUsernameResult = bridge.getPlayerStateServiceProxy().updateUserName(data.newName);
+    if (updateUsernameResult.status !== 200) 
+    {
+      response.updateNameResult = { message: "failed to update name to child account" };
+    } 
+    else 
+    {
+      var dataToReturn = { "newName": data.newName, "profileId": data.profileId };
+      response.userAdjusted = dataToReturn;
+    }
+
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+    if(response.userAdjusted)
+    {
+      var playerStatsProxy = bridge.getPlayerStatisticsServiceProxy();
+      var statToIncrease = {"userChangedName":1};
+      response.statIncrementResult = playerStatsProxy.incrementUserStats(statToIncrease);
+    }
+  }
+
+  return response;
+}
+
+main();

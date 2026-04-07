@@ -1,0 +1,25 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var lobbyType = "CursorPartyV2";
+  var criteriaJson = {
+    "rating": {
+      "min": 5,
+      "max": 100
+    }
+  };
+  var lobbyProxy = bridge.getLobbyServiceProxy();
+
+  var postResult = lobbyProxy.getLobbyInstances(lobbyType, criteriaJson);
+  if (postResult.status == 200) {
+    response.postResult = postResult;
+  }
+  
+  return response;
+}
+
+main();

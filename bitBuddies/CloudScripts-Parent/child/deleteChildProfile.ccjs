@@ -1,0 +1,77 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() {
+  var response = {};
+  var sysUserID = bridge.getGlobalProperty("systemUser_profileID");
+  
+  var sysSession = bridge.getSessionForProfile(sysUserID);
+
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var playerStatsProxy = bridge.getPlayerStatisticsServiceProxy();
+  var buddyDeleted = false;
+  const childProfiles = getChildProfiles(identityProxy).data;
+
+  if (childProfiles.children.length > 1)
+  {
+    const profileToDelete = data.childProfileId;
+    var profileFound = false;
+    
+    for(var i = 0; i < childProfiles.children.length; ++i)
+    {
+      if(profileToDelete === childProfiles.children[i].profileId)
+      {
+        profileFound = true;
+        break;
+      }
+    }
+    
+    if(profileFound === true)
+    {
+      response.profileFound = true;
+      var sysIdentityProxy = bridge.getIdentityServiceProxy(sysSession);
+      //var switchToChildResult = sysIdentityProxy.switchToChildProfile(null, data.childAppId, true);
+      var switchToChildResult = sysIdentityProxy.switchToChildProfile("f990645a-8279-4fc8-8cf6-b787fd409b78", data.childAppId, false);
+      if(switchToChildResult.status === 200)
+      {
+        var userProxy = bridge.getUserServiceProxy(sysSession);
+        var deleteResult = userProxy.sysDeleteUser(profileToDelete, {});
+        
+        if(deleteResult.status === 200)
+        {
+          buddyDeleted = true;
+        }
+        response.switchToSysChildResult = switchToChildResult;
+        response.deleteResult = deleteResult;
+        response.childProfiles = getChildProfiles(identityProxy).data;
+
+        sysIdentityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+      }
+      else
+      {
+        response.switchToSysChildResult = switchToChildResult;
+      }
+    }
+    else
+    {
+      response.deleteResult = "profile was not found";
+    }
+  }
+  else
+  {
+    response.childProfiles = getChildProfiles(identityProxy).data;
+    response.errorMessage = "Not enough child profiles found to delete one. Must have more than 1 child account";
+  }
+
+  if(buddyDeleted === true)
+  {
+     //Increment player stat for trashBuddy
+    var statToIncrease = {"trashBuddies":1};
+    var incrementResult = playerStatsProxy.incrementUserStats(statToIncrease);
+    response.incrementResult = incrementResult;
+  }
+
+  return response;
+}
+
+main();

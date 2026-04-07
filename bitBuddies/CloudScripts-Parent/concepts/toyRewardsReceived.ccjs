@@ -1,0 +1,78 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() {
+  var response = {};
+
+  /*
+  Game Plan:
+  Main goal is to increment LoveEarned Stat, BuddyBling and Coins 
+  but also updating any stat that involves this like 
+    - Level up based on love earned for child
+    - Increase CoinsEarned and LoveEarned stats for child
+    - Send back what the current values are for all fields
+  */
+  //Use script to award coins to Parent user
+
+  if(data.amountOfCoinsToGive > 0)
+  {
+    var increaseCoinsResult = bridge.callScript("../AwardCoinsToUser",{"increaseAmount": data.amountOfCoinsToGive});
+    if(increaseCoinsResult.status === 200)
+    {
+      response.incrementCoinsResult = increaseCoinsResult.data.response.getResult.data.currencyMap.coins;
+    }
+  }
+  
+
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var playerStatisticsProxy = bridge.getPlayerStatisticsServiceProxy();
+  var playerStateProxy = bridge.getPlayerStateServiceProxy();
+  //switch to child to update summary friend data
+  if(switchToChildAccount(data.profileId, data.childAppId, identityProxy))
+  {
+    //Do stuff if we have XP(love) to give
+    if(data.amountOfLoveToGive > 0)
+    {
+      var readUserResult = playerStateProxy.readUserState();  
+      var currentLevel = 0;  
+      if(readUserResult.status === 200)
+      {
+        currentLevel = readUserResult.data.experienceLevel;
+      }
+
+      //Update player stat for coins & love gained from this child      
+      var statToUpdate = {"CoinsGainedForParent": data.amountOfCoinsToGive, "LoveEarned": data.amountOfLoveToGive};
+      response.statResult = playerStatisticsProxy.incrementUserStats(statToUpdate);
+
+      var increaseXpResult = response.xpLoveResult = playerStatisticsProxy.incrementExperiencePoints(data.amountOfLoveToGive);
+
+      if(!isNullOrEmpty(increaseXpResult.data))
+      {
+        var responseLevel = increaseXpResult.data.experienceLevel;
+        if(responseLevel > currentLevel)
+        {
+          var getNextLevelResult = playerStatisticsProxy.getNextExperienceLevel();
+          if(getNextLevelResult)
+          {
+            response.nextLevelUpXP = getNextLevelResult.data.xp_level.experience;
+          }
+        }
+      }
+    }
+
+    if(data.amountOfBuddyBlingToGive > 0)
+    {
+      // Run AwardBuddyBling script in child profile
+      const scriptProxy = bridge.getScriptServiceProxy();    
+      var scriptResult = scriptProxy.runScript("AwardBuddyBling", {"increaseAmount": data.amountOfBuddyBlingToGive}).data;
+      response.blingResult = scriptResult.response.getResult.data.currencyMap.buddyBling;
+    }
+    
+    //switch back to parent
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+
+  return response;
+}
+
+main();

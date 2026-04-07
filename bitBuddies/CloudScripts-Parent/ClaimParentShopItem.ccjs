@@ -1,0 +1,227 @@
+"use strict";
+
+function main()
+{
+    var itemProxy = bridge.getItemCatalogServiceProxy();
+    var userItemProxy = bridge.getUserItemsServiceProxy();
+    var virtualCurrencyProxy = bridge.getVirtualCurrencyServiceProxy();
+    var log = bridge.getLogServiceProxy();
+
+    var result;
+
+    try
+    {
+        var itemId = data && data.itemId ? data.itemId.trim().toLowerCase() : null;
+
+        // Read user currency balances via ReadUserState
+        var playerStateProxy = bridge.getPlayerStateServiceProxy();
+        var readPlayerResult = playerStateProxy.readUserState();
+
+        var payload = readPlayerResult.data ? readPlayerResult.data : {};
+        var userCurrencies = payload && payload.currencies ? payload.currencies : {};
+
+        // Read the full item catalog
+        var catalogResponse = itemProxy.getCatalogItemsPage({});
+
+        if (!catalogResponse || catalogResponse.status !== 200)
+        {
+            result = { success: false, error: "Failed to read item catalog: status " + (catalogResponse ? catalogResponse.status : "no response") };
+            return result;
+        }
+
+        var items = catalogResponse.data && catalogResponse.data.results && catalogResponse.data.results.items ? catalogResponse.data.results.items : [];
+        var targetItem = null;
+
+        for (var i = 0; i < items.length; i++)
+        {
+            if (items[i].defId.toLowerCase() === itemId)
+            {
+                targetItem = items[i];
+                break;
+            }
+        }
+
+        if (!targetItem)
+        {
+            result = { success: false, error: "Item not found in catalog: " + itemId };
+            return result;
+        }
+
+        // Affordability check against user balances
+        var priceData = targetItem.pricing
+            && targetItem.pricing.prices
+            && targetItem.pricing.prices.length > 0
+            ? targetItem.pricing.prices[0].priceData
+            : null;
+        var cost = 0;
+
+        var canAfford = true;
+        var shortfall = null;
+
+        if (priceData)
+        {
+            for (var currType in priceData)
+            {
+                if (!priceData.hasOwnProperty(currType)) { continue; }
+
+                cost = priceData[currType];
+                var balance = userCurrencies[currType] && userCurrencies[currType].balance !== undefined
+                    ? userCurrencies[currType].balance
+                    : 0;
+
+                if (balance < cost)
+                {
+                    canAfford = false;
+                    shortfall = { currencyType: currType, needed: cost, has: balance };
+                    break;
+                }
+            }
+        }
+
+        if (!canAfford)
+        {
+            result = {
+                success: false,
+                error: "Insufficient " + shortfall.currencyType + ": needs " + shortfall.needed + ", has " + shortfall.has
+            };
+            return result;
+        }
+
+        // Award the item and capture cooldown expiry 
+        var awardResponse = userItemProxy.awardUserItem(targetItem.defId, 1, true);
+
+        if (!awardResponse || awardResponse.status !== 200)
+        {
+            log.logError("[ClaimCatalogItem] awardUserItem failed", JSON.stringify({ itemId: itemId, status: awardResponse ? awardResponse.status : "no response" }));
+            result = { success: false, error: "Failed to award item: status " + (awardResponse ? awardResponse.status : "no response") };
+            return result;
+        }
+        
+        var meta = targetItem.meta ? targetItem.meta : {};
+        var payoutType = meta.payoutType ? meta.payoutType   : null;
+        var payoutAmount = meta.payoutAmount ? meta.payoutAmount : 0;
+
+        // At this point the user has acquired the item..so check which item was grabbed for UserStatistics
+        var statIncremented = false;
+        var playerStatisticsProxy = bridge.getPlayerStatisticsServiceProxy();
+        if(itemId.indexOf("gembag") === 0)
+        {
+            //Increase stat
+            var gemData = {"boughtGemsWithCash": 1};
+            var gemStatResult = playerStatisticsProxy.incrementUserStats(gemData);
+            if(gemStatResult.status === 200)
+            {
+                statIncremented = true;
+            }
+
+            //Update currency
+            virtualCurrencyProxy.awardCurrency("gems", payoutAmount);
+            virtualCurrencyProxy.consumeCurrency("fakeDollars", cost);
+
+        }
+        else if(itemId.indexOf("coinbag") === 0)
+        {
+            var coinData = {"boughtCoinsWithGems": 1};
+            var coinStatResult = playerStatisticsProxy.incrementUserStats(coinData);
+            if(coinStatResult.status === 200)
+            {
+                statIncremented = true;
+            }
+
+            virtualCurrencyProxy.awardCurrency("coins", payoutAmount);
+            virtualCurrencyProxy.consumeCurrency("gems", cost);
+        }
+
+
+        var awardData = awardResponse.data ? awardResponse.data : {};
+        var coolDownUntil  = null;
+
+        // Use the item immediately if it is free 
+        if (!priceData)
+        {
+            var awardedItems = awardData.items ? awardData.items : null;
+            var itemInstanceId = null;
+
+            if (awardedItems)
+            {
+                var instanceKeys = Object.keys(awardedItems);
+                for (var k = 0; k < instanceKeys.length; k++)
+                {
+                    if (awardedItems[instanceKeys[k]].defId === targetItem.defId)
+                    {
+                        itemInstanceId = instanceKeys[k];
+                        break;
+                    }
+                }
+            }
+
+            if (!itemInstanceId)
+            {
+                log.logError("[ClaimCatalogItem] No item instance found in awardUserItem response — cannot use item", JSON.stringify(awardData));
+                result = { success: false, error: "Award succeeded but item instance ID was missing in response" };
+                return result;
+            }
+
+            var useResponse = userItemProxy.useUserItem(itemInstanceId, 1, {}, true);
+
+            if (!useResponse || useResponse.status !== 200)
+            {
+                log.logError("[ClaimCatalogItem] useUserItem failed", JSON.stringify({ itemInstanceId: itemInstanceId, status: useResponse ? useResponse.status : "no response" }));
+                result = { success: false, error: "Failed to use item: status " + (useResponse ? useResponse.status : "no response") };
+                return result;
+            }
+
+            coolDownUntil = useResponse.data && useResponse.data.item ? useResponse.data.item.coolDownUntil : null;
+        }
+
+
+        if(coolDownUntil > 0)
+        {
+            //Schedule script to drop user item after cooldown is reached
+            var scriptProxy = bridge.getScriptServiceProxy();
+            var scheduleData = {
+                "profileId": bridge.getProfileId()
+            };
+            var scriptName = "DropFreebieUserItems";
+            scriptProxy.scheduleRunScriptUTCv2(scriptName,scheduleData,coolDownUntil);
+            
+            //Return with cooldown included
+            result = 
+            {
+                success: true,
+                itemId: targetItem.defId,
+                coolDownUntil: coolDownUntil,
+                payout:
+                {
+                    currencyType: payoutType,
+                    amount:       payoutAmount
+                }
+            };
+        }
+        else
+        {
+            result = 
+            {
+                success: true,
+                itemId: targetItem.defId,
+                statIncremented: statIncremented,
+                payout:
+                {
+                    currencyType: payoutType,
+                    amount:       payoutAmount
+                }
+            };
+        }
+        
+
+        //log.logInfo("[ClaimCatalogItem] Complete", JSON.stringify(result));
+    }
+    catch (e)
+    {
+        result = { success: false, error: "Unhandled exception: " + e.message };
+    }
+
+    return result;
+}
+
+main();

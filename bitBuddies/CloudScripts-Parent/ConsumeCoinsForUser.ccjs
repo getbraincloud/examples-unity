@@ -1,0 +1,12 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  var vcProxy = bridge.getVirtualCurrencyServiceProxy();
+  var consumeCurrencyResult = vcProxy.consumeCurrency("coins", data.amountToConsume);
+  response.consumeCurrencyResult = consumeCurrencyResult;
+  return response;
+}
+
+main();

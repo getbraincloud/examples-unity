@@ -1,0 +1,35 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+/**
+ * Calls the 'AwardBuddyBling' script in the child app profile and returns its result.
+ *
+ * @param {Object} data - The input parameters for the script.
+ * @param {string} data.childAppId - The appId of the child app to switch to for child script execution.
+ * @returns {Object} response - The result of running the AwardBuddyBling script in the child app profile.
+ */
+function main() {
+  var response = {};
+
+  // Get identity proxy for profile switching
+  var identityProxy = bridge.getIdentityServiceProxy();
+  
+  // Switch to Child app profile using helper
+  // Uses childAppId from input data
+  const switched = switchToChildAccount(data.profileId, data.childAppId, identityProxy);
+  if (switched)
+  {
+    // Run AwardBuddyBling script in child profile
+    const scriptProxy = bridge.getScriptServiceProxy();
+    
+    var scriptResult = scriptProxy.runScript("AwardBuddyBling", {"increaseAmount": data.increaseAmount}).data;
+    response = scriptResult.response.getResult.data;
+  }
+
+  // Switch back to parent profile for cleanup
+  identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+
+  return response;
+}
+
+main();

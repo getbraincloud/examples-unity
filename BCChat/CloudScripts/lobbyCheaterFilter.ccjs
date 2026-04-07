@@ -1,0 +1,9 @@
+var result = {};
+result.accept = false;
+
+// Match cheaters up with cheaters only...
+if (data.matchCandidate.settings.isCheater == data.filter.isCheater) {
+    result.accept = false;
+}
+
+result;

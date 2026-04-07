@@ -1,0 +1,104 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() {
+  var response = {};
+  
+  //Get proxies
+  var playerStateProxy = bridge.getPlayerStateServiceProxy();
+  var playerStatisticsProxy = bridge.getPlayerStatisticsServiceProxy();
+  var identityProxy = bridge.getIdentityServiceProxy();
+  
+  var hourInSeconds = 3600;
+
+  //Get amount to award
+  var coinPerHour = data.summaryFriendData.coinPerHour;
+  var maxCoinCapacity = data.summaryFriendData.maxCoinCapacity;
+  var lastIdleTimestamp = data.summaryFriendData.lastIdleTimestamp;
+  var amountToReward = 0;
+
+  var nowMs = (new Date()).getTime(); // current UTC time in ms
+  var timeDifferenceSeconds = (nowMs - lastIdleTimestamp) / 1000.0;
+  var coinsPerSecond = coinPerHour / hourInSeconds;
+  var coinsEarned = Math.floor(coinsPerSecond * timeDifferenceSeconds);
+
+  if (coinsEarned > 0 && coinsEarned < maxCoinCapacity) 
+  {
+      amountToReward = coinsEarned;
+  } 
+  else 
+  {
+      amountToReward = maxCoinCapacity;
+  }
+  
+  if(amountToReward > 0)
+  {
+    //Update VC to new balance for parent profile
+    var vcId = "coins";
+    
+    var virtualCurrencyProxy = bridge.getVirtualCurrencyServiceProxy();
+
+    var postResult = virtualCurrencyProxy.awardCurrency(vcId, amountToReward);
+    if (postResult.status == 200) 
+    {    
+      response.currencyMap = postResult.data.currencyMap;
+      
+      //Increase XP for parent
+      var xpAmount = amountToReward/2;
+      
+      //var currentLevel = switchToChildResult.data.experienceLevel;
+      var statProxy = bridge.getPlayerStatisticsServiceProxy();
+      var playerStateProxy = bridge.getPlayerStateServiceProxy();
+      var readPlayerStateResult = playerStateProxy.readUserState();
+      var currentLevel = 0;
+      if(readPlayerStateResult.status === 200)
+      {
+        currentLevel = readPlayerStateResult.data.experienceLevel;
+      }
+      
+      //Check if we leveled up, if so send back next XP requirement to user
+      //field is needed for the progress bar.
+      var increaseXpResult = statProxy.incrementExperiencePoints(xpAmount);
+      if(increaseXpResult.status === 200)
+      {
+        response.xpAwarded = xpAmount;
+      }
+      else
+      {
+        response.xpAwardedBad = increaseXpResult;
+      }
+      if(!isNullOrEmpty(increaseXpResult.data))
+      {
+        
+        var responseLevel = increaseXpResult.data.experienceLevel;
+        if(responseLevel > currentLevel)
+        {
+          var getNextLevelResult = statProxy.getNextExperienceLevel();
+          if(getNextLevelResult && getNextLevelResult.data.xp_level)
+          {
+            response.nextLevelUpXP = getNextLevelResult.data.xp_level.experience;
+          }
+        }
+        response.increaseXpResult = increaseXpResult.data;
+      }
+    }
+  }
+
+  //switch to child to update summary friend data
+  if(switchToChildAccount(data.profileId, data.childAppId, identityProxy))
+  {
+    //Update SummaryFriendData of new timestamp
+    data.summaryFriendData.lastIdleTimestamp = Date.now(); 
+    playerStateProxy.updateSummaryFriendData(data.summaryFriendData);
+    response.summaryData = data.summaryFriendData;
+
+    //Update player stat for coins gained from this child      
+    var statToUpdate = {"CoinsGainedForParent": amountToReward};
+    response.statResult = playerStatisticsProxy.incrementUserStats(statToUpdate);
+    
+    //switch back to parent
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+  return response;
+}
+main();

@@ -1,0 +1,139 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+
+//Lootbox types include: common, rare and legendary
+
+/**
+ * Creating a child account with preset data that is randomly chosen to save against the child user
+ *
+ * @param {Object} data - The input parameters for the script.
+ * @param {string} data.childAppId - The appId of the child app to switch to for child stats.
+ * @returns {Object} response - The collected stats and results from parent and child profiles.
+ * @property {Object} response.parentStats - All parent user stats.
+ * @property {Object} response.childStats - All child user stats (if child app switch succeeds).
+ */
+function main() {
+  var response = {};
+
+  //Ensure we have a type assigned
+  if(!data.lootboxType)
+  {
+    response.status = 400;
+    response.data = {message:"Missing lootbox type"};
+    return response;
+  }
+
+  var entityProxy = bridge.getEntityServiceProxy();
+  // Get identity proxy for profile switching
+  var identityProxy = bridge.getIdentityServiceProxy();
+
+  //Grab chance data for lootbox based on what type is given.
+  var globalEntityProxy = bridge.getGlobalEntityServiceProxy();
+  var chanceData = globalEntityProxy.readEntity(LOOTBOX_CHANCES_ENTITY_ID);
+  if(!chanceData)
+  {
+    response.status = 400;
+    response.data = {message:"Failed to fetch lootbox chances"};
+    return;
+  }
+
+  // read "buddyConfigs", global entity" to get the buddy preset data
+  var listOfBuddies = globalEntityProxy.readEntity(BUDDY_CONFIG_ENTITY_ID);
+  if(listOfBuddies.status !== 200 || !listOfBuddies.data)
+  {
+    response.status = 404;
+    response.data = {message:"Buddy type not found", getBuddiesResult: listOfBuddies};
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+    return response;
+  }
+  
+  // Switch to Child app profile using helper
+  // Uses childAppId from input data
+  const switched = addChildAccount(data.childAppId, identityProxy);
+
+  if (switched)
+  {
+  
+    //Get the chances for this lootbox
+    var lootboxChances = chanceData.data.data[data.lootboxType];
+    if(lootboxChances === undefined)
+    {
+      response.status = 500;
+      response.data = {"message": "lootbox type not found"};
+      identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+      return response;
+    }
+
+    bridge.logDebugJson("lootbox chances", chanceData.data.data[data.lootboxType]);
+
+    var totalWeight = 0;
+    var pool = [];
+    for(var buddy in lootboxChances)
+    {
+      var weight = lootboxChances[buddy];
+      if(weight)
+      {
+        pool.push({buddy:buddy, weight:weight});
+        totalWeight += weight;
+      }
+    }
+
+    if(pool.length === 0)
+    {
+      response.status = 500;
+      response.data = { "message":"No valid buddies for lootbox type", "lootboxType":data.lootboxType};
+      identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+      return;
+    }
+    //randomize the pick for which buddy preset to return
+    var pick = Math.random() * totalWeight;
+    var cumulative = 0;
+    var selectedBuddy = null;
+    for(var i = 0; i < pool.length; ++i)
+    {
+      cumulative += pool[i].weight;
+      if(pick < cumulative)
+      {
+        selectedBuddy = pool[i].buddy;
+        break;
+      }
+    }
+
+    // and create it for the user as a singleton
+    var buddyConfig = listOfBuddies.data.data[selectedBuddy];
+    
+    if(!buddyConfig)
+    {
+      response.status = 400;
+      response.data = {"message":"Couldn't select buddy"};
+      identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+      return;
+    }
+    //Pass the buddy type in the config info
+    buddyConfig.buddyId = selectedBuddy;
+
+    //Return buddy info back to client to display
+    response.buddyConfig = buddyConfig;
+    
+    var createEntityResult = entityProxy.updateSingleton(CHILD_BUDDY_ENTITY_TYPE, buddyConfig, {"acl": 2}, -1);
+    if(createEntityResult.status !== 200)
+    {
+      response.status = 500;
+      response.data = {"message":"Failed to save singleton to user"};
+      identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+      return;
+    }
+    
+    // Switch back to parent profile for cleanup
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+  
+  const scriptProxy = bridge.getScriptServiceProxy();
+  var getProfileResult = scriptProxy.runScript("/child/getChildProfiles", {childAppId:data.childAppId}).data;
+  response.getProfileResult = getProfileResult.response;
+
+  return response;
+}
+
+main();

@@ -1,0 +1,18 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() {
+  var response = {};
+
+  response.update = updateBuddyLevel
+                    (
+                      data.incrementAmount, 
+                      data.summaryFriendData,
+                      bridge.getPlayerStatisticsServiceProxy(),
+                      bridge.getPlayerStateServiceProxy()
+                    );
+
+  return response;
+}
+
+main();

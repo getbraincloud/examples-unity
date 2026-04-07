@@ -1,0 +1,69 @@
+"use strict";
+bridge.include("/lobby/LobbyShared.ccjs");
+
+// 
+function generatePinCode() {
+  var pin = '';
+  var chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+  
+  for (var i = 0; i < LOBBY_PIN_LENGTH; i++) {
+    pin += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  
+  return pin;
+}
+
+// Create a lobby pin entity with a unique pin code
+function main() {
+  var response = {};
+
+  var customEntityService = bridge.getCustomEntityServiceProxy();
+
+  // generate a lobby pin code
+  var pinCode = generatePinCode();
+
+  // find or create the lobby pin entity
+  var contextFind = {
+    "pagination": {
+      "rowsPerPage": 50,
+      "pageNumber": 1,
+      "doCount": false
+    },
+    "searchCriteria": {
+      "data.lobbyId": data.lobbyId
+    },
+    "sortCriteria": { 
+      "createdAt": 1
+    }
+  };
+
+  var sysFindResult = customEntityService.sysGetEntityPage(LOBBY_TYPE, contextFind);
+  var existingEntities = sysFindResult.data.results.items;
+
+  if (existingEntities.length > 0 && existingEntities[0].expiresAt > Date.now()) // if there is an existing lobby pin that is still valid, return it
+  {
+    response.lobbyData = existingEntities[0].data;
+    response.lobbyData.expiresAt = existingEntities[0].expiresAt;
+  }
+  else
+  {
+    var lobbyData = {
+      pinCode: pinCode.toString(),
+      lobbyId: data.lobbyId,
+      isActive: true
+    };
+  
+    var publicAcl = {"other":1}; // Read access for everyone
+
+    // create the lobby data with read access by everyone, valid for 1 hour, system owned
+    var lobbyPinEntity = customEntityService.sysCreateEntity (LOBBY_TYPE, lobbyData, publicAcl, LOBBY_PIN_TTL_SECONDS, null);
+
+    response.lobbyData = lobbyData;
+    response.lobbyData.expiresAt =  lobbyPinEntity.data.expiresAt;
+
+  }
+
+  return response;
+}
+
+main();

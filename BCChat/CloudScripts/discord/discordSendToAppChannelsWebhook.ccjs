@@ -1,0 +1,33 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  bridge.logInfoJson("inData", data);
+  // this data is coming in from a discord web hook
+  const channel = bridge.getAppId() + ":gl:" + data.jsonBody.channel.name.replace("-","_");
+  const recordInHistory = true;
+  const fromData = {
+            "name": data.jsonBody.author.globalName + " via Discord",
+            "pic": data.jsonBody.author.displayAvatarURL
+          };
+  const content = data.jsonBody.content;
+              
+  var chatProxy = bridge.getChatServiceProxy();
+
+  var postChatMessageToChannel = chatProxy.sysPostChatMessageSimple(channel, 
+        content, 
+        recordInHistory, 
+        fromData);
+
+
+  // Construct a response
+  response.jsonResponse = postChatMessageToChannel;
+  response.message = "Webhook received";
+
+  response;
+
+  return response;
+}
+
+main();

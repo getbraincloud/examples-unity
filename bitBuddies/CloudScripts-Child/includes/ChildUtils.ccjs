@@ -1,0 +1,32 @@
+"use strict";
+
+function updateBuddyLevel(amountToIncrease, summaryFriendData, playerStatProxy, playerStateProxy)
+{
+  var response = {};
+
+  var currentLevel = summaryFriendData.data.level;
+  var statProxy = bridge.getPlayerStatisticsServiceProxy();
+
+  //Check if we leveled up, if so send back next XP requirement to user
+  //field is needed for the progress bar.
+  var increaseXpResult = statProxy.incrementExperiencePoints(amountToIncrease);
+  if(increaseXpResult)
+  {
+    var responseLevel = increaseXpResult.data.experienceLevel;
+    if(responseLevel > currentLevel)
+    {
+      var getNextLevelResult = playerStatProxy.getNextExperienceLevel();
+      if(getNextLevelResult)
+      {
+        response.nextLevelUpXP = getNextLevelResult.data.xp_level.experience;
+        var summaryFriendData = summaryFriendData.data.summaryFriendData;
+        summaryFriendData.level = responseLevel;
+        summaryFriendData.nextLevelUpXP = response.nextLevelUpXP;
+        summaryFriendData.experiencePoints = increaseXpResult.data.experiencePoints;
+        playerStateProxy.updateSummaryFriendData(summaryFriendData);
+      }
+    }
+  }
+  response.increaseXpResult = increaseXpResult.data;
+  return response;
+}

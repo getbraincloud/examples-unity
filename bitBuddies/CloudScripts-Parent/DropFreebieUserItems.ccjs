@@ -1,0 +1,60 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+    var profileId = data.profileId;
+  if (!profileId) {
+    response.result = "Error: profileId is required when running without a session.";
+    return response;
+  }
+
+  var session = bridge.getSessionForProfile(profileId);
+
+  //Get all user items from user
+  var userItemsProxy = bridge.getUserItemsServiceProxy(session);
+  var pageContext = {
+    pagination: {
+        rowsPerPage: 50,
+        pageNumber: 1
+    },
+    searchCriteria: {},
+    sortCriteria: {}
+  };
+  
+  var getUserItemsResult = userItemsProxy.getUserItemsPage(pageContext, true);
+  if(getUserItemsResult.status === 200)
+  {
+    var items = getUserItemsResult.data.results.items;
+
+    if(items === null || items.length === 0)
+    {
+      response.result = "No User Items available on user.";
+      return response;
+    }
+    
+    var successCount = 0;
+    for(var i = 0; i < items.length; ++i)
+    {
+      var item = items[i];
+      var itemId = item.itemId;
+      var quantity = item.quantity;
+
+      var dropItemResult = userItemsProxy.dropUserItem(itemId, quantity, false);
+      if(dropItemResult.status === 200)
+      {
+        successCount++;
+      }
+    }
+    
+    if(successCount === items.length)
+    {
+      response.result = "All user items are dropped.";
+    }
+  }
+  
+
+  return response;
+}
+
+main();

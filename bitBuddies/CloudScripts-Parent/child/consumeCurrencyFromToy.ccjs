@@ -1,0 +1,97 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+/**
+ * Main purpose for this script:
+ * To confirm the "pick ups" the user got is the correct value before rewarding the values to the user.
+ * This script will confirm if the values sent in are valid by checking against
+ * the Custom Entity type "toyRewardInfo" to see if the values are valid.
+ * Custom entities have a estimated 5-10 seconds to last before expiring.
+ */
+
+function main() {
+  var response = {};
+
+  //Making incoming values readable
+  var incomingCoinAmount = data.x;
+  var incomingLoveAmount = data.z;
+  var incomingBlingAmount = data.y;
+
+  var currencyProxy = bridge.getVirtualCurrencyServiceProxy();
+  var identityProxy = bridge.getIdentityServiceProxy()
+  var customEntityProxy = bridge.getCustomEntityServiceProxy();
+  var statProxy = bridge.getPlayerStatisticsServiceProxy();
+
+  var switchToChildResult = switchToChildAccount(data.profileId, data.childAppId, identityProxy);
+  if(switchToChildResult)
+  {
+    //Get custom entity that holds the drop info
+    var getCustomEntityResult = customEntityProxy.readEntity("toyRewardInfo", data.entityId);
+    if(getCustomEntityResult.status === 200)
+    {
+      var rewardData = getCustomEntityResult.data.data;
+      //Determine incoming values are valid
+      if(incomingCoinAmount > rewardData.coinPayout)
+      {
+        incomingCoinAmount = rewardData.coinPayout;
+      }
+      
+      //* 3 is for the love multiplier check
+      if(incomingLoveAmount > rewardData.lovePayout * 3)
+      {
+        incomingLoveAmount = rewardData.lovePayout;
+      }
+
+      if(incomingBlingAmount > rewardData.buddyBlingPayout)
+      {
+        incomingBlingAmount = rewardData.buddyBlingPayout;
+      }
+
+      //Reward the bling
+      if(incomingBlingAmount > 0)
+      {
+        var blingResult = currencyProxy.awardCurrency("buddyBling", incomingBlingAmount);
+        response.blingResult = blingResult;
+      }
+
+      //Reward the statistic for child profile
+      if(incomingCoinAmount > 0)
+      {
+        var increaseStatObject = {"CoinsGainedForParent": incomingCoinAmount};
+        var statIncreaseResult = statProxy.incrementUserStats(increaseStatObject);
+        response.increaseStatResult = statIncreaseResult;
+      }
+    }
+    else if(getCustomEntityResult.status === 202)
+    {
+      response.getCustomEntityResult = getCustomEntityResult;
+    }
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+
+
+    //Reward the coin
+    if(incomingCoinAmount > 0)
+    {
+      var coinResult = currencyProxy.awardCurrency("coins", incomingCoinAmount);
+      response.coinResult = coinResult;
+    }
+
+    //Reward the LOVE
+    if(incomingLoveAmount > 0)
+    {
+      var loveResult = updateBuddyLevel
+      (
+        data.profileId,
+        incomingLoveAmount,
+        data.childAppId,
+        identityProxy,
+        bridge.getPlayerStatisticsServiceProxy(),
+        bridge.getPlayerStateServiceProxy()
+      );
+      response.loveResult = loveResult;
+    }
+  }
+  return response;
+}
+
+main();

@@ -1,0 +1,192 @@
+"use strict";
+// BuyAndOpenBundle (VSCode created Script) 
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var userItemsService = bridge.getUserItemsServiceProxy();
+
+  //Let's make sure this is a bundle item
+  var itemCatalogService = bridge.getItemCatalogServiceProxy();
+  var getItemDefinition = itemCatalogService.getCatalogItemDefinition(data.defId);
+
+  if(getItemDefinition.status !== 200){
+    response.error = true;
+    response.message = "Failed to get item details";
+    response.errorMessage = getItemDefinition.statusMessage;
+
+    return response;
+  }
+
+  if(getItemDefinition.data.type !== "BUNDLE"){
+    response.error = true;
+    response.message = "This is not a BUNDLE type item";
+    response.errorMessage = "This is not a BUNDLE type item";
+
+    return response;
+  }
+
+  var purchaseItem = userItemsService.purchaseUserItem(data.defId, 1, "", true);
+
+  if(purchaseItem.status !== 200){
+    response.error = true;
+    response.message = "Failed to purchase item";
+    response.errorMessage = purchaseItem.status_message;
+
+    return response;
+  }
+
+  //lets get the user item id that we just purchased
+  var items = purchaseItem.data.items;
+
+  var itemId = null;
+  var itemObj = null;
+
+  for (var key in items) {
+      if (items.hasOwnProperty(key)) {
+          itemId = key;        // "d9e50f3b-cabb-4adc-8811-9ca97aac6570"
+          //itemObj = items[key]; // full item object not necessary for this but maybe for the future
+          break; // assuming only one item
+      }
+  }
+
+  var openBundle = userItemsService.openBundle(itemId, -1, 1, true, null);
+
+  if(openBundle.status !== 200){
+    response.error = true;
+    response.message = "Failed to open bundle";
+    response.errorMessage = openBundle.statusMessage;
+
+    return response;
+  }
+
+  response.error = false;
+  response.currencyAwarded = openBundle.data.currencyAwarded;
+
+  if(response.currencyAwarded.hasOwnProperty("Stars")){
+    var awardedAmount = response.currencyAwarded.Stars;
+    response.xpAward = convertStarsToXP(awardedAmount);
+  }
+
+  response.currencyData = openBundle.data.currencyBalances.currency;
+  response.currencySpent = purchaseItem.data.currencySpent;
+  response.items = openBundle.data.items;
+
+  return response;
+}
+
+function convertStarsToXP(amount){
+  var vcService = bridge.getVirtualCurrencyServiceProxy();
+  var playerStatsService = bridge.getPlayerStatisticsServiceProxy();
+  var gamificationService = bridge.getGamificationServiceProxy();
+  var response = {};
+
+  var consumeCurrency = vcService.consumeCurrency("Stars",amount);
+  if(consumeCurrency.status !== 200){
+    response.error = true;
+    response.message = "Failed to consume currency";
+    response.errorMessage = consumeCurrency.statusMessage;
+
+    return response;
+  }
+
+  //consumed currency now award XP
+  var xpAward = playerStatsService.incrementExperiencePoints(amount);
+
+  response = xpAward.data;
+  response.levelUp = false; //false until we find out more
+  //check if we leveled up, if so let's capture the XP To Next Level value and adjust XP value for xp bar UI
+  if(xpAward.data.rewardDetails && !isEmptyObject(xpAward.data.rewardDetails)){
+    //we got a level up
+    var rewardDetails = xpAward.data.rewardDetails;
+    var levelUpReward = rewardDetails.xp.experienceLevels[0];
+
+    response.levelUp = true;
+  }
+
+  //now we need to know about adjusted xp progress to next level
+  var xpMetaData = gamificationService.readXpLevelsMetadata();
+  
+  if(xpMetaData.data.xp_levels && xpMetaData.data.xp_levels.length !== 0){
+    var xpResults = calculateXpProgress(xpAward.data.experiencePoints, xpMetaData.data.xp_levels);
+
+    response.adjustedXp = xpResults.adjustedXp;
+    response.xpToNextLevel = xpResults.xpToNextLevel;
+    response.statusTitle = xpResults.statusTitle;
+  }
+
+  return response;
+}
+
+function calculateXpProgress(totalXp, xpLevels)
+{
+    if (!xpLevels || !(xpLevels instanceof Array) || xpLevels.length === 0)
+    {
+        bridge.logError("Invalid xpLevels data");
+        return null;
+    }
+
+    var currentLevel = 1;
+    var currentLevelXpRequired = 0;
+    var nextLevelXpRequired = null;
+    var statusTitle = "";
+
+    // Determine current level based on totalXp
+    for (var i = 0; i < xpLevels.length; i++)
+    {
+        var levelData = xpLevels[i];
+
+        if (totalXp >= levelData.experience)
+        {
+            currentLevel = levelData.level;
+            currentLevelXpRequired = levelData.experience;
+            statusTitle = levelData.statusTitle;
+
+            // Look ahead for next level
+            if (i + 1 < xpLevels.length)
+            {
+                nextLevelXpRequired = xpLevels[i + 1].experience;
+            }
+        }
+    }
+
+    var adjustedXp = totalXp - currentLevelXpRequired;
+    var xpToNextLevel = null;
+
+    if (nextLevelXpRequired != null)
+    {
+        xpToNextLevel = nextLevelXpRequired - currentLevelXpRequired;
+    }
+    else
+    {
+        // Player is at max level
+        xpToNextLevel = 0;
+    }
+
+    return {
+        "currentLevel": currentLevel,
+        "totalXp": totalXp,
+        "adjustedXp": adjustedXp,
+        "statusTitle": statusTitle,
+        "xpToNextLevel": xpToNextLevel,
+        "isMaxLevel": nextLevelXpRequired == null
+    };
+}
+
+function isEmptyObject(obj)
+{
+    for (var key in obj)
+    {
+        if (obj.hasOwnProperty(key))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
+main();

@@ -1,0 +1,194 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+// Expected data:
+//   data.profileId  – child profile ID
+//   data.childAppId – child app ID
+//   data.itemId     – defId of the love booster item (e.g. "dailylovebooster")
+// ---------------------------------------------------------------------------
+
+function main()
+{
+    var userItemProxy = bridge.getUserItemsServiceProxy();
+    var log           = bridge.getLogServiceProxy();
+    var identityProxy = bridge.getIdentityServiceProxy();
+
+    var inChildProfile = false;
+    var result;
+
+    try
+    {
+        var itemId = "dailylovebooster";
+
+        //var switchResult = identityProxy.switchToChildProfile(data.childProfileId, data.childAppId, false);
+
+        // ── 1. Switch to child ────────────────────────────────────────────────
+        if (!switchToChildAccount(data.childProfileId, data.childAppId, identityProxy))
+        {
+            //return { success: false, error: "Failed to switch to child profile", result: switchResult };
+            return { success: false, error: "Failed to switch to child profile" };
+        }
+        inChildProfile = true;
+
+        // ── 2. Get booster item definition from catalog ───────────────────────
+        var catalogResponse = bridge.getItemCatalogServiceProxy().getCatalogItemsPage({});
+        if (!catalogResponse || catalogResponse.status !== 200)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "Failed to read item catalog", status: catalogResponse ? catalogResponse.status : null, reason_code: catalogResponse ? catalogResponse.reason_code : null, status_message: catalogResponse ? catalogResponse.status_message : null };
+        }
+
+        var items      = catalogResponse.data && catalogResponse.data.results && catalogResponse.data.results.items ? catalogResponse.data.results.items : [];
+        var targetItem = null;
+        for (var i = 0; i < items.length; i++)
+        {
+            if (items[i].defId.toLowerCase() === itemId) 
+            {
+                targetItem = items[i]; 
+                break; 
+            }
+        }
+
+        if (!targetItem)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "Booster item not found in catalog: " + itemId };
+        }
+
+        var meta = targetItem.meta ? targetItem.meta : {};
+        if (meta.durationInSeconds === undefined)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "Item is not a valid Love Booster — missing durationInSeconds in meta" };
+        }
+
+        // ── 3. Check inventory for an existing booster instance ───────────────
+        var existingItems = userItemProxy.getUserItemsPage({}, true);
+        if (!existingItems || existingItems.status !== 200)
+        {
+            log.logError("[ClaimDailyLoveBooster] getUserItemsPage failed", JSON.stringify({ status: existingItems ? existingItems.status : "no response" }));
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "Failed to read user inventory", status: existingItems ? existingItems.status : null, reason_code: existingItems ? existingItems.reason_code : null, status_message: existingItems ? existingItems.status_message : null };
+        }
+
+        var allItems          = existingItems.data && existingItems.data.results && existingItems.data.results.items ? existingItems.data.results.items : [];
+        var existingInstance  = null;
+        for (var o = 0; o < allItems.length; o++)
+        {
+            if (allItems[o].defId === targetItem.defId)
+            {
+                existingInstance = allItems[o];
+                break;
+            }
+        }
+
+        // ── 4. If booster exists, check if it is still on cooldown ────────────
+        if (existingInstance)
+        {
+            var nowMs         = Date.now();
+            var coolDownUntil = existingInstance.coolDownUntil ? existingInstance.coolDownUntil : -1;
+
+            if (coolDownUntil > nowMs)
+            {
+                // Still on cooldown — check if the 3-minute active window is still open
+                var BOOSTER_ACTIVE_MS = 3 * 60 * 1000; // 3 minutes in milliseconds
+                var activatedAt       = existingInstance.updatedAt || nowMs;
+                var boosterExpiry     = activatedAt + BOOSTER_ACTIVE_MS;
+                var isStillActive     = boosterExpiry > nowMs;
+
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return {
+                    success:       false,
+                    onCooldown:    true,
+                    error:         "Daily Love Booster is still on cooldown",
+                    coolDownUntil: coolDownUntil,
+                    boosterExpiry: isStillActive ? boosterExpiry : null,
+                    multiplier:    meta.multiplier !== undefined ? meta.multiplier : null
+                };
+            }
+            // Cooldown has expired but drop script hasn't fired yet — fall through and re-use the instance
+        }
+
+        // ── 5. Award a fresh instance if not in inventory ─────────────────────
+        var itemInstanceId = existingInstance ? existingInstance.itemId : null;
+        if (!itemInstanceId)
+        {
+            var awardResp = userItemProxy.awardUserItem(targetItem.defId, 1, true);
+            if (!awardResp || awardResp.status !== 200)
+            {
+                log.logError("[ClaimDailyLoveBooster] awardUserItem failed", JSON.stringify({ status: awardResp ? awardResp.status : "no response" }));
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return { success: false, error: "Failed to award booster item", status: awardResp ? awardResp.status : null, reason_code: awardResp ? awardResp.reason_code : null, status_message: awardResp ? awardResp.status_message : null };
+            }
+
+            var awardedMap = awardResp.data && awardResp.data.items ? awardResp.data.items : {};
+            var keys       = Object.keys(awardedMap);
+            for (var k = 0; k < keys.length; k++)
+            {
+                if (awardedMap[keys[k]].defId === targetItem.defId) 
+                {
+                    itemInstanceId = keys[k]; 
+                    break; 
+                }
+            }
+        }
+
+        if (!itemInstanceId)
+        {
+            log.logError("[ClaimDailyLoveBooster] Could not resolve booster instance ID", "");
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "Could not resolve item instance ID for Love Booster" };
+        }
+
+        // ── 6. Use the item to start the 24-hour cooldown ─────────────────────
+        var useResp = userItemProxy.useUserItem(itemInstanceId, 1, {}, true);
+        if (!useResp || useResp.status !== 200)
+        {
+            log.logError("[ClaimDailyLoveBooster] useUserItem failed", JSON.stringify({ itemInstanceId: itemInstanceId, status: useResp ? useResp.status : "no response" }));
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "Failed to use booster item", status: useResp ? useResp.status : null, reason_code: useResp ? useResp.reason_code : null, status_message: useResp ? useResp.status_message : null };
+        }
+
+        var newCoolDownUntil = useResp.data && useResp.data.item ? useResp.data.item.coolDownUntil : null;
+        if (!newCoolDownUntil)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "useUserItem succeeded but coolDownUntil was missing in response" };
+        }
+
+
+        // ── 8. Schedule drop script for when the 24-hour cooldown expires ─────
+        bridge.getScriptServiceProxy().scheduleRunScriptUTCv2(
+            "DropDailyLoveBoosterUserItem",
+            { profileId: data.childProfileId },
+            newCoolDownUntil
+        );
+
+        // ── 9. Switch back to parent and return ───────────────────────────────
+        identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+        inChildProfile = false;
+
+        var BOOSTER_ACTIVE_MS = 3 * 60 * 1000; // 3 minutes in milliseconds
+
+        result = {
+            success:           true,
+            itemId:            targetItem.defId,
+            coolDownUntil:     newCoolDownUntil,
+            boosterExpiry:     Date.now() + BOOSTER_ACTIVE_MS,
+            durationInSeconds: meta.durationInSeconds,
+            multiplier:        meta.multiplier !== undefined ? meta.multiplier : null
+        };
+    }
+    catch (e)
+    {
+        if (inChildProfile) { identityProxy.switchToParentProfile(MASTER_PARENT_NAME); }
+        result = { success: false, error: "Unhandled exception: " + e.message };
+    }
+
+    return result;
+}
+
+main();

@@ -1,0 +1,107 @@
+"use strict";
+
+function main() {
+  var response = {};
+  var extractedData = [];
+
+  //At this point we know the user successful logged in, so increment user stat
+  var playerStatsProxy = bridge.getPlayerStatisticsServiceProxy();
+  var statToIncrease = {"loginCount":1};
+  playerStatsProxy.incrementUserStats(statToIncrease);
+
+  var gamificationProxy = bridge.getGamificationServiceProxy();  
+  var milestonesResponse = gamificationProxy.readMilestones(true);
+  
+  if (milestonesResponse.status !== 200) 
+  {
+      response.status = milestonesResponse.status;
+      response.error = "Failed to read milestones";
+      return response;
+  }
+  
+  if (milestonesResponse.data && milestonesResponse.data.tasks) 
+  {
+      var tasks = milestonesResponse.data.tasks;
+      
+      for (var i = 0; i < tasks.length; i++) 
+      {
+          var task = tasks[i];
+          var statToTrack = null;
+          var requiredThreshold = 0;
+          //Get the statistic for us to track on client
+          if(task.extraData && task.extraData.statToTrack)
+          {
+            statToTrack = task.extraData.statToTrack;
+            requiredThreshold = task.extraData.valueToCompleteTask;
+          }
+          //If the task doesn't have an unlockThreshold, its unlocked for the user right away.
+          var questIndex = 0;
+          //Determine what quest index this is, helps determine the next locked quest.
+          if(task.unlockThresholds && task.unlockThresholds.playerStatistics && task.unlockThresholds.playerStatistics.statistics)
+          {
+            var statistics = task.unlockThresholds.playerStatistics.statistics;
+            //Object.keys is meant to grab the next key down from the path you give
+            questIndex = statistics[Object.keys(statistics)];
+          }
+
+          var questLineId = "";
+          if(task.thresholds && task.thresholds.playerStatistics && task.thresholds.playerStatistics.statistics)
+          {
+            var stat = task.thresholds.playerStatistics.statistics;
+            questLineId = Object.keys(stat).toString();
+          }
+          var milestone = 
+          {
+              "title": task.title || null,
+              "questId": questLineId,
+              "reward": (task.rewards && task.rewards.currency) ? task.rewards.currency : null,
+              "statToTrack": statToTrack,
+              "thresholdRequired": requiredThreshold,
+              "questLineIndex": questIndex,
+              "status": task.status || null
+          };
+          extractedData.push(milestone);
+      }
+  }
+  response.milestones
+  response.quests = extractedData;
+
+  response.shopItems = [];
+  var itemCatalogProxy = bridge.getItemCatalogServiceProxy();
+  var getItemCatalogResult = itemCatalogProxy.getCatalogItemsPage({});
+  if(getItemCatalogResult.status === 200 &&
+      getItemCatalogResult.data.results.count > 0)
+  {
+    var shopCatalogItems = getItemCatalogResult.data.results.items;
+    for (let i = 0; i < shopCatalogItems.length; ++i)   
+    {
+      var item = {};
+      item.itemId = shopCatalogItems[i].defId;
+      item.displayName = shopCatalogItems[i].name;
+      item.description = shopCatalogItems[i].desc;
+      item.payoutAmount = shopCatalogItems[i].meta.payoutAmount;
+      item.payoutType = shopCatalogItems[i].meta.payoutType;
+      item.cooldown = shopCatalogItems[i].coolDownSecs;
+
+      if(shopCatalogItems[i].buyPrice)
+      {
+        item.buyPriceType = Object.keys(shopCatalogItems[i].buyPrice) + "";
+        if(item.buyPriceType)
+        {
+          var jsonString = JSON.stringify(shopCatalogItems[i].buyPrice);
+          var buyPriceValue = parseInt(jsonString.replace("{", "").replace("}", "").split(":")[1]);
+          item.buyPriceValue = buyPriceValue;
+        }
+      }
+      
+      response.shopItems.push(item);
+    }
+  }
+  response.freebieCooldown = bridge.callScript("GetCooldownFreebieUserItem", {}).data.response;
+  
+
+
+  return response;
+}
+
+main();

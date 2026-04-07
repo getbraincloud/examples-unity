@@ -1,0 +1,98 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+/**
+ * Fetches player statistics for both parent and child app profiles.
+ *
+ * @param {Object} data - The input parameters for the script.
+ * @param {string} data.childAppId - The appId of the child app to switch to for child stats.
+ * @returns {Object} response - The collected stats and results from parent and child profiles.
+ * @property {Object} response.parentStats - All parent user stats.
+ * @property {Object} response.childStats - All child user stats (if child app switch succeeds).
+ */
+function main() {
+  var response = {};
+
+  // Get identity proxy for profile switching
+  var identityProxy = bridge.getIdentityServiceProxy();
+  
+  var getChildResponse = getChildProfiles(identityProxy);
+
+  var playerStateProxy = bridge.getPlayerStateServiceProxy();
+
+  var userItemsProxy = bridge.getUserItemsServiceProxy();
+
+  // iterate over them and if they are there, randomly craete the user entities
+  if(getChildResponse.status === 200)
+  {
+    var returnProfiles = [];
+    //var debugValues = [];
+    //var extraChildren = [];
+
+    var children = getChildResponse.data.children;
+    
+    for(var i = 0; i < children.length; ++i)
+    {
+      var switchToChildResult = switchToChildAccount(children[i].profileId, data.childAppId, identityProxy);
+      if(switchToChildResult)
+      {
+        var childrenData = {};
+        var getPlayerStateResult = playerStateProxy.readUserState();
+        if(getPlayerStateResult)
+        {
+          //Get Currency info
+          childrenData.currency = getPlayerStateResult.data.currency;
+          
+          //Get Stats info
+          childrenData.stats = getPlayerStateResult.data.statistics;
+
+          var getUserItemsResult = userItemsProxy.getUserItemsPage({}, true);
+          if(getUserItemsResult.status === 200 &&
+              getUserItemsResult.data.results.count > 0)
+          {
+            childrenData.items = [];
+            var userItems = getUserItemsResult.data.results.items;
+            for(var x = 0; x < userItems.length; ++x)
+            {
+              var item = {};
+              item.itemId = userItems[x].defId;
+              item.displayName = userItems[x].itemDef.name;
+              item.cooldown = userItems[x].itemDef.coolDownSecs;
+              item.category = userItems[x].itemDef.category;
+              if(userItems[x].defId === "dailyLoveBooster")
+              {
+                item.createdAt = userItems[x].createdAt;
+                item.durationInSeconds = userItems[x].itemDef.meta.durationInSeconds;
+                item.cooldownUntil = userItems[x].coolDownUntil;
+                item.loveMultiplier = userItems[x].itemDef.meta.multiplier;
+              }
+
+              childrenData.items.push(item);
+            }
+          }
+          else
+          {
+            childrenData.items = {};
+          }
+          
+          children[i].extraData = childrenData;
+          identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+        }
+      }
+      else
+      {
+        response.badSwitchResult = switchToChildResult;
+      }
+    }
+    //response.debugValues = debugValues;
+    //response.extraChildren = extraChildren;
+    
+    response.children = returnProfiles;
+    getChildResponse.data.children = children;
+    
+  }
+  response.getChildProfiles = getChildResponse;
+  return response;
+}
+
+main();

@@ -1,0 +1,17 @@
+"use strict";
+
+function main() {
+
+	var response = {};
+
+
+    if (data.hasOwnProperty('context'))
+    {
+	    bridge.logInfoJson("Logging incoming data context", data.context);
+    }
+
+	return null;
+
+}
+
+main();

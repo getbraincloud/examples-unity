@@ -1,0 +1,20 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() {
+  var response = {};
+
+  response.update = updateBuddyLevel
+                    (
+                      data.profileId, 
+                      data.incrementAmount, 
+                      data.childAppId, 
+                      bridge.getIdentityServiceProxy(),
+                      bridge.getPlayerStatisticsServiceProxy(),
+                      bridge.getPlayerStateServiceProxy()
+                    );
+
+  return response;
+}
+
+main();

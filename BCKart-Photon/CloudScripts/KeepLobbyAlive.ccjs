@@ -1,0 +1,14 @@
+"use strict";
+
+//https://docs.braincloudservers.com/api/capi/lobby/sysroomkeepalive
+function main() {
+  var response = {};
+
+  const lobbyId = data.lobbyId;
+  var lobbyProxy = bridge.getLobbyServiceProxy();
+
+  var postResult = lobbyProxy.sysRoomKeepAlive(lobbyId);
+  return postResult;
+}
+
+main();

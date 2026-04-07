@@ -1,0 +1,415 @@
+const MASTER_PARENT_NAME = "Master";
+const BUDDY_CONFIG_TYPE = "buddyConfigs";
+const BUDDY_INDEX_ID = "buddyTypes";
+const BUDDY_CONFIG_ENTITY_ID = "26220884-f447-4e87-a47e-e155358d599a";
+const PARENT_GEMS = "GEMS";
+const BUDDY_BLING = "buddyBling";
+const CHILD_BUDDY_ENTITY_TYPE = "buddies";
+const LOOTBOX_CHANCES_TYPE = "buddyBoxChances";
+const LOOTBOX_CHANCES_ENTITY_ID = "f15c3e03-d7bb-464b-ae94-7e70d233a6d7";
+
+const BOX_RARITY = "boxRarity";
+const RARITY_TYPES = "rarityTypes";
+
+function getChildProfiles(identityProxy)
+{
+    var switchResponse = identityProxy.getChildProfiles(true);
+    return switchResponse;
+}
+
+function addChildAccount(appId, identityProxy)
+{
+    //Switch to child app
+    //The profileId of the child profile to switch to. If null and forceCreate is true a new profile will be created.
+    //params: profileID, appID, forceCreate
+    var switchResponse = identityProxy.switchToChildProfile(null, appId, true);
+
+    return switchResponse;
+}
+
+function syncSummaryData()
+{
+  var playerProxy = bridge.getPlayerStateServiceProxy();
+  playerProxy.updateUserName("test");
+
+  // read buddy info
+  playerProxy.updateSummaryFriendData({"name": "updateName"});
+}
+
+function switchToChildAccount(profileId, appId, identityProxy)
+{
+    //Switch to child app
+    var switchResponse = identityProxy.switchToChildProfile(profileId, appId, false);
+    
+    // it was succesful
+    return switchResponse.status == 200;
+}
+
+function switchToChildAppSafely(appId, identityProxy) 
+{
+    //Switch to child app
+    var switchResponse = identityProxy.switchToSingletonChildProfile(appId, false);
+    
+    if (switchResponse.status != 200)
+    {
+        switch (switchResponse.reason_code)
+        {
+            // must force create
+            case 40208:
+                {
+                    // no error to report, just a parent - child relationship hasn't been created yet
+                    switchResponse = identityProxy.switchToSingletonChildProfile(appId, true);
+                }break;
+            //Run state is disabled.
+            case 40372:
+                {
+                    // DO NOTHING, ITS DISABLED
+                    // the script calling this, if its being looked up by team/ group access should be removed from that access.
+                    
+                }
+                break;
+            default:
+                {
+                    bridge.logInfoJson(appId + " - switchToChildSafely Un Handled" + switchResponse.reason_code, switchResponse);
+                }break;
+        }
+    }
+    
+    // it was succesful
+    return switchResponse.status == 200;
+}
+
+function extractBalances(data)
+{
+  var flatBalances = {};
+
+  // Handle parentCurrency (nested groups)
+  for (var group in data.parentCurrency) {
+    if (data.parentCurrency.hasOwnProperty(group)) {
+      var currencies = data.parentCurrency[group];
+      for (var currency in currencies) {
+        if (currencies.hasOwnProperty(currency)) {
+          
+          flatBalances[currency] = {
+          balance : data.parentCurrency[group][currency].balance, 
+          consumed : data.parentCurrency[group][currency].consumed,
+        };
+        }
+      }
+    }
+  }
+
+  // Handle currencyMap (flat structure)
+  for (var currency in data.currencyMap) {
+    if (data.currencyMap.hasOwnProperty(currency)) {
+      flatBalances[currency] = {
+          balance : data.currencyMap[currency].balance, 
+          consumed : data.currencyMap[currency].consumed,
+        };
+    }
+  }
+
+  return flatBalances;
+}
+
+function debugIds(index)
+{
+  var appID = {"appID": bridge.getAppId()};
+  var profileID = {"profileId": bridge.getProfileId()};
+  var appIdMessage = " AppId: ";
+  var profileId = " ProfileID: "
+
+  bridge.logWarningJson(appIdMessage, appID);
+  bridge.logWarningJson(profileId, profileID);
+}
+
+function updateBuddyLevel(profileId, amountToIncrease, childAppId, identityProxy, playerStatProxy, playerStateProxy)
+{
+  var response = {};
+  var buddyLeveledUp = false;
+  var buddyLeveledUpTo5 = false;
+  // switch to profile
+  var switchToChildResult = identityProxy.switchToChildProfile(profileId, childAppId, false);
+  if(switchToChildResult)
+  {
+    if(!isNullOrEmpty(switchToChildResult.data) && !isNullOrEmpty(switchToChildResult.data.experienceLevel))
+    {
+      var currentLevel = switchToChildResult.data.experienceLevel;
+      var currentLevelUpReq = 0;
+      var statProxy = bridge.getPlayerStatisticsServiceProxy();
+
+      //Getting next XP level for Client UI purposes incase user levels up
+      var getNextLevelResult = playerStatProxy.getNextExperienceLevel();
+      if(getNextLevelResult.status === 200 && getNextLevelResult.data &&
+        getNextLevelResult.data.xp_level && getNextLevelResult.data.xp_level.experience)
+      {
+        currentLevelUpReq = getNextLevelResult.data.xp_level.experience;
+      }
+
+      //Check if we leveled up, if so send back next XP requirement to user
+      //for the level progress bar.
+      var increaseXpResult = statProxy.incrementExperiencePoints(amountToIncrease);
+      if(!isNullOrEmpty(increaseXpResult.data))
+      {
+        var responseLevel = increaseXpResult.data.experienceLevel;
+        var experiencePoints = increaseXpResult.data.experiencePoints;
+        if(responseLevel > currentLevel)
+        {
+          buddyLeveledUp = true;
+
+          if(increaseXpResult.data.rewards && increaseXpResult.data.rewards.experienceLevels)
+          {
+            var xpLevelArray = increaseXpResult.data.rewards.experienceLevels;
+            for(var i=0; i<xpLevelArray.length;i++)
+            {
+              if(xpLevelArray[i] === 5)
+              {
+                buddyLeveledUpTo5 = true;
+                response.didCatchLevel5 = true;
+              }
+            }
+          }
+        
+          var previousLevelUpReq = currentLevelUpReq;
+          var getNextLevelResult = playerStatProxy.getNextExperienceLevel();
+          if(getNextLevelResult.status === 200)
+          {
+            if(getNextLevelResult.data.xp_level.experience)
+            {
+              response.nextLevelUpXP = getNextLevelResult.data.xp_level.experience;
+            }
+            
+            response.previousLevelUpReq = previousLevelUpReq;
+            
+            var summaryFriendData = switchToChildResult.data.summaryFriendData;
+            summaryFriendData.nextLevelUpXP = response.nextLevelUpXP;
+            summaryFriendData.level = responseLevel;
+            summaryFriendData.experiencePoints = experiencePoints;
+            summaryFriendData.previousLevelXP = previousLevelUpReq;
+            playerStateProxy.updateSummaryFriendData(summaryFriendData);
+          }
+        }
+        else
+        {
+          //If we didn't level up, update the XP
+          var summaryFriendData = switchToChildResult.data.summaryFriendData;
+          summaryFriendData.experiencePoints = experiencePoints;
+          summaryFriendData.nextLevelUpXP = currentLevelUpReq;
+          playerStateProxy.updateSummaryFriendData(summaryFriendData);
+        }
+        response.increaseXpResult = increaseXpResult.data;
+      }
+    }
+    else
+    {
+      response.switchToChildError = switchToChildResult;
+    }
+    
+    response.buddyLeveledUp = buddyLeveledUp;
+    response.didCatchLevel5 = buddyLeveledUpTo5;
+    // .return to parent
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+
+    if(buddyLeveledUp)
+    {
+      //if child leveled up, increment stat
+      var statData = {"buddiesLeveledUp": 1};
+      var incrementStatResult = playerStatProxy.incrementUserStats(statData);
+      
+
+      if(buddyLeveledUpTo5)
+      {
+        var statLevelData = {"level5Buddies": 1};
+        var incrementBuddyLevelStatResult = playerStatProxy.incrementUserStats(statLevelData);
+        response.incrementBuddyLevelStatResult = incrementBuddyLevelStatResult;
+      }
+      else
+      {
+        response.incrementStatResult = incrementStatResult;
+      }
+    }
+  }
+  return response;
+}
+
+// view "boxRarity" global entity
+function addChildAndCreateBuddyFromBox(boxType, childAppId)
+{
+  var response = {};
+  
+  // Get identity proxy for profile switching
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var boxRarity = null;
+  var rarityTypes = null;
+  var selectedRarity = null;
+  var selectedStats = {};
+
+  var globalEntityProy = bridge.getGlobalEntityServiceProxy();
+  const where = {entityType:"config"};
+  const orderBy = {createdAt:1};
+  var listOfConfigs = globalEntityProy.getList(where,orderBy,10 ).data.entityList;
+
+  for (var i = 0; i < listOfConfigs.length; ++i)
+  {
+    if (listOfConfigs[i].entityIndexedId == BOX_RARITY)
+    {
+      boxRarity = listOfConfigs[i].data;
+    }
+
+    if (listOfConfigs[i].entityIndexedId == RARITY_TYPES)
+    {
+      rarityTypes = listOfConfigs[i].data;
+    }
+  }
+
+  // Switch to Child app profile using helper
+  // Uses childAppId from input data
+  const switched = addChildAccount(childAppId, identityProxy);
+
+  if (switched) {
+    if (boxRarity && boxRarity[boxType]) {
+      var rarities = boxRarity[boxType];
+      // Build weighted array for random selection
+      var weighted = [];
+      for (var rarity in rarities) {
+        for (var i = 0; i < rarities[rarity]; i++) {
+          weighted.push(rarity);
+        }
+      }
+      if (weighted.length > 0) {
+        var idx = Math.floor(Math.random() * weighted.length);
+        selectedRarity = weighted[idx];
+        if (rarityTypes && rarityTypes[selectedRarity]) {
+          selectedStats = rarityTypes[selectedRarity];
+        }
+      }
+    }
+
+    //create data and assign stats & rarity to it to send later
+    var newBuddy = selectedStats;
+    newBuddy.rarity = selectedRarity;
+    newBuddy.level = 1;
+    newBuddy.experiencePoints = 0;
+    newBuddy.lastIdleTimestamp = Date.now(); 
+
+    //get next experience requirement to save to new buddy
+    var playerStatProxy = bridge.getPlayerStatisticsServiceProxy();
+    var getNextLevel = playerStatProxy.getNextExperienceLevel();
+    if(getNextLevel)
+    {
+      //bridge.logInfoJson("get next level up", {"data": getNextLevel.data.xp_level});
+      newBuddy.nextLevelUpXP = getNextLevel.data.xp_level.experience;
+    }
+
+    var entityProxy = bridge.getEntityServiceProxy();
+    entityProxy.updateSingleton(CHILD_BUDDY_ENTITY_TYPE, newBuddy, {"acl": 2}, -1);
+    var playerProxy = bridge.getPlayerStateServiceProxy();
+    playerProxy.updateSummaryFriendData(newBuddy);
+
+
+
+    //Switch back to parent profile for cleanup
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+    var statToIncrement = {"bitBuddiesOwned":1};
+    var playerStatisticsProxy = bridge.getPlayerStatisticsServiceProxy();
+    newBuddy.statIncreaseResult = playerStatisticsProxy.incrementUserStats(statToIncrement);
+  }
+
+  response = getChildProfiles(identityProxy).data;
+  response.newBuddy = newBuddy;
+  
+  return response;
+}
+
+function getChildStats(childAppId, profileId)
+{
+  var response = {};
+  var identityProxy = bridge.getIdentityServiceProxy();
+  switchToChildAccount(profileId, childAppId,identityProxy);
+  if(switchToChildAccount)
+  {
+    var playerStatProxy = bridge.getPlayerStatisticsServiceProxy();
+    var getStatsResult = playerStatProxy.readAllUserStats();
+    if(getStatsResult.status === 200)
+    {
+      response = getStatsResult.data;
+    }
+    //identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+  return response;
+}
+
+function getChildCurrency(childAppId, profileId)
+{
+  var response = {};
+  var identityProxy = bridge.getIdentityServiceProxy();
+  switchToChildAccount(profileId, childAppId,identityProxy);
+  const virtualCurrencyProxy = bridge.getVirtualCurrencyServiceProxy();
+
+  // Switch to Child app profile using helper
+  const switched  = switchToChildAccount(data.childProfileId, data.childAppId, identityProxy);
+  if (switched)
+  {
+    // Get currencies within child app profile
+    const res = virtualCurrencyProxy.getCurrency("").data;
+    response = extractBalances(res);
+    //identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+  return response;
+}
+
+function isNullOrEmpty(obj) 
+{
+    if (obj === null || obj === undefined) {
+        return true;
+    }
+
+    if (typeof obj === "string") {
+        return obj.trim().length === 0;
+    }
+
+    try {
+        var str = JSON.stringify(obj);
+        if (str === "{}" || str === "[]" || str === "") {
+            return true;
+        }
+    } 
+    catch (e) {}
+
+    try {
+        for (var key in obj) {
+            return false;
+        }
+    } 
+    catch (e2) {}
+
+    
+    try {
+        if (obj.isEmpty && obj.isEmpty()) return true;  // Java Map/Collection
+        if (obj.size && obj.size() === 0) return true;  // Java List/Set
+    } 
+    catch (e3) {}
+
+    return false;
+}
+
+function doesUserOwnItemAlready(userItemsProxy)
+{
+    var getUserItemsResult = userItemsProxy.getUserItemsPage({}, true);
+
+    if (getUserItemsResult.status === 200 &&
+        getUserItemsResult.data.results.count > 0)
+    {
+        var userItems = getUserItemsResult.data.results.items;
+
+        for (var i = 0; i < userItems.length; ++i)
+        {
+            if (userItems[i].defId === data.toyId)
+            {
+                return userItems[i];
+            }
+        }
+    }
+
+    return null;
+}

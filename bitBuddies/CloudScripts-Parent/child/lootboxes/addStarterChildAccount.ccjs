@@ -1,0 +1,22 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+// Example: select a box type (e.g., "basic")
+const boxType = "starter";
+
+/**
+ * Fetches player statistics for both parent and child app profiles.
+ *
+ * @param {Object} data - The input parameters for the script.
+ * @param {string} data.childAppId - The appId of the child app to switch to for child stats.
+ * @returns {Object} response - The collected stats and results from parent and child profiles.
+ * @property {Object} response.parentStats - All parent user stats.
+ * @property {Object} response.childStats - All child user stats (if child app switch succeeds).
+ */
+function main() {
+  var response = addChildAndCreateBuddyFromBox(boxType, data.childAppId);
+
+  return response;
+}
+
+main();

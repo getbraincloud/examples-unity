@@ -1,0 +1,56 @@
+"use strict";
+bridge.include("/lobby/LobbyShared.ccjs");
+
+// FetchLobbyInfo.ccjs
+// Fetches lobby information based on a provided pin code.
+function main() {
+  var response = {};
+
+  var customEntityService = bridge.getCustomEntityServiceProxy();
+
+
+  // find or create the lobby pin entity
+  var contextFind = {
+    "pagination": {
+      "rowsPerPage": 1,
+      "pageNumber": 1,
+      "doCount": false
+    },
+    "searchCriteria": {
+      "data.pinCode": data.pinCode.toLowerCase()
+    },
+    "sortCriteria": { 
+      "createdAt": 1
+    }
+  };
+
+  var sysFindResult = customEntityService.sysGetEntityPage(LOBBY_TYPE, contextFind);
+  bridge.logDebugJson("FetchLobbyInfo - sysFindResult: ", sysFindResult);
+  var existingEntities = sysFindResult.data.results.items;
+
+  if (existingEntities.length > 0) {
+    response.lobbyData = existingEntities[0].data;
+    response.lobbyData.expiresAt = existingEntities[0].expiresAt;
+
+    // lets make sure the lobby exists
+    var lobbyEntityId = existingEntities[0].data.lobbyId;
+    var lobbyService = bridge.getLobbyServiceProxy();
+    var lobbyExistResponse = lobbyService.getLobbyData(lobbyEntityId);
+    if (lobbyExistResponse.status != 200)
+    {
+      response.error = "Lobby with the provided pin code does not exist.";
+      // we can also delete that entity since the lobby is gone
+      customEntityService.sysDeleteEntity(existingEntities[0].enityType, 
+                                          existingEntities[0].entityId, 
+                                          existingEntities[0].version);
+    }
+  }
+  else
+  {
+    response.error = "Lobby with the provided pin code does not exist.";
+  }
+  //
+  return response;
+}
+
+main();

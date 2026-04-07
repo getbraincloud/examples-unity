@@ -1,0 +1,177 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() 
+{
+  var response = {};
+  var context = {};
+  var selectedToy = null;
+  var playerStateProxy = bridge.getPlayerStateServiceProxy();
+  var itemCatalogProxy = bridge.getItemCatalogServiceProxy();
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var experienceLevel = 0;
+  var toyObtained = false;
+
+  //Check if user already has the item so that theres no doubles 
+  var doesUserHaveItem = null;
+
+  var switchToChildResult  = switchToChildAccount(data.profileId, data.childAppId, identityProxy);
+  if (switchToChildResult)
+  {
+    var getPlayerState = playerStateProxy.readUserState();
+    if(getPlayerState.status === 200)
+    {
+      experienceLevel = getPlayerState.data.experienceLevel;
+    }
+    var getItemsResult = itemCatalogProxy.getCatalogItemsPage(context);
+    
+    //Get Toy Info
+    if(getItemsResult.status === 200)
+    {
+      var items = getItemsResult.data.results.items;
+      
+      for(var i = 0; i<items.length; ++i)
+      {
+        if(items[i].defId === data.toyId)
+        {
+            selectedToy = items[i];
+        }
+      }
+      var userItemsProxy = bridge.getUserItemsServiceProxy();
+
+      doesUserHaveItem = doesUserOwnItemAlready(userItemsProxy);  
+      //response.doesUserHaveItem = doesUserHaveItem;
+    }
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+
+  //If the user has the item, then we dont have anything else to do here..
+  if(doesUserHaveItem)
+  {
+    return response;
+  }
+  
+  if(!isNullOrEmpty(selectedToy) && experienceLevel >= selectedToy.meta.levelRequirement)
+  {
+    //Check if Parent can afford it
+    var vcId = "coins";
+    var vcProxy = bridge.getVirtualCurrencyServiceProxy();
+    var buyPrice = 0;
+    if(selectedToy.meta)
+    {
+      buyPrice = selectedToy.meta.unlockAmount;
+      response.buyPrice = buyPrice;
+    }
+    
+    //Consume Currency cant take 0 or it'll return an error.
+    if(buyPrice > 0)
+    {
+      // We will get a status 400 if user cannot successfully consume currency
+      var consumeCurrencyResult = vcProxy.consumeCurrency(vcId, buyPrice);
+      
+      if(consumeCurrencyResult.status === 200)
+      {
+        response.consumeCurrencyResult = consumeCurrencyResult;
+        //Deliver Toy To Child
+        var switchToChildResult  = switchToChildAccount(data.profileId, data.childAppId, identityProxy);
+        if (switchToChildResult)
+        {
+          response.switchedToUser = true;
+          
+          if(!doesUserHaveItem)
+          {
+            var awardItemToUserResult = userItemsProxy.awardUserItem(selectedToy.defId, 1, true);
+            if(awardItemToUserResult.status === 200)
+            {
+              var items = awardItemToUserResult.data.items;
+              for(var i = 0; i < items.length; ++i)
+              {
+                response.awardItemResult = {};
+                response.awardItemResult.meta = items[i].itemDef.meta;
+                response.awardItemResult.meta.benchId = items[i].defId;
+              }
+              toyObtained = true;
+            }
+          }
+          else
+          {
+            response.doesUserHaveItem = true;
+          }
+        
+          identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+        }
+      }
+      else 
+      {
+        response.consumeCurrencyResult = consumeCurrencyResult;  
+      }
+    }
+    else if(buyPrice === 0)
+    {
+      //Deliver Toy To Child
+      var switchToChildResult  = switchToChildAccount(data.profileId, data.childAppId, identityProxy);
+      if (switchToChildResult)
+      {
+        response.switchedToUser = true;
+        response.buyPrice = buyPrice;
+        var userItemsProxy = bridge.getUserItemsServiceProxy();
+        
+        //Check if user already has the item so that theres no doubles 
+        var doesUserHaveItem = null;
+        doesUserHaveItem = doesUserOwnItemAlready(userItemsProxy);
+        if(!doesUserHaveItem)
+        {
+          var awardItemToUserResult = userItemsProxy.awardUserItem(selectedToy.defId, 1, true);
+          if(awardItemToUserResult.status === 200)
+          {
+            var items = awardItemToUserResult.data.items;
+            for(var i = 0; i < items.length; ++i)
+            {
+              response.awardItemResult = {};
+              response.awardItemResult.meta = items[i].itemDef.meta;
+              response.awardItemResult.meta.benchId = items[i].defId;
+            }
+            toyObtained = true;
+          }
+        }
+        else
+        {
+          response.doesUserHaveItem = true;
+        }
+
+        identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+      }
+    }
+  }
+  else
+  {
+    if(selectedToy != null && experienceLevel < selectedToy.meta.levelRequirement)
+    {
+      response.errorMessage = "User is not high enough level to obtain toy.";
+    }
+
+    if(selectedToy === null)
+    {
+      response.errorMessage = "Toy is not found in the Child App Item Catalog";
+    }
+  }
+  //Increase stats according to what was obtained
+  if(toyObtained)
+  {
+    var playerStatsProxy = bridge.getPlayerStatisticsServiceProxy();
+    var statToIncrease = {"toysBought":1};
+    response.incrementStatResult = playerStatsProxy.incrementUserStats(statToIncrease);
+    
+    if(data.toyId === "scienceTable")
+    {
+      var statData = {"scienceKitObtained": 1};
+      response.incrementScienceTable = playerStatsProxy.incrementUserStats(statData);
+    }
+  }
+  
+  return response;
+}
+
+main();
+
+

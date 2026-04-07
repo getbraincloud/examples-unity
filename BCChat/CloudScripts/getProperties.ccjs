@@ -1,0 +1,39 @@
+// get session
+var profileId = "d7389a1c-a2ad-4a2f-b04c-8e2b524f9ad8";
+var session = bridge.getSessionForProfile(profileId);
+
+// get proxies
+var globalAppProxy = bridge.getGlobalAppServiceProxy(session);
+var s3HandlingProxy = bridge.getS3HandlingServiceProxy(session);
+var globalEntityProxy = bridge.getGlobalEntityServiceProxy(session);
+//var httpProxy = bridge.getHttpClientServiceProxy(session);
+
+// Bake properties
+var properties = globalAppProxy.readProperties().data;
+var retVal = {};
+for (var key in properties)
+{
+    var property = properties[key];
+    var numVal = Number(property.value);
+    if (numVal != NaN) property.value = numVal;
+    retVal[property.name] = property.value;
+}
+
+// Get extra json configs
+/*var fileList = s3HandlingProxy.getFileList("").data.fileDetails;
+for (var i = 0; i < fileList.length; ++i)
+{
+    var file = fileList[i];
+    var result = httpProxy.getResponseJson("", file.absoluteUrl, {}, {});
+    retVal[file.shortName] = result;
+}*/
+
+var entityList = globalEntityProxy.getListByIndexedId("config", 100).data.entityList;
+for (var i = 0; i < entityList.length; ++i)
+{
+    var entity = entityList[i];
+    retVal[entity.entityType] = entity.data;
+}
+
+// return
+retVal;

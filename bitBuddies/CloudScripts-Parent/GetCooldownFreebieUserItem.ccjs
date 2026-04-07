@@ -1,0 +1,36 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  var context = {
+    "pagination": {
+      "rowsPerPage": 50,
+      "pageNumber": 1
+    },
+    "searchCriteria": {
+      "defId": "freebie"
+    },
+    "sortCriteria": {
+      "createdAt": 1,
+      "updatedAt": -1
+    }
+  };
+  var includeDef = true;
+  var userItemsProxy = bridge.getUserItemsServiceProxy();
+
+  var postResult = userItemsProxy.getUserItemsPage(context, includeDef);
+  if (postResult.status == 200) 
+  {
+      //response.postResult = postResult;
+      if(postResult.data.results.items.length > 0)
+      {
+        var items = postResult.data.results.items;
+        response.cooldownUntil = items[0].coolDownUntil;
+      }
+  }
+
+  return response;
+}
+
+main();

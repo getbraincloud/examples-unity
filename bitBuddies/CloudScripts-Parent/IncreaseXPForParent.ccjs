@@ -1,0 +1,78 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+function main() {
+  var response = {};
+
+  //Increase XP for parent
+  var xpAmount = data.x;
+  var currentLevelUpReq = 0;
+  var statProxy = bridge.getPlayerStatisticsServiceProxy();
+  var playerStateProxy = bridge.getPlayerStateServiceProxy();
+  var readPlayerStateResult = playerStateProxy.readUserState();
+  var currentLevel = 0;
+  if(readPlayerStateResult.status === 200)
+  {
+    currentLevel = readPlayerStateResult.data.experienceLevel;
+  }
+
+  //Getting next XP level for Client UI purposes incase user levels up
+  var getNextLevelResult = statProxy.getNextExperienceLevel();
+  if(getNextLevelResult.status === 200)
+  {
+    currentLevelUpReq = getNextLevelResult.data.xp_level.experience;
+  }
+  
+  //Check if we leveled up, if so send back next XP requirement to user
+  //field is needed for the progress bar.
+  var increaseXpResult = statProxy.incrementExperiencePoints(xpAmount);
+  if(increaseXpResult.status === 200)
+  {
+    response.xpAwarded = xpAmount;
+  }
+  else
+  {
+    response.xpAwardedBad = increaseXpResult;
+  }
+  if(!isNullOrEmpty(increaseXpResult.data))
+  {
+    var experiencePoints = increaseXpResult.data.experiencePoints;
+    var responseLevel = increaseXpResult.data.experienceLevel;
+    if(responseLevel > currentLevel)
+    {
+      var previousLevelUpReq = currentLevelUpReq;
+      var getNextLevelResult = statProxy.getNextExperienceLevel();
+      if(getNextLevelResult.status === 200)
+      {
+        response.nextLevelUpXP = getNextLevelResult.data.xp_level.experience;
+        response.previousLevelUpReq = previousLevelUpReq;
+        response.level = responseLevel;
+        
+        
+        var summaryFriendData = readPlayerStateResult.data.summaryFriendData;
+        summaryFriendData.nextLevelUpXP = response.nextLevelUpXP;
+        summaryFriendData.level = responseLevel;
+        summaryFriendData.experiencePoints = experiencePoints;
+        summaryFriendData.previousLevelXP = previousLevelUpReq;
+        playerStateProxy.updateSummaryFriendData(summaryFriendData);
+      }
+    }
+    else
+    {
+      
+      //If we didn't level up, update the XP info
+      var summaryFriendData = readPlayerStateResult.data.summaryFriendData;
+      summaryFriendData.experiencePoints = experiencePoints;
+      summaryFriendData.nextLevelUpXP = currentLevelUpReq;
+      summaryFriendData.level = currentLevel;
+      playerStateProxy.updateSummaryFriendData(summaryFriendData);
+    }
+
+    response.experiencePoints = experiencePoints;
+    //response.increaseXpResult = increaseXpResult.data;
+  }
+
+  return response;
+}
+
+main();

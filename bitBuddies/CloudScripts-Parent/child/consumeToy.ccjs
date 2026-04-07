@@ -1,0 +1,106 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+// consumeToy (VSCode created Script) 
+
+function main() {
+  var response = {};
+
+  /**
+   * Parameters: toyID, child appID, profile id
+   * I think consume the item and if its successful then do the following?
+   * Create UserEntity on child
+   * Insert toy info into entity
+   * Make sure Time To Live is set to the cooldown for toys info
+   * 
+   */
+  response.useItemFailedResult = false;
+  var userItemsProxy = bridge.getUserItemsServiceProxy();
+  var identityProxy = bridge.getIdentityServiceProxy();
+  var dropInfo = {};
+  // Switch to Child app profile using helper
+  var switchToChildResult  = identityProxy.switchToChildProfile(data.childProfileId, data.childAppId, false);
+  if (switchToChildResult)
+  {
+    var getUserItemResult = userItemsProxy.getUserItemsPage({}, true);
+    
+    var itemId = "123";
+    var foundItem = false;
+    if(getUserItemResult.status === 200 &&
+        getUserItemResult.data.results.count > 0)
+    {
+      //response.getUserItemResult = getUserItemResult;
+      var items = getUserItemResult.data.results.items;
+      for(var i = 0; i<items.length; ++i)
+      {
+        if(items[i].defId === data.toyId)
+        {
+          itemId = items[i].itemId;
+          foundItem = true;
+        }
+      }
+      
+      if(foundItem === true)
+      {
+        var useItemResult = userItemsProxy.useUserItem(itemId, -1, null, true);
+        //response.useItemResult = useItemResult;
+        if(useItemResult.status === 200)
+        {
+          if(useItemResult.data.item.itemDef.coolDownSecs > 0)
+          {
+            dropInfo.cooldown = useItemResult.data.item.itemDef.coolDownSecs;
+          }
+          else
+          {
+            dropInfo.cooldown = 0;
+            dropInfo.otherCooldown = useItemResult.data.item;
+          }
+          
+          dropInfo.entityTTL = useItemResult.data.item.itemDef.meta.entityTTL;
+          dropInfo.lovePayout = useItemResult.data.item.itemDef.meta.lovePayout;
+          dropInfo.coinPayout = useItemResult.data.item.itemDef.meta.coinPayout;
+          dropInfo.blingPayout = useItemResult.data.item.itemDef.meta.buddyBlingPayout;
+        }
+        else
+        {
+          response.useItemFailedResult = true;
+          response.useItemResult = useItemResult;
+        }
+      }
+      else
+      {
+        response.useItemFailedResult = true;
+        response.failedMessage = "Failed to find item on User Account";
+      }
+    }
+    else
+    {
+      response.useItemFailedResult = true;
+      response.failedMessage = "This User doesn't have any UserItems";
+    }
+    
+    if(foundItem)
+    {
+      var customEntityProxy = bridge.getCustomEntityServiceProxy();
+      
+      var createEntityResult = customEntityProxy.createEntity("toyRewardInfo", dropInfo, {"other": 1}, dropInfo.entityTTL, true);
+      //response.createEntityResult = createEntityResult;
+      if(createEntityResult.status === 200)
+      {
+        dropInfo.entityId = createEntityResult.data.entityId;
+        response.dropInfo = dropInfo;
+      }
+    }
+    
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+  else
+  {
+    response.useItemFailedResult = true;
+    response.failedMessage = "Failed to switch to child profile";
+  }
+  
+
+  return response;
+}
+
+main();

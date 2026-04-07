@@ -1,0 +1,34 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+/**
+ * Fetches player statistics for both parent and child app profiles.
+ *
+ * @param {Object} data - The input parameters for the script.
+ * @param {string} data.childAppId - The appId of the child app to switch to for child stats.
+ * @returns {Object} response - The collected stats and results from parent and child profiles.
+ * @property {Object} response.parentStats - All parent user stats.
+ * @property {Object} response.childStats - All child user stats (if child app switch succeeds).
+ */
+function main() {
+  var response = {};
+
+  // Get identity proxy for profile switching
+  var identityProxy = bridge.getIdentityServiceProxy();
+  
+  // Switch to Child app profile using helper
+  // Uses childAppId from input data
+  const switched = addChildAccount(data.childAppId, identityProxy);
+
+  if (switched)
+  {
+    // Switch back to parent profile for cleanup
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+  
+  response = getChildProfiles(identityProxy);
+
+  return response;
+}
+
+main();

@@ -1,0 +1,755 @@
+"use strict";
+bridge.include("/includes/ChildUtils.ccjs");
+
+/**
+ * Script Summary
+ * Main goal for claimMouseMerchantItem is to claim an item from the child apps item catalog. Items in the child item catalog are more unique
+ * vs the parent item catalog where items are both parent and child currency priced. 
+ * 
+ * Overview flow:
+ * Reads parent currency balances (gems) while still on the parent profile
+ * Switches to the child profile and stays there for the bulk of the work
+ * Reads child currency balances (buddyBling, etc.) and the full item catalog
+ * Finds the requested item in the catalog and resolves its pricing type into one of three categories:
+ *      - Parent-priced — costs gems, deducted from parent profile
+ *      - Child-priced — costs buddyBling or similar, deducted from child profile
+ *      - Free — no currency involved (Love Booster is handled by the separate script)
+ * Checks the user can afford the item against the correct currency pool
+ * Blocks max level users from purchasing level-up items before any currency is touched
+ * For non-consumable items, checks the user doesn't already own one
+ * Deducts currency from the correct profile — parent gems require a temporary switch to parent and back, child currency is deducted inline
+ * Applies the item's effect depending on its type:
+ *      - Level-up consumable (meta.payoutType === "level") — dynamically calculates the exact XP needed to
+ *        cross N level thresholds using readXpLevelsMetadata, capped at max level, then calls
+ *        incrementExperiencePoints and updates summaryFriendData
+ *      - Meta consumable — skips UserItems entirely and directly awards the payout via awardCurrency
+ *        for currency exchange items (gems → buddyBling)
+ *      - Switches to parent once to increment the relevant purchase stat (hatsBought, sunglassesBought, etc.) if applicable
+ *  Reads the updated balance of whichever currency was spent — parent balance is read on parent, child balance requires a brief switch back to child then returns to parent
+ *  Returns to the client with itemId, statIncremented, updated balance, and payout info. 
+ * Level-up items also include levelUpInfo with levelBefore, levelAfter, xpAwarded, and rewards
+ */
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function resolvePricing(targetItem)
+{
+    // 1. Check catalog pricing structure (pricing.prices[0].priceData)
+    var prices = targetItem.pricing
+        && targetItem.pricing.prices
+        && targetItem.pricing.prices.length > 0
+        ? targetItem.pricing.prices : null;
+
+    if (prices)
+    {
+        var priceData = prices[0].priceData;
+        var isParent  = false;
+        if (priceData)
+        {
+            for (var k in priceData)
+            {
+                if (priceData.hasOwnProperty(k) && k === "gems")
+                {
+                    isParent = true;
+                    break;
+                }
+            }
+        }
+        return { priceData: priceData || null, currencySource: priceData ? (isParent ? "parent" : "child") : "free" };
+    }
+
+    // 2. Check buyPrice field (used by mouseMerchant wearable items, e.g. { "bitBling": 100 })
+    if (targetItem.buyPrice)
+    {
+        var buyPriceData = targetItem.buyPrice;
+        var hasKeys      = false;
+        var buyIsParent  = false;
+        for (var bk in buyPriceData)
+        {
+            if (buyPriceData.hasOwnProperty(bk))
+            {
+                hasKeys = true;
+                if (bk === "gems")
+                {
+                    buyIsParent = true;
+                    break;
+                }
+            }
+        }
+        if (hasKeys)
+        {
+            return { priceData: buyPriceData, currencySource: buyIsParent ? "parent" : "child" };
+        }
+    }
+
+    // 3. Check meta-based pricing (used by consumable items)
+    var meta = targetItem.meta ? targetItem.meta : {};
+    if (meta.priceAmount !== undefined && meta.priceType !== undefined)
+    {
+        var fallbackPriceData = {};
+        fallbackPriceData[meta.priceType] = meta.priceAmount;
+        return { priceData: fallbackPriceData, currencySource: meta.priceType === "gems" ? "parent" : "child" };
+    }
+
+    return { priceData: null, currencySource: "free" };
+}
+
+function calculateMultiLevelXp(levelsToGain, log)
+{
+    var stateProxy = bridge.getPlayerStateServiceProxy();
+    var gamificationProxy = bridge.getGamificationServiceProxy();
+
+    // Read the child's current state to get level + XP
+    var childState = stateProxy.readUserState();
+    if (!childState || childState.status !== 200)
+    {
+        return { success: false, error: "Failed to read child player state for XP calculation" };
+    }
+
+    var currentLevel = childState.data.experienceLevel || 0;
+    var currentXp    = childState.data.experiencePoints || 0;
+
+    // Read the full XP levels metadata table
+    var xpLevelsResult = gamificationProxy.readXpLevelsMetadata();
+    if (!xpLevelsResult || xpLevelsResult.status !== 200)
+    {
+        return { success: false, error: "Failed to read XP levels metadata" };
+    }
+
+    var xpLevels = xpLevelsResult.data.xp_levels;
+
+    // Sort ascending by level just in case
+    xpLevels.sort(function(a, b)
+    {
+        return a.level - b.level;
+    });
+
+    var maxLevel = xpLevels.length > 0 ? xpLevels[xpLevels.length - 1].level : 0;
+
+    // Determine the target level (capped at max)
+    var targetLevel = currentLevel + levelsToGain;
+    if (targetLevel > maxLevel)
+    {
+        targetLevel = maxLevel;
+    }
+
+    // If already at or above target, nothing to do
+    if (currentLevel >= targetLevel)
+    {
+        return {
+            success:     true,
+            xpToAward:   0,
+            levelBefore: currentLevel,
+            targetLevel: currentLevel,
+            alreadyMax:  currentLevel >= maxLevel
+        };
+    }
+
+    // Find the XP threshold for the target level
+    var targetXpThreshold = 0;
+    for (var i = 0; i < xpLevels.length; i++)
+    {
+        if (xpLevels[i].level === targetLevel)
+        {
+            targetXpThreshold = xpLevels[i].experience;
+            break;
+        }
+    }
+
+    // The XP we need to award is the difference between target threshold and current XP.
+    var xpToAward = targetXpThreshold - currentXp;
+    if (xpToAward < 0)
+    {
+        xpToAward = 0;
+    }
+
+    return {
+        success:           true,
+        xpToAward:         xpToAward,
+        levelBefore:       currentLevel,
+        targetLevel:       targetLevel,
+        alreadyMax:        false,
+        currentXp:         currentXp,
+        targetXpThreshold: targetXpThreshold
+    };
+}
+
+function checkAffordability(priceData, currencySource, childCurrencies, parentCurrencies)
+{
+    if (!priceData || currencySource === "free")
+    {
+        return { canAfford: true, shortfall: null };
+    }
+
+    var pool = currencySource === "parent" ? parentCurrencies : childCurrencies;
+    for (var currType in priceData)
+    {
+        if (!priceData.hasOwnProperty(currType)) { continue; }
+        var cost    = priceData[currType];
+        var balance = pool[currType] && pool[currType].balance !== undefined ? pool[currType].balance : 0;
+        if (balance < cost)
+        {
+            return { canAfford: false, shortfall: { currencyType: currType, needed: cost, has: balance, source: currencySource } };
+        }
+    }
+    return { canAfford: true, shortfall: null };
+}
+
+function applyConsumablePayout(payoutType, payoutAmount, log)
+{
+    if (!payoutType || payoutAmount <= 0)
+    {
+        return { success: true };
+    }
+
+    var awardResult = bridge.getVirtualCurrencyServiceProxy().awardCurrency(payoutType, payoutAmount);
+    if (!awardResult || awardResult.status !== 200)
+    {
+        log.logError("[ClaimCatalogItem] awardCurrency failed", JSON.stringify({
+            payoutType: payoutType,
+            payoutAmount: payoutAmount,
+            status: awardResult ? awardResult.status : "no response",
+            status_message: awardResult ? awardResult.status_message : null
+        }));
+        return { success: false, error: "Failed to award payout currency: " + payoutType };
+    }
+    return { success: true };
+}
+
+function resolveStatKey(defId)
+{
+    var lower = defId.toLowerCase();
+    if (lower.indexOf("hat") !== -1)          { return "hatsBought"; }
+    if (lower.indexOf("sunglass") !== -1)     { return "sunglassesBought"; }
+    if (lower.indexOf("instantlevel") !== -1) { return "boughtLevelUpPromo"; }
+    if (lower.indexOf("goldchain") !== -1)    { return "chainNecklacesBought"; }
+    return null;
+}
+
+function extractCurrencyType(priceData)
+{
+    if (!priceData) { return null; }
+    for (var k in priceData)
+    {
+        if (priceData.hasOwnProperty(k)) { return k; }
+    }
+    return null;
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+function main()
+{
+    var itemProxy     = bridge.getItemCatalogServiceProxy();
+    var userItemProxy = bridge.getUserItemsServiceProxy();
+    var log           = bridge.getLogServiceProxy();
+    var identityProxy = bridge.getIdentityServiceProxy();
+
+    var inChildProfile = false;
+    var result;
+
+    try
+    {
+        var itemId = data && data.itemId ? data.itemId.trim().toLowerCase() : null;
+        if (!itemId)
+        {
+            return { success: false, error: "No itemId provided" };
+        }
+
+        // ── 1. Read parent currencies — still on parent ───────────────────────
+        var parentPayload    = bridge.getPlayerStateServiceProxy().readUserState();
+        var parentCurrencies = parentPayload.data && parentPayload.data.currency ? parentPayload.data.currency : {};
+
+        // ── 2. Switch to child — stay until step 9 ───────────────────────────
+        if (!switchToChildAccount(data.childProfileId, data.childAppId, identityProxy))
+        {
+            return { success: false, error: "Failed to switch to child profile" };
+        }
+        inChildProfile = true;
+
+        // ── 3. Read child state and catalog ───────────────────────────────────
+        var childStateResult = bridge.getPlayerStateServiceProxy().readUserState();
+        var childCurrencies  = childStateResult.data && childStateResult.data.currency ? childStateResult.data.currency : {};
+
+        var catalogResponse = itemProxy.getCatalogItemsPage({});
+        if (!catalogResponse || catalogResponse.status !== 200)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return {
+                success: false,
+                error: "Failed to read item catalog",
+                status: catalogResponse ? catalogResponse.status : null,
+                reason_code: catalogResponse ? catalogResponse.reason_code : null,
+                status_message: catalogResponse ? catalogResponse.status_message : null
+            };
+        }
+
+        var items      = catalogResponse.data && catalogResponse.data.results && catalogResponse.data.results.items ? catalogResponse.data.results.items : [];
+        var targetItem = null;
+        for (var i = 0; i < items.length; i++)
+        {
+            if (items[i].defId.toLowerCase() === itemId)
+            {
+                targetItem = items[i];
+                break;
+            }
+        }
+
+        if (!targetItem)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return { success: false, error: "Item not found in catalog: " + itemId };
+        }
+
+        // ── 4. Resolve pricing and item type flags ────────────────────────────
+        var pricing        = resolvePricing(targetItem);
+        var priceData      = pricing.priceData;
+        var currencySource = pricing.currencySource;
+        var meta           = targetItem.meta ? targetItem.meta : {};
+
+        var isLevelUpItem     = meta.payoutType === "level"
+            && meta.payoutAmount > 0
+            && targetItem.consumable === true;
+        var isMetaConsumable  = !isLevelUpItem
+            && currencySource !== "free"
+            && meta.payoutType !== undefined
+            && targetItem.consumable === true;
+        var spentCurrencyType = extractCurrencyType(priceData);
+
+        // Track child currency old balance for result reporting
+        var childCurrencyOldBalance = 0;
+        if (currencySource === "child" && spentCurrencyType)
+        {
+            childCurrencyOldBalance = childCurrencies[spentCurrencyType] && childCurrencies[spentCurrencyType].balance !== undefined
+                ? childCurrencies[spentCurrencyType].balance : 0;
+        }
+
+        // ── 5. Affordability check ────────────────────────────────────────────
+        var afford = checkAffordability(priceData, currencySource, childCurrencies, parentCurrencies);
+        if (!afford.canAfford)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            return {
+                success: false,
+                error: "Insufficient " + afford.shortfall.currencyType + " (" + afford.shortfall.source + "): needs " + afford.shortfall.needed + ", has " + afford.shortfall.has
+            };
+        }
+
+        // ── 5b. Block max-level users from buying level-up items ──────────
+        if (isLevelUpItem)
+        {
+            var preCheckState = bridge.getPlayerStateServiceProxy().readUserState();
+            var preCheckLevel = preCheckState.data ? preCheckState.data.experienceLevel || 0 : 0;
+            var gamifProxy    = bridge.getGamificationServiceProxy();
+            var xpMeta        = gamifProxy.readXpLevelsMetadata();
+
+            if (xpMeta && xpMeta.status === 200)
+            {
+                var levels   = xpMeta.data.xp_levels || [];
+                var maxLevel = levels.length > 0
+                    ? levels[levels.length - 1].level : 0;
+
+                if (preCheckLevel >= maxLevel)
+                {
+                    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                    return {
+                        success: false,
+                        error: "Already at max level — cannot purchase level-up item",
+                        alreadyMax: true
+                    };
+                }
+            }
+        }
+
+        // ── 6. Ownership check (skip for meta consumables) ───────────────────
+        if (!isMetaConsumable && !isLevelUpItem)
+        {
+            var existingItems = userItemProxy.getUserItemsPage({}, true);
+            if (!existingItems || existingItems.status !== 200)
+            {
+                log.logError("[ClaimCatalogItem] getUserItemsPage ownership check failed", JSON.stringify({
+                    itemId: itemId,
+                    status: existingItems ? existingItems.status : "no response"
+                }));
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return {
+                    success: false,
+                    error: "Failed to verify item ownership before award",
+                    status: existingItems ? existingItems.status : null,
+                    reason_code: existingItems ? existingItems.reason_code : null,
+                    status_message: existingItems ? existingItems.status_message : null
+                };
+            }
+
+            var allItems = existingItems.data && existingItems.data.results && existingItems.data.results.items ? existingItems.data.results.items : [];
+            for (var o = 0; o < allItems.length; o++)
+            {
+                if (allItems[o].defId === targetItem.defId)
+                {
+                    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                    return { success: false, error: "Item already owned: " + targetItem.defId, alreadyOwned: true };
+                }
+            }
+        }
+
+        // ── 7. Deduct currency ────────────────────────────────────────────────
+        if (currencySource === "parent" && priceData)
+        {
+            var switchToParent = identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+            if (!switchToParent || switchToParent.status !== 200)
+            {
+                return { success: false, error: "Failed to switch to parent for gem deduction" };
+            }
+            inChildProfile = false;
+
+            for (var pk in priceData)
+            {
+                if (!priceData.hasOwnProperty(pk)) { continue; }
+                var parentCostAmount = priceData[pk];
+                if (!parentCostAmount || parentCostAmount <= 0) { continue; }
+
+                var consumeResult = bridge.getVirtualCurrencyServiceProxy().consumeCurrency(pk, parentCostAmount);
+                if (!consumeResult || consumeResult.status !== 200)
+                {
+                    log.logError("[ClaimCatalogItem] consumeCurrency (parent) failed", JSON.stringify({
+                        currencyType: pk,
+                        amount: parentCostAmount,
+                        status: consumeResult ? consumeResult.status : "no response",
+                        status_message: consumeResult ? consumeResult.status_message : null
+                    }));
+                    return {
+                        success: false,
+                        error: "Failed to deduct parent currency: " + pk,
+                        status: consumeResult ? consumeResult.status : null,
+                        reason_code: consumeResult ? consumeResult.reason_code : null,
+                        status_message: consumeResult ? consumeResult.status_message : null
+                    };
+                }
+            }
+
+            var reswitch = identityProxy.switchToChildProfile(data.childProfileId, data.childAppId, true);
+            if (!reswitch || reswitch.status !== 200)
+            {
+                return { success: false, error: "Failed to return to child profile after gem deduction" };
+            }
+            inChildProfile = true;
+        }
+        else if (currencySource === "child" && priceData)
+        {
+            for (var currKey in priceData)
+            {
+                if (!priceData.hasOwnProperty(currKey)) { continue; }
+
+                var costAmount = priceData[currKey];
+                if (!costAmount || costAmount <= 0) { continue; }
+
+                log.logInfo("[ClaimCatalogItem] Deducting child currency", JSON.stringify({
+                    currencyType: currKey,
+                    amount: costAmount,
+                    itemId: itemId
+                }));
+
+                var consumeChild = bridge.getVirtualCurrencyServiceProxy().consumeCurrency(currKey, costAmount);
+                if (!consumeChild || consumeChild.status !== 200)
+                {
+                    log.logError("[ClaimCatalogItem] consumeCurrency (child) failed", JSON.stringify({
+                        currencyType: currKey,
+                        amount: costAmount,
+                        status: consumeChild ? consumeChild.status : "no response",
+                        status_message: consumeChild ? consumeChild.status_message : null
+                    }));
+                    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                    return {
+                        success: false,
+                        error: "Failed to deduct child currency: " + currKey,
+                        status: consumeChild ? consumeChild.status : null,
+                        reason_code: consumeChild ? consumeChild.reason_code : null,
+                        status_message: consumeChild ? consumeChild.status_message : null
+                    };
+                }
+            }
+
+            // Verify the deduction actually took effect
+            var verifyState      = bridge.getPlayerStateServiceProxy().readUserState();
+            var verifyCurrencies = verifyState.data && verifyState.data.currency ? verifyState.data.currency : {};
+            for (var vk in priceData)
+            {
+                if (!priceData.hasOwnProperty(vk)) { continue; }
+                var expectedCost  = priceData[vk];
+                if (!expectedCost || expectedCost <= 0) { continue; }
+
+                var beforeBalance  = childCurrencies[vk] && childCurrencies[vk].balance !== undefined ? childCurrencies[vk].balance : 0;
+                var afterBalance   = verifyCurrencies[vk] && verifyCurrencies[vk].balance !== undefined ? verifyCurrencies[vk].balance : 0;
+                var actualDeducted = beforeBalance - afterBalance;
+
+                if (actualDeducted < expectedCost)
+                {
+                    log.logError("[ClaimCatalogItem] Child currency deduction verification failed", JSON.stringify({
+                        currencyType: vk,
+                        expectedCost: expectedCost,
+                        beforeBalance: beforeBalance,
+                        afterBalance: afterBalance,
+                        actualDeducted: actualDeducted
+                    }));
+                    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                    return {
+                        success: false,
+                        error: "Currency deduction verification failed for " + vk + ": expected to deduct " + expectedCost + " but only " + actualDeducted + " was removed"
+                    };
+                }
+            }
+        }
+
+        // ── 8. Award / payout ─────────────────────────────────────────────────
+        var payoutResult = null;
+        var levelUpInfo  = null;
+
+        if (isLevelUpItem)
+        {
+            // ── Level-up item path ────────────────────────────────────────
+            var calc = calculateMultiLevelXp(meta.payoutAmount, log);
+            if (!calc.success)
+            {
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return { success: false, error: calc.error };
+            }
+
+            if (calc.alreadyMax || calc.xpToAward === 0)
+            {
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return {
+                    success: false,
+                    error: "Already at or above target level",
+                    alreadyMax: true
+                };
+            }
+
+            var statProxy = bridge.getPlayerStatisticsServiceProxy();
+            var xpResult  = statProxy.incrementExperiencePoints(calc.xpToAward);
+            if (!xpResult || xpResult.status !== 200)
+            {
+                log.logError(
+                    "[ClaimCatalogItem] incrementExperiencePoints failed for multi-level item",
+                    JSON.stringify({
+                        xpToAward: calc.xpToAward,
+                        levelBefore: calc.levelBefore,
+                        status: xpResult ? xpResult.status : "no response"
+                    })
+                );
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return {
+                    success: false,
+                    error: "Failed to award XP for level-up item"
+                };
+            }
+
+            // Update summaryFriendData so other systems see the new level
+            var updatedState = bridge.getPlayerStateServiceProxy().readUserState();
+            if (updatedState && updatedState.status === 200)
+            {
+                var summaryFriendData = updatedState.data.summaryFriendData || {};
+                summaryFriendData.level            = xpResult.data.experienceLevel;
+                summaryFriendData.experiencePoints = xpResult.data.experiencePoints;
+
+                var nextLevelResult = statProxy.getNextExperienceLevel();
+                if (nextLevelResult && nextLevelResult.status === 200
+                    && nextLevelResult.data.xp_level)
+                {
+                    summaryFriendData.nextLevelUpXP =
+                        nextLevelResult.data.xp_level.experience;
+                }
+
+                bridge.getPlayerStateServiceProxy()
+                    .updateSummaryFriendData(summaryFriendData);
+            }
+
+            levelUpInfo = {
+                levelBefore: calc.levelBefore,
+                levelAfter:  xpResult.data.experienceLevel,
+                xpAwarded:   calc.xpToAward,
+                rewards:     xpResult.data.rewards || {}
+            };
+        }
+        else if (isMetaConsumable)
+        {
+            // ── Standard consumable payout (currency exchange, etc.) ──────
+            payoutResult = applyConsumablePayout(meta.payoutType, meta.payoutAmount, log);
+            if (!payoutResult.success)
+            {
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return { success: false, error: payoutResult.error };
+            }
+        }
+        else
+        {
+            // ── Non-consumable item (wearables) ──────────────────────────
+            var awardResponse = userItemProxy.awardUserItem(targetItem.defId, 1, true);
+            if (!awardResponse || awardResponse.status !== 200)
+            {
+                log.logError("[ClaimCatalogItem] awardUserItem failed", JSON.stringify({
+                    itemId: itemId,
+                    status: awardResponse ? awardResponse.status : "no response"
+                }));
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                return {
+                    success: false,
+                    error: "Failed to award item",
+                    status: awardResponse ? awardResponse.status : null,
+                    reason_code: awardResponse ? awardResponse.reason_code : null,
+                    status_message: awardResponse ? awardResponse.status_message : null
+                };
+            }
+        }
+
+        // ── 9. Switch to parent — stat increment and balance reads ────────────
+        identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+        inChildProfile = false;
+
+        var statIncremented = false;
+        var statKey         = resolveStatKey(targetItem.defId);
+        if (statKey)
+        {
+            var statUpdate      = {};
+            statUpdate[statKey] = 1;
+            bridge.getPlayerStatisticsServiceProxy().incrementUserStats(statUpdate);
+            statIncremented = true;
+        }
+
+        // Read updated parent balance (for parent currency purchases)
+        var parentCurrencyOldBalance = 0;
+        var parentCurrencyNewBalance = 0;
+        if (currencySource === "parent" && spentCurrencyType)
+        {
+            parentCurrencyOldBalance = parentCurrencies[spentCurrencyType] && parentCurrencies[spentCurrencyType].balance !== undefined
+                ? parentCurrencies[spentCurrencyType].balance : 0;
+            var parentStateAfter = bridge.getPlayerStateServiceProxy().readUserState();
+            var parentCurrAfter  = parentStateAfter.data && parentStateAfter.data.currency ? parentStateAfter.data.currency : {};
+            parentCurrencyNewBalance = parentCurrAfter[spentCurrencyType] && parentCurrAfter[spentCurrencyType].balance !== undefined
+                ? parentCurrAfter[spentCurrencyType].balance : 0;
+        }
+
+        // Read updated child balance (for child currency purchases)
+        var childCurrencyNewBalance = 0;
+        if (currencySource === "child" && spentCurrencyType)
+        {
+            var reenterForBalance = identityProxy.switchToChildProfile(data.childProfileId, data.childAppId, true);
+            if (reenterForBalance && reenterForBalance.status === 200)
+            {
+                inChildProfile      = true;
+                var childStateAfter = bridge.getPlayerStateServiceProxy().readUserState();
+                var childCurrAfter  = childStateAfter.data && childStateAfter.data.currency ? childStateAfter.data.currency : {};
+                childCurrencyNewBalance = childCurrAfter[spentCurrencyType] && childCurrAfter[spentCurrencyType].balance !== undefined
+                    ? childCurrAfter[spentCurrencyType].balance : 0;
+                identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                inChildProfile = false;
+            }
+        }
+
+        // ── 10. Build result — three distinct result types ────────────────────
+        //return for instant level up
+        if (levelUpInfo)
+        {
+            // Include currency info if applicable
+            var parentCurrency = {
+                    currencyType: spentCurrencyType,
+                    oldBalance:   parentCurrencyOldBalance,
+                    newBalance:   parentCurrencyNewBalance,
+                    amountSpent:  priceData[spentCurrencyType] || 0
+                };
+            result = {
+                success:         true,
+                resultType:      "levelUpItem",
+                itemId:          targetItem.defId,
+                statIncremented: statIncremented,
+                levelUpInfo:     levelUpInfo,
+                parentCurrency:  parentCurrency
+            };
+        }
+        //return for child item catalog purchase
+        else if (currencySource === "child")
+        {
+            // ── Result type: childCatalogItem ─────────────────────────────────
+            result = {
+                success:         true,
+                resultType:      "childCatalogItem",
+                itemId:          targetItem.defId,
+                statIncremented: statIncremented,
+                childCurrency: {
+                    currencyType: spentCurrencyType,
+                    oldBalance:   childCurrencyOldBalance,
+                    newBalance:   childCurrencyNewBalance,
+                    amountSpent:  priceData[spentCurrencyType] || 0
+                }
+            };
+        }
+        //return for gemsForBling and payout to child profile
+        else if (currencySource === "parent")
+        {
+            var payoutCurrency;
+            // For consumable items that pay out child currency, include the new balance
+            if (isMetaConsumable && meta.payoutType)
+            {
+                var payoutBalanceSwitch = identityProxy.switchToChildProfile(data.childProfileId, data.childAppId, true);
+                if (payoutBalanceSwitch && payoutBalanceSwitch.status === 200)
+                {
+                    var payoutState = bridge.getPlayerStateServiceProxy().readUserState();
+                    var payoutCurr  = payoutState.data && payoutState.data.currency
+                        ? payoutState.data.currency : {};
+                    var payoutNewBalance = payoutCurr[meta.payoutType]
+                        && payoutCurr[meta.payoutType].balance !== undefined
+                        ? payoutCurr[meta.payoutType].balance : 0;
+
+                    payoutCurrency = {
+                        currencyType:  meta.payoutType,
+                        newBalance:    payoutNewBalance,
+                        amountAwarded: meta.payoutAmount
+                    };
+
+                    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+                }
+            }
+
+            // ── Result type: parentCurrencyPurchase ───────────────────────────
+            result = {
+                success:         true,
+                resultType:      "parentCurrencyPurchase",
+                itemId:          targetItem.defId,
+                statIncremented: statIncremented,
+                parentCurrency: {
+                    currencyType: spentCurrencyType,
+                    oldBalance:   parentCurrencyOldBalance,
+                    newBalance:   parentCurrencyNewBalance,
+                    amountSpent:  priceData[spentCurrencyType] || 0
+                },
+                payoutCurrency: payoutCurrency
+            };
+            
+        }
+        else
+        {
+            // ── Result type: freeItem (no currency involved) ──────────────────
+            result = {
+                success:         true,
+                resultType:      "freeItem",
+                itemId:          targetItem.defId,
+                statIncremented: statIncremented
+            };
+        }
+    }
+    catch (e)
+    {
+        if (inChildProfile)
+        {
+            identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+        }
+        result = { success: false, error: "Unhandled exception: " + e.message };
+    }
+
+    return result;
+}
+
+main();

@@ -1,0 +1,79 @@
+"use strict";
+
+function main() {
+  var response = {};
+  const message = data.callingMessage.content.text;
+
+  // this was just setup as the base discord url
+  var serviceCode = "discord";
+
+  // customize as you see fit
+  // this will be integrated with discord channel
+  
+  // bccode
+  const channelId = data.callingMessage.channelId;
+  const channelName = channelId.split(":")[2];
+
+  // bccode
+  const bccodePath = "api/webhooks/1470829429390577695/CsdYSe95gYemtRUf5O3pGFPAk3PvD_Lf9rtuCits8f4EbRZf0JcYb3tEVzURpU1U3Alc";
+  // feedback
+  const feedback = "api/webhooks/1470829550194917559/xNEwkFnSDOYo2ZqL3UleD2YNF_bOqLDf9U4UOLvP2UPvB6nVT_DneCg45OjEVYU-HYpA";
+  // news
+  const news = "api/webhooks/1470829762921500815/9F3VJwp9H0JwhOTKBGjJEVa0iNHiKzV9epXSp-s0Cq3YfW3AMgVnN8IHsAXj0OaV5Vnb";
+  // brainCloud
+  const brainCloudPath = "api/webhooks/1470825061752635618/TkVcVxjetatrzKDx4McMXBZfgZ2Hbqg3lWOvPEUpwsrTiZIoVHj92oVKA-_G-91q9xMs";
+
+
+  var path = "";
+  switch (channelName)
+  {
+    case "bc_code":
+    {
+      path = bccodePath;
+    }break;
+
+    case "bc_feedback":
+    {
+      path = feedback;
+    }break;
+
+    case "braincloud_news":
+    {
+      path = news;
+    }break;
+
+    case "bc_braincloud":
+    {
+      path = brainCloudPath;
+    }break;
+
+    default:
+    {
+  
+    }break;
+  }
+  if (path == "")
+  {
+    return response;
+  }
+
+  var readUserState = bridge.getPlayerStateServiceProxy();
+  var readData = readUserState.readUserState().data;
+  var userName = readData.playerName;
+  var headers = { 
+  };
+  
+  // let's post this to the correct discord location
+  var json = {
+        content: message,
+        username: userName + " via BCChat",
+      };
+  var httpClientProxy = bridge.getHttpClientServiceProxy();
+
+  var postResult = httpClientProxy.postJsonResponseJson(serviceCode, path, {}, headers, json);
+
+  response.data = postResult;
+  return response;
+}
+
+main();

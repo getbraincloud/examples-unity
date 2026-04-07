@@ -1,0 +1,31 @@
+"use strict";
+
+bridge.include("/includes/ChildUtils.ccjs");
+
+/**
+ * Fetches and flattens virtual currency balances for the child app profile. Grabs relative information to display in-game such as stats and virtual currencies.
+ *
+ * @param {Object} data - The input parameters for the script.
+ * @param {string} data.childAppId - The appId of the child app to switch to for child currencies.
+ * @returns {Object} response - Flattened currency balances from the child app profile.
+ */
+function main() {
+  var response = {};
+
+  const identityProxy = bridge.getIdentityServiceProxy();
+  const virtualCurrencyProxy = bridge.getVirtualCurrencyServiceProxy();
+
+  // Switch to Child app profile using helper
+  const switched  = switchToChildAccount(data.childProfileId, data.childAppId, identityProxy);
+  if (switched)
+  {
+    // Get currencies within child app profile
+    const res = virtualCurrencyProxy.getCurrency("").data;
+    response = extractBalances(res);
+    identityProxy.switchToParentProfile(MASTER_PARENT_NAME);
+  }
+
+  return response;
+}
+
+main();

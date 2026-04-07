@@ -1,0 +1,25 @@
+"use strict";
+
+function main() {
+  var response = {};
+  response.jsonResponse = { "ResultCode": 3, "Message": "Invalid parameters." };
+
+  // check against the passed in, info, the sessionId and the user match, and are active
+  var session = bridge.getSessionForSessionIdAndProfileId(data.parameters.sessionId, 
+          data.parameters.user);
+
+  // and that its the correct user, if so pass on the proper response
+  if (session && session.playerId == data.parameters.user)
+  {
+    response.jsonResponse = { "ResultCode": 1, "UserId": data.parameters.user }; // good
+  }
+  else
+  {
+    response.jsonResponse = { "ResultCode": 2, "Message": "Authentication failed. Wrong credentials." } // bad
+  }
+  
+
+  return response;
+}
+
+main();
