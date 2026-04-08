@@ -59,9 +59,11 @@ public class ParentShopItem : ShopItem
         {
             case CurrencyTypes.Coins:
                 userInfo.UpdateCoins(userInfo.Coins + amount);
+                StatTracker.Instance.IncrementStat(BitBuddiesConsts.BOUGHT_COINS_WITH_GEMS_STAT_NAME);
                 break;
             case CurrencyTypes.Gems:
                 userInfo.UpdateGems(userInfo.Gems + amount);
+                StatTracker.Instance.IncrementStat(BitBuddiesConsts.BOUGHT_GEMS_WITH_COINS_STAT_NAME);
                 break;
         }
         

@@ -18,6 +18,7 @@ public struct QuestInfo
     public int QuestRewardAmount;
     public QUEST_STATUS QuestStatus;
     public CurrencyTypes RewardCurrencyType;
+    public QuestTypes QuestType;
     
     public int CurrentProgress => StatTracker.Instance.GetStat(QuestStatToTrack);
     public float ProgressPercent => (float)CurrentProgress / QuestRequiredProgress;
@@ -74,21 +75,41 @@ public class QuestCard : MonoBehaviour
         _questInfo = in_questInfo;
         QuestTitleText.text = _questInfo.QuestTitle;
         StatTracker.OnStatChanged += OnStatChange;
+        int currentQuestIndex = 0;
+        switch (_questInfo.QuestType)
+        {
+            case QuestTypes.BitBuddies:
+                currentQuestIndex = StatTracker.Instance.GetStat(BitBuddiesConsts.BITBUDDIES_QUESTLINEID);
+                break;
+            case QuestTypes.General:
+                currentQuestIndex = StatTracker.Instance.GetStat(BitBuddiesConsts.GENERAL_QUESTLINEID);
+                break;
+            case QuestTypes.BitBling:
+                currentQuestIndex = StatTracker.Instance.GetStat(BitBuddiesConsts.BITBLING_QUESTLINEID);
+                break;
+        }
         int questValue = StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack);
         ProgressText.enabled = false;
         if(questValue >= _questInfo.QuestRequiredProgress)
         {
-            if(_questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || _questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)
+            if(currentQuestIndex == _questInfo.QuestLineIndex)
             {
+                ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
+                if(questValue > _questInfo.QuestRequiredProgress)
+                {
+                    ProgressSlider.value = _questInfo.QuestRequiredProgress;
+                }
+                else
+                {
+                    ProgressSlider.value = questValue;
+                }
+                
+                ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
                 ClaimButton.gameObject.SetActive(true);
                 ProgressText.enabled = true;
                 ClaimButton.onClick.AddListener(OnClaimButton);
-                
-                ProgressSlider.value = questValue;
-                ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
-                ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
             }
-            else if(_questInfo.QuestStatus == QUEST_STATUS.SATISFIED)
+            else if(currentQuestIndex > _questInfo.QuestLineIndex || _questInfo.QuestStatus == QUEST_STATUS.SATISFIED)
             {
                 ClaimButton.gameObject.SetActive(false);
                 ProgressSlider.fillRect.GetComponent<Image>().color = Color.green;

@@ -31,6 +31,12 @@ public class StatTracker : MonoBehaviour
         OnStatChanged?.Invoke(statName, _stats[statName]);
     }
     
+    public void SetStat(string statName, int amount)
+    {
+        _stats[statName] = amount;
+        OnStatChanged?.Invoke(statName, _stats[statName]);
+    }
+    
     public int GetStat(string statName)
     {
         return _stats.ContainsKey(statName) ? _stats[statName] : 0;

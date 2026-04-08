@@ -76,6 +76,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         {
             CurrentUserInfo.UpdateUsername(username);
         }
+        
+
             
         var email = data["emailAddress"] as string;
         if(email.IsNullOrEmpty() && !CurrentUserInfo.Email.IsNullOrEmpty())
@@ -108,6 +110,11 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         CurrentUserInfo.UpdateLevel((int) data["experienceLevel"]);
         CurrentUserInfo.UpdateXP((int) data["experiencePoints"]);
         CurrentUserInfo.UpdateStats(data["statistics"] as Dictionary<string, object>);
+        if(StatTracker.Instance.GetStat(BitBuddiesConsts.LOGIN_COUNT_STAT_NAME) == 0)
+        {
+            var loginCount = (int) data["loginCount"];
+            StatTracker.Instance.IncrementStat(BitBuddiesConsts.LOGIN_COUNT_STAT_NAME, loginCount);   
+        }
         
         var summaryFriendData = data["summaryFriendData"] as Dictionary<string, object>;
         if(summaryFriendData != null)
@@ -243,6 +250,18 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
                 questInfo.QuestLineIndex = (int) quests[i]["questLineIndex"];
                 questInfo.QuestRequiredProgress = Convert.ToInt32(quests[i]["thresholdRequired"]);
+                if(questInfo.QuestId.Contains("bitBuddies"))
+                {
+                    questInfo.QuestType = QuestTypes.BitBuddies;
+                }
+                else if(questInfo.QuestId.Contains("general"))
+                {
+                    questInfo.QuestType = QuestTypes.General;
+                }
+                else if(questInfo.QuestId.Contains("bitBling"))
+                {
+                    questInfo.QuestType = QuestTypes.BitBling;
+                }
             
                 var rewards = quests[i]["reward"] as Dictionary<string, object>;
                 string key = rewards.Keys.First();

@@ -130,9 +130,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		var listOfBuddies = GameManager.Instance.AppChildrenInfos;
 		if(listOfBuddies.Count > 0)
 		{
-			var recentBuddyAdded = listOfBuddies[listOfBuddies.Count - 1];
 			_parentMenu.NewAppChildrenInfo = new AppChildrenInfo();
-			_parentMenu.NewAppChildrenInfo.profileId = recentBuddyAdded.profileId;
 			
 			//Extract entity data from response
 			var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
@@ -146,6 +144,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 					var childName = profileChildren[i]["profileName"] as string;
 					if(childName.IsNullOrEmpty())
 					{
+						_parentMenu.NewAppChildrenInfo.profileId = profileChildren[i]["profileId"] as string;
 						var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
 						if(summaryData.ContainsKey("rarity"))
 						{
@@ -166,6 +165,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 						_parentMenu.NewAppChildrenInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryData["lastIdleTimestamp"]).UtcDateTime;
 						
 						SetupBuddyDataDisplay();
+						break;
 					}
 				}	
 			}
@@ -212,6 +212,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	    BrainCloudManager.Instance.UpdateChildProfileName(NameBuddyInput.text, _parentMenu.NewAppChildrenInfo.profileId, DestroySelf);
     }
     
+    //If the name is empty, this is the callback for that to send a generated name instead of one assigned from user
     private void OnConfirmEmptyName()
     {
 		Destroy(gameObject);

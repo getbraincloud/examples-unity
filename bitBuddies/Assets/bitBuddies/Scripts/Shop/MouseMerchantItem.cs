@@ -19,6 +19,13 @@ public class MouseMerchantItem : ShopItem
                 BuyButton.interactable = false;
             }
         }
+        if(_shopInfo.ShopId.Contains("level"))
+        {
+            if(GameManager.Instance.SelectedAppChildrenInfo.buddyLevel >= 10)
+            {
+                BuyButton.interactable = false;
+            }
+        }
     }
 
     protected override void OnBuyButton()
@@ -115,13 +122,9 @@ public class MouseMerchantItem : ShopItem
             StateManager.Instance.OpenInfoPopUp("Claim Item Failed", errorMessage);
             return;
         }
-        /*
-         * Daily free boost
-         * {"packetId":5,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"scriptSize":37162,"executeTime":142573},
-         * "response":{"success":true,"itemId":"dailyLoveBooster","coolDownUntil":1774982028917,"boosterExpiry":17749023483312,
-         * "multiplier":2},"success":true,"reasonCode":null},"status":200}]}
-         */
+        
         string resultType = (string)responseData["resultType"];
+        bool statIncremented = (bool)responseData["statIncremented"];
         if(resultType.Equals("levelUpItem"))
         {
             //Aka Instant level up item 
@@ -144,9 +147,24 @@ public class MouseMerchantItem : ShopItem
             BrainCloudManager.Instance.CurrentUserInfo.UpdateGems((int)parentCurrencyResults["newBalance"]);
             var amountSpent = (int)parentCurrencyResults["amountSpent"];
             var oldBalance = (int)parentCurrencyResults["oldBalance"];
-            GameManager.Instance.SelectedAppChildrenInfo.buddyLevel = levelAfter;
+            var previousLevelReq = (int)levelUpItemData["previousLevelXPReq"];
+            var nextLevelReq = (int)levelUpItemData["nextLevelXPReq"];
+            appInfo.previousLevelUp = previousLevelReq;
+            appInfo.nextLevelUp = nextLevelReq;
+            appInfo.buddyLevel = levelAfter;
+            if(statIncremented)
+            {
+                StatTracker.Instance.IncrementStat(BitBuddiesConsts.BUDDIES_LEVELED_UP_STAT_NAME);
+                StatTracker.Instance.IncrementStat(BitBuddiesConsts.BOUGHT_LEVELUP_PROMOS_STAT_NAME);
+                if(levelAfter >= 5)
+                {
+                    StatTracker.Instance.IncrementStat(BitBuddiesConsts.LEVEL5_BUDDIES_STAT_NAME);
+                }
+            }
             
             StateManager.Instance.OpenInfoPopUp($"{appInfo.profileName} Leveled Up", $"{appInfo.profileName} leveled up from {levelBefore} to {levelAfter} for {amountSpent} gems");
+            GameManager.Instance.UpdateSelectedAppChildrenInfo(appInfo);
+            
         }
         else if(resultType.Equals("childCatalogItem"))
         {
@@ -155,9 +173,29 @@ public class MouseMerchantItem : ShopItem
             GameManager.Instance.SelectedAppChildrenInfo.buddyBling = (int)childCurrency["newBalance"];
             string childItemId = (string)responseData["itemId"];
             string itemName = GameManager.Instance.GetChildItemDisplayName(childItemId);
+            if(GameManager.Instance.SelectedAppChildrenInfo.ownedShopItems == null)
+            {
+                GameManager.Instance.SelectedAppChildrenInfo.ownedShopItems = new List<string>();
+            }
             GameManager.Instance.SelectedAppChildrenInfo.ownedShopItems.Add(childItemId);
              
             StateManager.Instance.OpenInfoPopUp("Item Bought", $"{itemName} bought for {childCurrency["amountSpent"]} bitBling");
+            BuyButton.interactable = false;
+            if(statIncremented)
+            {
+                if(childItemId.Contains("hat"))
+                {
+                    StatTracker.Instance.IncrementStat(BitBuddiesConsts.HATS_BOUGHT_STAT_NAME);
+                }
+                else if(childItemId.Contains("sunglasses"))
+                {
+                    StatTracker.Instance.IncrementStat(BitBuddiesConsts.SUNGLASSES_BOUGHT_STAT_NAME);
+                }
+                else if(childItemId.Contains("gold"))
+                {
+                    StatTracker.Instance.IncrementStat(BitBuddiesConsts.CHAINS_BOUGHT_STAT_NAME);
+                }
+            }
 
         }
         else if(resultType.Equals("parentCurrencyPurchase"))

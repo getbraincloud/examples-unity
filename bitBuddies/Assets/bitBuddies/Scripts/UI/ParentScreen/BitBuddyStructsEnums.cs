@@ -23,6 +23,13 @@ public enum Rarity
 	legendary
 }
 
+public enum QuestTypes
+{
+	BitBuddies,
+	BitBling,
+	General
+}
+
 [Serializable]
 public struct MysteryBoxInfo
 {

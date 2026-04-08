@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,10 @@ public class QuestPanel : MonoBehaviour
 	[SerializeField] private Button NextPageButton;
 	[SerializeField] private Button PreviousPageButton;
 	[SerializeField] private Button CloseButton;
+	[SerializeField] private TextMeshProUGUI PageNumberText;
+	[SerializeField] private TextMeshProUGUI GeneralQuestCompletedText;
+	[SerializeField] private TextMeshProUGUI BitBuddiesQuestCompletedText;
+	[SerializeField] private TextMeshProUGUI BitBlingQuestCompletedText;
 	
 	private QuestCard _firstRowBitBuddyCard;
 	private QuestCard _firstRowBitBlingCard;
@@ -62,12 +67,15 @@ public class QuestPanel : MonoBehaviour
 		{
 			case BitBuddiesConsts.GENERAL_QUESTLINEID:
 				listOfQuests = gameManager.GeneralQuests;
+				StatTracker.Instance.SetStat(BitBuddiesConsts.GENERAL_QUESTLINEID, questLineIndex);
 				break;
 			case BitBuddiesConsts.BITBLING_QUESTLINEID:
 				listOfQuests = gameManager.BitBlingQuests;
+				StatTracker.Instance.SetStat(BitBuddiesConsts.BITBLING_QUESTLINEID, questLineIndex);
 				break;
 			case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
 				listOfQuests = gameManager.BitBuddiesQuests;
+				StatTracker.Instance.SetStat(BitBuddiesConsts.BITBUDDIES_QUESTLINEID, questLineIndex);
 				break;
 		}
 
@@ -96,9 +104,42 @@ public class QuestPanel : MonoBehaviour
 		PreviousPageButton.onClick.AddListener(OnPreviousPageButton);
 		CloseButton.onClick.AddListener(OnCloseButtonPressed);
 		_pageIndex = 0;
+		SetText();
 		SetUpQuestCard(gameManager.GeneralQuests, GeneralSpawnPoint);		
 		SetUpQuestCard(gameManager.BitBuddiesQuests, BitBuddiesSpawnPoint);
 		SetUpQuestCard(gameManager.BitBlingQuests, BitBlingSpawnPoint);
+		
+		SetCompletedQuestText(GeneralQuestCompletedText, gameManager.GeneralQuests);
+		SetCompletedQuestText(BitBuddiesQuestCompletedText, gameManager.BitBuddiesQuests);
+		SetCompletedQuestText(BitBlingQuestCompletedText, gameManager.BitBlingQuests);
+	}
+	
+	private void SetCompletedQuestText(TextMeshProUGUI questCompletedText, List<QuestInfo> listOfQuests)
+	{
+		int completedBitBlingQuests = GetNumberOfCompletedQuests(listOfQuests);
+		questCompletedText.text = $"{completedBitBlingQuests}/{listOfQuests.Count}";
+		// if(completedBitBlingQuests == listOfQuests.Count)
+		// {
+		// 	questCompletedText.color = Color.green + Color.blue;
+		// }
+	}
+	
+	private int GetNumberOfCompletedQuests(List<QuestInfo> listOfQuests)
+	{
+		int completedGeneralQuests = 0;
+		for (int i = 0; i < listOfQuests.Count; i++)
+		{
+			if(listOfQuests[i].QuestStatus == QUEST_STATUS.SATISFIED)
+			{
+				completedGeneralQuests++;
+			}
+		}
+		return completedGeneralQuests;
+	}
+	
+	private void SetText()
+	{
+		PageNumberText.text = (_pageIndex + 1).ToString();
 	}
 	
 	private void UpdatePanel()
@@ -120,6 +161,10 @@ public class QuestPanel : MonoBehaviour
 		SetUpQuestCard(gameManager.GeneralQuests, GeneralSpawnPoint);		
 		SetUpQuestCard(gameManager.BitBuddiesQuests, BitBuddiesSpawnPoint);
 		SetUpQuestCard(gameManager.BitBlingQuests, BitBlingSpawnPoint);
+		SetText();
+		SetCompletedQuestText(GeneralQuestCompletedText, gameManager.GeneralQuests);
+		SetCompletedQuestText(BitBuddiesQuestCompletedText, gameManager.BitBuddiesQuests);
+		SetCompletedQuestText(BitBlingQuestCompletedText, gameManager.BitBlingQuests);
 	}
 
 	private void OnDestroy()
@@ -160,16 +205,16 @@ public class QuestPanel : MonoBehaviour
 			Debug.Log("Quest stat to track is null or empty");
 			return;
 		}
-		QuestCard activeQuestCard = Instantiate(QuestCardPrefab, spawnParent);
-		activeQuestCard.SetupCard(firstRowQuest);
+		QuestCard firstRowQuestCard = Instantiate(QuestCardPrefab, spawnParent);
+		firstRowQuestCard.SetupCard(firstRowQuest);
 		
 		if(firstRowQuest.QuestStatToTrack.IsNullOrEmpty())
 		{
 			Debug.Log("Next quest in line is null or empty");
 			return;
 		}
-		QuestCard lockedQuestCard = Instantiate(QuestCardPrefab, spawnParent);
-		lockedQuestCard.SetupCard(secondRowQuest);
+		QuestCard secondRowQuestCard = Instantiate(QuestCardPrefab, spawnParent);
+		secondRowQuestCard.SetupCard(secondRowQuest);
 	}
 	
 	private QuestInfo GetFirstRow(List<QuestInfo> listOfQuests)

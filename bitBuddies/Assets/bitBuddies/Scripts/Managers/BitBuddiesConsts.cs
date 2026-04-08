@@ -63,11 +63,15 @@ namespace Gameframework
         public const string BOUGHT_LEVELUP_PROMOS_STAT_NAME = "boughtLevelUpPromo";
         public const string BOUGHT_COINS_WITH_GEMS_STAT_NAME = "boughtCoinsWithGems";
         public const string BOUGHT_GEMS_WITH_COINS_STAT_NAME = "boughtGemsWithCash";
+        public const string HATS_BOUGHT_STAT_NAME = "hatsBought";
+        public const string SUNGLASSES_BOUGHT_STAT_NAME = "sunglassesBought";
+        public const string CHAINS_BOUGHT_STAT_NAME = "chainNecklacesBought";
         public const string USER_NAME_CHANGED_STAT_NAME = "userChangedName";
         public const string LEVEL5_BUDDIES_STAT_NAME = "level5Buddies";
         public const string VISIT_BUDDIES_STAT_NAME = "visitBitBuddy";
         public const string TOYS_BOUGHT_STAT_NAME = "toysBought";
-        public const string SCIENCE_KITS_BOUGHT_STAT_NAME = "scienceKitBought";
+        public const string SCIENCE_KITS_BOUGHT_STAT_NAME = "scienceKitObtained";
+        public const string LOGIN_COUNT_STAT_NAME = "loginCount";
 
         public const string APP_CHILD_ID = "50974";
 

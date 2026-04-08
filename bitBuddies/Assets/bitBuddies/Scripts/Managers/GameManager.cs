@@ -12,11 +12,11 @@ public class GameManager : SingletonBehaviour<GameManager>
 	[SerializeField] public bool Debug;
 	private EventSystem _eventSystem;
 	[Tooltip("App Info")]
-	private List<AppChildrenInfo> appChildrenInfos = new List<AppChildrenInfo>();
+	private List<AppChildrenInfo> _appChildrenInfos = new List<AppChildrenInfo>();
 	public List<AppChildrenInfo> AppChildrenInfos
 	{
-		get { return appChildrenInfos; }
-		set { appChildrenInfos = value; }
+		get { return _appChildrenInfos; }
+		set { _appChildrenInfos = value; }
 	}
 	private List<MysteryBoxInfo> _mysteryBoxes;
 	public List<MysteryBoxInfo> MysteryBoxes
@@ -166,32 +166,48 @@ public class GameManager : SingletonBehaviour<GameManager>
 		 * Update list to remove selected child info
 		 * Refresh screen to display the current
 		 */
-		appChildrenInfos.Remove(_selectedAppChildrenInfo);
+		_appChildrenInfos.Remove(_selectedAppChildrenInfo);
 		StateManager.Instance.RefreshScreen();
 	}
 	
 	public void ClearDataForLogout()
 	{
-		appChildrenInfos.Clear();
+		_appChildrenInfos.Clear();
 		_selectedAppChildrenInfo = null;
+		
 	}
 	
 	public void UpdateChildAppInfo(AppChildrenInfo in_appChildrenInfo)
 	{
-		var index = appChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
+		var index = _appChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
 		if(index != -1)
 		{
-			appChildrenInfos[index] = in_appChildrenInfo;
+			_appChildrenInfos[index] = in_appChildrenInfo;
 		}
 	}
 	
 	public void UpdateSelectedAppChildrenInfo()
 	{
-		for (int i = 0; i < appChildrenInfos.Count; i++)
+		if (_appChildrenInfos == null || _appChildrenInfos.Count == 0) return;
+		if(SelectedAppChildrenInfo == null) return;
+		
+		for (int i = 0; i < _appChildrenInfos.Count; i++)
 		{
-			if(appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			if(_appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
 			{
-				appChildrenInfos[i] = SelectedAppChildrenInfo;
+				_appChildrenInfos[i] = SelectedAppChildrenInfo;
+			}
+		}
+	}
+	
+	public void UpdateSelectedAppChildrenInfo(AppChildrenInfo in_appChildrenInfo)
+	{
+		for (int i = 0; i < _appChildrenInfos.Count; i++)
+		{
+			if(_appChildrenInfos[i].profileId.Equals(in_appChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			{
+				_appChildrenInfos[i] = in_appChildrenInfo;
+				SelectedAppChildrenInfo = in_appChildrenInfo;
 			}
 		}
 	}
@@ -210,9 +226,9 @@ public class GameManager : SingletonBehaviour<GameManager>
 	
 	public void CompleteQuestCard(string questId, int questIndex)
 	{
-		for (int i = 0; i < appChildrenInfos.Count; i++)
+		for (int i = 0; i < _appChildrenInfos.Count; i++)
 		{
-			if(appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			if(_appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
 			{
 				switch (questId)
 				{
