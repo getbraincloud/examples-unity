@@ -78,21 +78,43 @@ public class QuestPanel : MonoBehaviour
 				StatTracker.Instance.SetStat(BitBuddiesConsts.BITBUDDIES_QUESTLINEID, questLineIndex);
 				break;
 		}
-
-		for (int i = 0; i < listOfQuests.Count; i++)
+		if(questLineIndex < listOfQuests.Count - 1)
 		{
-			if(listOfQuests[i].QuestLineIndex == questLineIndex)
+			for (int i = 0; i < listOfQuests.Count; i++)
 			{
-				QuestInfo completedQuest = listOfQuests[i - 1];
-				completedQuest.QuestStatus = QUEST_STATUS.SATISFIED;
-				QuestInfo unlockedQuest = listOfQuests[i];
-				unlockedQuest.QuestStatus = QUEST_STATUS.IN_PROGRESS;
+				if(listOfQuests[i].QuestLineIndex == questLineIndex)
+				{
+					QuestInfo completedQuest = listOfQuests[i - 1];
+					completedQuest.QuestStatus = QUEST_STATUS.SATISFIED;
+					QuestInfo unlockedQuest = listOfQuests[i];
+					unlockedQuest.QuestStatus = QUEST_STATUS.IN_PROGRESS;
 
-				listOfQuests[i - 1] = completedQuest;
-				listOfQuests[i] = unlockedQuest;
-				break;
+					listOfQuests[i - 1] = completedQuest;
+					listOfQuests[i] = unlockedQuest;
+					break;
+				}
 			}
 		}
+		else
+		{
+			QuestInfo lastQuest = listOfQuests[listOfQuests.Count - 1];
+			lastQuest.QuestStatus = QUEST_STATUS.SATISFIED;
+			listOfQuests[listOfQuests.Count - 1] = lastQuest;
+		}
+		
+		switch (questLineId)
+		{
+			case BitBuddiesConsts.GENERAL_QUESTLINEID:
+				gameManager.GeneralQuests = listOfQuests;
+				break;
+			case BitBuddiesConsts.BITBLING_QUESTLINEID:
+				gameManager.BitBlingQuests = listOfQuests;
+				break;
+			case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+				gameManager.BitBuddiesQuests = listOfQuests;
+				break;
+		}
+		
 		UpdatePanel();
 		StateManager.Instance.RefreshScreen();
 	}
@@ -104,7 +126,7 @@ public class QuestPanel : MonoBehaviour
 		PreviousPageButton.onClick.AddListener(OnPreviousPageButton);
 		CloseButton.onClick.AddListener(OnCloseButtonPressed);
 		_pageIndex = 0;
-		SetText();
+		SetPageText();
 		SetUpQuestCard(gameManager.GeneralQuests, GeneralSpawnPoint);		
 		SetUpQuestCard(gameManager.BitBuddiesQuests, BitBuddiesSpawnPoint);
 		SetUpQuestCard(gameManager.BitBlingQuests, BitBlingSpawnPoint);
@@ -116,28 +138,22 @@ public class QuestPanel : MonoBehaviour
 	
 	private void SetCompletedQuestText(TextMeshProUGUI questCompletedText, List<QuestInfo> listOfQuests)
 	{
-		int completedBitBlingQuests = GetNumberOfCompletedQuests(listOfQuests);
-		questCompletedText.text = $"{completedBitBlingQuests}/{listOfQuests.Count}";
-		// if(completedBitBlingQuests == listOfQuests.Count)
-		// {
-		// 	questCompletedText.color = Color.green + Color.blue;
-		// }
-	}
-	
-	private int GetNumberOfCompletedQuests(List<QuestInfo> listOfQuests)
-	{
-		int completedGeneralQuests = 0;
+		int completedQuests = 0;
 		for (int i = 0; i < listOfQuests.Count; i++)
 		{
 			if(listOfQuests[i].QuestStatus == QUEST_STATUS.SATISFIED)
 			{
-				completedGeneralQuests++;
+				completedQuests++;
 			}
 		}
-		return completedGeneralQuests;
+		questCompletedText.text = $"{completedQuests}/{listOfQuests.Count}";
+		// if(completedBitBlingQuests == listOfQuests.Count)
+		// {
+		// 	questCompletedText.color = Color.green;
+		// }
 	}
 	
-	private void SetText()
+	private void SetPageText()
 	{
 		PageNumberText.text = (_pageIndex + 1).ToString();
 	}
@@ -161,10 +177,10 @@ public class QuestPanel : MonoBehaviour
 		SetUpQuestCard(gameManager.GeneralQuests, GeneralSpawnPoint);		
 		SetUpQuestCard(gameManager.BitBuddiesQuests, BitBuddiesSpawnPoint);
 		SetUpQuestCard(gameManager.BitBlingQuests, BitBlingSpawnPoint);
-		SetText();
+		SetPageText();
 		SetCompletedQuestText(GeneralQuestCompletedText, gameManager.GeneralQuests);
-		SetCompletedQuestText(BitBuddiesQuestCompletedText, gameManager.BitBuddiesQuests);
-		SetCompletedQuestText(BitBlingQuestCompletedText, gameManager.BitBlingQuests);
+		//SetCompletedQuestText(BitBuddiesQuestCompletedText, gameManager.BitBuddiesQuests);
+		//SetCompletedQuestText(BitBlingQuestCompletedText, gameManager.BitBlingQuests);
 	}
 
 	private void OnDestroy()
@@ -193,7 +209,6 @@ public class QuestPanel : MonoBehaviour
 		}
 		UpdatePanel();
 	}
-	
 	
 	private void SetUpQuestCard(List<QuestInfo> listOfQuests, Transform spawnParent)
 	{
