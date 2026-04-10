@@ -78,7 +78,7 @@ public class QuestPanel : MonoBehaviour
 				StatTracker.Instance.SetStat(BitBuddiesConsts.BITBUDDIES_QUESTLINEID, questLineIndex);
 				break;
 		}
-		if(questLineIndex < listOfQuests.Count - 1)
+		if(questLineIndex <= listOfQuests.Count - 1)
 		{
 			for (int i = 0; i < listOfQuests.Count; i++)
 			{

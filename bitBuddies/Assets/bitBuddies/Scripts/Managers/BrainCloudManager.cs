@@ -110,6 +110,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         CurrentUserInfo.UpdateLevel((int) data["experienceLevel"]);
         CurrentUserInfo.UpdateXP((int) data["experiencePoints"]);
         CurrentUserInfo.UpdateStats(data["statistics"] as Dictionary<string, object>);
+        StatTracker.Instance.IncrementStat(BitBuddiesConsts.LOGIN_COUNT_STAT_NAME, (int) data["loginCount"]);
         if(StatTracker.Instance.GetStat(BitBuddiesConsts.LOGIN_COUNT_STAT_NAME) == 0)
         {
             var loginCount = (int) data["loginCount"];
