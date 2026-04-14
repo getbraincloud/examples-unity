@@ -212,12 +212,21 @@ public class JenkinsBuild {
         public string GetBuildFolderName()
         {
             GetEnviroVariables();
+            string buildName = "";
+            if(BrainCloud.Plugin.Interface.DispatcherURL.Contains("internal"))
+            {
+                buildName = $"{Application.productName}_Internal_clientVersion.{BrainCloud.Version.GetVersion()}";
+            }
+            else
+            {
+                buildName = $"{Application.productName}_Prod_clientVersion.{BrainCloud.Version.GetVersion()}";
+            }
 #if UNITY_STANDALONE_WIN
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{buildName}.exe";
 #elif UNITY_STANDALONE_OSX
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.app";
+            return $"{buildName}.app";
 #else
-            return $"RelayTestApp_Internal_clientVersion.{BrainCloud.Version.GetVersion()}.exe";
+            return $"{buildName}.exe";
 #endif
         }
         
