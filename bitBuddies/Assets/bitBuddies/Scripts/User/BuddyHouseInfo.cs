@@ -83,18 +83,32 @@ public class BuddyHouseInfo : MonoBehaviour
 		{
 			popUp.SetUpInfoPopup(BitBuddiesConsts.CANT_DELETE_BUDDY_TITLE, BitBuddiesConsts.CANT_DELETE_BUDDY_MESSAGE);
 		}
-		else if(HouseInfo.profileName.IsNullOrEmpty())
-		{
-			string titleMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
-			string bodyMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
-			popUp.SetupConfirmPopup(titleMessage, bodyMessage, DeleteBuddyRoom);
-		}
 		else
 		{
-			string titleMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + HouseInfo.profileName + "'s home?";
-			string bodyMessage = BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE + HouseInfo.profileName + "'s home?";
+			string titleMessage = GetTitleMessage();
+			string bodyMessage = GetBodyMessage();
 			popUp.SetupConfirmPopup(titleMessage, bodyMessage, DeleteBuddyRoom);
 		}
+	}
+	
+	private string GetTitleMessage()
+	{
+		if(HouseInfo.profileName.IsNullOrEmpty())
+		{
+			return BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+		}
+		
+		return BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + HouseInfo.profileName + "'s home?";
+	}
+	
+	private string GetBodyMessage()
+	{
+		if(HouseInfo.profileName.IsNullOrEmpty())
+		{
+			return BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+		}
+		
+		return BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE + HouseInfo.profileName + "'s home?";
 	}
 	
 	private void DeleteBuddyRoom()

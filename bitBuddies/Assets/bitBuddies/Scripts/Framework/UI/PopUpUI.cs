@@ -32,12 +32,7 @@ public class PopUpUI : ContentUIBehaviour
 		BodyText.text = in_body;
 	}
 	
-	public void DisableConfirmButton()
-	{
-		ConfirmButton.interactable = false;
-	}
-	
-	public void SetupConfirmPopup(string in_title, string in_body, Action in_confirmAction)
+	public void SetupConfirmPopup(string in_title, string in_body, Action in_confirmAction, bool enableConfirmButton = true)
 	{
 		ConfirmButton.gameObject.SetActive(true);
 		ConfirmButton.onClick.AddListener(OnConfirmButton);
@@ -46,6 +41,8 @@ public class PopUpUI : ContentUIBehaviour
 		CloseButton.onClick.AddListener(OnCloseButton);
 		TitleText.text = in_title;
 		BodyText.text = in_body;
+		
+		ConfirmButton.interactable = enableConfirmButton;
 	}
 	
 	private void OnConfirmButton()

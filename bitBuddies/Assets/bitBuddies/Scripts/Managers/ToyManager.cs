@@ -75,15 +75,6 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	{
 		Vector2 position = Vector2.zero;
 		
-#if UNITY_STANDALONE_WIN
-		RectTransformUtility.ScreenPointToLocalPointInRectangle
-		(
-			_buttonRectTransform, 
-		Input.mousePosition, 
-			Camera.main, 
-			out position 
-		);
-#elif UNITY_ANDROID
 		RectTransformUtility.ScreenPointToLocalPointInRectangle
 		(
 			_buttonRectTransform, 
@@ -91,7 +82,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			Camera.main, 
 			out position 
 		);
-#endif
+		
 		_moveBuddyAnimation.MoveBuddyToPosition(Input.mousePosition + MoveOffsetVector);
 	}
 	
@@ -99,7 +90,6 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 	{
 		Vector2 position = Vector2.zero;
 		
-#if UNITY_STANDALONE_WIN
 		RectTransformUtility.ScreenPointToLocalPointInRectangle
 		(
 			_buttonRectTransform, 
@@ -107,15 +97,7 @@ public class ToyManager : SingletonBehaviour<ToyManager>
 			Camera.main, 
 			out position 
 		);
-#elif UNITY_ANDROID
-		RectTransformUtility.ScreenPointToLocalPointInRectangle
-		(
-			_buttonRectTransform, 
-			Input.mousePosition, 
-			Camera.main, 
-			out position 
-		);
-#endif
+		
 		_moveBuddyAnimation.MoveBuddyToPosition(Input.mousePosition + MoveOffsetVector, callback);
 	}
 
