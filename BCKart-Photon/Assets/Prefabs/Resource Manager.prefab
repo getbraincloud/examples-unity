@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5565203122976307858
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5565203122976307856}
+  - component: {fileID: 5565203122976307857}
+  m_Layer: 0
+  m_Name: Resource Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5565203122976307856
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5565203122976307858}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5565203122976307857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5565203122976307858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 299e48354521c524c86e37c4c7ae311c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hudPrefab: {fileID: 5013491437410716719, guid: 2562ff4bafb44b549b9bdc0de26ba288, type: 3}
+  nicknameCanvasPrefab: {fileID: -7074372984941857023, guid: d1a6feee4f08fbb438b499a5f25259d3, type: 3}
+  kartDefinitions:
+  - {fileID: 11400000, guid: 23c8ed64a38d5124cb0388f6b7deca96, type: 2}
+  - {fileID: 11400000, guid: b93ea24a71abe01408a5b98e40380be6, type: 2}
+  - {fileID: 11400000, guid: 2b04fceee3af9b141a04106cfc3ed4c4, type: 2}
+  gameTypes:
+  - {fileID: 11400000, guid: 6ea96cec0cb2fbd46806fd453614e2cd, type: 2}
+  - {fileID: 11400000, guid: d8dc9c5c2af431a4886c85e36215bc6e, type: 2}
+  tracks:
+  - {fileID: 11400000, guid: e2e7036d9d3378a40abacf71ec90b788, type: 2}
+  - {fileID: 11400000, guid: 3156805d5ae531641bc7157f3bd03170, type: 2}
+  powerups:
+  - {fileID: 11400000, guid: 042f5f48da212a643a84a9160e282400, type: 2}
+  - {fileID: 11400000, guid: cea68da0a33ae0b49bbb6b024711b47f, type: 2}
+  noPowerup: {fileID: 11400000, guid: 0ffc7bc2261cf5e418558bfb6011681a, type: 2}

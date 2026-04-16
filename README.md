@@ -67,12 +67,6 @@ This example showcases the **One-Way Match** and **Playback Stream** services in
 
 ---
 
-## BCFishNet
-
-This example showcases a complete multiplayer game flow using **FishNet** for network object synchronization and **brainCloud** for user authentication, matchmaking, lobby management, and real-time relay transport. Check out [BCFishNet](./BCFishNet/README.md) for more information.
-
----
-
 ## BombersRTT
 
 This example is a real-time multiplayer game implemented using brainCloud. brainCloud provides the backend services for storing data, as well as the **Matchmaking** service and brainCloud's **Relay Multiplayer** server.
@@ -146,6 +140,27 @@ Showcases brainCloud's **Async Multiplayer** and **Cloud Code** services.
 Open up the **Start - TwoPlayer** scene to see it operate in side-by-side action, or build the **Start - OnePlayer** scene and run two different instances of the game to test it out!
 
 For more information, see the [TicTacToe README.md](./TicTacToe/README.md) file.
+
+---
+
+## BCFishNet
+
+Demonstrates a **multiplayer game** using **FishNet** for network object synchronization and **brainCloud** for authentication, matchmaking, lobby management, and real-time relay transport.
+
+Open the **Main** scene to test login, lobby creation, and real-time multiplayer gameplay in the Editor. Make sure to configure a brainCloud app in the Unity Inspector before running.
+
+For more information, see the [BCFishNet README.md](./BCFishNet/README.md) file.
+
+---
+
+
+## BCKart-Photon
+
+Demonstrates a **multiplayer kart game** using **Photon Fusion** for real-time object synchronization and **brainCloud** for authentication, lobby management, and matchmaking.
+
+Open the **Launch** scene to test login, lobby creation, and race flow in the Editor. Make sure to create a new app using the **BCKart-Photon template** in the brainCloud Plugin and configure your Photon Fusion AppId.
+
+For more information, see the [BCKart-Photon README.md](./BCKart-Photon/README.md) file.
 
 ---
 

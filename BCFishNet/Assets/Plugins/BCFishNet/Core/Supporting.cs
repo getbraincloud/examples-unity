@@ -98,7 +98,7 @@ namespace BCFishNet
                 return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
             }
         }
-        
+
         public string GetHexString()
         {
             ArraySegment<byte> segment = new(Data, 0, Length);
@@ -201,6 +201,7 @@ namespace BCFishNet
         public List<Member> members { get; set; }
 
         public LobbySettings settings { get; set; }
+        public LobbyTimetable timetable { get; set; }
 
         // Ensure parameterless constructor
         public Lobby()
@@ -209,9 +210,20 @@ namespace BCFishNet
         }
     }
 
+    public class LobbyTimetable
+    {
+        public double createdAt { get; set; }
+        public double early { get; set; }
+        public double onTime { get; set; }
+        public double tooLate { get; set; }
+        public double dropDead { get; set; }
+        public double ignoreDropDeadUntil { get; set; }
+
+    }
+
     public class LobbySettings
     {
-        public string lobbyCreator { get; set; }
+        public string appSettings { get; set; }
     }
 
     /// <summary>
@@ -229,7 +241,7 @@ namespace BCFishNet
     }
 
     /// <summary>
-    /// Lobby Memeber Data container
+    /// Lobby Member Data container
     /// </summary>
     public class Member
     {

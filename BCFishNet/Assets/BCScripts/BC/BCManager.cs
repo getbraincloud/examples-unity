@@ -45,14 +45,35 @@ public class BCManager : MonoBehaviour
 
     public string RelayPasscode;
     public string CurrentLobbyId = "";
+    public string CurrentLobbyPin = "";
+    public double CurrentLobbyPinExpiresAt = 0;
 
     public string RoomAddress;
     public ushort RoomPort;
 
     public string LobbyOwnerId;
 
+    public LobbyTimetable timetable = new LobbyTimetable();
+
     public List<LobbyMemberData> LobbyMembersData => new List<LobbyMemberData>(memberData);
     private List<LobbyMemberData> memberData = new List<LobbyMemberData>();
+
+    private bool isGeneratingPin = false;
+    void Update()
+    {
+        // if we are the owner and the current lobby pin is about to expire
+        // create another one for this lobby
+        string currentLobbyPin = CurrentLobbyPin;
+        if (!isGeneratingPin && currentLobbyPin != "GENERATING" &&
+            LobbyOwnerId == bc.Client.ProfileId && !string.IsNullOrEmpty(CurrentLobbyId))
+        {
+            if (TimeUtils.GetCurrentTime() * 1000 > CurrentLobbyPinExpiresAt)
+            {
+                isGeneratingPin = true;
+                GenerateLobbyPin();
+            }
+        }
+    }
 
     public void AddMember(LobbyMemberData member)
     {
@@ -132,6 +153,49 @@ public class BCManager : MonoBehaviour
         AddMember(lobbyMemberData);
     }
 
+    public void GenerateLobbyPin()
+    {
+        Debug.Log("Generating new lobby pin for lobby " + CurrentLobbyId);
+        if (string.IsNullOrEmpty(CurrentLobbyId))
+        {
+            Debug.LogWarning("Cannot generate lobby pin because CurrentLobbyId is null or empty.");
+            return;
+        }
+        CurrentLobbyPin = "GENERATING";
+        // Call cloud Script to enter in the pin
+        bc.ScriptService.RunScript("lobby/CreateLobbyPin",
+        "{\"lobbyId\":\"" + CurrentLobbyId + "\"}", (response, _) =>
+        {
+            var respDict = JsonReader.Deserialize<Dictionary<string, object>>(response);
+            if (respDict != null && respDict.TryGetValue("data", out var dataObj) && dataObj is Dictionary<string, object> dataDict)
+            {
+                if (dataDict.TryGetValue("response", out var responseObj) && responseObj is Dictionary<string, object> dataDict2)
+                {
+                    if (dataDict2.TryGetValue("lobbyData", out var lobbyObj) && lobbyObj is Dictionary<string, object> lobbyDataDict)
+                    {
+                        string pinCode = lobbyDataDict["pinCode"] as string;
+                        double expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToDouble(lobbyDataDict["expiresAt"]) : 0;
+
+                        Debug.Log("Generated Lobby Pin: " + pinCode);
+                        Debug.Log("Pin expires at (ms): " + expiresAt);
+
+                        CurrentLobbyPin = pinCode;
+                        CurrentLobbyPinExpiresAt = expiresAt;
+
+                        Debug.Log("Time until pin expiry (ms): " + (CurrentLobbyPinExpiresAt - (TimeUtils.GetCurrentTime() * 1000)));
+                        Dictionary<string, object> settings = new Dictionary<string, object>();
+                        settings["pinCode"] = pinCode;
+                        settings["appVersion"] = Application.version;
+
+                        bc.LobbyService.UpdateSettings(CurrentLobbyId,
+                            settings);
+
+                        isGeneratingPin = false;
+                    }
+                }
+            }
+        });
+    }
     public void OnLobbyEvent(string json)
     {
         try
@@ -158,6 +222,30 @@ public class BCManager : MonoBehaviour
                         LobbyOwnerId = parts[1]; // This is the profileID of the owner
                     }
                 }
+            }
+
+            // ensure to sync the current lobby pin when joining
+            if (lobbyData.ContainsKey("settings"))
+            {
+                var settingsTables = lobbyData["settings"] as Dictionary<string, object>;
+                if (settingsTables != null)
+                {
+                    CurrentLobbyPin = settingsTables.ContainsKey("pinCode") ? settingsTables["pinCode"] as string : "";
+                    CurrentLobbyPinExpiresAt = settingsTables.ContainsKey("expiresAt") ? Convert.ToDouble(settingsTables["expiresAt"]) : 0;
+                    UnityEngine.Debug.LogWarning($"[brainCloud] Synchronized CurrentLobbyPin: {CurrentLobbyPin}");
+                }
+            }
+
+            if (lobbyData.ContainsKey("timetable"))
+            {
+                var jsonTimeTable = lobbyData["timetable"] as Dictionary<string, object>;
+                timetable.createdAt = Convert.ToDouble(((long)jsonTimeTable["createdAt"]));
+                timetable.early = Convert.ToDouble(((long)jsonTimeTable["early"]));
+                timetable.onTime = Convert.ToDouble(((long)jsonTimeTable["onTime"]));
+                timetable.tooLate = Convert.ToDouble(((long)jsonTimeTable["tooLate"]));
+                timetable.dropDead = Convert.ToDouble(((long)jsonTimeTable["dropDead"]));
+                timetable.ignoreDropDeadUntil = Convert.ToDouble(((long)jsonTimeTable["ignoreDropDeadUntil"]));
+                UnityEngine.Debug.LogWarning($"[brainCloud] Lobby timetable updated: createdAt={timetable.createdAt}, early={timetable.early}, onTime={timetable.onTime}, tooLate={timetable.tooLate}, dropDead={timetable.dropDead}, ignoreDropDeadUntil={timetable.ignoreDropDeadUntil}");
             }
 
             if (jsonData.ContainsKey("member"))
@@ -231,6 +319,7 @@ public class BCManager : MonoBehaviour
         bc.LobbyService.LeaveLobby(CurrentLobbyId);
         Debug.Log("Left current lobby " + CurrentLobbyId);
         CurrentLobbyId = "";
+        CurrentLobbyPin = "";
 
         PlayerListItemManager.Instance.ClearAll();
         ClearMembers();
@@ -311,7 +400,7 @@ public class BCManager : MonoBehaviour
         Debug.LogWarning($"RTT disconnected: {statusMessage} (Status Code: {statusCode}, Reason Code: {reasonCode})");
 
         var activeScene = SceneManager.GetActiveScene().name;
-        
+
         // TODO: Make Network Handling more robust
         // while in the main menu, if we are not connected show a display message and prompt to reconnect
         if (activeScene == "Main")
@@ -380,7 +469,7 @@ public class BCManager : MonoBehaviour
     public void JoinLobby(string lobbyId, Action<string> OnEntryId)
     {
         var lobbyParams = CreateLobbyParams(OnEntryId);
-    
+
         _bc.LobbyService.JoinLobby(lobbyId,
             true,
             lobbyParams.extra,
@@ -389,7 +478,7 @@ public class BCManager : MonoBehaviour
             lobbyParams.success
         );
     }
-    
+
     public void QuickFindLobbyWithPreviousMembers(Action<string> OnEntryId)
     {
         var lobbyParams = CreateLobbyParams(OnEntryId);
@@ -412,12 +501,12 @@ public class BCManager : MonoBehaviour
     public Dictionary<string, object> GetLobbyExtraData()
     {
         var extra = new Dictionary<string, object>();
-        string profileId = BCManager.Instance.bc.Client.ProfileId;
+        string profileId = bc.Client.ProfileId;
         Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId).Color;
         extra["colour"] = ColorUtility.ToHtmlStringRGB(playerColor);
         return extra;
     }
-    
+
     private LobbyParams CreateLobbyParams(Action<string> OnEntryId)
     {
         var algo = new Dictionary<string, object>
@@ -439,7 +528,7 @@ public class BCManager : MonoBehaviour
         {
             var response = JsonReader.Deserialize<Dictionary<string, object>>(in_response);
             var data = response["data"] as Dictionary<string, object>;
-            if (data.ContainsKey("entryId"))
+            if (data != null && data.ContainsKey("entryId"))
             {
                 var entryId = data["entryId"] as string;
                 OnEntryId?.Invoke(entryId);

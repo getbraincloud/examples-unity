@@ -16,7 +16,7 @@ using UnityEngine.UI;
 /// 
 /// </summary>
 
-public enum GameMode {FreeForAll, Team}
+public enum GameMode { FreeForAll, Team }
 
 public class GameManager : MonoBehaviour
 {
@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
     //Singleton Pattern
     private static GameManager _instance;
     public static GameManager Instance => _instance;
-    
+
     //Local User Info
     [SerializeField]
     private UserInfo _currentUserInfo;
@@ -83,6 +83,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        stManager = StateManager.Instance;
         if (!_instance)
         {
             _instance = this;
@@ -106,7 +107,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-         
+
             if (next != null)
             {
                 InputField inputfield = next.GetComponent<InputField>();
@@ -119,45 +120,47 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-    
-#region Update Components
+
+    #region Update Components
     public void UpdateColorList(List<Color> listOfColors)
     {
         colours.Clear();
         colours = listOfColors;
     }
-    
+
     private void LoadPlayerSettings()
     {
         _currentUserInfo = Settings.LoadPlayerInfo();
     }
-    
+
     public void UpdateMainMenuText()
     {
         PlayerPrefs.SetString(Settings.UsernameKey, _currentUserInfo.Username);
         LoggedInNameText.text = $"Logged in as {_currentUserInfo.Username}";
     }
-    
+
     //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callback OnLobbyEvent()
     public void UpdateLocalColorChange(int newColor)
     {
         _currentUserInfo.UserGameColor = newColor;
         //Apply in game color changes
         Settings.SetPlayerPrefColor(newColor);
-        
+
         //Send update to BC
-        Dictionary<string,object> extra = new Dictionary<string, object>();
+        Dictionary<string, object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
         extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
         if (IsLocalUserHost())
         {
-            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+            extra["relayCompressionType"] = (int)BrainCloudManager.Instance._relayCompressionType;
         }
         BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
         (
-            StateManager.Instance.CurrentLobby.LobbyID,
-            StateManager.Instance.isReady,
-            extra
+            stManager.CurrentLobby.LobbyID,
+            stManager.isReady,
+            extra,
+            null,
+            BrainCloudManager.Instance.OnUpdateReadyFailure
         );
     }
 
@@ -165,42 +168,46 @@ public class GameManager : MonoBehaviour
     {
         _currentUserInfo.PresentSinceStart = true;
         //Send update to BC
-        Dictionary<string,object> extra = new Dictionary<string, object>();
+        Dictionary<string, object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
         extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
         if (IsLocalUserHost())
         {
-            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+            extra["relayCompressionType"] = (int)BrainCloudManager.Instance._relayCompressionType;
         }
         BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
         (
-            StateManager.Instance.CurrentLobby.LobbyID,
-            StateManager.Instance.isReady,
-            extra
+            stManager.CurrentLobby.LobbyID,
+            stManager.isReady,
+            extra,
+            null,
+            BrainCloudManager.Instance.OnUpdateReadyFailure
         );
     }
 
     public void SendUpdateRelayCompressionType()
     {
         //Send update to BC
-        Dictionary<string,object> extra = new Dictionary<string, object>();
+        Dictionary<string, object> extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
         extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
         if (IsLocalUserHost())
         {
-            extra["relayCompressionType"] = (int) BrainCloudManager.Instance._relayCompressionType;
+            extra["relayCompressionType"] = (int)BrainCloudManager.Instance._relayCompressionType;
         }
         BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
         (
-            StateManager.Instance.CurrentLobby.LobbyID,
-            StateManager.Instance.isReady,
-            extra
+            stManager.CurrentLobby.LobbyID,
+            stManager.isReady,
+            extra,
+            null,
+            BrainCloudManager.Instance.OnUpdateReadyFailure
         );
     }
-    
+
     public void UpdateCursorList()
     {
-        Lobby lobby = StateManager.Instance.CurrentLobby;
+        Lobby lobby = stManager.CurrentLobby;
         EmptyCursorList();
         Color newColor;
         Transform parent = UserCursorParent.transform;
@@ -210,16 +217,16 @@ public class GameManager : MonoBehaviour
             UserCursor newCursor = Instantiate(UserCursorPrefab, new Vector3(9999, 9999, 0), Quaternion.identity, parent);
             newCursor.AdjustVisibility(false);
             newColor = ReturnUserColor(lobby.Members[i].UserGameColor);
-            newCursor.SetUpCursor(newColor,lobby.Members[i].Username);
-            
+            newCursor.SetUpCursor(newColor, lobby.Members[i].Username);
+
             //Set up Rect Transform settings to anchor image
             lobby.Members[i].UserCursor = newCursor;
             RectTransform UITransform = newCursor.GetComponent<RectTransform>();
             Vector2 minMax = new Vector2(0, 1);
             UITransform.anchorMin = minMax;
             UITransform.anchorMax = minMax;
-            UITransform.pivot = new Vector2(0.5f, 0.5f);;
-            
+            UITransform.pivot = new Vector2(0.5f, 0.5f); ;
+
             //Save references for later..
             lobby.Members[i].CursorTransform = UITransform;
             _userCursorsList.Add(newCursor);
@@ -231,27 +238,27 @@ public class GameManager : MonoBehaviour
     }
 
     public void ClearMatchEntries()
-    { 
+    {
         if (_matchEntries.Count > 0)
         {
             foreach (UserEntry matchEntry in _matchEntries)
             {
-                if(matchEntry != null && matchEntry.gameObject != null)
+                if (matchEntry != null && matchEntry.gameObject != null)
                 {
-                    Destroy(matchEntry.gameObject);                    
+                    Destroy(matchEntry.gameObject);
                 }
             }
-            _matchEntries.Clear();    
+            _matchEntries.Clear();
         }
     }
-    
+
     public void UpdateLobbyState()
-    {   
+    {
         AdjustLobbyList();
         StartGameBtn.SetActive(IsLocalUserHost());
         EndGameBtn.SetActive(IsLocalUserHost());
         CompressionDropdown.interactable = IsLocalUserHost();
-        LobbyIdText.text = $"Lobby ID: {StateManager.Instance.CurrentLobby.LobbyID}";
+        LobbyIdText.text = $"Lobby ID: {stManager.CurrentLobby.LobbyID}";
         if (!LobbyIdText.enabled)
         {
             LobbyIdText.enabled = true;
@@ -263,7 +270,7 @@ public class GameManager : MonoBehaviour
         UpdateLobbyState();
         UpdateMatchState();
     }
-    
+
     /// <summary>
     /// After list of users is generated for the current match, call this to display the connected users
     /// </summary>
@@ -291,7 +298,7 @@ public class GameManager : MonoBehaviour
         {
             CleanUpChildrenOfParent(UserEntryLobbyParentFFA.transform);
             //populate user entries based on members in lobby
-            Lobby lobby = StateManager.Instance.CurrentLobby;
+            Lobby lobby = stManager.CurrentLobby;
             for (int i = 0; i < lobby.Members.Count; i++)
             {
                 if (lobby.Members[i].IsAlive)
@@ -299,15 +306,15 @@ public class GameManager : MonoBehaviour
                     var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, UserEntryLobbyParentFFA.transform);
                     SetUpUserEntry(lobby.Members[i], newEntry, false);
                     _matchEntries.Add(newEntry);
-                }    
-            }    
+                }
+            }
         }
         else if (_gameMode == GameMode.Team)
         {
             CleanUpChildrenOfParent(UserEntryLobbyParentTeamAlpha.transform);
             CleanUpChildrenOfParent(UserEntryLobbyParentTeamBeta.transform);
             //populate user entries based on members in lobby
-            Lobby lobby = StateManager.Instance.CurrentLobby;
+            Lobby lobby = stManager.CurrentLobby;
             for (int i = 0; i < lobby.Members.Count; i++)
             {
                 if (lobby.Members[i].IsAlive)
@@ -325,10 +332,10 @@ public class GameManager : MonoBehaviour
                     var newEntry = Instantiate(UserEntryLobbyPrefab, Vector3.zero, Quaternion.identity, parent);
                     SetUpUserEntry(lobby.Members[i], newEntry, false);
                     _matchEntries.Add(newEntry);
-                }    
-            }   
+                }
+            }
         }
-        
+
 
         LobbyLocalUserText.text = _currentUserInfo.Username;
         LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor);
@@ -340,7 +347,7 @@ public class GameManager : MonoBehaviour
         {
             CleanUpChildrenOfParent(UserEntryMatchParentFFA.transform);
             //populate user entries based on members in lobby
-            Lobby lobby = StateManager.Instance.CurrentLobby;
+            Lobby lobby = stManager.CurrentLobby;
             for (int i = 0; i < lobby.Members.Count; i++)
             {
                 if (lobby.Members[i].IsAlive)
@@ -348,15 +355,15 @@ public class GameManager : MonoBehaviour
                     var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, UserEntryMatchParentFFA.transform);
                     SetUpUserEntry(lobby.Members[i], newEntry, true);
                     _matchEntries.Add(newEntry);
-                }    
-            }    
+                }
+            }
         }
-        else if(_gameMode == GameMode.Team)
+        else if (_gameMode == GameMode.Team)
         {
             CleanUpChildrenOfParent(UserEntryMatchParentTeamAlpha.transform);
             CleanUpChildrenOfParent(UserEntryMatchParentTeamBeta.transform);
             //populate user entries based on members in lobby
-            Lobby lobby = StateManager.Instance.CurrentLobby;
+            Lobby lobby = stManager.CurrentLobby;
             for (int i = 0; i < lobby.Members.Count; i++)
             {
                 if (lobby.Members[i].IsAlive)
@@ -378,21 +385,21 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-    
-    private void SetUpUserEntry(UserInfo info,UserEntry entry, bool updateMatch)
+
+    private void SetUpUserEntry(UserInfo info, UserEntry entry, bool updateMatch)
     {
         entry.UsernameText.text = info.Username;
-        
-        if(updateMatch && !info.IsReady && !info.PresentSinceStart)
+
+        if (updateMatch && !info.IsReady && !info.PresentSinceStart)
         {
             entry.UsernameText.text = info.Username + " (In Lobby)";
         }
 
         if (entry.HostImage)
         {
-            entry.HostImage.enabled = info.IsHost;    
+            entry.HostImage.enabled = info.IsHost;
         }
-         
+
         Color userColor = ReturnUserColor(info.UserGameColor);
         entry.UsernameText.color = userColor;
         if (entry.UserDotImage != null)
@@ -401,10 +408,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void AdjustUserSplatterMask(string username,bool isVisible)
+    public void AdjustUserSplatterMask(string username, bool isVisible)
     {
         //populate user entries based on members in lobby
-        Lobby lobby = StateManager.Instance.CurrentLobby;
+        Lobby lobby = stManager.CurrentLobby;
         for (int i = 0; i < lobby.Members.Count; i++)
         {
             if (lobby.Members[i].Username.Equals(username))
@@ -424,11 +431,11 @@ public class GameManager : MonoBehaviour
 
         foreach (UserCursor userCursor in _userCursorsList)
         {
-            Destroy(userCursor.gameObject);   
+            Destroy(userCursor.gameObject);
         }
         _userCursorsList.Clear();
     }
-    
+
     public void UpdateLobbyDropdowns(List<string> in_ffaList, List<string> in_teamList)
     {
         FFADropdown.options.Clear();
@@ -436,7 +443,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < in_ffaList.Count; i++)
         {
             TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_ffaList[i]);
-            FFADropdown.options.Add(entry);            
+            FFADropdown.options.Add(entry);
         }
 
         for (int i = 0; i < in_teamList.Count; i++)
@@ -445,9 +452,9 @@ public class GameManager : MonoBehaviour
             TeamDropdown.options.Add(entry);
         }
     }
-#endregion Update Components
-    
-#region Helper Functions
+    #endregion Update Components
+
+    #region Helper Functions
 
     /// <summary>
     /// Main returns the current color the user has equipped or changes to new color and returns it
@@ -456,7 +463,7 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     public static Color ReturnUserColor(int newColor = 0)
     {
-        if(newColor >= 0 && newColor < colours.Count)
+        if (newColor >= 0 && newColor < colours.Count)
         {
             return colours[newColor];
         }
@@ -468,10 +475,12 @@ public class GameManager : MonoBehaviour
 
     public bool IsLocalUserHost()
     {
-        Lobby currentLobby = StateManager.Instance.CurrentLobby;
+        Lobby currentLobby = stManager.CurrentLobby;
         return currentLobby.OwnerID == CurrentUserInfo.ProfileID;
     }
 
+
+    StateManager stManager = StateManager.Instance;
     #endregion
 }
 
