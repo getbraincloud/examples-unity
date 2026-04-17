@@ -2,6 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Tracks stats for the game.
+/// Anytime the app increments a stat, this script will check if its in the list already
+/// If it is already in the list then script will just increment the stat
+/// </summary>
+
 public class StatTracker : MonoBehaviour
 {
     public static StatTracker Instance;

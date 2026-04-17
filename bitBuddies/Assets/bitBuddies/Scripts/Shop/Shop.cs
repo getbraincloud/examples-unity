@@ -1,7 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Base class for shop UI. Handles the close button logic and sets up virtual methods to refresh the shop screen.
+/// </summary>
 public class Shop : ContentUIBehaviour
 {
 	[SerializeField] protected Button CloseButton;

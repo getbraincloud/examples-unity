@@ -4,6 +4,14 @@ using BrainCloud.JSONHelper;
 using Gameframework;
 using UnityEngine;
 
+/// <summary>
+/// Main logic for the parent shop items which includes
+/// - Setting up the shop item
+/// - Buying the item(if its a freebie or something from the item catalog)
+/// - Increment stats locally if specific items are bought
+/// - Updating the UI
+/// </summary>
+
 public class ParentShopItem : ShopItem
 {
     
@@ -98,6 +106,6 @@ public class ParentShopItem : ShopItem
     
     private void OnClaimItemFailure()
     {
-        
+        //FL ToDo: Create a pop up displaying the error messsage
     }
 }

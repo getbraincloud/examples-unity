@@ -1,12 +1,13 @@
-using System;
 using System.Collections.Generic;
-using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using Gameframework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Setup for the parent shop UI and logic.
+/// </summary>
 public class ParentShop : Shop
 {
     [SerializeField] private ShopItem shopItemPrefab;
@@ -15,9 +16,12 @@ public class ParentShop : Shop
 
     private void OnEnable()
     {
-        GetMoreFakeMoneyButton.onClick.AddListener(GetMoreFakeMoney);
+        GetMoreFakeMoneyButton.onClick.AddListener(OnGetMoreFakeMoney);
     }
 
+    /// <summary>
+    /// Setup the shop UI to show fake money balance and listing shop items.
+    /// </summary>
     public override void SetupShop()
     {
         var userInfo = BrainCloudManager.Instance.CurrentUserInfo;
@@ -47,7 +51,10 @@ public class ParentShop : Shop
         GetMoreFakeMoneyButton.onClick.RemoveAllListeners();
     }
 
-    private void GetMoreFakeMoney()
+    /// <summary>
+    /// Button reaction for getting more fake money.
+    /// </summary>
+    private void OnGetMoreFakeMoney()
     {
         Dictionary<string, object> scriptData = new Dictionary<string, object>();
         scriptData.Add("increaseAmount", 10);
@@ -60,11 +67,7 @@ public class ParentShop : Shop
     
     private void OnGetMoreMoneySuccess(string jsonResponse)
     {
-        /*
-         * {"packetId":3,"responses":[{"data":{"runTimeData":{"hasIncludes":false,"compileTime":2929,"scriptSize":324,
-         * "renderTime":3,"executeTime":13047},"response":{"fakeDollarsMap":{"consumed":0,"balance":50,"purchased":0,"awarded":50,"revoked":0}},
-         * "success":true,"reasonCode":null},"status":200}]}
-         */
+        //Update fake money balance
         Dictionary<string, object> data = jsonResponse.Deserialize("data");
         Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
         var fakeDollarObject = response["fakeDollarsMap"] as Dictionary<string, object>;

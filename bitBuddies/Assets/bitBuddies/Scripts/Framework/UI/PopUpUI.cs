@@ -42,6 +42,7 @@ public class PopUpUI : ContentUIBehaviour
 		TitleText.text = in_title;
 		BodyText.text = in_body;
 		
+		//toggling interactable is mostly for when the user attempts to buy a toy they cannot buy.
 		ConfirmButton.interactable = enableConfirmButton;
 	}
 	

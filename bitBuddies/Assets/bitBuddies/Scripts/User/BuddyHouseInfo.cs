@@ -49,19 +49,9 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnVisitButton()
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
-		if(HouseInfo.profileName.IsNullOrEmpty())
-		{
-			string titleMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
-			string bodyMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_MESSAGE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
-			popUp.SetupConfirmPopup(titleMessage, bodyMessage, GoToBuddysRoom);
-				
-		}
-		else
-		{
-			string titleMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_TITLE + HouseInfo.profileName + "'s home?";
-			string bodyMessage = BitBuddiesConsts.GO_BUDDYS_ROOM_MESSAGE + HouseInfo.profileName + "'s home?";
-			popUp.SetupConfirmPopup(titleMessage, bodyMessage, GoToBuddysRoom);
-		}
+		string titleMessage = GetTitleMessage();
+		string bodyMessage = GetBodyMessage();
+		popUp.SetupConfirmPopup(titleMessage, bodyMessage, GoToBuddysRoom);
 	}
 	
 	private void GoToBuddysRoom()

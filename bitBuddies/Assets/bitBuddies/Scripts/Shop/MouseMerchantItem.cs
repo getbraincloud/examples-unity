@@ -4,7 +4,14 @@ using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using Gameframework;
-using UnityEngine;
+
+/// <summary>
+/// Main logic for the mouse merchant shop items which includes
+/// - Setting up the shop item
+/// - Buying the item(if its a love booster or something from the item catalog)
+/// - Increment stats locally if specific items are bought
+/// - Updating the UI
+/// </summary>
 
 public class MouseMerchantItem : ShopItem
 {

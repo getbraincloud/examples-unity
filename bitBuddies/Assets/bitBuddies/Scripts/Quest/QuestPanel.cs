@@ -7,7 +7,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-
+/// <summary>
+/// Quest Panel shows Quest cards and shows their progress.
+/// There are 3 quest lines: General, BitBuddies, and BitBling.
+/// Each quest line has 6 quests.
+/// Each quest page displays 2 Quest Cards.
+///
+/// Script handles the claim quest rewards button logic when a quest is completed and claimed.
+/// Stats for quests will be tracked in the StatTracker and won't be gated by quests to increment.
+/// Panel will have 3 pages of quest cards.
+/// </summary>
 public class QuestPanel : MonoBehaviour
 {
 	[SerializeField] private QuestCard QuestCardPrefab;
@@ -32,6 +41,7 @@ public class QuestPanel : MonoBehaviour
 
 	private int _pageIndex;
 	
+	//Response logic for claiming a quest
 	public void OnClaimButtonSuccess(string jsonResponse)
 	{
 		/*
@@ -147,10 +157,6 @@ public class QuestPanel : MonoBehaviour
 			}
 		}
 		questCompletedText.text = $"{completedQuests}/{listOfQuests.Count}";
-		// if(completedBitBlingQuests == listOfQuests.Count)
-		// {
-		// 	questCompletedText.color = Color.green;
-		// }
 	}
 	
 	private void SetPageText()
@@ -179,8 +185,8 @@ public class QuestPanel : MonoBehaviour
 		SetUpQuestCard(gameManager.BitBlingQuests, BitBlingSpawnPoint);
 		SetPageText();
 		SetCompletedQuestText(GeneralQuestCompletedText, gameManager.GeneralQuests);
-		//SetCompletedQuestText(BitBuddiesQuestCompletedText, gameManager.BitBuddiesQuests);
-		//SetCompletedQuestText(BitBlingQuestCompletedText, gameManager.BitBlingQuests);
+		SetCompletedQuestText(BitBuddiesQuestCompletedText, gameManager.BitBuddiesQuests);
+		SetCompletedQuestText(BitBlingQuestCompletedText, gameManager.BitBlingQuests);
 	}
 
 	private void OnDestroy()
@@ -195,7 +201,7 @@ public class QuestPanel : MonoBehaviour
 		_pageIndex++;
 		if(_pageIndex > 2)
 		{
-			_pageIndex = 0;
+			_pageIndex = 2;
 		}
 		UpdatePanel();
 	}
@@ -205,11 +211,16 @@ public class QuestPanel : MonoBehaviour
 		_pageIndex--;
 		if(_pageIndex < 0)
 		{
-			_pageIndex = 2;
+			_pageIndex = 0;
 		}
 		UpdatePanel();
 	}
 	
+	/// <summary>
+	/// Setting up a Quest Line Row with 2 Quest Cards per row.
+	/// </summary>
+	/// <param name="listOfQuests">list of quests for the current quest line</param>
+	/// <param name="spawnParent">transform reference to spawn quest cards</param>
 	private void SetUpQuestCard(List<QuestInfo> listOfQuests, Transform spawnParent)
 	{
 		QuestInfo firstRowQuest = GetFirstRow(listOfQuests);
@@ -232,6 +243,7 @@ public class QuestPanel : MonoBehaviour
 		secondRowQuestCard.SetupCard(secondRowQuest);
 	}
 	
+	//Getting quest info for the first row in the current quest line
 	private QuestInfo GetFirstRow(List<QuestInfo> listOfQuests)
 	{
 		int questIndex;
@@ -259,6 +271,7 @@ public class QuestPanel : MonoBehaviour
 		return new QuestInfo();
 	}
 	
+	//Getting quest for the second row in the current quest line
 	private QuestInfo GetSecondRow(List<QuestInfo> listOfQuests)
 	{
 		int questIndex;
@@ -289,6 +302,5 @@ public class QuestPanel : MonoBehaviour
 	private void OnCloseButtonPressed()
 	{
 		Destroy(gameObject);
-		
 	}
 }
