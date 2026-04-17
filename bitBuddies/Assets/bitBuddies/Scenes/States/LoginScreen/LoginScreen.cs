@@ -48,7 +48,7 @@ public class LoginScreen : ContentUIBehaviour
         //Authenticate Anonymously but still go through the normal logging in path
         _createAccount = true;
         IsInteractable = false;
-        BrainCloudManager.Instance.UserInfo = new UserInfo();
+        BrainCloudManager.Instance.CurrentUserInfo = new UserInfo();
         BrainCloudManager.Wrapper.AuthenticateAnonymous
         (
             OnSuccess("Anonymous Account creation successfully", OnLoggedInUser),
@@ -93,9 +93,9 @@ public class LoginScreen : ContentUIBehaviour
         int atSymbol = Email.text.IndexOf('@');
         string username =  Email.text.Substring(0, atSymbol);
         Debug.LogWarning("Username: " + username);
-        BrainCloudManager.Instance.UserInfo = new UserInfo();
-        BrainCloudManager.Instance.UserInfo.UpdateUsername(username);
-        BrainCloudManager.Instance.UserInfo.UpdateEmail(Email.text);
+        BrainCloudManager.Instance.CurrentUserInfo = new UserInfo();
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateUsername(username);
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateEmail(Email.text);
         
         AuthenticateEmail(Email.text, Password.text);
     }
@@ -135,6 +135,7 @@ public class LoginScreen : ContentUIBehaviour
     private void OnFailureCallback()
     {
         StateManager.Instance.OpenInfoPopUp("Something went wrong", "Please try again later");
+        IsInteractable = true;
     }
     
     private void OnOpenForgotPasswordPanel()
@@ -144,7 +145,28 @@ public class LoginScreen : ContentUIBehaviour
     
     private void OnForgotPasswordButtonClick()
     {
+        if(ForgotPasswordEmailInputField.text.IsNullOrEmpty())
+        {
+            StateManager.Instance.OpenInfoPopUp("Email is empty", "Please enter an email");
+            return;
+        }
+        if(!IsEmailValid(ForgotPasswordEmailInputField.text))
+        {
+            StateManager.Instance.OpenInfoPopUp("Email entered is invalid", "Please enter a valid email");
+            return;
+        }
+        
+        StateManager.Instance.OpenConfirmPopUp("Are you sure?", "We will send you an email with a link to reset your password", OnConfirmForgotPasswordButtonClick);
+    }
+    
+    private void OnConfirmForgotPasswordButtonClick()
+    {
         //No idea why but I keep getting status 202 and reason code 40209
-        BrainCloudManager.Wrapper.ResetEmailPassword(ForgotPasswordEmailInputField.text, null, OnFailure("Something went wrong", OnFailureCallback));
+        BrainCloudManager.Wrapper.ResetEmailPassword(ForgotPasswordEmailInputField.text, OnSuccess("ForgotPasswordEmailSuccess", OnForgotPasswordSuccess), OnFailure("Something went wrong", OnFailureCallback));
+    }
+    
+    private void OnForgotPasswordSuccess(string jsonResponse)
+    {
+        StateManager.Instance.OpenInfoPopUp("Email sent", "Please check your email for a link to reset your password");
     }
 }

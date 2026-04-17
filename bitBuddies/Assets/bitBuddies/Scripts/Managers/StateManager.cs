@@ -38,15 +38,16 @@ public class StateManager : SingletonBehaviour<StateManager>
 		popUp.SetUpInfoPopup(in_title, in_body);
 	}
 	
-	public void OpenConfirmPopUp(string in_title, string in_body, Action buttonCallback)
+	public void OpenConfirmPopUp(string in_title, string in_body, Action buttonCallback, bool in_showConfirmButton = true)
 	{
 		var popUp = Instantiate(_genericPopUpUI);
-		popUp.SetupConfirmPopup(in_title, in_body, buttonCallback);
+		popUp.SetupConfirmPopup(in_title, in_body, buttonCallback, in_showConfirmButton);
 	}
 	
 	//The idea here is to use InitializeUI to re-assign the UI elements to the updated variables. 
 	public void RefreshScreen()
 	{
+		GameManager.Instance.UpdateSelectedAppChildrenInfo();
 		var screens = FindObjectsByType<ContentUIBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 		foreach (ContentUIBehaviour screen in screens)
 		{

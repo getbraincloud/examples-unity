@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using BrainCloud.JSONHelper;
 using Gameframework;
 using UnityEditor;
 using UnityEngine;
@@ -31,38 +33,18 @@ public class BuddyUtility : EditorWindow
                 GUI.enabled = true;
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("++ child XP ");
-                    if (GUILayout.Button("Increase XP for buddy", GUILayout.Width(100), GUILayout.Height(40)))
+                    GUILayout.Label("test button");
+                    if (GUILayout.Button("test", GUILayout.Width(100), GUILayout.Height(40)))
                     {
-                        FindAnyObjectByType<BuddysRoom>().IncreaseXP(5);
-                    }
-                }
-            }
-            //Button 2
-            {
-                GUILayout.Space(12); // Left Padding
-
-                GUI.enabled = true;
-                using (new GUILayout.VerticalScope())
-                {
-                    GUILayout.Label("++ Gems 100");
-                    if (GUILayout.Button("Increase Gems", GUILayout.Width(100), GUILayout.Height(40)))
-                    {
-                        BrainCloudManager.Instance.RewardGemsToParent(100);
-                    }
-                }
-            }
-            //Button 3
-            {
-                GUILayout.Space(12); // Left Padding
-
-                GUI.enabled = true;
-                using (new GUILayout.VerticalScope())
-                {
-                    GUILayout.Label("++ BuddyBling");
-                    if (GUILayout.Button("AwardBling", GUILayout.Width(100), GUILayout.Height(40)))
-                    {
-                        BrainCloudManager.Instance.AwardBlingToChild(100);
+                        Dictionary<string, object> scriptData = new Dictionary<string, object>();
+                        scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
+                        scriptData.Add("incrementAmount", 40);
+                        scriptData.Add("profileId", GameManager.Instance.SelectedAppChildrenInfo.profileId);
+                        BrainCloudManager.Wrapper.ScriptService.RunScript
+                        (
+                            BitBuddiesConsts.INCREASE_XP_FOR_CHILD_SCRIPT_NAME,
+                            scriptData.Serialize()
+                        );
                     }
                 }
             }

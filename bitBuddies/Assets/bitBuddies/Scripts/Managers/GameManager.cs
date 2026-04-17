@@ -6,63 +6,18 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-[Serializable]
-public class AppChildrenInfo
-{
-	public string profileName { get; set; }
-	public string profileId { get; set; }
-	public Dictionary<string, object> summaryFriendData { get; set; }
-	public int buddyBling { get; set; }
-	public float coinMultiplier { get; set; }
-	public int coinPerHour { get; set; }
-	public int maxCoinCapacity {get; set;}
-	public string buddySpritePath { get; set; }
-	public string rarity { get; set; }
-	public int buddyLevel { get; set; }
-	public int nextLevelUp { get; set; }
-	public int currentXP { get; set; }
-	public DateTime lastIdleTimestamp { get; set; }
-	public int coinsEarnedInHolding { get; set; }
-	//Love is only earned through Toy interaction in Buddys Room.
-	//Aka used as current XP for profile. 
-	public int loveEarnedInLifetime {get; set;}
-	public int coinsEarnedInLifetime {get; set;}
-	
-	private float _hourInSeconds = 3600;
-	
-	public void CheckCoinsEarned()
-	{
-		TimeSpan timeDifference = DateTime.UtcNow - lastIdleTimestamp;
-		float coinsPerSecond = coinPerHour / _hourInSeconds;
-		int coinsEarned = Mathf.FloorToInt(coinsPerSecond * (float)timeDifference.TotalSeconds);
-		if(coinsEarned > 0)
-		{
-			if(coinsEarned < maxCoinCapacity)
-			{
-				coinsEarnedInHolding = coinsEarned;
-			}
-			else
-			{
-				coinsEarnedInHolding = maxCoinCapacity;
-			}			
-		}
-	}
-}
-
-
 public class GameManager : SingletonBehaviour<GameManager>
 {
 	[Tooltip("Debug")]
 	[SerializeField] public bool Debug;
 	private EventSystem _eventSystem;
 	[Tooltip("App Info")]
-	private List<AppChildrenInfo> appChildrenInfos = new List<AppChildrenInfo>();
+	private List<AppChildrenInfo> _appChildrenInfos = new List<AppChildrenInfo>();
 	public List<AppChildrenInfo> AppChildrenInfos
 	{
-		get { return appChildrenInfos; }
-		set { appChildrenInfos = value; }
+		get { return _appChildrenInfos; }
+		set { _appChildrenInfos = value; }
 	}
-	public Sprite[] BuddySprites;
 	private List<MysteryBoxInfo> _mysteryBoxes;
 	public List<MysteryBoxInfo> MysteryBoxes
 	{
@@ -73,34 +28,137 @@ public class GameManager : SingletonBehaviour<GameManager>
 	public AppChildrenInfo SelectedAppChildrenInfo
 	{
 		get { return _selectedAppChildrenInfo; }
-		set { _selectedAppChildrenInfo = value; }
-	}
-
-	public override void Awake()
-	{
-		_selectedAppChildrenInfo = new AppChildrenInfo();
-		_eventSystem = EventSystem.current;
-		base.Awake();
+		set
+		{
+			_selectedAppChildrenInfo = value;
+			UpdateSelectedAppChildrenInfo();
+		}
 	}
 	
-	private void Update()
+	private List<ToyBenchInfo> _toyBenchInfos;
+	public List<ToyBenchInfo> ToyBenchInfos
 	{
-		if (Input.GetKeyDown(KeyCode.Tab) && _eventSystem.currentSelectedGameObject != null)
+		get => _toyBenchInfos;
+		set => _toyBenchInfos = value;
+	}
+
+	private float _xpAcquiredAmount;
+	public float XpAcquiredAmount
+	{
+		get => _xpAcquiredAmount;
+		set => _xpAcquiredAmount = value;
+	}
+
+	private float _rewardPickupDuration;
+	public float RewardPickupDuration
+	{
+		get => _rewardPickupDuration;
+		set
 		{
-			Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-         
-			if (next != null)
+			if(value > 0)
+				_rewardPickupDuration = value;
+			else
+				_rewardPickupDuration = 10f;
+		}
+	}
+
+	private int _childCountMaximum;
+	public int ChildCountMaximum
+	{
+		get => _childCountMaximum;
+		set => _childCountMaximum = value;
+	}
+	
+	private List<QuestInfo> _bitBuddiesQuests;
+	public List<QuestInfo> BitBuddiesQuests
+	{
+		get => _bitBuddiesQuests;
+		set => _bitBuddiesQuests = value;
+	}
+	
+	private List<QuestInfo> _bitBlingQuests;
+	public List<QuestInfo> BitBlingQuests
+	{
+		get => _bitBlingQuests; 
+		set => _bitBlingQuests = value;
+	}
+	
+	private List<QuestInfo> _generalQuests;
+	public List<QuestInfo> GeneralQuests
+	{
+		get => _generalQuests; 
+		set => _generalQuests = value;
+	}
+	
+	private List<ShopInfo> _parentShopInfos;
+	public List<ShopInfo> ParentShopInfos
+	{
+		get => _parentShopInfos;
+		set => _parentShopInfos = value;
+	}
+	
+	private List<ShopInfo> _childShopInfos;
+	public List<ShopInfo> ChildShopInfos
+	{
+		get => _childShopInfos;
+		set => _childShopInfos = value;
+	}
+
+	private long _freebieItemCooldownUntil;
+	public long FreebieItemCooldownUntil
+	{
+		get => _freebieItemCooldownUntil;
+		set => _freebieItemCooldownUntil = value;
+	}
+	
+	public void SetQuestsLists(List<QuestInfo> listOfQuests)
+	{
+		_bitBlingQuests	= new List<QuestInfo>();
+		_bitBuddiesQuests = new List<QuestInfo>();
+		_generalQuests	= new List<QuestInfo>();
+	
+		for (int i = 0; i < listOfQuests.Count; i++)
+		{
+			switch (listOfQuests[i].QuestId)
 			{
-				InputField inputfield = next.GetComponent<InputField>();
-				if (inputfield != null)
-				{
-					//if it's an input field, also set the text caret
-					inputfield.OnPointerClick(new PointerEventData(_eventSystem));
-				}
-				_eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
+				case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+					BitBuddiesQuests.Add(listOfQuests[i]);
+					break;
+				case BitBuddiesConsts.BITBLING_QUESTLINEID:
+					BitBlingQuests.Add(listOfQuests[i]);
+					break;
+				case BitBuddiesConsts.GENERAL_QUESTLINEID:
+					GeneralQuests.Add(listOfQuests[i]);
+					break;
 			}
 		}
 	}
+	
+	public override void Awake()
+	{
+		_selectedAppChildrenInfo = new AppChildrenInfo();
+		//_eventSystem = EventSystem.current;
+		base.Awake();
+	}
+	
+	// private void Update()
+	// {
+	// 	if (Input.GetKeyDown(KeyCode.Tab) && _eventSystem.currentSelectedGameObject != null)
+	// 	{
+	// 		Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+ //         
+	// 		if (next != null)
+	// 		{
+	// 			InputField inputfield = next.GetComponent<InputField>();
+	// 			if (inputfield != null)
+	// 			{
+	// 				//if it's an input field, also set the text caret
+	// 				inputfield.OnPointerClick(new PointerEventData(_eventSystem));
+	// 			}
+	// 			_eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
+	// 		}
+	// 	}
+	// }
 	
 	public void OnDeleteBuddySuccess()
 	{
@@ -108,23 +166,81 @@ public class GameManager : SingletonBehaviour<GameManager>
 		 * Update list to remove selected child info
 		 * Refresh screen to display the current
 		 */
-		appChildrenInfos.Remove(_selectedAppChildrenInfo);
+		_appChildrenInfos.Remove(_selectedAppChildrenInfo);
 		StateManager.Instance.RefreshScreen();
 	}
 	
 	public void ClearDataForLogout()
 	{
-		appChildrenInfos.Clear();
+		_appChildrenInfos.Clear();
 		_selectedAppChildrenInfo = null;
+		
 	}
 	
 	public void UpdateChildAppInfo(AppChildrenInfo in_appChildrenInfo)
 	{
-		var index = appChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
+		var index = _appChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
 		if(index != -1)
 		{
-			appChildrenInfos[index] = in_appChildrenInfo;
+			_appChildrenInfos[index] = in_appChildrenInfo;
 		}
 	}
 	
+	public void UpdateSelectedAppChildrenInfo()
+	{
+		if (_appChildrenInfos == null || _appChildrenInfos.Count == 0) return;
+		if(SelectedAppChildrenInfo == null) return;
+		
+		for (int i = 0; i < _appChildrenInfos.Count; i++)
+		{
+			if(_appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			{
+				_appChildrenInfos[i] = SelectedAppChildrenInfo;
+			}
+		}
+	}
+	
+	public void UpdateSelectedAppChildrenInfo(AppChildrenInfo in_appChildrenInfo)
+	{
+		for (int i = 0; i < _appChildrenInfos.Count; i++)
+		{
+			if(_appChildrenInfos[i].profileId.Equals(in_appChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			{
+				_appChildrenInfos[i] = in_appChildrenInfo;
+				SelectedAppChildrenInfo = in_appChildrenInfo;
+			}
+		}
+	}
+	
+	public string GetChildItemDisplayName(string itemId)
+	{
+		for (int i = 0; i < _childShopInfos.Count; i++)
+		{
+			if(_childShopInfos[i].ShopId.Equals(itemId))
+			{
+				return _childShopInfos[i].DisplayName;
+			}
+		}
+		return "";
+	}
+	
+	public void CompleteQuestCard(string questId, int questIndex)
+	{
+		for (int i = 0; i < _appChildrenInfos.Count; i++)
+		{
+			if(_appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+			{
+				switch (questId)
+				{
+					case BitBuddiesConsts.GENERAL_QUESTLINEID:
+						//BrainCloudManager.Instance.CurrentUserInfo.
+						break;
+					case BitBuddiesConsts.BITBLING_QUESTLINEID:
+						break;
+					case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+						break;
+				}
+			}
+		}
+	}
 }

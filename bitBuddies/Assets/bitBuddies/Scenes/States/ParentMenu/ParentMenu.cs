@@ -11,8 +11,9 @@ using UnityEngine.UI;
 public class ParentMenu : ContentUIBehaviour
 {
     [SerializeField] private Button OpenSettingsButton;
-    [SerializeField] private TMP_Text UsernameText;
-    [SerializeField] private TMP_Text LevelText;
+    [SerializeField] private TextMeshProUGUI UsernameText;
+    [SerializeField] private TextMeshProUGUI LevelText;
+    [SerializeField] private TextMeshProUGUI LevelFillText;
     [SerializeField] private TextMeshProUGUI CoinsText;
     [SerializeField] private TextMeshProUGUI GemsText;
     [SerializeField] private Transform BuddySpawnTransform;
@@ -20,12 +21,17 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private GameObject MoveInPrefab;
     [SerializeField] private MysteryBoxPanelUI MysteryBoxPanelPrefab;
     [SerializeField] private SettingsPanelUI SettingsPanelUIPrefab;
-    [SerializeField] private TMP_Text GameVersionText;
-    [SerializeField] private TMP_Text BcClientVersionText;
+    [SerializeField] private TextMeshProUGUI GameVersionText;
+    [SerializeField] private TextMeshProUGUI BcClientVersionText;
     [SerializeField] private Slider LevelSlider;
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
+    [SerializeField] private QuestPanel QuestPanelPrefab;
+    [SerializeField] private Button OpenQuestPanelButton;
+    [SerializeField] private ParentShop ParentShopPrefab;
+    [SerializeField] private Button OpenParentShopButton;
 
-    [SerializeField] private float textSpawnOffset = 40f;
+    private float textGoldSpawnOffset = 40f;
+    private float textLevelSpawnOffset = -40f;
     //Debug Buttons
     [SerializeField] private Button IncreaseCoinsButton;
     [SerializeField] private Button IncreaseGemsButton;
@@ -48,7 +54,10 @@ public class ParentMenu : ContentUIBehaviour
     {
         InitializeUI();
         OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
+        OpenQuestPanelButton.onClick.AddListener(OpenQuestPanel);
+        OpenParentShopButton.onClick.AddListener(OpenParentShop);
         BuddyHouseInfo.OnCoinsCollected += UpdateValueText;
+        BuddyHouseInfo.OnCoinsCollected += SpawnCurrencyAddedAnimation;
         StartCoroutine(LoopCheckCoins());
         base.Awake();
     }
@@ -73,13 +82,34 @@ public class ParentMenu : ContentUIBehaviour
 
     protected override void InitializeUI()
     {
-        BuddyHouseInfo.OnCoinsCollected += SpawnValueAddedAnimation;
-    
-        UserInfo userInfo = BrainCloudManager.Instance.UserInfo;
-        UsernameText.text = userInfo.Username.IsNullOrEmpty() ? "New User" : userInfo.Username;
-        LevelText.text = $"Lv. {userInfo.Level}";
-        LevelSlider.value = userInfo.CurrentXP;
+        UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
+        if(userInfo.Username.IsNullOrEmpty())
+        {
+            UsernameText.text = "New User";
+        }
+        else
+        {
+            if(userInfo.Username.Length > 9)
+            {
+                UsernameText.text = userInfo.Username.Substring(0, 9) + "...";
+            }
+            else
+            {
+                UsernameText.text = userInfo.Username;
+            }
+        }
+        LevelText.text = $"{userInfo.Level}";
+        LevelFillText.text = $"{userInfo.CurrentXP}/{userInfo.NextLevelUp}";
+        LevelSlider.minValue = userInfo.PreviousLevelUp;
         LevelSlider.maxValue = userInfo.NextLevelUp;
+        LevelSlider.value = userInfo.CurrentXP;
+        //We're max level, so just have the bar filled.
+        if(LevelSlider.minValue == 0 && LevelSlider.maxValue == 0)
+        {
+            LevelSlider.minValue = 1;
+            LevelSlider.maxValue = 2;
+            LevelSlider.value = 2;
+        }
         CoinsText.text = userInfo.Coins.ToString();
         GemsText.text = userInfo.Gems.ToString();
         GameVersionText.text = $"Game Version: {Application.version}";
@@ -99,12 +129,15 @@ public class ParentMenu : ContentUIBehaviour
 
     private void OnDisable()
     {
-        BuddyHouseInfo.OnCoinsCollected -= SpawnValueAddedAnimation;
+        BuddyHouseInfo.OnCoinsCollected -= SpawnCurrencyAddedAnimation;
+        BuddyHouseInfo.OnCoinsCollected -= UpdateValueText;
         StopAllCoroutines();
         IncreaseCoinsButton.onClick.RemoveAllListeners();
         IncreaseGemsButton.onClick.RemoveAllListeners();
         IncreaseLevelButton.onClick.RemoveAllListeners();
         OpenSettingsButton.onClick.RemoveAllListeners();
+        OpenQuestPanelButton.onClick.RemoveAllListeners();
+        OpenParentShopButton.onClick.RemoveAllListeners();
     }
 
     public void SetupHouses()
@@ -123,8 +156,10 @@ public class ParentMenu : ContentUIBehaviour
             buddyHouseInfo.SetUpHouse();
             _listOfBuddies.Add(buddyHouseInfo);
         }
-        
-        Instantiate(MoveInPrefab, BuddySpawnTransform);
+        if(_listOfBuddies.Count < GameManager.Instance.ChildCountMaximum)
+        {
+            Instantiate(MoveInPrefab, BuddySpawnTransform);
+        }
     }
     
     private void OpenSettingsButtonOnClick()
@@ -134,17 +169,24 @@ public class ParentMenu : ContentUIBehaviour
         Instantiate(SettingsPanelUIPrefab, transform);
     }
     
+    private void OpenQuestPanel()
+    {
+        var questPanel = Instantiate(QuestPanelPrefab, transform);
+        questPanel.SetUpPanel();
+    }
+    
+    private void OpenParentShop()
+    {
+        var parentShopPanel = Instantiate(ParentShopPrefab, transform);
+        parentShopPanel.SetupShop();
+    }
+    
     public void OpenMysteryBoxPanel()
     {
         Instantiate(MysteryBoxPanelPrefab, transform);
     }
     
-    public void OpenConfirmDemolishPanel()
-    {
-        
-    }
-    
-    public void SpawnValueAddedAnimation(int amount, int typeIndex)
+    public void SpawnCurrencyAddedAnimation(int amount, int typeIndex)
     {
         RectTransform mainTextPosition = new RectTransform();
         Transform parent = new RectTransform();
@@ -163,8 +205,29 @@ public class ParentMenu : ContentUIBehaviour
         }
         //Set up animation
         var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
-        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textSpawnOffset, 0f);
-        textAnimation.SetUpText(amount);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textGoldSpawnOffset, 0f);
+        textAnimation.SetUpPositiveNumberText(amount);
+        textAnimation.PlayBounce();
+        
+        SpawnLevelIncreaseAnimation();
+    }
+    
+    public void SpawnLevelIncreaseAnimation()
+    {
+        if(Mathf.Approximately(LevelSlider.minValue, 1f) && Mathf.Approximately(LevelSlider.maxValue, 2f)) return; //No level increase animation (already max level)
+        
+        var amount = GameManager.Instance.XpAcquiredAmount;
+        if(amount == 0) return;
+        GameManager.Instance.XpAcquiredAmount = 0;
+        RectTransform mainTextPosition = new RectTransform();
+        Transform parent = new RectTransform();
+        mainTextPosition = LevelText.rectTransform;
+        parent = LevelText.transform.parent;
+        
+        //Set up animation
+        var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textLevelSpawnOffset, 0f);
+        textAnimation.SetUpPositiveNumberText(amount);
         textAnimation.PlayBounce();
     }
     
@@ -174,15 +237,16 @@ public class ParentMenu : ContentUIBehaviour
         {
             //Coins
             case 0:
-                CoinsText.text = BrainCloudManager.Instance.UserInfo.Coins.ToString();
+                CoinsText.text = BrainCloudManager.Instance.CurrentUserInfo.Coins.ToString();
                 break;
             //Gems
             case 1:
-                GemsText.text = BrainCloudManager.Instance.UserInfo.Gems.ToString();
+                GemsText.text = BrainCloudManager.Instance.CurrentUserInfo.Gems.ToString();
                 break;
         }
     }
     
+    //ToDo: Remove Debug Buttons before release
     private void OnIncreaseCoins()
     {
         if (isWaitingForResponse) return;

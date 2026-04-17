@@ -13,13 +13,14 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
     public static BrainCloudWrapper Wrapper { get; private set; }
-    public UserInfo UserInfo { get; set ; }
+    public UserInfo CurrentUserInfo { get; set ; }
     public bool IsEmailAuthenticated { get; set; }
 
     private bool _isProcessing;
     public bool IsProcessingRequest
     {
         get { return _isProcessing; }
+        set { _isProcessing = value; }
     }
 
     private int _childInfoIndex;
@@ -28,7 +29,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
     public override void StartUp()
     {
-	    UserInfo = new UserInfo();
+	    CurrentUserInfo = new UserInfo();
         Wrapper = gameObject.AddComponent<BrainCloudWrapper>();
         Wrapper.Init();
     }
@@ -67,55 +68,71 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var data = jsonResponse.Deserialize("data");
 
         var username = data["playerName"] as string;
-        if(username.IsNullOrEmpty() && !UserInfo.Username.IsNullOrEmpty())
+        if(username.IsNullOrEmpty() && !CurrentUserInfo.Username.IsNullOrEmpty())
         {
-            Wrapper.PlayerStateService.UpdateName(UserInfo.Username);
+            Wrapper.PlayerStateService.UpdateName(CurrentUserInfo.Username);
         }
         else if(!username.IsNullOrEmpty())
         {
-            UserInfo.UpdateUsername(username);
+            CurrentUserInfo.UpdateUsername(username);
         }
+        
+
             
         var email = data["emailAddress"] as string;
-        if(email.IsNullOrEmpty() && !UserInfo.Email.IsNullOrEmpty())
+        if(email.IsNullOrEmpty() && !CurrentUserInfo.Email.IsNullOrEmpty())
         {
-            Wrapper.PlayerStateService.UpdateContactEmail(UserInfo.Email);
+            Wrapper.PlayerStateService.UpdateContactEmail(CurrentUserInfo.Email);
             IsEmailAuthenticated = true;
         }
-        else if(email.IsNullOrEmpty() && UserInfo.Email.IsNullOrEmpty())
+        else if(email.IsNullOrEmpty() && CurrentUserInfo.Email.IsNullOrEmpty())
         {
             IsEmailAuthenticated = false;
         }
         else 
         {
             IsEmailAuthenticated = true;
-            UserInfo.UpdateEmail(email);
+            CurrentUserInfo.UpdateEmail(email);
         }
         var currency = data["currency"] as Dictionary<string, object>;
         if(currency != null)
         {
             var gems = currency["gems"] as Dictionary<string, object>;
-            UserInfo.UpdateGems((int)gems["balance"]);
+            CurrentUserInfo.UpdateGems((int)gems["balance"]);
             
             var coins = currency["coins"] as Dictionary<string, object>;
-            UserInfo.UpdateCoins((int)coins["balance"]);
+            CurrentUserInfo.UpdateCoins((int)coins["balance"]);
+            
+            var fakeMoney = currency["fakeDollars"] as Dictionary<string, object>;
+            CurrentUserInfo.UpdateFakeMoney((int)fakeMoney["balance"]);
         }
         
-        UserInfo.UpdateLevel((int) data["experienceLevel"]);
-        UserInfo.UpdateXP((int) data["experiencePoints"]);
+        CurrentUserInfo.UpdateLevel((int) data["experienceLevel"]);
+        CurrentUserInfo.UpdateXP((int) data["experiencePoints"]);
+        CurrentUserInfo.UpdateStats(data["statistics"] as Dictionary<string, object>);
+        StatTracker.Instance.IncrementStat(BitBuddiesConsts.LOGIN_COUNT_STAT_NAME, (int) data["loginCount"]);
+        if(StatTracker.Instance.GetStat(BitBuddiesConsts.LOGIN_COUNT_STAT_NAME) == 0)
+        {
+            var loginCount = (int) data["loginCount"];
+            StatTracker.Instance.IncrementStat(BitBuddiesConsts.LOGIN_COUNT_STAT_NAME, loginCount);   
+        }
         
         var summaryFriendData = data["summaryFriendData"] as Dictionary<string, object>;
         if(summaryFriendData != null)
         {
             int nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];
-            if(nextLevelUp > UserInfo.CurrentXP)
+            if(nextLevelUp > CurrentUserInfo.CurrentXP)
             {
-                UserInfo.UpdateNextLevelUp(nextLevelUp);
+                CurrentUserInfo.UpdateNextLevelUp(nextLevelUp);
             }
-            else
+            else if(nextLevelUp == 0)
             {
                 Wrapper.PlayerStatisticsService.GetNextExperienceLevel(HandleSuccess("GetNextXP Success", OnGetNextLevelUp));
-            }            
+            }
+            if(summaryFriendData.ContainsKey("previousLevelXP"))
+            {
+                CurrentUserInfo.PreviousLevelUp = (int) summaryFriendData["previousLevelXP"];
+            }
         }
         else
         {
@@ -130,12 +147,19 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleSuccess("Getting Child Accounts Success", OnGetChildAccounts),
             HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
         );
-        string[] propertyNames = new [] {"MysteryBoxInfo"}; 
+        string[] propertyNames = new [] {"MysteryBoxInfo", "RewardPickUpLifetime", "ChildAccountMaximum"}; 
         Wrapper.GlobalAppService.ReadSelectedProperties
         (
             propertyNames, 
-            HandleSuccess("Get Mystery Box Info Success", OnGetMysteryBoxInfo),
+            HandleSuccess("Get Global Properties Success", OnGetGlobalProperties),
             HandleFailure("Get Mystery Box Info Failed", OnFailureCallback)
+        );
+        Wrapper.ScriptService.RunScript
+        (
+            BitBuddiesConsts.GET_QUEST_INFO_SCRIPT_NAME,
+            "{}",
+            HandleSuccess("Getting Quest Info Success", OnGetQuestInfo),
+            HandleFailure("Getting Quest Info Failed", OnFailureCallback)
         );
     }
     
@@ -148,23 +172,23 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             int nextLevelUp =  (int) xpDetails["experience"];
             if(nextLevelUp != 0)
             {
-                UserInfo.UpdateNextLevelUp(nextLevelUp);
+                CurrentUserInfo.PreviousLevelUp = 0;
+                CurrentUserInfo.UpdateNextLevelUp(nextLevelUp);
                 Dictionary<string, object> scriptData = new Dictionary<string, object>();
                 scriptData.Add("nextLevelUpXP", nextLevelUp);
+                scriptData.Add("previousLevelUpXP", CurrentUserInfo.PreviousLevelUp);
                 Wrapper.PlayerStateService.UpdateSummaryFriendData(scriptData.Serialize());
             }
         }
     }
     
-    private void OnGetMysteryBoxInfo(string jsonResponse)
+    private void OnGetGlobalProperties(string jsonResponse)
     {
-        /*
-         * {"data":{"MysteryBoxInfo":{"name":"MysteryBoxInfo","value":"
-         * {\"CommonBox\":{\"unlockType\": \"coins\",\"unlockAmount\": 5000,\"rarity\": \"Common\",
-         * \"boxName\": \"Common Box\"},\"UncommonBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 10000,\"rarity\": \"Uncommon\",\"boxName\": \"Uncommon Box\"},\"RareBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 15000,\"rarity\": \"Rare\",\"boxName\": \"Rare Box\"},\"LegendaryBox\": {\"unlockType\": \"coins\",\"unlockAmount\": 20000,\"rarity\": \"Legendary\",\"boxName\": \"Legendary Box\"}}"}},"status":200}]}
-         */
+
         var response = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
         var data = (Dictionary<string, object>)response["data"];
+        
+        //Getting mystery buddy boxes
         var mysteryBoxInfo = (Dictionary<string, object>)data["MysteryBoxInfo"];
         string innerJson = (string)mysteryBoxInfo["value"];
         var lootboxes = (Dictionary<string, object>)JsonReader.Deserialize(innerJson);
@@ -180,10 +204,192 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             boxInfo.BoxName = boxInfo.Rarity + " Box";
             boxInfo.currencyType = Enum.Parse<CurrencyTypes>((string)boxDict["unlockType"]);
             boxInfo.UnlockAmount = (int)boxDict["unlockAmount"];
+            boxInfo.LevelRequirement = (int)boxDict["levelRequirement"];
             
             listOfBoxInfo.Add(boxInfo);
         }
         GameManager.Instance.MysteryBoxes = listOfBoxInfo;
+
+        var rewardPickUpLifetimeObj = data["RewardPickUpLifetime"]as Dictionary<string, object>;
+        if(float.TryParse((string) rewardPickUpLifetimeObj["value"], out float value))
+        {
+            GameManager.Instance.RewardPickupDuration = value;
+        }
+        else if(double.TryParse((string) rewardPickUpLifetimeObj["value"], out double value2))
+        {
+            GameManager.Instance.RewardPickupDuration = (float)value2;
+        }
+        else
+        {
+            GameManager.Instance.RewardPickupDuration = 20;
+        }
+        
+        var childAccountMaxObj = data["ChildAccountMaximum"]as Dictionary<string, object>;
+        if(int.TryParse((string) childAccountMaxObj["value"], out int value3))
+        {
+            GameManager.Instance.ChildCountMaximum = value3;
+        }
+    }
+    
+    private void OnGetQuestInfo(string jsonResponse)
+    {
+        var data = jsonResponse.Deserialize("data");
+        if(data == null) return;
+
+        var response = data["response"] as Dictionary<string, object>;
+        var quests = response["quests"] as Dictionary<string, object>[];
+        var listOfQuests =  new List<QuestInfo>();
+        
+        if(quests != null || quests.Length > 0)
+        {
+            for (int i = 0; i < quests.Length; ++i)
+            {
+                QuestInfo questInfo = new QuestInfo();
+                questInfo.QuestTitle = quests[i]["title"] as string;
+                questInfo.QuestStatToTrack = quests[i]["statToTrack"] as string;
+                questInfo.QuestId = quests[i]["questId"] as string;
+                questInfo.QuestStatus = Enum.Parse<QUEST_STATUS>(quests[i]["status"] as string);
+                questInfo.QuestLineIndex = (int) quests[i]["questLineIndex"];
+                questInfo.QuestRequiredProgress = Convert.ToInt32(quests[i]["thresholdRequired"]);
+                if(questInfo.QuestId.Contains("bitBuddies"))
+                {
+                    questInfo.QuestType = QuestTypes.BitBuddies;
+                }
+                else if(questInfo.QuestId.Contains("general"))
+                {
+                    questInfo.QuestType = QuestTypes.General;
+                }
+                else if(questInfo.QuestId.Contains("bitBling"))
+                {
+                    questInfo.QuestType = QuestTypes.BitBling;
+                }
+            
+                var rewards = quests[i]["reward"] as Dictionary<string, object>;
+                string key = rewards.Keys.First();
+                questInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(char.ToUpper(key[0]) + key.Substring(1));
+                questInfo.QuestRewardAmount = (int)rewards.Values.First();
+            
+                listOfQuests.Add(questInfo);
+            }
+            listOfQuests.Sort((x, y) => x.QuestLineIndex.CompareTo(y.QuestLineIndex));
+            GameManager.Instance.SetQuestsLists(listOfQuests);
+        }
+        
+        var shopItems = response["shopItems"] as Dictionary<string, object>[];
+        var listOfShopItems = new List<ShopInfo>();
+        if(shopItems != null && shopItems.Length > 0)
+        {
+            for (int i = 0; i < shopItems.Length; ++i)
+            {
+                ShopInfo shopInfo = new ShopInfo();
+                shopInfo.ShopId = shopItems[i]["itemId"] as string;
+                shopInfo.DisplayName = shopItems[i]["displayName"] as string;
+                shopInfo.ItemDescription = shopItems[i]["description"] as string;
+                shopInfo.RewardAmount = (int)shopItems[i]["payoutAmount"];
+                shopInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(shopItems[i]["payoutType"] as string, true);
+                
+                if(shopItems[i].ContainsKey("buyPriceValue"))
+                {
+                    shopInfo.BuyCost = (int)shopItems[i]["buyPriceValue"];                    
+                }
+                if(shopItems[i].ContainsKey("buyPriceType") && shopInfo.BuyCost > 0)
+                {
+                    shopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(shopItems[i]["buyPriceType"] as string, true);
+                }
+
+                listOfShopItems.Add(shopInfo);
+            }
+            
+            GameManager.Instance.ParentShopInfos = listOfShopItems;
+        }
+        
+        var cooldownUntilObject = response["freebieCooldown"] as Dictionary<string, object>;
+        if(cooldownUntilObject != null && cooldownUntilObject.Count > 0)
+        {
+            long cooldownUntil = Convert.ToInt64(cooldownUntilObject["cooldownUntil"]);
+            
+            if(cooldownUntil > 0 && CountdownTimer.GetRemainingTime(cooldownUntil) > TimeSpan.Zero)
+            {
+                GameManager.Instance.FreebieItemCooldownUntil = cooldownUntil;
+            }
+
+        }
+    }
+    
+    private void OnGetItemCatalog(string jsonResponse)
+    {
+        //Getting Toy Bench info
+        var response = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
+        var data = (Dictionary<string, object>)response["data"];
+        var response2 = (Dictionary<string, object>)data["response"];
+        var itemInfos = (Dictionary<string, object>[])response2["items"];
+        var listOfBenchInfo =  new List<ToyBenchInfo>();
+        var listOfShopInfo =  new List<ShopInfo>();
+
+        foreach (var itemDict in itemInfos)
+        {
+            string category = itemDict["category"] as string;
+            if(category.Equals("toys", StringComparison.OrdinalIgnoreCase))
+            {
+                ToyBenchInfo benchInfo = new ToyBenchInfo();
+                benchInfo.BenchId = itemDict["benchId"] as string;
+                benchInfo.LevelRequirement = (int)itemDict["levelRequirement"];
+                benchInfo.LoveRewardAmount = (int)itemDict["lovePayout"];
+                benchInfo.CoinRewardAmount = (int)itemDict["coinPayout"];
+                benchInfo.BuddyBlingRewardAmount = (int)itemDict["buddyBlingPayout"];
+                benchInfo.UnlockCost = (int)itemDict["unlockAmount"];
+                benchInfo.Cooldown = (int)itemDict["cooldown"];
+                benchInfo.CoinSpawnAmount = (int)itemDict["coinSpawnAmount"];
+                benchInfo.LoveSpawnAmount = (int)itemDict["loveSpawnAmount"];
+                benchInfo.BuddyBlingSpawnAmount = (int)itemDict["buddyBlingSpawnAmount"];
+                benchInfo.DisplayName = itemDict["displayName"] as string;
+            
+                listOfBenchInfo.Add(benchInfo);                
+            }
+            else if(category.Equals("mouseMerchant", StringComparison.OrdinalIgnoreCase))
+            {
+                ShopInfo shopInfo = new ShopInfo();
+                shopInfo.ShopId = itemDict["defId"] as string;
+                shopInfo.DisplayName = itemDict["displayName"] as string;
+                shopInfo.ItemDescription = itemDict["description"] as string;
+                
+                if(itemDict.ContainsKey("buyPriceValue"))
+                {
+                    shopInfo.BuyCost = (int)itemDict["buyPriceValue"];  
+                    if(shopInfo.BuyCost > 0)
+                    {
+                        shopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(itemDict["buyPriceType"] as string, true);                        
+                    }                  
+                }
+                
+                if(itemDict.ContainsKey("multiplier"))
+                {
+                    //ToDo: Set up multiplier field for toy collection
+                    //var value = (int)itemDict["multiplier"];
+                    //if(value > 0)
+                    //{
+                    //    //do something
+                    //}
+                    //var duration = (int)itemDict["duration"];
+                    //if(duration > 0)
+                    //{
+                    //    //do something
+                    //}
+                }
+                
+                if(itemDict.ContainsKey("priceAmount"))
+                {
+                    shopInfo.BuyCost = (int)itemDict["priceAmount"];
+                    shopInfo.BuyCurrency = Enum.Parse<CurrencyTypes>(itemDict["priceType"] as string, true);                   
+                    shopInfo.RewardAmount = (int)itemDict["payoutAmount"];
+                    shopInfo.RewardCurrencyType = Enum.Parse<CurrencyTypes>(itemDict["payoutType"] as string, true);                   
+                }
+                
+                listOfShopInfo.Add(shopInfo);
+            }
+        }
+        GameManager.Instance.ToyBenchInfos = listOfBenchInfo;
+        GameManager.Instance.ChildShopInfos = listOfShopInfo;
     }
     
     private void OnGetChildAccounts(string jsonResponse)
@@ -205,6 +411,8 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var data2 = getChildAccountObject["data"] as Dictionary<string, object>;
         var children = data2["children"] as Dictionary<string, object>[];
         var appChildrenInfos = new List<AppChildrenInfo>();
+
+        //If user has no child profiles, exit out
         if(children == null || children.Length == 0)
         {
             StateManager.Instance.RefreshScreen();
@@ -243,16 +451,49 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 {
                     dataInfo.buddySpritePath = BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY;
                 }
- 
-                var multiplier = summaryFriendData["coinMultiplier"] as double?;
-                if(multiplier != null)
+
+                try
                 {
-                    dataInfo.coinMultiplier = (float) multiplier;
+                    if(summaryFriendData["coinMultiplier"] is double multiplier)
+                    {
+                        dataInfo.coinMultiplier = (float) multiplier;
+                    }
+                }
+                catch (Exception e)
+                {
+                    var multiplierInt = (int) summaryFriendData["coinMultiplier"];
+                    if(multiplierInt > 0)
+                    {
+                        dataInfo.coinMultiplier = multiplierInt;
+                    }
+                    else
+                    {
+                        dataInfo.coinMultiplier = 1.0f;
+                    }
+
+                    Debug.LogWarning("Coin Multiplier exception: " + e.Message);
+                }
+                if(summaryFriendData.ContainsKey("experiencePoints"))
+                {
+                    dataInfo.currentXP  = (int) summaryFriendData["experiencePoints"];                    
+                }
+                if(summaryFriendData.ContainsKey("level"))
+                {
+                    dataInfo.buddyLevel = (int) summaryFriendData["level"];                    
+                }
+                if(summaryFriendData.ContainsKey("nextLevelUpXP"))
+                {
+                    dataInfo.nextLevelUp =  (int) summaryFriendData["nextLevelUpXP"];                    
+                }
+                if(summaryFriendData.ContainsKey("previousLevelUpReq"))
+                {
+                    dataInfo.previousLevelUp =  (int) summaryFriendData["previousLevelUpReq"];
                 }
                 else
                 {
-                    dataInfo.coinMultiplier = 1.0f;
+                    dataInfo.previousLevelUp = 0;
                 }
+                
                 dataInfo.coinPerHour = (int) summaryFriendData["coinPerHour"];
                 dataInfo.maxCoinCapacity = (int) summaryFriendData["maxCoinCapacity"];   
                 dataInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryFriendData["lastIdleTimestamp"]).UtcDateTime;
@@ -270,43 +511,75 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 }
             }
             
-            var extraData = children[i]["extraData"] as Dictionary<string, object>;
-            if(extraData != null)
+            if(children[i].ContainsKey("extraData"))
             {
-                var xpObj = extraData["xp"] as Dictionary<string, object>;
-                if(xpObj != null)
+                var extraData = children[i]["extraData"] as Dictionary<string, object>;
+                if(extraData != null)
                 {
-                    dataInfo.currentXP = (int) xpObj["xpPoints"];
-                    dataInfo.buddyLevel = (int) xpObj["xpLevel"];
-                    dataInfo.nextLevelUp =  (int) xpObj["nextXpLevel"];
-                }
-                
-                var currency = extraData["currency"] as Dictionary<string, object>;
-                if(currency != null)
-                {
-                    var buddyBling = currency["buddyBling"] as Dictionary<string, object>;
-                    if(buddyBling != null)
+                    var currency = extraData["currency"] as Dictionary<string, object>;
+                    if(currency != null)
                     {
-                        dataInfo.buddyBling = (int) buddyBling["balance"];
+                        var buddyBling = currency["buddyBling"] as Dictionary<string, object>;
+                        if(buddyBling != null)
+                        {
+                            dataInfo.buddyBling = (int) buddyBling["balance"];
+                        }
+                    }
+                
+                    var stats = extraData["stats"] as Dictionary<string, object>;
+                    if(stats != null)
+                    {
+                        dataInfo.coinsEarnedInLifetime = (int) stats["CoinsGainedForParent"];
+                        //dataInfo.loveEarnedInLifetime = (int) stats["LoveEarned"];
+                    }
+                    
+                    var items = extraData["items"] as Dictionary<string, object>[];
+                    if(items != null)
+                    {
+                        dataInfo.ownedToys = new List<string>();
+                        dataInfo.ownedShopItems = new List<string>();
+                        for (int x = 0; x < items.Length; x++)
+                        {
+                            string itemCategory = items[x]["category"] as string;
+
+                            if(itemCategory.Equals("toys", StringComparison.OrdinalIgnoreCase))
+                            {
+                                dataInfo.ownedToys.Add(items[x]["itemId"] as string);
+                            }
+                            else if(itemCategory.Equals("mouseMerchant", StringComparison.OrdinalIgnoreCase))
+                            {
+                                dataInfo.ownedShopItems.Add(items[x]["itemId"] as string);
+                            }
+
+                            string itemId = items[x]["itemId"] as string;
+                            if (itemId.Equals(BitBuddiesConsts.JSON_DAILY_LOVE_BOOSTER_ITEM))
+                            {
+                                //Getting info on daily love booster item for time expirys
+                                long durationInSeconds = Convert.ToInt64(items[x]["durationInSeconds"]);
+                                long createdAt = Convert.ToInt64(items[x]["createdAt"]);
+                                dataInfo.dailyBoosterExpiryUntil = createdAt + (durationInSeconds * 1000);
+                                dataInfo.dailyCooldownUntil = Convert.ToInt64(items[x]["cooldownUntil"]);
+                                dataInfo.loveMultiplier = (int)items[x]["loveMultiplier"];
+                            }
+
+                        }
                     }
                 }
-                
-                var stats = extraData["stats"] as Dictionary<string, object>;
-                if(stats != null)
-                {
-                    dataInfo.coinsEarnedInLifetime = (int) stats["CoinsGainedForParent"];
-                    dataInfo.loveEarnedInLifetime = (int) stats["LoveEarned"];
-                }
             }
+
             appChildrenInfos.Add(dataInfo);
         }
 
-        
-        if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
-        {
-            //Debug.LogError("Child Profile ID is missing. Cant fetch data.");
-            //return;
-        }
+        Dictionary<string, object> scriptData = new Dictionary<string, object>();
+        scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
+        scriptData.Add("profileId", appChildrenInfos[0].profileId);
+        Wrapper.ScriptService.RunScript
+        (
+            BitBuddiesConsts.GET_CHILD_ITEM_CATALOG_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("GetItemCatalog Success", OnGetItemCatalog),
+            HandleFailure("GetItemCatalog Failed", OnFailureCallback)
+        );
         
         _childInfoIndex = 0;
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;
@@ -366,7 +639,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     GetChildStatsAndCurrencyData();   
                 }
             }
-            if(UserInfo.Coins > 0)
+            if(CurrentUserInfo.Coins > 0)
             {
                 CompletedGettingCurrencies();
             }   
@@ -411,7 +684,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 GetChildStatsAndCurrencyData();   
             }
         }
-        if(UserInfo.Level > 0)
+        if(CurrentUserInfo.Level > 0)
         {
             CompletedGettingCurrencies();
         }
@@ -440,7 +713,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var secondData = result["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
         var coins = currencyMap["coins"] as Dictionary<string, object>;
-        UserInfo.UpdateCoins((int) coins["balance"]);
+        CurrentUserInfo.UpdateCoins((int) coins["balance"]);
         StateManager.Instance.RefreshScreen();
     }
     
@@ -471,7 +744,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var secondData = getResult["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
         var coins = currencyMap["coins"] as Dictionary<string, object>;
-        UserInfo.UpdateCoins((int) coins["balance"]);
+        CurrentUserInfo.UpdateCoins((int) coins["balance"]);
         StateManager.Instance.RefreshScreen();
     }
     
@@ -502,18 +775,48 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var secondData = getResult["data"] as Dictionary<string, object>;
         var currencyMap = secondData["currencyMap"] as Dictionary<string, object>;
         var gems = currencyMap["gems"] as Dictionary<string, object>;
-        UserInfo.UpdateGems((int) gems["balance"]);
+        CurrentUserInfo.UpdateGems((int) gems["balance"]);
         StateManager.Instance.RefreshScreen();
     }
     
     public void LevelUpParent()
     {
-
+        var scriptData = new Dictionary<string, object>();
+        scriptData.Add("x", 50);
+        Wrapper.ScriptService.RunScript
+        (
+            BitBuddiesConsts.INCREASE_XP_FOR_PARENT_SCRIPT_NAME,
+            scriptData.Serialize(),
+            HandleSuccess("LevelUpParent Success", OnLevelUpParent),
+            HandleFailure("LevelUpParent Failed", OnFailureCallback)
+        );
     }
     
     private void OnLevelUpParent(string jsonResponse, object cbObject)
     {
         //UserInfo.UpdateLevel(/*(int) statistics["Level"]*/);
+        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        var data =  packet["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
+        if(response == null) return;
+
+        if(response.ContainsKey("nextLevelUpXP"))
+        {
+            CurrentUserInfo.NextLevelUp = (int) response["nextLevelUpXP"];
+        }
+        if(response.ContainsKey("previousLevelUpReq"))
+        {
+            CurrentUserInfo.PreviousLevelUp = (int) response["previousLevelUpReq"];
+        }
+        if(response.ContainsKey("experiencePoints"))
+        {
+            CurrentUserInfo.CurrentXP = (int) response["experiencePoints"];
+        }
+        if(response.ContainsKey("level"))
+        {
+            CurrentUserInfo.UpdateLevel((int) response["level"]);
+        }
+                
         StateManager.Instance.RefreshScreen();
     }
     
@@ -555,13 +858,15 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     private void OnFailureCallback()
     {
-    
+        //FL: ToDo: Create an error catching system where we catch reason codes and display them for the user with StateManager
     }
-    
-    public void UpdateChildProfileName(string in_newName, string in_profileId)
+
+    private Action _updateNameAction;
+    public void UpdateChildProfileName(string in_newName, string in_profileId, Action OnSuccessAction)
     {
         if(_isProcessing) return;
         _isProcessing = true;
+        _updateNameAction = OnSuccessAction;
         Dictionary<string, object> scriptData = new Dictionary<string, object>
         {
             {"childAppId", BitBuddiesConsts.APP_CHILD_ID},
@@ -591,7 +896,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var newName = userAdjusted["newName"] as string;
         var profileId = userAdjusted["profileId"] as string;
         _isProcessing = false;
-        Destroy(FindAnyObjectByType<MysteryBoxPanelUI>().gameObject);
+        //Destroy(FindAnyObjectByType<MysteryBoxPanelUI>().gameObject);
         var listOfChildren = GameManager.Instance.AppChildrenInfos;
         foreach (var child in listOfChildren)
         {
@@ -603,27 +908,13 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         }
         GameManager.Instance.AppChildrenInfos = listOfChildren;
         StateManager.Instance.RefreshScreen();
+        if (_updateNameAction != null)
+        {
+            _updateNameAction();
+        }
     }
     
-    // public void AddRandomChildProfile(string in_childName, Rarity in_selectedLootbox)
-    // {
-    //     Dictionary<string, object> scriptData = new Dictionary<string, object>
-    //     {
-    //         {"childAppId", BrainCloudConsts.APP_CHILD_ID},
-    //         {"lootboxType", in_selectedLootbox},
-    //         {"customName", in_childName}
-    //     };
-    //     
-    //     Wrapper.ScriptService.RunScript
-    //     (
-    //         BrainCloudConsts.AWARD_RANDOM_LOOTBOX_SCRIPT_NAME,
-    //         scriptData.Serialize(),
-    //         HandleSuccess("Add Child Profile Success", OnAddRandomChildProfile),
-    //         HandleFailure("Add Child Profile Failed", OnFailureCallback)
-    //     );
-    // }
-    
-    public void OnAddRandomChildProfile(string jsonResponse)
+    public void OnAddChildProfile(string jsonResponse)
     {
 
         //var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
@@ -647,15 +938,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                 //Get Child data
                 dataInfo.profileName = profileChildren[i]["profileName"] as string;
                 dataInfo.profileId = profileChildren[i]["profileId"] as string;
-                //ToDo FL: need to get this from summary friend data
-                //dataInfo.buddyLevel = (int) profileChildren[i]["experienceLevel"];
-                //dataInfo.currentXP = (int) profileChildren[i]["experiencePoints"];
 
                 if (summaryData != null)
                 {
                     dataInfo.summaryFriendData = summaryData;
                     //Get Entity data
-                    dataInfo.rarity = "basic";//summaryData["rarity"] as string;
+                    dataInfo.rarity = summaryData["rarity"] as string;
                     dataInfo.buddySpritePath = summaryData["buddySpritePath"] as string;
                     var multiplier = summaryData["coinMultiplier"] as double?;
                     if (multiplier != null)
@@ -682,70 +970,19 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             return;
         }
         
-        _childInfoIndex = 0;
-        GameManager.Instance.AppChildrenInfos = appChildrenInfos;
-        GetChildStatsAndCurrencyData();
-    }
-    
-    public void OnAddBasicChildProfile(string jsonResponse)
-    {
-
-        //var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-        /*{"packetId":4,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"evaluateTime":124599,"scriptSize":8130,"renderTime":28},
-         "response":{"buddyConfig":{"rarity":"legendary","coinMultiplier":2,"coinPerHour":150,"maxCoinCapacity":1500,"buddyId":"Buddy04"},
-         "getProfileResult":{"data":{"children":[{"profileName":"sora","profileId":"abecf46c-8d5f-441d-9acf-8ecaaf665a2b","appId":"49162"},
-         {"profileName":"bob","profileId":"d58ec1f2-e465-4aa8-9906-e2dc2b153793","appId":"49162"},{"profileName":"riku",
-         "profileId":"959454d3-31f5-433a-9dc8-8e8f96a2657c","appId":"49162"}]},"status":200}},"success":true,"reasonCode":null},"status":200}]}
-         */
-        var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-        var data =  packet["data"] as Dictionary<string, object>;
-        var response = data["response"] as Dictionary<string, object>;
-        var getProfileResult = response["getProfileResult"] as Dictionary<string, object>;
-        var profileChildren = getProfileResult["childEntityData"] as Dictionary<string, object>[];
-        var appChildrenInfos = new List<AppChildrenInfo>();
-        for(int i = 0; i < profileChildren.Length; i++)
-        {
-            var childData =  profileChildren[i]["childData"] as  Dictionary<string, object>;
-            var entityDataObject = profileChildren[i]["entityData"] as Dictionary<string, object>;
-             var dataInfo = new AppChildrenInfo();
-             if(childData != null)
-             {
-                 //Get Child data
-                 dataInfo.profileName = childData["profileName"] as string;
-                 dataInfo.profileId = childData["profileId"] as string;   
-             }
-            
-             if(entityDataObject != null)
-             {
-                 var entityData = entityDataObject["data"] as Dictionary<string, object>;
-                 if(entityData != null)
-                 {
-                     //Get Entity data
-                     dataInfo.rarity = entityData["rarity"] as string;
-                     dataInfo.buddySpritePath = entityData["buddySpritePath"] as string;
-                     var multiplier = entityData["coinMultiplier"] as double?;
-                     if(multiplier != null)
-                     {
-                         dataInfo.coinMultiplier = (float) multiplier;
-                     }
-                     else
-                     {
-                         dataInfo.coinMultiplier = 1.0f;
-                     }
-                     dataInfo.coinPerHour = (int) entityData["coinPerHour"];
-                     dataInfo.maxCoinCapacity = (int) entityData["maxCoinCapacity"];   
-                 }
-             }
-            
-            appChildrenInfos.Add(dataInfo);
-        }
-
+        //Stat will be updated on the server from the cloud code script when adding a new child account
+        StatTracker.Instance.IncrementStat(BitBuddiesConsts.BUDDIES_OWNED_STAT_NAME);
         
-        if (appChildrenInfos.Count == 0 || appChildrenInfos[0].profileId.IsNullOrEmpty())
-        {
-            Debug.LogError("Child Profile ID is missing. Cant fetch data.");
-            return;
-        }
+        // Dictionary<string, object> scriptData = new Dictionary<string, object>();
+        // scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
+        // scriptData.Add("profileId", appChildrenInfos[0].profileId);
+        // Wrapper.ScriptService.RunScript
+        // (
+        //     BitBuddiesConsts.GET_CHILD_ITEM_CATALOG_SCRIPT_NAME,
+        //     scriptData.Serialize(),
+        //     HandleSuccess("GetItemCatalog Success", OnGetItemCatalog),
+        //     HandleFailure("GetItemCatalog Failed", OnFailureCallback)
+        // );
         
         _childInfoIndex = 0;
         GameManager.Instance.AppChildrenInfos = appChildrenInfos;
@@ -754,7 +991,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
     
     public void ClearDataForLogout()
     {
-        UserInfo = new UserInfo();
+        CurrentUserInfo = new UserInfo();
         IsEmailAuthenticated = false;
     }
 

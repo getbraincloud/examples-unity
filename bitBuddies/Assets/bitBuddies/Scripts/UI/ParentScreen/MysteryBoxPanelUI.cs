@@ -9,7 +9,13 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Random = System.Random;
 
+/// <summary>
+/// Class does 2 things
+/// Displays mystery boxes for user to select if they have the funds
+/// After a box is selected, this class handles 3 pages of dialog for a user opening a mystery box
+/// </summary>
 public class MysteryBoxPanelUI : ContentUIBehaviour
 {
 	[SerializeField] private TMP_Text TitleText;
@@ -35,8 +41,9 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	private List<MysteryBoxInfo> _mysteryBoxes;
 	private int _screenIndex;
 	private ParentMenu _parentMenu;
+	private string _buddyName;
+	
 	//Screen Titles
-	private const string DEFAULT_BUDDY_NAME = "MyBuddy";
 	private const string LIST_BOXES_TEXT_TITLE = "Pick a mystery box";
 	private const string OPEN_BOX_TEXT_TITLE = "Open your Mystery Box";
 	private const string NEW_BUDDY_TEXT_TITLE = "New BitBuddy!";
@@ -119,13 +126,11 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 	
 	private void OnGetLootboxInfo(string jsonResponse)
 	{
-		BrainCloudManager.Instance.OnAddRandomChildProfile(jsonResponse);
+		BrainCloudManager.Instance.OnAddChildProfile(jsonResponse);
 		var listOfBuddies = GameManager.Instance.AppChildrenInfos;
 		if(listOfBuddies.Count > 0)
 		{
-			var recentBuddyAdded = listOfBuddies[listOfBuddies.Count - 1];
 			_parentMenu.NewAppChildrenInfo = new AppChildrenInfo();
-			_parentMenu.NewAppChildrenInfo.profileId = recentBuddyAdded.profileId;
 			
 			//Extract entity data from response
 			var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
@@ -139,6 +144,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 					var childName = profileChildren[i]["profileName"] as string;
 					if(childName.IsNullOrEmpty())
 					{
+						_parentMenu.NewAppChildrenInfo.profileId = profileChildren[i]["profileId"] as string;
 						var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
 						if(summaryData.ContainsKey("rarity"))
 						{
@@ -159,6 +165,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 						_parentMenu.NewAppChildrenInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long) summaryData["lastIdleTimestamp"]).UtcDateTime;
 						
 						SetupBuddyDataDisplay();
+						break;
 					}
 				}	
 			}
@@ -195,10 +202,27 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     
     private void OnDoneButton()
     {
-		DoneButton.onClick.RemoveAllListeners();
-		DoneButton.interactable = false;
-	    string nameValue = NameBuddyInput.text.IsNullOrEmpty() ? DEFAULT_BUDDY_NAME: NameBuddyInput.text;
-	    BrainCloudManager.Instance.UpdateChildProfileName(nameValue, _parentMenu.NewAppChildrenInfo.profileId);
+		if(NameBuddyInput.text.IsNullOrEmpty())
+		{
+			_buddyName = BitBuddiesConsts.DEFAULT_BUDDY_NAME + UnityEngine.Random.Range(1, 1000);
+			StateManager.Instance.OpenConfirmPopUp("Name is empty", $"Are you sure you want to give your buddy a generated name? ({_buddyName})", OnConfirmEmptyName);
+			return;
+		}
+		
+	    BrainCloudManager.Instance.UpdateChildProfileName(NameBuddyInput.text, _parentMenu.NewAppChildrenInfo.profileId, DestroySelf);
+    }
+    
+    //If the name is empty, this is the callback for that to send a generated name instead of one assigned from user
+    private void OnConfirmEmptyName()
+    {
+		Destroy(gameObject);
+	    BrainCloudManager.Instance.UpdateChildProfileName(_buddyName, _parentMenu.NewAppChildrenInfo.profileId, DestroySelf);
+	    StateManager.Instance.RefreshScreen();
+    }
+
+    private void DestroySelf()
+    {
+	    Destroy(gameObject);
     }
     
     private void SetupBuddyDataDisplay()
@@ -216,7 +240,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 		    RarityText.text = "basic";
 	    }
 	    //BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
-	    BuddyImage.sprite = AssetLoader.LoadSprite(childAppInfo.buddySpritePath);
+	    BuddyImage.sprite = AssetLoader.LoadBuddySprite(childAppInfo.buddySpritePath);
 	    if(childAppInfo.buddySpritePath.IsNullOrEmpty())
 	    {
 		    Debug.LogWarning("Buddy sprite was missing for: "+ childAppInfo.profileName + " child");

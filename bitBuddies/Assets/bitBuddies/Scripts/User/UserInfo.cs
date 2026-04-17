@@ -1,16 +1,22 @@
 using System;
+using System.Collections.Generic;
+using BrainCloud.JsonFx.Json;
+using Gameframework;
 using UnityEngine;
+
 
 [Serializable]
 public class UserInfo
 {
     public int Level;
     public int CurrentXP;
+    public int PreviousLevelUp;
     public int NextLevelUp;
     public string Username;
     public string Email;
     public int Coins;
     public int Gems;
+    public int FakeMoney;
     
     public void UpdateLevel(int in_level)
     {
@@ -49,5 +55,19 @@ public class UserInfo
     public void UpdateGems(int in_gems)
     {
         Gems = in_gems;
+    }
+    
+    public void UpdateFakeMoney(int in_fakeMoney)
+    {
+        FakeMoney = in_fakeMoney;
+    }
+    
+    public void UpdateStats(Dictionary<string, object> in_jsonForStats)
+    {
+        StatTracker.Instance.ResetAllStats();
+        foreach (KeyValuePair<string,object> stat in in_jsonForStats)
+        {
+            StatTracker.Instance.IncrementStat(stat.Key, (int) stat.Value);
+        }
     }
 }

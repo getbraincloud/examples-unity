@@ -28,7 +28,7 @@ public class BuddyHouseInfo : MonoBehaviour
 		_visitButton.onClick.AddListener(OnVisitButton);
 		_deleteButton.onClick.AddListener(OnDeleteButton);
 		_parentTransform = FindAnyObjectByType<ParentMenu>().transform;
-		_buddySprite.sprite = AssetLoader.LoadSprite(HouseInfo.buddySpritePath); 
+		_buddySprite.sprite = AssetLoader.LoadBuddySprite(HouseInfo.buddySpritePath); 
 		_buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName + "'s Home";
 		
 		CheckCoinsButton();
@@ -49,11 +49,19 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnVisitButton()
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
-		popUp.SetupConfirmPopup(BitBuddiesConsts.GO_BUDDYS_ROOM_TITLE, BitBuddiesConsts.GO_BUDDYS_ROOM_MESSAGE, GoToBuddysRoom);
+		string titleMessage = GetTitleMessage();
+		string bodyMessage = GetBodyMessage();
+		popUp.SetupConfirmPopup(titleMessage, bodyMessage, GoToBuddysRoom);
 	}
 	
 	private void GoToBuddysRoom()
 	{
+		//Increment stat for visited buddies
+		var statData = new Dictionary<string, object>();
+		statData.Add(BitBuddiesConsts.VISIT_BUDDIES_STAT_NAME, 1);
+		BrainCloudManager.Client.PlayerStatisticsService.IncrementUserStats(statData.Serialize());
+		StatTracker.Instance.IncrementStat(BitBuddiesConsts.VISIT_BUDDIES_STAT_NAME);
+
 		GameManager.Instance.SelectedAppChildrenInfo = HouseInfo;
 		StateManager.Instance.GoToBuddysRoom();		
 	}
@@ -61,7 +69,36 @@ public class BuddyHouseInfo : MonoBehaviour
 	private void OnDeleteButton()
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
-		popUp.SetupConfirmPopup(BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE, BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE, DeleteBuddyRoom);
+		if (GameManager.Instance.AppChildrenInfos.Count <= 1)
+		{
+			popUp.SetUpInfoPopup(BitBuddiesConsts.CANT_DELETE_BUDDY_TITLE, BitBuddiesConsts.CANT_DELETE_BUDDY_MESSAGE);
+		}
+		else
+		{
+			string titleMessage = GetTitleMessage();
+			string bodyMessage = GetBodyMessage();
+			popUp.SetupConfirmPopup(titleMessage, bodyMessage, DeleteBuddyRoom);
+		}
+	}
+	
+	private string GetTitleMessage()
+	{
+		if(HouseInfo.profileName.IsNullOrEmpty())
+		{
+			return BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+		}
+		
+		return BitBuddiesConsts.DELETE_BUDDYS_ROOM_TITLE + HouseInfo.profileName + "'s home?";
+	}
+	
+	private string GetBodyMessage()
+	{
+		if(HouseInfo.profileName.IsNullOrEmpty())
+		{
+			return BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE + BitBuddiesConsts.DEFAULT_BUDDY_NAME + "'s home?";
+		}
+		
+		return BitBuddiesConsts.DELETE_BUDDYS_ROOM_MESSAGE + HouseInfo.profileName + "'s home?";
 	}
 	
 	private void DeleteBuddyRoom()
@@ -85,6 +122,7 @@ public class BuddyHouseInfo : MonoBehaviour
 	{
 		var popUp = Instantiate(PopUpPrefab,  _parentTransform);
 		popUp.SetUpInfoPopup(BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_TITLE, BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_MESSAGE);
+		StatTracker.Instance.IncrementStat(BitBuddiesConsts.TRASHED_BUDDIES_STAT_NAME);
 		GameManager.Instance.OnDeleteBuddySuccess();
 	}
 	
@@ -124,12 +162,32 @@ public class BuddyHouseInfo : MonoBehaviour
 		var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
 		var data =  packet["data"] as Dictionary<string, object>;
 		var response = data["response"] as Dictionary<string, object>;
+
+		try
+		{
+			var xpAcquired = (int) response["xpAwarded"];
+			if(xpAcquired > 0)
+			{
+				GameManager.Instance.XpAcquiredAmount = xpAcquired;
+			}
+		}
+		catch (Exception e)
+		{
+			var xpAcquired =  response["xpAwarded"]as double?;
+			if(xpAcquired > 0)
+			{
+				GameManager.Instance.XpAcquiredAmount = (float) xpAcquired;
+			}
+			Debug.Log("XpAwarded gave an exception: " + e.Message);
+		}
+
 		
 		var currencyMap = response["currencyMap"] as Dictionary<string, object>;
 		var coinsObj = currencyMap["coins"] as Dictionary<string, object>;
 		var currentBalance = (int) coinsObj["balance"];
-		var coinsAdded = currentBalance - BrainCloudManager.Instance.UserInfo.Coins;
-		BrainCloudManager.Instance.UserInfo.Coins = currentBalance;
+		var coinsAdded = currentBalance - BrainCloudManager.Instance.CurrentUserInfo.Coins;
+		BrainCloudManager.Instance.CurrentUserInfo.Coins = currentBalance;
+		
 				
 		var summaryData = response["summaryData"] as Dictionary<string, object>;
 		
@@ -143,10 +201,10 @@ public class BuddyHouseInfo : MonoBehaviour
 		var statistics = statData["statistics"] as Dictionary<string, object>;
 		
 		HouseInfo.coinsEarnedInLifetime = (int) statistics["CoinsGainedForParent"];
-		if(statistics.ContainsKey("LoveEarned"))
-		{
-			HouseInfo.loveEarnedInLifetime = (int) statistics["LoveEarned"];
-		}
+		// if(statistics.ContainsKey("LoveEarned"))
+		// {
+		// 	HouseInfo.loveEarnedInLifetime = (int) statistics["LoveEarned"];
+		// }
 		
 		//Fire UI event
 		if(OnCoinsCollected != null)
@@ -158,6 +216,7 @@ public class BuddyHouseInfo : MonoBehaviour
 	
 	private void OnUpdateSummaryDataFailure()
 	{
-		
+		//Check to see if its an error saying its empty,
+		//If so then create the entity now.
 	}
 }
