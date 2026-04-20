@@ -43,6 +43,11 @@ public class GameManager : MonoBehaviour
     public Button ReconnectButton;
     public Toggle RememberMeToggle;
 
+    [Header("Ping Region Data")]
+    public Toggle UsePingDataToggle;
+    public TMP_Text PingRegionQualityText;
+    public TMP_Text RelayPingText;
+
     //for updating members list of splatters
     public GameArea GameArea;
     public Button JoinInProgressButton;
@@ -59,6 +64,8 @@ public class GameManager : MonoBehaviour
     //List references for clean up when game closes
     private readonly List<UserEntry> _matchEntries = new List<UserEntry>();
     private readonly List<UserCursor> _userCursorsList = new List<UserCursor>();
+    private readonly List<UserEntry> _liveMatchEntryList = new List<UserEntry>();
+    private readonly List<UserInfo> _liveMatchUserList = new List<UserInfo>();
 
     private GameMode _gameMode = GameMode.FreeForAll;
     public GameMode GameMode
@@ -131,6 +138,16 @@ public class GameManager : MonoBehaviour
     private void LoadPlayerSettings()
     {
         _currentUserInfo = Settings.LoadPlayerInfo();
+        if (UsePingDataToggle != null)
+        {
+            UsePingDataToggle.isOn = Settings.GetUsePingData();
+            UsePingDataToggle.onValueChanged.AddListener(OnUsePingDataToggleChanged);
+        }
+    }
+
+    public void OnUsePingDataToggleChanged(bool value)
+    {
+        Settings.SetUsePingData(value);
     }
 
     public void UpdateMainMenuText()
@@ -250,6 +267,8 @@ public class GameManager : MonoBehaviour
             }
             _matchEntries.Clear();
         }
+        _liveMatchEntryList.Clear();
+        _liveMatchUserList.Clear();
     }
 
     public void UpdateLobbyState()
@@ -262,6 +281,56 @@ public class GameManager : MonoBehaviour
         if (!LobbyIdText.enabled)
         {
             LobbyIdText.enabled = true;
+        }
+        UpdatePingRegionQuality();
+    }
+
+    public void UpdatePingRegionQuality()
+    {
+        if (PingRegionQualityText == null) return;
+
+        var pingData = BrainCloudManager.Instance.PingData;
+        string lobbyId = stManager.CurrentLobby != null ? stManager.CurrentLobby.LobbyID ?? "" : "";
+        int colonPos = lobbyId.IndexOf(':');
+        bool regionIsNumeric = colonPos > 0 && int.TryParse(lobbyId.Substring(0, colonPos), out _);
+        string lobbyRegion = (colonPos > 0 && !regionIsNumeric) ? lobbyId.Substring(0, colonPos) : "";
+
+        if (pingData.Count > 0)
+        {
+            string lines = "";
+            int bestPing = int.MaxValue;
+            foreach (var ms in pingData.Values) if (ms < bestPing) bestPing = ms;
+            foreach (var kv in pingData)
+            {
+                string marker = kv.Key == lobbyRegion ? " ◄" : "";
+                lines += $"{kv.Key}: {kv.Value} ms{marker}\n";
+            }
+            if (lobbyRegion.Length > 0 && pingData.TryGetValue(lobbyRegion, out int lobbyPing))
+            {
+                bool isGood = (lobbyPing - bestPing) <= 30;
+                PingRegionQualityText.color = isGood ? new Color(0.27f, 0.93f, 0.27f) : new Color(0.93f, 0.27f, 0.27f);
+            }
+            PingRegionQualityText.text = lines.TrimEnd();
+            PingRegionQualityText.gameObject.SetActive(true);
+        }
+        else
+        {
+            PingRegionQualityText.gameObject.SetActive(false);
+        }
+    }
+
+    public void RefreshMatchEntryPings()
+    {
+        for (int i = 0; i < _liveMatchEntryList.Count && i < _liveMatchUserList.Count; i++)
+        {
+            UserEntry entry = _liveMatchEntryList[i];
+            UserInfo user = _liveMatchUserList[i];
+            if (entry == null || entry.UsernameText == null) continue;
+
+            string pingStr = user.activePing < 0 ? " ..." : user.activePing >= 999 ? " T/O" : $" {user.activePing} ms";
+            string baseName = user.Username;
+            if (!user.IsReady && !user.PresentSinceStart) baseName += " (In Lobby)";
+            entry.UsernameText.text = baseName + pingStr;
         }
     }
 
@@ -343,10 +412,12 @@ public class GameManager : MonoBehaviour
 
     private void AdjustMatchList()
     {
+        _liveMatchEntryList.Clear();
+        _liveMatchUserList.Clear();
+
         if (_gameMode == GameMode.FreeForAll)
         {
             CleanUpChildrenOfParent(UserEntryMatchParentFFA.transform);
-            //populate user entries based on members in lobby
             Lobby lobby = stManager.CurrentLobby;
             for (int i = 0; i < lobby.Members.Count; i++)
             {
@@ -355,6 +426,8 @@ public class GameManager : MonoBehaviour
                     var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, UserEntryMatchParentFFA.transform);
                     SetUpUserEntry(lobby.Members[i], newEntry, true);
                     _matchEntries.Add(newEntry);
+                    _liveMatchEntryList.Add(newEntry);
+                    _liveMatchUserList.Add(lobby.Members[i]);
                 }
             }
         }
@@ -362,25 +435,19 @@ public class GameManager : MonoBehaviour
         {
             CleanUpChildrenOfParent(UserEntryMatchParentTeamAlpha.transform);
             CleanUpChildrenOfParent(UserEntryMatchParentTeamBeta.transform);
-            //populate user entries based on members in lobby
             Lobby lobby = stManager.CurrentLobby;
             for (int i = 0; i < lobby.Members.Count; i++)
             {
                 if (lobby.Members[i].IsAlive)
                 {
-                    Transform parent = null;
-                    if (lobby.Members[i].Team == TeamCodes.alpha)
-                    {
-                        parent = UserEntryMatchParentTeamAlpha.transform;
-                    }
-                    //Member should be on team beta
-                    else
-                    {
-                        parent = UserEntryMatchParentTeamBeta.transform;
-                    }
+                    Transform parent = lobby.Members[i].Team == TeamCodes.alpha
+                        ? UserEntryMatchParentTeamAlpha.transform
+                        : UserEntryMatchParentTeamBeta.transform;
                     var newEntry = Instantiate(UserEntryMatchPrefab, Vector3.zero, Quaternion.identity, parent);
                     SetUpUserEntry(lobby.Members[i], newEntry, true);
                     _matchEntries.Add(newEntry);
+                    _liveMatchEntryList.Add(newEntry);
+                    _liveMatchUserList.Add(lobby.Members[i]);
                 }
             }
         }

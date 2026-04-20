@@ -45,6 +45,8 @@ public class BrainCloudManager : MonoBehaviour
     private static List<Color> colours = new List<Color>();
     private bool _noServerSelected;
 
+    private Dictionary<string, int> _pingData = new Dictionary<string, int>();
+
     // Lobby / server join timers — drive the loading-screen sub-message each FixedUpdate
     private long _lobbySearchStartTime = 0;   // set when FindOrCreateLobby is called
     private long _lobbyStatusStartTime = 0;   // set on STARTING lobby event
@@ -100,7 +102,7 @@ public class BrainCloudManager : MonoBehaviour
         }
 
         // Update the loading-screen timer while the connecting overlay is visible.
-        // we may also need to user _lobbyStatusStartTime 
+        // we may also need to user _lobbyStatusStartTime
         if ((_lobbySearchStartTime > 0 || _lobbyStatusStartTime > 0) && StateManager.Instance != null && StateManager.Instance.isLoading)
         {
             long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -113,6 +115,7 @@ public class BrainCloudManager : MonoBehaviour
                 : timerStr;
             StateManager.Instance.LoadingGameState.UpdateSubMessage(msg);
         }
+
     }
 
     private void OnApplicationQuit()
@@ -387,8 +390,32 @@ public class BrainCloudManager : MonoBehaviour
     }
 
     // Cleanly close the game. Go back to main menu but don't log
+    private void BroadcastRelayPing()
+    {
+        if (!_bcWrapper.RelayService.IsConnected()) return;
+        int ping = (int)(_bcWrapper.RelayService.LastPing * 0.0001f);
+
+        string myCxId = _bcWrapper.Client.RTTConnectionID;
+        foreach (var member in StateManager.Instance.CurrentLobby.Members)
+        {
+            if (member.cxId == myCxId) { member.activePing = ping; break; }
+        }
+
+        var msg = new Dictionary<string, object>
+        {
+            ["op"] = "relay_ping",
+            ["data"] = new Dictionary<string, object> { ["ping"] = ping }
+        };
+        byte[] bytes = Encoding.ASCII.GetBytes(JsonWriter.Serialize(msg));
+        _bcWrapper.RelayService.Send(bytes, BrainCloudRelay.TO_ALL_PLAYERS,
+            false, false, BrainCloudRelay.CHANNEL_HIGH_PRIORITY_1);
+
+        GameManager.Instance.RefreshMatchEntryPings();
+    }
+
     public void CloseGame(bool changeState = false)
     {
+        CancelInvoke(nameof(BroadcastRelayPing));
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
@@ -740,6 +767,21 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.PendingClearSplatters = true;
                 return;
             }
+            if (earlyOp == "relay_ping")
+            {
+                var pingData = earlyParse["data"] as Dictionary<string, object>;
+                if (pingData != null && pingData.ContainsKey("ping"))
+                {
+                    int ping = Convert.ToInt32(pingData["ping"]);
+                    string senderCxId = _bcWrapper.RelayService.GetCxIdForNetId(netId);
+                    foreach (var member in StateManager.Instance.CurrentLobby.Members)
+                    {
+                        if (member.cxId == senderCxId) { member.activePing = ping; break; }
+                    }
+                    GameManager.Instance.RefreshMatchEntryPings();
+                }
+                return;
+            }
         }
         catch { /* Binary DataStreamByte packets will throw — fall through to normal path */ }
 
@@ -984,6 +1026,7 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
         _bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
         _bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
+        InvokeRepeating(nameof(BroadcastRelayPing), 2f, 2f);
 
         int port = 0;
         Server server = StateManager.Instance.CurrentServer;
@@ -1049,6 +1092,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void DisconnectFromEverything()
     {
+        CancelInvoke(nameof(BroadcastRelayPing));
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
@@ -1058,6 +1102,7 @@ public class BrainCloudManager : MonoBehaviour
 
     public void DisconnectFromRelay()
     {
+        CancelInvoke(nameof(BroadcastRelayPing));
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
@@ -1163,7 +1208,6 @@ public class BrainCloudManager : MonoBehaviour
         _lobbyStatusStartTime = 0;
         _progressMessage = "";
 
-        // Find lobby
         var algo = new Dictionary<string, object>();
         algo["strategy"] = "ranged-absolute";
         algo["alignment"] = "center";
@@ -1171,36 +1215,52 @@ public class BrainCloudManager : MonoBehaviour
         ranges.Add(1000);
         algo["ranges"] = ranges;
 
-        //
         var extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
 
-        //
         var filters = new Dictionary<string, object>();
-
-        //
         var settings = new Dictionary<string, object>();
-
         string teamCode = GameManager.Instance.GameMode == GameMode.FreeForAll ? "all" : "";
 
-
-        //
-        _bcWrapper.LobbyService.FindOrCreateLobby
-        (
-            GetLobbyType(),
-            0, // rating
-            1, // max steps
-            algo, // algorithm
-            filters, // filters
-            false, // ready
-            extra, // extra
-            teamCode, // team code
-            settings, // settings
-            null, // other users
-            FindLobbyCallback,
-            LogErrorThenPopUpWindow, "Failed to find lobby"
-        );
+        if (Settings.GetUsePingData())
+        {
+            _bcWrapper.LobbyService.GetRegionsForLobbies(
+                new string[] { GetLobbyType() },
+                (regionsJson, cbObj) =>
+                {
+                    _bcWrapper.LobbyService.PingRegions(
+                        (pingJson, cbObj2) =>
+                        {
+                            _pingData.Clear();
+                            if (_bcWrapper.LobbyService.PingData != null)
+                            {
+                                foreach (var kv in _bcWrapper.LobbyService.PingData)
+                                    _pingData[kv.Key] = (int)kv.Value;
+                            }
+                            GameManager.Instance.UpdatePingRegionQuality();
+                            _bcWrapper.LobbyService.FindOrCreateLobbyWithPingData(
+                                GetLobbyType(), 0, 1, algo, filters, false, extra, teamCode, settings, null,
+                                FindLobbyCallback, LogErrorThenPopUpWindow, "Failed to find lobby"
+                            );
+                        },
+                        LogErrorThenPopUpWindow
+                    );
+                },
+                LogErrorThenPopUpWindow
+            );
+        }
+        else
+        {
+            _pingData.Clear();
+            GameManager.Instance.UpdatePingRegionQuality();
+            _bcWrapper.LobbyService.FindOrCreateLobby(
+                GetLobbyType(), 0, 1, algo, filters, false, extra, teamCode, settings, null,
+                FindLobbyCallback, LogErrorThenPopUpWindow, "Failed to find lobby"
+            );
+        }
     }
+
+    public Dictionary<string, int> PingData => _pingData;
 
     private string GetLobbyType()
     {

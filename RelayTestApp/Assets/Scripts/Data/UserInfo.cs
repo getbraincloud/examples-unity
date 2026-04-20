@@ -37,6 +37,7 @@ public class UserInfo
     public bool PresentSinceStart;
     public RectTransform CursorTransform;
     public TeamCodes Team;
+    public int activePing = -1;
     public UserInfo(Dictionary<string, object> userJson)
     {
         cxId = userJson["cxId"] as string;
