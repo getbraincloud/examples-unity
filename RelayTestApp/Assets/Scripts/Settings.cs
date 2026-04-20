@@ -19,15 +19,19 @@ public static class Settings
 
     public static string ChannelKey = "Channel";
 
-    public static int GetChannel() => PlayerPrefs.GetInt(ChannelKey); 
-    
+    public static string UsePingDataKey = "UsePingData";
+
+    public static int GetChannel() => PlayerPrefs.GetInt(ChannelKey);
+
     //Getters
     public static int GetPlayerPrefColor() => PlayerPrefs.GetInt(GameColorKey);
     public static bool GetPlayerPrefBool(string key) => PlayerPrefs.GetInt(key) != 0;
-    
+    public static bool GetUsePingData() => GetPlayerPrefBool(UsePingDataKey);
+
     //Setters
     public static void SetPlayerPrefColor(int colorToSave) => PlayerPrefs.SetInt(GameColorKey, colorToSave);
     public static void SetPlayerPrefBool(string key, bool value) => PlayerPrefs.SetInt(key, value == false ? 0 : 1);
+    public static void SetUsePingData(bool value) => SetPlayerPrefBool(UsePingDataKey, value);
 
 
     public static UserInfo LoadPlayerInfo()
