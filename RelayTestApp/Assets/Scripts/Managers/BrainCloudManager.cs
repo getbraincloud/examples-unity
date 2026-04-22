@@ -319,6 +319,30 @@ public class BrainCloudManager : MonoBehaviour
         _noServerSelected = false;
         GameManager.Instance.UpdateLobbyDropdowns(_ffaLobbyTypesList, _teamLobbyTypesList);
 
+        if (value.ContainsKey("Colors"))
+        {
+            try
+            {
+                var hexArray = JsonReader.Deserialize<string[]>((string)value["Colors"]);
+                if (hexArray != null && hexArray.Length > 0)
+                {
+                    var newColors = new List<Color>();
+                    foreach (var hex in hexArray)
+                    {
+                        if (ColorUtility.TryParseHtmlString(hex, out Color c))
+                            newColors.Add(c);
+                    }
+                    if (newColors.Count > 0)
+                    {
+                        colours.Clear();
+                        colours.AddRange(newColors);
+                        GameManager.Instance.UpdateColorList(colours);
+                    }
+                }
+            }
+            catch { }
+        }
+
         // Enable RTT
         _bcWrapper.RTTService.RegisterRTTLobbyCallback(OnLobbyEvent);
         _bcWrapper.RTTService.RegisterRTTEventCallback(OnEventCallback);
