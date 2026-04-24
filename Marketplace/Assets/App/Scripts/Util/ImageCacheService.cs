@@ -14,6 +14,9 @@ public class ImageCacheService : MonoBehaviour
 
     [SerializeField]
     private List<ItemSectionSprite> sectionSprites;
+
+    [SerializeField]
+    public Sprite noAdsSprite;
     public static ImageCacheService Instance { get; private set; }
 
     private Dictionary<string, Sprite> memoryCache = new Dictionary<string, Sprite>();

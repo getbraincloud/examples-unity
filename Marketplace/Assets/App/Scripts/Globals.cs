@@ -1,4 +1,6 @@
 
+using UnityEngine;
+
 public static class Globals
 {
     public static string APP_TITLE = "BC Marketplace";
@@ -8,5 +10,9 @@ public static class Globals
 
     /* PlayerPrefs */
     public static string PP_REMEMBER_ME = "RememberMe";
-    
+
+
+    /* BC User Entity types */
+    public static string ENTITY_AVATARFRAME_EQUIPSLOT = "AvatarFrameSlot";
+    public static string ENTITY_SHIRT_EQUIPSLOT = "ShirtSlot";
 }

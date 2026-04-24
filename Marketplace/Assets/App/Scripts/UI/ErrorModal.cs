@@ -1,16 +1,27 @@
+using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ErrorModal : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField]
+    private TextMeshProUGUI messageText;
+
+    [SerializeField]
+    private Button dismissButton;
+
+    private void OnEnable()
     {
-        
+        dismissButton.onClick.AddListener(OnDismissClicked);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        
+        dismissButton.onClick.RemoveAllListeners();
+    }
+    private void OnDismissClicked()
+    {
+
     }
 }

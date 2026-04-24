@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static ExampleApp;
 using JsonReader = BrainCloud.JsonFx.Json.JsonReader;
 
 public class LoginModal : MonoBehaviour
@@ -28,6 +27,9 @@ public class LoginModal : MonoBehaviour
     {
         _cg = GetComponent<CanvasGroup>();
         _anim = GetComponent<Animator>();
+
+        userNameInput.shouldHideMobileInput = true;
+        passwordInput.shouldHideMobileInput = true;
     }
 
     private int InputSelected;
@@ -73,7 +75,7 @@ public class LoginModal : MonoBehaviour
         AppManager.Instance.ProcessUserData(responseJson, () =>
         {
             _anim.SetBool("fadeOut", true);
-        });
+        }, userNameInput.text);
 
         Debug.Log($"User Anonymous ID: {BCManager.Instance.BCWrapper.GetStoredAnonymousId()}");
 
@@ -99,7 +101,7 @@ public class LoginModal : MonoBehaviour
             if (InputSelected < 0) InputSelected = 0;
             SelectInputField();
         }
-        if (Input.GetKeyDown(KeyCode.Tab))
+        else if (Input.GetKeyDown(KeyCode.Tab))
         {
             InputSelected++;
             if (InputSelected > 1) InputSelected = 0;

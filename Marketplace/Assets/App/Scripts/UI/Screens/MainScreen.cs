@@ -9,27 +9,44 @@ using UnityEngine.UI;
 
 public class MainScreen : MonoBehaviour
 {
+    //Buttons
     [SerializeField]
     private Button _avatarButton, _collectCoinsButton;
-
+    //GameObjects
     [SerializeField]
-    private TextMeshProUGUI _coinsAmountText, _gemsAmountText, _levelText;
-
+    private GameObject _collectCoinsBaseMessageDisplay,
+                        _goldAvatarFrameDisplay;
+    //UI Text
+    [SerializeField]
+    private TextMeshProUGUI _coinsAmountText,
+                            _gemsAmountText,
+                            _levelText,
+                            _collectCoinsBaseAmountText,
+                            _currentMarketplaceText;
+    //UI Image
     [SerializeField]
     private Image _xpBar, _userProfileImage, _avatarImage, _avatarFrameImage;
-
+    //Other
     [SerializeField]
     private Animator _profileModalAnim;
+    [SerializeField]
+    private MultiplierDisplay _multiplierDisplay;
+
+    [Header("Prefab References")]
     [SerializeField]
     private AnimatedNumberIncrement _animatedNumberIncrementPrefab;
     [SerializeField]
     private AnimatedCoinCollect _animatedCoinCollectPrefab;
     [SerializeField]
     private LevelUpStarAnim _animatedLevelUpStarPrefab;
+    [SerializeField]
+    private Sprite defaultAvatarImage;
+    
+
 
     private Animator _anim;
-
     private Coroutine _xpBarUpdateCoroutine;
+    private CoinMultiplierStatus _coinMultipierStatus;
 
     private void Awake()
     {
@@ -44,8 +61,38 @@ public class MainScreen : MonoBehaviour
         AppManager.Instance.OnGemsUpdated += OnGemsUpdated;
         AppManager.Instance.OnUserXPUpdated += OnUserXPUpdated;
         AppManager.Instance.OnUserLevelUpdated += OnUserLevelUpdated;
+        AppManager.Instance.OnMultiplierActivated += OnMultiplierActivated;
+
+        InventoryService.Instance.OnItemEquipChange += OnItemEquipChange;
 
         UpdateAllUserStatUI(AppManager.Instance.userData);
+    }
+
+    private void OnMultiplierActivated(CoinMultiplierStatus status)
+    {
+        //update gameplay button to show that multiplier is active and set the cooldown
+        if (status.isActive)
+        {
+            //show multiplier status and update coin amount (which is user level) by multiplier
+            int newCoinAmountsToCollect = AppManager.Instance.userData.Level * status.multiplierAmount;
+            _collectCoinsBaseAmountText.text = newCoinAmountsToCollect.ToString();
+
+            //hide base collect message and show multiplier message and timer
+            _collectCoinsBaseMessageDisplay.SetActive(false);
+            _multiplierDisplay.gameObject.SetActive(true);
+            _multiplierDisplay.SetCountdownTimer(status.ActiveUntil, () =>
+            {
+                //on multiplier period ended toggle off multiplier (which leads back to this function with status.isActive being false)
+                AppManager.Instance.ToggleCoinMultiplier(false, -1);
+            });
+        }
+        else
+        {
+            _collectCoinsBaseMessageDisplay.SetActive(true);
+            _multiplierDisplay.gameObject.SetActive(false);
+
+            _collectCoinsBaseAmountText.text = AppManager.Instance.userData.Level.ToString();
+        }
     }
 
     private void OnUserLevelUpdated(int level, int xpToNextLevel, string statusName)
@@ -55,11 +102,15 @@ public class MainScreen : MonoBehaviour
         {
             _levelText.text = level.ToString();
         };
+
+        _collectCoinsBaseAmountText.text = level.ToString();
     }
 
     private void OnUserXPUpdated(int newXp)
     {
-        UpdateXPBarUI((float)newXp / (float)AppManager.Instance.userData.XPToNextLevel);
+        float fillAmount = (float)newXp / (float)AppManager.Instance.userData.XPToNextLevel;
+        fillAmount = Mathf.Clamp(fillAmount, 0f, 1f);
+        UpdateXPBarUI(fillAmount, 0.75f);
     }
 
     private void OnGemsUpdated(int newGems)
@@ -83,6 +134,39 @@ public class MainScreen : MonoBehaviour
         AppManager.Instance.OnGemsUpdated -= OnGemsUpdated;
         AppManager.Instance.OnUserXPUpdated -= OnUserXPUpdated;
         AppManager.Instance.OnUserLevelUpdated -= OnUserLevelUpdated;
+        AppManager.Instance.OnMultiplierActivated -= OnMultiplierActivated;
+
+        InventoryService.Instance.OnItemEquipChange -= OnItemEquipChange;
+    }
+
+    private async void OnItemEquipChange(UserItemData itemData)
+    {
+        Debug.Log("OnItemEquipChange: " + itemData.defId + " " + itemData.isEquipped);
+        if(itemData.defId == "gold_frame")
+        {
+            //equip gold frame
+            _goldAvatarFrameDisplay.SetActive(itemData.isEquipped);
+        }
+        if(itemData.equippableSlot == "ShirtSlot")
+        {
+            ProfileModal pModal = _profileModalAnim.GetComponent<ProfileModal>();
+            //this could be any color shirt
+            if (itemData.isEquipped)
+            {
+                Sprite newProfileImage = await ImageCacheService.Instance.GetImageAsync(itemData.imageUrl);
+                _avatarImage.sprite = newProfileImage;
+                _userProfileImage.sprite = newProfileImage;
+
+                //update profile image in profile modal
+                pModal.UpdateProfileImage(newProfileImage);
+            }
+            else
+            {
+                _avatarImage.sprite = defaultAvatarImage;
+                _userProfileImage.sprite = defaultAvatarImage;
+                pModal.UpdateProfileImage(defaultAvatarImage);
+            }
+        }
     }
 
     private void UpdateAllUserStatUI(UserData userData)
@@ -91,34 +175,50 @@ public class MainScreen : MonoBehaviour
         _gemsAmountText.text = userData.Gems.ToString();
         _levelText.text = userData.Level.ToString();
         float fillAmount = (float)userData.CurrentXP / (float)userData.XPToNextLevel;
+        fillAmount = Mathf.Clamp(fillAmount, 0f, 1f);
+
+        _collectCoinsBaseAmountText.text = userData.Level.ToString();
 
         Debug.Log("Initial xp bar fill amount " + fillAmount + " currentXp: " + userData.CurrentXP + " XPToNextLevel: "  + userData.XPToNextLevel) ;
-        UpdateXPBarUI(fillAmount);
+        UpdateXPBarUI(fillAmount, 0.25f);
+
+        string currentStoreId = InventoryService.GetPlatformStoreId();
+        switch (currentStoreId)
+        {
+            case "googlePlay":
+                _currentMarketplaceText.text = "Google Play";
+                break;
+            case "itunes":
+                _currentMarketplaceText.text = "Apple Store";
+                break;
+            case "windows":
+                _currentMarketplaceText.text = "Windows Store";
+                break;
+        }
     }
 
-    private void UpdateXPBarUI(float fillAmount)
+    private void UpdateXPBarUI(float fillAmount, float seconds)
     {
-        if(_xpBarUpdateCoroutine != null)
+        if (_xpBarUpdateCoroutine != null)
         {
             StopCoroutine(_xpBarUpdateCoroutine);
-            _xpBarUpdateCoroutine = StartCoroutine(UpdateXPBarUI_CR(fillAmount));
         }
-        else
-        {
-            _xpBarUpdateCoroutine = StartCoroutine(UpdateXPBarUI_CR(fillAmount));
-        }
+
+        _xpBarUpdateCoroutine = StartCoroutine(UpdateXPBarUI_CR(fillAmount, seconds));
     }
 
-    private IEnumerator UpdateXPBarUI_CR(float fillAmount)
+    private IEnumerator UpdateXPBarUI_CR(float fillAmount, float seconds)
     {
         float t = 0;
         float originalFill = _xpBar.fillAmount;
-        while(_xpBar.fillAmount != fillAmount)
+        while (t <= seconds)
         {
-            _xpBar.fillAmount = Mathf.Lerp(originalFill, fillAmount, t);
-            t += 0.01f;
+            _xpBar.fillAmount = Mathf.Lerp(originalFill, fillAmount, t / seconds);
+            t += Time.deltaTime;
             yield return null;
         }
+
+        _xpBar.fillAmount = fillAmount;
         //xp bar filled
     }
 
@@ -180,7 +280,12 @@ public class MainScreen : MonoBehaviour
 
     public void ToggleProfileModal(bool enabled)
     {
-        _profileModalAnim.SetBool("ShowModal", true);
+        _profileModalAnim.SetBool("ShowModal", enabled);
+    }
+
+    private void ToggleGoldenFrame(bool enabled)
+    {
+        _goldAvatarFrameDisplay.SetActive(enabled);
     }
 
     private void UpdateUserStatsDisplay()

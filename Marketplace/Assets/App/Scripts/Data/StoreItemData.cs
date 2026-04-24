@@ -12,6 +12,7 @@ public class StoreItemData
     public string defId;
     public string itemId;
     public string imageUrl;
+    public ItemType itemType;
     public Dictionary<CurrencyType, decimal> buyPrices;
     public CurrencyType rewardCurrency;
     public decimal currentPrice = 0.00m;

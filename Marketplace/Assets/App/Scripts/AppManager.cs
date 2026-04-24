@@ -10,9 +10,11 @@ using UnityEngine.SceneManagement;
 public class AppManager : MonoBehaviour
 {
     [SerializeField]
-    private LoadingOverlay _loadingOverlayPrefab;
+    private LoadingOverlay loadingOverlayPrefab;
     [SerializeField]
-    private DynamicCurrencyAnim _currencyAnimPrefab;
+    private DynamicCurrencyAnim currencyAnimPrefab;
+    [SerializeField]
+    private ViewItemModal viewItemModalPrefab;
 
     private LoadingOverlay _currentLoadingOverlay;
 
@@ -26,6 +28,7 @@ public class AppManager : MonoBehaviour
     public Action<int> OnUserXPUpdated;
     public Action<string> OnUsernameUpdated;
     public Action<UserData> OnStatsUpdated;
+    public Action<CoinMultiplierStatus> OnMultiplierActivated;
 
     private Canvas _appCanvas;
 
@@ -56,7 +59,7 @@ public class AppManager : MonoBehaviour
         
     }
 
-    public void ProcessUserData(string jsonResponse, Action OnComplete)
+    public void ProcessUserData(string jsonResponse, Action OnComplete, string loginUsername = null)
     {
         if(userData == null)
         {
@@ -82,6 +85,11 @@ public class AppManager : MonoBehaviour
                 {
                     Debug.Log("Setup User account: " + responseJson);
                 });
+
+            if (!string.IsNullOrEmpty(loginUsername))
+            {
+                UpdatePlayerNameOnServer(loginUsername);
+            }
         }
         
 
@@ -104,64 +112,24 @@ public class AppManager : MonoBehaviour
 
         userData.UpdateFromAuth(authResponse);
 
-        //fetch other player XP data
-        BCManager.Instance.BCWrapper.GamificationService.ReadAllGamification(true,
+        BCManager.Instance.BCWrapper.ScriptService.RunScript("GetUserXPData", "{}",
         (string xpJsonResponse, object cbObj) =>
         {
-            Debug.Log("[Gamification] " + xpJsonResponse);
-            var xpData = (JsonReader.Deserialize<Dictionary<string, object>>(xpJsonResponse)["data"] as Dictionary<string, object>)["xp"] as Dictionary<string, object>;
-            var xpLevelData = xpData["xpLevel"] as Dictionary<string, object>;
+            //script call was successful check if operation was successful
+            var responseData = (JsonReader.Deserialize<Dictionary<string, object>>(xpJsonResponse)["data"] as Dictionary<string, object>)["response"] as Dictionary<string, object>;
 
-            GamificationResponse gamificationResponse = new GamificationResponse()
-            {
-                XPCapped = Convert.ToBoolean(xpData["xpCapped"]),
-                CurrentXP = Convert.ToInt32(xpData["experiencePoints"]),
-                LevelStatusName = xpLevelData["statusTitle"] as string
-            };
+            userData.XPCapped = Convert.ToBoolean(responseData["xpCapped"]);
+            userData.CurrentXP = Convert.ToInt32(responseData["adjustedXp"]);
+            userData.TotalXP = Convert.ToInt32(responseData["totalExperiencePoints"]);
+            userData.LevelStatusName = responseData["statusTitle"] as string;
+            userData.Level = Convert.ToInt32(responseData["experienceLevel"]);
+            userData.XPToNextLevel = Convert.ToInt32(responseData["xpToNextLevel"]);
 
-            userData.UpdateFromGamification(gamificationResponse);
-
-            //TODO: In the future, XPToNextLevel will be added as a field in the response to the ReadAllGamification call,
-            //Therefore it will not be necessary at that point to get that info from ReadXpLevelsMetaData
-
-            if (!userData.XPCapped)
-            {
-                //we are not at the max level so we want to know how much to reach the next level
-                //Get the XPToNextLevel value
-                BCManager.Instance.BCWrapper.GamificationService.ReadXpLevelsMetaData(
-                    (string xpMetaDataResponse, object cbObj_xp) =>
-                    {
-                        var xpMetaData = (JsonReader.Deserialize<Dictionary<string, object>>(xpMetaDataResponse)["data"] as Dictionary<string, object>)["xp_levels"] as object[];
-
-                        int nextLevel = userData.Level + 1;
-                        int xpRequired = 0;
-                        foreach (Dictionary<string, object> level in xpMetaData)
-                        {
-                            if (Convert.ToInt32(level["level"]) == nextLevel)
-                            {
-                                xpRequired = Convert.ToInt32(level["experience"]);
-                                break;
-                            }
-                        }
-                        userData.UpdateXPToNextLevel(xpRequired);
-                        OnUserDataCollected();
-
-                    },
-                    (int status, int responseCode, string jsonErrorData, object _cb) =>
-                    {
-                        Debug.LogError("ReadXpLevelsMetaData failed: " + jsonErrorData);
-                        OnUserDataCollected();
-                    });
-            }
-            else
-            {
-                //we are at the max level so we don't need that data
-                OnUserDataCollected();
-            }
+            OnUserDataCollected();
         },
-        (int gamificationStatus, int gamificationRCode, string gamificationJsonResponse, object gamificationCb) =>
+        (int statusCode, int responseCode, string errorJson, object errorObj) =>
         {
-            Debug.LogError("ReadAllGamification failed: " + gamificationJsonResponse);
+            //still continue without the data we failed to collect
             OnUserDataCollected();
         });
 
@@ -193,7 +161,7 @@ public class AppManager : MonoBehaviour
             if (_currentLoadingOverlay == null)
             {
                 Canvas canvas = FindFirstObjectByType<Canvas>();
-                _currentLoadingOverlay = Instantiate(_loadingOverlayPrefab, canvas.transform, false);
+                _currentLoadingOverlay = Instantiate(loadingOverlayPrefab, canvas.transform, false);
                 _currentLoadingOverlay.SetLoadingType(loadingType);
                 _currentLoadingOverlay.loadingBar.OnLoadingComplete.AddListener(() => { OnLoadingComplete?.Invoke(); });
             }
@@ -228,6 +196,24 @@ public class AppManager : MonoBehaviour
         OnUsernameUpdated?.Invoke(userData.PlayerName);
     }
 
+    public void UpdatePlayerNameOnServer(string newPlayerName, Action onSuccess = null, Action<string> onFailure = null)
+    {
+        BCManager.Instance.BCWrapper.PlayerStateService.UpdateName(
+            newPlayerName,
+            (string responseJson, object cb) =>
+            {
+                UpdatePlayerName(newPlayerName);
+                onSuccess?.Invoke();
+            },
+            (int statusCode, int reasonCode, string errorJson, object cb) =>
+            {
+                var error = JsonReader.Deserialize<Dictionary<string, object>>(errorJson);
+                var message = error["status_message"] as string;
+                Debug.LogError($"Failed to update player name: {message}");
+                onFailure?.Invoke(message);
+            });
+    }
+
     public void UpdateCoinsAmount(int amount)
     {
         if(userData.Coins != amount)
@@ -235,6 +221,24 @@ public class AppManager : MonoBehaviour
             userData.Coins = amount;
             OnCoinsUpdated?.Invoke(userData.Coins);
         }
+    }
+
+    public void ConsumeCoins(int amount)
+    {
+        int newAmount = userData.Coins - amount;
+        if (newAmount < 0)
+        {
+            newAmount = 0;
+        }
+
+        UpdateCoinsAmount(newAmount);
+    }
+
+    public void AddCoins(int amount)
+    {
+        int newAmount = userData.Coins + amount;
+
+        UpdateCoinsAmount(newAmount);
     }
 
     public void UpdateGemsAmount(int amount)
@@ -246,13 +250,30 @@ public class AppManager : MonoBehaviour
         }
     }
 
+    public void ConsumeGems(int amount)
+    {
+        int newAmount = userData.Gems - amount;
+        if(newAmount < 0)
+        {
+            newAmount = 0;
+        }
+
+        UpdateGemsAmount(newAmount);
+    }
+
+    public void AddGems(int amount)
+    {
+        int newAmount = userData.Gems + amount;
+        UpdateGemsAmount(newAmount);
+    }
+
     public void UpdateUserLevel(int level, string levelName, int XPToNextLevel)
     {
         if(userData.Level != level)
         {
             userData.Level = level;
 
-            if (string.IsNullOrEmpty(levelName))
+            if (!string.IsNullOrEmpty(levelName))
             {
                 userData.LevelStatusName = levelName;
             }
@@ -269,11 +290,23 @@ public class AppManager : MonoBehaviour
         OnUserXPUpdated?.Invoke(userData.CurrentXP);
     }
 
+    public void ToggleCoinMultiplier(bool active, long activeUntil)
+    {
+        CoinMultiplierStatus multiplierStatus = new CoinMultiplierStatus
+        {
+            isActive = active,
+            ActiveUntil = activeUntil,
+            multiplierAmount = 2
+        };
+
+        OnMultiplierActivated?.Invoke(multiplierStatus);
+    }
+
     public void AnimateDynamicAward(RectTransform sourceRect, CurrencyType currencyType, Action onComplete)
     {
         FetchReferences();
 
-        DynamicCurrencyAnim awardAnim = Instantiate(_currencyAnimPrefab, _appCanvas.transform);
+        DynamicCurrencyAnim awardAnim = Instantiate(currencyAnimPrefab, _appCanvas.transform);
         awardAnim.UpdateIcon(currencyType);
 
         RectTransform awardAnimRect = awardAnim.GetComponent<RectTransform>();
@@ -298,6 +331,19 @@ public class AppManager : MonoBehaviour
         }
 
         StartCoroutine(MoveWorld(awardAnimRect, targetRect.position, 2f, onComplete));
+    }
+
+    public void SpawnViewItemModal(UserItemData data, UserItemCard card, Action onClosed)
+    {
+        if(_appCanvas == null)
+        {
+            FetchReferences();
+        }
+
+        ViewItemModal viewItemModal = Instantiate(viewItemModalPrefab, _appCanvas.transform);
+        viewItemModal.transform.localScale = Vector3.one;
+
+        viewItemModal.SetData(data, card, onClosed);
     }
 
     private IEnumerator MoveWorld(RectTransform rect, Vector3 targetPos, float duration, Action onComplete)

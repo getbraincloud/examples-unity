@@ -3,6 +3,14 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+public enum ItemType
+{
+    Freebie,
+    Item,
+    Bundle,
+    Multiplier,
+    Product
+}
 public enum CurrencyType
 {
     None = 0,
@@ -16,6 +24,7 @@ public class UserData
     public int Coins;
     public int Gems;
     public int CurrentXP;
+    public int TotalXP;
     public int Level;
     public int XPToNextLevel;
     public bool XPCapped;
@@ -31,18 +40,6 @@ public class UserData
         PlayerName = response.PlayerName;
         PictureUrl = response.PictureUrl;
     }
-
-    public void UpdateFromGamification(GamificationResponse response)
-    {
-        XPCapped = response.XPCapped;
-        CurrentXP = response.CurrentXP;
-        LevelStatusName = response.LevelStatusName;
-    }
-
-    public void UpdateXPToNextLevel(int XPToNextLevel)
-    {
-        this.XPToNextLevel = XPToNextLevel;
-    }
 }
 public class AuthResponse
 {
@@ -52,6 +49,11 @@ public class AuthResponse
     public CurrencyData Currency { get; set; }
 }
 
+public class ItemSlot
+{
+    public string slotName;
+    public string equippedItemId;
+}
 
 public class CurrencyData
 {
@@ -60,11 +62,11 @@ public class CurrencyData
 
 }
 
-public class GamificationResponse
+public class CoinMultiplierStatus
 {
-    public bool XPCapped { get; set; }
-    public string LevelStatusName { get; set; }
-    public int CurrentXP { get; set; }
+    public long ActiveUntil { get; set; }
+    public bool isActive { get; set; }
+    public int multiplierAmount { get; set; }
 }
 
 [Serializable]

@@ -1,0 +1,62 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  var currencyService = bridge.getVirtualCurrencyServiceProxy();
+  //get user level to award amount equal to user level
+  var gamificationService = bridge.getGamificationServiceProxy();
+  var playerStateService = bridge.getPlayerStateServiceProxy();
+  var userGamificationData = gamificationService.readAllGamification(false);
+
+  var CoinsMultiplierStatus = playerStateService.getUserStatus("coin_multiplier");
+  var multiply = false;
+
+  if(!isEmptyObject(CoinsMultiplierStatus.data)){
+    //Multiplier status active
+    multiply = true;
+  }
+
+  if (userGamificationData.status !== 200) 
+  {
+      response.status = userGamificationData.status;
+      response.error = "Failed to read user gamification data";
+      return response;
+  }
+
+  if(userGamificationData.data && userGamificationData.data.xp){
+    var xpData = userGamificationData.data.xp;
+    var userLevel = xpData.experienceLevel;
+
+    if(multiply){
+      userLevel *= 2;
+    }
+
+    var result = currencyService.awardCurrency("Coins", userLevel);
+    
+    if(result.status == 200)
+    {
+      response = result.data.currencyMap.Coins.balance;
+    }
+  }
+
+  
+
+
+  return response;
+}
+
+function isEmptyObject(obj)
+{
+    for (var key in obj)
+    {
+        if (obj.hasOwnProperty(key))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+main();

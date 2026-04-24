@@ -43,6 +43,8 @@ public class ProfileModal : MonoBehaviour
         _updateProfileButton.onClick.AddListener(OnUpdateProfileButtonClicked);
         _restorePurchasesButton.onClick.AddListener(OnRestorePurchasesButtonClicked);
         _logoutButton.onClick.AddListener(OnLogoutButtonClicked);
+
+        _usernameInputField.text = AppManager.Instance.userData.PlayerName;
     }
     private void OnDisable()
     {
@@ -50,6 +52,11 @@ public class ProfileModal : MonoBehaviour
         _updateProfileButton.onClick.RemoveAllListeners();
         _restorePurchasesButton.onClick.RemoveAllListeners();
         _logoutButton.onClick.RemoveAllListeners();
+    }
+
+    public void UpdateProfileImage(Sprite image)
+    {
+        _profileImage.sprite = image;
     }
 
     private void OnLogoutButtonClicked()
@@ -74,7 +81,11 @@ public class ProfileModal : MonoBehaviour
 
     private void OnUpdateProfileButtonClicked()
     {
-        throw new NotImplementedException();
+        AppManager.Instance.UpdatePlayerNameOnServer(_usernameInputField.text, () =>
+        {
+            //on success
+
+        });
     }
 
     private void OnCloseButtonClicked()

@@ -1,0 +1,51 @@
+"use strict";
+// BuyMultiplier (VSCode created Script) 
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var userItemsService = bridge.getUserItemsServiceProxy();
+  var purchaseMultiplier = userItemsService.purchaseUserItem("coin_multiplier", 1, "", true);
+
+  if(purchaseMultiplier.status !== 200){
+    response.error = true;
+    response.message = "Failed to purchase item";
+    response.errorMessage = purchaseMultiplier.status_message;
+
+    return response;
+  }
+  
+  //lets get the user item id that we just purchased
+  var items = purchaseMultiplier.data.items;
+  
+  response.currencySpent = purchaseMultiplier.data.currencySpent;
+
+  var itemId = null;
+  var itemObj = null;
+
+  for (var key in items) {
+      if (items.hasOwnProperty(key)) {
+          itemId = key;        // "d9e50f3b-cabb-4adc-8811-9ca97aac6570"
+          //itemObj = items[key]; // full item object not necessary for this but maybe for the future
+          break; // assuming only one item
+      }
+  }
+
+  var useMultiplier = userItemsService.useUserItem(itemId, -1, {"used":true}, true);
+  if(useMultiplier.status !== 200){
+    response.error = true;
+    response.message = "Failed to use item";
+    response.errorMessage = useMultiplier.status_message;
+
+    return response;
+  }
+
+  response.used = useMultiplier.data.used;
+  response.activeUntil = useMultiplier.data.statusEffects.activeUntil;
+
+  return response;
+}
+
+main();

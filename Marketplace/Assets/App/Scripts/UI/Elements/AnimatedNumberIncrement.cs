@@ -31,7 +31,15 @@ public class AnimatedNumberIncrement : MonoBehaviour
 
     public void SetAmountUI(int amount)
     {
-        _text.text = "+" + amount.ToString();
+        if(amount > 0)
+        {
+            _text.text = "+" + amount.ToString();
+        }else if(amount < 0)
+        {
+            _text.text = amount.ToString();
+            _text.color = Color.red;
+        }
+        
     }
 
     public void OnAnimationComplete()

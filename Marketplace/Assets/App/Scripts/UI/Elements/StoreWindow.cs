@@ -16,20 +16,19 @@ public class StoreWindow : MonoBehaviour
     void Start()
     {
         _sections = new Dictionary<string, ItemSection>();
-        FetchUserItems();
+        FetchStoreItems();
     }
 
-    private void FetchUserItems()
+    private void FetchStoreItems()
     {
-        InventoryService.Instance.GetAllUserItems((List<StoreItemData> items) =>
+        InventoryService.Instance.FetchStoreItems(InventoryService.GetPlatformStoreId(), (List<StoreItemData> items) =>
         {
             ProcessItems(items);
         }, (string error) =>
         {
-            Debug.LogError("Couldn't get user items: " + error);
+            Debug.LogError("Couldn't get store items: " + error);
         });
     }
-
 
     private void ProcessItems(List<StoreItemData> items)
     {
@@ -50,6 +49,5 @@ public class StoreWindow : MonoBehaviour
                 newSection.AddStoreItem(item);
             }
         }
-        
     }
 }
