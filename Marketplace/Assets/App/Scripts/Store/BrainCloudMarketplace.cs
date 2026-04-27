@@ -18,8 +18,10 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
     private const string APP_STORE =
 #if UNITY_ANDROID
         "googlePlay";
-#elif UNITY_IOS
+#elif UNITY_IOS || UNITY_STANDALONE_OSX
         "itunes";
+#elif UNITY_STANDALONE_WIN
+        "steam";
 #else
         "";
 #endif
@@ -32,6 +34,7 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
     private static Action<BCProduct[]> onProcessingFinished = null;
     private static BCProduct[] bcIventory = null;
     private static string _pendingGooglePurchaseToken = null;
+    private static string _pendingAppleReceipt = null;
 
     /// <summary>
     /// True once Unity IAP has successfully initialized with products from brainCloud.
@@ -254,7 +257,9 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
         if (InternalCheckNotInitialized())
             return false;
 
-#if !UNITY_EDITOR
+        // Unity IAP's SubscriptionManager is only supported on iOS and Google Play.
+        // For macOS and Windows, use InventoryService.GetNoAdsSubscriptionStatus instead.
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
         if (controller.products.WithID(id) is Product subscription &&
             subscription.definition.type == ProductType.Subscription && subscription.hasReceipt)
         {
@@ -389,12 +394,31 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
                                                               () => InternalInvokeCallback(null)));
 
         return PurchaseProcessingResult.Pending;
-#elif !UNITY_EDITOR && UNITY_IOS
+#elif !UNITY_EDITOR && (UNITY_IOS || UNITY_STANDALONE_OSX)
+        string appleReceipt = json["Payload"].ToString();
+
+        if (product.definition.id == "no_ads")
+            _pendingAppleReceipt = appleReceipt;
+
         bc.AppStoreService.VerifyPurchase(APP_STORE,
                                           JsonWriter.Serialize(new Dictionary<string, object>
                                           {
-                                              { "receipt",                json["Payload"] },
-                                              { "excludeOldTransactions", false           }
+                                              { "receipt",                appleReceipt },
+                                              { "excludeOldTransactions", false        }
+                                          }),
+                                          OnVerifyPurchasesSuccess,
+                                          OnBrainCloudFailure("Unable to verify purchase(s) with brainCloud!",
+                                                              () => InternalInvokeCallback(null)));
+
+        return PurchaseProcessingResult.Pending;
+#elif !UNITY_EDITOR && UNITY_STANDALONE_WIN
+        json = JsonReader.Deserialize<Dictionary<string, object>>(json["Payload"].ToString());
+
+        bc.AppStoreService.VerifyPurchase(APP_STORE,
+                                          JsonWriter.Serialize(new Dictionary<string, object>
+                                          {
+                                              { "orderId", json["orderId"] },
+                                              { "token",   json["token"]   }
                                           }),
                                           OnVerifyPurchasesSuccess,
                                           OnBrainCloudFailure("Unable to verify purchase(s) with brainCloud!",
@@ -495,6 +519,17 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
                                 false,
                                 (_, __) => Debug.Log("Saved googlePurchaseToken_no_ads to user attributes."),
                                 (_, __, jsonError, ___) => Debug.LogError($"Failed to save googlePurchaseToken_no_ads: {jsonError}"));
+                        }
+#elif UNITY_IOS || UNITY_STANDALONE_OSX
+                        if (productId == "no_ads" && !string.IsNullOrEmpty(_pendingAppleReceipt))
+                        {
+                            string receipt = _pendingAppleReceipt;
+                            _pendingAppleReceipt = null;
+                            bc.PlayerStateService.UpdateAttributes(
+                                JsonWriter.Serialize(new Dictionary<string, object> { { "appleReceipt_no_ads", receipt } }),
+                                false,
+                                (_, __) => Debug.Log("Saved appleReceipt_no_ads to user attributes."),
+                                (_, __, jsonError, ___) => Debug.LogError($"Failed to save appleReceipt_no_ads: {jsonError}"));
                         }
 #endif
                         break;

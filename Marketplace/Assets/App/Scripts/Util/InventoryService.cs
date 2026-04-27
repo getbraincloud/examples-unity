@@ -36,9 +36,12 @@ public class InventoryService : MonoBehaviour
                 return "googlePlay";
             case RuntimePlatform.IPhonePlayer:
                 return "itunes";
+            case RuntimePlatform.OSXPlayer:
+            case RuntimePlatform.OSXEditor:
+                return "itunes";
             case RuntimePlatform.WindowsPlayer:
             case RuntimePlatform.WindowsEditor:
-                return "windows";
+                return "steam";
             case RuntimePlatform.WSAPlayerX86:
             case RuntimePlatform.WSAPlayerX64:
             case RuntimePlatform.WSAPlayerARM:
@@ -435,30 +438,76 @@ public class InventoryService : MonoBehaviour
 
     public void GetNoAdsSubscriptionStatus(Action<bool, long> onComplete)
     {
+#if UNITY_ANDROID
         BCManager.Instance.BCWrapper.ScriptService.RunScript(
             "VerifyGoogleSubscription",
             "{}",
             (string responseJson, object cbObject) =>
             {
-                var root = JsonReader.Deserialize<Dictionary<string, object>>(responseJson);
-                var data = root["data"] as Dictionary<string, object>;
-                var response = data["response"] as Dictionary<string, object>;
-
-                bool error = Convert.ToBoolean(response["error"]);
-                if (error)
-                {
-                    onComplete?.Invoke(false, 0);
-                    return;
-                }
-
-                bool isActive = Convert.ToBoolean(response["isActive"]);
-                long expiryTimeMs = isActive ? Convert.ToInt64(response["expiryTimeMs"]) : 0;
-                onComplete?.Invoke(isActive, expiryTimeMs);
+                ParseSubscriptionScriptResponse(responseJson, onComplete);
             },
             (int statusCode, int responseCode, string errorJson, object errorCb) =>
             {
                 onComplete?.Invoke(false, 0);
             });
+#elif UNITY_IOS || UNITY_STANDALONE_OSX
+        // Fetch the receipt we stored at purchase time from BC user attributes,
+        // then forward it to the VerifyAppleSubscription cloud script.
+        BCManager.Instance.BCWrapper.PlayerStateService.GetAttributes(
+            (string attrResponseJson, object cbObject) =>
+            {
+                var attrRoot = JsonReader.Deserialize<Dictionary<string, object>>(attrResponseJson);
+                var attrData = attrRoot["data"] as Dictionary<string, object>;
+                var attributes = attrData["attributes"] as Dictionary<string, object>;
+
+                if (attributes == null || !attributes.ContainsKey("appleReceipt_no_ads"))
+                {
+                    onComplete?.Invoke(false, 0);
+                    return;
+                }
+
+                string receipt = attributes["appleReceipt_no_ads"] as string;
+                var scriptData = new Dictionary<string, object> { { "receiptData", receipt } };
+
+                BCManager.Instance.BCWrapper.ScriptService.RunScript(
+                    "VerifyAppleSubscription",
+                    JsonWriter.Serialize(scriptData),
+                    (string responseJson, object scriptCbObject) =>
+                    {
+                        ParseSubscriptionScriptResponse(responseJson, onComplete);
+                    },
+                    (int statusCode, int responseCode, string errorJson, object errorCb) =>
+                    {
+                        onComplete?.Invoke(false, 0);
+                    });
+            },
+            (int statusCode, int responseCode, string errorJson, object errorCb) =>
+            {
+                onComplete?.Invoke(false, 0);
+            });
+#else
+        // Steam does not have a subscription model for in-game content;
+        // no_ads on Steam is a non-consumable one-time purchase.
+        onComplete?.Invoke(false, 0);
+#endif
+    }
+
+    private static void ParseSubscriptionScriptResponse(string responseJson, Action<bool, long> onComplete)
+    {
+        var root = JsonReader.Deserialize<Dictionary<string, object>>(responseJson);
+        var data = root["data"] as Dictionary<string, object>;
+        var response = data["response"] as Dictionary<string, object>;
+
+        bool error = Convert.ToBoolean(response["error"]);
+        if (error)
+        {
+            onComplete?.Invoke(false, 0);
+            return;
+        }
+
+        bool isActive = Convert.ToBoolean(response["isActive"]);
+        long expiryTimeMs = isActive ? Convert.ToInt64(response["expiryTimeMs"]) : 0;
+        onComplete?.Invoke(isActive, expiryTimeMs);
     }
 
     public void GetUserInventoryItems(Action<List<UserItemData>> onSuccess, Action<string> onFailure)
