@@ -141,6 +141,27 @@ public class InventoryService : MonoBehaviour
             var dict = productsArray[i] as Dictionary<string, object>;
             var priceDict = dict["priceData"] as Dictionary<string, object>;
 
+            // "id" is present for Android (Google Play ID); iOS uses an "ids" array instead.
+            string priceId = priceDict.ContainsKey("id") ? priceDict["id"] as string : null;
+
+            // Parse the "ids" array used by iOS (each entry has "appId" and "itunesId").
+            Dictionary<string, string>[] idsArray = null;
+            if (priceDict.ContainsKey("ids") && priceDict["ids"] is object[] rawIds)
+            {
+                idsArray = new Dictionary<string, string>[rawIds.Length];
+                for (int j = 0; j < rawIds.Length; j++)
+                {
+                    var rawEntry = rawIds[j] as Dictionary<string, object>;
+                    var entry = new Dictionary<string, string>();
+                    if (rawEntry != null)
+                    {
+                        foreach (var kvp in rawEntry)
+                            entry[kvp.Key] = kvp.Value as string;
+                    }
+                    idsArray[j] = entry;
+                }
+            }
+
             result[i] = new BCProduct
             {
                 itemId   = dict["itemId"] as string,
@@ -150,7 +171,8 @@ public class InventoryService : MonoBehaviour
                 payload  = dict.ContainsKey("payload")  ? dict["payload"] as string  : null,
                 priceData = new BCPriceData
                 {
-                    id = priceDict["id"] as string,
+                    id = priceId,
+                    ids = idsArray,
                     referencePrice = Convert.ToInt32(priceDict["referencePrice"]),
                     isPromotion = Convert.ToBoolean(priceDict["isPromotion"])
                 }
@@ -192,7 +214,9 @@ public class InventoryService : MonoBehaviour
                 ? Convert.ToDecimal(defaultPriceData["referencePrice"]) / 100m
                 : 0m;
 
-            string storeProductId = priceData != null ? priceData["id"] as string : productDict["itemId"] as string;
+            string storeProductId = (priceData != null && priceData.ContainsKey("id"))
+                ? priceData["id"] as string
+                : productDict["itemId"] as string;
 
             string productItemId = productDict["itemId"] as string;
             string productImageUrl = productDict["imageUrl"] as string;
