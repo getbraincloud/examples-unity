@@ -396,19 +396,38 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
         return PurchaseProcessingResult.Pending;
 #elif !UNITY_EDITOR && (UNITY_IOS || UNITY_STANDALONE_OSX)
         string appleReceipt = json["Payload"].ToString();
+        string iapProductId  = product.definition.id;
 
-        if (product.definition.id == "no_ads")
+        if (iapProductId == "no_ads")
             _pendingAppleReceipt = appleReceipt;
 
-        bc.AppStoreService.VerifyPurchase(APP_STORE,
-                                          JsonWriter.Serialize(new Dictionary<string, object>
-                                          {
-                                              { "receipt",                appleReceipt },
-                                              { "excludeOldTransactions", false        }
-                                          }),
-                                          OnVerifyPurchasesSuccess,
-                                          OnBrainCloudFailure("Unable to verify purchase(s) with brainCloud!",
-                                                              () => InternalInvokeCallback(null)));
+        // CachePurchasePayloadContext must be called before VerifyPurchase on Apple platforms.
+        // PurchaseProduct handles this for user-initiated purchases, but Unity IAP can also
+        // replay pending transactions at startup (ones that were never confirmed), which
+        // arrive here directly without going through PurchaseProduct first. Calling it here
+        // every time covers both cases — for a normal purchase it's a harmless second write
+        // of the same data; for a replayed transaction it's the step that was missing.
+        BCProduct bcProduct  = FindInInventoryByProductId(iapProductId);
+        string    payload    = bcProduct?.payload ?? string.Empty;
+
+        bc.AppStoreService.CachePurchasePayloadContext(
+            APP_STORE,
+            iapProductId,
+            payload,
+            (string _, object __) =>
+            {
+                bc.AppStoreService.VerifyPurchase(APP_STORE,
+                                                  JsonWriter.Serialize(new Dictionary<string, object>
+                                                  {
+                                                      { "receipt",                appleReceipt },
+                                                      { "excludeOldTransactions", false        }
+                                                  }),
+                                                  OnVerifyPurchasesSuccess,
+                                                  OnBrainCloudFailure("Unable to verify purchase(s) with brainCloud!",
+                                                                      () => InternalInvokeCallback(null)));
+            },
+            OnBrainCloudFailure("Unable to cache purchase payload context on brainCloud!",
+                                () => InternalInvokeCallback(null)));
 
         return PurchaseProcessingResult.Pending;
 #elif !UNITY_EDITOR && UNITY_STANDALONE_WIN
@@ -630,6 +649,17 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
     {
         onProcessingFinished?.Invoke(cbResult);
         onProcessingFinished = null;
+    }
+
+    private static BCProduct FindInInventoryByProductId(string iapProductId)
+    {
+        if (bcIventory == null) return null;
+        foreach (var p in bcIventory)
+        {
+            try { if (p.GetProductID() == iapProductId) return p; }
+            catch { /* skip malformed product entries */ }
+        }
+        return null;
     }
 
     private static void InternalDispose()
