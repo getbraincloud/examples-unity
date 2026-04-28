@@ -26,6 +26,7 @@ public class PlayerInventory : MonoBehaviour
         InventoryService.Instance.OnItemSold += OnItemSold;
         InventoryService.Instance.OnItemBought += FetchUserItems;
         InventoryService.Instance.OnItemEquipChange += UpdateItemsEquipped;
+        InventoryService.Instance.OnSubscriptionExpired += OnSubscriptionExpired;
     }
 
     private void OnDisable()
@@ -33,6 +34,7 @@ public class PlayerInventory : MonoBehaviour
         InventoryService.Instance.OnItemSold -= OnItemSold;
         InventoryService.Instance.OnItemBought -= FetchUserItems;
         InventoryService.Instance.OnItemEquipChange -= UpdateItemsEquipped;
+        InventoryService.Instance.OnSubscriptionExpired -= OnSubscriptionExpired;
     }
 
     private void OnItemSold(UserItemData data)
@@ -43,6 +45,16 @@ public class PlayerInventory : MonoBehaviour
         {
             _items.Remove(data.itemId);
             Destroy(itemCard.gameObject);
+        }
+    }
+
+    private void OnSubscriptionExpired()
+    {
+        UserItemCard card = GetItemCardByItemId("subscription_no_ads");
+        if (card != null)
+        {
+            _items.Remove("subscription_no_ads");
+            Destroy(card.gameObject);
         }
     }
 

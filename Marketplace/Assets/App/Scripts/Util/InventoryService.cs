@@ -1,5 +1,6 @@
 using BrainCloud.JsonFx.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Purchasing.MiniJSON;
@@ -11,9 +12,11 @@ public class InventoryService : MonoBehaviour
     public Action<UserItemData> OnItemEquipChange;
     public Action<UserItemData> OnItemSold;
     public Action OnItemBought;
+    public Action OnSubscriptionExpired;
 
     private Dictionary<string, string> _itemSlots;
     private string _noAdsImageUrl = null;
+    private Coroutine _subscriptionExpiryWatcher;
 
     private void Awake()
     {
@@ -492,6 +495,46 @@ public class InventoryService : MonoBehaviour
 #endif
     }
 
+    private void StartSubscriptionExpiryWatcher(long expiryTimeMs)
+    {
+        if (_subscriptionExpiryWatcher != null)
+            StopCoroutine(_subscriptionExpiryWatcher);
+
+        _subscriptionExpiryWatcher = StartCoroutine(SubscriptionExpiryWatcherCoroutine(expiryTimeMs));
+    }
+
+    private IEnumerator SubscriptionExpiryWatcherCoroutine(long expiryTimeMs)
+    {
+        // Sleep in 60-second realtime chunks. Using WaitForSecondsRealtime means the
+        // wait is unaffected by Time.timeScale, and re-checking every 60 seconds means
+        // we correctly detect expiry shortly after the app resumes from suspension
+        // (Time.unscaledTime doesn't advance while the app is suspended).
+        while (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < expiryTimeMs)
+        {
+            long msRemaining = expiryTimeMs - DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            float waitSeconds = Mathf.Min((float)(msRemaining / 1000.0), 60f);
+            yield return new WaitForSecondsRealtime(waitSeconds);
+        }
+
+        Debug.Log("[InventoryService] Subscription expiry time reached — re-verifying...");
+
+        GetNoAdsSubscriptionStatus((isActive, newExpiryMs) =>
+        {
+            if (!isActive)
+            {
+                Debug.Log("[InventoryService] Subscription confirmed expired.");
+                _subscriptionExpiryWatcher = null;
+                OnSubscriptionExpired?.Invoke();
+            }
+            else
+            {
+                // Subscription was renewed — restart the watcher with the new expiry time.
+                Debug.Log("[InventoryService] Subscription renewed, restarting expiry watcher.");
+                StartSubscriptionExpiryWatcher(newExpiryMs);
+            }
+        });
+    }
+
     private static void ParseSubscriptionScriptResponse(string responseJson, Action<bool, long> onComplete)
     {
         var root = JsonReader.Deserialize<Dictionary<string, object>>(responseJson);
@@ -540,6 +583,7 @@ public class InventoryService : MonoBehaviour
                                 isSubscription = true,
                                 subscriptionExpiryMs = expiryTimeMs
                             });
+                            StartSubscriptionExpiryWatcher(expiryTimeMs);
                         }
                         onSuccess?.Invoke(items);
                     });
