@@ -8,12 +8,12 @@ PlayerSettings:
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
-  defaultScreenOrientation: 0
+  defaultScreenOrientation: 2
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: YourCompany
-  productName: Marketplace
+  companyName: braincloud
+  productName: marketplace
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.08627451, g: 0.14509805, b: 0.2901961, a: 1}
@@ -170,7 +170,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.YourCompany.Marketplace
     Standalone: com.YourCompany.Marketplace
-    iPhone: com.YourCompany.Marketplace
+    iPhone: com.braincloud.marketplace
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -561,6 +561,9 @@ PlayerSettings:
   m_BuildTargetDefaultTextureCompressionFormat:
   - serializedVersion: 3
     m_BuildTarget: Android
+    m_Formats: 03000000
+  - serializedVersion: 3
+    m_BuildTarget: iOS
     m_Formats: 03000000
   playModeTestRunnerEnabled: 0
   runPlayModeTestAsEditModeTest: 0
