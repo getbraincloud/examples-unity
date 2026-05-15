@@ -113,6 +113,8 @@ public class ViewItemModal : MonoBehaviour
         {
             _data.isEquipped = success ? !_data.isEquipped : _data.isEquipped;
             _itemCardRef.SetUserItemData(_data);
+            if (!_data.isEquipped)
+                InventoryService.Instance.OnItemEquipChange?.Invoke(_data);
             equipButtonText.text = _data.isEquipped ? "Unequip" : "Equip";
             _cg.interactable = true;
         });

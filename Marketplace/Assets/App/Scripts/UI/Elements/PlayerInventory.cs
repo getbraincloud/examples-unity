@@ -24,7 +24,8 @@ public class PlayerInventory : MonoBehaviour
     private void OnEnable()
     {
         InventoryService.Instance.OnItemSold += OnItemSold;
-        InventoryService.Instance.OnItemBought += FetchUserItems;
+        InventoryService.Instance.OnItemBought += FetchUserItemsPreserveEquipped;
+        InventoryService.Instance.OnSingleItemBought += AddSingleItem;
         InventoryService.Instance.OnItemEquipChange += UpdateItemsEquipped;
         InventoryService.Instance.OnSubscriptionExpired += OnSubscriptionExpired;
     }
@@ -32,7 +33,8 @@ public class PlayerInventory : MonoBehaviour
     private void OnDisable()
     {
         InventoryService.Instance.OnItemSold -= OnItemSold;
-        InventoryService.Instance.OnItemBought -= FetchUserItems;
+        InventoryService.Instance.OnItemBought -= FetchUserItemsPreserveEquipped;
+        InventoryService.Instance.OnSingleItemBought -= AddSingleItem;
         InventoryService.Instance.OnItemEquipChange -= UpdateItemsEquipped;
         InventoryService.Instance.OnSubscriptionExpired -= OnSubscriptionExpired;
     }
@@ -81,6 +83,22 @@ public class PlayerInventory : MonoBehaviour
         }
 
         return cards;
+    }
+
+    private void AddSingleItem(UserItemData item)
+    {
+        ProcessItems(new List<UserItemData> { item });
+    }
+
+    private void FetchUserItemsPreserveEquipped()
+    {
+        InventoryService.Instance.GetUserInventoryItems((List<UserItemData> items) =>
+        {
+            ProcessItems(items);
+        }, (string error) =>
+        {
+            Debug.LogError("Could not get user items " + error);
+        }, refreshEquipped: false);
     }
 
     private void FetchUserItems()

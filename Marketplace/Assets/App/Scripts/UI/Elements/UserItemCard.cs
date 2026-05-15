@@ -45,8 +45,8 @@ public class UserItemCard : MonoBehaviour
     public void SetUserItemData(UserItemData data)
     {
         _data = data;
-        if (_data.isEquippable)
-        {   
+        if (_data.isEquippable && _data.isEquipped)
+        {
             InventoryService.Instance.OnItemEquipChange(_data);
         }
         UpdateUI();

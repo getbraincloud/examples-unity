@@ -12,6 +12,7 @@ public class InventoryService : MonoBehaviour
     public Action<UserItemData> OnItemEquipChange;
     public Action<UserItemData> OnItemSold;
     public Action OnItemBought;
+    public Action<UserItemData> OnSingleItemBought;
     public Action OnSubscriptionExpired;
 
     private Dictionary<string, string> _itemSlots;
@@ -553,12 +554,11 @@ public class InventoryService : MonoBehaviour
         onComplete?.Invoke(isActive, expiryTimeMs);
     }
 
-    public void GetUserInventoryItems(Action<List<UserItemData>> onSuccess, Action<string> onFailure)
+    public void GetUserInventoryItems(Action<List<UserItemData>> onSuccess, Action<string> onFailure, bool refreshEquipped = true)
     {
         List<UserItemData> allItems = new List<UserItemData>();
 
-        //get equipped items first to define which items are equipped or not
-        GetEquippedItems((equippedSlots) =>
+        void fetchItems()
         {
             Debug.Log("Equipped slots: " + JsonWriter.Serialize(_itemSlots));
             FetchInventoryItemPageRecursive(
@@ -590,7 +590,12 @@ public class InventoryService : MonoBehaviour
                 },
                 onFailure: onFailure
             );
-        });
+        }
+
+        if (refreshEquipped)
+            GetEquippedItems((_) => fetchItems());
+        else
+            fetchItems();
     }
 
     private void FetchInventoryItemPageRecursive(
@@ -745,6 +750,65 @@ public class InventoryService : MonoBehaviour
         };
     }
 
+    public UserItemData ParseGainedItem(string gainedItemId, Dictionary<string, object> gainedItemDict)
+    {
+        if (gainedItemDict == null) return null;
+
+        var itemDef = gainedItemDict["itemDef"] as Dictionary<string, object>;
+        if (itemDef == null) return null;
+
+        string itemCategory = itemDef["category"] as string;
+        if (itemCategory == "Freebies") return null;
+
+        var meta = itemDef.ContainsKey("meta") ? itemDef["meta"] as Dictionary<string, object> : null;
+
+        bool isEquippable = false;
+        string equippableSlot = "";
+        if (meta != null && meta.ContainsKey("equippable"))
+        {
+            string equippableStr = meta["equippable"] as string;
+            isEquippable = string.Equals(equippableStr, "true", StringComparison.OrdinalIgnoreCase);
+            equippableSlot = meta["equippableSlot"] as string;
+        }
+
+        var sellPriceData = itemDef["sellPrice"] as Dictionary<string, object>;
+        CurrencyType sellCurrencyType = CurrencyType.None;
+        int sellAmount = 0;
+        if (sellPriceData != null)
+        {
+            foreach (var kvp in sellPriceData)
+            {
+                if (Enum.TryParse(kvp.Key, out CurrencyType currency))
+                {
+                    sellCurrencyType = currency;
+                    sellAmount = Convert.ToInt32(kvp.Value);
+                }
+            }
+        }
+
+        string itemId = gainedItemId ?? (gainedItemDict.ContainsKey("itemId") ? gainedItemDict["itemId"] as string : null);
+        if (string.IsNullOrEmpty(itemId)) return null;
+
+        return new UserItemData
+        {
+            itemId = itemId,
+            defId = gainedItemDict.ContainsKey("defId") ? gainedItemDict["defId"] as string : string.Empty,
+            itemName = itemDef["name"] as string,
+            description = itemDef["desc"] as string,
+            category = itemCategory,
+            imageUrl = itemDef["image"] as string,
+            quantity = gainedItemDict.ContainsKey("quantity") ? Convert.ToInt32(gainedItemDict["quantity"]) : 1,
+            isEquippable = isEquippable,
+            equippableSlot = equippableSlot,
+            isEquipped = false,
+            isSellable = sellCurrencyType != CurrencyType.None,
+            sellCurrency = sellCurrencyType,
+            sellAmount = sellAmount,
+            isStackable = Convert.ToBoolean(itemDef["stackable"]),
+            maxStackable = Convert.ToInt32(itemDef["maxStackable"])
+        };
+    }
+
     public void ToggleItemEquipped(UserItemData item, bool equip, Action<bool> onComplete)
     {
         Dictionary<string, object> scriptData = new();
@@ -759,6 +823,15 @@ public class InventoryService : MonoBehaviour
                 var response = root["response"] as Dictionary<string, object>;
 
                 bool opSuccess = Convert.ToBoolean(response["success"]);
+
+                if (opSuccess)
+                {
+                    if (equip)
+                        _itemSlots[item.equippableSlot] = item.itemId;
+                    else if (_itemSlots.ContainsKey(item.equippableSlot) && _itemSlots[item.equippableSlot] == item.itemId)
+                        _itemSlots.Remove(item.equippableSlot);
+                }
+
                 onComplete?.Invoke(opSuccess);
             },
             (int statusCode, int errorCode, string errorJson, object errorObj) =>

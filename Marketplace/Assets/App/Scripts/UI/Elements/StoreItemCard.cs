@@ -336,9 +336,14 @@ public class StoreItemCard : MonoBehaviour
                         {
                             UpdateSpentCurrency(response);
 
-                            //update user inventory with new item - if item is equippable (get that from meta data) then auto-equip it
-                            InventoryService.Instance.OnItemBought();
+                            string gainedItemId = response.ContainsKey("gainedItemId") ? response["gainedItemId"] as string : null;
+                            var gainedItemDict = response.ContainsKey("gainedItem") ? response["gainedItem"] as Dictionary<string, object> : null;
+                            UserItemData newItem = InventoryService.Instance.ParseGainedItem(gainedItemId, gainedItemDict);
 
+                            if (newItem != null)
+                                InventoryService.Instance.OnSingleItemBought?.Invoke(newItem);
+                            else
+                                InventoryService.Instance.OnItemBought?.Invoke();
                         }
                     });
 

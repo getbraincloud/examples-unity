@@ -1,0 +1,180 @@
+/**
+ * Cloud Code Script: verifyAppleSubscription
+ *
+ * Verifies the current user's "no_ads" Apple subscription by:
+ *   1. Sending the iOS receipt to Apple's verifyReceipt endpoint
+ *   2. Scanning the returned transactions for the no_ads product
+ *   3. Checking whether the latest transaction is still within its expiry date
+ *
+ * Uses Apple's legacy verifyReceipt API — no JWT signing or crypto required.
+ *
+ * ── PRE-REQUISITES ────────────────────────────────────────────────────────
+ * 1. In App Store Connect → Your App → General → App Information, scroll to
+ *    "App-Specific Shared Secret" and generate one. Store it in:
+ *      brainCloud → Design → Cloud Code → Global Properties
+ *        appleSharedSecret → <your shared secret>
+ *
+ * 2. In brainCloud → Design → Cloud Code → Web Services, create TWO entries:
+ *      Name / code : appleApis
+ *      Base URL    : https://buy.itunes.apple.com
+ *
+ *      Name / code : appleSandboxApis
+ *      Base URL    : https://sandbox.itunes.apple.com
+ *
+ * 3. On the client (Swift), pass the receipt at script call time:
+ *      let receiptURL  = Bundle.main.appStoreReceiptURL
+ *      let receiptData = try Data(contentsOf: receiptURL!)
+ *      let receiptB64  = receiptData.base64EncodedString()
+ *      // Pass receiptB64 as the "receiptData" script parameter
+ *
+ * ── SCRIPT PARAMETERS ─────────────────────────────────────────────────────
+ * {
+ *   "receiptData": "<base64-encoded receipt from Bundle.main.appStoreReceiptURL>"
+ * }
+ *
+ * ── RETURN VALUE ──────────────────────────────────────────────────────────
+ * {
+ *   "isActive"            : true | false,
+ *   "expiryTimeMs"        : "1234567890000",
+ *   "autoRenewStatus"     : "1" | "0",
+ *   "productId"           : "no_ads",
+ *   "error"               : false
+ * }
+ */
+
+var BUNDLE_ID       = "com.braincloud.marketplace";
+var SUBSCRIPTION_ID = "no_ads";
+
+function main() {
+  var response = { error: false };
+
+  // ── READ GLOBAL PROPERTIES ─────────────────────────────────────────────
+  var propsResult = bridge.getGlobalAppServiceProxy()
+    .readSelectedProperties(["appleSharedSecret"]);
+
+  if (propsResult.status !== 200 || !propsResult.data) {
+    response.error   = true;
+    response.message = "Could not read Apple global properties.";
+    return response;
+  }
+
+  var sharedSecret = bridge.getGlobalProperty("appleSharedSecret");
+
+  if (!sharedSecret) {
+    response.error   = true;
+    response.message = "Global property 'appleSharedSecret' is missing.";
+    return response;
+  }
+
+  // ── RESOLVE RECEIPT DATA ───────────────────────────────────────────────
+  var receiptData = data.receiptData;
+
+  if (!receiptData) {
+    // Fall back to stored receipt on user attributes
+    var attrResult = bridge.getPlayerStateServiceProxy().getAttributes();
+    if (attrResult.status === 200 && attrResult.data && attrResult.data.attributes) {
+      receiptData = attrResult.data.attributes["appleReceipt_no_ads"] || null;
+    }
+  }
+
+  if (!receiptData) {
+    response.error   = true;
+    response.message = "No receipt data found. Pass 'receiptData' as a script parameter " +
+      "or store it in the user attribute 'appleReceipt_no_ads'.";
+    return response;
+  }
+
+  // ── STEP 1: VERIFY RECEIPT WITH APPLE ─────────────────────────────────
+  // Always try production first. If Apple returns status 21007 it means this
+  // is a sandbox receipt, so we retry against the sandbox endpoint.
+  var http = bridge.getHttpClientServiceProxy();
+
+  var requestBody = {
+    "receipt-data"             : receiptData,
+    "password"                 : sharedSecret,
+    "exclude-old-transactions" : true
+  };
+
+  var headers = { "Content-Type": "application/json" };
+
+  var appleResult = http.postJsonResponseJson(
+    "appleApis", "/verifyReceipt", {}, headers, requestBody
+  );
+
+  bridge.logDebugJson("Apple production response", appleResult);
+
+  var appleData = appleResult.data ? appleResult.data.json : null;
+
+  // Fall back to sandbox if:
+  //  - Apple returned status 21007 (sandbox receipt sent to production), OR
+  //  - Production returned a non-200 HTTP response (e.g. 406) with no usable body
+  if (!appleData || appleData.status === 21007 || appleResult.status !== 200) {
+    appleResult = http.postJsonResponseJson(
+      "appleSandboxApis", "/verifyReceipt", {}, headers, requestBody
+    );
+    bridge.logDebugJson("Apple sandbox response", appleResult);
+    appleData = appleResult.data ? appleResult.data.json : null;
+  }
+
+  if (!appleData) {
+    response.error   = true;
+    response.message = "No response from Apple verifyReceipt endpoint.";
+    return response;
+  }
+
+  // status 0 = valid, 21006 = receipt valid but all subscriptions expired
+  if (appleData.status !== 0 && appleData.status !== 21006) {
+    response.error   = true;
+    response.message = "Apple verifyReceipt returned error status: " + appleData.status;
+    return response;
+  }
+
+  // ── STEP 2: FIND THE LATEST no_ads TRANSACTION ────────────────────────
+  // latest_receipt_info is sorted newest-first when exclude-old-transactions
+  // is true, but we scan all entries to be safe and find the latest expiry.
+  var transactions = appleData.latest_receipt_info || [];
+  var latestTx     = null;
+  var latestExpiry = 0;
+
+  for (var i = 0; i < transactions.length; i++) {
+    var tx = transactions[i];
+    if (tx.product_id !== SUBSCRIPTION_ID) continue;
+    var expiry = parseInt(tx.expires_date_ms, 10);
+    if (expiry > latestExpiry) {
+      latestExpiry = expiry;
+      latestTx     = tx;
+    }
+  }
+
+  if (!latestTx) {
+    // No transaction for this product found at all
+    bridge.getPlayerStateServiceProxy().updateAttributes(
+      { "no_ads_active": "false" }, false
+    );
+    response.isActive = false;
+    response.message  = "No transactions found for product: " + SUBSCRIPTION_ID;
+    return response;
+  }
+
+  // ── STEP 3: DETERMINE ACTIVE STATUS ───────────────────────────────────
+  var nowMs    = Date.now();
+  var isActive = latestExpiry > nowMs;
+
+  // ── CACHE RESULT ON THE USER ───────────────────────────────────────────
+  bridge.getPlayerStateServiceProxy().updateAttributes(
+    { "no_ads_active": isActive ? "true" : "false" },
+    false
+  );
+
+  response = {
+    isActive        : isActive,
+    expiryTimeMs    : latestTx.expires_date_ms,
+    autoRenewStatus : latestTx.auto_renew_status,
+    productId       : latestTx.product_id,
+    error           : false
+  };
+
+  return response;
+}
+
+main();

@@ -32,6 +32,7 @@ function main() {
   }
   
   response.currencySpent = purchaseItem.data.currencySpent;
+  response.gainedItemId = itemId;
   response.gainedItem = itemObj;
   response.success = true;
 

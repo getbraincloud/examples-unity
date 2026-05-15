@@ -1,4 +1,6 @@
+using BrainCloud.JsonFx.Json;
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +23,8 @@ public class ProfileModal : MonoBehaviour
     private Button _logoutButton;
     [SerializeField]
     private Image _profileImage;
+    [SerializeField]
+    private TextMeshProUGUI _projectVersionText, _bcVersionText, _serverVersionText;
 
     private bool _isLoggedOut = false;
     private Animator _modalAnim;
@@ -44,6 +48,8 @@ public class ProfileModal : MonoBehaviour
         _restorePurchasesButton.onClick.AddListener(OnRestorePurchasesButtonClicked);
         _logoutButton.onClick.AddListener(OnLogoutButtonClicked);
 
+        GetVersions();
+
         _usernameInputField.text = AppManager.Instance.userData.PlayerName;
     }
     private void OnDisable()
@@ -52,6 +58,21 @@ public class ProfileModal : MonoBehaviour
         _updateProfileButton.onClick.RemoveAllListeners();
         _restorePurchasesButton.onClick.RemoveAllListeners();
         _logoutButton.onClick.RemoveAllListeners();
+    }
+
+    private void GetVersions()
+    {
+        _bcVersionText.text = BCManager.Instance.BCWrapper.Client.BrainCloudClientVersion;
+        _projectVersionText.text = Application.version;
+        //get server version
+        BCManager.Instance.BCWrapper.Client.GetAuthenticationService().getServerVersion(
+            (string responseJson, object cbObject) =>
+            {
+                var root = JsonReader.Deserialize<Dictionary<string, object>>(responseJson)["data"] as Dictionary<string, object>;
+                string serverVersion = root["serverVersion"] as string;
+                _serverVersionText.text = serverVersion;
+            }
+        );
     }
 
     public void UpdateProfileImage(Sprite image)
