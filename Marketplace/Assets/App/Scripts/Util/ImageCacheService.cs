@@ -16,7 +16,7 @@ public class ImageCacheService : MonoBehaviour
     private List<ItemSectionSprite> sectionSprites;
 
     [SerializeField]
-    public Sprite noAdsSprite;
+    public Sprite noAdsSprite, timerSprite;
     public static ImageCacheService Instance { get; private set; }
 
     private Dictionary<string, Sprite> memoryCache = new Dictionary<string, Sprite>();
@@ -87,27 +87,76 @@ public class ImageCacheService : MonoBehaviour
 
         return result;
     }
+    [Serializable]
+    private class ImageMeta
+    {
+        public string etag;
+        public string lastModified;
+    }
+
     // Core Logic
     private async Task<Sprite> LoadOrDownloadAsync(string url)
     {
         string filePath = GetFilePathFromUrl(url);
+        string metaPath = filePath + ".meta";
 
-        // Check disk image
         if (File.Exists(filePath))
         {
-            byte[] fileData = await Task.Run(() => File.ReadAllBytes(filePath));
-            Sprite spriteFromDisk = CreateSpriteFromBytes(fileData);
+            // Load any cached validation headers so we can make a conditional request
+            ImageMeta meta = null;
+            if (File.Exists(metaPath))
+            {
+                string json = await Task.Run(() => File.ReadAllText(metaPath));
+                meta = JsonUtility.FromJson<ImageMeta>(json);
+            }
 
-            memoryCache[url] = spriteFromDisk;
-            return spriteFromDisk;
+            using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+            {
+                if (meta != null)
+                {
+                    if (!string.IsNullOrEmpty(meta.etag))
+                        request.SetRequestHeader("If-None-Match", meta.etag);
+                    else if (!string.IsNullOrEmpty(meta.lastModified))
+                        request.SetRequestHeader("If-Modified-Since", meta.lastModified);
+                }
+
+                var op = request.SendWebRequest();
+                while (!op.isDone)
+                    await Task.Yield();
+
+                // 304 = image unchanged on server, keep cached copy
+                if (request.responseCode == 304)
+                {
+                    byte[] data = await Task.Run(() => File.ReadAllBytes(filePath));
+                    Sprite sprite = CreateSpriteFromBytes(data);
+                    memoryCache[url] = sprite;
+                    return sprite;
+                }
+
+#if UNITY_2020_1_OR_NEWER
+                if (request.result == UnityWebRequest.Result.Success)
+#else
+                if (!request.isNetworkError && !request.isHttpError)
+#endif
+                {
+                    // 200 = image was updated, save new copy and carry on
+                    return await SaveDownloadedImage(url, filePath, metaPath, request);
+                }
+
+                // Network error — serve the stale cached copy rather than returning null
+                Debug.LogWarning($"[ImageCache] Could not validate {url} ({request.error}), using cached copy.");
+                byte[] cachedData = await Task.Run(() => File.ReadAllBytes(filePath));
+                Sprite cachedSprite = CreateSpriteFromBytes(cachedData);
+                memoryCache[url] = cachedSprite;
+                return cachedSprite;
+            }
         }
 
-        // Download image
+        // No cached copy — fresh download
         using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
         {
-            var operation = request.SendWebRequest();
-
-            while (!operation.isDone)
+            var op = request.SendWebRequest();
+            while (!op.isDone)
                 await Task.Yield();
 
 #if UNITY_2020_1_OR_NEWER
@@ -120,16 +169,30 @@ public class ImageCacheService : MonoBehaviour
                 return null;
             }
 
-            Texture2D texture = DownloadHandlerTexture.GetContent(request);
-            Sprite sprite = CreateSpriteFromTexture(texture);
-
-            // Save to disk
-            byte[] pngData = texture.EncodeToPNG();
-            await Task.Run(() => File.WriteAllBytes(filePath, pngData));
-
-            memoryCache[url] = sprite;
-            return sprite;
+            return await SaveDownloadedImage(url, filePath, metaPath, request);
         }
+    }
+
+    private async Task<Sprite> SaveDownloadedImage(string url, string filePath, string metaPath, UnityWebRequest request)
+    {
+        Texture2D texture = DownloadHandlerTexture.GetContent(request);
+        Sprite sprite = CreateSpriteFromTexture(texture);
+        byte[] pngData = texture.EncodeToPNG();
+
+        string metaJson = JsonUtility.ToJson(new ImageMeta
+        {
+            etag = request.GetResponseHeader("ETag"),
+            lastModified = request.GetResponseHeader("Last-Modified")
+        });
+
+        await Task.Run(() =>
+        {
+            File.WriteAllBytes(filePath, pngData);
+            File.WriteAllText(metaPath, metaJson);
+        });
+
+        memoryCache[url] = sprite;
+        return sprite;
     }
 
     // Helpers

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.LowLevelPhysics2D;
 using UnityEngine.UI;
 
 public class MainScreen : MonoBehaviour
@@ -197,29 +198,54 @@ public class MainScreen : MonoBehaviour
         }
     }
 
-    private void UpdateXPBarUI(float fillAmount, float seconds)
+    private void UpdateXPBarUI(float fillAmount, float seconds, bool fromLevelUp = false)
     {
         if (_xpBarUpdateCoroutine != null)
         {
             StopCoroutine(_xpBarUpdateCoroutine);
         }
 
-        _xpBarUpdateCoroutine = StartCoroutine(UpdateXPBarUI_CR(fillAmount, seconds));
+        _xpBarUpdateCoroutine = StartCoroutine(UpdateXPBarUI_CR(fillAmount, seconds, fromLevelUp));
     }
 
-    private IEnumerator UpdateXPBarUI_CR(float fillAmount, float seconds)
+    private IEnumerator UpdateXPBarUI_CR(float fillAmount, float seconds, bool fromLevelUp = false)
     {
         float t = 0;
-        float originalFill = _xpBar.fillAmount;
+        RectTransform barRect = _xpBar.gameObject.GetComponent<RectTransform>();
+        float originalFill = barRect.offsetMax.x;
+        float fill = Globals.XP_BAR_FILL * -fillAmount;
+        float targetFill = -(Globals.XP_BAR_FILL + fill);
+        Debug.Log($"Original Fill: {originalFill} FillAmount: {fill} Target: {targetFill}");
+        bool leveledUp = false;
+
+        if (fromLevelUp)
+        {
+            //reset xp bar fill
+            originalFill = -Globals.XP_BAR_FILL;
+        }
+
+        if(targetFill < originalFill && !fromLevelUp)
+        {
+            //This is a level up, fill bar completely before resetting it
+            targetFill = 0;
+            leveledUp = true;
+        }
+
         while (t <= seconds)
         {
-            _xpBar.fillAmount = Mathf.Lerp(originalFill, fillAmount, t / seconds);
+            float lerpedAmount = Mathf.Lerp(originalFill, targetFill, t / seconds);
+            barRect.offsetMax = new Vector2(lerpedAmount, 0);
+
             t += Time.deltaTime;
             yield return null;
         }
 
-        _xpBar.fillAmount = fillAmount;
-        //xp bar filled
+        barRect.offsetMax = new Vector2(targetFill, 0);
+
+        if (leveledUp)
+        {
+            UpdateXPBarUI(fillAmount, seconds, true);
+        }
     }
 
     private void OnCoinsUpdated(int newAmount)

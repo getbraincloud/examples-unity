@@ -273,6 +273,8 @@ public class InventoryService : MonoBehaviour
             string category = itemDict["category"] as string;
             string itemDefId = itemDict["defId"] as string;
 
+            int activeSeconds = 0;
+
             ItemType itemType = ItemType.Item;
             switch (itemTypeString)
             {
@@ -287,6 +289,7 @@ public class InventoryService : MonoBehaviour
             if (itemDefId == "coin_multiplier")
             {
                 itemType = ItemType.Multiplier;
+                activeSeconds = Convert.ToInt32(itemDict["activeSecs"]);
             }
 
             if (category == "Freebies")
@@ -359,7 +362,8 @@ public class InventoryService : MonoBehaviour
                 isFree = buyPrices.Count == 0,
                 isOnCooldown = false,
                 isOnPromotion = isPromotion,
-                oldPrice = oldPrice
+                oldPrice = oldPrice,
+                activeSeconds = activeSeconds
             });
         }
 

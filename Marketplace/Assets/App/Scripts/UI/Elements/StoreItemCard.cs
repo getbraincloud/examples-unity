@@ -12,13 +12,28 @@ using Action = System.Action;
 public class StoreItemCard : MonoBehaviour
 {
     [SerializeField]
-    private Image _cardArt, _amountDisplayIcon, _buttonIconLeft, _buttonIconRight, _lowerMessageIcon;
+    private Image _cardArt,
+                  _amountDisplayIcon,
+                  _buttonIconLeft,
+                  _buttonIconRight,
+                  _upperMessageIcon,
+                  _lowerMessageIcon;
 
     [SerializeField]
-    private TextMeshProUGUI _inventoryCount, _messageDisplayText, _amountDisplayText, _primaryPriceText, _secondaryPriceText, _lowerMessageText;
+    private TextMeshProUGUI _inventoryCount,
+                            _messageDisplayText,
+                            _amountDisplayText,
+                            _primaryPriceText,
+                            _secondaryPriceText,
+                            _lowerMessageText;
 
     [SerializeField]
-    private GameObject _secondaryPriceDisplay, _lowerMessageDisplay, _amountDisplay, _inventoryCountDisplay, _loadingDisplay;
+    private GameObject _secondaryPriceDisplay,
+                        _upperMessageDisplay,
+                        _lowerMessageDisplay,
+                        _amountDisplay,
+                        _inventoryCountDisplay,
+                        _loadingDisplay;
 
     [SerializeField]
     private Button _buyButton;
@@ -104,7 +119,7 @@ public class StoreItemCard : MonoBehaviour
         }
         else
         {
-            _buttonIconLeft.gameObject.SetActive(true);
+            _buttonIconLeft.gameObject.SetActive(false);
             _buttonIconRight.gameObject.SetActive(true);
 
             Sprite buyCurrencyIcon = ImageCacheService.Instance.GetSpriteForCurrency(_data.buyPrices.Keys.FirstOrDefault());
@@ -156,6 +171,14 @@ public class StoreItemCard : MonoBehaviour
         {
             ToggleSecondaryPriceDisplay(false);
         }
+
+        if (_data.itemType == ItemType.Multiplier)
+        {
+            _upperMessageDisplay.SetActive(true);
+            _messageDisplayText.text = _data.activeSeconds + " Sec";
+            _upperMessageIcon.sprite = ImageCacheService.Instance.timerSprite;
+        }
+
     }
 
     public void ToggleCooldownDisplay(bool enable)

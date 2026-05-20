@@ -22,6 +22,7 @@ public class StoreItemData
     public int usesLeft;
     public int maxUses;
     public int quantity;
+    public int activeSeconds;
     public long coolDownUntil;
     public long recoveryUntil;
     public bool isFree = false;

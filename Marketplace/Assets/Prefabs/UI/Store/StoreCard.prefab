@@ -93,10 +93,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StoreItemCard
   _cardArt: {fileID: 5342123904795067787}
-  _movingCurrencyAnim: {fileID: 8410105359450070395}
   _amountDisplayIcon: {fileID: 4688547591158479182}
   _buttonIconLeft: {fileID: 517730837968541127}
   _buttonIconRight: {fileID: 3461622334353161038}
+  _upperMessageIcon: {fileID: 6467672494515698006}
   _lowerMessageIcon: {fileID: 2950535811983403240}
   _inventoryCount: {fileID: 7149376057244754617}
   _messageDisplayText: {fileID: 4555223325072121319}
@@ -105,11 +105,13 @@ MonoBehaviour:
   _secondaryPriceText: {fileID: 8345260268745727163}
   _lowerMessageText: {fileID: 432614927861341710}
   _secondaryPriceDisplay: {fileID: 1553517554834048538}
+  _upperMessageDisplay: {fileID: 8661396512942759481}
   _lowerMessageDisplay: {fileID: 2687873101115230662}
   _amountDisplay: {fileID: 3824790145117286470}
   _inventoryCountDisplay: {fileID: 3737596133525286556}
   _loadingDisplay: {fileID: 6135352873247095658}
   _buyButton: {fileID: 4539713483514810173}
+  currencyAnimPrefab: {fileID: 0}
 --- !u!1 &732558339698196026
 GameObject:
   m_ObjectHideFlags: 0

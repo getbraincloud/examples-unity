@@ -15,4 +15,7 @@ public static class Globals
     /* BC User Entity types */
     public static string ENTITY_AVATARFRAME_EQUIPSLOT = "AvatarFrameSlot";
     public static string ENTITY_SHIRT_EQUIPSLOT = "ShirtSlot";
+
+    /* UI data */
+    public static int XP_BAR_FILL = 892;
 }
