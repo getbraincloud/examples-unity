@@ -16,7 +16,8 @@ public class MainScreen : MonoBehaviour
     //GameObjects
     [SerializeField]
     private GameObject _collectCoinsBaseMessageDisplay,
-                        _goldAvatarFrameDisplay;
+                        _goldAvatarFrameDisplay,
+                        _adsBanner;
     //UI Text
     [SerializeField]
     private TextMeshProUGUI _coinsAmountText,
@@ -65,6 +66,10 @@ public class MainScreen : MonoBehaviour
         AppManager.Instance.OnMultiplierActivated += OnMultiplierActivated;
 
         InventoryService.Instance.OnItemEquipChange += OnItemEquipChange;
+        InventoryService.Instance.OnNoAdsStatusKnown += OnNoAdsStatusKnown;
+        InventoryService.Instance.OnSubscriptionExpired += OnSubscriptionExpired;
+
+        _adsBanner.SetActive(!InventoryService.Instance.NoAdsSubscriptionActive);
 
         UpdateAllUserStatUI(AppManager.Instance.userData);
     }
@@ -138,6 +143,18 @@ public class MainScreen : MonoBehaviour
         AppManager.Instance.OnMultiplierActivated -= OnMultiplierActivated;
 
         InventoryService.Instance.OnItemEquipChange -= OnItemEquipChange;
+        InventoryService.Instance.OnNoAdsStatusKnown -= OnNoAdsStatusKnown;
+        InventoryService.Instance.OnSubscriptionExpired -= OnSubscriptionExpired;
+    }
+
+    private void OnNoAdsStatusKnown(bool hasSubscription)
+    {
+        _adsBanner.SetActive(!hasSubscription);
+    }
+
+    private void OnSubscriptionExpired()
+    {
+        _adsBanner.SetActive(true);
     }
 
     private async void OnItemEquipChange(UserItemData itemData)

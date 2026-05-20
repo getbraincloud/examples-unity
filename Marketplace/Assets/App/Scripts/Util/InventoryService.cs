@@ -14,6 +14,9 @@ public class InventoryService : MonoBehaviour
     public Action OnItemBought;
     public Action<UserItemData> OnSingleItemBought;
     public Action OnSubscriptionExpired;
+    public Action<bool> OnNoAdsStatusKnown;
+
+    public bool NoAdsSubscriptionActive { get; private set; }
 
     private Dictionary<string, string> _itemSlots;
     private string _noAdsImageUrl = null;
@@ -572,6 +575,9 @@ public class InventoryService : MonoBehaviour
                 {
                     GetNoAdsSubscriptionStatus((isActive, expiryTimeMs) =>
                     {
+                        NoAdsSubscriptionActive = isActive;
+                        OnNoAdsStatusKnown?.Invoke(isActive);
+
                         if (isActive)
                         {
                             var expiry = DateTimeOffset.FromUnixTimeMilliseconds(expiryTimeMs).LocalDateTime;
