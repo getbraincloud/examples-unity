@@ -5,12 +5,14 @@
 var hasGemsFreebie = false;
 var hasCoinsFreebie = false;
 var hasStarsFreebie = false;
+var hasGreyShirt = false;
 
 function main() {
   var response = {
     Gained_GemsFreebie: false,
     Gained_CoinsFreebie: false,
-    Gained_StarsFreebie: false
+    Gained_StarsFreebie: false,
+    Gained_GreyShirt: false,
   };
 
   bridge.logDebugJson("Script Inputs", data);
@@ -65,6 +67,18 @@ function main() {
     }
   }
 
+  if(!hasGreyShirt){
+    //Give grey shirt if we don't have it
+    var giveShirt = userItemsService.awardUserItem("shirt_grey",1,false);
+    if(giveShirt.status !== 200){
+      response.error = true;
+      response.message = "Failed to give Grey Shirt freebie";
+      return response;
+    }else{
+      response.Gained_GreyShirt = true;
+    }
+  }
+
   //Set up user entity for equipped items if it doesn't already exist, this is used for the avatar shop to determine what items the user has equipped
 
   var entityType = "EquippedItems";
@@ -115,6 +129,9 @@ function processItems(itemsResult){
     }
     if(itemDefId == "Freebie_Stars"){
       hasStarsFreebie = true;
+    }
+    if(itemDefId == "shirt_grey"){
+      hasGreyShirt = true;
     }
   }
 }
