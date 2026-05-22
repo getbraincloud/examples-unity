@@ -19,6 +19,7 @@ public class InventoryService : MonoBehaviour
     public bool NoAdsSubscriptionActive { get; private set; }
 
     private Dictionary<string, string> _itemSlots;
+    private Dictionary<string, UserItemData> _defaultItems = new();
     private string _noAdsImageUrl = null;
     private Coroutine _subscriptionExpiryWatcher;
 
@@ -567,6 +568,7 @@ public class InventoryService : MonoBehaviour
 
         void fetchItems()
         {
+            _defaultItems.Clear();
             Debug.Log("Equipped slots: " + JsonWriter.Serialize(_itemSlots));
             FetchInventoryItemPageRecursive(
                 pageNumber: 1,
@@ -699,11 +701,19 @@ public class InventoryService : MonoBehaviour
 
             bool isEquippable = false;
             string equippableSlot = "";
+            bool isDefault = false;
+            bool autoEquip = false;
             if (meta != null && meta.ContainsKey("equippable"))
             {
                 string equippableStr = meta["equippable"] as string;
                 isEquippable = string.Equals(equippableStr, "true", StringComparison.OrdinalIgnoreCase);
                 equippableSlot = meta["equippableSlot"] as string;
+
+                if (meta.ContainsKey("isDefault"))
+                    isDefault = string.Equals(meta["isDefault"] as string, "true", StringComparison.OrdinalIgnoreCase);
+
+                if (meta.ContainsKey("autoEquip"))
+                    autoEquip = string.Equals(meta["autoEquip"] as string, "true", StringComparison.OrdinalIgnoreCase);
             }
 
             var sellPriceData = itemDef["sellPrice"] as Dictionary<string, object>;
@@ -733,7 +743,7 @@ public class InventoryService : MonoBehaviour
                 }
             }
 
-            parsedItems.Add(new UserItemData
+            var userItem = new UserItemData
             {
                 itemId = itemId,
                 defId = itemDict["defId"] as string,
@@ -749,8 +759,14 @@ public class InventoryService : MonoBehaviour
                 sellCurrency = sellCurrencyType,
                 sellAmount = sellAmount,
                 isStackable = Convert.ToBoolean(itemDef["stackable"]),
-                maxStackable = Convert.ToInt32(itemDef["maxStackable"])
-            });
+                maxStackable = Convert.ToInt32(itemDef["maxStackable"]),
+                isDefault = isDefault,
+                autoEquip = autoEquip
+            };
+            parsedItems.Add(userItem);
+
+            if (isDefault && isEquippable && !string.IsNullOrEmpty(equippableSlot))
+                _defaultItems[equippableSlot] = userItem;
         }
 
         return new InventoryPageParseResult
@@ -774,11 +790,19 @@ public class InventoryService : MonoBehaviour
 
         bool isEquippable = false;
         string equippableSlot = "";
+        bool isDefault = false;
+        bool autoEquip = false;
         if (meta != null && meta.ContainsKey("equippable"))
         {
             string equippableStr = meta["equippable"] as string;
             isEquippable = string.Equals(equippableStr, "true", StringComparison.OrdinalIgnoreCase);
             equippableSlot = meta["equippableSlot"] as string;
+
+            if (meta.ContainsKey("isDefault"))
+                isDefault = string.Equals(meta["isDefault"] as string, "true", StringComparison.OrdinalIgnoreCase);
+
+            if (meta.ContainsKey("autoEquip"))
+                autoEquip = string.Equals(meta["autoEquip"] as string, "true", StringComparison.OrdinalIgnoreCase);
         }
 
         var sellPriceData = itemDef["sellPrice"] as Dictionary<string, object>;
@@ -815,7 +839,9 @@ public class InventoryService : MonoBehaviour
             sellCurrency = sellCurrencyType,
             sellAmount = sellAmount,
             isStackable = Convert.ToBoolean(itemDef["stackable"]),
-            maxStackable = Convert.ToInt32(itemDef["maxStackable"])
+            maxStackable = Convert.ToInt32(itemDef["maxStackable"]),
+            isDefault = isDefault,
+            autoEquip = autoEquip
         };
     }
 
@@ -848,6 +874,25 @@ public class InventoryService : MonoBehaviour
             {
                 onComplete?.Invoke(false);
             });
+    }
+
+    public void EquipDefaultItemForSlot(string slot, Action onComplete)
+    {
+        if (!_defaultItems.TryGetValue(slot, out UserItemData defaultItem))
+        {
+            onComplete?.Invoke();
+            return;
+        }
+
+        ToggleItemEquipped(defaultItem, true, (bool success) =>
+        {
+            if (success)
+            {
+                defaultItem.isEquipped = true;
+                OnItemEquipChange?.Invoke(defaultItem);
+            }
+            onComplete?.Invoke();
+        });
     }
 
     public void SellItem(UserItemData item, Action<CurrencyType, int> onComplete)

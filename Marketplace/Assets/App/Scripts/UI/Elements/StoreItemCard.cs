@@ -364,7 +364,21 @@ public class StoreItemCard : MonoBehaviour
                             UserItemData newItem = InventoryService.Instance.ParseGainedItem(gainedItemId, gainedItemDict);
 
                             if (newItem != null)
+                            {
                                 InventoryService.Instance.OnSingleItemBought?.Invoke(newItem);
+
+                                if (newItem.autoEquip)
+                                {
+                                    InventoryService.Instance.ToggleItemEquipped(newItem, true, (bool equipped) =>
+                                    {
+                                        if (equipped)
+                                        {
+                                            newItem.isEquipped = true;
+                                            InventoryService.Instance.OnItemEquipChange?.Invoke(newItem);
+                                        }
+                                    });
+                                }
+                            }
                             else
                                 InventoryService.Instance.OnItemBought?.Invoke();
                         }

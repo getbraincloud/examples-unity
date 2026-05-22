@@ -66,7 +66,7 @@ function main() {
       response.Gained_StarsFreebie = true;
     }
   }
-
+  var greyShirtItemId = "none";
   if(!hasGreyShirt){
     //Give grey shirt if we don't have it
     var giveShirt = userItemsService.awardUserItem("shirt_grey",1,false);
@@ -76,6 +76,9 @@ function main() {
       return response;
     }else{
       response.Gained_GreyShirt = true;
+      bridge.logDebugJson("Shirt response", giveShirt.data);
+      var itemKeys = Object.keys(giveShirt.data.items);
+      greyShirtItemId = itemKeys.length > 0 ? giveShirt.data.items[itemKeys[0]].itemId : "none";
     }
   }
 
@@ -85,7 +88,7 @@ function main() {
 
   var entityData = {
     "AvatarFrameSlot":"none",
-    "ShirtSlot":"none"
+    "ShirtSlot":greyShirtItemId,
   }
 
   var acl = {

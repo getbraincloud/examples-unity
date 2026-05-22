@@ -39,6 +39,8 @@ public class LoginModal : MonoBehaviour
     {
         LoginButton.onClick.AddListener(OnLoginButton);
         RememberMeToggle.onValueChanged.AddListener(OnRememberMeToggled);
+        userNameInput.onValueChanged.AddListener(OnUsernameChanged);
+        passwordInput.onValueChanged.AddListener(OnPasswordChanged);
 
         //get value of remember me toggle that was previously saved
         if (PlayerPrefs.HasKey(Globals.PP_REMEMBER_ME))
@@ -52,8 +54,22 @@ public class LoginModal : MonoBehaviour
     {
         LoginButton.onClick.RemoveAllListeners();
         RememberMeToggle.onValueChanged.RemoveAllListeners();
+        userNameInput.onValueChanged.RemoveAllListeners();
+        passwordInput.onValueChanged.RemoveAllListeners();
     }
     #endregion
+    private void OnUsernameChanged(string value)
+    {
+        if (value.Contains(' '))
+            userNameInput.SetTextWithoutNotify(value.Replace(" ", ""));
+    }
+
+    private void OnPasswordChanged(string value)
+    {
+        if (value.Contains(' '))
+            passwordInput.SetTextWithoutNotify(value.Replace(" ", ""));
+    }
+
     private void OnRememberMeToggled(bool isOn)
     {
         PlayerPrefs.SetInt(Globals.PP_REMEMBER_ME, isOn ? 1 : 0);

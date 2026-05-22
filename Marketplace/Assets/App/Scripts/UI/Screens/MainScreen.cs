@@ -41,9 +41,6 @@ public class MainScreen : MonoBehaviour
     private AnimatedCoinCollect _animatedCoinCollectPrefab;
     [SerializeField]
     private LevelUpStarAnim _animatedLevelUpStarPrefab;
-    [SerializeField]
-    private Sprite defaultAvatarImage;
-    
 
 
     private Animator _anim;
@@ -180,9 +177,7 @@ public class MainScreen : MonoBehaviour
             }
             else
             {
-                _avatarImage.sprite = defaultAvatarImage;
-                _userProfileImage.sprite = defaultAvatarImage;
-                pModal.UpdateProfileImage(defaultAvatarImage);
+                InventoryService.Instance.EquipDefaultItemForSlot("ShirtSlot", null);
             }
         }
     }

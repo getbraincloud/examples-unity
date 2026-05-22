@@ -115,22 +115,13 @@ public class PlayerInventory : MonoBehaviour
     private void UpdateItemsEquipped(UserItemData item)
     {
         if (!item.isEquipped)
-        {
-            //if we are just unequipping an item, there is no need to unequip any other item
             return;
-        }
 
         List<UserItemCard> cards = GetItemCardsByEquippableSlot(item.equippableSlot);
-        Debug.Log("UpdateItemsEquipped itemID: " + item.itemId);
-        //unequip any item that has the same equippableSlot
         foreach (var itemCard in cards)
         {
-            if (!itemCard.data.itemId.Equals(item.itemId))
-            {
-                //if this is not the item we equipped, set it to unequipped
-                itemCard.UpdateEquippedStatus(false);
-                Debug.Log("Looping item " + itemCard.data.itemName + " ID: " + itemCard.data.itemId);
-            }
+            bool isEquippedCard = itemCard.data.itemId.Equals(item.itemId);
+            itemCard.UpdateEquippedStatus(isEquippedCard);
         }
     }
 
