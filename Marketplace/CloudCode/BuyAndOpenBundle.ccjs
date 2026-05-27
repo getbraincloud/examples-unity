@@ -65,12 +65,12 @@ function main() {
   response.error = false;
   response.currencyAwarded = openBundle.data.currencyAwarded;
 
-  if(response.currencyAwarded.hasOwnProperty("Stars")){
+  if(response.currencyAwarded && response.currencyAwarded.hasOwnProperty("Stars")){
     var awardedAmount = response.currencyAwarded.Stars;
     response.xpAward = convertStarsToXP(awardedAmount);
   }
 
-  response.currencyData = openBundle.data.currencyBalances.currency;
+  response.currencyData = openBundle.data.currencyBalances ? openBundle.data.currencyBalances.currency : {};
   response.currencySpent = purchaseItem.data.currencySpent;
   response.items = openBundle.data.items;
 

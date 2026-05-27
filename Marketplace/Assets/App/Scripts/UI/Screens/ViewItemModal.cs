@@ -1,4 +1,6 @@
+using BrainCloud.JsonFx.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -13,7 +15,7 @@ public class ViewItemModal : MonoBehaviour
     private TextMeshProUGUI itemTitleText, itemDescriptionText, equipButtonText, sellAmountText;
 
     [SerializeField]
-    private Button sellButton, equipButton, closeButton, backgroundButton, continueButton, unsubscribeButton;
+    private Button sellButton, equipButton, closeButton, backgroundButton, continueButton, unsubscribeButton, openBundleButton;
 
     [SerializeField]
     private GameObject loadingSpinner;
@@ -42,6 +44,7 @@ public class ViewItemModal : MonoBehaviour
         equipButton.onClick.AddListener(OnEquipButtonClicked);
         sellButton.onClick.AddListener(OnSellButtonClicked);
         unsubscribeButton.onClick.AddListener(OnUnsubscribeButtonClicked);
+        openBundleButton.onClick.AddListener(OnOpenBundleButtonClicked);
     }
 
     private void OnDisable()
@@ -52,6 +55,7 @@ public class ViewItemModal : MonoBehaviour
         equipButton.onClick.RemoveAllListeners();
         sellButton.onClick.RemoveAllListeners();
         unsubscribeButton.onClick.RemoveAllListeners();
+        openBundleButton.onClick.RemoveAllListeners();
     }
 
     public void SetData(UserItemData itemData, UserItemCard itemCardRef, Action onClosed)
@@ -91,6 +95,7 @@ public class ViewItemModal : MonoBehaviour
         sellButton.gameObject.SetActive(_data.isSellable);
         equipButton.gameObject.SetActive(_data.isEquippable);
         unsubscribeButton.gameObject.SetActive(_data.isSubscription);
+        openBundleButton.gameObject.SetActive(_data.isBundle);
 
         if (_data.isSellable)
         {
@@ -134,6 +139,68 @@ public class ViewItemModal : MonoBehaviour
 
             itemDescriptionText.text = "Item sold.";
         });
+    }
+
+    private void OnOpenBundleButtonClicked()
+    {
+        _cg.interactable = false;
+
+        var scriptData = new Dictionary<string, string> { { "itemId", _data.itemId } };
+        BCManager.Instance.BCWrapper.ScriptService.RunScript("OpenBundle", BrainCloud.JsonFx.Json.JsonWriter.Serialize(scriptData),
+            (string responseJson, object cbObject) =>
+            {
+                var root = JsonReader.Deserialize<Dictionary<string, object>>(responseJson)["data"] as Dictionary<string, object>;
+                var response = root["response"] as Dictionary<string, object>;
+
+                bool error = Convert.ToBoolean(response["error"]);
+                if (error)
+                {
+                    Debug.LogError("Failed to open bundle: " + response["message"]);
+                    _cg.interactable = true;
+                    return;
+                }
+
+                if (response.ContainsKey("currencyData"))
+                {
+                    var currencyData = response["currencyData"] as Dictionary<string, object>;
+                    if (currencyData.ContainsKey("Coins"))
+                    {
+                        var coinsInfo = currencyData["Coins"] as Dictionary<string, object>;
+                        AppManager.Instance.UpdateCoinsAmount(Convert.ToInt32(coinsInfo["balance"]));
+                    }
+                    if (currencyData.ContainsKey("Gems"))
+                    {
+                        var gemsInfo = currencyData["Gems"] as Dictionary<string, object>;
+                        AppManager.Instance.UpdateGemsAmount(Convert.ToInt32(gemsInfo["balance"]));
+                    }
+                }
+
+                if (response.ContainsKey("xpAward"))
+                {
+                    var xpAward = response["xpAward"] as Dictionary<string, object>;
+                    int newXpPoints = Convert.ToInt32(xpAward["adjustedXp"]);
+                    int currentLevel = Convert.ToInt32(xpAward["experienceLevel"]);
+                    int xpToNextLevel = Convert.ToInt32(xpAward["xpToNextLevel"]);
+                    bool xpCapped = Convert.ToBoolean(xpAward["xpCapped"]);
+                    string statusTitle = xpAward["statusTitle"] as string;
+
+                    AppManager.Instance.userData.XPCapped = xpCapped;
+                    AppManager.Instance.UpdateUserLevel(currentLevel, statusTitle, xpToNextLevel);
+                    AppManager.Instance.UpdateUserXP(newXpPoints);
+                }
+
+                _data.quantity -= 1;
+                if (_data.quantity <= 0)
+                    InventoryService.Instance.OnItemSold?.Invoke(_data);
+
+                InventoryService.Instance.OnItemBought?.Invoke();
+                CloseModal();
+            },
+            (int status, int reason, string errorJson, object _) =>
+            {
+                Debug.LogError("OpenBundle script failed: " + errorJson);
+                _cg.interactable = true;
+            });
     }
 
     private void OnUnsubscribeButtonClicked()

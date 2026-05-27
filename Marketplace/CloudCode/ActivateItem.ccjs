@@ -1,0 +1,30 @@
+"use strict";
+// ActivateItem - Uses/activates an item the user already owns
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var userItemsService = bridge.getUserItemsServiceProxy();
+
+  var useItem = userItemsService.useUserItem(data.itemId, -1, { "used": true }, true);
+
+  if (useItem.status !== 200) {
+    response.error = true;
+    response.message = "Failed to use item";
+    response.errorMessage = useItem.statusMessage;
+    return response;
+  }
+
+  response.error = false;
+  response.used = useItem.data.used;
+
+  if (useItem.data.statusEffects) {
+    response.activeUntil = useItem.data.statusEffects.activeUntil;
+  }
+
+  return response;
+}
+
+main();

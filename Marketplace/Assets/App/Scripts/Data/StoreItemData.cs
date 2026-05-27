@@ -29,6 +29,7 @@ public class StoreItemData
     public bool isOnCooldown = false;
     public bool isOnPromotion = false;
     public bool isCurrency = false;
+    public bool autoOpen = false;
 
     public StoreItemData() { }
 

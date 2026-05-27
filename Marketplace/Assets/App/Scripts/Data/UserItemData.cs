@@ -22,4 +22,7 @@ public class UserItemData
     public long subscriptionExpiryMs;
     public bool isDefault;
     public bool autoEquip;
+    public bool isBundle;
+    public bool isActivatable;
+    public int activeSeconds;
 }

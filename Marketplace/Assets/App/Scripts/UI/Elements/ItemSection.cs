@@ -37,6 +37,14 @@ public class ItemSection : MonoBehaviour
         cards.Add(itemData.defId, card);
     }
 
+    public void UpdateStoreItem(StoreItemData itemData)
+    {
+        if (cards.ContainsKey(itemData.defId))
+            cards[itemData.defId].SetStoreItemData(itemData);
+        else
+            AddStoreItem(itemData);
+    }
+
     public void ClearItems()
     {
         //remove all cards within this section

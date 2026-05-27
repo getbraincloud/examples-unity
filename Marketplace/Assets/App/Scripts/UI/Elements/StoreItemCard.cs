@@ -49,12 +49,40 @@ public class StoreItemCard : MonoBehaviour
 
     private void OnEnable()
     {
-        _buyButton.onClick.AddListener(OnBuyButtonClicked);   
+        _buyButton.onClick.AddListener(OnBuyButtonClicked);
+        AppManager.Instance.OnCoinsUpdated += OnCurrencyChanged;
+        AppManager.Instance.OnGemsUpdated += OnCurrencyChanged;
     }
 
     private void OnDisable()
     {
         _buyButton.onClick.RemoveAllListeners();
+        if (AppManager.Instance != null)
+        {
+            AppManager.Instance.OnCoinsUpdated -= OnCurrencyChanged;
+            AppManager.Instance.OnGemsUpdated -= OnCurrencyChanged;
+        }
+    }
+
+    private void OnCurrencyChanged(int _)
+    {
+        if (_data != null)
+            _buyButton.interactable = CanAfford();
+    }
+
+    private bool CanAfford()
+    {
+        if (_data == null || _data.isFree || _data.itemType == ItemType.Product)
+            return true;
+
+        foreach (var kvp in _data.buyPrices)
+        {
+            if (kvp.Key == CurrencyType.Coins && (int)kvp.Value > AppManager.Instance.userData.Coins)
+                return false;
+            if (kvp.Key == CurrencyType.Gems && (int)kvp.Value > AppManager.Instance.userData.Gems)
+                return false;
+        }
+        return true;
     }
 
     public void SetStoreItemData(StoreItemData data)
@@ -179,6 +207,7 @@ public class StoreItemCard : MonoBehaviour
             _upperMessageIcon.sprite = ImageCacheService.Instance.timerSprite;
         }
 
+        _buyButton.interactable = CanAfford();
     }
 
     public void ToggleCooldownDisplay(bool enable)
@@ -212,92 +241,112 @@ public class StoreItemCard : MonoBehaviour
                 ActivateFreebie();
                 break;
             case ItemType.Bundle:
-                Dictionary<string, string> scriptData = new();
-                scriptData.Add("defId", _data.defId);
-                string scriptDataString = JsonWriter.Serialize(scriptData);
-                BCManager.Instance.BCWrapper.ScriptService.RunScript("BuyAndOpenBundle", scriptDataString,
-                    (string responseJson, object cbObject) =>
-                    {
-                        var data = JsonReader.Deserialize<Dictionary<string, object>>(responseJson)["data"] as Dictionary<string, object>;
-                        var response = data["response"] as Dictionary<string, object>;
-
-                        bool error = Convert.ToBoolean(response["error"]);
-                        if (error)
+                if (_data.autoOpen)
+                {
+                    Dictionary<string, string> scriptData = new();
+                    scriptData.Add("defId", _data.defId);
+                    string scriptDataString = JsonWriter.Serialize(scriptData);
+                    BCManager.Instance.BCWrapper.ScriptService.RunScript("BuyAndOpenBundle", scriptDataString,
+                        (string responseJson, object cbObject) =>
                         {
-                            string message = response["message"] as string;
-                            Debug.Log("Error buying bundle: " + message);
-                            return;
-                        }
+                            var data = JsonReader.Deserialize<Dictionary<string, object>>(responseJson)["data"] as Dictionary<string, object>;
+                            var response = data["response"] as Dictionary<string, object>;
 
-                        UpdateSpentCurrency(response);
-
-                        //we were either awarded currency or items or both
-                        //we will just update our total currency levels and items
-                        var currencyAward = response["currencyData"] as Dictionary<string, object>;
-                        var coinsInfo = currencyAward["Coins"] as Dictionary<string, object>;
-                        var gemsInfo = currencyAward["Gems"] as Dictionary<string, object>;
-
-                        int newCoinsBalance = Convert.ToInt32(coinsInfo["balance"]);
-                        int newGemsBalance = Convert.ToInt32(gemsInfo["balance"]);
-
-                        Debug.Log($"new coins: {newCoinsBalance} new gems: {newGemsBalance}");
-
-                        
-                        //If we were awarded gems or coins
-                        if(_data.rewardCurrency != CurrencyType.Stars)
-                        {
-                            AnimateCurrencyAward(() =>
+                            bool error = Convert.ToBoolean(response["error"]);
+                            if (error)
                             {
-                                AppManager.Instance.UpdateCoinsAmount(newCoinsBalance);
-                                AppManager.Instance.UpdateGemsAmount(newGemsBalance);
-                            });
-                        }
+                                string message = response["message"] as string;
+                                Debug.Log("Error buying bundle: " + message);
+                                return;
+                            }
 
-                        //If we were awarded stars which converted to XP
-                        if (response.ContainsKey("xpAward"))
-                        {
-                            Debug.Log("We were awarded xp");
-                            //we were awarded some xp
-                            var xpAward = response["xpAward"] as Dictionary<string, object>;
+                            UpdateSpentCurrency(response);
 
-                            int newXpPoints = Convert.ToInt32(xpAward["adjustedXp"]);
-                            int currentLevel = Convert.ToInt32(xpAward["experienceLevel"]);
-                            int xpToNextLevel = Convert.ToInt32(xpAward["xpToNextLevel"]);
-                            bool xpCapped = Convert.ToBoolean(xpAward["xpCapped"]);
-                            string statusTitle = xpAward["statusTitle"] as string;
+                            var currencyAward = response["currencyData"] as Dictionary<string, object>;
+                            var coinsInfo = currencyAward["Coins"] as Dictionary<string, object>;
+                            var gemsInfo = currencyAward["Gems"] as Dictionary<string, object>;
 
-                            AnimateCurrencyAward(() =>
+                            int newCoinsBalance = Convert.ToInt32(coinsInfo["balance"]);
+                            int newGemsBalance = Convert.ToInt32(gemsInfo["balance"]);
+
+                            if (_data.rewardCurrency != CurrencyType.Stars)
                             {
-                                //TODO: Do this in a better way so that some UI gets updated when we reach the level cap
-                                AppManager.Instance.userData.XPCapped = xpCapped;
-                                //Should we be passing level name here? Not really a feature within the scope but will keep it optional for future
-                                AppManager.Instance.UpdateUserLevel(currentLevel, statusTitle, xpToNextLevel);
-                                AppManager.Instance.UpdateUserXP(newXpPoints);
-                            });
-                        }
-                        //TODO: Handle displaying awarded items
-                    }
-                    );
+                                AnimateCurrencyAward(() =>
+                                {
+                                    AppManager.Instance.UpdateCoinsAmount(newCoinsBalance);
+                                    AppManager.Instance.UpdateGemsAmount(newGemsBalance);
+                                });
+                            }
+
+                            if (response.ContainsKey("xpAward"))
+                            {
+                                var xpAward = response["xpAward"] as Dictionary<string, object>;
+
+                                int newXpPoints = Convert.ToInt32(xpAward["adjustedXp"]);
+                                int currentLevel = Convert.ToInt32(xpAward["experienceLevel"]);
+                                int xpToNextLevel = Convert.ToInt32(xpAward["xpToNextLevel"]);
+                                bool xpCapped = Convert.ToBoolean(xpAward["xpCapped"]);
+                                string statusTitle = xpAward["statusTitle"] as string;
+
+                                AnimateCurrencyAward(() =>
+                                {
+                                    AppManager.Instance.userData.XPCapped = xpCapped;
+                                    AppManager.Instance.UpdateUserLevel(currentLevel, statusTitle, xpToNextLevel);
+                                    AppManager.Instance.UpdateUserXP(newXpPoints);
+                                });
+                            }
+                        });
+                }
+                else
+                {
+                    Dictionary<string, string> buyBundleData = new();
+                    buyBundleData.Add("defId", _data.defId);
+                    BCManager.Instance.BCWrapper.ScriptService.RunScript("BuyItem", JsonWriter.Serialize(buyBundleData),
+                        (string responseJson, object cbObject) =>
+                        {
+                            var data = JsonReader.Deserialize<Dictionary<string, object>>(responseJson)["data"] as Dictionary<string, object>;
+                            var response = data["response"] as Dictionary<string, object>;
+
+                            bool success = Convert.ToBoolean(data["success"]);
+                            if (success)
+                            {
+                                UpdateSpentCurrency(response);
+                                InventoryService.Instance.OnItemBought?.Invoke();
+                            }
+                        },
+                        (int status, int reason, string errorJson, object _) =>
+                        {
+                            Debug.LogError("Failed to buy bundle: " + errorJson);
+                        });
+                }
                 break;
             case ItemType.Multiplier:
-                BCManager.Instance.BCWrapper.ScriptService.RunScript("BuyMultiplier", "{}",
+                Dictionary<string, string> buyMultiplierData = new();
+                buyMultiplierData.Add("defId", _data.defId);
+                BCManager.Instance.BCWrapper.ScriptService.RunScript("BuyItem", JsonWriter.Serialize(buyMultiplierData),
                     (string responseJson, object cbObj) =>
                     {
-                        Debug.Log("Bought multiplier: " + responseJson);
                         var data = JsonReader.Deserialize<Dictionary<string, object>>(responseJson)["data"] as Dictionary<string, object>;
                         var response = data["response"] as Dictionary<string, object>;
 
                         bool success = Convert.ToBoolean(data["success"]);
-
                         if (success)
                         {
                             UpdateSpentCurrency(response);
 
-                            bool usedMultiplier = Convert.ToBoolean(response["used"]);
-                            long activeUntil = Convert.ToInt64(response["activeUntil"]);
+                            string gainedItemId = response.ContainsKey("gainedItemId") ? response["gainedItemId"] as string : null;
+                            var gainedItemDict = response.ContainsKey("gainedItem") ? response["gainedItem"] as Dictionary<string, object> : null;
+                            UserItemData newItem = InventoryService.Instance.ParseGainedItem(gainedItemId, gainedItemDict);
 
-                            AppManager.Instance.ToggleCoinMultiplier(usedMultiplier, activeUntil);
+                            if (newItem != null)
+                                InventoryService.Instance.OnSingleItemBought?.Invoke(newItem);
+                            else
+                                InventoryService.Instance.OnItemBought?.Invoke();
                         }
+                    },
+                    (int status, int reason, string errorJson, object _) =>
+                    {
+                        Debug.LogError("Failed to buy multiplier: " + errorJson);
                     });
                 break;
             case ItemType.Product:

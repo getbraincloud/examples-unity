@@ -235,6 +235,29 @@ public class InventoryService : MonoBehaviour
             if (productItemId == "no_ads")
                 _noAdsImageUrl = productImageUrl;
 
+            var currencyDict = productDict.ContainsKey("currency")
+                ? productDict["currency"] as Dictionary<string, object>
+                : null;
+
+            CurrencyType rewardCurrency = CurrencyType.None;
+            int itemAmount = 0;
+            bool isCurrency = false;
+
+            if (currencyDict != null && currencyDict.Count > 0)
+            {
+                isCurrency = true;
+                if (currencyDict.ContainsKey("Gems"))
+                {
+                    rewardCurrency = CurrencyType.Gems;
+                    itemAmount = Convert.ToInt32(currencyDict["Gems"]);
+                }
+                else if (currencyDict.ContainsKey("Coins"))
+                {
+                    rewardCurrency = CurrencyType.Coins;
+                    itemAmount = Convert.ToInt32(currencyDict["Coins"]);
+                }
+            }
+
             parsedItems.Add(new StoreItemData
             {
                 itemId = productItemId,
@@ -248,7 +271,9 @@ public class InventoryService : MonoBehaviour
                 oldPrice = oldPrice,
                 isOnPromotion = isPromotion,
                 isFree = false,
-                isCurrency = false,
+                isCurrency = isCurrency,
+                rewardCurrency = rewardCurrency,
+                itemAmount = itemAmount,
             });
         }
 
@@ -288,6 +313,13 @@ public class InventoryService : MonoBehaviour
                 case "BUNDLE":
                     itemType = ItemType.Bundle;
                     break;
+            }
+
+            bool autoOpen = false;
+            if (itemType == ItemType.Bundle && meta != null && meta.ContainsKey("autoOpen"))
+            {
+                var val = meta["autoOpen"];
+                autoOpen = val is bool b ? b : string.Equals(val as string, "true", StringComparison.OrdinalIgnoreCase);
             }
 
             if (itemDefId == "coin_multiplier")
@@ -367,7 +399,8 @@ public class InventoryService : MonoBehaviour
                 isOnCooldown = false,
                 isOnPromotion = isPromotion,
                 oldPrice = oldPrice,
-                activeSeconds = activeSeconds
+                activeSeconds = activeSeconds,
+                autoOpen = autoOpen
             });
         }
 
@@ -697,6 +730,8 @@ public class InventoryService : MonoBehaviour
             if (itemCategory == "Freebies")
                 continue;
 
+            bool isBundle = string.Equals(itemDict["type"] as string, "BUNDLE", StringComparison.OrdinalIgnoreCase);
+
             var meta = itemDef.ContainsKey("meta") ? itemDef["meta"] as Dictionary<string, object> : null;
 
             bool isEquippable = false;
@@ -715,6 +750,11 @@ public class InventoryService : MonoBehaviour
                 if (meta.ContainsKey("autoEquip"))
                     autoEquip = string.Equals(meta["autoEquip"] as string, "true", StringComparison.OrdinalIgnoreCase);
             }
+
+            bool isActivatable = itemDef.ContainsKey("activatable") && Convert.ToBoolean(itemDef["activatable"]);
+
+            int activeSeconds = itemDef.ContainsKey("activeSecs") ? Convert.ToInt32(itemDef["activeSecs"]) : 0;
+
 
             var sellPriceData = itemDef["sellPrice"] as Dictionary<string, object>;
 
@@ -761,7 +801,10 @@ public class InventoryService : MonoBehaviour
                 isStackable = Convert.ToBoolean(itemDef["stackable"]),
                 maxStackable = Convert.ToInt32(itemDef["maxStackable"]),
                 isDefault = isDefault,
-                autoEquip = autoEquip
+                autoEquip = autoEquip,
+                isBundle = isBundle,
+                isActivatable = isActivatable,
+                activeSeconds = activeSeconds
             };
             parsedItems.Add(userItem);
 
@@ -805,6 +848,8 @@ public class InventoryService : MonoBehaviour
                 autoEquip = string.Equals(meta["autoEquip"] as string, "true", StringComparison.OrdinalIgnoreCase);
         }
 
+        bool isActivatable = itemDef.ContainsKey("activatable") && Convert.ToBoolean(itemDef["activatable"]);
+
         var sellPriceData = itemDef["sellPrice"] as Dictionary<string, object>;
         CurrencyType sellCurrencyType = CurrencyType.None;
         int sellAmount = 0;
@@ -822,6 +867,8 @@ public class InventoryService : MonoBehaviour
 
         string itemId = gainedItemId ?? (gainedItemDict.ContainsKey("itemId") ? gainedItemDict["itemId"] as string : null);
         if (string.IsNullOrEmpty(itemId)) return null;
+
+        int activeSeconds = itemDef.ContainsKey("activeSecs") ? Convert.ToInt32(itemDef["activeSecs"]) : 0;
 
         return new UserItemData
         {
@@ -841,7 +888,9 @@ public class InventoryService : MonoBehaviour
             isStackable = Convert.ToBoolean(itemDef["stackable"]),
             maxStackable = Convert.ToInt32(itemDef["maxStackable"]),
             isDefault = isDefault,
-            autoEquip = autoEquip
+            autoEquip = autoEquip,
+            isActivatable = isActivatable,
+            activeSeconds = activeSeconds
         };
     }
 
