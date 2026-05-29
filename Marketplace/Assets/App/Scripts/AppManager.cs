@@ -15,6 +15,8 @@ public class AppManager : MonoBehaviour
     private DynamicCurrencyAnim currencyAnimPrefab;
     [SerializeField]
     private ViewItemModal viewItemModalPrefab;
+    [SerializeField]
+    private ViewStoreItemModal viewStoreItemModalPrefab;
 
     private LoadingOverlay _currentLoadingOverlay;
 
@@ -344,6 +346,19 @@ public class AppManager : MonoBehaviour
         viewItemModal.transform.localScale = Vector3.one;
 
         viewItemModal.SetData(data, card, onClosed);
+    }
+
+    public void SpawnViewStoreItemModal(StoreItemData data, Action onActionButton, Action onClosed)
+    {
+        if (_appCanvas == null)
+        {
+            FetchReferences();
+        }
+
+        ViewStoreItemModal modal = Instantiate(viewStoreItemModalPrefab, _appCanvas.transform);
+        modal.transform.localScale = Vector3.one;
+
+        modal.SetData(data, onActionButton, onClosed);
     }
 
     private IEnumerator MoveWorld(RectTransform rect, Vector3 targetPos, float duration, Action onComplete)

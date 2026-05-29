@@ -30,6 +30,13 @@ public class StoreItemData
     public bool isOnPromotion = false;
     public bool isCurrency = false;
     public bool autoOpen = false;
+    public bool isStackable = false;
+    public int maxStackable = 0;
+    public bool isOwned = false;
+
+    public bool IsOwned => isOwned || (isStackable
+        ? maxStackable > 0 && inventoryAmount >= maxStackable
+        : inventoryAmount > 0);
 
     public StoreItemData() { }
 

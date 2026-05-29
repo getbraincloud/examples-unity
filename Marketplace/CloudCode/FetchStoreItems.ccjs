@@ -102,7 +102,61 @@ function main() {
     }
   }
 
-  // ── 2. Fetch user-owned Freebie items by specific defIds ──────────────────
+  // ── 1d. Build catalog meta lookup: defId → meta ──────────────────────────
+  var catalogMetaByDefId = {};
+  for (var ci = 0; ci < allCatalogItems.length; ci++) {
+    catalogMetaByDefId[allCatalogItems[ci].defId] = allCatalogItems[ci].meta || {};
+  }
+
+  // ── 2. Fetch user inventory to determine owned items ─────────────────────
+  var inventoryByDefId = {};
+  var invPageNum = 1;
+  var invHasMore = true;
+
+  while (invHasMore) {
+    var invContext = {
+      "pagination": { "rowsPerPage": 50, "pageNumber": invPageNum },
+      "searchCriteria": {},
+      "sortCriteria": {}
+    };
+
+    var invResult = userItemsProxy.getUserItemsPage(invContext, true);
+
+    if (invResult.status !== 200) {
+      invHasMore = false;
+      break;
+    }
+
+    var invItems = invResult.data.results.items || [];
+    for (var k = 0; k < invItems.length; k++) {
+      var invItem = invItems[k];
+      var invDefId = invItem.defId;
+      var invQty = invItem.quantity || 1;
+      inventoryByDefId[invDefId] = (inventoryByDefId[invDefId] || 0) + invQty;
+    }
+
+    invHasMore = invResult.data.results.moreAfter === true;
+    invPageNum++;
+  }
+
+  // ── 2b. Enrich catalog items with inventoryAmount based on ownership ──────
+  for (var m = 0; m < allCatalogItems.length; m++) {
+    var catItem = allCatalogItems[m];
+
+    // Exempt freebies from ownership tracking
+    if (catItem.category === "Freebies") continue;
+
+    var catMeta = catItem.meta || {};
+    var isUnique = catMeta.unique === true || catMeta.unique === "true";
+
+    // Set inventoryAmount for unique items (so IsOwned = inventoryAmount > 0)
+    // and for stackable items (so IsOwned = inventoryAmount >= maxStackable)
+    if (isUnique || catItem.stackable) {
+      catItem.inventoryAmount = inventoryByDefId[catItem.defId] || 0;
+    }
+  }
+
+  // ── 3. Fetch user-owned Freebie items by specific defIds ──────────────────
   var freebiesContext = {
     "pagination": { "rowsPerPage": 50, "pageNumber": 1 },
     "searchCriteria": {
@@ -122,7 +176,7 @@ function main() {
 
   var freebieItems = freebiesResult.data.results.items || [];
 
-  // ── 3. Fetch store products for the requested store ───────────────────────
+  // ── 4. Fetch store products for the requested store ───────────────────────
   var priceInfoCriteria = {
     "userCurrency": "CAD"
   };
@@ -141,6 +195,34 @@ function main() {
     }
 
     storeProducts = storeResult.data.productInventory || [];
+  }
+
+  // ── 4b. Mark store products as owned when all awarded items are unique and already owned ──
+  for (var sp = 0; sp < storeProducts.length; sp++) {
+    var product = storeProducts[sp];
+    var productItems = product.items || {};
+    var productDefIds = Object.keys(productItems);
+
+    if (productDefIds.length === 0) {
+      product.isOwned = false;
+      continue;
+    }
+
+    // Non-consumable products can only be purchased once — check if all awarded items are already owned.
+    if (product.type !== "Nonconsumable") {
+      product.isOwned = false;
+      continue;
+    }
+
+    var ownedStatus = true;
+    for (var pi = 0; pi < productDefIds.length; pi++) {
+      if (!inventoryByDefId[productDefIds[pi]]) {
+        ownedStatus = false;
+        break;
+      }
+    }
+
+    product.isOwned = ownedStatus;
   }
 
   // ── Return all results ────────────────────────────────────────────────────

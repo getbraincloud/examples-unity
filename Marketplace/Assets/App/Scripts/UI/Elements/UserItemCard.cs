@@ -133,7 +133,8 @@ public class UserItemCard : MonoBehaviour
         if (_data.isStackable)
         {
             inventoryCountText.gameObject.SetActive(true);
-            inventoryCountText.text = _data.quantity.ToString() + "/" + _data.maxStackable.ToString();
+            string maxStack = _data.maxStackable == 0 ? "∞" : _data.maxStackable.ToString();
+            inventoryCountText.text = _data.quantity.ToString() + "/" + maxStack;
         }
         else
         {
@@ -157,8 +158,21 @@ public class UserItemCard : MonoBehaviour
         }
         else if (_data.isEquippable)
         {
-            _primaryButton.gameObject.SetActive(true);
-            primaryButtonText.text = _data.isEquipped ? "Unequip" : "Equip";
+            if(_data.defId == "gold_frame")
+            {
+                _primaryButton.gameObject.SetActive(true);
+                primaryButtonText.text = _data.isEquipped ? "Unequip" : "Equip";
+            }
+            else
+            {
+                _primaryButton.gameObject.SetActive(!_data.isEquipped);
+                primaryButtonText.text = "Equip";
+                if (_data.isEquipped)
+                {
+                    upperMessageIcon.gameObject.SetActive(false);
+                    upperMessageText.text = "[Equipped]";
+                }
+            }
         }
         else
         {

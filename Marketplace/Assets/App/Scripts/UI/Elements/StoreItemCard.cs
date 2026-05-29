@@ -44,35 +44,65 @@ public class StoreItemCard : MonoBehaviour
 
     private StoreItemData _data;
 
+    private Button _button;
+    private CanvasGroup _cg;
+
     private DateTimeOffset _recoveryTime;
     private Coroutine _timerRoutine;
+
+    private void Awake()
+    {
+        _button = GetComponent<Button>();
+        _cg = GetComponent<CanvasGroup>();
+    }
+
+    private bool IsItemOwned => _data != null && (_data.IsOwned ||
+        (_data.defId == "no_ads" && InventoryService.Instance != null && InventoryService.Instance.NoAdsSubscriptionActive));
 
     private void OnEnable()
     {
         _buyButton.onClick.AddListener(OnBuyButtonClicked);
         AppManager.Instance.OnCoinsUpdated += OnCurrencyChanged;
         AppManager.Instance.OnGemsUpdated += OnCurrencyChanged;
+        _button.onClick.AddListener(OnCardClicked);
+        if (InventoryService.Instance != null)
+            InventoryService.Instance.OnNoAdsStatusKnown += OnNoAdsStatusKnown;
+    }
+
+    private void OnCardClicked()
+    {
+        _cg.interactable = false;
+        AppManager.Instance.SpawnViewStoreItemModal(_data, () => _buyButton.onClick.Invoke(), () =>
+        {
+            if (this == null) return;
+            _cg.interactable = true;
+        });
     }
 
     private void OnDisable()
     {
         _buyButton.onClick.RemoveAllListeners();
+        _button.onClick.RemoveAllListeners();
         if (AppManager.Instance != null)
         {
             AppManager.Instance.OnCoinsUpdated -= OnCurrencyChanged;
             AppManager.Instance.OnGemsUpdated -= OnCurrencyChanged;
         }
+        if (InventoryService.Instance != null)
+            InventoryService.Instance.OnNoAdsStatusKnown -= OnNoAdsStatusKnown;
     }
+
+    private void OnNoAdsStatusKnown(bool _) => UpdateUI();
 
     private void OnCurrencyChanged(int _)
     {
-        if (_data != null)
+        if (!IsItemOwned)
             _buyButton.interactable = CanAfford();
     }
 
     private bool CanAfford()
     {
-        if (_data == null || _data.isFree || _data.itemType == ItemType.Product)
+        if (_data == null || _data.isFree || _data.itemType == ItemType.Freebie)
             return true;
 
         foreach (var kvp in _data.buyPrices)
@@ -113,7 +143,14 @@ public class StoreItemCard : MonoBehaviour
         _cardArt.gameObject.SetActive(true);
 
         ToggleInventoryAmountDisplay(false);
-        if(_data.isFree)
+        if (IsItemOwned && _data.itemType != ItemType.Freebie)
+        {
+            _primaryPriceText.text = "[Owned]";
+            _buttonIconLeft.gameObject.SetActive(false);
+            _buttonIconRight.gameObject.SetActive(false);
+            _buyButton.interactable = false;
+        }
+        else if(_data.isFree || _data.itemType == ItemType.Freebie)
         {
             _primaryPriceText.text = Globals.STORE_ITEM_BUTTON_TEXT_FREE;
             _buttonIconLeft.gameObject.SetActive(false);
@@ -207,7 +244,8 @@ public class StoreItemCard : MonoBehaviour
             _upperMessageIcon.sprite = ImageCacheService.Instance.timerSprite;
         }
 
-        _buyButton.interactable = CanAfford();
+        if (!IsItemOwned)
+            _buyButton.interactable = CanAfford();
     }
 
     public void ToggleCooldownDisplay(bool enable)

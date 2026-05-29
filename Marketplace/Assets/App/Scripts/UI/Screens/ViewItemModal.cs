@@ -93,7 +93,7 @@ public class ViewItemModal : MonoBehaviour
         itemDescriptionText.text = _data.description;
 
         sellButton.gameObject.SetActive(_data.isSellable);
-        equipButton.gameObject.SetActive(_data.isEquippable);
+        
         unsubscribeButton.gameObject.SetActive(_data.isSubscription);
         openBundleButton.gameObject.SetActive(_data.isBundle);
 
@@ -103,7 +103,20 @@ public class ViewItemModal : MonoBehaviour
             sellAmountText.text = _data.sellAmount.ToString();
         }
 
-        equipButtonText.text = _data.isEquipped ? "Unequip" : "Equip";
+        if(_data.defId == "gold_frame")
+        {
+            equipButton.gameObject.SetActive(true);
+            equipButtonText.text = _data.isEquipped ? "Unequip" : "Equip";
+        }
+        else if (_data.isEquippable)
+        {
+            equipButton.gameObject.SetActive(!_data.isEquipped);
+            equipButtonText.text = "Equip";
+        }
+        if (_data.isEquipped)
+        {
+            itemDescriptionText.text += " [Equipped]";
+        }
     }
 
     private void CloseModal()
@@ -120,7 +133,24 @@ public class ViewItemModal : MonoBehaviour
             _itemCardRef.SetUserItemData(_data);
             if (!_data.isEquipped)
                 InventoryService.Instance.OnItemEquipChange?.Invoke(_data);
+
+            equipButton.gameObject.SetActive(true);
             equipButtonText.text = _data.isEquipped ? "Unequip" : "Equip";
+
+            if (_data.defId != "gold_frame")
+            {
+                equipButton.gameObject.SetActive(false);
+            }
+
+            if (_data.isEquipped)
+            {
+                itemDescriptionText.text += " [Equipped]";
+            }
+            else
+            {
+                itemDescriptionText.text = _data.description;
+            }
+
             _cg.interactable = true;
         });
     }

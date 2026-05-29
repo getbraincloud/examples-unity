@@ -262,7 +262,8 @@ public class InventoryService : MonoBehaviour
             {
                 itemId = productItemId,
                 defId = storeProductId,
-                itemName = productDict["title"] as string,
+                itemName = productDict.ContainsKey("title") ? productDict["title"] as string : string.Empty,
+                message = productDict.ContainsKey("description") ? productDict["description"] as string : string.Empty,
                 imageUrl = productImageUrl,
                 category = "Products",
                 itemType = ItemType.Product,
@@ -274,6 +275,7 @@ public class InventoryService : MonoBehaviour
                 isCurrency = isCurrency,
                 rewardCurrency = rewardCurrency,
                 itemAmount = itemAmount,
+                isOwned = productDict.ContainsKey("isOwned") && Convert.ToBoolean(productDict["isOwned"]),
             });
         }
 
@@ -379,9 +381,15 @@ public class InventoryService : MonoBehaviour
                 }
             }
 
+            bool isStackable = itemDict.ContainsKey("stackable") && Convert.ToBoolean(itemDict["stackable"]);
+            int maxStackable = itemDict.ContainsKey("maxStackable") ? Convert.ToInt32(itemDict["maxStackable"]) : 0;
+            int inventoryAmount = itemDict.ContainsKey("inventoryAmount") ? Convert.ToInt32(itemDict["inventoryAmount"]) : 0;
+
             parsedItems.Add(new StoreItemData
             {
                 itemId = string.Empty,
+                itemName = itemDict["name"] as string,
+                message = itemDict["desc"] as string,
                 defId = itemDefId,
                 imageUrl = itemDict["image"] as string,
                 quantity = 0,
@@ -400,7 +408,10 @@ public class InventoryService : MonoBehaviour
                 isOnPromotion = isPromotion,
                 oldPrice = oldPrice,
                 activeSeconds = activeSeconds,
-                autoOpen = autoOpen
+                autoOpen = autoOpen,
+                isStackable = isStackable,
+                maxStackable = maxStackable,
+                inventoryAmount = inventoryAmount
             });
         }
 
@@ -457,12 +468,18 @@ public class InventoryService : MonoBehaviour
 
             long recoveryUntil = Convert.ToInt64(itemDict["recoveryUntil"]);
 
+            int freebieQuantity = Convert.ToInt32(itemDict["quantity"]);
+            bool freebieStackable = itemDef.ContainsKey("stackable") && Convert.ToBoolean(itemDef["stackable"]);
+            int freebieMaxStackable = itemDef.ContainsKey("maxStackable") ? Convert.ToInt32(itemDef["maxStackable"]) : 0;
+
             parsedItems.Add(new StoreItemData
             {
+                itemName = itemDef["name"] as string,
+                message = itemDef["desc"] as string,
                 itemId = itemDict["itemId"] as string,
                 defId = itemDict["defId"] as string,
                 imageUrl = itemDef["image"] as string,
-                quantity = Convert.ToInt32(itemDict["quantity"]),
+                quantity = freebieQuantity,
                 usesLeft = itemDict["usesLeft"] != null ? Convert.ToInt32(itemDict["usesLeft"]) : 0,
                 maxUses = itemDict["maxUses"] != null ? Convert.ToInt32(itemDict["maxUses"]) : 0,
                 itemType = ItemType.Freebie,
@@ -474,7 +491,10 @@ public class InventoryService : MonoBehaviour
                 isCurrency = rewardCurrency != CurrencyType.None,
                 itemAmount = rewardAmount,
                 isFree = buyPrices.Count == 0,
-                isOnCooldown = recoveryUntil != -1
+                isOnCooldown = recoveryUntil != -1,
+                isStackable = freebieStackable,
+                maxStackable = freebieMaxStackable,
+                inventoryAmount = freebieQuantity
             });
         }
 
