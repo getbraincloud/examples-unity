@@ -23,6 +23,12 @@ public class InventoryService : MonoBehaviour
     private string _noAdsImageUrl = null;
     private Coroutine _subscriptionExpiryWatcher;
 
+    private const long MOCK_SUB_DURATION_MS = 10 * 60 * 1000; // 10 minutes total
+    private const long MOCK_SUB_RENEWAL_MS  =  2 * 60 * 1000; //  2 minutes per renewal period
+
+    private struct MockSubscriptionEntry { public long start; public long expiry; }
+    private readonly Dictionary<string, MockSubscriptionEntry> _mockSubscriptions = new();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -38,6 +44,21 @@ public class InventoryService : MonoBehaviour
 
     public static string GetPlatformStoreId()
     {
+        if (AppManager.MockPurchasesEnabled)
+        {
+            // In mock mode we bypass real stores — map to googlePlay or itunes so
+            // products exist in the brainCloud inventory regardless of actual platform.
+            switch (Application.platform)
+            {
+                case RuntimePlatform.IPhonePlayer:
+                case RuntimePlatform.OSXPlayer:
+                case RuntimePlatform.OSXEditor:
+                    return "itunes";
+                default:
+                    return "googlePlay";
+            }
+        }
+
         switch (Application.platform)
         {
             case RuntimePlatform.Android:
@@ -134,8 +155,11 @@ public class InventoryService : MonoBehaviour
         var storeProductsArray = response["storeProducts"] as object[];
         if (storeProductsArray != null && storeProductsArray.Length > 0)
         {
-            BCProduct[] products = BuildBCProducts(storeProductsArray);
-            BrainCloudMarketplace.InitializeWithProducts(products);
+            BCProduct[] bcProducts = BuildBCProducts(storeProductsArray);
+            if (AppManager.MockPurchasesEnabled)
+                BrainCloudMarketplace.SetMockProducts(bcProducts);
+            else
+                BrainCloudMarketplace.InitializeWithProducts(bcProducts);
             allItems.AddRange(ParseStoreProducts(storeProductsArray));
         }
 
@@ -258,6 +282,13 @@ public class InventoryService : MonoBehaviour
                 }
             }
 
+            bool productIsOwned = productDict.ContainsKey("isOwned") && Convert.ToBoolean(productDict["isOwned"]);
+
+            // no_ads is a subscription — hide it only while the subscription is active
+            if (productItemId == "no_ads" && NoAdsSubscriptionActive) continue;
+            // All other owned non-consumables are hidden from the store
+            if (productItemId != "no_ads" && productIsOwned) continue;
+
             parsedItems.Add(new StoreItemData
             {
                 itemId = productItemId,
@@ -275,7 +306,7 @@ public class InventoryService : MonoBehaviour
                 isCurrency = isCurrency,
                 rewardCurrency = rewardCurrency,
                 itemAmount = itemAmount,
-                isOwned = productDict.ContainsKey("isOwned") && Convert.ToBoolean(productDict["isOwned"]),
+                isOwned = productIsOwned,
             });
         }
 
@@ -385,7 +416,7 @@ public class InventoryService : MonoBehaviour
             int maxStackable = itemDict.ContainsKey("maxStackable") ? Convert.ToInt32(itemDict["maxStackable"]) : 0;
             int inventoryAmount = itemDict.ContainsKey("inventoryAmount") ? Convert.ToInt32(itemDict["inventoryAmount"]) : 0;
 
-            parsedItems.Add(new StoreItemData
+            var catalogItem = new StoreItemData
             {
                 itemId = string.Empty,
                 itemName = itemDict["name"] as string,
@@ -412,7 +443,10 @@ public class InventoryService : MonoBehaviour
                 isStackable = isStackable,
                 maxStackable = maxStackable,
                 inventoryAmount = inventoryAmount
-            });
+            };
+
+            if (!catalogItem.IsOwned)
+                parsedItems.Add(catalogItem);
         }
 
         return parsedItems;
@@ -501,8 +535,54 @@ public class InventoryService : MonoBehaviour
         return parsedItems;
     }
 
+    /// <summary>
+    /// Registers a mock subscription for <paramref name="productId"/> that lasts
+    /// <see cref="MOCK_SUB_DURATION_MS"/> (10 min) with <see cref="MOCK_SUB_RENEWAL_MS"/> (2 min) renewal periods.
+    /// Call this after a successful mock subscription purchase.
+    /// </summary>
+    public void RegisterMockSubscription(string productId)
+    {
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        _mockSubscriptions[productId] = new MockSubscriptionEntry
+        {
+            start  = now,
+            expiry = now + MOCK_SUB_DURATION_MS
+        };
+        Debug.Log($"[Mock Sub] Registered '{productId}' — expires in {MOCK_SUB_DURATION_MS / 60000} min.");
+    }
+
+    private void GetMockSubscriptionStatus(string productId, Action<bool, long> onComplete)
+    {
+        if (!_mockSubscriptions.TryGetValue(productId, out var sub))
+        {
+            onComplete?.Invoke(false, 0);
+            return;
+        }
+
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (now >= sub.expiry)
+        {
+            _mockSubscriptions.Remove(productId);
+            onComplete?.Invoke(false, 0);
+            return;
+        }
+
+        // Compute next 2-minute renewal boundary within the 10-minute window
+        long elapsed    = now - sub.start;
+        long nextBound  = sub.start + ((elapsed / MOCK_SUB_RENEWAL_MS) + 1) * MOCK_SUB_RENEWAL_MS;
+        long expiryMs   = Math.Min(nextBound, sub.expiry);
+
+        onComplete?.Invoke(true, expiryMs);
+    }
+
     public void GetNoAdsSubscriptionStatus(Action<bool, long> onComplete)
     {
+        if (AppManager.MockPurchasesEnabled)
+        {
+            GetMockSubscriptionStatus("no_ads", onComplete);
+            return;
+        }
+
 #if UNITY_ANDROID
         BCManager.Instance.BCWrapper.ScriptService.RunScript(
             "VerifyGoogleSubscription",

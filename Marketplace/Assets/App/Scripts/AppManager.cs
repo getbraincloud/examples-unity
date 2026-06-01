@@ -9,6 +9,12 @@ using UnityEngine.SceneManagement;
 
 public class AppManager : MonoBehaviour
 {
+    /// <summary>
+    /// When true, IAP purchases are simulated via brainCloud's mock store instead of real platform stores.
+    /// Set to false to re-enable real purchases on Android/iOS.
+    /// </summary>
+    public static bool MockPurchasesEnabled = true;
+
     [SerializeField]
     private LoadingOverlay loadingOverlayPrefab;
     [SerializeField]

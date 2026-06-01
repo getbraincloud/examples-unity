@@ -44,7 +44,9 @@ public class MainScreen : MonoBehaviour
 
 
     private Animator _anim;
-    private Coroutine _xpBarUpdateCoroutine;
+    private Queue<(bool isLevelUp, float targetFill)> _xpAnimQueue = new();
+    private float _lastQueuedFill;
+    private Coroutine _xpAnimCoroutine;
     private CoinMultiplierStatus _coinMultipierStatus;
 
     private void Awake()
@@ -111,9 +113,8 @@ public class MainScreen : MonoBehaviour
 
     private void OnUserXPUpdated(int newXp)
     {
-        float fillAmount = (float)newXp / (float)AppManager.Instance.userData.XPToNextLevel;
-        fillAmount = Mathf.Clamp(fillAmount, 0f, 1f);
-        UpdateXPBarUI(fillAmount, 0.75f);
+        float newFill = Mathf.Clamp01((float)newXp / (float)AppManager.Instance.userData.XPToNextLevel);
+        EnqueueXPFill(newFill);
     }
 
     private void OnGemsUpdated(int newGems)
@@ -142,6 +143,13 @@ public class MainScreen : MonoBehaviour
         InventoryService.Instance.OnItemEquipChange -= OnItemEquipChange;
         InventoryService.Instance.OnNoAdsStatusKnown -= OnNoAdsStatusKnown;
         InventoryService.Instance.OnSubscriptionExpired -= OnSubscriptionExpired;
+
+        if (_xpAnimCoroutine != null)
+        {
+            StopCoroutine(_xpAnimCoroutine);
+            _xpAnimCoroutine = null;
+        }
+        _xpAnimQueue.Clear();
     }
 
     private void OnNoAdsStatusKnown(bool hasSubscription)
@@ -192,8 +200,17 @@ public class MainScreen : MonoBehaviour
 
         _collectCoinsBaseAmountText.text = userData.Level.ToString();
 
-        Debug.Log("Initial xp bar fill amount " + fillAmount + " currentXp: " + userData.CurrentXP + " XPToNextLevel: "  + userData.XPToNextLevel) ;
-        UpdateXPBarUI(fillAmount, 0.25f);
+        // Reset any in-flight animation so the initial fill starts cleanly
+        if (_xpAnimCoroutine != null)
+        {
+            StopCoroutine(_xpAnimCoroutine);
+            _xpAnimCoroutine = null;
+        }
+        _xpAnimQueue.Clear();
+        _xpBar.GetComponent<RectTransform>().offsetMax = new Vector2(-Globals.XP_BAR_FILL, 0);
+        _lastQueuedFill = 0f;
+
+        EnqueueXPFill(fillAmount);
 
         string currentStoreId = InventoryService.GetPlatformStoreId();
         switch (currentStoreId)
@@ -210,54 +227,62 @@ public class MainScreen : MonoBehaviour
         }
     }
 
-    private void UpdateXPBarUI(float fillAmount, float seconds, bool fromLevelUp = false)
+    private void EnqueueXPFill(float newFill)
     {
-        if (_xpBarUpdateCoroutine != null)
-        {
-            StopCoroutine(_xpBarUpdateCoroutine);
-        }
+        // A fill that is less than the last queued fill means a level-up occurred
+        _xpAnimQueue.Enqueue((newFill < _lastQueuedFill, newFill));
+        _lastQueuedFill = newFill;
 
-        _xpBarUpdateCoroutine = StartCoroutine(UpdateXPBarUI_CR(fillAmount, seconds, fromLevelUp));
+        if (_xpAnimCoroutine == null)
+            _xpAnimCoroutine = StartCoroutine(ProcessXPQueue());
     }
 
-    private IEnumerator UpdateXPBarUI_CR(float fillAmount, float seconds, bool fromLevelUp = false)
+    private IEnumerator ProcessXPQueue()
     {
-        float t = 0;
-        RectTransform barRect = _xpBar.gameObject.GetComponent<RectTransform>();
-        float originalFill = barRect.offsetMax.x;
-        float fill = Globals.XP_BAR_FILL * -fillAmount;
-        float targetFill = -(Globals.XP_BAR_FILL + fill);
-        Debug.Log($"Original Fill: {originalFill} FillAmount: {fill} Target: {targetFill}");
-        bool leveledUp = false;
+        RectTransform barRect = _xpBar.GetComponent<RectTransform>();
 
-        if (fromLevelUp)
+        while (_xpAnimQueue.Count > 0)
         {
-            //reset xp bar fill
-            originalFill = -Globals.XP_BAR_FILL;
+            var (isLevelUp, targetFill) = _xpAnimQueue.Dequeue();
+
+            if (!isLevelUp)
+            {
+                // Collapse consecutive non-level-up fills into one — skip to the last
+                // non-level-up fill before the next level-up (or end of queue)
+                while (_xpAnimQueue.Count > 0 && !_xpAnimQueue.Peek().isLevelUp)
+                    (_, targetFill) = _xpAnimQueue.Dequeue();
+            }
+
+            if (isLevelUp)
+            {
+                // Fill to full, snap back to empty, then fill to the post-level amount
+                yield return AnimateXPBar(barRect, 1f);
+                barRect.offsetMax = new Vector2(-Globals.XP_BAR_FILL, 0);
+                yield return AnimateXPBar(barRect, targetFill);
+            }
+            else
+            {
+                yield return AnimateXPBar(barRect, targetFill);
+            }
         }
 
-        if(targetFill < originalFill && !fromLevelUp)
-        {
-            //This is a level up, fill bar completely before resetting it
-            targetFill = 0;
-            leveledUp = true;
-        }
+        _xpAnimCoroutine = null;
+    }
 
-        while (t <= seconds)
-        {
-            float lerpedAmount = Mathf.Lerp(originalFill, targetFill, t / seconds);
-            barRect.offsetMax = new Vector2(lerpedAmount, 0);
+    private IEnumerator AnimateXPBar(RectTransform barRect, float targetFill, float duration = 0.4f)
+    {
+        float startX = barRect.offsetMax.x;
+        float endX = -Globals.XP_BAR_FILL * (1f - targetFill);
+        float t = 0f;
 
+        while (t < duration)
+        {
             t += Time.deltaTime;
+            barRect.offsetMax = new Vector2(Mathf.Lerp(startX, endX, t / duration), 0);
             yield return null;
         }
 
-        barRect.offsetMax = new Vector2(targetFill, 0);
-
-        if (leveledUp)
-        {
-            UpdateXPBarUI(fillAmount, seconds, true);
-        }
+        barRect.offsetMax = new Vector2(endX, 0);
     }
 
     private void OnCoinsUpdated(int newAmount)

@@ -323,6 +323,107 @@ public class BrainCloudMarketplace : MonoBehaviour, IDetailedStoreListener
     }
 
     /// <summary>
+    /// Stores the product inventory for mock-purchase mode without initializing Unity IAP.
+    /// Call this in place of <see cref="InitializeWithProducts"/> when mock purchases are enabled.
+    /// </summary>
+    public static void SetMockProducts(BCProduct[] products)
+    {
+        bc = BCManager.Instance.BCWrapper;
+        bcIventory = products;
+        Debug.Log($"[Mock IAP] Stored {products?.Length ?? 0} product(s) for mock purchases.");
+    }
+
+    /// <summary>
+    /// Returns the raw product inventory stored for mock mode (does not require Unity IAP).
+    /// </summary>
+    public static BCProduct[] GetMockInventory() => bcIventory;
+
+    /// <summary>
+    /// Performs a mock purchase through brainCloud's mock store (no real payment, no Unity IAP).
+    /// Calls <b>CachePurchasePayloadContext</b> then runs the <b>VerifyPurchaseMockStore</b> cloud script.
+    /// </summary>
+    public static void MockPurchaseProduct(BCProduct product, Action<BCProduct[]> onPurchaseFinished = null)
+    {
+        bc = bc ?? BCManager.Instance.BCWrapper;
+        InternalSetCallback(onPurchaseFinished);
+
+        string itemId  = product.itemId;
+        string payload = product.payload ?? string.Empty;
+        string iapId   = !string.IsNullOrEmpty(product.priceData?.id) ? product.priceData.id : itemId;
+
+        // For itunes products that use an ids array instead of a flat id
+        if (string.IsNullOrEmpty(product.priceData?.id) && product.priceData?.ids != null)
+        {
+            foreach (var entry in product.priceData.ids)
+            {
+                if (entry.ContainsKey("itunesId") && !string.IsNullOrEmpty(entry["itunesId"]))
+                {
+                    iapId = entry["itunesId"];
+                    break;
+                }
+            }
+        }
+
+        Debug.Log($"[Mock IAP] Starting mock purchase — itemId={itemId} iapId={iapId}");
+
+        bc.AppStoreService.CachePurchasePayloadContext(
+            "mock",
+            iapId,
+            payload,
+            (string _, object __) =>
+            {
+                var transactions = new Dictionary<string, object>[1];
+                transactions[0] = new Dictionary<string, object>
+                {
+                    { "transactionId", Guid.NewGuid().ToString()                               },
+                    { "itemId",        itemId                                                  },
+                    { "sandbox",       true                                                    },
+                    { "quantity",      1                                                       },
+                    { "payload",       payload                                                 },
+                    { "iapId",         iapId                                                   },
+                    { "receiptTime",   (ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()   }
+                };
+
+                string scriptData = JsonWriter.Serialize(new Dictionary<string, object>
+                {
+                    { "storeId",     "mock"                                                              },
+                    { "receiptData", new Dictionary<string, object> { { "transactions", transactions } } }
+                });
+
+                bc.ScriptService.RunScript(
+                    "VerifyPurchaseMockStore",
+                    scriptData,
+                    (string scriptResponse, object _) =>
+                    {
+                        var root     = JsonReader.Deserialize<Dictionary<string, object>>(scriptResponse);
+                        var response = ((root["data"] as Dictionary<string, object>)["response"] as Dictionary<string, object>);
+
+                        if (response.ContainsKey("success") && (bool)response["success"])
+                        {
+                            var verifyData = ((response["data"] as Dictionary<string, object>)["data"] as Dictionary<string, object>);
+                            var summary    = verifyData["transactionSummary"] as Dictionary<string, object>;
+
+                            if (Convert.ToInt32(summary["processedCount"]) > 0)
+                            {
+                                HasErrorOccurred = false;
+                                Debug.Log($"[Mock IAP] Purchase successful: {itemId}");
+                                InternalInvokeCallback(new BCProduct[] { product });
+                                return;
+                            }
+                        }
+
+                        if (response.ContainsKey("errorMessage"))
+                            Debug.LogError($"[Mock IAP] VerifyPurchaseMockStore: {response["errorMessage"]}");
+
+                        HasErrorOccurred = true;
+                        InternalInvokeCallback(null);
+                    },
+                    OnBrainCloudFailure("Mock purchase script failed!", () => InternalInvokeCallback(null)));
+            },
+            OnBrainCloudFailure("Unable to cache mock purchase payload!", () => InternalInvokeCallback(null)));
+    }
+
+    /// <summary>
     /// Gets a platform store extension (e.g. IGooglePlayStoreExtensions).
     /// </summary>
     public static T GetExtension<T>() where T : IStoreExtension

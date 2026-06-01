@@ -388,6 +388,48 @@ public class StoreItemCard : MonoBehaviour
                     });
                 break;
             case ItemType.Product:
+                if (AppManager.MockPurchasesEnabled)
+                {
+                    BCProduct[] mockInventory = BrainCloudMarketplace.GetMockInventory();
+                    if (mockInventory == null)
+                    {
+                        Debug.LogWarning("[Mock IAP] No products loaded yet.");
+                        break;
+                    }
+
+                    BCProduct mockProductToBuy = null;
+                    foreach (BCProduct p in mockInventory)
+                    {
+                        if (p.itemId == _data.itemId || p.priceData?.id == _data.defId)
+                        {
+                            mockProductToBuy = p;
+                            break;
+                        }
+                    }
+
+                    if (mockProductToBuy == null)
+                    {
+                        Debug.LogWarning($"[Mock IAP] Product '{_data.itemId}' not found in mock inventory.");
+                        break;
+                    }
+
+                    BrainCloudMarketplace.MockPurchaseProduct(mockProductToBuy, (BCProduct[] purchased) =>
+                    {
+                        if (purchased != null && purchased.Length > 0)
+                        {
+                            Debug.Log($"[Mock IAP] Purchase successful: {_data.itemId}");
+                            if (mockProductToBuy.IAPProductType == UnityEngine.Purchasing.ProductType.Subscription)
+                                InventoryService.Instance.RegisterMockSubscription(mockProductToBuy.itemId);
+                            InventoryService.Instance.OnItemBought?.Invoke();
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[Mock IAP] Purchase failed: {_data.itemId}");
+                        }
+                    });
+                    break;
+                }
+
                 Debug.Log($"[IAP] Buy tapped for '{_data.itemId}'. IsInitialized={BrainCloudMarketplace.IsInitialized}");
 
                 if (!BrainCloudMarketplace.IsInitialized)
