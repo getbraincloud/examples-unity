@@ -148,7 +148,7 @@ public class Login : GameScene
         App.Name = UniversalId.text;
 
         // and also update their name on brainCloud
-        App.Bc.PlayerStateService.UpdateName(UniversalId.text,
+        App.Bc.PlayerStateService.UpdateUserName(UniversalId.text,
             (jsonResponse, o) => { App.GotoMatchSelectScene(gameObject); });
     }
 }

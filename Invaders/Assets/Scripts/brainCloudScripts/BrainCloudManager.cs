@@ -165,7 +165,7 @@ public class BrainCloudManager : MonoBehaviour
         if (playerName.IsNullOrEmpty())
         {
             // Update name for display
-            _wrapper.PlayerStateService.UpdateName(_localUserInfo.Username, OnUpdateName, OnFailureCallback,
+            _wrapper.PlayerStateService.UpdateUserName(_localUserInfo.Username, OnUpdateName, OnFailureCallback,
                 "Failed to update username to braincloud");
         }
         else

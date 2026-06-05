@@ -61,7 +61,7 @@ public class ProfileSetupUI : MonoBehaviour
 		// only update it if changed
 		if (initialNickname != ClientInfo.Username)
 		{
-			BCManager.Wrapper.PlayerStateService.UpdateName(ClientInfo.Username, OnUpdateNameSuccess, OnUpdateNameError);
+			BCManager.Wrapper.PlayerStateService.UpdateUserName(ClientInfo.Username, OnUpdateNameSuccess, OnUpdateNameError);
 		}
 		else
         {
