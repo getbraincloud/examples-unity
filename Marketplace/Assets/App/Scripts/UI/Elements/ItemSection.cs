@@ -45,6 +45,15 @@ public class ItemSection : MonoBehaviour
             AddStoreItem(itemData);
     }
 
+    public void RemoveStoreItem(string defId)
+    {
+        if (cards.TryGetValue(defId, out StoreItemCard card))
+        {
+            Destroy(card.gameObject);
+            cards.Remove(defId);
+        }
+    }
+
     public void ClearItems()
     {
         //remove all cards within this section

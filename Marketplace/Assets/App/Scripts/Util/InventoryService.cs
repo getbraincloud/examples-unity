@@ -538,27 +538,79 @@ public class InventoryService : MonoBehaviour
     /// <summary>
     /// Registers a mock subscription for <paramref name="productId"/> that lasts
     /// <see cref="MOCK_SUB_DURATION_MS"/> (10 min) with <see cref="MOCK_SUB_RENEWAL_MS"/> (2 min) renewal periods.
-    /// Call this after a successful mock subscription purchase.
+    /// Persists start/expiry timestamps to brainCloud user attributes so the subscription
+    /// survives app restarts within the 10-minute window.
     /// </summary>
     public void RegisterMockSubscription(string productId)
     {
         long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        _mockSubscriptions[productId] = new MockSubscriptionEntry
+        var entry = new MockSubscriptionEntry
         {
             start  = now,
             expiry = now + MOCK_SUB_DURATION_MS
         };
+        _mockSubscriptions[productId] = entry;
         Debug.Log($"[Mock Sub] Registered '{productId}' — expires in {MOCK_SUB_DURATION_MS / 60000} min.");
+
+        BCManager.Instance.BCWrapper.PlayerStateService.UpdateAttributes(
+            JsonWriter.Serialize(new Dictionary<string, object>
+            {
+                { $"mockSubStart_{productId}",  entry.start.ToString()  },
+                { $"mockSubExpiry_{productId}", entry.expiry.ToString() }
+            }),
+            false,
+            (string _, object __) => Debug.Log($"[Mock Sub] Persisted '{productId}' timing to user attributes."),
+            (int _, int __, string err, object ___) => Debug.LogError($"[Mock Sub] Failed to persist timing: {err}"));
     }
 
     private void GetMockSubscriptionStatus(string productId, Action<bool, long> onComplete)
     {
-        if (!_mockSubscriptions.TryGetValue(productId, out var sub))
+        // If already loaded in memory, evaluate immediately
+        if (_mockSubscriptions.TryGetValue(productId, out var cached))
         {
-            onComplete?.Invoke(false, 0);
+            EvaluateMockSubscription(productId, cached, onComplete);
             return;
         }
 
+        // Not in memory (fresh app start) — load persisted timestamps from user attributes
+        BCManager.Instance.BCWrapper.PlayerStateService.GetAttributes(
+            (string attrJson, object _) =>
+            {
+                var attrData = (JsonReader.Deserialize<Dictionary<string, object>>(attrJson)["data"]
+                    as Dictionary<string, object>)["attributes"] as Dictionary<string, object>;
+
+                string startKey  = $"mockSubStart_{productId}";
+                string expiryKey = $"mockSubExpiry_{productId}";
+
+                if (attrData != null &&
+                    attrData.TryGetValue(startKey, out var rawStart) &&
+                    attrData.TryGetValue(expiryKey, out var rawExpiry))
+                {
+                    try
+                    {
+                        var entry = new MockSubscriptionEntry
+                        {
+                            start  = Convert.ToInt64(rawStart),
+                            expiry = Convert.ToInt64(rawExpiry)
+                        };
+                        _mockSubscriptions[productId] = entry;
+                        EvaluateMockSubscription(productId, entry, onComplete);
+                    }
+                    catch
+                    {
+                        onComplete?.Invoke(false, 0);
+                    }
+                }
+                else
+                {
+                    onComplete?.Invoke(false, 0);
+                }
+            },
+            (int _, int __, string ___, object ____) => onComplete?.Invoke(false, 0));
+    }
+
+    private void EvaluateMockSubscription(string productId, MockSubscriptionEntry sub, Action<bool, long> onComplete)
+    {
         long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         if (now >= sub.expiry)
         {
@@ -568,9 +620,9 @@ public class InventoryService : MonoBehaviour
         }
 
         // Compute next 2-minute renewal boundary within the 10-minute window
-        long elapsed    = now - sub.start;
-        long nextBound  = sub.start + ((elapsed / MOCK_SUB_RENEWAL_MS) + 1) * MOCK_SUB_RENEWAL_MS;
-        long expiryMs   = Math.Min(nextBound, sub.expiry);
+        long elapsed   = now - sub.start;
+        long nextBound = sub.start + ((elapsed / MOCK_SUB_RENEWAL_MS) + 1) * MOCK_SUB_RENEWAL_MS;
+        long expiryMs  = Math.Min(nextBound, sub.expiry);
 
         onComplete?.Invoke(true, expiryMs);
     }
@@ -665,8 +717,10 @@ public class InventoryService : MonoBehaviour
             if (!isActive)
             {
                 Debug.Log("[InventoryService] Subscription confirmed expired.");
+                NoAdsSubscriptionActive = false;
                 _subscriptionExpiryWatcher = null;
                 OnSubscriptionExpired?.Invoke();
+                OnItemBought?.Invoke(); // Refresh the store so the product becomes purchasable again
             }
             else
             {

@@ -413,6 +413,10 @@ public class StoreItemCard : MonoBehaviour
                         break;
                     }
 
+                    bool mockIsCurrency     = _data.isCurrency;
+                    CurrencyType mockRewardCurrency = _data.rewardCurrency;
+                    int mockItemAmount      = _data.itemAmount;
+
                     BrainCloudMarketplace.MockPurchaseProduct(mockProductToBuy, (BCProduct[] purchased) =>
                     {
                         if (purchased != null && purchased.Length > 0)
@@ -420,6 +424,8 @@ public class StoreItemCard : MonoBehaviour
                             Debug.Log($"[Mock IAP] Purchase successful: {_data.itemId}");
                             if (mockProductToBuy.IAPProductType == UnityEngine.Purchasing.ProductType.Subscription)
                                 InventoryService.Instance.RegisterMockSubscription(mockProductToBuy.itemId);
+                            if (mockIsCurrency && mockRewardCurrency != CurrencyType.None)
+                                AnimateCurrencyAward(() => ApplyCurrencyAward(mockRewardCurrency, mockItemAmount));
                             InventoryService.Instance.OnItemBought?.Invoke();
                         }
                         else
@@ -458,11 +464,17 @@ public class StoreItemCard : MonoBehaviour
                     break;
                 }
 
+                bool isCurrency     = _data.isCurrency;
+                CurrencyType rewardCurrency = _data.rewardCurrency;
+                int itemAmount      = _data.itemAmount;
+
                 BrainCloudMarketplace.PurchaseProduct(productToBuy, (BCProduct[] purchased) =>
                 {
                     if (purchased != null && purchased.Length > 0)
                     {
                         Debug.Log($"Purchase successful: {_data.itemId}");
+                        if (isCurrency && rewardCurrency != CurrencyType.None)
+                            AnimateCurrencyAward(() => ApplyCurrencyAward(rewardCurrency, itemAmount));
                         InventoryService.Instance.OnItemBought?.Invoke();
                     }
                     else
@@ -611,6 +623,14 @@ public class StoreItemCard : MonoBehaviour
         {
 
         });
+    }
+
+    private void ApplyCurrencyAward(CurrencyType currency, int amount)
+    {
+        if (currency == CurrencyType.Gems)
+            AppManager.Instance.AddGems(amount);
+        else if (currency == CurrencyType.Coins)
+            AppManager.Instance.AddCoins(amount);
     }
 
     private void AnimateCurrencyAward(Action onComplete)
