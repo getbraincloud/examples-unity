@@ -58,6 +58,7 @@ public class MainScreen : MonoBehaviour
     {
         _avatarButton.onClick.AddListener(OnAvatarButtonClicked);
         _collectCoinsButton.onClick.AddListener(OnCollectCoinsButtonClicked);
+        _adsBanner.GetComponent<Button>().onClick.AddListener(OnAdsBannerClicked);
         AppManager.Instance.OnCoinsUpdated += OnCoinsUpdated;
         AppManager.Instance.OnGemsUpdated += OnGemsUpdated;
         AppManager.Instance.OnUserXPUpdated += OnUserXPUpdated;
@@ -71,6 +72,16 @@ public class MainScreen : MonoBehaviour
         _adsBanner.SetActive(!InventoryService.Instance.NoAdsSubscriptionActive);
 
         UpdateAllUserStatUI(AppManager.Instance.userData);
+    }
+
+    private void OnAdsBannerClicked()
+    {
+        AppManager.Instance.SpawnInfoModal(
+            title: "Go to Samples Page?",
+            message: "Collaborative Canvas is a free, cooperative painting experience.\n\nExplore this and all our sample game projects, complete with full source code.",
+            actionButtonLabel: "View All Samples",
+            onAction: () => Application.OpenURL("https://getbraincloud.com/samples/")
+        );
     }
 
     private void OnMultiplierActivated(CoinMultiplierStatus status)
@@ -134,6 +145,7 @@ public class MainScreen : MonoBehaviour
     {
         _avatarButton.onClick.RemoveListener(OnAvatarButtonClicked);
         _collectCoinsButton.onClick.RemoveListener(OnCollectCoinsButtonClicked);
+        _adsBanner.GetComponent<Button>().onClick.RemoveListener(OnAdsBannerClicked);
         AppManager.Instance.OnCoinsUpdated -= OnCoinsUpdated;
         AppManager.Instance.OnGemsUpdated -= OnGemsUpdated;
         AppManager.Instance.OnUserXPUpdated -= OnUserXPUpdated;

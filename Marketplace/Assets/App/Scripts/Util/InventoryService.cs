@@ -216,6 +216,13 @@ public class InventoryService : MonoBehaviour
         return result;
     }
 
+    private static int GetInventoryItemOrder(UserItemData item)
+    {
+        if (item.isBundle)      return 0;
+        if (item.isActivatable) return 1;
+        return 2;
+    }
+
     private static int GetCategoryOrder(StoreItemData item)
     {
         switch (item.category)
@@ -784,6 +791,7 @@ public class InventoryService : MonoBehaviour
                             });
                             StartSubscriptionExpiryWatcher(expiryTimeMs);
                         }
+                        items.Sort((a, b) => GetInventoryItemOrder(a).CompareTo(GetInventoryItemOrder(b)));
                         onSuccess?.Invoke(items);
                     });
                 },

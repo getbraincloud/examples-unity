@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 
@@ -23,6 +24,8 @@ public class AppManager : MonoBehaviour
     private ViewItemModal viewItemModalPrefab;
     [SerializeField]
     private ViewStoreItemModal viewStoreItemModalPrefab;
+    [SerializeField]
+    private InfoModal infoModalPrefab;
 
     private LoadingOverlay _currentLoadingOverlay;
 
@@ -61,10 +64,24 @@ public class AppManager : MonoBehaviour
         
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            var results = new List<RaycastResult>();
+            var pointerData = new PointerEventData(EventSystem.current) { position = Input.mousePosition };
+            EventSystem.current.RaycastAll(pointerData, results);
+
+            if (results.Count == 0)
+            {
+                Debug.Log("[ClickDebug] Click hit no UI elements");
+            }
+            else
+            {
+                for (int i = 0; i < results.Count; i++)
+                    Debug.Log($"[ClickDebug] Hit[{i}]: '{results[i].gameObject.name}' depth={results[i].depth} sortOrder={results[i].sortingOrder}");
+            }
+        }
     }
 
     public void ProcessUserData(string jsonResponse, Action OnComplete, string loginUsername = null)
@@ -365,6 +382,19 @@ public class AppManager : MonoBehaviour
         modal.transform.localScale = Vector3.one;
 
         modal.SetData(data, onActionButton, onClosed);
+    }
+
+    public void SpawnInfoModal(string title, string message, string actionButtonLabel, Action onAction, Action onClosed = null)
+    {
+        if (_appCanvas == null)
+        {
+            FetchReferences();
+        }
+
+        InfoModal modal = Instantiate(infoModalPrefab, _appCanvas.transform);
+        modal.transform.localScale = Vector3.one;
+
+        modal.SetData(title, message, actionButtonLabel, onAction, onClosed);
     }
 
     private IEnumerator MoveWorld(RectTransform rect, Vector3 targetPos, float duration, Action onComplete)

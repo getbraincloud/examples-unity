@@ -144,6 +144,22 @@ public class PlayerInventory : MonoBehaviour
                 _items.Add(item.itemId, itemCard);
             }
         }
+        ReorderCards();
+    }
+
+    private void ReorderCards()
+    {
+        var sorted = new List<UserItemCard>(_items.Values);
+        sorted.Sort((a, b) => GetInventoryItemOrder(a.data).CompareTo(GetInventoryItemOrder(b.data)));
+        for (int i = 0; i < sorted.Count; i++)
+            sorted[i].transform.SetSiblingIndex(i);
+    }
+
+    private static int GetInventoryItemOrder(UserItemData item)
+    {
+        if (item.isBundle)      return 0;
+        if (item.isActivatable) return 1;
+        return 2;
     }
 
 }
