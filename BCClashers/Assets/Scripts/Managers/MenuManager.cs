@@ -103,7 +103,6 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
-        BrainCloudVersionText.text = $"brainCloud Version: {BrainCloud.Version.GetVersion()}";
         PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
         if (NetworkManager.Instance.IsSessionValid())
         {
