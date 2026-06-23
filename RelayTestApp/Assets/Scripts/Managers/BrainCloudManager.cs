@@ -130,8 +130,8 @@ public class BrainCloudManager : MonoBehaviour
     {
         string tag = "";
 #if UNITY_EDITOR
-    var tags = Unity.Multiplayer.PlayMode.CurrentPlayer.Tags;
-    if (tags != null && tags.Count > 0)
+    var tags = Unity.Multiplayer.Playmode.CurrentPlayer.ReadOnlyTags();
+    if (tags != null && tags.Length > 0)
         tag = tags[0];
 #endif
         _bcWrapper.WrapperName = "RelayTestApp_" + tag;
