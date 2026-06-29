@@ -20,7 +20,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text _mainStatus;
     #region LoginVars
     [Header("Login Vars")]
-    [SerializeField] private TMP_InputField _usernameInput, _passwordInput, _displayNameInput;
+    [SerializeField] private TMP_InputField _usernameInput, _passwordInput, _displayNameInput, _joinLobbyInput;
     [SerializeField] private TMP_Text _authErrorText;
     [SerializeField] private Button _loginButton;
     #endregion
@@ -29,7 +29,9 @@ public class UIManager : MonoBehaviour
     [Header("MainMenu Vars")]
     [SerializeField] private GameObject _displayNamePanel;
     [SerializeField] private TMP_Text _displayNameText, _accountNameText;
-    [SerializeField] private Button _createLobbyButton, _findLobbyButton, _cancelMatchmakingButton, _findCreateLobbyButton;
+    [SerializeField]
+    private Button _createLobbyButton, _findLobbyButton,
+            _cancelMatchmakingButton, _findCreateLobbyButton, _joinLobbyButton;
     [SerializeField] private Image _playerColourImage;
 
     private string _currentEntryId;
@@ -37,7 +39,7 @@ public class UIManager : MonoBehaviour
 
     #region LobbyVars
     [Header("Lobby Vars")]
-    [SerializeField] private TMP_Text _lobbyIdText, _loadingNumMembersText;
+    [SerializeField] private TMP_Text _lobbyIdText, _lobbyPinText, _loadingNumMembersText, _autoLaunchText;
     [SerializeField] private Button _readyUpButton, _leaveLobbyButton;
     [SerializeField] private LobbyMemberItem _lobbyMemberRowPrefab;
     [SerializeField] private Transform _lobbyMembersContainer;
@@ -78,7 +80,7 @@ public class UIManager : MonoBehaviour
         if (BCManager.Instance.bc.Client.IsAuthenticated())
         {
             OnAuthSuccess();
-            
+
         }
         else
         {
@@ -131,6 +133,33 @@ public class UIManager : MonoBehaviour
         {
             SelectNextField();
         }
+
+
+        // when there is an active lobby
+        // when there is we are less then a minute to 
+        // BCManager.Instance.timetable.onTime, 
+        // .the game will launch the server
+        // instead of disbanding the lobby, even on a long lived lobby
+        BCManager bcm = BCManager.Instance;
+        if (_curState == State.Lobby && !string.IsNullOrEmpty(bcm.CurrentLobbyId))
+        {
+
+            _lobbyPinText.text = BCManager.Instance.CurrentLobbyPin;
+
+            double currentTime = TimeUtils.GetCurrentTime() * 1000; // in ms
+            double timeToLaunch = bcm.timetable.onTime - currentTime;
+
+            if (timeToLaunch <= 60000 && timeToLaunch > 0 && _loadingView.activeInHierarchy == false)
+            {
+                TimeSpan timeSpan = TimeSpan.FromMilliseconds(timeToLaunch);
+                _autoLaunchText.text = $"Launching in {timeSpan.Seconds} s";
+            }
+            else
+            {
+                _autoLaunchText.text = string.Empty;
+            }
+        }
+
     }
 
     void SelectNextField()
@@ -183,6 +212,7 @@ public class UIManager : MonoBehaviour
         _findLobbyButton.gameObject.SetActive(true);
         _createLobbyButton.gameObject.SetActive(true);
         _findCreateLobbyButton.gameObject.SetActive(true);
+        _joinLobbyButton.gameObject.SetActive(true);
         _displayNamePanel.SetActive(true);
 
         _cancelMatchmakingButton.gameObject.SetActive(false);
@@ -203,10 +233,74 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+            _joinLobbyButton.gameObject.SetActive(false);
             _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
         });
     }
+
+    public void OnJoinLobby()
+    {
+        _mainStatus.text = "Finding Lobby " + _joinLobbyInput.text + "...";
+        _loadingView.SetActive(true);
+        _loadingStatusText.text = "Finding lobby...";
+
+
+        //temp disable lobby buttons
+        _findLobbyButton.gameObject.SetActive(false);
+        _createLobbyButton.gameObject.SetActive(false);
+        _findCreateLobbyButton.gameObject.SetActive(false);
+        _joinLobbyButton.gameObject.SetActive(false);
+        _displayNamePanel.SetActive(false);
+        _cancelMatchmakingButton.gameObject.SetActive(true);
+
+        // Call cloud Script to enter in the pin
+        BCManager.Instance.bc.ScriptService.RunScript("lobby/FetchLobbyInfo", "{\"pinCode\":\"" + _joinLobbyInput.text + "\"}", (response, _) =>
+        {
+            Debug.Log("JoinLobbyWithPin response: " + response);
+            // if we get a lobbyid, join it right away
+            // otherwise cancel out the join
+
+            var respDict = JsonReader.Deserialize<Dictionary<string, object>>(response);
+            if (respDict != null && respDict.TryGetValue("data", out var dataObj) && dataObj is Dictionary<string, object> dataDict)
+            {
+                if (dataDict.TryGetValue("response", out var responseObj) && responseObj is Dictionary<string, object> dataDict2)
+                {
+                    if (dataDict2.TryGetValue("lobbyData", out var lobbyObj) && lobbyObj is Dictionary<string, object> lobbyDataDict)
+                    {
+                        string lobbyId = lobbyDataDict["lobbyId"] as string;
+                        string pinCode = lobbyDataDict["pinCode"] as string;
+                        double expiresAt = lobbyDataDict.ContainsKey("expiresAt") ? Convert.ToDouble(lobbyDataDict["expiresAt"]) : double.MaxValue;
+
+                        // update the current lobby pin in the manager so it can be displayed in the lobby scene
+                        BCManager.Instance.CurrentLobbyPin = pinCode;
+                        BCManager.Instance.CurrentLobbyPinExpiresAt = expiresAt;
+
+                        Debug.Log("Joining Lobby with ID: " + lobbyId);
+                        BCManager.Instance.JoinLobby(lobbyId, (json) =>
+                        {
+                        });
+                    }
+                    else
+                    {
+                        Debug.LogError("JoinLobbyWithPin failed to get lobbyId from response.");
+                        OnCancelMatchmakingClicked();
+
+                        _mainStatus.text = "Lobby does not exist or pin is incorrect.";
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("JoinLobbyWithPin failed to get lobbyId from response.");
+                OnCancelMatchmakingClicked();
+                _mainStatus.text = "Lobby does not exist or pin is incorrect.";
+            }
+
+        });
+
+    }
+
 
     public void OnFindLobbyClicked()
     {
@@ -221,6 +315,7 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+            _joinLobbyButton.gameObject.SetActive(false);
 
             _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
@@ -242,6 +337,7 @@ public class UIManager : MonoBehaviour
             _findLobbyButton.gameObject.SetActive(false);
             _createLobbyButton.gameObject.SetActive(false);
             _findCreateLobbyButton.gameObject.SetActive(false);
+            _joinLobbyButton.gameObject.SetActive(false);
 
             _displayNamePanel.SetActive(false);
             _cancelMatchmakingButton.gameObject.SetActive(true);
@@ -264,7 +360,7 @@ public class UIManager : MonoBehaviour
             AddMemberRow(row);
         }
     }
-    
+
 
     private void AddMemberRow(LobbyMemberData lobbyMemberData)
     {
@@ -383,9 +479,9 @@ public class UIManager : MonoBehaviour
                 var operation = response["operation"] as string;
                 var service = response["service"] as string;
 
-                    if (operation != "SIGNAL" && operation != "MEMBER_UPDATE")
-                    {
-                        var data = response["data"] as Dictionary<string, object>;
+                if (operation != "SIGNAL" && operation != "MEMBER_UPDATE")
+                {
+                    var data = response["data"] as Dictionary<string, object>;
                     if (data.ContainsKey("reason") && data["reason"] is Dictionary<string, object> reasonData)
                     {
                         if (reasonData.ContainsKey("desc"))
@@ -410,123 +506,125 @@ public class UIManager : MonoBehaviour
                 }
 
                 _lobbyIdText.text = BCManager.Instance.CurrentLobbyId;
+                _lobbyPinText.text = BCManager.Instance.CurrentLobbyPin;
 
                 switch (operation)
-                    {
-                        case "MEMBER_JOIN":
+                {
+                    case "MEMBER_JOIN":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+                            if (!string.IsNullOrEmpty(joiningMemberId) && joiningMemberId == BCManager.Instance.bc.Client.ProfileId)
                             {
-                                Debug.Log("OnLobbyEvent : " + json);
-                                if (!string.IsNullOrEmpty(joiningMemberId) && joiningMemberId == BCManager.Instance.bc.Client.ProfileId)
+                                //we just joined this lobby
+                                UpdateState(State.Lobby);
+                            }
+                            FillCurrentMemberRows();
+                        }
+                        break;
+                    case "MEMBER_UPDATE":
+                        {
+                            bool memberReady = (bool)memberData["isReady"];
+
+                            UpdateMemberReady(joiningMemberId, memberReady);
+                        }
+                        break;
+                    case "MEMBER_LEFT":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+                            RemoveMember(joiningMemberId);
+                        }
+                        break;
+                    case "DISBANDED":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+                            var reason = jsonData["reason"] as Dictionary<string, object>;
+                            if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
+                            {
+                                // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
+                                UpdateState(State.Main);
+                            }
+                        }
+                        break;
+                    case "STARTING":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+
+                            // launching
+                            _loadingView.SetActive(true);
+                            _loadingStatusText.text = "Launching...";
+                        }
+                        break;
+                    case "ROOM_READY":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+
+                            //get pass code
+                            if (jsonData.ContainsKey("passcode"))
+                            {
+                                string passCode = jsonData["passcode"] as string;
+                                BCManager.Instance.RelayPasscode = passCode;
+                            }
+
+                            // iterate over all BCManager.Instance.LobbyMembersData and set them all to not ready
+                            foreach (var member in BCManager.Instance.LobbyMembersData)
+                            {
+                                member.ReadyStateValue = false;
+                            }
+
+                            Dictionary<string, object> extra = BCManager.Instance.GetLobbyExtraData();
+
+                            BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, false, extra);
+
+                            Dictionary<string, object> roomData = jsonData["connectData"] as Dictionary<string, object>;
+                            BCManager.Instance.RoomAddress = roomData["address"] as string;
+                            Dictionary<string, object> portsData = roomData["ports"] as Dictionary<string, object>;
+                            BCManager.Instance.RoomPort = (ushort)int.Parse(portsData["udp"].ToString());
+
+                            //load game scene
+                            UnityEngine.SceneManagement.SceneManager.sceneLoaded += BCManager.Instance.OnGameSceneLoaded;
+
+                            UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+
+                        }
+                        break;
+                    case "JOIN_FAIL":
+                        {
+                            Debug.Log("OnLobbyEvent : " + json);
+                            _findLobbyButton.gameObject.SetActive(true);
+                            _createLobbyButton.gameObject.SetActive(true);
+                            _findCreateLobbyButton.gameObject.SetActive(true);
+                            _joinLobbyButton.gameObject.SetActive(true);
+                            _cancelMatchmakingButton.gameObject.SetActive(false);
+
+                            _displayNamePanel.SetActive(true);
+                            _loadingView.SetActive(false);
+                        }
+                        break;
+
+                    case "SIGNAL":
+                        {
+                            if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
+                            {
+                                if (signalData.TryGetValue("color", out object colorObj) && colorObj is string hexColor)
                                 {
-                                    //we just joined this lobby
-                                    UpdateState(State.Lobby);
-                                }
-                                FillCurrentMemberRows();
-                            }
-                            break;
-                        case "MEMBER_UPDATE":
-                            { 
-                                bool memberReady = (bool)memberData["isReady"];
-
-                                UpdateMemberReady(joiningMemberId, memberReady);
-                            }
-                            break;
-                        case "MEMBER_LEFT":
-                            {
-                                Debug.Log("OnLobbyEvent : " + json);
-                                RemoveMember(joiningMemberId);
-                            }
-                            break;
-                        case "DISBANDED":
-                            {
-                                Debug.Log("OnLobbyEvent : " + json);
-                                var reason = jsonData["reason"] as Dictionary<string, object>;
-                                if ((int)reason["code"] != ReasonCodes.RTT_ROOM_READY)
-                                {
-                                    // Disbanded for any other reason than ROOM_READY, means we failed to launch the game.
-                                    UpdateState(State.Main);
-                                }
-                            }
-                            break;
-                        case "STARTING":
-                            {
-                                Debug.Log("OnLobbyEvent : " + json);
-
-                                // launching
-                                 _loadingView.SetActive(true);
-                                _loadingStatusText.text = "Launching...";
-                            }
-                            break;
-                        case "ROOM_READY":
-                            {
-                                Debug.Log("OnLobbyEvent : " + json);
-                                
-                                //get pass code
-                                if (jsonData.ContainsKey("passcode"))
-                                {
-                                    string passCode = jsonData["passcode"] as string;
-                                    BCManager.Instance.RelayPasscode = passCode;
-                                }
-
-                                // iterate over all BCManager.Instance.LobbyMembersData and set them all to not ready
-                                foreach (var member in BCManager.Instance.LobbyMembersData)
-                                {
-                                    member.ReadyStateValue = false;
-                                }
-
-                                Dictionary<string, object> extra = BCManager.Instance.GetLobbyExtraData();
-
-                                BCManager.Instance.bc.LobbyService.UpdateReady(BCManager.Instance.CurrentLobbyId, false, extra);
-                                
-                                Dictionary<string, object> roomData = jsonData["connectData"] as Dictionary<string, object>;
-                                BCManager.Instance.RoomAddress = roomData["address"] as string;
-                                Dictionary<string, object> portsData = roomData["ports"] as Dictionary<string, object>;
-                                BCManager.Instance.RoomPort = (ushort)int.Parse(portsData["udp"].ToString());
-
-                                //load game scene
-                                UnityEngine.SceneManagement.SceneManager.sceneLoaded += BCManager.Instance.OnGameSceneLoaded;
-
-                                UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
-                                
-                            }
-                            break;
-                        case "JOIN_FAIL":
-                            {
-                                Debug.Log("OnLobbyEvent : " + json);
-                                _findLobbyButton.gameObject.SetActive(true);
-                                _createLobbyButton.gameObject.SetActive(true);
-                                _findCreateLobbyButton.gameObject.SetActive(true);
-                                _cancelMatchmakingButton.gameObject.SetActive(false);
-
-                                _displayNamePanel.SetActive(true);
-                                _loadingView.SetActive(false);
-                            }
-                            break;
-
-                        case "SIGNAL":
-                            {
-                                if (jsonData.ContainsKey("signalData") && jsonData["signalData"] is Dictionary<string, object> signalData)
-                                {
-                                    if (signalData.TryGetValue("color", out object colorObj) && colorObj is string hexColor)
+                                    if (ColorUtility.TryParseHtmlString("#" + hexColor, out Color receivedColor))
                                     {
-                                        if (ColorUtility.TryParseHtmlString("#" + hexColor, out Color receivedColor))
+                                        LobbyMemberItem tempItem = GetLobbyMemberItem(fromMemberId);
+                                        if (tempItem != null)
                                         {
-                                            LobbyMemberItem tempItem = GetLobbyMemberItem(fromMemberId);
-                                            if (tempItem != null)
-                                            {
-                                                // Apply the receivedColor to the correct object
-                                                tempItem.ApplyColorUpdate(receivedColor);
-                                            }
-                                            else
-                                            {
-                                                FillCurrentMemberRows();
-                                            }
+                                            // Apply the receivedColor to the correct object
+                                            tempItem.ApplyColorUpdate(receivedColor);
+                                        }
+                                        else
+                                        {
+                                            FillCurrentMemberRows();
                                         }
                                     }
                                 }
                             }
-                            break;
-                    }
+                        }
+                        break;
+                }
             }
         }
         catch (Exception ex)
@@ -540,7 +638,7 @@ public class UIManager : MonoBehaviour
     private const string P2_STR = P_PRE_FIX + "player2";
     private const string P3_STR = P_PRE_FIX + "player3";
     private const string P4_STR = P_PRE_FIX + "player4";
-    
+
     private void LoginHelper(string str, string pwd)
     {
         UpdateState(State.Loading);
@@ -606,7 +704,7 @@ public class UIManager : MonoBehaviour
         string profileId = BCManager.Instance.bc.Client.ProfileId;
         Color playerColor = PlayerListItemManager.Instance.GetPlayerDataByProfileId(profileId).Color;
         Debug.Log($"Updating display name to: {displayName} with color: {playerColor}, ProfileId: {profileId}");
-    
+
         _displayNameInput.gameObject.GetComponent<Image>().color = playerColor;
         _playerColourImage.color = playerColor;
 
@@ -615,7 +713,7 @@ public class UIManager : MonoBehaviour
         _accountNameText.text = BCManager.Instance.ExternalId;
 
         // Update the display name in BrainCloud
-        BCManager.Instance.bc.PlayerStateService.UpdateName(displayName, successCallback, failureCallback);
+        BCManager.Instance.bc.PlayerStateService.UpdateUserName(displayName, successCallback, failureCallback);
     }
 
     public void OnLoginClicked()

@@ -245,7 +245,7 @@ public class NetworkManager : MonoBehaviour
         if (!data.ContainsKey("playerName"))
         {
             // Update name for display
-            _bcWrapper.PlayerStateService.UpdateName(tempUsername, OnLoggedIn, OnFailureCallback,
+            _bcWrapper.PlayerStateService.UpdateUserName(tempUsername, OnLoggedIn, OnFailureCallback,
                 "Failed to update username to braincloud");
         }
         else
@@ -255,7 +255,7 @@ public class NetworkManager : MonoBehaviour
             if (userInfo.Username.IsNullOrEmpty())
             {
                 userInfo.Username = tempUsername;
-                _bcWrapper.PlayerStateService.UpdateName(userInfo.Username, OnLoggedIn, OnFailureCallback,
+                _bcWrapper.PlayerStateService.UpdateUserName(userInfo.Username, OnLoggedIn, OnFailureCallback,
                     "Failed to update username to braincloud");
             }
             else

@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "com.bitheads.braincloud": {
-      "version": "https://github.com/getbraincloud/braincloud-unity-package.git",
+      "version": "https://github.com/getbraincloud/braincloud-unity-package.git#release/6.0",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "b363aadbc7da6ff1f6b9656b472e104ebb040ecc"
+      "hash": "a77835b1dd03ea075474dc4ac3818201a0b750f0"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -20,7 +20,7 @@
       "dependencies": {}
     },
     "com.unity.ide.rider": {
-      "version": "3.0.38",
+      "version": "3.0.39",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -29,12 +29,28 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.26",
+      "version": "2.0.27",
       "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.test-framework": "1.1.33"
       },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.multiplayer.playmode": {
+      "version": "1.6.3",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "2.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.sysroot": {
@@ -54,7 +70,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.5.1",
+      "version": "1.6.0",
       "depth": 1,
       "source": "builtin",
       "dependencies": {
@@ -64,7 +80,7 @@
       }
     },
     "com.unity.timeline": {
-      "version": "1.8.10",
+      "version": "1.8.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
