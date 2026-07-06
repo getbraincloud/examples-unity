@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "a77835b1dd03ea075474dc4ac3818201a0b750f0"
+      "hash": "af51acb48ead8b76dc35b9b0f87b8a555d5cc777"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -194,15 +194,6 @@
         "com.unity.modules.terrain": "1.0.0"
       }
     },
-    "com.unity.sdk.linux-x86_64": {
-      "version": "1.1.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.sysroot.base": "1.1.0"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.searcher": {
       "version": "4.9.3",
       "depth": 2,
@@ -280,11 +271,20 @@
         "com.unity.searcher": "4.9.3"
       }
     },
-    "com.unity.sysroot.base": {
-      "version": "1.1.0",
+    "com.unity.sysroot": {
+      "version": "2.0.10",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.sysroot.linux-x86_64": {
+      "version": "2.0.9",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot": "2.0.10"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
@@ -319,12 +319,23 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.toolchain.win-x86_64-linux": {
-      "version": "1.1.0",
+    "com.unity.toolchain.macos-arm64-linux-x86_64": {
+      "version": "2.0.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.sysroot.base": "1.1.0"
+        "com.unity.sysroot": "2.0.10",
+        "com.unity.sysroot.linux-x86_64": "2.0.9"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.toolchain.win-x86_64-linux-x86_64": {
+      "version": "2.0.11",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot": "2.0.10",
+        "com.unity.sysroot.linux-x86_64": "2.0.9"
       },
       "url": "https://packages.unity.com"
     },
