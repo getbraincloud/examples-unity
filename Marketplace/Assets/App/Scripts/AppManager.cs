@@ -223,7 +223,7 @@ public class AppManager : MonoBehaviour
 
     public void UpdatePlayerNameOnServer(string newPlayerName, Action onSuccess = null, Action<string> onFailure = null)
     {
-        BCManager.Instance.BCWrapper.PlayerStateService.UpdateName(
+        BCManager.Instance.BCWrapper.PlayerStateService.UpdateUserName(
             newPlayerName,
             (string responseJson, object cb) =>
             {

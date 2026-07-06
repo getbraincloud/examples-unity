@@ -36,7 +36,7 @@ public class BCManager : MonoBehaviour
         // Initialize BrainCloud wrapper
         BCWrapper = GetComponent<BrainCloudWrapper>();
         BCWrapper.Init();
-        BCWrapper.EnableLongSession(true);
+        BCWrapper.EnableAutoReconnect(true);
         Debug.Log("BCManager initialized and BrainCloudWrapper ready.");
         isInitialized = BCWrapper.Client.Initialized;
         OnBrainCloudInitialized?.Invoke();
