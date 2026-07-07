@@ -2,7 +2,6 @@ using BrainCloud.JSONHelper;
 using Gameframework;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +18,7 @@ public class MysteryBoxUI : ContentUIBehaviour
     [SerializeField] private GameObject LevelRequirementObject;
     [SerializeField] private GameObject PriceRequirementObject;
     [SerializeField] private TextMeshProUGUI LevelRequirementText;
+
     [Header("References")]
     [SerializeField] private Sprite[] UnlockTypeSprites;  //0 = coins, 1 = love, 2 = level
     [SerializeField] private Sprite[] OpenBoxTypeSprites;
