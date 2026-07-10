@@ -119,12 +119,13 @@ claude mcp remove unity-mcp -s user
 claude mcp add unity-mcp -s local -- <relay-command> --mcp
 ```
 
-Unity builds a separate relay per platform and architecture, so there's no single path to
-paste. The **Example Configuration** box at the bottom of the Unity MCP Server settings page
-shows the exact command for your machine — copy `command` from there, or use **Locate Server**
-to reveal it on disk. After rescoping, the settings page may report `Not Configured` (it only
-reads user scope) even though the server works; pressing **Configure** again restores the
-user-scope entry.
+Unity builds a separate relay per platform and architecture, so the path isn't the same on
+every machine (on Apple Silicon it's `~/.unity/relay/relay_mac_arm64.app/…`). The simplest way
+to get the exact command is to let **Configure** write the `unity-mcp` entry, then copy its
+`command` and `args` (the relay path plus `--mcp`) before you rescope it; the **Locate Server**
+button also reveals the relay on disk. After rescoping to local, the settings page may still
+show the client as not configured even though it works — pressing **Configure** again re-adds
+the user-scope entry.
 
 ## Troubleshooting
 
