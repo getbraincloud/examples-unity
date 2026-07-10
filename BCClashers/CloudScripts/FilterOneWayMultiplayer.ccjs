@@ -1,0 +1,24 @@
+"use strict";
+
+// This script is used to filter the list of multiplayer rooms returned by the Get Multiplayer Rooms API call.
+function main() {
+  var response = {};
+
+  // based off of 
+  bridge.logDebugJson("Script Inputs", data);
+
+  return response;
+}
+
+main();
+
+//*** ------------- brainCloud meta-data begins now - do not hand-edit -----------------
+// "scriptName": "FilterOneWayMultiplayer",
+// "clientCallable": true,
+// "s2sCallable": false,
+// "peerCallable": false,
+// "scriptTimeout": 20,
+// "description": "",
+// "version": 1,
+// "updatedAt": 1709580413424,
+// "scriptId": "b2d32bdf-8d11-4c7c-bdc8-82697a01512f"
