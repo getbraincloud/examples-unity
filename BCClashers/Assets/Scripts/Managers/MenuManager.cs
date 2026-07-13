@@ -25,7 +25,11 @@ public class MenuManager : MonoBehaviour
     public Button ShieldButton;
     public Button PlaybackLastMatchButton;
     public Button InvasionPlaybackButton;
-    
+
+    [Header("Shared UI")]
+    [Tooltip("Single shared TopBar instance (prefab) reused by the MainMenu and Lobby screens.")]
+    public GameObject SharedTopBar;
+
     [Header("Menu States")]
     public List<MenuState> MenuStatesList = new List<MenuState>();
     public MenuStates CurrentMenuState;
@@ -70,8 +74,10 @@ public class MenuManager : MonoBehaviour
     private UserInfo _opponent;
     private readonly List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
     private EventSystem _eventSystem;
-    private readonly List<float> _selectionDefenderXPlacement = new List<float> {-169, -3.7f, 160};
-    private readonly List<float> _selectionInvaderYPlacement = new List<float> {192f, 4f, -186f};
+    // Defense selectors are stacked vertically (Line/Cross/Diamond), so the highlight border moves in Y.
+    private readonly List<float> _selectionDefenderYPlacement = new List<float> {153f, -1f, -155f};
+    // Attack-force selectors sit in a horizontal row, so the highlight border moves in X.
+    private readonly List<float> _selectionInvaderXPlacement = new List<float> {-520f, 0f, 520f};
     private readonly List<int> _priceOfInvaders = new List<int> {100000, 200000, 400000};
 
     public List<int> PriceOfInvaders
@@ -267,13 +273,15 @@ public class MenuManager : MonoBehaviour
 
         int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
         Vector2 posI = DefenderButtonBorder.anchoredPosition;
-        posI.x = _selectionDefenderXPlacement[defenderIndex];
+        posI.x = 0f;
+        posI.y = _selectionDefenderYPlacement[defenderIndex];
         DefenderPreview.sprite = DefenderPreviews[defenderIndex];
         DefenderButtonBorder.anchoredPosition = posI;
         
         int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
         Vector2 posD = InvaderButtonBorder.anchoredPosition;
-        posD.y = _selectionInvaderYPlacement[invaderIndex];
+        posD.x = _selectionInvaderXPlacement[invaderIndex];
+        posD.y = 0f;
         InvaderButtonBorder.anchoredPosition = posD;
 
         UpdateMatchMakingInfo();
@@ -365,7 +373,8 @@ public class MenuManager : MonoBehaviour
             {
                 int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
                 Vector2 posD = InvaderButtonBorder.anchoredPosition;
-                posD.y = _selectionInvaderYPlacement[invaderIndex];
+                posD.x = _selectionInvaderXPlacement[invaderIndex];
+                posD.y = 0f;
                 InvaderButtonBorder.anchoredPosition = posD;
                 break;
             }
@@ -373,7 +382,8 @@ public class MenuManager : MonoBehaviour
             {
                 int defenderIndex = (int) GameManager.Instance.CurrentUserInfo.DefendersSelected;
                 Vector2 posI = DefenderButtonBorder.anchoredPosition;
-                posI.x = _selectionDefenderXPlacement[defenderIndex];
+                posI.x = 0f;
+                posI.y = _selectionDefenderYPlacement[defenderIndex];
                 DefenderPreview.sprite = DefenderPreviews[defenderIndex];
                 DefenderButtonBorder.anchoredPosition = posI;
                 break;
@@ -435,6 +445,12 @@ public class MenuManager : MonoBehaviour
         foreach (MenuState currentState in MenuStatesList)
         {
             currentState.gameObject.SetActive(currentState.AssignedGameState == newMenuState);
+        }
+
+        //The TopBar is a single shared instance, so it lives outside the menu states and is toggled here.
+        if (SharedTopBar)
+        {
+            SharedTopBar.SetActive(newMenuState == MenuStates.MainMenu || newMenuState == MenuStates.Lobby);
         }
 
         CurrentMenuState = newMenuState;

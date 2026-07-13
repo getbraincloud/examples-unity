@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using BCClashers.Redesign;
 public enum TroopStates {Idle, Move, Attack}
 public enum EnemyTypes {Grunt, Soldier, Shooter}
 
@@ -21,6 +22,12 @@ public class TroopAI : BaseHealthBehavior
     public LayerMask DefenderMask;
     
     private int _hitBackForce = 1000;
+
+    // Code-driven melee damage (reliable; the animation moves only the visual, and a stopped
+    // attacker's rigidbody sleeps so trigger-based damage is unreliable).
+    private int _meleeDamage = 10;
+    private float _meleeInterval = 0.6f;
+    private float _meleeTimer;
     
     //Checks every 10 frames for a new target
     private int _searchTargetInterval = 5;
@@ -50,6 +57,7 @@ public class TroopAI : BaseHealthBehavior
     private NavMeshAgent _navMeshAgent;
     
     private static readonly int IsAttacking = Animator.StringToHash("isAttacking");
+    private static readonly int IsMoving = Animator.StringToHash("isMoving");
     private const string _nonTargetTag = "NonTarget";
     
     private GameObject _target;
@@ -65,6 +73,7 @@ public class TroopAI : BaseHealthBehavior
         _animator = GetComponent<Animator>();
         _collider = GetComponent<BoxCollider>();
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
+        if (_meleeWeapon) _meleeDamage = _meleeWeapon.DamageAmount;
         _healthBar = GetComponentInChildren<HealthBar>();
         _shootScript = GetComponent<ShootProjectiles>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
@@ -119,6 +128,7 @@ public class TroopAI : BaseHealthBehavior
             }
             _navMeshAgent.isStopped = false;
             CurrentState = TroopStates.Move;
+            _animator.SetBool(IsMoving, true);
             MoveTroop();
         }
         //Attack !!!!!!!!!!!!!
@@ -126,10 +136,18 @@ public class TroopAI : BaseHealthBehavior
         {
             CurrentState = TroopStates.Attack;
             _navMeshAgent.isStopped = true;
+            _animator.SetBool(IsMoving, false);
             RotateToTarget();
             if (EnemyType is EnemyTypes.Grunt or EnemyTypes.Soldier)
             {
-                PlayAttackAnimation(); 
+                PlayAttackAnimation();
+                _meleeTimer -= Time.fixedDeltaTime;
+                if (!IsInPlaybackMode && _meleeTimer <= 0f && _target != null)
+                {
+                    var dmg = _target.GetComponent<BaseHealthBehavior>();
+                    if (dmg != null) dmg.Damage(_meleeDamage);
+                    _meleeTimer = _meleeInterval;
+                }
             }
             else if (IsFacingObject())
             {
@@ -140,6 +158,7 @@ public class TroopAI : BaseHealthBehavior
         {
             CurrentState = TroopStates.Idle;
             _navMeshAgent.isStopped = true;
+            _animator.SetBool(IsMoving, false);
             PlayIdleAnimation();
         }
     }
@@ -212,6 +231,8 @@ public class TroopAI : BaseHealthBehavior
     {
         GameManager.Instance.Troops.Add(this);
         TeamID = in_teamID;
+        var painter = GetComponentInChildren<BotTeamPainter>(true);
+        if (painter) painter.Apply(in_teamID == 1);
         if (in_teamID == 0)
         {
             //Invaders
