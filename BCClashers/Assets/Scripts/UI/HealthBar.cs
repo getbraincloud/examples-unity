@@ -29,8 +29,13 @@ public class HealthBar : MonoBehaviour
 
     public void SetMaxHealth(int newMaxValue)
     {
-        _slider.maxValue = newMaxValue; 
+        _slider.maxValue = newMaxValue;
         _slider.value = newMaxValue;
+
+        //Show the bar from the moment the unit spawns. It used to stay hidden until the first
+        //hit (only SetHealth re-enabled it), so healthy troops had no bar at all and you couldn't
+        //read their health until something damaged them.
+        AdjustImageBeingActive(true);
     }
 
     public void SetHealth(int newValue)

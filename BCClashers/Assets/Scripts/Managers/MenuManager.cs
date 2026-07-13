@@ -62,7 +62,10 @@ public class MenuManager : MonoBehaviour
     public PlayerCardLobby PlayerCardRef;
     public GameObject LobbyListParent;
     public Image DefenderPreview;
+    [Tooltip("YOUR defense, rendered in blue (your team) - used by the MainMenu 'My Defense' preview.")]
     public List<Sprite> DefenderPreviews;
+    [Tooltip("The OPPONENT's defense, rendered in red (enemy team) - used by the Lobby 'Target's Defense' preview.")]
+    public List<Sprite> OpponentDefenderPreviews;
     public Image LobbyPlayerDefensePreview;
     public TMP_Text LobbyUsernameText;
     public TMP_Text LobbyGoldText;
@@ -427,7 +430,11 @@ public class MenuManager : MonoBehaviour
             LobbyHintText.enabled = false;
         }
 
-        LobbyPlayerDefensePreview.sprite = DefenderPreviews[defenseIndex];
+        //This is the opponent's base, so show the RED (enemy) render, not your blue one.
+        List<Sprite> previews = OpponentDefenderPreviews != null && OpponentDefenderPreviews.Count > defenseIndex
+            ? OpponentDefenderPreviews
+            : DefenderPreviews;
+        LobbyPlayerDefensePreview.sprite = previews[defenseIndex];
         OpponentSelectedText.text = GameManager.Instance.OpponentUserInfo.Username;
         LobbyAttackSelectTargetGroup.SetActive(false);
         ValidateInvaderSelection();
