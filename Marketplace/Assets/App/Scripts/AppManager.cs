@@ -26,6 +26,8 @@ public class AppManager : MonoBehaviour
     private ViewStoreItemModal viewStoreItemModalPrefab;
     [SerializeField]
     private InfoModal infoModalPrefab;
+    [SerializeField]
+    private LevelUpModal levelUpModalPrefab;
 
     private LoadingOverlay _currentLoadingOverlay;
 
@@ -163,6 +165,54 @@ public class AppManager : MonoBehaviour
             OnStatsUpdated?.Invoke(userData);
             OnComplete?.Invoke();
         }
+    }
+
+    /// <summary>
+    /// Checks the server for any XP accrued by the xp_generator status effect since it was
+    /// last collected (covers time the user spent offline). If any was awarded, shows a modal
+    /// with the level/XP the user had when they last logged out - the actual level/XP bar
+    /// update (and any resulting level-up modal) is deferred until the user dismisses that
+    /// modal, so they see the old values behind it and then watch the bar fill up afterward.
+    /// If the status is still active (the offline window didn't use up the full 90s), resumes
+    /// live in-session ticking for the remaining time.
+    ///
+    /// Must only be called once the Main scene (and its Canvas) is loaded — this relies on
+    /// <see cref="SpawnInfoModal"/>, which is not safe to call during the splash/login flow.
+    /// </summary>
+    public void CollectOfflineXpGeneratorXP(Action onDone = null)
+    {
+        InventoryService.Instance.CollectXpGeneratorXP((result) =>
+        {
+            void ResumeTrackingIfStillActive()
+            {
+                // Only resume live ticking once we're done presenting the offline result -
+                // otherwise a tick could sneak in and apply/animate XP while the "Welcome
+                // Back" modal (showing the pre-collect level/XP) is still on screen.
+                if (result.isActive)
+                {
+                    InventoryService.Instance.StartXpGeneratorTracking(result.activeUntil);
+                }
+            }
+
+            if (result.xpAwarded <= 0)
+            {
+                ResumeTrackingIfStillActive();
+                onDone?.Invoke();
+                return;
+            }
+
+            SpawnInfoModal(
+                title: "Welcome Back!",
+                message: $"You gained {result.xpAwarded} XP while you were offline!",
+                actionButtonLabel: "Collect",
+                onAction: null,
+                onClosed: () =>
+                {
+                    InventoryService.ApplyXpGeneratorResult(result);
+                    ResumeTrackingIfStillActive();
+                    onDone?.Invoke();
+                });
+        });
     }
 
     public void SwitchScenes(string scene)
@@ -355,7 +405,7 @@ public class AppManager : MonoBehaviour
                 break;
         }
 
-        StartCoroutine(MoveWorld(awardAnimRect, targetRect.position, 2f, onComplete));
+        StartCoroutine(MoveWorld(awardAnimRect, targetRect.position, 0.666f, onComplete));
     }
 
     public void SpawnViewItemModal(UserItemData data, UserItemCard card, Action onClosed)
@@ -397,10 +447,28 @@ public class AppManager : MonoBehaviour
         modal.SetData(title, message, actionButtonLabel, onAction, onClosed);
     }
 
+    public void SpawnLevelUpModal(int newLevel, Action onClosed = null)
+    {
+        if (_appCanvas == null)
+        {
+            FetchReferences();
+        }
+
+        LevelUpModal modal = Instantiate(levelUpModalPrefab, _appCanvas.transform);
+        modal.transform.localScale = Vector3.one;
+
+        modal.SetData(newLevel, onClosed);
+    }
+
     private IEnumerator MoveWorld(RectTransform rect, Vector3 targetPos, float duration, Action onComplete)
     {
         Vector3 startPos = rect.position;
+        Vector3 startScale = rect.localScale;
         float time = 0f;
+
+        // Arc height scales with screen height so the hop looks proportionate on any
+        // resolution, rather than using a fixed pixel value.
+        float arcHeight = Screen.height * 0.12f;
 
         while (time < duration)
         {
@@ -410,12 +478,19 @@ public class AppManager : MonoBehaviour
             // Smooth easing
             t = Mathf.SmoothStep(0f, 1f, t);
 
-            rect.position = Vector3.Lerp(startPos, targetPos, t);
+            Vector3 pos = Vector3.Lerp(startPos, targetPos, t);
+            pos.y += arcHeight * 4f * t * (1f - t); // parabola: 0 at t=0/1, peaks at t=0.5
+            rect.position = pos;
+
+            // Scale up to 3x at the midpoint, back to normal by the end
+            float scale = 1f + 2.5f * Mathf.Sin(t * Mathf.PI);
+            rect.localScale = startScale * scale;
 
             yield return null;
         }
 
         rect.position = targetPos;
+        rect.localScale = startScale;
 
         // Destroy after arrival
         Destroy(rect.gameObject);

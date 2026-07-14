@@ -1,5 +1,5 @@
 "use strict";
-// BuyItem (VSCode created Script) 
+// BuyItem (VSCode created Script)
 
 function main() {
   var response = {};
@@ -7,6 +7,8 @@ function main() {
   bridge.logDebugJson("Script Inputs", data);
 
   var userItemsService = bridge.getUserItemsServiceProxy();
+  var playerStateService = bridge.getPlayerStateServiceProxy();
+
   var purchaseItem = userItemsService.purchaseUserItem(data.defId, 1, "", true);
 
    if(purchaseItem.status !== 200){
@@ -16,6 +18,15 @@ function main() {
 
     return response;
   }
+
+  // brainCloud never marks a promotion as redeemed for items bought with virtual
+  // currency (only cash purchases verified through VerifyPurchase do that), so
+  // FetchStoreItems.ccjs would keep applying a one-time promo price forever. Record
+  // that this defId has now been bought at least once so it can strip the promo.
+  var attrKey = "promoRedeemed_" + data.defId;
+  var attrs = {};
+  attrs[attrKey] = "true";
+  playerStateService.updateAttributes(attrs, false);
 
   //lets get the user item id that we just purchased
   var items = purchaseItem.data.items;

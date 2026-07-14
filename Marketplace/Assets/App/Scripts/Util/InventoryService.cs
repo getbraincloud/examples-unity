@@ -15,18 +15,22 @@ public class InventoryService : MonoBehaviour
     public Action<UserItemData> OnSingleItemBought;
     public Action OnSubscriptionExpired;
     public Action<bool> OnNoAdsStatusKnown;
+    public Action<bool, long> OnXpGeneratorStatusChanged;
 
     public bool NoAdsSubscriptionActive { get; private set; }
+    public bool XpGeneratorActive { get; private set; }
+    public long XpGeneratorActiveUntil { get; private set; }
 
     private Dictionary<string, string> _itemSlots;
     private Dictionary<string, UserItemData> _defaultItems = new();
     private string _noAdsImageUrl = null;
     private Coroutine _subscriptionExpiryWatcher;
+    private Coroutine _xpGeneratorTickCoroutine;
 
-    private const long MOCK_SUB_DURATION_MS = 10 * 60 * 1000; // 10 minutes total
     private const long MOCK_SUB_RENEWAL_MS  =  2 * 60 * 1000; //  2 minutes per renewal period
+    private const float XP_GENERATOR_POLL_INTERVAL_SECONDS = 2f;
 
-    private struct MockSubscriptionEntry { public long start; public long expiry; }
+    private struct MockSubscriptionEntry { public long start; public bool autoRenew; public long finalExpiry; }
     private readonly Dictionary<string, MockSubscriptionEntry> _mockSubscriptions = new();
 
     private void Awake()
@@ -163,7 +167,24 @@ public class InventoryService : MonoBehaviour
             allItems.AddRange(ParseStoreProducts(storeProductsArray));
         }
 
-        allItems.Sort((a, b) => GetCategoryOrder(a).CompareTo(GetCategoryOrder(b)));
+        allItems.Sort((a, b) =>
+        {
+            int categoryCompare = GetCategoryOrder(a).CompareTo(GetCategoryOrder(b));
+            if (categoryCompare != 0)
+                return categoryCompare;
+
+            // Only the "Products" (cash store) category needs a curated sub-order -
+            // leave every other category's relative ordering untouched.
+            if (a.category != "Products")
+                return 0;
+
+            int productOrderCompare = GetProductOrder(a).CompareTo(GetProductOrder(b));
+            if (productOrderCompare != 0)
+                return productOrderCompare;
+
+            // Within the gems group, smallest amount first
+            return a.itemAmount.CompareTo(b.itemAmount);
+        });
 
         return allItems;
     }
@@ -220,6 +241,17 @@ public class InventoryService : MonoBehaviour
     {
         if (item.isBundle)      return 0;
         if (item.isActivatable) return 1;
+        return 2;
+    }
+
+    /// <summary>
+    /// Sub-ordering within the "Products" (cash store) category: gems offers first,
+    /// then no_ads, then any other (non-consumable) product.
+    /// </summary>
+    private static int GetProductOrder(StoreItemData item)
+    {
+        if (item.isCurrency && item.rewardCurrency == CurrencyType.Gems) return 0;
+        if (item.itemId == "no_ads") return 1;
         return 2;
     }
 
@@ -543,34 +575,81 @@ public class InventoryService : MonoBehaviour
     }
 
     /// <summary>
-    /// Registers a mock subscription for <paramref name="productId"/> that lasts
-    /// <see cref="MOCK_SUB_DURATION_MS"/> (10 min) with <see cref="MOCK_SUB_RENEWAL_MS"/> (2 min) renewal periods.
-    /// Persists start/expiry timestamps to brainCloud user attributes so the subscription
-    /// survives app restarts within the 10-minute window.
+    /// Registers a mock subscription for <paramref name="productId"/> that auto-renews every
+    /// <see cref="MOCK_SUB_RENEWAL_MS"/> (2 min) indefinitely until the user unsubscribes via
+    /// <see cref="UnsubscribeMockSubscription"/>. Persists start/auto-renew state to brainCloud
+    /// user attributes so the subscription survives app restarts.
     /// </summary>
     public void RegisterMockSubscription(string productId)
     {
         long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var entry = new MockSubscriptionEntry
         {
-            start  = now,
-            expiry = now + MOCK_SUB_DURATION_MS
+            start       = now,
+            autoRenew   = true,
+            finalExpiry = 0
         };
         _mockSubscriptions[productId] = entry;
-        Debug.Log($"[Mock Sub] Registered '{productId}' — expires in {MOCK_SUB_DURATION_MS / 60000} min.");
+        Debug.Log($"[Mock Sub] Registered '{productId}' — auto-renewing every {MOCK_SUB_RENEWAL_MS / 60000} min.");
 
         BCManager.Instance.BCWrapper.PlayerStateService.UpdateAttributes(
             JsonWriter.Serialize(new Dictionary<string, object>
             {
-                { $"mockSubStart_{productId}",  entry.start.ToString()  },
-                { $"mockSubExpiry_{productId}", entry.expiry.ToString() }
+                { $"mockSubStart_{productId}",      entry.start.ToString() },
+                { $"mockSubAutoRenew_{productId}",   "true"                },
+                { $"mockSubFinalExpiry_{productId}", "0"                   }
             }),
             false,
             (string _, object __) => Debug.Log($"[Mock Sub] Persisted '{productId}' timing to user attributes."),
             (int _, int __, string err, object ___) => Debug.LogError($"[Mock Sub] Failed to persist timing: {err}"));
     }
 
-    private void GetMockSubscriptionStatus(string productId, Action<bool, long> onComplete)
+    /// <summary>
+    /// Turns off auto-renew for a mock subscription (Windows/Mac mock-purchase mode). The
+    /// subscription stays active through the period already paid for, then expires and the
+    /// product becomes purchasable again instead of renewing. Reports the frozen expiry
+    /// (period end) back to the caller so displayed UI can show the correct date, since the
+    /// caller's own copy of the expiry may be stale by the time the user clicks unsubscribe.
+    /// </summary>
+    public void UnsubscribeMockSubscription(string productId, Action<long> onComplete = null)
+    {
+        if (!_mockSubscriptions.TryGetValue(productId, out var entry))
+        {
+            Debug.LogWarning($"[Mock Sub] Tried to unsubscribe from '{productId}' but no active mock subscription was found.");
+            onComplete?.Invoke(0);
+            return;
+        }
+
+        long now       = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        long elapsed   = now - entry.start;
+        long periodEnd = entry.start + ((elapsed / MOCK_SUB_RENEWAL_MS) + 1) * MOCK_SUB_RENEWAL_MS;
+
+        entry.autoRenew   = false;
+        entry.finalExpiry = periodEnd;
+        _mockSubscriptions[productId] = entry;
+
+        Debug.Log($"[Mock Sub] Auto-renew disabled for '{productId}' — will expire at period end.");
+
+        BCManager.Instance.BCWrapper.PlayerStateService.UpdateAttributes(
+            JsonWriter.Serialize(new Dictionary<string, object>
+            {
+                { $"mockSubAutoRenew_{productId}",   "false" },
+                { $"mockSubFinalExpiry_{productId}", periodEnd.ToString() }
+            }),
+            false,
+            (string _, object __) =>
+            {
+                Debug.Log($"[Mock Sub] Persisted unsubscribe state for '{productId}'.");
+                onComplete?.Invoke(periodEnd);
+            },
+            (int _, int __, string err, object ___) =>
+            {
+                Debug.LogError($"[Mock Sub] Failed to persist unsubscribe state: {err}");
+                onComplete?.Invoke(periodEnd);
+            });
+    }
+
+    private void GetMockSubscriptionStatus(string productId, Action<bool, long, bool> onComplete)
     {
         // If already loaded in memory, evaluate immediately
         if (_mockSubscriptions.TryGetValue(productId, out var cached))
@@ -586,55 +665,68 @@ public class InventoryService : MonoBehaviour
                 var attrData = (JsonReader.Deserialize<Dictionary<string, object>>(attrJson)["data"]
                     as Dictionary<string, object>)["attributes"] as Dictionary<string, object>;
 
-                string startKey  = $"mockSubStart_{productId}";
-                string expiryKey = $"mockSubExpiry_{productId}";
+                string startKey       = $"mockSubStart_{productId}";
+                string autoRenewKey   = $"mockSubAutoRenew_{productId}";
+                string finalExpiryKey = $"mockSubFinalExpiry_{productId}";
 
-                if (attrData != null &&
-                    attrData.TryGetValue(startKey, out var rawStart) &&
-                    attrData.TryGetValue(expiryKey, out var rawExpiry))
+                if (attrData != null && attrData.TryGetValue(startKey, out var rawStart))
                 {
                     try
                     {
                         var entry = new MockSubscriptionEntry
                         {
-                            start  = Convert.ToInt64(rawStart),
-                            expiry = Convert.ToInt64(rawExpiry)
+                            start = Convert.ToInt64(rawStart),
+                            autoRenew = !attrData.TryGetValue(autoRenewKey, out var rawAutoRenew)
+                                || Convert.ToString(rawAutoRenew) == "true",
+                            finalExpiry = attrData.TryGetValue(finalExpiryKey, out var rawFinalExpiry)
+                                ? Convert.ToInt64(rawFinalExpiry)
+                                : 0
                         };
                         _mockSubscriptions[productId] = entry;
                         EvaluateMockSubscription(productId, entry, onComplete);
                     }
                     catch
                     {
-                        onComplete?.Invoke(false, 0);
+                        onComplete?.Invoke(false, 0, false);
                     }
                 }
                 else
                 {
-                    onComplete?.Invoke(false, 0);
+                    onComplete?.Invoke(false, 0, false);
                 }
             },
-            (int _, int __, string ___, object ____) => onComplete?.Invoke(false, 0));
+            (int _, int __, string ___, object ____) => onComplete?.Invoke(false, 0, false));
     }
 
-    private void EvaluateMockSubscription(string productId, MockSubscriptionEntry sub, Action<bool, long> onComplete)
+    private void EvaluateMockSubscription(string productId, MockSubscriptionEntry sub, Action<bool, long, bool> onComplete)
     {
         long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        if (now >= sub.expiry)
+
+        if (!sub.autoRenew)
         {
-            _mockSubscriptions.Remove(productId);
-            onComplete?.Invoke(false, 0);
+            // Unsubscribed - stays active only through the period already paid for.
+            if (now >= sub.finalExpiry)
+            {
+                _mockSubscriptions.Remove(productId);
+                onComplete?.Invoke(false, 0, false);
+                return;
+            }
+
+            onComplete?.Invoke(true, sub.finalExpiry, false);
             return;
         }
 
-        // Compute next 2-minute renewal boundary within the 10-minute window
+        // Auto-renewing indefinitely - always active, expiry is the next renewal boundary.
         long elapsed   = now - sub.start;
         long nextBound = sub.start + ((elapsed / MOCK_SUB_RENEWAL_MS) + 1) * MOCK_SUB_RENEWAL_MS;
-        long expiryMs  = Math.Min(nextBound, sub.expiry);
 
-        onComplete?.Invoke(true, expiryMs);
+        onComplete?.Invoke(true, nextBound, true);
     }
 
-    public void GetNoAdsSubscriptionStatus(Action<bool, long> onComplete)
+    /// <summary>
+    /// Reports (isActive, expiryTimeMs, isAutoRenewing) for the no_ads subscription.
+    /// </summary>
+    public void GetNoAdsSubscriptionStatus(Action<bool, long, bool> onComplete)
     {
         if (AppManager.MockPurchasesEnabled)
         {
@@ -652,7 +744,7 @@ public class InventoryService : MonoBehaviour
             },
             (int statusCode, int responseCode, string errorJson, object errorCb) =>
             {
-                onComplete?.Invoke(false, 0);
+                onComplete?.Invoke(false, 0, false);
             });
 #elif UNITY_IOS || UNITY_STANDALONE_OSX
         // Fetch the receipt we stored at purchase time from BC user attributes,
@@ -666,7 +758,7 @@ public class InventoryService : MonoBehaviour
 
                 if (attributes == null || !attributes.ContainsKey("appleReceipt_no_ads"))
                 {
-                    onComplete?.Invoke(false, 0);
+                    onComplete?.Invoke(false, 0, false);
                     return;
                 }
 
@@ -682,17 +774,17 @@ public class InventoryService : MonoBehaviour
                     },
                     (int statusCode, int responseCode, string errorJson, object errorCb) =>
                     {
-                        onComplete?.Invoke(false, 0);
+                        onComplete?.Invoke(false, 0, false);
                     });
             },
             (int statusCode, int responseCode, string errorJson, object errorCb) =>
             {
-                onComplete?.Invoke(false, 0);
+                onComplete?.Invoke(false, 0, false);
             });
 #else
         // Steam does not have a subscription model for in-game content;
         // no_ads on Steam is a non-consumable one-time purchase.
-        onComplete?.Invoke(false, 0);
+        onComplete?.Invoke(false, 0, false);
 #endif
     }
 
@@ -719,7 +811,7 @@ public class InventoryService : MonoBehaviour
 
         Debug.Log("[InventoryService] Subscription expiry time reached — re-verifying...");
 
-        GetNoAdsSubscriptionStatus((isActive, newExpiryMs) =>
+        GetNoAdsSubscriptionStatus((isActive, newExpiryMs, isAutoRenewing) =>
         {
             if (!isActive)
             {
@@ -727,18 +819,142 @@ public class InventoryService : MonoBehaviour
                 NoAdsSubscriptionActive = false;
                 _subscriptionExpiryWatcher = null;
                 OnSubscriptionExpired?.Invoke();
-                OnItemBought?.Invoke(); // Refresh the store so the product becomes purchasable again
             }
             else
             {
-                // Subscription was renewed — restart the watcher with the new expiry time.
-                Debug.Log("[InventoryService] Subscription renewed, restarting expiry watcher.");
+                // Subscription is still active - either it renewed to a new period (autoRenew)
+                // or it's coasting through the final period after being unsubscribed. Restart
+                // the watcher against the current expiry either way.
+                Debug.Log("[InventoryService] Subscription still active, restarting expiry watcher.");
                 StartSubscriptionExpiryWatcher(newExpiryMs);
             }
+
+            // Refresh listeners (inventory cards, store) so displayed expiry/auto-renew
+            // state and product availability stay current instead of showing stale data.
+            OnItemBought?.Invoke();
         });
     }
 
-    private static void ParseSubscriptionScriptResponse(string responseJson, Action<bool, long> onComplete)
+    /// <summary>
+    /// Result of a <see cref="CollectXpGeneratorXP"/> call. Deliberately does not get applied
+    /// to local user data automatically - callers decide when that should happen (e.g.
+    /// immediately for live in-session ticking, or deferred until a "Collect" modal is
+    /// dismissed for the offline-return flow) since applying it changes what the XP bar and
+    /// level text show.
+    /// </summary>
+    public struct XpGeneratorCollectResult
+    {
+        public int xpAwarded;
+        public bool isActive;
+        public long activeUntil;
+        public bool hasXpProgress;
+        public bool xpCapped;
+        public int experienceLevel;
+        public int xpToNextLevel;
+        public string statusTitle;
+        public int adjustedXp;
+    }
+
+    /// <summary>
+    /// Calls the server to collect any XP accrued by the xp_generator status effect since it
+    /// was last collected. Reports how much was awarded, whether the status is still active
+    /// (and until when), and the resulting level/XP progress - without applying any of it to
+    /// local user data (see <see cref="XpGeneratorCollectResult"/> and <see cref="ApplyXpGeneratorResult"/>).
+    /// </summary>
+    public void CollectXpGeneratorXP(Action<XpGeneratorCollectResult> onComplete)
+    {
+        BCManager.Instance.BCWrapper.ScriptService.RunScript("CollectXpGeneratorXP", "{}",
+            (string responseJson, object cbObj) =>
+            {
+                var response = (JsonReader.Deserialize<Dictionary<string, object>>(responseJson)["data"] as Dictionary<string, object>)["response"] as Dictionary<string, object>;
+
+                var result = new XpGeneratorCollectResult
+                {
+                    xpAwarded = response.ContainsKey("xpAwarded") ? Convert.ToInt32(response["xpAwarded"]) : 0,
+                    isActive = response.ContainsKey("isActive") && Convert.ToBoolean(response["isActive"]),
+                    activeUntil = response.ContainsKey("activeUntil") ? Convert.ToInt64(response["activeUntil"]) : 0
+                };
+
+                if (result.xpAwarded > 0 && response.ContainsKey("adjustedXp"))
+                {
+                    result.hasXpProgress = true;
+                    result.xpCapped = response.ContainsKey("xpCapped") && Convert.ToBoolean(response["xpCapped"]);
+                    result.experienceLevel = Convert.ToInt32(response["experienceLevel"]);
+                    result.xpToNextLevel = Convert.ToInt32(response["xpToNextLevel"]);
+                    result.statusTitle = response["statusTitle"] as string;
+                    result.adjustedXp = Convert.ToInt32(response["adjustedXp"]);
+                }
+
+                onComplete?.Invoke(result);
+            },
+            (int statusCode, int responseCode, string errorJson, object errorObj) =>
+            {
+                Debug.LogError("Failed to collect xp_generator XP: " + errorJson);
+                onComplete?.Invoke(new XpGeneratorCollectResult());
+            });
+    }
+
+    /// <summary>
+    /// Applies a previously-fetched <see cref="XpGeneratorCollectResult"/> to local user data,
+    /// updating the level/XP bar (and triggering a level-up modal if it crossed a level).
+    /// </summary>
+    public static void ApplyXpGeneratorResult(XpGeneratorCollectResult result)
+    {
+        if (!result.hasXpProgress)
+            return;
+
+        AppManager.Instance.userData.XPCapped = result.xpCapped;
+        AppManager.Instance.UpdateUserLevel(result.experienceLevel, result.statusTitle, result.xpToNextLevel);
+        AppManager.Instance.UpdateUserXP(result.adjustedXp);
+    }
+
+    /// <summary>
+    /// Starts (or restarts) live in-session polling for the xp_generator boost so the XP bar
+    /// visibly fills in near-real-time while it's active, instead of only catching up the
+    /// next time the app is opened. Polls every <see cref="XP_GENERATOR_POLL_INTERVAL_SECONDS"/>
+    /// until <paramref name="activeUntilMs"/> is reached.
+    /// </summary>
+    public void StartXpGeneratorTracking(long activeUntilMs)
+    {
+        if (_xpGeneratorTickCoroutine != null)
+            StopCoroutine(_xpGeneratorTickCoroutine);
+
+        _xpGeneratorTickCoroutine = StartCoroutine(XpGeneratorTickCoroutine(activeUntilMs));
+    }
+
+    private IEnumerator XpGeneratorTickCoroutine(long activeUntilMs)
+    {
+        XpGeneratorActive = true;
+        XpGeneratorActiveUntil = activeUntilMs;
+        OnXpGeneratorStatusChanged?.Invoke(true, activeUntilMs);
+
+        while (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < activeUntilMs)
+        {
+            yield return new WaitForSecondsRealtime(XP_GENERATOR_POLL_INTERVAL_SECONDS);
+            CollectXpGeneratorXP(ApplyXpGeneratorResult);
+        }
+
+        // One final collect to mop up any remainder after the window has closed.
+        CollectXpGeneratorXP(ApplyXpGeneratorResult);
+
+        XpGeneratorActive = false;
+        XpGeneratorActiveUntil = 0;
+        _xpGeneratorTickCoroutine = null;
+        OnXpGeneratorStatusChanged?.Invoke(false, 0);
+    }
+
+    /// <summary>
+    /// Builds the no_ads subscription's inventory description: "Renews on ..." while it will
+    /// auto-renew, or "Expires on ..." once auto-renew has been turned off.
+    /// </summary>
+    public static string BuildSubscriptionDescription(long expiryTimeMs, bool isAutoRenewing)
+    {
+        var expiry = DateTimeOffset.FromUnixTimeMilliseconds(expiryTimeMs).LocalDateTime;
+        string verb = isAutoRenewing ? "Renews" : "Expires";
+        return $"{verb} on {expiry:MMM d, yyyy h:mm tt}";
+    }
+
+    private static void ParseSubscriptionScriptResponse(string responseJson, Action<bool, long, bool> onComplete)
     {
         var root = JsonReader.Deserialize<Dictionary<string, object>>(responseJson);
         var data = root["data"] as Dictionary<string, object>;
@@ -747,13 +963,23 @@ public class InventoryService : MonoBehaviour
         bool error = Convert.ToBoolean(response["error"]);
         if (error)
         {
-            onComplete?.Invoke(false, 0);
+            onComplete?.Invoke(false, 0, false);
             return;
         }
 
         bool isActive = Convert.ToBoolean(response["isActive"]);
         long expiryTimeMs = isActive ? Convert.ToInt64(response["expiryTimeMs"]) : 0;
-        onComplete?.Invoke(isActive, expiryTimeMs);
+
+        bool isAutoRenewing = false;
+        if (isActive)
+        {
+            if (response.ContainsKey("autoRenewing"))
+                isAutoRenewing = Convert.ToBoolean(response["autoRenewing"]);
+            else if (response.ContainsKey("autoRenewStatus"))
+                isAutoRenewing = Convert.ToString(response["autoRenewStatus"]) == "1";
+        }
+
+        onComplete?.Invoke(isActive, expiryTimeMs, isAutoRenewing);
     }
 
     public void GetUserInventoryItems(Action<List<UserItemData>> onSuccess, Action<string> onFailure, bool refreshEquipped = true)
@@ -769,24 +995,24 @@ public class InventoryService : MonoBehaviour
                 accumulatedItems: allItems,
                 onSuccess: (items) =>
                 {
-                    GetNoAdsSubscriptionStatus((isActive, expiryTimeMs) =>
+                    GetNoAdsSubscriptionStatus((isActive, expiryTimeMs, isAutoRenewing) =>
                     {
                         NoAdsSubscriptionActive = isActive;
                         OnNoAdsStatusKnown?.Invoke(isActive);
 
                         if (isActive)
                         {
-                            var expiry = DateTimeOffset.FromUnixTimeMilliseconds(expiryTimeMs).LocalDateTime;
                             items.Add(new UserItemData
                             {
                                 itemId = "subscription_no_ads",
                                 defId = "no_ads",
                                 itemName = "No Ads",
-                                description = $"Expires on {expiry:MMM d, yyyy h:mm tt}",
+                                description = BuildSubscriptionDescription(expiryTimeMs, isAutoRenewing),
                                 category = "Subscriptions",
                                 imageUrl = _noAdsImageUrl ?? string.Empty,
                                 equippableSlot = string.Empty,
                                 isSubscription = true,
+                                isAutoRenewing = isAutoRenewing,
                                 subscriptionExpiryMs = expiryTimeMs
                             });
                             StartSubscriptionExpiryWatcher(expiryTimeMs);

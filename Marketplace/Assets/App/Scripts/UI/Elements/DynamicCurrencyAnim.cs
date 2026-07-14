@@ -6,9 +6,13 @@ using UnityEngine.UI;
 public class DynamicCurrencyAnim : MonoBehaviour
 {
     private RectTransform _rect;
+    [SerializeField]
     private Image _image;
 
     public Action<int> OnAnimationComplete;
+
+    [SerializeField]
+    private GameObject _coinAnim, _otherCurrenciesAnim;
 
     [SerializeField]
     private Sprite coinIcon, gemIcon, starIcon;
@@ -16,7 +20,6 @@ public class DynamicCurrencyAnim : MonoBehaviour
     void Awake()
     {
         _rect = GetComponent<RectTransform>();
-        _image = GetComponent<Image>();
     }
 
     public void UpdateIcon(CurrencyType currencyType)
@@ -24,13 +27,16 @@ public class DynamicCurrencyAnim : MonoBehaviour
         switch (currencyType)
         {
             case CurrencyType.Coins:
-                _image.sprite = coinIcon;
+                _image.color = new Color(0, 0, 0, 0);
+                _coinAnim.SetActive(true);
                 break;
             case CurrencyType.Gems:
                 _image.sprite = gemIcon;
+                _otherCurrenciesAnim.SetActive(true);
                 break;
             case CurrencyType.Stars:
                 _image.sprite = starIcon;
+                _otherCurrenciesAnim.SetActive(true);
                 break;
         }
     }

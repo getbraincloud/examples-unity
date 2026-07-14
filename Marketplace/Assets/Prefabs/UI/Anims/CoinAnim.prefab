@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8856511600971959256}
   - component: {fileID: 989815610900070939}
   - component: {fileID: 8588829338412999282}
-  - component: {fileID: 8149964524917206188}
   m_Layer: 5
   m_Name: CoinAnim
   m_TagString: Untagged
@@ -99,15 +98,3 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8149964524917206188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1086714395491865103}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ceca0a9952756c46a54a9c60591d7c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AnimatedCoinCollect

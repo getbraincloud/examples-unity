@@ -38,6 +38,14 @@ public class StoreItemData
         ? maxStackable > 0 && inventoryAmount >= maxStackable
         : inventoryAmount > 0);
 
+    /// <summary>
+    /// Stable identity for UI list tracking. Cash products reuse defId for their platform
+    /// store SKU, which changes when a one-time promotion price ends, so itemId (constant
+    /// across price changes) is preferred when present; other item types leave itemId empty
+    /// and fall back to defId.
+    /// </summary>
+    public string Key => !string.IsNullOrEmpty(itemId) ? itemId : defId;
+
     public StoreItemData() { }
 
     public void UpdateFromJson(Dictionary<string,object> itemJson)

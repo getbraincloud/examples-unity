@@ -1,5 +1,6 @@
 using BrainCloud.JsonFx.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
@@ -17,6 +18,9 @@ public class UserItemCard : MonoBehaviour
     private TextMeshProUGUI inventoryCountText, upperMessageText, lowerMessageText, primaryButtonText;
 
     [SerializeField]
+    private TextMeshProUGUI subscriptionRenewsText;
+
+    [SerializeField]
     private GameObject loadingDisplay, lowerMessageDisplay, upperMessageDisplay;
 
     [SerializeField]
@@ -28,6 +32,7 @@ public class UserItemCard : MonoBehaviour
 
     private Button _button;
     private CanvasGroup _cg;
+    private Coroutine _renewsCountdownRoutine;
 
     private void Awake()
     {
@@ -45,6 +50,12 @@ public class UserItemCard : MonoBehaviour
     {
         _button.onClick.RemoveAllListeners();
         _primaryButton.onClick.RemoveAllListeners();
+
+        if (_renewsCountdownRoutine != null)
+        {
+            StopCoroutine(_renewsCountdownRoutine);
+            _renewsCountdownRoutine = null;
+        }
     }
 
     public void SetUserItemData(UserItemData data)
@@ -64,6 +75,11 @@ public class UserItemCard : MonoBehaviour
     }
 
     private void OnCardClicked()
+    {
+        OpenItemModal();
+    }
+
+    private void OpenItemModal()
     {
         _cg.interactable = false;
         //show modal
@@ -174,10 +190,56 @@ public class UserItemCard : MonoBehaviour
                 }
             }
         }
+        else if (_data.defId == "no_ads")
+        {
+            _primaryButton.gameObject.SetActive(true);
+            primaryButtonText.text = "Manage";
+        }
         else
         {
             _primaryButton.gameObject.SetActive(false);
         }
+
+        if (_data.isSubscription)
+        {
+            subscriptionRenewsText.gameObject.SetActive(true);
+            if (_renewsCountdownRoutine != null)
+                StopCoroutine(_renewsCountdownRoutine);
+            _renewsCountdownRoutine = StartCoroutine(RenewsCountdownRoutine());
+        }
+        else
+        {
+            subscriptionRenewsText.gameObject.SetActive(false);
+            if (_renewsCountdownRoutine != null)
+            {
+                StopCoroutine(_renewsCountdownRoutine);
+                _renewsCountdownRoutine = null;
+            }
+        }
+    }
+
+    private IEnumerator RenewsCountdownRoutine()
+    {
+        while (true)
+        {
+            long remainingMs = _data.subscriptionExpiryMs - DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            string label = _data.isAutoRenewing ? "Renews: " : "Expires: ";
+            subscriptionRenewsText.text = label + FormatRenewsCountdown(remainingMs);
+            yield return new WaitForSecondsRealtime(1f);
+        }
+    }
+
+    private static string FormatRenewsCountdown(long remainingMs)
+    {
+        if (remainingMs < 0)
+            remainingMs = 0;
+
+        int minutes = (int)(remainingMs / 60000);
+        if (minutes >= 1)
+            return minutes + "m";
+
+        int seconds = (int)(remainingMs / 1000);
+        return seconds + "s";
     }
 
     private void OnPrimaryButtonClicked()
@@ -188,6 +250,8 @@ public class UserItemCard : MonoBehaviour
             OnActivateClicked();
         else if (_data.isEquippable)
             OnEquipClicked();
+        else if (_data.defId == "no_ads")
+            OpenItemModal();
     }
 
     private void OnOpenBundleClicked()
@@ -267,7 +331,11 @@ public class UserItemCard : MonoBehaviour
                 if (response.ContainsKey("activeUntil"))
                 {
                     long activeUntil = Convert.ToInt64(response["activeUntil"]);
-                    AppManager.Instance.ToggleCoinMultiplier(true, activeUntil);
+
+                    if (_data.defId == "xp_generator")
+                        InventoryService.Instance.StartXpGeneratorTracking(activeUntil);
+                    else
+                        AppManager.Instance.ToggleCoinMultiplier(true, activeUntil);
                 }
 
                 _data.quantity -= 1;

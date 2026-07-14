@@ -19,6 +19,7 @@ public class UserItemData
     public bool isStackable;
     public int maxStackable;
     public bool isSubscription;
+    public bool isAutoRenewing;
     public long subscriptionExpiryMs;
     public bool isDefault;
     public bool autoEquip;

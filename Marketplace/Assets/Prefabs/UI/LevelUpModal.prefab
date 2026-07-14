@@ -652,6 +652,7 @@ GameObject:
   - component: {fileID: 7964867877872328699}
   - component: {fileID: 5124522873414957146}
   - component: {fileID: 4136306026176934566}
+  - component: {fileID: 2972611187136944467}
   m_Layer: 5
   m_Name: LevelUpModal
   m_TagString: Untagged
@@ -817,6 +818,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &2972611187136944467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6553454277629149188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6717fd229598780438d4b7ed6bf0cc44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpModal
+  _levelText: {fileID: 5902884570519460119}
+  _continueButton: {fileID: 2432429531509511982}
 --- !u!1 &8139558346483096521
 GameObject:
   m_ObjectHideFlags: 0

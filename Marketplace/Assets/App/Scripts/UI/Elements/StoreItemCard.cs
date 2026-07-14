@@ -333,6 +333,8 @@ public class StoreItemCard : MonoBehaviour
                                     AppManager.Instance.UpdateUserXP(newXpPoints);
                                 });
                             }
+
+                            InventoryService.Instance.OnItemBought?.Invoke();
                         });
                 }
                 else

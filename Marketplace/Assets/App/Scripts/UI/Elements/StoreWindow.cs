@@ -114,14 +114,24 @@ public class StoreWindow : MonoBehaviour
 
     private void ProcessItems(List<StoreItemData> items)
     {
-        // Track which defIds the server returned, per section
-        var returnedDefIds = new Dictionary<string, HashSet<string>>();
+        // Stars convert directly to XP, and xp_generator/multiplier_pack only exist to earn
+        // more XP faster - once the player is at max level none of these are useful anymore.
+        if (AppManager.Instance.userData.XPCapped)
+        {
+            items.RemoveAll(item =>
+                (item.isCurrency && item.rewardCurrency == CurrencyType.Stars) ||
+                item.defId == "xp_generator" ||
+                item.defId == "multiplier_pack");
+        }
+
+        // Track which item keys the server returned, per section
+        var returnedKeys = new Dictionary<string, HashSet<string>>();
 
         foreach (StoreItemData item in items)
         {
-            if (!returnedDefIds.ContainsKey(item.category))
-                returnedDefIds[item.category] = new HashSet<string>();
-            returnedDefIds[item.category].Add(item.defId);
+            if (!returnedKeys.ContainsKey(item.category))
+                returnedKeys[item.category] = new HashSet<string>();
+            returnedKeys[item.category].Add(item.Key);
 
             if (_sections.ContainsKey(item.category))
             {
@@ -141,12 +151,12 @@ public class StoreWindow : MonoBehaviour
         var emptySections = new List<string>();
         foreach (var kvp in _sections)
         {
-            HashSet<string> returned = returnedDefIds.TryGetValue(kvp.Key, out var set) ? set : new HashSet<string>();
+            HashSet<string> returned = returnedKeys.TryGetValue(kvp.Key, out var set) ? set : new HashSet<string>();
             var toRemove = new List<string>(kvp.Value.cards.Keys);
-            foreach (string defId in toRemove)
+            foreach (string key in toRemove)
             {
-                if (!returned.Contains(defId))
-                    kvp.Value.RemoveStoreItem(defId);
+                if (!returned.Contains(key))
+                    kvp.Value.RemoveStoreItem(key);
             }
 
             if (kvp.Value.cards.Count == 0)

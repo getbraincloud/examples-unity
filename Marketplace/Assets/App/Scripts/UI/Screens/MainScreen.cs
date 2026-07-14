@@ -12,19 +12,25 @@ public class MainScreen : MonoBehaviour
 {
     //Buttons
     [SerializeField]
-    private Button _avatarButton, _collectCoinsButton;
+    private Button _avatarButton, _collectCoinsButton, _closeButton;
     //GameObjects
     [SerializeField]
     private GameObject _collectCoinsBaseMessageDisplay,
                         _goldAvatarFrameDisplay,
-                        _adsBanner;
+                        _adsBanner,
+                        _xpDoublerIcon,
+                        _maxLevelText;
+
+    [SerializeField]
+    private RectTransform _coinIconRef;
     //UI Text
     [SerializeField]
     private TextMeshProUGUI _coinsAmountText,
                             _gemsAmountText,
                             _levelText,
                             _collectCoinsBaseAmountText,
-                            _currentMarketplaceText;
+                            _currentMarketplaceText,
+                            _generatorTimerText;
     //UI Image
     [SerializeField]
     private Image _xpBar, _userProfileImage, _avatarImage, _avatarFrameImage;
@@ -39,8 +45,6 @@ public class MainScreen : MonoBehaviour
     private AnimatedNumberIncrement _animatedNumberIncrementPrefab;
     [SerializeField]
     private AnimatedCoinCollect _animatedCoinCollectPrefab;
-    [SerializeField]
-    private LevelUpStarAnim _animatedLevelUpStarPrefab;
 
 
     private Animator _anim;
@@ -48,6 +52,7 @@ public class MainScreen : MonoBehaviour
     private float _lastQueuedFill;
     private Coroutine _xpAnimCoroutine;
     private CoinMultiplierStatus _coinMultipierStatus;
+    private Coroutine _generatorTimerCoroutine;
 
     private void Awake()
     {
@@ -58,6 +63,7 @@ public class MainScreen : MonoBehaviour
     {
         _avatarButton.onClick.AddListener(OnAvatarButtonClicked);
         _collectCoinsButton.onClick.AddListener(OnCollectCoinsButtonClicked);
+        _closeButton.onClick.AddListener(OnCloseButtonClicked);
         _adsBanner.GetComponent<Button>().onClick.AddListener(OnAdsBannerClicked);
         AppManager.Instance.OnCoinsUpdated += OnCoinsUpdated;
         AppManager.Instance.OnGemsUpdated += OnGemsUpdated;
@@ -68,10 +74,57 @@ public class MainScreen : MonoBehaviour
         InventoryService.Instance.OnItemEquipChange += OnItemEquipChange;
         InventoryService.Instance.OnNoAdsStatusKnown += OnNoAdsStatusKnown;
         InventoryService.Instance.OnSubscriptionExpired += OnSubscriptionExpired;
+        InventoryService.Instance.OnXpGeneratorStatusChanged += OnXpGeneratorStatusChanged;
 
         _adsBanner.SetActive(!InventoryService.Instance.NoAdsSubscriptionActive);
+        OnXpGeneratorStatusChanged(InventoryService.Instance.XpGeneratorActive, InventoryService.Instance.XpGeneratorActiveUntil);
+        _maxLevelText.SetActive(AppManager.Instance.userData.XPCapped);
 
         UpdateAllUserStatUI(AppManager.Instance.userData);
+
+        // Safe to check for offline xp_generator gains here (unlike during the splash/login
+        // flow) since the Main scene's Canvas now exists for the resulting modal to spawn in.
+        AppManager.Instance.CollectOfflineXpGeneratorXP();
+    }
+
+    private void OnXpGeneratorStatusChanged(bool isActive, long activeUntil)
+    {
+        _xpDoublerIcon.SetActive(isActive);
+
+        if (_generatorTimerCoroutine != null)
+        {
+            StopCoroutine(_generatorTimerCoroutine);
+            _generatorTimerCoroutine = null;
+        }
+
+        _generatorTimerText.gameObject.SetActive(isActive);
+        if (isActive)
+        {
+            // Restarting here (rather than just updating a target) also covers extension:
+            // activating another xp_generator item while already active pushes activeUntil
+            // further out and re-fires this event with the new value.
+            _generatorTimerCoroutine = StartCoroutine(GeneratorTimerRoutine(activeUntil));
+        }
+    }
+
+    private IEnumerator GeneratorTimerRoutine(long activeUntilMs)
+    {
+        while (true)
+        {
+            long remainingMs = activeUntilMs - DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (remainingMs <= 0)
+            {
+                _generatorTimerText.text = "0:00";
+                yield break;
+            }
+
+            int totalSeconds = Mathf.CeilToInt(remainingMs / 1000f);
+            int minutes = totalSeconds / 60;
+            int seconds = totalSeconds % 60;
+            _generatorTimerText.text = $"{minutes}:{seconds:00}";
+
+            yield return new WaitForSecondsRealtime(1f);
+        }
     }
 
     private void OnAdsBannerClicked()
@@ -81,6 +134,18 @@ public class MainScreen : MonoBehaviour
             message: "Collaborative Canvas is a free, cooperative painting experience.\n\nExplore this and all our sample game projects, complete with full source code.",
             actionButtonLabel: "View All Samples",
             onAction: () => Application.OpenURL("https://getbraincloud.com/samples/")
+        );
+    }
+
+    private void OnCloseButtonClicked()
+    {
+        // Cancel/close/background on InfoModal all just dismiss it, so this only needs
+        // to wire up the confirm action - no separate cancel handler required.
+        AppManager.Instance.SpawnInfoModal(
+            title: "Quit Game?",
+            message: "Are you sure you want to quit?",
+            actionButtonLabel: "Quit",
+            onAction: () => Application.Quit()
         );
     }
 
@@ -113,13 +178,10 @@ public class MainScreen : MonoBehaviour
 
     private void OnUserLevelUpdated(int level, int xpToNextLevel, string statusName)
     {
-        LevelUpStarAnim starAnim = Instantiate(_animatedLevelUpStarPrefab, transform);
-        starAnim.OnAnimComplete += () =>
-        {
-            _levelText.text = level.ToString();
-        };
-
+        AppManager.Instance.SpawnLevelUpModal(level);
+        _levelText.text = level.ToString();
         _collectCoinsBaseAmountText.text = level.ToString();
+        _maxLevelText.SetActive(AppManager.Instance.userData.XPCapped);
     }
 
     private void OnUserXPUpdated(int newXp)
@@ -145,6 +207,7 @@ public class MainScreen : MonoBehaviour
     {
         _avatarButton.onClick.RemoveListener(OnAvatarButtonClicked);
         _collectCoinsButton.onClick.RemoveListener(OnCollectCoinsButtonClicked);
+        _closeButton.onClick.RemoveListener(OnCloseButtonClicked);
         _adsBanner.GetComponent<Button>().onClick.RemoveListener(OnAdsBannerClicked);
         AppManager.Instance.OnCoinsUpdated -= OnCoinsUpdated;
         AppManager.Instance.OnGemsUpdated -= OnGemsUpdated;
@@ -155,6 +218,7 @@ public class MainScreen : MonoBehaviour
         InventoryService.Instance.OnItemEquipChange -= OnItemEquipChange;
         InventoryService.Instance.OnNoAdsStatusKnown -= OnNoAdsStatusKnown;
         InventoryService.Instance.OnSubscriptionExpired -= OnSubscriptionExpired;
+        InventoryService.Instance.OnXpGeneratorStatusChanged -= OnXpGeneratorStatusChanged;
 
         if (_xpAnimCoroutine != null)
         {
@@ -162,6 +226,12 @@ public class MainScreen : MonoBehaviour
             _xpAnimCoroutine = null;
         }
         _xpAnimQueue.Clear();
+
+        if (_generatorTimerCoroutine != null)
+        {
+            StopCoroutine(_generatorTimerCoroutine);
+            _generatorTimerCoroutine = null;
+        }
     }
 
     private void OnNoAdsStatusKnown(bool hasSubscription)
@@ -330,12 +400,17 @@ public class MainScreen : MonoBehaviour
             Debug.Log("User award coins successfully! " + jsonResponse);
             var data = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse)["data"] as Dictionary<string, object>;
             int newCoinsBalance = Convert.ToInt32(data["response"]);
-
+            /*
             AnimatedCoinCollect coinCollectAnim = Instantiate(_animatedCoinCollectPrefab, transform.parent);
             coinCollectAnim.newCoinsBalance = newCoinsBalance;
             coinCollectAnim.OnCoinAnimComplete += OnCoinCollectAnimComplete;
+            */
 
-            
+            AppManager.Instance.AnimateDynamicAward(_coinIconRef, CurrencyType.Coins, () =>
+            {
+                OnCoinCollectAnimComplete(newCoinsBalance);
+            });
+
             _collectCoinsButton.interactable = true;
         }, (int status, int reason, string errorJson, object _) =>
         {

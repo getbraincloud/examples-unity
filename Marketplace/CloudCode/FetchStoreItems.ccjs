@@ -8,6 +8,7 @@ function main() {
   var itemCatalogProxy = bridge.getItemCatalogServiceProxy();
   var userItemsProxy   = bridge.getUserItemsServiceProxy();
   var appStoreProxy    = bridge.getAppStoreServiceProxy();
+  var playerStateProxy = bridge.getPlayerStateServiceProxy();
 
   // ── 1. Fetch ALL item catalog entries (paginated), keep only purchasable ones ──
   var allCatalogItems = [];
@@ -81,6 +82,26 @@ function main() {
           promoPriceMap[defId] = promoItem.buyPrice;
         }
       }
+    }
+  }
+
+  // brainCloud's promotion "purchased" counter only auto-increments for cash products
+  // verified through VerifyPurchase (the promotionId travels in the purchase payload).
+  // Items bought with virtual currency via UserItemsService/purchaseUserItem never
+  // notify the promotion, so getEligiblePromotions keeps reporting them as eligible
+  // forever. We track one-time redemption of these promos ourselves via a per-defId
+  // player attribute (see BuyItem.ccjs / BuyAndOpenBundle.ccjs) and strip any promo
+  // the user has already redeemed out of the price map here.
+  var attrResult = playerStateProxy.getAttributes();
+  var attributes = (attrResult.status === 200 && attrResult.data && attrResult.data.attributes)
+    ? attrResult.data.attributes
+    : {};
+
+  var promoDefIds = Object.keys(promoPriceMap);
+  for (var pd = 0; pd < promoDefIds.length; pd++) {
+    var promoDefId = promoDefIds[pd];
+    if (attributes["promoRedeemed_" + promoDefId] === "true") {
+      delete promoPriceMap[promoDefId];
     }
   }
 

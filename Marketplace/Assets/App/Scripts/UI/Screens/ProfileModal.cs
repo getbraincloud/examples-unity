@@ -48,6 +48,12 @@ public class ProfileModal : MonoBehaviour
         _restorePurchasesButton.onClick.AddListener(OnRestorePurchasesButtonClicked);
         _logoutButton.onClick.AddListener(OnLogoutButtonClicked);
 
+        // Restoring purchases is only relevant on mobile platform stores (Android/iOS) -
+        // Windows/Mac use mock purchases and have nothing to restore.
+#if !UNITY_ANDROID && !UNITY_IOS
+        _restorePurchasesButton.gameObject.SetActive(false);
+#endif
+
         GetVersions();
 
         _usernameInputField.text = AppManager.Instance.userData.PlayerName;

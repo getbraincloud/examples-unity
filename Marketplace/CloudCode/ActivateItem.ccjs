@@ -1,6 +1,8 @@
 "use strict";
 // ActivateItem - Uses/activates an item the user already owns
 
+var XP_GENERATOR_STATUS_NAME = "xp_generator";
+
 function main() {
   var response = {};
 
@@ -22,6 +24,20 @@ function main() {
 
   if (useItem.data.statusEffects) {
     response.activeUntil = useItem.data.statusEffects.activeUntil;
+
+    // The xp_generator status is native brainCloud item-catalog state, which brainCloud
+    // stops returning once it naturally expires. CollectXpGeneratorXP.ccjs needs the
+    // activation window to still be known after that point (e.g. the user was offline
+    // past the full 90s), so persist it ourselves as the source of truth for collection.
+    if (useItem.data.statusEffects.statusName === XP_GENERATOR_STATUS_NAME) {
+      var playerStateService = bridge.getPlayerStateServiceProxy();
+      var activeStart = useItem.data.statusEffects.activeStart || Date.now();
+
+      playerStateService.updateAttributes({
+        "xpGenActiveUntil":     String(useItem.data.statusEffects.activeUntil),
+        "xpGenLastCollectedAt": String(activeStart)
+      }, false);
+    }
   }
 
   return response;

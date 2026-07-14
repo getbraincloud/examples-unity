@@ -94,7 +94,7 @@ public class ViewItemModal : MonoBehaviour
 
         sellButton.gameObject.SetActive(_data.isSellable);
         
-        unsubscribeButton.gameObject.SetActive(_data.isSubscription);
+        unsubscribeButton.gameObject.SetActive(_data.isSubscription && _data.isAutoRenewing);
         openBundleButton.gameObject.SetActive(_data.isBundle);
 
         if (_data.isSellable)
@@ -235,6 +235,24 @@ public class ViewItemModal : MonoBehaviour
 
     private void OnUnsubscribeButtonClicked()
     {
+        if (AppManager.MockPurchasesEnabled)
+        {
+            // Windows/Mac mock-purchase mode: there's no real store subscription to manage,
+            // so just turn off auto-renew — the subscription stays active until its current
+            // period ends, then becomes purchasable again instead of renewing.
+            _cg.interactable = false;
+            InventoryService.Instance.UnsubscribeMockSubscription(_data.defId, (long finalExpiryMs) =>
+            {
+                _data.isAutoRenewing = false;
+                _data.subscriptionExpiryMs = finalExpiryMs;
+                _data.description = InventoryService.BuildSubscriptionDescription(finalExpiryMs, false);
+                _itemCardRef.UpdateUI();
+                UpdateUI();
+                _cg.interactable = true;
+            });
+            return;
+        }
+
         Application.OpenURL($"https://play.google.com/store/account/subscriptions?sku=no_ads&package={Application.identifier}");
     }
 

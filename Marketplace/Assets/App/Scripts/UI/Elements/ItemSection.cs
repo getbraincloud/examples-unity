@@ -34,23 +34,23 @@ public class ItemSection : MonoBehaviour
 
         card.SetStoreItemData(itemData);
 
-        cards.Add(itemData.defId, card);
+        cards.Add(itemData.Key, card);
     }
 
     public void UpdateStoreItem(StoreItemData itemData)
     {
-        if (cards.ContainsKey(itemData.defId))
-            cards[itemData.defId].SetStoreItemData(itemData);
+        if (cards.ContainsKey(itemData.Key))
+            cards[itemData.Key].SetStoreItemData(itemData);
         else
             AddStoreItem(itemData);
     }
 
-    public void RemoveStoreItem(string defId)
+    public void RemoveStoreItem(string key)
     {
-        if (cards.TryGetValue(defId, out StoreItemCard card))
+        if (cards.TryGetValue(key, out StoreItemCard card))
         {
             Destroy(card.gameObject);
-            cards.Remove(defId);
+            cards.Remove(key);
         }
     }
 

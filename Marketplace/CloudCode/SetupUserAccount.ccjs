@@ -31,6 +31,15 @@ function main() {
   var userItems = userItemsService.getUserItemsPage(searchContext, true);
   processItems(userItems);
 
+  bridge.getPlayerStateServiceProxy().updateAttributes({ "bought200stars": "false" }, false);
+
+  // Promotion eligibility is a snapshot that's normally recalculated during
+  // authentication, but for a brand-new account that recalculation hasn't caught up
+  // yet by the time this script runs mid-auth. Force it now so the very first
+  // FetchStoreItems call after account creation already shows correct promo pricing,
+  // instead of requiring the user to relaunch the app.
+  bridge.getAppStoreServiceProxy().refreshPromotions();
+
   if(!hasGemsFreebie){
     //Give gems freebie if we don't have it
     var giveGems = userItemsService.awardUserItem("Freebie_Gems",1,false);

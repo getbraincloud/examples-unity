@@ -38,6 +38,15 @@ function main() {
     return response;
   }
 
+  // brainCloud never marks a promotion as redeemed for items bought with virtual
+  // currency (only cash purchases verified through VerifyPurchase do that), so
+  // FetchStoreItems.ccjs would keep applying a one-time promo price forever. Record
+  // that this defId has now been bought at least once so it can strip the promo.
+  var attrKey = "promoRedeemed_" + data.defId;
+  var attrs = {};
+  attrs[attrKey] = "true";
+  bridge.getPlayerStateServiceProxy().updateAttributes(attrs, false);
+
   //lets get the user item id that we just purchased
   var items = purchaseItem.data.items;
 
