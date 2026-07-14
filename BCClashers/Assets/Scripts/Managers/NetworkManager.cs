@@ -38,6 +38,9 @@ public class NetworkManager : MonoBehaviour
     private bool _shieldActive;
     private bool _didInvadersWin;
     private string _invadedPlaybackID;
+    //Difficulty of defense to raid. ANY_DEFENDER_RANK matches every difficulty.
+    public const int ANY_DEFENDER_RANK = -1;
+    private int _defenderRankFilter = ANY_DEFENDER_RANK;
 
     private static string _currencyType = "gold";
     private static int _startingGold = 100000;
@@ -162,6 +165,26 @@ public class NetworkManager : MonoBehaviour
             null,
             OnFailureCallback
         );
+
+        PublishDefenseSummary();
+    }
+
+    //Summary friend data is the only player data the matchmaking filter sees, so publish our
+    //defense there or we stay invisible to other players' searches.
+    public void PublishDefenseSummary()
+    {
+        _bcWrapper.PlayerStateService.UpdateSummaryFriendData
+        (
+            CreateJsonDefenseSummaryData(),
+            null,
+            OnFailureCallback
+        );
+    }
+
+    //Called from a Unity Dropdown to pick which defense difficulty to raid.
+    public void SetDefenderRankFilter(int in_defenderRank)
+    {
+        _defenderRankFilter = in_defenderRank;
     }
 
     public void LookForPlayers()
@@ -171,10 +194,12 @@ public class NetworkManager : MonoBehaviour
 
     private void OnEnableMatchMaking(string jsonResponse, object cbObject)
     {
-        _bcWrapper.MatchMakingService.FindPlayers
+        //FilterOneWayMultiplayer drops candidates with no raidable defense, server-side.
+        _bcWrapper.MatchMakingService.FindPlayersUsingFilter
         (
             _findPlayersRange,
             _numberOfMatches,
+            CreateJsonMatchFilterParms(),
             OnFoundPlayers,
             OnFoundPlayersError
         );
@@ -389,6 +414,8 @@ public class NetworkManager : MonoBehaviour
                 int invaderSelection = (int) entityData["invaderSelection"];
 
                 GameManager.Instance.UpdateLocalArmySelection(defenderSelection, invaderSelection);
+                //Backfill for profiles created before the matchmaking filter existed.
+                PublishDefenseSummary();
             }
         }
 
@@ -410,6 +437,8 @@ public class NetworkManager : MonoBehaviour
                     string entityId = entities[0]["entityId"] as string;
 
                     GameManager.Instance.UpdateFromReadResponse(entityId, defenderSelection, invaderSelection);
+                    //Backfill for profiles created before the matchmaking filter existed.
+                    PublishDefenseSummary();
                 }
 
                 MenuManager.Instance.UpdateMainMenu();
@@ -528,6 +557,8 @@ public class NetworkManager : MonoBehaviour
         }
 
         GameManager.Instance.UpdateLocalArmySelection(0, 0);
+        //A brand new player starts on the Easy defense, so they are raidable straight away.
+        PublishDefenseSummary();
         MenuManager.Instance.IsLoading = false;
         MenuManager.Instance.UpdateMainMenu();
         SetDefaultPlayerRating();
@@ -893,6 +924,25 @@ public class NetworkManager : MonoBehaviour
         
         string value = JsonWriter.Serialize(eventData);
         return value;
+    }
+
+    private string CreateJsonDefenseSummaryData()
+    {
+        UserInfo user = GameManager.Instance.CurrentUserInfo;
+        Dictionary<string, object> summaryInfo = new Dictionary<string, object>();
+        summaryInfo.Add("hasDefense", user.DefendersSelected != ArmyDivisionRank.None);
+        summaryInfo.Add("defenderRank", (int) user.DefendersSelected);
+
+        return JsonWriter.Serialize(summaryInfo);
+    }
+
+    private string CreateJsonMatchFilterParms()
+    {
+        Dictionary<string, object> filterParms = new Dictionary<string, object>();
+        filterParms.Add("requireDefense", true);
+        filterParms.Add("defenderRank", _defenderRankFilter);
+
+        return JsonWriter.Serialize(filterParms);
     }
 
     private string CreateJsonEntityData(bool in_isDataNew)
