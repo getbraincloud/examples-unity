@@ -84,7 +84,7 @@ public class SpawnController : MonoBehaviour
     {
         GameManager.Instance.InvaderTroopCount = 0;
         //Get our troop data that we can summon
-        troopSelectorList = FindObjectsOfType<SummonSelector>().ToList();
+        troopSelectorList = FindObjectsByType<SummonSelector>(FindObjectsSortMode.InstanceID).ToList();
         List<SpawnInfo> spawnList = GameManager.Instance.InvaderSpawnInfo;
         if (spawnList == null)
         {

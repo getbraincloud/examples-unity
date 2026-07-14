@@ -41,7 +41,7 @@ public class FloatingDamageNumber : MonoBehaviour
         label.fontSize = 14f;
         label.alignment = TextAlignmentOptions.Center;
         label.fontStyle = FontStyles.Bold;
-        label.enableWordWrapping = false;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
         //Sit on top of the board and the bots rather than z-fighting into them.
         label.GetComponent<MeshRenderer>().sortingOrder = 500;
 

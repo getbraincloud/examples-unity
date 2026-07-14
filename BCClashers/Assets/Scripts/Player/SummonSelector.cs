@@ -11,7 +11,7 @@ public class SummonSelector : MonoBehaviour
 
     private void Awake()
     {
-        _spawnController = FindObjectOfType<SpawnController>();
+        _spawnController = FindFirstObjectByType<SpawnController>();
     }
 
     public void UpdateSpawnNumber(int currentLimit)

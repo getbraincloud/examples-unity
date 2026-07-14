@@ -11,9 +11,13 @@ public class HealthBar : MonoBehaviour
     private void Awake()
     {
         _slider = GetComponent<Slider>();
-        
+
         AdjustImageBeingActive(false);
     }
+
+    /// Binding lazily makes the bar work regardless of activation order.
+    /// </summary>
+    private Slider Slider => _slider != null ? _slider : (_slider = GetComponent<Slider>());
 
     public void AssignTeamColor(Color in_teamColor)
     {
@@ -29,12 +33,11 @@ public class HealthBar : MonoBehaviour
 
     public void SetMaxHealth(int newMaxValue)
     {
-        _slider.maxValue = newMaxValue;
-        _slider.value = newMaxValue;
+        Slider.maxValue = newMaxValue;
+        Slider.value = newMaxValue;
 
         //Show the bar from the moment the unit spawns. It used to stay hidden until the first
-        //hit (only SetHealth re-enabled it), so healthy troops had no bar at all and you couldn't
-        //read their health until something damaged them.
+        //hit (only SetHealth re-enabled it), so healthy troops had no bar at all.
         AdjustImageBeingActive(true);
     }
 
@@ -44,7 +47,14 @@ public class HealthBar : MonoBehaviour
         {
             AdjustImageBeingActive(true);
         }
-        
-        _slider.value = newValue;
+
+        //Guard against a max of 0: if SetMaxHealth never landed, the slider would clamp every
+        //value to 0/1 and the fill would look stuck.
+        if (Slider.maxValue <= 0)
+        {
+            Slider.maxValue = Mathf.Max(newValue, 1);
+        }
+
+        Slider.value = newValue;
     }
 }

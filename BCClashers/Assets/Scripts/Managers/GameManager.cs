@@ -203,7 +203,7 @@ public class GameManager : MonoBehaviour
     {
         if(_sessionManagerRef == null)
         {
-            _sessionManagerRef = FindObjectOfType<GameSessionManager>();
+            _sessionManagerRef = FindFirstObjectByType<GameSessionManager>();
         }
 
         return _sessionManagerRef;
@@ -224,7 +224,7 @@ public class GameManager : MonoBehaviour
 
         if (!_gameOverScreenRef)
         {
-            _gameOverScreenRef = FindObjectOfType<GameOverScreen>();    
+            _gameOverScreenRef = FindFirstObjectByType<GameOverScreen>();    
         }
 
         if (_gameOverScreenRef)
@@ -314,7 +314,7 @@ public class GameManager : MonoBehaviour
         //Do Game over things
         GetSessionManager().StopTimer();
         
-        FindObjectOfType<SpawnController>().enabled = false;
+        FindFirstObjectByType<SpawnController>().enabled = false;
         
         
         _gameOverScreenRef.gameObject.SetActive(true);
@@ -338,13 +338,13 @@ public class GameManager : MonoBehaviour
         _isGameActive = true;
         IsInPlaybackMode = true;
         GetSessionManager().SetupGameSession();
-        var troopsToDestroy = FindObjectsOfType<TroopAI>();
+        var troopsToDestroy = FindObjectsByType<TroopAI>(FindObjectsSortMode.InstanceID);
         foreach (var troopAI in troopsToDestroy)
         {
             Destroy(troopAI.gameObject);
         }
 
-        var housesToDestroy = FindObjectsOfType<BaseHealthBehavior>();
+        var housesToDestroy = FindObjectsByType<BaseHealthBehavior>(FindObjectsSortMode.InstanceID);
         foreach (var house in housesToDestroy)
         {
             Destroy(house.gameObject);
@@ -354,13 +354,13 @@ public class GameManager : MonoBehaviour
     //Sets up defender and invader spawner logic
     private void SetUpSpawners()
     {
-        var _invaderSpawner = FindObjectOfType<SpawnController>();
+        var _invaderSpawner = FindFirstObjectByType<SpawnController>();
         if (_invaderSpawner)
         {
             _invaderSpawner.SetUpInvaders();
         }
 
-        var _defenderSpawner = FindObjectOfType<DefenderSpawner>();
+        var _defenderSpawner = FindFirstObjectByType<DefenderSpawner>();
         if (_defenderSpawner)
         {
             if (!IsInPlaybackMode)

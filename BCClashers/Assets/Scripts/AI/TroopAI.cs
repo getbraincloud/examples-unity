@@ -74,7 +74,9 @@ public class TroopAI : BaseHealthBehavior
         _collider = GetComponent<BoxCollider>();
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
         if (_meleeWeapon) _meleeDamage = _meleeWeapon.DamageAmount;
-        _healthBar = GetComponentInChildren<HealthBar>();
+        //Search inactive children too: the default lookup skips them, which left _healthBar null on
+        //troops whose bar/canvas wasn't active at Awake, so their bar never tracked damage.
+        _healthBar = GetComponentInChildren<HealthBar>(true);
         _shootScript = GetComponent<ShootProjectiles>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _currentHealth = StartingHealth;

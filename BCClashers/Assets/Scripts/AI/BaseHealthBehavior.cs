@@ -14,7 +14,7 @@ public class BaseHealthBehavior : MonoBehaviour
     private void Start()
     {
         _currentHealth = StartingHealth;
-        _healthBar = GetComponentInChildren<HealthBar>();
+        ResolveHealthBar();
         if (_healthBar)
         {
             _healthBar.SetMaxHealth(_currentHealth);
@@ -23,12 +23,30 @@ public class BaseHealthBehavior : MonoBehaviour
         _isAStructure = gameObject.name.Contains("House");
     }
 
+    /// <summary>
+    /// Binds the health bar, searching INACTIVE children too.
+    /// The plain GetComponentInChildren&lt;HealthBar&gt;() used before skips inactive objects, so if the
+    /// bar (or its world-space canvas) wasn't active at bind time it silently resolved to null -
+    /// and Damage()'s `if (_healthBar)` then skipped the bar for the unit's whole life, leaving it
+    /// pinned at full health while the unit took hits and died.
+    /// </summary>
+    protected void ResolveHealthBar()
+    {
+        if (_healthBar == null)
+        {
+            _healthBar = GetComponentInChildren<HealthBar>(true);
+        }
+    }
+
     public  void Damage(int damageTaken)
     {
         if (_currentHealth <= 0) return;
 
         _currentHealth -= damageTaken;
 
+        //Self-heal the binding: if the bar was never resolved (inactive at bind time), grab it now
+        //rather than silently never showing damage on this unit.
+        ResolveHealthBar();
         if (_healthBar)
         {
             _healthBar.SetHealth(_currentHealth);
@@ -57,13 +75,14 @@ public class BaseHealthBehavior : MonoBehaviour
         //Spawn height comes from the target's bounds so the number sits above a tall tower
         //instead of inside it. Scale has a high floor on purpose: troops are short, so scaling
         //purely off their height made their numbers unreadably small next to the structures'.
-        float height = 3f;
+        float height = 6f;
         float scale = 1.6f;
         Renderer renderer = GetComponentInChildren<Renderer>();
         if (renderer != null)
         {
             Bounds bounds = renderer.bounds;
-            height = bounds.size.y * 0.85f + 1.5f;
+            //Clear the model AND its health bar, which floats above the unit's head.
+            height = bounds.size.y * 1.25f + 4f;
             scale = Mathf.Clamp(bounds.size.y * 0.25f, 1.6f, 2.6f);
         }
 
