@@ -3,6 +3,12 @@ using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour
 {
+    //Main menu palette: cyan accent at full health, falling through amber to the same warm red
+    //FloatingDamageNumber uses for self-hits.
+    public static readonly Color HealthyColor = new Color(0.18f, 0.93f, 0.89f);
+    public static readonly Color WarningColor = new Color(1.00f, 0.78f, 0.25f);
+    public static readonly Color CriticalColor = new Color(1.00f, 0.35f, 0.30f);
+
     public Image FillImage;
     public Image BorderImage;
     public Image HeartImage;
@@ -15,13 +21,31 @@ public class HealthBar : MonoBehaviour
         AdjustImageBeingActive(false);
     }
 
-    /// Binding lazily makes the bar work regardless of activation order.
-    /// </summary>
     private Slider Slider => _slider != null ? _slider : (_slider = GetComponent<Slider>());
 
     public void AssignTeamColor(Color in_teamColor)
     {
+        //Structures leave TeamColorImage unassigned; only troops carry a team swatch.
+        if (TeamColorImage == null)
+        {
+            return;
+        }
+
         TeamColorImage.color = in_teamColor;
+    }
+
+    private void RefreshFillColor()
+    {
+        if (FillImage == null || Slider.maxValue <= 0)
+        {
+            return;
+        }
+
+        float percent = Mathf.Clamp01(Slider.value / Slider.maxValue);
+
+        FillImage.color = percent >= 0.5f
+            ? Color.Lerp(WarningColor, HealthyColor, (percent - 0.5f) / 0.5f)
+            : Color.Lerp(CriticalColor, WarningColor, percent / 0.5f);
     }
 
     private void AdjustImageBeingActive(bool isActive)
@@ -36,14 +60,12 @@ public class HealthBar : MonoBehaviour
         Slider.maxValue = newMaxValue;
         Slider.value = newMaxValue;
 
-        //Show the bar from the moment the unit spawns. It used to stay hidden until the first
-        //hit (only SetHealth re-enabled it), so healthy troops had no bar at all.
-        AdjustImageBeingActive(true);
+        RefreshFillColor();
     }
 
     public void SetHealth(int newValue)
     {
-        if (!BorderImage.enabled)
+        if (Slider.value < Slider.maxValue)
         {
             AdjustImageBeingActive(true);
         }
@@ -56,5 +78,7 @@ public class HealthBar : MonoBehaviour
         }
 
         Slider.value = newValue;
+
+        RefreshFillColor();
     }
 }

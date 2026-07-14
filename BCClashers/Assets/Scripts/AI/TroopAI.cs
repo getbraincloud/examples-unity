@@ -64,6 +64,8 @@ public class TroopAI : BaseHealthBehavior
 
     private readonly int INVADER_COLLISION_LAYER = 6;
     private readonly int DEFENDER_COLLISION_LAYER = 7;
+    private readonly Color INVADER_TEAM_COLOR = new Color(0.00f, 0.68f, 1.00f);
+    private readonly Color DEFENDER_TEAM_COLOR = new Color(1.00f, 0.35f, 0.30f);
     
     public GameObject Target { set => _target = value; }
     
@@ -250,7 +252,7 @@ public class TroopAI : BaseHealthBehavior
             }
             //6 = Invader Layer, 7 = Defender Layer
             gameObject.layer = INVADER_COLLISION_LAYER;
-            _healthBar.AssignTeamColor(Color.blue);
+            _healthBar.AssignTeamColor(INVADER_TEAM_COLOR);
         }
         else
         {
@@ -266,7 +268,7 @@ public class TroopAI : BaseHealthBehavior
             }
             //6 = Invader Layer, 7 = Defender Layer
             gameObject.layer = DEFENDER_COLLISION_LAYER;
-            _healthBar.AssignTeamColor(Color.red);
+            _healthBar.AssignTeamColor(DEFENDER_TEAM_COLOR);
         }
     }
 
