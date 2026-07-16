@@ -24,6 +24,8 @@ public class ProfileModal : MonoBehaviour
     [SerializeField]
     private Image _profileImage;
     [SerializeField]
+    private Button _profileImageButton;
+    [SerializeField]
     private TextMeshProUGUI _projectVersionText, _bcVersionText, _serverVersionText;
 
     private bool _isLoggedOut = false;
@@ -47,6 +49,9 @@ public class ProfileModal : MonoBehaviour
         _updateProfileButton.onClick.AddListener(OnUpdateProfileButtonClicked);
         _restorePurchasesButton.onClick.AddListener(OnRestorePurchasesButtonClicked);
         _logoutButton.onClick.AddListener(OnLogoutButtonClicked);
+        _profileImageButton.onClick.AddListener(OnProfileImageButtonClicked);
+
+        AppManager.Instance.OnProfileImageChanged += OnProfileImageChanged;
 
         // Restoring purchases is only relevant on mobile platform stores (Android/iOS) -
         // Windows/Mac use mock purchases and have nothing to restore.
@@ -57,6 +62,7 @@ public class ProfileModal : MonoBehaviour
         GetVersions();
 
         _usernameInputField.text = AppManager.Instance.userData.PlayerName;
+        _profileImage.sprite = AppManager.Instance.GetCurrentProfileImage();
     }
     private void OnDisable()
     {
@@ -64,6 +70,19 @@ public class ProfileModal : MonoBehaviour
         _updateProfileButton.onClick.RemoveAllListeners();
         _restorePurchasesButton.onClick.RemoveAllListeners();
         _logoutButton.onClick.RemoveAllListeners();
+        _profileImageButton.onClick.RemoveAllListeners();
+
+        AppManager.Instance.OnProfileImageChanged -= OnProfileImageChanged;
+    }
+
+    private void OnProfileImageChanged(Sprite newImage)
+    {
+        _profileImage.sprite = newImage;
+    }
+
+    private void OnProfileImageButtonClicked()
+    {
+        AppManager.Instance.SpawnProfileImagePickerModal();
     }
 
     private void GetVersions()
@@ -79,11 +98,6 @@ public class ProfileModal : MonoBehaviour
                 _serverVersionText.text = serverVersion;
             }
         );
-    }
-
-    public void UpdateProfileImage(Sprite image)
-    {
-        _profileImage.sprite = image;
     }
 
     private void OnLogoutButtonClicked()

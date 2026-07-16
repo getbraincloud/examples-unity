@@ -28,6 +28,11 @@ public class AppManager : MonoBehaviour
     private InfoModal infoModalPrefab;
     [SerializeField]
     private LevelUpModal levelUpModalPrefab;
+    [SerializeField]
+    private ProfileImagePickerModal profileImagePickerModalPrefab;
+
+    [SerializeField]
+    private Sprite[] profileImages;
 
     private LoadingOverlay _currentLoadingOverlay;
 
@@ -42,6 +47,9 @@ public class AppManager : MonoBehaviour
     public Action<string> OnUsernameUpdated;
     public Action<UserData> OnStatsUpdated;
     public Action<CoinMultiplierStatus> OnMultiplierActivated;
+    public Action<Sprite> OnProfileImageChanged;
+
+    public int ProfileImageIndex { get; private set; }
 
     private Canvas _appCanvas;
 
@@ -139,6 +147,14 @@ public class AppManager : MonoBehaviour
 
         userData.UpdateFromAuth(authResponse);
 
+        // We reuse brainCloud's native pictureUrl field to store the chosen profile image's
+        // index (see SetProfileImageIndex) rather than an actual URL - it comes back fresh
+        // with every login's auth response, so this is always this account's own selection
+        // (defaulting to 0 if never set), never a stale value left over from another account.
+        ProfileImageIndex = int.TryParse(userData.PictureUrl, out int savedProfileImageIndex)
+            ? ClampProfileImageIndex(savedProfileImageIndex)
+            : 0;
+
         BCManager.Instance.BCWrapper.ScriptService.RunScript("GetUserXPData", "{}",
         (string xpJsonResponse, object cbObj) =>
         {
@@ -165,6 +181,51 @@ public class AppManager : MonoBehaviour
             OnStatsUpdated?.Invoke(userData);
             OnComplete?.Invoke();
         }
+    }
+
+    private int ClampProfileImageIndex(int index)
+    {
+        if (profileImages == null || profileImages.Length == 0)
+            return 0;
+
+        return Mathf.Clamp(index, 0, profileImages.Length - 1);
+    }
+
+    /// <summary>
+    /// Returns the sprite for the user's currently-selected profile image, or null if no
+    /// profile images have been configured on this component.
+    /// </summary>
+    public Sprite GetCurrentProfileImage()
+    {
+        if (profileImages == null || profileImages.Length == 0)
+            return null;
+
+        return profileImages[ClampProfileImageIndex(ProfileImageIndex)];
+    }
+
+    /// <summary>
+    /// Sets and persists the user's chosen profile image, then notifies listeners
+    /// (MainScreen's HUD icon, ProfileModal) so they can update immediately.
+    /// </summary>
+    public void SetProfileImageIndex(int index, Action onComplete = null)
+    {
+        index = ClampProfileImageIndex(index);
+        ProfileImageIndex = index;
+        userData.PictureUrl = index.ToString();
+
+        OnProfileImageChanged?.Invoke(GetCurrentProfileImage());
+
+        // Reusing brainCloud's native pictureUrl field (storing the index as a string instead
+        // of an actual URL) means this comes back for free in every future login's auth
+        // response, tied to this specific account, with no extra attribute round trip needed.
+        BCManager.Instance.BCWrapper.PlayerStateService.UpdateUserPictureUrl(
+            index.ToString(),
+            (string _, object __) => onComplete?.Invoke(),
+            (int statusCode, int responseCode, string errorJson, object errorObj) =>
+            {
+                Debug.LogError("Failed to persist profile image selection: " + errorJson);
+                onComplete?.Invoke();
+            });
     }
 
     /// <summary>
@@ -458,6 +519,19 @@ public class AppManager : MonoBehaviour
         modal.transform.localScale = Vector3.one;
 
         modal.SetData(newLevel, onClosed);
+    }
+
+    public void SpawnProfileImagePickerModal(Action onClosed = null)
+    {
+        if (_appCanvas == null)
+        {
+            FetchReferences();
+        }
+
+        ProfileImagePickerModal modal = Instantiate(profileImagePickerModalPrefab, _appCanvas.transform);
+        modal.transform.localScale = Vector3.one;
+
+        modal.SetData(profileImages, (int selectedIndex) => SetProfileImageIndex(selectedIndex), onClosed);
     }
 
     private IEnumerator MoveWorld(RectTransform rect, Vector3 targetPos, float duration, Action onComplete)

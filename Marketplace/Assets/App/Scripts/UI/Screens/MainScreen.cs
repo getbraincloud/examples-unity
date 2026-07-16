@@ -70,6 +70,7 @@ public class MainScreen : MonoBehaviour
         AppManager.Instance.OnUserXPUpdated += OnUserXPUpdated;
         AppManager.Instance.OnUserLevelUpdated += OnUserLevelUpdated;
         AppManager.Instance.OnMultiplierActivated += OnMultiplierActivated;
+        AppManager.Instance.OnProfileImageChanged += OnProfileImageChanged;
 
         InventoryService.Instance.OnItemEquipChange += OnItemEquipChange;
         InventoryService.Instance.OnNoAdsStatusKnown += OnNoAdsStatusKnown;
@@ -79,6 +80,7 @@ public class MainScreen : MonoBehaviour
         _adsBanner.SetActive(!InventoryService.Instance.NoAdsSubscriptionActive);
         OnXpGeneratorStatusChanged(InventoryService.Instance.XpGeneratorActive, InventoryService.Instance.XpGeneratorActiveUntil);
         _maxLevelText.SetActive(AppManager.Instance.userData.XPCapped);
+        _userProfileImage.sprite = AppManager.Instance.GetCurrentProfileImage();
 
         UpdateAllUserStatUI(AppManager.Instance.userData);
 
@@ -214,6 +216,7 @@ public class MainScreen : MonoBehaviour
         AppManager.Instance.OnUserXPUpdated -= OnUserXPUpdated;
         AppManager.Instance.OnUserLevelUpdated -= OnUserLevelUpdated;
         AppManager.Instance.OnMultiplierActivated -= OnMultiplierActivated;
+        AppManager.Instance.OnProfileImageChanged -= OnProfileImageChanged;
 
         InventoryService.Instance.OnItemEquipChange -= OnItemEquipChange;
         InventoryService.Instance.OnNoAdsStatusKnown -= OnNoAdsStatusKnown;
@@ -254,22 +257,22 @@ public class MainScreen : MonoBehaviour
         }
         if(itemData.equippableSlot == "ShirtSlot")
         {
-            ProfileModal pModal = _profileModalAnim.GetComponent<ProfileModal>();
             //this could be any color shirt
             if (itemData.isEquipped)
             {
-                Sprite newProfileImage = await ImageCacheService.Instance.GetImageAsync(itemData.imageUrl);
-                _avatarImage.sprite = newProfileImage;
-                _userProfileImage.sprite = newProfileImage;
-
-                //update profile image in profile modal
-                pModal.UpdateProfileImage(newProfileImage);
+                Sprite newAvatarImage = await ImageCacheService.Instance.GetImageAsync(itemData.imageUrl);
+                _avatarImage.sprite = newAvatarImage;
             }
             else
             {
                 InventoryService.Instance.EquipDefaultItemForSlot("ShirtSlot", null);
             }
         }
+    }
+
+    private void OnProfileImageChanged(Sprite newImage)
+    {
+        _userProfileImage.sprite = newImage;
     }
 
     private void UpdateAllUserStatUI(UserData userData)
