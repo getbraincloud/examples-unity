@@ -106,7 +106,7 @@ public class ImageCacheService : MonoBehaviour
             ImageMeta meta = null;
             if (File.Exists(metaPath))
             {
-                string json = await Task.Run(() => File.ReadAllText(metaPath));
+                string json = File.ReadAllText(metaPath);
                 meta = JsonUtility.FromJson<ImageMeta>(json);
             }
 
@@ -127,7 +127,7 @@ public class ImageCacheService : MonoBehaviour
                 // 304 = image unchanged on server, keep cached copy
                 if (request.responseCode == 304)
                 {
-                    byte[] data = await Task.Run(() => File.ReadAllBytes(filePath));
+                    byte[] data = File.ReadAllBytes(filePath);
                     Sprite sprite = CreateSpriteFromBytes(data);
                     memoryCache[url] = sprite;
                     return sprite;
@@ -145,7 +145,7 @@ public class ImageCacheService : MonoBehaviour
 
                 // Network error — serve the stale cached copy rather than returning null
                 Debug.LogWarning($"[ImageCache] Could not validate {url} ({request.error}), using cached copy.");
-                byte[] cachedData = await Task.Run(() => File.ReadAllBytes(filePath));
+                byte[] cachedData = File.ReadAllBytes(filePath);
                 Sprite cachedSprite = CreateSpriteFromBytes(cachedData);
                 memoryCache[url] = cachedSprite;
                 return cachedSprite;
@@ -185,11 +185,8 @@ public class ImageCacheService : MonoBehaviour
             lastModified = request.GetResponseHeader("Last-Modified")
         });
 
-        await Task.Run(() =>
-        {
-            File.WriteAllBytes(filePath, pngData);
-            File.WriteAllText(metaPath, metaJson);
-        });
+        File.WriteAllBytes(filePath, pngData);
+        File.WriteAllText(metaPath, metaJson);
 
         memoryCache[url] = sprite;
         return sprite;
