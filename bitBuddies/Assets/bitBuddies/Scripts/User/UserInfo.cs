@@ -6,23 +6,19 @@ public class UserInfo
 {
     public int Level;
     public int CurrentXP;
-    public int PreviousLevelUp;
-    public int NextLevelUp;
     public string Username;
     public string Email;
     public int Coins;
     public int Gems;
     public int FakeMoney;
 
+    public int MinLevel { get; private set; } = int.MaxValue;
+    public int MaxLevel { get; private set; } = int.MinValue;
+    public Dictionary<int, int> LevelUpInfo { get; private set; } = new();
+
     public void UpdateLevel(int in_level)
     {
         Level = in_level;
-    }
-
-    public void UpdateLevelUpInfo(int in_previousLevelUp, int in_nextLevelUp)
-    {
-        PreviousLevelUp = in_previousLevelUp;
-        NextLevelUp = in_nextLevelUp;
     }
 
     public void UpdateXP(int in_xp)
@@ -31,12 +27,35 @@ public class UserInfo
         {
             in_xp = 0;
         }
+
         CurrentXP = in_xp;
     }
 
-    public void UpdateNextLevelUp(int in_nextLevel)
+    public void UpdateLevelUpInfo(Dictionary<string, object>[] xp_levels)
     {
-        NextLevelUp = in_nextLevel;
+        LevelUpInfo.Clear();
+
+        foreach (Dictionary<string, object> levelData in xp_levels)
+        {
+            if (levelData.ContainsKey("level") && levelData.ContainsKey("experience") &&
+                levelData["level"] is int level && levelData["experience"] is int experience)
+            {
+                LevelUpInfo.Add(level, experience);
+                MinLevel = level < MinLevel ? level : MinLevel;
+                MaxLevel = level > MaxLevel ? level : MaxLevel;
+            }
+        }
+    }
+
+    public int GetPreviousLevelExperience()
+    {
+        return Level < MinLevel ? 0 : LevelUpInfo[Level];
+    }
+
+    public int GetNextLevelExperience()
+    {
+        int next = Level + 1;
+        return next > MaxLevel ? 0 : LevelUpInfo[next];
     }
 
     public void UpdateUsername(string in_username)

@@ -43,23 +43,28 @@ namespace BrainCloud.JSONHelper
         /// </returns>
         public static T GetValue<T>(this IDictionary<string, object> self, string property) where T : struct, IConvertible
         {
-            if (self is not null && self.TryGetValue(property, out object obj))
+            if (self is not null && self.TryGetValue(property, out object obj) && obj is not null)
             {
                 if (obj is T value) return value;
 
                 try
                 {
+                    if (typeof(T).IsEnum)
+                    {
+                        return obj is string enumStr
+                            ? (Enum.TryParse(typeof(T), enumStr, true, out object parsed) ? (T)parsed : default)
+                            : (T)Enum.ToObject(typeof(T), Convert.ToInt64(obj));
+                    }
+
                     if (typeof(T) == typeof(bool))
                     {
-                        string str = self.ToString().Trim();
-
-                        return (T)((!string.IsNullOrEmpty(str) &&
-                                    str != "0" && str.ToLower() != "false") as T?);
+                        string str = obj.ToString().Trim();
+                        return (T)(object)(!string.IsNullOrEmpty(str) && str != "0" && str.ToLower() != "false");
                     }
 
                     return (T)Convert.ChangeType(obj, typeof(T));
                 }
-                catch { } // If conversion fails we silently fail to return a default value
+                catch { }
             }
 
             return default;

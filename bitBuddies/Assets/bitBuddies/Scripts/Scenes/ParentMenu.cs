@@ -120,9 +120,11 @@ public class ParentMenu : ContentUIBehaviour
 
         LevelText.text = $"{userInfo.Level}";
 
-        int adjustedCurrentXP = userInfo.CurrentXP - userInfo.PreviousLevelUp;
-        int adjustedNextLevelXP = userInfo.NextLevelUp - userInfo.PreviousLevelUp;
-        if (userInfo.NextLevelUp == 0)
+        int prevXP = userInfo.GetPreviousLevelExperience();
+        int nextXP = userInfo.GetNextLevelExperience();
+        int adjustedCurrentXP = userInfo.CurrentXP - prevXP;
+        int adjustedNextLevelXP = nextXP - prevXP;
+        if (nextXP == 0)
         {
             LevelFillText.text = "MAX";
             LevelSlider.minValue = 0;

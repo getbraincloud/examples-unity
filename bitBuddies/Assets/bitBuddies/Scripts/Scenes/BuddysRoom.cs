@@ -105,9 +105,11 @@ public class BuddysRoom : ContentUIBehaviour
 
         LoveLevelText.text = $"{_appChildrenInfo.buddyLevel}";
 
-        int adjustedCurrentXP = _appChildrenInfo.currentXP - _appChildrenInfo.previousLevelUp;
-        int adjustedNextLevelXP = _appChildrenInfo.nextLevelUp - _appChildrenInfo.previousLevelUp;
-        if (_appChildrenInfo.nextLevelUp == 0)
+        int prevXP = _appChildrenInfo.GetPreviousLevelExperience();
+        int nextXP = _appChildrenInfo.GetNextLevelExperience();
+        int adjustedCurrentXP = _appChildrenInfo.currentXP - prevXP;
+        int adjustedNextLevelXP = nextXP - prevXP;
+        if (nextXP == 0)
         {
             LoveFillText.text = "MAX";
             LoveSlider.minValue = 0;
@@ -258,7 +260,8 @@ public class BuddysRoom : ContentUIBehaviour
             var nextLevelUp = (int)update["nextLevelUpXP"];
             if (nextLevelUp != 0)
             {
-                _appChildrenInfo.nextLevelUp = nextLevelUp;
+                Debug.LogError("[NEED TO UPDATE THIS] - _appChildrenInfo.nextLevelUp = nextLevelUp");
+                //_appChildrenInfo.nextLevelUp = nextLevelUp;
                 LoveSlider.maxValue = nextLevelUp;
             }
         }

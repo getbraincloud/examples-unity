@@ -160,8 +160,9 @@ public class MouseMerchantItem : ShopItem
             var oldBalance = (int)parentCurrencyResults["oldBalance"];
             var previousLevelReq = (int)levelUpItemData["previousLevelXPReq"];
             var nextLevelReq = (int)levelUpItemData["nextLevelXPReq"];
-            appInfo.previousLevelUp = previousLevelReq;
-            appInfo.nextLevelUp = nextLevelReq;
+
+            //appInfo.previousLevelUp = previousLevelReq;
+            //appInfo.nextLevelUp = nextLevelReq;
             appInfo.buddyLevel = levelAfter;
             if (statIncremented)
             {

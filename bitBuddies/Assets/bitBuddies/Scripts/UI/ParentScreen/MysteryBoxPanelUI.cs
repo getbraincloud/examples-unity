@@ -132,49 +132,36 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     private void OnGetLootboxInfo(string jsonResponse)
     {
         BrainCloudManager.Instance.OnAddChildProfile(jsonResponse);
+
         _receivedResponse = true;
         var listOfBuddies = GameManager.Instance.AppChildrenInfos;
+
         if (listOfBuddies.Count > 0)
         {
             _parentMenu.NewAppChildrenInfo = new AppChildrenInfo();
 
-            //Extract entity data from response
-            var packet = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
-            var data = packet["data"] as Dictionary<string, object>;
-            var response = data["response"] as Dictionary<string, object>;
+            var data = jsonResponse.Deserialize("data", "response");
 
-            var newBuddy = response["newBuddy"] as Dictionary<string, object>;
-            BuddyTypeNameText.text = newBuddy["name"] as string;
+            BuddyTypeNameText.text = data.GetJSONObject("newBuddy")?.GetString("name");
 
-            var profileChildren = response["children"] as Dictionary<string, object>[];
-
-            //At this point the newly created child profile should not have a name yet and thats what we use to determine the new user.
-            if (profileChildren != null)
+            // At this point the newly created child profile should not have a name yet and thats what we use to determine the new user.
+            if (data.GetJSONArray("children") is var children && children != null && children.Length > 0)
             {
-                for (int i = 0; i < profileChildren.Length; i++)
+                foreach (var child in children)
                 {
-                    var childName = profileChildren[i]["profileName"] as string;
+                    var childName = child["profileName"] as string;
                     if (childName.IsNullOrEmpty())
                     {
-                        _parentMenu.NewAppChildrenInfo.profileId = profileChildren[i]["profileId"] as string;
-                        var summaryData = profileChildren[i]["summaryFriendData"] as Dictionary<string, object>;
-                        if (summaryData.ContainsKey("rarity"))
-                        {
-                            _parentMenu.NewAppChildrenInfo.rarity = Enum.Parse<Rarity>(summaryData["rarity"] as string);
-                        }
-                        _parentMenu.NewAppChildrenInfo.coinPerHour = (int)summaryData["coinPerHour"];
-                        _parentMenu.NewAppChildrenInfo.maxCoinCapacity = (int)summaryData["maxCoinCapacity"];
-                        _parentMenu.NewAppChildrenInfo.buddySpritePath = summaryData["buddySpritePath"] as string;
-                        var multiplier = summaryData["coinMultiplier"] as double?;
-                        if (multiplier.HasValue)
-                        {
-                            _parentMenu.NewAppChildrenInfo.coinMultiplier = (float)multiplier;
-                        }
-                        else
-                        {
-                            _parentMenu.NewAppChildrenInfo.coinMultiplier = 1.0f;
-                        }
-                        _parentMenu.NewAppChildrenInfo.lastIdleTimestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)summaryData["lastIdleTimestamp"]).UtcDateTime;
+                        _parentMenu.NewAppChildrenInfo.profileId = child.GetString("profileId");
+
+                        var buddyInfo = child.GetJSONObject("buddyInfo");
+
+                        _parentMenu.NewAppChildrenInfo.rarity = buddyInfo.GetValue<Rarity>("rarity");
+                        _parentMenu.NewAppChildrenInfo.coinPerHour = buddyInfo.GetValue<int>("coinPerHour");
+                        _parentMenu.NewAppChildrenInfo.maxCoinCapacity = buddyInfo.GetValue<int>("maxCoinCapacity");
+                        _parentMenu.NewAppChildrenInfo.buddySpritePath = buddyInfo.GetString("buddySpritePath") is string path && !string.IsNullOrWhiteSpace(path) ? path : BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY;
+                        _parentMenu.NewAppChildrenInfo.coinMultiplier = buddyInfo.GetValue<double>("coinMultiplier") is double mult && mult > 0.0 ? (float)mult : 1.0f;
+                        _parentMenu.NewAppChildrenInfo.lastIdleTimestamp = buddyInfo.GetDateTime("lastIdleTimestamp");
 
                         SetupBuddyDataDisplay();
                         break;
@@ -186,7 +173,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 
     private void OnFailureCallback()
     {
-
+        // TODO: ???
     }
 
     IEnumerator Shake()

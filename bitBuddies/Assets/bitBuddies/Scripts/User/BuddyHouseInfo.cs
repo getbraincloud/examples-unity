@@ -6,17 +6,18 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BuddyHouseInfo : MonoBehaviour
 {
     public AppChildrenInfo HouseInfo;
-    [SerializeField] private UnityEngine.UI.Button _visitButton;
-    [SerializeField] private UnityEngine.UI.Button _secondVisitButton;
-    [SerializeField] private UnityEngine.UI.Button _deleteButton;
-    [SerializeField] private PopUpUI PopUpPrefab;
+    [SerializeField] private Button _visitButton;
+    [SerializeField] private Button _secondVisitButton;
+    [SerializeField] private Button _deleteButton;
     [SerializeField] private TMP_Text _buddyNameText;
-    [SerializeField] private UnityEngine.UI.Image _buddySprite;
-    [SerializeField] private UnityEngine.UI.Button _collectCoinsButton;
+    [SerializeField] private Image _buddySprite;
+    [SerializeField] private Button _collectCoinsButton;
+
     private Transform _parentTransform;
     private int enableCollectCoinsButtonMinValue = 1;
 
@@ -155,16 +156,17 @@ public class BuddyHouseInfo : MonoBehaviour
 
     private void OnDeleteBuddySuccess()
     {
-        var popUp = Instantiate(PopUpPrefab, _parentTransform);
-        popUp.SetUpInfoPopup(BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_TITLE, BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_MESSAGE);
+        PopUpUI.Show(BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_TITLE, true)
+               .AddBodyText(BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_MESSAGE);
+
         StatTracker.Instance.IncrementStat(BitBuddiesConsts.TRASHED_BUDDIES_STAT_NAME);
         GameManager.Instance.OnDeleteBuddySuccess();
     }
 
     private void OnDeleteBuddyFailure()
     {
-        var popUp = Instantiate(PopUpPrefab, _parentTransform);
-        popUp.SetUpInfoPopup(BitBuddiesConsts.DELETE_BUDDYS_ROOM_FAILED_TITLE, BitBuddiesConsts.DELETE_BUDDYES_ROOM_FAILED_MESSAGE);
+        PopUpUI.Show(BitBuddiesConsts.DELETE_BUDDYS_ROOM_FAILED_TITLE, true)
+               .AddBodyText(BitBuddiesConsts.DELETE_BUDDYES_ROOM_FAILED_MESSAGE);
     }
 
     public void OnCollectCoinsButton()
@@ -172,7 +174,7 @@ public class BuddyHouseInfo : MonoBehaviour
         Dictionary<string, object> scriptData = new Dictionary<string, object>();
         scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
         scriptData.Add("profileId", HouseInfo.profileId);
-        scriptData.Add("summaryFriendData", HouseInfo.summaryFriendData);
+        //scriptData.Add("summaryFriendData", HouseInfo.summaryFriendData);
         BrainCloudManager.Wrapper.ScriptService.RunScript
         (
             BitBuddiesConsts.UPDATE_CHILD_COINS_COLLECTED_SCRIPT_NAME,

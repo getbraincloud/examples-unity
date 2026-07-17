@@ -144,8 +144,4 @@ public class PopUpUI : ContentUIBehaviour
 
         return this;
     }
-
-    public void SetUpInfoPopup(string in_title, string in_body) { }
-
-    public void SetupConfirmPopup(string in_title, string in_body, Action buttonCallback, bool in_enableConfirmButton = true) { }
 }

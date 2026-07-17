@@ -9,26 +9,24 @@ namespace Gameframework
         public const string JSON_DATA = "data";
         public const string JSON_ENTITY_LIST = "entityList";
 
-        //Scene Names
+        // Scene Names
         public const string LOGIN_SCENE_NAME = "LoginScreen";
         public const string GAME_SCENE_NAME = "BuddysRoom";
         public const string PARENT_SCENE_NAME = "ParentMenu";
         public const string LOADING_SCREEN_SCENE_NAME = "LoadingScreen";
 
-        //Script Names
+        // Script Names
         public const string CONSUME_PARENT_COINS_SCRIPT_NAME = "ConsumeCoinsForUser";
         public const string AWARD_COINS_SCRIPT_NAME = "AwardCoinsToUser";
         public const string AWARD_GEMS_SCRIPT_NAME = "AwardGemsToUser";
         public const string AWARD_BLING_TO_CHILD_SCRIPT_NAME = "AwardBlingToChild";
-        public const string INCREASE_XP_FOR_PARENT_SCRIPT_NAME = "IncreaseXPForParent";
         public const string GET_QUEST_INFO_SCRIPT_NAME = "GetQuestInfo";
         public const string CLAIM_QUEST_SCRIPT_NAME = "ClaimQuestReward";
         public const string GET_SHOP_CATALOG_SCRIPT_NAME = "GetParentShopCatalog";
         public const string AWARD_MONEY_SCRIPT_NAME = "AwardMoneyToUser";
         public const string CLAIM_ITEM_SCRIPT_NAME = "ClaimParentShopItem";
 
-
-
+        // Child Scripts
         public const string GET_STATS_SCRIPT_NAME = "child/fetchStats";
         public const string GET_CURRENCIES_SCRIPT_NAME = "child/fetchCurrencies";
         public const string GET_CHILD_ACCOUNTS_SCRIPT_NAME = "child/getChildProfiles";
@@ -52,12 +50,12 @@ namespace Gameframework
 
         public const string JSON_DAILY_LOVE_BOOSTER_ITEM = "dailyLoveBooster";
 
-        //Quest Line names
+        // Quest Line Names
         public const string BITBUDDIES_QUESTLINEID = "bitBuddiesQuestTier";
         public const string GENERAL_QUESTLINEID = "generalQuestTier";
         public const string BITBLING_QUESTLINEID = "bitBlingQuestTier";
 
-        //Stat Names
+        // Stat Names
         public const string PLAYER_STAT_LEVEL_NAME = "Level";
         public const string TRASHED_BUDDIES_STAT_NAME = "trashBuddies";
         public const string BUDDIES_OWNED_STAT_NAME = "bitBuddiesOwned";
@@ -77,10 +75,10 @@ namespace Gameframework
 
         public const string APP_CHILD_ID = "50974";
 
-        //Player Prefs Keys
+        // Player Prefs Keys
         public const string VOLUME_SLIDER_KEY = "volume";
 
-        //Sprite Paths
+        // Sprite Paths
         public const string DEFAULT_SPRITE_PATH_FOR_BUDDY = "BuddySprites/buddy-1";
         public const string GEM_SPRITE_PATH = "RewardIcons/IconGem";
         public const string COIN_SPRITE_PATH = "RewardIcons/IconCoin_Gold";
@@ -91,9 +89,8 @@ namespace Gameframework
         public const string DISABLE_BUTTON_SPRITE_PATH = "Buttons/ButtonWide1_Disabled";
         public const string ENABLE_BUTTON_SPRITE_PATH = "Buttons/ButtonWide1_Green";
 
-
-        //Pop Up messages
-        //Buddys Room
+        // Pop Up Messages
+        // Buddys Room
         public const string GO_BUDDYS_ROOM_TITLE = "Enter ";
         public const string GO_BUDDYS_ROOM_MESSAGE = "Would you like to enter ";
         public const string DELETE_BUDDYS_ROOM_TITLE = "Delete ";
@@ -105,7 +102,7 @@ namespace Gameframework
         public const string DELETE_BUDDYES_ROOM_FAILED_MESSAGE = "There was an error while attempting to delete the requested buddy's room, please try again later";
         public const string DEFAULT_BUDDY_NAME = "MyBuddy";
 
-        //Settings
+        // Settings
         public const string ATTACH_EMAIL_SUCCESS_TITLE = "Attach Email Successful";
         public const string ATTACH_EMAIL_SUCCESS_MESSAGE = "Email address entered is now attached to this account.";
 
@@ -121,11 +118,11 @@ namespace Gameframework
         public const string SOMETHING_WENT_WRONG_TITLE = "Something went wrong";
         public const string SOMETHING_WENT_WRONG_MESSAGE = "Something went wrong, please try again later.";
 
-        //Parent Screen
+        // Parent Screen
         public const string CANT_DELETE_BUDDY_TITLE = "Can't Delete Buddy";
         public const string CANT_DELETE_BUDDY_MESSAGE = "You can't have zero buddies, try again later when you have more than 1 buddy.";
 
-
-        public static readonly Vector2 OFFSET_CURRENCY_BUDDYS_ROOM = new Vector2(-170, 20);
+        // Game Consts
+        public static readonly Vector2 OFFSET_CURRENCY_BUDDYS_ROOM = new(-170, 20);
     }
 }

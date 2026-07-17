@@ -209,11 +209,13 @@ public class ToyManager : SingletonBehaviour<ToyManager>
                     selectedAppChildInfo.buddyLevel = (int)xpData["experienceLevel"];
                     if (xpResult.ContainsKey("nextLevelUpXP"))
                     {
-                        selectedAppChildInfo.nextLevelUp = (int)xpResult["nextLevelUpXP"];
+                        Debug.LogError("[NEED TO UPDATE THIS] - selectedAppChildInfo.nextLevelUp = (int)xpResult[\"nextLevelUpXP\"]");
+                        //selectedAppChildInfo.nextLevelUp = (int)xpResult["nextLevelUpXP"];
                     }
                     if (xpResult.ContainsKey("previousLevelXP"))
                     {
-                        selectedAppChildInfo.previousLevelUp = (int)xpResult["previousLevelXP"];
+                        Debug.LogError("selectedAppChildInfo.previousLevelUp = (int)xpResult[\"previousLevelXP\"]");
+                        //selectedAppChildInfo.previousLevelUp = (int)xpResult["previousLevelXP"];
                     }
 
                     //Check for stats for UI updates
