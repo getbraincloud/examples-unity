@@ -39,6 +39,10 @@ public class GameManager : MonoBehaviour
     private GameOverScreen _gameOverScreenRef;
     private int _startingDefenderCount;
     private int _startingInvaderCount;
+    //Total structures the defender started with. The redesign's match-history cards express
+    //damage as a fraction of the base destroyed, so we need the denominator.
+    private int _startingStructureCount;
+    public int StartingStructureCount => _startingStructureCount;
 
     //Transform parent of structure sets for defender user
     private Transform _defenderStructParent;
@@ -126,7 +130,17 @@ public class GameManager : MonoBehaviour
     }
 
     public StreamInfo InvadedStreamInfo;
-    
+
+    //Redesign: the dashboard's two match-history panels. Both are filled at login from
+    //PlaybackStream reads (initiating = my attacks, target = invasions against me).
+    public List<MatchSummary> RecentAttacks = new List<MatchSummary>();
+    public List<MatchSummary> RecentInvasions = new List<MatchSummary>();
+
+    //Redesign: raw brainCloud user statistics (ReadAllUserStats). Null until read / when no
+    //clashers_* stats are defined in the portal yet - MatchHistoryStats then falls back to the
+    //stream-derived "last N" numbers. Written server-side by the RecordMatchResult cloud script.
+    public System.Collections.Generic.Dictionary<string, object> UserStatistics;
+
     private void Awake()
     {
         InvadedStreamInfo = new StreamInfo();
@@ -235,6 +249,16 @@ public class GameManager : MonoBehaviour
         _isGameActive = true;
         _startingDefenderCount = _defenderTroopCount;
         _startingInvaderCount = _invaderTroopCount;
+        _startingStructureCount = PlaybackStreamManager.Instance.StructuresList.Count;
+
+        //NetworkManager survives the scene load, and StructureKillCount is only ever
+        //incremented (BaseHealthBehavior), so without this it carries over into the next
+        //match - inflating the gold reward and the game-over tally, and pinning the new
+        //match-history damage % at 100%.
+        if (NetworkManager.Instance)
+        {
+            NetworkManager.Instance.StructureKillCount = 0;
+        }
     }
 
     public void GameOver(bool in_didInvaderWin, bool in_didTimeExpire = false)

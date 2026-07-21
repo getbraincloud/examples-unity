@@ -34,6 +34,15 @@ public class NetworkManager : MonoBehaviour
     private string _playbackStreamId;
     private long _incrementRatingAmount = 100;
     private long _decrementRatingAmount = 50;
+    //How many matches to pull for each dashboard history panel. The cards only show the first
+    //few, but My Stats aggregates over the whole window - so this doubles as the sample size
+    //behind the stats panel. See MatchHistoryStats: these are "last N", NOT lifetime totals.
+    private int _recentMatchCount = 50;
+    private const string UNKNOWN_OPPONENT_NAME = "Unknown";
+    //Gold wagered on the current raid. Captured at StartMatch, which runs in the MENU scene:
+    //the price list lives on MenuManager, and MenuManager (unlike GameManager/NetworkManager)
+    //is not DontDestroyOnLoad, so it is gone by the time the match ends in the Game scene.
+    private int _currentMatchStake;
     private bool _dead;
     private bool _shieldActive;
     private bool _didInvadersWin;
@@ -44,6 +53,17 @@ public class NetworkManager : MonoBehaviour
 
     private static string _currencyType = "gold";
     private static int _startingGold = 100000;
+
+    //Fallback only. The real round length is GameSessionManager.RoundDuration (set in the
+    //inspector), but that only exists while the Game scene is loaded - the menu reads streams
+    //without it, so a match recorded before durationSecs was stamped still needs a denominator.
+    private const float DEFAULT_MATCH_LENGTH_SECONDS = 180f;
+
+    private float MatchLengthSeconds()
+    {
+        GameSessionManager session = GameManager.Instance.SessionManager;
+        return session != null ? session.RoundDuration : DEFAULT_MATCH_LENGTH_SECONDS;
+    }
 
     public bool DidInvadersWin
     {
@@ -340,10 +360,19 @@ public class NetworkManager : MonoBehaviour
         _bcWrapper.EntityService.UpdateSingleton(_currencyType, CreateJsonCurrencyEntityData(), CreateACLJson(0), -1);
     }
 
+    //Price of the currently selected invader force. Only valid while the MainMenu scene is
+    //loaded (see _currentMatchStake). Guarded because ArmyDivisionRank has None/Test entries
+    //that have no matching price.
+    private int GetSelectedInvaderPrice()
+    {
+        List<int> prices = MenuManager.Instance.PriceOfInvaders;
+        int index = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+        return index >= 0 && index < prices.Count ? prices[index] : 0;
+    }
+
     public void DecreaseGoldAmountForInvaderSelection()
     {
-        var invaderSelection = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
-        var decrementAmount = MenuManager.Instance.PriceOfInvaders[invaderSelection];
+        var decrementAmount = GetSelectedInvaderPrice();
         GameManager.Instance.CurrentUserInfo.GoldAmount -= decrementAmount;
         MenuManager.Instance.UpdateGoldAmount();
         MenuManager.Instance.ValidateInvaderSelection();
@@ -494,7 +523,7 @@ public class NetworkManager : MonoBehaviour
         _bcWrapper.PlaybackStreamService.GetRecentStreamsForTargetPlayer
         (
             GameManager.Instance.CurrentUserInfo.ProfileId,
-            10,
+            _recentMatchCount,
             OnGetRecentStreams,
             OnFailureCallback
         );
@@ -540,8 +569,11 @@ public class NetworkManager : MonoBehaviour
             GameManager.Instance.InvadedStreamInfo = streamInfo;
         }
 
-        MenuManager.Instance.UpdateMainMenu();
-        MenuManager.Instance.IsLoading = false;
+        //Same response, second reading: the full "Recent Invasions" list for the dashboard.
+        GameManager.Instance.RecentInvasions = ParseRecentStreams(jsonResponse, false);
+
+        //Chain the other half of the history ("My Recent Attacks"), which finishes the login flow.
+        GetRecentAttacks();
     }
 
     private void OnCreatedEntityResponse(string jsonResponse, object cbObject)
@@ -614,7 +646,33 @@ public class NetworkManager : MonoBehaviour
         string summaryData = CreateSummaryData();
         _bcWrapper.PlaybackStreamService.AddEvent(_playbackStreamId, eventData, summaryData, null, OnFailureCallback);
         RecordDefenderSelected((int)GameManager.Instance.DefenderRank);
+        RecordMatchResultToStats(in_didPlayerWin);
         PlayerPrefs.SetString("PlaybackKey", _playbackStreamId);
+    }
+
+    //Redesign: hand the finished raid to the RecordMatchResult cloud script, which writes the
+    //user statistics for BOTH players (see the script header). Attacker-only path - GameCompleted
+    //never runs in playback mode. No-ops harmlessly server-side until the clashers_* stats are
+    //defined in the portal, so it is safe to ship ahead of that step.
+    private void RecordMatchResultToStats(bool in_didAttackerWin)
+    {
+        int startingStructures = GameManager.Instance.StartingStructureCount;
+        float damageFraction = startingStructures > 0
+            ? Mathf.Clamp01((float) _structureKillCount / startingStructures)
+            : 0f;
+
+        UserInfo defender = GameManager.Instance.OpponentUserInfo;
+
+        Dictionary<string, object> scriptData = new Dictionary<string, object>();
+        scriptData.Add("damagePercent", Mathf.Clamp(Mathf.RoundToInt(damageFraction * 100f), 0, 100));
+        scriptData.Add("damageGold", Mathf.RoundToInt(damageFraction * _currentMatchStake));
+        scriptData.Add("durationSecs", MatchLengthSeconds() - timeLeft);
+        scriptData.Add("didAttackerWin", in_didAttackerWin);
+        scriptData.Add("attackerRating", GameManager.Instance.CurrentUserInfo.Rating);
+        scriptData.Add("defenderProfileId", defender != null ? defender.ProfileId : "");
+        scriptData.Add("defenderRank", (int) GameManager.Instance.DefenderRank);
+
+        _bcWrapper.ScriptService.RunScript("RecordMatchResult", JsonWriter.Serialize(scriptData), null, OnFailureCallback);
     }
 
     private void OnAdjustPlayerRating(string jsonResponse, object cbObject)
@@ -672,6 +730,8 @@ public class NetworkManager : MonoBehaviour
 
     public void StartMatch()
     {
+        //Capture the wager now, while MenuManager still exists, for the end-of-match summary.
+        _currentMatchStake = GetSelectedInvaderPrice();
         DecreaseGoldAmountForInvaderSelection();
         if (_shieldActive)
         {
@@ -709,8 +769,160 @@ public class NetworkManager : MonoBehaviour
 
     public void ReadInvasionStream()
     {
-        _bcWrapper.PlaybackStreamService.ReadStream(GameManager.Instance.InvadedStreamInfo.PlaybackStreamID, OnReadStreamSuccess, OnFailureCallback);
+        ReadStreamById(GameManager.Instance.InvadedStreamInfo.PlaybackStreamID);
     }
+
+    //Replay any match by id - used by the "Watch" button on the dashboard's match-history cards.
+    public void ReadStreamById(string in_playbackStreamId)
+    {
+        if (in_playbackStreamId.IsNullOrEmpty())
+        {
+            Debug.LogWarning("No playback stream id supplied, cannot replay this match.");
+            return;
+        }
+        _bcWrapper.PlaybackStreamService.ReadStream(in_playbackStreamId, OnReadStreamSuccess, OnFailureCallback);
+    }
+
+    // -----------------------------
+    // Redesign: dashboard match history
+    // -----------------------------
+
+    /// <summary>
+    /// Re-read both history panels.
+    ///
+    /// The login chain reads the streams once (OnReadMatchMaking -> OnGetRecentStreams), but
+    /// returning from a raid re-loads the MainMenu scene WITHOUT re-authenticating, so without
+    /// this the dashboard would keep showing the history from before the match just played -
+    /// the match you just finished would not appear until the next login.
+    /// </summary>
+    public void RefreshMatchHistory()
+    {
+        if (!IsSessionValid()) return;
+
+        _bcWrapper.PlaybackStreamService.GetRecentStreamsForTargetPlayer
+        (
+            GameManager.Instance.CurrentUserInfo.ProfileId,
+            _recentMatchCount,
+            OnGetRecentStreams,
+            OnFailureCallback
+        );
+    }
+
+    //"My Recent Attacks" - the matches this player initiated.
+    private void GetRecentAttacks()
+    {
+        _bcWrapper.PlaybackStreamService.GetRecentStreamsForInitiatingPlayer
+        (
+            GameManager.Instance.CurrentUserInfo.ProfileId,
+            _recentMatchCount,
+            OnGetRecentAttacks,
+            OnFailureCallback
+        );
+    }
+
+    private void OnGetRecentAttacks(string jsonResponse, object cbObject)
+    {
+        GameManager.Instance.RecentAttacks = ParseRecentStreams(jsonResponse, true);
+
+        //Bind now with the stream-derived numbers, then read the real lifetime statistics -
+        //when they arrive the panel re-binds and overlays them (see MatchHistoryStats).
+        MenuManager.Instance.UpdateMatchHistoryPanels();
+        MenuManager.Instance.UpdateMainMenu();
+        MenuManager.Instance.IsLoading = false;
+
+        ReadUserStatistics();
+    }
+
+    //"My Stats" lifetime totals, written server-side by RecordMatchResult.
+    public void ReadUserStatistics()
+    {
+        _bcWrapper.PlayerStatisticsService.ReadAllUserStats(OnReadUserStatistics, OnFailureCallback);
+    }
+
+    private void OnReadUserStatistics(string jsonResponse, object cbObject)
+    {
+        GameManager.Instance.UserStatistics = null;
+        if (JsonReader.Deserialize(jsonResponse) is Dictionary<string, object> response &&
+            response["data"] is Dictionary<string, object> data &&
+            data["statistics"] is Dictionary<string, object> stats)
+        {
+            GameManager.Instance.UserStatistics = stats;
+        }
+
+        //Re-bind the stats panel with the lifetime overlay applied (no-op if nothing is defined).
+        MenuManager.Instance.UpdateMatchHistoryPanels();
+    }
+
+    /// <summary>
+    /// Turns a GET_RECENT_STREAMS_* response into dashboard cards.
+    ///
+    /// Two things worth knowing:
+    ///  - The profile ids are read off the STREAM (initiatingPlayerId/targetPlayerId) rather than
+    ///    the summary, because they are always present - the summary fields are not.
+    ///  - The summary is overwritten by every AddEvent during a match (see CreateSummaryData),
+    ///    and only becomes the end-game blob on the final event. We therefore only surface
+    ///    streams carrying "stake", which is stamped exclusively by CreateEndGameSummaryData.
+    ///    That skips both in-progress/abandoned matches and matches recorded before this
+    ///    redesign - neither can populate a card without inventing an outcome.
+    /// </summary>
+    private List<MatchSummary> ParseRecentStreams(string jsonResponse, bool in_isAttack)
+    {
+        var matches = new List<MatchSummary>();
+
+        if (JsonReader.Deserialize(jsonResponse) is not Dictionary<string, object> response) return matches;
+        if (response["data"] is not Dictionary<string, object> data) return matches;
+        if (data["streams"] is not Dictionary<string, object>[] streams) return matches;
+
+        foreach (Dictionary<string, object> stream in streams)
+        {
+            if (GetValue(stream, "summary") is not Dictionary<string, object> summary) continue;
+            if (!summary.ContainsKey("stake")) continue;
+
+            var match = new MatchSummary();
+            match.IsAttack = in_isAttack;
+            match.PlaybackStreamId = ToStr(GetValue(stream, "playbackStreamId"));
+            match.OpponentProfileId = ToStr(GetValue(stream, in_isAttack ? "targetPlayerId" : "initiatingPlayerId"));
+            match.OccurredAtUtc = DateTimeOffset.FromUnixTimeMilliseconds(ToLong(GetValue(stream, "createdAt"))).UtcDateTime;
+
+            //The opponent is whichever side of the match we are not.
+            match.OpponentName = ToStr(GetValue(summary, in_isAttack ? "defenderName" : "attackerName"));
+            if (match.OpponentName.IsNullOrEmpty())
+            {
+                match.OpponentName = UNKNOWN_OPPONENT_NAME;
+            }
+            match.OpponentRating = ToInt(GetValue(summary, in_isAttack ? "defenderRating" : "attackerRating"));
+            //...and MY rating is whichever side of the summary we ARE.
+            match.MyRating = ToInt(GetValue(summary, in_isAttack ? "attackerRating" : "defenderRating"));
+            match.DidAttackerWin = GetValue(summary, "didInvadersWin") is bool won && won;
+            //Absent must mean None, not Easy(0) - otherwise matches recorded before defenderRank
+            //was stamped would all be counted against the Line layout in the breach breakdown.
+            match.DefenderRank = summary.ContainsKey("defenderRank")
+                ? (ArmyDivisionRank) ToInt(GetValue(summary, "defenderRank"))
+                : ArmyDivisionRank.None;
+
+            match.Stake = ToInt(GetValue(summary, "stake"));
+            match.DamageGold = ToInt(GetValue(summary, "damageGold"));
+            match.DurationSeconds = summary.ContainsKey("durationSecs")
+                ? ToFloat(GetValue(summary, "durationSecs"))
+                : MatchLengthSeconds() - ToFloat(GetValue(summary, "timeLeft"));
+
+            matches.Add(match);
+        }
+
+        //Newest first, matching the design.
+        matches.Sort((a, b) => b.OccurredAtUtc.CompareTo(a.OccurredAtUtc));
+        return matches;
+    }
+
+    private static object GetValue(Dictionary<string, object> dict, string key)
+        => dict != null && dict.ContainsKey(key) ? dict[key] : null;
+
+    //JsonFx boxes numbers as int/long/double depending on magnitude (the same reason the shield
+    //expiry read below is wrapped in a try/catch), so convert rather than hard-cast.
+    private static string ToStr(object value) => value as string ?? "";
+    private static int ToInt(object value) => value == null ? 0 : Convert.ToInt32(value);
+    private static long ToLong(object value) => value == null ? 0L : Convert.ToInt64(value);
+    private static float ToFloat(object value) => value == null ? 0f : Convert.ToSingle(value);
 
     private void OnReadStreamSuccess(string in_jsonResponse, object cbObject)
     {
@@ -850,6 +1062,39 @@ public class NetworkManager : MonoBehaviour
         summaryData.Add("defenderKillCount", _defenderKillCount);
         summaryData.Add("timeLeft", timeLeft);
         summaryData.Add("didInvadersWin", _didInvadersWin);
+
+        //Redesign: the dashboard's match-history cards are built entirely from this blob, so
+        //stamp BOTH sides of the match into it. The stream is always recorded by the attacker,
+        //but it is read back from both ends (my attacks / invasions against me) - carrying both
+        //identities means neither panel needs a follow-up per-opponent lookup.
+        UserInfo attacker = GameManager.Instance.CurrentUserInfo;
+        UserInfo defender = GameManager.Instance.OpponentUserInfo;
+
+        int stake = _currentMatchStake;
+        //Damage is "how much of the base fell", charged against the stake, so a levelled town
+        //is exactly 100% of stake -> Total Victory / Town Destroyed on the badge legend.
+        int startingStructures = GameManager.Instance.StartingStructureCount;
+        float damageFraction = startingStructures > 0
+            ? Mathf.Clamp01((float) _structureKillCount / startingStructures)
+            : 0f;
+
+        summaryData.Add("attackerName", attacker.Username);
+        summaryData.Add("attackerRating", attacker.Rating);
+        summaryData.Add("attackerProfileId", attacker.ProfileId);
+
+        if (defender != null)
+        {
+            summaryData.Add("defenderName", defender.Username);
+            summaryData.Add("defenderRating", defender.Rating);
+            summaryData.Add("defenderProfileId", defender.ProfileId);
+        }
+
+        summaryData.Add("stake", stake);
+        summaryData.Add("damageGold", Mathf.RoundToInt(damageFraction * stake));
+        summaryData.Add("durationSecs", MatchLengthSeconds() - timeLeft);
+        //Which layout was being defended. Drives the dashboard's "breaches by layout" breakdown.
+        summaryData.Add("defenderRank", (int) GameManager.Instance.DefenderRank);
+
         string value = JsonWriter.Serialize(summaryData);
         return value;
     }
