@@ -39,7 +39,7 @@ public class MouseMerchantItem : ShopItem
         if (_shopInfo.BuyCost > 0)
         {
             PopUpUI.Show("Are you sure?", false)
-                   .AddBodyText($"Buy {_shopInfo.DisplayName} for {_shopInfo.BuyCost} {_shopInfo.BuyCurrency.ToString()}?")
+                   .AddBodyText($"Buy {_shopInfo.DisplayName} for {_shopInfo.BuyCost:N0} {_shopInfo.BuyCurrency}?")
                    .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
                    .AddButton("Confirm", PopUpUI.ButtonColor.Green, OnBuyCallback, GameManager.CanBuyItem(_shopInfo.BuyCurrency, _shopInfo.BuyCost));
         }
@@ -82,11 +82,6 @@ public class MouseMerchantItem : ShopItem
 
     private void OnClaimLoveBoosterSuccess(string jsonResponse)
     {
-        /*
-        {"packetId":4,"responses":[{"data":{"runTimeData":{"hasIncludes":true,"compileTime":23056,"scriptSize":23439,"renderTime":54,"executeTime":99406},
-        "response":{"success":false,"onCooldown":true,"error":"Daily Love Booster is still on cooldown","coolDownUntil":1775157691848,"boosterExpiry":null,
-        "multiplier":2},"success":true,"reasonCode":null},"status":200}]}
-         */
         Dictionary<string, object> response = (Dictionary<string, object>)JsonReader.Deserialize(jsonResponse);
         Dictionary<string, object> data = (Dictionary<string, object>)response["data"];
         Dictionary<string, object> responseData = (Dictionary<string, object>)data["response"];
@@ -175,7 +170,7 @@ public class MouseMerchantItem : ShopItem
             }
 
             PopUpUI.Show($"{appInfo.profileName} Leveled Up")
-                   .AddBodyText($"{appInfo.profileName} leveled up from {levelBefore} to {levelAfter} for {amountSpent} gems");
+                   .AddBodyText($"{appInfo.profileName} leveled up from {levelBefore} to {levelAfter} for {amountSpent:N0} gems");
             GameManager.Instance.UpdateSelectedAppChildrenInfo(appInfo);
             ToyManager.Instance.CheckForUnlockedBenches();
         }
@@ -193,7 +188,7 @@ public class MouseMerchantItem : ShopItem
             GameManager.Instance.SelectedAppChildrenInfo.ownedShopItems.Add(childItemId);
 
             PopUpUI.Show("Item Bought")
-                   .AddBodyText($"{itemName} bought for {childCurrency["amountSpent"]} bitBling");
+                   .AddBodyText($"{itemName} bought for {childCurrency["amountSpent"]:N0} bitBling");
             BuyButton.interactable = false;
             if (statIncremented)
             {
@@ -227,7 +222,7 @@ public class MouseMerchantItem : ShopItem
             GameManager.Instance.SelectedAppChildrenInfo.buddyBling = newBlingBalance;
 
             PopUpUI.Show("bitBling Purchased")
-                   .AddBodyText($"{amountSpent} gems bought for {amountAwarded} bitBling");
+                   .AddBodyText($"{amountSpent:N0} gems bought for {amountAwarded:N0} bitBling");
         }
 
         StateManager.Instance.RefreshScreen();

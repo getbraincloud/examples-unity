@@ -85,7 +85,11 @@ public class ParentMenu : ContentUIBehaviour
     {
         while (true)
         {
-            CheckAllBuddiesCoinEarnings();
+            if (!BrainCloudManager.Instance.IsProcessingRequest)
+            {
+                CheckAllBuddiesCoinEarnings();
+            }
+            
             yield return new WaitForSeconds(checkForCoinsInterval);
         }
     }
@@ -94,7 +98,6 @@ public class ParentMenu : ContentUIBehaviour
     {
         for (int i = 0; i < _listOfBuddies.Count; i++)
         {
-            _listOfBuddies[i].HouseInfo.CheckCoinsEarned();
             _listOfBuddies[i].CheckCoinsButton();
         }
     }

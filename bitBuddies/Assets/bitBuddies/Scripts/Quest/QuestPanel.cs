@@ -61,14 +61,14 @@ public class QuestPanel : MonoBehaviour
             int coinReward = (int)rewards["coins"];
             userInfo.UpdateCoins(coinReward + userInfo.Coins);
             PopUpUI.Show("Quest Rewards")
-                   .AddBodyText($"You have received {coinReward} coins!");
+                   .AddBodyText($"You have received {coinReward:N0} coins!");
         }
         else if (rewards.ContainsKey("gems"))
         {
             int gemReward = (int)rewards["gems"];
             userInfo.UpdateGems(gemReward + userInfo.Gems);
             PopUpUI.Show("Quest Rewards")
-                   .AddBodyText($"You have received {gemReward} gems!");
+                   .AddBodyText($"You have received {gemReward:N0} gems!");
 
         }
         string questLineId = response["questLine"] as string;

@@ -176,6 +176,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     {
         // Quit app
         if (Input.GetKeyDown(KeyCode.Escape) &&
+            !BrainCloudManager.Instance.IsProcessingRequest &&
             FindFirstObjectByType<PopUpUI>() == null &&
             FindFirstObjectByType<LoadingScreen>() == null)
         {

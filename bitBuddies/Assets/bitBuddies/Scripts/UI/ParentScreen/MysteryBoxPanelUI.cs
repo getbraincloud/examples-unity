@@ -142,7 +142,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 
             var data = jsonResponse.Deserialize("data", "response");
 
-            BuddyTypeNameText.text = data.GetJSONObject("newBuddy")?.GetString("name");
+            BuddyTypeNameText.text = data.GetString("newBuddyName");
 
             // At this point the newly created child profile should not have a name yet and thats what we use to determine the new user.
             if (data.GetJSONArray("children") is var children && children != null && children.Length > 0)

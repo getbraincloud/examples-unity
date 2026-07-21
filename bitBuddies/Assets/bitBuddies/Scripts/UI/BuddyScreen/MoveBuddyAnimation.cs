@@ -6,6 +6,8 @@ using Random = UnityEngine.Random;
 
 public class MoveBuddyAnimation : MonoBehaviour
 {
+    private const float MINIMUM_MOVEMENT = 20.0f;
+
     [Header("Movement Settings")]
     public float moveDuration = 0.3f;
 
@@ -14,12 +16,14 @@ public class MoveBuddyAnimation : MonoBehaviour
     public float shakeDuration = 0.2f;
     public float shakeMagnitude = 10f;
 
-    private Vector2 startPosition;
     private bool isRunning = false;
+    private bool isInteracting = false;
+    private Vector2 startPosition;
     private Vector2 _targetPosition;
     private RectTransform _buddySpriteTransform;
 
     private Action OnFinishAnimation;
+
     private void Awake()
     {
         if (_buddySpriteTransform == null)
@@ -31,35 +35,53 @@ public class MoveBuddyAnimation : MonoBehaviour
 
     private void OnDisable()
     {
-        if (isRunning)
-            StopAllCoroutines();
+        ResetAnimation();
     }
+
+    private void ResetAnimation()
+    {
+        if (isRunning)
+        {
+            StopAllCoroutines();
+            OnFinishAnimation = null;
+            isInteracting = false;
+            isRunning = false;
+        }
+    }    
 
     public void MoveBuddyToBench(Vector2 in_targetPosition, Action in_onFinishShaking)
     {
-        if (isRunning) return;
+        if (!isInteracting)
+        {
+            ResetAnimation();
+        }
+
         OnFinishAnimation = in_onFinishShaking;
         _targetPosition = in_targetPosition;
-        if (!isRunning)
-            StartCoroutine(MoveShakeWaitForResponse());
+        StartCoroutine(MoveShakeWaitForResponse());
     }
 
     public void MoveBuddyToPosition(Vector2 in_targetPosition)
     {
-        if (isRunning) return;
-        _targetPosition = in_targetPosition;
+        if (!isInteracting)
+        {
+            ResetAnimation();
+        }
 
-        if (!isRunning)
-            StartCoroutine(MoveToLocation());
+        _targetPosition = in_targetPosition;
+        StartCoroutine(MoveToLocation());
     }
 
     public void MoveBuddyToPosition(Vector2 in_targetPosition, Action in_onFinishAnimation)
     {
-        if (isRunning) return;
+        if (!isInteracting)
+        {
+            ResetAnimation();
+        }
+
         _targetPosition = in_targetPosition;
         OnFinishAnimation = in_onFinishAnimation;
-        if (!isRunning)
-            StartCoroutine(MoveToLocation());
+        StartCoroutine(MoveToLocation());
     }
 
     private IEnumerator MoveShakeWaitForResponse()
@@ -67,7 +89,10 @@ public class MoveBuddyAnimation : MonoBehaviour
         isRunning = true;
         startPosition = _buddySpriteTransform.anchoredPosition;
 
-        yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
+        if (Vector2.Distance(startPosition, _targetPosition) > MINIMUM_MOVEMENT)
+        {
+            yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
+        }
 
         yield return StartCoroutine(Shake(shakeDuration, shakeMagnitude));
 
@@ -88,7 +113,10 @@ public class MoveBuddyAnimation : MonoBehaviour
         // Duration is now driven by speed — faster speed = shorter duration
         var duration = distance / (_moveSpeed * 500f);
 
-        yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, duration));
+        if (distance > MINIMUM_MOVEMENT)
+        {
+            yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, duration));
+        }
 
         if (OnFinishAnimation != null)
         {
@@ -117,6 +145,7 @@ public class MoveBuddyAnimation : MonoBehaviour
 
     private IEnumerator Shake(float duration, float magnitude)
     {
+        isInteracting = true;
         float elapsed = 0f;
         Vector2 original = _buddySpriteTransform.anchoredPosition;
 
@@ -136,6 +165,7 @@ public class MoveBuddyAnimation : MonoBehaviour
         }
 
         _buddySpriteTransform.anchoredPosition = original;
+        isInteracting = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

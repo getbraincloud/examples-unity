@@ -25,7 +25,7 @@ public class ParentShopItem : ShopItem
         else
         {
             PopUpUI.Show("Are you sure?", false)
-                   .AddBodyText($"Buy {_shopInfo.DisplayName} for {_shopInfo.BuyCost} {_shopInfo.BuyCurrency}?")
+                   .AddBodyText($"Buy {_shopInfo.DisplayName} for {_shopInfo.BuyCost:N0} {_shopInfo.BuyCurrency}?")
                    .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
                    .AddButton("Confirm", PopUpUI.ButtonColor.Green, OnBuyCallback, GameManager.CanBuyItem(_shopInfo.BuyCurrency, _shopInfo.BuyCost));
         }

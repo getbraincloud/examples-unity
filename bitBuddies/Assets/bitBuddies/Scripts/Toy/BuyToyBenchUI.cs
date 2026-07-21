@@ -109,7 +109,7 @@ public class BuyToyBenchUI : ContentUIBehaviour
         else
         {
             PopUpUI.Show("Are you sure?", false)
-                   .AddBodyText($"Buy {_toyBenchInfo.BenchId} for {_toyBenchInfo.UnlockCost}?")
+                   .AddBodyText($"Buy {_toyBenchInfo.BenchId} for {_toyBenchInfo.UnlockCost:N0}?")
                    .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
                    .AddButton("Confirm", PopUpUI.ButtonColor.Green, GiveToyToChild);
         }

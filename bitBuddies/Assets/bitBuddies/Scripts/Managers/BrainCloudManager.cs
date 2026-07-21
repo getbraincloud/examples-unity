@@ -406,8 +406,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
     private void ReadChildrenInfo(Dictionary<string, object>[] children)
     {
-        const float HOUR_IN_SECONDS = 3600;
-
         var appChildrenInfos = new List<AppChildrenInfo>();
 
         for (int i = 0; i < children.Length; i++)
@@ -433,11 +431,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                         child.coinPerHour = buddyInfo.GetValue<int>("coinPerHour");
                         child.maxCoinCapacity = buddyInfo.GetValue<int>("maxCoinCapacity");
                         child.lastIdleTimestamp = buddyInfo.GetDateTime("lastIdleTimestamp");
-
-                        TimeSpan timeDifference = DateTime.UtcNow - child.lastIdleTimestamp;
-                        float coinsPerSecond = child.coinPerHour / HOUR_IN_SECONDS;
-                        int coinsEarned = Mathf.FloorToInt(coinsPerSecond * (float)timeDifference.TotalSeconds);
-                        child.coinsEarnedInHolding = coinsEarned >= 0 && coinsEarned < child.maxCoinCapacity ? coinsEarned : child.maxCoinCapacity;
                     }
                     else
                     {

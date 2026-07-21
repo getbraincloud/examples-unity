@@ -102,12 +102,10 @@ public class AppChildrenInfo
     public int buddyLevel { get; set; }
     public int currentXP { get; set; }
     public DateTime lastIdleTimestamp { get; set; }
-    public int coinsEarnedInHolding { get; set; }
-    //Love is only earned through Toy interaction in Buddys Room.
-    //Aka used as current XP for profile. 
-    public int coinsEarnedInLifetime { get; set; }
 
-    private float _hourInSeconds = 3600;
+    // Love is only earned through Toy interaction in Buddys Room.
+    // Aka used as current XP for profile. 
+    public int coinsEarnedInLifetime { get; set; }
 
     public List<string> ownedToys { get; set; } = new List<string>();
     public List<string> ownedShopItems { get; set; }
@@ -120,22 +118,17 @@ public class AppChildrenInfo
     public static int MaxLevel { get; private set; } = int.MinValue;
     public static Dictionary<int, int> LevelUpInfo { get; private set; } = new();
 
-    public void CheckCoinsEarned()
+    public int GetCoinsEarned()
     {
-        TimeSpan timeDifference = DateTime.UtcNow - lastIdleTimestamp;
-        float coinsPerSecond = coinPerHour / _hourInSeconds;
-        int coinsEarned = Mathf.FloorToInt(coinsPerSecond * (float)timeDifference.TotalSeconds);
-        if (coinsEarned > 0)
-        {
-            if (coinsEarned < maxCoinCapacity)
-            {
-                coinsEarnedInHolding = coinsEarned;
-            }
-            else
-            {
-                coinsEarnedInHolding = maxCoinCapacity;
-            }
-        }
+        const float HOURS_IN_SECONDS = 3600.0f;
+        const float MS_IN_SECONDS = 1000.0f;
+
+        float timeDifference = (float)(DateTime.UtcNow - lastIdleTimestamp).TotalMilliseconds / MS_IN_SECONDS;
+        float coinsPerSecond = coinPerHour / HOURS_IN_SECONDS;
+        int coinsEarned = Mathf.FloorToInt(coinsPerSecond * timeDifference);
+
+        return coinsEarned > maxCoinCapacity ? maxCoinCapacity
+                                             : coinsEarned > 0 ? coinsEarned : 0;
     }
 
     public Sprite GetBuddySprite()

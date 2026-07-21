@@ -111,11 +111,8 @@ public class ToyBench : MonoBehaviour
     private void OnBuddyArrivedAtBench()
     {
         var title = "Are you sure?";
-        var body = $"Buy {_toyBenchInfo.DisplayName} for {_toyBenchInfo.UnlockCost}?";
-        if (_toyBenchInfo.UnlockCost == 0)
-        {
-            body = $"Get the {_toyBenchInfo.DisplayName} for free?";
-        }
+        var body = _toyBenchInfo.UnlockCost == 0 ? $"Get the {_toyBenchInfo.DisplayName} for free?"
+                                                 : $"Buy {_toyBenchInfo.DisplayName} for {_toyBenchInfo.UnlockCost:N0}?";
 
         bool canBuyToy = BrainCloudManager.Instance.CurrentUserInfo.Coins >= _toyBenchInfo.UnlockCost;
         if (canBuyToy)
