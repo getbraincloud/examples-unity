@@ -65,9 +65,9 @@ public class RewardPickup : MonoBehaviour
         StopAllCoroutines();
     }
 
-    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount, ToyBench in_toyBench, Vector3 in_targetPosition, string in_entityId, BuddysRoom in_buddysRoom)
+    public void SetUpPickup(CurrencyTypes in_currencyType, int in_rewardAmount, ToyBench in_toyBench, Vector3 in_targetPosition, string in_entityId, BuddysRoom in_buddysRoom, float in_pickupLifetime)
     {
-        _totalDuration = GameManager.Instance.RewardPickupDuration;
+        _totalDuration = in_pickupLifetime;
         _timeBeforeBlinkDuration = _totalDuration * (1f - _blinkThresholdPercent);
         _blinkDuration = _totalDuration * _blinkThresholdPercent;
         _currencyType = in_currencyType;
@@ -82,6 +82,18 @@ public class RewardPickup : MonoBehaviour
 
     public void PickUpCollected()
     {
+        if (_isCollected)
+        {
+            return;
+        }
+        _isCollected = true;
+
+        // Disable immediately so no further OnTriggerEnter2D can land before Destroy.
+        if (_collider != null)
+        {
+            _collider.enabled = false;
+        }
+
         RectTransform target = _buddysRoom.GetCurrencyTextRectTransform(_currencyType);
         StateManager.Instance.PlayCurrencyAnimationLocal
         (
@@ -99,14 +111,20 @@ public class RewardPickup : MonoBehaviour
 
     private IEnumerator PerformBehavior()
     {
-        //Go to target location to land
+        // Go to target location to land
         yield return StartCoroutine(MoveToLocation());
 
-        //Wait to start blinking
+        // Wait to start blinking
         yield return new WaitForSeconds(_timeBeforeBlinkDuration);
 
         _isBlinking = true;
         yield return StartCoroutine(BlinkSequence());
+
+        // Reward expired on the floor without being collected
+        if (!_isCollected)
+        {
+            ToyManager.Instance.OnRewardExpired();
+        }
 
         Destroy(gameObject);
     }

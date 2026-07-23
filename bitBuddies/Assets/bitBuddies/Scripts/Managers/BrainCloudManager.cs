@@ -115,7 +115,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             HandleFailure("Getting Child Accounts Failed", OnFailureCallback)
         );
 
-        string[] propertyNames = new[] { "MysteryBoxInfo", "RewardPickUpLifetime", "ChildAccountMaximum", "BuddyMoveSpeedInfo" };
+        string[] propertyNames = new[] { "MysteryBoxInfo", "ChildAccountMaximum", "BuddyMoveSpeedInfo" };
         Wrapper.GlobalAppService.ReadSelectedProperties
         (
             propertyNames,
@@ -173,20 +173,6 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
             listOfBoxInfo.Add(boxInfo);
         }
         GameManager.Instance.MysteryBoxes = listOfBoxInfo;
-
-        var rewardPickUpLifetimeObj = data["RewardPickUpLifetime"] as Dictionary<string, object>;
-        if (float.TryParse((string)rewardPickUpLifetimeObj["value"], out float value))
-        {
-            GameManager.Instance.RewardPickupDuration = value;
-        }
-        else if (double.TryParse((string)rewardPickUpLifetimeObj["value"], out double value2))
-        {
-            GameManager.Instance.RewardPickupDuration = (float)value2;
-        }
-        else
-        {
-            GameManager.Instance.RewardPickupDuration = 20;
-        }
 
         var childAccountMaxObj = data["ChildAccountMaximum"] as Dictionary<string, object>;
         if (int.TryParse((string)childAccountMaxObj["value"], out int value3))
@@ -423,6 +409,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     // Get Buddy Info
                     if (data.GetJSONObject("buddyInfo") is var buddyInfo && buddyInfo != null && buddyInfo.Count > 0)
                     {
+                        child.buddyType = buddyInfo.GetString("name");
                         child.buddyLevel = buddyInfo.GetValue<int>("buddyLevel");
                         child.currentXP = buddyInfo.GetValue<int>("currentXP");
                         child.rarity = buddyInfo.GetValue<Rarity>("rarity");

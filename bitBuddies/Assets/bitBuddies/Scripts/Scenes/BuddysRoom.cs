@@ -180,6 +180,12 @@ public class BuddysRoom : ContentUIBehaviour
 
     private void GoToParentMenu()
     {
+        // Save any pickups before we leave the room
+        if (ToyManager.Instance != null)
+        {
+            ToyManager.Instance.FlushPendingRewards();
+        }
+
         StateManager.Instance.GoToParent();
     }
 

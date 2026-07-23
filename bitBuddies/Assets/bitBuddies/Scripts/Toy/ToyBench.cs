@@ -27,18 +27,19 @@ public class ToyBench : MonoBehaviour
     [SerializeField] private Sprite CooldownSprite;
     [SerializeField] private Sprite ReadySprite;
 
-    private int _rewardSpawnNumber; //used to determine how many rewards are spawned in level	
+    private const float PICKUP_DEFAULT_TTL = 30.0f;
+    private const float PICKUP_TTL_SAFETY_BUFFER = 2.5f;
+
+    private int _rewardSpawnNumber; // Used to determine how many rewards are spawned in level
     private Image _readyStatusImage;
     private ToyBenchInfo _toyBenchInfo;
     private Image _toyBenchImage;
     private Vector2 _rewardSpawnRangeX = new Vector2(-440, 440);
     private Vector2 _rewardSpawnRangeY = new Vector2(-125, 125);
     private Button _benchButton;
-    private bool _isEnabled;
     private MoveBuddyAnimation _moveBuddyAnimation;
     private RectTransform _buddyTargetPosition;
     private int _buddyTargetPositionOffsetY = 300;
-    private float _currentCooldown;
     private BuddysRoom _buddysRoom;
 
     private void Awake()
@@ -147,10 +148,14 @@ public class ToyBench : MonoBehaviour
     private void RequestConsumeToy()
     {
         _benchButton.interactable = false;
-        var scriptData = new Dictionary<string, object>();
-        scriptData.Add("toyId", BenchId);
-        scriptData.Add("childProfileId", GameManager.Instance.SelectedAppChildrenInfo.profileId);
-        scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
+
+        var scriptData = new Dictionary<string, object>
+        {
+            { "toyId", BenchId },
+            { "childProfileId", GameManager.Instance.SelectedAppChildrenInfo.profileId },
+            { "childAppId", BitBuddiesConsts.APP_CHILD_ID }
+        };
+
         BrainCloudManager.Wrapper.ScriptService.RunScript
         (
             BitBuddiesConsts.CONSUME_TOY_SCRIPT_NAME,
@@ -165,6 +170,8 @@ public class ToyBench : MonoBehaviour
         _rewardSpawnNumber = 0;
         var data = jsonResponse.Deserialize("data");
         var entityId = "";
+        
+        float pickupLifetime = PICKUP_DEFAULT_TTL; // Fallback lifetime if the drop doesn't provide a TTL.
         if (data.TryGetValue("response", out object response))
         {
             var responseDict = response as Dictionary<string, object>;
@@ -174,14 +181,19 @@ public class ToyBench : MonoBehaviour
             _toyBenchInfo.BuddyBlingRewardAmount = (int)dropInfo["blingPayout"];
             _toyBenchInfo.Cooldown = (int)dropInfo["cooldown"];
             entityId = dropInfo["entityId"] as string;
-            ToyManager.Instance.SetRewardEntityId(entityId);
+
+            long entityTtlMs = dropInfo.GetValue<long>("entityTTL");
+            if (entityTtlMs > 0)
+            {
+                pickupLifetime = Mathf.Max(entityTtlMs / 1000f - PICKUP_TTL_SAFETY_BUFFER, 1f);
+            }
         }
 
-        SpawnReward(CurrencyTypes.Coins, _toyBenchInfo.CoinRewardAmount, _toyBenchInfo.CoinSpawnAmount, entityId);
+        SpawnReward(CurrencyTypes.Coins, _toyBenchInfo.CoinRewardAmount, _toyBenchInfo.CoinSpawnAmount, entityId, pickupLifetime);
 
-        SpawnReward(CurrencyTypes.Love, _toyBenchInfo.LoveRewardAmount, _toyBenchInfo.LoveSpawnAmount, entityId);
+        SpawnReward(CurrencyTypes.Love, _toyBenchInfo.LoveRewardAmount, _toyBenchInfo.LoveSpawnAmount, entityId, pickupLifetime);
 
-        SpawnReward(CurrencyTypes.BuddyBling, _toyBenchInfo.BuddyBlingRewardAmount, _toyBenchInfo.BuddyBlingSpawnAmount, entityId);
+        SpawnReward(CurrencyTypes.BuddyBling, _toyBenchInfo.BuddyBlingRewardAmount, _toyBenchInfo.BuddyBlingSpawnAmount, entityId, pickupLifetime);
         ToyManager.Instance.IncrementRewardSpawnCount(_rewardSpawnNumber);
 
         if (_toyBenchInfo.Cooldown > 0)
@@ -201,11 +213,11 @@ public class ToyBench : MonoBehaviour
         _benchButton.interactable = true;
     }
 
-    private void SpawnReward(CurrencyTypes in_currencyType, int in_rewardValue, int in_rewardSpawnNumber, string in_entityId)
+    private void SpawnReward(CurrencyTypes in_currencyType, int in_rewardValue, int in_rewardSpawnNumber, string in_entityId, float in_pickupLifetime)
     {
         for (int i = 0; i < in_rewardSpawnNumber; ++i)
         {
-            Vector2 spawnPos = new Vector2(
+            var spawnPos = new Vector2(
                 Random.Range(_rewardSpawnRangeX.x, _rewardSpawnRangeX.y),
                 Random.Range(_rewardSpawnRangeY.x, _rewardSpawnRangeY.y));
             var reward = Instantiate(RewardPickupPrefab, RewardSpawnPoint);
@@ -220,7 +232,7 @@ public class ToyBench : MonoBehaviour
             {
                 rewardValue = in_rewardValue;
             }
-            reward.SetUpPickup(in_currencyType, rewardValue, this, spawnPos, in_entityId, _buddysRoom);
+            reward.SetUpPickup(in_currencyType, rewardValue, this, spawnPos, in_entityId, _buddysRoom, in_pickupLifetime);
         }
         _rewardSpawnNumber += in_rewardSpawnNumber;
     }

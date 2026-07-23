@@ -122,6 +122,17 @@ namespace Gameframework
         public const string CANT_DELETE_BUDDY_TITLE = "Can't Delete Buddy";
         public const string CANT_DELETE_BUDDY_MESSAGE = "You can't have zero buddies, try again later when you have more than 1 buddy.";
 
+        // Screen Titles
+        public const string LIST_BOXES_TEXT_TITLE = "Pick a mystery box";
+        public const string OPEN_BOX_TEXT_TITLE = "Open your Mystery Box";
+        public const string NEW_BUDDY_TEXT_TITLE = "New bitBuddy!";
+
+        // Buddy Info
+        public const string COIN_PAYOUT_TEXT = "Coin Payouts ";
+        public const string COIN_GAIN_TEXT = "Idle Coin Gains ";
+        public const string COIN_PER_HOUR_TEXT = "/hr";
+        public const string COIN_CAPACITY_TEXT = "Idle Coins Capacity ";
+
         // Game Consts
         public static readonly Vector2 OFFSET_CURRENCY_BUDDYS_ROOM = new(-170, 20);
     }

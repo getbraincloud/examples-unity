@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class StatsScreen : PopUpUI
+public class StatsScreen : MonoBehaviour
 {
     [SerializeField] private TMP_Text _loveEarnedText;
     [SerializeField] private TMP_Text _coinsEarnedText;

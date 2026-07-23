@@ -25,6 +25,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     [SerializeField] private Button OpenBoxButton;	// for page 2
     [SerializeField] private List<GameObject> _mysteryScreens;   //0 = selection, 1 = open box, 2 = name buddy,display stats etc
 
+    [Header("Buddy Info")]
     [SerializeField] private TMP_Text CoinMultiplierText;
     [SerializeField] private TMP_Text CoinPerHourText;
     [SerializeField] private TMP_Text CoinCapacityText;
@@ -45,16 +46,6 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     private RectTransform _rectTransform;
     private bool _receivedResponse;
 
-    //Screen Titles
-    private const string LIST_BOXES_TEXT_TITLE = "Pick a mystery box";
-    private const string OPEN_BOX_TEXT_TITLE = "Open your Mystery Box";
-    private const string NEW_BUDDY_TEXT_TITLE = "New bitBuddy!";
-
-    //screen 3 text presets
-    private const string COIN_PAYOUT_TEXT = "Coin Payouts ";
-    private const string COIN_GAIN_TEXT = "Idle Coin Gains ";
-    private const string COIN_PER_HOUR_TEXT = "/hr";
-    private const string COIN_CAPACITY_TEXT = "Idle Coins Capacity ";
     private bool isOpeningBox = false;
 
     protected override void Awake()
@@ -72,7 +63,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
         _rectTransform = OpenBoxButton.GetComponent<RectTransform>();
         _parentMenu = FindAnyObjectByType<ParentMenu>();
         _mysteryScreens[0].SetActive(true);
-        TitleText.text = LIST_BOXES_TEXT_TITLE;
+        TitleText.text = BitBuddiesConsts.LIST_BOXES_TEXT_TITLE;
         _screenIndex = 0;
         OpenBoxButton.onClick.AddListener(OnOpenBox);
         CloseButton.onClick.AddListener(OnCloseButton);
@@ -87,13 +78,14 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 
     private void OnOpenBox()
     {
-        //Open another screen where we Animate the box opening
+        // Open another screen where we Animate the box opening
         // After box is opened, we show another screen where the user 
         // picks the name of buddy
-
         if (isOpeningBox) return;
+
         isOpeningBox = true;
         _receivedResponse = false;
+
         string scriptName = "";
         switch (_mysteryBoxInfo.RarityEnum)
         {
@@ -114,10 +106,11 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
                 break;
         }
 
-        Dictionary<string, object> scriptData = new Dictionary<string, object>
+        var scriptData = new Dictionary<string, object>
         {
-            {"childAppId", BitBuddiesConsts.APP_CHILD_ID}
+            { "childAppId", BitBuddiesConsts.APP_CHILD_ID }
         };
+
         BrainCloudManager.Wrapper.ScriptService.RunScript
         (
             scriptName,
@@ -125,6 +118,8 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
             BrainCloudManager.HandleSuccess("Award new buddy Success", OnGetLootboxInfo),
             BrainCloudManager.HandleFailure("Award new buddy Failure", OnFailureCallback)
         );
+
+        BrainCloudManager.Instance.LevelUpParent(); // This is also where the Parent gains Pink Stars
 
         StartCoroutine(Shake());
     }
@@ -142,8 +137,6 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 
             var data = jsonResponse.Deserialize("data", "response");
 
-            BuddyTypeNameText.text = data.GetString("newBuddyName");
-
             // At this point the newly created child profile should not have a name yet and thats what we use to determine the new user.
             if (data.GetJSONArray("children") is var children && children != null && children.Length > 0)
             {
@@ -154,14 +147,17 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
                     {
                         _parentMenu.NewAppChildrenInfo.profileId = child.GetString("profileId");
 
-                        var buddyInfo = child.GetJSONObject("buddyInfo");
+                        var buddyInfo = child.GetJSONObject("data").GetJSONObject("buddyInfo");
 
+                        _parentMenu.NewAppChildrenInfo.buddyType = buddyInfo.GetString("name");
                         _parentMenu.NewAppChildrenInfo.rarity = buddyInfo.GetValue<Rarity>("rarity");
                         _parentMenu.NewAppChildrenInfo.coinPerHour = buddyInfo.GetValue<int>("coinPerHour");
                         _parentMenu.NewAppChildrenInfo.maxCoinCapacity = buddyInfo.GetValue<int>("maxCoinCapacity");
                         _parentMenu.NewAppChildrenInfo.buddySpritePath = buddyInfo.GetString("buddySpritePath") is string path && !string.IsNullOrWhiteSpace(path) ? path : BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY;
                         _parentMenu.NewAppChildrenInfo.coinMultiplier = buddyInfo.GetValue<double>("coinMultiplier") is double mult && mult > 0.0 ? (float)mult : 1.0f;
                         _parentMenu.NewAppChildrenInfo.lastIdleTimestamp = buddyInfo.GetDateTime("lastIdleTimestamp");
+
+                        BuddyTypeNameText.text = _parentMenu.NewAppChildrenInfo.buddyType;
 
                         SetupBuddyDataDisplay();
                         break;
@@ -215,11 +211,11 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
             _mysteryScreens[_screenIndex].SetActive(true);
             if (_screenIndex == 1)
             {
-                TitleText.text = OPEN_BOX_TEXT_TITLE;
+                TitleText.text = BitBuddiesConsts.OPEN_BOX_TEXT_TITLE;
             }
             else
             {
-                TitleText.text = NEW_BUDDY_TEXT_TITLE;
+                TitleText.text = BitBuddiesConsts.NEW_BUDDY_TEXT_TITLE;
             }
         }
         else
@@ -233,10 +229,10 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
         if (NameBuddyInput.text.IsNullOrEmpty())
         {
             _buddyName = BitBuddiesConsts.DEFAULT_BUDDY_NAME + UnityEngine.Random.Range(1, 1000);
-            PopUpUI.Show("Name is empty", false)
-               .AddBodyText($"Are you sure you want to give your buddy a generated name? ({_buddyName})")
-               .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
-               .AddButton("Confirm", PopUpUI.ButtonColor.Green, OnConfirmEmptyName);
+            PopUpUI.Show("Name is Empty", false)
+                   .AddBodyText($"Are you sure you want to give your buddy a generated name? ({_buddyName})")
+                   .AddButton("Cancel", PopUpUI.ButtonColor.Blue, null)
+                   .AddButton("Confirm", PopUpUI.ButtonColor.Green, OnConfirmEmptyName);
             return;
         }
 
@@ -259,10 +255,10 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     private void SetupBuddyDataDisplay()
     {
         var childAppInfo = _parentMenu.NewAppChildrenInfo;
-        CoinMultiplierText.text = COIN_PAYOUT_TEXT + childAppInfo.coinMultiplier + "x";
-        CoinPerHourText.text = COIN_GAIN_TEXT + childAppInfo.coinPerHour + COIN_PER_HOUR_TEXT;
-        CoinCapacityText.text = COIN_CAPACITY_TEXT + childAppInfo.maxCoinCapacity;
-        RarityText.text = FormatCamelCase(childAppInfo.rarity.ToString());
+        CoinMultiplierText.text = BitBuddiesConsts.COIN_PAYOUT_TEXT + childAppInfo.coinMultiplier + "x";
+        CoinPerHourText.text = BitBuddiesConsts.COIN_GAIN_TEXT + childAppInfo.coinPerHour + BitBuddiesConsts.COIN_PER_HOUR_TEXT;
+        CoinCapacityText.text = BitBuddiesConsts.COIN_CAPACITY_TEXT + childAppInfo.maxCoinCapacity;
+        RarityText.text = GameManager.FormatCamelCase(childAppInfo.rarity.ToString());
         //BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
         BuddyImage.sprite = AssetLoader.LoadBuddySprite(childAppInfo.buddySpritePath);
         if (childAppInfo.buddySpritePath.IsNullOrEmpty())
@@ -270,16 +266,4 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
             Debug.LogWarning("Buddy sprite was missing for: " + childAppInfo.profileName + " child");
         }
     }
-
-    private string FormatCamelCase(string input)
-    {
-        if (string.IsNullOrEmpty(input)) return input;
-
-        // Insert a space before each uppercase letter (except the first)
-        string result = System.Text.RegularExpressions.Regex.Replace(input, "(?<!^)([A-Z])", " $1");
-
-        // Capitalize the first letter
-        return char.ToUpper(result[0]) + result.Substring(1);
-    }
-
 }

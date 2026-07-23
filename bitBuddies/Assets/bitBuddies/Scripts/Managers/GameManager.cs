@@ -49,19 +49,6 @@ public class GameManager : SingletonBehaviour<GameManager>
         set => _xpAcquiredAmount = value;
     }
 
-    private float _rewardPickupDuration;
-    public float RewardPickupDuration
-    {
-        get => _rewardPickupDuration;
-        set
-        {
-            if (value > 0)
-                _rewardPickupDuration = value;
-            else
-                _rewardPickupDuration = 10f;
-        }
-    }
-
     private int _childCountMaximum;
     public int ChildCountMaximum
     {
@@ -345,5 +332,16 @@ public class GameManager : SingletonBehaviour<GameManager>
             default:
                 return Resources.Load<Sprite>(BitBuddiesConsts.COIN_SPRITE_PATH);
         }
+    }
+
+    public static string FormatCamelCase(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        // Insert a space before each uppercase letter (except the first)
+        string result = System.Text.RegularExpressions.Regex.Replace(input, "(?<!^)([A-Z])", " $1");
+
+        // Capitalize the first letter
+        return char.ToUpper(result[0]) + result.Substring(1);
     }
 }

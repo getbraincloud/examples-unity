@@ -93,6 +93,7 @@ public class AppChildrenInfo
 {
     public string profileName { get; set; }
     public string profileId { get; set; }
+    public string buddyType { get; set; }
     public int buddyBling { get; set; }
     public float coinMultiplier { get; set; }
     public int coinPerHour { get; set; }
@@ -173,5 +174,15 @@ public class AppChildrenInfo
     {
         int next = buddyLevel + 1;
         return next > MaxLevel ? 0 : LevelUpInfo[next];
+    }
+
+    public void PredictLevelFromXP()
+    {
+        while (buddyLevel < MaxLevel &&
+               LevelUpInfo.ContainsKey(buddyLevel + 1) &&
+               currentXP >= LevelUpInfo[buddyLevel + 1])
+        {
+            buddyLevel++;
+        }
     }
 }

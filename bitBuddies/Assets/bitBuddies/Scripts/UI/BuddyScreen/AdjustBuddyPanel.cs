@@ -11,10 +11,18 @@ public class AdjustBuddyPanel : MonoBehaviour
     [SerializeField] private Button EnableInputFieldButton;
     [SerializeField] private Button DoneButton;
     [SerializeField] private Button ExitButton;
+
+    [Header("Buddy Info")]
+    [SerializeField] private TMP_Text CoinMultiplierText;
+    [SerializeField] private TMP_Text CoinPerHourText;
+    [SerializeField] private TMP_Text CoinCapacityText;
+    [SerializeField] private TMP_Text RarityText;
+    [SerializeField] private TMP_Text BuddyTypeNameText;
     [SerializeField] private Image BuddySprite;
 
     private TextMeshProUGUI _buddyPlaceholderText;
     private AppChildrenInfo _appChildrenInfo;
+
     private void Awake()
     {
         _appChildrenInfo = GameManager.Instance.SelectedAppChildrenInfo;
@@ -29,8 +37,12 @@ public class AdjustBuddyPanel : MonoBehaviour
         _buddyPlaceholderText.text = _appChildrenInfo.profileName;
         DoneButton.gameObject.SetActive(false);
 
+        CoinMultiplierText.text = BitBuddiesConsts.COIN_PAYOUT_TEXT + _appChildrenInfo.coinMultiplier + "x";
+        CoinPerHourText.text = BitBuddiesConsts.COIN_GAIN_TEXT + _appChildrenInfo.coinPerHour + BitBuddiesConsts.COIN_PER_HOUR_TEXT;
+        CoinCapacityText.text = BitBuddiesConsts.COIN_CAPACITY_TEXT + _appChildrenInfo.maxCoinCapacity;
+        RarityText.text = GameManager.FormatCamelCase(_appChildrenInfo.rarity.ToString());
+        BuddyTypeNameText.text = _appChildrenInfo.buddyType;
         BuddySprite.sprite = _appChildrenInfo.GetBuddySprite();
-
     }
 
     private void OnDisable()
@@ -55,7 +67,7 @@ public class AdjustBuddyPanel : MonoBehaviour
 
         PopUpUI.Show("Are you sure?", false)
                .AddBodyText($"Are you sure you want to change {_appChildrenInfo.profileName} to {BuddyInputField.text}?")
-               .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
+               .AddButton("Cancel", PopUpUI.ButtonColor.Blue, null)
                .AddButton("Confirm", PopUpUI.ButtonColor.Green, OnConfirm);
 
         BuddyInputField.interactable = false;
@@ -64,11 +76,14 @@ public class AdjustBuddyPanel : MonoBehaviour
 
     private void OnConfirm()
     {
-        //Update brainCloud with new name
-        Dictionary<string, object> scriptData = new Dictionary<string, object>();
-        scriptData.Add("childAppId", BitBuddiesConsts.APP_CHILD_ID);
-        scriptData.Add("profileId", _appChildrenInfo.profileId);
-        scriptData.Add("newName", BuddyInputField.text);
+        // Update brainCloud with new name
+        var scriptData = new Dictionary<string, object>
+        {
+            { "childAppId", BitBuddiesConsts.APP_CHILD_ID },
+            { "profileId", _appChildrenInfo.profileId },
+            { "newName", BuddyInputField.text }
+        };
+
         BrainCloudManager.Wrapper.ScriptService.RunScript
         (
             BitBuddiesConsts.UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME,

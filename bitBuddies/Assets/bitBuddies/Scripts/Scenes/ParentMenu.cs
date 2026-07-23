@@ -28,15 +28,14 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private Button OpenParentShopButton;
     [SerializeField] private Image FreebieIcon;
 
-    private float textGoldSpawnOffset = 40f;
-    private float textLevelSpawnOffset = -300f;
-
-    //Debug Buttons
+    [Header("Debug")]
     [SerializeField] private Button IncreaseCoinsButton;
     [SerializeField] private Button IncreaseGemsButton;
     [SerializeField] private Button IncreaseLevelButton;
     [SerializeField] private GameObject DebugButtonGroup;
 
+    private float textGoldSpawnOffset = 40f;
+    private float textLevelSpawnOffset = -300f;
     private bool isWaitingForResponse = false;
     private float checkForCoinsInterval = 60;
     private List<AppChildrenInfo> _appChildrenInfos;
