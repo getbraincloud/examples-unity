@@ -38,6 +38,7 @@ public class SpawnController : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        UpdateCooldownUI();
         if (Input.GetButtonDown("Fire1") && _timer < Time.realtimeSinceStartup)
         {
             if (GameManager.Instance.IsInPlaybackMode) return;
@@ -71,11 +72,19 @@ public class SpawnController : MonoBehaviour
         }
     }
 
+    // Drives the radial deploy-cooldown overlay on every troop button (cooldown is global).
+    private void UpdateCooldownUI()
+    {
+        float remaining = _timer > Time.realtimeSinceStartup ? (_timer - Time.realtimeSinceStartup) / _cooldown : 0f;
+        for (int i = 0; i < troopSelectorList.Count; i++)
+            if (troopSelectorList[i] != null) troopSelectorList[i].SetCooldown(remaining);
+    }
+
     public void SetUpInvaders()
     {
         GameManager.Instance.InvaderTroopCount = 0;
         //Get our troop data that we can summon
-        troopSelectorList = FindObjectsOfType<SummonSelector>().ToList();
+        troopSelectorList = FindObjectsByType<SummonSelector>(FindObjectsSortMode.InstanceID).ToList();
         List<SpawnInfo> spawnList = GameManager.Instance.InvaderSpawnInfo;
         if (spawnList == null)
         {

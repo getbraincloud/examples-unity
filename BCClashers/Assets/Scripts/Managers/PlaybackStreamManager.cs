@@ -42,7 +42,7 @@ public class PlaybackStreamManager : MonoBehaviour
             Destroy(gameObject);
         }
         
-        _spawnController = FindObjectOfType<SpawnController>();
+        _spawnController = FindFirstObjectByType<SpawnController>();
         _invaderSpawnData = _spawnController.SpawnData;
     }
 

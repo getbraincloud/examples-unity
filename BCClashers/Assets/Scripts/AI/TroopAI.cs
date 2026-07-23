@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using BCClashers.Redesign;
 public enum TroopStates {Idle, Move, Attack}
 public enum EnemyTypes {Grunt, Soldier, Shooter}
 
@@ -21,6 +22,12 @@ public class TroopAI : BaseHealthBehavior
     public LayerMask DefenderMask;
     
     private int _hitBackForce = 1000;
+
+    // Code-driven melee damage (reliable; the animation moves only the visual, and a stopped
+    // attacker's rigidbody sleeps so trigger-based damage is unreliable).
+    private int _meleeDamage = 10;
+    private float _meleeInterval = 0.6f;
+    private float _meleeTimer;
     
     //Checks every 10 frames for a new target
     private int _searchTargetInterval = 5;
@@ -50,12 +57,15 @@ public class TroopAI : BaseHealthBehavior
     private NavMeshAgent _navMeshAgent;
     
     private static readonly int IsAttacking = Animator.StringToHash("isAttacking");
+    private static readonly int IsMoving = Animator.StringToHash("isMoving");
     private const string _nonTargetTag = "NonTarget";
     
     private GameObject _target;
 
     private readonly int INVADER_COLLISION_LAYER = 6;
     private readonly int DEFENDER_COLLISION_LAYER = 7;
+    private readonly Color INVADER_TEAM_COLOR = new Color(0.00f, 0.68f, 1.00f);
+    private readonly Color DEFENDER_TEAM_COLOR = new Color(1.00f, 0.35f, 0.30f);
     
     public GameObject Target { set => _target = value; }
     
@@ -65,7 +75,10 @@ public class TroopAI : BaseHealthBehavior
         _animator = GetComponent<Animator>();
         _collider = GetComponent<BoxCollider>();
         _meleeWeapon = GetComponentInChildren<MeleeWeapon>();
-        _healthBar = GetComponentInChildren<HealthBar>();
+        if (_meleeWeapon) _meleeDamage = _meleeWeapon.DamageAmount;
+        //Search inactive children too: the default lookup skips them, which left _healthBar null on
+        //troops whose bar/canvas wasn't active at Awake, so their bar never tracked damage.
+        _healthBar = GetComponentInChildren<HealthBar>(true);
         _shootScript = GetComponent<ShootProjectiles>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _currentHealth = StartingHealth;
@@ -119,6 +132,7 @@ public class TroopAI : BaseHealthBehavior
             }
             _navMeshAgent.isStopped = false;
             CurrentState = TroopStates.Move;
+            _animator.SetBool(IsMoving, true);
             MoveTroop();
         }
         //Attack !!!!!!!!!!!!!
@@ -126,10 +140,18 @@ public class TroopAI : BaseHealthBehavior
         {
             CurrentState = TroopStates.Attack;
             _navMeshAgent.isStopped = true;
+            _animator.SetBool(IsMoving, false);
             RotateToTarget();
             if (EnemyType is EnemyTypes.Grunt or EnemyTypes.Soldier)
             {
-                PlayAttackAnimation(); 
+                PlayAttackAnimation();
+                _meleeTimer -= Time.fixedDeltaTime;
+                if (!IsInPlaybackMode && _meleeTimer <= 0f && _target != null)
+                {
+                    var dmg = _target.GetComponent<BaseHealthBehavior>();
+                    if (dmg != null) dmg.Damage(_meleeDamage);
+                    _meleeTimer = _meleeInterval;
+                }
             }
             else if (IsFacingObject())
             {
@@ -140,6 +162,7 @@ public class TroopAI : BaseHealthBehavior
         {
             CurrentState = TroopStates.Idle;
             _navMeshAgent.isStopped = true;
+            _animator.SetBool(IsMoving, false);
             PlayIdleAnimation();
         }
     }
@@ -212,6 +235,8 @@ public class TroopAI : BaseHealthBehavior
     {
         GameManager.Instance.Troops.Add(this);
         TeamID = in_teamID;
+        var painter = GetComponentInChildren<BotTeamPainter>(true);
+        if (painter) painter.Apply(in_teamID == 1);
         if (in_teamID == 0)
         {
             //Invaders
@@ -227,7 +252,7 @@ public class TroopAI : BaseHealthBehavior
             }
             //6 = Invader Layer, 7 = Defender Layer
             gameObject.layer = INVADER_COLLISION_LAYER;
-            _healthBar.AssignTeamColor(Color.blue);
+            _healthBar.AssignTeamColor(INVADER_TEAM_COLOR);
         }
         else
         {
@@ -243,7 +268,7 @@ public class TroopAI : BaseHealthBehavior
             }
             //6 = Invader Layer, 7 = Defender Layer
             gameObject.layer = DEFENDER_COLLISION_LAYER;
-            _healthBar.AssignTeamColor(Color.red);
+            _healthBar.AssignTeamColor(DEFENDER_TEAM_COLOR);
         }
     }
 
