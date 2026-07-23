@@ -1,0 +1,262 @@
+"use strict";
+
+
+function main() {
+
+  var storeId = data.storeId;
+
+  var itemCatalogProxy = bridge.getItemCatalogServiceProxy();
+  var userItemsProxy   = bridge.getUserItemsServiceProxy();
+  var appStoreProxy    = bridge.getAppStoreServiceProxy();
+  var playerStateProxy = bridge.getPlayerStateServiceProxy();
+
+  // ── 1. Fetch ALL item catalog entries (paginated), keep only purchasable ones ──
+  var allCatalogItems = [];
+  var pageOffset = 0;
+  var hasMore = true;
+
+  while (hasMore) {
+    var catalogContext = {
+      "pagination":    { "rowsPerPage": 50, "pageNumber": pageOffset + 1 },
+      "searchCriteria": {},
+      "sortCriteria":  {}
+    };
+
+    var catalogResult = itemCatalogProxy.getCatalogItemsPage(catalogContext);
+
+    if (catalogResult.status !== 200) {
+      return {
+        "error":  "Failed to fetch item catalog",
+        "status": catalogResult.status,
+        "page":   pageOffset
+      };
+    }
+
+    var pageItems = catalogResult.data.results.items || [];
+    for (var i = 0; i < pageItems.length; i++) {
+      var item = pageItems[i];
+      // Only include items that have at least one buyPrice entry
+      var buyPrice = item.buyPrice;
+      var isPurchasable = false;
+      if (buyPrice) {
+        var keys = Object.keys(buyPrice);
+        if (keys.length > 0) {
+          isPurchasable = true;
+        }
+      }
+      if (isPurchasable) {
+        allCatalogItems.push(item);
+      }
+    }
+
+    hasMore = catalogResult.data.results.moreAfter === true;
+    pageOffset++;
+  }
+
+  // ── 1b. Fetch eligible promotions ─────────────────────────────────────────
+  var promotions = [];
+  var promoResult = appStoreProxy.getEligiblePromotions();
+
+  if (promoResult.status === 200) {
+    promotions = promoResult.data.promotions || [];
+  }
+
+  // Build a lookup map: defId -> promotional buyPrice
+  // Each promotion has an "items" object keyed by defId, e.g.:
+  //   "items": {
+  //       "bundle_stars_200": {
+  //           "defId": "bundle_stars_200",
+  //           "buyPrice": { "Coins": 10 }
+  //       }
+  //   }
+  var promoPriceMap = {};
+  for (var p = 0; p < promotions.length; p++) {
+    var promo = promotions[p];
+    if (promo.items) {
+      var promoDefIds = Object.keys(promo.items);
+      for (var d = 0; d < promoDefIds.length; d++) {
+        var defId = promoDefIds[d];
+        var promoItem = promo.items[defId];
+        if (promoItem.buyPrice) {
+          // If multiple promotions target the same item, last one wins
+          promoPriceMap[defId] = promoItem.buyPrice;
+        }
+      }
+    }
+  }
+
+  // brainCloud's promotion "purchased" counter only auto-increments for cash products
+  // verified through VerifyPurchase (the promotionId travels in the purchase payload).
+  // Items bought with virtual currency via UserItemsService/purchaseUserItem never
+  // notify the promotion, so getEligiblePromotions keeps reporting them as eligible
+  // forever. We track one-time redemption of these promos ourselves via a per-defId
+  // player attribute (see BuyItem.ccjs / BuyAndOpenBundle.ccjs) and strip any promo
+  // the user has already redeemed out of the price map here.
+  var attrResult = playerStateProxy.getAttributes();
+  var attributes = (attrResult.status === 200 && attrResult.data && attrResult.data.attributes)
+    ? attrResult.data.attributes
+    : {};
+
+  var promoDefIds = Object.keys(promoPriceMap);
+  for (var pd = 0; pd < promoDefIds.length; pd++) {
+    var promoDefId = promoDefIds[pd];
+    if (attributes["promoRedeemed_" + promoDefId] === "true") {
+      delete promoPriceMap[promoDefId];
+    }
+  }
+
+  // ── 1c. Apply promotional pricing to catalog items ────────────────────────
+  for (var j = 0; j < allCatalogItems.length; j++) {
+    var catalogItem = allCatalogItems[j];
+    var originalBuyPrice = JSON.parse(JSON.stringify(catalogItem.buyPrice));
+
+    if (promoPriceMap[catalogItem.defId]) {
+      // This item has an active promotion — override buyPrice
+      var promoBuyPrice = JSON.parse(JSON.stringify(promoPriceMap[catalogItem.defId]));
+      promoBuyPrice.isPromotion = true;
+      catalogItem.buyPrice = promoBuyPrice;
+      catalogItem.defaultBuyPrice = originalBuyPrice;
+    } else {
+      // No active promotion for this item
+      catalogItem.buyPrice.isPromotion = false;
+      catalogItem.defaultBuyPrice = originalBuyPrice;
+    }
+  }
+
+  // ── 1d. Build catalog meta lookup: defId → meta ──────────────────────────
+  var catalogMetaByDefId = {};
+  for (var ci = 0; ci < allCatalogItems.length; ci++) {
+    catalogMetaByDefId[allCatalogItems[ci].defId] = allCatalogItems[ci].meta || {};
+  }
+
+  // ── 2. Fetch user inventory to determine owned items ─────────────────────
+  var inventoryByDefId = {};
+  var invPageNum = 1;
+  var invHasMore = true;
+
+  while (invHasMore) {
+    var invContext = {
+      "pagination": { "rowsPerPage": 50, "pageNumber": invPageNum },
+      "searchCriteria": {},
+      "sortCriteria": {}
+    };
+
+    var invResult = userItemsProxy.getUserItemsPage(invContext, true);
+
+    if (invResult.status !== 200) {
+      invHasMore = false;
+      break;
+    }
+
+    var invItems = invResult.data.results.items || [];
+    for (var k = 0; k < invItems.length; k++) {
+      var invItem = invItems[k];
+      var invDefId = invItem.defId;
+      var invQty = invItem.quantity || 1;
+      inventoryByDefId[invDefId] = (inventoryByDefId[invDefId] || 0) + invQty;
+    }
+
+    invHasMore = invResult.data.results.moreAfter === true;
+    invPageNum++;
+  }
+
+  // ── 2b. Enrich catalog items with inventoryAmount based on ownership ──────
+  for (var m = 0; m < allCatalogItems.length; m++) {
+    var catItem = allCatalogItems[m];
+
+    // Exempt freebies from ownership tracking
+    if (catItem.category === "Freebies") continue;
+
+    var catMeta = catItem.meta || {};
+    var isUnique = catMeta.unique === true || catMeta.unique === "true";
+
+    // Set inventoryAmount for unique items (so IsOwned = inventoryAmount > 0)
+    // and for stackable items (so IsOwned = inventoryAmount >= maxStackable)
+    if (isUnique || catItem.stackable) {
+      catItem.inventoryAmount = inventoryByDefId[catItem.defId] || 0;
+    }
+  }
+
+  // ── 3. Fetch user-owned Freebie items by specific defIds ──────────────────
+  var freebiesContext = {
+    "pagination": { "rowsPerPage": 50, "pageNumber": 1 },
+    "searchCriteria": {
+      "defId": { "$in": ["Freebie_Coins", "Freebie_Gems", "Freebie_Stars"] }
+    },
+    "sortCriteria": {}
+  };
+
+  var freebiesResult = userItemsProxy.getUserItemsPage(freebiesContext, true);
+
+  if (freebiesResult.status !== 200) {
+    return {
+      "error":  "Failed to fetch user freebie items",
+      "status": freebiesResult.status
+    };
+  }
+
+  var freebieItems = freebiesResult.data.results.items || [];
+
+  // ── 4. Fetch store products for the requested store ───────────────────────
+  var priceInfoCriteria = {
+    "userCurrency": "CAD"
+  };
+
+  var storeProducts = [];
+
+  if(storeId != ""){
+    var storeResult = appStoreProxy.getSalesInventory(storeId, priceInfoCriteria);
+
+    if (storeResult.status !== 200) {
+      return {
+        "error":   "Failed to fetch store inventory",
+        "status":  storeResult.status,
+        "storeId": storeId
+      };
+    }
+
+    storeProducts = storeResult.data.productInventory || [];
+  }
+
+  // ── 4b. Mark store products as owned when all awarded items are unique and already owned ──
+  for (var sp = 0; sp < storeProducts.length; sp++) {
+    var product = storeProducts[sp];
+    var productItems = product.items || {};
+    var productDefIds = Object.keys(productItems);
+
+    if (productDefIds.length === 0) {
+      product.isOwned = false;
+      continue;
+    }
+
+    // Non-consumable products can only be purchased once — check if all awarded items are already owned.
+    if (product.type !== "Nonconsumable") {
+      product.isOwned = false;
+      continue;
+    }
+
+    var ownedStatus = true;
+    for (var pi = 0; pi < productDefIds.length; pi++) {
+      if (!inventoryByDefId[productDefIds[pi]]) {
+        ownedStatus = false;
+        break;
+      }
+    }
+
+    product.isOwned = ownedStatus;
+  }
+
+  // ── Return all results ────────────────────────────────────────────────────
+  return {
+    "catalogItems":      allCatalogItems,
+    "catalogItemCount":  allCatalogItems.length,
+    "promotions":        promotions,
+    "promotionCount":    promotions.length,
+    "freebies":          freebieItems,
+    "freebiesCount":     freebieItems.length,
+    "storeProducts":     storeProducts,
+    "storeProductCount": storeProducts.length
+  };
+}
+
+main();

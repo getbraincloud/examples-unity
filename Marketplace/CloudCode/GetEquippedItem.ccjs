@@ -1,0 +1,27 @@
+"use strict";
+// GetEquippedItem (VSCode created Script) 
+// returns the equipped item id in the specified item slot
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  //data.itemSlot - gets the item equipped in this itemSlot if it exists
+  var entityService = bridge.getEntityServiceProxy();
+  var entityType = "EquippedItems";
+  var existingEntity = entityService.getEntitiesByType(entityType);
+
+  response.itemId = "none";
+
+  if(existingEntity.data.entities.length > 0){
+    var entityData = existingEntity.data.entities[0].data;
+    var equippedItemId = entityData[data.itemSlot];
+
+    response.itemId = equippedItemId;
+  }
+
+  return response;
+}
+
+main();
