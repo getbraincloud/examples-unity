@@ -729,8 +729,12 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     break;
                 }
 
-                CurrentUserInfo.UpdateCoins(CurrentUserInfo.Coins + currency.GetValue<int>("coins"));
-                CurrentUserInfo.UpdateGems(CurrentUserInfo.Gems + currency.GetValue<int>("gems"));
+                int coins = currency.GetValue<int>("coins");
+                int gems = currency.GetValue<int>("gems");
+                GameManager.Instance.HomeRewards["coins"] = coins;
+                GameManager.Instance.HomeRewards["gems"] = gems;
+                CurrentUserInfo.UpdateCoins(CurrentUserInfo.Coins + coins);
+                CurrentUserInfo.UpdateGems(CurrentUserInfo.Gems + gems);
 
                 break;
             }

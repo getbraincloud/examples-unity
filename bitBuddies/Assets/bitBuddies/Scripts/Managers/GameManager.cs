@@ -3,27 +3,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class GameManager : SingletonBehaviour<GameManager>
 {
-    [Tooltip("Debug"), SerializeField] public bool Debug;
+    [Tooltip("Debug")] public bool Debug;
 
-    private float resetTime = 0.0f;
-
-    private List<AppChildrenInfo> _appChildrenInfos = new List<AppChildrenInfo>();
-
-    public List<AppChildrenInfo> AppChildrenInfos
-    {
-        get { return _appChildrenInfos; }
-        set { _appChildrenInfos = value; }
-    }
-    private List<MysteryBoxInfo> _mysteryBoxes;
-    public List<MysteryBoxInfo> MysteryBoxes
-    {
-        get => _mysteryBoxes;
-        set => _mysteryBoxes = value;
-    }
+    public List<AppChildrenInfo> AppChildrenInfos { get; set; } = new();
     private AppChildrenInfo _selectedAppChildrenInfo;
     public AppChildrenInfo SelectedAppChildrenInfo
     {
@@ -35,130 +20,32 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
     }
 
-    private List<ToyBenchInfo> _toyBenchInfos;
-    public List<ToyBenchInfo> ToyBenchInfos
-    {
-        get => _toyBenchInfos;
-        set => _toyBenchInfos = value;
-    }
-
-    private float _xpAcquiredAmount;
-    public float XpAcquiredAmount
-    {
-        get => _xpAcquiredAmount;
-        set => _xpAcquiredAmount = value;
-    }
-
-    private int _childCountMaximum;
-    public int ChildCountMaximum
-    {
-        get => _childCountMaximum;
-        set => _childCountMaximum = value;
-    }
-
-    private List<QuestInfo> _bitBuddiesQuests;
-    public List<QuestInfo> BitBuddiesQuests
-    {
-        get => _bitBuddiesQuests;
-        set => _bitBuddiesQuests = value;
-    }
-
-    private List<QuestInfo> _bitBlingQuests;
-    public List<QuestInfo> BitBlingQuests
-    {
-        get => _bitBlingQuests;
-        set => _bitBlingQuests = value;
-    }
-
-    private List<QuestInfo> _generalQuests;
-    public List<QuestInfo> GeneralQuests
-    {
-        get => _generalQuests;
-        set => _generalQuests = value;
-    }
-
-    private List<ShopInfo> _parentShopInfos;
-    public List<ShopInfo> ParentShopInfos
-    {
-        get => _parentShopInfos;
-        set => _parentShopInfos = value;
-    }
-
-    private List<ShopInfo> _childShopInfos;
-    public List<ShopInfo> ChildShopInfos
-    {
-        get => _childShopInfos;
-        set => _childShopInfos = value;
-    }
-
-    private long _freebieItemCooldownUntil;
-    public long FreebieItemCooldownUntil
-    {
-        get => _freebieItemCooldownUntil;
-        set => _freebieItemCooldownUntil = value;
-    }
-
-    private int _coinsCollectedViaVisit;
-
-    public int CoinsCollectedViaVisit
-    {
-        get => _coinsCollectedViaVisit;
-        set => _coinsCollectedViaVisit = value;
-    }
-
-    private List<float> _buddyMoveSpeeds;
-    public List<float> BuddyMoveSpeeds
-    {
-        get => _buddyMoveSpeeds;
-        set => _buddyMoveSpeeds = value;
-    }
-
-    private bool _claimQuestAvailable;
-    public bool ClaimQuestAvailable
-    {
-        get => _claimQuestAvailable;
-        set => _claimQuestAvailable = value;
-    }
-
-    public float GetBuddyMoveSpeed()
-    {
-        if (_buddyMoveSpeeds == null || _buddyMoveSpeeds.Count == 0) return 0;
-
-        return _buddyMoveSpeeds[(int)_selectedAppChildrenInfo.rarity];
-    }
-
-    public void SetQuestsLists(List<QuestInfo> listOfQuests)
-    {
-        _bitBlingQuests = new List<QuestInfo>();
-        _bitBuddiesQuests = new List<QuestInfo>();
-        _generalQuests = new List<QuestInfo>();
-
-        for (int i = 0; i < listOfQuests.Count; i++)
-        {
-
-            switch (listOfQuests[i].QuestId)
-            {
-                case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
-                    BitBuddiesQuests.Add(listOfQuests[i]);
-                    break;
-                case BitBuddiesConsts.BITBLING_QUESTLINEID:
-                    BitBlingQuests.Add(listOfQuests[i]);
-                    break;
-                case BitBuddiesConsts.GENERAL_QUESTLINEID:
-                    GeneralQuests.Add(listOfQuests[i]);
-                    break;
-            }
-        }
-    }
+    public List<MysteryBoxInfo> MysteryBoxes { get; set; }
+    public List<ToyBenchInfo> ToyBenchInfos { get; set; }
+    public float XpAcquiredAmount { get; set; }
+    public int ChildCountMaximum { get; set; }
+    public List<QuestInfo> BitBuddiesQuests { get; set; }
+    public List<QuestInfo> BitBlingQuests { get; set; }
+    public List<QuestInfo> GeneralQuests { get; set; }
+    public List<ShopInfo> ParentShopInfos { get; set; }
+    public List<ShopInfo> ChildShopInfos { get; set; }
+    public long FreebieItemCooldownUntil { get; set; }
+    public int CoinsCollectedViaVisit { get; set; }
+    public List<float> BuddyMoveSpeeds { get; set; }
+    public bool ClaimQuestAvailable { get; set; }
+    public Dictionary<string, object> HomeRewards { get; set; }
 
     public override void Awake()
     {
-        _selectedAppChildrenInfo = new AppChildrenInfo();
-        //_eventSystem = EventSystem.current;
+        _selectedAppChildrenInfo = new();
+        HomeRewards = new();
+
         base.Awake();
     }
 
 #if UNITY_STANDALONE
+    private float resetTime = 0.0f;
+
     private void Update()
     {
         // Quit app
@@ -194,7 +81,7 @@ public class GameManager : SingletonBehaviour<GameManager>
                     Application.Quit();
                 }
 
-                var eventSystems = FindObjectsByType<EventSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                var eventSystems = FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
                 foreach (var system in eventSystems)
                 {
@@ -212,42 +99,73 @@ public class GameManager : SingletonBehaviour<GameManager>
     }
 #endif
 
+    public float GetBuddyMoveSpeed()
+    {
+        if (BuddyMoveSpeeds == null || BuddyMoveSpeeds.Count == 0) return 0;
+
+        return BuddyMoveSpeeds[(int)_selectedAppChildrenInfo.rarity];
+    }
+
+    public void SetQuestsLists(List<QuestInfo> listOfQuests)
+    {
+        BitBlingQuests = new List<QuestInfo>();
+        BitBuddiesQuests = new List<QuestInfo>();
+        GeneralQuests = new List<QuestInfo>();
+
+        for (int i = 0; i < listOfQuests.Count; i++)
+        {
+
+            switch (listOfQuests[i].QuestId)
+            {
+                case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+                    BitBuddiesQuests.Add(listOfQuests[i]);
+                    break;
+                case BitBuddiesConsts.BITBLING_QUESTLINEID:
+                    BitBlingQuests.Add(listOfQuests[i]);
+                    break;
+                case BitBuddiesConsts.GENERAL_QUESTLINEID:
+                    GeneralQuests.Add(listOfQuests[i]);
+                    break;
+            }
+        }
+    }
+
     public void OnDeleteBuddySuccess()
     {
         /*
          * Update list to remove selected child info
          * Refresh screen to display the current
          */
-        _appChildrenInfos.Remove(_selectedAppChildrenInfo);
+        AppChildrenInfos.Remove(_selectedAppChildrenInfo);
         StateManager.Instance.RefreshScreen();
     }
 
     public void ClearDataForLogout()
     {
-        _appChildrenInfos.Clear();
+        AppChildrenInfos.Clear();
         _selectedAppChildrenInfo = null;
 
     }
 
     public void UpdateChildAppInfo(AppChildrenInfo in_appChildrenInfo)
     {
-        var index = _appChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
+        var index = AppChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
         if (index != -1)
         {
-            _appChildrenInfos[index] = in_appChildrenInfo;
+            AppChildrenInfos[index] = in_appChildrenInfo;
         }
     }
 
     public void UpdateSelectedAppChildrenInfo()
     {
-        if (_appChildrenInfos == null || _appChildrenInfos.Count == 0) return;
+        if (AppChildrenInfos == null || AppChildrenInfos.Count == 0) return;
         if (SelectedAppChildrenInfo == null) return;
 
-        for (int i = 0; i < _appChildrenInfos.Count; i++)
+        for (int i = 0; i < AppChildrenInfos.Count; i++)
         {
-            if (_appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+            if (AppChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
             {
-                _appChildrenInfos[i] = SelectedAppChildrenInfo;
+                AppChildrenInfos[i] = SelectedAppChildrenInfo;
             }
         }
     }
@@ -292,11 +210,11 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     public void UpdateSelectedAppChildrenInfo(AppChildrenInfo in_appChildrenInfo)
     {
-        for (int i = 0; i < _appChildrenInfos.Count; i++)
+        for (int i = 0; i < AppChildrenInfos.Count; i++)
         {
-            if (_appChildrenInfos[i].profileId.Equals(in_appChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+            if (AppChildrenInfos[i].profileId.Equals(in_appChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
             {
-                _appChildrenInfos[i] = in_appChildrenInfo;
+                AppChildrenInfos[i] = in_appChildrenInfo;
                 SelectedAppChildrenInfo = in_appChildrenInfo;
             }
         }
@@ -304,11 +222,11 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     public string GetChildItemDisplayName(string itemId)
     {
-        for (int i = 0; i < _childShopInfos.Count; i++)
+        for (int i = 0; i < ChildShopInfos.Count; i++)
         {
-            if (_childShopInfos[i].ShopId.Equals(itemId))
+            if (ChildShopInfos[i].ShopId.Equals(itemId))
             {
-                return _childShopInfos[i].DisplayName;
+                return ChildShopInfos[i].DisplayName;
             }
         }
         return "";

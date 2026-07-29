@@ -5,12 +5,10 @@ using UnityEngine.UI;
 
 public class PopUpUI : ContentUIBehaviour
 {
+    private const int COUNT_OF_COPIABLE_ITEMS = 3;
     private const string BUTTON_CLOSE_TEXT = "Close";
 
     public enum ButtonColor { Red, Blue, Green }
-    public enum PopUpImage { None }
-
-    [SerializeField] private Sprite[] DisplayImages;
 
     [Header("Background")]
     [SerializeField] private GameObject Background;
@@ -22,6 +20,10 @@ public class PopUpUI : ContentUIBehaviour
     [SerializeField] private TMP_Text HeaderText;
     [SerializeField] private Image BaseBodyImage;
     [SerializeField] private TMP_Text BaseBodyText;
+
+    [Header("Reward Content")]
+    [SerializeField] private Transform RewardContainer;
+    [SerializeField] private GameObject RewardItem;
 
     [Header("Buttons")]
     [SerializeField] private Transform ButtonGroup;
@@ -55,6 +57,8 @@ public class PopUpUI : ContentUIBehaviour
 
     protected override void InitializeUI() { }
 
+    private int GetInactiveCopiableItems() => Content.childCount - (COUNT_OF_COPIABLE_ITEMS - (RewardContainer.gameObject.activeSelf ? 1 : 0));
+
     public static PopUpUI Show(string headerText, bool showClose = true)
     {
         var self = Instantiate(Resources.Load<PopUpUI>("PopUpCanvas"));
@@ -64,6 +68,8 @@ public class PopUpUI : ContentUIBehaviour
         self.HeaderText.text = headerText;
         self.BaseBodyImage.gameObject.SetActive(false);
         self.BaseBodyText.gameObject.SetActive(false);
+        self.RewardContainer.gameObject.SetActive(false);
+        self.RewardItem.SetActive(false);
         self.RedButtonHolder.SetActive(false);
         self.GreenButtonHolder.SetActive(false);
 
@@ -80,12 +86,12 @@ public class PopUpUI : ContentUIBehaviour
         return self;
     }
 
-    public PopUpUI AddImage(PopUpImage image)
+    public PopUpUI AddImage(Sprite image)
     {
         var bodyImage = Instantiate(BaseBodyImage, Content, false);
 
-        bodyImage.sprite = BaseBodyImage.sprite; // TODO: Get sprite images to show here
-        bodyImage.transform.SetSiblingIndex(Content.childCount - 2);
+        bodyImage.sprite = image;
+        bodyImage.transform.SetSiblingIndex(GetInactiveCopiableItems());
         bodyImage.gameObject.SetActive(true);
 
         return this;
@@ -96,8 +102,55 @@ public class PopUpUI : ContentUIBehaviour
         var bodyText = Instantiate(BaseBodyText, Content, false);
 
         bodyText.text = text;
-        bodyText.transform.SetSiblingIndex(Content.childCount - 2);
+        bodyText.transform.SetSiblingIndex(GetInactiveCopiableItems());
         bodyText.gameObject.SetActive(true);
+
+        return this;
+    }
+
+    public PopUpUI AddRewardItem(string name, Sprite image, int amount = 0, string header = "")
+    {
+        if (!string.IsNullOrEmpty(header))
+        {
+            AddBodyText(header);
+        }
+
+        if (!RewardContainer.gameObject.activeSelf)
+        {
+            RewardContainer.gameObject.SetActive(true);
+            RewardContainer.SetSiblingIndex(GetInactiveCopiableItems());
+        }
+
+        var reward = Instantiate(RewardItem, RewardContainer, false);
+
+        // This is a little hacky but didn't want to make a new component just for this one situation
+        foreach (var tmText in reward.GetComponentsInChildren<TMP_Text>())
+        {
+            if (tmText.gameObject.name == "RewardTitle")
+            {
+                tmText.text = name;
+                continue;
+            }
+
+            if (tmText.gameObject.name == "RewardAmount")
+            {
+                if (amount > 0)
+                {
+                    tmText.text = $"x{amount:N0}";
+                }
+                else
+                {
+                    tmText.gameObject.SetActive(false);
+                }
+
+                continue;
+            }
+        }
+
+        var rewardImage = reward.GetComponentInChildren<Image>();
+        rewardImage.sprite = image;
+
+        reward.SetActive(true);
 
         return this;
     }

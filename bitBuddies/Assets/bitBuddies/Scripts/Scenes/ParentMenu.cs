@@ -1,3 +1,4 @@
+using BrainCloud.JSONHelper;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +8,11 @@ using UnityEngine.UI;
 
 public class ParentMenu : ContentUIBehaviour
 {
+    private const float TEXT_GOLD_SPAWN_OFFSET = 40.0f;
+    private const float TEXT_LEVEL_SPAWN_OFFSET = -300.0f;
+    private const float COIN_CHECK_INTERVAL = 60.0f;
+    private const string CHILD_COUNT_TEXT = "Buddy Count: ";
+
     [SerializeField] private Button OpenSettingsButton;
     [SerializeField] private TextMeshProUGUI UsernameText;
     [SerializeField] private TextMeshProUGUI LevelText;
@@ -34,34 +40,25 @@ public class ParentMenu : ContentUIBehaviour
     [SerializeField] private Button IncreaseLevelButton;
     [SerializeField] private GameObject DebugButtonGroup;
 
-    private float textGoldSpawnOffset = 40f;
-    private float textLevelSpawnOffset = -300f;
     private bool isWaitingForResponse = false;
-    private float checkForCoinsInterval = 60;
     private List<AppChildrenInfo> _appChildrenInfos;
     private List<BuddyHouseInfo> _listOfBuddies;
 
-    private RectTransform _canvasRectTransform;
-    public RectTransform CanvasRectTransform { get { return _canvasRectTransform; } }
-    private AppChildrenInfo _newAppChildrenInfo;
-    public AppChildrenInfo NewAppChildrenInfo
-    {
-        get { return _newAppChildrenInfo; }
-        set { _newAppChildrenInfo = value; }
-    }
+    public RectTransform CanvasRectTransform { get; private set; }
+    public AppChildrenInfo NewAppChildrenInfo { get; set; }
 
-    private const string CHILD_COUNT_TEXT = "Buddy Count: ";
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Awake()
     {
         InitializeUI();
+
         OpenSettingsButton.onClick.AddListener(OpenSettingsButtonOnClick);
         OpenQuestPanelButton.onClick.AddListener(OpenQuestPanel);
         OpenParentShopButton.onClick.AddListener(OpenParentShop);
         BuddyHouseInfo.OnCoinsCollected += UpdateValueText;
         BuddyHouseInfo.OnCoinsCollected += SpawnCurrencyAddedAnimation;
         StartCoroutine(LoopCheckCoins());
-        _canvasRectTransform = GetComponent<RectTransform>();
+        CanvasRectTransform = (RectTransform)transform;
+
         base.Awake();
     }
 
@@ -89,7 +86,7 @@ public class ParentMenu : ContentUIBehaviour
                 CheckAllBuddiesCoinEarnings();
             }
             
-            yield return new WaitForSeconds(checkForCoinsInterval);
+            yield return new WaitForSeconds(COIN_CHECK_INTERVAL);
         }
     }
 
@@ -141,8 +138,10 @@ public class ParentMenu : ContentUIBehaviour
             LevelSlider.value = adjustedCurrentXP;
         }
 
-        CoinsText.text = userInfo.Coins.ToString("N0");
-        GemsText.text = userInfo.Gems.ToString("N0");
+        var homeRewards = GameManager.Instance.HomeRewards;
+        CoinsText.text  = (homeRewards.GetValue<int>("coins") is int coins && coins > 0 ? userInfo.Coins - coins : userInfo.Coins).ToString("N0");
+        GemsText.text   = (homeRewards.GetValue<int>("gems")  is int gems  && gems > 0  ? userInfo.Gems  - gems  : userInfo.Gems).ToString("N0");
+
         GameVersionText.text = $"Game Version: {Application.version}";
         BcClientVersionText.text = $"BC Client Version: {BrainCloud.Version.GetVersion()}";
 
@@ -158,7 +157,9 @@ public class ParentMenu : ContentUIBehaviour
 
         DebugButtonGroup.SetActive(debug);
         _appChildrenInfos = GameManager.Instance.AppChildrenInfos;
+
         SetupHouses();
+        ShowRewardsPopUp();
     }
 
     private void OnDisable()
@@ -196,6 +197,32 @@ public class ParentMenu : ContentUIBehaviour
         }
     }
 
+    private void ShowRewardsPopUp()
+    {
+        var homeRewards = GameManager.Instance.HomeRewards;
+        int coinReward = homeRewards.GetValue<int>("coins");
+        int gemReward = homeRewards.GetValue<int>("gems");
+
+        if (coinReward > 0 || gemReward > 0)
+        {
+            var popup = PopUpUI.Show("You Leveled Up!", false)
+                               .AddButton("OK!", PopUpUI.ButtonColor.Green, RefreshScreen);
+
+            if (coinReward > 0)
+            {
+                popup.AddRewardItem("Coins", GameManager.Instance.GetCurrencySprite(CurrencyTypes.Coins), coinReward, "You recieved");
+            }
+
+            if (gemReward > 0)
+            {
+                popup.AddRewardItem("Gems", GameManager.Instance.GetCurrencySprite(CurrencyTypes.Gems), gemReward);
+            }
+
+            homeRewards["coins"] = 0;
+            homeRewards["gems"] = 0;
+        }
+    }
+
     private void OpenSettingsButtonOnClick()
     {
         // what do other than open ?
@@ -222,24 +249,27 @@ public class ParentMenu : ContentUIBehaviour
 
     public void SpawnCurrencyAddedAnimation(int amount, int typeIndex)
     {
-        RectTransform mainTextPosition = new RectTransform();
-        Transform parent = new RectTransform();
+        RectTransform mainTextPosition;
+        Transform parent;
         switch (typeIndex)
         {
-            //Coins
+            // Coins
             case 0:
                 mainTextPosition = CoinsText.rectTransform;
                 parent = CoinsText.transform.parent;
                 break;
-            //Gems
+            // Gems
             case 1:
                 mainTextPosition = GemsText.rectTransform;
                 parent = GemsText.transform.parent;
                 break;
+            default:
+                throw new System.Exception("Unknown typeIndex, cannot play animation!");
         }
-        //Set up animation
+
+        // Set up animation
         var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
-        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textGoldSpawnOffset, 0f);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - TEXT_GOLD_SPAWN_OFFSET, 0f);
         if (amount > 1)
         {
             textAnimation.SetUpPositiveNumberText(amount);
@@ -267,7 +297,7 @@ public class ParentMenu : ContentUIBehaviour
 
         //Set up animation
         var textAnimation = Instantiate(AddedValueTextAnimationPrefab, parent);
-        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - textLevelSpawnOffset, 0f);
+        textAnimation.TextRectTransform.localPosition = mainTextPosition.localPosition + new Vector3(mainTextPosition.rect.width - TEXT_LEVEL_SPAWN_OFFSET, 0f);
         if (amount > 1)
         {
             textAnimation.SetUpPositiveNumberText((int)amount);
