@@ -119,7 +119,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
             BrainCloudManager.HandleFailure("Award new buddy Failure", OnFailureCallback)
         );
 
-        BrainCloudManager.Instance.LevelUpParent(); // This is also where the Parent gains Pink Stars
+        BrainCloudManager.Instance.ParentReceivesXP(); // This is also where the Parent gains Pink Stars
 
         StartCoroutine(Shake());
     }

@@ -35,7 +35,10 @@ public class ToyManager : SingletonBehaviour<ToyManager>
     private long _loveMultiplierDuration = 1;
     private const float MULTIPLIER_DEFAULT = 1.0f;
     private CountdownTimer _multiplierCountdownTimer;
+
+    public static event Action<int> OnBuddyLeveledUp;
     public static event Action<int> OnCoinsTaken;
+
     private bool _isRunning = false;
 
     public override void Awake()
@@ -63,6 +66,11 @@ public class ToyManager : SingletonBehaviour<ToyManager>
         {
             StartLoveMultiplierCountdown(appInfo.loveMultiplier, appInfo.dailyBoosterExpiryUntil);
         }
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
     }
 
     public void CheckForUnlockedBenches()
@@ -99,9 +107,30 @@ public class ToyManager : SingletonBehaviour<ToyManager>
         _moveBuddyAnimation.MoveBuddyToPosition(position, callback);
     }
 
-    private void OnDisable()
+    public static void ReportBuddyLeveledUp(int levelsGained)
     {
-        StopAllCoroutines();
+        if (levelsGained < 1)
+        {
+            levelsGained = 1;
+        }
+
+        OnBuddyLeveledUp?.Invoke(levelsGained);
+    }
+
+    // We use the xpRewards payload to count the levels (Buddy levels are tied to achievements)
+    public static void ReportBuddyLeveledUp(Dictionary<string, object> increaseXpResult)
+    {
+        int levelsGained = 1;
+        var xpRewards = increaseXpResult?.GetJSONObject("rewards");
+        if (xpRewards != null &&
+            xpRewards.TryGetValue("experienceLevels", out object xpLevelsObj) &&
+            xpLevelsObj is System.Collections.IList xpLevelsList &&
+            xpLevelsList.Count > 0)
+        {
+            levelsGained = xpLevelsList.Count;
+        }
+
+        ReportBuddyLeveledUp(levelsGained);
     }
 
     public void IncrementRewardSpawnCount(int in_amount)
@@ -213,14 +242,17 @@ public class ToyManager : SingletonBehaviour<ToyManager>
                     selectedAppChildInfo.currentXP = (int)xpData["experiencePoints"];
                     selectedAppChildInfo.buddyLevel = (int)xpData["experienceLevel"];
 
-                    //Check for stats for UI updates
-                    bool didBuddyLevelUp = (bool)xpResult["buddyLeveledUp"];
+                    bool didBuddyLevelUp = xpResult.GetValue<bool>("buddyLeveledUp");
                     if (didBuddyLevelUp)
                     {
                         StatTracker.Instance.IncrementStat(BitBuddiesConsts.BUDDIES_LEVELED_UP_STAT_NAME);
+
+                        // A single love batch can cross more than one level; this
+                        // reports the total so subscribers act once.
+                        ReportBuddyLeveledUp(xpData);
                     }
 
-                    bool didBuddyLevelUpTo5 = (bool)xpResult["didCatchLevel5"];
+                    bool didBuddyLevelUpTo5 = xpResult.GetValue<bool>("didCatchLevel5");
                     if (didBuddyLevelUpTo5)
                     {
                         StatTracker.Instance.IncrementStat(BitBuddiesConsts.LEVEL5_BUDDIES_STAT_NAME);

@@ -285,6 +285,10 @@ public class BuddysRoom : ContentUIBehaviour
             _appChildrenInfo.buddyLevel = currentLevel;
         }
 
+        if (update.GetValue<bool>("buddyLeveledUp"))
+        {
+            ToyManager.ReportBuddyLeveledUp(increaseXP);
+        }
 
         if (data.ContainsKey("currency"))
         {

@@ -173,6 +173,11 @@ public class MouseMerchantItem : ShopItem
                    .AddBodyText($"{appInfo.profileName} leveled up from {levelBefore} to {levelAfter} for {amountSpent:N0} gems");
             GameManager.Instance.UpdateSelectedAppChildrenInfo(appInfo);
             ToyManager.Instance.CheckForUnlockedBenches();
+
+            if (levelAfter > levelBefore)
+            {
+                ToyManager.ReportBuddyLeveledUp(levelAfter - levelBefore);
+            }
         }
         else if (resultType.Equals("childCatalogItem"))
         {

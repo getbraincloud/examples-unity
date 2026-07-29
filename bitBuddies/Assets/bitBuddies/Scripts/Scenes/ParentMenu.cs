@@ -343,7 +343,7 @@ public class ParentMenu : ContentUIBehaviour
     private void OnIncreaseLevel()
     {
         if (isWaitingForResponse) return;
-        BrainCloudManager.Instance.LevelUpParent();
+        BrainCloudManager.Instance.ParentReceivesXP();
         StartCoroutine(WaitAbitForResponse());
     }
 

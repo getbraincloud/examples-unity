@@ -10,6 +10,8 @@ using UnityEngine;
 
 public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 {
+    private const int PARENT_PINK_STAR_INCREASE_AMOUNT = 10;
+
     public static BrainCloudClient Client => Wrapper != null ? Wrapper.Client : null;
     public static BrainCloudWrapper Wrapper { get; private set; }
     public UserInfo CurrentUserInfo { get; set; }
@@ -371,6 +373,9 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
         _childInfoIndex = 0;
         CompletedGettingCurrencies();
+
+        ToyManager.OnBuddyLeveledUp -= ParentReceivesXP;
+        ToyManager.OnBuddyLeveledUp += ParentReceivesXP;
     }
 
     private void GetChildItemCatalog()
@@ -679,14 +684,14 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         StateManager.Instance.RefreshScreen();
     }
 
-    public void LevelUpParent()
+    public void ParentReceivesXP(int xpMultiplier = 1)
     {
-        var scriptData = new Dictionary<string, object>
+        if (xpMultiplier < 1)
         {
-            { "x", 10 }
-        };
+            xpMultiplier = 1;
+        }
 
-        Wrapper.PlayerStatisticsService.IncrementExperiencePoints(10,
+        Wrapper.PlayerStatisticsService.IncrementExperiencePoints(PARENT_PINK_STAR_INCREASE_AMOUNT * xpMultiplier,
                                                                   HandleSuccess("LevelUpParent Success", OnLevelUpParent),
                                                                   HandleFailure("LevelUpParent Failed", OnFailureCallback));
     }
