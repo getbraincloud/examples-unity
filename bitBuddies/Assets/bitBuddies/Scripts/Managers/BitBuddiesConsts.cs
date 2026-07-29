@@ -96,8 +96,6 @@ namespace Gameframework
         public const string DELETE_BUDDYS_ROOM_TITLE = "Delete ";
         public const string DELETE_BUDDYS_ROOM_MESSAGE = "Would you like to demolish ";
 
-        public const string DELETE_BUDDYS_ROOM_SUCCESS_TITLE = "Buddys Room Deleted";
-        public const string DELETE_BUDDYS_ROOM_SUCCESS_MESSAGE = "The requested buddy's room was deleted";
         public const string DELETE_BUDDYS_ROOM_FAILED_TITLE = "Something went wrong";
         public const string DELETE_BUDDYES_ROOM_FAILED_MESSAGE = "There was an error while attempting to delete the requested buddy's room, please try again later";
         public const string DEFAULT_BUDDY_NAME = "MyBuddy";

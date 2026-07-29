@@ -143,9 +143,6 @@ public class BuddyHouseInfo : MonoBehaviour
 
     private void OnDeleteBuddySuccess()
     {
-        PopUpUI.Show(BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_TITLE, true)
-               .AddBodyText(BitBuddiesConsts.DELETE_BUDDYS_ROOM_SUCCESS_MESSAGE);
-
         StatTracker.Instance.IncrementStat(BitBuddiesConsts.TRASHED_BUDDIES_STAT_NAME);
         GameManager.Instance.OnDeleteBuddySuccess();
     }

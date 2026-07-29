@@ -17,10 +17,7 @@ public class ParentShopItem : ShopItem
     {
         if (_shopInfo.BuyCost == 0)
         {
-            PopUpUI.Show("Are you sure?", false)
-                   .AddBodyText($"Obtain {_shopInfo.DisplayName} for free?")
-                   .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
-                   .AddButton("Confirm", PopUpUI.ButtonColor.Green, OnBuyCallback, GameManager.CanBuyItem(_shopInfo.BuyCurrency, _shopInfo.BuyCost));
+            OnBuyCallback();
         }
         else
         {
