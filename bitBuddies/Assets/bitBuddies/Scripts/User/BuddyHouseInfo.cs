@@ -207,8 +207,7 @@ public class BuddyHouseInfo : MonoBehaviour
             _spawnRectTransform = _parentMenu.transform.GetChild(0).GetComponent<RectTransform>();
 
             RectTransform target = _parentMenu.GetCurrencyTextRectTransform(CurrencyTypes.Coins);
-            _coinButtonRectTransform.position -= Vector3.left * 50;
-            StateManager.Instance.PlayCurrencyAnimationWorld(_coinButtonRectTransform, target, CurrencyTypes.Coins, _parentMenu.CanvasRectTransform, _spawnRectTransform);
+            StateManager.Instance.PlayCurrencyAnimation(CurrencyTypes.Coins, _coinButtonRectTransform.position, target.position);
         }
 
         BrainCloudManager.Instance.CurrentUserInfo = currentUser;

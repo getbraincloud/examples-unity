@@ -72,9 +72,6 @@ public class ParentShopItem : ShopItem
         switch (buyCurrencyType)
         {
             case CurrencyTypes.Gems:
-                RectTransform target = _parentMenu.GetCurrencyTextRectTransform(CurrencyTypes.Gems);
-                RectTransform coinButtonRectTransform = GetComponent<RectTransform>();
-                StateManager.Instance.PlayCurrencyAnimationWorld(coinButtonRectTransform, target, CurrencyTypes.Coins, _parentMenu.CanvasRectTransform, spawnRectTransform);
                 userInfo.UpdateGems(userInfo.Gems - _shopInfo.BuyCost);
                 break;
             case CurrencyTypes.Coins:
@@ -83,6 +80,12 @@ public class ParentShopItem : ShopItem
             case CurrencyTypes.FakeDollars:
                 userInfo.UpdateFakeMoney(userInfo.FakeMoney - _shopInfo.BuyCost);
                 break;
+        }
+
+        if (_shopInfo.RewardAmount > 0)
+        {
+            StateManager.Instance.PlayCurrencyAnimation(currencyType, GetComponent<RectTransform>().position,
+                                                                      _parentMenu.GetCurrencyTextRectTransform(currencyType).position);
         }
 
         // Check for freebie to set up cooldown clock

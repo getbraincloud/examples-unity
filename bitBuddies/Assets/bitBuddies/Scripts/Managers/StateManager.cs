@@ -1,13 +1,13 @@
-using System;
-using System.Collections;
 using Gameframework;
+using PrimeTween;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StateManager : SingletonBehaviour<StateManager>
 {
-    [SerializeField] private PopUpUI _genericPopUpUI;
-
-    [SerializeField] private AddCurrencyAnimation _addCurrencyAnimation;
+    [SerializeField] private GameObject CurrencyHolder;
+    [SerializeField] private AnimationCurve CurrencyEasing;
 
     private Canvas _canvas;
 
@@ -33,22 +33,16 @@ public class StateManager : SingletonBehaviour<StateManager>
         }
     }
 
-    public void PlayCurrencyAnimationLocal(RectTransform in_startPosition, RectTransform target, CurrencyTypes in_currencyType, RectTransform canvasRect, Vector2 offset)
+    public void PlayCurrencyAnimation(CurrencyTypes currencyType, Vector3 startPosition, Vector3 endPosition)
     {
-        var endPosition = GetCanvasLocalPos(canvasRect, target) + offset;
-        var startPosition = GetCanvasLocalPos(canvasRect, in_startPosition);
+        var currencySprite = Instantiate(CurrencyHolder, null, false).GetComponentInChildren<Image>();
+        currencySprite.sprite = GameManager.Instance.GetCurrencySprite(currencyType);
+        currencySprite.transform.position = startPosition;
 
-        var animation = Instantiate(_addCurrencyAnimation, in_startPosition.parent);
-        animation.PlayLocal(startPosition, endPosition, in_currencyType);
-    }
+        Tween.Position(currencySprite.transform, startPosition, endPosition, 1.0f, Easing.Curve(CurrencyEasing), 1, CycleMode.Restart, 0.0f, 0.1f, true)
+             .OnComplete(target: this, target => Destroy(currencySprite.transform.parent.gameObject));
 
-    public void PlayCurrencyAnimationWorld(RectTransform in_startPosition, RectTransform target, CurrencyTypes in_currencyType, RectTransform canvasRect, Transform parent)
-    {
-        Vector2 startPosition = in_startPosition.position;
-        Vector2 endPosition = (Vector2)target.position;
-
-        var animation = Instantiate(_addCurrencyAnimation, parent);
-        animation.PlayWorld(startPosition, endPosition, in_currencyType);
+        Tween.Scale(currencySprite.transform, 0.1f, 0.25f, Easing.Standard(Ease.OutQuad), 1, CycleMode.Restart, 0.75f, 0.0f, true);
     }
 
     private Vector2 GetOverlayCanvasPos(RectTransform canvasRect, RectTransform target)

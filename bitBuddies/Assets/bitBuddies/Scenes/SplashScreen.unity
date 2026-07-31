@@ -561,8 +561,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0baa154eb9a6cd47a1586229cc49ac4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _genericPopUpUI: {fileID: 7179948164311745232, guid: d3477c3073dbfd041b314aa232b1834b, type: 3}
-  _addCurrencyAnimation: {fileID: -770785967171924637, guid: af31d4d9030cce443bff99b429ea7269, type: 3}
+  CurrencyHolder: {fileID: 1460114537456451037, guid: 58f2f30cf09899d4d86c2bfd401cb4f4, type: 3}
+  CurrencyEasing:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: -1.3412744
+      outSlope: -1.3412744
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.11912478
+    - serializedVersion: 3
+      time: 0.35036772
+      value: -0.000012587523
+      inSlope: 0.88146937
+      outSlope: 0.88146937
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.81378984
+      outWeight: 0.120650426
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &1374859309
 MonoBehaviour:
   m_ObjectHideFlags: 0

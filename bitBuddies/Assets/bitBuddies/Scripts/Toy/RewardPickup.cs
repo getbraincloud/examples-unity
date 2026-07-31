@@ -95,14 +95,7 @@ public class RewardPickup : MonoBehaviour
         }
 
         RectTransform target = _buddysRoom.GetCurrencyTextRectTransform(_currencyType);
-        StateManager.Instance.PlayCurrencyAnimationLocal
-        (
-            _rewardRectTransform,
-            target,
-            _currencyType,
-            _buddysRoom.CanvasRectTransform,
-            BitBuddiesConsts.OFFSET_CURRENCY_BUDDYS_ROOM
-        );
+        StateManager.Instance.PlayCurrencyAnimation(_currencyType, _rewardRectTransform.position, target.position);
         ToyManager.Instance.DecrementRewardSpawnCount();
         ToyManager.Instance.AddRewardPickup(this);
         StopAllCoroutines();

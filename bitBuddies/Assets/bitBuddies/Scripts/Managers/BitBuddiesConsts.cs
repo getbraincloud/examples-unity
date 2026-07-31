@@ -130,8 +130,5 @@ namespace Gameframework
         public const string COIN_GAIN_TEXT = "Idle Coin Gains ";
         public const string COIN_PER_HOUR_TEXT = "/hr";
         public const string COIN_CAPACITY_TEXT = "Idle Coins Capacity ";
-
-        // Game Consts
-        public static readonly Vector2 OFFSET_CURRENCY_BUDDYS_ROOM = new(-170, 20);
     }
 }

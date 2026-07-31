@@ -237,22 +237,15 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     public Sprite GetCurrencySprite(CurrencyTypes in_currency)
     {
-        switch (in_currency)
+        return in_currency switch
         {
-            case CurrencyTypes.BuddyBling:
-                return Resources.Load<Sprite>(BitBuddiesConsts.BIT_BLING_SPRITE_PATH);
-            case CurrencyTypes.Gems:
-                return Resources.Load<Sprite>(BitBuddiesConsts.GEM_SPRITE_PATH);
-            case CurrencyTypes.FakeDollars:
-                return Resources.Load<Sprite>(BitBuddiesConsts.FAKE_MONEY_SPRITE_PATH);
-            case CurrencyTypes.Love:
-                return Resources.Load<Sprite>(BitBuddiesConsts.LOVE_SPRITE_PATH);
-            case CurrencyTypes.Level:
-                return Resources.Load<Sprite>(BitBuddiesConsts.LEVEL_SPRITE_PATH);
-            case CurrencyTypes.Coins:
-            default:
-                return Resources.Load<Sprite>(BitBuddiesConsts.COIN_SPRITE_PATH);
-        }
+            CurrencyTypes.BuddyBling => Resources.Load<Sprite>(BitBuddiesConsts.BIT_BLING_SPRITE_PATH),
+            CurrencyTypes.Gems => Resources.Load<Sprite>(BitBuddiesConsts.GEM_SPRITE_PATH),
+            CurrencyTypes.FakeDollars => Resources.Load<Sprite>(BitBuddiesConsts.FAKE_MONEY_SPRITE_PATH),
+            CurrencyTypes.Love => Resources.Load<Sprite>(BitBuddiesConsts.LOVE_SPRITE_PATH),
+            CurrencyTypes.Level => Resources.Load<Sprite>(BitBuddiesConsts.LEVEL_SPRITE_PATH),
+            _ => Resources.Load<Sprite>(BitBuddiesConsts.COIN_SPRITE_PATH),
+        };
     }
 
     public void ShowFailurePopUp(string header = "Something went wrong",
