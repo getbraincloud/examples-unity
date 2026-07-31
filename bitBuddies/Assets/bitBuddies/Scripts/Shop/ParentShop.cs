@@ -5,6 +5,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Setup for the parent shop UI and logic.
+/// </summary>
 public class ParentShop : Shop
 {
     [SerializeField] private ShopItem shopItemPrefab;

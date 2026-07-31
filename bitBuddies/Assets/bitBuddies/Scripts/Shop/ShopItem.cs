@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class ShopItem : MonoBehaviour
 {
-
     [SerializeField] protected TMP_Text ItemNameText;
     [SerializeField] protected TMP_Text ItemDescriptionText;
     [SerializeField] protected TMP_Text ItemPriceText;
@@ -13,10 +12,7 @@ public class ShopItem : MonoBehaviour
     [SerializeField] protected Image RewardImage;
     [SerializeField] protected Button BuyButton;
     [SerializeField] protected Image FreebieImage;
-
     [SerializeField] protected Image BuyImage;
-    //[SerializeField] private Image ItemImage;
-
 
     protected ShopInfo _shopInfo;
     public ShopInfo ItemInfo { get { return _shopInfo; } }

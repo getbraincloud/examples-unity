@@ -90,7 +90,7 @@ public class StateManager : SingletonBehaviour<StateManager>
         var screens = FindObjectsByType<ContentUIBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (ContentUIBehaviour screen in screens)
         {
-            screen.RefreshScreen();
+            screen.ResetUI();
         }
     }
 

@@ -181,6 +181,9 @@ public class GameManager : SingletonBehaviour<GameManager>
             case CurrencyTypes.Gems:
                 canBuy = BrainCloudManager.Instance.CurrentUserInfo.Gems >= in_itemCost;
                 break;
+            case CurrencyTypes.FakeDollars:
+                canBuy = BrainCloudManager.Instance.CurrentUserInfo.FakeMoney >= in_itemCost;
+                break;
             case CurrencyTypes.BuddyBling:
                 canBuy = Instance.SelectedAppChildrenInfo.buddyBling >= in_itemCost;
                 break;
@@ -250,6 +253,15 @@ public class GameManager : SingletonBehaviour<GameManager>
             default:
                 return Resources.Load<Sprite>(BitBuddiesConsts.COIN_SPRITE_PATH);
         }
+    }
+
+    public void ShowFailurePopUp(string header = "Something went wrong",
+                                 string body = "Please try again or restart the application.",
+                                 Action onOKButton = null)
+    {
+        PopUpUI.Show(header, false)
+               .AddBodyText(body)
+               .AddButton("OK", PopUpUI.ButtonColor.Green, onOKButton, true, true);
     }
 
     public static string FormatCamelCase(string input)

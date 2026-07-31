@@ -206,7 +206,7 @@ public class ParentMenu : ContentUIBehaviour
         if (coinReward > 0 || gemReward > 0)
         {
             var popup = PopUpUI.Show("You Leveled Up!", false)
-                               .AddButton("OK!", PopUpUI.ButtonColor.Green, RefreshScreen);
+                               .AddButton("OK!", PopUpUI.ButtonColor.Green, ResetUI);
 
             if (coinReward > 0)
             {

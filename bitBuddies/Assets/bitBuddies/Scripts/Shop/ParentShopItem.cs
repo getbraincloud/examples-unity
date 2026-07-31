@@ -26,48 +26,35 @@ public class ParentShopItem : ShopItem
                    .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
                    .AddButton("Confirm", PopUpUI.ButtonColor.Green, OnBuyCallback, GameManager.CanBuyItem(_shopInfo.BuyCurrency, _shopInfo.BuyCost));
         }
-
     }
 
     private void OnBuyCallback()
     {
-        Dictionary<string, object> scriptData = new Dictionary<string, object>();
-        scriptData.Add("itemId", _shopInfo.ShopId);
-        BrainCloudManager.Client.ScriptService.RunScript
-        (
-            BitBuddiesConsts.CLAIM_ITEM_SCRIPT_NAME,
-            scriptData.Serialize(),
-            BrainCloudManager.HandleSuccess("Claim Item Success", OnClaimItemSuccess),
-            BrainCloudManager.HandleFailure("Claim Item Failure", OnClaimItemFailure)
-        );
+        var scriptData = new Dictionary<string, object>
+        {
+            { "itemId", _shopInfo.ShopId }
+        };
+
+        BrainCloudManager.Client.ScriptService.RunScript(BitBuddiesConsts.CLAIM_ITEM_SCRIPT_NAME,
+                                                         scriptData.Serialize(),
+                                                         BrainCloudManager.HandleSuccess("Claim Item Success", OnClaimItemSuccess),
+                                                         BrainCloudManager.HandleFailure("Claim Item Failure", OnClaimItemFailure));
     }
 
     private void OnClaimItemSuccess(string jsonResponse)
     {
-        /*
-         * "response": {
-              "success": true,
-              "itemId": "freebie",
-              "coolDownUntil": 1774475149170, <--------- Need to read this in for cooldown clock for freebie if it exists
-              "payout": {
-                "currencyType": "coins",
-                "amount": 1000
-              }
-            }
-         */
-        Dictionary<string, object> data = jsonResponse.Deserialize("data");
-        Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
+        var response = jsonResponse.Deserialize("data", "response");
 
-        Dictionary<string, object> payoutObject = response["payout"] as Dictionary<string, object>;
-        if (payoutObject == null)
+        if (response["payout"] is not Dictionary<string, object> payoutObject)
         {
             Debug.LogError("Payout object is null in OnClaimItemSuccess");
             return;
         }
 
-        CurrencyTypes currencyType = Enum.Parse<CurrencyTypes>(payoutObject["currencyType"] as string, true);
-        int amount = (int)payoutObject["amount"];
         UserInfo userInfo = BrainCloudManager.Instance.CurrentUserInfo;
+
+        CurrencyTypes currencyType = payoutObject.GetValue<CurrencyTypes>("currencyType");
+        int amount = payoutObject.GetValue<int>("amount");
         switch (currencyType)
         {
             case CurrencyTypes.Coins:
@@ -79,6 +66,7 @@ public class ParentShopItem : ShopItem
                 StatTracker.Instance.IncrementStat(BitBuddiesConsts.BOUGHT_GEMS_WITH_COINS_STAT_NAME);
                 break;
         }
+
         RectTransform spawnRectTransform = _parentMenu.transform.GetChild(1).GetComponent<RectTransform>();
         CurrencyTypes buyCurrencyType = _shopInfo.BuyCurrency;
         switch (buyCurrencyType)
@@ -86,7 +74,6 @@ public class ParentShopItem : ShopItem
             case CurrencyTypes.Gems:
                 RectTransform target = _parentMenu.GetCurrencyTextRectTransform(CurrencyTypes.Gems);
                 RectTransform coinButtonRectTransform = GetComponent<RectTransform>();
-                coinButtonRectTransform.position -= Vector3.left * 50;
                 StateManager.Instance.PlayCurrencyAnimationWorld(coinButtonRectTransform, target, CurrencyTypes.Coins, _parentMenu.CanvasRectTransform, spawnRectTransform);
                 userInfo.UpdateGems(userInfo.Gems - _shopInfo.BuyCost);
                 break;
@@ -98,10 +85,10 @@ public class ParentShopItem : ShopItem
                 break;
         }
 
-        //Check for freebie to set up cooldown clock
+        // Check for freebie to set up cooldown clock
         if (_shopInfo.ShopId == "freebie")
         {
-            var cooldownUntil = (long)response["coolDownUntil"];
+            var cooldownUntil = response.GetValue<long>("coolDownUntil");
             if (cooldownUntil > 0)
             {
                 GameManager.Instance.FreebieItemCooldownUntil = cooldownUntil;
@@ -116,6 +103,6 @@ public class ParentShopItem : ShopItem
 
     private void OnClaimItemFailure()
     {
-        //FL ToDo: Create a pop up displaying the error messsage
+        GameManager.Instance.ShowFailurePopUp(body: "Item failed to claim. Please try again or restart the application.");
     }
 }
