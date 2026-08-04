@@ -12,12 +12,15 @@ public class JenkinsBuild
 
     static string[] EnabledScenes = FindEnabledEditorScenes();
 
-    // called from Jenkins
+    // called from Jenkins / BCCM
+    // Args: -executeMethod JenkinsBuild.BuildWebGL <appName> <outputDir>
+    // Output goes to <outputDir>/<appName>/ (a folder — WebGL has no .exe extension).
+    // Note: GetEnviroVariables() is intentionally skipped here; it overwrites targetDir
+    // with the $targetDirectory env var, which is not set in BCCM CLI invocations.
     public static void BuildWebGL()
     {
         var args = FindArgs();
-        args.GetEnviroVariables();
-        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        string fullPathAndName = args.targetDir + args.appName;
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.None);
     }
 
@@ -25,8 +28,7 @@ public class JenkinsBuild
     public static void BuildWindowStandalone()
     {
         var args = FindArgs();
-        args.GetEnviroVariables();
-        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        string fullPathAndName = args.targetDir + args.appName;
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows, BuildOptions.None);
     }
 
@@ -34,8 +36,7 @@ public class JenkinsBuild
     public static void BuildMacOS()
     {
         var args = FindArgs();
-        args.GetEnviroVariables();
-        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        string fullPathAndName = args.targetDir + args.appName;
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX, BuildOptions.None);
     }
 
@@ -43,8 +44,7 @@ public class JenkinsBuild
     public static void BuildAndroid()
     {
         var args = FindArgs();
-        args.GetEnviroVariables();
-        string fullPathAndName = args.targetDir + args.GetBuildFolderName();
+        string fullPathAndName = args.targetDir + args.appName;
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
     }
 
