@@ -81,11 +81,22 @@ public class ImageCacheService : MonoBehaviour
         var downloadTask = LoadOrDownloadAsync(url);
         ongoingDownloads[url] = downloadTask;
 
-        Sprite result = await downloadTask;
-
-        ongoingDownloads.Remove(url);
-
-        return result;
+        try
+        {
+            return await downloadTask;
+        }
+        catch (Exception e)
+        {
+            // A failure here (e.g. disk persistence) must never leave the
+            // caller's loading state stuck — return null instead of faulting.
+            Debug.LogError($"[ImageCache] Failed to load image {url}: {e}");
+            return null;
+        }
+        finally
+        {
+            // Always clear the entry so a failed load isn't cached forever.
+            ongoingDownloads.Remove(url);
+        }
     }
     [Serializable]
     private class ImageMeta
@@ -97,6 +108,14 @@ public class ImageCacheService : MonoBehaviour
     // Core Logic
     private async Task<Sprite> LoadOrDownloadAsync(string url)
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // On WebGL there is no reliable persistent file cache and the browser
+        // already caches HTTP responses, so skip the disk layer entirely and
+        // download straight into the memory cache. This also avoids the
+        // EncodeToPNG()/File IO calls that fail on WebGL and would otherwise
+        // fault the task and leave item cards stuck on "loading".
+        return await DownloadToMemoryAsync(url);
+#else
         string filePath = GetFilePathFromUrl(url);
         string metaPath = filePath + ".meta";
 
@@ -140,7 +159,7 @@ public class ImageCacheService : MonoBehaviour
 #endif
                 {
                     // 200 = image was updated, save new copy and carry on
-                    return await SaveDownloadedImage(url, filePath, metaPath, request);
+                    return SaveDownloadedImage(url, filePath, metaPath, request);
                 }
 
                 // Network error — serve the stale cached copy rather than returning null
@@ -169,26 +188,68 @@ public class ImageCacheService : MonoBehaviour
                 return null;
             }
 
-            return await SaveDownloadedImage(url, filePath, metaPath, request);
+            return SaveDownloadedImage(url, filePath, metaPath, request);
+        }
+#endif
+    }
+
+    // Plain download into the memory cache with no disk persistence.
+    private async Task<Sprite> DownloadToMemoryAsync(string url)
+    {
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        {
+            var op = request.SendWebRequest();
+            while (!op.isDone)
+                await Task.Yield();
+
+#if UNITY_2020_1_OR_NEWER
+            if (request.result != UnityWebRequest.Result.Success)
+#else
+            if (request.isNetworkError || request.isHttpError)
+#endif
+            {
+                Debug.LogError($"Image download failed: {url}\n{request.error}");
+                return null;
+            }
+
+            Texture2D texture = DownloadHandlerTexture.GetContent(request);
+            Sprite sprite = CreateSpriteFromTexture(texture);
+            memoryCache[url] = sprite;
+            return sprite;
         }
     }
 
-    private async Task<Sprite> SaveDownloadedImage(string url, string filePath, string metaPath, UnityWebRequest request)
+    private Sprite SaveDownloadedImage(string url, string filePath, string metaPath, UnityWebRequest request)
     {
         Texture2D texture = DownloadHandlerTexture.GetContent(request);
         Sprite sprite = CreateSpriteFromTexture(texture);
-        byte[] pngData = texture.EncodeToPNG();
 
-        string metaJson = JsonUtility.ToJson(new ImageMeta
-        {
-            etag = request.GetResponseHeader("ETag"),
-            lastModified = request.GetResponseHeader("Last-Modified")
-        });
-
-        File.WriteAllBytes(filePath, pngData);
-        File.WriteAllText(metaPath, metaJson);
-
+        // Cache the sprite before touching the disk so the caller always gets
+        // its image even if persistence below fails.
         memoryCache[url] = sprite;
+
+        // Disk persistence is best-effort — a failure here must not fault the
+        // load or leave the caller stuck loading.
+        try
+        {
+            byte[] pngData = texture.EncodeToPNG();
+            if (pngData != null && pngData.Length > 0)
+            {
+                string metaJson = JsonUtility.ToJson(new ImageMeta
+                {
+                    etag = request.GetResponseHeader("ETag"),
+                    lastModified = request.GetResponseHeader("Last-Modified")
+                });
+
+                File.WriteAllBytes(filePath, pngData);
+                File.WriteAllText(metaPath, metaJson);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[ImageCache] Failed to persist {url} to disk: {e.Message}");
+        }
+
         return sprite;
     }
 
