@@ -1,119 +1,130 @@
-# Push Notifications & Marketplace
+# Marketplace
 
 <p align="center">
-    <img  src="../_screenshots/x_Marketplace.png?raw=true">
+    <img  src="https://apps.braincloudservers.com/Builds/screenshots/Marketplace.png">
 </p>
 
-This showcases the use of the [Push Notification](https://docs.braincloudservers.com/api/capi/pushnotification/) and [App Store](https://docs.braincloudservers.com/api/capi/appstore/) services available on [brainCloud](https://getbraincloud.com/).
+This example is a small virtual-goods economy built on top of [brainCloud](https://getbraincloud.com/): a store, an inventory, a couple of currencies, and enough supporting mechanics (leveling, boosts, freebies, subscriptions) to make it feel like a real game economy rather than a bare-bones "buy one product" demo.
 
-Push Notifications and In-App Purchases are set up differently for both Android and iOS so be sure to pay attention to the instructions for the platform you want to make use of.
+It uses brainCloud's [Script](https://docs.braincloudservers.com/api/capi/scripting/), [App Store](https://docs.braincloudservers.com/api/capi/appstore/), [User Items](https://docs.braincloudservers.com/api/capi/useritems/), and [Player State](https://docs.braincloudservers.com/api/capi/playerstate/) services under the hood.
 
----
-
-## Push Notification
-
-The [ExampleApp](./Assets/App/Scripts/ExampleApp.cs) script will register device tokens (either through Firebase or the App Store) and the `SendPushNotification(Action)` function will send Push Notifications via brainCloud's [SendRawPushNotification](https://docs.braincloudservers.com/api/capi/pushnotification/schedulerawpushnotificationutc) API call. This sends JSON data to be used by their respectivce remote push notification services so be sure to look up how the JSON is supposed to be set up for [Firebase](https://github.com/firebase/firebase-admin-dotnet/blob/db55e58ee591dab1f90a399336670ae84bab915b/FirebaseAdmin/FirebaseAdmin.Snippets/FirebaseMessagingSnippets.cs) and [Apple Push Services](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/generating_a_remote_notification).
-
-Try the different [PushNotificationService](https://docs.braincloudservers.com/api/capi/pushnotification/) calls from here to see how each one works.
-
-### Android Setup
-
-Push Notifications on Android devices make use of the [Firebase Messaging](https://firebase.google.com/docs/unity/setup) plugin. You will have to set up a project on the [Firebase Console](https://console.firebase.google.com/) and enable **Messaging** to make use of this plugin.
-
-You will need to include the `google-services.json` file in your projects `Assets` folder for Firebase to initialize properly.
-
-### iOS Setup
-
-You will need to set up a bundle identifier on [Apple's developer portal](https://developer.apple.com/account/resources/identifiers/list) and enable **Push Notifications** for this bundle identifier (if you set up one up for In-App Purchases you will need to use the same one). Be sure to generate an [Apple Push Services certificate](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/establishing_a_certificate-based_connection_to_apns) using the bundle identifier you set up and export it as a `.p12` certificate (you can do so either with [OpenSSL](https://www.openssl.org/) or the Keychain Access app on MacOS).
-
-The `.p12` certificate will be need to be uploaded to your app's **Notifications** settings on brainCloud in order to be able to send remote push notifications to registered devices.
-
-If you're having trouble receiving remote push notifications, try changing the **Push Notification Environment** to `Development` in your settings.
-
-Note: When building for iOS, you might receive errors from Firebase in Unity after successful builds. This won't impact your app. The Dependency Resolver will, however, include Firebase in your `Podfile` but if you don't have any other plugins included in your build, you don't need to install any external dependencies for the project to build. If you do, you can simply remove Firebase from your `Podfile` before running CocoaPods.
+One thing worth flagging up front: this used to also be a Push Notification example. That's gone now, and this project is focused on the marketplace/economy side only.
 
 ---
 
-## Marketplace
+## What's in here
 
-Both Android and iOS makes use of Unity's In-App Purchasing service to initiate purchases and then it will verify through brainCloud's App Store service to keep purchases synced to the user's account. Android handles purchases through the [Google Play Store](https://play.google.com/console/about/in-appproductssetup/) while iOS uses the [App Store](https://developer.apple.com/in-app-purchase/). Both services have differences from each other so be sure to read up on their developer portals to see how they should be set up.
+- **Coins and Gems** as the two virtual currencies, with a little fly-to-HUD animation when you collect them (`AppManager`, `DynamicCurrencyAnim`).
+- **Leveling and XP**: level up and you'll get a `LevelUpModal`. XP is awarded server-side and just reflected on the client (`AppManager.OnUserLevelUpdated` / `OnUserXPUpdated`).
+- **A store** for browsing and buying items, bundles, currency packs, and real-money products (`StoreWindow`, `StoreItemCard`, `ViewStoreItemModal`).
+- **An inventory** (`PlayerInventory`, `UserItemCard`) where owned items can be:
+  - equipped into a slot (avatar frame, shirt, etc.)
+  - sold back for currency
+  - activated, if they're time-limited boosts (there's a coin multiplier and an XP generator that keeps accruing XP in real time, even while you're offline)
+  - opened, if they're bundles containing other stuff
+- **Freebies**: items you can claim for free once a cooldown has passed.
+- **Subscriptions**: a `no_ads` subscription with renewal/expiry tracking, which works with both a real platform subscription and a mocked one.
+- **A profile picture picker**, mostly just for flavor.
+- **In-App Purchases**, either the real thing through Unity IAP + brainCloud's App Store service, or a mock mode (on by default, see below) that fakes the actual purchase through brainCloud instead of going through Unity IAP or a real store account.
 
-[BrainCloudMarketplace](./Assets/App/Scripts/Store/BrainCloudMarketplace.cs) will handle the process for you making use of JSON objects defined in [BCProduct](./Assets/App/Scripts/Store/BCProduct.cs). These two scripts can be dropped into your own project to help get started on integrating in-app purchases for your app!
+All the actual gameplay logic (buying, selling, equipping, activating, opening bundles, claiming freebies, awarding XP and coins, verifying subscriptions) lives server-side as brainCloud Cloud Code. Those scripts are in the [`CloudCode`](./CloudCode) folder, and you'll need to upload them to your app under `Design > Cloud Code > Scripts` before any of this will work.
+
+If you want to dig into how it's wired up, these are the scripts to start with:
+- [`AppManager`](./Assets/App/Scripts/AppManager.cs): session state such as currencies, XP/leveling, modals, profile image
+- [`InventoryService`](./Assets/App/Scripts/Util/InventoryService.cs): fetches store/inventory data and drives most of the buy/sell/equip/activate/bundle/freebie logic
+- [`BrainCloudMarketplace`](./Assets/App/Scripts/Store/BrainCloudMarketplace.cs) and [`BCProduct`](./Assets/App/Scripts/Store/BCProduct.cs): bridges brainCloud's Marketplace/App Store service with Unity IAP, both real and mock
+- [`ImageCacheService`](./Assets/App/Scripts/Util/ImageCacheService.cs): loads and caches item art from URLs (disk-cached with ETag revalidation on native platforms, memory-only on WebGL since disk caching doesn't behave well there)
+
+---
+
+## Mock purchases (the default)
+
+Out of the box, `AppManager.MockPurchasesEnabled` is `true`. In this mode, purchases and subscriptions are faked entirely through brainCloud (`BrainCloudMarketplace.MockPurchaseProduct`, the `VerifyPurchaseMockStore` script, and a fake subscription renewal timer) instead of going through Unity IAP and an actual store. That means you can run the store/economy loop in the Editor, on desktop, or on WebGL without touching the Google Cloud Console, Play Console, OAuth credentials, or a `.p12` certificate. None of the real store account setup is needed.
+
+One thing this *doesn't* skip: brainCloud's own product catalog. Real-money products are still fetched from brainCloud's App Store service using a `storeId` (`InventoryService.GetPlatformStoreId()`), and even in mock mode that defaults to `"googlePlay"` on Editor/Desktop/WebGL (only iOS/macOS resolve to `"itunes"`). So for those products to actually show up in the store, they still need to exist on the brainCloud portal under `Design > Marketplace > Products`, linked to a Google Product ID (see the [brainCloud Marketplace](#braincloud-marketplace) steps below for that part). Items, bundles, freebies, and multipliers bought with Coins/Gems aren't affected by any of this, since those come from the item catalog and need no store setup at all, mock or real.
+
+When you're ready to test real purchases end-to-end through an actual store, set `AppManager.MockPurchasesEnabled = false` and follow the rest of the setup below.
+
+---
+
+## Setting up real In-App Purchases
+
+Both Android and iOS use Unity's In-App Purchasing service to kick off a purchase, which then gets verified through brainCloud's App Store service so it's synced to the user's account. Android goes through the [Google Play Store](https://play.google.com/console/about/in-appproductssetup/), iOS through the [App Store](https://developer.apple.com/in-app-purchase/), and since the two platforms don't work the same way, it's worth reading through their developer portals as you set things up.
 
 ### Unity In-App Purchasing
 
-You will need to enable Unity's **In-App Purchasing** services to make use of in-app purchases in your Unity projects. You will not be charged for this service as it'll only be used as an interface for your respective platforms to get, initiate, and validate purchases.
+You'll need Unity's **In-App Purchasing** service enabled for the project. It's free to enable; it's just the interface layer for getting, initiating, and validating purchases on each platform.
 
-Follow Unity's [setup](https://docs.unity3d.com/Manual/UnityIAPSettingUp.html) guide to enable the service for the project. You will need to include the Google Play **License Key** for your Unity services project's dashboard for Android in-app purchases.
+Follow Unity's [setup guide](https://docs.unity3d.com/Manual/UnityIAPSettingUp.html) to turn it on, and grab the Google Play **License Key** from your Unity services dashboard for Android purchases.
 
 ### Google Play Store
 
-You will have to setup a project on both the [Google Cloud Console](https://console.cloud.google.com/) and the [Google Play Console](https://play.google.com/console/developers) in order to make use of in-app purchasing in your project.
+You'll need a project set up on both the [Google Cloud Console](https://console.cloud.google.com/) and the [Google Play Console](https://play.google.com/console/developers).
 
 #### Google Cloud Console
 
-- Enable **Google Cloud APIs**, **Google Play Android Developer API**, **Google Play Game Services**, **Service Usage API** and **Token Service API** for your app
-- Create an **OAuth 2.0 Client ID** account for your app
-    - This will give you the Client ID and Client Secret needed for your app on both brainCloud and the Google Play Console
-- Create a **Service Account** under **Credentials**
-    - This is crucial as its required for brainCloud to have access to your app on the Google Play Store
-    - You will also need to also create a **Google Service Account p12 Certificate** under **Keys**; download the `.p12` certificate and keep it somewhere safe
+- Enable **Google Cloud APIs**, **Google Play Android Developer API**, **Google Play Game Services**, **Service Usage API**, and **Token Service API**
+- Create an **OAuth 2.0 Client ID**, which gives you the Client ID and Client Secret you'll need on both brainCloud and the Google Play Console
+- Create a **Service Account** under **Credentials**, which is what lets brainCloud talk to your app on the Play Store
+    - Also generate a **Google Service Account p12 Certificate** under **Keys**, and keep the downloaded `.p12` somewhere safe
 
 #### Google Play Console
 
-- Ensure that you have billing enabled for your developer account
-- Give the service account you have set up under the Google Cloud Console **API access** to your developer account
-- Under **Users and permissions**, add the same service account app as a user and give it permissions to your app and enable the following permissions:
+- Make sure billing is enabled on your developer account
+- Give the service account **API access** to your developer account
+- Under **Users and permissions**, add that same service account and grant it:
     - View app information (read-only)
     - View financial data
     - Manage orders and subscriptions
     - Manage store presence
     - Manage policy declarations
-- Also add the client ID account as a user and give it **View app information (read-only)** permissions
-- For your app, go through the **Monetization setup** to enable monetization
-    - You can find the Base64-encoded RSA public key here to enable Google Play Store purchasing in the Unity IAP service
-- You will need to have **In-app products** and/or **Subscriptions** added to your app
+- Also add the OAuth client ID account as a user with **View app information (read-only)**
+- Go through **Monetization setup** to enable monetization (this is also where you'll find the Base64-encoded RSA public key Unity IAP needs)
+- Add your **In-app products** and/or **Subscriptions**
 
 #### brainCloud Marketplace
 
-1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
+1. In the [brainCloud portal](https://portal.braincloudservers.com/) for your app, go to `Design > Core App Info > Application IDs`
 2. Click **GOOGLE** under **Configure Platforms**
-3. You will need to fill out all of the fields using the information in your Google Cloud project for your app in order to allow brainCloud to have access to your app:
-    - Google Service Account Email
-        - This is the same service account created from above
+3. Fill in the fields using what you set up in Google Cloud:
+    - Google Service Account Email (the service account from above)
     - Google Package Name
     - Google App ID
-    - Google Client ID
-    - Google Client Secret
-        - These are from the OAuth 2.0 client ID account
-4. You will also need to upload the `.p12` certificate created for the service account here
-5. Navigate to `Design > Marketplace > Products` to set up your in-app purchases
-    - Each product here is meant to reflect a product that your users can purchase; setting these up will automatically facilitate currencies and items that your in-app purchases can redeem on brainCloud once the purchases are verified
-    - You will need to ensure that when adding the Google product info for your products that the **Google Product ID** matches the product ID in your app's Google Play Console
-    - The prices here are for your own references and is not the same as what is set up for your Google Play Store app
-    - It is recommended that you use the localized titles, descriptions, and prices that you can obtain through the product's metadata in your scripts to display the proper information to your users
-    - See the [StorePanel](./Assets/App/Scripts/UI/StorePanel.cs), [BrainCloudMarketplace](./Assets/App/Scripts/Store/BrainCloudMarketplace.cs), and [BCProduct](./Assets/App/Scripts/Store/BCProduct.cs) scripts for how this example makes use of brainCloud's Marketplace features
+    - Google Client ID / Client Secret (from the OAuth client)
+4. Upload the `.p12` certificate for the service account
+5. Head to `Design > Marketplace > Products` and set up your products
+    - Each product here represents something a user can buy, and setting it up here is what lets brainCloud grant the right currency/items once a purchase is verified
+    - The **Google Product ID** has to match the product ID from the Play Console
+    - Prices here are just for reference; they don't need to match what's actually configured in the Play Store
+    - It's a good idea to pull the localized title/description/price from the product metadata at runtime rather than hardcoding them, so users see pricing correct for their region
+    - [`BrainCloudMarketplace`](./Assets/App/Scripts/Store/BrainCloudMarketplace.cs), [`BCProduct`](./Assets/App/Scripts/Store/BCProduct.cs), and [`StoreWindow`](./Assets/App/Scripts/UI/Elements/StoreWindow.cs) show how this example uses all of that
 
 ### App Store
 
-You will need to set up a **Bundle Identifier** on [Apple's developer portal](https://developer.apple.com/account/resources/identifiers/list) (if you set up one up for Push Notifications you will need to use the same one). You will also need to create an app in [App Store Connect](https://appstoreconnect.apple.com/apps); make sure to use the Bundle ID you created for this app.
+Set up a **Bundle Identifier** on [Apple's developer portal](https://developer.apple.com/account/resources/identifiers/list), then create an app in [App Store Connect](https://appstoreconnect.apple.com/apps) using it.
 
 #### App Store Connect
 
-1. After creating your app, under `App Information > Bundle ID` make sure you have selected the proper Bundle ID
-2. You can create in-app purchase products under `Features > In-App Purchases` and subscriptions under `Features > Subscriptions`
-    - You will only be able to create one in-app purchase product and one subscription until you upload your app for the first time; you can do so as a test if you need to test more than one
+1. Under `App Information > Bundle ID`, make sure the right Bundle ID is selected
+2. Create in-app purchase products under `Features > In-App Purchases` and subscriptions under `Features > Subscriptions`
+    - You can only create one of each until you've uploaded a build for the first time; if you need more for testing, a test build will unlock that
 
 #### brainCloud Marketplace
 
-1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
+1. In the [brainCloud portal](https://portal.braincloudservers.com/) for your app, go to `Design > Core App Info > Application IDs`
 2. Click **APPLE** under **Configure Platforms**
-3. Fill out **Bundle Id** with the bundle identifier you created for your app
-4. Navigate to `Design > Marketplace > Products` to set up your in-app purchases
-    - When configuring for Apple, you will need to make sure your **Product ID** matches what you set up in the App Store Connect
-    - You should use the same Product ID for iPhone, iPad and Apple TV (at one point Apple required all three to be different but this is no longer the case)
-    - Read [step 5](#braincloud-marketplace) of the Google Play Store brainCloud Marketplace instructions for more information
+3. Fill in **Bundle Id** with the bundle identifier you created
+4. Head to `Design > Marketplace > Products` and set up your products
+    - Your **Product ID** needs to match what's in App Store Connect
+    - Use the same Product ID across iPhone, iPad, and Apple TV (Apple used to require these be different, but that's no longer the case)
+    - See [step 5](#braincloud-marketplace) above for the rest, same idea, just on the Apple side
 
 ---
 
-Check out [brainCloud Monetization](https://docs.braincloudservers.com/learn/key-concepts/monetization/) for more information on how to make use of brainCloud monetization features. For more information on other brainCloud services, check out [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and [API Reference](https://docs.braincloudservers.com/api/introduction).
+## Cloud Code
+
+The scripts in [`CloudCode`](./CloudCode) are where all the real logic lives: currency/XP awards, buying/selling/equipping items, opening bundles, claiming freebies, activating boosts, verifying purchases and subscriptions. Upload them to your brainCloud app under `Design > Cloud Code > Scripts`, keeping the names as-is, since the client calls them by name through the Script Service (things like `BuyItem`, `SellItem`, `EquipItem`, `ActivateItem`, `UseFreebie`, `OpenBundle`, `AwardUserCoins`).
+
+---
+
+For more on brainCloud's monetization tools, check out [brainCloud Monetization](https://docs.braincloudservers.com/learn/key-concepts/monetization/). For everything else, there's [brainCloud Learn](https://docs.braincloudservers.com/learn/introduction/) and the [API Reference](https://docs.braincloudservers.com/api/introduction).
