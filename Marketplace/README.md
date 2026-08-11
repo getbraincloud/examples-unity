@@ -8,23 +8,21 @@ This example is a small virtual-goods economy built on top of [brainCloud](https
 
 It uses brainCloud's [Script](https://docs.braincloudservers.com/api/capi/scripting/), [App Store](https://docs.braincloudservers.com/api/capi/appstore/), [User Items](https://docs.braincloudservers.com/api/capi/useritems/), and [Player State](https://docs.braincloudservers.com/api/capi/playerstate/) services under the hood.
 
-One thing worth flagging up front: this used to also be a Push Notification example. That's gone now, and this project is focused on the marketplace/economy side only.
+This used to also be a Push Notification example. That's gone now, and this project is focused on the marketplace/economy side only.
 
 ---
 
 ## What's in here
 
-- **Coins and Gems** as the two virtual currencies, with a little fly-to-HUD animation when you collect them (`AppManager`, `DynamicCurrencyAnim`).
+- **Coins and Gems** as the two virtual currencies
 - **Leveling and XP**: level up and you'll get a `LevelUpModal`. XP is awarded server-side and just reflected on the client (`AppManager.OnUserLevelUpdated` / `OnUserXPUpdated`).
 - **A store** for browsing and buying items, bundles, currency packs, and real-money products (`StoreWindow`, `StoreItemCard`, `ViewStoreItemModal`).
 - **An inventory** (`PlayerInventory`, `UserItemCard`) where owned items can be:
   - equipped into a slot (avatar frame, shirt, etc.)
-  - sold back for currency
   - activated, if they're time-limited boosts (there's a coin multiplier and an XP generator that keeps accruing XP in real time, even while you're offline)
   - opened, if they're bundles containing other stuff
 - **Freebies**: items you can claim for free once a cooldown has passed.
 - **Subscriptions**: a `no_ads` subscription with renewal/expiry tracking, which works with both a real platform subscription and a mocked one.
-- **A profile picture picker**, mostly just for flavor.
 - **In-App Purchases**, either the real thing through Unity IAP + brainCloud's App Store service, or a mock mode (on by default, see below) that fakes the actual purchase through brainCloud instead of going through Unity IAP or a real store account.
 
 All the actual gameplay logic (buying, selling, equipping, activating, opening bundles, claiming freebies, awarding XP and coins, verifying subscriptions) lives server-side as brainCloud Cloud Code. Those scripts are in the [`CloudCode`](./CloudCode) folder, and you'll need to upload them to your app under `Design > Cloud Code > Scripts` before any of this will work.
@@ -39,9 +37,9 @@ If you want to dig into how it's wired up, these are the scripts to start with:
 
 ## Mock purchases (the default)
 
-Out of the box, `AppManager.MockPurchasesEnabled` is `true`. In this mode, purchases and subscriptions are faked entirely through brainCloud (`BrainCloudMarketplace.MockPurchaseProduct`, the `VerifyPurchaseMockStore` script, and a fake subscription renewal timer) instead of going through Unity IAP and an actual store. That means you can run the store/economy loop in the Editor, on desktop, or on WebGL without touching the Google Cloud Console, Play Console, OAuth credentials, or a `.p12` certificate. None of the real store account setup is needed.
+`AppManager.MockPurchasesEnabled` is `true` by default. In this mode, purchases and subscriptions are faked entirely through brainCloud (`BrainCloudMarketplace.MockPurchaseProduct`, the `VerifyPurchaseMockStore` script, and a fake subscription renewal timer) instead of going through Unity IAP and an actual store. That means you can run the store/economy loop in the Editor, on desktop, or on WebGL without touching the Google Cloud Console, Play Console, OAuth credentials, or a `.p12` certificate. None of the real store account setup is needed.
 
-One thing this *doesn't* skip: brainCloud's own product catalog. Real-money products are still fetched from brainCloud's App Store service using a `storeId` (`InventoryService.GetPlatformStoreId()`), and even in mock mode that defaults to `"googlePlay"` on Editor/Desktop/WebGL (only iOS/macOS resolve to `"itunes"`). So for those products to actually show up in the store, they still need to exist on the brainCloud portal under `Design > Marketplace > Products`, linked to a Google Product ID (see the [brainCloud Marketplace](#braincloud-marketplace) steps below for that part). Items, bundles, freebies, and multipliers bought with Coins/Gems aren't affected by any of this, since those come from the item catalog and need no store setup at all, mock or real.
+One thing this *doesn't* skip: brainCloud's own product catalog. Real-money products are still fetched from brainCloud's App Store service using a `storeId` (`InventoryService.GetPlatformStoreId()`), and even in mock mode that defaults to `"googlePlay"` on Editor/Desktop/WebGL (iOS/macOS resolve to `"itunes"`). So for those products to actually show up in the store, they still need to exist on the brainCloud portal under `Design > Marketplace > Products`, linked to a Google Product ID (see the [brainCloud Marketplace](#braincloud-marketplace) steps below for that part). Items, bundles, freebies, and multipliers bought with Coins/Gems aren't affected by any of this, since those come from the item catalog and need no store setup at all, mock or real.
 
 When you're ready to test real purchases end-to-end through an actual store, set `AppManager.MockPurchasesEnabled = false` and follow the rest of the setup below.
 
