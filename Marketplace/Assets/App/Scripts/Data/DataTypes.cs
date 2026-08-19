@@ -110,3 +110,12 @@ public class ItemSectionSprite
     public string sectionName;
     public Sprite sprite;
 }
+
+[Serializable]
+public class LocalImageOverride
+{
+    // Matches the catalog "image" value (filename, case-insensitive, extension optional)
+    // for items whose art ships with the app instead of being hosted at a URL.
+    public string key;
+    public Sprite sprite;
+}
