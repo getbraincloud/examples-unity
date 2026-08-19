@@ -55,9 +55,10 @@ public class ViewStoreItemModal : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(_data.imageUrl))
         {
-            cardArt.sprite = await ImageCacheService.Instance.GetImageAsync(_data.imageUrl);
-            if (cardArt.sprite != null)
+            Sprite fetchedSprite = await ImageCacheService.Instance.GetImageAsync(_data.imageUrl);
+            if (fetchedSprite != null)
             {
+                cardArt.sprite = fetchedSprite;
                 loadingSpinner.SetActive(false);
                 cardArt.gameObject.SetActive(true);
             }

@@ -260,7 +260,8 @@ public class MainScreen : MonoBehaviour
             if (itemData.isEquipped)
             {
                 Sprite newAvatarImage = await ImageCacheService.Instance.GetImageAsync(itemData.imageUrl);
-                _avatarImage.sprite = newAvatarImage;
+                if (newAvatarImage != null)
+                    _avatarImage.sprite = newAvatarImage;
             }
             else
             {

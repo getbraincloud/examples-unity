@@ -71,7 +71,9 @@ public class ViewItemModal : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(_data.imageUrl))
         {
-            cardArt.sprite = await ImageCacheService.Instance.GetImageAsync(_data.imageUrl);
+            Sprite fetchedSprite = await ImageCacheService.Instance.GetImageAsync(_data.imageUrl);
+            if (fetchedSprite != null)
+                cardArt.sprite = fetchedSprite;
         }
         else if (_data.isSubscription && ImageCacheService.Instance.noAdsSprite != null)
         {

@@ -69,6 +69,19 @@ public class ImageCacheService : MonoBehaviour
         if (string.IsNullOrEmpty(url))
             return null;
 
+        // Some catalog items (e.g. freebies, default starter items) carry a bare
+        // filename in their "image" field rather than a hosted URL, since their
+        // art already ships baked into the prefab. Attempting to fetch a bare
+        // filename as a network request fails everywhere, and on WebGL the
+        // browser resolves it as if it were a hostname (e.g. "https://foo.png/"),
+        // producing a CORS/NetworkError. Skip the fetch and let the caller keep
+        // whatever sprite is already assigned.
+        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri parsedUri) ||
+            (parsedUri.Scheme != Uri.UriSchemeHttp && parsedUri.Scheme != Uri.UriSchemeHttps))
+        {
+            return null;
+        }
+
         // First check memory cache
         if (memoryCache.TryGetValue(url, out Sprite cachedSprite))
             return cachedSprite;
