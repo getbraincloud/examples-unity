@@ -50,12 +50,15 @@ public class GameManager : MonoBehaviour
     //for updating members list of splatters
     public GameArea GameArea;
     public Button JoinInProgressButton;
-    public TMP_Dropdown FFADropdown;
-    public TMP_Dropdown TeamDropdown;
+    public TMP_Dropdown LobbyTypeDropdown;
 
     //local user's start button for starting a match
     public GameObject StartGameBtn;
     public GameObject EndGameBtn;
+    public MatchSummaryController MatchSummaryScreen;
+    public TMP_Text LiveScoreboardText;
+    public TMP_Text MatchPingText;
+    public Image OwnColorSwatchImage;
     public TMP_Text LobbyLocalUserText;
     public TMP_Dropdown CompressionDropdown;
     private EventSystem _eventSystem;
@@ -169,70 +172,57 @@ public class GameManager : MonoBehaviour
         LoggedInNameText.text = $"Logged in as {_currentUserInfo.Username}";
     }
 
-    //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callback OnLobbyEvent()
-    public void UpdateLocalColorChange(int newColor)
+    // Shared "extra" payload for every UpdateReady call — colour, presence, own rank, and
+    // relay compression type if host.
+    public Dictionary<string, object> BuildExtraJson()
     {
-        _currentUserInfo.UserGameColor = newColor;
-        //Apply in game color changes
-        Settings.SetPlayerPrefColor(newColor);
-
-        //Send update to BC
-        Dictionary<string, object> extra = new Dictionary<string, object>();
+        var extra = new Dictionary<string, object>();
         extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
         extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
+        extra["rank"] = _currentUserInfo.WorldwideRank;
         if (IsLocalUserHost())
         {
             extra["relayCompressionType"] = (int)BrainCloudManager.Instance._relayCompressionType;
         }
+        return extra;
+    }
+
+    private void SendUpdateReady()
+    {
         BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
         (
             stManager.CurrentLobby.LobbyID,
             stManager.isReady,
-            extra,
+            BuildExtraJson(),
             null,
             BrainCloudManager.Instance.OnUpdateReadyFailure
         );
+    }
+
+    //Note: Lobby text color is changed within UpdateLobbyList() from Brain Cloud's callback OnLobbyEvent()
+    public void UpdateLocalColorChange(int newColor)
+    {
+        _currentUserInfo.UserGameColor = newColor;
+        Settings.SetPlayerPrefColor(newColor);
+        SendUpdateReady();
     }
 
     public void UpdatePresentSinceStart()
     {
         _currentUserInfo.PresentSinceStart = true;
-        //Send update to BC
-        Dictionary<string, object> extra = new Dictionary<string, object>();
-        extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
-        extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
-        if (IsLocalUserHost())
-        {
-            extra["relayCompressionType"] = (int)BrainCloudManager.Instance._relayCompressionType;
-        }
-        BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
-        (
-            stManager.CurrentLobby.LobbyID,
-            stManager.isReady,
-            extra,
-            null,
-            BrainCloudManager.Instance.OnUpdateReadyFailure
-        );
+        SendUpdateReady();
     }
 
     public void SendUpdateRelayCompressionType()
     {
-        //Send update to BC
-        Dictionary<string, object> extra = new Dictionary<string, object>();
-        extra["colorIndex"] = (int)_currentUserInfo.UserGameColor;
-        extra["presentSinceStart"] = _currentUserInfo.PresentSinceStart;
-        if (IsLocalUserHost())
-        {
-            extra["relayCompressionType"] = (int)BrainCloudManager.Instance._relayCompressionType;
-        }
-        BrainCloudManager.Instance.Wrapper.LobbyService.UpdateReady
-        (
-            stManager.CurrentLobby.LobbyID,
-            stManager.isReady,
-            extra,
-            null,
-            BrainCloudManager.Instance.OnUpdateReadyFailure
-        );
+        SendUpdateReady();
+    }
+
+    // Called once rank is known — pushes it to lobby-mates right away if already in a lobby.
+    public void PushWorldwideRankIfInLobby()
+    {
+        if (stManager.CurrentLobby != null && !string.IsNullOrEmpty(stManager.CurrentLobby.LobbyID))
+            SendUpdateReady();
     }
 
     public void UpdateCursorList()
@@ -288,7 +278,9 @@ public class GameManager : MonoBehaviour
     {
         AdjustLobbyList();
         StartGameBtn.SetActive(IsLocalUserHost());
-        EndGameBtn.SetActive(IsLocalUserHost());
+        // "Exit Match", not host-only "End Match" — everyone can leave individually; the match
+        // itself only ends via the 90s timer.
+        EndGameBtn.SetActive(true);
         CompressionDropdown.interactable = IsLocalUserHost();
         LobbyIdText.text = stManager.CurrentLobby.LobbyID;
         if (!LobbyIdText.enabled)
@@ -351,6 +343,56 @@ public class GameManager : MonoBehaviour
     {
         UpdateLobbyState();
         UpdateMatchState();
+    }
+
+    // Called by BrainCloudManager whenever match_result/lb_result data arrives or changes.
+    public void RefreshMatchSummary()
+    {
+        if (MatchSummaryScreen != null)
+            MatchSummaryScreen.RefreshResults();
+    }
+
+    // Live "RANK / PLAYER / COVERAGE" sidebar — rebuilt on every live_coverage snapshot.
+    // Exact hex values from the cpp reference client's rankColorFor() (game.cpp), reused verbatim
+    // there across the leaderboard panel, in-match sidebar, and match summary.
+    private static string RankMedalColor(int rank)
+    {
+        switch (rank)
+        {
+            case 1: return "#FFD700"; // gold
+            case 2: return "#BFBFBF"; // silver
+            case 3: return "#CC8033"; // bronze
+            default: return "#FFFFFF";
+        }
+    }
+
+    public void RefreshLiveScoreboard()
+    {
+        if (LiveScoreboardText == null) return;
+
+        var sb = new System.Text.StringBuilder();
+        foreach (var entry in stManager.LiveCoverage)
+        {
+            string name = "?";
+            bool isMe = false;
+            foreach (var m in stManager.CurrentLobby.Members)
+            {
+                if (m.cxId == entry.CxId)
+                {
+                    name = m.Username;
+                    isMe = m.ProfileID == CurrentUserInfo.ProfileID;
+                    break;
+                }
+            }
+            Color dotColour = ReturnUserColor(entry.ColourIndex);
+            string hex = ColorUtility.ToHtmlStringRGB(dotColour);
+            // Rank medal colours + "me" name colour match the cpp reference client's HUD sidebar exactly.
+            string rankColor = RankMedalColor(entry.Rank);
+            string nameDisplay = isMe ? $"<color=#59ff73>{name}</color> <mark=#ffffff22>YOU</mark>" : name;
+            string row = $"<color={rankColor}>#{entry.Rank}</color>  <color=#{hex}>●</color>  {nameDisplay}<pos=90%><align=right>{entry.CoveragePct:F0}%</align>";
+            sb.AppendLine(isMe ? $"<mark=#4caf5022>{row}</mark>" : row);
+        }
+        LiveScoreboardText.text = sb.ToString();
     }
 
     /// <summary>
@@ -421,6 +463,8 @@ public class GameManager : MonoBehaviour
 
         LobbyLocalUserText.text = _currentUserInfo.Username;
         LobbyLocalUserText.color = ReturnUserColor(_currentUserInfo.UserGameColor);
+        if (OwnColorSwatchImage != null)
+            OwnColorSwatchImage.color = ReturnUserColor(_currentUserInfo.UserGameColor);
     }
 
     private void AdjustMatchList()
@@ -475,9 +519,29 @@ public class GameManager : MonoBehaviour
             entry.UsernameText.text = info.Username + " (In Lobby)";
         }
 
-        if (entry.HostImage)
+        if (entry.HostBadgeRoot)
         {
-            entry.HostImage.enabled = info.IsHost;
+            entry.HostBadgeRoot.SetActive(info.IsHost);
+        }
+
+        if (entry.YouBadgeRoot)
+        {
+            entry.YouBadgeRoot.SetActive(info.ProfileID == CurrentUserInfo.ProfileID);
+        }
+
+        if (entry.StatusText)
+        {
+            entry.StatusText.text = info.IsReady ? "Ready" : "Not ready";
+        }
+
+        if (entry.PingText)
+        {
+            entry.PingText.text = info.activePing >= 999 || info.activePing < 0 ? "..." : $"{info.activePing}ms";
+        }
+
+        if (entry.RankText)
+        {
+            entry.RankText.text = info.WorldwideRank > 0 ? $"#{info.WorldwideRank}" : "Unranked";
         }
 
         Color userColor = ReturnUserColor(info.UserGameColor);
@@ -486,22 +550,14 @@ public class GameManager : MonoBehaviour
         {
             entry.UserDotImage.color = userColor;
         }
-    }
 
-    public void AdjustUserSplatterMask(string username, bool isVisible)
-    {
-        //populate user entries based on members in lobby
-        Lobby lobby = stManager.CurrentLobby;
-        for (int i = 0; i < lobby.Members.Count; i++)
+        if (entry.UserDotButton != null)
         {
-            if (lobby.Members[i].Username.Equals(username))
-            {
-                lobby.Members[i].AllowSendTo = isVisible;
-            }
-        }
-        if (CurrentUserInfo.Username.Equals(username))
-        {
-            CurrentUserInfo.AllowSendTo = isVisible;
+            bool isLocal = info.ProfileID == CurrentUserInfo.ProfileID;
+            entry.UserDotButton.onClick.RemoveAllListeners();
+            entry.UserDotButton.interactable = isLocal;
+            if (isLocal)
+                entry.UserDotButton.onClick.AddListener(() => ColorPopupController.Instance?.Show());
         }
     }
 
@@ -516,20 +572,13 @@ public class GameManager : MonoBehaviour
         _userCursorsList.Clear();
     }
 
-    public void UpdateLobbyDropdowns(List<string> in_ffaList, List<string> in_teamList)
+    public void UpdateLobbyDropdown(List<string> in_lobbyList)
     {
-        FFADropdown.options.Clear();
-        TeamDropdown.options.Clear();
-        for (int i = 0; i < in_ffaList.Count; i++)
+        LobbyTypeDropdown.options.Clear();
+        for (int i = 0; i < in_lobbyList.Count; i++)
         {
-            TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_ffaList[i]);
-            FFADropdown.options.Add(entry);
-        }
-
-        for (int i = 0; i < in_teamList.Count; i++)
-        {
-            TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_teamList[i]);
-            TeamDropdown.options.Add(entry);
+            TMP_Dropdown.OptionData entry = new TMP_Dropdown.OptionData(in_lobbyList[i]);
+            LobbyTypeDropdown.options.Add(entry);
         }
     }
     #endregion Update Components
