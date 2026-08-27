@@ -956,8 +956,25 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 #else
             Debug.Log($"{logMessage}\nJSON Response:\n{jsonResponse}");
 #endif
-
-            onSuccess?.Invoke(jsonResponse, cbObject);
+            try
+            {
+                onSuccess?.Invoke(jsonResponse, cbObject);
+            }
+            catch (Exception e)
+            {
+#if UNITY_EDITOR
+                if (cbObject is MonoBehaviour errObject)
+                {
+                    Debug.LogException(e, errObject);
+                }
+                else
+                {
+                    Debug.LogException(e);
+                }
+#else
+                Debug.LogException(e);
+#endif
+            }
         };
     }
 
@@ -990,10 +1007,27 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 #else
             Debug.Log($"{errorMessage} - Status: {status} - Reason: {reasonCode}\nJSON Response:\n{jsonError}");
 #endif
-
-            onFailure?.Invoke(jsonError.Deserialize<ErrorResponse>(), cbObject);
+            try
+            {
+                onFailure?.Invoke(jsonError.Deserialize<ErrorResponse>(), cbObject);
+            }
+            catch (Exception e)
+            {
+#if UNITY_EDITOR
+                if (cbObject is MonoBehaviour errObject)
+                {
+                    Debug.LogException(e, errObject);
+                }
+                else
+                {
+                    Debug.LogException(e);
+                }
+#else
+                Debug.LogException(e);
+#endif
+            }
         };
     }
 
-    #endregion
+#endregion
 }
