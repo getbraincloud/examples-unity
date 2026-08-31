@@ -20,8 +20,6 @@ public class BuddyHouseInfo : MonoBehaviour
 
     public AppChildrenInfo HouseInfo { get; set; }
 
-    //This is specifically for when the user visits a buddy without collecting any coins.
-    private bool _saveCoinsCollected;
     private RectTransform _coinButtonRectTransform;
     private RectTransform _spawnRectTransform;
     private ParentMenu _parentMenu;
@@ -186,8 +184,6 @@ public class BuddyHouseInfo : MonoBehaviour
                                    ?.GetJSONObject("coins")
                                    ?.GetValue<int>("balance") is int coins && coins > currentUser.Coins ? coins : currentUser.Coins);
 
-        GameManager.Instance.CoinsCollectedViaVisit = _saveCoinsCollected ? amountToReward : 0;
-        _saveCoinsCollected = false;
         BrainCloudManager.Instance.IsProcessingRequest = false;
 
         HouseInfo.lastIdleTimestamp = data.GetDateTime("newLastIdleTimestamp");

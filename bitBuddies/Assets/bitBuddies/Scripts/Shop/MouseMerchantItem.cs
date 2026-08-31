@@ -130,19 +130,19 @@ public class MouseMerchantItem : ShopItem
         if (resultType.Equals("levelUpItem"))
         {
             //Aka Instant level up item 
-            Dictionary<string, object> levelUpItemData = (Dictionary<string, object>)responseData["levelUpInfo"];
+            var levelUpItemData = (Dictionary<string, object>)responseData["levelUpInfo"];
 
             //Get level up before and after
             int levelBefore = (int)levelUpItemData["levelBefore"];
             int levelAfter = (int)levelUpItemData["levelAfter"];
             var appInfo = GameManager.Instance.SelectedAppChildrenInfo;
+            appInfo.currentXP = (int)levelUpItemData["currentXP"];
 
             //Get Rewards
             var rewards = (Dictionary<string, object>)levelUpItemData["rewards"];
             if (rewards != null)
             {
-                var achievementObject = rewards["playerAchievements"] as string[];
-                if (achievementObject != null && achievementObject.Length > 0)
+                if (rewards["playerAchievements"] is string[] achievementObject && achievementObject.Length > 0)
                 {
                     GameManager.Instance.UpdateAchievementAwarded(achievementObject);
                 }
@@ -152,12 +152,8 @@ public class MouseMerchantItem : ShopItem
             var parentCurrencyResults = (Dictionary<string, object>)responseData["parentCurrency"];
             BrainCloudManager.Instance.CurrentUserInfo.UpdateGems((int)parentCurrencyResults["newBalance"]);
             var amountSpent = (int)parentCurrencyResults["amountSpent"];
-            var oldBalance = (int)parentCurrencyResults["oldBalance"];
-            var previousLevelReq = (int)levelUpItemData["previousLevelXPReq"];
-            var nextLevelReq = (int)levelUpItemData["nextLevelXPReq"];
+            //var oldBalance = (int)parentCurrencyResults["oldBalance"]; // TODO: Is this needed?
 
-            //appInfo.previousLevelUp = previousLevelReq;
-            //appInfo.nextLevelUp = nextLevelReq;
             appInfo.buddyLevel = levelAfter;
             if (statIncremented)
             {
@@ -218,7 +214,7 @@ public class MouseMerchantItem : ShopItem
             Dictionary<string, object> parentCurrency = (Dictionary<string, object>)responseData["parentCurrency"];
             int newGemBalance = (int)parentCurrency["newBalance"];
             var amountSpent = (int)parentCurrency["amountSpent"];
-            var oldBalance = (int)parentCurrency["oldBalance"];
+            //var oldBalance = (int)parentCurrency["oldBalance"]; // TODO: Is this needed?
             BrainCloudManager.Instance.CurrentUserInfo.UpdateGems(newGemBalance);
 
             Dictionary<string, object> payoutCurrency = (Dictionary<string, object>)responseData["payoutCurrency"];

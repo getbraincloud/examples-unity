@@ -211,7 +211,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
         var quests = response["quests"] as Dictionary<string, object>[];
         var listOfQuests = new List<QuestInfo>();
 
-        if (quests != null || quests.Length > 0)
+        if (quests != null && quests.Length > 0)
         {
             for (int i = 0; i < quests.Length; ++i)
             {
@@ -842,8 +842,15 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
 
     public void OnAddChildProfile(string jsonResponse)
     {
-        var children = jsonResponse.Deserialize("data", "response")
-                                  ?.GetJSONArray("children");
+        var response = jsonResponse.Deserialize("data", "response");
+
+        var xpLevels = response?.GetJSONArray("xp_levels");
+        if (xpLevels != null && xpLevels.Length > 0)
+        {
+            AppChildrenInfo.UpdateLevelUpInfo(xpLevels);
+        }
+
+        var children = response?.GetJSONArray("children");
 
         if (children != null && children.Length > 0)
         {

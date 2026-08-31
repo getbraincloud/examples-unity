@@ -78,9 +78,6 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 
     private void OnOpenBox()
     {
-        // Open another screen where we Animate the box opening
-        // After box is opened, we show another screen where the user 
-        // picks the name of buddy
         if (isOpeningBox) return;
 
         isOpeningBox = true;

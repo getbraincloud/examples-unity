@@ -165,15 +165,32 @@ public class AppChildrenInfo
         }
     }
 
+    public static bool HasLevelUpInfo => LevelUpInfo.Count > 0;
+
     public int GetPreviousLevelExperience()
     {
-        return buddyLevel < MinLevel ? 0 : LevelUpInfo[buddyLevel];
+        if (!HasLevelUpInfo || buddyLevel < MinLevel)
+        {
+            return 0;
+        }
+
+        return LevelUpInfo.TryGetValue(buddyLevel, out int experience) ? experience : 0;
     }
 
     public int GetNextLevelExperience()
     {
+        if (!HasLevelUpInfo)
+        {
+            return -1;
+        }
+
         int next = buddyLevel + 1;
-        return next > MaxLevel ? 0 : LevelUpInfo[next];
+        if (next > MaxLevel)
+        {
+            return 0;
+        }
+
+        return LevelUpInfo.TryGetValue(next, out int experience) ? experience : 0;
     }
 
     public void PredictLevelFromXP()

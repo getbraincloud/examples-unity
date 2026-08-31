@@ -54,17 +54,6 @@ public class BuddysRoom : ContentUIBehaviour
         ToyManager.OnCoinsTaken += SpawnValueSubtractedAnimation;
     }
 
-    protected override void Start()
-    {
-        base.Start();
-        if (GameManager.Instance.CoinsCollectedViaVisit > 0)
-        {
-            SpawnValueAddedAnimation(GameManager.Instance.CoinsCollectedViaVisit);
-            GameManager.Instance.CoinsCollectedViaVisit = 0;
-            ParentCoinText.text = BrainCloudManager.Instance.CurrentUserInfo.Coins.ToString("N0");
-        }
-    }
-
     public RectTransform GetCurrencyTextRectTransform(CurrencyTypes in_type)
     {
         switch (in_type)
@@ -109,7 +98,14 @@ public class BuddysRoom : ContentUIBehaviour
         int nextXP = _appChildrenInfo.GetNextLevelExperience();
         int adjustedCurrentXP = _appChildrenInfo.currentXP - prevXP;
         int adjustedNextLevelXP = nextXP - prevXP;
-        if (nextXP == 0)
+        if (nextXP < 0)
+        {
+            LoveFillText.text = $"{_appChildrenInfo.currentXP:N0}";
+            LoveSlider.minValue = 0;
+            LoveSlider.maxValue = 1;
+            LoveSlider.value = 0;
+        }
+        else if (nextXP == 0)
         {
             LoveFillText.text = "MAX";
             LoveSlider.minValue = 0;

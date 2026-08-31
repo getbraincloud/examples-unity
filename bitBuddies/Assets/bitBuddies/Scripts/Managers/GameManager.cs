@@ -30,7 +30,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     public List<ShopInfo> ParentShopInfos { get; set; }
     public List<ShopInfo> ChildShopInfos { get; set; }
     public long FreebieItemCooldownUntil { get; set; }
-    public int CoinsCollectedViaVisit { get; set; }
     public List<float> BuddyMoveSpeeds { get; set; }
     public bool ClaimQuestAvailable { get; set; }
     public Dictionary<string, object> HomeRewards { get; set; }

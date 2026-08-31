@@ -36,7 +36,7 @@ public class SettingsPanelUI : MonoBehaviour
             value = 0.5f;
         }
 
-        //ToDo: Hook up this value to the main audio source component if we get one..
+        // TODO: Hook volume slider to actual audio player
         _volumeSlider.value = value;
     }
 
