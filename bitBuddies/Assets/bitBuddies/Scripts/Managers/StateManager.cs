@@ -36,7 +36,7 @@ public class StateManager : SingletonBehaviour<StateManager>
     public void PlayCurrencyAnimation(CurrencyTypes currencyType, Vector3 startPosition, Vector3 endPosition)
     {
         var currencySprite = Instantiate(CurrencyHolder, null, false).GetComponentInChildren<Image>();
-        currencySprite.sprite = GameManager.Instance.GetCurrencySprite(currencyType);
+        currencySprite.sprite = AssetLoader.GetCurrencySprite(currencyType);
         currencySprite.transform.position = startPosition;
 
         Tween.Position(currencySprite.transform, startPosition, endPosition, 1.0f, Easing.Curve(CurrencyEasing), 1, CycleMode.Restart, 0.0f, 0.1f, true)

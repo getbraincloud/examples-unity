@@ -133,12 +133,7 @@ public class BuddysRoom : ContentUIBehaviour
 
         TimestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
 
-        //_buddySprite.sprite = Resources.Load<Sprite>(_appChildrenInfo.buddySpritePath.IsNullOrEmpty() ? BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY : _appChildrenInfo.buddySpritePath);
         BuddySprite.sprite = _appChildrenInfo.GetBuddySprite();
-        if (_appChildrenInfo.buddySpritePath.IsNullOrEmpty())
-        {
-            Debug.LogWarning("Buddy sprite was missing for: " + _appChildrenInfo.profileName + " child");
-        }
 
         if (_appChildrenInfo.childAchievements != null && _appChildrenInfo.childAchievements.Count > 0)
         {

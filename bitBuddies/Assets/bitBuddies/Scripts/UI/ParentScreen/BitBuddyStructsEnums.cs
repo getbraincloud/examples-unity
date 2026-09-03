@@ -1,3 +1,4 @@
+using Gameframework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,11 +15,12 @@ public enum CurrencyTypes
 
 public enum Rarity
 {
-    starter,
-    basic,
-    rare,
-    superRare,
-    legendary
+    Starter,
+    Basic,
+    Uncommon,
+    Rare,
+    Legendary,
+    Mythic
 }
 
 public enum QuestTypes
@@ -26,6 +28,26 @@ public enum QuestTypes
     BitBuddies,
     BitBling,
     General
+}
+
+public enum BitBuddy
+{
+    BitBunny_BunBun,
+    BitBunny_BunBunWhite,
+    BitBunny_PinkE,
+    BitBear_Grizz,
+    BitBear_GrizzBlack,
+    BitBear_GrizzWhite,
+    BitCat_TabE,
+    BitCat_Tux,
+    BitCat_Snowball,
+    BitElephant_Eli,
+    BitElephant_EliWhite,
+    BitElephant_EliPink,
+    BitPanda_PandE,
+    BitPanda_PandEYellow,
+    BitPanda_PandERed,
+    Default = BitBunny_BunBun
 }
 
 [Serializable]
@@ -93,27 +115,25 @@ public class AppChildrenInfo
 {
     public string profileName { get; set; }
     public string profileId { get; set; }
-    public string buddyType { get; set; }
+    public string buddyName { get; set; }
     public int buddyBling { get; set; }
     public float coinMultiplier { get; set; }
+    public float loveMultiplier { get; set; }
+    public float blingMultiplier { get; set; }
     public int coinPerHour { get; set; }
     public int maxCoinCapacity { get; set; }
-    public string buddySpritePath { get; set; }
+    public string buddyType { get; set; }
     public Rarity rarity { get; set; }
     public int buddyLevel { get; set; }
     public int currentXP { get; set; }
     public DateTime lastIdleTimestamp { get; set; }
-
-    // Love is only earned through Toy interaction in Buddys Room.
-    // Aka used as current XP for profile. 
     public int coinsEarnedInLifetime { get; set; }
-
     public List<string> ownedToys { get; set; } = new List<string>();
     public List<string> ownedShopItems { get; set; }
     public List<ChildAchievementInfo> childAchievements { get; set; }
     public long dailyCooldownUntil { get; set; }
     public long dailyBoosterExpiryUntil { get; set; }
-    public float loveMultiplier { get; set; }
+    public float dailyBoosterMultiplier { get; set; }
 
     public static int MinLevel { get; private set; } = int.MaxValue;
     public static int MaxLevel { get; private set; } = int.MinValue;
@@ -134,19 +154,24 @@ public class AppChildrenInfo
 
     public Sprite GetBuddySprite()
     {
-        return Resources.Load<Sprite>(buddySpritePath);
+        BitBuddy buddy = BitBuddy.Default;
+        if (BitBuddiesConsts.BUDDY_TYPE_TO_ENUM.ContainsKey(buddyType))
+        {
+            buddy = BitBuddiesConsts.BUDDY_TYPE_TO_ENUM[buddyType];
+        }
+        else
+        {
+            Debug.LogError($"Unknown BitBuddy Key: {buddyType}; Using Default Sprite.");
+        }
+
+        return AssetLoader.GetBuddySprite(buddy);
     }
 
-    public void UpdateLoveBoosterInfo(int in_loveMultiplier, long in_expiryTime, long in_dailyCooldownTime)
+    public void UpdateLoveBoosterInfo(int loveMultiplier, long expiryTime, long cooldownTime)
     {
-        loveMultiplier = in_loveMultiplier;
-        dailyBoosterExpiryUntil = in_expiryTime;
-        dailyCooldownUntil = in_dailyCooldownTime;
-    }
-
-    public void UpdateCoinBoosterInfo(int in_coinMultiplier, long in_expiryTime, long in_dailyCooldownTime)
-    {
-        coinMultiplier = in_coinMultiplier;
+        dailyBoosterMultiplier = loveMultiplier;
+        dailyBoosterExpiryUntil = expiryTime;
+        dailyCooldownUntil = cooldownTime;
     }
 
     public static void UpdateLevelUpInfo(Dictionary<string, object>[] xplevels)

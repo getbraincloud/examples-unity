@@ -414,12 +414,14 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                     // Get Buddy Info
                     if (data.GetJSONObject("buddyInfo") is var buddyInfo && buddyInfo != null && buddyInfo.Count > 0)
                     {
-                        child.buddyType = buddyInfo.GetString("name");
+                        child.buddyName = buddyInfo.GetString("name");
                         child.buddyLevel = buddyInfo.GetValue<int>("buddyLevel");
                         child.currentXP = buddyInfo.GetValue<int>("currentXP");
                         child.rarity = buddyInfo.GetValue<Rarity>("rarity");
-                        child.coinMultiplier = buddyInfo.GetValue<double>("coinMultiplier") is double mult && mult > 0.0 ? (float)mult : 1.0f;
-                        child.buddySpritePath = buddyInfo.GetString("buddySpritePath") is string path && !string.IsNullOrWhiteSpace(path) ? path : BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY;
+                        child.buddyType = buddyInfo.GetString("buddyType");
+                        child.coinMultiplier = buddyInfo.GetValue<double>("coinMultiplier") is double cMult && cMult > 0.0 ? (float)cMult : 1.0f;
+                        child.loveMultiplier = buddyInfo.GetValue<double>("loveMultiplier") is double lMult && lMult > 0.0 ? (float)lMult : 1.0f;
+                        child.blingMultiplier = buddyInfo.GetValue<double>("blingMultiplier") is double bMult && bMult > 0.0 ? (float)bMult : 1.0f;
                         child.coinPerHour = buddyInfo.GetValue<int>("coinPerHour");
                         child.maxCoinCapacity = buddyInfo.GetValue<int>("maxCoinCapacity");
                         child.lastIdleTimestamp = buddyInfo.GetDateTime("lastIdleTimestamp");
@@ -468,7 +470,7 @@ public class BrainCloudManager : SingletonBehaviour<BrainCloudManager>
                                 long createdAt = item.GetValue<long>("createdAt");
                                 child.dailyBoosterExpiryUntil = createdAt + (durationInSeconds * 1000);
                                 child.dailyCooldownUntil = item.GetValue<long>("cooldownUntil");
-                                child.loveMultiplier = item.GetValue<int>("loveMultiplier");
+                                child.dailyBoosterMultiplier = item.GetValue<int>("loveMultiplier");
                             }
                         }
                     }

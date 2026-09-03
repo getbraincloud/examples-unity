@@ -1,4 +1,5 @@
-using UnityEngine;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Gameframework
 {
@@ -6,6 +7,25 @@ namespace Gameframework
 
     public class BitBuddiesConsts
     {
+        public static readonly Dictionary<string, BitBuddy> BUDDY_TYPE_TO_ENUM = new()
+        {
+            { "BunBun", BitBuddy.BitBunny_BunBun }, { "BunBunWhite", BitBuddy.BitBunny_BunBunWhite }, { "PinkE",      BitBuddy.BitBunny_PinkE      },
+            { "Grizz",  BitBuddy.BitBear_Grizz   }, { "GrizzBlack",  BitBuddy.BitBear_GrizzBlack   }, { "GrizzWhite", BitBuddy.BitBear_GrizzWhite  },
+            { "TabE",   BitBuddy.BitCat_TabE     }, { "Tux",         BitBuddy.BitCat_Tux           }, { "Snowball",   BitBuddy.BitCat_Snowball     },
+            { "Eli",    BitBuddy.BitElephant_Eli }, { "EliWhite",    BitBuddy.BitElephant_EliWhite }, { "EliPink",    BitBuddy.BitElephant_EliPink },
+            { "PandE",  BitBuddy.BitPanda_PandE  }, { "PandEYellow", BitBuddy.BitPanda_PandEYellow }, { "PandERed",   BitBuddy.BitPanda_PandERed   }
+        };
+
+        public static readonly Dictionary<BitBuddy, string> BUDDY_ENUM_TO_SPRITE_NAME = new()
+        {
+            { BitBuddy.BitBunny_BunBun, "BitBuddy_BunBun_Large_Front" }, { BitBuddy.BitBunny_BunBunWhite, "BitBuddy_BunBunWhite_Large_Front" }, { BitBuddy.BitBunny_PinkE,      "BitBuddy_PinkE_Large_Front"      },
+            { BitBuddy.BitBear_Grizz,   "BitBuddy_Grizz_Large_Front"  }, { BitBuddy.BitBear_GrizzBlack,   "BitBuddy_GrizzBlack_Large_Front"  }, { BitBuddy.BitBear_GrizzWhite,  "BitBuddy_GrizzWhite_Large_Front" },
+            { BitBuddy.BitCat_TabE,     "BitBuddy_TabE_Large_Front"   }, { BitBuddy.BitCat_Tux,           "BitBuddy_Tux_Large_Front"         }, { BitBuddy.BitCat_Snowball,     "BitBuddy_Snowball_Large_Front"   },
+            { BitBuddy.BitElephant_Eli, "BitBuddy_Eli_Large_Front"    }, { BitBuddy.BitElephant_EliWhite, "BitBuddy_EliWhite_Large_Front"    }, { BitBuddy.BitElephant_EliPink, "BitBuddy_EliPink_Large_Front"    },
+            { BitBuddy.BitPanda_PandE,  "BitBuddy_PandE_Large_Front"  }, { BitBuddy.BitPanda_PandEYellow, "BitBuddy_PandEYellow_Large_Front" }, { BitBuddy.BitPanda_PandERed,   "BitBuddy_PandERed_Large_Front"   }
+        };
+
+        // ???
         public const string JSON_DATA = "data";
         public const string JSON_ENTITY_LIST = "entityList";
 
@@ -34,9 +54,10 @@ namespace Gameframework
         public const string AWARD_RANDOM_LOOTBOX_SCRIPT_NAME = "child/addRandomChildAccount";
         public const string AWARD_STARTER_BUDDY_SCRIPT_NAME = "child/lootboxes/addStarterChildAccount";
         public const string AWARD_BASIC_LOOTBOX_SCRIPT_NAME = "child/lootboxes/addBasicChildAccount";
+        public const string AWARD_UNCOMMON_LOOTBOX_SCRIPT_NAME = "child/lootboxes/addUncommonChildAccount";
         public const string AWARD_RARE_LOOTBOX_SCRIPT_NAME = "child/lootboxes/addRareChildAccount";
-        public const string AWARD_SUPER_RARE_LOOTBOX_SCRIPT_NAME = "child/lootboxes/addSuperRareChildAccount";
         public const string AWARD_LEGENDARY_LOOTBOX_SCRIPT_NAME = "child/lootboxes/addLegendaryChildAccount";
+        public const string AWARD_MYTHIC_LOOTBOX_SCRIPT_NAME = "child/lootboxes/addMythicChildAccount";
         public const string UPDATE_CHILD_PROFILE_NAME_SCRIPT_NAME = "child/updateChildAccountName";
         public const string DELETE_CHILD_PROFILE_SCRIPT_NAME = "child/deleteChildProfile";
         public const string INCREASE_XP_FOR_CHILD_SCRIPT_NAME = "child/increaseChildBuddyExperience";

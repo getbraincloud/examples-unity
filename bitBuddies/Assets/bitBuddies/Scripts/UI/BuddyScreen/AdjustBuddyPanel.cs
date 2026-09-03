@@ -41,7 +41,7 @@ public class AdjustBuddyPanel : MonoBehaviour
         CoinPerHourText.text = BitBuddiesConsts.COIN_GAIN_TEXT + _appChildrenInfo.coinPerHour + BitBuddiesConsts.COIN_PER_HOUR_TEXT;
         CoinCapacityText.text = BitBuddiesConsts.COIN_CAPACITY_TEXT + _appChildrenInfo.maxCoinCapacity;
         RarityText.text = GameManager.FormatCamelCase(_appChildrenInfo.rarity.ToString());
-        BuddyTypeNameText.text = _appChildrenInfo.buddyType;
+        BuddyTypeNameText.text = _appChildrenInfo.buddyName;
         BuddySprite.sprite = _appChildrenInfo.GetBuddySprite();
     }
 

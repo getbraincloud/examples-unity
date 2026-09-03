@@ -234,19 +234,6 @@ public class GameManager : SingletonBehaviour<GameManager>
         return "";
     }
 
-    public Sprite GetCurrencySprite(CurrencyTypes in_currency)
-    {
-        return in_currency switch
-        {
-            CurrencyTypes.BuddyBling => Resources.Load<Sprite>(BitBuddiesConsts.BIT_BLING_SPRITE_PATH),
-            CurrencyTypes.Gems => Resources.Load<Sprite>(BitBuddiesConsts.GEM_SPRITE_PATH),
-            CurrencyTypes.FakeDollars => Resources.Load<Sprite>(BitBuddiesConsts.FAKE_MONEY_SPRITE_PATH),
-            CurrencyTypes.Love => Resources.Load<Sprite>(BitBuddiesConsts.LOVE_SPRITE_PATH),
-            CurrencyTypes.Level => Resources.Load<Sprite>(BitBuddiesConsts.LEVEL_SPRITE_PATH),
-            _ => Resources.Load<Sprite>(BitBuddiesConsts.COIN_SPRITE_PATH),
-        };
-    }
-
     public void ShowFailurePopUp(string header = "Something went wrong",
                                  string body = "Please try again or restart the application.",
                                  Action onOKButton = null)

@@ -86,20 +86,23 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
         string scriptName = "";
         switch (_mysteryBoxInfo.RarityEnum)
         {
-            case Rarity.starter:
+            case Rarity.Starter:
                 scriptName = BitBuddiesConsts.AWARD_STARTER_BUDDY_SCRIPT_NAME;
                 break;
-            case Rarity.basic:
+            case Rarity.Basic:
                 scriptName = BitBuddiesConsts.AWARD_BASIC_LOOTBOX_SCRIPT_NAME;
                 break;
-            case Rarity.rare:
+            case Rarity.Uncommon:
+                scriptName = BitBuddiesConsts.AWARD_UNCOMMON_LOOTBOX_SCRIPT_NAME;
+                break;
+            case Rarity.Rare:
                 scriptName = BitBuddiesConsts.AWARD_RARE_LOOTBOX_SCRIPT_NAME;
                 break;
-            case Rarity.superRare:
-                scriptName = BitBuddiesConsts.AWARD_SUPER_RARE_LOOTBOX_SCRIPT_NAME;
-                break;
-            case Rarity.legendary:
+            case Rarity.Legendary:
                 scriptName = BitBuddiesConsts.AWARD_LEGENDARY_LOOTBOX_SCRIPT_NAME;
+                break;
+            case Rarity.Mythic:
+                scriptName = BitBuddiesConsts.AWARD_MYTHIC_LOOTBOX_SCRIPT_NAME;
                 break;
         }
 
@@ -146,15 +149,17 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
 
                         var buddyInfo = child.GetJSONObject("data").GetJSONObject("buddyInfo");
 
-                        _parentMenu.NewAppChildrenInfo.buddyType = buddyInfo.GetString("name");
+                        _parentMenu.NewAppChildrenInfo.buddyName = buddyInfo.GetString("name");
                         _parentMenu.NewAppChildrenInfo.rarity = buddyInfo.GetValue<Rarity>("rarity");
                         _parentMenu.NewAppChildrenInfo.coinPerHour = buddyInfo.GetValue<int>("coinPerHour");
                         _parentMenu.NewAppChildrenInfo.maxCoinCapacity = buddyInfo.GetValue<int>("maxCoinCapacity");
-                        _parentMenu.NewAppChildrenInfo.buddySpritePath = buddyInfo.GetString("buddySpritePath") is string path && !string.IsNullOrWhiteSpace(path) ? path : BitBuddiesConsts.DEFAULT_SPRITE_PATH_FOR_BUDDY;
-                        _parentMenu.NewAppChildrenInfo.coinMultiplier = buddyInfo.GetValue<double>("coinMultiplier") is double mult && mult > 0.0 ? (float)mult : 1.0f;
+                        _parentMenu.NewAppChildrenInfo.buddyType = buddyInfo.GetString("buddyType");
+                        _parentMenu.NewAppChildrenInfo.coinMultiplier = buddyInfo.GetValue<double>("coinMultiplier") is double cMult && cMult > 0.0 ? (float)cMult : 1.0f;
+                        _parentMenu.NewAppChildrenInfo.loveMultiplier = buddyInfo.GetValue<double>("loveMultiplier") is double lMult && lMult > 0.0 ? (float)lMult : 1.0f;
+                        _parentMenu.NewAppChildrenInfo.blingMultiplier = buddyInfo.GetValue<double>("blingMultiplier") is double bMult && bMult > 0.0 ? (float)bMult : 1.0f;
                         _parentMenu.NewAppChildrenInfo.lastIdleTimestamp = buddyInfo.GetDateTime("lastIdleTimestamp");
 
-                        BuddyTypeNameText.text = _parentMenu.NewAppChildrenInfo.buddyType;
+                        BuddyTypeNameText.text = _parentMenu.NewAppChildrenInfo.buddyName;
 
                         SetupBuddyDataDisplay();
                         break;
@@ -256,11 +261,6 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
         CoinPerHourText.text = BitBuddiesConsts.COIN_GAIN_TEXT + childAppInfo.coinPerHour + BitBuddiesConsts.COIN_PER_HOUR_TEXT;
         CoinCapacityText.text = BitBuddiesConsts.COIN_CAPACITY_TEXT + childAppInfo.maxCoinCapacity;
         RarityText.text = GameManager.FormatCamelCase(childAppInfo.rarity.ToString());
-        //BuddyTypeNameText.text = childAppInfo.buddySpritePath.ToString();
-        BuddyImage.sprite = AssetLoader.LoadBuddySprite(childAppInfo.buddySpritePath);
-        if (childAppInfo.buddySpritePath.IsNullOrEmpty())
-        {
-            Debug.LogWarning("Buddy sprite was missing for: " + childAppInfo.profileName + " child");
-        }
+        BuddyImage.sprite = childAppInfo.GetBuddySprite();
     }
 }

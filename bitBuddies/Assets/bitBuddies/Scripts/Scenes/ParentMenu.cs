@@ -210,12 +210,12 @@ public class ParentMenu : ContentUIBehaviour
 
             if (coinReward > 0)
             {
-                popup.AddRewardItem("Coins", GameManager.Instance.GetCurrencySprite(CurrencyTypes.Coins), coinReward, "You recieved");
+                popup.AddRewardItem("Coins", AssetLoader.GetCurrencySprite(CurrencyTypes.Coins), coinReward, "You recieved");
             }
 
             if (gemReward > 0)
             {
-                popup.AddRewardItem("Gems", GameManager.Instance.GetCurrencySprite(CurrencyTypes.Gems), gemReward);
+                popup.AddRewardItem("Gems", AssetLoader.GetCurrencySprite(CurrencyTypes.Gems), gemReward);
             }
 
             homeRewards["coins"] = 0;

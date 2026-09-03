@@ -62,9 +62,9 @@ public class ToyManager : SingletonBehaviour<ToyManager>
             canvas = MoveAreaButton.GetComponentInParent<Canvas>();
         var appInfo = GameManager.Instance.SelectedAppChildrenInfo;
         _multiplierCountdownTimer = GetComponent<CountdownTimer>();
-        if (appInfo.loveMultiplier > MULTIPLIER_DEFAULT)
+        if (appInfo.dailyBoosterMultiplier > MULTIPLIER_DEFAULT)
         {
-            StartLoveMultiplierCountdown(appInfo.loveMultiplier, appInfo.dailyBoosterExpiryUntil);
+            StartLoveMultiplierCountdown(appInfo.dailyBoosterMultiplier, appInfo.dailyBoosterExpiryUntil);
         }
     }
 
