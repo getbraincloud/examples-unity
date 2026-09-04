@@ -15,6 +15,7 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private TMP_Text BuddyBlingText;
     [SerializeField] private TMP_Text ParentCoinText;
     [SerializeField] private Image BuddySprite;
+    [SerializeField] private Image RoomBackground;
     [SerializeField] private TMP_Text GameVersionText;
     [SerializeField] private TMP_Text BcClientVersionText;
     [SerializeField] private Slider LoveSlider;
@@ -26,7 +27,7 @@ public class BuddysRoom : ContentUIBehaviour
     [SerializeField] private Button ExitCornerButton;
     [SerializeField] private Button ShopButton;
     [SerializeField] private Button StatsButton;
-    [SerializeField] private Shop shop;
+    [SerializeField] private Shop Shop;
     [SerializeField] private ValueAddedAnimation AddedValueTextAnimationPrefab;
     [SerializeField] private Button BuddyOverviewButton;
     [SerializeField] private AdjustBuddyPanel AdjustBuddyPanelPrefab;
@@ -134,6 +135,7 @@ public class BuddysRoom : ContentUIBehaviour
         TimestampText.text = _appChildrenInfo.lastIdleTimestamp.ToString();
 
         BuddySprite.sprite = _appChildrenInfo.GetBuddySprite();
+        AssetLoader.GetBuddyBackground(_appChildrenInfo.GetBuddyEnum(), ref RoomBackground);
 
         if (_appChildrenInfo.childAchievements != null && _appChildrenInfo.childAchievements.Count > 0)
         {
@@ -193,7 +195,7 @@ public class BuddysRoom : ContentUIBehaviour
 
     private void OnMoveToComplete()
     {
-        Instantiate(shop, transform);
+        Instantiate(Shop, transform);
     }
 
     private void OnStatsButton()

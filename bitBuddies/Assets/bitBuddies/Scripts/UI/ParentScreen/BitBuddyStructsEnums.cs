@@ -152,7 +152,7 @@ public class AppChildrenInfo
                                              : coinsEarned > 0 ? coinsEarned : 0;
     }
 
-    public Sprite GetBuddySprite()
+    public BitBuddy GetBuddyEnum()
     {
         BitBuddy buddy = BitBuddy.Default;
         if (BitBuddiesConsts.BUDDY_TYPE_TO_ENUM.ContainsKey(buddyType))
@@ -164,7 +164,12 @@ public class AppChildrenInfo
             Debug.LogError($"Unknown BitBuddy Key: {buddyType}; Using Default Sprite.");
         }
 
-        return AssetLoader.GetBuddySprite(buddy);
+        return buddy;
+    }
+
+    public Sprite GetBuddySprite()
+    {
+        return AssetLoader.GetBuddySprite(GetBuddyEnum());
     }
 
     public void UpdateLoveBoosterInfo(int loveMultiplier, long expiryTime, long cooldownTime)

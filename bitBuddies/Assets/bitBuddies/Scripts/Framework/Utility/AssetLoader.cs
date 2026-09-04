@@ -1,10 +1,13 @@
 using Gameframework;
 using UnityEngine;
 using UnityEngine.U2D;
+using UnityEngine.UI;
 
 public static class AssetLoader
 {
-    private static SpriteAtlas BIT_BUDDY_SPRITES = null;
+    private static SpriteAtlas BITBUDDY_SPRITES = null;
+    private static SpriteAtlas PARENTMENU_IMAGES = null;
+    private static SpriteAtlas BUDDYSROOM_IMAGES = null;
 
     public static Sprite LoadSprite(string path)
     {
@@ -20,9 +23,9 @@ public static class AssetLoader
 
     public static Sprite GetBuddySprite(BitBuddy buddy)
     {
-        if (BIT_BUDDY_SPRITES == null)
+        if (BITBUDDY_SPRITES == null)
         {
-            BIT_BUDDY_SPRITES = Resources.Load<SpriteAtlas>("BitBuddySprites");
+            BITBUDDY_SPRITES = Resources.Load<SpriteAtlas>("BitBuddySprites");
         }
 
         if (!BitBuddiesConsts.BUDDY_ENUM_TO_SPRITE_NAME.ContainsKey(buddy))
@@ -31,7 +34,41 @@ public static class AssetLoader
             buddy = BitBuddy.Default;
         }
 
-        return BIT_BUDDY_SPRITES.GetSprite(BitBuddiesConsts.BUDDY_ENUM_TO_SPRITE_NAME[buddy]);
+        return BITBUDDY_SPRITES.GetSprite(BitBuddiesConsts.BUDDY_ENUM_TO_SPRITE_NAME[buddy]);
+    }
+
+    public static void GetBuddyParentMenuSprites(BitBuddy buddy, ref Image houseImage, ref Image nameSignImage)
+    {
+        if (PARENTMENU_IMAGES == null)
+        {
+            PARENTMENU_IMAGES = Resources.Load<SpriteAtlas>("ParentMenu");
+        }
+
+        if (!BitBuddiesConsts.BUDDY_ENUM_TO_HOUSE_IMAGE_NAME.ContainsKey(buddy) ||
+            !BitBuddiesConsts.BUDDY_ENUM_TO_NAMESIGN_IMAGE_NAME.ContainsKey(buddy))
+        {
+            Debug.LogError($"Unknown BitBuddy Key: {buddy}; Using Default Sprite.");
+            buddy = BitBuddy.Default;
+        }
+
+        houseImage.sprite = PARENTMENU_IMAGES.GetSprite(BitBuddiesConsts.BUDDY_ENUM_TO_HOUSE_IMAGE_NAME[buddy]);
+        nameSignImage.sprite = PARENTMENU_IMAGES.GetSprite(BitBuddiesConsts.BUDDY_ENUM_TO_NAMESIGN_IMAGE_NAME[buddy]);
+    }
+
+    public static void GetBuddyBackground(BitBuddy buddy, ref Image houseBackground)
+    {
+        if (BUDDYSROOM_IMAGES == null)
+        {
+            BUDDYSROOM_IMAGES = Resources.Load<SpriteAtlas>("BuddysRoom");
+        }
+
+        if (!BitBuddiesConsts.BUDDY_ENUM_TO_BACKGROUND_IMAGE_NAME.ContainsKey(buddy))
+        {
+            Debug.LogError($"Unknown BitBuddy Key: {buddy}; Using Default Sprite.");
+            buddy = BitBuddy.Default;
+        }
+
+        houseBackground.sprite = BUDDYSROOM_IMAGES.GetSprite(BitBuddiesConsts.BUDDY_ENUM_TO_BACKGROUND_IMAGE_NAME[buddy]);
     }
 
     public static Sprite GetCurrencySprite(CurrencyTypes in_currency)

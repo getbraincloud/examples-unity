@@ -7,6 +7,8 @@ namespace Gameframework
 
     public class BitBuddiesConsts
     {
+        #region SpriteAtlas Buddy Configs
+
         public static readonly Dictionary<string, BitBuddy> BUDDY_TYPE_TO_ENUM = new()
         {
             { "BunBun", BitBuddy.BitBunny_BunBun }, { "BunBunWhite", BitBuddy.BitBunny_BunBunWhite }, { "PinkE",      BitBuddy.BitBunny_PinkE      },
@@ -24,6 +26,35 @@ namespace Gameframework
             { BitBuddy.BitElephant_Eli, "BitBuddy_Eli_Large_Front"    }, { BitBuddy.BitElephant_EliWhite, "BitBuddy_EliWhite_Large_Front"    }, { BitBuddy.BitElephant_EliPink, "BitBuddy_EliPink_Large_Front"    },
             { BitBuddy.BitPanda_PandE,  "BitBuddy_PandE_Large_Front"  }, { BitBuddy.BitPanda_PandEYellow, "BitBuddy_PandEYellow_Large_Front" }, { BitBuddy.BitPanda_PandERed,   "BitBuddy_PandERed_Large_Front"   }
         };
+
+        public static readonly Dictionary<BitBuddy, string> BUDDY_ENUM_TO_HOUSE_IMAGE_NAME = new()
+        {
+            { BitBuddy.BitBunny_BunBun, "BunBun_House" }, { BitBuddy.BitBunny_BunBunWhite, "BunBunWhite_House" }, { BitBuddy.BitBunny_PinkE,      "PinkE_House"      },
+            { BitBuddy.BitBear_Grizz,   "Grizz_House"  }, { BitBuddy.BitBear_GrizzBlack,   "GrizzBlack_House"  }, { BitBuddy.BitBear_GrizzWhite,  "GrizzWhite_House" },
+            { BitBuddy.BitCat_TabE,     "TabE_House"   }, { BitBuddy.BitCat_Tux,           "Tux_House"         }, { BitBuddy.BitCat_Snowball,     "Snowball_House"   },
+            { BitBuddy.BitElephant_Eli, "Eli_House"    }, { BitBuddy.BitElephant_EliWhite, "EliWhite_House"    }, { BitBuddy.BitElephant_EliPink, "EliPink_House"    },
+            { BitBuddy.BitPanda_PandE,  "PandE_House"  }, { BitBuddy.BitPanda_PandEYellow, "PandEYellow_House" }, { BitBuddy.BitPanda_PandERed,   "PandERed_House"   }
+        };
+
+        public static readonly Dictionary<BitBuddy, string> BUDDY_ENUM_TO_NAMESIGN_IMAGE_NAME = new()
+        {
+            { BitBuddy.BitBunny_BunBun, "BunBun_NameSign" }, { BitBuddy.BitBunny_BunBunWhite, "BunBunWhite_NameSign" }, { BitBuddy.BitBunny_PinkE,      "PinkE_NameSign"      },
+            { BitBuddy.BitBear_Grizz,   "Grizz_NameSign"  }, { BitBuddy.BitBear_GrizzBlack,   "GrizzBlack_NameSign"  }, { BitBuddy.BitBear_GrizzWhite,  "GrizzWhite_NameSign" },
+            { BitBuddy.BitCat_TabE,     "TabE_NameSign"   }, { BitBuddy.BitCat_Tux,           "Tux_NameSign"         }, { BitBuddy.BitCat_Snowball,     "Snowball_NameSign"   },
+            { BitBuddy.BitElephant_Eli, "Eli_NameSign"    }, { BitBuddy.BitElephant_EliWhite, "EliWhite_NameSign"    }, { BitBuddy.BitElephant_EliPink, "EliPink_NameSign"    },
+            { BitBuddy.BitPanda_PandE,  "PandE_NameSign"  }, { BitBuddy.BitPanda_PandEYellow, "PandEYellow_NameSign" }, { BitBuddy.BitPanda_PandERed,   "PandERed_NameSign"   }
+        };
+
+        public static readonly Dictionary<BitBuddy, string> BUDDY_ENUM_TO_BACKGROUND_IMAGE_NAME = new()
+        {
+            { BitBuddy.BitBunny_BunBun, "BunBun_Background" }, { BitBuddy.BitBunny_BunBunWhite, "BunBunWhite_Background" }, { BitBuddy.BitBunny_PinkE,      "PinkE_Background"      },
+            { BitBuddy.BitBear_Grizz,   "Grizz_Background"  }, { BitBuddy.BitBear_GrizzBlack,   "GrizzBlack_Background"  }, { BitBuddy.BitBear_GrizzWhite,  "GrizzWhite_Background" },
+            { BitBuddy.BitCat_TabE,     "TabE_Background"   }, { BitBuddy.BitCat_Tux,           "Tux_Background"         }, { BitBuddy.BitCat_Snowball,     "Snowball_Background"   },
+            { BitBuddy.BitElephant_Eli, "Eli_Background"    }, { BitBuddy.BitElephant_EliWhite, "EliWhite_Background"    }, { BitBuddy.BitElephant_EliPink, "EliPink_Background"    },
+            { BitBuddy.BitPanda_PandE,  "PandE_Background"  }, { BitBuddy.BitPanda_PandEYellow, "PandEYellow_Background" }, { BitBuddy.BitPanda_PandERed,   "PandERed_Background"   }
+        };
+
+        #endregion
 
         // ???
         public const string JSON_DATA = "data";

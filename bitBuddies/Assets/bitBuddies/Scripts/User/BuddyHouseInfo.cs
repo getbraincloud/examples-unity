@@ -11,12 +11,14 @@ public class BuddyHouseInfo : MonoBehaviour
 {
     private const int MINIMUM_COINS_FOR_COLLECTION = 1;
 
-    [SerializeField] private Button _visitButton;
-    [SerializeField] private Button _secondVisitButton;
-    [SerializeField] private Button _deleteButton;
-    [SerializeField] private TMP_Text _buddyNameText;
-    [SerializeField] private Image _buddySprite;
-    [SerializeField] private Button _collectCoinsButton;
+    [SerializeField] private Button VisitButton;
+    [SerializeField] private Button SecondVisitButton;
+    [SerializeField] private Button DeleteButton;
+    [SerializeField] private TMP_Text BuddyNameText;
+    [SerializeField] private Image BuddySprite;
+    [SerializeField] private Image HouseImage;
+    [SerializeField] private Image NameSignImage;
+    [SerializeField] private Button CollectCoinsButton;
 
     public AppChildrenInfo HouseInfo { get; set; }
 
@@ -27,28 +29,29 @@ public class BuddyHouseInfo : MonoBehaviour
 
     public void SetUpHouse()
     {
-        _collectCoinsButton.onClick.AddListener(OnCollectCoinsButton);
-        _visitButton.onClick.AddListener(GoToBuddysRoom);
-        _secondVisitButton.onClick.AddListener(GoToBuddysRoom);
-        _deleteButton.onClick.AddListener(OnDeleteButton);
-        _buddySprite.sprite = HouseInfo.GetBuddySprite();
-        _buddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName;
         _parentMenu = FindAnyObjectByType<ParentMenu>();
-        _coinButtonRectTransform = _collectCoinsButton.GetComponent<RectTransform>();
+        CollectCoinsButton.onClick.AddListener(OnCollectCoinsButton);
+        VisitButton.onClick.AddListener(GoToBuddysRoom);
+        SecondVisitButton.onClick.AddListener(GoToBuddysRoom);
+        DeleteButton.onClick.AddListener(OnDeleteButton);
+        _coinButtonRectTransform = CollectCoinsButton.GetComponent<RectTransform>();
+        BuddySprite.sprite = HouseInfo.GetBuddySprite();
+        BuddyNameText.text = HouseInfo.profileName.IsNullOrEmpty() ? "Missing Name" : HouseInfo.profileName;
+        AssetLoader.GetBuddyParentMenuSprites(HouseInfo.GetBuddyEnum(), ref HouseImage, ref NameSignImage);
         CheckCoinsButton();
     }
 
     private void OnDestroy()
     {
-        _collectCoinsButton.onClick.RemoveAllListeners();
-        _visitButton.onClick.RemoveAllListeners();
-        _secondVisitButton.onClick.RemoveAllListeners();
-        _deleteButton.onClick.RemoveAllListeners();
+        CollectCoinsButton.onClick.RemoveAllListeners();
+        VisitButton.onClick.RemoveAllListeners();
+        SecondVisitButton.onClick.RemoveAllListeners();
+        DeleteButton.onClick.RemoveAllListeners();
     }
 
     public void CheckCoinsButton()
     {
-        _collectCoinsButton.gameObject.SetActive(HouseInfo.GetCoinsEarned() >= MINIMUM_COINS_FOR_COLLECTION);
+        CollectCoinsButton.gameObject.SetActive(HouseInfo.GetCoinsEarned() >= MINIMUM_COINS_FOR_COLLECTION);
     }
 
     private void GoToBuddysRoom()
@@ -155,7 +158,7 @@ public class BuddyHouseInfo : MonoBehaviour
     {
         if (HouseInfo.GetCoinsEarned() >= MINIMUM_COINS_FOR_COLLECTION)
         {
-            _collectCoinsButton.gameObject.SetActive(false);
+            CollectCoinsButton.gameObject.SetActive(false);
 
             Dictionary<string, object> scriptData = new()
             {

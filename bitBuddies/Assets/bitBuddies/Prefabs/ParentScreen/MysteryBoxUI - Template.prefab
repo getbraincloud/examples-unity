@@ -140,7 +140,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8369359535824903520, guid: 2d8fd0d519b9b4b1690703b246e1ae09, type: 3}
+  m_Sprite: {fileID: 21300000, guid: aa2b2055ac3444548b53636fb690e7b8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -299,6 +299,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -581,17 +582,19 @@ MonoBehaviour:
   - {fileID: -205270267638800340, guid: 3ce7c6e630b5d1241bb884dea24fb7da, type: 3}
   - {fileID: 4815476061570213978, guid: 919cc0b4bc77c4e40ba2545b87859268, type: 3}
   OpenBoxTypeSprites:
-  - {fileID: 8369359535824903520, guid: 2d8fd0d519b9b4b1690703b246e1ae09, type: 3}
-  - {fileID: 8369359535824903520, guid: 2d8fd0d519b9b4b1690703b246e1ae09, type: 3}
-  - {fileID: 1754801811389002229, guid: abf3e4fd64fcb4281999b1304593ef75, type: 3}
-  - {fileID: 1754801811389002229, guid: abf3e4fd64fcb4281999b1304593ef75, type: 3}
-  - {fileID: 2290831216901384722, guid: 816bda855b10246e8b283203087aea59, type: 3}
+  - {fileID: 21300000, guid: aa2b2055ac3444548b53636fb690e7b8, type: 3}
+  - {fileID: 21300000, guid: 2d8fd0d519b9b4b1690703b246e1ae09, type: 3}
+  - {fileID: 21300000, guid: abf3e4fd64fcb4281999b1304593ef75, type: 3}
+  - {fileID: 21300000, guid: 816bda855b10246e8b283203087aea59, type: 3}
+  - {fileID: 21300000, guid: a308c91b6ed084121b5fa672dabeee9d, type: 3}
+  - {fileID: 21300000, guid: 51ca571587348ce4c82a7d2275cdc533, type: 3}
   ClosedBoxTypeSprites:
-  - {fileID: -1190600825747284067, guid: 8b55c31d55db84f10acdb6d51fc32e7c, type: 3}
-  - {fileID: -1190600825747284067, guid: 8b55c31d55db84f10acdb6d51fc32e7c, type: 3}
-  - {fileID: 4762115868283100827, guid: db863aa6d363b4c1596968ea90ed1c14, type: 3}
-  - {fileID: 4762115868283100827, guid: db863aa6d363b4c1596968ea90ed1c14, type: 3}
-  - {fileID: -529272046633078556, guid: 7f5d97b0172434b219865576e7ad1e30, type: 3}
+  - {fileID: 21300000, guid: 59a5821bb14a64a0a95c252249e3d207, type: 3}
+  - {fileID: 21300000, guid: 8b55c31d55db84f10acdb6d51fc32e7c, type: 3}
+  - {fileID: 21300000, guid: db863aa6d363b4c1596968ea90ed1c14, type: 3}
+  - {fileID: 21300000, guid: 7f5d97b0172434b219865576e7ad1e30, type: 3}
+  - {fileID: 21300000, guid: f45a090c38cb64eb481d28ec8f05a3fe, type: 3}
+  - {fileID: 21300000, guid: 75d8c43da7882224cbe02b67bb1967e5, type: 3}
 --- !u!1 &6502236686525725057
 GameObject:
   m_ObjectHideFlags: 0
@@ -770,6 +773,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -890,7 +894,7 @@ GameObject:
   - component: {fileID: 3660850780342490252}
   - component: {fileID: 498903059640105613}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1056,6 +1060,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
