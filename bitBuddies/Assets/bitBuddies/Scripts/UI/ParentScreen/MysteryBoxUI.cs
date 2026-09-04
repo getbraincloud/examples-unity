@@ -33,6 +33,8 @@ public class MysteryBoxUI : ContentUIBehaviour
         InitializeUI();
     }
 
+    public Sprite GetBoxSpriteImage() => BoxSpriteImage.sprite;
+
     protected override void InitializeUI()
     {
         UnlockAmountText.text = _mysteryBoxInfo.UnlockAmount.ToString("#,#");    //#,# adds commas to the string when using ints
@@ -65,6 +67,7 @@ public class MysteryBoxUI : ContentUIBehaviour
             LevelRequirementText.text = $"Lvl. {_mysteryBoxInfo.LevelRequirement}";
             OpenBoxButton.interactable = false;
             LockIconImage.gameObject.SetActive(true);
+            BoxSpriteImage.sprite = ClosedBoxTypeSprites[(int)_mysteryBoxInfo.RarityEnum];
         }
 
         BoxNameText.text = _mysteryBoxInfo.BoxName;
@@ -86,6 +89,7 @@ public class MysteryBoxUI : ContentUIBehaviour
         );
 
         _mysteryBoxPanelUI.MysteryBoxInfo = _mysteryBoxInfo;
+        _mysteryBoxPanelUI.OpenBoxImageSprite = OpenBoxTypeSprites[(int)_mysteryBoxInfo.RarityEnum];
         _mysteryBoxPanelUI.NextPage();
     }
 

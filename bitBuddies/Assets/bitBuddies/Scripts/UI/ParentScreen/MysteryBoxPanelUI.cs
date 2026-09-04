@@ -23,6 +23,7 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     [SerializeField] private Button DoneButton; //for page 3, closes the whole panel but captures the data input
     [SerializeField] private TMP_InputField NameBuddyInput;	// for page 3
     [SerializeField] private Button OpenBoxButton;	// for page 2
+    [SerializeField] private Image OpenBoxImage;
     [SerializeField] private List<GameObject> _mysteryScreens;   //0 = selection, 1 = open box, 2 = name buddy,display stats etc
 
     [Header("Buddy Info")]
@@ -37,6 +38,11 @@ public class MysteryBoxPanelUI : ContentUIBehaviour
     public MysteryBoxInfo MysteryBoxInfo
     {
         set { _mysteryBoxInfo = value; }
+    }
+
+    public Sprite OpenBoxImageSprite
+    {
+        set { OpenBoxImage.sprite = value; }
     }
 
     private List<MysteryBoxInfo> _mysteryBoxes;
