@@ -16,21 +16,24 @@ namespace Gameframework
 
         public virtual void Awake()
         {
-            DontDestroyOnLoad(gameObject);
             if (m_instance == null)
             {
                 m_instance = this as T;
                 name = GetType().Name;
+                DontDestroyOnLoad(gameObject);
             }
-            else
+            else if (m_instance != this as T)
             {
-                Destroy(gameObject);
+                Destroy(this);
             }
         }
 
         public virtual void OnDestroy()
         {
-            m_instance = null;
+            if (m_instance == this as T)
+            {
+                m_instance = null;
+            }
         }
 
         #endregion

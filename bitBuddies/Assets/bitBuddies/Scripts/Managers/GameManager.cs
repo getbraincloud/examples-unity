@@ -42,7 +42,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         base.Awake();
     }
 
-#if UNITY_STANDALONE
+#if UNITY_STANDALONE || UNITY_WEBGL
     private float resetTime = 0.0f;
 
     private void Update()
@@ -62,7 +62,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         // Clear app data
         if (Input.GetKey(KeyCode.F12))
         {
-            resetTime += Time.deltaTime;
+            resetTime += Time.unscaledDeltaTime;
             if (resetTime >= 3.0f)
             {
                 static IEnumerator reset()
@@ -231,6 +231,7 @@ public class GameManager : SingletonBehaviour<GameManager>
                 return ChildShopInfos[i].DisplayName;
             }
         }
+
         return "";
     }
 
@@ -250,7 +251,6 @@ public class GameManager : SingletonBehaviour<GameManager>
         // Insert a space before each uppercase letter (except the first)
         string result = System.Text.RegularExpressions.Regex.Replace(input, "(?<!^)([A-Z])", " $1");
 
-        // Capitalize the first letter
-        return char.ToUpper(result[0]) + result.Substring(1);
+        return char.ToUpper(result[0]) + result.Substring(1); // Capitalize the first letter
     }
 }

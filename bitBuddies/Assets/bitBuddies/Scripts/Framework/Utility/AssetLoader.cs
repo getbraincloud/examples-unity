@@ -26,6 +26,7 @@ public static class AssetLoader
         if (BITBUDDY_SPRITES == null)
         {
             BITBUDDY_SPRITES = Resources.Load<SpriteAtlas>("BitBuddySprites");
+            Debug.Log($"BitBuddySprites loaded: {BITBUDDY_SPRITES != null}, spriteCount: {(BITBUDDY_SPRITES != null ? BITBUDDY_SPRITES.spriteCount : -1)}");
         }
 
         if (!BitBuddiesConsts.BUDDY_ENUM_TO_SPRITE_NAME.ContainsKey(buddy))
@@ -42,6 +43,7 @@ public static class AssetLoader
         if (PARENTMENU_IMAGES == null)
         {
             PARENTMENU_IMAGES = Resources.Load<SpriteAtlas>("ParentMenu");
+            Debug.Log($"ParentMenu loaded: {PARENTMENU_IMAGES != null}, spriteCount: {(PARENTMENU_IMAGES != null ? PARENTMENU_IMAGES.spriteCount : -1)}");
         }
 
         if (!BitBuddiesConsts.BUDDY_ENUM_TO_HOUSE_IMAGE_NAME.ContainsKey(buddy) ||
@@ -60,6 +62,7 @@ public static class AssetLoader
         if (BUDDYSROOM_IMAGES == null)
         {
             BUDDYSROOM_IMAGES = Resources.Load<SpriteAtlas>("BuddysRoom");
+            Debug.Log($"BuddysRoom loaded: {BUDDYSROOM_IMAGES != null}, spriteCount: {(BUDDYSROOM_IMAGES != null ? BUDDYSROOM_IMAGES.spriteCount : -1)}");
         }
 
         if (!BitBuddiesConsts.BUDDY_ENUM_TO_BACKGROUND_IMAGE_NAME.ContainsKey(buddy))
