@@ -1,16 +1,16 @@
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using UnityEditor.Build.Reporting;
-using System.IO;
-  
+
 // ------------------------------------------------------------------------
 // https://docs.unity3d.com/Manual/CommandLineArguments.html
 // ------------------------------------------------------------------------
-public class JenkinsBuild {
-  
+public class JenkinsBuild
+{
     static string[] EnabledScenes = FindEnabledEditorScenes();
-  
+
     // called from Jenkins
     public static void BuildWebGL()
     {
@@ -19,7 +19,7 @@ public class JenkinsBuild {
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.WebGL, BuildTarget.WebGL, BuildOptions.None);
     }
-    
+
     // called from Jenkins
     public static void BuildWindowStandalone()
     {
@@ -28,7 +28,7 @@ public class JenkinsBuild {
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows, BuildOptions.None);
     }
-    
+
     // called from Jenkins
     public static void BuildMacOS()
     {
@@ -46,7 +46,7 @@ public class JenkinsBuild {
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
     }
-    
+
     // called from Jenkins
     public static void BuildDedicatedServer()
     {
@@ -55,7 +55,7 @@ public class JenkinsBuild {
         string fullPathAndName = args.targetDir + args.GetBuildFolderName();
         BuildServer(fullPathAndName);
     }
-    
+
     //WIP, doesn't work on Mac but works fine in Windows..
     private static void SetRemoteBuildSettings()
     {
@@ -63,7 +63,7 @@ public class JenkinsBuild {
         string appSecret = GetArg("-appSecret");
         string appAuthUrl = GetArg("-url");
 
-        if(!string.IsNullOrEmpty(appId) && !string.IsNullOrEmpty(appSecret))
+        if (!string.IsNullOrEmpty(appId) && !string.IsNullOrEmpty(appSecret))
         {
             string path = "Assets/Resources/BCSettings.txt";
             StreamWriter writer = new StreamWriter(path, true);
@@ -81,11 +81,11 @@ public class JenkinsBuild {
             Debug.Log($"Successfully set the appID and appSecret to: {bcsettings}");
         }
     }
-    
+
     private static Args FindArgs()
     {
         var returnValue = new Args();
- 
+
         // find: -executeMethod
         //   +1: JenkinsBuild.BuildMacOS
         //   +2: FindTheGnome
@@ -102,7 +102,7 @@ public class JenkinsBuild {
             var realPos = execMethodArgPos == -1 ? -1 : i - execMethodArgPos - 2;
             if (realPos < 0)
                 continue;
- 
+
             if (realPos == 0)
                 returnValue.appName = args[i];
             if (realPos == 1)
@@ -110,17 +110,17 @@ public class JenkinsBuild {
                 returnValue.targetDir = args[i];
                 if (!returnValue.targetDir.EndsWith(System.IO.Path.DirectorySeparatorChar + ""))
                     returnValue.targetDir += System.IO.Path.DirectorySeparatorChar;
- 
+
                 allArgsFound = true;
             }
         }
- 
+
         if (!allArgsFound)
             System.Console.WriteLine("[JenkinsBuild] Incorrect Parameters for -executeMethod Format: -executeMethod JenkinsBuild.BuildWindows64 <app name> <output dir>");
- 
+
         return returnValue;
     }
-    
+
     private static string GetArg(string name)
     {
         var args = System.Environment.GetCommandLineArgs();
@@ -133,24 +133,25 @@ public class JenkinsBuild {
         }
         return null;
     }
-    
-    private static string[] FindEnabledEditorScenes(){
-  
+
+    private static string[] FindEnabledEditorScenes()
+    {
+
         List<string> EditorScenes = new List<string>();
         foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
             if (scene.enabled)
                 EditorScenes.Add(scene.path);
- 
+
         return EditorScenes.ToArray();
     }
-  
+
     // ------------------------------------------------------------------------
     // e.g. BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX
     // ------------------------------------------------------------------------
     private static void BuildProject(string[] scenes, string targetDir, BuildTargetGroup buildTargetGroup, BuildTarget buildTarget, BuildOptions buildOptions)
     {
         System.Console.WriteLine("[JenkinsBuild] Building:" + targetDir + " buildTargetGroup:" + buildTargetGroup.ToString() + " buildTarget:" + buildTarget.ToString());
-  
+
         // https://docs.unity3d.com/ScriptReference/EditorUserBuildSettings.SwitchActiveBuildTarget.html
         bool switchResult = EditorUserBuildSettings.SwitchActiveBuildTarget(buildTargetGroup, buildTarget);
         if (switchResult)
@@ -162,7 +163,7 @@ public class JenkinsBuild {
             System.Console.WriteLine("[JenkinsBuild] Unable to change Build Target to: " + buildTarget.ToString() + " Exiting...");
             return;
         }
-  
+
         // https://docs.unity3d.com/ScriptReference/BuildPipeline.BuildPlayer.html
         BuildReport buildReport = BuildPipeline.BuildPlayer(scenes, targetDir, buildTarget, buildOptions);
         BuildSummary buildSummary = buildReport.summary;
@@ -180,7 +181,7 @@ public class JenkinsBuild {
     {
         var buildPlayerOptions = new BuildPlayerOptions()
         {
-            subtarget = (int) StandaloneBuildSubtarget.Server,
+            subtarget = (int)StandaloneBuildSubtarget.Server,
             scenes = EnabledScenes,
             target = BuildTarget.LinuxHeadlessSimulation,
             options = BuildOptions.Development
@@ -198,11 +199,11 @@ public class JenkinsBuild {
         {
             System.Console.WriteLine("[JenkinsBuild] Build Failed: Time:" + buildSummary.totalTime + " Total Errors:" + buildSummary.totalErrors);
         }
-        
+
         if (buildReport.summary.totalErrors > 0)
             EditorApplication.Exit(1);
     }
- 
+
     private class Args
     {
         public string appName;
@@ -220,7 +221,7 @@ public class JenkinsBuild {
             return $"{Application.productName}_Internal";
 #endif
         }
-        
+
         public void GetEnviroVariables()
         {
             targetDir = System.Environment.GetEnvironmentVariable("targetDirectory");

@@ -1,47 +1,42 @@
-﻿using UnityEngine;
+using UnityEngine;
+
 namespace Gameframework
 {
-    // this is persistent and doesn't get destroyed
-    public class SingletonBehaviour<T> : MonoBehaviour
-        where T : Component
+    // This is persistent and doesn't get destroyed
+    public class SingletonBehaviour<T> : MonoBehaviour where T : Component
     {
         public static T Instance
         {
             get { return GetInstance(); }
         }
 
-        public static T singleton
-        {
-            get { return GetInstance(); }
-        }
-
-        virtual public void StartUp()
-        {
-        }
+        virtual public void StartUp() { }
 
         #region BaseBehaviour
+
         public virtual void Awake()
         {
-            DontDestroyOnLoad(this.gameObject);
+            DontDestroyOnLoad(gameObject);
             if (m_instance == null)
             {
                 m_instance = this as T;
-                this.name = this.GetType().Name;
+                name = GetType().Name;
             }
             else
             {
-                Destroy(this.gameObject);
+                Destroy(gameObject);
             }
         }
 
-        public virtual void OnApplicationQuit()
+        public virtual void OnDestroy()
         {
-            // release reference on exit
             m_instance = null;
         }
+
         #endregion
 
-        #region PRIVATE
+        #region GetInstance()
+
         private static T GetInstance()
         {
             if (m_instance == null)
@@ -54,10 +49,12 @@ namespace Gameframework
                     m_instance = obj.AddComponent<T>();
                 }
             }
+
             return m_instance;
         }
 
         protected static T m_instance;
+
         #endregion
     }
 }

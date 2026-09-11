@@ -39,6 +39,10 @@ public class GameManager : MonoBehaviour
     private GameOverScreen _gameOverScreenRef;
     private int _startingDefenderCount;
     private int _startingInvaderCount;
+    //Total structures the defender started with. The redesign's match-history cards express
+    //damage as a fraction of the base destroyed, so we need the denominator.
+    private int _startingStructureCount;
+    public int StartingStructureCount => _startingStructureCount;
 
     //Transform parent of structure sets for defender user
     private Transform _defenderStructParent;
@@ -126,7 +130,17 @@ public class GameManager : MonoBehaviour
     }
 
     public StreamInfo InvadedStreamInfo;
-    
+
+    //Redesign: the dashboard's two match-history panels. Both are filled at login from
+    //PlaybackStream reads (initiating = my attacks, target = invasions against me).
+    public List<MatchSummary> RecentAttacks = new List<MatchSummary>();
+    public List<MatchSummary> RecentInvasions = new List<MatchSummary>();
+
+    //Redesign: raw brainCloud user statistics (ReadAllUserStats). Null until read / when no
+    //clashers_* stats are defined in the portal yet - MatchHistoryStats then falls back to the
+    //stream-derived "last N" numbers. Written server-side by the RecordMatchResult cloud script.
+    public System.Collections.Generic.Dictionary<string, object> UserStatistics;
+
     private void Awake()
     {
         InvadedStreamInfo = new StreamInfo();
@@ -203,7 +217,7 @@ public class GameManager : MonoBehaviour
     {
         if(_sessionManagerRef == null)
         {
-            _sessionManagerRef = FindObjectOfType<GameSessionManager>();
+            _sessionManagerRef = FindFirstObjectByType<GameSessionManager>();
         }
 
         return _sessionManagerRef;
@@ -224,7 +238,7 @@ public class GameManager : MonoBehaviour
 
         if (!_gameOverScreenRef)
         {
-            _gameOverScreenRef = FindObjectOfType<GameOverScreen>();    
+            _gameOverScreenRef = FindFirstObjectByType<GameOverScreen>();    
         }
 
         if (_gameOverScreenRef)
@@ -235,6 +249,16 @@ public class GameManager : MonoBehaviour
         _isGameActive = true;
         _startingDefenderCount = _defenderTroopCount;
         _startingInvaderCount = _invaderTroopCount;
+        _startingStructureCount = PlaybackStreamManager.Instance.StructuresList.Count;
+
+        //NetworkManager survives the scene load, and StructureKillCount is only ever
+        //incremented (BaseHealthBehavior), so without this it carries over into the next
+        //match - inflating the gold reward and the game-over tally, and pinning the new
+        //match-history damage % at 100%.
+        if (NetworkManager.Instance)
+        {
+            NetworkManager.Instance.StructureKillCount = 0;
+        }
     }
 
     public void GameOver(bool in_didInvaderWin, bool in_didTimeExpire = false)
@@ -314,7 +338,7 @@ public class GameManager : MonoBehaviour
         //Do Game over things
         GetSessionManager().StopTimer();
         
-        FindObjectOfType<SpawnController>().enabled = false;
+        FindFirstObjectByType<SpawnController>().enabled = false;
         
         
         _gameOverScreenRef.gameObject.SetActive(true);
@@ -338,13 +362,13 @@ public class GameManager : MonoBehaviour
         _isGameActive = true;
         IsInPlaybackMode = true;
         GetSessionManager().SetupGameSession();
-        var troopsToDestroy = FindObjectsOfType<TroopAI>();
+        var troopsToDestroy = FindObjectsByType<TroopAI>(FindObjectsSortMode.InstanceID);
         foreach (var troopAI in troopsToDestroy)
         {
             Destroy(troopAI.gameObject);
         }
 
-        var housesToDestroy = FindObjectsOfType<BaseHealthBehavior>();
+        var housesToDestroy = FindObjectsByType<BaseHealthBehavior>(FindObjectsSortMode.InstanceID);
         foreach (var house in housesToDestroy)
         {
             Destroy(house.gameObject);
@@ -354,13 +378,13 @@ public class GameManager : MonoBehaviour
     //Sets up defender and invader spawner logic
     private void SetUpSpawners()
     {
-        var _invaderSpawner = FindObjectOfType<SpawnController>();
+        var _invaderSpawner = FindFirstObjectByType<SpawnController>();
         if (_invaderSpawner)
         {
             _invaderSpawner.SetUpInvaders();
         }
 
-        var _defenderSpawner = FindObjectOfType<DefenderSpawner>();
+        var _defenderSpawner = FindFirstObjectByType<DefenderSpawner>();
         if (_defenderSpawner)
         {
             if (!IsInPlaybackMode)

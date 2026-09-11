@@ -1,92 +1,122 @@
 using System;
+using System.Collections;
 using UnityEngine;
+
 using Random = UnityEngine.Random;
 
 public class MoveBuddyAnimation : MonoBehaviour
 {
+    private const float MINIMUM_MOVEMENT = 20.0f;
+
     [Header("Movement Settings")]
     public float moveDuration = 0.3f;
 
+    private float _moveSpeed = 1.0f;
     [Header("Shake Settings")]
     public float shakeDuration = 0.2f;
     public float shakeMagnitude = 10f;
 
-    private Vector2 startPosition;
     private bool isRunning = false;
+    private bool isInteracting = false;
+    private Vector2 startPosition;
     private Vector2 _targetPosition;
     private RectTransform _buddySpriteTransform;
 
     private Action OnFinishAnimation;
+
     private void Awake()
     {
         if (_buddySpriteTransform == null)
             _buddySpriteTransform = GetComponent<RectTransform>();
 
         startPosition = _buddySpriteTransform.anchoredPosition;
+        _moveSpeed = GameManager.Instance.GetBuddyMoveSpeed();
     }
 
     private void OnDisable()
     {
-        if(isRunning)
-            StopAllCoroutines();
+        ResetAnimation();
     }
+
+    private void ResetAnimation()
+    {
+        if (isRunning)
+        {
+            StopAllCoroutines();
+            OnFinishAnimation = null;
+            isInteracting = false;
+            isRunning = false;
+        }
+    }    
 
     public void MoveBuddyToBench(Vector2 in_targetPosition, Action in_onFinishShaking)
     {
-        if (isRunning) return;
+        if (!isInteracting)
+        {
+            ResetAnimation();
+        }
+
         OnFinishAnimation = in_onFinishShaking;
         _targetPosition = in_targetPosition;
-        if (!isRunning)
-            StartCoroutine(MoveShakeWaitForResponse());
-    }
-    
-    public void MoveBuddyToPosition(Vector2 in_targetPosition)
-    {
-        if (isRunning) return;
-        _targetPosition = in_targetPosition;
-        
-        if (!isRunning)
-            StartCoroutine(MoveToLocation());
-    }
-    
-    public void MoveBuddyToPosition(Vector2 in_targetPosition, Action in_onFinishAnimation)
-    {
-        if (isRunning) return;
-        _targetPosition = in_targetPosition;
-        OnFinishAnimation = in_onFinishAnimation;
-        if (!isRunning)
-            StartCoroutine(MoveToLocation());
+        StartCoroutine(MoveShakeWaitForResponse());
     }
 
-    private System.Collections.IEnumerator MoveShakeWaitForResponse()
+    public void MoveBuddyToPosition(Vector2 in_targetPosition)
+    {
+        if (!isInteracting)
+        {
+            ResetAnimation();
+        }
+
+        _targetPosition = in_targetPosition;
+        StartCoroutine(MoveToLocation());
+    }
+
+    public void MoveBuddyToPosition(Vector2 in_targetPosition, Action in_onFinishAnimation)
+    {
+        if (!isInteracting)
+        {
+            ResetAnimation();
+        }
+
+        _targetPosition = in_targetPosition;
+        OnFinishAnimation = in_onFinishAnimation;
+        StartCoroutine(MoveToLocation());
+    }
+
+    private IEnumerator MoveShakeWaitForResponse()
     {
         isRunning = true;
         startPosition = _buddySpriteTransform.anchoredPosition;
-        
-        yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
-        
+
+        if (Vector2.Distance(startPosition, _targetPosition) > MINIMUM_MOVEMENT)
+        {
+            yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, moveDuration));
+        }
+
         yield return StartCoroutine(Shake(shakeDuration, shakeMagnitude));
-        
+
         //ToDo: Add a wait for response yield here..
-        
+
         //yield return StartCoroutine(MoveToPosition(_buddySpriteTransform.anchoredPosition, startPosition, moveDuration));
 
         isRunning = false;
     }
-    
-    private System.Collections.IEnumerator MoveToLocation()
+
+    private IEnumerator MoveToLocation()
     {
         isRunning = true;
-        
+
         startPosition = _buddySpriteTransform.anchoredPosition;
         var distance = Vector2.Distance(startPosition, _targetPosition);
-        var duration = moveDuration;
-        
-        if(distance >= 500)
+
+        // Duration is now driven by speed — faster speed = shorter duration
+        var duration = distance / (_moveSpeed * 500f);
+
+        if (distance > MINIMUM_MOVEMENT)
         {
-            duration = 1;
+            yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, duration));
         }
-        yield return StartCoroutine(MoveToPosition(startPosition, _targetPosition, duration));
 
         if (OnFinishAnimation != null)
         {
@@ -97,7 +127,7 @@ public class MoveBuddyAnimation : MonoBehaviour
         isRunning = false;
     }
 
-    private System.Collections.IEnumerator MoveToPosition(Vector2 from, Vector2 to, float duration)
+    private IEnumerator MoveToPosition(Vector2 from, Vector2 to, float duration)
     {
         float elapsed = 0f;
 
@@ -113,8 +143,9 @@ public class MoveBuddyAnimation : MonoBehaviour
         _buddySpriteTransform.anchoredPosition = to;
     }
 
-    private System.Collections.IEnumerator Shake(float duration, float magnitude)
+    private IEnumerator Shake(float duration, float magnitude)
     {
+        isInteracting = true;
         float elapsed = 0f;
         Vector2 original = _buddySpriteTransform.anchoredPosition;
 
@@ -126,22 +157,22 @@ public class MoveBuddyAnimation : MonoBehaviour
 
             yield return null;
         }
-        
-        if(OnFinishAnimation != null)
+
+        if (OnFinishAnimation != null)
         {
             OnFinishAnimation();
             OnFinishAnimation = null;
         }
 
         _buddySpriteTransform.anchoredPosition = original;
+        isInteracting = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        var pickUpScript = other.GetComponent<RewardPickup>();
-        if(pickUpScript)
+        if (other.GetComponent<RewardPickup>() is var reward && reward != null)
         {
-            pickUpScript.PickUpCollected();
+            reward.PickUpCollected();
         }
     }
 }

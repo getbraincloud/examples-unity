@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+
 namespace Gameframework
 {
     public class ReplaceWithPrefab : EditorWindow

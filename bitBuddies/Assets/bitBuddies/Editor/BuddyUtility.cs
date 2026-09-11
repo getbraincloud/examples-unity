@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using BrainCloud.JSONHelper;
 using Gameframework;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,8 +15,8 @@ public class BuddyUtility : EditorWindow
 
         window.Show();
     }
-    
-        // Draw GUI components (buttons, textboxes, etc.)
+
+    // Draw GUI components (buttons, textboxes, etc.)
     private void OnGUI()
     {
         GUI.skin.label.fontSize = 9;

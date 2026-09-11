@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
 using BrainCloud.JSONHelper;
 using Gameframework;
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,7 +19,7 @@ public struct QuestInfo
     public QUEST_STATUS QuestStatus;
     public CurrencyTypes RewardCurrencyType;
     public QuestTypes QuestType;
-    
+
     public int CurrentProgress => StatTracker.Instance.GetStat(QuestStatToTrack);
     public float ProgressPercent => (float)CurrentProgress / QuestRequiredProgress;
 }
@@ -35,7 +35,7 @@ public class QuestCard : MonoBehaviour
     [SerializeField] private TextMeshProUGUI RewardText;
     [SerializeField] private Button ClaimButton;
     [SerializeField] private Image BGImage;
-    
+
     private QuestPanel _questPanel;
     private QuestInfo _questInfo;
     public QuestInfo QuestInfo
@@ -54,7 +54,7 @@ public class QuestCard : MonoBehaviour
         StatTracker.OnStatChanged -= OnStatChange;
         ClaimButton.onClick.RemoveAllListeners();
     }
-    
+
     private void OnClaimButton()
     {
         Dictionary<string, object> scriptData = new Dictionary<string, object>();
@@ -63,12 +63,12 @@ public class QuestCard : MonoBehaviour
         scriptData.Add("questScore", StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack));
         BrainCloudManager.Client.ScriptService.RunScript
         (
-            BitBuddiesConsts.CLAIM_QUEST_SCRIPT_NAME, 
-            scriptData.Serialize(), 
+            BitBuddiesConsts.CLAIM_QUEST_SCRIPT_NAME,
+            scriptData.Serialize(),
             BrainCloudManager.HandleSuccess("Claim Quest Success", _questPanel.OnClaimButtonSuccess)
         );
     }
-    
+
     public void SetupCard(QuestInfo in_questInfo)
     {
         _questPanel = FindAnyObjectByType<QuestPanel>();
@@ -90,12 +90,12 @@ public class QuestCard : MonoBehaviour
         }
         int questValue = StatTracker.Instance.GetStat(_questInfo.QuestStatToTrack);
         ProgressText.enabled = false;
-        if(questValue >= _questInfo.QuestRequiredProgress)
+        if (questValue >= _questInfo.QuestRequiredProgress)
         {
-            if(currentQuestIndex == _questInfo.QuestLineIndex)
+            if (currentQuestIndex == _questInfo.QuestLineIndex)
             {
                 ProgressSlider.maxValue = _questInfo.QuestRequiredProgress;
-                if(questValue > _questInfo.QuestRequiredProgress)
+                if (questValue > _questInfo.QuestRequiredProgress)
                 {
                     ProgressSlider.value = _questInfo.QuestRequiredProgress;
                 }
@@ -103,13 +103,13 @@ public class QuestCard : MonoBehaviour
                 {
                     ProgressSlider.value = questValue;
                 }
-                
-                ProgressText.text = $"{_questInfo.CurrentProgress}/{_questInfo.QuestRequiredProgress}";
+
+                ProgressText.text = $"{ProgressSlider.value}/{_questInfo.QuestRequiredProgress}";
                 ClaimButton.gameObject.SetActive(true);
                 ProgressText.enabled = true;
                 ClaimButton.onClick.AddListener(OnClaimButton);
             }
-            else if(currentQuestIndex > _questInfo.QuestLineIndex || _questInfo.QuestStatus == QUEST_STATUS.SATISFIED)
+            else if (currentQuestIndex > _questInfo.QuestLineIndex || _questInfo.QuestStatus == QUEST_STATUS.SATISFIED)
             {
                 ClaimButton.gameObject.SetActive(false);
                 ProgressSlider.fillRect.GetComponent<Image>().color = Color.green;
@@ -125,7 +125,7 @@ public class QuestCard : MonoBehaviour
         else
         {
             ClaimButton.gameObject.SetActive(false);
-            if(_questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || _questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)
+            if (_questInfo.QuestStatus == QUEST_STATUS.UNLOCKED || _questInfo.QuestStatus == QUEST_STATUS.IN_PROGRESS)
             {
                 //ProgressSlider.fillRect.GetComponent<Image>().color = Color.blue;
                 ProgressText.enabled = true;
@@ -147,13 +147,13 @@ public class QuestCard : MonoBehaviour
             case CurrencyTypes.Coins:
                 RewardIcon.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.COIN_SPRITE_PATH);
                 break;
-            
+
             case CurrencyTypes.Gems:
                 RewardIcon.sprite = AssetLoader.LoadSprite(BitBuddiesConsts.GEM_SPRITE_PATH);
                 break;
         }
-        
-        switch(_questInfo.QuestStatus)
+
+        switch (_questInfo.QuestStatus)
         {
             case QUEST_STATUS.LOCKED:
                 LockImage.gameObject.SetActive(true);

@@ -55,6 +55,10 @@ After the game has completed, these events will execute:
     - **Multiplayer** > **Matchmaking** > **Allow attack while online = TRUE**
 - Defining new User Entity types can only be achieved with the `CreateEntity()` call. 
 
+### AI Assistant (MCP)
+
+- [Using brainCloud MCP with Unity and AI assistants](../MCP_SETUP.md) — manage this app's cloud code, API hooks, and more from Unity's Assistant or a coding agent.
+
 ### brainCloud Resources
 
 - [Designing Offline Multiplayer](https://help.getbraincloud.com/en/articles/3272700-design-multiplayer-matchmaking)

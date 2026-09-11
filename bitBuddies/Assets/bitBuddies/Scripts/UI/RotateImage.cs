@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class RotateImage : MonoBehaviour
 {
-    [SerializeField] private float rotationSpeed = 180f; 
+    [SerializeField] private float rotationSpeed = 180f;
     private RectTransform rectTransform;
 
     void Awake()

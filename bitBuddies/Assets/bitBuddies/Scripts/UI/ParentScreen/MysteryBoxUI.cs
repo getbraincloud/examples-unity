@@ -1,12 +1,9 @@
-using System.Collections.Generic;
-using BrainCloud.JsonFx.Json;
 using BrainCloud.JSONHelper;
 using Gameframework;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEngine.Serialization;
 
 //Mystery box template to then be displayed with different rarities and cost.
 public class MysteryBoxUI : ContentUIBehaviour
@@ -21,13 +18,14 @@ public class MysteryBoxUI : ContentUIBehaviour
     [SerializeField] private GameObject LevelRequirementObject;
     [SerializeField] private GameObject PriceRequirementObject;
     [SerializeField] private TextMeshProUGUI LevelRequirementText;
+
     [Header("References")]
     [SerializeField] private Sprite[] UnlockTypeSprites;  //0 = coins, 1 = love, 2 = level
     [SerializeField] private Sprite[] OpenBoxTypeSprites;
     [SerializeField] private Sprite[] ClosedBoxTypeSprites;
+
     private MysteryBoxPanelUI _mysteryBoxPanelUI;
-    //Data
-    private MysteryBoxInfo _mysteryBoxInfo;
+    private MysteryBoxInfo _mysteryBoxInfo; // Data
 
     public void Init(MysteryBoxInfo in_mysteryBoxInfo)
     {
@@ -40,21 +38,21 @@ public class MysteryBoxUI : ContentUIBehaviour
         UnlockAmountText.text = _mysteryBoxInfo.UnlockAmount.ToString("#,#");    //#,# adds commas to the string when using ints
         UnlockTypeImage.sprite = UnlockTypeSprites[(int)CurrencyTypes.Coins];
         var userInfo = BrainCloudManager.Instance.CurrentUserInfo;
-        if(userInfo.Level >= _mysteryBoxInfo.LevelRequirement)
+        if (userInfo.Level >= _mysteryBoxInfo.LevelRequirement)
         {
             LevelRequirementObject.SetActive(false);
             PriceRequirementObject.SetActive(true);
-            
+
             var usersCoins = BrainCloudManager.Instance.CurrentUserInfo.Coins;
-            if(_mysteryBoxInfo.UnlockAmount > usersCoins)
+            if (_mysteryBoxInfo.UnlockAmount > usersCoins)
             {
                 LockIconImage.gameObject.SetActive(true);
                 OpenBoxButton.interactable = false;
-                BoxSpriteImage.sprite = ClosedBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
+                BoxSpriteImage.sprite = ClosedBoxTypeSprites[(int)_mysteryBoxInfo.RarityEnum];
             }
             else
             {
-                BoxSpriteImage.sprite = OpenBoxTypeSprites[(int) _mysteryBoxInfo.RarityEnum];
+                BoxSpriteImage.sprite = OpenBoxTypeSprites[(int)_mysteryBoxInfo.RarityEnum];
                 LockIconImage.gameObject.SetActive(false);
                 OpenBoxButton.interactable = true;
                 OpenBoxButton.onClick.AddListener(OnOpenBox);
@@ -68,31 +66,31 @@ public class MysteryBoxUI : ContentUIBehaviour
             OpenBoxButton.interactable = false;
             LockIconImage.gameObject.SetActive(true);
         }
-        
+
         BoxNameText.text = _mysteryBoxInfo.BoxName;
         _mysteryBoxPanelUI = FindAnyObjectByType<MysteryBoxPanelUI>();
     }
-    
+
     private void OnOpenBox()
     {
         //Goal: Open another screen where we Animate the box opening
         // After box is opened, we show another screen where the user 
         // picks the name of buddy
-        Dictionary<string, object> scriptData =  new Dictionary<string, object> {{"amountToConsume", _mysteryBoxInfo.UnlockAmount}};
+        Dictionary<string, object> scriptData = new Dictionary<string, object> { { "amountToConsume", _mysteryBoxInfo.UnlockAmount } };
         BrainCloudManager.Wrapper.ScriptService.RunScript
         (
-            BitBuddiesConsts.CONSUME_PARENT_COINS_SCRIPT_NAME, 
-            scriptData.Serialize(), 
+            BitBuddiesConsts.CONSUME_PARENT_COINS_SCRIPT_NAME,
+            scriptData.Serialize(),
             BrainCloudManager.HandleSuccess("Consume Coins Success", BrainCloudManager.Instance.OnConsumeCoins),
             BrainCloudManager.HandleFailure("Consume Coins Failure", OnFailureCallback)
         );
-            
+
         _mysteryBoxPanelUI.MysteryBoxInfo = _mysteryBoxInfo;
         _mysteryBoxPanelUI.NextPage();
     }
-    
+
     private void OnFailureCallback()
     {
-        
+
     }
 }

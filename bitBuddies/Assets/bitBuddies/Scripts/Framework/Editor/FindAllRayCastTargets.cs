@@ -1,8 +1,7 @@
-﻿using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor.SceneManagement;
 
 namespace Gameframework
@@ -157,7 +156,7 @@ namespace Gameframework
         Texture GetTextureForFile(GameObject in_obj)
         {
             Image image = in_obj.GetComponent<Image>();
-            
+
             if (image) return image.raycastTarget ? (Texture)AssetDatabase.LoadAssetAtPath("Assets/Framework/Icons/IconAffirmative.png", typeof(Texture)) : (Texture)AssetDatabase.LoadAssetAtPath("Assets/Framework/Icons/IconNegative.png", typeof(Texture));
 
             Text text = in_obj.GetComponent<Text>();

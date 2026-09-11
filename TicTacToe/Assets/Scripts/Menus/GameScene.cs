@@ -57,7 +57,7 @@ public class GameScene : MonoBehaviour
         UserName.text = UserName.text.Trim();
         App.Name = UserName.text;
 
-        App.Bc.PlayerStateService.UpdateName(App.Name,
+        App.Bc.PlayerStateService.UpdateUserName(App.Name,
             (response, cbObject) => { },
             (status, code, error, cbObject) => { Debug.Log("Failed to change Player Name"); });
     }

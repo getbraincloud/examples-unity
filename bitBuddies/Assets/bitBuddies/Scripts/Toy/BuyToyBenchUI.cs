@@ -28,21 +28,21 @@ public class BuyToyBenchUI : ContentUIBehaviour
         SetupToyBenchesUI();
 
     }
-    
+
     public void SetupToyBenchesUI()
     {
         var benchInfoList = GameManager.Instance.ToyBenchInfos;
-        foreach(var benchInfo in benchInfoList)
+        foreach (var benchInfo in benchInfoList)
         {
-            if(benchInfo.BenchId.Equals(_toyBenchInfo.BenchId, StringComparison.OrdinalIgnoreCase))
+            if (benchInfo.BenchId.Equals(_toyBenchInfo.BenchId, StringComparison.OrdinalIgnoreCase))
             {
                 _toyBenchInfo = benchInfo;
                 break;
             }
         }
-        
+
         ToyNameText.text = _toyBenchInfo.BenchId;
-        if(_toyBenchInfo.LevelRequirement == 0)
+        if (_toyBenchInfo.LevelRequirement == 0)
         {
             LevelRequirementText.text = "";
         }
@@ -50,7 +50,7 @@ public class BuyToyBenchUI : ContentUIBehaviour
         {
             LevelRequirementText.text = "Lv. " + _toyBenchInfo.LevelRequirement;
         }
-        if(_toyBenchInfo.UnlockCost == 0)
+        if (_toyBenchInfo.UnlockCost == 0)
         {
             UnlockAmountText.text = "Free";
         }
@@ -61,7 +61,7 @@ public class BuyToyBenchUI : ContentUIBehaviour
 
         var childInfo = GameManager.Instance.SelectedAppChildrenInfo;
         var parentInfo = BrainCloudManager.Instance.CurrentUserInfo;
-        if(childInfo.buddyLevel >= _toyBenchInfo.LevelRequirement &&
+        if (childInfo.buddyLevel >= _toyBenchInfo.LevelRequirement &&
            parentInfo.Coins >= _toyBenchInfo.UnlockCost)
         {
             LockImage.SetActive(false);
@@ -74,19 +74,19 @@ public class BuyToyBenchUI : ContentUIBehaviour
         }
         PurchasedObject.SetActive(false);
         var listOfOwnedToys = GameManager.Instance.SelectedAppChildrenInfo.ownedToys;
-        if(listOfOwnedToys != null && listOfOwnedToys.Count > 0)
+        if (listOfOwnedToys != null && listOfOwnedToys.Count > 0)
         {
             foreach (var value in listOfOwnedToys)
             {
-                if(value.Equals(_toyBenchInfo.BenchId, StringComparison.OrdinalIgnoreCase))
+                if (value.Equals(_toyBenchInfo.BenchId, StringComparison.OrdinalIgnoreCase))
                 {
                     PurchasedObject.SetActive(true);
                     BuyButton.interactable = false;
                     break;
                 }
-            }   
+            }
         }
-        if(listOfOwnedToys == null || listOfOwnedToys.Count == 0)
+        if (listOfOwnedToys == null || listOfOwnedToys.Count == 0)
         {
             PurchasedObject.SetActive(false);
         }
@@ -99,21 +99,27 @@ public class BuyToyBenchUI : ContentUIBehaviour
 
     private void OnBuyButton()
     {
-        if(_toyBenchInfo.UnlockCost == 0)
+        if (_toyBenchInfo.UnlockCost == 0)
         {
-            StateManager.Instance.OpenConfirmPopUp("Are you sure?", $"Get the {_toyBenchInfo.BenchId} for free?", GiveToyToChild);
+            PopUpUI.Show("Are you sure?", false)
+                   .AddBodyText($"Get the {_toyBenchInfo.BenchId} for free?")
+                   .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
+                   .AddButton("Confirm", PopUpUI.ButtonColor.Green, GiveToyToChild);
         }
         else
         {
-            StateManager.Instance.OpenConfirmPopUp("Are you sure?", $"Buy {_toyBenchInfo.BenchId} for {_toyBenchInfo.UnlockCost}?", GiveToyToChild);
+            PopUpUI.Show("Are you sure?", false)
+                   .AddBodyText($"Buy {_toyBenchInfo.BenchId} for {_toyBenchInfo.UnlockCost:N0}?")
+                   .AddButton("Close", PopUpUI.ButtonColor.Blue, null)
+                   .AddButton("Confirm", PopUpUI.ButtonColor.Green, GiveToyToChild);
         }
     }
-    
+
     private void GiveToyToChild()
     {
         ToyManager.Instance.ObtainToy(_toyBenchInfo.BenchId, BenchIsPurchased);
     }
-    
+
     public void BenchIsPurchased()
     {
         PurchasedObject.SetActive(true);

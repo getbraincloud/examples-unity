@@ -15,9 +15,9 @@ public class MouseMerchant : Shop
     {
         GemBalanceText.text = BrainCloudManager.Instance.CurrentUserInfo.Gems.ToString();
 
-        if (ItemSpawnPoint.transform.childCount > 0) 
+        if (ItemSpawnPoint.transform.childCount > 0)
             return;
-        
+
         List<ShopInfo> shopItems = GameManager.Instance.ChildShopInfos;
         foreach (ShopInfo shopItem in shopItems)
         {

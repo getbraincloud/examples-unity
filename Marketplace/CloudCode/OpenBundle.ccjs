@@ -1,0 +1,112 @@
+"use strict";
+// OpenBundle - Opens a bundle item the user already owns
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var userItemsService = bridge.getUserItemsServiceProxy();
+
+  var openBundle = userItemsService.openBundle(data.itemId, -1, 1, true, null);
+
+  if (openBundle.status !== 200) {
+    response.error = true;
+    response.message = "Failed to open bundle";
+    response.errorMessage = openBundle.statusMessage;
+    return response;
+  }
+
+  response.error = false;
+  response.currencyAwarded = openBundle.data.currencyAwarded;
+
+  if (response.currencyAwarded && response.currencyAwarded.hasOwnProperty("Stars")) {
+    var awardedAmount = response.currencyAwarded.Stars;
+    response.xpAward = convertStarsToXP(awardedAmount);
+  }
+
+  response.currencyData = openBundle.data.currencyBalances ? openBundle.data.currencyBalances.currency : {};
+  response.items = openBundle.data.items;
+
+  return response;
+}
+
+function convertStarsToXP(amount) {
+  var vcService = bridge.getVirtualCurrencyServiceProxy();
+  var playerStatsService = bridge.getPlayerStatisticsServiceProxy();
+  var gamificationService = bridge.getGamificationServiceProxy();
+  var response = {};
+
+  var consumeCurrency = vcService.consumeCurrency("Stars", amount);
+  if (consumeCurrency.status !== 200) {
+    response.error = true;
+    response.message = "Failed to consume currency";
+    response.errorMessage = consumeCurrency.statusMessage;
+    return response;
+  }
+
+  var xpAward = playerStatsService.incrementExperiencePoints(amount);
+
+  response = xpAward.data;
+  response.levelUp = false;
+
+  if (xpAward.data.rewardDetails && !isEmptyObject(xpAward.data.rewardDetails)) {
+    response.levelUp = true;
+  }
+
+  var xpMetaData = gamificationService.readXpLevelsMetadata();
+
+  if (xpMetaData.data.xp_levels && xpMetaData.data.xp_levels.length !== 0) {
+    var xpResults = calculateXpProgress(xpAward.data.experiencePoints, xpMetaData.data.xp_levels);
+    response.adjustedXp = xpResults.adjustedXp;
+    response.xpToNextLevel = xpResults.xpToNextLevel;
+    response.statusTitle = xpResults.statusTitle;
+  }
+
+  return response;
+}
+
+function calculateXpProgress(totalXp, xpLevels) {
+  if (!xpLevels || !(xpLevels instanceof Array) || xpLevels.length === 0) {
+    bridge.logError("Invalid xpLevels data");
+    return null;
+  }
+
+  var currentLevel = 1;
+  var currentLevelXpRequired = 0;
+  var nextLevelXpRequired = null;
+  var statusTitle = "";
+
+  for (var i = 0; i < xpLevels.length; i++) {
+    var levelData = xpLevels[i];
+    if (totalXp >= levelData.experience) {
+      currentLevel = levelData.level;
+      currentLevelXpRequired = levelData.experience;
+      statusTitle = levelData.statusTitle;
+      if (i + 1 < xpLevels.length) {
+        nextLevelXpRequired = xpLevels[i + 1].experience;
+      }
+    }
+  }
+
+  var adjustedXp = totalXp - currentLevelXpRequired;
+  var xpToNextLevel = nextLevelXpRequired != null ? nextLevelXpRequired - currentLevelXpRequired : 0;
+
+  return {
+    "currentLevel": currentLevel,
+    "totalXp": totalXp,
+    "adjustedXp": adjustedXp,
+    "statusTitle": statusTitle,
+    "xpToNextLevel": xpToNextLevel,
+    "isMaxLevel": nextLevelXpRequired == null
+  };
+}
+
+function isEmptyObject(obj) {
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) return false;
+  }
+  return true;
+}
+
+main();

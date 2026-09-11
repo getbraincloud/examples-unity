@@ -1,246 +1,270 @@
-using System;
-using System.Collections.Generic;
-using BrainCloud.Plugin;
 using Gameframework;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class GameManager : SingletonBehaviour<GameManager>
 {
-	[Tooltip("Debug")]
-	[SerializeField] public bool Debug;
-	private EventSystem _eventSystem;
-	[Tooltip("App Info")]
-	private List<AppChildrenInfo> _appChildrenInfos = new List<AppChildrenInfo>();
-	public List<AppChildrenInfo> AppChildrenInfos
-	{
-		get { return _appChildrenInfos; }
-		set { _appChildrenInfos = value; }
-	}
-	private List<MysteryBoxInfo> _mysteryBoxes;
-	public List<MysteryBoxInfo> MysteryBoxes
-	{
-		get => _mysteryBoxes;
-		set => _mysteryBoxes = value;
-	}
-	private AppChildrenInfo _selectedAppChildrenInfo;
-	public AppChildrenInfo SelectedAppChildrenInfo
-	{
-		get { return _selectedAppChildrenInfo; }
-		set
-		{
-			_selectedAppChildrenInfo = value;
-			UpdateSelectedAppChildrenInfo();
-		}
-	}
-	
-	private List<ToyBenchInfo> _toyBenchInfos;
-	public List<ToyBenchInfo> ToyBenchInfos
-	{
-		get => _toyBenchInfos;
-		set => _toyBenchInfos = value;
-	}
+    [Tooltip("Debug")] public bool Debug;
 
-	private float _xpAcquiredAmount;
-	public float XpAcquiredAmount
-	{
-		get => _xpAcquiredAmount;
-		set => _xpAcquiredAmount = value;
-	}
+    public List<AppChildrenInfo> AppChildrenInfos { get; set; } = new();
+    private AppChildrenInfo _selectedAppChildrenInfo;
+    public AppChildrenInfo SelectedAppChildrenInfo
+    {
+        get { return _selectedAppChildrenInfo; }
+        set
+        {
+            _selectedAppChildrenInfo = value;
+            UpdateSelectedAppChildrenInfo();
+        }
+    }
 
-	private float _rewardPickupDuration;
-	public float RewardPickupDuration
-	{
-		get => _rewardPickupDuration;
-		set
-		{
-			if(value > 0)
-				_rewardPickupDuration = value;
-			else
-				_rewardPickupDuration = 10f;
-		}
-	}
+    public List<MysteryBoxInfo> MysteryBoxes { get; set; }
+    public List<ToyBenchInfo> ToyBenchInfos { get; set; }
+    public float XpAcquiredAmount { get; set; }
+    public int ChildCountMaximum { get; set; }
+    public List<QuestInfo> BitBuddiesQuests { get; set; }
+    public List<QuestInfo> BitBlingQuests { get; set; }
+    public List<QuestInfo> GeneralQuests { get; set; }
+    public List<ShopInfo> ParentShopInfos { get; set; }
+    public List<ShopInfo> ChildShopInfos { get; set; }
+    public long FreebieItemCooldownUntil { get; set; }
+    public int CoinsCollectedViaVisit { get; set; }
+    public List<float> BuddyMoveSpeeds { get; set; }
+    public bool ClaimQuestAvailable { get; set; }
+    public Dictionary<string, object> HomeRewards { get; set; }
 
-	private int _childCountMaximum;
-	public int ChildCountMaximum
-	{
-		get => _childCountMaximum;
-		set => _childCountMaximum = value;
-	}
-	
-	private List<QuestInfo> _bitBuddiesQuests;
-	public List<QuestInfo> BitBuddiesQuests
-	{
-		get => _bitBuddiesQuests;
-		set => _bitBuddiesQuests = value;
-	}
-	
-	private List<QuestInfo> _bitBlingQuests;
-	public List<QuestInfo> BitBlingQuests
-	{
-		get => _bitBlingQuests; 
-		set => _bitBlingQuests = value;
-	}
-	
-	private List<QuestInfo> _generalQuests;
-	public List<QuestInfo> GeneralQuests
-	{
-		get => _generalQuests; 
-		set => _generalQuests = value;
-	}
-	
-	private List<ShopInfo> _parentShopInfos;
-	public List<ShopInfo> ParentShopInfos
-	{
-		get => _parentShopInfos;
-		set => _parentShopInfos = value;
-	}
-	
-	private List<ShopInfo> _childShopInfos;
-	public List<ShopInfo> ChildShopInfos
-	{
-		get => _childShopInfos;
-		set => _childShopInfos = value;
-	}
+    public override void Awake()
+    {
+        _selectedAppChildrenInfo = new();
+        HomeRewards = new();
 
-	private long _freebieItemCooldownUntil;
-	public long FreebieItemCooldownUntil
-	{
-		get => _freebieItemCooldownUntil;
-		set => _freebieItemCooldownUntil = value;
-	}
-	
-	public void SetQuestsLists(List<QuestInfo> listOfQuests)
-	{
-		_bitBlingQuests	= new List<QuestInfo>();
-		_bitBuddiesQuests = new List<QuestInfo>();
-		_generalQuests	= new List<QuestInfo>();
-	
-		for (int i = 0; i < listOfQuests.Count; i++)
-		{
-			switch (listOfQuests[i].QuestId)
-			{
-				case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
-					BitBuddiesQuests.Add(listOfQuests[i]);
-					break;
-				case BitBuddiesConsts.BITBLING_QUESTLINEID:
-					BitBlingQuests.Add(listOfQuests[i]);
-					break;
-				case BitBuddiesConsts.GENERAL_QUESTLINEID:
-					GeneralQuests.Add(listOfQuests[i]);
-					break;
-			}
-		}
-	}
-	
-	public override void Awake()
-	{
-		_selectedAppChildrenInfo = new AppChildrenInfo();
-		//_eventSystem = EventSystem.current;
-		base.Awake();
-	}
-	
-	// private void Update()
-	// {
-	// 	if (Input.GetKeyDown(KeyCode.Tab) && _eventSystem.currentSelectedGameObject != null)
-	// 	{
-	// 		Selectable next = _eventSystem.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
- //         
-	// 		if (next != null)
-	// 		{
-	// 			InputField inputfield = next.GetComponent<InputField>();
-	// 			if (inputfield != null)
-	// 			{
-	// 				//if it's an input field, also set the text caret
-	// 				inputfield.OnPointerClick(new PointerEventData(_eventSystem));
-	// 			}
-	// 			_eventSystem.SetSelectedGameObject(next.gameObject, new BaseEventData(_eventSystem));
-	// 		}
-	// 	}
-	// }
-	
-	public void OnDeleteBuddySuccess()
-	{
-		/*
-		 * Update list to remove selected child info
-		 * Refresh screen to display the current
-		 */
-		_appChildrenInfos.Remove(_selectedAppChildrenInfo);
-		StateManager.Instance.RefreshScreen();
-	}
-	
-	public void ClearDataForLogout()
-	{
-		_appChildrenInfos.Clear();
-		_selectedAppChildrenInfo = null;
-		
-	}
-	
-	public void UpdateChildAppInfo(AppChildrenInfo in_appChildrenInfo)
-	{
-		var index = _appChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
-		if(index != -1)
-		{
-			_appChildrenInfos[index] = in_appChildrenInfo;
-		}
-	}
-	
-	public void UpdateSelectedAppChildrenInfo()
-	{
-		if (_appChildrenInfos == null || _appChildrenInfos.Count == 0) return;
-		if(SelectedAppChildrenInfo == null) return;
-		
-		for (int i = 0; i < _appChildrenInfos.Count; i++)
-		{
-			if(_appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
-			{
-				_appChildrenInfos[i] = SelectedAppChildrenInfo;
-			}
-		}
-	}
-	
-	public void UpdateSelectedAppChildrenInfo(AppChildrenInfo in_appChildrenInfo)
-	{
-		for (int i = 0; i < _appChildrenInfos.Count; i++)
-		{
-			if(_appChildrenInfos[i].profileId.Equals(in_appChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
-			{
-				_appChildrenInfos[i] = in_appChildrenInfo;
-				SelectedAppChildrenInfo = in_appChildrenInfo;
-			}
-		}
-	}
-	
-	public string GetChildItemDisplayName(string itemId)
-	{
-		for (int i = 0; i < _childShopInfos.Count; i++)
-		{
-			if(_childShopInfos[i].ShopId.Equals(itemId))
-			{
-				return _childShopInfos[i].DisplayName;
-			}
-		}
-		return "";
-	}
-	
-	public void CompleteQuestCard(string questId, int questIndex)
-	{
-		for (int i = 0; i < _appChildrenInfos.Count; i++)
-		{
-			if(_appChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
-			{
-				switch (questId)
-				{
-					case BitBuddiesConsts.GENERAL_QUESTLINEID:
-						//BrainCloudManager.Instance.CurrentUserInfo.
-						break;
-					case BitBuddiesConsts.BITBLING_QUESTLINEID:
-						break;
-					case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
-						break;
-				}
-			}
-		}
-	}
+        base.Awake();
+    }
+
+#if UNITY_STANDALONE
+    private float resetTime = 0.0f;
+
+    private void Update()
+    {
+        // Quit app
+        if (Input.GetKeyDown(KeyCode.Escape) &&
+            !BrainCloudManager.Instance.IsProcessingRequest &&
+            FindFirstObjectByType<PopUpUI>() == null &&
+            FindFirstObjectByType<LoadingScreen>() == null)
+        {
+            PopUpUI.Show("Quit bitBuddies", false)
+                   .AddBodyText("Are you sure you want to quit the game?")
+                   .AddButton("Back", PopUpUI.ButtonColor.Blue, null)
+                   .AddButton("Quit", PopUpUI.ButtonColor.Red, Application.Quit);
+        }
+
+        // Clear app data
+        if (Input.GetKey(KeyCode.F12))
+        {
+            resetTime += Time.deltaTime;
+            if (resetTime >= 3.0f)
+            {
+                static IEnumerator reset()
+                {
+                    yield return new WaitForFixedUpdate();
+
+                    PlayerPrefs.DeleteAll();
+
+                    yield return new WaitForFixedUpdate();
+
+                    PlayerPrefs.Save();
+
+                    yield return new WaitForFixedUpdate();
+
+                    Application.Quit();
+                }
+
+                var eventSystems = FindObjectsByType<UnityEngine.EventSystems.EventSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                foreach (var system in eventSystems)
+                {
+                    system.gameObject.SetActive(false);
+                }
+
+                StartCoroutine(reset());
+                return;
+            }
+        }
+        else
+        {
+            resetTime = 0.0f;
+        }
+    }
+#endif
+
+    public float GetBuddyMoveSpeed()
+    {
+        if (BuddyMoveSpeeds == null || BuddyMoveSpeeds.Count == 0) return 0;
+
+        return BuddyMoveSpeeds[(int)_selectedAppChildrenInfo.rarity];
+    }
+
+    public void SetQuestsLists(List<QuestInfo> listOfQuests)
+    {
+        BitBlingQuests = new List<QuestInfo>();
+        BitBuddiesQuests = new List<QuestInfo>();
+        GeneralQuests = new List<QuestInfo>();
+
+        for (int i = 0; i < listOfQuests.Count; i++)
+        {
+
+            switch (listOfQuests[i].QuestId)
+            {
+                case BitBuddiesConsts.BITBUDDIES_QUESTLINEID:
+                    BitBuddiesQuests.Add(listOfQuests[i]);
+                    break;
+                case BitBuddiesConsts.BITBLING_QUESTLINEID:
+                    BitBlingQuests.Add(listOfQuests[i]);
+                    break;
+                case BitBuddiesConsts.GENERAL_QUESTLINEID:
+                    GeneralQuests.Add(listOfQuests[i]);
+                    break;
+            }
+        }
+    }
+
+    public void OnDeleteBuddySuccess()
+    {
+        /*
+         * Update list to remove selected child info
+         * Refresh screen to display the current
+         */
+        AppChildrenInfos.Remove(_selectedAppChildrenInfo);
+        StateManager.Instance.RefreshScreen();
+    }
+
+    public void ClearDataForLogout()
+    {
+        AppChildrenInfos.Clear();
+        _selectedAppChildrenInfo = null;
+
+    }
+
+    public void UpdateChildAppInfo(AppChildrenInfo in_appChildrenInfo)
+    {
+        var index = AppChildrenInfos.FindIndex(x => x.profileId == in_appChildrenInfo.profileId);
+        if (index != -1)
+        {
+            AppChildrenInfos[index] = in_appChildrenInfo;
+        }
+    }
+
+    public void UpdateSelectedAppChildrenInfo()
+    {
+        if (AppChildrenInfos == null || AppChildrenInfos.Count == 0) return;
+        if (SelectedAppChildrenInfo == null) return;
+
+        for (int i = 0; i < AppChildrenInfos.Count; i++)
+        {
+            if (AppChildrenInfos[i].profileId.Equals(SelectedAppChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+            {
+                AppChildrenInfos[i] = SelectedAppChildrenInfo;
+            }
+        }
+    }
+
+    public static bool CanBuyItem(CurrencyTypes in_currencyType, int in_itemCost)
+    {
+        bool canBuy = false;
+        switch (in_currencyType)
+        {
+            case CurrencyTypes.Coins:
+                canBuy = BrainCloudManager.Instance.CurrentUserInfo.Coins >= in_itemCost;
+                break;
+            case CurrencyTypes.Gems:
+                canBuy = BrainCloudManager.Instance.CurrentUserInfo.Gems >= in_itemCost;
+                break;
+            case CurrencyTypes.FakeDollars:
+                canBuy = BrainCloudManager.Instance.CurrentUserInfo.FakeMoney >= in_itemCost;
+                break;
+            case CurrencyTypes.BuddyBling:
+                canBuy = Instance.SelectedAppChildrenInfo.buddyBling >= in_itemCost;
+                break;
+        }
+
+        return canBuy;
+    }
+
+    public void UpdateAchievementAwarded(string[] in_achievementId)
+    {
+        if (SelectedAppChildrenInfo == null) return;
+
+        ChildAchievementInfo childAchievementInfo = new ChildAchievementInfo();
+        for (int i = 0; i < SelectedAppChildrenInfo.childAchievements.Count; i++)
+        {
+            for (int x = 0; x < in_achievementId.Length; x++)
+            {
+                if (SelectedAppChildrenInfo.childAchievements[i].AchievementId.Equals(in_achievementId[x], StringComparison.OrdinalIgnoreCase))
+                {
+                    childAchievementInfo = SelectedAppChildrenInfo.childAchievements[i];
+                    childAchievementInfo.Status = "AWARDED";
+                    SelectedAppChildrenInfo.childAchievements[i] = childAchievementInfo;
+                }
+            }
+        }
+    }
+
+    public void UpdateSelectedAppChildrenInfo(AppChildrenInfo in_appChildrenInfo)
+    {
+        for (int i = 0; i < AppChildrenInfos.Count; i++)
+        {
+            if (AppChildrenInfos[i].profileId.Equals(in_appChildrenInfo.profileId, StringComparison.OrdinalIgnoreCase))
+            {
+                AppChildrenInfos[i] = in_appChildrenInfo;
+                SelectedAppChildrenInfo = in_appChildrenInfo;
+            }
+        }
+    }
+
+    public string GetChildItemDisplayName(string itemId)
+    {
+        for (int i = 0; i < ChildShopInfos.Count; i++)
+        {
+            if (ChildShopInfos[i].ShopId.Equals(itemId))
+            {
+                return ChildShopInfos[i].DisplayName;
+            }
+        }
+        return "";
+    }
+
+    public Sprite GetCurrencySprite(CurrencyTypes in_currency)
+    {
+        return in_currency switch
+        {
+            CurrencyTypes.BuddyBling => Resources.Load<Sprite>(BitBuddiesConsts.BIT_BLING_SPRITE_PATH),
+            CurrencyTypes.Gems => Resources.Load<Sprite>(BitBuddiesConsts.GEM_SPRITE_PATH),
+            CurrencyTypes.FakeDollars => Resources.Load<Sprite>(BitBuddiesConsts.FAKE_MONEY_SPRITE_PATH),
+            CurrencyTypes.Love => Resources.Load<Sprite>(BitBuddiesConsts.LOVE_SPRITE_PATH),
+            CurrencyTypes.Level => Resources.Load<Sprite>(BitBuddiesConsts.LEVEL_SPRITE_PATH),
+            _ => Resources.Load<Sprite>(BitBuddiesConsts.COIN_SPRITE_PATH),
+        };
+    }
+
+    public void ShowFailurePopUp(string header = "Something went wrong",
+                                 string body = "Please try again or restart the application.",
+                                 Action onOKButton = null)
+    {
+        PopUpUI.Show(header, false)
+               .AddBodyText(body)
+               .AddButton("OK", PopUpUI.ButtonColor.Green, onOKButton, true, true);
+    }
+
+    public static string FormatCamelCase(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        // Insert a space before each uppercase letter (except the first)
+        string result = System.Text.RegularExpressions.Regex.Replace(input, "(?<!^)([A-Z])", " $1");
+
+        // Capitalize the first letter
+        return char.ToUpper(result[0]) + result.Substring(1);
+    }
 }

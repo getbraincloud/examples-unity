@@ -15,7 +15,6 @@ namespace Gameframework
             PlayerPrefs.DeleteKey(USER_NAME);
             PlayerPrefs.DeleteKey(ASKED_TO_NOTIFY);
             PlayerPrefs.DeleteKey(PUSH_AUTHORIZED);
-
             PlayerPrefs.DeleteKey(GAME_SPEED);
         }
 
@@ -25,7 +24,7 @@ namespace Gameframework
             get { return GetStringValue(USER_NAME); }
             set { SetStringValue(USER_NAME, value); }
         }
-        
+
         // the last downloaded asset bundle version, just compares it to the version of the app
         public static string AssetBundleVersion
         {
@@ -83,7 +82,7 @@ namespace Gameframework
 
             set { SetFloatValue(EFFECT_VOLUME, value); }
         }
-        
+
         public static bool AskedToNotify
         {
             get { return GetIntValue(ASKED_TO_NOTIFY) == 0 ? false : true; }

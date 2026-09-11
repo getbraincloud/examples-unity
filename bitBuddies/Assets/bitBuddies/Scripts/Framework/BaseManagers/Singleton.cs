@@ -1,9 +1,9 @@
-﻿namespace Gameframework
+namespace Gameframework
 {
     public class Singleton
     {
-        private Singleton(){}
-        static Singleton(){}
+        private Singleton() { }
+        static Singleton() { }
 
         #region Public 
         public static Singleton Instance { get { return GetInstance(); } }

@@ -1,0 +1,40 @@
+"use strict";
+
+// One-way (raid) matchmaking filter. brainCloud runs this once per candidate from
+// FindPlayersUsingFilter(); return true to keep the candidate, false to drop them.
+// Attach under Design | Multiplayer | Matchmaking.
+//
+//   matchCandidate.summaryFriendData - { hasDefense, defenderRank }, published by the client
+//   extraParms                       - { requireDefense, defenderRank }, rank -1 = any
+
+let RANK_NONE = 3;  // ArmyDivisionRank.None
+let RANK_ANY = -1;
+
+function main() {
+    let summary = (data.matchCandidate || {}).summaryFriendData || {};
+    let extraParms = data.extraParms || {};
+
+    // No summaryFriendData means a profile from before this filter shipped, so it has no base to raid.
+    let defenderRank = typeof summary.defenderRank === "number" ? summary.defenderRank : RANK_NONE;
+    let hasDefense = summary.hasDefense === true && defenderRank !== RANK_NONE;
+
+    if (extraParms.requireDefense !== false && !hasDefense) {
+        return false;
+    }
+
+    let wantedRank = typeof extraParms.defenderRank === "number" ? extraParms.defenderRank : RANK_ANY;
+    return wantedRank === RANK_ANY || defenderRank === wantedRank;
+}
+
+main();
+
+//*** ------------- brainCloud meta-data begins now - do not hand-edit -----------------
+// "scriptName": "FilterOneWayMultiplayer",
+// "clientCallable": false,
+// "s2sCallable": false,
+// "peerCallable": false,
+// "scriptTimeout": 20,
+// "description": "One-way raid matchmaking filter: keeps candidates with a saved defense, optionally narrowed to one difficulty (extraParms.defenderRank, -1 = any).",
+// "version": 4,
+// "updatedAt": 1784044339160,
+// "scriptId": "b2d32bdf-8d11-4c7c-bdc8-82697a01512f"

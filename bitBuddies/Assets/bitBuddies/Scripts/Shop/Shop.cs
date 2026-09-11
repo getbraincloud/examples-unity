@@ -6,31 +6,31 @@ using UnityEngine.UI;
 /// </summary>
 public class Shop : ContentUIBehaviour
 {
-	[SerializeField] protected Button CloseButton;
-	[SerializeField] protected Transform ItemSpawnPoint;
+    [SerializeField] protected Button CloseButton;
+    [SerializeField] protected Transform ItemSpawnPoint;
 
-	protected override void Awake()
-	{
-		base.Awake();
-		CloseButton.onClick.AddListener(OnCloseButtonPressed);
+    protected override void Awake()
+    {
+        base.Awake();
+        CloseButton.onClick.AddListener(OnCloseButtonPressed);
 
-		InitializeUI();
-	}
+        InitializeUI();
+    }
 
-	protected override void InitializeUI()
-	{
-		RefreshShopScreen();
-	}
-	
-	public virtual void SetupShop() {}
-	
-	public virtual void RefreshShopScreen()
-	{
-		SetupShop();
-	}
-	
-	private void OnCloseButtonPressed()
-	{
-		Destroy(gameObject);
-	}
+    protected override void InitializeUI()
+    {
+        RefreshShopScreen();
+    }
+
+    public virtual void SetupShop() { }
+
+    public virtual void RefreshShopScreen()
+    {
+        SetupShop();
+    }
+
+    private void OnCloseButtonPressed()
+    {
+        Destroy(gameObject);
+    }
 }

@@ -1,11 +1,12 @@
-using System;
 using BrainCloud.UnityWebSocketsForWebGL.WebSocketSharp;
+using System;
 using TMPro;
 using UnityEngine;
 
 public class CountdownTimer : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI TimerLabel;
+    [SerializeField] private GameObject ParentObject;
 
     private long _endEpochMs;
     private bool _isRunning = false;
@@ -15,21 +16,31 @@ public class CountdownTimer : MonoBehaviour
     {
         _shopItem = GetComponent<ShopItem>();
         TimerLabel.gameObject.SetActive(false);
+        if (ParentObject)
+        {
+            ParentObject.SetActive(false);
+        }
+
     }
 
     public void StartCountdown(long epochMS)
     {
+        if (ParentObject)
+        {
+            ParentObject.SetActive(true);
+        }
+
         _endEpochMs = epochMS;
         UpdateDisplay();
         _isRunning = true;
     }
-    
+
     void Update()
     {
         if (!_isRunning) return;
         UpdateDisplay();
     }
-    
+
     void UpdateDisplay()
     {
         TimeSpan remaining = GetRemainingTime(_endEpochMs);
@@ -42,14 +53,14 @@ public class CountdownTimer : MonoBehaviour
             OnCooldownComplete();
             return;
         }
-        
-        if(TimerLabel && TimerLabel.gameObject && !TimerLabel.gameObject.activeSelf)
+
+        if (TimerLabel && TimerLabel.gameObject && !TimerLabel.gameObject.activeSelf)
         {
             TimerLabel.gameObject.SetActive(true);
         }
         TimerLabel.text = FormatTime(remaining);
     }
-    
+
     public static TimeSpan GetRemainingTime(long endEpochMs)
     {
         long nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -61,26 +72,31 @@ public class CountdownTimer : MonoBehaviour
 
         return TimeSpan.FromMilliseconds(remainingMs);
     }
-    
+
     private string FormatTime(TimeSpan t)
     {
         //Format dynamically if time should include hours or just minutes/seconds.
 
         if (t.TotalHours >= 1)
             return $"{(int)t.TotalHours:D2}:{t.Minutes:D2}:{t.Seconds:D2}";
-        
+
         return $"{t.Minutes:D2}:{t.Seconds:D2}";
     }
-    
+
     private void OnCooldownComplete()
     {
-        if(_shopItem)
+        if (_shopItem)
         {
             _shopItem.EnableBuyButton();
-            if(!_shopItem.ItemInfo.ShopId.IsNullOrEmpty() && _shopItem.ItemInfo.ShopId == "freebie")
+            if (!_shopItem.ItemInfo.ShopId.IsNullOrEmpty() && _shopItem.ItemInfo.ShopId == "freebie")
             {
                 GameManager.Instance.FreebieItemCooldownUntil = 0;
             }
         }
+        if (ParentObject)
+        {
+            ParentObject.SetActive(false);
+        }
+
     }
 }

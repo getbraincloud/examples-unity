@@ -8,7 +8,7 @@ public class Billboard : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        _cam = FindObjectOfType<Camera>().transform;
+        _cam = FindFirstObjectByType<Camera>().transform;
         if (!_cam)
         {
             enabled = false;

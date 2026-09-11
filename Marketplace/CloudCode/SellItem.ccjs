@@ -1,0 +1,28 @@
+"use strict";
+// SellItem (VSCode created Script) 
+
+function main() {
+  var response = {};
+
+  response.success = false;
+  response.message = "";
+
+  bridge.logDebugJson("Script Inputs", data);
+  //data.itemId - the item we want to sell
+  var userItemService = bridge.getUserItemsServiceProxy();
+
+  var sellItem = userItemService.sellUserItem(data.itemId, -1, 1, null, false);
+
+  if(sellItem.status !== 200){
+    response.message = "Failed to sell item";
+    return response;
+  }
+
+  response.currencyRefunded = sellItem.data.currencyRefunded;
+  response.currencyMap = sellItem.data.currencyBalances.currencyMap;
+  response.success = true;
+
+  return response;
+}
+
+main();

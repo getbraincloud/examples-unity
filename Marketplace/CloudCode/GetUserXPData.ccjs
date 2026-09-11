@@ -1,0 +1,101 @@
+"use strict";
+// GetUserData (VSCode created Script) 
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var playerStatsService = bridge.getPlayerStatisticsServiceProxy();
+  var gamificationService = bridge.getGamificationServiceProxy();
+
+  //We want to get :
+  // the users currency amounts
+  // the users adjusted XP data (totalXp, adjustedXp, XPToNextLevel, XPCapped, current level, level status name)
+  var allGamification = gamificationService.readAllGamification(true);
+
+  if(allGamification.status !== 200){
+    //error 
+    response.error = true;
+    response.message = "Failed to read all gamification";
+    return response;
+  }
+
+  var userXpData = allGamification.data.xp;
+  var xpLevelData = userXpData.xpLevel;
+
+  response.xpCapped = userXpData.xpCapped;
+  response.totalExperiencePoints = userXpData.experiencePoints;
+  response.experienceLevel = userXpData.experienceLevel;
+  response.statusTitle = xpLevelData.statusTitle;
+  //get adjusted XP - for that we need to read xp meta data
+
+  var xpMetaData = gamificationService.readXpLevelsMetadata();
+        
+  if(xpMetaData.data.xp_levels && xpMetaData.data.xp_levels.length !== 0){
+    var xpResults = calculateXpProgress(userXpData.experiencePoints, xpMetaData.data.xp_levels);
+
+    response.adjustedXp = xpResults.adjustedXp;
+    response.xpToNextLevel = xpResults.xpToNextLevel;
+  }
+
+  return response;
+}
+
+
+function calculateXpProgress(totalXp, xpLevels)
+{
+    if (!xpLevels || !(xpLevels instanceof Array) || xpLevels.length === 0)
+    {
+        bridge.logError("Invalid xpLevels data");
+        return null;
+    }
+
+    var currentLevel = 1;
+    var currentLevelXpRequired = 0;
+    var nextLevelXpRequired = null;
+    var statusTitle = "";
+
+    // Determine current level based on totalXp
+    for (var i = 0; i < xpLevels.length; i++)
+    {
+        var levelData = xpLevels[i];
+
+        if (totalXp >= levelData.experience)
+        {
+            currentLevel = levelData.level;
+            currentLevelXpRequired = levelData.experience;
+            statusTitle = levelData.statusTitle;
+
+            // Look ahead for next level
+            if (i + 1 < xpLevels.length)
+            {
+                nextLevelXpRequired = xpLevels[i + 1].experience;
+            }
+        }
+    }
+
+    var adjustedXp = totalXp - currentLevelXpRequired;
+    var xpToNextLevel = null;
+
+    if (nextLevelXpRequired != null)
+    {
+        xpToNextLevel = nextLevelXpRequired - currentLevelXpRequired;
+    }
+    else
+    {
+        // Player is at max level
+        xpToNextLevel = 0;
+    }
+
+    return {
+        "currentLevel": currentLevel,
+        "totalXp": totalXp,
+        "adjustedXp": adjustedXp,
+        "statusTitle": statusTitle,
+        "xpToNextLevel": xpToNextLevel,
+        "isMaxLevel": nextLevelXpRequired == null
+    };
+}
+
+main();

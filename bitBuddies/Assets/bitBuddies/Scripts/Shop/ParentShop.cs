@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using BrainCloud.JSONHelper;
 using Gameframework;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class ParentShop : Shop
 {
     [SerializeField] private ShopItem shopItemPrefab;
-    [SerializeField] private TMP_Text FakeMoneyBalanceText; 
+    [SerializeField] private TMP_Text FakeMoneyBalanceText;
     [SerializeField] private Button GetMoreFakeMoneyButton;
 
     private void OnEnable()
@@ -19,24 +19,21 @@ public class ParentShop : Shop
         GetMoreFakeMoneyButton.onClick.AddListener(OnGetMoreFakeMoney);
     }
 
-    /// <summary>
-    /// Setup the shop UI to show fake money balance and listing shop items.
-    /// </summary>
     public override void SetupShop()
     {
         var userInfo = BrainCloudManager.Instance.CurrentUserInfo;
-        if(userInfo.FakeMoney > 0)
+        if (userInfo.FakeMoney > 0)
         {
-            FakeMoneyBalanceText.text = $"${BrainCloudManager.Instance.CurrentUserInfo.FakeMoney.ToString("#,#")}";
+            FakeMoneyBalanceText.text = $"${BrainCloudManager.Instance.CurrentUserInfo.FakeMoney:#,#}";
         }
         else
         {
             FakeMoneyBalanceText.text = "$ 0";
         }
-        
+
         if (ItemSpawnPoint.transform.childCount > 0)
             return;
-            
+
         List<ShopInfo> shopItems = GameManager.Instance.ParentShopInfos;
         foreach (ShopInfo shopItem in shopItems)
         {
@@ -51,28 +48,25 @@ public class ParentShop : Shop
         GetMoreFakeMoneyButton.onClick.RemoveAllListeners();
     }
 
-    /// <summary>
-    /// Button reaction for getting more fake money.
-    /// </summary>
     private void OnGetMoreFakeMoney()
     {
-        Dictionary<string, object> scriptData = new Dictionary<string, object>();
-        scriptData.Add("increaseAmount", 10);
-        BrainCloudManager.Client.ScriptService.RunScript(
-            BitBuddiesConsts.AWARD_MONEY_SCRIPT_NAME, 
-            scriptData.Serialize(), 
-            BrainCloudManager.HandleSuccess("Awarded money successful", OnGetMoreMoneySuccess)
-        );
+        var scriptData = new Dictionary<string, object>
+        {
+            { "increaseAmount", 10 }
+        };
+
+        BrainCloudManager.Client.ScriptService.RunScript(BitBuddiesConsts.AWARD_MONEY_SCRIPT_NAME,
+                                                         scriptData.Serialize(),
+                                                         BrainCloudManager.HandleSuccess("Awarded money successful", OnGetMoreMoneySuccess));
     }
-    
+
     private void OnGetMoreMoneySuccess(string jsonResponse)
     {
-        //Update fake money balance
-        Dictionary<string, object> data = jsonResponse.Deserialize("data");
-        Dictionary<string, object> response = data["response"] as Dictionary<string, object>;
-        var fakeDollarObject = response["fakeDollarsMap"] as Dictionary<string, object>;
-        int fakeDollarBalance = (int) fakeDollarObject["balance"];
-        BrainCloudManager.Instance.CurrentUserInfo.UpdateFakeMoney(fakeDollarBalance);
+        // Update fake money balance
+        var data = jsonResponse.Deserialize("data", "response", "fakeDollarsMap");
+
+        BrainCloudManager.Instance.CurrentUserInfo.UpdateFakeMoney(data.GetValue<int>("balance"));
+
         StateManager.Instance.RefreshScreen();
     }
 }

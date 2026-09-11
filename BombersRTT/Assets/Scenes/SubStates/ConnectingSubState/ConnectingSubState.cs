@@ -1,4 +1,4 @@
-﻿using Gameframework;
+using Gameframework;
 using BrainCloud;
 using BrainCloud.Common;
 using TMPro;
@@ -173,7 +173,7 @@ namespace BrainCloudUNETExample
             if (m_lastAuthType == AuthenticationType.Universal)
             {
                 GPlayerMgr.Instance.PlayerData.UniversalId = UsernameBox.text;
-                GCore.Wrapper.Client.PlayerStateService.UpdateName(UsernameBox.text);
+                GCore.Wrapper.Client.PlayerStateService.UpdateUserName(UsernameBox.text);
             }
             if(!RememberMeToggle.isOn)
             {

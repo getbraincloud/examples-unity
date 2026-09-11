@@ -1,0 +1,25 @@
+"use strict";
+
+function main() {
+  var response = {};
+
+  if (data && data.storeId == "mock" && data.receiptData) {
+    var postResults = bridge.getAppStoreServiceProxy().verifyPurchase(data.storeId, data.receiptData);
+
+    response.data = postResults;
+    response.success = postResults.status == 200;
+
+    if (!response.success) {
+      response.success = false;
+      response.errorMessage = "VerifyPurchase was not a success.";
+    }
+  }
+  else {
+    response.success = false;
+    response.errorMessage = "Client did not receive the proper data for a mock VerifyPurchase.";
+  }
+
+  return response;
+}
+
+main();

@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "path": "",
+  "mcpServers": {
+    "braincloud": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.braincloudservers.com/mcp"
+      ]
+    }
+  }
+}

@@ -72,8 +72,6 @@ public abstract class ContentUIBehaviour : MonoBehaviour
     /// Override this to be able to set up the various UI elements to their initial states.
     /// </summary>
     protected abstract void InitializeUI();
-
-    public void RefreshScreen() => InitializeUI();
     
     protected void OnCloseButton()
     {

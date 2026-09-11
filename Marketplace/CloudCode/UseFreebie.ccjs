@@ -1,0 +1,148 @@
+"use strict";
+// UseFreebie (VSCode created Script) 
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var userItemsService = bridge.getUserItemsServiceProxy();
+  var currencyService = bridge.getVirtualCurrencyServiceProxy();
+  var playerStatsService = bridge.getPlayerStatisticsServiceProxy();
+  var gamificationService = bridge.getGamificationServiceProxy();
+  var useItem = userItemsService.useUserItem(data.itemId, -1, null, true);
+
+  if(useItem.status !== 200){
+    //use item failed
+    response.error = true;
+    response.message = "API call to use item failed " + useItem.statusMessage;
+
+    return response;
+  }
+
+  var useItemData = useItem.data;
+
+  if(useItemData.used){
+    //item was used successfully
+    //let's apply the freebie based on what it is
+    var itemDef = useItemData.item.itemDef;
+    response.item = useItemData.item;
+    if(itemDef.category == "Freebies"){
+      //Make sure this is a freebie item first
+      var currencyToGive = itemDef.meta.currency;
+      var amountToGive = itemDef.meta.amount;
+
+      if(currencyToGive == "Stars"){
+        //Stars actually represent XP in this case, so instead of awarding a virtual currency we will award XP points here
+        var xpAward = playerStatsService.incrementExperiencePoints(amountToGive);
+        response.xpAward = xpAward.data;
+        response.xpAward.levelUp = false; //false until we find out more
+        //check if we leveled up, if so let's capture the XP To Next Level value and adjust XP value for xp bar UI
+        if(xpAward.data.rewardDetails && !isEmptyObject(xpAward.data.rewardDetails)){
+          //we got a level up
+          var rewardDetails = xpAward.data.rewardDetails;
+          var levelUpReward = rewardDetails.xp.experienceLevels[0];
+
+          response.xpAward.levelUp = true;
+        }
+
+        //now we need to know about adjusted xp progress to next level
+        var xpMetaData = gamificationService.readXpLevelsMetadata();
+        
+        if(xpMetaData.data.xp_levels && xpMetaData.data.xp_levels.length !== 0){
+          var xpResults = calculateXpProgress(xpAward.data.experiencePoints, xpMetaData.data.xp_levels);
+
+          response.xpAward.adjustedXp = xpResults.adjustedXp;
+          response.xpAward.xpToNextLevel = xpResults.xpToNextLevel;
+          response.xpAward.statusTitle = xpResults.statusTitle;
+        }
+      }else{
+        var currencyAward = currencyService.awardCurrency(currencyToGive, amountToGive);
+        response.currencyAward = currencyAward.data.currencyMap;
+      }
+
+      response.success = true;
+
+    }else{
+      //Wasn't a freebie item so just return
+      response.error = true;
+      response.message = "Item was used but was not a Freebie item";
+    }
+  }else{
+    response.error = true;
+    response.message = "Item was not used. Fail reason: " + useItem.data.failReason;
+
+  }
+
+
+  return response;
+}
+
+function calculateXpProgress(totalXp, xpLevels)
+{
+    if (!xpLevels || !(xpLevels instanceof Array) || xpLevels.length === 0)
+    {
+        bridge.logError("Invalid xpLevels data");
+        return null;
+    }
+
+    var currentLevel = 1;
+    var currentLevelXpRequired = 0;
+    var nextLevelXpRequired = null;
+    var statusTitle = "";
+
+    // Determine current level based on totalXp
+    for (var i = 0; i < xpLevels.length; i++)
+    {
+        var levelData = xpLevels[i];
+
+        if (totalXp >= levelData.experience)
+        {
+            currentLevel = levelData.level;
+            currentLevelXpRequired = levelData.experience;
+            statusTitle = levelData.statusTitle;
+
+            // Look ahead for next level
+            if (i + 1 < xpLevels.length)
+            {
+                nextLevelXpRequired = xpLevels[i + 1].experience;
+            }
+        }
+    }
+
+    var adjustedXp = totalXp - currentLevelXpRequired;
+    var xpToNextLevel = null;
+
+    if (nextLevelXpRequired != null)
+    {
+        xpToNextLevel = nextLevelXpRequired - currentLevelXpRequired;
+    }
+    else
+    {
+        // Player is at max level
+        xpToNextLevel = 0;
+    }
+
+    return {
+        "currentLevel": currentLevel,
+        "totalXp": totalXp,
+        "adjustedXp": adjustedXp,
+        "statusTitle": statusTitle,
+        "xpToNextLevel": xpToNextLevel,
+        "isMaxLevel": nextLevelXpRequired == null
+    };
+}
+
+function isEmptyObject(obj)
+{
+    for (var key in obj)
+    {
+        if (obj.hasOwnProperty(key))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+main();

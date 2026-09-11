@@ -38,8 +38,7 @@ public class GameManager : MonoBehaviour
     public TMP_InputField UsernameInputField;
     public TMP_InputField PasswordInputField;
     public TMP_Text LoggedInNameText;
-    public TMP_Text AppIdText;
-    public TMP_Text LobbyIdText;
+    public TMP_Text AppIdText, LobbyIdText, AppVersionText, BCVersionText, ServerVersionText, EnvText;
     public Button ReconnectButton;
     public Toggle RememberMeToggle;
 
@@ -105,7 +104,21 @@ public class GameManager : MonoBehaviour
         PasswordInputField.inputType = TMP_InputField.InputType.Password;
         LoadPlayerSettings();
         LobbyIdText.enabled = false;
-        AppIdText.text = $"App ID: {BrainCloud.Plugin.Interface.AppId}";
+        AppIdText.text = BrainCloud.Plugin.Interface.AppId;
+        AppVersionText.text = Application.version;
+        BCVersionText.text = BrainCloudManager.Instance.Wrapper.Client.BrainCloudClientVersion;
+        BrainCloudManager.Instance.Wrapper.Client.GetAuthenticationService().getServerVersion(
+            (string jsonResponse, object cbObj) =>
+            {
+                var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+                var data = response["data"] as Dictionary<string, object>;
+
+                ServerVersionText.text = data["serverVersion"] as string;
+            });
+
+        string env = BrainCloud.Plugin.Interface.DispatcherURL.Split('.')[1];
+        if (env == "braincloudservers") env = "prod";
+        EnvText.text = env;
     }
 
     // Update is called once per frame
@@ -277,7 +290,7 @@ public class GameManager : MonoBehaviour
         StartGameBtn.SetActive(IsLocalUserHost());
         EndGameBtn.SetActive(IsLocalUserHost());
         CompressionDropdown.interactable = IsLocalUserHost();
-        LobbyIdText.text = $"Lobby ID: {stManager.CurrentLobby.LobbyID}";
+        LobbyIdText.text = stManager.CurrentLobby.LobbyID;
         if (!LobbyIdText.enabled)
         {
             LobbyIdText.enabled = true;

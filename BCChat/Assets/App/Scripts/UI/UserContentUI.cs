@@ -194,7 +194,7 @@ public class UserContentUI : ContentUIBehaviour
 
         IsInteractable = false;
 
-        playerService.UpdateName(UsernameField.text);
+        playerService.UpdateUserName(UsernameField.text);
         playerService.UpdateUserPictureUrl(PictureURLField.text,
                                            OnSuccess("Profile changes saved!", OnBackButton),
                                            OnFailure("Could not save profile. Please try again.", () => IsInteractable = true));

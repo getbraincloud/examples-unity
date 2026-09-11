@@ -1,4 +1,5 @@
-﻿#define CONSOLE_WRITE
+#define CONSOLE_WRITE
+
 using UnityEngine;
 
 namespace Gameframework
@@ -52,7 +53,7 @@ namespace Gameframework
         }
 
         [System.Diagnostics.Conditional("DEBUG_LOG_ENABLED")]
-        public static void LogException(System.Exception exception) 
+        public static void LogException(System.Exception exception)
         {
 #if !CONSOLE_WRITE
             Debug.LogException(exception);
@@ -62,25 +63,25 @@ namespace Gameframework
         }
 
         [System.Diagnostics.Conditional("DEBUG_LOG_ENABLED")]
-        public static void LogException(System.Exception exception, Object context) 
+        public static void LogException(System.Exception exception, Object context)
         {
             Debug.LogException(exception, context);
         }
 
         [System.Diagnostics.Conditional("DEBUG_LOG_ENABLED")]
-        public static void LogFormat(string format, params object[] args) 
+        public static void LogFormat(string format, params object[] args)
         {
             Debug.LogFormat(format, args);
         }
 
         [System.Diagnostics.Conditional("DEBUG_LOG_ENABLED")]
-        public static void LogFormat(Object context, string format, params object[] args) 
+        public static void LogFormat(Object context, string format, params object[] args)
         {
             Debug.LogFormat(context, format, args);
         }
 
         [System.Diagnostics.Conditional("DEBUG_LOG_ENABLED")]
-        public static void LogWarning(object message) 
+        public static void LogWarning(object message)
         {
 #if !CONSOLE_WRITE
             Debug.LogWarning(message);
@@ -90,7 +91,7 @@ namespace Gameframework
         }
 
         [System.Diagnostics.Conditional("DEBUG_LOG_ENABLED")]
-        public static void LogWarning(object message, Object context) 
+        public static void LogWarning(object message, Object context)
         {
             Debug.LogWarning(message, context);
         }

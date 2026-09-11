@@ -41,6 +41,14 @@ Create a new app using a template of one of these examples:
 
 ---
 
+### Using brainCloud with an AI assistant (MCP)
+
+brainCloud hosts a [Model Context Protocol](https://modelcontextprotocol.io/) server that lets an AI assistant manage your team and app — cloud code, API hooks, "My Server" (S2S), and Web Services — using your own account. You can drive it from **Unity's built-in AI Assistant** or from a coding agent like Claude Code. One guide covers both — plus, optionally, giving your agent access to the Unity Editor:
+
+→ **[Using brainCloud MCP with Unity and AI assistants](MCP_SETUP.md)**
+
+---
+
 ## Authentication
 
 Authentication has been updated with a new look! Check out the [Authentication README.md](./Authentication/README.md) for more information. This example will be updated as new features and authentication methods are added to brainCloud.

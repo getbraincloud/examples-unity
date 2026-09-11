@@ -1,0 +1,94 @@
+"use strict";
+// EquipItem (VSCode created Script) 
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+  //data.itemId - the item id to equip
+  //data.equip - true | false if we equip or unequip
+
+  var entityService = bridge.getEntityServiceProxy();
+  var userItemsService = bridge.getUserItemsServiceProxy();
+
+  response.success = false;
+  response.message = "";
+
+  var itemSlot = "";
+  //first we verify that the itemId actually exists
+  var existingItem = userItemsService.getUserItem(data.itemId, true);
+  if(existingItem.status !== 200){
+    //item does not exist in users inventory
+    response.message = "Item does not exist in user inventory";
+    return response;
+  }else{
+    //If it exists, make sure that the item is equippable
+    var existingItemMetaData = existingItem.data.item.itemDef.meta;
+    var equippable = false;
+    if(!isEmptyObject(existingItemMetaData.equippable)){
+      equippable = existingItemMetaData.equippable;
+      itemSlot = existingItemMetaData.equippableSlot;
+    }
+    if(!equippable){
+      response.message = "Item is not equippable";
+      return response;
+    }
+  }
+
+  if(itemSlot === ""){
+    response.message = "Invalid item slot";
+    return response;
+  }
+
+  var entityType = "EquippedItems";
+
+  //check that our entity for the item slot exists, if it exists update it, if not create it
+  var existingEntity = entityService.getEntitiesByType(entityType);
+  if(existingEntity.status == 200){
+
+      var acl = {
+        "other": 1
+      }
+
+      if(existingEntity.data.entities.length > 0){
+        //entity exists so we update it
+        var entityData = existingEntity.data.entities[0].data;
+
+        entityData[itemSlot] = data.equip ? data.itemId : "none";
+
+        var entityId = existingEntity.data.entities[0].entityId;
+        var updatedEntity = entityService.updateEntity(entityId, entityType, entityData, acl, -1);
+
+        if(updatedEntity.status == 200){
+          response.equippedItems = updatedEntity.data;
+          response.success = true;
+        }
+      }else{
+        var entityData = {}
+        entityData[itemSlot] = data.equip ? data.itemId : "none";
+        //entity does not exist, we create it
+        var newEntity = entityService.createEntity(entityType, entityData, acl);
+
+        if(newEntity.status == 200){
+          response.equippedItems = newEntity.data;
+          response.success = true;
+        }
+      }
+    }
+
+  return response;
+}
+
+function isEmptyObject(obj)
+{
+    for (var key in obj)
+    {
+        if (obj.hasOwnProperty(key))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+main();
