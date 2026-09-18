@@ -26,19 +26,16 @@ public class BrainCloudManager : MonoBehaviour
     private bool _dead = false;
     public BrainCloudWrapper Wrapper => _bcWrapper;
     public static BrainCloudManager Instance;
-    public TMP_Dropdown FreeForAllDropdown;
-    public TMP_Dropdown TeamDropdown;
+    public TMP_Dropdown LobbyTypeDropdown;
     internal RelayCompressionTypes _relayCompressionType { get; set; }
     private LogErrors _logger;
     private bool _presentWhileStarted;
     private bool _isReconnecting;
     public TeamCodes TeamCode { get; set; } = TeamCodes.all;
 
-    private List<string> _ffaLobbyTypesList = new List<string>();
-    private List<string> _teamLobbyTypesList = new List<string>();
+    private List<string> _lobbyTypesList = new List<string>();
 
-    private string _currentFFALobby;
-    private string _currentTeamLobby;
+    private string _currentLobbyType;
 
     private string currentEntryId;
 
@@ -52,6 +49,11 @@ public class BrainCloudManager : MonoBehaviour
     private long _lobbyStatusStartTime = 0;   // set on STARTING lobby event
     private string _progressMessage = "";  // latest roomProgressUpdate text
 
+    // Match timer — host sends "match_start" once per match (plus a unicast resend to any
+    // JIP joiner, alongside the existing splotch_sync handshake) so every client's countdown
+    // is synced off the same epoch instead of each starting its own local timer on connect.
+    private bool _matchStartSent = false;
+
     private void Awake()
     {
         _logger = FindObjectOfType<LogErrors>();
@@ -64,6 +66,8 @@ public class BrainCloudManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        // Let's put lobbies behind https for security reasons. This is optional, but recommended.
+        BrainCloud.BrainCloudLobby.UseHttps = true;
         InitializeBC();
     }
 
@@ -164,6 +168,34 @@ public class BrainCloudManager : MonoBehaviour
     {
         GameManager.Instance.UpdateMainMenuText();
         StateManager.Instance.isLoading = false;
+        ConnectGlobalChat();
+        FetchWorldwideRank();
+    }
+
+    // No API to look up anyone else's rank — each player fetches their own, shares via "extra".
+    private bool _rankFetchInFlight;
+    public void FetchWorldwideRank()
+    {
+        if (_rankFetchInFlight) return;
+        _rankFetchInFlight = true;
+        _bcWrapper.SocialLeaderboardService.GetGlobalLeaderboardViewIfExists(
+            "CursorParty_HighestCoverage", BrainCloudSocialLeaderboard.SortOrder.HIGH_TO_LOW, 0, 0,
+            (jsonResponse, cbObject) =>
+            {
+                _rankFetchInFlight = false;
+                var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+                var data = response.ContainsKey("data") ? response["data"] as Dictionary<string, object> : null;
+                int rank = -1;
+                if (data != null && data.ContainsKey("leaderboard") && data["leaderboard"] is object[] arr && arr.Length > 0
+                    && arr[0] is Dictionary<string, object> entry && entry.ContainsKey("rank"))
+                {
+                    rank = Convert.ToInt32(entry["rank"]);
+                }
+                if (rank == GameManager.Instance.CurrentUserInfo.WorldwideRank) return;
+                GameManager.Instance.CurrentUserInfo.WorldwideRank = rank;
+                GameManager.Instance.PushWorldwideRankIfInLobby();
+            },
+            (status, reasonCode, jsonError, cbObject) => { _rankFetchInFlight = false; });
     }
 
     // 40-colour palette aligned with C#/Java/JS/C++ RelayTestApp implementations.
@@ -300,24 +332,16 @@ public class BrainCloudManager : MonoBehaviour
 
         Dictionary<string, object> lobby = new Dictionary<string, object>();
         var lobbyData = JsonReader.Deserialize<Dictionary<string, object>>((string)value["AllLobbyTypes"]);
-        _teamLobbyTypesList.Clear();
-        _ffaLobbyTypesList.Clear();
+        _lobbyTypesList.Clear();
         for (int j = 0; j < lobbyData.Count; j++)
         {
             lobby = lobbyData[j.ToString()] as Dictionary<string, object>;
             string lobbyType = lobby["lobby"].ToString();
-            if (lobbyType.Contains("Team"))
-            {
-                _teamLobbyTypesList.Add(lobbyType);
-            }
-            else
-            {
-                _ffaLobbyTypesList.Add(lobbyType);
-            }
+            _lobbyTypesList.Add(lobbyType);
         }
 
         _noServerSelected = false;
-        GameManager.Instance.UpdateLobbyDropdowns(_ffaLobbyTypesList, _teamLobbyTypesList);
+        GameManager.Instance.UpdateLobbyDropdown(_lobbyTypesList);
 
         if (value.ContainsKey("Colors"))
         {
@@ -407,6 +431,7 @@ public class BrainCloudManager : MonoBehaviour
     public void FindLobby(RelayConnectionType protocol)
     {
         StateManager.Instance.SessionPlayers.Clear();
+        StateManager.Instance.LobbyChatHistory.Clear();
         StateManager.Instance.Protocol = protocol;
         GameManager.Instance.CurrentUserInfo.UserGameColor = Settings.GetPlayerPrefColor();
         _isReconnecting = false;
@@ -425,6 +450,17 @@ public class BrainCloudManager : MonoBehaviour
             if (member.cxId == myCxId) { member.activePing = ping; break; }
         }
 
+        if (GameManager.Instance.MatchPingText != null)
+        {
+            GameManager.Instance.MatchPingText.text = $"Ping: {ping} ms";
+            // Thresholds match the cpp reference client's ping display exactly (game.cpp).
+            GameManager.Instance.MatchPingText.color =
+                ping < 0 ? new Color(0.6f, 0.6f, 0.6f, 1f)
+                : ping < 100 ? new Color(0.4f, 0.9f, 0.5f, 1f)
+                : ping < 200 ? new Color(0.95f, 0.8f, 0.3f, 1f)
+                : new Color(1.0f, 0.4f, 0.4f, 1f);
+        }
+
         var msg = new Dictionary<string, object>
         {
             ["op"] = "relay_ping",
@@ -437,9 +473,68 @@ public class BrainCloudManager : MonoBehaviour
         GameManager.Instance.RefreshMatchEntryPings();
     }
 
+    // Host-only, ~250ms tick: sends match_start once connected, then watches the clock and
+    // flips the match phase when it elapses. Lifecycle mirrors BroadcastRelayPing.
+    private void CheckMatchTimer()
+    {
+        if (!_bcWrapper.RelayService.IsConnected()) return;
+        if (!GameManager.Instance.IsLocalUserHost()) return;
+
+        // Guard on MatchStartTimeMs too — a migrated-in host shouldn't resend and reset clocks.
+        if (!_matchStartSent && StateManager.Instance.MatchStartTimeMs <= 0)
+        {
+            _matchStartSent = true;
+            long startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            StateManager.Instance.MatchStartTimeMs = startTime;
+            SendMatchStart(BrainCloudRelay.TO_ALL_PLAYERS, startTime);
+        }
+
+        if (StateManager.Instance.MatchStartTimeMs <= 0) return;
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        if (StateManager.Instance.CurrentMatchPhase == MatchPhase.Running)
+        {
+            // Live sidebar — recomputed+broadcast ~1x/sec (every 4th tick of this 250ms timer).
+            _liveCoverageTickCounter++;
+            if (_liveCoverageTickCounter >= 4)
+            {
+                _liveCoverageTickCounter = 0;
+                BroadcastLiveCoverage();
+            }
+
+            if (now - StateManager.Instance.MatchStartTimeMs >= StateManager.MATCH_DURATION_MS)
+            {
+                StateManager.Instance.CurrentMatchPhase = MatchPhase.ResultsBroadcast;
+                OnMatchTimerElapsed();
+            }
+        }
+        else if (StateManager.Instance.CurrentMatchPhase == MatchPhase.ResultsBroadcast)
+        {
+            // Ends regardless of whether PostMatchResults has responded — the Summary screen's
+            // 8s fallback covers a slow script.
+            if (now - StateManager.Instance.MatchResultSentAtMs >= StateManager.RESULT_GRACE_MS)
+            {
+                StateManager.Instance.CurrentMatchPhase = MatchPhase.Ended;
+                EndMatch();
+            }
+        }
+    }
+
+    private void SendMatchStart(ulong toPlayerMask, long startTimeMs)
+    {
+        var msg = new Dictionary<string, object>
+        {
+            ["op"] = "match_start",
+            ["data"] = new Dictionary<string, object> { ["startTime"] = startTimeMs }
+        };
+        byte[] bytes = Encoding.ASCII.GetBytes(JsonWriter.Serialize(msg));
+        _bcWrapper.RelayService.Send(bytes, toPlayerMask, true, false, BrainCloudRelay.CHANNEL_HIGH_PRIORITY_1);
+    }
+
     public void CloseGame(bool changeState = false)
     {
         CancelInvoke(nameof(BroadcastRelayPing));
+        CancelInvoke(nameof(CheckMatchTimer));
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
@@ -486,13 +581,8 @@ public class BrainCloudManager : MonoBehaviour
         }
         else if (!StateManager.Instance.CurrentLobby.LobbyID.IsNullOrEmpty())
         {
-            //Setting up a update to send to brain cloud about local users color
-            var extra = new Dictionary<string, object>();
-            extra["colorIndex"] = (int)GameManager.Instance.CurrentUserInfo.UserGameColor;
-            extra["presentSinceStart"] = GameManager.Instance.CurrentUserInfo.PresentSinceStart;
-
-            //
-            _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true, extra, null, OnUpdateReadyFailure);
+            _bcWrapper.LobbyService.UpdateReady(StateManager.Instance.CurrentLobby.LobbyID, true,
+                GameManager.Instance.BuildExtraJson(), null, OnUpdateReadyFailure);
         }
     }
 
@@ -580,22 +670,22 @@ public class BrainCloudManager : MonoBehaviour
     }
 
     // Local User summoned a splatter in the play area
-    public void LocalSplatter(Vector2 pos)
+    public void LocalSplatter(Vector2 pos, float angle)
     {
         SendWithSpecificCompression
         (
-            CreateSplatterJson(pos, TeamCodes.all),
+            CreateSplatterJson(pos, TeamCodes.all, angle),
             true,
             false,
             Settings.GetChannel()
         );
     }
 
-    public void SendSplatterToAll(Vector2 pos)
+    public void SendSplatterToAll(Vector2 pos, float angle)
     {
         SendToSpecificTeamWithCompression
         (
-            CreateSplatterJson(pos, TeamCodes.all),
+            CreateSplatterJson(pos, TeamCodes.all, angle),
             TeamCodes.all,
             true,
             false,
@@ -603,12 +693,12 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    public void SendSplatterToTeam(Vector2 pos)
+    public void SendSplatterToTeam(Vector2 pos, float angle)
     {
         TeamCodes teamToSend = GameManager.Instance.CurrentUserInfo.Team;
         SendToSpecificTeamWithCompression
         (
-            CreateSplatterJson(pos, teamToSend),
+            CreateSplatterJson(pos, teamToSend, angle),
             teamToSend,
             true,
             false,
@@ -616,14 +706,14 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    public void SendSplatterToOpponents(Vector2 pos)
+    public void SendSplatterToOpponents(Vector2 pos, float angle)
     {
         TeamCodes TeamToSend = GameManager.Instance.CurrentUserInfo.Team == TeamCodes.alpha
             ? TeamCodes.beta
             : TeamCodes.alpha;
         SendToSpecificTeamWithCompression
         (
-            CreateSplatterJson(pos, TeamToSend),
+            CreateSplatterJson(pos, TeamToSend, angle),
             TeamToSend,
             true,
             false,
@@ -631,12 +721,13 @@ public class BrainCloudManager : MonoBehaviour
         );
     }
 
-    private Dictionary<string, object> CreateSplatterJson(Vector2 pos, TeamCodes intendedTeam)
+    private Dictionary<string, object> CreateSplatterJson(Vector2 pos, TeamCodes intendedTeam, float angle)
     {
         // Send to other players
         Dictionary<string, object> jsonData = new Dictionary<string, object>();
         jsonData["x"] = pos.x;
         jsonData["y"] = pos.y;
+        jsonData["angle"] = angle;
         jsonData["teamCode"] = (int)intendedTeam;
         jsonData["instigator"] = (int)GameManager.Instance.CurrentUserInfo.Team;
 
@@ -791,6 +882,34 @@ public class BrainCloudManager : MonoBehaviour
                 StateManager.Instance.PendingClearSplatters = true;
                 return;
             }
+            if (earlyOp == "live_coverage")
+            {
+                HandleLiveCoverage(earlyParse);
+                return;
+            }
+            if (earlyOp == "match_result")
+            {
+                HandleMatchResult(earlyParse);
+                return;
+            }
+            if (earlyOp == "lb_result")
+            {
+                HandleLbResult(earlyParse);
+                return;
+            }
+            if (earlyOp == "match_start")
+            {
+                var startData = earlyParse["data"] as Dictionary<string, object>;
+                if (startData != null && startData.ContainsKey("startTime"))
+                {
+                    long startTime = Convert.ToInt64(startData["startTime"]);
+                    if (startTime > 0 && StateManager.Instance.MatchStartTimeMs == 0)
+                    {
+                        StateManager.Instance.MatchStartTimeMs = startTime;
+                    }
+                }
+                return;
+            }
             if (earlyOp == "relay_ping")
             {
                 var pingData = earlyParse["data"] as Dictionary<string, object>;
@@ -842,6 +961,7 @@ public class BrainCloudManager : MonoBehaviour
                             position.x = (float)Convert.ToDouble(data["x"]);
                             position.y = (float)Convert.ToDouble(data["y"]);
                             member.SplatterPositions.Add(position);
+                            member.SplatterAngles.Add(data.ContainsKey("angle") ? (float)Convert.ToDouble(data["angle"]) : 0f);
                             if (data.ContainsKey("teamCode"))
                             {
                                 TeamCodes splatterCode = (TeamCodes)data["teamCode"];
@@ -862,14 +982,18 @@ public class BrainCloudManager : MonoBehaviour
                         {
                             member.IsAlive = true;
                             member.MousePosition.x = (float)Convert.ToDouble(json["x"]);
-                            member.MousePosition.y = (float)-Convert.ToDouble(json["y"]);
+                            // store the raw wire fraction — GameArea applies the single sign
+                            // flip at render time; negating here too double-flips (was a
+                            // pre-existing bug in this compression path only).
+                            member.MousePosition.y = (float)Convert.ToDouble(json["y"]);
                         }
                         else if (op == "shockwave")
                         {
                             Vector2 position;
                             position.x = (float)Convert.ToDouble(json["x"]);
-                            position.y = (float)-Convert.ToDouble(json["y"]);
+                            position.y = (float)Convert.ToDouble(json["y"]);
                             member.SplatterPositions.Add(position);
+                            member.SplatterAngles.Add(json.ContainsKey("angle") ? (float)Convert.ToDouble(json["angle"]) : 0f);
 
                             TeamCodes splatterCode = (TeamCodes)json["teamCode"];
                             member.SplatterTeamCodes.Add(splatterCode);
@@ -981,6 +1105,9 @@ public class BrainCloudManager : MonoBehaviour
                         GameManager.Instance.JoinInProgressButton.gameObject.SetActive(true);
                     }
                     break;
+                case "SIGNAL":
+                    OnLobbySignalReceived(jsonData);
+                    break;
             }
         }
     }
@@ -1051,12 +1178,16 @@ public class BrainCloudManager : MonoBehaviour
         _bcWrapper.RelayService.RegisterRelayCallback(OnRelayMessage);
         _bcWrapper.RelayService.RegisterSystemCallback(OnRelaySystemMessage);
         InvokeRepeating(nameof(BroadcastRelayPing), 2f, 2f);
+        _matchStartSent = false;
+        _roundNumber++;
+        InvokeRepeating(nameof(CheckMatchTimer), 0.25f, 0.25f);
 
         int port = 0;
         Server server = StateManager.Instance.CurrentServer;
 
-        // GameLift and i3D only expose a single WebSocket port — force WEBSOCKET for both.
+        // GameLift/i3D only expose one non-secure WebSocket port — force WEBSOCKET, no ssl.
         RelayConnectionType connectionType = StateManager.Instance.Protocol;
+        bool useSSL = false;
         if (server.GameliftPort != -1)
         {
             port = server.GameliftPort;
@@ -1069,10 +1200,12 @@ public class BrainCloudManager : MonoBehaviour
         }
         else
         {
+            useSSL = connectionType == RelayConnectionType.WEBSOCKET && StateManager.Instance.UseSSL;
             switch (connectionType)
             {
                 case RelayConnectionType.WEBSOCKET:
-                    port = server.WsPort;
+                    // Fall back to the plain ws port if no wss port was handed back.
+                    port = useSSL && server.WssPort != -1 ? server.WssPort : server.WsPort;
                     break;
                 case RelayConnectionType.TCP:
                     port = server.TcpPort;
@@ -1082,13 +1215,14 @@ public class BrainCloudManager : MonoBehaviour
                     break;
             }
         }
+        string host = useSSL ? server.SecureHost : server.Host;
 
         if (_noServerSelected)
         {
             _bcWrapper.RelayService.Connect
             (
                 connectionType,
-                new RelayConnectOptions(false, server.Host, port, server.Passcode, serverId),
+                new RelayConnectOptions(useSSL, host, port, server.Passcode, serverId),
                 null,
                 (FailureCallback)OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
@@ -1099,7 +1233,7 @@ public class BrainCloudManager : MonoBehaviour
             _bcWrapper.RelayService.Connect
             (
                 connectionType,
-                new RelayConnectOptions(false, server.Host, port, server.Passcode, server.LobbyId),
+                new RelayConnectOptions(useSSL, host, port, server.Passcode, server.LobbyId),
                 null,
                 (FailureCallback)OnConnectFailed + LogErrorThenPopUpWindow,
                 "Failed to connect to server"
@@ -1117,6 +1251,7 @@ public class BrainCloudManager : MonoBehaviour
     public void DisconnectFromEverything()
     {
         CancelInvoke(nameof(BroadcastRelayPing));
+        CancelInvoke(nameof(CheckMatchTimer));
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
@@ -1127,6 +1262,7 @@ public class BrainCloudManager : MonoBehaviour
     public void DisconnectFromRelay()
     {
         CancelInvoke(nameof(BroadcastRelayPing));
+        CancelInvoke(nameof(CheckMatchTimer));
         _bcWrapper.RelayService.DeregisterRelayCallback();
         _bcWrapper.RelayService.DeregisterSystemCallback();
         _bcWrapper.RelayService.Disconnect();
@@ -1206,6 +1342,13 @@ public class BrainCloudManager : MonoBehaviour
                 {
                     ulong playerMask = (ulong)newNetId;
                     SendSplotchSync(playerMask);
+                    // Also resend match_start directly to this joiner — the broadcast sent once
+                    // at match start won't have reached a join-in-progress player, and without
+                    // this their countdown would sit at 0/stale until the next full broadcast.
+                    if (StateManager.Instance.MatchStartTimeMs > 0)
+                    {
+                        SendMatchStart(playerMask, StateManager.Instance.MatchStartTimeMs);
+                    }
                 }
             }
         }
@@ -1214,9 +1357,13 @@ public class BrainCloudManager : MonoBehaviour
             StateManager.Instance.isReady = false;
             GameManager.Instance.CurrentUserInfo.PresentSinceStart = false;
 
+            // Straight to Match Summary, not the plain lobby — matches every other client.
+            // ResetData() clears match visuals but leaves MatchResults/LbResults alone; the
+            // summary screen still needs those (ClearMatchResultsData() handles that on exit).
+            StateManager.Instance.MatchSummaryArrivalTimeMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             StateManager.Instance.ResetData();
             GameManager.Instance.UpdateMatchAndLobbyState();
-            StateManager.Instance.ChangeState(GameStates.Lobby);
+            StateManager.Instance.ChangeState(GameStates.MatchSummary);
         }
         else if (json["op"] as string == "MIGRATE_OWNER")
         {
@@ -1288,17 +1435,7 @@ public class BrainCloudManager : MonoBehaviour
 
     private string GetLobbyType()
     {
-        string lobbyType = "";
-        if (GameManager.Instance.GameMode == GameMode.FreeForAll)
-        {
-            lobbyType = _currentFFALobby;
-        }
-        else
-        {
-            lobbyType = _currentTeamLobby;
-        }
-
-        return lobbyType;
+        return _currentLobbyType;
     }
 
 
@@ -1494,7 +1631,8 @@ public class BrainCloudManager : MonoBehaviour
                 ColorIndex = Convert.ToInt32(sd["c"]),
                 TeamCode = TeamCodes.all,
                 InstigatorCode = TeamCodes.all,
-                StartTimeMs = Convert.ToInt64(sd["t"])
+                StartTimeMs = Convert.ToInt64(sd["t"]),
+                Angle = sd.ContainsKey("a") ? (float)Convert.ToDouble(sd["a"]) : 0f
             });
         }
     }
@@ -1525,7 +1663,8 @@ public class BrainCloudManager : MonoBehaviour
                     ["x"] = s.Position.x,
                     ["y"] = s.Position.y,
                     ["c"] = s.ColorIndex,
-                    ["t"] = s.StartTimeMs
+                    ["t"] = s.StartTimeMs,
+                    ["a"] = s.Angle
                 });
 
                 byte[] candidate = BuildSplotchSyncPacket(isFirst, batch);
@@ -1577,17 +1716,567 @@ public class BrainCloudManager : MonoBehaviour
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    public void SetLobbyType(GameMode in_gameMode, int index)
+    public void SetLobbyType(int index)
     {
-        if (in_gameMode == GameMode.Team)
+        _currentLobbyType = _lobbyTypesList[index];
+        GameManager.Instance.GameMode = _currentLobbyType.Contains("Team") ? GameMode.Team : GameMode.FreeForAll;
+        _noServerSelected = _currentLobbyType.Contains("NoRoomServer");
+    }
+
+    // ── Match result / leaderboard posting ──────────────────────────────────────────────────
+    // Host computes+broadcasts match_result at match end, fires PostMatchResults async, then
+    // broadcasts lb_result once that responds. Non-host clients just reassemble both.
+
+    private int _roundNumber = 0;
+    private int _liveCoverageTickCounter = 0;
+
+    // Host-only: live rank/coverage snapshot, broadcast ~1x/sec during the match.
+    private void BroadcastLiveCoverage()
+    {
+        var members = new List<Coverage.MemberLike>();
+        foreach (var m in StateManager.Instance.CurrentLobby.Members)
+            members.Add(new Coverage.MemberLike(m.cxId, m.UserGameColor));
+
+        var splotches = new List<Coverage.SplotchLike>();
+        foreach (var s in StateManager.Instance.AllSplotches)
+            splotches.Add(new Coverage.SplotchLike(s.Position.x, s.Position.y, s.ColorIndex, s.SenderCxId));
+
+        var results = Coverage.Compute(splotches, members);
+        StateManager.Instance.LiveCoverage = results;
+        GameManager.Instance.RefreshLiveScoreboard();
+
+        var entries = new List<Dictionary<string, object>>();
+        foreach (var r in results)
         {
-            _currentTeamLobby = _teamLobbyTypesList[index];
-            _noServerSelected = _currentTeamLobby.Contains("NoRoomServer");
+            entries.Add(new Dictionary<string, object>
+            {
+                ["cx"] = r.CxId,
+                ["r"] = r.Rank,
+                ["c"] = Mathf.RoundToInt(r.CoveragePct * 100f)
+            });
         }
-        else
+        var json = new Dictionary<string, object> { ["op"] = "live_coverage", ["data"] = new Dictionary<string, object> { ["e"] = entries.ToArray() } };
+        byte[] bytes = Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+        _bcWrapper.RelayService.Send(bytes, BrainCloudRelay.TO_ALL_PLAYERS, false, false, BrainCloudRelay.CHANNEL_HIGH_PRIORITY_1);
+    }
+
+    private void HandleLiveCoverage(Dictionary<string, object> json)
+    {
+        var data = json.ContainsKey("data") ? json["data"] as Dictionary<string, object> : null;
+        if (data == null || !data.ContainsKey("e") || !(data["e"] is object[] arr)) return;
+
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        var results = new List<Coverage.Entry>();
+        foreach (var entry in arr)
         {
-            _currentFFALobby = _ffaLobbyTypesList[index];
-            _noServerSelected = _currentFFALobby.Contains("NoRoomServer");
+            if (!(entry is Dictionary<string, object> ed)) continue;
+            string cxId = ed["cx"] as string;
+            int colorIndex = 0;
+            foreach (var m in lobby.Members) { if (m.cxId == cxId) { colorIndex = m.UserGameColor; break; } }
+            results.Add(new Coverage.Entry
+            {
+                CxId = cxId,
+                ColourIndex = colorIndex,
+                Rank = Convert.ToInt32(ed["r"]),
+                CoveragePct = Convert.ToInt32(ed["c"]) / 100f
+            });
         }
+        StateManager.Instance.LiveCoverage = results;
+        GameManager.Instance.RefreshLiveScoreboard();
+    }
+    private List<Dictionary<string, object>> _pendingMatchResultChunk = new List<Dictionary<string, object>>();
+    private List<Dictionary<string, object>> _pendingLbResultChunk = new List<Dictionary<string, object>>();
+
+    private void OnMatchTimerElapsed()
+    {
+        StateManager.Instance.MatchResultSentAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        var members = new List<Coverage.MemberLike>();
+        foreach (var m in StateManager.Instance.CurrentLobby.Members)
+            members.Add(new Coverage.MemberLike(m.cxId, m.UserGameColor));
+
+        var splotches = new List<Coverage.SplotchLike>();
+        foreach (var s in StateManager.Instance.AllSplotches)
+            splotches.Add(new Coverage.SplotchLike(s.Position.x, s.Position.y, s.ColorIndex, s.SenderCxId));
+
+        var results = Coverage.Compute(splotches, members);
+
+        ApplyMatchResultEntries(results);
+        SendMatchResult(results);
+        CallPostMatchResults(results);
+    }
+
+    private void ApplyMatchResultEntries(List<Coverage.Entry> results)
+    {
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        foreach (var r in results)
+        {
+            string profileId = lobby.FormatCxIdToProfileId(r.CxId);
+            StateManager.Instance.MatchResults[profileId] = new MatchResultEntry
+            {
+                ProfileId = profileId,
+                CxId = r.CxId,
+                ColorIndex = r.ColourIndex,
+                CoveragePct = r.CoveragePct,
+                Rank = r.Rank,
+                Beaten = r.Beaten
+            };
+
+            // Drain any lb_result that arrived (from a migrated-in host, or just packet
+            // reordering) before this player's match_result did.
+            if (StateManager.Instance.PendingLbResults.TryGetValue(profileId, out var pending))
+            {
+                StateManager.Instance.LbResults[profileId] = pending;
+                StateManager.Instance.PendingLbResults.Remove(profileId);
+            }
+        }
+
+        // Null-safe, no state guard — this data usually arrives before END_MATCH even fires.
+        GameManager.Instance.RefreshMatchSummary();
+    }
+
+    private void SendMatchResult(List<Coverage.Entry> results)
+    {
+        const int maxChunkBytes = 900;
+        bool isFirst = true;
+        int i = 0;
+        do
+        {
+            var batch = new List<Dictionary<string, object>>();
+            while (i < results.Count)
+            {
+                var r = results[i];
+                batch.Add(new Dictionary<string, object>
+                {
+                    ["cx"] = r.CxId,
+                    ["r"] = r.Rank,
+                    ["c"] = Mathf.RoundToInt(r.CoveragePct * 100f),
+                    ["b"] = r.Beaten
+                });
+                byte[] candidate = BuildMatchResultPacket(isFirst, false, batch);
+                if (candidate.Length > maxChunkBytes && batch.Count > 1)
+                {
+                    batch.RemoveAt(batch.Count - 1);
+                    break;
+                }
+                i++;
+            }
+            bool isLast = i >= results.Count;
+            byte[] packet = BuildMatchResultPacket(isFirst, isLast, batch);
+            _bcWrapper.RelayService.Send(packet, BrainCloudRelay.TO_ALL_PLAYERS, true, true, 0);
+            isFirst = false;
+        } while (i < results.Count);
+
+        if (results.Count == 0)
+        {
+            _bcWrapper.RelayService.Send(BuildMatchResultPacket(true, true, new List<Dictionary<string, object>>()),
+                BrainCloudRelay.TO_ALL_PLAYERS, true, true, 0);
+        }
+    }
+
+    private byte[] BuildMatchResultPacket(bool isFirst, bool isLast, List<Dictionary<string, object>> batch)
+    {
+        var json = new Dictionary<string, object>
+        {
+            ["op"] = "match_result",
+            ["data"] = new Dictionary<string, object>
+            {
+                ["first"] = isFirst,
+                ["last"] = isLast,
+                ["e"] = batch.ToArray()
+            }
+        };
+        return Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+    }
+
+    private void HandleMatchResult(Dictionary<string, object> json)
+    {
+        var data = json.ContainsKey("data") ? json["data"] as Dictionary<string, object> : null;
+        if (data == null) return;
+
+        bool isFirst = data.ContainsKey("first") && data["first"] is bool bf && bf;
+        if (isFirst) _pendingMatchResultChunk.Clear();
+
+        if (data.ContainsKey("e") && data["e"] is object[] arr)
+        {
+            foreach (var entry in arr)
+            {
+                if (entry is Dictionary<string, object> ed) _pendingMatchResultChunk.Add(ed);
+            }
+        }
+
+        bool isLast = data.ContainsKey("last") && data["last"] is bool bl && bl;
+        if (!isLast) return;
+
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        foreach (var ed in _pendingMatchResultChunk)
+        {
+            string cxId = ed["cx"] as string;
+            string profileId = lobby.FormatCxIdToProfileId(cxId);
+            int colorIndex = 0;
+            foreach (var m in lobby.Members) { if (m.cxId == cxId) { colorIndex = m.UserGameColor; break; } }
+
+            StateManager.Instance.MatchResults[profileId] = new MatchResultEntry
+            {
+                ProfileId = profileId,
+                CxId = cxId,
+                ColorIndex = colorIndex,
+                CoveragePct = Convert.ToInt32(ed["c"]) / 100f,
+                Rank = Convert.ToInt32(ed["r"]),
+                Beaten = Convert.ToInt32(ed["b"])
+            };
+
+            if (StateManager.Instance.PendingLbResults.TryGetValue(profileId, out var pending))
+            {
+                StateManager.Instance.LbResults[profileId] = pending;
+                StateManager.Instance.PendingLbResults.Remove(profileId);
+            }
+        }
+        _pendingMatchResultChunk.Clear();
+
+        // Null-safe, no state guard — this data usually arrives before END_MATCH even fires.
+        GameManager.Instance.RefreshMatchSummary();
+    }
+
+    private void CallPostMatchResults(List<Coverage.Entry> results)
+    {
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        var entries = new List<Dictionary<string, object>>();
+        foreach (var r in results)
+        {
+            string profileId = lobby.FormatCxIdToProfileId(r.CxId);
+            string name = "?";
+            foreach (var m in lobby.Members) { if (m.cxId == r.CxId) { name = m.Username; break; } }
+            entries.Add(new Dictionary<string, object>
+            {
+                ["profileId"] = profileId,
+                ["name"] = name,
+                ["points"] = r.Beaten + 1,
+                ["coverageBasisPoints"] = Mathf.RoundToInt(r.CoveragePct * 100f)
+            });
+        }
+
+        var payload = new Dictionary<string, object>
+        {
+            ["round"] = _roundNumber,
+            ["pointsLeaderboardId"] = "CursorParty_Points",
+            ["pointsLeaderboardIdQuarterly"] = "CursorParty_Points_Quarterly",
+            ["coverageLeaderboardId"] = "CursorParty_HighestCoverage",
+            ["coverageLeaderboardIdQuarterly"] = "CursorParty_HighestCoverage_Quarterly",
+            ["entries"] = entries.ToArray()
+        };
+
+        _bcWrapper.ScriptService.RunScript("PostMatchResults", JsonWriter.Serialize(payload),
+            OnPostMatchResultsSuccess, OnPostMatchResultsFailure);
+    }
+
+    private void OnPostMatchResultsFailure(int status, int reasonCode, string jsonError, object cbObject)
+    {
+        Debug.LogWarning($"PostMatchResults failed: status={status} reason={reasonCode} {jsonError}");
+        // No retry — the 8s per-row fallback on Match Summary covers this.
+    }
+
+    // Envelope: data.response.results, matches cpp's relay log. Reconfirm against a real call.
+    private void OnPostMatchResultsSuccess(string jsonResponse, object cbObject)
+    {
+        var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        if (response == null || !response.ContainsKey("data")) return;
+        var data = response["data"] as Dictionary<string, object>;
+        if (data == null || !data.ContainsKey("response")) return;
+        var scriptResponse = data["response"] as Dictionary<string, object>;
+        if (scriptResponse == null || !scriptResponse.ContainsKey("results")) return;
+        if (!(scriptResponse["results"] is object[] resultsArr)) return;
+
+        foreach (var entry in resultsArr)
+        {
+            if (!(entry is Dictionary<string, object> ed) || !ed.ContainsKey("profileId")) continue;
+            string profileId = ed["profileId"] as string;
+
+            var delta = new LbResultEntry { Ready = true };
+            ReadPeriodResponse(ed, "pointsLifetime", delta.PointsLifetime);
+            ReadPeriodResponse(ed, "pointsQuarterly", delta.PointsQuarterly);
+            ReadPeriodResponse(ed, "coverageLifetime", delta.CoverageLifetime);
+            ReadPeriodResponse(ed, "coverageQuarterly", delta.CoverageQuarterly);
+
+            StateManager.Instance.LbResults[profileId] = delta;
+        }
+
+        // Null-safe, no state guard — this data usually arrives before END_MATCH even fires.
+        GameManager.Instance.RefreshMatchSummary();
+
+        SendLbResult();
+    }
+
+    private static void ReadPeriodResponse(Dictionary<string, object> ed, string key, LeaderboardPeriodDelta target)
+    {
+        if (!ed.ContainsKey(key) || !(ed[key] is Dictionary<string, object> pd)) return;
+        target.Improved = pd.ContainsKey("improved") && Convert.ToBoolean(pd["improved"]);
+        target.RankBefore = pd.ContainsKey("before") ? Convert.ToInt32(pd["before"]) : -1;
+        target.RankAfter = pd.ContainsKey("after") ? Convert.ToInt32(pd["after"]) : -1;
+    }
+
+    // Host-only, best-effort: skipped if relay already disconnected by the time this fires.
+    private void SendLbResult()
+    {
+        if (!_bcWrapper.RelayService.IsConnected()) return;
+
+        var outEntries = new List<Dictionary<string, object>>();
+        foreach (var kv in StateManager.Instance.LbResults)
+        {
+            if (!kv.Value.Ready) continue;
+            if (!StateManager.Instance.MatchResults.TryGetValue(kv.Key, out var matchEntry)) continue;
+
+            var je = new Dictionary<string, object> { ["cx"] = matchEntry.CxId };
+            WritePeriodWire(je, "pl", kv.Value.PointsLifetime);
+            WritePeriodWire(je, "pq", kv.Value.PointsQuarterly);
+            WritePeriodWire(je, "cl", kv.Value.CoverageLifetime);
+            WritePeriodWire(je, "cq", kv.Value.CoverageQuarterly);
+            outEntries.Add(je);
+        }
+
+        const int maxChunkBytes = 900;
+        bool isFirst = true;
+        int i = 0;
+        do
+        {
+            var batch = new List<Dictionary<string, object>>();
+            while (i < outEntries.Count)
+            {
+                batch.Add(outEntries[i]);
+                byte[] candidate = BuildLbResultPacket(isFirst, false, batch);
+                if (candidate.Length > maxChunkBytes && batch.Count > 1)
+                {
+                    batch.RemoveAt(batch.Count - 1);
+                    break;
+                }
+                i++;
+            }
+            bool isLast = i >= outEntries.Count;
+            byte[] packet = BuildLbResultPacket(isFirst, isLast, batch);
+            _bcWrapper.RelayService.Send(packet, BrainCloudRelay.TO_ALL_PLAYERS, true, true, 0);
+            isFirst = false;
+        } while (i < outEntries.Count);
+
+        if (outEntries.Count == 0)
+        {
+            _bcWrapper.RelayService.Send(BuildLbResultPacket(true, true, new List<Dictionary<string, object>>()),
+                BrainCloudRelay.TO_ALL_PLAYERS, true, true, 0);
+        }
+    }
+
+    private static void WritePeriodWire(Dictionary<string, object> je, string key, LeaderboardPeriodDelta pd)
+    {
+        if (!pd.Improved) return;
+        je[key] = new Dictionary<string, object> { ["b"] = pd.RankBefore, ["a"] = pd.RankAfter };
+    }
+
+    private byte[] BuildLbResultPacket(bool isFirst, bool isLast, List<Dictionary<string, object>> batch)
+    {
+        var json = new Dictionary<string, object>
+        {
+            ["op"] = "lb_result",
+            ["data"] = new Dictionary<string, object>
+            {
+                ["first"] = isFirst,
+                ["last"] = isLast,
+                ["e"] = batch.ToArray()
+            }
+        };
+        return Encoding.ASCII.GetBytes(JsonWriter.Serialize(json));
+    }
+
+    private void HandleLbResult(Dictionary<string, object> json)
+    {
+        var data = json.ContainsKey("data") ? json["data"] as Dictionary<string, object> : null;
+        if (data == null) return;
+
+        bool isFirst = data.ContainsKey("first") && data["first"] is bool bf && bf;
+        if (isFirst) _pendingLbResultChunk.Clear();
+
+        if (data.ContainsKey("e") && data["e"] is object[] arr)
+        {
+            foreach (var entry in arr)
+            {
+                if (entry is Dictionary<string, object> ed) _pendingLbResultChunk.Add(ed);
+            }
+        }
+
+        bool isLast = data.ContainsKey("last") && data["last"] is bool bl && bl;
+        if (!isLast) return;
+
+        Lobby lobby = StateManager.Instance.CurrentLobby;
+        foreach (var ed in _pendingLbResultChunk)
+        {
+            string cxId = ed["cx"] as string;
+            string profileId = lobby.FormatCxIdToProfileId(cxId);
+
+            var delta = new LbResultEntry { Ready = true };
+            ReadPeriodWire(ed, "pl", delta.PointsLifetime);
+            ReadPeriodWire(ed, "pq", delta.PointsQuarterly);
+            ReadPeriodWire(ed, "cl", delta.CoverageLifetime);
+            ReadPeriodWire(ed, "cq", delta.CoverageQuarterly);
+
+            if (StateManager.Instance.MatchResults.ContainsKey(profileId))
+                StateManager.Instance.LbResults[profileId] = delta;
+            else
+                StateManager.Instance.PendingLbResults[profileId] = delta; // match_result not here yet
+        }
+        _pendingLbResultChunk.Clear();
+
+        // Null-safe, no state guard — this data usually arrives before END_MATCH even fires.
+        GameManager.Instance.RefreshMatchSummary();
+    }
+
+    private static void ReadPeriodWire(Dictionary<string, object> ed, string key, LeaderboardPeriodDelta target)
+    {
+        if (!ed.ContainsKey(key) || !(ed[key] is Dictionary<string, object> pd)) return;
+        target.Improved = true;
+        target.RankBefore = pd.ContainsKey("b") ? Convert.ToInt32(pd["b"]) : -1;
+        target.RankAfter = pd.ContainsKey("a") ? Convert.ToInt32(pd["a"]) : -1;
+    }
+
+    // ── Chat (global + lobby) ───────────────────────────────────────────────────────────────
+    // Global: Chat service channel via GetChannelId, registered once (not per-screen).
+    // Lobby: rides the lobby's own RTT via SendSignal — no separate channel needed. Server
+    // echoes our own signal back, so send appends locally and receive skips our own cxId.
+
+    private const string GLOBAL_CHAT_CHANNEL_TYPE = "gl";
+    private const string GLOBAL_CHAT_CHANNEL_SUB_ID = "gl";
+    private const int GLOBAL_CHAT_MAX_HISTORY = 30;
+
+    private string _globalChatChannelId;
+    private bool _globalChatConnecting;
+
+    public void ConnectGlobalChat()
+    {
+        if (!string.IsNullOrEmpty(_globalChatChannelId) || _globalChatConnecting) return;
+        if (!_bcWrapper.RTTService.IsRTTEnabled()) return;
+
+        _globalChatConnecting = true;
+        _bcWrapper.ChatService.GetChannelId(GLOBAL_CHAT_CHANNEL_TYPE, GLOBAL_CHAT_CHANNEL_SUB_ID,
+            (jsonResponse, cbObject) =>
+            {
+                var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+                var data = response.ContainsKey("data") ? response["data"] as Dictionary<string, object> : null;
+                string channelId = data != null && data.ContainsKey("channelId") ? data["channelId"] as string : null;
+                if (string.IsNullOrEmpty(channelId))
+                {
+                    _globalChatConnecting = false;
+                    return;
+                }
+                ConnectGlobalChatChannel(channelId);
+            },
+            (status, reasonCode, jsonError, cbObject) => { _globalChatConnecting = false; });
+    }
+
+    private void ConnectGlobalChatChannel(string channelId)
+    {
+        _bcWrapper.ChatService.ChannelConnect(channelId, GLOBAL_CHAT_MAX_HISTORY,
+            (jsonResponse, cbObject) =>
+            {
+                _globalChatConnecting = false;
+                var response = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+                var data = response.ContainsKey("data") ? response["data"] as Dictionary<string, object> : null;
+                if (data == null) return;
+
+                _globalChatChannelId = channelId;
+                StateManager.Instance.GlobalChatHistory.Clear();
+                if (data.ContainsKey("messages") && data["messages"] is object[] messages)
+                {
+                    foreach (var m in messages)
+                    {
+                        if (m is Dictionary<string, object> md)
+                            StateManager.Instance.GlobalChatHistory.Add(ParseWireChatMessage(md));
+                    }
+                }
+
+                _bcWrapper.RTTService.RegisterRTTChatCallback(OnGlobalChatEvent);
+            },
+            (status, reasonCode, jsonError, cbObject) => { _globalChatConnecting = false; });
+    }
+
+    private static ChatMessage ParseWireChatMessage(Dictionary<string, object> m)
+    {
+        string fromName = "Player";
+        string fromCxId = "";
+        if (m.ContainsKey("from") && m["from"] is Dictionary<string, object> from)
+        {
+            if (from.ContainsKey("name")) fromName = from["name"] as string ?? fromName;
+            if (from.ContainsKey("cxId")) fromCxId = from["cxId"] as string ?? "";
+        }
+        string text = "";
+        if (m.ContainsKey("content") && m["content"] is Dictionary<string, object> content && content.ContainsKey("text"))
+            text = content["text"] as string ?? "";
+        return new ChatMessage
+        {
+            MsgId = m.ContainsKey("msgId") ? m["msgId"] as string : "",
+            FromCxId = fromCxId,
+            FromName = fromName,
+            Text = text
+        };
+    }
+
+    // New messages, edits, and deletes all arrive on the same RTT event, keyed by msgId.
+    private void OnGlobalChatEvent(string jsonResponse)
+    {
+        var result = JsonReader.Deserialize<Dictionary<string, object>>(jsonResponse);
+        string operation = result.ContainsKey("operation") ? result["operation"] as string : null;
+        var data = result.ContainsKey("data") ? result["data"] as Dictionary<string, object> : null;
+        if (data == null) return;
+
+        var history = StateManager.Instance.GlobalChatHistory;
+        if (operation == "INCOMING")
+        {
+            history.Add(ParseWireChatMessage(data));
+        }
+        else if (operation == "UPDATE")
+        {
+            var updated = ParseWireChatMessage(data);
+            for (int i = 0; i < history.Count; i++)
+            {
+                if (history[i].MsgId == updated.MsgId) { history[i] = updated; break; }
+            }
+        }
+        else if (operation == "DELETE")
+        {
+            string msgId = data.ContainsKey("msgId") ? data["msgId"] as string : null;
+            history.RemoveAll(m => m.MsgId == msgId);
+        }
+    }
+
+    public void SendGlobalChatMessage(string text)
+    {
+        if (string.IsNullOrEmpty(_globalChatChannelId) || string.IsNullOrEmpty(text)) return;
+        _bcWrapper.ChatService.PostChatMessageSimple(_globalChatChannelId, text, true);
+    }
+
+    public void SendLobbyChatMessage(string text)
+    {
+        if (string.IsNullOrEmpty(text) || StateManager.Instance.CurrentLobby == null) return;
+
+        var signalData = new Dictionary<string, object> { ["text"] = text };
+        _bcWrapper.LobbyService.SendSignal(StateManager.Instance.CurrentLobby.LobbyID, signalData);
+
+        StateManager.Instance.LobbyChatHistory.Add(new ChatMessage
+        {
+            FromCxId = _bcWrapper.Client.RTTConnectionID,
+            FromName = GameManager.Instance.CurrentUserInfo.Username,
+            Text = text
+        });
+    }
+
+    private void OnLobbySignalReceived(Dictionary<string, object> jsonData)
+    {
+        if (!jsonData.ContainsKey("from") || !jsonData.ContainsKey("signalData")) return;
+        var from = jsonData["from"] as Dictionary<string, object>;
+        var signalData = jsonData["signalData"] as Dictionary<string, object>;
+        if (from == null || signalData == null) return;
+
+        string fromCxId = from.ContainsKey("cxId") ? from["cxId"] as string : "";
+        string fromName = from.ContainsKey("name") ? from["name"] as string : "Player";
+        string text = signalData.ContainsKey("text") ? signalData["text"] as string : "";
+        if (string.IsNullOrEmpty(text) || fromCxId == _bcWrapper.Client.RTTConnectionID) return;
+
+        StateManager.Instance.LobbyChatHistory.Add(new ChatMessage { FromCxId = fromCxId, FromName = fromName, Text = text });
     }
 }

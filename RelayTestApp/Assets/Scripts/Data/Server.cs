@@ -7,7 +7,10 @@ using UnityEngine;
 public class Server
 {
     public string Host;
+    // Can differ from Host (different DNS name/cert) — falls back to Host if not provided.
+    public string SecureHost;
     public int WsPort      = -1;
+    public int WssPort     = -1;
     public int TcpPort     = -1;
     public int UdpPort     = -1;
     public int i3dPort     = -1;
@@ -22,7 +25,9 @@ public class Server
         var ports = connectData["ports"] as Dictionary<string, object>;
 
         Host = connectData["address"] as string;
+        SecureHost = connectData.ContainsKey("secureAddress") ? connectData["secureAddress"] as string : Host;
         TryGetPort(ports, "ws",       ref WsPort);
+        TryGetPort(ports, "wss",      ref WssPort);
         TryGetPort(ports, "tcp",      ref TcpPort);
         TryGetPort(ports, "udp",      ref UdpPort);
         TryGetPort(ports, "i3d",      ref i3dPort);
@@ -38,7 +43,9 @@ public class Server
         var ports = connectData["ports"] as Dictionary<string, object>;
 
         Host = connectData["address"] as string;
+        SecureHost = connectData.ContainsKey("secureAddress") ? connectData["secureAddress"] as string : Host;
         TryGetPort(ports, "ws",       ref WsPort);
+        TryGetPort(ports, "wss",      ref WssPort);
         TryGetPort(ports, "tcp",      ref TcpPort);
         TryGetPort(ports, "udp",      ref UdpPort);
         TryGetPort(ports, "i3d",      ref i3dPort);
