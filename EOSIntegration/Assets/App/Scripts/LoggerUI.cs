@@ -175,7 +175,11 @@ public class LoggerUI : MonoBehaviour
 
     private void OnLogMessageReceived(string log, string _, LogType type)
     {
-        if (log.Contains("\nJSON Response:\n")) // Strip JSON from Success & Failure callbacks from BCManager
+        if (type == LogType.Log && log.Contains("LogEOS")) // Skip EOS SDK spam
+        {
+            return;
+        }
+        else if (log.Contains("\nJSON Response:\n")) // Strip JSON from Success & Failure callbacks from BCManager
         {
             log = log[..log.IndexOf("\nJSON Response:\n")];
         }

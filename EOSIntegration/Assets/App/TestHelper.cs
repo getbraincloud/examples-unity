@@ -47,22 +47,23 @@ public class TestHelper : MonoBehaviour
     private ProductUserId ProductUserID = default;
 
     // EOS Purchase
-    private string ConsumableOfferID = string.Empty;
+    private CatalogItem? CatalogItem = null;
+    private string OfferID = string.Empty;
     private string TransactionID = string.Empty;
-    private string EntitlementID = string.Empty;
+    private List<string> EntitlementIDs = null;
     private string EntitlementName = string.Empty;
     private string EntitlementToken = string.Empty;
+    private string AudienceItemID = string.Empty;
 
     // EOS Ownership
     private string DurableOfferID = string.Empty;
-    private string CatalogItemID = string.Empty;
+    private string OwnershipItemID = string.Empty;
     private string ItemNamespace = string.Empty;
     private string OwnershipToken = string.Empty;
     private bool ItemIsOwned = false;
 
-
     // brainCloud
-    private const string STORE_ID = "epic";
+    private const string STORE_ID = "epicGames";
 
     private BrainCloudWrapper BC = default;
     private string IAPProductID = string.Empty;
@@ -141,15 +142,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator StartEOSTesting()
     {
-        yield return new WaitForSecondsRealtime(5.0f); // Waiting for several EOS messages to go through first
+        yield return new WaitForSecondsRealtime(1.0f); // Waiting for several EOS messages to go through first
 
         yield return InitializeBrainCloud();
 
         yield return EOSAuthenticationTest();
 
-        //yield return EOSEntitlementTest();
+        yield return EOSEntitlementTest();
 
-        //yield return EOSOwnershipTest();
+        //yield return EOSOwnershipTest(); // We're not testing for Ownership so this is commented out
     }
 
     private IEnumerator InitializeBrainCloud()
@@ -236,6 +237,7 @@ public class TestHelper : MonoBehaviour
         if (EpicAccountID != null && ProductUserID != null &&
             !string.IsNullOrWhiteSpace(AuthIDToken) && !string.IsNullOrWhiteSpace(ConnectIDToken))
         {
+            LogWarning("EOSAuth properties are not null. Was test already ran?");
             yield break;
         }
 
@@ -273,14 +275,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSAuthTest_Step1()
     {
-        FailureReason = string.Empty;
-        Log("STEP 1: Log in & retrieve EpicAccountID");
+        Log("STEP 1: Log in & retrieve EpicAccountID.");
 
         var options = new AuthLoginOptions
         {
             Credentials = BuildAuthCredentials(),
-            ScopeFlags = AuthScopeFlags.NoFlags
+            ScopeFlags = AuthScopeFlags.NoFlags // Requesting scopes triggers a consent loop unless they're configured on the EAS app
         };
+
+        FailureReason = string.Empty;
 
         Log($"Auth login as {options.Credentials.Value.Type}");
 
@@ -322,11 +325,12 @@ public class TestHelper : MonoBehaviour
     {
         if (EpicAccountID == null)
         {
+            LogWarning("STEP SKIPPED! EpicAccountID is null!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 2: Copy AuthIDToken for Connect Interface & later brainCloud");
+        Log("STEP 2: Copy AuthIDToken for Connect Interface & later brainCloud.");
 
         AuthIdToken? token = null;
         Result result = Result.NotFound;
@@ -356,13 +360,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSAuthTest_Step3()
     {
+        Log("STEP 3: Use AuthIDToken to retrieve ProductUserID.");
+
         if (string.IsNullOrWhiteSpace(AuthIDToken))
         {
+            LogWarning("STEP SKIPPED! AuthIDToken is null!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 3: Use AuthIDToken to retrieve ProductUserID");
 
         var options = new ConnectLoginOptions
         {
@@ -421,13 +427,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSAuthTest_Step4()
     {
+        Log("STEP 4: Copy ConnectIDToken for brainCloud.");
+
         if (ProductUserID == null)
         {
+            LogWarning("STEP SKIPPED! ProductUserID is null!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 4: Copy ConnectIDToken for brainCloud");
 
         ConnectIdToken? token = null;
         Result result = Result.NotFound;
@@ -457,17 +465,19 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSAuthTest_Step5()
     {
+        Log("STEP 5: Use AuthIDToken to log into brainCloud.");
+
         if (BC.Client == null || !BC.Client.IsInitialized() ||
             string.IsNullOrWhiteSpace(AuthIDToken) || string.IsNullOrWhiteSpace(ConnectIDToken))
         {
+            LogWarning("STEP SKIPPED! BC.Client uninitialized or IdTokens are empty!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 5: Use AuthIDToken to log into brainCloud");
 
         string response = string.Empty;
-        BC.Client.AuthenticationService.AuthenticateEpicGames(EpicAccountID.ToString(), AuthIDToken, true,
+        BC.AuthenticateEpicGames(EpicAccountID.ToString(), AuthIDToken, true,
             (jsonResponse, cbObject) =>
             {
                 response = jsonResponse;
@@ -496,12 +506,12 @@ public class TestHelper : MonoBehaviour
     private bool EOSAuthTest_AssertSuccess()
     {
         Assert(BC.Client != null, "BrainCloudWrapper.Client is null!");
-        Assert(BC.Client.IsInitialized(), "BrainCloudWrapper.Client is not initialized!");
+        Assert(BC.Client != null && BC.Client.IsInitialized(), "BrainCloudWrapper.Client is not initialized!");
         Assert(EpicAccountID != null, "EpicAccountId is null! Login was unsuccessful!");
         Assert(ProductUserID != null, "ProductUserId is null! Login was unsuccessful!");
         Assert(!string.IsNullOrWhiteSpace(AuthIDToken), "AuthIdToken is empty! Did not copy Auth JWT!");
         Assert(!string.IsNullOrWhiteSpace(ConnectIDToken), "ConnectIdToken is empty! Did not copy Connect JWT!");
-        Assert(BC.Client.IsAuthenticated(), "User is not authenticated in brainCloud!");
+        Assert(BC.Client != null && BC.Client.IsAuthenticated(), "User is not authenticated in brainCloud!");
 
         return BC.Client != null &&
                BC.Client.IsInitialized() &&
@@ -520,12 +530,10 @@ public class TestHelper : MonoBehaviour
     {
         if (EpicAccountID == null || !BC.Client.IsAuthenticated())
         {
-            throw new Exception("User is not authenticated which means EOSAuthenticationTest failed or was not run first!");
+            LogError("User is not authenticated which means EOSAuthenticationTest failed or was not run first!");
+            yield break;
         }
 
-        IAPProductID = string.Empty;
-        PayloadContext = string.Empty;
-        VerifyPurchaseJson = string.Empty;
         FailureReason = string.Empty;
 
         yield return new WaitUntil(() => EOSManager.Instance != null &&
@@ -540,8 +548,8 @@ public class TestHelper : MonoBehaviour
         else
         {
             yield return EOSEntitlementTest_Step1();
-            //yield return EOSEntitlementTest_Step2(); // Commented out until BC support comes in
-            //yield return EOSEntitlementTest_Step3(); // Commented out since we've made one purchase already
+            yield return EOSEntitlementTest_Step2();
+            yield return EOSEntitlementTest_Step3();
             yield return EOSEntitlementTest_Step4();
             yield return EOSEntitlementTest_Step5();
             yield return EOSEntitlementTest_Step6();
@@ -559,13 +567,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSEntitlementTest_Step1()
     {
+        Log("STEP 1: Query catalog offers.");
+
         if (EpicAccountID == null)
         {
+            LogWarning("STEP SKIPPED! EpicAccountID is null!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 1: Query catalog offers");
 
         bool done = false;
         var options = new QueryOffersOptions { LocalUserId = EpicAccountID };
@@ -611,8 +621,8 @@ public class TestHelper : MonoBehaviour
 
             if (o.AvailableForPurchase && o.PriceResult == Result.Success)
             {
-                ConsumableOfferID = o.Id.ToString();
-                Log($"Selected offer: {o.TitleText} [{ConsumableOfferID}]");
+                string id = o.Id.ToString();
+                Log($"Selected offer: {o.TitleText} [{id}]");
 
                 var itemCountOptions = new GetOfferItemCountOptions { LocalUserId = EpicAccountID, OfferId = o.Id };
                 uint itemCount = ecom.GetOfferItemCount(ref itemCountOptions);
@@ -632,17 +642,18 @@ public class TestHelper : MonoBehaviour
                     }
 
                     CatalogItem ci = item.Value;
-                    Log($"Offer: {ci.TitleText} (ItemType: {ci.ItemType}, EntitlementName: {ci.EntitlementName})");
+                    Log($"Offer: {ci.TitleText} (ItemType: {ci.ItemType}, EntitlementName: {ci.EntitlementName} [{ci.Id}])");
 
                     if (ci.ItemType == EcomItemType.Consumable)
                     {
-                        EntitlementName = ci.EntitlementName.ToString();
+                        OfferID = id;
+                        CatalogItem = ci;
                     }
                 }
             }
         }
 
-        if (string.IsNullOrWhiteSpace(ConsumableOfferID) || string.IsNullOrWhiteSpace(EntitlementName))
+        if (CatalogItem == null)
         {
             LogError("No purchasable offer found.");
         }
@@ -652,31 +663,28 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSEntitlementTest_Step2()
     {
-        if (string.IsNullOrWhiteSpace(ConsumableOfferID))
+        Log("STEP 2: Get matching IAPProductID matching OfferID and the PayloadContext from brainCloud.");
+
+        if (CatalogItem == null)
         {
+            LogWarning("STEP SKIPPED! CatalogItem is null!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log($"STEP 2: Get matching IAPProductID matching OfferID and the PayloadContext from brainCloud");
 
-        // TODO: Product needs to be set-up on brainCloud (when that becomes available...)
-
-        bool done = false;
         string response = string.Empty;
         BC.AppStoreService.GetSalesInventory(STORE_ID, string.Empty,
             (jsonResponse, cbObject) =>
             {
                 response = jsonResponse;
-                done = true;
             },
             (status, reasonCode, jsonError, cbObject) =>
             {
                 FailureReason = $"GetSalesInventory failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
-                done = true;
             });
 
-        yield return new WaitUntil(() => FailureOccurred || done,
+        yield return new WaitUntil(() => !string.IsNullOrWhiteSpace(response) || FailureOccurred,
                                    TimeSpan.FromSeconds(30.0f),
                                    () => FailureReason = "GetSalesInventory timed out!");
 
@@ -692,8 +700,8 @@ public class TestHelper : MonoBehaviour
         foreach (var product in data)
         {
             if (product.ContainsKey("priceData") && product["priceData"] is Dictionary<string, object> priceData &&
-                priceData != null && priceData.Count > 0 && priceData.ContainsKey("id") &&
-                priceData["id"] is string id && !string.IsNullOrWhiteSpace(id) && id == ConsumableOfferID &&
+                priceData != null && priceData.Count > 0 && priceData.ContainsKey("audienceItemId") &&
+                priceData["audienceItemId"] is string id && !string.IsNullOrWhiteSpace(id) && id == CatalogItem.Value.Id &&
                 product.ContainsKey("payload") && product["payload"] is string payload  && !string.IsNullOrWhiteSpace(payload))
             {
                 IAPProductID = id;
@@ -715,21 +723,21 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSEntitlementTest_Step3()
     {
-        if (string.IsNullOrWhiteSpace(ConsumableOfferID))// ||
-            //string.IsNullOrEmpty(IAPProductID) ||
-            //string.IsNullOrEmpty(PayloadContext))
+        Log($"STEP 3: Checkout offer {CatalogItem.Value.TitleText}.");
+
+        if (CatalogItem == null)
         {
+            LogWarning("STEP SKIPPED! CatalogItem is null!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log($"STEP 3: Checkout offer {ConsumableOfferID}");
 
         bool done = false;
         var options = new CheckoutOptions
         {
             LocalUserId = EpicAccountID,
-            Entries = new CheckoutEntry[] { new() { OfferId = ConsumableOfferID } }
+            Entries = new CheckoutEntry[] { new() { OfferId = OfferID } }
         };
 
         EOSManager.Instance.GetEOSEcomInterface().Checkout(ref options, null, (ref CheckoutCallbackInfo info) =>
@@ -763,13 +771,17 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSEntitlementTest_Step4()
     {
-        if (EpicAccountID == null)
+        Log("STEP 4: Query entitlements for the purchase.");
+
+        if (EpicAccountID == null ||
+            CatalogItem == null)
         {
+            LogWarning("STEP SKIPPED! EpicAccountID or CatalogItem is null!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 4: Query entitlements for the purchase");
+        EntitlementIDs = new();
 
         const int MAX_ATTEMPTS = 10; // We'll retry several times until entitlement is retrievable on Epic's side
 
@@ -825,17 +837,16 @@ public class TestHelper : MonoBehaviour
                         continue;
                     }
 
-                    if (!string.IsNullOrWhiteSpace(EntitlementName) &&
-                        e.EntitlementName.ToString() != EntitlementName)
+                    if (e.CatalogItemId.ToString() != CatalogItem.Value.Id)
                     {
                         continue;
                     }
 
-                    EntitlementID = e.EntitlementId.ToString();
+                    EntitlementIDs.Add(e.EntitlementId.ToString());
                     EntitlementName = e.EntitlementName.ToString();
+                    AudienceItemID = e.CatalogItemId.ToString();
 
-                    Log($"Entitlement: {EntitlementName} [{EntitlementID}] (CatalogItemId: {e.CatalogItemId})");
-                    break;
+                    Log($"Entitlement: {EntitlementName} [{e.EntitlementId}] (CatalogItemId: {AudienceItemID})");
                 }
 
                 done = true;
@@ -851,7 +862,7 @@ public class TestHelper : MonoBehaviour
                 yield break;
             }
 
-            if (!string.IsNullOrWhiteSpace(EntitlementID))
+            if (EntitlementIDs.Count > 0)
             {
                 break;
             }
@@ -861,27 +872,29 @@ public class TestHelper : MonoBehaviour
             yield return new WaitForSecondsRealtime(1.0f);
         }
 
-        if (string.IsNullOrWhiteSpace(EntitlementID))
+        if (EntitlementIDs.Count == 0)
         {
             FailureReason = "No unredeemed entitlement appeared after checkout.";
             LogError(FailureReason);
             yield break;
         }
 
-        Log($"Entitlement OK! EntitlementID: {EntitlementID}");
+        Log($"Entitlement OK! EntitlementIDs: {string.Join(", ", EntitlementIDs)}");
 
         yield return null;
     }
 
     private IEnumerator EOSEntitlementTest_Step5()
     {
-        if (string.IsNullOrWhiteSpace(EntitlementID))
+        Log("STEP 5: Copy the entitlement token (the receipt for brainCloud).");
+
+        if (EntitlementIDs == null || EntitlementIDs.Count == 0)
         {
+            LogWarning("STEP SKIPPED! EntitlementID is empty!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 5: Copy the entitlement token (the receipt for brainCloud)");
 
         bool done = false;
         var options = new QueryEntitlementTokenOptions
@@ -921,33 +934,28 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSEntitlementTest_Step6()
     {
+        Log("STEP 6: Verify the purchase through brainCloud.");
+
         if (string.IsNullOrWhiteSpace(IAPProductID) ||
             string.IsNullOrWhiteSpace(PayloadContext) ||
             string.IsNullOrWhiteSpace(EntitlementToken) ||
             BC == null || BC.Client == null || !BC.Client.IsAuthenticated())
         {
+            LogWarning("STEP SKIPPED! BC.Client is uninitialized or other properties are empty!");
             yield break;
         }
 
-        FailureReason = string.Empty;
-        Log("STEP 6: Verify the purchase through brainCloud");
+        Log("NOTE: brainCloud will redeem entitlements during the VerifyPurchase call.");
 
-        // TODO: Need to get the proper receiptJson format
+        FailureReason = string.Empty;
+
         string receiptJson = JsonWriter.Serialize(new Dictionary<string, object>()
         {
-            { "entitlementToken", EntitlementToken                   },
-            { "transactionId",    TransactionID                      },
-            { "entitlementId",    EntitlementID                      },
-            { "entitlementName",  EntitlementName                    },
-            { "offerId",          ConsumableOfferID                  },
-            { "epicAccountId",    EpicAccountID.ToString()           },
-            { "sandboxId",        "6f47fc27bf4e4faa947e5c50a7e492d4" },
-            { "deploymentId",     "3d2140535d7d4d2aaeac9bc7ea032688" }
+            { "entitlementIds",  EntitlementIDs },
+            { "audienceItemId",  AudienceItemID }
         });
 
         bool done = false;
-
-        // TODO: Test when we have the API properly hooked up
         BC.AppStoreService.CachePurchasePayloadContext(STORE_ID, IAPProductID, PayloadContext,
             (jsonResponse, cbObject) =>
             {
@@ -971,7 +979,6 @@ public class TestHelper : MonoBehaviour
         }
 
         done = false;
-
         BC.AppStoreService.VerifyPurchase(STORE_ID, receiptJson,
             (jsonResponse, cbObject) =>
             {
@@ -1001,30 +1008,35 @@ public class TestHelper : MonoBehaviour
     {
         Assert(!string.IsNullOrWhiteSpace(IAPProductID), "IAPProductID is empty! Cannot verify purchase without it!");
         Assert(!string.IsNullOrWhiteSpace(PayloadContext), "PayloadContext is empty! Payload cannot be cached!");
-        Assert(!string.IsNullOrWhiteSpace(ConsumableOfferID), "OfferID is empty! No offer was selected!");
+        Assert(CatalogItem != null, "CatalogItem is null! No offer was selected!");
         Assert(!string.IsNullOrWhiteSpace(TransactionID), "TransactionID is empty! Checkout did not complete!");
-        Assert(!string.IsNullOrWhiteSpace(EntitlementID), "EntitlementID is empty! The grant never landed!");
+        Assert(EntitlementIDs != null && EntitlementIDs.Count > 0, "EntitlementIDs is empty! The grant never landed!");
+        Assert(!string.IsNullOrWhiteSpace(AudienceItemID), "AudienceItemID is empty! The grant never landed!");
         Assert(!string.IsNullOrWhiteSpace(EntitlementToken), "EntitlementToken Empty! Nothing to verify!");
         Assert(!string.IsNullOrWhiteSpace(VerifyPurchaseJson), "VerifyPurchaseJson is empty! Purchase wasn't verified by brainCloud!");
 
         return !string.IsNullOrWhiteSpace(IAPProductID) &&
                !string.IsNullOrWhiteSpace(PayloadContext) &&
-               !string.IsNullOrWhiteSpace(ConsumableOfferID) &&
+               CatalogItem != null &&
                !string.IsNullOrWhiteSpace(TransactionID) &&
-               !string.IsNullOrWhiteSpace(EntitlementID) &&
+               EntitlementIDs != null &&
+               EntitlementIDs.Count > 0 &&
+               !string.IsNullOrWhiteSpace(AudienceItemID) &&
                !string.IsNullOrWhiteSpace(EntitlementToken) &&
                !string.IsNullOrWhiteSpace(VerifyPurchaseJson);
     }
 
     #endregion
 
+    // Ownership is not being tested since it's not supported, but this will be kept in-case we revisit
     #region EOS Ownership Test
 
     private IEnumerator EOSOwnershipTest()
     {
         if (EpicAccountID == null || !BC.Client.IsAuthenticated())
         {
-            throw new Exception("User is not authenticated which means EOSAuthenticationTest failed or was not run first!");
+            LogError("User is not authenticated which means EOSAuthenticationTest failed or was not run first!");
+            yield break;
         }
 
         IAPProductID = string.Empty;
@@ -1063,13 +1075,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSOwnershipTest_Step1()
     {
+        Log("STEP 1: Query catalog offers for a durable item.");
+
         if (EpicAccountID == null)
         {
+            LogWarning("STEP SKIPPED!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 1: Query catalog offers for a durable item");
 
         bool done = false;
         var options = new QueryOffersOptions { LocalUserId = EpicAccountID };
@@ -1133,18 +1147,18 @@ public class TestHelper : MonoBehaviour
                 CatalogItem ci = item.Value;
                 Log($"Offer: {ci.TitleText} (ItemType: {ci.ItemType}, EntitlementName: {ci.EntitlementName})");
 
-                if (ci.ItemType == EcomItemType.Durable && string.IsNullOrWhiteSpace(CatalogItemID))
+                if (ci.ItemType == EcomItemType.Durable && string.IsNullOrWhiteSpace(OwnershipItemID))
                 {
                     DurableOfferID = o.Id.ToString();
-                    CatalogItemID = ci.Id.ToString();
+                    OwnershipItemID = ci.Id.ToString();
                     ItemNamespace = ci.CatalogNamespace.ToString();
 
-                    Log($"Selected durable: {ci.TitleText} [{CatalogItemID}]");
+                    Log($"Selected durable: {ci.TitleText} [{OwnershipItemID}]");
                 }
             }
         }
 
-        if (string.IsNullOrWhiteSpace(CatalogItemID))
+        if (string.IsNullOrWhiteSpace(OwnershipItemID))
         {
             LogError("No durable item found.");
         }
@@ -1154,13 +1168,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSOwnershipTest_Step2()
     {
+        Log($"STEP 2: Get matching IAPProductID matching DurableOfferID and the PayloadContext from brainCloud.");
+
         if (string.IsNullOrWhiteSpace(DurableOfferID))
         {
+            LogWarning("STEP SKIPPED!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log($"STEP 2: Get matching IAPProductID matching DurableOfferID and the PayloadContext from brainCloud");
 
         // TODO: Product needs to be set-up on brainCloud (when that becomes available...)
 
@@ -1194,8 +1210,8 @@ public class TestHelper : MonoBehaviour
         foreach (var product in data)
         {
             if (product.ContainsKey("priceData") && product["priceData"] is Dictionary<string, object> priceData &&
-                priceData != null && priceData.Count > 0 && priceData.ContainsKey("id") &&
-                priceData["id"] is string id && !string.IsNullOrWhiteSpace(id) && id == DurableOfferID &&
+                priceData != null && priceData.Count > 0 && priceData.ContainsKey("audienceItemId") &&
+                priceData["audienceItemId"] is string id && !string.IsNullOrWhiteSpace(id) && id == DurableOfferID &&
                 product.ContainsKey("payload") && product["payload"] is string payload && !string.IsNullOrWhiteSpace(payload))
             {
                 IAPProductID = id;
@@ -1217,15 +1233,17 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSOwnershipTest_Step3()
     {
+        Log($"STEP 3: Checkout durable offer {DurableOfferID}.");
+
         if (string.IsNullOrWhiteSpace(DurableOfferID))// ||
             //string.IsNullOrEmpty(IAPProductID) ||
             //string.IsNullOrEmpty(PayloadContext))
         {
+            LogWarning("STEP SKIPPED!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log($"STEP 3: Checkout durable offer {DurableOfferID}");
 
         bool done = false;
         var options = new CheckoutOptions
@@ -1265,13 +1283,15 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSOwnershipTest_Step4()
     {
-        if (string.IsNullOrWhiteSpace(CatalogItemID))
+        Log("STEP 4: Query ownership of the durable item.");
+
+        if (string.IsNullOrWhiteSpace(OwnershipItemID))
         {
+            LogWarning("STEP SKIPPED!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 4: Query ownership of the durable item");
 
         const int MAX_ATTEMPTS = 10; // We'll retry several times until ownership is reflected on Epic's side
 
@@ -1281,7 +1301,7 @@ public class TestHelper : MonoBehaviour
             var options = new QueryOwnershipOptions
             {
                 LocalUserId = EpicAccountID,
-                CatalogItemIds = new Utf8String[] { CatalogItemID },
+                CatalogItemIds = new Utf8String[] { OwnershipItemID },
                 CatalogNamespace = ItemNamespace
             };
 
@@ -1300,7 +1320,7 @@ public class TestHelper : MonoBehaviour
                     {
                         Log($"Ownership: [{ownership.Id}] {ownership.OwnershipStatus}");
 
-                        if (ownership.Id.ToString() == CatalogItemID &&
+                        if (ownership.Id.ToString() == OwnershipItemID &&
                             ownership.OwnershipStatus == OwnershipStatus.Owned)
                         {
                             ItemIsOwned = true;
@@ -1339,26 +1359,28 @@ public class TestHelper : MonoBehaviour
             yield break;
         }
 
-        Log($"Ownership OK! CatalogItemID: {CatalogItemID}");
+        Log($"Ownership OK! CatalogItemID: {OwnershipItemID}");
 
         yield return null;
     }
 
     private IEnumerator EOSOwnershipTest_Step5()
     {
+        Log("STEP 5: Copy the ownership token (the receipt for brainCloud).");
+
         if (!ItemIsOwned)
         {
+            LogWarning("STEP SKIPPED!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 5: Copy the ownership token (the receipt for brainCloud)");
 
         bool done = false;
         var options = new QueryOwnershipTokenOptions
         {
             LocalUserId = EpicAccountID,
-            CatalogItemIds = new Utf8String[] { CatalogItemID },
+            CatalogItemIds = new Utf8String[] { OwnershipItemID },
             CatalogNamespace = ItemNamespace
         };
 
@@ -1393,22 +1415,24 @@ public class TestHelper : MonoBehaviour
 
     private IEnumerator EOSOwnershipTest_Step6()
     {
+        Log("STEP 6: Verify ownership through brainCloud.");
+
         if (string.IsNullOrWhiteSpace(IAPProductID) ||
             string.IsNullOrWhiteSpace(PayloadContext) ||
             string.IsNullOrWhiteSpace(OwnershipToken) ||
             BC == null || BC.Client == null || !BC.Client.IsAuthenticated())
         {
+            LogWarning("STEP SKIPPED!");
             yield break;
         }
 
         FailureReason = string.Empty;
-        Log("STEP 6: Verify ownership through brainCloud");
 
         // TODO: Need to get the proper receiptJson format
         string receiptJson = JsonWriter.Serialize(new Dictionary<string, object>()
         {
             { "ownershipToken",    OwnershipToken                     },
-            { "catalogItemId",     CatalogItemID                      },
+            { "catalogItemId",     OwnershipItemID                      },
             { "catalogNamespace",  ItemNamespace                      },
             { "offerId",           DurableOfferID                     },
             { "epicAccountId",     EpicAccountID.ToString()           },
@@ -1473,7 +1497,7 @@ public class TestHelper : MonoBehaviour
         Assert(!string.IsNullOrWhiteSpace(IAPProductID), "IAPProductID is empty! Cannot verify ownership without it!");
         Assert(!string.IsNullOrWhiteSpace(PayloadContext), "PayloadContext is empty! Payload cannot be cached!");
         Assert(!string.IsNullOrWhiteSpace(DurableOfferID), "DurableOfferID is empty! No durable offer was found!");
-        Assert(!string.IsNullOrWhiteSpace(CatalogItemID), "CatalogItemID is empty! No durable item was selected!");
+        Assert(!string.IsNullOrWhiteSpace(OwnershipItemID), "CatalogItemID is empty! No durable item was selected!");
         Assert(ItemIsOwned, "The item is not owned! Nothing to verify!");
         Assert(!string.IsNullOrWhiteSpace(OwnershipToken), "OwnershipToken is empty! Nothing to verify!");
         Assert(!string.IsNullOrWhiteSpace(VerifyOwnershipJson), "VerifyOwnershipJson is empty! Ownership wasn't verified by brainCloud!");
@@ -1481,11 +1505,11 @@ public class TestHelper : MonoBehaviour
         return !string.IsNullOrWhiteSpace(IAPProductID) &&
                !string.IsNullOrWhiteSpace(PayloadContext) &&
                !string.IsNullOrWhiteSpace(DurableOfferID) &&
-               !string.IsNullOrWhiteSpace(CatalogItemID) &&
+               !string.IsNullOrWhiteSpace(OwnershipItemID) &&
                ItemIsOwned &&
                !string.IsNullOrWhiteSpace(OwnershipToken) &&
                !string.IsNullOrWhiteSpace(VerifyOwnershipJson);
     }
 
-    #endregion
+    #endregion // Ownership is not being tested since it's not supported, but this will be kept in-case we revisit
 }
