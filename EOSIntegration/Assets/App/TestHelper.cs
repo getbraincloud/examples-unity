@@ -539,10 +539,17 @@ public class TestHelper : MonoBehaviour
 
         FailureReason = string.Empty;
 
-        yield return new WaitUntil(() => EOSManager.Instance != null &&
-                                         EOSManager.Instance.GetEOSPlatformInterface() != null,
-                                   TimeSpan.FromSeconds(10.0f),
-                                   () => FailureReason = "EOSManager platform never initialized!");
+        if (string.IsNullOrWhiteSpace(TestAudienceItemID))
+        {
+            FailureReason = "TestProductSKU must be set on the TestHelper component!";
+        }
+        else
+        {
+            yield return new WaitUntil(() => EOSManager.Instance != null &&
+                                             EOSManager.Instance.GetEOSPlatformInterface() != null,
+                                       TimeSpan.FromSeconds(10.0f),
+                                       () => FailureReason = "EOSManager platform never initialized!");
+        }
 
         if (FailureOccurred)
         {
