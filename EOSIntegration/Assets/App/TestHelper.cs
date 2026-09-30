@@ -34,8 +34,11 @@ public class TestHelper : MonoBehaviour
     [Header("Helper")]
     [SerializeField] private TMP_Text AppInfoLabel = default;
 
+    [Header("EOS")]
+    [SerializeField] private string TestAudienceItemID = string.Empty;
+
 #if UNITY_EDITOR
-    [Header("EOS Properties")]
+    [Header("EOS Editor Testing")]
     [SerializeField] private string DevAuthToolCredentialName = string.Empty;
     [SerializeField] private string DevAuthToolHostName = string.Empty;
 #endif
@@ -644,7 +647,7 @@ public class TestHelper : MonoBehaviour
                     CatalogItem ci = item.Value;
                     Log($"Offer: {ci.TitleText} (ItemType: {ci.ItemType}, EntitlementName: {ci.EntitlementName} [{ci.Id}])");
 
-                    if (ci.ItemType == EcomItemType.Consumable)
+                    if (ci.ItemType == EcomItemType.Consumable && ci.Id == TestAudienceItemID)
                     {
                         OfferID = id;
                         CatalogItem = ci;
@@ -725,9 +728,9 @@ public class TestHelper : MonoBehaviour
     {
         Log($"STEP 3: Checkout offer {CatalogItem.Value.TitleText}.");
 
-        if (CatalogItem == null)
+        if (string.IsNullOrEmpty(IAPProductID) || string.IsNullOrEmpty(PayloadContext))
         {
-            LogWarning("STEP SKIPPED! CatalogItem is null!");
+            LogWarning("STEP SKIPPED! IAPProductID and/or PayloadContext is null!");
             yield break;
         }
 
