@@ -21,16 +21,11 @@ public class TestHelper : MonoBehaviour
     [SerializeField] private bool TrySilentLogin = true;
     [SerializeField] private string TestProductSKU = string.Empty;
 
-    [Header("brainCloud")]
-    [SerializeField] private string TestIAPProductID = string.Empty;
-    [SerializeField] private string UserCurrency = "USD";
-
     // Xsolla Auth
     private XsollaClientConfiguration XsollaConfig = default;
     private XsollaLoginClient XsollaLogin = default;
-    private string XsollaAuthID = string.Empty;       // 'sub' claim is the Xsolla user ID
-    private string XsollaProjectID = string.Empty;    // 'xsolla_login_project_id' claim
-    private string XsollaToken = string.Empty;        // Xsolla access token (JWT)
+    private string XsollaAuthID = string.Empty;
+    private string XsollaToken = string.Empty;
     private string XsollaRefreshToken = string.Empty;
     private long XsollaTokenExpiresIn = 0;
 
@@ -40,12 +35,13 @@ public class TestHelper : MonoBehaviour
     private XsollaStoreClientPurchasedProduct XsollaPurchase = default;
 
     // brainCloud
-    private const string STORE_ID = "windowsPhone";//"xsolla";
-    private const string BC_USER_ID_PREFIX = "xsolla_";
+    private const string EXTERNAL_NAME = "Xsolla";
+    private const string STORE_ID = "xsolla";
 
     private BrainCloudWrapper BC = default;
     private string IAPProductID = string.Empty;
     private string PayloadContext = string.Empty;
+    private string VerifyReceiptResponse = string.Empty;
 
     #region Unity Messages
 
@@ -104,10 +100,6 @@ public class TestHelper : MonoBehaviour
     private string FailureReason = string.Empty;
 
     private bool FailureOccurred => !string.IsNullOrWhiteSpace(FailureReason);
-
-    private string BrainCloudUniversal => BC_USER_ID_PREFIX + XsollaAuthID;
-
-    private string BrainCloudPassword => $"{XsollaProjectID}:{XsollaAuthID}".Base64Encode()[..32];
 
     private static void Log(object message)
     {
@@ -335,8 +327,6 @@ public class TestHelper : MonoBehaviour
                 FailureReason = "Xsolla login succeeded but the access token has no 'sub' claim!";
                 return;
             }
-
-            TryGetJWTClaim(XsollaToken, "xsolla_login_project_id", out XsollaProjectID);
         };
 
         if (TrySilentLogin)
@@ -374,24 +364,10 @@ public class TestHelper : MonoBehaviour
         }
 
         FailureReason = string.Empty;
-        Log("STEP 2: Use Universal auth to log into brainCloud.");
-
-        var ids = new AuthenticationIds
-        {
-            externalId = BrainCloudUniversal,
-            authenticationToken = BrainCloudPassword,
-            authenticationSubType = string.Empty
-        };
-        
-        var extraJson = new Dictionary<string, object>
-        {
-            ["xsollaUserId"] = XsollaAuthID,
-            ["xsollaProjectId"] = XsollaProjectID,
-            ["xsollaAccessToken"] = XsollaToken
-        };
+        Log($"STEP 2: Use External({EXTERNAL_NAME}) auth to log into brainCloud.");
 
         string response = string.Empty;
-        BC.AuthenticateAdvanced(BrainCloud.Common.AuthenticationType.Universal, ids, true, extraJson,
+        BC.AuthenticateExternal(XsollaAuthID, XsollaToken, EXTERNAL_NAME, true,
             (jsonResponse, cbObject) =>
             {
                 response = jsonResponse;
@@ -468,9 +444,9 @@ public class TestHelper : MonoBehaviour
         PayloadContext = string.Empty;
         FailureReason = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(TestProductSKU) || string.IsNullOrWhiteSpace(TestIAPProductID))
+        if (string.IsNullOrWhiteSpace(TestProductSKU))
         {
-            FailureReason = "TestProductSKU and TestIAPProductID must both be set on the TestHelper component!";
+            FailureReason = "TestProductSKU must be set on the TestHelper component!";
         }
 
         if (FailureOccurred)
@@ -482,9 +458,8 @@ public class TestHelper : MonoBehaviour
             yield return XsollaPurchaseTest_Step1();
             yield return XsollaPurchaseTest_Step2();
             yield return XsollaPurchaseTest_Step3();
-            //yield return XsollaPurchaseTest_Step4();
-            //yield return XsollaPurchaseTest_Step5();
-            yield return XsollaPurchaseTest_TempStep();
+            yield return XsollaPurchaseTest_Step4();
+            yield return XsollaPurchaseTest_Step5();
         }
 
         if (!XsollaPurchaseTest_AssertSuccess())
@@ -567,7 +542,7 @@ public class TestHelper : MonoBehaviour
         Log("STEP 2: Get the brainCloud sales inventory and pull the payload for the IAP product.");
 
         string response = string.Empty;
-        BC.AppStoreService.GetSalesInventory(STORE_ID, UserCurrency,
+        BC.AppStoreService.GetSalesInventory(STORE_ID, string.Empty,
             (jsonResponse, cbObject) =>
             {
                 response = jsonResponse;
@@ -591,30 +566,19 @@ public class TestHelper : MonoBehaviour
 
         try
         {
-            var inventory = (JsonReader.Deserialize<Dictionary<string, object>>(response)
-                            ["data"] as Dictionary<string, object>)
-                            ["productInventory"] as object[];
+            var data = (JsonReader.Deserialize<Dictionary<string, object>>(response)["data"]
+                       as Dictionary<string, object>)["productInventory"] as Dictionary<string, object>[];
 
-            foreach (object entry in inventory)
+            foreach (var product in data)
             {
-                if (entry is not Dictionary<string, object> item)
+                if (product.ContainsKey("priceData") && product["priceData"] is Dictionary<string, object> priceData &&
+                    priceData != null && priceData.Count > 0 && priceData.ContainsKey("sku") &&
+                    priceData["sku"] is string sku && !string.IsNullOrWhiteSpace(sku) && sku == TestProductSKU &&
+                    product.ContainsKey("payload") && product["payload"] is string payload && !string.IsNullOrWhiteSpace(payload))
                 {
-                    continue;
+                    IAPProductID = sku;
+                    PayloadContext = payload;
                 }
-
-                if (!item.TryGetValue("itemId", out object itemId) || (itemId as string) != TestIAPProductID)
-                {
-                    continue;
-                }
-
-                IAPProductID = TestIAPProductID;
-
-                if (item.TryGetValue("payload", out object payload) && payload != null)
-                {
-                    PayloadContext = payload as string ?? JsonWriter.Serialize(payload);
-                }
-
-                break;
             }
         }
         catch (Exception e)
@@ -628,7 +592,7 @@ public class TestHelper : MonoBehaviour
         }
         else if (string.IsNullOrWhiteSpace(IAPProductID))
         {
-            FailureReason = $"IAP product '{TestIAPProductID}' was not found in the '{STORE_ID}' sales inventory!";
+            FailureReason = $"IAP product '{TestProductSKU}' was not found in the '{STORE_ID}' sales inventory!";
             LogError(FailureReason);
         }
         else
@@ -728,33 +692,24 @@ public class TestHelper : MonoBehaviour
 
         var receipt = new Dictionary<string, object>
         {
-            ["sku"] = XsollaPurchase.sku,
-            ["orderId"] = XsollaPurchase.orderId,
-            ["invoiceId"] = XsollaPurchase.invoiceId,
-            ["transactionId"] = XsollaPurchase.transactionId,
-            ["quantity"] = XsollaPurchase.quantity,
-            ["status"] = XsollaPurchase.status.ToString(),
-            ["receipt"] = XsollaPurchase.receipt,
-            ["developerPayload"] = XsollaPurchase.developerPayload,
-            ["projectId"] = XsollaProjectID,
-            ["userId"] = XsollaAuthID
+            ["orderId"] = XsollaPurchase.orderId.ToString()
         };
 
         string receiptJson = JsonWriter.Serialize(receipt);
         Log($"Receipt being sent to VerifyPurchase('{STORE_ID}'):\n{receiptJson.FormatJSON()}");
 
-        string response = string.Empty;
-        //BC.AppStoreService.VerifyPurchase(STORE_ID, receiptJson,
-        //    (jsonResponse, cbObject) =>
-        //    {
-        //        response = jsonResponse;
-        //    },
-        //    (status, reasonCode, jsonError, cbObject) =>
-        //    {
-        //        FailureReason = $"VerifyPurchase failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
-        //    });
+        VerifyReceiptResponse = string.Empty;
+        BC.AppStoreService.VerifyPurchase(STORE_ID, receiptJson,
+            (jsonResponse, cbObject) =>
+            {
+                VerifyReceiptResponse = jsonResponse;
+            },
+            (status, reasonCode, jsonError, cbObject) =>
+            {
+                FailureReason = $"VerifyPurchase failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
+            });
 
-        yield return new WaitUntil(() => FailureOccurred || !string.IsNullOrWhiteSpace(response),
+        yield return new WaitUntil(() => FailureOccurred || !string.IsNullOrWhiteSpace(VerifyReceiptResponse),
                                    TimeSpan.FromSeconds(60.0f),
                                    () => FailureReason = "VerifyPurchase timed out!");
 
@@ -764,53 +719,7 @@ public class TestHelper : MonoBehaviour
         }
         else
         {
-            Log($"VerifyPurchase is a success! jsonResponse:\n{response}");
-        }
-
-        yield return null;
-    }
-
-    private IEnumerator XsollaPurchaseTest_TempStep()
-    {
-        if (FailureOccurred || XsollaPurchase == null)
-        {
-            yield break;
-        }
-
-        FailureReason = string.Empty;
-        Log("TEMP STEP: Verify the Xsolla purchase on brainCloud using the XsollaVerifyPurchase Clouad Code script.");
-
-        var receipt = new Dictionary<string, object>
-        {
-            //["receipt"] = XsollaPurchase.receipt,
-            ["orderId"] = XsollaPurchase.orderId,
-            ["xsollaAccessToken"] = XsollaToken
-        };
-
-        string receiptJson = JsonWriter.Serialize(receipt);
-        Log($"Receipt being sent to ScriptService.XsollaVerifyPurchase:\n{receiptJson.FormatJSON()}");
-
-        string response = string.Empty;
-        BC.ScriptService.RunScript("/xsolla/XsollaVerifyPurchase", receiptJson, (jsonResponse, cbObject) =>
-            {
-                response = jsonResponse;
-            },
-            (status, reasonCode, jsonError, cbObject) =>
-            {
-                FailureReason = $"ScriptService.XsollaVerifyPurchase failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
-            });
-
-        yield return new WaitUntil(() => FailureOccurred || !string.IsNullOrWhiteSpace(response),
-                                   TimeSpan.FromSeconds(60.0f),
-                                   () => FailureReason = "ScriptService.XsollaVerifyPurchase timed out!");
-
-        if (FailureOccurred)
-        {
-            LogError(FailureReason);
-        }
-        else
-        {
-            Log($"ScriptService.XsollaVerifyPurchase is a success! jsonResponse:\n{response}");
+            Log($"VerifyPurchase is a success! jsonResponse:\n{VerifyReceiptResponse}");
         }
 
         yield return null;
@@ -822,12 +731,14 @@ public class TestHelper : MonoBehaviour
         Assert(!string.IsNullOrWhiteSpace(PayloadContext), "PayloadContext is empty! Payload cannot be cached!");
         Assert(XsollaPurchase != null, "No Xsolla purchase was completed!");
         Assert(XsollaPurchase == null || !string.IsNullOrWhiteSpace(XsollaPurchase.transactionId), "The Xsolla purchase has no transactionId to verify!");
+        Assert(!string.IsNullOrWhiteSpace(VerifyReceiptResponse), "VerifyReceiptResponse is empty! Purchase was not verified!");
         Assert(!FailureOccurred, $"The purchase test reported a failure: {FailureReason}");
 
         return !string.IsNullOrWhiteSpace(IAPProductID) &&
                !string.IsNullOrWhiteSpace(PayloadContext) &&
                XsollaPurchase != null &&
                !string.IsNullOrWhiteSpace(XsollaPurchase.transactionId) &&
+               !string.IsNullOrWhiteSpace(VerifyReceiptResponse) &&
                !FailureOccurred;
     }
 
