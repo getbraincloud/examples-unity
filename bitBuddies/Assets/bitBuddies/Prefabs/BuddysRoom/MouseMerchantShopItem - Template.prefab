@@ -620,14 +620,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 9ae50bba1b72b4d02949a6dc9f8e58db, type: 3}
+  m_Sprite: {fileID: -5755248916613434909, guid: 102b51fbf7f7b41ed8fd894f2064014b, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -725,12 +725,12 @@ GameObject:
   - component: {fileID: 1016717041977786811}
   - component: {fileID: 4196680923772530618}
   m_Layer: 5
-  m_Name: BG - Image
+  m_Name: BG - Image DEPRECATED
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1154304430850382761
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1424,7 +1424,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 4196680923772530618}
+  m_TargetGraphic: {fileID: 7160731115777774263}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
