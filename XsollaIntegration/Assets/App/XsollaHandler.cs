@@ -54,6 +54,7 @@ public class XsollaHandler : MonoBehaviour
     [SerializeField] private GameObject[] DropOnOffStates;
     [SerializeField] private TMP_InputField TradeToInput;
     [SerializeField] private Button TradeButton;
+    [SerializeField] private TMP_InputField DropAmountInput;
     [SerializeField] private Button DropButton;
 
     [Header("Controls GameObjects")]
@@ -80,7 +81,8 @@ public class XsollaHandler : MonoBehaviour
     private bool LockUI = false;
     private int SelectedCurrencyItem = -1;
     private List<Button> CurrencyItems = new();
-    private Dictionary<string, int> CurrencyBalance = new();
+    private List<string> CurrencyTypes = new();
+    private List<ulong> CurrencyBalance = new();
     private int SelectedInventoryItem = -1;
     private List<Button> InventoryItems = new();
     private List<string> InventoryDetails = new();
@@ -89,7 +91,7 @@ public class XsollaHandler : MonoBehaviour
     private string SelectedStoreItem = string.Empty;
 
     // brainCloud
-    private const float RESPONSE_TIME = 20.0f;
+    private const float RESPONSE_TIME = 20.0f; // 20 seconds is standard time before dropping for a brainCloud API call
     private const string STORE_ID = "xsolla";
     private BrainCloudWrapper BCWrapper = default;
 
@@ -99,6 +101,10 @@ public class XsollaHandler : MonoBehaviour
     private XsollaStoreClient XsollaStore = default;
     private XsollaStoreClientProduct[] XsollaProducts = default;
     private XsollaStoreClientPurchasedProduct XsollaPurchase = default;
+
+    // Testing
+    private string FailureReason = string.Empty;
+    private bool FailureOccurred => !string.IsNullOrWhiteSpace(FailureReason);
 
     #region Unity Messages
 
@@ -130,6 +136,7 @@ public class XsollaHandler : MonoBehaviour
         // Input Fields
         ConsumeAmountInput.onValueChanged.AddListener(OnConsumeAmountValueChanged);
         TradeToInput.onValueChanged.AddListener(OnTradeToValueChanged);
+        DropAmountInput.onValueChanged.AddListener(OnDropAmountValueChanged);
 
         // Instantiated Buttons
         for (int i = 0; i < CurrencyItems.Count; i++)
@@ -176,8 +183,14 @@ public class XsollaHandler : MonoBehaviour
         OnLoggingToggle(LoggingToggle.isOn);
         OnTradeToggle(TradeToggle.isOn);
         OnDropToggle(DropToggle.isOn);
+        OnConsumeAmountValueChanged(string.Empty);
+        OnTradeToValueChanged(string.Empty);
+        OnDropAmountValueChanged(string.Empty);
         ShowHowToControls();
+
+        LockUI = true;
         MainContentCG.interactable = false;
+        MainContentCG.blocksRaycasts = false;
 
         StartCoroutine(UserLoginProcess());
     }
@@ -201,6 +214,7 @@ public class XsollaHandler : MonoBehaviour
         // Input Fields
         ConsumeAmountInput.onValueChanged.RemoveAllListeners();
         TradeToInput.onValueChanged.RemoveAllListeners();
+        DropAmountInput.onValueChanged.RemoveAllListeners();
 
         // Instantiated Buttons
         if (CurrencyItems != null)
@@ -245,6 +259,12 @@ public class XsollaHandler : MonoBehaviour
             CurrencyItems = null;
         }
 
+        if (CurrencyTypes != null)
+        {
+            CurrencyTypes.Clear();
+            CurrencyTypes = null;
+        }
+
         if (CurrencyBalance != null)
         {
             CurrencyBalance.Clear();
@@ -287,7 +307,7 @@ public class XsollaHandler : MonoBehaviour
             {
                 if (error != null)
                 {
-                    LogWarning($"Xsolla store failed to deinitialize: {error}");
+                    Debug.LogWarning($"Xsolla store failed to deinitialize: {error}");
                 }
             });
         }
@@ -300,6 +320,7 @@ public class XsollaHandler : MonoBehaviour
 
     private void Update()
     {
+        // Update App info
         if (BCWrapper != null && BCWrapper.Client != null && BCWrapper.Client.IsInitialized())
         {
             AppInfoText.text = string.Format("{0} ({1}) v{2} (BC v{3})",
@@ -309,34 +330,18 @@ public class XsollaHandler : MonoBehaviour
         {
             AppInfoText.text = Application.productName;
         }
-    }
 
-    #endregion
-
-    #region App Control
-
-    private string FailureReason = string.Empty;
-
-    private bool FailureOccurred => !string.IsNullOrWhiteSpace(FailureReason);
-
-    private static void Log(object message)
-    {
-        Debug.Log(message);
-    }
-
-    private static void LogWarning(object message)
-    {
-        Debug.LogWarning(message);
-    }
-
-    private static void LogError(object message)
-    {
-        Debug.LogError(message);
-    }
-
-    private static void Assert(bool condition, object message)
-    {
-        Debug.Assert(condition, message);
+        // During brainCloud or Xsolla calls we'll lock the Main UI so that it can't be interacted with until those processes are done
+        if (LockUI)
+        {
+            MainContentCG.interactable = false;
+            MainContentCG.blocksRaycasts = false;
+        }
+        else // Doing it like this gives a frame wait before it actually unlocks
+        {
+            MainContentCG.interactable = UserControlsToggle.isOn;
+            MainContentCG.blocksRaycasts = UserControlsToggle.isOn;
+        }
     }
 
     #endregion
@@ -365,6 +370,8 @@ public class XsollaHandler : MonoBehaviour
 
     private void ShowHowToControls()
     {
+        SelectedCurrencyItem = -1;
+        SelectedInventoryItem = -1;
         HowToControlsGO.SetActive(true);
         CurrencyControlsGO.SetActive(false);
         InventoryControlsGO.SetActive(false);
@@ -378,8 +385,6 @@ public class XsollaHandler : MonoBehaviour
         }
 
         MainContentCG.alpha = isOn ? 1.0f : 0.0f;
-        MainContentCG.interactable = isOn && !LockUI;
-        MainContentCG.blocksRaycasts = isOn;
     }
 
     private void OnLoggingToggle(bool isOn)
@@ -418,17 +423,17 @@ public class XsollaHandler : MonoBehaviour
 
     private void OnConsumeButton()
     {
-
+        StartCoroutine(ConsumeCurrencyProcess());
     }
 
     private void OnTradeButton()
     {
-
+        StartCoroutine(TradeItemProcess());
     }
 
     private void OnDropButton()
     {
-
+        StartCoroutine(DropItemProcess());
     }
 
     private void OnClosePopUpButton()
@@ -436,8 +441,7 @@ public class XsollaHandler : MonoBehaviour
         CheckoutPopUpCG.interactable = false;
         CheckoutPopUpCG.gameObject.SetActive(false);
         SelectedStoreItem = string.Empty;
-        MainContentCG.interactable = UserControlsToggle.isOn && !LockUI;
-        MainContentCG.blocksRaycasts = true;
+        LockUI = false;
     }
 
     private void OnCheckoutButton()
@@ -448,56 +452,61 @@ public class XsollaHandler : MonoBehaviour
 
     private void OnConsumeAmountValueChanged(string value)
     {
-
+        value = value.Trim();
+        ConsumeButton.interactable = SelectedCurrencyItem >= 0 &&
+                                     !string.IsNullOrWhiteSpace(value) &&
+                                     Convert.ToUInt64(value) is ulong amount &&
+                                     amount > 0 && amount <= CurrencyBalance[SelectedCurrencyItem];
     }
 
     private void OnTradeToValueChanged(string value)
     {
+        value = value.Trim();
+        TradeButton.interactable = SelectedInventoryItem >= 0 &&
+                                   !string.IsNullOrWhiteSpace(value) &&
+                                   Guid.TryParseExact(value, "D", out Guid _);
+    }
 
+    private void OnDropAmountValueChanged(string value)
+    {
+        value = value.Trim();
+        DropButton.interactable = SelectedInventoryItem >= 0 &&
+                                  !string.IsNullOrWhiteSpace(value) &&
+                                  Convert.ToInt32(value) is int amount &&
+                                  amount > 0 &&
+                                  amount <= JsonParser.GetValue<int>(InventoryDetails[SelectedInventoryItem], "quantity");
     }
 
     private void OnCurrencyItemSelected(int index)
     {
-        if (index == SelectedCurrencyItem)
-        {
-            return;
-        }
-
         SelectedCurrencyItem = index;
         SelectedInventoryItem = -1;
         ConsumeAmountInput.text = string.Empty;
-        SelectedCurrencyText.text = $"You have: <b>{CurrencyItems[index].GetComponentInChildren<TMP_Text>(true).text}</b>";
-
+        SelectedCurrencyText.text = $"You have: <b>{CurrencyBalance[index]:N0} {CurrencyTypes[index]}</b>";
         ShowCurrencyControls();
     }
 
     private void OnInventoryItemSelected(int index)
     {
-        if (index == SelectedInventoryItem)
-        {
-            return;
-        }
-
         SelectedCurrencyItem = -1;
         SelectedInventoryItem = index;
         TradeToInput.text = string.Empty;
+        DropAmountInput.text = string.Empty;
         SelectedInventoryText.text = $"Selected: <b>{InventoryItems[index].GetComponentInChildren<TMP_Text>(true).text}</b>";
-
         ShowInventoryControls();
     }
 
     private void OnStoreItemSelected(int index)
     {
+        LockUI = true;
         CheckoutPopUpCG.gameObject.SetActive(true);
         CheckoutPopUpCG.interactable = true;
-        MainContentCG.interactable = false;
-        MainContentCG.blocksRaycasts = false;
 
         // Set-up popup...
         SelectedStoreItem = StoreItemDefinitions[index];
         ItemNameText.text = JsonParser.GetString(SelectedStoreItem, "title");
         ItemDescriptionText.text = JsonParser.GetString(SelectedStoreItem, "description");
-        decimal price = JsonParser.GetValue<int>(SelectedStoreItem, "priceData", "referencePrice") / 100m;
+        decimal price = JsonParser.GetValue<int>(SelectedStoreItem, "priceData", "referencePrice") / 100m; // Prices shown are in USD by default
         ItemPriceText.text = "$" + price.ToString("N2", CultureInfo.InvariantCulture);
 
         // Set-up bonus...
@@ -526,16 +535,14 @@ public class XsollaHandler : MonoBehaviour
         {
             if (FailureOccurred)
             {
-                LogError(FailureReason);
+                Debug.LogError(FailureReason);
                 LockUI = false;
-                MainContentCG.interactable = UserControlsToggle.isOn;
                 return true;
             }
 
             return false;
         }
 
-        MainContentCG.interactable = false;
         LockUI = true;
 
         yield return null;
@@ -552,7 +559,7 @@ public class XsollaHandler : MonoBehaviour
         }
         else
         {
-            Log("brainCloud Initialized!");
+            Debug.Log("brainCloud Initialized!");
         }
 
         yield return null;
@@ -607,12 +614,10 @@ public class XsollaHandler : MonoBehaviour
         yield return InitializeXsollaStore();
 
         LockUI = false;
-        MainContentCG.interactable = UserControlsToggle.isOn;
     }
 
     private IEnumerator RefreshUserProcess()
     {
-        MainContentCG.interactable = false;
         LockUI = true;
 
         yield return UpdateUserCurrency();
@@ -620,7 +625,130 @@ public class XsollaHandler : MonoBehaviour
         yield return UpdateStoreItems();
 
         LockUI = false;
-        MainContentCG.interactable = UserControlsToggle.isOn;
+    }
+
+    private IEnumerator ConsumeCurrencyProcess()
+    {
+        LockUI = true;
+
+        // TODO: Need to write a ConsumeCurrency script...
+        string response = string.Empty;
+#pragma warning disable CS0618 // Type or member is obsolete
+        BCWrapper.VirtualCurrencyService.ConsumeCurrency(CurrencyTypes[SelectedCurrencyItem], Convert.ToUInt64(ConsumeAmountInput.text),
+            (jsonResponse, cbObject) =>
+            {
+                response = jsonResponse;
+            },
+            (status, reasonCode, jsonError, cbObject) =>
+            {
+                FailureReason = $"ConsumeCurrency failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
+            });
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        ConsumeAmountInput.text = string.Empty;
+        OnConsumeAmountValueChanged(string.Empty);
+
+        yield return new WaitUntil(() => FailureOccurred || !string.IsNullOrWhiteSpace(response),
+                                   TimeSpan.FromSeconds(RESPONSE_TIME),
+                                   () => FailureReason = "ConsumeCurrency timed out!");
+
+        if (FailureOccurred)
+        {
+            Debug.LogError(FailureReason);
+            LockUI = false;
+            yield break;
+        }
+
+        yield return UpdateUserCurrency(response);
+
+        OnCurrencyItemSelected(SelectedCurrencyItem); // Update the UI
+
+        LockUI = false;
+    }
+
+    private IEnumerator TradeItemProcess()
+    {
+        LockUI = true;
+
+        string response = string.Empty;
+        BCWrapper.UserItemsService.GiveUserItemTo(TradeToInput.text,
+            JsonParser.GetString(InventoryDetails[SelectedInventoryItem], "itemId"),
+            -1, 1, true,
+            (jsonResponse, cbObject) =>
+            {
+                response = jsonResponse;
+            },
+            (status, reasonCode, jsonError, cbObject) =>
+            {
+                FailureReason = $"GiveUserItemTo failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
+            });
+
+        TradeToInput.text = string.Empty;
+        OnTradeToValueChanged(string.Empty);
+
+        yield return new WaitUntil(() => FailureOccurred || !string.IsNullOrWhiteSpace(response),
+                                   TimeSpan.FromSeconds(RESPONSE_TIME),
+                                   () => FailureReason = "GiveUserItemTo timed out!");
+
+        if (FailureOccurred)
+        {
+            Debug.LogError(FailureReason);
+            LockUI = false;
+            yield break;
+        }
+
+        uint quantity = JsonParser.GetValue<uint>(InventoryDetails[SelectedInventoryItem], "quantity"); // Get the quantity BEFORE we update user items
+
+        yield return UpdateUserInventory();
+
+        if (quantity <= 1) // So if it was the last item, we would change the controls
+        {
+            ShowHowToControls();
+        }
+
+        LockUI = false;
+    }
+
+    private IEnumerator DropItemProcess()
+    {
+        LockUI = true;
+
+        string response = string.Empty;
+        BCWrapper.UserItemsService.DropUserItem(JsonParser.GetString(InventoryDetails[SelectedInventoryItem], "itemId"),
+            Convert.ToInt32(DropAmountInput.text), false,
+            (jsonResponse, cbObject) =>
+            {
+                response = jsonResponse;
+            },
+            (status, reasonCode, jsonError, cbObject) =>
+            {
+                FailureReason = $"DropUserItem failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
+            });
+
+        DropAmountInput.text = string.Empty;
+        OnDropAmountValueChanged(string.Empty);
+
+        yield return new WaitUntil(() => FailureOccurred || !string.IsNullOrWhiteSpace(response),
+                                   TimeSpan.FromSeconds(RESPONSE_TIME),
+                                   () => FailureReason = "DropUserItem timed out!");
+
+        if (FailureOccurred)
+        {
+            Debug.LogError(FailureReason);
+            LockUI = false;
+            yield break;
+        }
+
+        uint quantity = JsonParser.GetValue<uint>(InventoryDetails[SelectedInventoryItem], "quantity"); // Get the quantity BEFORE we update user items
+
+        yield return UpdateUserInventory();
+
+        if (quantity <= 1) // So if it was the last item, we would change the controls
+        {
+            ShowHowToControls();
+        }
+
+        LockUI = false;
     }
 
     private IEnumerator UpdateUserCurrency(string response = "")
@@ -643,11 +771,12 @@ public class XsollaHandler : MonoBehaviour
 
             if (FailureOccurred)
             {
-                LogError(FailureReason);
+                Debug.LogError(FailureReason);
                 yield break;
             }
         }
 
+        CurrencyTypes.Clear();
         CurrencyBalance.Clear();
         try
         {
@@ -673,7 +802,8 @@ public class XsollaHandler : MonoBehaviour
                 if (currencies[key] is Dictionary<string, object> currency &&
                     currency.ContainsKey("balance") && currency["balance"] is object balance)
                 {
-                    CurrencyBalance.Add(name, Convert.ToInt32(balance));
+                    CurrencyTypes.Add(name);
+                    CurrencyBalance.Add(Convert.ToUInt64(balance));
                 }
             }
         }
@@ -684,7 +814,7 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
             yield break;
         }
 
@@ -698,14 +828,14 @@ public class XsollaHandler : MonoBehaviour
 
         CurrencyItems.Clear();
 
-        yield return new WaitForFixedUpdate(); // Need to allow content fitters to update...
+        yield return new WaitForSecondsRealtime(0.05f); // Need to allow content fitters to update...
 
-        if (CurrencyBalance.Count > 0)
+        if (CurrencyTypes.Count > 0)
         {
-            foreach (var name in CurrencyBalance.Keys)
+            for (int i = 0; i < CurrencyTypes.Count; i++)
             {
                 var currencyButton = Instantiate(CurrencySelectorButton_TEMPLATE, CurrencyContent, false);
-                currencyButton.GetComponentInChildren<TMP_Text>(true).text = $"{CurrencyBalance[name]:N0} {name}";
+                currencyButton.GetComponentInChildren<TMP_Text>(true).text = $"{CurrencyBalance[i]:N0} {CurrencyTypes[i]}";
                 currencyButton.gameObject.name = $"{name}SelectorButton";
                 currencyButton.gameObject.SetActive(true);
                 CurrencyItems.Add(currencyButton);
@@ -739,7 +869,7 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
             yield break;
         }
 
@@ -747,10 +877,13 @@ public class XsollaHandler : MonoBehaviour
         try
         {
             var inventory = JsonParser.GetArrayString(response, "data", "results", "items");
-            foreach (var item in inventory)
+            if (inventory != null && inventory.Length > 0)
             {
-                string details = item;
-                InventoryDetails.Add(details);
+                foreach (var item in inventory)
+                {
+                    string details = item;
+                    InventoryDetails.Add(details);
+                }
             }
         }
         catch (Exception e)
@@ -760,7 +893,7 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
             yield break;
         }
 
@@ -774,14 +907,14 @@ public class XsollaHandler : MonoBehaviour
 
         InventoryItems.Clear();
 
-        yield return new WaitForFixedUpdate(); // Need to allow content fitters to update...
+        yield return new WaitForSecondsRealtime(0.05f); // Need to allow content fitters to update...
 
         if (InventoryDetails.Count > 0)
         {
             foreach (var item in InventoryDetails)
             {
                 var inventoryButton = Instantiate(InventorySelectorButton_TEMPLATE, InventoryContent, false);
-                inventoryButton.GetComponentInChildren<TMP_Text>(true).text = JsonParser.GetString(item, "itemDef", "name");
+                inventoryButton.GetComponentInChildren<TMP_Text>(true).text = $"{JsonParser.GetString(item, "itemDef", "name")} x{JsonParser.GetString(item, "quantity")}";
                 inventoryButton.gameObject.name = $"{JsonParser.GetString(item, "defId")}SelectorButton";
                 inventoryButton.gameObject.SetActive(true);
                 InventoryItems.Add(inventoryButton);
@@ -815,7 +948,7 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
             yield break;
         }
 
@@ -836,7 +969,7 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
             yield break;
         }
 
@@ -850,7 +983,7 @@ public class XsollaHandler : MonoBehaviour
 
         StoreItems.Clear();
 
-        yield return new WaitForFixedUpdate(); // Need to allow content fitters to update...
+        yield return new WaitForSecondsRealtime(0.05f); // Need to allow content fitters to update...
 
         if (StoreItemDefinitions.Count > 0)
         {
@@ -894,7 +1027,7 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
             OnClosePopUpButton();
             yield break;
         }
@@ -913,7 +1046,7 @@ public class XsollaHandler : MonoBehaviour
         };
 
         string receiptJson = JsonWriter.Serialize(receipt);
-        Log($"Receipt being sent to VerifyPurchase('{STORE_ID}'):\n{receiptJson.FormatJSON()}");
+        Debug.Log($"Receipt being sent to VerifyPurchase('{STORE_ID}'):\n{receiptJson.FormatJSON()}");
 
         const int RETRY = 5;
         int count = 0;
@@ -985,7 +1118,7 @@ public class XsollaHandler : MonoBehaviour
 
                 if (count < RETRY)
                 {
-                    Log($"Couldn't find transaction. Trying again... ({count}/{RETRY})");
+                    Debug.Log($"Couldn't find transaction. Trying again... ({count}/{RETRY})");
 
                     yield return new WaitForSecondsRealtime(retryTime);
 
@@ -1001,7 +1134,7 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
         }
 
         yield return RefreshUserProcess();
@@ -1018,7 +1151,7 @@ public class XsollaHandler : MonoBehaviour
         XsollaClientSettingsAsset asset = XsollaClientSettingsAsset.Instance();
         if (asset == null || asset.settings == null)
         {
-            LogError("Xsolla settings asset is missing! Configure it via the Xsolla menu in the Editor.");
+            Debug.LogError("Xsolla settings asset is missing! Configure it via the Xsolla menu in the Editor.");
             yield break;
         }
 
@@ -1038,11 +1171,11 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
         }
         else
         {
-            Log($"Xsolla Initialized! (sandbox: {true})");
+            Debug.Log($"Xsolla Initialized! (sandbox: {true})");
         }
 
         bool silentAttempted = false;
@@ -1054,7 +1187,7 @@ public class XsollaHandler : MonoBehaviour
                 if (!silentAttempted)
                 {
                     silentAttempted = true;
-                    LogWarning($"Silent login failed ({error}); falling back to the login widget.");
+                    Debug.LogWarning($"Silent login failed ({error}); falling back to the login widget.");
                     XsollaLogin.Login(onLogin);
                     return;
                 }
@@ -1075,11 +1208,11 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
         }
         else
         {
-            Log($"Xsolla Auth OK! Xsolla accessToken: {XsollaConfig.accessToken}");
+            Debug.Log($"Xsolla Auth OK! Xsolla accessToken: {XsollaConfig.accessToken}");
         }
     }
 
@@ -1102,14 +1235,15 @@ public class XsollaHandler : MonoBehaviour
                                                {
                                                    if (error != null)
                                                    {
-                                                       LogWarning($"Restore reported an error: {error}");
+                                                       Debug.LogWarning($"Restore reported an error: {error}");
                                                    }
                                                    else if (product != null)
                                                    {
-                                                       Log($"Consuming prior purchase: {product.sku} x{product.quantity}");
+                                                       // TODO: Need to go through VerifyPurchase if the Client isn't handling consumption
+                                                       Debug.Log($"Consuming prior purchase: {product.sku} x{product.quantity}");
                                                        XsollaStore.ConsumeProduct(product.sku, product.quantity, product.transactionId, err =>
                                                        {
-                                                           if (err != null) LogWarning($"Could not consume {product.sku}: {err}");
+                                                           if (err != null) Debug.LogWarning($"Could not consume {product.sku}: {err}");
                                                        });
                                                    }
                                                })
@@ -1133,17 +1267,17 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
         }
         else
         {
-            Log($"Xsolla store ready with {(XsollaProducts != null ? XsollaProducts.Length : 0)} product(s).");
+            Debug.Log($"Xsolla store ready with {(XsollaProducts != null ? XsollaProducts.Length : 0)} product(s).");
 
             if (XsollaProducts != null)
             {
                 foreach (var product in XsollaProducts)
                 {
-                    Log($"  - {product.sku}: {product.title} @ {product.formattedPriceWithDiscount}");
+                    Debug.Log($"  - {product.sku}: {product.title} @ {product.formattedPriceWithDiscount}");
                 }
             }
         }
@@ -1170,12 +1304,12 @@ public class XsollaHandler : MonoBehaviour
 
         if (FailureOccurred)
         {
-            LogError(FailureReason);
+            Debug.LogError(FailureReason);
         }
         else
         {
-            Log($"Purchase complete! sku: {XsollaPurchase.sku} | order: {XsollaPurchase.orderId} | " +
-                $"invoice: {XsollaPurchase.invoiceId} | txn: {XsollaPurchase.transactionId} | status: {XsollaPurchase.status}");
+            Debug.Log($"Purchase complete! sku: {XsollaPurchase.sku} | order: {XsollaPurchase.orderId} | " +
+                      $"invoice: {XsollaPurchase.invoiceId} | txn: {XsollaPurchase.transactionId} | status: {XsollaPurchase.status}");
         }
     }
 
