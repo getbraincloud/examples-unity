@@ -82,7 +82,7 @@ public class XsollaHandler : MonoBehaviour
     private int SelectedCurrencyItem = -1;
     private List<Button> CurrencyItems = new();
     private List<string> CurrencyTypes = new();
-    private List<ulong> CurrencyBalance = new();
+    private List<long> CurrencyBalance = new();
     private int SelectedInventoryItem = -1;
     private List<Button> InventoryItems = new();
     private List<string> InventoryDetails = new();
@@ -96,11 +96,12 @@ public class XsollaHandler : MonoBehaviour
     private BrainCloudWrapper BCWrapper = default;
 
     // Xsolla
+    private string BCXsollaDefinition = string.Empty;
     private XsollaClientConfiguration XsollaConfig = default;
     private XsollaLoginClient XsollaLogin = default;
     private XsollaStoreClient XsollaStore = default;
     private XsollaStoreClientProduct[] XsollaProducts = default;
-    private XsollaStoreClientPurchasedProduct XsollaPurchase = default;
+    private XsollaStoreClientPurchasedProduct XsollaPurchaseMade = default;
 
     // Testing
     private string FailureReason = string.Empty;
@@ -137,39 +138,6 @@ public class XsollaHandler : MonoBehaviour
         ConsumeAmountInput.onValueChanged.AddListener(OnConsumeAmountValueChanged);
         TradeToInput.onValueChanged.AddListener(OnTradeToValueChanged);
         DropAmountInput.onValueChanged.AddListener(OnDropAmountValueChanged);
-
-        // Instantiated Buttons
-        for (int i = 0; i < CurrencyItems.Count; i++)
-        {
-            CurrencyItems[i].onClick.RemoveAllListeners();
-            CurrencyItems[i].onClick.AddListener(() => OnCurrencyItemSelected(i));
-        }
-
-        // Instantiated Buttons
-        for (int i = 0; i < CurrencyItems.Count; i++)
-        {
-            CurrencyItems[i].onClick.RemoveAllListeners();
-            CurrencyItems[i].onClick.AddListener(() => OnCurrencyItemSelected(i));
-        }
-
-        // Instantiated Buttons
-        for (int i = 0; i < CurrencyItems.Count; i++)
-        {
-            int index = i;
-            CurrencyItems[i].onClick.AddListener(() => OnCurrencyItemSelected(index));
-        }
-
-        for (int i = 0; i < InventoryItems.Count; i++)
-        {
-            int index = i;
-            InventoryItems[i].onClick.AddListener(() => OnInventoryItemSelected(index));
-        }
-
-        for (int i = 0; i < StoreItems.Count; i++)
-        {
-            int index = i;
-            StoreItems[i].GetComponentInChildren<Button>(true).onClick.AddListener(() => OnStoreItemSelected(index));
-        }
     }
 
     private void Start()
@@ -215,40 +183,6 @@ public class XsollaHandler : MonoBehaviour
         ConsumeAmountInput.onValueChanged.RemoveAllListeners();
         TradeToInput.onValueChanged.RemoveAllListeners();
         DropAmountInput.onValueChanged.RemoveAllListeners();
-
-        // Instantiated Buttons
-        if (CurrencyItems != null)
-        {
-            for (int i = 0; i < CurrencyItems.Count; i++)
-            {
-                if (CurrencyItems[i] != null)
-                {
-                    CurrencyItems[i].onClick.RemoveAllListeners();
-                }
-            }
-        }
-
-        if (InventoryItems != null)
-        {
-            for (int i = 0; i < InventoryItems.Count; i++)
-            {
-                if (InventoryItems[i] != null)
-                {
-                    InventoryItems[i].onClick.RemoveAllListeners();
-                }
-            }
-        }
-
-        if (StoreItems != null)
-        {
-            for (int i = 0; i < StoreItems.Count; i++)
-            {
-                if (StoreItems[i] != null)
-                {
-                    StoreItems[i].GetComponentInChildren<Button>(true).onClick.RemoveAllListeners();
-                }
-            }
-        }
     }
 
     private void OnDestroy()
@@ -455,7 +389,7 @@ public class XsollaHandler : MonoBehaviour
         value = value.Trim();
         ConsumeButton.interactable = SelectedCurrencyItem >= 0 &&
                                      !string.IsNullOrWhiteSpace(value) &&
-                                     Convert.ToUInt64(value) is ulong amount &&
+                                     Convert.ToInt64(value) is long amount &&
                                      amount > 0 && amount <= CurrencyBalance[SelectedCurrencyItem];
     }
 
@@ -536,7 +470,7 @@ public class XsollaHandler : MonoBehaviour
             if (FailureOccurred)
             {
                 Debug.LogError(FailureReason);
-                LockUI = false;
+                //LockUI = false;
                 return true;
             }
 
@@ -599,17 +533,38 @@ public class XsollaHandler : MonoBehaviour
         {
             yield break;
         }
-        else
-        {
-            UpdateBCIds(BCWrapper.GetStoredProfileId(), BCWrapper.GetStoredAnonymousId());
-        }
+
+        UpdateBCIds(BCWrapper.GetStoredProfileId(), BCWrapper.GetStoredAnonymousId());
 
         // Then get user currencies, iventory, and store items
         yield return UpdateUserCurrency(response); // Send the response since it already includes currency
         yield return UpdateUserInventory();
         yield return UpdateStoreItems();
 
-        // Now attempt to log into Xsolla & set-up the Xsolla store
+        // Get Xsolla's integration config from brainCloud
+        response = string.Empty;
+        BCWrapper.AppStoreService.GetStoreInfo(STORE_ID,
+            (jsonResponse, cbObject) =>
+            {
+                response = jsonResponse;
+            },
+            (status, reasonCode, jsonError, cbObject) =>
+            {
+                FailureReason = $"AuthenticateAnonymous failed! Status: {status} | Code: {reasonCode} | jsonError:\n{jsonError}";
+            });
+
+        yield return new WaitUntil(() => FailureOccurred || !string.IsNullOrWhiteSpace(response),
+                                   TimeSpan.FromSeconds(RESPONSE_TIME),
+                                   () => FailureReason = "AuthenticateAnonymous/Reconnect timed out!");
+
+        if (checkIfShouldLogFailure())
+        {
+            yield break;
+        }
+
+        BCXsollaDefinition = JsonParser.GetString(response, "data");
+
+        // Finally attempt to log into Xsolla & set-up the Xsolla store
         yield return XsollaLoginProcess();
         yield return InitializeXsollaStore();
 
@@ -803,7 +758,7 @@ public class XsollaHandler : MonoBehaviour
                     currency.ContainsKey("balance") && currency["balance"] is object balance)
                 {
                     CurrencyTypes.Add(name);
-                    CurrencyBalance.Add(Convert.ToUInt64(balance));
+                    CurrencyBalance.Add(Convert.ToInt64(balance));
                 }
             }
         }
@@ -828,7 +783,7 @@ public class XsollaHandler : MonoBehaviour
 
         CurrencyItems.Clear();
 
-        yield return new WaitForSecondsRealtime(0.05f); // Need to allow content fitters to update...
+        yield return new WaitForSecondsRealtime(0.03333f); // Need to allow content fitters to update...
 
         if (CurrencyTypes.Count > 0)
         {
@@ -907,7 +862,7 @@ public class XsollaHandler : MonoBehaviour
 
         InventoryItems.Clear();
 
-        yield return new WaitForSecondsRealtime(0.05f); // Need to allow content fitters to update...
+        yield return new WaitForSecondsRealtime(0.03333f); // Need to allow content fitters to update...
 
         if (InventoryDetails.Count > 0)
         {
@@ -973,36 +928,9 @@ public class XsollaHandler : MonoBehaviour
             yield break;
         }
 
-        // Destroy all of the store items before we create new ones
-        for (int i = 0; i < StoreItems.Count; i++)
+        if (XsollaProducts != null) // If the Xsolla store's been populated, we will add them here; otherwise Xsolla store's init will do it
         {
-            StoreItems[i].GetComponentInChildren<Button>(true).onClick.RemoveAllListeners();
-            Destroy(StoreItems[i].gameObject);
-            StoreItems[i] = null;
-        }
-
-        StoreItems.Clear();
-
-        yield return new WaitForSecondsRealtime(0.05f); // Need to allow content fitters to update...
-
-        if (StoreItemDefinitions.Count > 0)
-        {
-            foreach (var item in StoreItemDefinitions)
-            {
-                var storeItemButton = Instantiate(StoreItem_TEMPLATE, StoreContent, false);
-                storeItemButton.text = JsonParser.GetString(item, "title");
-                storeItemButton.gameObject.name = $"{JsonParser.GetString(item, "itemId")}StoreItem";
-                storeItemButton.gameObject.SetActive(true);
-                StoreItems.Add(storeItemButton);
-            }
-
-            for (int i = 0; i < StoreItems.Count; i++)
-            {
-                int index = i;
-                var storeButton = StoreItems[i].GetComponentInChildren<Button>(true);
-                storeButton.onClick.RemoveAllListeners();
-                storeButton.onClick.AddListener(() => OnStoreItemSelected(index));
-            }
+            yield return PopulateStoreItems();
         }
     }
 
@@ -1042,7 +970,7 @@ public class XsollaHandler : MonoBehaviour
 
         var receipt = new Dictionary<string, object>
         {
-            ["orderId"] = XsollaPurchase.orderId.ToString()
+            ["orderId"] = XsollaPurchaseMade.orderId.ToString()
         };
 
         string receiptJson = JsonWriter.Serialize(receipt);
@@ -1102,7 +1030,7 @@ public class XsollaHandler : MonoBehaviour
                 foreach (var detail in data)
                 {
                     if (detail.TryGetValue("transactionResultCode", out object code) &&
-                        Convert.ToInt32(code) == 107) // Transaction not found
+                        Convert.ToUInt32(code) == 107) // Transaction not found
                     {
                         transactionNotFound = true;
                         break;
@@ -1118,7 +1046,7 @@ public class XsollaHandler : MonoBehaviour
 
                 if (count < RETRY)
                 {
-                    Debug.Log($"Couldn't find transaction. Trying again... ({count}/{RETRY})");
+                    Debug.Log($"Couldn't find transaction ({count}/{RETRY}); Trying again...");
 
                     yield return new WaitForSecondsRealtime(retryTime);
 
@@ -1271,13 +1199,55 @@ public class XsollaHandler : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Xsolla store ready with {(XsollaProducts != null ? XsollaProducts.Length : 0)} product(s).");
+            yield return PopulateStoreItems();
+        }
+    }
 
-            if (XsollaProducts != null)
+    private IEnumerator PopulateStoreItems()
+    {
+        if (XsollaStore == null)
+        {
+            Debug.LogError("XsollaStore hasn't been initialized yet! Cannot populate store items.");
+            yield break;
+        }
+
+        // Destroy all of the store items before we create new ones
+        for (int i = 0; i < StoreItems.Count; i++)
+        {
+            StoreItems[i].GetComponentInChildren<Button>(true).onClick.RemoveAllListeners();
+            Destroy(StoreItems[i].gameObject);
+            StoreItems[i] = null;
+        }
+
+        StoreItems.Clear();
+
+        yield return new WaitForSecondsRealtime(0.03333f); // Need to allow content fitters to update...
+
+        if (StoreItemDefinitions.Count > 0)
+        {
+            for (int i = 0; i < StoreItemDefinitions.Count; i++)
             {
+                string item = StoreItemDefinitions[i];
+                string sku = JsonParser.GetString(item, "priceData", "sku");
                 foreach (var product in XsollaProducts)
                 {
-                    Debug.Log($"  - {product.sku}: {product.title} @ {product.formattedPriceWithDiscount}");
+                    if (product.sku == sku)
+                    {
+                        // Setup button GO
+                        var storeItemButton = Instantiate(StoreItem_TEMPLATE, StoreContent, false);
+                        storeItemButton.text = JsonParser.GetString(item, "title");
+                        storeItemButton.gameObject.name = $"{JsonParser.GetString(item, "itemId")}StoreItem";
+                        storeItemButton.gameObject.SetActive(true);
+
+                        // Add button functionality
+                        int index = i;
+                        var clickButton = storeItemButton.GetComponentInChildren<Button>(true);
+                        clickButton.onClick.RemoveAllListeners();
+                        clickButton.onClick.AddListener(() => OnStoreItemSelected(index));
+
+                        StoreItems.Add(storeItemButton);
+                        break;
+                    }
                 }
             }
         }
@@ -1285,6 +1255,7 @@ public class XsollaHandler : MonoBehaviour
 
     private IEnumerator PurchaseXollaProduct()
     {
+        XsollaPurchaseMade = null;
         string productSku = JsonParser.GetString(SelectedStoreItem, "priceData", "sku");
         string payload = JsonParser.GetString(SelectedStoreItem, "payload");
         XsollaStore.PurchaseProduct(productSku, payload, (product, error) =>
@@ -1295,21 +1266,16 @@ public class XsollaHandler : MonoBehaviour
                 return;
             }
 
-            XsollaPurchase = product;
+            XsollaPurchaseMade = product;
         });
 
-        yield return new WaitUntil(() => FailureOccurred || XsollaPurchase != null,
+        yield return new WaitUntil(() => FailureOccurred || XsollaPurchaseMade != null,
                                    TimeSpan.FromSeconds(300.0f),
                                    () => FailureReason = "Xsolla purchase timed out!");
 
         if (FailureOccurred)
         {
             Debug.LogError(FailureReason);
-        }
-        else
-        {
-            Debug.Log($"Purchase complete! sku: {XsollaPurchase.sku} | order: {XsollaPurchase.orderId} | " +
-                      $"invoice: {XsollaPurchase.invoiceId} | txn: {XsollaPurchase.transactionId} | status: {XsollaPurchase.status}");
         }
     }
 
