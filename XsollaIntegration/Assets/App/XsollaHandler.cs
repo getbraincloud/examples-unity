@@ -436,22 +436,51 @@ public class XsollaHandler : MonoBehaviour
         CheckoutPopUpCG.gameObject.SetActive(true);
         CheckoutPopUpCG.interactable = true;
 
-        // Set-up popup...
+        // Set-up popup
         SelectedStoreItem = StoreItemDefinitions[index];
         ItemNameText.text = JsonParser.GetString(SelectedStoreItem, "title");
         ItemDescriptionText.text = JsonParser.GetString(SelectedStoreItem, "description");
         decimal price = JsonParser.GetValue<int>(SelectedStoreItem, "priceData", "referencePrice") / 100m; // Prices shown are in USD by default
         ItemPriceText.text = "$" + price.ToString("N2", CultureInfo.InvariantCulture);
 
-        // Set-up bonus...
+        // Set-up bonus
         if (SelectedStoreItem.Contains("bonusRewards") &&
             JsonParser.GetString(SelectedStoreItem, "bonusRewards") is string bonusJson &&
-            !string.IsNullOrWhiteSpace("bonusJson") && bonusJson != "null")
+            !string.IsNullOrWhiteSpace("bonusJson") && bonusJson != "null" && bonusJson.Contains("xsolla"))
         {
             var bonus = JsonReader.Deserialize<Dictionary<string, object>>(JsonParser.GetString(bonusJson, "xsolla"));
-            List<string> items = new();
+            List<string> bonusItems = new();
 
-            BonusText.text = "Bonus with purchase: " + JsonWriter.Serialize(bonus);
+            // Get bonus inventory items
+            if (bonus.ContainsKey("items") &&
+                bonus["items"] is Dictionary<string, object> items &&
+                items != null && items.Count > 0)
+            {
+                foreach (var itemObj in items.Values)
+                {
+                    var item = itemObj as Dictionary<string, object>;
+                    bonusItems.Add($"{item["defId"]} x{item["quantity"]}");
+                }
+            }
+
+            // Get bonus currencies
+            if (bonus.ContainsKey("currency") &&
+                bonus["currency"] is Dictionary<string, object> currency &&
+                currency != null && currency.Count > 0)
+            {
+                foreach (var key in currency.Keys)
+                {
+                    bonusItems.Add($"{currency[key]:N0} {key}");
+                }
+            }
+
+            bonusItems.RemoveAll(string.IsNullOrWhiteSpace);
+
+            if (bonusItems.Count > 0)
+            {
+                BonusText.text = "Bonus with Xsolla purchase: " + string.Join(", ", bonusItems);
+                BonusText.gameObject.SetActive(true);
+            }
         }
         else
         {
@@ -660,7 +689,11 @@ public class XsollaHandler : MonoBehaviour
         {
             ShowHowToControls();
         }
-
+        else // Update the UI
+        {
+            OnInventoryItemSelected(SelectedInventoryItem);
+        }
+        
         LockUI = false;
     }
 
@@ -701,6 +734,10 @@ public class XsollaHandler : MonoBehaviour
         if (quantity <= 1) // So if it was the last item, we would change the controls
         {
             ShowHowToControls();
+        }
+        else // Update the UI
+        {
+            OnInventoryItemSelected(SelectedInventoryItem);
         }
 
         LockUI = false;
@@ -968,9 +1005,36 @@ public class XsollaHandler : MonoBehaviour
             yield break;
         }
 
+        yield return VerifyPurchase(XsollaPurchaseMade);
+
+        if (FailureOccurred)
+        {
+            OnClosePopUpButton();
+            yield break;
+        }
+
+        // Consume purchases if the store config is set to not consume via the WebHook
+        if (!JsonParser.GetValue<bool>(BCXsollaDefinition, "storeInfo", "consumeOnPurchase"))
+        {
+            XsollaStore.ConsumeProduct(XsollaPurchaseMade.sku, XsollaPurchaseMade.quantity, XsollaPurchaseMade.transactionId, err =>
+            {
+                if (err != null)
+                {
+                    Debug.LogWarning($"Could not consume {XsollaPurchaseMade.sku}: {err}");
+                }
+            });
+        }
+
+        yield return RefreshUserProcess();
+
+        OnClosePopUpButton();
+    }
+
+    private IEnumerator VerifyPurchase(XsollaStoreClientPurchasedProduct product)
+    {
         var receipt = new Dictionary<string, object>
         {
-            ["orderId"] = XsollaPurchaseMade.orderId.ToString()
+            ["orderId"] = product.orderId.ToString()
         };
 
         string receiptJson = JsonWriter.Serialize(receipt);
@@ -979,7 +1043,7 @@ public class XsollaHandler : MonoBehaviour
         const int RETRY = 5;
         int count = 0;
         float retryTime = 1.0f;
-        response = string.Empty;
+        string response = string.Empty;
 
         // The WebHook for the purchase can take time to process on brainCloud
         // so we will retry a couple times until it comes back successfully
@@ -1030,7 +1094,7 @@ public class XsollaHandler : MonoBehaviour
                 foreach (var detail in data)
                 {
                     if (detail.TryGetValue("transactionResultCode", out object code) &&
-                        Convert.ToUInt32(code) == 107) // Transaction not found
+                        Convert.ToInt32(code) == 107) // Transaction not found
                     {
                         transactionNotFound = true;
                         break;
@@ -1064,10 +1128,6 @@ public class XsollaHandler : MonoBehaviour
         {
             Debug.LogError(FailureReason);
         }
-
-        yield return RefreshUserProcess();
-
-        OnClosePopUpButton();
     }
 
     #endregion
@@ -1085,7 +1145,7 @@ public class XsollaHandler : MonoBehaviour
 
         XsollaConfig = XsollaClientConfiguration.Builder.Create()
                                                         .SetSettings(asset.settings)
-                                                        .SetSandbox(true)
+                                                        .SetSandbox(JsonParser.GetValue<bool>(BCXsollaDefinition, "storeInfo", "sandbox"))
                                                         .SetLogLevel(XsollaLogLevel.Debug)
                                                         .Build();
 
@@ -1156,6 +1216,7 @@ public class XsollaHandler : MonoBehaviour
             xsollaProducts.Add(product);
         }
 
+        List<XsollaStoreClientPurchasedProduct> missedPurchases = null;
         XsollaStore = XsollaStoreClient.Builder.Create()
                                                .SetConfiguration(XsollaConfig)
                                                .AddProducts(xsollaProducts.ToArray())
@@ -1167,12 +1228,22 @@ public class XsollaHandler : MonoBehaviour
                                                    }
                                                    else if (product != null)
                                                    {
-                                                       // TODO: Need to go through VerifyPurchase if the Client isn't handling consumption
-                                                       Debug.Log($"Consuming prior purchase: {product.sku} x{product.quantity}");
-                                                       XsollaStore.ConsumeProduct(product.sku, product.quantity, product.transactionId, err =>
+                                                       Debug.Log($"Missed purchase: {product.sku} x{product.quantity}; need to verify or consume.");
+                                                       if (!JsonParser.GetValue<bool>(BCXsollaDefinition, "storeInfo", "consumeOnPurchase"))
                                                        {
-                                                           if (err != null) Debug.LogWarning($"Could not consume {product.sku}: {err}");
-                                                       });
+                                                           XsollaStore.ConsumeProduct(product.sku, product.quantity, product.transactionId, err =>
+                                                           {
+                                                               if (err != null)
+                                                               {
+                                                                   Debug.LogWarning($"Could not consume {product.sku}: {err}");
+                                                               }
+                                                           });
+                                                       }
+                                                       else
+                                                       {
+                                                           missedPurchases ??= new();
+                                                           missedPurchases.Add(product);
+                                                       }
                                                    }
                                                })
                                                .Build();
@@ -1197,10 +1268,18 @@ public class XsollaHandler : MonoBehaviour
         {
             Debug.LogError(FailureReason);
         }
-        else
+
+        if (missedPurchases != null && missedPurchases.Count > 0)
         {
-            yield return PopulateStoreItems();
+            Debug.LogError("Products weren't consumed, need to verify the purchases...");
+            while (missedPurchases.Count > 0)
+            {
+                yield return VerifyPurchase(missedPurchases[0]);
+                missedPurchases.RemoveAt(0);
+            }
         }
+
+        yield return PopulateStoreItems();
     }
 
     private IEnumerator PopulateStoreItems()
