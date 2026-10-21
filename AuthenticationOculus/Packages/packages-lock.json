@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "com.bitheads.braincloud": {
-      "version": "https://github.com/getbraincloud/braincloud-unity-package.git#release/6.0",
+      "version": "https://github.com/getbraincloud/braincloud-unity-package.git#develop",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "a77835b1dd03ea075474dc4ac3818201a0b750f0"
+      "hash": "6c48631d78b7d154cf4422131acbcdbb0c85bb4c"
     },
     "com.meta.xr.sdk.core": {
       "version": "83.0.1",
@@ -57,7 +57,7 @@
       "dependencies": {}
     },
     "com.unity.burst": {
-      "version": "1.8.28",
+      "version": "1.8.29",
       "depth": 2,
       "source": "registry",
       "dependencies": {
@@ -67,21 +67,21 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.collab-proxy": {
-      "version": "2.11.3",
+      "version": "2.12.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.collections": {
-      "version": "2.6.2",
+      "version": "2.6.7",
       "depth": 2,
       "source": "registry",
       "dependencies": {
-        "com.unity.burst": "1.8.23",
+        "com.unity.burst": "1.8.29",
         "com.unity.mathematics": "1.3.2",
         "com.unity.test-framework": "1.4.6",
-        "com.unity.nuget.mono-cecil": "1.11.5",
+        "com.unity.nuget.mono-cecil": "1.11.6",
         "com.unity.test-framework.performance": "3.0.3"
       },
       "url": "https://packages.unity.com"
@@ -102,7 +102,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.18.0",
+      "version": "1.19.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -118,7 +118,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.nuget.mono-cecil": {
-      "version": "1.11.5",
+      "version": "1.11.6",
       "depth": 3,
       "source": "registry",
       "dependencies": {},
@@ -210,7 +210,7 @@
       }
     },
     "com.unity.test-framework.performance": {
-      "version": "3.2.0",
+      "version": "3.5.0",
       "depth": 3,
       "source": "registry",
       "dependencies": {
@@ -257,7 +257,7 @@
       }
     },
     "com.unity.xr.core-utils": {
-      "version": "2.5.3",
+      "version": "2.6.0",
       "depth": 1,
       "source": "registry",
       "dependencies": {

@@ -16,7 +16,7 @@ Mac Users, you may need to run ** xattr -r -d com.apple.quarantine ./BCKart-Phot
 
 Please ensure that you have setup your Fusion AppId, and configure it in Unity via Tools -> Fusion -> Realtime Settings. The app will not work until you do so.
 
-It is highly recommended to manage your Fusion App Servers, with a Custom Authentication configured as the AuthenticatePhoton webhook, associated with the AuthenticatePhoton.ccjs Cloud Script File of your app.
+It is highly recommended to secure your Fusion App with Custom Authentication using brainCloud's built-in Photon integration (Design → Integrations → Multiplayer in the brainCloud portal). See Setting Up Custom Authentication below.
 
 ### Requirements
 
@@ -72,7 +72,7 @@ It is highly recommended to manage your Fusion App Servers, with a Custom Authen
 
 ## Setting Up Custom Authentication (brainCloud ↔ Photon)
 
-To complete the authentication flow between brainCloud and Photon Fusion, you must configure a brainCloud Webhook, link it in the Photon Dashboard, and ensure your Unity client sends the correct AuthenticationValues through Photon when connecting.
+brainCloud has a built-in Photon integration that validates a player's brainCloud session when they connect to Photon Fusion. No webhook or cloud script is needed. You turn on the integration in the brainCloud portal, register its URL and secret in the Photon Dashboard, and the Unity client sends its brainCloud ProfileId and SessionId through Photon's AuthenticationValues.
 
 The following assumes:
 
@@ -82,34 +82,23 @@ The following assumes:
 
   - You have working Fusion AppId settings in the Unity project
 
-### 1. Configure the AuthenticatePhoton Webhook in brainCloud
+### 1. Enable the Photon Integration in brainCloud
 
 1. Log into the brainCloud portal: https://portalx.braincloudservers.com
 
-2. Navigate to:
-  Design → Cloud Code → WebHooks
-  (direct link: https://portalx.braincloudservers.com/#/app/design/cloud-code/web-hooks)
+2. Select your app and navigate to:
+  Design → Integrations → Multiplayer
 
-3. Look for an existing webhook named AuthenticatePhoton.
-  - If it already exists (the template app usually creates it automatically), you may skip to Section 2.
+3. On the **Photon** card, tick **Enable**, then click **Save Changes**.
 
-4. If not present, create one:
+4. Copy the two values the card shows:
 
-  - Click + New WebHook
+  - **Authentication URL**. It looks like:
+  ```https://api.braincloudservers.com/photonauth/<appId>```
 
-  - Name it: AuthenticatePhoton
+  - **Secret**. It is generated on first save. You can also enter your own, or click **Regenerate** to rotate it.
 
-  - Point it to the Cloud Script → AuthenticatePhoton.ccjs
-
-  - Set the webhook to enforce the secret using URL parameters, not HTTP headers
-
-  - Save the webhook and copy the final generated webhook URL
-
-  - It will look something like:
-  ```https://api.braincloudservers.com/webhook/<appId>/AuthenticatePhoton/<webhookSecret>```
-
-
-This URL is what Photon will use to validate and authenticate players.
+> Regenerating the secret takes effect when you save. Every Photon connection fails until the new secret is entered in the Photon Dashboard.
 
 ### 2. Configure Photon Custom Authentication
 
@@ -117,21 +106,20 @@ This URL is what Photon will use to validate and authenticate players.
 
 2. Select your Fusion App → Manage
 
-3. Under Authentication / Custom Authentication, set:
+3. Under Authentication / Custom Authentication, add a provider:
 
   - Type: Custom
 
-  - URL: Paste the brainCloud webhook URL from Section 1
-  Example:
-  ```https://api.braincloudservers.com/webhook/<appId>/AuthenticatePhoton/<webhookSecret> ```
+  - URL: the **Authentication URL** from Section 1
 
+  - Key/value pair: key `secret`, value = the **Secret** from Section 1
 
-Photon will now call your brainCloud webhook each time a client attempts to join a Fusion session.
+Photon now calls brainCloud each time a client connects to a Fusion session.
 
 ### 3. Required Unity Client Code (AuthenticationValues)
 
 The client must pass Custom Authentication to Photon using the player's active brainCloud ProfileId and SessionId.
-These values allow the Cloud Script to validate the user and attach them to the session.
+brainCloud uses these values to confirm the player has a valid session for your app.
 
 Below is the final code snapshot used in GameLauncher.cs:
 
@@ -155,15 +143,17 @@ _runner.StartGame(new StartGameArgs
 }); 
 ```
 
+The parameter names `user` and `sessionId` are required by the brainCloud endpoint. Don't rename them.
+
 ### What This Does
 
   - ProfileId identifies the brainCloud user
 
   - SessionId validates their active authenticated session
 
-  - Photon forwards these to the AuthenticatePhoton Webhook
+  - Photon forwards these, along with the secret, to the brainCloud Authentication URL
 
-  - The webhook runs AuthenticatePhoton.ccjs, which confirms the session and constructs the return payload Photon expects
+  - brainCloud confirms the session belongs to that profile and to your app, then returns the ResultCode Photon expects
 
 This is the required bridge between your brainCloud login and Photon Fusion server-side authentication.
 
@@ -173,11 +163,15 @@ This is the required bridge between your brainCloud login and Photon Fusion serv
 
 2. Client joins Photon Fusion → passes ProfileId & SessionId via AuthenticationValues
 
-3. Photon calls brainCloud Webhook → Cloud Script validates user session
+3. Photon calls the brainCloud Authentication URL → brainCloud validates the session
 
 4. Authentication succeeds → Photon admits user into the session
 
 5. Player joins the Fusion server and gameplay proceeds
+
+> Each validation is metered as an API call against your app and is rate limited per app.
+
+> If your app was set up with the older **AuthenticatePhoton** webhook and `AuthenticatePhoton.ccjs` cloud script, switch the Photon Dashboard URL to the Authentication URL above. You can then delete the webhook and the script.
 
 ---
 
@@ -237,7 +231,6 @@ This is the required bridge between your brainCloud login and Photon Fusion serv
 ## Future Improvements
 
 - Possible Support for persistent levels and state during host migration.  
-- Better Photon Integration for custom server authentication
 
 ---
 
