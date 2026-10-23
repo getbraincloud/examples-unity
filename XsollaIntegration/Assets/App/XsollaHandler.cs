@@ -1116,6 +1116,10 @@ public class XsollaHandler : MonoBehaviour
 
                     retryTime = retryTime *= 2.0f;
                 }
+                else
+                {
+                    Debug.LogError($"Couldn't find transaction ({count}/{RETRY})!");
+                }
             }
         }
 
@@ -1216,7 +1220,6 @@ public class XsollaHandler : MonoBehaviour
             xsollaProducts.Add(product);
         }
 
-        List<XsollaStoreClientPurchasedProduct> missedPurchases = null;
         XsollaStore = XsollaStoreClient.Builder.Create()
                                                .SetConfiguration(XsollaConfig)
                                                .AddProducts(xsollaProducts.ToArray())
@@ -1241,8 +1244,15 @@ public class XsollaHandler : MonoBehaviour
                                                        }
                                                        else
                                                        {
-                                                           missedPurchases ??= new();
-                                                           missedPurchases.Add(product);
+                                                           if (string.IsNullOrWhiteSpace(product.orderId.ToString()) ||
+                                                               product.orderId == 0)
+                                                           {
+                                                               Debug.LogWarning("Product orderId is 0! Cannot consume via VerifyPurchase.");
+                                                           }
+                                                           else
+                                                           {
+                                                               StartCoroutine(VerifyPurchase(product));
+                                                           }
                                                        }
                                                    }
                                                })
@@ -1267,16 +1277,6 @@ public class XsollaHandler : MonoBehaviour
         if (FailureOccurred)
         {
             Debug.LogError(FailureReason);
-        }
-
-        if (missedPurchases != null && missedPurchases.Count > 0)
-        {
-            Debug.LogError("Products weren't consumed, need to verify the purchases...");
-            while (missedPurchases.Count > 0)
-            {
-                yield return VerifyPurchase(missedPurchases[0]);
-                missedPurchases.RemoveAt(0);
-            }
         }
 
         yield return PopulateStoreItems();
