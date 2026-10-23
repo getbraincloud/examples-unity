@@ -389,7 +389,7 @@ public class XsollaHandler : MonoBehaviour
         value = value.Trim();
         ConsumeButton.interactable = SelectedCurrencyItem >= 0 &&
                                      !string.IsNullOrWhiteSpace(value) &&
-                                     Convert.ToInt64(value) is long amount &&
+                                     long.TryParse(value, out long amount) &&
                                      amount > 0 && amount <= CurrencyBalance[SelectedCurrencyItem];
     }
 
@@ -406,7 +406,7 @@ public class XsollaHandler : MonoBehaviour
         value = value.Trim();
         DropButton.interactable = SelectedInventoryItem >= 0 &&
                                   !string.IsNullOrWhiteSpace(value) &&
-                                  Convert.ToInt32(value) is int amount &&
+                                  long.TryParse(value, out long amount) &&
                                   amount > 0 &&
                                   amount <= JsonParser.GetValue<int>(InventoryDetails[SelectedInventoryItem], "quantity");
     }
@@ -702,8 +702,9 @@ public class XsollaHandler : MonoBehaviour
         LockUI = true;
 
         string response = string.Empty;
+        int dropAmount = Convert.ToInt32(DropAmountInput.text);
         BCWrapper.UserItemsService.DropUserItem(JsonParser.GetString(InventoryDetails[SelectedInventoryItem], "itemId"),
-            Convert.ToInt32(DropAmountInput.text), false,
+            dropAmount, false,
             (jsonResponse, cbObject) =>
             {
                 response = jsonResponse;
@@ -731,7 +732,7 @@ public class XsollaHandler : MonoBehaviour
 
         yield return UpdateUserInventory();
 
-        if (quantity <= 1) // So if it was the last item, we would change the controls
+        if (quantity <= dropAmount) // So if it was the last item, we would change the controls
         {
             ShowHowToControls();
         }
