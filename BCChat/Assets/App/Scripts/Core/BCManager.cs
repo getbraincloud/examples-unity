@@ -3,7 +3,6 @@ using BrainCloud.Entity;
 using BrainCloud.JSONHelper;
 using BrainCloud.Plugin;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -30,8 +29,6 @@ using UnityEngine;
 public class BCManager : MonoBehaviour
 {
     private static bool _isInstanced = false; // To keep track if BCManager has been Instantiated or not
-
-    [SerializeField] private bool InitFromBCSettings = true;
 
     private static bool _rememberMeSetting = false;
 
@@ -171,12 +168,9 @@ public class BCManager : MonoBehaviour
             return;
         }
 
-        if (InitFromBCSettings)
-        {
-            Wrapper = gameObject.AddComponent<BrainCloudWrapper>();
-            Wrapper.WrapperName = AppName;
-            Wrapper.Init();
-        }
+        Wrapper = gameObject.AddComponent<BrainCloudWrapper>();
+        Wrapper.WrapperName = AppName;
+        Wrapper.Init();
 
         GameObject = gameObject;
         DontDestroyOnLoad(GameObject);
@@ -212,43 +206,9 @@ public class BCManager : MonoBehaviour
     {
         RememberMeSetting = value;
     }
-    public static void SetupClient(string serverURL, string appID, string appSecret, string version, Dictionary<string, string> childApps = null)
-    {
-        if (!_isInstanced)
-        {
-            Debug.LogError($"BCManager does not exist! Cannot setup a new brainCloud Client.");
-            return;
-        }
-
-        GameObject.GetComponent<BCManager>().InternalSetupClient(serverURL, appID, appSecret, version, childApps);
-    }
 
     public static void DismantleClient()
         => GameObject.GetComponent<BCManager>().InternalDismantleClient();
-
-    private void InternalSetupClient(string serverURL, string appID, string appSecret, string version, Dictionary<string, string> childApps = null)
-    {
-        Wrapper = gameObject.AddComponent<BrainCloudWrapper>();
-        Wrapper.WrapperName = AppName;
-
-        // Make sure to use the right braincloudservers.com URL
-        if (serverURL.Contains("braincloudservers.com"))
-        {
-            serverURL = "https://" +
-                         serverURL[serverURL.IndexOf("api.")..(serverURL.IndexOf("braincloudservers.com") + 21)] +
-                         "/dispatcherv2";
-        }
-
-        if (!childApps.IsNullOrEmpty())
-        {
-            childApps.Add(appID, appSecret);
-            Wrapper.InitWithApps(serverURL, appID, childApps, version);
-        }
-        else
-        {
-            Wrapper.Init(serverURL, appSecret, appID, version);
-        }
-    }
 
     private void InternalDismantleClient()
     {
