@@ -127,9 +127,11 @@ public class StoreItemCard : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(_data.imageUrl))
         {
-            _cardArt.sprite = await ImageCacheService.Instance.GetImageAsync(_data.imageUrl);
+            Sprite fetchedSprite = await ImageCacheService.Instance.GetImageAsync(_data.imageUrl);
+            if (fetchedSprite != null)
+                _cardArt.sprite = fetchedSprite;
         }
-            
+
 
         _amountDisplayIcon.sprite = ImageCacheService.Instance.GetSpriteForCurrency(_data.rewardCurrency);
 

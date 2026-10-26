@@ -16,6 +16,9 @@ public class ImageCacheService : MonoBehaviour
     private List<ItemSectionSprite> sectionSprites;
 
     [SerializeField]
+    private List<LocalImageOverride> localImageOverrides;
+
+    [SerializeField]
     public Sprite noAdsSprite, timerSprite;
     public static ImageCacheService Instance { get; private set; }
 
@@ -51,6 +54,26 @@ public class ImageCacheService : MonoBehaviour
 
         return null;
     }
+    private Sprite GetLocalOverrideSprite(string key)
+    {
+        if (localImageOverrides == null || string.IsNullOrEmpty(key))
+            return null;
+
+        string normalizedKey = Path.GetFileNameWithoutExtension(key).ToLowerInvariant();
+
+        foreach (LocalImageOverride entry in localImageOverrides)
+        {
+            if (string.IsNullOrEmpty(entry.key))
+                continue;
+
+            string normalizedEntryKey = Path.GetFileNameWithoutExtension(entry.key).ToLowerInvariant();
+            if (normalizedEntryKey == normalizedKey)
+                return entry.sprite;
+        }
+
+        return null;
+    }
+
     public Sprite GetSpriteForSection(string sectionName)
     {
         foreach (ItemSectionSprite sSprite in sectionSprites)
@@ -68,6 +91,19 @@ public class ImageCacheService : MonoBehaviour
     {
         if (string.IsNullOrEmpty(url))
             return null;
+
+        // Some catalog items (e.g. freebies, default starter items) carry a bare
+        // filename in their "image" field rather than a hosted URL, since their
+        // art already ships with the app. Attempting to fetch a bare filename as
+        // a network request fails everywhere, and on WebGL the browser resolves
+        // it as if it were a hostname (e.g. "https://foo.png/"), producing a
+        // CORS/NetworkError. Resolve those against the local override list
+        // instead of hitting the network.
+        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri parsedUri) ||
+            (parsedUri.Scheme != Uri.UriSchemeHttp && parsedUri.Scheme != Uri.UriSchemeHttps))
+        {
+            return GetLocalOverrideSprite(url);
+        }
 
         // First check memory cache
         if (memoryCache.TryGetValue(url, out Sprite cachedSprite))

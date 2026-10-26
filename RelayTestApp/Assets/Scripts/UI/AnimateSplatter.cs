@@ -22,14 +22,18 @@ public class AnimateSplatter : MonoBehaviour
 
         _image = GetComponent<Image>();
 
-        transform.eulerAngles = new Vector3(0, 0, Random.Range(0, 360));
-
         StartCoroutine(AppearAnimation());
     }
 
     public void SetColour(Color newColour)
     {
         _image.color = AlterColour(newColour);
+    }
+
+    // Chosen once by the painter, carried on the wire — never re-randomized here.
+    public void SetAngle(float degrees)
+    {
+        transform.eulerAngles = new Vector3(0, 0, degrees);
     }
 
     public void SetLifespan(float newLifespan)

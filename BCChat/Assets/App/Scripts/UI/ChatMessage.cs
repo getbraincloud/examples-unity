@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -13,6 +14,7 @@ public class ChatMessage : MonoBehaviour
     private const int PROFILE_DISPLAY_SIZE = 100;
     private static readonly Color ACTIVE_USER_COLOR = new Color32(20, 35, 75, 255);
     private static readonly Color OTHER_USER_COLOR = new Color32(66, 66, 66, 255);
+    private static readonly Regex UrlRegex = new(@"https?://[^\s<>""']+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     [Header("Header")]
     [SerializeField] private GameObject Header = default;
@@ -47,6 +49,7 @@ public class ChatMessage : MonoBehaviour
     {
         UsernameText.text = string.Empty;
         MessageText.text = string.Empty;
+        MessageText.emojiFallbackSupport = true;
         DateText.text = string.Empty;
     }
 
@@ -94,13 +97,14 @@ public class ChatMessage : MonoBehaviour
         bool isActiveUser = message.from.id == UserHandler.ProfileID;
 
         UsernameText.text = message.from.name;
-        MessageText.text = message.content.text;
+        MessageText.text = RemovePreviewOnlyUrls(EmojiShortcodes.Expand(message.content.text));
         DateText.text = $"{message.date.ToShortDateString()} at {message.date.ToShortTimeString()}";
 
-        if(message.ver > 1)
+        if(message.ver > 1 && !MessageText.text.IsEmpty())
         {
             MessageText.text += " <size=50%>(edited)</size>";
         }
+        MessageText.gameObject.SetActive(!MessageText.text.IsEmpty());
 
         ContentLayout.reverseArrangement = !isActiveUser;
         MessageBox.color = isActiveUser ? ACTIVE_USER_COLOR : OTHER_USER_COLOR;
@@ -114,10 +118,93 @@ public class ChatMessage : MonoBehaviour
 
         Message = message;
 
+        RebuildLinkPreviews(message.content.text);
+
         if (!message.from.pic.IsEmpty())
         {
             StartCoroutine(DownloadProfileImage());
         }
+    }
+
+    private void RebuildLinkPreviews(string text)
+    {
+        for (int i = MessageBox.transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = MessageBox.transform.GetChild(i);
+            if (child.GetComponent<DirectImagePreview>() != null || child.GetComponent<UrlPreviewCard>() != null)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        foreach (Match match in UrlRegex.Matches(text ?? string.Empty))
+        {
+            string url = match.Value.TrimEnd('.', ',', '!', ')', ']');
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uri) ||
+                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                continue;
+            }
+
+            bool isDirectImage = IsDirectImageUrl(url);
+            GameObject previewObject = isDirectImage
+                ? new GameObject("DirectImagePreview", typeof(RectTransform), typeof(CanvasRenderer),
+                                 typeof(RawImage), typeof(LayoutElement), typeof(DirectImagePreview))
+                : new GameObject("UrlPreviewCard", typeof(RectTransform), typeof(CanvasRenderer),
+                                 typeof(Image), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter), typeof(UrlPreviewCard));
+            previewObject.layer = gameObject.layer;
+            previewObject.transform.SetParent(MessageBox.transform, false);
+            previewObject.transform.SetSiblingIndex(Footer.transform.GetSiblingIndex());
+            if (isDirectImage)
+            {
+                previewObject.GetComponent<DirectImagePreview>().Initialize(url);
+            }
+            else
+            {
+                previewObject.GetComponent<UrlPreviewCard>().Initialize(url, MessageText, MessageBox);
+            }
+        }
+    }
+
+    private static bool IsDirectImageUrl(string url)
+    {
+        if (!System.Uri.TryCreate(url, UriKind.Absolute, out Uri uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return false;
+        }
+
+        string path = Uri.UnescapeDataString(uri.AbsolutePath);
+        return path.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+               path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+               path.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+               path.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
+               path.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ||
+               path.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string RemovePreviewOnlyUrls(string text)
+    {
+        string withoutImages = UrlRegex.Replace(text ?? string.Empty, match =>
+        {
+            string url = match.Value.TrimEnd('.', ',', '!', ')', ']');
+            return IsDirectImageUrl(url) || UrlPreviewCard.IsYouTubeUrl(url) ? string.Empty : match.Value;
+        });
+
+        return withoutImages.Trim();
+    }
+
+    public void HidePreviewUrl(string url)
+    {
+        MessageText.text = UrlRegex.Replace(MessageText.text, match =>
+        {
+            string candidate = match.Value.TrimEnd('.', ',', '!', ')', ']');
+            return string.Equals(candidate, url, StringComparison.OrdinalIgnoreCase)
+                ? match.Value.Substring(candidate.Length)
+                : match.Value;
+        }).Trim();
+        MessageText.gameObject.SetActive(!MessageText.text.IsEmpty());
+        LayoutRebuilder.MarkLayoutForRebuild(MessageBox.rectTransform);
     }
 
     private IEnumerator DownloadProfileImage()

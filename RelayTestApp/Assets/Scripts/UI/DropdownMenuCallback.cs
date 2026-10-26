@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 /// <summary>
 /// Sends information when a dropdown menu value is changed based on the DropdownMenu enum selected
 /// </summary>
-public enum DropdownMenus{Socket,Channel,Compression, FFALobbyType, TeamLobbyType}
+public enum DropdownMenus{Socket,Channel,Compression, LobbyType}
 public class DropdownMenuCallback : MonoBehaviour
 {
     public DropdownMenus TargetMenu;
@@ -26,17 +26,32 @@ public class DropdownMenuCallback : MonoBehaviour
                 PlayerPrefs.SetInt(Settings.ChannelKey, Dropdown.value);
                 break;
             case DropdownMenus.Socket:
-                StateManager.Instance.Protocol = (RelayConnectionType)Dropdown.value + 1;
+#if UNITY_WEBGL && !UNITY_EDITOR
+                // Browsers have no raw TCP/UDP socket API, and insecure ws:// is blocked as
+                // mixed content on an https-hosted page — every WebGL build must use secure
+                // WebSocket regardless of what's selected, or the connect attempt crashes the page.
+                StateManager.Instance.Protocol = RelayConnectionType.WEBSOCKET;
+                StateManager.Instance.UseSSL = true;
+#else
+                // WSS (index 3) isn't its own enum value, so it can't follow index+1 like the rest.
+                if (Dropdown.value == 3)
+                {
+                    StateManager.Instance.Protocol = RelayConnectionType.WEBSOCKET;
+                    StateManager.Instance.UseSSL = true;
+                }
+                else
+                {
+                    StateManager.Instance.Protocol = (RelayConnectionType)Dropdown.value + 1;
+                    StateManager.Instance.UseSSL = false;
+                }
+#endif
                 break;
             case DropdownMenus.Compression:
                 BrainCloudManager.Instance._relayCompressionType = (RelayCompressionTypes)Dropdown.value;
                 GameManager.Instance.SendUpdateRelayCompressionType();
                 break;
-            case DropdownMenus.FFALobbyType:
-                BrainCloudManager.Instance.SetLobbyType(GameMode.FreeForAll, Dropdown.value);
-                 break;
-            case DropdownMenus.TeamLobbyType:
-                BrainCloudManager.Instance.SetLobbyType(GameMode.Team, Dropdown.value);
+            case DropdownMenus.LobbyType:
+                BrainCloudManager.Instance.SetLobbyType(Dropdown.value);
                 break;
         }   
     }

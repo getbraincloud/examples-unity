@@ -31,7 +31,7 @@ public class MainContentUI : ContentUIBehaviour
     [SerializeField] private Button SettingsButton = default;
 
     [Header("Chat Content")]
-    [SerializeField] private int MaxChatMessages = 30;
+    [SerializeField] private int MaxChatMessages = 100;
     [SerializeField] private ScrollRect ChatScroll = default;
     [SerializeField] private RectTransform ChatContent = default;
     [SerializeField] private TMP_InputField ChatField = default;
@@ -214,7 +214,7 @@ public class MainContentUI : ContentUIBehaviour
         var contentJson = new Dictionary<string, object>()
         {
             {"rich", null },
-            {"text", ChatField.text }
+            {"text", EmojiShortcodes.Expand(ChatField.text) }
         };
 
         if (!messageToEdit.msgId.IsEmpty() &&
