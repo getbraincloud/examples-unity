@@ -25,7 +25,29 @@ public class MenuManager : MonoBehaviour
     public Button ShieldButton;
     public Button PlaybackLastMatchButton;
     public Button InvasionPlaybackButton;
-    
+
+    [Header("Shared UI")]
+    [Tooltip("Single shared TopBar instance (prefab) reused by the MainMenu and Lobby screens.")]
+    public GameObject SharedTopBar;
+
+    [Header("Redesign - Selector Buttons")]
+    [Tooltip("The Line/Cross/Diamond buttons, in Easy/Medium/Hard order. When assigned, the highlight " +
+             "border snaps to the selected button, so the row can be laid out vertically OR horizontally " +
+             "without touching code. Leave empty to keep the legacy hardcoded offsets.")]
+    public List<RectTransform> DefenderSelectorButtons = new List<RectTransform>();
+    [Tooltip("The attack-force buttons, in Easy/Medium/Hard order. Same behaviour as DefenderSelectorButtons.")]
+    public List<RectTransform> InvaderSelectorButtons = new List<RectTransform>();
+
+    [Header("Redesign - Dashboard Panels")]
+    [Tooltip("'My Recent Attacks' list (IsAttackPanel = true).")]
+    public MatchHistoryPanel RecentAttacksPanel;
+    [Tooltip("'Recent Invasions' list (IsAttackPanel = false).")]
+    public MatchHistoryPanel RecentInvasionsPanel;
+    [Tooltip("'My Stats' panel. Derived from the same match history the lists use - no extra calls.")]
+    public MyStatsPanel MyStatsPanel;
+    [Tooltip("'My Rating: N ELO' label above the Find New Opponent / Attack button. Optional.")]
+    public TMP_Text FindOpponentRatingText;
+
     [Header("Menu States")]
     public List<MenuState> MenuStatesList = new List<MenuState>();
     public MenuStates CurrentMenuState;
@@ -58,7 +80,10 @@ public class MenuManager : MonoBehaviour
     public PlayerCardLobby PlayerCardRef;
     public GameObject LobbyListParent;
     public Image DefenderPreview;
+    [Tooltip("YOUR defense, rendered in blue (your team) - used by the MainMenu 'My Defense' preview.")]
     public List<Sprite> DefenderPreviews;
+    [Tooltip("The OPPONENT's defense, rendered in red (enemy team) - used by the Lobby 'Target's Defense' preview.")]
+    public List<Sprite> OpponentDefenderPreviews;
     public Image LobbyPlayerDefensePreview;
     public TMP_Text LobbyUsernameText;
     public TMP_Text LobbyGoldText;
@@ -70,8 +95,10 @@ public class MenuManager : MonoBehaviour
     private UserInfo _opponent;
     private readonly List<PlayerCardLobby> _listOfPlayers = new List<PlayerCardLobby>();
     private EventSystem _eventSystem;
-    private readonly List<float> _selectionDefenderXPlacement = new List<float> {-169, -3.7f, 160};
-    private readonly List<float> _selectionInvaderYPlacement = new List<float> {192f, 4f, -186f};
+    // Defense selectors are stacked vertically (Line/Cross/Diamond), so the highlight border moves in Y.
+    private readonly List<float> _selectionDefenderYPlacement = new List<float> {153f, -1f, -155f};
+    // Attack-force selectors sit in a horizontal row, so the highlight border moves in X.
+    private readonly List<float> _selectionInvaderXPlacement = new List<float> {-520f, 0f, 520f};
     private readonly List<int> _priceOfInvaders = new List<int> {100000, 200000, 400000};
 
     public List<int> PriceOfInvaders
@@ -103,11 +130,17 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
-        PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
+        if (PlaybackLastMatchButton)
+        {
+            PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
+        }
         if (NetworkManager.Instance.IsSessionValid())
         {
             UpdateMainMenu();
             ChangeState(MenuStates.MainMenu);
+            //We got here without logging in - i.e. we just came back from a raid - so the
+            //history panels still hold the pre-match reads. Pull them again.
+            NetworkManager.Instance.RefreshMatchHistory();
         }
         else if (NetworkManager.Instance.Wrapper.CanReconnect())
         {
@@ -265,16 +298,8 @@ public class MenuManager : MonoBehaviour
         PlayerPrefs.SetString(Settings.UsernameKey, username);
         LobbyUsernameText.text = LoggedInNameText.text = $"{username}";
 
-        int defenderIndex = (int)GameManager.Instance.CurrentUserInfo.DefendersSelected;
-        Vector2 posI = DefenderButtonBorder.anchoredPosition;
-        posI.x = _selectionDefenderXPlacement[defenderIndex];
-        DefenderPreview.sprite = DefenderPreviews[defenderIndex];
-        DefenderButtonBorder.anchoredPosition = posI;
-        
-        int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
-        Vector2 posD = InvaderButtonBorder.anchoredPosition;
-        posD.y = _selectionInvaderYPlacement[invaderIndex];
-        InvaderButtonBorder.anchoredPosition = posD;
+        UpdateButtonSelectorPosition(ArmyType.Defense);
+        UpdateButtonSelectorPosition(ArmyType.Invader);
 
         UpdateMatchMakingInfo();
         UpdateGoldAmount();
@@ -283,38 +308,105 @@ public class MenuManager : MonoBehaviour
     public void UpdateMatchMakingInfo()
     {
         UserInfo user = GameManager.Instance.CurrentUserInfo;
-        RatingText.text = $"{user.Rating.ToString("#,#")}";
-        MatchesPlayedText.text = $"{user.MatchesPlayed.ToString("#,#")}";
-        ShieldButton.interactable = user.ShieldTime <= 0;
+        if (RatingText) RatingText.text = $"{user.Rating.ToString("#,#")}";
+        if (FindOpponentRatingText) FindOpponentRatingText.text = $"My Rating: {user.Rating.ToString("#,0")} ELO";
+        if (MatchesPlayedText) MatchesPlayedText.text = $"{user.MatchesPlayed.ToString("#,#")}";
+
+        if (ShieldButton) ShieldButton.interactable = user.ShieldTime <= 0;
         if (user.ShieldTime > 0)
         {
             StartCoroutine(ShieldTimerCountdown(user.ShieldTime * 60));
         }
-        else
+        else if (ShieldTimerText)
         {
             ShieldTimerText.text = "Off";
         }
-        PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
+
+        //Everything below is the pre-redesign "last invasion" block. The dashboard's Recent
+        //Invasions panel supersedes it (every row has its own Watch button), so these widgets
+        //are optional - the null checks let the redesigned scene delete them outright.
+        if (PlaybackLastMatchButton)
+        {
+            PlaybackLastMatchButton.interactable = NetworkManager.Instance.IsPlaybackIDValid();
+        }
 
         StreamInfo invaderInfo = GameManager.Instance.InvadedStreamInfo;
-        if (!invaderInfo.PlaybackStreamID.IsNullOrEmpty())
-        {
-            InvasionPlaybackButton.interactable = true;
-            LastInvasionStatusText.text = invaderInfo.DidInvadersWin ? "Last Invasion: Defeated" : "Last Invasion: Victorious";
-            SlayCountText.text = $"You lost {invaderInfo.SlayCount} troops";
-            DefeatedTroopsText.text = $"You killed {invaderInfo.DefeatedTroops} troops";
-            float minuteDuration =  Mathf.FloorToInt(invaderInfo.DurationOfInvasion / 60);
-            float secondsDuration =  Mathf.FloorToInt(invaderInfo.DurationOfInvasion % 60);
+        bool hasInvasion = !invaderInfo.PlaybackStreamID.IsNullOrEmpty();
 
-            InvasionDurationText.text = $"Duration: {minuteDuration:00}:{secondsDuration:00} / 3:00";
+        if (InvasionPlaybackButton) InvasionPlaybackButton.interactable = hasInvasion;
+
+        if (hasInvasion)
+        {
+            if (LastInvasionStatusText)
+            {
+                LastInvasionStatusText.text = invaderInfo.DidInvadersWin ? "Last Invasion: Defeated" : "Last Invasion: Victorious";
+            }
+            if (SlayCountText) SlayCountText.text = $"You lost {invaderInfo.SlayCount} troops";
+            if (DefeatedTroopsText) DefeatedTroopsText.text = $"You killed {invaderInfo.DefeatedTroops} troops";
+            if (InvasionDurationText)
+            {
+                float minuteDuration = Mathf.FloorToInt(invaderInfo.DurationOfInvasion / 60);
+                float secondsDuration = Mathf.FloorToInt(invaderInfo.DurationOfInvasion % 60);
+                InvasionDurationText.text = $"Duration: {minuteDuration:00}:{secondsDuration:00} / 3:00";
+            }
         }
         else
         {
-            InvasionPlaybackButton.interactable = false;
-            LastInvasionStatusText.text = "No recent invasions";
-            SlayCountText.text = "";
-            DefeatedTroopsText.text = "";
+            if (LastInvasionStatusText) LastInvasionStatusText.text = "No recent invasions";
+            if (SlayCountText) SlayCountText.text = "";
+            if (DefeatedTroopsText) DefeatedTroopsText.text = "";
         }
+    }
+
+    /// <summary>
+    /// Redesign: refresh both dashboard history lists from the streams read at login.
+    /// Safe to call before the panels are wired up - each is optional.
+    /// </summary>
+    public void UpdateMatchHistoryPanels()
+    {
+        if (RecentAttacksPanel)
+        {
+            RecentAttacksPanel.Populate(GameManager.Instance.RecentAttacks);
+        }
+        if (RecentInvasionsPanel)
+        {
+            RecentInvasionsPanel.Populate(GameManager.Instance.RecentInvasions);
+        }
+        if (MyStatsPanel)
+        {
+            //Same two lists the panels above render, just aggregated - so the stats can never
+            //disagree with the cards sitting next to them.
+            MyStatsPanel.Bind(MatchHistoryStats.Compute(
+                GameManager.Instance.RecentAttacks,
+                GameManager.Instance.RecentInvasions,
+                GameManager.Instance.UserStatistics));
+        }
+    }
+
+    /// <summary>
+    /// Redesign: "Attack" on a match-history card. We already know the target, so this drops
+    /// straight into the Lobby with them pre-selected instead of running matchmaking - the
+    /// player still picks their invader force and confirms the raid there.
+    /// </summary>
+    public void AttackOpponentDirect(MatchSummary in_match)
+    {
+        if (in_match == null || in_match.OpponentProfileId.IsNullOrEmpty()) return;
+
+        //Resets the lobby widgets AND clears OpponentUserInfo, so it has to run before we
+        //install the opponent below.
+        SetupLobbyScreenSelections();
+        ChangeState(MenuStates.Lobby);
+
+        GameManager.Instance.OpponentUserInfo = new UserInfo
+        {
+            ProfileId = in_match.OpponentProfileId,
+            Username = in_match.OpponentName,
+            Rating = in_match.OpponentRating
+        };
+
+        //Pulls their CURRENT defense (not the one from the historical match) so the lobby
+        //previews what we would actually be raiding.
+        NetworkManager.Instance.ReadLobbyUserSelected(in_match.OpponentProfileId);
     }
 
     public void BeginMatch()
@@ -359,26 +451,74 @@ public class MenuManager : MonoBehaviour
 
     public void UpdateButtonSelectorPosition(ArmyType in_type)
     {
+        int index = in_type == ArmyType.Invader
+            ? (int) GameManager.Instance.CurrentUserInfo.InvaderSelected
+            : (int) GameManager.Instance.CurrentUserInfo.DefendersSelected;
+
+        MoveSelectorBorder(in_type, index);
+    }
+
+    /// <summary>
+    /// Places the highlight border on the selected army button.
+    ///
+    /// Preferred path: snap to the button's own RectTransform, which works for ANY layout - the
+    /// redesign moves the defense row from vertical to horizontal, and hardcoded offsets cannot
+    /// survive that. Falls back to the legacy offset tables while the button lists are unassigned,
+    /// so the existing scene keeps working until it is re-laid-out.
+    /// </summary>
+    private void MoveSelectorBorder(ArmyType in_type, int in_index)
+    {
+        //ArmyDivisionRank carries None/Test entries that have no button or preview.
+        if (in_index < 0) return;
+
         switch (in_type)
         {
             case ArmyType.Invader:
             {
-                int invaderIndex = (int) GameManager.Instance.CurrentUserInfo.InvaderSelected;
+                if (TrySnapToButton(InvaderButtonBorder, InvaderSelectorButtons, in_index)) return;
+                if (in_index >= _selectionInvaderXPlacement.Count) return;
+
                 Vector2 posD = InvaderButtonBorder.anchoredPosition;
-                posD.y = _selectionInvaderYPlacement[invaderIndex];
+                posD.x = _selectionInvaderXPlacement[in_index];
+                posD.y = 0f;
                 InvaderButtonBorder.anchoredPosition = posD;
                 break;
             }
             case ArmyType.Defense:
             {
-                int defenderIndex = (int) GameManager.Instance.CurrentUserInfo.DefendersSelected;
+                if (DefenderPreview && in_index < DefenderPreviews.Count)
+                {
+                    DefenderPreview.sprite = DefenderPreviews[in_index];
+                }
+
+                if (TrySnapToButton(DefenderButtonBorder, DefenderSelectorButtons, in_index)) return;
+                if (in_index >= _selectionDefenderYPlacement.Count) return;
+
                 Vector2 posI = DefenderButtonBorder.anchoredPosition;
-                posI.x = _selectionDefenderXPlacement[defenderIndex];
-                DefenderPreview.sprite = DefenderPreviews[defenderIndex];
+                posI.x = 0f;
+                posI.y = _selectionDefenderYPlacement[in_index];
                 DefenderButtonBorder.anchoredPosition = posI;
                 break;
             }
         }
+    }
+
+    //World position is used so the border does not have to share a parent with the buttons.
+    private static bool TrySnapToButton(RectTransform in_border, List<RectTransform> in_buttons, int in_index)
+    {
+        if (!in_border || in_buttons == null || in_index >= in_buttons.Count || !in_buttons[in_index])
+        {
+            return false;
+        }
+
+        //The selector buttons are placed by a LayoutGroup, and layout does not run until the end
+        //of the frame. Reading a button's world position during Start (i.e. every time the menu
+        //is shown, including on return from a raid) would otherwise read its PRE-layout position
+        //and park the border away from the selected button.
+        Canvas.ForceUpdateCanvases();
+
+        in_border.position = in_buttons[in_index].position;
+        return true;
     }
 
     public void UpdateGoldAmount()
@@ -417,7 +557,11 @@ public class MenuManager : MonoBehaviour
             LobbyHintText.enabled = false;
         }
 
-        LobbyPlayerDefensePreview.sprite = DefenderPreviews[defenseIndex];
+        //This is the opponent's base, so show the RED (enemy) render, not your blue one.
+        List<Sprite> previews = OpponentDefenderPreviews != null && OpponentDefenderPreviews.Count > defenseIndex
+            ? OpponentDefenderPreviews
+            : DefenderPreviews;
+        LobbyPlayerDefensePreview.sprite = previews[defenseIndex];
         OpponentSelectedText.text = GameManager.Instance.OpponentUserInfo.Username;
         LobbyAttackSelectTargetGroup.SetActive(false);
         ValidateInvaderSelection();
@@ -435,6 +579,12 @@ public class MenuManager : MonoBehaviour
         foreach (MenuState currentState in MenuStatesList)
         {
             currentState.gameObject.SetActive(currentState.AssignedGameState == newMenuState);
+        }
+
+        //The TopBar is a single shared instance, so it lives outside the menu states and is toggled here.
+        if (SharedTopBar)
+        {
+            SharedTopBar.SetActive(newMenuState == MenuStates.MainMenu || newMenuState == MenuStates.Lobby);
         }
 
         CurrentMenuState = newMenuState;

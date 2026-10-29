@@ -1,0 +1,64 @@
+"use strict";
+// CleanupUserItems (VSCode created Script) 
+var userItemsService = bridge.getUserItemsServiceProxy();
+
+function main() {
+  var response = {};
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  var allItems = GetAllUserItems();
+  //drop all items
+  for(var i = 0; i < allItems.length; i++){
+    var item = allItems[i];
+    var dropItemRequest = userItemsService.dropUserItem(item.itemId, item.quantity, false);
+
+    if(dropItemRequest.status !== 200){
+      bridge.logError("Failed to drop item " + item.itemId);
+    }
+  }
+  
+  return response;
+}
+
+function GetAllUserItems()
+{
+    var page = 1;
+    var accumulatedItems = [];
+    var moreAfter = true;
+
+    while (moreAfter)
+    {
+        var context = {
+            "pagination": {
+                "rowsPerPage": 50,
+                "pageNumber": page
+            }
+        };
+
+        var response = userItemsService.getUserItemsPage(context, false);
+
+        if (response.status !== 200)
+        {
+            bridge.logError("Failed to get user items. Status: " + response.status);
+            break;
+        }
+
+        var results = response.data.results;
+
+        if (results.items && results.items.length > 0)
+        {
+            for (var i = 0; i < results.items.length; i++)
+            {
+                accumulatedItems.push(results.items[i]);
+            }
+        }
+
+        moreAfter = results.moreAfter === true;
+        page++;
+    }
+
+    return accumulatedItems;
+}
+
+main();

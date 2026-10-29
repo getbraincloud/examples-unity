@@ -68,3 +68,9 @@ ExportedObj/
 # Force include all files in Assets/FishNet
 !Assets/FishNet/
 !Assets/FishNet/**
+
+# ...except dotnet build output from the vendored LiteNetLib.csproj - if an IDE
+# builds it in place, Unity picks up the per-TFM obj/ AssemblyInfo.cs files as
+# source and fails with CS0579 duplicate attribute errors.
+Assets/FishNet/**/obj/
+Assets/FishNet/**/bin/

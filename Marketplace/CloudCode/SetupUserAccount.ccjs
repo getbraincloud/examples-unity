@@ -1,0 +1,151 @@
+"use strict";
+// SetupUserAccount (VSCode created Script) 
+// This initializes a users account with the freebie items if the user does not have them already
+
+var hasGemsFreebie = false;
+var hasCoinsFreebie = false;
+var hasStarsFreebie = false;
+var hasGreyShirt = false;
+
+function main() {
+  var response = {
+    Gained_GemsFreebie: false,
+    Gained_CoinsFreebie: false,
+    Gained_StarsFreebie: false,
+    Gained_GreyShirt: false,
+  };
+
+  bridge.logDebugJson("Script Inputs", data);
+
+  //We're getting the first page since this is a function that will run on a new account creation, 
+  //otherwise we'd have to account for the potential of there being multiple pages of items
+  var userItemsService = bridge.getUserItemsServiceProxy();
+
+  var searchContext = {
+    "pagination": {
+      "rowsPerPage": 50,
+      "pageNumber": 1
+    }
+  }
+
+  var userItems = userItemsService.getUserItemsPage(searchContext, true);
+  processItems(userItems);
+
+  bridge.getPlayerStateServiceProxy().updateAttributes({ "bought200stars": "false" }, false);
+
+  // Promotion eligibility is a snapshot that's normally recalculated during
+  // authentication, but for a brand-new account that recalculation hasn't caught up
+  // yet by the time this script runs mid-auth. Force it now so the very first
+  // FetchStoreItems call after account creation already shows correct promo pricing,
+  // instead of requiring the user to relaunch the app.
+  bridge.getAppStoreServiceProxy().refreshPromotions();
+
+  if(!hasGemsFreebie){
+    //Give gems freebie if we don't have it
+    var giveGems = userItemsService.awardUserItem("Freebie_Gems",1,false);
+    if(giveGems.status !== 200){
+      response.error = true;
+      response.message = "Failed to give Gems freebie";
+      return response;
+    }else{
+      response.Gained_GemsFreebie = true;
+    }
+  }
+
+  if(!hasCoinsFreebie){
+    //Give coins freebie if we don't have it
+    var giveCoins = userItemsService.awardUserItem("Freebie_Coins",1,false);
+    if(giveCoins.status !== 200){
+      response.error = true;
+      response.message = "Failed to give Coins freebie";
+      return response;
+    }else{
+      response.Gained_CoinsFreebie = true;
+    }
+  }
+
+  if(!hasStarsFreebie){
+    //Give stars freebie if we don't have it
+    var giveStars = userItemsService.awardUserItem("Freebie_Stars",1,false);
+    if(giveStars.status !== 200){
+      response.error = true;
+      response.message = "Failed to give Stars freebie";
+      return response;
+    }else{
+      response.Gained_StarsFreebie = true;
+    }
+  }
+  var greyShirtItemId = "none";
+  if(!hasGreyShirt){
+    //Give grey shirt if we don't have it
+    var giveShirt = userItemsService.awardUserItem("shirt_grey",1,false);
+    if(giveShirt.status !== 200){
+      response.error = true;
+      response.message = "Failed to give Grey Shirt freebie";
+      return response;
+    }else{
+      response.Gained_GreyShirt = true;
+      bridge.logDebugJson("Shirt response", giveShirt.data);
+      var itemKeys = Object.keys(giveShirt.data.items);
+      greyShirtItemId = itemKeys.length > 0 ? giveShirt.data.items[itemKeys[0]].itemId : "none";
+    }
+  }
+
+  //Set up user entity for equipped items if it doesn't already exist, this is used for the avatar shop to determine what items the user has equipped
+
+  var entityType = "EquippedItems";
+
+  var entityData = {
+    "AvatarFrameSlot":"none",
+    "ShirtSlot":greyShirtItemId,
+  }
+
+  var acl = {
+    "other": 1
+  }
+
+  var entityService = bridge.getEntityServiceProxy();
+
+  var foundEntity = entityService.getEntitiesByType(entityType);
+
+  var entityExists = false;
+  if(foundEntity.status == 200){
+    if(foundEntity.data.entities.length > 0){
+      //entity already exists, no need to create it
+      entityExists = true;
+    }
+  }
+
+  if(!entityExists){
+    var createEntity = entityService.createEntity(entityType, entityData, acl);
+  }
+
+  return response;
+}
+
+function processItems(itemsResult){
+  var allItems = itemsResult.data.results.items;
+  var page = itemsResult.data.results.page;
+  var total = itemsResult.data.results.count;
+
+  for(var i = 0; i < total; i++){
+    //loop through each item to check if our freebies exist
+    var item = allItems[i];
+    var itemDefId = item.defId;
+
+    if(itemDefId == "Freebie_Coins"){
+      hasCoinsFreebie = true;
+    }
+    if(itemDefId == "Freebie_Gems"){
+      hasGemsFreebie = true;
+    }
+    if(itemDefId == "Freebie_Stars"){
+      hasStarsFreebie = true;
+    }
+    if(itemDefId == "shirt_grey"){
+      hasGreyShirt = true;
+    }
+  }
+}
+
+main();

@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "com.bitheads.braincloud": {
-      "version": "https://github.com/getbraincloud/braincloud-unity-package.git#release/6.0",
+      "version": "https://github.com/getbraincloud/braincloud-unity-package.git#release/6.1",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "af51acb48ead8b76dc35b9b0f87b8a555d5cc777"
+      "hash": "57244b974ab4624ac0df990091c07739090bcdb4"
     },
     "com.google.external-dependency-manager": {
       "version": "https://github.com/googlesamples/unity-jar-resolver.git?path=upm",
@@ -60,6 +60,16 @@
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
       }
+    },
+    "com.unity.toolchain.macos-arm64-linux-x86_64": {
+      "version": "2.0.5",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot": "2.0.10",
+        "com.unity.sysroot.linux-x86_64": "2.0.9"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.toolchain.win-x86_64-linux-x86_64": {
       "version": "2.0.11",

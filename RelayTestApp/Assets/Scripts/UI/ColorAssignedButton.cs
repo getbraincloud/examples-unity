@@ -16,5 +16,6 @@ public class ColorAssignedButton : MonoBehaviour
     public void ChangeColor()
     {
         GameManager.Instance.UpdateLocalColorChange(ButtonColor);
+        ColorPopupController.Instance?.Hide();
     }
 }

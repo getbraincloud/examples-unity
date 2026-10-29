@@ -1,0 +1,147 @@
+"use strict";
+// CollectXpGeneratorXP - awards any XP accrued from the xp_generator status effect
+// (4 XP/sec for 90s once activated) since it was last collected. Computing this
+// server-side from persisted timestamps means it correctly covers time the user
+// spent offline, and the client can't forge the awarded amount.
+
+var XP_PER_SECOND = 4;
+
+function main() {
+  var response = { xpAwarded: 0, isActive: false };
+
+  var playerStateService = bridge.getPlayerStateServiceProxy();
+
+  var attrResult = playerStateService.getAttributes();
+  var attributes = (attrResult.status === 200 && attrResult.data && attrResult.data.attributes) || {};
+
+  var activeUntil = attributes.xpGenActiveUntil ? parseInt(attributes.xpGenActiveUntil, 10) : 0;
+
+  if (!activeUntil) {
+    // xp_generator has never been activated - nothing to collect.
+    return response;
+  }
+
+  var now = Date.now();
+  var lastCollected = attributes.xpGenLastCollectedAt ? parseInt(attributes.xpGenLastCollectedAt, 10) : activeUntil;
+
+  var windowEnd = Math.min(now, activeUntil);
+  var elapsedMs = windowEnd - lastCollected;
+
+  response.isActive = now < activeUntil;
+  response.activeUntil = activeUntil;
+
+  if (elapsedMs <= 0) {
+    return response;
+  }
+
+  // Only award for whole elapsed seconds, carrying any leftover fraction of a second
+  // over to the next collection instead of losing it.
+  var elapsedSeconds = Math.floor(elapsedMs / 1000);
+  var xpToAward = elapsedSeconds * XP_PER_SECOND;
+
+  if (xpToAward <= 0) {
+    return response;
+  }
+
+  var newLastCollected = lastCollected + elapsedSeconds * 1000;
+
+  playerStateService.updateAttributes({
+    "xpGenLastCollectedAt": String(newLastCollected)
+  }, false);
+
+  var playerStatsService = bridge.getPlayerStatisticsServiceProxy();
+  var gamificationService = bridge.getGamificationServiceProxy();
+
+  var xpAward = playerStatsService.incrementExperiencePoints(xpToAward);
+
+  response.xpAwarded = xpToAward;
+  response.experiencePoints = xpAward.data.experiencePoints;
+  response.experienceLevel = xpAward.data.experienceLevel;
+  response.xpCapped = xpAward.data.xpCapped;
+  response.levelUp = false;
+
+  if (xpAward.data.rewardDetails && !isEmptyObject(xpAward.data.rewardDetails)) {
+    response.levelUp = true;
+  }
+
+  var xpMetaData = gamificationService.readXpLevelsMetadata();
+
+  if (xpMetaData.data.xp_levels && xpMetaData.data.xp_levels.length !== 0) {
+    var xpResults = calculateXpProgress(xpAward.data.experiencePoints, xpMetaData.data.xp_levels);
+
+    response.adjustedXp = xpResults.adjustedXp;
+    response.xpToNextLevel = xpResults.xpToNextLevel;
+    response.statusTitle = xpResults.statusTitle;
+  }
+
+  return response;
+}
+
+function calculateXpProgress(totalXp, xpLevels)
+{
+    if (!xpLevels || !(xpLevels instanceof Array) || xpLevels.length === 0)
+    {
+        bridge.logError("Invalid xpLevels data");
+        return null;
+    }
+
+    var currentLevel = 1;
+    var currentLevelXpRequired = 0;
+    var nextLevelXpRequired = null;
+    var statusTitle = "";
+
+    // Determine current level based on totalXp
+    for (var i = 0; i < xpLevels.length; i++)
+    {
+        var levelData = xpLevels[i];
+
+        if (totalXp >= levelData.experience)
+        {
+            currentLevel = levelData.level;
+            currentLevelXpRequired = levelData.experience;
+            statusTitle = levelData.statusTitle;
+
+            // Look ahead for next level
+            if (i + 1 < xpLevels.length)
+            {
+                nextLevelXpRequired = xpLevels[i + 1].experience;
+            }
+        }
+    }
+
+    var adjustedXp = totalXp - currentLevelXpRequired;
+    var xpToNextLevel = null;
+
+    if (nextLevelXpRequired != null)
+    {
+        xpToNextLevel = nextLevelXpRequired - currentLevelXpRequired;
+    }
+    else
+    {
+        // Player is at max level
+        xpToNextLevel = 0;
+    }
+
+    return {
+        "currentLevel": currentLevel,
+        "totalXp": totalXp,
+        "adjustedXp": adjustedXp,
+        "statusTitle": statusTitle,
+        "xpToNextLevel": xpToNextLevel,
+        "isMaxLevel": nextLevelXpRequired == null
+    };
+}
+
+function isEmptyObject(obj)
+{
+    for (var key in obj)
+    {
+        if (obj.hasOwnProperty(key))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+main();

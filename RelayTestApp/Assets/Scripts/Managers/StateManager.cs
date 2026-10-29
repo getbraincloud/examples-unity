@@ -14,7 +14,56 @@ using BrainCloud;
 ///     - Info about Server and Lobby
 /// </summary>
 
-public enum GameStates { SignIn, MainMenu, Lobby, Match, Connecting, Reconnecting }
+public enum GameStates { SignIn, MainMenu, Lobby, Match, Connecting, Reconnecting, MatchSummary }
+
+/// <summary>Match lifecycle phase (parity with cpp/react/Godot RelayTestApp clients).</summary>
+public enum MatchPhase { Running, ResultsBroadcast, Ended }
+
+/// <summary>One leaderboard period's before/after rank for a single board (points or coverage,
+/// lifetime or quarterly). Absent/not-improved means "no change" — matches the other RelayTestApp
+/// clients, which likewise only ever transmit a period when it actually improved.</summary>
+[Serializable]
+public class LeaderboardPeriodDelta
+{
+    public bool Improved;
+    public int RankBefore = -1;
+    public int RankAfter = -1;
+}
+
+/// <summary>One player's result for the round that just ended (rank/coverage, not yet the
+/// leaderboard delta — that arrives later, separately, as an LbResultEntry).</summary>
+[Serializable]
+public class MatchResultEntry
+{
+    public string ProfileId;
+    public string CxId;
+    public int ColorIndex;
+    public float CoveragePct;
+    public int Rank;
+    public int Beaten;
+}
+
+/// <summary>One player's PostMatchResults leaderboard deltas, across all 4 boards. Ready=true
+/// as soon as this exists at all — even if none of the 4 periods actually improved, so the
+/// Match Summary screen can tell "no change" apart from "still waiting."</summary>
+[Serializable]
+public class ChatMessage
+{
+    public string MsgId;
+    public string FromCxId;
+    public string FromName;
+    public string Text;
+}
+
+[Serializable]
+public class LbResultEntry
+{
+    public bool Ready;
+    public LeaderboardPeriodDelta PointsLifetime = new LeaderboardPeriodDelta();
+    public LeaderboardPeriodDelta PointsQuarterly = new LeaderboardPeriodDelta();
+    public LeaderboardPeriodDelta CoverageLifetime = new LeaderboardPeriodDelta();
+    public LeaderboardPeriodDelta CoverageQuarterly = new LeaderboardPeriodDelta();
+}
 
 /// <summary>Splotch record kept for host-to-client JIP canvas sync.</summary>
 [Serializable]
@@ -25,6 +74,11 @@ public struct SplotchRecord
     public TeamCodes TeamCode;
     public TeamCodes InstigatorCode;
     public long StartTimeMs;
+    // Painter's cxId, for Coverage attribution (so shared colours don't merge). Empty for
+    // JIP-synced splotches; Coverage falls back to ColorIndex there.
+    public string SenderCxId;
+    // Chosen once by the sender, carried on the wire — never re-rolled on receive/sync.
+    public float Angle;
 }
 
 public class StateManager : MonoBehaviour
@@ -47,10 +101,40 @@ public class StateManager : MonoBehaviour
     [SerializeField]
     public Server CurrentServer;
     internal RelayConnectionType Protocol { get; set; }
+    // WSS = WEBSOCKET + this flag (RelayConnectOptions.ssl), not its own enum value.
+    internal bool UseSSL { get; set; }
 
     //Specific for loading and waiting
     public bool isReady;
     public bool isLoading;
+
+    // Match timer — fixed duration, host-authoritative, synced off one shared epoch.
+    public const long MATCH_DURATION_MS = 90000;
+    public MatchPhase CurrentMatchPhase = MatchPhase.Running;
+    public long MatchStartTimeMs = 0;
+
+    // Match result / leaderboard posting + rematch queue.
+    public const long RESULT_GRACE_MS = 3000;         // match_result -> EndMatch(), regardless of the script
+    public const long LB_RESULT_FALLBACK_MS = 8000;   // "Updating..." -> "unavailable" backstop
+    public const long MATCH_SUMMARY_REMATCH_MS = 45000;
+
+    // Keyed by profileId — survives CurrentLobby getting fully rebuilt on lobby events.
+    public Dictionary<string, MatchResultEntry> MatchResults = new Dictionary<string, MatchResultEntry>();
+    public Dictionary<string, LbResultEntry> LbResults = new Dictionary<string, LbResultEntry>();
+    // lb_result chunks that beat their match_result entry into existence.
+    public Dictionary<string, LbResultEntry> PendingLbResults = new Dictionary<string, LbResultEntry>();
+
+    // Local optimistic "queued for rematch" flag — the server-echoed list lags after END_MATCH.
+    public bool LocalWantsRematch = false;
+    public long MatchResultSentAtMs = 0;
+    public long MatchSummaryArrivalTimeMs = 0;
+
+    // Live in-match rank/coverage sidebar, broadcast ~1x/sec (separate from match_result).
+    public List<Coverage.Entry> LiveCoverage = new List<Coverage.Entry>();
+
+    // Chat history — kept here so it survives a chat panel being disabled/re-enabled.
+    public List<ChatMessage> GlobalChatHistory = new List<ChatMessage>();
+    public List<ChatMessage> LobbyChatHistory = new List<ChatMessage>();
 
     //Used to clean up objects when game is finished
     public List<GameObject> Splatters = new List<GameObject>();
@@ -118,6 +202,7 @@ public class StateManager : MonoBehaviour
         LoadingGameState.CancelNextState = true;
         ChangeState(GameStates.MainMenu);
         ResetData();
+        ClearMatchResultsData();
     }
 
     public void LeaveToMainMenu()
@@ -134,6 +219,7 @@ public class StateManager : MonoBehaviour
         BrainCloudManager.Instance.LeaveLobby();
         ChangeState(GameStates.MainMenu);
         ResetData();
+        ClearMatchResultsData();
         yield return new WaitForFixedUpdate();
     }
 
@@ -141,6 +227,7 @@ public class StateManager : MonoBehaviour
     {
         GameManager.Instance.LobbyIdText.enabled = false;
         ResetData();
+        ClearMatchResultsData();
         ChangeState(GameStates.SignIn);
     }
 
@@ -161,9 +248,23 @@ public class StateManager : MonoBehaviour
         PendingSyncSplotches.Clear();
         PendingSyncIsFirst = false;
         PendingClearSplatters = false;
+        CurrentMatchPhase = MatchPhase.Running;
+        MatchStartTimeMs = 0;
+        LiveCoverage.Clear();
         GameManager.Instance.EmptyCursorList();
         GameManager.Instance.CurrentUserInfo.IsAlive = false;
         GameManager.Instance.CurrentUserInfo.MousePosition = Vector2.zero;
+    }
+
+    // Kept out of ResetData() on purpose — clearing these there raced the Match Summary screen
+    // back to empty. Call only when actually leaving (main menu / sign-in), not into Summary.
+    public void ClearMatchResultsData()
+    {
+        MatchResults.Clear();
+        LbResults.Clear();
+        PendingLbResults.Clear();
+        LocalWantsRematch = false;
+        MatchResultSentAtMs = 0;
     }
 
     //Takes in the current Game state to then load into the next game state

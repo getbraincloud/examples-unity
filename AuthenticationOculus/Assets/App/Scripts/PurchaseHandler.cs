@@ -115,7 +115,7 @@ public class PurchaseHandler : MonoBehaviour
     {
         var item = Instantiate(IAPItemTemplate, IAPContent, false);
         item.InitializeIAPItem(product,
-                               (sku) => StartCoroutine(HandlePurchaseFlow(sku)));
+                               (sku) => StartCoroutine(HandlePurchaseFlow(product, sku)));
         item.gameObject.SetActive(true);
 
         IAPItems.Add(item);
@@ -373,23 +373,12 @@ public class PurchaseHandler : MonoBehaviour
         yield return new WaitUntil(() => isSuccess);
         yield return new WaitForFixedUpdate();
 
-        // Finally we will go through our purchases, cache the payloads, then verify purchases
+        // Finally we will go through our purchases and verify them
         bool verifyLingering = false;
         foreach (BCProduct product in cachedPurchases.Keys)
         {
-            isSuccess = false;
             verifyLingering = verifyLingering || product.IAPProductType == ProductType.DURABLE
                                               || product.IAPProductType == ProductType.SUBSCRIPTION;
-
-            BC.AppStoreService
-              .CachePurchasePayloadContext("metaHorizon",
-                                           product.IAPSku,
-                                           product.payload,
-                                           (_, __) => isSuccess = true,
-                                           OnBrainCloudFailure);
-
-            yield return new WaitUntil(() => isSuccess);
-            yield return new WaitForFixedUpdate();
 
             isSuccess = false;
             BC.AppStoreService
@@ -478,14 +467,25 @@ public class PurchaseHandler : MonoBehaviour
         yield return new WaitForFixedUpdate();
     }
 
-    private IEnumerator HandlePurchaseFlow(string sku)
+    private IEnumerator HandlePurchaseFlow(BCProduct product, string sku)
     {
         MainCanvas.interactable = false;
 
         yield return new WaitForFixedUpdate();
 
-        // Launch the Meta Horizon purchase flow and wait for its OnComplete
+        // Cache payload context before we make our purchase
         bool isSuccess = false;
+        BC.AppStoreService.CachePurchasePayloadContext("metaHorizon",
+                                                       product.IAPSku,
+                                                       product.payload,
+                                                       (_, __) => isSuccess = true,
+                                                       OnBrainCloudFailure);
+
+        yield return new WaitUntil(() => isSuccess);
+        yield return new WaitForFixedUpdate();
+
+        // Launch the Meta Horizon purchase flow and wait for its OnComplete
+        isSuccess = false;
         IAP.LaunchCheckoutFlow(sku).OnComplete((msg) =>
         {
             if (msg.IsError)

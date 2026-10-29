@@ -1,5 +1,8 @@
 using UnityEngine;
 
+// Damage is dealt in code by TroopAI while attacking (reliable). This component now only
+// applies knockback when the weapon collider strikes an enemy troop. DamageAmount is still
+// read by TroopAI to set its per-hit melee damage.
 public class MeleeWeapon : MonoBehaviour
 {
     public int DamageAmount;
@@ -8,22 +11,15 @@ public class MeleeWeapon : MonoBehaviour
 
     private void Awake()
     {
-        _myTroop = transform.parent.GetComponent<TroopAI>();
+        _myTroop = GetComponentInParent<TroopAI>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!gameObject.activeSelf) return;
-        
+        if (!gameObject.activeSelf || _myTroop == null) return;
+
         var troop = other.GetComponent<TroopAI>();
-        
-        if (troop != null && troop.TeamID == _myTroop.TeamID) return;
-        
-        var damageable = other.GetComponent<BaseHealthBehavior>();
-        if (damageable != null)
-        {
-            damageable.Damage(DamageAmount);
-        }
+        if (troop == null || troop.TeamID == _myTroop.TeamID) return;
 
         if (other.tag.Equals(_troopTag))
         {

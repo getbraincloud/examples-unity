@@ -1,0 +1,165 @@
+/**
+ * Cloud Code Script: verifyGoogleSubscription
+ *
+ * Verifies the current user's "no_ads" Google Play subscription by:
+ *   1. Exchanging a stored OAuth2 refresh token for a short-lived access token
+ *   2. Calling the Google Play Developer API to check the subscription status
+ *
+ * No external services, no crypto, no Java signing required.
+ *
+ * ── PRE-REQUISITES ────────────────────────────────────────────────────────
+ * 1. In Google Cloud Console → APIs & Credentials, create an OAuth 2.0
+ *    Client ID (type: Web application). Add this as an authorized redirect URI:
+ *      https://developers.google.com/oauthplayground
+ *
+ * 2. Use the OAuth2 Playground (https://developers.google.com/oauthplayground)
+ *    to get a refresh token for scope:
+ *      https://www.googleapis.com/auth/androidpublisher
+ *    (Sign in with the Google account that owns your Play Console.)
+ *
+ * 3. In brainCloud → Design → Cloud Code → Global Properties, add:
+ *      oauthClientId      → your OAuth2 client ID
+ *      oauthClientSecret  → your OAuth2 client secret
+ *      oauthRefreshToken  → the refresh token from step 2
+ *
+ * 4. In brainCloud → Design → Cloud Code → Web Services, create:
+ *      Name / code : googleApis
+ *      Base URL    : https://www.googleapis.com
+ *
+ * 5. At purchase-confirm time, store the Google purchase token on the user:
+ *      bridge.getPlayerStateServiceProxy().updateAttributes(
+ *        { "googlePurchaseToken_no_ads": "<token>" }, false
+ *      );
+ *
+ * ── SCRIPT PARAMETERS ─────────────────────────────────────────────────────
+ * {
+ *   "purchaseToken": "optional – if omitted, read from user attributes"
+ * }
+ *
+ * ── RETURN VALUE ──────────────────────────────────────────────────────────
+ * {
+ *   "isActive"     : true | false,
+ *   "expiryTimeMs" : "1234567890000",
+ *   "autoRenewing" : true | false,
+ *   "paymentState" : 1
+ * }
+ */
+
+var PACKAGE_NAME     = "com.brainCloud.Marketplace"; 
+var SUBSCRIPTION_ID  = "no_ads";
+var HTTP_SERVICE     = "googleApis";
+
+function main() {
+// ── READ GLOBAL PROPERTIES ─────────────────────────────────────────────────
+var propsResult = bridge.getGlobalAppServiceProxy()
+  .readSelectedProperties(["oauthClientId", "oauthClientSecret", "oauthRefreshToken"]);
+
+
+
+if (propsResult.status !== 200 || !propsResult.data) {
+  exitError(500, "Could not read OAuth global properties.");
+}
+
+var clientId     = bridge.getGlobalProperty("oauthClientId");
+var clientSecret = bridge.getGlobalProperty("oauthClientSecret");
+var refreshToken = bridge.getGlobalProperty("oauthRefreshToken");
+
+var response = {};
+response.error = false;
+
+if (!clientId || !clientSecret || !refreshToken) {
+  response.error = true;
+  response.message = "One or more OAuth global properties are missing.";
+  return response;
+}
+
+// ── RESOLVE PURCHASE TOKEN ─────────────────────────────────────────────────
+var purchaseToken = data.purchaseToken;
+
+if (!purchaseToken) {
+  var attrResult = bridge.getPlayerStateServiceProxy().getAttributes();
+  if (attrResult.status === 200 && attrResult.data && attrResult.data.attributes) {
+    purchaseToken = attrResult.data.attributes["googlePurchaseToken_no_ads"] || null;
+  }
+}
+
+if (!purchaseToken) {
+  response.error = true;
+  response.message = "No purchase token found. Pass 'purchaseToken' as a script parameter " +
+    "or store it in the user attribute 'googlePurchaseToken_no_ads'.";
+  return response;
+}
+
+// ── STEP 1: EXCHANGE REFRESH TOKEN FOR ACCESS TOKEN ───────────────────────
+var http = bridge.getHttpClientServiceProxy();
+
+var tokenBodyJson = {
+  "client_id" : clientId,
+  "client_secret" : clientSecret,
+  "refresh_token" : refreshToken,
+  "grant_type" :"refresh_token"
+}
+
+var tokenResult = http.postTextResponseJson(HTTP_SERVICE, "token", {}, { "Content-Type": "application/x-www-form-urlencoded", "grant_type": "refresh_token" }, JSON.stringify(tokenBodyJson));
+
+bridge.logDebugJson("Token response", tokenResult);
+
+if (tokenResult.status !== 200) {
+  exitError(502, "Failed to get access token: " + JSON.stringify(tokenResult.data));
+}
+
+var accessToken = tokenResult.data.json.access_token;
+
+if (!accessToken) {
+  exitError(502, "Access token missing from Google response.");
+}
+
+// ── STEP 2: CALL GOOGLE PLAY DEVELOPER API ────────────────────────────────
+var apiUrl =
+  "androidpublisher/v3/applications/" +
+  PACKAGE_NAME + "/purchases/subscriptions/" +
+  SUBSCRIPTION_ID + "/tokens/" +
+  purchaseToken;
+
+
+var subResult = http.getResponseJson("androidApis", 
+  apiUrl, {},
+  { "Authorization": "Bearer " + accessToken }
+);
+
+if (subResult.status !== 200) {
+  exitError(subResult.status,
+    "Google Play API error: " + JSON.stringify(subResult.data));
+}
+
+bridge.logDebugJson("Subscription response", subResult);
+
+var sub = subResult.data.json;
+
+// ── STEP 3: DETERMINE ACTIVE STATUS ───────────────────────────────────────
+var nowMs      = Date.now();
+var expiryMs   = parseInt(sub.expiryTimeMillis, 10);
+var notExpired = expiryMs > nowMs;
+// paymentState: 1 = received, 2 = free trial
+var paymentOk  = (sub.paymentState === 1 || sub.paymentState === 2);
+var isActive   = notExpired && paymentOk;
+
+// ── CACHE RESULT ON THE USER ───────────────────────────────────────────────
+bridge.getPlayerStateServiceProxy().updateAttributes(
+  { "no_ads_active": isActive ? "true" : "false" },
+  false
+);
+
+response =
+{
+  isActive     : isActive,
+  expiryTimeMs : sub.expiryTimeMillis,
+  autoRenewing : sub.autoRenewing === true,
+  paymentState : sub.paymentState,
+  error       : false
+}
+
+return response;
+}
+
+main();
