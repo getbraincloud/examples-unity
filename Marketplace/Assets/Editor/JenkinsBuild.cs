@@ -44,7 +44,7 @@ public class JenkinsBuild
     public static void BuildAndroid()
     {
         var args = FindArgs();
-        string fullPathAndName = args.targetDir + args.appName;
+        string fullPathAndName = args.targetDir + args.appName + (EditorUserBuildSettings.buildAppBundle ? ".aab" : ".apk");
         BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
     }
 

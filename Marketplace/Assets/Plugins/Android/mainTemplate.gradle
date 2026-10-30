@@ -4,11 +4,13 @@ apply from: '../shared/keepUnitySymbols.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // Aligns kotlin-stdlib-jdk7/jdk8 with the stdlib the billing library pulls in, avoiding duplicate classes.
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
 **DEPS**}
 
 android {
     ndkVersion "**NDKVERSION**"
-    namespace "**NAMESPACE**"
+    namespace "com.unity3d.player"
     ndkPath "**NDKPATH**"
 
     compileSdk **APIVERSION**
