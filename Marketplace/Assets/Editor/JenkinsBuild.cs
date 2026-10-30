@@ -45,7 +45,36 @@ public class JenkinsBuild
     {
         var args = FindArgs();
         string fullPathAndName = args.targetDir + args.appName + (EditorUserBuildSettings.buildAppBundle ? ".aab" : ".apk");
-        BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
+
+        // Signing info comes from the environment so no keystore path or password is saved in the project.
+        string keystore = System.Environment.GetEnvironmentVariable("ANDROID_KEYSTORE_PATH");
+        if (string.IsNullOrEmpty(keystore))
+        {
+            BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
+            return;
+        }
+
+        bool prevUseCustom = PlayerSettings.Android.useCustomKeystore;
+        string prevKeystore = PlayerSettings.Android.keystoreName;
+        string prevAlias = PlayerSettings.Android.keyaliasName;
+        try
+        {
+            PlayerSettings.Android.useCustomKeystore = true;
+            PlayerSettings.Android.keystoreName = keystore;
+            PlayerSettings.Android.keystorePass = System.Environment.GetEnvironmentVariable("ANDROID_KEYSTORE_PASS");
+            PlayerSettings.Android.keyaliasName = System.Environment.GetEnvironmentVariable("ANDROID_KEYALIAS_NAME");
+            PlayerSettings.Android.keyaliasPass = System.Environment.GetEnvironmentVariable("ANDROID_KEYALIAS_PASS");
+            BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
+        }
+        finally
+        {
+            PlayerSettings.Android.useCustomKeystore = prevUseCustom;
+            PlayerSettings.Android.keystoreName = prevKeystore;
+            PlayerSettings.Android.keystorePass = string.Empty;
+            PlayerSettings.Android.keyaliasName = prevAlias;
+            PlayerSettings.Android.keyaliasPass = string.Empty;
+            AssetDatabase.SaveAssets();
+        }
     }
 
     // WIP, doesn't work on Mac but works fine in Windows..
