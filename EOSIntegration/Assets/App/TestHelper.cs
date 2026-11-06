@@ -35,6 +35,8 @@ public class TestHelper : MonoBehaviour
     [SerializeField] private TMP_Text AppInfoLabel = default;
 
     [Header("EOS")]
+    [SerializeField] private bool AuthenticateWithConnectID = false;
+    [SerializeField] private bool SkipPurchases = true;
     [SerializeField] private string TestAudienceItemID = string.Empty;
 
 #if UNITY_EDITOR
@@ -151,7 +153,10 @@ public class TestHelper : MonoBehaviour
 
         yield return EOSAuthenticationTest();
 
-        yield return EOSEntitlementTest();
+        if (!SkipPurchases)
+        {
+            yield return EOSEntitlementTest();
+        }
 
         //yield return EOSOwnershipTest(); // We're not testing for Ownership so this is commented out
     }
@@ -305,7 +310,6 @@ public class TestHelper : MonoBehaviour
             }
 
             EpicAccountID = info.LocalUserId;
-
         });
 
         yield return new WaitUntil(() => FailureOccurred || EpicAccountID != null,
@@ -480,7 +484,9 @@ public class TestHelper : MonoBehaviour
         FailureReason = string.Empty;
 
         string response = string.Empty;
-        BC.AuthenticateEpicGames(EpicAccountID.ToString(), AuthIDToken, true,
+        BC.AuthenticateEpicGames(AuthenticateWithConnectID ? ProductUserID.ToString() : EpicAccountID.ToString(),
+                                 AuthenticateWithConnectID ? ConnectIDToken : AuthIDToken,
+                                 true,
             (jsonResponse, cbObject) =>
             {
                 response = jsonResponse;
