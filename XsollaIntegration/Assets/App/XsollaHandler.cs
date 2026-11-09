@@ -144,7 +144,7 @@ public class XsollaHandler : MonoBehaviour
     {
         BCWrapper = GetComponent<BrainCloudWrapper>();
 
-        UpdateBCIds("---", "---");
+        UpdateBCIds(string.Empty, string.Empty);
 
         OnClosePopUpButton();
         OnUserControlsToggle(UserControlsToggle.isOn);
@@ -284,8 +284,19 @@ public class XsollaHandler : MonoBehaviour
 
     private void UpdateBCIds(string profileId, string anonymousId)
     {
-        ProfileIdText.text = $"ProfileId: {profileId}";
-        AnonymousIdText.text = $"AnonymousId: {anonymousId}";
+        bool validIds = Guid.TryParseExact(profileId, "D", out Guid _) &&
+                        Guid.TryParseExact(anonymousId, "D", out Guid _);
+
+        if (validIds)
+        {
+            ProfileIdText.text = $"ProfileId: {profileId}";
+            AnonymousIdText.text = $"AnonymousId: {anonymousId}";
+        }
+        else
+        {
+            ProfileIdText.text = "ProfileId: ---";
+            AnonymousIdText.text = "AnonymousId: ---";
+        }
     }
 
     private void ShowCurrencyControls()
@@ -499,7 +510,6 @@ public class XsollaHandler : MonoBehaviour
             if (FailureOccurred)
             {
                 Debug.LogError(FailureReason);
-                //LockUI = false;
                 return true;
             }
 

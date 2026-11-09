@@ -265,6 +265,12 @@ public class EOSHandler : MonoBehaviour
             CatalogItems = null;
         }
 
+        if (EntitlementTransaction.entitlementIds != null)
+        {
+            EntitlementTransaction.entitlementIds.Clear();
+            EntitlementTransaction.entitlementIds = null;
+        }
+
         BCWrapper = null;
     }
 
