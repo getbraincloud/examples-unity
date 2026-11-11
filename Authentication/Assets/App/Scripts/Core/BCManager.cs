@@ -30,6 +30,15 @@ public class BCManager : MonoBehaviour
 {
     private static bool _isInstanced = false; // To keep track if BCManager has been Instantiated or not
 
+#if true && UNITY_EDITOR
+    [Header("EOS AuthInterface Editor Testing")]
+    [SerializeField] private string DevAuthToolHostName = string.Empty;
+    [SerializeField] private string DevAuthToolCredentialName = string.Empty;
+
+    public static string EOSDevAuthToolHostName => GameObject.GetComponent<BCManager>().DevAuthToolHostName;
+    public static string EOSDevAuthToolCredentialName => GameObject.GetComponent<BCManager>().DevAuthToolCredentialName;
+#endif
+
     #region Wrapper Properties
 
     /// <summary>
@@ -140,6 +149,8 @@ public class BCManager : MonoBehaviour
     public static BrainCloudRelay RelayService => Wrapper != null ? Wrapper.RelayService : null;
 
     public static BrainCloudBlockchain BlockchainService => Wrapper != null ? Client.Blockchain : null;
+
+    public static BrainCloudCampaign CampaignService => Wrapper != null ? Client.Campaign : null;
 
     #endregion
 
