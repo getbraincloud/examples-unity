@@ -22,10 +22,6 @@ using Google;
 using AppleAuth;
 #endif
 
-#if EPICGAMES_SDK
-using PlayEveryWare.EpicOnlineServices;
-#endif
-
 /// <summary>
 /// A login panel to hold buttons for multiple external authentication methods.
 /// </summary>
@@ -206,7 +202,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #endif
 
 #if EPICGAMES_SDK
-        BCManager.GameObject.AddComponent<EOSManager>();
+        BCManager.GameObject.AddComponent<PlayEveryWare.EpicOnlineServices.EOSManager>();
 #endif
     }
 
