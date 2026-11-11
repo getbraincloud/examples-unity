@@ -30,7 +30,7 @@ public class BCManager : MonoBehaviour
 {
     private static bool _isInstanced = false; // To keep track if BCManager has been Instantiated or not
 
-#if true && UNITY_EDITOR
+#if EPICGAMES_SDK && UNITY_EDITOR
     [Header("EOS AuthInterface Editor Testing")]
     [SerializeField] private string DevAuthToolHostName = string.Empty;
     [SerializeField] private string DevAuthToolCredentialName = string.Empty;

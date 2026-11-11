@@ -22,7 +22,7 @@ using Google;
 using AppleAuth;
 #endif
 
-#if true
+#if EPICGAMES_SDK
 using PlayEveryWare.EpicOnlineServices;
 #endif
 
@@ -92,7 +92,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #if STEAMWORKS_NET && UNITY_STANDALONE
             AuthenticationType.Steam.ToString(),
 #endif
-#if true && UNITY_STANDALONE
+#if EPICGAMES_SDK && UNITY_STANDALONE
             AuthenticationType.EpicGames.ToString(),
 #endif
         };
@@ -205,7 +205,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
 #endif
 
-#if true
+#if EPICGAMES_SDK
         BCManager.GameObject.AddComponent<EOSManager>();
 #endif
     }
@@ -321,7 +321,7 @@ public class ExternalAuthPanel : ContentUIBehaviour
         }
         else if (type == AuthenticationType.EpicGames)
         {
-#if true
+#if EPICGAMES_SDK
             UserHandler.AuthenticateEpicGames(true,
                                               OnSuccess("Authentication Success", OnAuthenticationSuccess),
                                               OnFailure("Authentication Failed", OnAuthenticationFailure));

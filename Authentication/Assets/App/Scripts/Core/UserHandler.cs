@@ -30,7 +30,7 @@ using GooglePlayGames.BasicApi;
 using Google;
 #endif
 
-#if true
+#if EPICGAMES_SDK
 using Epic.OnlineServices;
 using PlayEveryWare.EpicOnlineServices;
 using AuthCopyIdTokenOptions = Epic.OnlineServices.Auth.CopyIdTokenOptions;
@@ -475,7 +475,7 @@ public static class UserHandler
     }
 #endif
 
-#if true
+#if EPICGAMES_SDK
     /// <summary>
     /// Authenticate the user using the Epic Online Service AuthInterface.
     /// </summary>
