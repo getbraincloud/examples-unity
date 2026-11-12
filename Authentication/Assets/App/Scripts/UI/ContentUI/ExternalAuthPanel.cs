@@ -88,6 +88,9 @@ public class ExternalAuthPanel : ContentUIBehaviour
 #if STEAMWORKS_NET && UNITY_STANDALONE
             AuthenticationType.Steam.ToString(),
 #endif
+#if EPICGAMES_SDK && UNITY_STANDALONE
+            AuthenticationType.EpicGames.ToString(),
+#endif
         };
 
         authButtons = new List<ButtonContent>();
@@ -197,6 +200,10 @@ public class ExternalAuthPanel : ContentUIBehaviour
             SteamUtils.SetupSteamManager();
         }
 #endif
+
+#if EPICGAMES_SDK
+        BCManager.GameObject.AddComponent<PlayEveryWare.EpicOnlineServices.EOSManager>();
+#endif
     }
 
 #if FACEBOOK_SDK
@@ -247,24 +254,6 @@ public class ExternalAuthPanel : ContentUIBehaviour
                                                     OnFailure("Authentication Failed", OnAuthenticationFailure));
         }
 #endif
-    }
-#endif
-
-#if STEAMWORKS_NET
-    private void HandleSteamAuthenticationButton()
-    {
-        void onSteamAuthTicketReceived(string ticket)
-        {
-            Debug.Log($"Steam Auth Ticket: {ticket}");
-
-            string userSteamId = SteamUtils.GetSteamID().ToString();
-
-            UserHandler.AuthenticateSteam(userSteamId, ticket, true,
-                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
-                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
-        }
-
-        SteamUtils.GetSteamAuthTicket(onSteamAuthTicketReceived);
     }
 #endif
 
@@ -320,7 +309,18 @@ public class ExternalAuthPanel : ContentUIBehaviour
         else if (type == AuthenticationType.Steam)
         {
 #if STEAMWORKS_NET
-            HandleSteamAuthenticationButton();
+            UserHandler.AuthenticateSteam(true,
+                                          OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                          OnFailure("Authentication Failed", OnAuthenticationFailure));
+            return;
+#endif
+        }
+        else if (type == AuthenticationType.EpicGames)
+        {
+#if EPICGAMES_SDK
+            UserHandler.AuthenticateEpicGames(true,
+                                              OnSuccess("Authentication Success", OnAuthenticationSuccess),
+                                              OnFailure("Authentication Failed", OnAuthenticationFailure));
             return;
 #endif
         }

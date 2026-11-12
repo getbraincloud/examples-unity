@@ -35,7 +35,6 @@ RectTransform:
   m_Children:
   - {fileID: 8611135998465170980}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -59,7 +58,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -135,6 +136,7 @@ MonoBehaviour:
   ButtonTemplate: {fileID: 6143870348393929812, guid: ebc28ece934ca124088033db86cd5334, type: 3}
   AuthItems:
   - {fileID: 11400000, guid: 3ee024f80eac53e43a2d79d53482ea49, type: 2}
+  - {fileID: 11400000, guid: 51ccba24533755043bc04e0ba91757af, type: 2}
   - {fileID: 11400000, guid: 46296b713a649e849b178f74501233fa, type: 2}
   - {fileID: 11400000, guid: 5d793362a85f9d341b5aa344c6d7a861, type: 2}
   - {fileID: 11400000, guid: 98338f7b33f5c9143a31b2cc4bef2cd4, type: 2}
@@ -154,6 +156,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 131844596949435054}
     m_Modifications:
     - target: {fileID: 5432071203236653233, guid: f2f017c2efd01714e8e24c9cdc1132b0, type: 3}
@@ -163,6 +166,10 @@ PrefabInstance:
     - target: {fileID: 8526582274026182565, guid: f2f017c2efd01714e8e24c9cdc1132b0, type: 3}
       propertyPath: m_text
       value: Or Log In via
+      objectReference: {fileID: 0}
+    - target: {fileID: 8526582274026182565, guid: f2f017c2efd01714e8e24c9cdc1132b0, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 8526582274026182566, guid: f2f017c2efd01714e8e24c9cdc1132b0, type: 3}
       propertyPath: m_Pivot.x
@@ -253,6 +260,9 @@ PrefabInstance:
       value: TextHeader
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f2f017c2efd01714e8e24c9cdc1132b0, type: 3}
 --- !u!224 &8611135998465170980 stripped
 RectTransform:

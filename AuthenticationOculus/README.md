@@ -95,11 +95,9 @@ Finally, you may need to fill out any **Tasks** that are required under `Require
 
 ## brainCloud Configuration
 
-1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
-2. Click **Configure Oculus**
-3. Fill out the following required fields:
-    - Oculus App ID
-    - Oculus App Secret 
+1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `App > Design > Integrations > Platforms`
+2. Click the **Oculus** tab
+3. You will need to fill out the both the ID and Secret depending on if the app is intended for the Meta Horizon Store or is a Rift App. Read below for more info.
 
 <p align="center">
     <img  src="../_screenshots/_authOculus/BCConfig.png?raw=true">
@@ -146,7 +144,7 @@ brainCloud now supports [Meta Horizon Store's Add-ons](https://developers.meta.c
 
 Note: You can also create **Subscriptions** under `Monetization > Subscriptions`. The process is similiar to Add-ons and it is important to note down the **SKU**.
 
-3. When your Add-ons are published, you will need to configure the **Product** on brainCloud; navigate to `Design > Marketplace > Products`; from here you can add & configure your products on brainCloud and fill out the various details and awards
+3. When your Add-ons are published, you will need to configure the **Product** on brainCloud; navigate to `App > Design > Marketplace > Products`; from here you can add & configure your products on brainCloud and fill out the various details and awards
     - The idea is that you will want to create **Products** that correspond to the **Add-ons** on the Meta Horizon Store and brainCloud will manage the rewards those purchases will give to your users
 
 4. Once a product has been configured you will need to add the Meta Horizon Store for that product's **Price Points** platform; edit your product and click the **+** across from Price Points then click **Add Platform** and select **Meta Horizon**

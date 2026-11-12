@@ -16,8 +16,8 @@ Installing the plugin automatically adds `STEAMWORKS_NET` to your scipting defin
 
 ### brainCloud Configuration
 
-1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
-2. Click **Configure Steam**
+1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `App > Design > Integrations > Platforms`
+2. Click the **Steam** tab
 3. Fill out the following required fields using the information in the Steamworks dashboard for your app:
     - Steam App ID
     - Steam Publisher Key
