@@ -20,8 +20,8 @@ You'll need to ensure that your app on App Store Connect also has Game Center en
 
 ### brainCloud Configuration
 
-1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
-2. Click **Configure Apple**
+1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `App > Design > Integrations > Platforms`
+2. Click the **Apple** tab
 3. Fill out the **Bundle Id** and **Signin Client Id** fields using the Identifier attached to your app from the Apple Developer portal.
 
 ---

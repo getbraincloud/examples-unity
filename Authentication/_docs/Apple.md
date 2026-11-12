@@ -18,8 +18,8 @@ This example app makes use of `AppleAuthManager` from within `UserHandler` itsel
 
 ### brainCloud Configuration
 
-1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `Design > Core App Info > Application IDs`
-2. Click **Configure Apple**
+1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `App > Design > Integrations > Platforms`
+2. Click the **Apple** tab
 3. Fill out the **Signin Client Id** field using the Identifier attached to your app from the Apple Developer portal.
 
 ### Building for macOS

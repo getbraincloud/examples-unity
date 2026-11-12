@@ -30,6 +30,18 @@ using GooglePlayGames.BasicApi;
 using Google;
 #endif
 
+#if EPICGAMES_SDK
+using Epic.OnlineServices;
+using PlayEveryWare.EpicOnlineServices;
+using AuthCopyIdTokenOptions = Epic.OnlineServices.Auth.CopyIdTokenOptions;
+using AuthCredentials = Epic.OnlineServices.Auth.Credentials;
+using AuthIdToken = Epic.OnlineServices.Auth.IdToken;
+using AuthLoginCallbackInfo = Epic.OnlineServices.Auth.LoginCallbackInfo;
+using AuthLoginCredentialType = Epic.OnlineServices.Auth.LoginCredentialType;
+using AuthLoginOptions = Epic.OnlineServices.Auth.LoginOptions;
+using AuthScopeFlags = Epic.OnlineServices.Auth.AuthScopeFlags;
+#endif
+
 /// <summary>
 /// Interacts with <see cref="BCManager"/> to handle User Authentication.
 ///
@@ -440,16 +452,126 @@ public static class UserHandler
 
 #if STEAMWORKS_NET
     /// <summary>
-    /// Authenticate the user through Steam their Styeam account
+    /// Authenticate the user through Steam their Steam account.
     /// </summary>
     /// Steamworks.NET Plugin: https://github.com/rlabrecque/Steamworks.NET
-    public static void AuthenticateSteam(string userid, string sessionTicket, bool forceCreate, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    public static void AuthenticateSteam(bool forceCreate, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
     {
 #if UNITY_STANDALONE
-        BCManager.Wrapper.AuthenticateSteam(userid, sessionTicket, forceCreate, onSuccess, onFailure, cbObject);
+        void onSteamAuthTicketReceived(string authTicket)
+        {
+            Debug.Log($"Steam Auth Ticket: {authTicket}");
+
+            BCManager.Wrapper.AuthenticateSteam(SteamUtils.GetSteamID().ToString(),
+                                                authTicket,
+                                                forceCreate, onSuccess, onFailure, cbObject);
+        }
+
+        SteamUtils.GetSteamAuthTicket(onSteamAuthTicketReceived);
 #else
         Debug.LogError("AuthenticateSteam is not available on this platform. Check your scripting defines. Returning with error...");
         onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateSteam</b> is not available on this platform."), cbObject);
+#endif
+    }
+#endif
+
+#if EPICGAMES_SDK
+    /// <summary>
+    /// Authenticate the user using the Epic Online Service AuthInterface.
+    /// </summary>
+    /// EOS for Unity Plugin: https://github.com/EOS-Contrib/eos_plugin_for_unity
+    public static void AuthenticateEpicGames(bool forceCreate = true, SuccessCallback onSuccess = null, FailureCallback onFailure = null, object cbObject = null)
+    {
+#if UNITY_STANDALONE
+        static AuthCredentials buildAuthCredentials()
+        {
+#if UNITY_EDITOR
+            // For in-editor testing, you must use EOS's DevAuthTool and fill
+            // out the hostname and credentials on the BCManager component.
+            return new AuthCredentials
+            {
+                Type = AuthLoginCredentialType.Developer,
+                Id = BCManager.EOSDevAuthToolHostName,
+                Token = BCManager.EOSDevAuthToolCredentialName
+            };
+#else
+            string exchangeCode = string.Empty;
+            var args = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string raw in Environment.GetCommandLineArgs())
+            {
+                string arg = raw.TrimStart('-');
+                int split = arg.IndexOf('=');
+                if (split > 0)
+                    args[arg.Substring(0, split)] = arg.Substring(split + 1);
+            }
+
+            if (args.TryGetValue("AUTH_TYPE", out string authType) &&
+                authType.Equals("exchangecode", StringComparison.OrdinalIgnoreCase) &&
+                args.TryGetValue("AUTH_PASSWORD", out string code))
+            {
+                exchangeCode = code;
+            }
+
+            if (!string.IsNullOrEmpty(exchangeCode))
+            {
+                // Epic Games Launcher
+                return new AuthCredentials
+                {
+                    Type = AuthLoginCredentialType.ExchangeCode,
+                    Id = null,
+                    Token = exchangeCode
+                };
+            }
+
+            // Epic's internal UI
+            return new AuthCredentials
+            {
+                Type = AuthLoginCredentialType.AccountPortal,
+                Id = null,
+                Token = null
+            };
+#endif
+        }
+
+        var options = new AuthLoginOptions
+        {
+            Credentials = buildAuthCredentials(),
+            ScopeFlags = AuthScopeFlags.NoFlags
+        };
+
+        // Log in through the AuthInterface
+        EOSManager.Instance.GetEOSAuthInterface().Login(ref options, null, (ref AuthLoginCallbackInfo info) =>
+        {
+            if (!Common.IsOperationComplete(info.ResultCode))
+            {
+                Debug.Log($"AuthInterface login in progress: {info.ResultCode}");
+                return;
+            }
+
+            if (info.ResultCode != Result.Success)
+            {
+                Debug.LogError($"AuthInterface login failed! ResultCode: {info.ResultCode}");
+                return;
+            }
+
+            // Get the AuthIdToken once logged in
+            var opts = new AuthCopyIdTokenOptions { AccountId = info.LocalUserId };
+            Result result = EOSManager.Instance.GetEOSAuthInterface().CopyIdToken(ref opts, out AuthIdToken? token);
+
+            if (result != Result.Success)
+            {
+                Debug.LogError($"AuthInterface CopyIdToken failed! Result: {result}");
+                return;
+            }
+
+            // Log into brainCloud using the EpicAccountId and token's JWT
+            BCManager.Wrapper.AuthenticateEpicGames(info.LocalUserId.ToString(),
+                                                    token.Value.JsonWebToken,
+                                                    forceCreate, onSuccess, onFailure, cbObject);
+        });
+#else
+        Debug.LogError("AuthenticateEpicGames is not available on this platform. Check your scripting defines. Returning with error...");
+        onFailure(0, 0, ErrorResponse.CreateGeneric("<b>AuthenticateEpicGames</b> is not available on this platform."), cbObject);
 #endif
     }
 #endif
