@@ -55,8 +55,6 @@ These are basic examples that showcase Epic Online Service auth & ecom interface
 - [EOSIntegration](https://github.com/getbraincloud/examples-unity/tree/3PIntegrations/EOSIntegration#epic-online-services-auth--store-integration)
 - [XsollaIntegration](https://github.com/getbraincloud/examples-unity/tree/3PIntegrations/XsollaIntegration#xsolla-web-store-integration)
 
----
-
 ## Authentication
 
 Authentication has been updated with a new look! Check out the [Authentication README.md](./Authentication/README.md) for more information. This example will be updated as new features and authentication methods are added to brainCloud.
