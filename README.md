@@ -49,6 +49,12 @@ brainCloud hosts a [Model Context Protocol](https://modelcontextprotocol.io/) se
 
 ---
 
+### NEW: Epic Online Service & Xsolla Integration Projects
+
+These are basic examples that showcase Epic Online Service auth & ecom interfaces and Xsolla web store integrations. Currently they reside in the [3PIntegrations](https://github.com/getbraincloud/examples-unity/tree/3PIntegrations) branch. To view each project individually check out:
+- [EOSIntegration](https://github.com/getbraincloud/examples-unity/tree/3PIntegrations/EOSIntegration#epic-online-services-auth--store-integration)
+- [XsollaIntegration](https://github.com/getbraincloud/examples-unity/tree/3PIntegrations/XsollaIntegration#xsolla-web-store-integration)
+
 ## Authentication
 
 Authentication has been updated with a new look! Check out the [Authentication README.md](./Authentication/README.md) for more information. This example will be updated as new features and authentication methods are added to brainCloud.
