@@ -14,25 +14,25 @@ To download the SDK used in this project for your own Unity project, you can add
 
 ## Xsolla Configuration
 
-1. Under your Merchant account you will need to set up a Project
-2. You will then need to set-up a Login project for your Project
-    - For testing within the Unity Editor you can set up a Passwordless login and enable Login with device ID
-3. You will need to set up two different OAuth 2.0 authentication; this will give you the Client ID and Secret required for your configs:
+1. Under your **Merchant** account you will need to set up a **Project**
+2. You will then need to set-up a **Login project** for your Project
+    - For testing within the Unity Editor you can set up a **Passwordless login** and enable **Login with device ID**
+3. You will need to set up two different **OAuth 2.0 authentication**; this will give you the Client ID and Secret required for your configs:
     - Public (for your Unity project)
     - Server (for your brainCloud app)
 4. Under your **Project Settings** you will also need to go to **Integration settings** and ensure **Use webhooks** is enabled
 5. Go to **Webhooks** next and do the following:
     1. Add a Secret key
-        - Name it brainCloud to to indicate it's being used by your brainCloud app
-        - Copy your secret
-            - You can only do this once! If you lose this secret you'll need to delete this and generate a new one
-    2. Under **Payments Advanced settings** enable the following (***REQUIRED*** or else brainCloud can't verify purchases!):
+        - Name it `brainCloud` to to indicate it's being used by your brainCloud app
+        - Copy your Secret
+            - You can only do this once; if you lose this secret you'll need to delete this and generate a new one
+    2. Under **Payments Advanced settings** enable the following (***REQUIRED*** or else brainCloud can't verify purchases):
         - Send only necessary user parameters without sensitive data
         - Send custom parameters
         - Show info about the refund reason
         - Show country WHT and user acquisition fees
     3. You'll receive the **Webhook server** URL when you go to configure Xsolla on your brainCloud app (see below); once you do make sure to fill that out too
-6. Finally go to **API keys** and click **Create API key +**; give it an appropriate name (braincloud-server-key) and copy the secret
+6. Finally go to **API keys** and click **Create API key +**; give it an appropriate name (`braincloud-server-key`) and copy the Secret
     - Again this can only be done once here so if you lose the secret you will need to generate a new one
 
 ## brainCloud Configuration
@@ -44,12 +44,12 @@ To download the SDK used in this project for your own Unity project, you can add
     - Project Secret Key (Webhooks)
     - Server OAuth 2.0 Client ID
     - Server OAuth 2.0 Client Secret
-4. **Login Project ID** is an optional field that is required for the AppStore.GetUserToken API call
+4. **Login Project ID** is an optional field that is required for the `AppStore.GetUserToken` API call
 5. **Project API Key** is also optional but required for the server to consume the purchase instead of relying on your client app
 
-This config is also where you'll receive the Webhook URL to set on your Xsolla **Webhook server** URL mentioned above.
+This config is also where you'll receive the **Webhook URL** to set on your Xsolla **Webhook server** URL mentioned above.
 
-Finally you can also set the app's behaviour for the Refund webhook behaviour.
+Finally you can also set the app's behavior for the Refund webhook mechanism.
 
 ### Bonus Rewards
 
@@ -65,7 +65,7 @@ You can use your credentials to log into your Xsolla publishing account and fill
 
 #### Important Set-up in the Scripting
 
-When you go to build your `XsollaClientConfiguration` in your scripting you MUST pass the user's brainCloud ProfileId to the config's `userId` custom field. This is ***REQUIRED*** during the Xsolla login and when you go to pass the config to the `XsollaStoreClient` builder.
+When you go to build your `XsollaClientConfiguration` in your scripting you ***MUST*** pass the user's brainCloud ProfileId to the config's `userId` custom field. This is ***REQUIRED*** during the Xsolla login and when you go to pass the config to the `XsollaStoreClient` builder. If you don't do this then the brainCloud webhook won't be able to match the purchase to the user!
 
 You can see this in action in this project in the script [XsollaHandler.cs](https://github.com/getbraincloud/examples-unity/blob/3PIntegrations/XsollaIntegration/Assets/App/XsollaHandler.cs#L1203) in the inline `Login()` function.
 

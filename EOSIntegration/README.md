@@ -13,19 +13,21 @@ To download the EOS plugin used in this project for your own Unity project, you 
 
 ## Epic Online Services Configuration
 
-On the [Epic Games Developer Portal](https://dev.epicgames.com/portal), you will need to set up a Product. Your product will need to enable the **Epic Games Store** service and the **Epic Online Servives** service.
+On the [Epic Games Developer Portal](https://dev.epicgames.com/portal), you will need to set up a **Product**. Your Product will need to enable the **Epic Games Store** service and the **Epic Online Servives** service.
 
 Once those are set up you can retrieve the various IDs you need for the Unity project and brainCloud app from `Product > Product Settings`.
 
-From the Product Settings page, if you navigate to **Clients** tab, you can set up a **GameClient** client policy and **TrustedService** policy and create clients, each with the respective policy, in order to generate the Client IDs and Secrets further required for your Unity project and brainCloud app.
+From the **Product Settings** page, if you navigate to **Clients** tab, you can set up a **GameClient** client policy and **TrustedService** policy and create clients, each with the respective policy, in order to generate the Client IDs and Secrets further required for your Unity project and brainCloud app.
 
 ### EGS Offers
 
-Under the **Epic Games Store** service, on the **Offers** page you can create the offers that are tied to the `App > Marketplace > Cash Products` on brainCloud.
+Under the **Epic Games Store** service on the **Offers** page you can create the offers that are tied to the `App > Marketplace > Cash Products` on brainCloud.
 
-Do note that brainCloud only supports Consumable products for the AppStore.VerifyPurchase API call! These are called Entitlements on the EGS side. When you create the Entitlement, you will need to copy the **Audience Item ID** to the EpicGames configuration for your Cash Product on brainCloud `App > Marketplace > Cash Products`.
+Do note that brainCloud only supports **Consumable** products for the `AppStore.VerifyPurchase` API call! These are called Entitlements on the EGS side. When you create the Entitlement, you will need to copy the **Audience Item ID** to the `epicGames` configuration for your Cash Product on brainCloud `App > Marketplace > Cash Products`.
 
 For testing purposes, we recommend you setting your Consumable Offers to Free until you need to properly integrate your Product's Offers.
+
+Note: brainCloud currently only supports EGS Entitlements and not the Ownerships.
 
 ## brainCloud Configuration
 
@@ -35,8 +37,8 @@ For testing purposes, we recommend you setting your Consumable Offers to Free un
     - Epic Games Client ID
     - Sandbox ID
     - Deployment ID
-4. For the AppStore.VerifyPurchase API call to work you will also need to fill out the **Trusted Server Client ID** and **Trusted Server Client Secret** fields as well
-    - This will be the TrustedServer client you would have set up for your Product on the Epic Games Developer portal
+4. For the `AppStore.VerifyPurchase` API call to work you will also need to fill out the **Trusted Server Client ID** and **Trusted Server Client Secret** fields as well
+    - This will be the **TrustedServer** client you would have set up for your Product on the Epic Games Developer portal
 
 ## Unity Project Set Up
 
