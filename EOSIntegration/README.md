@@ -13,44 +13,74 @@ To download the EOS plugin used in this project for your own Unity project, you 
 
 ## Epic Online Services Configuration
 
-On the [Epic Games Developer Portal](https://dev.epicgames.com/portal), you will need to set up a **Product**. Your Product will need to enable the **Epic Games Store** service and the **Epic Online Servives** service.
+On the [Epic Games Developer Portal](https://dev.epicgames.com/portal), set up a **Product** with the **Epic Games Store** and **Epic Online Services** services enabled.
 
-Once those are set up you can retrieve the various IDs you need for the Unity project and brainCloud app from `Product > Product Settings`.
+The IDs needed for Unity and brainCloud are under `Product > Product Settings`, in the **EOS SDK Credentials** section of the **SDK Download & Credentials** tab.
 
-From the **Product Settings** page, if you navigate to **Clients** tab, you can set up a **GameClient** client policy and **TrustedService** policy and create clients, each with the respective policy, in order to generate the Client IDs and Secrets further required for your Unity project and brainCloud app.
+### Clients
+
+On the **Clients** tab, create a client policy and a client for each of:
+
+- **GameClient**: used by the Unity build. Its policy must allow **Ecom**.
+- **TrustedServer**: used by brainCloud to call Epic's Ecom APIs. Never ship it in a build.
+
+### Epic Account Services
+
+Create an **Epic Account Services** application and link your **GameClient** client to it. The Auth Interface can't log in without this.
 
 ### EGS Offers
 
-Under the **Epic Games Store** service on the **Offers** page you can create the offers that are tied to the `App > Marketplace > Cash Products` on brainCloud.
+Under **Epic Games Store > Offers**, create offers matching your brainCloud `App > Marketplace > Cash Products`.
 
-Do note that brainCloud only supports **Consumable** products for the `AppStore.VerifyPurchase` API call! These are called Entitlements on the EGS side. When you create the Entitlement, you will need to copy the **Audience Item ID** to the `epicGames` configuration for your Cash Product on brainCloud `App > Marketplace > Cash Products`.
-
-For testing purposes, we recommend you setting your Consumable Offers to Free until you need to properly integrate your Product's Offers.
-
-Note: brainCloud currently only supports EGS Entitlements and not the Ownerships.
+- `AppStore.VerifyPurchase` only supports **Consumable** items. Buying one grants an Entitlement. Durable items and Ownership checks aren't supported.
+- Copy each offer's **Audience Item ID** into the `epicGames` configuration of the matching Cash Product.
+- For testing, set your offers to **Free**.
 
 ## brainCloud Configuration
 
-1. In the [brainCloud server portal](https://portal.braincloudservers.com/) for your app, navigate to `App > Design > Integrations > Platforms`
-2. Click the **Epic Games** tab
-3. At bare minimum, for the Auth AND Connect Interface to work at creating new accounts on brainCloud, you will need to fill out these fields (these values will be the same as the ones in your EOS Unity Configuration file (`EOS Plugin > EOS Configuration` and under Deployment Configuration)):
-    - Epic Games Client ID
-    - Sandbox ID
-    - Deployment ID
-4. For the `AppStore.VerifyPurchase` API call to work you will also need to fill out the **Trusted Server Client ID** and **Trusted Server Client Secret** fields as well
-    - This will be the **TrustedServer** client you would have set up for your Product on the Epic Games Developer portal
+1. In the [brainCloud portal](https://portal.braincloudservers.com/), go to `App > Design > Integrations > Platforms` and open the **Epic Games** tab.
+2. For the Auth and Connect Interfaces, fill in:
+    - **Epic Games Client ID**: your **GameClient** client, not the TrustedServer one
+    - **Sandbox ID**
+    - **Deployment ID**: must belong to that sandbox
 
-## Unity Project Set Up
+    These match the values in `EOS Plugin > EOS Configuration` in Unity.
+3. For `AppStore.VerifyPurchase`, also fill in **Trusted Server Client ID** and **Trusted Server Client Secret** from your **TrustedServer** client.
 
-After you've set up your Product and various Product Settings on the Epic Games Developer Portal, you will need to fill out most of your EOS Configuration file under `EOS Plugin > EOS Configuration` in order to make use of the EOS Auth, Connect, and Ecom Interfaces in this app.
+## Unity Project Setup
 
-For testing in the Editor, you will need to download the [EOS Authentication Tool](https://dev.epicgames.com/docs/epic-online-services/accounts-and-social/eos-epic-account-services/developer-authentication-tool) and keep it running in the background. Then, in the **Main** scene in Unity, the **EOSHandler** object's **EOS Handler** component will have the following fields for you to fill out:
-- Dev Auth Tool Host Name
-- Dev Auth Tool Credential Name
+**Prerequisites:** Git and Git LFS. The EOS plugin is installed from a Git URL, and its native libraries come through LFS.
 
-These fields must be filled out in order to test the Auth and Connect interfaces from within the Editor.
+This repo doesn't include an EOS configuration or brainCloud settings. Create your own:
 
-For testing outside of the Unity Editor, which is required for the Ecom Interface, you will need to upload the app to the Product's page on the Epic Games Developer Portal as an Artifact using the **BuildPatchTool**. This should be included in the SDK you downloaded with the EOS Authentication Tool. Then you can download the app using the Epic Games Launcher and you will have to test from there. For further testing, you can simply copy over your new Windows build over the files that the Epic Games Launcher installed, replacing all files. Then launching the app through the Epic Games Launcher should work.
+- **EOS:** in `EOS Plugin > EOS Configuration`, enter your Product ID, Sandbox ID, Deployment ID, and **GameClient** Client ID and Secret.
+- **brainCloud:** enter your App ID and Secret in the brainCloud settings window.
+
+### Testing in the Editor
+
+The Auth and Connect Interfaces can be tested in the Editor using the [Developer Authentication Tool](https://dev.epicgames.com/docs/epic-online-services/accounts-and-social/eos-epic-account-services/developer-authentication-tool), found in the EOS SDK under `Tools/`:
+
+1. Run the tool, pick a port, log in, and save a credential name. Keep it running.
+2. In the **Main** scene, fill in the **EOSHandler** object's **EOS Handler** component:
+    - **Dev Auth Tool Host Name**: `localhost:<port>`
+    - **Dev Auth Tool Credential Name**: the name you saved
+
+The Ecom Interface can't be tested in the Editor.
+
+### Testing through the Epic Games Launcher
+
+The Ecom Interface needs the EOS overlay, so it only works in a Windows build launched from the Epic Games Launcher.
+
+1. Make a Windows build and check it contains `EOSBootstrapper.exe`.
+2. Upload it as an **Artifact** with **BuildPatchTool**, downloaded from the Artifacts page on the Developer Portal. Set the launch executable to `EOSBootstrapper.exe`, and use a new **Build Version** for each upload.
+3. Set the uploaded binary to active.
+4. Generate an **Access Key** for the product and redeem it on your Epic account.
+5. Install and launch the app from the Epic Games Launcher.
+
+To test a new build without re-uploading, copy it over the installed files and launch from the Epic Games Launcher again. Two cautions:
+
+- Don't change the **Product Name** in Unity. It renames the `.exe`, and `EOSBootstrapper.exe` will keep launching the old one. Re-upload if you do.
+- Don't run **Verify** in the launcher. It restores the uploaded build.
 
 ---
 
