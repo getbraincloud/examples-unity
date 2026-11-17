@@ -605,7 +605,11 @@ public class EOSHandler : MonoBehaviour
             (EpicAccountInfo.id == null && EpicAccountInfo.token.IsEmpty()))
         {
             FailureReason = "Do not have the proper credentials for AuthenticateEpicGames!";
-            checkIfShouldLogFailure();
+
+            if (checkIfShouldLogFailure())
+            {
+                yield break;
+            }
         }
 
         // Log into brainCloud with AuthenticateEpicGames

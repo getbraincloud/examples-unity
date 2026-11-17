@@ -1178,7 +1178,7 @@ public class XsollaHandler : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Xsolla Initialized! (sandbox: {true})");
+            Debug.Log($"Xsolla Initialized! (sandbox: {XsollaConfig.sandbox})");
         }
 
         bool silentAttempted = false;
@@ -1215,7 +1215,7 @@ public class XsollaHandler : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Xsolla Auth OK! Xsolla accessToken: {XsollaConfig.accessToken}");
+            Debug.Log($"Xsolla Auth OK!");
         }
     }
 
@@ -1312,6 +1312,13 @@ public class XsollaHandler : MonoBehaviour
         StoreItems.Clear();
 
         yield return new WaitForSecondsRealtime(0.03333f); // Need to allow content fitters to update...
+
+        // Checking here, in the situation that there's a mismatch between Xsolla and brainCloud
+        if (XsollaProducts == null || XsollaProducts.Length == 0)
+        {
+            Debug.LogWarning("XsollaProducts is null/empty. Cannot populate store items.");
+            yield break;
+        }
 
         if (StoreItemDefinitions.Count > 0)
         {
