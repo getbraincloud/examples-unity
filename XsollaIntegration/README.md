@@ -67,7 +67,7 @@ You can use your credentials to log into your Xsolla publishing account and fill
 
 When you go to build your `XsollaClientConfiguration` in your scripting you ***MUST*** pass the user's brainCloud ProfileId to the config's `userId` custom field. This is ***REQUIRED*** during the Xsolla login and when you go to pass the config to the `XsollaStoreClient` builder. If you don't do this then the brainCloud webhook won't be able to match the purchase to the user!
 
-You can see this in action in this project in the script [XsollaHandler.cs](https://github.com/getbraincloud/examples-unity/blob/3PIntegrations/XsollaIntegration/Assets/App/XsollaHandler.cs#L1203) in the inline `Login()` function.
+You can see this in action in this project in the script [XsollaHandler.cs](./Assets/App/XsollaHandler.cs#L1203) in the inline `Login()` function.
 
 ---
 
