@@ -30,7 +30,7 @@ Create an **Epic Account Services** application and link your **GameClient** cli
 
 ### EGS Offers
 
-Under **Epic Games Store > Offers**, create offers matching your brainCloud `App > Marketplace > Cash Products`.
+Under `Epic Games Store > Offers`, create offers matching your brainCloud `App > Marketplace > Cash Products`.
 
 - `AppStore.VerifyPurchase` only supports **Consumable** items. Buying one grants an Entitlement. Durable items and Ownership checks aren't supported.
 - Copy each offer's **Audience Item ID** into the `epicGames` configuration of the matching Cash Product.
@@ -49,12 +49,7 @@ Under **Epic Games Store > Offers**, create offers matching your brainCloud `App
 
 ## Unity Project Setup
 
-**Prerequisites:** Git and Git LFS. The EOS plugin is installed from a Git URL, and its native libraries come through LFS.
-
-This repo doesn't include an EOS configuration or brainCloud settings. Create your own:
-
-- **EOS:** in `EOS Plugin > EOS Configuration`, enter your Product ID, Sandbox ID, Deployment ID, and **GameClient** Client ID and Secret.
-- **brainCloud:** enter your App ID and Secret in the brainCloud settings window.
+After the plugin is installed under `EOS Plugin > EOS Configuration`, enter your Product ID, Sandbox ID, Deployment ID, and **GameClient** Client ID and Secret for your EOS app.
 
 ### Testing in the Editor
 
@@ -63,7 +58,7 @@ The Auth and Connect Interfaces can be tested in the Editor using the [Developer
 1. Run the tool, pick a port, log in, and save a credential name. Keep it running.
 2. In the **Main** scene, fill in the **EOSHandler** object's **EOS Handler** component:
     - **Dev Auth Tool Host Name**: `localhost:<port>`
-    - **Dev Auth Tool Credential Name**: the name you saved
+    - **Dev Auth Tool Credential Name**: the credential you saved
 
 The Ecom Interface can't be tested in the Editor.
 
