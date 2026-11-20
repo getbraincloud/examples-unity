@@ -46,24 +46,28 @@ public class JenkinsBuild
         var args = FindArgs();
         string fullPathAndName = args.targetDir + args.appName + (EditorUserBuildSettings.buildAppBundle ? ".aab" : ".apk");
 
-        // Signing info comes from the environment so no keystore path or password is saved in the project.
+        // Signing info and extra architectures come from the environment and are only applied for this
+        // build, so no keystore path, password or emulator setting is saved in the project.
         string keystore = System.Environment.GetEnvironmentVariable("ANDROID_KEYSTORE_PATH");
-        if (string.IsNullOrEmpty(keystore))
-        {
-            BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
-            return;
-        }
+        bool addX86_64 = System.Environment.GetEnvironmentVariable("ANDROID_ADD_X86_64") == "1";
 
         bool prevUseCustom = PlayerSettings.Android.useCustomKeystore;
         string prevKeystore = PlayerSettings.Android.keystoreName;
         string prevAlias = PlayerSettings.Android.keyaliasName;
+        AndroidArchitecture prevArchitectures = PlayerSettings.Android.targetArchitectures;
         try
         {
-            PlayerSettings.Android.useCustomKeystore = true;
-            PlayerSettings.Android.keystoreName = keystore;
-            PlayerSettings.Android.keystorePass = System.Environment.GetEnvironmentVariable("ANDROID_KEYSTORE_PASS");
-            PlayerSettings.Android.keyaliasName = System.Environment.GetEnvironmentVariable("ANDROID_KEYALIAS_NAME");
-            PlayerSettings.Android.keyaliasPass = System.Environment.GetEnvironmentVariable("ANDROID_KEYALIAS_PASS");
+            if (!string.IsNullOrEmpty(keystore))
+            {
+                PlayerSettings.Android.useCustomKeystore = true;
+                PlayerSettings.Android.keystoreName = keystore;
+                PlayerSettings.Android.keystorePass = System.Environment.GetEnvironmentVariable("ANDROID_KEYSTORE_PASS");
+                PlayerSettings.Android.keyaliasName = System.Environment.GetEnvironmentVariable("ANDROID_KEYALIAS_NAME");
+                PlayerSettings.Android.keyaliasPass = System.Environment.GetEnvironmentVariable("ANDROID_KEYALIAS_PASS");
+            }
+            // x86_64 lets the APK run natively on desktop emulators instead of through ARM translation.
+            if (addX86_64)
+                PlayerSettings.Android.targetArchitectures = prevArchitectures | AndroidArchitecture.X86_64;
             BuildProject(EnabledScenes, fullPathAndName, BuildTargetGroup.Android, BuildTarget.Android, BuildOptions.None);
         }
         finally
@@ -73,6 +77,7 @@ public class JenkinsBuild
             PlayerSettings.Android.keystorePass = string.Empty;
             PlayerSettings.Android.keyaliasName = prevAlias;
             PlayerSettings.Android.keyaliasPass = string.Empty;
+            PlayerSettings.Android.targetArchitectures = prevArchitectures;
             AssetDatabase.SaveAssets();
         }
     }
