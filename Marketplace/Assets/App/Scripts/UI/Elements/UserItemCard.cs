@@ -26,6 +26,9 @@ public class UserItemCard : MonoBehaviour
     [SerializeField]
     private Button _primaryButton;
 
+    [SerializeField]
+    private Sprite equippedIcon;
+
     private UserItemData _data;
     public UserItemData data { get { return _data; } }
 
@@ -144,6 +147,7 @@ public class UserItemCard : MonoBehaviour
         await FetchSprites();
 
         loadingDisplay.SetActive(false);
+        lowerMessageDisplay.SetActive(false);
 
         upperMessageText.gameObject.SetActive(true);
         upperMessageText.text = _data.itemName;
@@ -188,7 +192,9 @@ public class UserItemCard : MonoBehaviour
                 if (_data.isEquipped)
                 {
                     upperMessageIcon.gameObject.SetActive(false);
-                    upperMessageText.text = "[Equipped]";
+                    lowerMessageDisplay.SetActive(true);
+                    lowerMessageText.text = "Equipped";
+                    categoryIcon.sprite = equippedIcon;
                 }
             }
         }

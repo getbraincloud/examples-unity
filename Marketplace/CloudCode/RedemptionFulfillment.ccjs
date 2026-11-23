@@ -1,0 +1,58 @@
+"use strict";
+// RedemptionFulfillment - fulfillment script for the Marketplace redemption campaigns.
+// brainCloud runs this when a player redeems a valid promo code. The reward comes from the
+// campaign's Code Info JSON (data.customCodeInfo), e.g.
+//   COINS: { "rewardType": "currency", "currency": "Coins", "amount": 2500 }
+//   SHIRT: { "rewardType": "item", "defId": "shirt-golden" }
+// Whatever is returned in customRedemptionInfo is sent back to the client in the RedeemCode response.
+
+function main() {
+  bridge.logDebugJson("Script Inputs", data);
+
+  var info = data.customCodeInfo || {};
+  var reward = { rewardType: info.rewardType };
+
+  if (info.rewardType === "currency") {
+    var award = bridge.getVirtualCurrencyServiceProxy().awardCurrency(info.currency, info.amount);
+    if (award.status !== 200) {
+      return fail(award);
+    }
+
+    reward.currency = info.currency;
+    reward.amount = info.amount;
+    reward.balance = award.data.currencyMap[info.currency].balance;
+  } else if (info.rewardType === "item") {
+    var awardItem = bridge.getUserItemsServiceProxy().awardUserItem(info.defId, 1, true);
+    if (awardItem.status !== 200) {
+      return fail(awardItem);
+    }
+
+    var items = awardItem.data.items;
+    for (var key in items) {
+      if (items.hasOwnProperty(key)) {
+        reward.gainedItemId = key;
+        reward.gainedItem = items[key];
+        break;
+      }
+    }
+  } else {
+    return fail({ status_message: "Campaign Code Info JSON has no valid rewardType" });
+  }
+
+  return {
+    success: true,
+    complete: true,
+    customRedemptionInfo: reward
+  };
+}
+
+function fail(result) {
+  return {
+    success: false,
+    complete: true,
+    errorCode: result.reason_code || 0,
+    errorMsg: result.status_message || "Redemption fulfillment failed"
+  };
+}
+
+main();

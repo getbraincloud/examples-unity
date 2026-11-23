@@ -102,7 +102,7 @@ public class StoreItemCard : MonoBehaviour
 
     private bool CanAfford()
     {
-        if (_data == null || _data.isFree || _data.itemType == ItemType.Freebie)
+        if (_data == null || _data.isFree || _data.itemType == ItemType.Freebie || _data.itemType == ItemType.RedemptionCode)
             return true;
 
         foreach (var kvp in _data.buyPrices)
@@ -145,7 +145,13 @@ public class StoreItemCard : MonoBehaviour
         _cardArt.gameObject.SetActive(true);
 
         ToggleInventoryAmountDisplay(false);
-        if (IsItemOwned && _data.itemType != ItemType.Freebie)
+        if (_data.itemType == ItemType.RedemptionCode)
+        {
+            _primaryPriceText.text = "Enter Code";
+            _buttonIconLeft.gameObject.SetActive(false);
+            _buttonIconRight.gameObject.SetActive(false);
+        }
+        else if (IsItemOwned && _data.itemType != ItemType.Freebie)
         {
             _primaryPriceText.text = "[Owned]";
             _buttonIconLeft.gameObject.SetActive(false);
@@ -277,6 +283,9 @@ public class StoreItemCard : MonoBehaviour
 
         switch (_data.itemType)
         {
+            case ItemType.RedemptionCode:
+                OnCardClicked();
+                break;
             case ItemType.Freebie:
                 ActivateFreebie();
                 break;
