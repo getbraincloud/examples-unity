@@ -9,7 +9,8 @@ public enum ItemType
     Item,
     Bundle,
     Multiplier,
-    Product
+    Product,
+    RedemptionCode
 }
 public enum CurrencyType
 {

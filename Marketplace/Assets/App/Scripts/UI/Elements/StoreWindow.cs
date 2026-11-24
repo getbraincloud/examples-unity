@@ -19,7 +19,9 @@ public class StoreWindow : MonoBehaviour
     private ToggleGroup _toggleGroup;
 
     [SerializeField]
-    private Toggle _toggleFreebies, _toggleBundles, _toggleItems, _toggleProducts;
+    private Toggle _toggleFreebies, _toggleBundles, _toggleItems, _toggleProducts, _toggleRedemptionCodes;
+
+    private const string REDEMPTION_CODES_SECTION = "Redemption Codes";
 
     [SerializeField]
     private float _scrollOffset = -190f;
@@ -46,6 +48,7 @@ public class StoreWindow : MonoBehaviour
         _toggleBundles.onValueChanged.AddListener(on   => { if (on) ScrollToSection("Bundles"); });
         _toggleItems.onValueChanged.AddListener(on     => { if (on) ScrollToSection("Items"); });
         _toggleProducts.onValueChanged.AddListener(on  => { if (on) ScrollToSection("Products"); });
+        _toggleRedemptionCodes.onValueChanged.AddListener(on => { if (on) ScrollToSection(REDEMPTION_CODES_SECTION); });
     }
 
     private void OnDisable()
@@ -60,6 +63,7 @@ public class StoreWindow : MonoBehaviour
         _toggleBundles.onValueChanged.RemoveAllListeners();
         _toggleItems.onValueChanged.RemoveAllListeners();
         _toggleProducts.onValueChanged.RemoveAllListeners();
+        _toggleRedemptionCodes.onValueChanged.RemoveAllListeners();
     }
 
     private void OnAnyItemBought(UserItemData _) => FetchStoreItems();
@@ -123,6 +127,18 @@ public class StoreWindow : MonoBehaviour
                 item.defId == "xp_generator" ||
                 item.defId == "multiplier_pack");
         }
+
+        // Client-side card (not a catalog item), added last so its section sits at the bottom
+        items.Add(new StoreItemData
+        {
+            itemName = REDEMPTION_CODES_SECTION,
+            category = REDEMPTION_CODES_SECTION,
+            defId = "redemption_codes",
+            itemType = ItemType.RedemptionCode,
+            imageUrl = "Image-Redemption-Code-Awards.png",
+            message = string.Empty,
+            buyPrices = new Dictionary<CurrencyType, decimal>()
+        });
 
         // Track which item keys the server returned, per section
         var returnedKeys = new Dictionary<string, HashSet<string>>();
