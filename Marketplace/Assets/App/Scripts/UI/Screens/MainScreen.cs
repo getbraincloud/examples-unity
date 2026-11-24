@@ -18,6 +18,7 @@ public class MainScreen : MonoBehaviour
                         _goldAvatarFrameDisplay,
                         _adsBanner,
                         _xpDoublerIcon,
+                        _generatorTimeDisplay,
                         _maxLevelText;
 
     [SerializeField]
@@ -98,7 +99,7 @@ public class MainScreen : MonoBehaviour
             _generatorTimerCoroutine = null;
         }
 
-        _generatorTimerText.gameObject.SetActive(isActive);
+        _generatorTimeDisplay.SetActive(isActive);
         if (isActive)
         {
             // Restarting here (rather than just updating a target) also covers extension:
