@@ -1204,8 +1204,12 @@ public class BrainCloudManager : MonoBehaviour
             switch (connectionType)
             {
                 case RelayConnectionType.WEBSOCKET:
-                    // Fall back to the plain ws port if no wss port was handed back.
-                    port = useSSL && server.WssPort != -1 ? server.WssPort : server.WsPort;
+                    if (useSSL && string.IsNullOrEmpty(server.SecureUrl))
+                    {
+                        Debug.LogWarning("No secureUrl from server, falling back to ws");
+                        useSSL = false;
+                    }
+                    port = useSSL ? 0 : server.WsPort;
                     break;
                 case RelayConnectionType.TCP:
                     port = server.TcpPort;
@@ -1215,7 +1219,8 @@ public class BrainCloudManager : MonoBehaviour
                     break;
             }
         }
-        string host = useSSL ? server.SecureHost : server.Host;
+        // wss uses the server-provided URL as-is; no port
+        string host = useSSL ? server.SecureUrl : server.Host;
 
         if (_noServerSelected)
         {

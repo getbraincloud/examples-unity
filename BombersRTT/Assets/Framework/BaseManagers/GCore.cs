@@ -84,6 +84,8 @@ namespace Gameframework
         void Start()
         {
             EnsureMgrsAreSetup();
+            // Uncapped, the menus spin a core; vsync takes precedence where it's on.
+            Application.targetFrameRate = 30;
 #if !UNITY_EDITOR && UNITY_IOS
             //UnityEngine.iOS.NotificationServices.CancelAllLocalNotifications();
 #endif
